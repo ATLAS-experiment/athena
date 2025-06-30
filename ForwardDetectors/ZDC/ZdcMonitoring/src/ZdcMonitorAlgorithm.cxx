@@ -163,7 +163,7 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
     if (m_enableRPDAmp){
         m_RPDChannelToolIndices = buildToolMap<std::map<std::string,int>>(m_tools,"RpdChannelMonitor",sides,channels);
     }
-    if (m_isInjectedPulse && (!m_isStandalone)){
+    if (m_isInjectedPulse && (!m_isStandalone) && (!m_isOnline)) {
         m_LucrodResponseSingleVoltageToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"LucrodResponseSingleVoltageMonitor",sides,modules,m_injPulseVoltageStepsStr.value());
     }
 
@@ -210,6 +210,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     // declaring & obtaining event-level information of interest 
 // ______________________________________________________________________________
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);
+
     // already checked in fillHistograms that eventInfo is valid
     auto lumiBlock = Monitored::Scalar<uint32_t>("lumiBlock", eventInfo->lumiBlock());
     auto bcid = Monitored::Scalar<unsigned int>("bcid", eventInfo->bcid());
@@ -242,8 +243,11 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     fill(zdcTool, decodingErrorBits, lumiBlock);
 
 // ______________________________________________________________________________
-    // does event pass trigger selection?
+    // does event pass trigger selections?
 // ______________________________________________________________________________
+
+
+//  ----------------------- ZDC single-sided triggers -----------------------
 
     auto passTrigSideA = Monitored::Scalar<bool>("passTrigSideA",false); // if trigger isn't enabled (e.g, MC) the with-trigger histograms are never filled (cut mask never satisfied)
     auto passTrigSideC = Monitored::Scalar<bool>("passTrigSideC",false);
@@ -255,6 +259,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         if (passTrigSideA) ATH_MSG_DEBUG("passing trig on side A!");    
         if (passTrigSideC) ATH_MSG_DEBUG("passing trig on side C!");    
     }
+
+//  ----------------------- UCC triggers -----------------------
     
     auto passUCCTrig_HELT15 = Monitored::Scalar<bool>("passUCCTrig_HELT15",false);
     auto passUCCTrig_HELT20 = Monitored::Scalar<bool>("passUCCTrig_HELT20",false);
@@ -301,6 +307,70 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto uccTrigBits = Monitored::Collection("uccTrigBits", uccTrigBitsArr);
     fill(zdcTool, uccTrigBits, lumiBlock);
 
+//  ----------------------- OOpO triggers -----------------------
+    int nOOpOTriggers = m_IsPEBStream? m_OOpOPEBTriggerMap.size() : m_OOpOtriggerChains.size();
+    std::vector<float> oopoTrigBitsArr(nOOpOTriggers+2, 0.); // enabled, trigger bits, disabled
+
+    std::vector<Monitored::Scalar<bool>> oopoTrigPassBoolVec;
+    oopoTrigPassBoolVec.reserve(nOOpOTriggers);
+
+    if(m_EnableOOpOTriggers && m_enableZDCPhysics) { // if not enable trigger, the pass-trigger booleans will still be defined but with value always set to false
+        oopoTrigBitsArr[0] += 1; // OOpO trigger enabled
+        
+        const auto &trigDecTool = getTrigDecisionTool();
+        // ATH_MSG_INFO ( " L1 items : " << trigDecTool->getChainGroup("L1_.*")->getListOfTriggers() );
+        // ATH_MSG_INFO ( " HLT items : " << trigDecTool->getChainGroup("HLT_.*")->getListOfTriggers() );
+
+
+        if (m_IsPEBStream){
+            try {
+                const xAOD::TrigDecision* trigDecision = nullptr;
+                ANA_CHECK(evtStore()->retrieve( trigDecision, "xTrigDecision"));
+
+                if (!trigDecision){
+                    throw std::runtime_error("Trigger decision NOT retrieved for PEB stream!");
+                }
+                std::vector<uint32_t> tbp = trigDecision->tbp();
+
+                for (const auto& [ctp_id, trig_name] : m_OOpOPEBTriggerMap) {
+                    int ind = ctp_id / 32; // index in vector tbp
+                    int bit = ctp_id % 32; // bit in tax[ind]
+                    const bool pass = ((tbp.at(ind) >> bit) & 1);
+                    std::string varName = "pass" + trig_name;
+                    oopoTrigPassBoolVec.emplace_back( varName, pass );
+                    oopoTrigBitsArr.at(oopoTrigPassBoolVec.size()) += pass;
+                }
+            } catch (const std::out_of_range& e) {
+                ATH_MSG_WARNING("Out of range error captured when fetching L1 trigger bits for PEB stream: " << e.what());
+            } catch (const std::runtime_error& e) {
+                ATH_MSG_WARNING("Runtime error captured when fetching L1 trigger bits for PEB stream: " << e.what());
+            } catch (const std::exception& e) {
+                ATH_MSG_WARNING("Other std::exception captured when fetching L1 trigger bits for PEB stream: " << e.what());
+            } catch (...) {
+                ATH_MSG_WARNING("Error captured when fetching L1 trigger bits for PEB stream. Likely either no L1 trigger looked at or no L1 trigger will show to be passed.");
+            }
+        }else{
+            for (int i = 0; i < nOOpOTriggers; ++i) {
+                const bool pass = (trigDecTool->isPassed( m_OOpOtriggerChains[i] ));
+
+                // Histogram variable name:  “pass<L1-name>”
+                std::string varName = "pass" + m_OOpOtriggerChains[i];
+                //  *Optionally sanitise if you have funky characters*
+                std::replace_if( varName.begin(), varName.end(),
+                                 [](char c){ return c=='-'; }, '_' );
+
+                oopoTrigPassBoolVec.emplace_back( varName, pass );
+                oopoTrigBitsArr[i+1] += pass;
+            }
+        }
+    }else{
+        oopoTrigBitsArr[nOOpOTriggers + 1] += 1; // OOpO trigger disabled
+    }
+
+    auto oopoTrigBits = Monitored::Collection("OOpOTrigBits", oopoTrigBitsArr);
+
+    fill(zdcTool, oopoTrigBits, lumiBlock);
+
 // ______________________________________________________________________________
     // declaring & obtaining variables of interest for the ZDC sums
     // including the RPD x,y positions, reaction plane and status
@@ -317,6 +387,9 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto bothReactionPlaneAngleValid = Monitored::Scalar<bool>("bothReactionPlaneAngleValid",true);
     auto bothHasCentroid = Monitored::Scalar<bool>("bothHasCentroid",true); // the looser requirement that both centroids were calculated (ignore valid)
     
+    Monitored::Scalar<int> nTracksPV{"nTracksPV", 0};
+    Monitored::Scalar<float> avgTracksPerVertex{"avgTracksPerVertex", 0};
+
     std::array<bool, 2> centroidSideValidArr;
     std::array<bool, 2> rpdSideValidArr = {false, false};
     std::array<std::vector<float>,2> rpdSubAmpVecs;
@@ -755,7 +828,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
                             if (m_isStandalone) injectedPulseInputVoltage = zdcModuleAmp * 1. / 25000.; // no LB in standalone --> fill dummy histograms 
                             fill(m_tools[m_ZDCModuleToolIndices.at(side_str).at(module_str)], VoltageIndex, zdcModuleAmp, zdcModuleFitAmp, zdcModuleMaxADC, zdcModuleMaxADCHG, zdcModuleMaxADCLG, zdcModuleAmpToMaxADCRatio, zdcModuleFract, zdcUncalibSumCurrentSide, zdcEnergySumCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, zdcModuleAmpLGRefit, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleLGFitAmp, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGAmpRatioNoNonlinCorr, zdcModuleHGtoLGT0Diff, zdcModuleFractionValid, zdcModuleTimeValid, zdcModuleHGTimeValid, zdcModuleLGTimeValid, injectedPulseInputVoltage, zdcHGInjPulseValid, zdcLGInjPulseValid, lumiBlock, bcid);
-                            if (voltage_index >= 0){
+                            if (voltage_index >= 0 && (!m_isOnline)){
                                 fill(m_tools[m_LucrodResponseSingleVoltageToolIndices.at(side_str).at(module_str).at(m_injPulseVoltageStepsStr.value().at(voltage_index))], zdcModuleFitAmp, zdcModuleLGFitAmp, zdcModuleMaxADCHG, zdcModuleMaxADCLG, zdcHGInjPulseValid, zdcLGInjPulseValid);
                             }
                         }else{
@@ -833,6 +906,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     // obtaining fCalEt on A,C side
 // ______________________________________________________________________________
 
+    auto totalEt24 = Monitored::Scalar<double>("totalEt24", 0.0); // total ET within |eta| < 2.4
     auto fcalEtA = Monitored::Scalar<double>("fcalEtA", 0.0);
     auto fcalEtC = Monitored::Scalar<double>("fcalEtC", 0.0);
     auto fcalEtSumTwoSides = Monitored::Scalar<double>("fcalEtSumTwoSides", 0.0);
@@ -848,7 +922,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 int layer = eventShape->layer();
                 float eta = eventShape->etaMin();
                 float et = eventShape->et();
-                if (layer == 21 || layer == 22 || layer == 23){
+                if (layer == 21 || layer == 22 || layer == 23){ // FCal
                     fcalEtSumTwoSides += et / 1000000.;
                     if (eta > 0){
                         fcalEtA += et / 1000000.;
@@ -859,11 +933,46 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                         fcalEtArr[0] += et / 1000000.;
                     }
                 }
+
+                if (TMath::Abs(eta) < 2.4) {
+                    totalEt24 += et / 1000000.;
+                }
             }
         }
-
     }
 
+// ______________________________________________________________________________
+    // obtaining track info
+// ______________________________________________________________________________
+
+    if (m_enableZDCPhysics && m_TrkInfoOn) {
+    // Retrieve vertices
+    const xAOD::VertexContainer* vertices = nullptr;
+    if (!evtStore()->retrieve(vertices, m_vertexContainerKey).isSuccess()) {
+        ATH_MSG_WARNING("Failed to retrieve vertex container: " << m_vertexContainerKey);
+    } else {
+        // Find primary vertex
+        const xAOD::Vertex* primaryVertex = nullptr;
+        for (const auto& vtx : *vertices) {
+            if (vtx->vertexType() == xAOD::VxType::PriVtx) {
+                primaryVertex = vtx;
+                break;
+            }
+        }
+        
+        // Count tracks from primary vertex
+        if (primaryVertex) {
+            nTracksPV = primaryVertex->nTrackParticles();
+        }
+        
+        // Calculate average tracks per vertex
+        int totalTracks = 0;
+        for (const auto& vtx : *vertices) {
+            totalTracks += vtx->nTrackParticles();
+        }
+        avgTracksPerVertex = vertices->empty() ? 0 : static_cast<float>(totalTracks) / vertices->size();
+    }
+}
 
 // ______________________________________________________________________________
     // give warning if there is missing aux data but no decoding error
@@ -886,20 +995,55 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     // filling generic ZDC monitoring tool for A-C side correlations & cos(reaction plane angle)
 // ______________________________________________________________________________
 
-    if ((m_enableZDCPhysics && cur_event_ZDC_available) || (m_enableCentroid && cur_event_RPD_available)){
+    if ((m_enableZDCPhysics && cur_event_ZDC_available) || (m_enableCentroid && cur_event_RPD_available)) {
 
         if (m_enableZDCPhysics && cur_event_ZDC_available){
+            // ZDC-only global variables
+            std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> vars_global = {
+                std::ref(lumiBlock),
+                std::ref(bcid), 
+                std::ref(passTrigSideA), 
+                std::ref(passTrigSideC), 
+                std::ref(zdcEnergySumA), 
+                std::ref(zdcEnergySumC), 
+                std::ref(zdcUncalibSumA), 
+                std::ref(zdcUncalibSumC), 
+                std::ref(zdcEnergySumTwoSidesTeV),
+            };
+
+            // calo-based global variables
             if (m_CalInfoOn){ // calorimeter information is turned on
-                fill(zdcTool, lumiBlock, bcid, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, fcalEtA, fcalEtC);
-                if (m_EnableUCCTriggers){
-                    ATH_MSG_DEBUG("zdcEnergySumTwoSidesTeV: " << zdcEnergySumTwoSidesTeV << "; fcalEtSumTwoSides: " << fcalEtSumTwoSides);
-                    fill(zdcTool, lumiBlock, bcid, zdcEnergySumTwoSidesTeV, zdcHadronicEnergySumTwoSidesTeV, fcalEtSumTwoSides, passUCCTrig_HELT15, passUCCTrig_HELT20, passUCCTrig_HELT25, passUCCTrig_HELT35, passUCCTrig_HELT50);
-                }else{
-                    fill(zdcTool, lumiBlock, bcid, zdcEnergySumTwoSidesTeV, zdcHadronicEnergySumTwoSidesTeV, fcalEtSumTwoSides);
-                }
-            } else{
-                fill(zdcTool, lumiBlock, bcid, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC);
+                vars_global.insert(vars_global.end(), {
+                    std::ref(fcalEtA), 
+                    std::ref(fcalEtC),
+                    std::ref(zdcHadronicEnergySumTwoSidesTeV),
+                    std::ref(fcalEtSumTwoSides),
+                    std::ref(totalEt24)
+                });
             }
+
+            if (m_TrkInfoOn){
+                vars_global.insert(vars_global.end(), {
+                    std::ref(nTracksPV),
+                    std::ref(avgTracksPerVertex)
+                });
+            }
+
+            if (m_EnableUCCTriggers){
+                vars_global.insert(vars_global.end(), {
+                    std::ref(passUCCTrig_HELT15), 
+                    std::ref(passUCCTrig_HELT20), 
+                    std::ref(passUCCTrig_HELT25), 
+                    std::ref(passUCCTrig_HELT35), 
+                    std::ref(passUCCTrig_HELT50)
+                });
+            }
+
+            if (m_EnableOOpOTriggers){
+                for (auto& m : oopoTrigPassBoolVec) vars_global.push_back( std::ref(m) );
+            }
+
+            auto monitor_globals = Monitored::Group(zdcTool, vars_global);
         }
 
         if (m_enableCentroid && cur_event_RPD_available){
@@ -969,8 +1113,8 @@ StatusCode ZdcMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     ATH_MSG_DEBUG("calling the fillHistograms function");
 
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);
-    if (! eventInfo.isValid() ) {
-        ATH_MSG_WARNING("cannot retrieve event info from evtStore()!");
+    if (! eventInfo.isValid() || eventInfo.cptr() == nullptr) {
+        ATH_MSG_WARNING("EventInfo handle is not valid or has null pointer!");
         return StatusCode::SUCCESS;
     }
     

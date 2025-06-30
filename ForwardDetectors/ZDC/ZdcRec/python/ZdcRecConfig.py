@@ -47,6 +47,10 @@ def zdcGeometry(flags):
             return defaultGeometryTags.RUN3_ZDC24
         case "data25_hi":
             return defaultGeometryTags.RUN3_ZDC24
+        case "data25_hipcomm":
+            return defaultGeometryTags.RUN3_ZDC24
+        case "data25_hicomm":
+            return defaultGeometryTags.RUN3_ZDC24
         case _:
             run = flags.GeoModel.Run
             if run == LHCPeriod.Run2:
@@ -94,10 +98,10 @@ def SetConfigTag(flags):
         config = "InjectorpOOONeNe2025" # default config tag for injector pulse - suitable also for running in standalone partition (except for standalone data taken during pp reference run + its commissionging period)
         if flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
             config = "Injectorpp2024"
-        if flags.Input.ProjectName == "data24_hi":
-            config = "InjectorPbPb2024"     
+        if flags.Input.ProjectName in ["data24_hi","data24_hicomm"]:
+            config = "InjectorPbPb2024"
         if flags.Input.ProjectName in ["data25_hi","data25_hicomm","data25_hip"] :
-            config = "InjectorpOOONeNe2025" 
+            config = "InjectorpOOONeNe2025"
 
     else:
         config = "PbPb2023" # default config tag
@@ -108,17 +112,17 @@ def SetConfigTag(flags):
                 config = "MonteCarloPbPb2023"
             elif flags.Input.ProjectName == "data22_13p6TeV":
                 config = "LHCf2022"
-            elif flags.Input.ProjectName == "data23_5p36TeV" or flags.Input.ProjectName == "data23_900GeV" or flags.Input.ProjectName == "data23_13p6TeV":
+            elif flags.Input.ProjectName in ["data23_5p36TeV", "data23_900GeV", "data23_13p6TeV"]:
                 config = "pp2023"
-            elif flags.Input.ProjectName == "data23_hi" or flags.Input.ProjectName == "data23_comm":
+            elif flags.Input.ProjectName in ["data23_hi", "data23_comm"]:
                 config = "PbPb2023"
-            elif flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
+            elif flags.Input.ProjectName in ["data24_5p36TeV", "data24_900GeV", "data24_13p6TeV", "data24_refcomm"]:
                 config = "pp2024"
-            elif flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
+            elif flags.Input.ProjectName in ["data24_hi", "data24_hicomm"]:
                 config = "PbPb2024" 
-            elif flags.Input.ProjectName == "data25_hip":
+            elif flags.Input.ProjectName in ["data25_hip","data25_hipcomm"]:
                 config = "pO2025"
-            elif flags.Input.ProjectName == "data25_hi":
+            elif flags.Input.ProjectName in ["data25_hi","data25_hicomm"]:
                 config = "OONeNe2025"
         elif run == LHCPeriod.Run2:
             if flags.Input.ProjectName == "data15_hi":
@@ -179,7 +183,7 @@ def ZdcStreamDependentFlagSetting(flags):
     isComm = (flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib")
     isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
     isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib" or isComm)
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC") and not isComm
+    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or "physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express" and not isComm)
     
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
         runInjForStandaloneDataArgValid = False

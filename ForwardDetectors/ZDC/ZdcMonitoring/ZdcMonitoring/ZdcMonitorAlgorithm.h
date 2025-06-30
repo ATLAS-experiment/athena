@@ -20,6 +20,9 @@
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
+#include <xAODTrigger/TrigDecision.h>
 //---------------------------------------------------
 #include "ZdcUtils/ZdcEventInfo.h"
 #include "ZdcConditions/ZdcInjPulserAmpMap.h"
@@ -51,7 +54,7 @@ private:
     bool check_equal_within_rounding(float a, float b, float epsilon = 1e-6f) const;
     void calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
     float calculate_inverse_bin_width(float event_value, const std::string& variable_name, const std::vector<float>& bin_edges) const;
-    
+
     Gaudi::Property<unsigned int> m_runNumber {this, "RunNumber", 0, "Run number for current job"};
     ZdcInjPulserAmpMap::Token m_injMapRunToken{};
     
@@ -89,6 +92,9 @@ private:
     Gaudi::Property<float> m_minVInjToImposeAmpRequirementHGInjectorPulse {this, "MinVInjToImposeAmpRequirementHGInjectorPulse", 0.002, "Minimum input voltage to impose HG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel HG minimum-amplitude requirement"};
     Gaudi::Property<float> m_minVInjToImposeAmpRequirementLGInjectorPulse {this, "MinVInjToImposeAmpRequirementLGInjectorPulse", 0.002, "Minimum input voltage to impose LG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel LG minimum-amplitude requirement"};
 
+    Gaudi::Property<std::vector<std::string>> m_OOpOtriggerChains {this, "OOpOTriggers", {}, "List of trigger chains to monitor"};
+    Gaudi::Property<std::map<int,std::string>> m_OOpOPEBTriggerMap {this, "OOpOPEBtriggerMap", {}, "Map of CTP ID to trigger name for ZdcCalib PEB stream pO/OO monitoring"};
+
     Gaudi::Property<std::string > m_lbTimeCoolFolderName{ this, "LumiBlockTimeCoolFolderName", "/TRIGGER/LUMI/LBLB", "COOL folder in COOLONL_TRIGGER holding info about start and stop times for luminosity blocks" };
 
 
@@ -120,9 +126,14 @@ private:
     Gaudi::Property<bool> m_isOnline {this,"IsOnline",false};
     Gaudi::Property<bool> m_isSim {this,"IsSim",false}; // is simulation
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
+    Gaudi::Property<bool> m_TrkInfoOn {this,"TrkInfoOn",false};
     Gaudi::Property<bool> m_EnableZDCSingleSideTriggers {this,"EnableZDCSingleSideTriggers",true};
     Gaudi::Property<bool> m_EnableUCCTriggers {this,"EnableUCCTriggers",false};
+    Gaudi::Property<bool> m_EnableOOpOTriggers {this,"EnableOOpOTriggers",false};
+    Gaudi::Property<bool> m_IsPEBStream {this,"IsPEBStream",true};
     Gaudi::Property<bool> m_isPPMode {this,"IsPPMode",true};
+    Gaudi::Property<bool> m_ispOMode {this,"IspOMode",true};
+    Gaudi::Property<bool> m_isOOMode {this,"IsOOMode",true};
     Gaudi::Property<bool> m_isInjectedPulse {this,"IsInjectedPulse",false};
     Gaudi::Property<bool> m_isStandalone {this,"IsStandalone",false}; // determine if standalone via metadata
     Gaudi::Property<bool> m_enableZDC {this,"EnableZDC",true};
@@ -145,6 +156,9 @@ private:
     // SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcBCIDKey {this, "ZdcBCIDKey", m_zdcSumContainerName + ".BCID" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_DAQModeKey {this, "ZdcDAQModeKey", m_zdcSumContainerName + ".DAQMode" + m_auxSuffix};
     
+    Gaudi::Property<std::string> m_vertexContainerKey{this, "VertexContainerKey", "PrimaryVertices", "Vertex container name"};
+    Gaudi::Property<std::string> m_trackContainerKey{this, "TrackContainerKey", "InDetTrackParticles", "Track container name"};    
+
     // Per-am (module sum) observables
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumCalibEnergyKey {this, "ZdcSumCalibEnergyKey", m_zdcSumContainerName + ".CalibEnergy" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumAverageTimeKey {this, "ZdcSumAverageTimeKey", m_zdcSumContainerName + ".AverageTime" + m_auxSuffix};
