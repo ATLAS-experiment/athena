@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackSystematicsTools package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -33,16 +33,12 @@ def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool", **kwar
         
     from AthenaConfiguration.Enums import LHCPeriod
     # 2022 recommendations (MC23a)
-    if flags.GeoModel.Run == LHCPeriod.Run3 and flags.Input.MCCampaign == Campaign.MC23a:
-        kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
-        kwargs.setdefault("fFakeLoose", 0.40)
-        kwargs.setdefault("fFakeTight", 1.00)
-    elif flags.GeoModel.Run == LHCPeriod.Run3 and flags.Input.MCCampaign == Campaign.MC23d:
+    if flags.Input.MCCampaign in [Campaign.MC23a, Campaign.MC23d]:
         kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
         kwargs.setdefault("fFakeLoose", 0.40)
         kwargs.setdefault("fFakeTight", 1.00)
     # Run 2 recommendations (MC20)
-    elif flags.GeoModel.Run == LHCPeriod.Run2:
+    elif flags.GeoModel.Run is LHCPeriod.Run2:
         kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
         kwargs.setdefault("fFakeLoose", 0.10)
         kwargs.setdefault("fFakeTight", 1.00)
@@ -76,12 +72,12 @@ def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool", **kwargs
 
     from AthenaConfiguration.Enums import LHCPeriod
     # 2022 recommendations (MC23a)
-    if flags.GeoModel.Run == LHCPeriod.Run3 and flags.Input.MCCampaign == Campaign.MC23a:
+    if flags.Input.MCCampaign is Campaign.MC23a:
         kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23a.root")
-    elif flags.GeoModel.Run == LHCPeriod.Run3 and flags.Input.MCCampaign == Campaign.MC23d:
+    elif flags.Input.MCCampaign is Campaign.MC23d:
         kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23d.root")
     # Run 2 recommendations (MC20)
-    elif flags.GeoModel.Run == LHCPeriod.Run2:
+    elif flags.GeoModel.Run is LHCPeriod.Run2:
         kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_24.0_2023-v00/LargeD0TrackingRecommendations_20230824.root")
     else:
         raise ValueError(f"InclusiveTrackFilterTool: Recommendations not yet available for campaign {flags.Input.MCCampaign}! Please check the configuration and contact Tracking CP if you believe this message is in error.")
@@ -101,7 +97,7 @@ def InDetTrackSmearingToolCfg(flags, name="InDetTrackSmearingTool", **kwargs):
     elif flags.Input.MCCampaign is Campaign.MC23d:
         kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0_smearing_factors_v2.root")
     # 2024 recommendations (MC23e)
-    elif flags.Input.MCCampaign is Campaign.MC23d:
+    elif flags.Input.MCCampaign is Campaign.MC23e:
         kwargs.setdefault("calibFileIP_CTIDE", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0_smearing_factors.root")
     # Run 2 recommendations (MC20)
     elif flags.GeoModel.Run is LHCPeriod.Run2:
