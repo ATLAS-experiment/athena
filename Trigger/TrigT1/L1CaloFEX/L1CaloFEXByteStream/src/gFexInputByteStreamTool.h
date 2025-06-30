@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -91,7 +91,7 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
     virtual void c_gtrx_map( const gfiber &inputData, gfiber &outputData) const;
 
     virtual void gtReconstructABC(  int XFPGA,
-                                    gfiber Xfiber,
+                                    const gfiber & Xfiber,
                                     int Xin,
                                     gtFPGA &XgtF,
                                     gtFPGA &Xgt,

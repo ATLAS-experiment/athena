@@ -317,7 +317,7 @@ namespace LVL1 {
                 }
             }
 
-            m_map_TTower2SCells[TTID] = SCellvector;
+            m_map_TTower2SCells[TTID] = std::move(SCellvector);
         }
         file.close();
 
@@ -377,7 +377,7 @@ namespace LVL1 {
                     Tilevector.push_back(tileid_uint32);
                 }
             }
-            m_map_TTower2Tile[gTowerID] = Tilevector;
+            m_map_TTower2Tile[gTowerID] = std::move(Tilevector);
         }
         myfile.close();
 
