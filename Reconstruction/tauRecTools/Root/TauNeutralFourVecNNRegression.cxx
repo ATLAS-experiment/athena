@@ -396,7 +396,15 @@ StatusCode TauNeutralFourVecNNRegression::getInputs(const xAOD::TauJet &xTau, In
   for (const auto &trk : vTauTracks)
   {
     setCommonP4Vars(chrg_map, trk->p4());
-    setTrackIPVars(chrg_map, trk);
+    try
+    {
+      setTrackIPVars(chrg_map, trk);
+    }
+    catch (const std::exception &e)
+    {
+      ATH_MSG_ERROR("Error setting tau track variables: " << e.what());
+      return StatusCode::FAILURE;
+    }
   }
 
   // set Neutral PFOs variables
@@ -432,7 +440,15 @@ StatusCode TauNeutralFourVecNNRegression::getInputs(const xAOD::TauJet &xTau, In
   for (const auto &trk : vConvTracks)
   {
     setCommonP4Vars(conv_map, trk->p4());
-    setTrackIPVars(conv_map, trk);
+    try
+    {
+      setTrackIPVars(conv_map, trk);
+    }
+    catch (const std::exception &e)
+    {
+      ATH_MSG_ERROR("Error setting conversion track variables: " << e.what());
+      return StatusCode::FAILURE;
+    }
   }
 
   return StatusCode::SUCCESS;
