@@ -22,8 +22,6 @@ namespace ActsTrk {
     ATH_CHECK(m_decorator_actsTracks.initialize());
     ATH_CHECK(m_trackMsosLink.initialize());
     
-    ATH_CHECK(m_pixelMeasurementsKey.initialize());
-    ATH_CHECK(m_stripMeasurementsKey.initialize());
     ATH_CHECK(m_pixelMsosKey.initialize());
     ATH_CHECK(m_stripMsosKey.initialize());
     
@@ -38,14 +36,6 @@ namespace ActsTrk {
     ATH_CHECK(trackParticleHandle.isValid());
     const xAOD::TrackParticleContainer* trackParticles = trackParticleHandle.cptr();
 
-    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> pixelMeasurementHandle = SG::makeHandle( m_pixelMeasurementsKey, ctx );
-    ATH_CHECK(pixelMeasurementHandle.isValid());
-    const xAOD::TrackMeasurementValidationContainer* pixelMeasurements = pixelMeasurementHandle.cptr();
-    
-    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> stripMeasurementHandle = SG::makeHandle( m_stripMeasurementsKey, ctx );
-    ATH_CHECK(stripMeasurementHandle.isValid());
-    const xAOD::TrackMeasurementValidationContainer* stripMeasurements = stripMeasurementHandle.cptr();
-    
     SG::WriteHandle<xAOD::TrackStateValidationContainer> pixelMsosHandle = SG::makeHandle( m_pixelMsosKey, ctx );
     ATH_CHECK( pixelMsosHandle.record(std::make_unique<xAOD::TrackStateValidationContainer>(),
 				      std::make_unique<xAOD::TrackStateValidationAuxContainer>()) );
@@ -103,14 +93,12 @@ namespace ActsTrk {
 
 	if ( detectorTypeFromId == xAOD::UncalibMeasType::PixelClusterType ) {
 	  ATH_CHECK( storeTrackState(state,
-				     *pixelMeasurements,
 				     msos,
 				     *pixelMsos) );
 	  pixelMsos->back()->setDetType( Trk::TrackState::Pixel );  
 	}
 	else if ( detectorTypeFromId == xAOD::UncalibMeasType::StripClusterType ) {
 	  ATH_CHECK( storeTrackState(state,
-				     *stripMeasurements,
 				     msos,
 				     *stripMsos) );
 	  stripMsos->back()->setDetType( Trk::TrackState::SCT );
@@ -129,7 +117,6 @@ namespace ActsTrk {
   }
 
   StatusCode ActsTrackStateOnSurfaceDecoratorAlg::storeTrackState(const typename ActsTrk::TrackContainer::ConstTrackStateProxy& state,
-								  const xAOD::TrackMeasurementValidationContainer& measurements,
 								  std::vector< ElementLink< xAOD::TrackStateValidationContainer > >& msosLinks,
 								  xAOD::TrackStateValidationContainer& msosContainer) const
   {
@@ -138,13 +125,26 @@ namespace ActsTrk {
     ElementLink< xAOD::TrackStateValidationContainer > elink( &msosContainer, msosContainer.back()->index() );
     ATH_CHECK( elink.isValid() );
     msosLinks.push_back( std::move(elink) );
+
+    static const SG::ConstAccessor< ElementLink< xAOD::TrackMeasurementValidationContainer > > decorator_measurement_link("validationMeasurementLink");
     
     auto flags = state.typeFlags();
     if (not flags.test(Acts::TrackStateFlag::HoleFlag) ) {
       auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
       ATH_CHECK( sl != nullptr );
-      const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);    
-      msosContainer.back()->setTrackMeasurementValidationLink( ElementLink<xAOD::TrackMeasurementValidationContainer>(&measurements, cluster.index()) );
+      const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);
+
+      if (not decorator_measurement_link.isAvailable(cluster)) {
+	ATH_MSG_ERROR("xAOD Cluster does not have a link to TrackMeasurementValidation element");
+	return StatusCode::FAILURE;
+      }
+      const auto& el = decorator_measurement_link(cluster);
+      ATH_CHECK( el.isValid() );
+      const xAOD::TrackMeasurementValidation *measurement = *el;
+
+      ElementLink<xAOD::TrackMeasurementValidationContainer> tmvc_el( *static_cast<const xAOD::TrackMeasurementValidationContainer*>(measurement->container()),
+								      measurement->index() );
+      msosContainer.back()->setTrackMeasurementValidationLink( std::move(tmvc_el) );
     }
     
     if (flags.test(Acts::TrackStateFlag::HoleFlag)) {

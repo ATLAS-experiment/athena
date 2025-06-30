@@ -27,6 +27,8 @@ namespace ActsTrk {
     ATH_CHECK(m_write_xaod_key.initialize());
 
     // Decorators
+    ATH_CHECK(m_trackMeasurement_link.initialize());
+
     ATH_CHECK(m_measurement_truth_indices.initialize(m_useTruthInfo));
     ATH_CHECK(m_measurement_truth_barcodes.initialize(m_useTruthInfo));
 
@@ -80,6 +82,9 @@ namespace ActsTrk {
                         std::make_unique<xAOD::TrackMeasurementValidationAuxContainer>()));
 
   // Decorations
+  SG::WriteDecorHandle<xAOD::PixelClusterContainer,
+		       ElementLink< xAOD::TrackMeasurementValidationContainer > > decorator_measurement_link( m_trackMeasurement_link, ctx );  
+    
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::uint64_t> decor_detectorElementID ( m_measurement_detectorElementID, ctx );
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, int> decor_waferID ( m_measurement_waferID, ctx );
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, int> decor_bec ( m_measurement_bec, ctx );
@@ -111,6 +116,10 @@ namespace ActsTrk {
   for (std::size_t i(0); i<clusters->size(); ++i) {
     const xAOD::PixelCluster* cluster = clusters->at(i);
     xAOD::TrackMeasurementValidation* measurement = measurements->at(i);
+
+    ElementLink< xAOD::TrackMeasurementValidationContainer > mlink( measurements, i);
+    ATH_CHECK( mlink.isValid() );    
+    decorator_measurement_link(*cluster) = std::move(mlink);
     
     xAOD::DetectorIdentType clusterId = cluster->identifier();
     xAOD::DetectorIDHashType hashId = cluster->identifierHash();

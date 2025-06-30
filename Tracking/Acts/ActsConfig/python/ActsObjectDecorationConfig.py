@@ -10,10 +10,15 @@ def ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault('TrackParticles', 'InDetTrackParticles')
-    kwargs.setdefault('PixelMeasurements', 'ITkPixelMeasurements')
-    kwargs.setdefault('StripMeasurements', 'ITkStripMeasurements')
     kwargs.setdefault('PixelMSOSs', 'ITkPixelMSOSs')
     kwargs.setdefault('StripMSOSs', 'ITkStripMSOSs')
+    kwargs.setdefault('ExtraInputs',[
+        ( 'xAOD::PixelClusterContainer' , 'StoreGateSvc+ITkPixelClusters.validationMeasurementLink' ),
+        ( 'xAOD::StripClusterContainer' , 'StoreGateSvc+ITkStripClusters.validationMeasurementLink' ),
+        ( 'xAOD::TrackMeasurementValidationContainer' , 'StoreGateSvc+ITkPixelMeasurements' ),
+        ( 'xAOD::TrackMeasurementValidationContainer' , 'StoreGateSvc+ITkStripMeasurements' )
+    ])
+    
     acc.addEventAlgo(CompFactory.ActsTrk.ActsTrackStateOnSurfaceDecoratorAlg(name, **kwargs))
 
     toAOD = []
