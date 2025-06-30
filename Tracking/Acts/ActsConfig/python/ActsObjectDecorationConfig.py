@@ -106,7 +106,6 @@ def ActsPixelClusterSiHitDecoratorAlgCfg(flags,
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('Measurements', 'ITkPixelMeasurements')
-    kwargs.setdefault('Clusters', 'ITkPixelClusters')
     kwargs.setdefault('SDOs', 'ITkPixelSDO_Map')
     kwargs.setdefault('SiHits', 'ITkPixelHits')
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterSiHitDecoratorAlg(name, **kwargs))
@@ -117,7 +116,6 @@ def ActsStripClusterSiHitDecoratorAlgCfg(flags,
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('Measurements', 'ITkStripMeasurements')
-    kwargs.setdefault('Clusters', 'ITkStripClusters')
     kwargs.setdefault('SDOs', 'ITkStripSDO_Map')
     kwargs.setdefault('SiHits', 'ITkStripHits')
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterSiHitDecoratorAlg(name, **kwargs))
