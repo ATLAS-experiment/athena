@@ -28,7 +28,7 @@ namespace ActsTrk::detail {
 
       unsigned int nDepos {0};
       for (const auto& deposit: pos->second.getdeposits()) {
-	if (deposit.first) sdoDepBC[nDepos] = HepMC::barcode(deposit.first);
+	if (deposit.first) sdoDepBC[nDepos] = HepMC::barcode(deposit.first); // FIXME barcode-based
 	sdoDepEnergy[nDepos] = deposit.second;
 	++nDepos;
       }
@@ -78,7 +78,7 @@ namespace ActsTrk::detail {
       sihit_meanTime[hitNumber] =  sihit.meanTime() ;
 
       const HepMcParticleLink& HMPL = sihit.particleLink();
-      sihit_barcode[hitNumber] = HepMC::barcode(HMPL) ;
+      sihit_barcode[hitNumber] = HepMC::barcode(HMPL); // FIXME barcode-based
       if( HMPL.isValid() ){
         sihit_pdgid[hitNumber] = HMPL->pdg_id();
       }

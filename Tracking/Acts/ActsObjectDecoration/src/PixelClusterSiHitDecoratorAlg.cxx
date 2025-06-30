@@ -149,12 +149,12 @@ namespace ActsTrk {
 	  rdos[i].set_literal( rdoIdentifierList[i] );
 	}
 		
-	auto [word, depositsBarcode, depositsEnergy] = ActsTrk::detail::getSDOInformation(rdos, *sdos);
+	auto [word, depositsBarcode, depositsEnergy] = ActsTrk::detail::getSDOInformation(rdos, *sdos); // FIXME barcode-based
 	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(rdos, *element, siHitsWithCurrentHash, depositsBarcode);
 
 	auto [energyDeposit, meanTime, barcode, pdgid,
 	      startPosX, startPosY, startPosZ,
-	      endPosX, endPosY, endPosZ] = ActsTrk::detail::getSiHitInformation(*element, compatibleSiHits);
+	      endPosX, endPosY, endPosZ] = ActsTrk::detail::getSiHitInformation(*element, compatibleSiHits); // FIXME barcode-based
 	
 	// attach SDO decorations
 	decor_sdo_words(*measurement) = std::move(word);
@@ -208,9 +208,9 @@ namespace ActsTrk {
 	} // list on rdos
 	
       } else { // not m_useSiHitsGeometryMatching
-	auto siHitBarcode = HepMC::barcode(siHit->particleLink());       
+	auto siHitBarcode = HepMC::barcode(siHit->particleLink()); // FIXME barcode-based
 	for ( const std::vector<int>& barcodeSDOColl : sdoTracks ) {
-	  if (std::find(barcodeSDOColl.begin(), barcodeSDOColl.end(), siHitBarcode) == barcodeSDOColl.end()) continue;
+	  if (std::find(barcodeSDOColl.begin(), barcodeSDOColl.end(), siHitBarcode) == barcodeSDOColl.end()) continue; // FIXME barcode-based
 	  multiMatchingHits.push_back(siHit);	
 	  break;
 	}	
@@ -283,7 +283,7 @@ namespace ActsTrk {
 				  highestXPos->localEndPosition(),
 				  energyDep,
 				  time,
-				  HepMC::barcode((*siHitIter)->particleLink()),
+				  HepMC::barcode((*siHitIter)->particleLink()), // FIXME barcode-based
 				  0, // 0 for pixel 1 for strip
 				  (*siHitIter)->getBarrelEndcap(),
 				  (*siHitIter)->getLayerDisk(),
