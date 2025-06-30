@@ -24,7 +24,7 @@ atlas_add_poolcnv_library( xAODTruthAthenaPoolPoolCnv
    xAOD::TruthMetaDataContainer xAOD::TruthMetaDataAuxContainer
    CNV_PFX xAOD
    LINK_LIBRARIES AthContainers AthenaKernel AthenaPoolCnvSvcLib
-   AthenaPoolUtilities xAODTruth )
+   AthenaPoolUtilities xAODTruth TruthUtils )
 
 # Install files from the package.
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
