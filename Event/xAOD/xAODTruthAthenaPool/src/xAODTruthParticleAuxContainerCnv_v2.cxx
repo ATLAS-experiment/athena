@@ -18,9 +18,6 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace HepMC {
-  constexpr int INVALID_PARTICLE_ID = -1;
-}
 
 void xAODTruthParticleAuxContainerCnv_v2::persToTrans(
     const xAOD::TruthParticleAuxContainer_v2* futureObj,

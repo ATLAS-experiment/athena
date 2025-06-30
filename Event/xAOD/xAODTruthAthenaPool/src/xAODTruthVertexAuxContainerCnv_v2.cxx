@@ -18,9 +18,6 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace HepMC {
-  constexpr int INVALID_VERTEX_ID = 1;
-}
 
 void xAODTruthVertexAuxContainerCnv_v2::persToTrans(
     const xAOD::TruthVertexAuxContainer_v2* futureObj,
