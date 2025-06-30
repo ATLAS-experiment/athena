@@ -31,6 +31,8 @@ using VectorMap = std::map<std::string, std::vector<double>>;
 using InputMap = std::map<std::string, ValueMap>;
 using InputSequenceMap = std::map<std::string, VectorMap>;
 
+static const std::set<std::string> branches = {"TauTrack", "NeutralPFO", "ShotPFO", "ConvTrack"};
+
 TauNeutralFourVecNNRegression::TauNeutralFourVecNNRegression(const std::string &name)
     : TauRecToolBase(name)
 {
@@ -172,7 +174,7 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   //
   InputMap inputMapDummy;
   InputSequenceMap inputSeqMap;
-  std::set<std::string> branches = {"TauTrack", "NeutralPFO", "ShotPFO", "ConvTrack"};
+  
   DMHelper::initMapKeys(inputSeqMap, branches);
 
   ATH_CHECK(getInputs(xTau, inputSeqMap));
