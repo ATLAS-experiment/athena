@@ -59,7 +59,7 @@ def calibrationTag(flags):
 
 
 def saveSv1(prevFlags):
-    return prevFlags.Common.ProductionStep is ProductionStep.Derivation or prevFlags.GeoModel.Run >= LHCPeriod.Run4
+    return prevFlags.GeoModel.Run >= LHCPeriod.Run4
 
 
 def runOldSecVrtSecIncl(prevFlags):
