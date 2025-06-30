@@ -40,7 +40,7 @@ public:
     };
 
     struct Cluster {
-	std::vector<Identifier> ids;
+        std::vector<Identifier::value_type> ids;
 	uint16_t hitsInThirdTimeBin{0};
     };
 
@@ -78,7 +78,7 @@ private:
 		    Identifier stripId) const;
 
     // N.B. the cluster is added to the container
-    StatusCode makeCluster(const StripClusteringTool::Cluster &cluster,
+    StatusCode makeCluster(StripClusteringTool::Cluster &cluster,
 			   double LorentzShift,
 			   Eigen::Matrix<float,1,1>& localCov,
 			   const StripID& stripID,
