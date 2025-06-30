@@ -59,11 +59,13 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
         static float getPhiScale() { return 3.15;};
         static float getD0Scale() { return 2.0;};
         static float getZ0Scale() { return 200.;};        
+        static float getRScale() {return 1015.;};
   
 	// Flags
 	Gaudi::Property <unsigned int> m_minNumberOfRealHitsInATrack{ this, "MinNumberOfRealHitsInATrack", 4, "Minimum number of real hits in a track candidate to process" };
 	Gaudi::Property <bool> m_doGNNTracking{ this, "doGNNTracking", false, "Flag to turn on GNN Tracking configuration for road-to-track" };
 	Gaudi::Property <int> m_nInputsGNN{ this, "nInputsGNN", 9, "Number of Hit Inputs for NN for GNN configuration. Depends on which model is chosen."};
+        Gaudi::Property <bool> m_useCartesian { this, "useCartesian", true, "If true, NNs use Cartestian coordinates. If false,they use cylindrical coordiantes"};
 
   private:
 

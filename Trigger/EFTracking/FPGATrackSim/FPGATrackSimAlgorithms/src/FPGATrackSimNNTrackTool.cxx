@@ -78,7 +78,9 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
         float tmp_xf;
         float tmp_yf;
         float tmp_zf;
-
+	float tmp_rf;
+	float tmp_phif;
+	
         for (const auto& hit : hits) {
             if (!hit.isReal()) continue;
 
@@ -86,7 +88,9 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
             float xf = hit.getX();
             float yf = hit.getY();
             float zf = hit.getZ();
-
+	    float rf = std::sqrt(xf*xf+yf*yf);
+	    float phif = hit.getGPhi();
+	    
             // Get average of values for strip hit pairs
             // TODO: this needs to be fixed in the future, for this to work for other cases
             if (hit.isStrip()) {
@@ -94,28 +98,52 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
                     tmp_xf = xf;
                     tmp_yf = yf;
                     tmp_zf = zf;
+		    tmp_rf = rf;
+		    tmp_phif = phif;
                     gotSecondSP = true;
                 }
                 else {
+		  gotSecondSP = false;
 
+		  if (m_useCartesian) {
                     float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
                     float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
                     float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-
+		    
                     // Get average of two hits for strip hits 
                     inputTensorValues.push_back(xf_scaled);
                     inputTensorValues.push_back(yf_scaled);
                     inputTensorValues.push_back(zf_scaled);
-                    gotSecondSP = false;
+		  }
+		  else {
+		    float rf_scaled = (rf+tmp_rf) / (2.*getRScale());
+		    float phif_scaled = (phif+tmp_phif) / (2.*getPhiScale());
+		    float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		    // Get average of two hits for strip hits
+                    inputTensorValues.push_back(rf_scaled);
+                    inputTensorValues.push_back(phif_scaled);
+                    inputTensorValues.push_back(zf_scaled);
+		  }
                 }
             }
             else {
+	      if (m_useCartesian) {
                 float xf_scaled = (xf) / (getXScale());
                 float yf_scaled = (yf) / (getYScale());
                 float zf_scaled = (zf) / (getZScale());
                 inputTensorValues.push_back(xf_scaled);
                 inputTensorValues.push_back(yf_scaled);
                 inputTensorValues.push_back(zf_scaled);
+	      }
+	      else {
+		float rf_scaled = (rf) / (getRScale());
+		float phif_scaled = (phif) / (getPhiScale());
+		float zf_scaled = (zf) / (getZScale());
+		// Get average of two hits for strip hits
+		inputTensorValues.push_back(rf_scaled);
+		inputTensorValues.push_back(phif_scaled);
+		inputTensorValues.push_back(zf_scaled);
+	      }
             }
         }
 
@@ -260,66 +288,96 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
             float tmp_xf;
             float tmp_yf;
             float tmp_zf;
-
+	    float tmp_rf;
+	    float tmp_phif;
+	    
             // Loop over all hits
             for (const auto &hit : hit_list) {
                 // Need to rotate hits
                 float x0 = hit->getX();
                 float y0 = hit->getY();
                 float z0 = hit->getZ();
-                if (index == 1) {
-                    if (z0 < 0)
-                        flipZ = true;
-                    rotateAngle = std::atan(x0 / y0);
-                    if (y0 < 0)
-                        rotateAngle += M_PI;
-                }
-
-                float xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
-                float yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
-                float zf = z0;
-
-                if (flipZ) zf = z0 * -1;
+		float r0 = std::sqrt(x0*x0+y0*y0);
+		float phi0 = hit->getGPhi();
+		float xf = x0;
+		float yf = y0;
+		float zf = z0;
+		float rf = r0;
+		float phif = phi0;
+		if (m_useCartesian) {
+		  if (index == 1) {
+		    if (z0 < 0)
+		      flipZ = true;
+		    rotateAngle = std::atan(x0 / y0);
+		    if (y0 < 0)
+		      rotateAngle += M_PI;
+		  }		  
+		  xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
+		  yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
+		  zf = z0;
+		  if (flipZ) zf = z0 * -1;
+		}
 
                 // Get average of values for strip hit pairs
                 // TODO: this needs to be fixed in the future, for this to work for other cases
                 if (hit->isStrip()) {
                     if (!gotSecondSP) {
-                        tmp_xf = xf;
-                        tmp_yf = yf;
-                        tmp_zf = zf;
-                        gotSecondSP = true;
+		      tmp_xf = xf;
+		      tmp_yf = yf;
+		      tmp_zf = zf;
+		      tmp_phif = phif;
+		      tmp_rf = rf;
+		      gotSecondSP = true;
                     }
                     else {
-
+		      gotSecondSP = false;
+		      if (m_useCartesian) {
                         float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
                         float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
                         float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-
+			
                         // Get average of two hits for strip hits 
                         inputTensorValues.push_back(xf_scaled);
                         inputTensorValues.push_back(yf_scaled);
                         inputTensorValues.push_back(zf_scaled);
                         index++;
-                        gotSecondSP = false;
+		      }
+		      else {
+                        float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
+                        float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
+                        float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+			inputTensorValues.push_back(rf_scaled);
+			inputTensorValues.push_back(phif_scaled);
+			inputTensorValues.push_back(zf_scaled);
+		      }
                     }
                 }
                 else {
-                    float xf_scaled = (xf) / (getXScale());
+		  if (m_useCartesian) {
+		    float xf_scaled = (xf) / (getXScale());
                     float yf_scaled = (yf) / (getYScale());
                     float zf_scaled = (zf) / (getZScale());
                     inputTensorValues.push_back(xf_scaled);
                     inputTensorValues.push_back(yf_scaled);
                     inputTensorValues.push_back(zf_scaled);
                     index++;
+		  }
+		  else {
+		    float rf_scaled = (rf) / (getRScale());
+		    float phif_scaled = (phif) / (getPhiScale());
+		    float zf_scaled = (zf) / (getZScale());
+		    inputTensorValues.push_back(rf_scaled);
+		    inputTensorValues.push_back(phif_scaled);
+		    inputTensorValues.push_back(zf_scaled);
+		  }
                 }
             }
-
+	    
             if (inputTensorValues.size() != planeMap->getNLogiLayers()*3) {
                 inputTensorValues.resize(planeMap->getNLogiLayers()*3);
             }
             inputTensorValues.resize(15); // Retain only the first 15 values for consistency
-
+	    
             inputTensorValuesAll.push_back(inputTensorValues);
             FPGATrackSimTrack track_cand;
             track_cand.setTrackID(n_track);
@@ -433,7 +491,8 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
             float tmp_xf;
             float tmp_yf;
             float tmp_zf;
-
+	    float tmp_rf;
+	    float tmp_phif;
             // Loop over all hits
             for (const auto &hit : hit_list) {
 
@@ -441,19 +500,28 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
                 float x0 = hit->getX();
                 float y0 = hit->getY();
                 float z0 = hit->getZ();
-                if (index == 1) {
+		float r0 = std::sqrt(x0*x0+y0*y0);
+                float phi0 = hit->getGPhi();
+                float xf = x0;
+                float yf = y0;
+                float zf = z0;
+		float rf = r0;
+		float phif = phi0;
+		
+		if (m_useCartesian) {
+		  if (index == 1) {
                     if (z0 < 0)
-                        flipZ = true;
+		      flipZ = true;
                     rotateAngle = std::atan(x0 / y0);
                     if (y0 < 0)
-                        rotateAngle += M_PI;
-                }
-
-                float xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
-                float yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
-                float zf = z0;
-
-                if (flipZ) zf = z0 * -1;
+		      rotateAngle += M_PI;
+		  }		  
+		  xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
+		  yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
+		  zf = z0;
+		  
+		  if (flipZ) zf = z0 * -1;
+		}
 
                 // Get average of values for strip hit pairs
                 // TODO: this needs to be fixed in the future, for this to work for other cases
@@ -462,23 +530,35 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
                         tmp_xf = xf;
                         tmp_yf = yf;
                         tmp_zf = zf;
+			tmp_rf = rf;
+			tmp_phif = phif;
                         gotSecondSP = true;
                     }
                     else {
-
+		      gotSecondSP = false;
+		      if (m_useCartesian) {
                         float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
                         float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
                         float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-
+			
                         // Get average of two hits for strip hits
                         inputTensorValues.push_back(xf_scaled);
                         inputTensorValues.push_back(yf_scaled);
                         inputTensorValues.push_back(zf_scaled);
                         index++;
-                        gotSecondSP = false;
-                    }
-                }
+		      }
+		      else {
+                        float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
+                        float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
+                        float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+                        inputTensorValues.push_back(rf_scaled);
+                        inputTensorValues.push_back(phif_scaled);
+                        inputTensorValues.push_back(zf_scaled);
+		      }
+		    }
+		}
                 else {
+		  if (m_useCartesian) {
                     float xf_scaled = (xf) / (getXScale());
                     float yf_scaled = (yf) / (getYScale());
                     float zf_scaled = (zf) / (getZScale());
@@ -486,9 +566,18 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
                     inputTensorValues.push_back(yf_scaled);
                     inputTensorValues.push_back(zf_scaled);
                     index++;
-                }
-            }
-
+		  }
+		  else {
+                    float rf_scaled = (rf) / (getRScale());
+                    float phif_scaled = (phif) / (getPhiScale());
+                    float zf_scaled = (zf) / (getZScale());
+                    inputTensorValues.push_back(rf_scaled);
+                    inputTensorValues.push_back(phif_scaled);
+                    inputTensorValues.push_back(zf_scaled);
+		  }
+		}
+	    }
+	    
             if (inputTensorValues.size() != 39) {
 	      inputTensorValues.resize(39);
             }
@@ -629,6 +718,8 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
         float tmp_xf;
         float tmp_yf;
         float tmp_zf;
+        float tmp_phif;
+        float tmp_rf;		
 
         // Loop over all hits
         for (const auto &hit : hit_list) {
@@ -636,20 +727,29 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
             float x0 = hit->getX();
             float y0 = hit->getY();
             float z0 = hit->getZ();
-            if (index == 1) {
+	    float r0 = std::sqrt(x0*x0+y0*y0);
+	    float phi0 = hit->getGPhi();
+	    float xf = x0;
+	    float yf = y0;
+	    float zf = z0;
+	    float rf = r0;
+	    float phif = phi0;
+	    
+	    if (m_useCartesian) {
+	      if (index == 1) {
                 if (z0 < 0)
-                    flipZ = true;
+		  flipZ = true;
                 rotateAngle = std::atan(x0 / y0);
                 if (y0 < 0)
-                    rotateAngle += M_PI;
-            }
-
-            float xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
-            float yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
-            float zf = z0;
-
-            if (flipZ) zf = z0 * -1;
-
+		  rotateAngle += M_PI;
+	      }	      
+	      xf = x0 * std::cos(rotateAngle) - y0 * std::sin(rotateAngle);
+	      yf = x0 * std::sin(rotateAngle) + y0 * std::cos(rotateAngle);
+	      zf = z0;
+	      
+	      if (flipZ) zf = z0 * -1;
+	    }
+	    
             // Get average of values for strip hit pairs
             // TODO: this needs to be fixed in the future, for this to work for other cases
             if (hit->isStrip()) {
@@ -657,23 +757,35 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
                     tmp_xf = xf;
                     tmp_yf = yf;
                     tmp_zf = zf;
+		    tmp_phif = phif;
+		    tmp_rf = rf;
                     gotSecondSP = true;
                 }
                 else {
-
+		  gotSecondSP = false;
+	          if (m_useCartesian) {
                     float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
                     float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
                     float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-
+		    
                     // Get average of two hits for strip hits 
                     inputTensorValues.push_back(xf_scaled);
                     inputTensorValues.push_back(yf_scaled);
                     inputTensorValues.push_back(zf_scaled);
                     index++;
-                    gotSecondSP = false;
+		  }
+		  else {
+		    float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
+		    float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
+		    float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		    inputTensorValues.push_back(rf_scaled);
+		    inputTensorValues.push_back(phif_scaled);
+		    inputTensorValues.push_back(zf_scaled);
+		  }
                 }
             }
             else {
+	      if (m_useCartesian) {
                 float xf_scaled = (xf) / (getXScale());
                 float yf_scaled = (yf) / (getYScale());
                 float zf_scaled = (zf) / (getZScale());
@@ -681,6 +793,15 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
                 inputTensorValues.push_back(yf_scaled);
                 inputTensorValues.push_back(zf_scaled);
                 index++;
+	      }
+	      else {
+		float rf_scaled = (rf) / (getRScale());
+		float phif_scaled = (phif) / (getPhiScale());
+		float zf_scaled = (zf) / (getZScale());
+		inputTensorValues.push_back(rf_scaled);
+		inputTensorValues.push_back(phif_scaled);
+		inputTensorValues.push_back(zf_scaled);
+	      }
             }
         }
 

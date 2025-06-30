@@ -302,6 +302,7 @@ def FPGATrackSimNNPathfinderExtensionToolCfg(flags,name="FPGATrackSimNNPathfinde
     else:
         FPGATrackSimNNPathfinderExtensionTool.threshold = flags.Trigger.FPGATrackSim.hitThreshold
     FPGATrackSimNNPathfinderExtensionTool.windowR = flags.Trigger.FPGATrackSim.windowR
+    FPGATrackSimNNPathfinderExtensionTool.windowPhi = flags.Trigger.FPGATrackSim.windowPhi    
     FPGATrackSimNNPathfinderExtensionTool.windowZ = flags.Trigger.FPGATrackSim.windowZ
     FPGATrackSimNNPathfinderExtensionTool.lowPtValueWindowR = flags.Trigger.FPGATrackSim.lowPtvalueR
     FPGATrackSimNNPathfinderExtensionTool.lowPtRScaling = flags.Trigger.FPGATrackSim.lowPtWindowRScaling
@@ -309,7 +310,12 @@ def FPGATrackSimNNPathfinderExtensionToolCfg(flags,name="FPGATrackSimNNPathfinde
     FPGATrackSimNNPathfinderExtensionTool.lowPtZScaling = flags.Trigger.FPGATrackSim.lowPtWindowZScaling
     FPGATrackSimNNPathfinderExtensionTool.missedHitRScaling = flags.Trigger.FPGATrackSim.missedHitRScaling
     FPGATrackSimNNPathfinderExtensionTool.missedHitZScaling = flags.Trigger.FPGATrackSim.missedHitZScaling
+    FPGATrackSimNNPathfinderExtensionTool.missedHitPhiScaling = flags.Trigger.FPGATrackSim.missedHitPhiScaling
+    FPGATrackSimNNPathfinderExtensionTool.lowPtValueWindowPhi = flags.Trigger.FPGATrackSim.lowPtvaluePhi
+    FPGATrackSimNNPathfinderExtensionTool.lowPtPhiScaling = flags.Trigger.FPGATrackSim.lowPtWindowPhiScaling
     FPGATrackSimNNPathfinderExtensionTool.maxBranches = flags.Trigger.FPGATrackSim.maxBranches
+    FPGATrackSimNNPathfinderExtensionTool.useCartesian = flags.Trigger.FPGATrackSim.NNCartesianCoordinates
+    
     FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = True
     if (flags.Trigger.FPGATrackSim.ActiveConfig.genScan):
         FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = False
@@ -355,6 +361,7 @@ def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool_2nd"):
     NNTrackTool.SPRoadFilterTool = result.popToolsAndMerge(FPGATrackSimAnalysisConfig.SPRoadFilterToolCfg(flags,secondStage=True))
     NNTrackTool.Do2ndStageTrackFit = True
     NNTrackTool.useSectors = False
+    NNTrackTool.useCartesian = flags.Trigger.FPGATrackSim.NNCartesianCoordinates
     result.setPrivateTools(NNTrackTool)
     return result
 
