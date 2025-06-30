@@ -8,10 +8,7 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
-#include "AsgDataHandles/ReadHandle.h"
-#include "AsgDataHandles/ReadHandleKey.h"
-#include "AsgDataHandles/WriteDecorHandle.h"
-#include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "PathResolver/PathResolver.h"
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticle.h"
@@ -69,8 +66,8 @@ namespace CP {
     Gaudi::Property<bool> m_equalizeClusterMeasurements
     { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
 
-    /// PathResolverFindCalibFile need the logical filename in ASG calibration area.
-    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "pixeldEdxEqualizationSFs_v0.root"}; // FIX! TBD
+    // PathResolverFindCalibFile needs the logical filename in ASG calibration area.
+    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "dev/PixelDEdxCalib/pixeldEdxEqualizationSFs_v1.root"}; // FIX! TBD
     /// Override version in ASG calibration area with a local file is not empty string.
     Gaudi::Property<std::string> m_sfLocalFileName {this, "SFLocalFileName", ""};
     /// Name of SF tree.

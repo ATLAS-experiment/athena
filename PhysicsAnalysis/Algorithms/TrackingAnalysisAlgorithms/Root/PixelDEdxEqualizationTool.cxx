@@ -40,6 +40,9 @@ namespace CP {
     if (m_sfLocalFileName != "") {
         ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfLocalFileName << "\"!! FOR DEVELOPMENT USE ONLY !! ");
     }
+    else {
+      ATH_MSG_INFO("Using default calibration file from ASG area:" << m_sfFileName);
+    }
     ATH_CHECK(initSFsFromTrees());
 
     return StatusCode::SUCCESS;
@@ -62,9 +65,7 @@ namespace CP {
       filename = m_sfLocalFileName;
     }
     else {
-      //filename = PathResolverFindCalibFile( m_sfFileName );
-      ATH_MSG_ERROR("PathResolver not availabnle in AnalysisBase?"); //FIXME!
-      return StatusCode::FAILURE;
+      filename = PathResolverFindCalibFile( m_sfFileName );
     }
 
     if (filename.empty()) {
