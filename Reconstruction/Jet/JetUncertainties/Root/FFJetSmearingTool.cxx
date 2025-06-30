@@ -324,7 +324,7 @@ namespace CP {
                 return StatusCode::FAILURE;
             }
         
-            m_CALO_ResponseMap  = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get( CaloResponseMap_path )));
+            m_CALO_ResponseMap  = std::unique_ptr<TH2>(static_cast<TH2*>(data_file->Get( CaloResponseMap_path )));
             m_CALO_ResponseMap->SetDirectory(nullptr);
 
             ATH_MSG_INFO("    ResponseMap: " << CaloResponseMap_path);
@@ -338,7 +338,7 @@ namespace CP {
                 return StatusCode::FAILURE;
             }
 
-            m_TA_ResponseMap  = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get( TAResponseMap_path )));
+            m_TA_ResponseMap  = std::unique_ptr<TH2>(static_cast<TH2*>(data_file->Get( TAResponseMap_path )));
             m_TA_ResponseMap->SetDirectory(nullptr);//To keep it open when we close the .root file
             
             ATH_MSG_INFO("    ResponseMap: " << TAResponseMap_path);
@@ -473,8 +473,8 @@ namespace CP {
                 return StatusCode::FAILURE;
             }
 
-            m_caloMassWeight = std::unique_ptr<TH3F>(dynamic_cast<TH3F*>(Calo_TA_weight_file->Get(Calo_weight_hist_name)));
-            m_TAMassWeight = std::unique_ptr<TH3F>(dynamic_cast<TH3F*>(Calo_TA_weight_file->Get(TA_weight_hist_name)));
+            m_caloMassWeight = std::unique_ptr<TH3F>(static_cast<TH3F*>(Calo_TA_weight_file->Get(Calo_weight_hist_name)));
+            m_TAMassWeight = std::unique_ptr<TH3F>(static_cast<TH3F*>(Calo_TA_weight_file->Get(TA_weight_hist_name)));
 
             m_caloMassWeight->SetDirectory(nullptr);
             m_TAMassWeight->SetDirectory(nullptr);//To keep it open when we close the .root file
@@ -571,9 +571,9 @@ namespace CP {
         auto comb = JetTools::FFJetAllowedMassDefEnum::Comb;
         auto ufo = JetTools::FFJetAllowedMassDefEnum::UFO;
         
-        auto massAffectedSys = m_Syst_MassDefAffected_map.at(m_currentSysData->SysBaseName);
-        auto topologyAffected = m_Syst_TopologyAffected_map.at(m_currentSysData->SysBaseName);
-        auto uncertparam = m_Syst_uncertparam.at(m_currentSysData->SysBaseName);
+        const auto & massAffectedSys = m_Syst_MassDefAffected_map.at(m_currentSysData->SysBaseName);
+        const auto & topologyAffected = m_Syst_TopologyAffected_map.at(m_currentSysData->SysBaseName);
+        const auto & uncertparam = m_Syst_uncertparam.at(m_currentSysData->SysBaseName);
 
         if (massAffectedSys ==  JetTools::enumToString(MassDef_of_syst) || massAffectedSys ==  JetTools::enumToString(comb) ){
             ATH_MSG_VERBOSE("This uncertainty affects to the " << JetTools::enumToString(MassDef_of_syst) << " mass");
@@ -860,15 +860,13 @@ namespace CP {
             jet_reco.getAttribute<xAOD::JetFourMom_t>("JetJMSScaleMomentumCalo",jet_reco_CALO);
             jet_reco.getAttribute<xAOD::JetFourMom_t>("JetJMSScaleMomentumTA",jet_reco_TA);
 
-            xAOD::JetFourMom_t p4_aux;
 
             //The smearing do not change the pt but it changes the mass (so the energy too) so, if we want to perform the smearing properly, we have to change 
             //the Calo and TA four momenta before looking at the weights map
-            p4_aux = xAOD::JetFourMom_t(jet_reco_CALO.pt(),jet_reco_CALO.eta(),jet_reco_CALO.phi(),smeared_CALO_mass);//The smearing do not change the pt but it changes the Energy 
-            jet_reco_CALO = p4_aux;
+            jet_reco_CALO = xAOD::JetFourMom_t(jet_reco_CALO.pt(),jet_reco_CALO.eta(),jet_reco_CALO.phi(),smeared_CALO_mass);//The smearing do not change the pt but it changes the Energy 
 
-            p4_aux = xAOD::JetFourMom_t(jet_reco_TA.pt(),jet_reco_TA.eta(),jet_reco_TA.phi(),smeared_TA_mass);
-            jet_reco_TA = p4_aux;
+            jet_reco_TA = xAOD::JetFourMom_t(jet_reco_TA.pt(),jet_reco_TA.eta(),jet_reco_TA.phi(),smeared_TA_mass);
+             
 
             caloRes=FFJetSmearingTool::Read3DHistogram(m_caloMassWeight.get() ,jet_reco_CALO.e()*m_MeVtoGeV,TMath::Log(jet_reco_CALO.M()/jet_reco_CALO.e()),std::abs(jet_reco_CALO.eta()));
 
