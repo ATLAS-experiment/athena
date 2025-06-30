@@ -459,9 +459,9 @@ def addLowMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_AND_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
-        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_AND_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_C', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
         # new items ATR-29027
         # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_A',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),
         # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_PP_C',    l1SeedThresholds=['FSNOSEED'], stream=['ZDCCalib'], groups=['RATE:Calibration','BW:Detector']),

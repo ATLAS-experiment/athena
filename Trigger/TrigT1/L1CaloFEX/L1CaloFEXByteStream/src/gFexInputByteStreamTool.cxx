@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -434,8 +434,8 @@ void gFexInputByteStreamTool::c_gtrx_map( const gfiber &inputData, gfiber &outpu
 }
 
 
-void gFexInputByteStreamTool::gtReconstructABC(int XFPGA, 
-                                               gfiber Xfiber, int Xin, 
+void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
+                                               const gfiber &Xfiber, int Xin,
                                                gtFPGA &XgtF, gtFPGA &Xgt,
                                                int *BCIDptr,
                                                int do_lconv, 
