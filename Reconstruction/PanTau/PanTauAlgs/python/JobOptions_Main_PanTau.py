@@ -62,56 +62,53 @@ def PanTauFeatureExtractorCfg(flags, infoHandler):
     result.addPublicTool(python_Tool_FeatureExtractor, True)
     return result
 
-def PanTauModeDiscr_1p0nv1p1n_Cfg(flags, infoHandler, curInAlg):
+def PanTauModeDiscr_1p0nv1p1n_Cfg(flags, infoHandler):
     result = ComponentAccumulator()
     PanTau__Tool_ModeDiscriminator = CompFactory.PanTau.Tool_ModeDiscriminator
 
-    python_Tool_ModeDiscri_1p0n_vs_1p1n = PanTau__Tool_ModeDiscriminator("PanTau_ModeDiscri_1p0n_vs_1p1n_" + curInAlg,
+    python_Tool_ModeDiscri_1p0n_vs_1p1n = PanTau__Tool_ModeDiscriminator("PanTau_ModeDiscri_1p0n_vs_1p1n_CellBased",
                                                                          calibFolder             = flags.Tau.tauRecToolsCVMFSPath,
-                                                                         Name_InputAlg           = curInAlg,
                                                                          Name_ModeCase           = "1p0n_vs_1p1n",
                                                                          Tool_InformationStore = result.getPrimaryAndMerge(PanTauInformationStoreCfg(flags, infoHandler)) )
 
     result.addPublicTool(python_Tool_ModeDiscri_1p0n_vs_1p1n, True)
     return result
 
-def PanTauModeDiscr_1p1nv1pXn_Cfg(flags, infoHandler, curInAlg):
+def PanTauModeDiscr_1p1nv1pXn_Cfg(flags, infoHandler):
     result = ComponentAccumulator()    
     PanTau__Tool_ModeDiscriminator = CompFactory.PanTau.Tool_ModeDiscriminator
 
-    python_Tool_ModeDiscri_1p1n_vs_1pXn = PanTau__Tool_ModeDiscriminator("PanTau_ModeDiscri_1p1n_vs_1pXn_" + curInAlg,
+    python_Tool_ModeDiscri_1p1n_vs_1pXn = PanTau__Tool_ModeDiscriminator("PanTau_ModeDiscri_1p1n_vs_1pXn_CellBased",
                                                                          calibFolder             = flags.Tau.tauRecToolsCVMFSPath,
-                                                                         Name_InputAlg           = curInAlg,
                                                                          Name_ModeCase           = "1p1n_vs_1pXn",
                                                                          Tool_InformationStore = result.getPrimaryAndMerge(PanTauInformationStoreCfg(flags, infoHandler)) )
 
     result.addPublicTool(python_Tool_ModeDiscri_1p1n_vs_1pXn, True)
     return result
 
-def PanTauModeDiscr_3p0nv3pXn_Cfg(flags, infoHandler, curInAlg):
+def PanTauModeDiscr_3p0nv3pXn_Cfg(flags, infoHandler):
     result = ComponentAccumulator()    
     PanTau__Tool_ModeDiscriminator = CompFactory.PanTau.Tool_ModeDiscriminator
 
-    python_Tool_ModeDiscri_3p0n_vs_3pXn = PanTau__Tool_ModeDiscriminator("PanTau_ModeDiscri_3p0n_vs_3pXn_" + curInAlg,
+    python_Tool_ModeDiscri_3p0n_vs_3pXn = PanTau__Tool_ModeDiscriminator("PanTau_ModeDiscri_3p0n_vs_3pXn_CellBased",
                                                                          calibFolder             = flags.Tau.tauRecToolsCVMFSPath,
-                                                                         Name_InputAlg           = curInAlg,
                                                                          Name_ModeCase           = "3p0n_vs_3pXn",
                                                                          Tool_InformationStore = result.getPrimaryAndMerge(PanTauInformationStoreCfg(flags, infoHandler)) )
 
     result.addPublicTool(python_Tool_ModeDiscri_3p0n_vs_3pXn, True)
     return result
 
-def PanTauDecayModeDetCfg(flags, infoHandler, curInAlg):
+def PanTauDecayModeDetCfg(flags, infoHandler):
     result = ComponentAccumulator()    
     PanTau__Tool_DecayModeDeterminator = CompFactory.PanTau.Tool_DecayModeDeterminator
 
     # ===> Tau Decay Mode Determinator for current input alg
-    Name_DecayModeDeterminator = "PanTau_DecayModeDeterminator_" + curInAlg
+    Name_DecayModeDeterminator = "PanTau_DecayModeDeterminator_CellBased"
     python_Tool_DecayModeDeterminator = PanTau__Tool_DecayModeDeterminator(Name_DecayModeDeterminator,
                                                                            Tool_InformationStore = result.getPrimaryAndMerge(PanTauInformationStoreCfg(flags, infoHandler)),
-                                                                           Tool_ModeDiscriminator_1p0n_vs_1p1n = result.getPrimaryAndMerge(PanTauModeDiscr_1p0nv1p1n_Cfg(flags, infoHandler, curInAlg)),
-                                                                           Tool_ModeDiscriminator_1p1n_vs_1pXn = result.getPrimaryAndMerge(PanTauModeDiscr_1p1nv1pXn_Cfg(flags, infoHandler, curInAlg)),
-                                                                           Tool_ModeDiscriminator_3p0n_vs_3pXn = result.getPrimaryAndMerge(PanTauModeDiscr_3p0nv3pXn_Cfg(flags, infoHandler, curInAlg)) )
+                                                                           Tool_ModeDiscriminator_1p0n_vs_1p1n = result.getPrimaryAndMerge(PanTauModeDiscr_1p0nv1p1n_Cfg(flags, infoHandler)),
+                                                                           Tool_ModeDiscriminator_1p1n_vs_1pXn = result.getPrimaryAndMerge(PanTauModeDiscr_1p1nv1pXn_Cfg(flags, infoHandler)),
+                                                                           Tool_ModeDiscriminator_3p0n_vs_3pXn = result.getPrimaryAndMerge(PanTauModeDiscr_3p0nv3pXn_Cfg(flags, infoHandler)) )
     
     result.addPublicTool(python_Tool_DecayModeDeterminator, True)
     return result
@@ -138,18 +135,14 @@ def PanTauCfg(flags):
     from PanTauAlgs.Class_InformationHandler import InformationHandler
     infoHandler = InformationHandler(flags)
 
-    curInAlg = 'CellBased'
-    print("TopOptions_NewPanTau: Adding PanTau algorithms for input alg: " + curInAlg)
-
     PanTau__PanTauProcessor = CompFactory.PanTau.PanTauProcessor
 
     myPanTauProcessor = PanTau__PanTauProcessor(name = _name,
-                                                Name_InputAlg               = curInAlg,
                                                 Tool_InformationStore       = result.getPrimaryAndMerge(PanTauInformationStoreCfg(flags, infoHandler)),
                                                 Tool_TauConstituentGetter   = result.getPrimaryAndMerge(PanTauConstGetterCfg(flags, infoHandler)),
                                                 Tool_TauConstituentSelector = result.getPrimaryAndMerge(PanTauConstSelectorCfg(flags, infoHandler)),
                                                 Tool_FeatureExtractor       = result.getPrimaryAndMerge(PanTauFeatureExtractorCfg(flags, infoHandler)),
-                                                Tool_DecayModeDeterminator  = result.getPrimaryAndMerge(PanTauDecayModeDetCfg(flags, infoHandler, curInAlg)),
+                                                Tool_DecayModeDeterminator  = result.getPrimaryAndMerge(PanTauDecayModeDetCfg(flags, infoHandler)),
                                                 Tool_DetailsArranger        = result.getPrimaryAndMerge(PanTauDetailsArrangerCfg(flags, infoHandler)) )
 
     result.setPrivateTools(myPanTauProcessor)

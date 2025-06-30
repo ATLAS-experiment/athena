@@ -53,8 +53,6 @@ namespace PanTau
        
     private:
         
-        Gaudi::Property<std::string> m_Name_InputAlg{this, "Name_InputAlg", "", "Name of input algorithm for this instance"};
-                	
         //Tools used in seed building
         ToolHandle<PanTau::ITool_InformationStore>          m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore", "Tool handle to Tool_InformationStore"};
         ToolHandle<PanTau::ITool_TauConstituentGetter>      m_Tool_TauConstituentGetter{this, "Tool_TauConstituentGetter", "PanTau::Tool_TauConstituentGetter/Tool_TauConstituentGetter", "Tool handle to Tool_TauConstituentGetter"};

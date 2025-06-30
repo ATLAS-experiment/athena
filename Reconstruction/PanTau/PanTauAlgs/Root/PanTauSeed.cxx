@@ -13,7 +13,6 @@ PanTau::PanTauSeed::PanTauSeed()
   m_p4(),
   m_IsValidSeed(false),
   m_TechnicalQuality(),
-  m_NameInputAlgorithm("InvalidAlg"),
   m_TauJet(nullptr),
   m_Constituents(),
   m_TypeHLVs(),
@@ -59,7 +58,6 @@ PanTau::PanTauSeed::PanTauSeed(const PanTau::PanTauSeed& rhs)
   m_p4(rhs.m_p4),
   m_IsValidSeed(rhs.m_IsValidSeed),
   m_TechnicalQuality(rhs.m_TechnicalQuality),
-  m_NameInputAlgorithm(rhs.m_NameInputAlgorithm),
   m_TauJet(rhs.m_TauJet),
   m_Constituents(rhs.m_Constituents),
   m_TypeHLVs(rhs.m_TypeHLVs),
@@ -86,7 +84,6 @@ PanTau::PanTauSeed& PanTau::PanTauSeed::operator=(const PanTau::PanTauSeed& seed
     this->m_p4 = seed.m_p4;
     m_IsValidSeed           = seed.m_IsValidSeed;
     m_TechnicalQuality      = seed.m_TechnicalQuality;
-    m_NameInputAlgorithm    = seed.m_NameInputAlgorithm;
     m_TauJet                = seed.m_TauJet;
     m_Constituents          = seed.m_Constituents;
     m_TypeHLVs              = seed.m_TypeHLVs;
@@ -187,8 +184,7 @@ xAOD::Type::ObjectType PanTau::PanTauSeed::type() const {
 
 
 /** Main constructor to be used */
-PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInputAlgorithm,
-				xAOD::TauJet*                           tauJet,
+PanTau::PanTauSeed::PanTauSeed( xAOD::TauJet*                           tauJet,
 				const std::vector<PanTau::TauConstituent*>&    tauConstituents,
 				const std::vector<PanTau::TauConstituent*>&    tauConstituentsAll,
 				const std::vector<int>&                 pantauSeed_TechnicalQuality
@@ -202,7 +198,6 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
   m_p4.SetPtEtaPhiM(tauJet->ptIntermediateAxis(), tauJet->etaIntermediateAxis(), tauJet->phiIntermediateAxis(), tauJet->mIntermediateAxis() );
   m_IsValidSeed           = true;
   m_TechnicalQuality      = pantauSeed_TechnicalQuality;
-  m_NameInputAlgorithm    = nameInputAlgorithm;
   m_TauJet                = tauJet;
   m_decayModeHack_CellBasedShots = false;
   m_Features              = new PanTau::TauFeature;
@@ -270,8 +265,7 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
 
 
 /** Constructor for invalid seeds */
-PanTau::PanTauSeed::PanTauSeed(const std::string& nameInputAlgorithm,
-			       xAOD::TauJet* tauJet,
+PanTau::PanTauSeed::PanTauSeed(xAOD::TauJet* tauJet,
 			       const std::vector<int>& pantauSeed_TechnicalQuality)				  
   :
   IParticle(),
@@ -288,7 +282,6 @@ PanTau::PanTauSeed::PanTauSeed(const std::string& nameInputAlgorithm,
   m_p4.SetPtEtaPhiM(tauJet->ptIntermediateAxis(), tauJet->etaIntermediateAxis(), tauJet->phiIntermediateAxis(), tauJet->mIntermediateAxis() );
   m_IsValidSeed           = false;
   m_TechnicalQuality      = pantauSeed_TechnicalQuality;
-  m_NameInputAlgorithm    = nameInputAlgorithm;
   m_TauJet                = tauJet;
   m_Features              = new PanTau::TauFeature;
 }

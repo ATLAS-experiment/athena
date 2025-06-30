@@ -96,8 +96,7 @@ class InformationHandler:
 
     def setupInfo_Features(self, flags):
         
-        #get list of algorithms and signal modes from config
-        List_InputAlgs      = flags.Tau.PanTau.Names_InputAlgorithms
+        #get list of signal modes from config
         List_ModeCases      = flags.Tau.PanTau.Names_ModeCases
         
         #get the feature handler
@@ -107,30 +106,27 @@ class InformationHandler:
         #for each algorithm and mode, loop over variables to be used in BDT
         # and fetch the type of the variable and the name
         # these are needed for the PanTauFillerTool in TauD3PDMaker
-        for iAlg in List_InputAlgs:
-            for iModeCase in List_ModeCases:
+        for iModeCase in List_ModeCases:
                 
-                infoKey_Names = "ModeDiscriminator_BDTVariableNames_" + iAlg + "_" + iModeCase
-                curVarList = self.m_Infos_VecString[infoKey_Names]
+            infoKey_Names = "ModeDiscriminator_BDTVariableNames_CellBased_" + iModeCase
+            curVarList = self.m_Infos_VecString[infoKey_Names]
                 
-                BDTVariable_TypeList        = []
-                BDTVariable_DefaultValList  = []
+            BDTVariable_TypeList        = []
+            BDTVariable_DefaultValList  = []
                 
-                for iVar in curVarList:
-                    theType     = theFeatureHandler.m_Feature_Types[iVar]
-                    theDefVal   = theFeatureHandler.m_Feature_Defaults[iVar]
-                    BDTVariable_TypeList        += [theType]
-                    BDTVariable_DefaultValList  += [theDefVal]
-                #end loop over variables
+            for iVar in curVarList:
+                theType     = theFeatureHandler.m_Feature_Types[iVar]
+                theDefVal   = theFeatureHandler.m_Feature_Defaults[iVar]
+                BDTVariable_TypeList        += [theType]
+                BDTVariable_DefaultValList  += [theDefVal]
+            #end loop over variables
                 
-                infoKey_Types       = "ModeDiscriminator_BDTVariableTypes_" + iAlg + "_" + iModeCase
-                self.m_Infos_VecString[infoKey_Types] = BDTVariable_TypeList
+            infoKey_Types       = "ModeDiscriminator_BDTVariableTypes_CellBased_" + iModeCase
+            self.m_Infos_VecString[infoKey_Types] = BDTVariable_TypeList
                 
-                infoKey_Defaults    = "ModeDiscriminator_BDTVariableDefaults_" + iAlg + "_" + iModeCase
-                self.m_Infos_VecDouble[infoKey_Defaults] = BDTVariable_DefaultValList
-                
-            #end loop over signal modes
-        #end loop over algs for default value creation for ModeDiscriminator tools
+            infoKey_Defaults    = "ModeDiscriminator_BDTVariableDefaults_CellBased_" + iModeCase
+            self.m_Infos_VecDouble[infoKey_Defaults] = BDTVariable_DefaultValList    
+        #end loop over signal modes
         
         #add the prefixes for the variables
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Sum"]         = theFeatureHandler.m_VarTypeName_Sum

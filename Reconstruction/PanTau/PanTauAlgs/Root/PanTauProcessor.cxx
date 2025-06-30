@@ -76,7 +76,7 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
   //Only process taus with 1 <= ntracks <= 5:
   int numTrack = curTauJet->nTracks();
   if(numTrack == 0 || numTrack > 5) {
-    ATH_MSG_DEBUG("Flagging tau for algorithm " << m_Name_InputAlg << " as invalid, because numTrack is " << numTrack);
+    ATH_MSG_DEBUG("Flagging tau for algorithm CellBased as invalid, because numTrack is " << numTrack);
     pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoValidInputTau) = 1;
   }
 
@@ -87,7 +87,7 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
     
   if(pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoValidInputTau) == 0) {
     // Get the constituents for the current tau
-    ATH_CHECK( m_Tool_TauConstituentGetter->GetTauConstituents(curTauJet, list_TauConstituents, m_Name_InputAlg) );
+    ATH_CHECK( m_Tool_TauConstituentGetter->GetTauConstituents(curTauJet, list_TauConstituents) );
     if(list_TauConstituents.empty())  {
       pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoConstituentsAtAll) = 1;
       ATH_MSG_DEBUG("Seed has no associated constituents!");
@@ -127,8 +127,7 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
   }
     
   // Now build the PanTauSeed with the new Constituents
-  PanTau::PanTauSeed* curPanTauSeed = new PanTau::PanTauSeed(m_Name_InputAlg,
-							     curTauJet,
+  PanTau::PanTauSeed* curPanTauSeed = new PanTau::PanTauSeed(curTauJet,
 							     list_SelectedTauConstituents,
 							     list_TauConstituents,
 							     pantauSeed_TechnicalQuality);
