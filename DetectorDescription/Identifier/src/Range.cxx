@@ -130,12 +130,7 @@ void Range::clear () {
 int Range::match (const ExpandedIdentifier& id) const { 
   size_type my_fields = m_fields.size (); 
   const size_type id_fields = id.fields (); 
-    // Remove trailing wild cards since they are meaningless. 
-  while ((my_fields > 1) && 
-         (m_fields[my_fields-1].empty())){ 
-      my_fields--; 
-    } 
-    // Ranges with only wild cards always match. 
+  // Ranges with only wild cards always match. 
   if (my_fields == 0) return (1); 
   // More fields in the range than in the identifier will never match. 
   //if (my_fields > id_fields) return (0); 
@@ -158,11 +153,6 @@ int Range::match (const ExpandedIdentifier& id) const {
 ExpandedIdentifier Range::minimum () const { 
   size_type my_fields = m_fields.size (); 
   ExpandedIdentifier result; 
-    // Remove trailing wild cards since they are meaningless. 
-  while ((my_fields > 1) && 
-         (m_fields[my_fields-1].empty())){ 
-      my_fields--; 
-  } 
     // Ranges with only wild cards: set first field of min to 0 
   if (my_fields == 0) {
     result << 0;
@@ -187,14 +177,7 @@ ExpandedIdentifier Range::minimum () const {
 ExpandedIdentifier Range::maximum () const { 
   size_type my_fields = m_fields.size (); 
   ExpandedIdentifier result; 
-    // Remove all by the last trailing wild card, extra ones are 
-    // meaningless. 
-  while ((my_fields > 1) && 
-         (m_fields[my_fields-1].empty())) { 
-      my_fields--; 
-  } 
- 
-    // Ranges with only wild cards: set first field of min to ExpandedIdentifier::max_value 
+  // Ranges with only wild cards: set first field of min to ExpandedIdentifier::max_value 
   if (my_fields == 0) {
     result << ExpandedIdentifier::max_value;
     return result; // Don't combine these two lines --- it inhibits RVO.
