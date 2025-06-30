@@ -3,12 +3,19 @@
 #
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
+from AthenaConfiguration.Enums import FlagEnum
+
+
+class GNNTrackFinderToolType(FlagEnum):
+    TrackReader = "TrackReader"
+    TrackFinder = "TrackFinder"
+    Triton = "Triton"
+
 
 def createGNNTrackingConfigFlags():
     """Create flags for configuring the GNN tracking."""
     icf = AthConfigFlags()
-    icf.addFlag("Tracking.GNN.useTrackFinder", False)
-    icf.addFlag("Tracking.GNN.useTrackReader", False)
+    icf.addFlag("Tracking.GNN.ToolType", GNNTrackFinderToolType.TrackReader, type=GNNTrackFinderToolType)
     icf.addFlag("Tracking.GNN.usePixelHitsOnly", False)
 
     # Dump objects
@@ -43,6 +50,10 @@ def createGNNTrackingConfigFlags():
 
     # this option turns on the ambiguity resolution, False by default
     icf.addFlag("Tracking.GNN.doAmbiResolution", False)
+
+    # Triton Tool
+    icf.addFlag("Tracking.GNN.Triton.url", "localhost")
+    icf.addFlag("Tracking.GNN.Triton.model", "MetricLearning")
 
     return icf
 
