@@ -35,7 +35,7 @@ getProp(SmartIF<T>& iface, const std::string& name)
       if_name = iface.template as<INamedInterface>()->name();
     } catch (...) {
     }
-    const std::string what = fmt::format(
+    const std::string what = std::format(
         "The {} object's {} property has type {} not Gaudi::Property<{}>",
         if_name, name, boost::core::demangled_name(typeid(prop)),
         boost::core::demangled_name(typeid(propType)));
@@ -106,7 +106,7 @@ StatusCode SkipEventIdxSvc::initialize() {
             const std::uint64_t lbNum = mod_lb_num ? rec[3] : 0;
             const std::uint64_t numEvts = rec[4];
 
-            fmt::format_to(config_str_iter,
+            std::format_to(config_str_iter,
                            "Run: {} [{:c}] LB: {} [{:c}] EVT: {} [{:c}] "
                            "NumEvts: {}\n",
                            runNum, mod_run_num ? 'Y' : 'N', lbNum,
@@ -147,8 +147,6 @@ StatusCode SkipEventIdxSvc::initialize() {
     // if that doesn't exist, and xAOD::EventInfo
     std::vector<std::string> attr_lists;
     sg->keys<AthenaAttributeList> (attr_lists);
-    ATH_MSG_DEBUG(
-        "Attr lists are: " << fmt::format("[{}]", fmt::join(attr_lists, ", ")));
     const auto* attr_list_p =
         sg->tryConstRetrieve<AthenaAttributeList>("Input");
     if (attr_list_p != nullptr && attr_list_p->size() > 6) {
@@ -184,7 +182,7 @@ StatusCode SkipEventIdxSvc::initialize() {
   ATH_MSG_INFO("Setting SkipEvents back to " << m_initial_skip_events
                                              << " and rewinding");
   ATH_CHECK(
-      setProp(evtSel, "SkipEvents", fmt::format("{}", m_initial_skip_events)));
+      setProp(evtSel, "SkipEvents", std::format("{}", m_initial_skip_events)));
   ATH_CHECK(evtSel->rewind(*ctx));
   ATH_MSG_INFO("Recorded a total of " << m_events.size() << " events");
 

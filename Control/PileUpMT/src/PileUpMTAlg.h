@@ -22,13 +22,11 @@
 // Example ROOT Includes
 // #include "TTree.h"
 // #include "TH1D.h"
-#include <fmt/chrono.h>
-#include <fmt/compile.h>
-#include <fmt/format.h>
 
 #include <atomic>
 #include <chrono>
 #include <cstdio>
+#include <format>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -47,9 +45,10 @@ class atomic_output {
       return;
     }
     m_file = std::fopen(filename.c_str(), "a");
-    auto time = fmt::localtime(system_clock::to_time_t(system_clock::now()));
-    fmt::print(m_file, ("FILE CREATED ON {:%Y-%m-%d} at {:%H:%M:%S %Z}\n"),
-               time, time);
+    auto time = system_clock::now();
+    auto header = std::format("FILE CREATED ON {:%Y-%m-%d} at {:%H:%M:%S %Z}\n",
+                              time, time);
+    std::fputs(header.c_str(), m_file);
   }
   ~atomic_output() {
     std::lock_guard lck{m_mtx};
@@ -59,9 +58,9 @@ class atomic_output {
     }
   }
 
-  void print(const fmt::memory_buffer& str) {
+  void print(const std::string& str) {
     std::lock_guard lck{m_mtx};
-    std::fwrite(str.data(), sizeof(char), str.size(), m_file);
+    std::fputs(str.c_str(), m_file);
     std::fflush(m_file);
   }
 };

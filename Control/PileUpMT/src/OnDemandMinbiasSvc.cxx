@@ -5,12 +5,11 @@
 #include "OnDemandMinbiasSvc.h"
 
 #include <GaudiKernel/ConcurrencyFlags.h>
-#include <fmt/chrono.h>
-#include <fmt/format.h>
 
 #include <algorithm>
 #include <boost/core/demangle.hpp>
 #include <chrono>
+#include <format>
 #include <random>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/numeric/accumulate.hpp>
@@ -69,7 +68,7 @@ StatusCode OnDemandMinbiasSvc::initialize() {
   }
   // AthenaPoolAddressProviderSvc
   SmartIF<IAddressProvider> athPoolAP{
-    serviceLocator()->service(fmt::format("AthenaPoolAddressProviderSvc/BkgAPAPSvc_{}", name()))
+    serviceLocator()->service(std::format("AthenaPoolAddressProviderSvc/BkgAPAPSvc_{}", name()))
   };
   if (!athPoolAP) {
     ATH_MSG_WARNING(
@@ -79,7 +78,7 @@ StatusCode OnDemandMinbiasSvc::initialize() {
   }
   // AddressRemappingSvc
   SmartIF<IAddressProvider> addRemapAP{
-    serviceLocator()->service(fmt::format("AddressRemappingSvc/BkgARSvc_{}", name()))
+    serviceLocator()->service(std::format("AddressRemappingSvc/BkgARSvc_{}", name()))
   };
   if (!addRemapAP) {
     ATH_MSG_WARNING("Could not cast AddressRemappingSvc to IAddressProvider");
@@ -106,7 +105,7 @@ StatusCode OnDemandMinbiasSvc::initialize() {
     for (int j = 0; j < n_stores; ++j) {
       // creates / retrieves a different StoreGateSvc for each slot
       auto& sg = sgs.emplace_back(
-          fmt::format("StoreGateSvc/StoreGate_{}_{}_{}", name(), i, j), name());
+          std::format("StoreGateSvc/StoreGate_{}_{}_{}", name(), i, j), name());
       ATH_CHECK(sg.retrieve());
       sg->setStoreID(StoreID::PILEUP_STORE);
       sg->setProxyProviderSvc(m_proxyProviderSvc.get());
@@ -205,9 +204,11 @@ std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   std::iota(index_array.begin(), index_array.end(), 0);
   // Don't need to shuffle, since these events aren't reused
   // std::shuffle(index_array.begin(), index_array.end(), prng);
-  ATH_MSG_DEBUG("HS ID " << hs_id << " uses " << num_mb << " events\n"
-                         << fmt::format("\t\tBy bunch: [{}]\n",
-                                        fmt::join(num_mb_by_bunch, ", ")));
+
+  // Commented out until we can use C++ 23 range formatting
+  // ATH_MSG_DEBUG("HS ID " << hs_id << " uses " << num_mb << " events\n"
+  //                        << fmt::format("\t\tBy bunch: [{}]\n",
+  //                                       fmt::join(num_mb_by_bunch, ", ")));
   return num_mb;
 }
 
@@ -227,7 +228,7 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
     stores.reserve(num_to_load);
     for (std::size_t i = stores.size(); i < num_to_load; ++i) {
       auto& sg = stores.emplace_back(
-          fmt::format("StoreGateSvc/StoreGate_{}_{}_{}", name(), slot, i),
+          std::format("StoreGateSvc/StoreGate_{}_{}_{}", name(), slot, i),
           name());
       ATH_CHECK(sg.retrieve());
       sg->setStoreID(StoreID::PILEUP_STORE);
@@ -243,7 +244,7 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
       std::this_thread::sleep_for(50ms);
     }
     auto wait_time = std::chrono::steady_clock::now() - order_wait_start;
-    ATH_MSG_INFO(fmt::format("Waited {:%M:%S} to prevent out-of-order loading",
+    ATH_MSG_INFO(std::format("Waited {:%M:%S} to prevent out-of-order loading",
                              wait_time));
   }
   // Lock reading mutex
@@ -284,7 +285,7 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
   }
   // Reset active store
   m_activeStoreSvc->setStore(old_store);
-  ATH_MSG_INFO(fmt::format("Took {:%M:%S} to load events",
+  ATH_MSG_INFO(std::format("Took {:%M:%S} to load events",
                            std::chrono::steady_clock::now() - start));
   // Update last loaded
   m_last_loaded_hs.store(hs_id);
@@ -301,7 +302,7 @@ StoreGateSvc* OnDemandMinbiasSvc::getMinbias(const EventContext& ctx,
 std::size_t OnDemandMinbiasSvc::getNumForBunch(const EventContext& ctx,
                                                int bunch) const {
   if (bunch < m_earliestDeltaBC.value() || bunch > m_latestDeltaBC.value()) {
-    throw std::logic_error(fmt::format(
+    throw std::logic_error(std::format(
         "Tried to request bunch {} which is outside the range [{}, {}]", bunch,
         m_earliestDeltaBC.value(), m_latestDeltaBC.value()));
   }
