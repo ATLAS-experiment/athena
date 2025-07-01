@@ -15,6 +15,7 @@ usage () {
     -x  |  --xclbin         STRING      path to the xclbin that needs to be run
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
     -s  |  --skipCheck                  skip checks on output AOD file
+    -f  |  --runF110                    run F110 Integration algo
     -c  |  --doClusters                 persistify xAOD cluster and space point containers
     -h  |  --help                       this help
     "
@@ -46,7 +47,7 @@ while [ $# -ge 1 ];do
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    storeClusters=True ;;
-	-f  | --runF110 )       runF110=True ;;
+        -f  | --runF110 )       runF110=True ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
         esac
@@ -69,7 +70,7 @@ Reco_tf.py --CA \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
     --preExec "flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
-                flags.FPGADataPrep.DoF110=${runF110};flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
+                flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
