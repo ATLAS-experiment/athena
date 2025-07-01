@@ -10,6 +10,10 @@
 
 // xAOD include(s)
 #include "xAODTau/TauJet.h"
+#include "xAODTau/TauJetContainer.h"
+
+#include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 
 // lwtnn include(s)
 #include "lwtnn/LightweightGraph.hh"
@@ -52,7 +56,6 @@ private:
   Gaudi::Property<std::size_t> m_maxShotPFOs{this, "MaxShotPFOs", 6};
   Gaudi::Property<std::size_t> m_maxConvTracks{this, "MaxConvTracks", 4};
   Gaudi::Property<float> m_neutralPFOPtCut{this, "NeutralPFOPtCut", 1.5};
-  Gaudi::Property<bool> m_decayModeName{this, "DecayModeName", true}; // needs to be same as m_outputName in TauDecayModeNNClassifier.cxx
   // Gaudi::Property<std::array<std::string, 3>> m_fourVecDimNames{this, "FourVecDimNames", {"E", "eta", "phi"}};
   /**
    * @brief retrieve the input variables from a TauJet
@@ -64,6 +67,12 @@ private:
    */
   virtual StatusCode getInputs(const xAOD::TauJet &xTau,
                                std::map<std::string, std::map<std::string, std::vector<double>>> &inputSeqMap) const;
+
+  SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_decayModeName {this,
+      "decayModeNameKey", 
+      "TauJets.NNDecayMode",
+      "Decoration for Tau Decay Mode"};
+
   /// lwtnn graph
   std::unique_ptr<const lwt::LightweightGraph> m_lwtGraph_1p1n; //!
   std::unique_ptr<const lwt::LightweightGraph> m_lwtGraph_1pXn; //!
