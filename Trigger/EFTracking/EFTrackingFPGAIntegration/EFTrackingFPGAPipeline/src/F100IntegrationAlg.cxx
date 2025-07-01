@@ -294,7 +294,12 @@ namespace EFTrackingFPGAIntegration
 
         // get the time of the whole kernel execution
         cl_ulong kernel_start = cl_evt_pixel_clustering.getProfilingInfo<CL_PROFILING_COMMAND_QUEUED>();
-        cl_ulong kernel_end = cl_evt_edm_prep.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+        cl_ulong kernel_end;
+	if (m_doF110) {
+	    kernel_end = pixel_edm_prep_end > strip_edm_prep_end ? pixel_edm_prep_end : strip_edm_prep_end;
+	} else {
+            kernel_end = cl_evt_edm_prep.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+	}
         cl_ulong kernel_time = kernel_end - kernel_start;
         m_kernelTime += kernel_time;
         ATH_MSG_DEBUG("Kernel execution time: " << kernel_time / 1e6 << " ms");
