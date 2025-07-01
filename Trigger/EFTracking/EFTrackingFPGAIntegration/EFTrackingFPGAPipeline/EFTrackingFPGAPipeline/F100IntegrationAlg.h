@@ -65,8 +65,17 @@ namespace EFTrackingFPGAIntegration
         Gaudi::Property<std::string> m_xclbin{
             this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
 
+        Gaudi::Property<bool> m_doF110{
+            this, "doF110", "", "Run F110 instead of F100"}; //!< Boolean to run F110 instead of F100
+
         Gaudi::Property<std::string> m_edmKernelName{
             this, "EDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
+
+        Gaudi::Property<std::string> m_pixelEdmKernelName{
+            this, "PixelEDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
+
+        Gaudi::Property<std::string> m_stripEdmKernelName{
+            this, "StripEDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
 
         Gaudi::Property<std::string> m_pixelClusterKernelName{
             this, "PixelClusterKernelName", "", "Name of the pixel clustering kernel"}; //!< Name of the pixel clustering kernel
@@ -89,6 +98,8 @@ namespace EFTrackingFPGAIntegration
         mutable std::atomic<cl_ulong> m_pixelL2GTime{0};        //!< Time for pixel L2G
         mutable std::atomic<cl_ulong> m_stripL2GTime{0};        //!< Time for strip L2G
         mutable std::atomic<cl_ulong> m_edmPrepTime{0};         //!< Time for EDM preparation
+        mutable std::atomic<cl_ulong> m_pixelEdmPrepTime{0};    //!< Time for pixel EDM preparation
+        mutable std::atomic<cl_ulong> m_stripEdmPrepTime{0};    //!< Time for strip EDM preparation
         mutable std::atomic<cl_ulong> m_pixelOutputTime{0};     //!< Time for pixel output buffer read
         mutable std::atomic<cl_ulong> m_stripOutputTime{0};     //!< Time for strip output buffer read
         mutable std::atomic<cl_ulong> m_kernelTime{0};          //!< Time for kernel execution

@@ -13,8 +13,11 @@ def F100IntegrationCFG(flags, name = 'F100IntegrationAlog', **kwarg):
     kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
     kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
     kwarg.setdefault('EDMPrepKernelName', 'EDMPrep')
+    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
     kwarg.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     kwarg.setdefault('doEmulation', flags.FPGADataPrep.DoEmulation)
+    kwarg.setdefault('doF110', flags.FPGADataPrep.DoF110)
     
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
