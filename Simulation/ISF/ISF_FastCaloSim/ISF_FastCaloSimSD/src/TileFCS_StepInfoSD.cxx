@@ -89,15 +89,13 @@ G4bool TileFCS_StepInfoSD::ProcessHits(G4Step* a_step,
           0.5 * (a_step->GetPreStepPoint()->GetPosition() +
                  a_step->GetPostStepPoint()->GetPosition());
       const int numberOfProcessedHits(1);
-      const double timeWindow(m_config.m_maxTimeTile);
-      const double distanceWindow(m_config.m_maxRadiusTile);
       if (!m_calo_dd_man.get()) {
         getCaloDDManager();
       }
       this->update_map(pos, micHit.pmt_up, micHit.e_up, micHit.time_up, true,
-                       numberOfProcessedHits, timeWindow, distanceWindow);
+                       numberOfProcessedHits);
       this->update_map(pos, micHit.pmt_down, micHit.e_down, micHit.time_down,
-                       true, numberOfProcessedHits, timeWindow, distanceWindow);
+                       true, numberOfProcessedHits);
     }
   }
   return true;
