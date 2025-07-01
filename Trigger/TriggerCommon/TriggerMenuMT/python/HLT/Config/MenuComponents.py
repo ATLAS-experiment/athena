@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
@@ -10,7 +10,6 @@ from AthenaCommon.CFElements import parOR, seqAND, findAlgorithmByPredicate
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
-import GaudiConfig2
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
@@ -210,8 +209,6 @@ class InputMakerNode(AlgNode):
 class ComboHypoNode(AlgNode):
     """AlgNode for Combo HypoAlgs"""
     def __init__(self, name, comboHypoCfg):
-        self.prop1 = "MultiplicitiesMap"
-        self.prop2 = "LegToInputCollectionMap"
         self.comboHypoCfg = comboHypoCfg
         self.acc = self.create( name )        
         thealgs= self.acc.getEventAlgos()
@@ -226,8 +223,8 @@ class ComboHypoNode(AlgNode):
         self.resetInput()
         self.resetOutput() ## why do we need this in CA mode??
         # reset the chains, why do we need to do it?
-        setattr(self.Alg, self.prop1, {})
-        setattr(self.Alg, self.prop2, {})
+        #self.Alg.MultiplicitiesMap = {}
+        #self.Alg.LegToInputCollectionMap = {}
 
     def __del__(self):
         self.acc.wasMerged()
@@ -265,26 +262,16 @@ class ComboHypoNode(AlgNode):
             log.error("Check why ComboHypoNode.addInput(...) was not called exactly once per leg.")
             raise Exception("[createDataFlow] Error in ComboHypoNode.addChain. Cannot proceed.")
 
-        cval1 = getattr(self.Alg, self.prop1)  # check necessary to see if chain was added already?
-        cval2 = getattr(self.Alg, self.prop2)
-        if type(cval1) is dict or isinstance(cval1, GaudiConfig2.semantics._DictHelper):
-            if chainName in cval1.keys():
-                log.error("ERROR in configuration: ComboAlg %s has already been configured for chain %s", self.Alg.name, chainName)
-                raise Exception("[createDataFlow] Error in ComboHypoNode.addChain. Cannot proceed.")
-            else:
-                cval1[chainName] = chainMult
-                cval2[chainName] = legsToInputCollections
+        if chainName in self.Alg.MultiplicitiesMap:
+            log.error("ComboAlg %s has already been configured for chain %s", self.Alg.name, chainName)
+            raise Exception("[createDataFlow] Error in ComboHypoNode.addChain. Cannot proceed.")
         else:
-            cval1 = {chainName : chainMult}
-            cval2 = {chainName : legsToInputCollections} 
+            self.Alg.MultiplicitiesMap[chainName] = chainMult
+            self.Alg.LegToInputCollectionMap[chainName] = legsToInputCollections
 
-        setattr(self.Alg, self.prop1, cval1)
-        setattr(self.Alg, self.prop2, cval2)
-        
 
     def getChains(self):
-        cval = getattr(self.Alg, self.prop1)
-        return cval.keys()
+        return self.Alg.MultiplicitiesMap.keys()
 
 
     def createComboHypoTools(self, flags, chainDict, comboToolConfs):
