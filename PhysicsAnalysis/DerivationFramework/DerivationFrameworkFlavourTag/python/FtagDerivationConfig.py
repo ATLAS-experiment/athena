@@ -1,14 +1,37 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
+from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 
 import ParticleJetTools.ParentDecoratorConfig as pdc
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
+
+
+def _addDepsByTaggername(cfgFlags, tagger: str) -> ComponentAccumulator:
+    """
+    Add additional algorithms based on the dirname of the network files.
+
+    Parameters
+    ----------
+    cfgFlags : ConfigFlags
+        The configuration flags for.
+    tagger : str
+        The name of the tagger.
+
+    Returns
+    -------
+    ComponentAccumulator
+        An accumulator containing the additional algorithms based on the dirname.
+    """
+    acc = ComponentAccumulator()
+    if "GN2Xv02" in tagger:
+        acc.merge(TrackLeptonDecorationCfg(cfgFlags))
+    return acc
 
 
 def HLTJetFTagDecorationCfg(cfgFlags):
@@ -49,6 +72,9 @@ def BTagLargeRDecoration(cfgFlags, jet_col):
         if nnFile.split('/')[0] == "JetCalibTools":
             # not technically a tagger, but works in this code
             tagger_name = nnFile.split('_')[-2]
+
+        acc.merge(_addDepsByTaggername(cfgFlags, tagger_name))
+
         acc.addEventAlgo(
             CompFactory.FlavorTagInference.JetTagDecoratorAlg(
                 f'{jet_col}{tagger_name}JetTagAlg',
