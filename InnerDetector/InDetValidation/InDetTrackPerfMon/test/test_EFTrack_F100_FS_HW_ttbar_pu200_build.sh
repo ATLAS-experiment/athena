@@ -53,6 +53,16 @@ run () {
     return $rc
 }
 
+## parsing flags
+while [ $# -ge 1 ]; do
+    case "$1" in
+        --) shift ; break ;;
+        -f | --doF110 ) doF110="1" ;;
+        *) shift ;;
+    esac
+    shift
+done
+
 ## Getting the comma-separated list of input RDOs
 InputRDOfiles=$( getEFTrackSample.py -s ${SampleName} )
 if [ ! -f "${InputRDOfiles}" ]; then
@@ -61,11 +71,20 @@ if [ ! -f "${InputRDOfiles}" ]; then
 fi
 
 ## Track reconstruction step
-run "${pipelineName}" \
-  runReco_F100_FS_HW.sh \
-    -i ${InputRDOfiles} \
-    -o "${OutSampleName}.AOD.pool.root"
-    #-n 10
+if [ "$doF110" == "1" ]; then
+    run "${pipelineName}" \
+      runReco_F100_FS_HW.sh \
+        -i ${InputRDOfiles} \
+        -f \
+        -o "${OutSampleName}.AOD.pool.root"
+        #-n 10
+else
+    run "${pipelineName}" \
+      runReco_F100_FS_HW.sh \
+        -i ${InputRDOfiles} \
+        -o "${OutSampleName}.AOD.pool.root"
+        #-n 10
+fi
 
 ## Don't run if IDTPM json config is not found
 if [ ! -f "$IDTPMjsonConfig_absPath" ]; then

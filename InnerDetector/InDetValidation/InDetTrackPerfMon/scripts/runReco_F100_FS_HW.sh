@@ -57,6 +57,7 @@ while [ $# -ge 1 ];do
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; doClusters="1" ;;
+        -f  | --doF110 )        if [ $# -lt 1 ] ; then usage ; fi ; doF110="1" ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -78,12 +79,32 @@ fi
 
 ## running reconstruction
 if [ "$doClusters" == "1" ]; then
+    if [ "$doF110" == "1" ]; then
+        run "${pipelineName}" \
+            F100.sh \
+            -i ${inputRDO} \
+            -o ${outputAOD} \
+            -n ${nEvents} \
+            -x ${xclbinPath} \
+            -f \
+            -c
+    else
+        run "${pipelineName}" \
+            F100.sh \
+            -i ${inputRDO} \
+            -o ${outputAOD} \
+            -n ${nEvents} \
+            -x ${xclbinPath} \
+            -c
+    fi
+elif [ "$doF110" == "1" ]; then
     run "${pipelineName}" \
         F100.sh \
         -i ${inputRDO} \
         -o ${outputAOD} \
         -n ${nEvents} \
         -x ${xclbinPath} \
+        -f \
         -c
 else
     run "${pipelineName}" \
