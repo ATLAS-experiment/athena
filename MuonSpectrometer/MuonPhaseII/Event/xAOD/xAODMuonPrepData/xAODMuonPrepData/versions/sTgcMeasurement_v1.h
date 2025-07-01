@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_STGCMEASUREMENT_V1_H
 #define XAODMUONPREPDATA_VERSION_STGCMEASUREMENT_V1_H
@@ -79,15 +79,8 @@ class sTgcMeasurement_v1 : public UncalibratedMeasurement_v1 {
   void setCharge(int q);
 
     private:
-#ifdef __CLING__
-    /// Down cast the memory of the readoutElement cache if the object is stored to disk 
-    ///  to arrive at the same memory layout between Athena & CLING
-    char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::sTgcReadoutElement*>)]{};
-    char m_identifier[sizeof(CxxUtils::CachedValue<Identifier>)]{};
-#else
-    CxxUtils::CachedValue<const MuonGMR4::sTgcReadoutElement*> m_readoutEle{};
-    CxxUtils::CachedValue<Identifier> m_identifier{};
-#endif
+       CxxUtils::CachedValue<const MuonGMR4::sTgcReadoutElement*> m_readoutEle{};
+       CxxUtils::CachedValue<Identifier> m_identifier{};
 };
 
 }  // namespace xAOD
