@@ -295,6 +295,8 @@ def ActsPixelSpacePointAnalysisAlgCfg(flags,
     kwargs.setdefault("SpacePointContainerKey", "ITkPixelSpacePoints")
     kwargs.setdefault("UsePixel", True)
     kwargs.setdefault("UseOverlap", False)
+    kwargs.setdefault('ExtraInputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["SpacePointContainerKey"]}.measurements')])
 
     acc.merge(ActsBaseSpacePointAnalysisAlgCfg(flags, 
                                                name = name,
@@ -318,7 +320,9 @@ def ActsStripSpacePointAnalysisAlgCfg(flags,
     kwargs.setdefault("SpacePointContainerKey", "ITkStripSpacePoints")
     kwargs.setdefault("UsePixel", False)
     kwargs.setdefault("UseOverlap", False)
-
+    kwargs.setdefault('ExtraInputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["SpacePointContainerKey"]}.measurements')])
+    
     acc.merge(ActsBaseSpacePointAnalysisAlgCfg(flags,
                                                name = name,
                                                extension = extension,
@@ -338,7 +342,9 @@ def ActsStripOverlapSpacePointAnalysisAlgCfg(flags,
     kwargs.setdefault("SpacePointContainerKey", "ITkStripOverlapSpacePoints")
     kwargs.setdefault("UsePixel", False)
     kwargs.setdefault("UseOverlap", True)
-
+    kwargs.setdefault('ExtraInputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["SpacePointContainerKey"]}.measurements')])
+    
     acc.merge(ActsBaseSpacePointAnalysisAlgCfg(flags,
                                                name = name,
                                                extension = extension,
