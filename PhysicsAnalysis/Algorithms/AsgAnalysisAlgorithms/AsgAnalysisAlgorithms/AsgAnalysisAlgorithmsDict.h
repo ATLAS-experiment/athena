@@ -21,6 +21,7 @@
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgMassSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgNumDecorationSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 #include <AsgAnalysisAlgorithms/AsgUnionPreselectionAlg.h>

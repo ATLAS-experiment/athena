@@ -17,6 +17,7 @@
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgMassSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgNumDecorationSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 #include <AsgAnalysisAlgorithms/AsgUnionPreselectionAlg.h>
@@ -61,6 +62,8 @@ DECLARE_COMPONENT (CP::AsgOriginalObjectLinkAlg)
 DECLARE_COMPONENT (CP::AsgPriorityDecorationAlg)
 DECLARE_COMPONENT (CP::AsgPtEtaSelectionTool)
 DECLARE_COMPONENT (CP::AsgMassSelectionTool)
+DECLARE_COMPONENT (CP::AsgNumDecorationSelectionToolInt)
+DECLARE_COMPONENT (CP::AsgNumDecorationSelectionToolUInt8)
 DECLARE_COMPONENT (CP::AsgSelectionAlg)
 DECLARE_COMPONENT (CP::AsgShallowCopyAlg)
 DECLARE_COMPONENT (CP::AsgUnionPreselectionAlg)

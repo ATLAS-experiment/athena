@@ -12,6 +12,8 @@
    <class name="CP::AsgPriorityDecorationAlg" />
    <class name="CP::AsgPtEtaSelectionTool" />
    <class name="CP::AsgMassSelectionTool" />
+   <class name="CP::AsgNumDecorationSelectionToolInt" />
+   <class name="CP::AsgNumDecorationSelectionToolUInt8" />
    <class name="CP::AsgSelectionAlg" />
    <class name="CP::AsgShallowCopyAlg" />
    <class name="CP::AsgUnionPreselectionAlg" />

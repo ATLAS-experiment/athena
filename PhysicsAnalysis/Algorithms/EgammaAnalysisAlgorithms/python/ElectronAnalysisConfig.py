@@ -309,6 +309,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
             "VarRad, TightTrackOnly_FixedRad, NonIso.")
+        self.addOption ('convSelection', None, type=str,
+            info="enter additional selection (string) to use. To be used with "
+            "TightLH or will crash. Supported keywords:"
+            "Veto, MatConv, GammaStar.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only electrons satisfying the working point "
             "requirements. The default is True.")
@@ -471,6 +475,49 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             # Set flag to only collect SiHit electrons for events with an electron or muon pair to minimize size increase from SiHit electrons
             algDec.RequireTwoLeptons = True
             config.addSelection (self.containerName, self.selectionName, selDec,
+                                 preselection=self.addSelectionToPreselection)
+
+        # Additional selection for conversions and gamma*
+        if self.convSelection is not None:
+            # skip if not applied together with TightLH
+            if self.identificationWP != 'TightLH':
+                raise ValueError(f"convSelection can only be used with TightLH ID, "
+                                 f"whereas {self.identificationWP} has been selected. convSelection option will be ignored.")
+            # check if allowed value 
+            allowedValues = ["Veto", "GammaStar", "MatConv"]
+            if self.convSelection not in allowedValues:  
+                raise ValueError(f"convSelection has been set to {self.convSelection}, which is not a valid option. "
+                                 f"convSelection option must be one of {allowedValues}.")
+
+            # ambiguityType == 0
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronAmbiguityTypeAlg' + postfix )
+            alg.selectionDecoration = 'selectAmbiguityType' + selectionPostfix + ',as_char'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgNumDecorationSelectionToolUInt8' )
+            alg.selectionTool.decorationName = "ambiguityType"
+            alg.selectionTool.doEqual = True
+            alg.selectionTool.equal = 0
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
+
+            # DFCommonAddAmbiguity selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDFCommonAddAmbiguityAlg' + postfix )
+            alg.selectionDecoration = 'selectDFCommonAddAmbiguity' + selectionPostfix + ',as_char'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgNumDecorationSelectionToolInt' )
+            alg.selectionTool.decorationName = "DFCommonAddAmbiguity"
+            if self.convSelection == "Veto":
+                alg.selectionTool.doMax = True
+                alg.selectionTool.max = 1
+            elif self.convSelection == "GammaStar":
+                alg.selectionTool.doEqual = True
+                alg.selectionTool.equal = 1
+            elif self.convSelection == "MatConv":
+                alg.selectionTool.doEqual = True
+                alg.selectionTool.equal = 2
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                                  preselection=self.addSelectionToPreselection)
 
         # Set up the FSR selection
