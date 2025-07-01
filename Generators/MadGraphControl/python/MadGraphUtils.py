@@ -331,6 +331,9 @@ def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs
         mglog.info('Setting default sde_strategy to old default (1)')
         my_settings = {'sde_strategy':1}
         modify_run_card(process_dir=process_dir,settings=my_settings,skipBaseFragment=True)
+        
+    #tell MadGraph not to bother trying to create popup windows since this is running in a CLI, this will save ~50 seconds every time MadGraph is called.    
+    modify_config_card(process_dir=process_dir,settings={'notification_center':'False'})
 
     # Make sure we store the resultant directory
     MADGRAPH_COMMAND_STACK += ['export MGaMC_PROCESS_DIR='+os.path.basename(process_dir)]
