@@ -137,6 +137,29 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('useLowPt', False, type=bool, 
             info="select taus starting from 15 GeV instead of the default 20 GeV cut "
             "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs")
+        self.addOption ('useSelectionConfigFile', True, type=bool,
+            info="use pre-defined configuration files for selecting taus "
+            "recommendations: set this to False only if you want to test/optimise the tau selection for selections not already provided through config files")
+        self.addOption ('manual_sel_minpt', 20.0, type=float,
+            info="minimum pt cut used for tau selection when useSelectionConfigFile is set to false")
+        self.addOption ('manual_sel_absetaregion', [0, 1.37, 1.52, 2.5], type=list,
+            info="eta regions cut used for tau selection when useSelectionConfigFile is set to false") 
+        self.addOption ('manual_sel_abscharges', [1,], type=list,
+            info="charge of the tau cut used for tau selection when useSelectionConfigFile is set to false")
+        self.addOption ('manual_sel_ntracks', [1,3], type=list,
+            info="number of tau tracks used for tau selection when useSelectionConfigFile is set to false")
+        self.addOption ('manual_sel_minrnnscore', -1, type=float,
+            info="minimum rnn score cut used for tau selection when useSelectionConfigFile is set to false")
+        self.addOption ('manual_sel_mingntauscore', -1, type=float,
+            info="minimum gntau score selection when useSelectionConfigFile is set to false")
+        self.addOption ('manual_sel_rnnwp', None, type=str,
+            info="rnn working point used for tau selection when useSelectionConfigFile is set to false")
+        self.addOption ('manual_sel_gntauwp', None, type=str,
+            info="gntau working point used for tau selection when useSelectionConfigFile is set to false")
+        self.addOption ('manual_sel_evetowp', None, type=str, 
+            info="eveto working point used for tau selection when useSelectionConfigFile is set to false")
+        self.addOption ('manual_sel_muonolr', False, type=bool,
+            info="use muonolr used for tau selection when useSelectionConfigFile is set to false")    
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -163,32 +186,110 @@ class TauWorkingPointConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        nameFormat = 'TauAnalysisAlgorithms/tau_selection_'
-        if self.dropPtCut:
-            nameFormat = nameFormat + 'nopt_'
-        if self.useLowPt:
-            nameFormat = nameFormat + 'lowpt_'
-        if self.useGNTau:
-            nameFormat = nameFormat + 'gntau_'
-        nameFormat = nameFormat + '{}_'
-        if self.use_eVeto:
-            nameFormat = nameFormat + 'eleid'
-        else:
-            nameFormat = nameFormat + 'noeleid'
-        if self.use_muonOLR:
-            nameFormat = nameFormat + '_muonolr' 
-        nameFormat = nameFormat + '.conf'    
+        # do tau seletion through external txt config file
+        if self.useSelectionConfigFile:
+            nameFormat = 'TauAnalysisAlgorithms/tau_selection_'
+            if self.dropPtCut:
+                nameFormat = nameFormat + 'nopt_'
+            if self.useLowPt:
+                nameFormat = nameFormat + 'lowpt_'
+            if self.useGNTau:
+                nameFormat = nameFormat + 'gntau_'
+            nameFormat = nameFormat + '{}_'
+            if self.use_eVeto:
+                nameFormat = nameFormat + 'eleid'
+            else:
+                nameFormat = nameFormat + 'noeleid'
+            if self.use_muonOLR:
+                nameFormat = nameFormat + '_muonolr' 
+            nameFormat = nameFormat + '.conf'    
 
         if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
             raise ValueError ("invalid tau quality: \"" + self.quality +
                               "\", allowed values are Tight, Medium, Loose, " +
                               "VeryLoose, Baseline, BaselineForFakes")
-        inputfile = nameFormat.format(self.quality.lower())
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
         config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
-        alg.selectionTool.ConfigPath = inputfile
+        if self.useSelectionConfigFile:
+            inputfile = nameFormat.format(self.quality.lower())
+            alg.selectionTool.ConfigPath = inputfile
+        else:
+            #build selection from user handmade selection
+            from ROOT import TauAnalysisTools
+            selectioncuts = TauAnalysisTools.SelectionCuts
+            alg.selectionTool.ConfigPath = ""
+            alg.selectionTool.SelectionCuts = int(selectioncuts.CutPt | 
+                                                  selectioncuts.CutAbsEta | 
+                                                  selectioncuts.CutAbsCharge | 
+                                                  selectioncuts.CutNTrack | 
+                                                  selectioncuts.CutJetRNNScoreSigTrans |
+                                                  selectioncuts.CutGNTauScoreSigTrans |
+                                                  selectioncuts.CutJetIDWP |
+                                                  selectioncuts.CutEleIDWP |
+                                                  selectioncuts.CutMuonOLR)
+
+            alg.selectionTool.PtMin = self.manual_sel_minpt
+            alg.selectionTool.AbsEtaRegion = self.manual_sel_absetaregion
+            alg.selectionTool.AbsCharges = self.manual_sel_abscharges
+            alg.selectionTool.NTracks = self.manual_sel_ntracks 
+            alg.selectionTool.JetRNNSigTransMin = self.manual_sel_minrnnscore 
+            alg.selectionTool.GNTauSigTransMin = self.manual_sel_mingntauscore
+            #cross-check that min rnn score and min gntau score are not both set at the same time
+            if self.manual_sel_minrnnscore != -1 and self.manual_sel_mingntauscore != -1:
+               raise RuntimeError("manual_sel_minrnnscore and manual_sel_mingntauscore have been both set; please choose only one type of ID: RNN or GNTau, not both") 
+            # working point following the Enums from https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h
+            if self.manual_sel_rnnwp is None:
+               alg.selectionTool.JetIDWP = 1 
+            elif self.manual_sel_rnnwp == "veryloose":
+               alg.selectionTool.JetIDWP = 6
+            elif self.manual_sel_rnnwp == "loose":
+               alg.selectionTool.JetIDWP = 7
+            elif self.manual_sel_rnnwp == "medium":
+               alg.selectionTool.JetIDWP = 8
+            elif self.manual_sel_rnnwp == "tight":
+               alg.selectionTool.JetIDWP = 9
+            else:   
+               raise ValueError ("invalid RNN TauID WP: \"" + self.manual_sel_rnnwp + "\". Allowed values are None, veryloose, loose, medium, tight")
+
+            # cross-check that min rnn score and RNN WPs are not set at the same time
+            if self.manual_sel_minrnnscore != -1 and self.manual_sel_rnnwp is not None:
+                raise RuntimeError("manual_sel_minrnnscore and manual_sel_rnnwp have been both set; please set only one of them") 
+
+            # working point following the Enums from https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h
+            if self.manual_sel_gntauwp is None:
+               alg.selectionTool.JetIDWP = 1
+            elif self.manual_sel_gntauwp == "veryloose":
+               alg.selectionTool.JetIDWP = 10
+            elif self.manual_sel_gntauwp == "loose":
+               alg.selectionTool.JetIDWP = 11
+            elif self.manual_sel_gntauwp == "medium":
+               alg.selectionTool.JetIDWP = 12
+            elif self.manual_sel_gntauwp == "tight":
+               alg.selectionTool.JetIDWP = 13  
+            else:
+               raise ValueError ("invalid GNN Tau ID WP: \"" + self.manual_sel_gntauwp + "\". Allowed values are None, veryloose, loose, medium, tight")
+
+            # cross-check that min gntau score and GNTau WPs are not set at the same time
+            if self.manual_sel_mingntauscore != -1 and self.manual_sel_gntauwp is not None:
+                raise RuntimeError("manual_sel_mingntauscore and manual_sel_gntauwp have been both set; please set only one of them")
+
+            # working point following the Enums from https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h 
+            if self.manual_sel_evetowp is None:
+               alg.selectionTool.EleIDWP = 1
+            elif self.manual_sel_evetowp == "loose":
+               alg.selectionTool.EleIDWP = 2
+            elif self.manual_sel_evetowp == "medium":
+               alg.selectionTool.EleIDWP = 3
+            elif self.manual_sel_evetowp == "tight":
+               alg.selectionTool.EleIDWP = 4   
+            else:
+               raise ValueError ("invalid eVeto WP: \"" + self.manual_sel_evetowp + "\". Allowed values are None, loose, medium, tight")  
+
+            # set MuonOLR option:
+            alg.selectionTool.MuonOLR = self.manual_sel_muonolr
+
         alg.selectionDecoration = 'selected_tau' + selectionPostfix + ',as_char'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
