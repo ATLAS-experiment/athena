@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(InsertRefSurface) {
         auto surf = Acts::Surface::makeShared<Acts::ConeSurface>(
               transform, alpha, minZ, maxZ, halfPhi);                   
         ActsTrk::encodeSurface(surfBackend, surf.get(), gctx);
-        auto outSurf = ActsTrk::decodeSurface(surfBackend, gctx);
+        auto outSurf = ActsTrk::decodeSurface(surfBackend);
         testSurface(std::move(surf), std::move(outSurf), gctx);
         break;
         }     
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(InsertRefSurface) {
         auto surf = Acts::Surface::makeShared<Acts::CylinderSurface>(
               transform, layerR, layerHalfZ);                 
         ActsTrk::encodeSurface(surfBackend, surf.get(), gctx);
-        auto outSurf = ActsTrk::decodeSurface(surfBackend, gctx);
+        auto outSurf = ActsTrk::decodeSurface(surfBackend);
         testSurface(std::move(surf), std::move(outSurf), gctx);
         break;
         }
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(InsertRefSurface) {
         auto surf = Acts::Surface::makeShared<Acts::DiscSurface>(
               transform, rMin, rMax, halfPhiSector);                    
         ActsTrk::encodeSurface(surfBackend, surf.get(), gctx);
-        auto outSurf = ActsTrk::decodeSurface(surfBackend, gctx);
+        auto outSurf = ActsTrk::decodeSurface(surfBackend);
         testSurface(std::move(surf), std::move(outSurf), gctx);
         break;
         }  
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(InsertRefSurface) {
         auto surf = Acts::Surface::makeShared<Acts::PerigeeSurface>(
               transform);                    
         ActsTrk::encodeSurface(surfBackend, surf.get(), gctx);
-        auto outSurf = ActsTrk::decodeSurface(surfBackend, gctx);
+        auto outSurf = ActsTrk::decodeSurface(surfBackend);
         testSurface(std::move(surf), std::move(outSurf), gctx);
         break;
         }  
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(InsertRefSurface) {
         auto surf = Acts::Surface::makeShared<Acts::PlaneSurface>(
               transform, rBounds);   
         ActsTrk::encodeSurface(surfBackend, surf.get(), gctx);
-        auto outSurf = ActsTrk::decodeSurface(surfBackend, gctx);
+        auto outSurf = ActsTrk::decodeSurface(surfBackend);
         testSurface(std::move(surf), std::move(outSurf), gctx);
         break;
         }  
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(InsertRefSurface) {
         auto surf = Acts::Surface::makeShared<Acts::StrawSurface>(
               transform, radius, halfZ);   
         ActsTrk::encodeSurface(surfBackend, surf.get(), gctx);
-        auto outSurf = ActsTrk::decodeSurface(surfBackend, gctx);
+        auto outSurf = ActsTrk::decodeSurface(surfBackend);
         testSurface(std::move(surf), std::move(outSurf), gctx);
         break;
         }  

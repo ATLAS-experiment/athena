@@ -761,7 +761,7 @@ std::vector<Acts::HashedString> ActsTrk::MultiTrajectory::dynamicKeys_impl() con
 }
 
 
-void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const Acts::GeometryContext& geoContext ) {
+void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo) {
   if ( not m_surfaces.empty() )
     return;
   m_surfaces.resize(m_trackStatesIface.size(), nullptr);
@@ -775,7 +775,7 @@ void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, c
         m_surfaces[i] = geo->findSurface(Acts::GeometryIdentifier{geoID});
       } else {
         unsigned int backendIndex = m_trackStatesAux->surfaceIndex[i];
-        std::shared_ptr<const Acts::Surface> surface = decodeSurface( m_trackSurfacesAux, backendIndex, geoContext);
+        std::shared_ptr<const Acts::Surface> surface = decodeSurface(m_trackSurfacesAux, backendIndex);
         m_surfaces[i] = surface; // TODO
 
       }

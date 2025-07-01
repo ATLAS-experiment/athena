@@ -104,7 +104,7 @@ class TrackSummaryContainer {
 
   void restoreDecorations();
 
-  void decodeSurfaces(const xAOD::TrackSurfaceContainer* src, const Acts::GeometryContext&);
+  void decodeSurfaces(const xAOD::TrackSurfaceContainer* src);
 
   std::vector<Acts::HashedString> dynamicKeys_impl() const;
 

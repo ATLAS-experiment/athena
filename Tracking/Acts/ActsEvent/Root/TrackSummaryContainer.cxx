@@ -122,9 +122,10 @@ std::vector<Acts::HashedString> ActsTrk::TrackSummaryContainer::dynamicKeys_impl
   return result;
 }
 
-void ActsTrk::TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceContainer* src, const Acts::GeometryContext& geoContext) {
+void ActsTrk::TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceContainer* src) {
+  m_surfaces.reserve(src->size());
   for ( auto xAODSurfacePtr: *src) {
-    m_surfaces.push_back( decodeSurface(xAODSurfacePtr, geoContext));
+    m_surfaces.push_back( decodeSurface(xAODSurfacePtr));
   }
 }
 
