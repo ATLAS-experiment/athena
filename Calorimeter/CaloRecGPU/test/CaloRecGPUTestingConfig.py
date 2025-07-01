@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 class PlotterConfigurator:
     #DoCells currently changes nothing
     #(originally was intended to show
@@ -991,31 +991,26 @@ def GetRealInputFilePaths(files, default_files):
         
         from TrigValTools.TrigValSteering.Input import load_input_json
         trigger_tests = load_input_json()
-        
-        
+
         for f in files:
             if f == 'default':
                 ret += default_files
             elif f == 'trigEB':
-                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-11._0001.1",
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-12._0001.1"]
-            elif f == 'ttbar' or f == 'ttbar_original':
-                #We used ttbar to mean a different sample from the ttbar from the trigger tests...
-                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1",
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000002.pool.root.1",
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000003.pool.root.1" ]
-            elif f == 'jets':
-                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
-            elif f == 'ttbar_triggertest':
-                #This is the way to get the 'proper' ttbar from the trigger test
+                ret += trigger_tests['data']['paths']
+            elif f == 'ttbar':
                 ret += trigger_tests['ttbar']['paths']
+            elif f == 'jets':
+                ret += ["/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
             elif f in trigger_tests.keys():
                 ret += trigger_tests[f]['paths']
             elif f in standard_tests.keys():
                 ret += standard_tests[f]
             else:
                 ret += [f]
-        
+
+        # for files on EOS, use xrootd rather than fuse
+        ret = [f'root://eosatlas.cern.ch/{path}' if '/eos/' in path else path for path in ret]
+
         return ret
     
     

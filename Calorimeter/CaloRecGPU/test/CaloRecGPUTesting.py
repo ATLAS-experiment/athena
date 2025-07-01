@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #import CaloRecGPU.CaloRecGPUConfigurator
 
 from CaloRecGPU.CaloRecGPUConfigurator import SingleToolToPlot, ComparedToolsToPlot
@@ -411,19 +411,19 @@ def PrepareTest(Configurator,
         if args.files[0] == 'default':
             Configurator.ConfigFlags.Input.Files = default_files
         elif args.files[0] == 'ttbar':
-            Configurator.ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1",
-                                       "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000002.pool.root.1",
-                                       "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000003.pool.root.1" ]
-            
+            from TrigValTools.TrigValSteering.Input import load_input_json
+            trigger_tests = load_input_json()
+            Configurator.ConfigFlags.Input.Files = trigger_tests['ttbar']['paths']
         elif args.files[0] == 'jets':
-            Configurator.ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
+            Configurator.ConfigFlags.Input.Files = ["/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
         else:
             Configurator.ConfigFlags.Input.Files = args.files
     else:
         Configurator.ConfigFlags.Input.Files = args.files
-           
-    #Configurator.ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-            
+
+    # for files on EOS, use xrootd rather than fuse
+    Configurator.ConfigFlags.Input.Files = [f'root://eosatlas.cern.ch/{path}' if '/eos/' in path else path for path in Configurator.ConfigFlags.Input.Files]
+
     if parse_command_arguments:
         Configurator.ConfigFlags.Concurrency.NumThreads = int(args.numthreads)
         Configurator.ConfigFlags.Concurrency.NumConcurrentEvents = int(args.numthreads)
@@ -789,4 +789,3 @@ class PlotterConfigurator:
         for plotdef in self.PlotsToDo:
             Plotter.MonitoringTool.defineHistogram(*plotdef[0], **plotdef[1])
         return Plotter
-        
