@@ -240,9 +240,9 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
         JetTrackAssociator,
     ))
 
-    SecVertexers = ['SV1','JetFitter']
+    SecVertexers = ['SV1']
     if flags.BTagging.RunFlipTaggers:
-        SecVertexers += ['JetFitterFlip','SV1Flip']
+        SecVertexers += ['SV1Flip']
 
     secVtxFinderxAODBaseNameList = []
 
