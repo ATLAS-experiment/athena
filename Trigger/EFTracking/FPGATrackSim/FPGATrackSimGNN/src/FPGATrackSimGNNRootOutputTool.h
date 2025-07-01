@@ -60,6 +60,7 @@ class FPGATrackSimGNNRootOutputTool : public AthAlgTool
         // Handles
 
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
+        Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
 
         ///////////////////////////////////////////////////////////////////////
         // Convenience

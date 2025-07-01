@@ -419,6 +419,7 @@ def FPGATrackSimGNNRootOutputToolCfg(flags,name="FPGATrackSimGNNRootOutputTool")
     result = ComponentAccumulator()
 
     GNNRootOutputTool = CompFactory.FPGATrackSimGNNRootOutputTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
+    GNNRootOutputTool.OutputRegion = str(flags.Trigger.FPGATrackSim.region)
 
     result.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
     result.setPrivateTools(GNNRootOutputTool)
