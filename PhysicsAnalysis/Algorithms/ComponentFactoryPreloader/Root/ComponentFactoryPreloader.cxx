@@ -177,6 +177,7 @@
 #include <TrackingAnalysisAlgorithms/SecVertexTruthMatchAlg.h>
 #include <TrackingAnalysisAlgorithms/TrackParticleMergerAlg.h>
 #include <TrackingAnalysisAlgorithms/VertexSelectionAlg.h>
+#include <TrackingAnalysisAlgorithms/InDetTrackSmearingAlg.h>
 #include <TrigConfxAOD/xAODConfigTool.h>
 #include <TrigDecisionTool/TrigDecisionTool.h>
 #include <TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h>
@@ -320,6 +321,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauTruthDecorationsAlg>("CP::TauTruthDecorationsAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TauTruthMatchingAlg>("CP::TauTruthMatchingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrackParticleMergerAlg>("CP::TrackParticleMergerAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::InDetTrackSmearingAlg>("CP::InDetTrackSmearingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TransverseMassSelectorAlg>("CP::TransverseMassSelectorAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TreeFillerAlg>("CP::TreeFillerAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TreeMakerAlg>("CP::TreeMakerAlg"));

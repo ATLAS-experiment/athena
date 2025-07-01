@@ -308,6 +308,13 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="WorkingPoint", alg=DiTauWorkingPointConfig,
             superBlocks="DiTauJets")
 
+        # tracks
+        from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackCalibrationConfig
+        self.addAlgConfigBlock(algName="InDetTracks", alg=InDetTrackCalibrationConfig)
+        from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackWorkingPointConfig
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=InDetTrackWorkingPointConfig,
+            superBlocks="InDetTracks")
+
         # SystObjectLink
         from AsgAnalysisAlgorithms.SystObjectLinkConfig import SystObjectLinkBlock
         self.addAlgConfigBlock(algName="SystObjectLink", alg=SystObjectLinkBlock,

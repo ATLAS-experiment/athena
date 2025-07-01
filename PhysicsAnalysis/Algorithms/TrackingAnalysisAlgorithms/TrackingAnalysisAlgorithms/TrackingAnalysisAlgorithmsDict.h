@@ -9,5 +9,6 @@
 #include "TrackingAnalysisAlgorithms/VertexSelectionAlg.h"
 #include "TrackingAnalysisAlgorithms/TrackParticleMergerAlg.h"
 #include "TrackingAnalysisAlgorithms/SecVertexTruthMatchAlg.h"
+#include "TrackingAnalysisAlgorithms/InDetTrackSmearingAlg.h"
 
 #endif // TRACKINGANALYSISALGORITHMS_TRACKINGANALYSISALGORITHMSDICT_H
