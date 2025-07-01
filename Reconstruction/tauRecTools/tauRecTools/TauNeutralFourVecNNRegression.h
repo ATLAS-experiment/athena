@@ -56,7 +56,7 @@ private:
   Gaudi::Property<std::size_t> m_maxShotPFOs{this, "MaxShotPFOs", 6};
   Gaudi::Property<std::size_t> m_maxConvTracks{this, "MaxConvTracks", 4};
   Gaudi::Property<float> m_neutralPFOPtCut{this, "NeutralPFOPtCut", 1.5};
-  // Gaudi::Property<std::array<std::string, 3>> m_fourVecDimNames{this, "FourVecDimNames", {"E", "eta", "phi"}};
+  Gaudi::Property<std::vector<std::string> > m_fourVecDimNames{this, "FourVecDimNames", {"E", "eta", "phi"}};
   /**
    * @brief retrieve the input variables from a TauJet
    * @param xTau a TauJet object
