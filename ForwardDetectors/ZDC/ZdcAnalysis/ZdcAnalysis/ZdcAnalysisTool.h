@@ -117,6 +117,7 @@ private:
   std::unique_ptr<ZDCDataAnalyzer> initializePbPb2024();
   std::unique_ptr<ZDCDataAnalyzer> initializeOONeNe2025();
   std::unique_ptr<ZDCDataAnalyzer> initializepO2025();
+  std::unique_ptr<ZDCDataAnalyzer> initializepO2025B();
   std::unique_ptr<ZDCDataAnalyzer> initializeInjectorpp2024();
   std::unique_ptr<ZDCDataAnalyzer> initializeInjectorPbPb2024();
   std::unique_ptr<ZDCDataAnalyzer> initializeInjectorpOOONeNe2025();

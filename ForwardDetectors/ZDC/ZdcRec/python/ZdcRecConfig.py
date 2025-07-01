@@ -120,8 +120,10 @@ def SetConfigTag(flags):
                 config = "pp2024"
             elif flags.Input.ProjectName in ["data24_hi", "data24_hicomm"]:
                 config = "PbPb2024" 
-            elif flags.Input.ProjectName in ["data25_hip","data25_hipcomm"]:
+            elif flags.Input.ProjectName in ["data25_hipcomm"]:
                 config = "pO2025"
+            elif flags.Input.ProjectName in ["data25_hip"]:
+                config = "pO2025B"
             elif flags.Input.ProjectName in ["data25_hi","data25_hicomm"]:
                 config = "OONeNe2025"
         elif run == LHCPeriod.Run2:
