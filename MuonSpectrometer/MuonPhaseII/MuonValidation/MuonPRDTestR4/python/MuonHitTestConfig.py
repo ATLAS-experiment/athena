@@ -11,6 +11,7 @@ def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **k
     result.merge(ActsGeometryContextAlgCfg(flags))
     kwargs.setdefault("isMC", flags.Input.isMC)
 
+    kwargs.setdefault("dumpPileUp", True)
     
     kwargs.setdefault("dumpPrds", False)
     kwargs.setdefault("dumpDigits", False)
