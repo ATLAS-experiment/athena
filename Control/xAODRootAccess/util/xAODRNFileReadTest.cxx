@@ -46,7 +46,7 @@ public:
          return StatusCode::FAILURE;
       }
       // Loop over the objects of the file:
-      for( auto ef_itr : *ef ) {
+      for( const auto & ef_itr : *ef ) {
          // A helper object:
          const xAOD::EventFormatElement& efe = ef_itr.second;
          // Skip auxiliary objects:
