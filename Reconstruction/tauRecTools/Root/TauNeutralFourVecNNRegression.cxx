@@ -45,7 +45,7 @@ TauNeutralFourVecNNRegression::~TauNeutralFourVecNNRegression()
 StatusCode TauNeutralFourVecNNRegression::initialize()
 {
   ATH_MSG_INFO("Initializing TauNeutralFourVecNNRegression");
-
+  ATH_CHECK ( m_decayModeName.initialize() );
   // find input JSON files
   std::string weightFile_1p1n = find_file(m_weightFile_1p1n);
   std::string weightFile_1pXn = find_file(m_weightFile_1pXn);
@@ -141,19 +141,19 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   // Read the previously classified decay mode of the tau
   // Decay modes are "1p0n", "1p1n", "1pXn", "3p0n", "3pXn",
   // here they are encoded as 0, 1, 2, 3, 4 (as in TauDecayModeNNClassifier.cxx)
-  const static SG::Accessor<int> accDecayMode(m_decayModeName); // This can probably also be a ConstAccessor?
-  int decayMode = 7; // 7 is the error mode used as initialisation
-  if (accDecayMode.isAvailable(xTau))
+  
+  SG::ReadDecorHandle<xAOD::TauJetContainer, int> decayModeHandle( m_decayModeName );
+  if (!decayModeHandle.isPresent())
   {
-    decayMode = accDecayMode(xTau);
-    // concert to enum DecayMode and throw error if that fails
-    // then change if else statements to use this enum "if Mode_1p0n" instead of "if 0" etc.
+      ATH_MSG_ERROR( "TauJet container " << m_decayModeName << " not available!" );
+      return StatusCode::FAILURE;  
   }
-  else
+  if (!decayModeHandle.isAvailable())
   {
-    ATH_MSG_WARNING("Initializing TauNeutralFourVecNNRegression"); // maybe this should even be an error?
-    // decorate zeros.
+      ATH_MSG_ERROR( "TauJet decoration " << m_decayModeName << " not available!" );
+      return StatusCode::FAILURE;  
   }
+  int decayMode = decayModeHandle(xTau);
 
   // inputs
   // ------
