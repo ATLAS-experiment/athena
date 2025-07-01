@@ -43,6 +43,10 @@ def zdcGeometry(flags):
             return defaultGeometryTags.RUN3_ZDC24
         case "data24_hicomm":
             return defaultGeometryTags.RUN3_ZDC24
+        case "data25_hip":
+            return defaultGeometryTags.RUN3_ZDC24
+        case "data25_hi":
+            return defaultGeometryTags.RUN3_ZDC24
         case _:
             run = flags.GeoModel.Run
             if run == LHCPeriod.Run2:
@@ -82,11 +86,19 @@ def GenerateConfigTagDict():
     
 def SetConfigTag(flags):
 
-    if flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # calibration_DcmDummyProcessor is the "trigger stream" in the data we record in the standalone partition that is NOT LED data                
-        config = "InjectorPbPb2024" # default config tag for injector pulse - suitable also for running in standalone partition (except for standalone data taken during pp reference run + its commissionging period)
-
+    # terrible kludge for early 2025
+    if flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib":
+        config = "InjectorpOOONeNe2025"
+    
+    elif flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # calibration_DcmDummyProcessor is the "trigger stream" in the data we record in the standalone partition that is NOT LED data                
+        config = "InjectorpOOONeNe2025" # default config tag for injector pulse - suitable also for running in standalone partition (except for standalone data taken during pp reference run + its commissionging period)
         if flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
-            config = "Injectorpp2024" 
+            config = "Injectorpp2024"
+        if flags.Input.ProjectName == "data24_hi":
+            config = "InjectorPbPb2024"     
+        if flags.Input.ProjectName in ["data25_hi","data25_hicomm","data25_hip"] :
+            config = "InjectorpOOONeNe2025" 
+
     else:
         config = "PbPb2023" # default config tag
         
@@ -103,7 +115,11 @@ def SetConfigTag(flags):
             elif flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
                 config = "pp2024"
             elif flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
-                config = "PbPb2024"
+                config = "PbPb2024" 
+            elif flags.Input.ProjectName == "data25_hip":
+                config = "pO2025"
+            elif flags.Input.ProjectName == "data25_hi":
+                config = "OONeNe2025"
         elif run == LHCPeriod.Run2:
             if flags.Input.ProjectName == "data15_hi":
                 config = "PbPb2015"
@@ -160,9 +176,10 @@ def ZdcStreamDependentFlagSetting(flags):
         pn - string, project name such as data24_hi
     '''
     # check for LED / calibration data running, and configure appropriately
+    isComm = (flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib")
     isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
-    isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib")
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC")
+    isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib" or isComm)
+    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC") and not isComm
     
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
         runInjForStandaloneDataArgValid = False
@@ -397,6 +414,11 @@ def ZdcRecRun3Cfg(flags):
         elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = True
+            doFADCCorr = False
+            doNonLinCorr = False
+        elif flags.Input.ProjectName == "data25_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
+            doCalib = True
+            doTimeCalib = False
             doFADCCorr = False
             doNonLinCorr = False
 
@@ -670,9 +692,9 @@ if __name__ == '__main__':
             if flags.Input.TriggerStream != "calibration_DcmDummyProcessor": #after ntuple works for standalone data, take this line out
                 acc.merge(ZdcNtupleLocalCfg(flags))
         if isInj:
-            from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
-            zdcMonitorAcc = ZdcMonitoringConfig(flags)
-            acc.merge(zdcMonitorAcc)
+            #from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
+            #zdcMonitorAcc = ZdcMonitoringConfig(flags)
+            #acc.merge(zdcMonitorAcc)
             acc.merge(ZdcInjNtupleCfg(flags))            
     else:
         acc.merge(ZdcRecCfg(flags))

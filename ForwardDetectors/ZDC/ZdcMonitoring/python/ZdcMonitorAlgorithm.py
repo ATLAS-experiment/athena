@@ -232,7 +232,7 @@ def ZdcMonitoringConfig(inputFlags):
         module_amp_1Nmonitor_xmax = 2000 #about 5N / 4 * 2.7TeV
         module_calib_amp_1Nmonitor_xmax = 5000 #about 5N / 4 * 2.7TeV
 
-    elif config == "PbPb2023" or config == "PbPb2024" or config == "InjectorPbPb2024":
+    elif config == "PbPb2023" or config == "PbPb2024" or config == "InjectorPbPb2024" or config == "InjectorpOOONeNe2025":
         print ("looking at pbpb run")
         energy_sum_xmax = 200000.0
         energy_sum_two_sides_xmax_TeV = 400.0

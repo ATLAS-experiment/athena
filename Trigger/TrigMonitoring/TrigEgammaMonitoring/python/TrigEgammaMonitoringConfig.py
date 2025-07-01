@@ -195,10 +195,10 @@ class TrigEgammaMonAlgBuilder:
         self.photonList   = mongroups['monitoring_photon_cosmic']
         self.bootstrapMap = mongroups['monitoring_bootstrap_cosmic']
     elif self.HI_mode or self.pPb_mode:
-        self.electronList = mongroups['monitoring_electron_hi']
-        self.tpList       = mongroups['monitoring_electron_TP_hi']
-        self.photonList   = mongroups['monitoring_photon_hi']
-        self.bootstrapMap = mongroups['monitoring_bootstrap_hi']
+        self.electronList = mongroups['monitoring_electron_hi_oo']
+        self.tpList       = mongroups['monitoring_electron_TP_hi_oo']
+        self.photonList   = mongroups['monitoring_photon_hi_oo']
+        self.bootstrapMap = mongroups['monitoring_bootstrap_hi_oo']
     else:
         self.electronList = mongroups['monitoring_electron']
         self.photonList   = mongroups['monitoring_photon']
