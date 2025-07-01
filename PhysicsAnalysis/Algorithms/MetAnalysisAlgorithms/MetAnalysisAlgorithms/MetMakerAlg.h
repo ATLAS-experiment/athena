@@ -57,7 +57,7 @@ namespace CP
 
     /// \brief the name of the MissingETAssociationMap
   private:
-    Gaudi::Property<std::string> m_metAssociationName {this, "metAssociation", "", "the name of the core MissingETContainer"};
+    Gaudi::Property<std::string> m_metAssociationName {this, "metAssociation", "", "the name of the MissingETAssociationMap"};
 
     /// \brief the systematics list we run
   private:

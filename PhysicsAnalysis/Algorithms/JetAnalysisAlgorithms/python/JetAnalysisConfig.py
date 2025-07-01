@@ -121,8 +121,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             info="whether to update the JVT. The default is False.")
         self.addOption ('runNNJvtUpdate', False, type=bool,
             info="whether to update the NN-JVT. The default is False.")
-        self.addOption ('runFJvtUpdate', False, type=bool,
-            info="whether to update the forward JVT. The default is False.")
         self.addOption ('runJvtSelection', True, type=bool,
             info="whether to run JVT selection. The default is True.")
         self.addOption ('runFJvtSelection', False, type=bool,
@@ -381,19 +379,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.decorator.JetContainer = alg.jetsOut.replace ('%SYS%', 'NOSYS')
             alg.decorator.SuppressInputDependence=True
             alg.decorator.SuppressOutputDependence=True
-
-        if self.runFJvtUpdate :
-            alg = config.createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+self.containerName )
-            config.addPrivateTool( 'modifierTool', 'JetForwardJvtTool')
-            alg.modifierTool.OutputDec = "passFJVT_internal" #Output decoration
-            alg.modifierTool.FJVTName = "fJVT"
-            # fJVT WPs depend on the MET WP
-            # see https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EtmissRecommendationsRel21p2#fJVT_and_MET
-            alg.modifierTool.EtaThresh = 2.5 # Eta dividing central from forward jets
-            alg.modifierTool.ForwardMaxPt = 120*GeV #Max Pt to define fwdJets for JVT
-            alg.modifierTool.RenounceOutputs = True
-            alg.jets = config.readName (self.containerName)
-            alg.jetsOut = config.copyName (self.containerName)
 
         # Set up the jet efficiency scale factor calculation algorithm
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
@@ -946,7 +931,7 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection,
 
 
 def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
-                                 runJvtUpdate = None, runNNJvtUpdate = None, runFJvtUpdate = None,
+                                 runJvtUpdate = None, runNNJvtUpdate = None,
                                  runJvtSelection = None, runFJvtSelection = None,
                                  jvtWP = None, fJvtWP = None,
                                  runJvtEfficiency = None, runFJvtEfficiency = None,
@@ -959,7 +944,6 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
         jetInput -- The type of input used, read from the collection name.
         runJvtUpdate -- Determines whether or not to update JVT on the jets
         runNNJvtUpdate -- Determines whether or not to update NN JVT on the jets
-        runFJvtUpdate -- Determines whether or not to update forward JVT on the jets
         runJvtSelection -- Determines whether or not to run JVT selection on the jets
         runFJvtSelection -- Determines whether or not to run forward JVT selection on the jets
         jvtWP -- Defines the NNJvt WP to apply on the jets
@@ -977,7 +961,6 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
     config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput)
     config.setOptionValue ('runJvtUpdate', runJvtUpdate)
     config.setOptionValue ('runNNJvtUpdate', runNNJvtUpdate)
-    config.setOptionValue ('runFJvtUpdate', runFJvtUpdate)
     config.setOptionValue ('runJvtSelection', runJvtSelection)
     config.setOptionValue ('runFJvtSelection', runFJvtSelection)
     config.setOptionValue ('jvtWP', jvtWP)

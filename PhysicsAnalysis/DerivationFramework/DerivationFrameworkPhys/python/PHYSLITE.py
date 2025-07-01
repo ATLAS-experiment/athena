@@ -179,7 +179,6 @@ def CPAlgorithmsCfg(flags):
     jetContainer = 'AntiKt4EMPFlowJets'
     subConfig = factory.makeConfig ('Jets', containerName='AnalysisJets',
         jetCollection=jetContainer)
-    subConfig.setOptionValue ('.runFJvtUpdate', False)
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
     configSeq += subConfig
