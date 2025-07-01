@@ -7,8 +7,9 @@ atlas_subdir( TrackingAnalysisAlgorithms )
 atlas_add_library( TrackingAnalysisAlgorithmsLib
    TrackingAnalysisAlgorithms/*.h Root/*.cxx
    PUBLIC_HEADERS TrackingAnalysisAlgorithms
-   LINK_LIBRARIES AnaAlgorithmLib EventBookkeeperToolsLib xAODTracking InDetSecVtxTruthMatchToolLib
-   AsgDataHandlesLib AsgTools AthContainers )
+   LINK_LIBRARIES AnaAlgorithmLib EventBookkeeperToolsLib xAODTracking 
+   InDetSecVtxTruthMatchToolLib InDetTrackSystematicsToolsLib InDetTrackSelectionToolLib
+   SelectionHelpersLib AsgDataHandlesLib AsgTools AthContainers )
 
 atlas_add_dictionary( TrackingAnalysisAlgorithmsDict
    TrackingAnalysisAlgorithms/TrackingAnalysisAlgorithmsDict.h
