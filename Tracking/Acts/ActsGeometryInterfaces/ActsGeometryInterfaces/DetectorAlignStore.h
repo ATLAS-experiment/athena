@@ -28,7 +28,7 @@ namespace ActsTrk {
         /// @brief Default virtual destructor
         virtual ~DetectorAlignStore() = default;
         /// @brief Store containing the aligned GeoModel nodes
-        std::shared_ptr<GeoAlignmentStore> geoModelAlignment{std::make_unique<GeoAlignmentStore>()};
+        std::shared_ptr<GeoAlignmentStore> geoModelAlignment{std::make_shared<GeoAlignmentStore>()};
         /// @brief Store holding the transfomations used by the Acts algorithms
         class TrackingAlignStore{
            public:

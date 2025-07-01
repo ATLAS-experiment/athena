@@ -208,8 +208,8 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
         ATH_MSG_DEBUG("defaultRt new MuonCalib::IRtResolution");
 
         // create RT and resolution "I" objects
-        std::shared_ptr<MuonCalib::IRtRelation> rtRel{std::make_unique<RtRelationLookUp>(rtPars)};
-        std::shared_ptr<MuonCalib::IRtResolution> resoRel{std::make_unique<RtResolutionLookUp>(resoPars)};
+        std::shared_ptr<MuonCalib::IRtRelation> rtRel{std::make_shared<RtRelationLookUp>(rtPars)};
+        std::shared_ptr<MuonCalib::IRtResolution> resoRel{std::make_shared<RtResolutionLookUp>(resoPars)};
 
 
         // Since the same RT is loaded for all chambers you might be tempted to create it once
@@ -219,7 +219,7 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
         // for rtRel, resoRel, and MdtRtRelation
 
         // Loop over RT regions and store the default RT in each
-        RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(rtRel, resoRel);
+        RtRelationPtr MdtRt = std::make_shared<MuonCalib::MdtRtRelation>(rtRel, resoRel);
         
         for(auto itr = idHelper.detectorElement_begin();
                  itr!= idHelper.detectorElement_end();++itr){
@@ -535,7 +535,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         // Save ML difference if it is available
         if (multilayer_tmax_diff > -8e8) { rt->SetTmaxDiff(multilayer_tmax_diff); }
         // Store RT and resolution functions for this region
-        RtRelationPtr rt_rel = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso));
+        RtRelationPtr rt_rel = std::make_shared<MuonCalib::MdtRtRelation>(std::move(rt), std::move(reso));
 
         if (!writeCdo.storeData(athenaId ,rt_rel, msgStream())) return StatusCode::FAILURE;
         if (!(m_create_b_field_function || m_createSlewingFunction)) continue;

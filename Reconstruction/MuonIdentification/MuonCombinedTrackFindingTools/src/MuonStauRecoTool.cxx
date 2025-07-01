@@ -960,11 +960,11 @@ namespace MuonCombined {
                     if (nextensions == 0)
                         theCandidate = candidate.get();
                     else {
-                        std::shared_ptr<Candidate> newCandidate = std::make_unique<Candidate>(candidate->betaSeed);
+                        std::shared_ptr<Candidate> newCandidate = std::make_shared<Candidate>(candidate->betaSeed);
                         newCandidate->layerDataVec = layerDataVec;
                         newCandidate->hits = hits;
-                        newCandidates.push_back(newCandidate);
                         theCandidate = newCandidate.get();
+                        newCandidates.emplace_back(std::move(newCandidate));
                     }
 
                     // create a LayerData object to add to the selected candidate
@@ -1199,7 +1199,8 @@ namespace MuonCombined {
                 Trk::SegmentCollection::iterator sit_end = segColl->end();
                 for (; sit != sit_end; ++sit) {
                     Trk::Segment* tseg = *sit;
-                    Muon::MuonSegment* mseg = dynamic_cast<Muon::MuonSegment*>(tseg);
+                    Muon::MuonSegment* mseg = static_cast<Muon::MuonSegment*>(tseg);
+                    assert(dynamic_cast<Muon::MuonSegment*>(tseg) != nullptr);
                     ATH_MSG_DEBUG("Segment:  " << m_printer->print(*mseg));
                     segments.push_back(std::shared_ptr<const Muon::MuonSegment>(mseg));
                 }
