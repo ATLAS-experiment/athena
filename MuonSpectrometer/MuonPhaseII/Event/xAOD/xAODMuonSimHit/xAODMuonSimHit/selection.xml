@@ -1,7 +1,8 @@
-<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
-
-    <class name="xAOD::MuonSimHit_v1" />
+    <class name="xAOD::MuonSimHit_v1" >
+       <field name="m_hepMCLink" transient="true" />
+    </class>
     <typedef name="xAOD::MuonSimHit" />
     <class name="xAOD::MuonSimHitContainer_v1"
            id="664D13C6-32E9-42B5-9B6F-CAF60B049C05" />
