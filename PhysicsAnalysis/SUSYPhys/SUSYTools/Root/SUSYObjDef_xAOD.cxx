@@ -1607,7 +1607,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_BtagWP, "Btag.WP", rEnv, "Continuous");
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
 
-  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root": "xAODBTaggingEfficiency/13TeV/MC20_2024-10-17_GN2v01_v1.root");
+  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2025-06-17_GN2v01_v4.root": "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root");
   configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "SFEigen");
   configFromFile(m_EigenvectorReductionB, "Btag.EigenvectorReductionB", rEnv, "Loose");
   configFromFile(m_EigenvectorReductionC, "Btag.EigenvectorReductionC", rEnv, "Loose");
