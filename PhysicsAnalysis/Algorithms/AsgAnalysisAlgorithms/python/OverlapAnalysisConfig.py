@@ -22,6 +22,10 @@ class OverlapAnalysisConfig (ConfigBlock):
             info="whether to use the user's custom priority ranking, instead of the recommended one. If set to True, will respect the priorities set with inputLabel (e.g. in SUSYTools, every object gets priority 2, but pre-selected jets get priority 1). The default is False.")
         self.addOption ('bJetLabel', '', type=str,
             info="flag to select b-jets with. If left empty, no b-jets are used in the overlap removal. The default is '' (empty string).")
+        self.addOption ('InnerDR', 0.2, type=float,
+            info="radius of the inner cone for removing jets. The default is 0.2.")
+        self.addOption ('OuterDR', 0.4, type=float,
+            info="radius of the outer cone for removing leptons. The default is 0.4.")
         self.addOption ('boostedLeptons', False, type=bool,
             info="whether to enable boosted lepton overlap removal (toggles on the property UseSlidingDR of the ORUtils::EleJetOverlapTool and ORUtils::MuJetOverlapTool tools). The default is False.")
         self.addOption ('nominalOnly', False, type=bool,
@@ -369,6 +373,8 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.EleJetORT.OutputLabel = outputLabel
             alg.overlapTool.EleJetORT.LinkOverlapObjects = self.linkOverlapObjects
             alg.overlapTool.EleJetORT.BJetLabel = self.bJetLabel
+            alg.overlapTool.EleJetORT.InnerDR = self.InnerDR
+            alg.overlapTool.EleJetORT.OuterDR = self.OuterDR
             alg.overlapTool.EleJetORT.UseSlidingDR = self.boostedLeptons
             alg.overlapTool.EleJetORT.EnableUserPriority = self.enableUserPriority
             alg.overlapTool.EleJetORT.OutputPassValue = True
@@ -381,6 +387,8 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.MuJetORT.OutputLabel = outputLabel
             alg.overlapTool.MuJetORT.LinkOverlapObjects = self.linkOverlapObjects
             alg.overlapTool.MuJetORT.BJetLabel = self.bJetLabel
+            alg.overlapTool.MuJetORT.InnerDR = self.InnerDR
+            alg.overlapTool.MuJetORT.OuterDR = self.OuterDR
             alg.overlapTool.MuJetORT.UseSlidingDR = self.boostedLeptons
             alg.overlapTool.MuJetORT.EnableUserPriority = self.enableUserPriority
             alg.overlapTool.MuJetORT.OutputPassValue = True
