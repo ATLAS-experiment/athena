@@ -10,7 +10,7 @@
 //  ***************************************************************************/
 
 #include "gFexByteStreamTool.h"
-#include "gFexPos.h"
+#include "L1CaloFEXByteStream/gFexPos.h"
 #include "CxxUtils/span.h"
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
