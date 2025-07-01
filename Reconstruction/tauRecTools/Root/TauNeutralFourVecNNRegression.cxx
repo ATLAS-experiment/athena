@@ -232,7 +232,6 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   */
   // Outputs are E, eta, and phi
   // here they are encoded as 0, 1, 2
-  const std::array<std::string, 3> m_fourVecDimNames = {"E", "eta", "phi"}; // ideally this shouldn't be "buried" down here in the code, but with declare properties but that doesn't seem to like getting vectors.
   std::array<float, 3> pi0fourVec = {}; // = {} should initialize all values in the array to be 0 (which we want for deacy modes without neutral pions)
   if (decayMode != 0 && decayMode != 3) // not 1p0n or 1p3n
   {
