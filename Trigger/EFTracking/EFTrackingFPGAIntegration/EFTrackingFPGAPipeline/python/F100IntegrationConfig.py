@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def F100IntegrationCFG(flags, name = 'F100IntegrationAlog', **kwarg):
     acc = ComponentAccumulator()
 
-    kwarg.setdefault('bdfID','0000:c3:00.1') # On the testbed
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
     kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
     kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
     kwarg.setdefault('StripClusterKernelName','processHits')

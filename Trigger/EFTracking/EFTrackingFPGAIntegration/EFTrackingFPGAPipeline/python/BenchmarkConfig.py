@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
-    kwarg.setdefault('bdfID','0000:83:00.1') # On the testbed
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
     kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
     kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
     kwarg.setdefault('StripClusterKernelName','processHits')

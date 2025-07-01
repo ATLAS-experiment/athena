@@ -7,6 +7,7 @@ def addFPGADataPrepFlags(flags):
 
 
     flags.addFlag("FPGADataPrep.xclbin", "/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin")
+    flags.addFlag("FPGADataPrep.bdfID", "0000:c3:00.1")
 
     flags.addFlag("FPGADataPrep.DoActs", True)
     flags.addFlag("FPGADataPrep.FPGA.RunPixelClustering", True)

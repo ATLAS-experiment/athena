@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def F600IntegrationCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
-    kwarg.setdefault('bdfID','0000:c4:00.1') # On the testbed
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
     kwarg.setdefault('xclbin', '/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F610/kernels.hw.xclbin')
 
     # Set up Cluster maker tool
