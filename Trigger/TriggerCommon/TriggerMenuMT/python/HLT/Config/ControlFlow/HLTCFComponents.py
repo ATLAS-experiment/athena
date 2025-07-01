@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import AlgNode, HypoAlgNode
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
@@ -34,32 +34,29 @@ class SequenceFilterNode(AlgNode):
     def __repr__(self):
         return "SequenceFilter::%s  [%s] -> [%s], chains=%s"%(self.Alg.name,' '.join(map(str, self.getInputList())),' '.join(map(str, self.getOutputList())), self.getChains())
 
+
 class RoRSequenceFilterNode(SequenceFilterNode):
     def __init__(self, name): 
         Alg= RoRSeqFilter(name)            
         SequenceFilterNode.__init__(self,  Alg, 'Input', 'Output')
-        self.resetInput()
-        self.resetOutput() ## why do we need this in CA mode??
 
     def addChain(self, name, input_name):
         input_index = self.readInputList().index(input_name)
-        chains_in_input = self.getPar("ChainsPerInput")
-        if len(chains_in_input) == input_index:
-            chains_in_input.append([name])
-        elif len(chains_in_input) > input_index:
-            chains_in_input[input_index].append(name)
+        if len(self.Alg.ChainsPerInput) == input_index:
+            self.Alg.ChainsPerInput.append([name])
+        elif len(self.Alg.ChainsPerInput) > input_index:
+            self.Alg.ChainsPerInput[input_index].append(name)
         else:
-            log.error("Error: why requiring input %i when size is %i ?" , input_index , len(chains_in_input))
-            raise RuntimeError("Error: why requiring input %i when size is %i " , input_index , len(chains_in_input))
+            log.error("Error: why requiring input %i when size is %i ?" , input_index , len(self.Alg.ChainsPerInput))
+            raise RuntimeError("Error: why requiring input %i when size is %i " , input_index , len(self.Alg.ChainsPerInput))
             
-        self.Alg.ChainsPerInput= chains_in_input
-        return self.setPar("Chains", name) # still neded?
+        return self.Alg.Chains.append(name) # still neded?
         
     def getChains(self):
-        return self.getPar("Chains")
+        return self.Alg.Chains
 
     def getChainsPerInput(self):
-        return self.getPar("ChainsPerInput")
+        return self.Alg.ChainsPerInput
 
 
 

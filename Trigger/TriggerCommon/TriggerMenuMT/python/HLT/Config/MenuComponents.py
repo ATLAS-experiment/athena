@@ -58,10 +58,6 @@ class AlgNode(Node):
         self.outputProp = outputProp
         self.inputProp = inputProp
 
-    def addDefaultOutput(self):
-        if self.outputProp != '':
-            self.addOutput(("%s_%s"%(self.Alg.getName(),self.outputProp)))
-
     def setPar(self, propname, value):
         cval = getattr( self.Alg, propname)
         if isinstance(cval, MutableSequence):
@@ -69,22 +65,6 @@ class AlgNode(Node):
             return setattr(self.Alg, propname, cval)
         else:
             return setattr(self.Alg, propname, value)
-
-    def resetPar(self, prop):
-        cval = getattr(self.Alg, prop)
-        if isinstance(cval, MutableSequence):
-            return setattr(self.Alg, prop, [])
-        else:
-            return setattr(self.Alg, prop, "")
-
-    def getPar(self, prop):
-        return getattr(self.Alg, prop)
-
-    def resetOutput(self):
-        self.resetPar(self.outputProp)
-
-    def resetInput(self):
-        self.resetPar(self.inputProp)
 
     def addOutput(self, name):
         outputs = self.readOutputList()
@@ -98,7 +78,7 @@ class AlgNode(Node):
         Node.addOutput(self, name)
 
     def readOutputList(self):
-        cval = self.getPar(self.outputProp)
+        cval = getattr(self.Alg, self.outputProp)
         return (cval if isinstance(cval, MutableSequence) else
                 ([str(cval)] if cval else []))
 
@@ -115,7 +95,7 @@ class AlgNode(Node):
         return len(self.readInputList())
 
     def readInputList(self):
-        cval = self.getPar(self.inputProp)
+        cval = getattr(self.Alg, self.inputProp)
         return (cval if isinstance(cval, MutableSequence) else
                 ([str(cval)] if cval else []))
 
@@ -123,7 +103,7 @@ class AlgNode(Node):
         return "Alg::%s  [%s] -> [%s]"%(self.Alg.getName(), ' '.join(map(str, self.getInputList())), ' '.join(map(str, self.getOutputList())))
 
 
-class HypoToolConf(object):
+class HypoToolConf:
     """ Class to group info on hypotools for ChainDict"""
     def __init__(self, hypoToolGen):
         # Check if the generator function takes flags:
@@ -200,8 +180,6 @@ class InputMakerNode(AlgNode):
     def __init__(self, Alg):
         assert isInputMakerBase(Alg), "Error in creating InputMakerNode from Alg "  + Alg.name
         AlgNode.__init__(self,  Alg, 'InputMakerInputDecisions', 'InputMakerOutputDecisions')
-        self.resetInput()
-        self.resetOutput() ## why do we need this in CA mode??
         input_maker_output = CFNaming.inputMakerOutName(self.Alg.name)
         self.addOutput(input_maker_output)
 
@@ -220,11 +198,6 @@ class ComboHypoNode(AlgNode):
 
         log.debug("ComboHypoNode init: Alg %s", name)
         AlgNode.__init__(self,  Alg, 'HypoInputDecisions', 'HypoOutputDecisions')
-        self.resetInput()
-        self.resetOutput() ## why do we need this in CA mode??
-        # reset the chains, why do we need to do it?
-        #self.Alg.MultiplicitiesMap = {}
-        #self.Alg.LegToInputCollectionMap = {}
 
     def __del__(self):
         self.acc.wasMerged()
