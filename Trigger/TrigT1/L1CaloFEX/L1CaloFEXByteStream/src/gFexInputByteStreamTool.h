@@ -24,7 +24,7 @@
 // Gaudi includes
 #include "Gaudi/Property.h"
 
-#include "gFexPos.h"
+#include "L1CaloFEXByteStream/gFexPos.h"
 #include <array>
 #include <vector>
 #include <cstdint>
