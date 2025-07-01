@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <deque>
+#include <format>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -97,7 +98,7 @@ class BatchedMinbiasSvc : public extends<AthService, IMinbiasSvc> {
       this, "ActiveStoreSvc", "ActiveStoreSvc", "ActiveStoreSvc"};
 
   SGHandle m_spare_store{this, "StoreGateSvc",
-                         fmt::format("StoreGateSvc/discards_{}", name()),
+                         std::format("StoreGateSvc/discards_{}", name()),
                          "StoreGate for discarding events"};
   IEvtSelector::Context* m_bkg_evt_sel_ctx;
 

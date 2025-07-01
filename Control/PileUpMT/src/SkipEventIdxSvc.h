@@ -5,7 +5,7 @@
 #ifndef PILEUPMT_SKIPEVENTIDXSVC_H
 #define PILEUPMT_SKIPEVENTIDXSVC_H
 
-#include <fmt/format.h>
+#include <format>
 
 #include "AthenaBaseComps/AthService.h"
 #include "ISkipEventIdxSvc.h"

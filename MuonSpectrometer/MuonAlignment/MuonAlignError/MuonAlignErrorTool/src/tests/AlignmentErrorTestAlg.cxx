@@ -1,6 +1,6 @@
 #include "AlignmentErrorTestAlg.h"
 
-#include <fmt/format.h>
+#include <format>
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "MuonAlignErrorBase/AlignmentRotationDeviation.h"
@@ -95,7 +95,7 @@ StatusCode AlignmentErrorTestAlg::execute() {
         Amg::Vector3D u = tdev->getU();
         double sigma = tdev->getSigma();
         ATH_MSG_INFO(
-            fmt::format("TranslationNP U = {:14.6f} {:14.6f} {:14.6f}"
+            std::format("TranslationNP U = {:14.6f} {:14.6f} {:14.6f}"
                         " sigma = {:8.6f} chambers = {}",
                         u.x(), u.y(), u.z(), sigma, makeChamberString(hits)));
       } else if (const auto* rdev =
@@ -103,7 +103,7 @@ StatusCode AlignmentErrorTestAlg::execute() {
         Amg::Vector3D c = rdev->getCenter();
         Amg::Vector3D a = rdev->getAxis();
         double sigma = rdev->getSigma();
-        ATH_MSG_INFO(fmt::format(
+        ATH_MSG_INFO(std::format(
             "RotationNP    C = {:14.6f} {:14.6f} {:14.6f} "
             "A = {:14.6f} {:14.6f} {:14.6f} sigma = {:11.9f} chambers = {}",
             c.x(), c.y(), c.z(), a.x(), a.y(), a.z(), sigma, makeChamberString(hits)));

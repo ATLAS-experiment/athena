@@ -6,10 +6,9 @@
 #ifndef PILEUPMT_ONDEMANDMINBIASSVC_H
 #define PILEUPMT_ONDEMANDMINBIASSVC_H
 
-#include <fmt/format.h>
-
 #include <atomic>
 #include <deque>
+#include <format>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -86,7 +85,7 @@ class OnDemandMinbiasSvc final : public extends<AthService, IMinbiasSvc> {
       this, "ActiveStoreSvc", "ActiveStoreSvc", "ActiveStoreSvc"};
 
   SGHandle m_spare_store{this, "StoreGateSvc",
-                         fmt::format("StoreGateSvc/discards_{}", name()),
+                         std::format("StoreGateSvc/discards_{}", name()),
                          "StoreGate for discarding events"};
   IEvtSelector::Context* m_bkg_evt_sel_ctx;
   ServiceHandle<IProxyProviderSvc> m_proxyProviderSvc;
