@@ -149,7 +149,9 @@ def ActsPixelSpacePointFormationAlgCfg(flags,
 
     kwargs.setdefault('PixelClusters', 'ITkPixelClusters')
     kwargs.setdefault('PixelSpacePoints', 'ITkPixelSpacePoints') 
-
+    kwargs.setdefault('ExtraOutputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["PixelSpacePoints"]}.measurements')])
+    
     if useCache:
         kwargs.setdefault('SPCacheBackend', 'ActsPixelSpacePointCache_Back')
         kwargs.setdefault('SPCache', 'ActsPixelSpacePointCache')
@@ -189,7 +191,11 @@ def ActsStripSpacePointFormationAlgCfg(flags,
     kwargs.setdefault('StripClusters', 'ITkStripClusters')
     kwargs.setdefault('StripSpacePoints', 'ITkStripSpacePoints')
     kwargs.setdefault('StripOverlapSpacePoints', 'ITkStripOverlapSpacePoints')
+    kwargs.setdefault('ExtraOutputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["StripSpacePoints"]}.measurements'),
+                       ('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["StripOverlapSpacePoints"]}.measurements')])
 
+    
     if useCache:
         kwargs.setdefault('SPCacheBackend', 'ActsStripSpacePointCache_Back')
         kwargs.setdefault('SPCache', 'ActsStripSpacePointCache')
