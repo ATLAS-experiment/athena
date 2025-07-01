@@ -14,7 +14,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 from ZdcRecConfig import ZdcGenericFlagSetting, ZdcStreamDependentFlagSetting
 
-from ZdcFCalRecConfig import FCalRecCfg, ZdcFCalAdditionalFlagSetting
+from ZdcPhysRecConfig import FCalRecCfg, ZdcFCalAdditionalFlagSetting
 
 import os
 import ispy
@@ -67,8 +67,13 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
     flags.Common.useOnlineLumi = True
     flags.DQ.doStreamAwareMon = False
     flags.DQ.FileKey = ""
-    flags.LAr.doHVCorr = False
+
+    flags.IOVDb.GlobalTag="CONDBR2-HLTP-2024-02"
     flags.Trigger.triggerConfig = 'DB'
+
+    flags.LAr.doHVCorr = False
+    flags.InDet.useSctDCS = False
+    flags.InDet.useDCS = False
 
     flags.Output.doWriteESD = False
     flags.Output.doWriteAOD = False
@@ -87,13 +92,28 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
             flags.addFlag('DQ.Steering.' + flag, False)
 
     # ------------------------------- turn off trigger flags for online environment -------------------------------
-    _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'decodeHLT', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1.doCTP', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doCalo', 'doID', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
+    _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1.doCTP', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doCalo', 'doID', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
 
     for flag in _triggerFlags:
         if flags.hasFlag('Trigger.' + flag):
             flags._set('Trigger.' + flag, False)
         else:
             flags.addFlag('Trigger.' + flag, False)
+
+    # ------------------------------- turn off muon detector flags for online environment -------------------------------
+
+    _detectorFlags = ['MDT', 'MM', 'Muon', 'RPC', 'TGC', 'sTGC']
+    for flag in _detectorFlags:
+        if flags.hasFlag('Detector.Enable' + flag):
+            flags._set('Detector.Enable' + flag, False)
+        else:
+            flags.addFlag('Detector.Enable' + flag, False)
+
+        if flags.hasFlag('Detector.Geometry' + flag):
+            flags._set('Detector.Geometry' + flag, False)
+        else:
+            flags.addFlag('Detector.Geometry' + flag, False)
+
 
 
 # -------------------------------- Online project name manual setting for testbed --------------------------------
@@ -146,11 +166,12 @@ def ZdcOnlineTriggerStreamManualSetting(flags, partition, isTestbed):
             flags.Input.TriggerStream = "calibration_ZDCInjCalib"
         elif os.getenv("ZDC_STREAM_NAME") == "MinBias":
             flags.Input.TriggerStream = "physics_MinBias"
+        elif os.getenv("ZDC_STREAM_NAME") == "Standby":
+            flags.Input.TriggerStream = "physics_Standby"
         elif os.getenv("ZDC_STREAM_NAME") == "UCC":
             flags.Input.TriggerStream = "physics_UCC"
         elif os.getenv("ZDC_STREAM_NAME") == "express":
             flags.Input.TriggerStream = "express_express"
-
     
 # -------------------------------- OUTPUTTING DEGUG MESSAGES --------------------------------
 def ZdcOnlinePrintDebugMsgs():
@@ -244,11 +265,15 @@ def ZdcOnlineRecoFlagSettings(flags):
     
     ZdcFCalAdditionalFlagSetting(flags)
 
-
     # stream-dependent flag setting
     isLED, isInj, isCalib, pn = ZdcStreamDependentFlagSetting(flags)
 
-    return isLED, isInj, isCalib, pn
+    from ZdcRec.ZdcRecConfig import SetConfigTag
+    config = SetConfigTag(flags)
+
+    flags.Trigger.decodeHLT = flags.DQ.useTrigger and 'physics_' in flags.Input.TriggerStream # development stage ||| [PRODUCTION] ('pO' in config or 'OO' in config) and flags.DQ.useTrigger and flags.Input.TriggerStream == 'physics_MinBias'
+
+    return isLED, isInj, isCalib, pn, config
 
 
 def RunZdcOnlineRecoCfg(flags, isLED, isInj, isCalib):
@@ -307,7 +332,7 @@ if __name__ == '__main__':
 
     flags = initConfigFlags()
 
-    isLED, isInj, isCalib, pn = ZdcOnlineRecoFlagSettings(flags)
+    isLED, isInj, isCalib, pn, config = ZdcOnlineRecoFlagSettings(flags)
 
     flags.lock()
     flags.dump(evaluate=True) # testing stage - always dump: make sure settings are correct + geometry/steering/triggers/reconstruction/... of all other sub-detectors are turned off
@@ -342,8 +367,13 @@ if __name__ == '__main__':
 
     acc.merge(RunZdcOnlineRecoCfg(flags, isLED, isInj, isCalib))
 
-    if (flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC"):
+    if ("physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express"):
         acc.merge(FCalRecCfg(flags))
+
+    if "physics_" in flags.Input.TriggerStream: # disregard OO config / physics stream for testing stage ||| [PRODUCTION] if ('pO' in config or 'OO' in config) and flags.Input.TriggerStream == "physics_MinBias":
+        from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+        acc.merge(InDetTrackRecoCfg(flags))
+
 
     acc.merge(RunZdcOnlineMonitorCfg(flags, isLED, isInj, isCalib))
 
@@ -356,6 +386,12 @@ if __name__ == '__main__':
     log.info("Configured Services: %s", ", ".join(svc.name for svc in acc.getServices()))
     log.info("Configured EventAlgos: %s", ", ".join(alg.name for alg in acc.getEventAlgos()))
     log.info("Configured CondAlgos: %s", ", ".join(alg.name for alg in acc.getCondAlgos()))
+
+    if partition.isValid():
+        from IOVDbSvc.IOVDbSvcConfig import addOverride
+        acc.merge(addOverride(flags, "/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v2", db=""))
+
+        acc.getService("PoolSvc").ReadCatalog += ["xmlcatalog_file:/det/dqm/GlobalMonitoring/PoolFileCatalog_M7/PoolFileCatalog.xml"]
 
     status = acc.run()
     if status.isFailure():

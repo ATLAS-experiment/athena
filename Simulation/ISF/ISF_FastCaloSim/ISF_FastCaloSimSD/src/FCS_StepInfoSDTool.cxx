@@ -91,34 +91,15 @@ FCS_StepInfoSDTool::FCS_StepInfoSDTool(const std::string& type,
   declareProperty("shift_lar_subhit", m_config.shift_lar_subhit, "");
   declareProperty("shorten_lar_step", m_config.shorten_lar_step, "");
 
-  declareProperty("maxRadius", m_config.m_maxRadius, "");
-  declareProperty("maxRadiusFine", m_config.m_maxRadiusFine, "");
-  declareProperty("maxRadiusLAr", m_config.m_maxRadiusLAr, "");
-  declareProperty("maxRadiusHEC", m_config.m_maxRadiusHEC, "");
-  declareProperty("maxRadiusFCAL", m_config.m_maxRadiusFCAL, "");
-  declareProperty("maxRadiusTile", m_config.m_maxRadiusTile, "");
+  declareProperty("maxRadiusLateral", m_config.m_maxRadiusLateral, "");
+  declareProperty("maxRadiusLongitudinal", m_config.m_maxRadiusLongitudinal,
+                  "");
 
   declareProperty("maxTime", m_config.m_maxTime, "");
   declareProperty("maxTimeLAr", m_config.m_maxTimeLAr, "");
   declareProperty("maxTimeHEC", m_config.m_maxTimeHEC, "");
   declareProperty("maxTimeFCAL", m_config.m_maxTimeFCAL, "");
   declareProperty("maxTimeTile", m_config.m_maxTimeTile, "");
-
-  declareProperty("maxEtaPS", m_config.m_maxEtaPS, "");
-  declareProperty("maxPhiPS", m_config.m_maxPhiPS, "");
-  declareProperty("maxrPS", m_config.m_maxrPS, "");
-
-  declareProperty("maxEtaEM1", m_config.m_maxEtaEM1, "");
-  declareProperty("maxPhiEM1", m_config.m_maxPhiEM1, "");
-  declareProperty("maxrEM1", m_config.m_maxrEM1, "");
-
-  declareProperty("maxEtaEM2", m_config.m_maxEtaEM2, "");
-  declareProperty("maxPhiEM2", m_config.m_maxPhiEM2, "");
-  declareProperty("maxrEM2", m_config.m_maxrEM2, "");
-
-  declareProperty("maxEtaEM3", m_config.m_maxEtaEM3, "");
-  declareProperty("maxPhiEM3", m_config.m_maxPhiEM3, "");
-  declareProperty("maxrEM3", m_config.m_maxrEM3, "");
 }
 
 //---------------------------------------------------------------------------

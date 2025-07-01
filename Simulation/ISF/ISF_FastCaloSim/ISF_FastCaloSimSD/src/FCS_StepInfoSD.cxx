@@ -46,93 +46,6 @@ inline double FCS_StepInfoSD::getMaxTime(
   return m_config.m_maxTime;
 }
 
-inline double FCS_StepInfoSD::getMaxRadius(
-    const CaloCell_ID::CaloSample& layer) const {
-  /// NB The result of this function should actually be constant for each SD
-  if (layer >= CaloCell_ID::PreSamplerB && layer <= CaloCell_ID::EME3) {
-    return m_config.m_maxRadiusLAr;
-  }
-  if (layer >= CaloCell_ID::HEC0 && layer <= CaloCell_ID::HEC3) {
-    return m_config.m_maxRadiusHEC;
-  }
-  if (layer >= CaloCell_ID::FCAL0 && layer <= CaloCell_ID::FCAL2) {
-    return m_config.m_maxRadiusFCAL;
-  }
-  return m_config.m_maxRadius;
-}
-
-inline double FCS_StepInfoSD::getMaxDeltaR(
-    const CaloCell_ID::CaloSample& layer) const {
-  /// NB The result of this function should actually be constant for each SD
-  if (m_config.m_maxRadiusLAr != 25)
-    return 999.;
-  if (layer >= CaloCell_ID::PreSamplerB && layer <= CaloCell_ID::EME3) {
-    if (layer == CaloCell_ID::PreSamplerB ||
-        layer == CaloCell_ID::PreSamplerE) {
-      // PS default is 1mm in eta, 5mm in phi, no cut in r
-      return m_config.m_maxrPS;
-    } else if (layer == CaloCell_ID::EMB1 || layer == CaloCell_ID::EME1) {
-      // EM1 default is 1mm in eta, 5mm in phi, 15mm in r
-      return m_config.m_maxrEM1;
-    } else if (layer == CaloCell_ID::EMB2 || layer == CaloCell_ID::EME2) {
-      // EM2 default is 1mm in eta, 5mm in phi, 60mm in r
-      return m_config.m_maxrEM2;
-    } else if (layer == CaloCell_ID::EMB3 || layer == CaloCell_ID::EME3) {
-      // EM3 default is 1mm in eta, 5mm in phi, 8mm in r
-      return m_config.m_maxrEM3;
-    }
-  }
-  return 999.;
-}
-
-inline double FCS_StepInfoSD::getMaxDeltaEta(
-    const CaloCell_ID::CaloSample& layer) const {
-  /// NB The result of this function should actually be constant for each SD
-  if (m_config.m_maxRadiusLAr != 25)
-    return 999.;
-  if (layer >= CaloCell_ID::PreSamplerB && layer <= CaloCell_ID::EME3) {
-    if (layer == CaloCell_ID::PreSamplerB ||
-        layer == CaloCell_ID::PreSamplerE) {
-      // PS default is 1mm in eta, 5mm in phi, no cut in r
-      return m_config.m_maxEtaPS;
-    } else if (layer == CaloCell_ID::EMB1 || layer == CaloCell_ID::EME1) {
-      // EM1 default is 1mm in eta, 5mm in phi, 15mm in r
-      return m_config.m_maxEtaEM1;
-    } else if (layer == CaloCell_ID::EMB2 || layer == CaloCell_ID::EME2) {
-      // EM2 default is 1mm in eta, 5mm in phi, 60mm in r
-      return m_config.m_maxEtaEM2;
-    } else if (layer == CaloCell_ID::EMB3 || layer == CaloCell_ID::EME3) {
-      // EM3 default is 1mm in eta, 5mm in phi, 8mm in r
-      return m_config.m_maxEtaEM3;
-    }
-  }
-  return 999.;
-}
-
-inline double FCS_StepInfoSD::getMaxDeltaPhi(
-    const CaloCell_ID::CaloSample& layer) const {
-  /// NB The result of this function should actually be constant for each SD
-  if (m_config.m_maxRadiusLAr != 25)
-    return 999.;
-  if (layer >= CaloCell_ID::PreSamplerB && layer <= CaloCell_ID::EME3) {
-    if (layer == CaloCell_ID::PreSamplerB ||
-        layer == CaloCell_ID::PreSamplerE) {
-      // PS default is 1mm in eta, 5mm in phi, no cut in r
-      return m_config.m_maxPhiPS;
-    } else if (layer == CaloCell_ID::EMB1 || layer == CaloCell_ID::EME1) {
-      // EM1 default is 1mm in eta, 5mm in phi, 15mm in r
-      return m_config.m_maxPhiEM1;
-    } else if (layer == CaloCell_ID::EMB2 || layer == CaloCell_ID::EME2) {
-      // EM2 default is 1mm in eta, 5mm in phi, 60mm in r
-      return m_config.m_maxPhiEM2;
-    } else if (layer == CaloCell_ID::EMB3 || layer == CaloCell_ID::EME3) {
-      // EM3 default is 1mm in eta, 5mm in phi, 8mm in r
-      return m_config.m_maxPhiEM3;
-    }
-  }
-  return 999.;
-}
-
 void FCS_StepInfoSD::getCaloDDManager() {
   SG::ReadCondHandleKey<CaloDetDescrManager> caloMgrKey{"CaloDetDescrManager"};
   if (caloMgrKey.initialize().isFailure()) {
@@ -148,8 +61,9 @@ void FCS_StepInfoSD::getCaloDDManager() {
 
 void FCS_StepInfoSD::update_map(const CLHEP::Hep3Vector& l_vec,
                                 const Identifier& l_identifier, double l_energy,
-                                double l_time, bool l_valid, int l_detector,
-                                double timeWindow, double distanceWindow) {
+                                double l_time, bool l_valid,
+                                int l_detector)  // TODO: is the "&" needed?
+{
   // NB l_identifier refers to:
   // - the cell identifier for LAr
   // - the PMT identifier for Tile
@@ -176,6 +90,11 @@ void FCS_StepInfoSD::update_map(const CLHEP::Hep3Vector& l_vec,
     // Get the appropriate merging limits
     const CaloCell_ID::CaloSample& layer =
         m_calo_dd_man.get()->get_element(l_identifier)->getSampling();
+
+    double timeWindow = m_config.m_maxTime;
+    const double distWinLong = m_config.m_maxRadiusLongitudinal.at(layer);
+    const double distWinLat = m_config.m_maxRadiusLateral.at(layer);
+
     const double tsame(this->getMaxTime(layer));
     bool match = false;
     for (auto* map_it : *map_item->second) {
@@ -190,9 +109,22 @@ void FCS_StepInfoSD::update_map(const CLHEP::Hep3Vector& l_vec,
 
       // Distance check
       const CLHEP::Hep3Vector& currentPosition = map_it->position();
-      const double hit_diff2 = currentPosition.diff2(l_vec);
-      // Global distance check
-      if (hit_diff2 >= distanceWindow) {
+      const double currentPosition_mag = currentPosition.mag();
+      const double proj_longitudinal =
+          currentPosition.dot(l_vec) / currentPosition_mag;
+      const double delta_longitudinal = currentPosition_mag - proj_longitudinal;
+      if (std::fabs(delta_longitudinal) >= distWinLong) {
+        continue;
+      }
+
+      // Lateral distance check
+      double delta_lateral_2 = l_vec.mag2() - proj_longitudinal * proj_longitudinal;
+      if (delta_lateral_2 < 0) {
+        delta_lateral_2 = 0;  // Avoid negative square root
+      }
+      const double delta_lateral =
+          std::sqrt(delta_lateral_2);
+      if (delta_lateral >= distWinLat) {
         continue;
       }
 

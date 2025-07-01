@@ -43,46 +43,18 @@ struct Config {
                                         // before calling the calculators.
 
   // Merging properties
-  double m_maxRadius = 25.;  //!< property, see @link
-                             //!< LArG4GenShowerLib::LArG4GenShowerLib @endlink
-  double m_maxRadiusFine =
-      1.;  //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib
-           //!< @endlink
-  double m_maxRadiusLAr =
-      25.;  //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib
-            //!< @endlink
-  double m_maxRadiusHEC =
-      100.;  //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib
-             //!< @endlink
-  double m_maxRadiusFCAL =
-      100.;  //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib
-             //!< @endlink
-  double m_maxRadiusTile =
-      100.;  //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib
-             //!< @endlink
+  std::vector<double> m_maxRadiusLateral{
+      24, 5.};  //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib
+                //!< @endlink
+  std::vector<double> m_maxRadiusLongitudinal{
+      24, 5.};  //!< property, see @link LArG4GenShowerLib::LArG4GenShowerLib
+                //!< @endlink
 
   double m_maxTime = 25.;
   double m_maxTimeLAr = 25.;
   double m_maxTimeHEC = 25.;
   double m_maxTimeFCAL = 25.;
   double m_maxTimeTile = 25.;
-
-  // Optimised merging scheme
-  double m_maxEtaPS = 1.;
-  double m_maxPhiPS = 5.;
-  double m_maxrPS = 0.;
-
-  double m_maxEtaEM1 = 1.;
-  double m_maxPhiEM1 = 5.;
-  double m_maxrEM1 = 15.;
-
-  double m_maxEtaEM2 = 1.;
-  double m_maxPhiEM2 = 5.;
-  double m_maxrEM2 = 60.;
-
-  double m_maxEtaEM3 = 1.;
-  double m_maxPhiEM3 = 5.;
-  double m_maxrEM3 = 8.;
 
   ILArCalculatorSvc* m_LArCalculator = nullptr;
   ITileCalculator* m_TileCalculator = nullptr;
@@ -124,8 +96,7 @@ class FCS_StepInfoSD : public G4VSensitiveDetector {
   void getCaloDDManager();
   void update_map(const CLHEP::Hep3Vector& l_vec,
                   const Identifier& l_identifier, double l_energy,
-                  double l_time, bool l_valid, int l_detector,
-                  double timeWindow, double distanceWindow);
+                  double l_time, bool l_valid, int l_detector);
   FCS_Param::Config m_config;
   /// Pointers to the identifier helpers
   const LArEM_ID* m_larEmID{nullptr};
@@ -139,14 +110,6 @@ class FCS_StepInfoSD : public G4VSensitiveDetector {
  private:
   ///
   double getMaxTime(const CaloCell_ID::CaloSample& layer) const;
-  ///
-  double getMaxRadius(const CaloCell_ID::CaloSample& layer) const;
-  ///
-  double getMaxDeltaR(const CaloCell_ID::CaloSample& layer) const;
-  ///
-  double getMaxDeltaEta(const CaloCell_ID::CaloSample& layer) const;
-  ///
-  double getMaxDeltaPhi(const CaloCell_ID::CaloSample& layer) const;
 };
 
 #endif  // ISF_FASTCALOSIM_FCS_STEPINFOSD_H

@@ -20,7 +20,9 @@ atlas_add_component( ZdcMonitoring
         AthenaMonitoringKernelLib
         AthenaPoolUtilities
         StoreGateLib
+        xAODTrigger
         xAODEventInfo
+        xAODTracking
         xAODForward
         xAODHIEvent
         ZdcAnalysisLib

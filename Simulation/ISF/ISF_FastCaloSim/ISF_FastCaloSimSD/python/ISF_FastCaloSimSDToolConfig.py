@@ -27,11 +27,52 @@ def FCS_StepInfoSDToolCfg(flags, name="FCS_StepInfoSensitiveDetector", **kwargs)
 
 
 def PostIncludeParametrizationInputSim_1mm(flags, cfg):
+    
+    # // LAr barrel
+    # CALOSAMPLING(PreSamplerB, 1, 0) //  0
+    # CALOSAMPLING(EMB1,        1, 0) //  1
+    # CALOSAMPLING(EMB2,        1, 0) //  2
+    # CALOSAMPLING(EMB3,        1, 0) //  3
+
+    # // LAr EM endcap
+    # CALOSAMPLING(PreSamplerE, 0, 1) //  4
+    # CALOSAMPLING(EME1,        0, 1) //  5
+    # CALOSAMPLING(EME2,        0, 1) //  6
+    # CALOSAMPLING(EME3,        0, 1) //  7
+
+    # // Hadronic endcap
+    # CALOSAMPLING(HEC0,        0, 1) //  8
+    # CALOSAMPLING(HEC1,        0, 1) //  9
+    # CALOSAMPLING(HEC2,        0, 1) // 10
+    # CALOSAMPLING(HEC3,        0, 1) // 11
+
+    # // Tile barrel
+    # CALOSAMPLING(TileBar0,    1, 0) // 12
+    # CALOSAMPLING(TileBar1,    1, 0) // 13
+    # CALOSAMPLING(TileBar2,    1, 0) // 14
+
+    # // Tile gap (ITC & scint)
+    # CALOSAMPLING(TileGap1,    1, 0) // 15
+    # CALOSAMPLING(TileGap2,    1, 0) // 16
+    # CALOSAMPLING(TileGap3,    1, 0) // 17
+
+    # // Tile extended barrel
+    # CALOSAMPLING(TileExt0,    1, 0) // 18
+    # CALOSAMPLING(TileExt1,    1, 0) // 19
+    # CALOSAMPLING(TileExt2,    1, 0) // 20
+
+    # // Forward EM endcap
+    # CALOSAMPLING(FCAL0,       0, 1) // 21
+    # CALOSAMPLING(FCAL1,       0, 1) // 22
+    # CALOSAMPLING(FCAL2,       0, 1) // 23
+
+    
     stepInfoSDTool = cfg.getPublicTool("SensitiveDetectorMasterTool").SensitiveDetectors['FCS_StepInfoSensitiveDetector']
     stepInfoSDTool.shift_lar_subhit=True #default
     stepInfoSDTool.shorten_lar_step=True
-    stepInfoSDTool.maxRadiusFine=1. #default (for EMB1 and EME1)
-    stepInfoSDTool.maxRadius=25. #default
-    stepInfoSDTool.maxRadiusTile=25. #default
+    
+    stepInfoSDTool.maxRadiusLateral =   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5] # For finer merging
+    stepInfoSDTool.maxRadiusLongitudinal = [11.0,  5.0, 31.0,  5.0,  5.0,  7.0, 32.0,  9.0, 35.0, 67.0, 62.0, 58.0, 38.0, 49.0, 48.0, 56.0, 48.0,  5.0, 38.0, 68.0, 85.0, 56.0, 55.0, 55.0] # For finer merging
+    
     stepInfoSDTool.maxTime=25. #default
     stepInfoSDTool.maxTimeTile=100. #default
