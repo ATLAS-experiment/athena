@@ -10,7 +10,6 @@ from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg, BTagT
 from BTagging.BTagConfig import _get_flip_config
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 from FlavorTagInference.FlavorTagNNConfig import MultifoldGNNCfg
-from BTagging.BTagToolConfig import BTagToolCfg
 from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactoryCfg
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
@@ -230,7 +229,6 @@ def _fastCfg(flags, pv, tc, pfx):
 
 def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssociator,):
 
-    SetupScheme = ''
     jetcol_no_suffix = jet.replace("Jets","")
 
     acc = ComponentAccumulator()
@@ -241,11 +239,6 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
         trackCollection,
         JetTrackAssociator,
     ))
-
-    options = {}
-
-    options['BTagTool'] = acc.popToolsAndMerge(BTagToolCfg(
-        flags, ['SV1'], pv_col, SetupScheme))
 
     SecVertexers = ['SV1','JetFitter']
     if flags.BTagging.RunFlipTaggers:
