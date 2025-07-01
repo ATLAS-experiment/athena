@@ -3,6 +3,8 @@
 */
 #ifndef SIMULATIONBASE
 
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+
 #include "ActsGeoUtils/SurfaceEncoding.h"
 
 #include "Acts/Surfaces/ConeSurface.hpp"
@@ -22,29 +24,35 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
                    const Acts::Surface* surface,
                    const Acts::GeometryContext& geoContext) {
   // return if surf is a nullptr
-  if (surface == nullptr) {
+  if (!surface) {
     return;
   }
-
-  // surface type specifics
-  if (surface->type() == Acts::Surface::Cone) {
-    surfaceType = xAOD::SurfaceType::Cone;
-  } else if (surface->type() == Acts::Surface::Cylinder) {
-    surfaceType = xAOD::SurfaceType::Cylinder;
-  } else if (surface->type() == Acts::Surface::Disc) {
-    surfaceType = xAOD::SurfaceType::Disc;
-  } else if (surface->type() == Acts::Surface::Perigee) {
-    surfaceType = xAOD::SurfaceType::Perigee;
-  } else if (surface->type() == Acts::Surface::Plane) {
-    surfaceType = xAOD::SurfaceType::Plane;
-  } else if (surface->type() == Acts::Surface::Straw) {
-    surfaceType = xAOD::SurfaceType::Straw;
-  } else {
-    throw std::out_of_range(
-        "encodeSurface this type " +
-        std::to_string(static_cast<int>(surface->type())) +
-        " of Acts Surface can not be saved in xAOD::TrackSurface");
-    return;
+  switch (surface->type()){
+     using enum Acts::Surface::SurfaceType;
+     case Cone:
+        surfaceType = xAOD::SurfaceType::Cone;
+        break;
+      case Cylinder: 
+        surfaceType = xAOD::SurfaceType::Cylinder;
+        break;
+      case Disc:
+        surfaceType = xAOD::SurfaceType::Disc;
+        break;
+      case Perigee:
+        surfaceType = xAOD::SurfaceType::Perigee;
+        break;
+      case Plane:
+        surfaceType = xAOD::SurfaceType::Plane;
+        break;
+      case Straw: 
+        surfaceType = xAOD::SurfaceType::Straw;
+        break;
+      case Curvilinear:
+        surfaceType = xAOD::SurfaceType::Curvilinear;
+        break;
+      case Other:
+        surfaceType = xAOD::SurfaceType::Other;
+        break;
   }
 
   Acts::RotationMatrix3 lRotation =
@@ -52,15 +60,13 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
   Acts::Vector3 eulerAngles = lRotation.eulerAngles(2, 1, 0);
   Acts::Vector3 lTranslation = surface->center(geoContext);
 
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; ++i) {
     rotation.push_back(eulerAngles[i]);
     translation.push_back(lTranslation[i]);
   }
-
   // copy and transform double->float
   const std::vector<double>& values = surface->bounds().values();
-  for (double v: values)
-    boundValues.push_back(v);
+  boundValues.insert(boundValues.end(), values.begin(), values.end());
 }
 
 void encodeSurface(xAOD::TrackSurfaceAuxContainer* s, size_t i,
@@ -84,84 +90,58 @@ void encodeSurface(xAOD::TrackSurface* s, const Acts::Surface* surface,
 
 std::shared_ptr<const Acts::Surface> decodeSurface(
     const xAOD::SurfaceType surfaceType, const std::vector<float>& translation,
-    const std::vector<float>& rotation, const std::vector<float>& boundValues,
-    const Acts::GeometryContext&) {
+    const std::vector<float>& rotation, const std::vector<float>& boundValues) {
 
   // Translation and rotation
 
   // create the transformation matrix
-  auto transform = Acts::Transform3(
-      Acts::Translation3(translation[0], translation[1], translation[2]));
-  transform *=
-      Acts::AngleAxis3(rotation[0], Acts::Vector3(0., 0., 1.));  // rotZ
-  transform *=
-      Acts::AngleAxis3(rotation[1], Acts::Vector3(0., 1., 0.));  // rotY
-  transform *=
-      Acts::AngleAxis3(rotation[2], Acts::Vector3(1., 0., 0.));  // rotX
+  Amg::Transform3D transform = 
+                   Amg::getTranslate3D(translation[0], translation[1], translation[2]) *
+                   Amg::getRotateZ3D(rotation[0]) *
+                   Amg::getRotateY3D(rotation[1]) *
+                   Amg::getRotateX3D(rotation[2]);
 
-  // cone
-  if (surfaceType == xAOD::Cone) {
-    auto surface = Acts::Surface::makeShared<Acts::ConeSurface>(
-        transform, boundValues[0], boundValues[1], boundValues[2],
-        boundValues[3]);
-    return surface;
+  switch (surfaceType) {
+      using enum xAOD::SurfaceType;
+      case Cone:
+        return Acts::Surface::makeShared<Acts::ConeSurface>(std::move(transform), 
+                    boundValues[0], boundValues[1], boundValues[2], boundValues[3]);
+      case Cylinder: {
+        // phi/2 must be slightly < Pi to avoid crashing
+        const float fixedPhi = boundValues[2] > M_PI - 0.001 ? M_PI - 0.001 : boundValues[2];
+        return Acts::Surface::makeShared<Acts::CylinderSurface>(std::move(transform), 
+                boundValues[0], boundValues[1], fixedPhi, boundValues[3], boundValues[4]);
+      } case Disc:
+        return Acts::Surface::makeShared<Acts::DiscSurface>(std::move(transform), 
+                boundValues[0], boundValues[1], boundValues[2]);
+        case Perigee: 
+          return Acts::Surface::makeShared<Acts::PerigeeSurface>(std::move(transform));
+        case Plane: {
+          Acts::Vector2 min(boundValues[0], boundValues[1]),
+                        max(boundValues[2], boundValues[3]);
+          auto rBounds = std::make_shared<const Acts::RectangleBounds>(min, max);
+          return Acts::Surface::makeShared<Acts::PlaneSurface>(std::move(transform), rBounds);
+        } case Straw: 
+          return Acts::Surface::makeShared<Acts::StrawSurface>(std::move(transform), 
+                                                               boundValues[0], boundValues[1]);
+          case Curvilinear:
+          case Other: 
+            THROW_EXCEPTION("EncodeSurface this type " <<static_cast<int>(surfaceType)<< 
+                           " of xAOD::surface cannot be converted into an Acts one");
   }
-  // Cylinder
-  else if (surfaceType == xAOD::Cylinder) {
-    // phi/2 must be slightly < Pi to avoid crashing
-    float fixedPhi =
-        boundValues[2] > M_PI - 0.001 ? M_PI - 0.001 : boundValues[2];
-    auto surface = Acts::Surface::makeShared<Acts::CylinderSurface>(
-        transform, boundValues[0], boundValues[1], fixedPhi, boundValues[3],
-        boundValues[4]);
-    return surface;
-  }
-  // Disc
-  else if (surfaceType == xAOD::Disc) {
-    auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(
-        transform, boundValues[0], boundValues[1], boundValues[2]);
-    return surface;
-  }
-  // Perigee
-  else if (surfaceType == xAOD::Perigee) {
-    auto surface = Acts::Surface::makeShared<Acts::PerigeeSurface>(transform);
-    return surface;
-  }
-  // Plane
-  else if (surfaceType == xAOD::Plane) {
-    Acts::Vector2 min(boundValues[0], boundValues[1]),
-        max(boundValues[2], boundValues[3]);
-    auto rBounds = std::make_shared<const Acts::RectangleBounds>(min, max);
-    auto surface =
-        Acts::Surface::makeShared<Acts::PlaneSurface>(transform, rBounds);
-    return surface;
-  }
-  // Straw
-  else if (surfaceType == xAOD::Straw) {
-    auto surface = Acts::Surface::makeShared<Acts::StrawSurface>(
-        transform, boundValues[0], boundValues[1]);
-    return surface;
-  } else {
-    throw std::out_of_range(
-        "encodeSurface this type " +
-        std::to_string(static_cast<int>(surfaceType)) +
-        " of Acts Surface can not be saved in xAOD::TrackSurface");
-    return nullptr;
-  }
+  
   return nullptr;
 }
 
-std::shared_ptr<const Acts::Surface> decodeSurface(
-    const xAOD::TrackSurface* s, const Acts::GeometryContext& geo) {
+std::shared_ptr<const Acts::Surface> decodeSurface(const xAOD::TrackSurface* s) {
   return decodeSurface(s->surfaceType(), s->translation(), s->rotation(),
-                       s->boundValues(), geo);
+                       s->boundValues());
 }
 
-std::shared_ptr<const Acts::Surface> decodeSurface(
-    const xAOD::TrackSurfaceAuxContainer* s, size_t i,
-    const Acts::GeometryContext& geo) {
+std::shared_ptr<const Acts::Surface> decodeSurface(const xAOD::TrackSurfaceAuxContainer* s, 
+                                                    size_t i) {
   return decodeSurface(s->surfaceType[i], s->translation[i], s->rotation[i],
-                       s->boundValues[i], geo);
+                       s->boundValues[i]);
 }
 
 }  // namespace ActsTrk

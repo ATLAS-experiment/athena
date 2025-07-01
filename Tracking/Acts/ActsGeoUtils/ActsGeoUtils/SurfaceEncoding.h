@@ -41,14 +41,13 @@ void encodeSurface(xAOD::TrackSurface* backend,
  * implementation should be exact mirror of encodeSurface
  */
 
-std::shared_ptr<const Acts::Surface> decodeSurface(
-    const xAOD::TrackSurface* backend, const Acts::GeometryContext& geoContext);
+std::shared_ptr<const Acts::Surface> decodeSurface(const xAOD::TrackSurface* backend);
 
 /**
 * As above, but takes data from Aux container at an index i
 */
-std::shared_ptr<const Acts::Surface> decodeSurface(
-    const xAOD::TrackSurfaceAuxContainer* backend, size_t i, const Acts::GeometryContext& geoContext);
+std::shared_ptr<const Acts::Surface> decodeSurface(const xAOD::TrackSurfaceAuxContainer* backend, 
+                                                  size_t i);
 
 
 }  // namespace ActsTrk

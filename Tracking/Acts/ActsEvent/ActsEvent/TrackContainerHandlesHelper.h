@@ -117,8 +117,7 @@ class ConstTrackContainerHandlesHelper {
   SG::WriteHandleKey<ActsTrk::MultiTrajectory> m_mtjKey;
   // build for MTJ part
   std::unique_ptr<ActsTrk::MultiTrajectory> buildMtj(
-      const Acts::TrackingGeometry* geo,
-      const Acts::GeometryContext& geoContext,
+      const Acts::TrackingGeometry* geo,      
       const EventContext& context) const;
   // TrackContainer part
 
