@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 TEST_LABEL="F410"
-xAODOutput="FPGATrackSim_${TEST_LABEL}_reg34.AOD.pool.root"
+xAODOutput="FPGATrackSim_${TEST_LABEL}.AOD.pool.root"
 
 FWRD_ARGS=()
 while [[ $# -gt 0 ]]; do
@@ -40,7 +40,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.GNN.doGNNTracking=True \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
     Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
-    Trigger.FPGATrackSim.regionList="34" \
+    Trigger.FPGATrackSim.regionList="34,98,162,226,290,354,418,482,546,610,674,738,802,866,930,994,1058,1122,1186,1250" \
     Trigger.FPGATrackSim.oldRegionDefs=False \
     Trigger.FPGATrackSim.writeToAOD=True \
     Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
@@ -49,7 +49,8 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM_2ND \
     Trigger.FPGATrackSim.GNN.nInputsGNN=9 \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
-    Trigger.FPGATrackSim.doOverlapRemoval=False
+    Trigger.FPGATrackSim.doOverlapRemoval=False \
+    Trigger.FPGATrackSim.writeOfflPRDInfo=True
 }
 run_F410
 if [ -z $ArtJobType ];then # skip file check for ART (this has already been done in CI)

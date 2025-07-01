@@ -151,7 +151,9 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
           if (inputTensorValues.size() < 15) {
             inputTensorValues.resize(15, 0.0f); // Resize to 15 and fill with 0.0f
           }
-          else if (m_doGNNTracking) inputTensorValues.resize(15);
+          if (m_doGNNTracking) {
+            inputTensorValues.resize(m_nInputsGNN * 3);
+        }
         }
         else {
           if (inputTensorValues.size() < 27) {
@@ -161,11 +163,6 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
             inputTensorValues.resize(27); // Resize to 27 and keep the first 27 elements
           }
         }
-
-        if (m_doGNNTracking) {
-            inputTensorValues.resize(m_nInputsGNN * 3);
-        }
-
 
         if (isFirst) paramNNoutputs = m_paramNN_1st.runONNXInference(inputTensorValues);
         else paramNNoutputs = m_paramNN_2nd.runONNXInference(inputTensorValues);
@@ -675,9 +672,6 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
         std::vector<std::shared_ptr<const FPGATrackSimHit>> all_pixel_hits;
         std::vector<std::shared_ptr<const FPGATrackSimHit>> all_strip_hits;
         size_t pixelCount = 0;
-
-        // Temporarily do not make a road if it has more than 40 hits, there is an issue with some big roads which we do not want to work with right now.
-        if (iroad->getNHits() > 40) continue;
 
         for (unsigned layer = 0; layer < iroad->getNLayers(); ++layer) {
             all_hits.insert(all_hits.end(), iroad->getHits(layer).begin(), iroad->getHits(layer).end());
