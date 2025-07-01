@@ -14,9 +14,9 @@ class MetAnalysisConfig (ConfigBlock):
             noneAction='error',
             info="the name of the input container")
         self.addOption ('useJVT', True, type=bool,
-            info="whether to use the JVT decision in the calculation")
+            info="whether to use the JVT decision in the MET calculation")
         self.addOption ('useFJVT', False, type=bool,
-            info="whether to use the forward JVT decision in the calculation")
+            info="whether to use the forward JVT decision in the MET calculation")
         self.addOption ('treatPUJets', False, type=bool,
             info="whether to treat pile-up jets in the MET significance calculation")
         self.addOption ('setMuonJetEMScale', True, type=bool,
@@ -52,6 +52,8 @@ class MetAnalysisConfig (ConfigBlock):
             info="whether to save the MET significance (default=True)")
         self.addOption ('useLRT', False, type=bool,
             info="whether to use LRT MET Core and association map")
+        self.addOption ('useCaloSoftTerm', False, type=bool,
+            info="(expert) use calo- instead of track-based soft term")
 
     def makeAlgs (self, config) :
 
@@ -62,9 +64,6 @@ class MetAnalysisConfig (ConfigBlock):
             metSuffix = jetContainer[:-4]
         if self.useLRT:
             metSuffix += "_LRT"
-
-        if not self.useFJVT and self.treatPUJets:
-            raise ValueError ("MET significance pile-up treatment requires fJVT")
 
         # Remove b-tagging calibration from the MET suffix name
         btIndex = metSuffix.find('_BTagging')
@@ -81,7 +80,7 @@ class MetAnalysisConfig (ConfigBlock):
             config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
             alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
         if self.useFJVT:
-            alg.makerTool.JetRejectionDec = 'passFJVT_internal'
+            alg.makerTool.JetRejectionDec = 'fjvt_selection'
 
         alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
@@ -93,6 +92,7 @@ class MetAnalysisConfig (ConfigBlock):
         alg.metCore = 'MET_Core_' + metSuffix
         alg.metAssociation = 'METAssoc_' + metSuffix
         alg.jets = config.readName (self.jets)
+        alg.softTermKey = "PVSoftTrk" if not self.useCaloSoftTerm else "SoftClus"
         if self.muons != "" :
             alg.muons, alg.muonsSelection = config.readNameAndSelection (self.muons, excludeFrom={'or'})
         if self.electrons != "" :
@@ -108,6 +108,7 @@ class MetAnalysisConfig (ConfigBlock):
 
         # Set up the met builder algorithm:
         alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' + self.containerName )
+        alg.softTerm = "PVSoftTrk" if not self.useCaloSoftTerm else "SoftClus"
         alg.met = config.readName (self.containerName)
 
 
