@@ -539,7 +539,7 @@ class ConfigAccumulator :
             subresult = self.getFullSelection (containerName, '', excludeFrom=excludeFrom)
             if subresult != '' :
                 result = subresult + '&&(' + result + ')'
-            return result
+            return '(' + result + ')' if result !='' else ''
 
         config = self._containerConfig[containerName]
         decorations = []
