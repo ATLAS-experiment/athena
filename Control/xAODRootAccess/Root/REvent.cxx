@@ -739,7 +739,7 @@ namespace xAOD {
       }
 
       // Remember the setting:
-      m_auxItemList[ containerKey ] = attributes;
+      m_auxItemList[ containerKey ] = std::move(attributes);
 
       return;
    }
