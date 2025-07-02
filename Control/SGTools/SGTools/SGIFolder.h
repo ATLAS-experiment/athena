@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_IFOLDER_H
@@ -8,10 +8,7 @@
 #include <set>
 #include <string>
 
-#ifndef GAUDIKERNEL_IALGTOOL_H
- #include "GaudiKernel/IAlgTool.h"
-#endif
-
+#include "GaudiKernel/IAlgTool.h"
 #include "SGTools/SGFolderItem.h"
 
 namespace SG {  
