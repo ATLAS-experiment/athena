@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************-*-c++-*-*************************************
@@ -36,7 +36,7 @@ namespace Analysis
     Can be used where JetFitterTagInfo was used before
 */
   
-class IJetFitterTagInfo : public virtual BaseTagInfo
+class IJetFitterTagInfo : public BaseTagInfo
 {
 public:
 
@@ -45,6 +45,8 @@ public:
   typedef std::map<std::string,double> DoubleMap; 
 
   // --- lookup strings for backward compatibility  ---
+
+  using BaseTagInfo::BaseTagInfo;
 
   /** default destructor */
   virtual ~IJetFitterTagInfo(){};
