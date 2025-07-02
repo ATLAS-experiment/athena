@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -33,23 +33,23 @@ namespace Analysis
   const char* const JetFitterGenericTagInfo::DELTA_PHI = "deltaphi";
 
   /** Default constructor */
-  JetFitterGenericTagInfo::JetFitterGenericTagInfo() : BaseTagInfo()
+  JetFitterGenericTagInfo::JetFitterGenericTagInfo()
   {
   }
 
   /** constructor with infotype */
   JetFitterGenericTagInfo::JetFitterGenericTagInfo(const TagInfoType& tagJetInfoType) : 
-    BaseTagInfo(tagJetInfoType)
+    IJetFitterTagInfo(tagJetInfoType)
   {
   }
 
   /** Copy constructor */
   JetFitterGenericTagInfo::JetFitterGenericTagInfo(const JetFitterGenericTagInfo& rhs) : 
-    BaseTagInfo(rhs)
+    IJetFitterTagInfo(rhs)
   {
   }
 
-  /** assigenment operator */
+  /** assignment operator */
   JetFitterGenericTagInfo& JetFitterGenericTagInfo::operator= (const JetFitterGenericTagInfo& rhs)
   {
     if (this!=&rhs)
