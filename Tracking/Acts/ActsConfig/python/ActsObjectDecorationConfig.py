@@ -54,12 +54,26 @@ def ActsMeasurementToTrackParticleDecorationAlgCfg(flags,
 
 def ActsPixelClusterTruthDecoratorAlgCfg(flags,
                                          name: str = "ActsPixelClusterTruthDecoratorAlg",
+                                         *,
+                                         TrackParticles: list[str] = None,
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("ClusterContainer","ITkPixelClusters")
     kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
     kwargs.setdefault("MeasurementContainer","ITkPixelMeasurements")
     kwargs.setdefault("UseTruthInfo", flags.Tracking.doTruth)
+    
+    if flags.Tracking.PRDInfo.KeepOnlyOnTrackMeasurements:
+        if TrackParticles is None:
+            raise ValueError("Requesting persistification of on-track clusters, but no track particle collection has been provided!")
+        
+        kwargs.setdefault("KeepOnlyOnTrackMeasurements", True)
+        kwargs.setdefault("TrackParticles", TrackParticles)
+
+        deps = []
+        for collection in TrackParticles:
+            deps += [( 'xAOD::TrackParticleContainer' , f'StoreGateSvc+{collection}.actsTrack' )]
+        kwargs.setdefault('ExtraInputs', deps)
 
     if "LorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
@@ -85,11 +99,26 @@ def ActsPixelClusterTruthDecoratorAlgCfg(flags,
 
 def ActsStripClusterTruthDecoratorAlgCfg(flags,
                                          name: str = "ActsStripClusterTruthDecoratorAlg",
+                                         *,
+                                         TrackParticles: list[str] = None,
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("ClusterContainer","ITkStripClusters")
     kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
     kwargs.setdefault("MeasurementContainer","ITkStripMeasurements")
+
+    if flags.Tracking.PRDInfo.KeepOnlyOnTrackMeasurements:
+        if TrackParticles is None:
+            raise ValueError("Requesting persistification of on-track clusters, but no track particle collection has been provided!")
+
+        kwargs.setdefault("KeepOnlyOnTrackMeasurements", True)
+        kwargs.setdefault("TrackParticles", TrackParticles)
+
+        deps = []
+        for collection in TrackParticles:
+            deps += [( 'xAOD::TrackParticleContainer' , f'StoreGateSvc+{collection}.actsTrack' )]
+        kwargs.setdefault('ExtraInputs', deps)
+            
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecoratorAlg(name,**kwargs))
 
     if flags.Acts.decoratePRD.sdoSiHit:

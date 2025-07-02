@@ -75,3 +75,44 @@ def extractTrackingPasses(flags) -> list:
         
     return trackingPasses
 
+def getListOfGeneratedTrackParticles(flags) -> list[str]:
+    generateTrackCollections = ["InDetTrackParticles"]
+
+    # loop on tracking passes
+    scheduledTrackingPasses: list = extractTrackingPasses(flags)
+    for currentFlags in scheduledTrackingPasses:
+        # Add the seed tracks
+        if currentFlags.Tracking.ActiveConfig.storeTrackSeeds:
+            # pixel seeds
+            generatePixelSegments = currentFlags.Detector.EnableITkPixel
+            generateStripSegments = currentFlags.Detector.EnableITkStrip
+            
+            # For conversion pass we do not process pixels
+            if currentFlags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
+                generatePixelSegments = False
+                # For main pass disable strips if fast tracking configuration
+            elif isFastPrimaryPass(currentFlags):
+                generateStripSegments = False
+
+            if generatePixelSegments:
+                generateTrackCollections += [f'SiSPSeedSegments{currentFlags.Tracking.ActiveConfig.extension}PixelTrackParticles']
+            if generateStripSegments:
+                generateTrackCollections += [f'SiSPSeedSegments{currentFlags.Tracking.ActiveConfig.extension}StripTrackParticles']
+            if generatePixelSegments and generateStripSegments:
+                generateTrackCollections += [f'SiSPSeedSegments{currentFlags.Tracking.ActiveConfig.extension}TrackParticles']
+            
+            # Add CKF tracks
+            if currentFlags.Tracking.ActiveConfig.storeSiSPSeededTracks:
+                generateTrackCollections += [f'SiSPSeededTracks{currentFlags.Tracking.ActiveConfig.extension}TrackParticles']
+            
+            # Add tracks after ambi
+            # this is necessary only if ambiguity resolution is run and we
+            # store track particles in a separate container w.r.t InDetTrackParticles
+            if currentFlags.Acts.doAmbiguityResolution and currentFlags.Tracking.ActiveConfig.storeSeparateContainer:
+                generateTrackCollections += [f'InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles']
+
+    print('Here is the list of generated track particle collections:')
+    for collection in generateTrackCollections:
+        print(f'- {collection}')
+        
+    return generateTrackCollections

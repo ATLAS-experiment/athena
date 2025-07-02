@@ -7,6 +7,8 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetMeasurementUtilities/Helpers.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "ActsEvent/TrackContainer.h"
 
 namespace ActsTrk {
   
@@ -22,6 +24,9 @@ namespace ActsTrk {
     ATH_CHECK(m_clustercontainer_key.initialize());
     ATH_CHECK(m_associationMap_key.initialize(m_useTruthInfo));
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
+
+    // Tracks only needed if we want on track clusters only
+    ATH_CHECK(m_trackParticlesKey.initialize(m_keepOnlyOnTrackMeasurements));
     
     // Write keys
     ATH_CHECK(m_write_xaod_key.initialize());
@@ -104,20 +109,20 @@ namespace ActsTrk {
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<int>> decor_tots ( m_measurement_tots, ctx );
   
   // Create output collection
+  std::vector<bool> keepClusterCollection {};
+  ATH_CHECK( labelMeasurementToKeep(ctx, *clusters, keepClusterCollection) );
   xAOD::TrackMeasurementValidationContainer *measurements = xaod.ptr();
-  std::vector<xAOD::TrackMeasurementValidation*> toAdd(clusters->size(), nullptr);
-  for (std::size_t i(0); i<toAdd.size(); ++i) {
-    toAdd[i] = new xAOD::TrackMeasurementValidation();
-  }
-  measurements->insert(measurements->end(), toAdd.begin(), toAdd.end());
-
   
   // loop over collection and convert to xAOD::TrackMeasurementValidation
   for (std::size_t i(0); i<clusters->size(); ++i) {
+    if (not keepClusterCollection[i]) continue;    
     const xAOD::PixelCluster* cluster = clusters->at(i);
-    xAOD::TrackMeasurementValidation* measurement = measurements->at(i);
+    
+    measurements->push_back( new xAOD::TrackMeasurementValidation() );
+    xAOD::TrackMeasurementValidation* measurement = measurements->back();    
+    ElementLink< xAOD::TrackMeasurementValidationContainer > mlink( measurements,
+								    measurements->back()->index() );
 
-    ElementLink< xAOD::TrackMeasurementValidationContainer > mlink( measurements, i);
     ATH_CHECK( mlink.isValid() );    
     decorator_measurement_link(*cluster) = std::move(mlink);
     
@@ -202,11 +207,20 @@ namespace ActsTrk {
   if (m_useTruthInfo) {
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<unsigned int>> decor_truth_indices( m_measurement_truth_indices, ctx );
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<unsigned int>> decor_truth_barcode( m_measurement_truth_barcodes, ctx );
-  
-    for (std::size_t i(0); i<clusters->size(); ++i) {
-      const xAOD::PixelCluster* cluster = clusters->at(i);
-      xAOD::TrackMeasurementValidation* measurement = measurements->at(i);
 
+    // reset measurement counter
+    std::size_t measurementIndex = 0;
+    for (std::size_t i(0); i<clusters->size(); ++i) {
+      if (not keepClusterCollection[i]) continue;
+      const xAOD::PixelCluster* cluster = clusters->at(i);
+      xAOD::TrackMeasurementValidation* measurement = measurements->at(measurementIndex);
+
+      // check the two match
+      if (cluster->identifier() != measurement->identifier()) {
+	ATH_MSG_ERROR("Cluster and Measurement are not matching!");
+	return StatusCode::FAILURE;
+      }
+      
       // Use the MultiTruth Collection 
       // to get a list of all true particle contributing to the cluster      
       if (cluster->index() >= measToTruth->size()) {
@@ -226,7 +240,7 @@ namespace ActsTrk {
       // decorate
       decor_truth_indices(*measurement) = std::move(tp_indices);
       decor_truth_barcode(*measurement) = std::move(tp_barcodes);
-      
+      ++measurementIndex;      
     } // loop on clusters/measurements
   } // if do truth
 
@@ -234,6 +248,61 @@ namespace ActsTrk {
   return StatusCode::SUCCESS;
 }
 
+StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventContext& ctx,
+								 const xAOD::PixelClusterContainer& clusters,
+								 std::vector<bool>& labels) const
+{
+  labels.clear();
+  if (not m_keepOnlyOnTrackMeasurements) {
+    labels.resize(clusters.size(), true);
+    return StatusCode::SUCCESS;
+  }
+  labels.resize(clusters.size(), false);
+
+  static const SG::ConstAccessor< ElementLink<ActsTrk::TrackContainer> > decorator_trackLink("actsTrack");
+  
+  // get the tracks
+  for (const SG::ReadHandleKey<xAOD::TrackParticleContainer>& trackParticleKey : m_trackParticlesKey) {
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleHandle = SG::makeHandle( trackParticleKey, ctx );
+    ATH_CHECK(trackParticleHandle.isValid());
+    const xAOD::TrackParticleContainer* trackParticles = trackParticleHandle.cptr();
+    
+    for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
+      // Get the ACTS track object
+      ATH_CHECK( decorator_trackLink.isAvailable(*trackParticle) );
+      ElementLink<ActsTrk::TrackContainer> trackLink = decorator_trackLink(*trackParticle);
+      ATH_CHECK(trackLink.isValid());
+      
+      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *trackLink;
+      if ( not optional_track.has_value() ) {
+	ATH_MSG_ERROR("Invalid track link for particle  " << trackParticle->index());
+	return StatusCode::FAILURE;
+      }
+      ActsTrk::TrackContainer::ConstTrackProxy track = optional_track.value();
+      
+      // loop on track states
+      track.container().trackStateContainer()
+	.visitBackwards(track.tipIndex(),
+			[&labels]
+			(const typename ActsTrk::TrackContainer::ConstTrackStateProxy& state)
+			{
+			  auto flags = state.typeFlags();
+			  if (not flags.test(Acts::TrackStateFlag::MeasurementFlag) and
+			      not flags.test(Acts::TrackStateFlag::OutlierFlag)) return;
+			  
+			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+			  if (sl == nullptr) return;
+			  
+			  const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);    
+			  if (cluster.type() != xAOD::UncalibMeasType::PixelClusterType) return;
+			  labels.at(cluster.index()) = true;
+			});
+    } // loop on tracks
+  } // loop on read handle keys
+  
+  return StatusCode::SUCCESS;
+}
+  
 }
 
 

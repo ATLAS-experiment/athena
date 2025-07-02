@@ -4,6 +4,9 @@
 
 #include "src/StripClusterTruthDecoratorAlg.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "ActsEvent/TrackContainer.h"
 
 namespace ActsTrk {
 
@@ -20,6 +23,9 @@ namespace ActsTrk {
     ATH_CHECK(m_clustercontainer_key.initialize());
     ATH_CHECK(m_associationMap_key.initialize(m_useTruthInfo));
     ATH_CHECK(m_stripDetEleCollKey.initialize());
+
+    // Tracks only needed if we want on track clusters only
+    ATH_CHECK(m_trackParticlesKey.initialize(m_keepOnlyOnTrackMeasurements));
     
     // Write keys
     ATH_CHECK(m_write_xaod_key.initialize());
@@ -73,7 +79,6 @@ namespace ActsTrk {
     SG::WriteHandle<xAOD::TrackMeasurementValidationContainer> xaod = SG::makeHandle( m_write_xaod_key,ctx );
     ATH_CHECK(xaod.record(std::make_unique<xAOD::TrackMeasurementValidationContainer>(),
 			  std::make_unique<xAOD::TrackMeasurementValidationAuxContainer>()));
-    xAOD::TrackMeasurementValidationContainer* measurements = xaod.ptr();
 
     SG::WriteDecorHandle<xAOD::StripClusterContainer,
 			 ElementLink< xAOD::TrackMeasurementValidationContainer > > decorator_measurement_link( m_trackMeasurement_link, ctx );
@@ -93,19 +98,21 @@ namespace ActsTrk {
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> decor_centroid_xphi ( m_measurement_centroid_xphi, ctx );
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> decor_centroid_xeta ( m_measurement_centroid_xeta, ctx );
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, int> decor_side ( m_measurement_side, ctx );
-    
-    std::vector<xAOD::TrackMeasurementValidation*> toAdd(stripClusters->size(), nullptr);
-    for (std::size_t i(0); i<toAdd.size(); ++i) {
-      toAdd[i] = new xAOD::TrackMeasurementValidation();
-    }
-    measurements->insert(measurements->end(), toAdd.begin(), toAdd.end());
-    
+
+    // collection
+    std::vector<bool> keepClusterCollection {};
+    ATH_CHECK( labelMeasurementToKeep(ctx, *stripClusters, keepClusterCollection) );
+    xAOD::TrackMeasurementValidationContainer *measurements = xaod.ptr();
+
     // loop over collection and convert to xAOD::TrackMeasurementValidation
     for (std::size_t i(0); i<stripClusters->size(); ++i) {
+      if (not keepClusterCollection[i]) continue;
       const xAOD::StripCluster* cluster = stripClusters->at(i);
-      xAOD::TrackMeasurementValidation *measurement = measurements->at(i);
-
-      ElementLink< xAOD::TrackMeasurementValidationContainer > mlink( measurements, i);
+      
+      measurements->push_back( new xAOD::TrackMeasurementValidation() );
+      xAOD::TrackMeasurementValidation* measurement = measurements->back();
+      ElementLink< xAOD::TrackMeasurementValidationContainer > mlink( measurements,
+								      measurements->back()->index() );
       ATH_CHECK( mlink.isValid() );
       decorator_measurement_link(*cluster) = std::move(mlink);
     
@@ -163,10 +170,18 @@ namespace ActsTrk {
     if (m_useTruthInfo) {
       SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<unsigned int>> decor_truth_indices( m_measurement_truth_indices, ctx );
       SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<unsigned int>> decor_truth_barcode( m_measurement_truth_barcodes, ctx );
-    
+
+      std::size_t measurementIndex = 0;
       for (std::size_t i(0); i<stripClusters->size(); ++i) {
+	if (not keepClusterCollection[i]) continue;
 	const xAOD::StripCluster* cluster = stripClusters->at(i);
-	xAOD::TrackMeasurementValidation *measurement = measurements->at(i);
+	xAOD::TrackMeasurementValidation* measurement = measurements->at(measurementIndex);
+
+	// Check the two match
+	if (cluster->identifier() != measurement->identifier()) {
+	  ATH_MSG_ERROR("Cluster and Measurement are not matching!");
+	  return StatusCode::FAILURE;
+	}
 	
 	if (cluster->index() >= measToTruth->size()) {
 	  ATH_MSG_ERROR("PRD index "<< cluster->index() << " not present in the measurement to truth vector with size " << measToTruth->size());
@@ -184,11 +199,67 @@ namespace ActsTrk {
 	
 	decor_truth_indices(*measurement) = std::move(tp_indices);
 	decor_truth_barcode(*measurement) = std::move(tp_barcodes);
+	++measurementIndex;
       } // loop on clusters
     }
     
     ATH_MSG_DEBUG( " recorded StripPrepData objects: size " << measurements->size() );    
     return StatusCode::SUCCESS;
   }
+
+StatusCode StripClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventContext& ctx,
+                                                                 const xAOD::StripClusterContainer& clusters,
+                                                                 std::vector<bool>& labels) const
+{
+  labels.clear();
+  if (not m_keepOnlyOnTrackMeasurements) {
+    labels.resize(clusters.size(), true);
+    return StatusCode::SUCCESS;
+  }
+  labels.resize(clusters.size(), false);
+
+   static const SG::ConstAccessor< ElementLink<ActsTrk::TrackContainer> > decorator_trackLink("actsTrack");
+   
+  // get the tracks
+  for (const SG::ReadHandleKey<xAOD::TrackParticleContainer>& trackParticlesKey : m_trackParticlesKey) {
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleHandle = SG::makeHandle( trackParticlesKey, ctx );
+    ATH_CHECK(trackParticleHandle.isValid());
+    const xAOD::TrackParticleContainer* trackParticles = trackParticleHandle.cptr();
+    
+    for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
+      // Get the ACTS track object
+      ATH_CHECK( decorator_trackLink.isAvailable(*trackParticle) );
+      ElementLink<ActsTrk::TrackContainer> trackLink = decorator_trackLink(*trackParticle);
+      ATH_CHECK(trackLink.isValid());
+      
+      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *trackLink;
+      if ( not optional_track.has_value() ) {
+	ATH_MSG_ERROR("Invalid track link for particle  " << trackParticle->index());
+	return StatusCode::FAILURE;
+      }
+      ActsTrk::TrackContainer::ConstTrackProxy track = optional_track.value();
+      
+      // loop on track states
+      track.container().trackStateContainer()
+	.visitBackwards(track.tipIndex(),
+			[&labels]
+			(const typename ActsTrk::TrackContainer::ConstTrackStateProxy& state)
+			{
+			  auto flags = state.typeFlags();
+			  if (not flags.test(Acts::TrackStateFlag::MeasurementFlag) and
+			      not flags.test(Acts::TrackStateFlag::OutlierFlag)) return;
+			  
+			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+			  if (sl == nullptr) return;
+			  
+			  const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);
+			  if (cluster.type() != xAOD::UncalibMeasType::StripClusterType) return;
+			  labels.at(cluster.index()) = true;
+			});    
+    } // loop on tracks
+  } // loop on read handle keys
+  
+  return StatusCode::SUCCESS;
+}
   
 } // ActsTrk

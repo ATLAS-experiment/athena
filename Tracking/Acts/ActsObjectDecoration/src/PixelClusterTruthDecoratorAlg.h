@@ -17,6 +17,8 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadHandleKeyArray.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
@@ -43,12 +45,23 @@ namespace ActsTrk {
     
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
+
+  private:
+    // This function is used to mark the clusters and decide which one to keep
+    // and which one to skip. It does so by filling a std::vector<bool>, which
+    // size is the same as the cluster collection.
+    StatusCode labelMeasurementToKeep(const EventContext& ctx,
+				      const xAOD::PixelClusterContainer& clusters,
+				      std::vector<bool>& labels) const;
     
   private:
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", ""};
 
     SG::ReadHandleKey<xAOD::PixelClusterContainer> m_clustercontainer_key {this,"ClusterContainer", "","Input Pixel Cluster container"};
     SG::ReadHandleKey<ActsTrk::MeasurementToTruthParticleAssociation> m_associationMap_key {this,"AssociationMapOut","", "Association map between measurements and truth particles"};
+
+    SG::ReadHandleKeyArray< xAOD::TrackParticleContainer > m_trackParticlesKey {this, "TrackParticles", {}, "Input xAOD::TrackParticles"};
+    
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection"};
     SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key{this,"MeasurementContainer","", "Output Pixel Validation Clusters"};
 
@@ -77,6 +90,8 @@ namespace ActsTrk {
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_tots {this, "MeasurementToT", m_write_xaod_key, "tots"};
     
     Gaudi::Property<bool> m_useTruthInfo {this, "UseTruthInfo", true};
+    Gaudi::Property<bool> m_keepOnlyOnTrackMeasurements {this, "KeepOnlyOnTrackMeasurements", false, "Keep on on-track measurements instead of the full collection"};
+
     const PixelID *m_PixelHelper {nullptr};
   };
   
