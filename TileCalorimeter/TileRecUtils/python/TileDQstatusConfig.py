@@ -67,6 +67,10 @@ def TileDQstatusAlgCfg(flags, **kwargs):
         digitsContainer = flags.Overlay.BkgPrefix + 'TileDigitsCnt'
         rawChannelContainer = flags.Overlay.BkgPrefix + 'TileRawChannelCnt'
 
+        if not flags.Overlay.ByteStream:
+            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+            acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{digitsContainer}']))
+            acc.merge(SGInputLoaderCfg(flags, [f'TileRawChannelContainer#{rawChannelContainer}']))
     else:
         beamElemContainer = ""
         digitsContainer = ""
