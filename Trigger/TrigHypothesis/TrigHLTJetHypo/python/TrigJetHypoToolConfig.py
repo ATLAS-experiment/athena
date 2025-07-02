@@ -83,10 +83,10 @@ def trigJetHypoToolFromDict(flags, chain_dict):
     return hypo_tool
 
     
-def  trigJetTLAHypoToolFromDict(chain_dict):
+def  trigJetTLAHypoToolFromDict(flags, chain_dict):
     return  CompFactory.TrigJetTLAHypoTool(chain_dict['chainName'])
 
-def  trigJetEJsHypoToolFromDict(chain_dict):
+def  trigJetEJsHypoToolFromDict(flags, chain_dict):
     if len(chain_dict['chainParts']) > 1:
         raise Exception("misconfiguration of emerging jet chain")
 
@@ -115,7 +115,7 @@ def  trigJetEJsHypoToolFromDict(chain_dict):
 
     return  hypo
 
-def  trigJetCRVARHypoToolFromDict(chain_dict):
+def  trigJetCRVARHypoToolFromDict(flags, chain_dict):
     chain_name = chain_dict['chainName']
     doBIBrm = int(0)
     doExoCal = int(0)
@@ -171,7 +171,7 @@ def  trigJetCRVARHypoToolFromDict(chain_dict):
 
     return  hypo
 
-def  trigJetCRHypoToolFromDict(chain_dict):
+def  trigJetCRHypoToolFromDict(flags, chain_dict):
     chain_name = chain_dict['chainName']
  
     doBIBrm = int(0)

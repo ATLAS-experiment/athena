@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import GeV
 
-def TrigHIUCCHypoToolFromDict(chainDict):
+def TrigHIUCCHypoToolFromDict(flags, chainDict):
   """Configure the ultra-central collisions hypo tool"""
 
   tool = CompFactory.TrigHIUCCHypoTool(chainDict['chainName'])

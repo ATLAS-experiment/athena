@@ -32,7 +32,7 @@ def TrigdEdxTrackHypoAlgCfg(flags : AthConfigFlags, name : str) -> ComponentAccu
     return acc
 
 
-def TrigdEdxTrackHypoToolFromDict( chainDict ):
+def TrigdEdxTrackHypoToolFromDict( flags, chainDict ):
 
     log = logging.getLogger('TrigdEdxTrackHypoTool')
 
