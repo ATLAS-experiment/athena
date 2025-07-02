@@ -852,10 +852,10 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeOONeNe2025()
 									peak2ndDerivMinThresholdsHG,
 									peak2ndDerivMinThresholdsLG,
 									ZDCPulseAnalyzer::LGModeRefitLG));
-  zdcDataAnalyzer->set2ndDerivStep(2);
+  zdcDataAnalyzer->set2ndDerivStep(1);
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{1, 1, 1, 1.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{4.0/3, 1, 1, 1},{4.0/3, 1, 1, 1.0}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{4,4,4,4}, {4,4,4,4}}};
 
   zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 4 applied to LG ADC, 1 to HG ADC values
@@ -1187,7 +1187,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepO2025B()
   zdcDataAnalyzer->set2ndDerivStep(1);
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{4/3., 1, 1, 1.0}}}; // correct for reduction of LUCROD gain in 81EM
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{4.0/3, 1, 1, 1.0}}}; // correct for reduction of LUCROD gain in 81EM
   ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{4,4,4,4}, {4,4,4,4}}};
 
   zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
