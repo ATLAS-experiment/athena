@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_MERGEDEVENTINFO_H
@@ -12,20 +12,11 @@
  *  and the bkg ones)
  *
  * @author Paolo Calafiura <pcalafiura@lbl.gov>
- *
- * $Id: MergedEventInfo.h,v 1.2 2005-01-12 11:07:52 schaffer Exp $
  */
 
-#ifndef GAUDIKERNEL_CLASSID_H
-# include "GaudiKernel/ClassID.h"
-#endif
-
-#ifndef EVENTINFO_EVENTINFO_H
-# include "EventInfo/EventInfo.h"
-#endif
-#ifndef EVENTINFO_EVENTID_H
-# include "EventInfo/EventID.h"
-#endif
+#include "GaudiKernel/ClassID.h"
+#include "EventInfo/EventInfo.h"
+#include "EventInfo/EventID.h"
 
 class EventType;
 class TriggerInfo;

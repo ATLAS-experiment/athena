@@ -356,17 +356,6 @@ TTree* TilePaterMonTool::bookTree(const std::string & subdir, const std::string 
 */
 
 
-//
-// Terrible hack to register TGraph in THistSvc
-//
-
-//#define private public
-//#define GAUDISVC_THISTSVC_ICC
-//#include "THistSvc/THistSvc.h"
-//#undef GAUDISVC_THISTSVC_ICC
-//#include "THistSvc/THistSvc.icc"
-//#undef private
-
 class TGraph1: public TGraph {
   public:
     TGraph1(int N, float * X, float * Y)
