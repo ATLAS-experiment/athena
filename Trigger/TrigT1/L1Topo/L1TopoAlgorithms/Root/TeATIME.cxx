@@ -32,8 +32,8 @@ TCS::TeATIME::TeATIME(const std::string & name) : DecisionAlg(name)
   for (unsigned int i=0;i<numberOutputBits();i++){
     // Algo parameters
     defineParameter("algoLogic", 0, i);
-    defineParameter("nextBcOffset", 0, i);
     defineParameter("nextBcFactor", 0, i);
+    defineParameter("nextBcOffset", 0, i);
   }
   
 }
