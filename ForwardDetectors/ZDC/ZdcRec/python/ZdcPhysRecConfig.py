@@ -23,7 +23,6 @@ def ZdcFCalAdditionalFlagSetting(flags):
         flags.Detector.EnableCalo = False
 
 
-
 def FCalRecCfg(flags):
     """Calorimeter and HIGlobal reconstruction config for ZDC-FCal correlations"""
     
@@ -35,6 +34,7 @@ def FCalRecCfg(flags):
     acc.merge(HIGlobalRecCfg(flags))
 
     return acc
+
 
 def ZdcNtupleWithCaloRun3Cfg(flags, outputlevel = 3, **kwargs):
     """ZDC Ntuple configuration for run3 data potential with Calorimeter-info retrieving & writing
@@ -68,6 +68,9 @@ def ZdcNtupleWithCaloRun3Cfg(flags, outputlevel = 3, **kwargs):
 
 if __name__ == '__main__':
 
+    import time
+    start_time = time.time()
+
     """ This is selftest & ZDC calibration transform at the same time"""
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -84,6 +87,11 @@ if __name__ == '__main__':
 
     isLED, isInj, isCalib, pn = ZdcStreamDependentFlagSetting(flags) # set stream-dependent ZDC flags & get return values
 
+    from ZdcRecConfig import SetConfigTag
+    config = SetConfigTag(flags)
+
+    flags.Trigger.decodeHLT = flags.DQ.useTrigger and 'physics_' in flags.Input.TriggerStream # development stage ||| [PRODUCTION] ('pO' in config or 'OO' in config) and flags.DQ.useTrigger and flags.Input.TriggerStream == 'physics_MinBias'
+
     flags.lock()
     flags.dump(evaluate=True) # uncomment this line if needed for testing
 
@@ -97,7 +105,6 @@ if __name__ == '__main__':
         acc.merge(TriggerRecoCfgData(flags))
 
     if isLED:
-        #acc.merge(ZdcLEDTrigCfg(flags))
         from ZdcRecConfig import ZdcLEDRecCfg
         acc.merge(ZdcLEDRecCfg(flags))
     if isCalib: # should be able to run both if in standalone data
@@ -107,8 +114,12 @@ if __name__ == '__main__':
         from ZdcRecConfig import ZdcRecCfg
         acc.merge(ZdcRecCfg(flags))
 
-    if (flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC"):
+    if ("physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express"):
         acc.merge(FCalRecCfg(flags))
+
+    if flags.Input.TriggerStream == "physics_MinBias": # disregard OO config / physics stream for testing stage ||| [PRODUCTION] if ('pO' in config or 'OO' in config) and flags.Input.TriggerStream == "physics_MinBias":
+        from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+        acc.merge(InDetTrackRecoCfg(flags))
 
     if not flags.Input.isMC:
         if (isLED):
@@ -135,6 +146,7 @@ if __name__ == '__main__':
         acc.merge(ZdcNtupleLocalCfg(flags))
 
     acc.printConfig(withDetails=True)
+    # acc.foreach_component("*Zdc*").OutputLevel=DEBUG #uncomment to turn on DEBUG messages for ZDC applications
 
     with open("config.pkl", "wb") as f:
         acc.store(f)
@@ -143,3 +155,14 @@ if __name__ == '__main__':
         import sys
         sys.exit(-1)
 
+    end_time = time.time()
+
+    # If number of events is known from runArgs or input configuration
+    # Use an explicit number if known, or get it from athena configuration if possible
+    n_events = int(flags.Exec.MaxEvents) if 'flags' in locals() and hasattr(flags.Exec, "MaxEvents") else -1
+
+    print(f"Total time: {end_time - start_time:.2f} seconds")
+    if n_events > 0:
+        print(f"Average time per event: {(end_time - start_time)/n_events:.4f} seconds/event")
+    else:
+        print("Number of events unknown, cannot compute per-event timing.")

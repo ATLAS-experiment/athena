@@ -10,7 +10,6 @@
 //  ***************************************************************************/
 
 #include "gFexInputByteStreamTool.h"
-#include "gFexPos.h"
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
 
