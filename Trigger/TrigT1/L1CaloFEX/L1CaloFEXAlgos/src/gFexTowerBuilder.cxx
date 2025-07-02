@@ -189,9 +189,10 @@ namespace LVL1 {
                     auto it_TileID2ptr = map_TileID2ptr.find(TileTowerID);
                     if (it_TileID2ptr == map_TileID2ptr.end()) {
                         if(m_isDATA) {
-                            ATH_MSG_ERROR("Tile cool ID: " << TileTowerID
+                            // this can happen in data if e.g. there is a dropped ROB fragment so that the TriggerTower readout is incomplete
+                            // Just warn about this (it is what jFex version of this class does)
+                            ATH_MSG_WARNING("Tile cool ID: " << TileTowerID
                                                              << " not found in the xAOD::TriggerTower (map_TileID2ptr)");
-                            return StatusCode::FAILURE;
                         }
                         continue; // in MC the xAODTriggerTowers have variable size due to noise cuts, continue on to the next tower
                     } else {
