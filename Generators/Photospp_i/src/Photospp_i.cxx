@@ -22,6 +22,7 @@ using PhotosHepMCEvent=PhotosHepMC3Event;
 
 #include "CLHEP/Random/RandFlat.h"
 #include "AthenaKernel/RNGWrapper.h"
+#include "TruthUtils/ParticleConstants.h"
 
 using namespace Photospp;
 
@@ -65,7 +66,7 @@ void Photospp_i::setupPhotos() {
     Photos::forceMassFrom4Vector(true);
     Photos::forceMassFromEventRecord(13);
     Photos::forceMassFromEventRecord(15);
-    Photos::forceMass(11, 0.510998910); // The assumption that unots are MEV will be checked later
+    Photos::forceMass(11, ParticleConstants::electronMassInMeV); // The assumption that units are MEV will be checked later
     Photos::forceMassFromEventRecord(211);
     Photos::setTopProcessRadiation(false);
     Photos::createHistoryEntries(m_createHistory, 3);
@@ -161,20 +162,20 @@ StatusCode Photospp_i::execute() {
 #ifdef HEPMC3
     case HepMC3::Units::MomentumUnit::GEV:
         Photos::setMomentumUnit(Photos::GEV);
-        Photos::forceMass(11, 0.000510998910);
+        Photos::forceMass(11, ParticleConstants::electronMassInMeV/1000.); // Convert MeV to GeV
         break;
     case HepMC3::Units::MomentumUnit::MEV:
         Photos::setMomentumUnit(Photos::MEV);
-        Photos::forceMass(11, 0.510998910);
+        Photos::forceMass(11, ParticleConstants::electronMassInMeV);
         break;
 #else
     case HepMC::Units::GEV:
         Photos::setMomentumUnit(Photos::GEV);
-        Photos::forceMass(11, 0.000510998910);
+        Photos::forceMass(11, ParticleConstants::electronMassInMeV/1000.); // Convert MeV to GeV
         break;
     case HepMC::Units::MEV:
         Photos::setMomentumUnit(Photos::MEV);
-        Photos::forceMass(11, 0.510998910);
+        Photos::forceMass(11, ParticleConstants::electronMassInMeV);
         break;
 #endif
     default:

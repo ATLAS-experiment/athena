@@ -22,6 +22,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/ParticleConstants.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 namespace Analysis {
     
@@ -108,8 +109,8 @@ namespace Analysis {
     m_useCombMeasurement(false),
     m_useV0Fitter(false),
     m_diMuons(true),
-    m_trk1M(105.66),
-    m_trk2M(105.66),
+    m_trk1M(ParticleConstants::muonMassInMeV),
+    m_trk2M(ParticleConstants::muonMassInMeV),
     m_thresholdPt(0.0),
     m_higherPt(0.0),
     m_trkThresholdPt(0.0),

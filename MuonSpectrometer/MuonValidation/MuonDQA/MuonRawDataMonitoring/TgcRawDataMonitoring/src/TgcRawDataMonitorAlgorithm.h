@@ -23,6 +23,7 @@
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
 #include "TrigConfData/L1Menu.h"
 #include "xAODTracking/VertexContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 #include <memory>
 #include <vector>
 #include <set>
@@ -293,7 +294,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   DoubleProperty m_M3_Z{this,"M3_Z",15148.2,"z-position of TGC M3-station in mm for track extrapolate"};
   DoubleProperty m_EI_Z{this,"EI_Z",7364.7,"z-position of TGC EI-station in mm for track extrapolate"};
   DoubleProperty m_FI_Z{this,"FI_Z",6978.2,"z-position of TGC FI-station in mm for track extrapolate"};
-  DoubleProperty m_muonMass{this,"MuonMass",105.6583755,"muon invariant mass in MeV"};
+  DoubleProperty m_muonMass{this,"MuonMass",ParticleConstants::muonMassInMeV,"muon invariant mass in MeV"};
   DoubleProperty m_zMass{this,"ZMass",91187.6,"muon invariant mass in MeV"};
   DoubleProperty m_zMassWindow{this,"ZMassWindow",10000,"muon invariant mass half-window in MeV"};
   DoubleProperty m_endcapPivotPlaneMinimumRadius{this,"endcapPivotPlaneMinimumRadius",0.,"minimum radius of pivot plane in endcap region"};

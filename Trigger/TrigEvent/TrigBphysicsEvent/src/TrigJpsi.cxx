@@ -9,6 +9,7 @@
 #include "TrigBphysicsEvent/TrigJpsi.h"
 #include "TrigMuonEvent/CombinedMuonFeature.h"
 #include "TrigInDetEvent/TrigInDetTrack.h"
+#include "TruthUtils/ParticleConstants.h"
 #include <math.h>
 
 TrigJpsi::TrigJpsi()
@@ -42,7 +43,7 @@ void TrigJpsi::setDaughters( const CombinedMuonFeature* jpsimuon1, const Combine
     for ( int i=0 ; i<2 ; ++i )
     {		
 	double cot_teta=1/tan(2*atan(exp(-m_jpsimuon[i]->IDTrack()->param()->eta())));		
-	double mass_muon = 105.658357;
+	double mass_muon = ParticleConstants::muonMassInMeV;
         double absPt = fabs(m_jpsimuon[i]->pt());
 	const double px = cos(m_jpsimuon[i]->IDTrack()->param()->phi0())*absPt;
         const double py = sin(m_jpsimuon[i]->IDTrack()->param()->phi0())*absPt;

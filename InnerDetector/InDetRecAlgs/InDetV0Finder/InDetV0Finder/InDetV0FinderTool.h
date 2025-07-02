@@ -160,9 +160,9 @@ namespace InDet
     BooleanProperty m_useTrkSel{this, "use_TrackSelector", true};      //!< = true uses TrackSelectorTool
     
     IntegerProperty m_masses{this, "masses", 1};                        //!< = 1 if using PDG values, = 2 if user set (1)
-    DoubleProperty m_masspi{this, "masspi", 139.57};                    //!< pion mass (139.57 MeV)
+    DoubleProperty m_masspi{this, "masspi", ParticleConstants::chargedPionMassInMeV};                    //!< pion mass (139.57 MeV)
     DoubleProperty m_massp{this, "massp", 938.272};                     //!< proton mass (938.272 MeV)
-    DoubleProperty m_masse{this, "masse", 0.510999};                    //!< electron mass (0.510999 MeV)
+    DoubleProperty m_masse{this, "masse", ParticleConstants::electronMassInMeV};                    //!< electron mass (0.510999 MeV)
     DoubleProperty m_massK0S{this, "massK0S", 497.672};                 //!< Kshort mass (497.672 MeV)
     DoubleProperty m_massLambda{this, "massLambda", 1115.68};           //!< Lambda mass (1115.68 MeV)
     DoubleProperty m_ptTRT{this, "ptTRT", 700.};                        //!< Minimum pT for TRT tracks (700. MeV)

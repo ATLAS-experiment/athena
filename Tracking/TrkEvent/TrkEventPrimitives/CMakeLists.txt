@@ -9,7 +9,7 @@ find_package( Boost COMPONENTS unit_test_framework)
 atlas_add_library( TrkEventPrimitives
                    src/*.cxx
                    PUBLIC_HEADERS TrkEventPrimitives
-                   LINK_LIBRARIES GeoPrimitives EventPrimitives GaudiKernel )
+                   LINK_LIBRARIES GeoPrimitives EventPrimitives GaudiKernel TruthUtils)
 
 atlas_add_dictionary( TrkEventPrimitivesDict
                       TrkEventPrimitives/TrkEventPrimitivesDict.h

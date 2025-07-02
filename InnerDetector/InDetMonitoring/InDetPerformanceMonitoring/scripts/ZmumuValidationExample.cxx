@@ -11,6 +11,7 @@
 #include "TF1.h"
 
 #include "ZmumuValidationExample.h"
+#include "TruthUtils/ParticleConstants.h"
 
 ZmumuValidationExample::ZmumuValidationExample( std::list<std::string> const & s_fileNames, string s_treeName
                                           , std::string const & s_outFileName
@@ -357,7 +358,7 @@ void ZmumuValidationExample::loopThroughEvents( unsigned int maxItr )
 void ZmumuValidationExample::fillHistograms()
 {
   
-  const double muon_mass = 105.658;  //MeV
+  const double muon_mass = ParticleConstants::muonMassInMeV;  //MeV
   
   //create lorentz vectors for both muons
   TLorentzVector* vec_pos = new TLorentzVector(); 

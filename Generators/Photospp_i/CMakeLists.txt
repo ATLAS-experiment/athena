@@ -22,7 +22,7 @@ atlas_add_library( Photospp_iLib
    DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES ${PHOTOSPP_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps
    PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel
-   GeneratorObjects )
+   GeneratorObjects TruthUtils )
 
 atlas_add_component( Photospp_i
    src/components/*.cxx

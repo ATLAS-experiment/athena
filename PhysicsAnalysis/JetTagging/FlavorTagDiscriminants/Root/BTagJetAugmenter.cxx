@@ -11,6 +11,7 @@
 #include "xAODJet/Jet.h"
 #include "xAODBTagging/BTaggingUtilities.h"
 #include "CxxUtils/trapping_fp.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include "TVector3.h"
 
@@ -315,7 +316,7 @@ void BTagJetAugmenter::augment(const xAOD::BTagging &btag) const {
   m_secondaryVtx_L3d(btag) = min_jf_vtx_L3d;
   m_secondaryVtx_Lxy(btag) = min_jf_vtx_L3d * sinf(jf_theta);
 
-  const float track_mass = 139.57; // assume pion mass for all tracks
+  const float track_mass = ParticleConstants::chargedPionMassInMeV; // assume pion mass for all tracks
   const float track_kaon = 493.677; // kaon mass
 
   unsigned track_number = 0;

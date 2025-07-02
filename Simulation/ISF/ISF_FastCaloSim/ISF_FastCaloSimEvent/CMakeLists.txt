@@ -114,8 +114,8 @@ if(USE_GPU AND CMAKE_CUDA_COMPILER)
     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS}
     DEFINITIONS ${CLHEP_DEFINITIONS}
     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} ${ALL_ONNX_LIBS}
-    CaloGeoHelpers CxxUtils TileSimEvent ISF_FastCaloGpuLib
-    PRIVATE_LINK_LIBRARIES GaudiKernel )
+    CaloGeoHelpers CxxUtils TileSimEvent ISF_FastCaloGpuLib TruthUtils
+    PRIVATE_LINK_LIBRARIES GaudiKernel)
 else()
   atlas_add_library( ISF_FastCaloSimEvent
     ISF_FastCaloSimEvent/*.h ${_dictSource} src/*.cxx
@@ -123,8 +123,8 @@ else()
     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS}
     DEFINITIONS ${CLHEP_DEFINITIONS}
     LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} ${ALL_ONNX_LIBS}
-    CaloGeoHelpers CxxUtils TileSimEvent
-    PRIVATE_LINK_LIBRARIES GaudiKernel )
+    CaloGeoHelpers CxxUtils TileSimEvent TruthUtils
+    PRIVATE_LINK_LIBRARIES GaudiKernel)
 endif()
 
 atlas_add_dictionary( ISF_FastCaloSimEventDict

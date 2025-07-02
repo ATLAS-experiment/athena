@@ -21,15 +21,16 @@
 #include "AthLinks/ElementLink.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include <memory>
+#include "TruthUtils/ParticleConstants.h"
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
 #include <limits>
 
 namespace Analysis {
 
     // Set masses
-    constexpr double muMass = 105.658;
+    constexpr double muMass = ParticleConstants::muonMassInMeV;
     constexpr double kMass = 493.677;
-    constexpr double piMass = 139.57;
+    constexpr double piMass = ParticleConstants::chargedPionMassInMeV;
     constexpr double pMass = 938.272;
     
     StatusCode JpsiPlus2Tracks::initialize() {

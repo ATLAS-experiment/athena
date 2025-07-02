@@ -14,6 +14,7 @@
 #include "BPhysPVTools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TruthUtils/ParticleConstants.h"
 
 namespace DerivationFramework {
     
@@ -153,8 +154,8 @@ namespace DerivationFramework {
         // Mass-hypothesis dependent quantities
         //----------------------------------------------------
         
-        std::vector<double> muonPairMasses = std::vector<double>(2, 105.658);
-        std::vector<double> muonQuadMasses = std::vector<double>(4, 105.658);
+        std::vector<double> muonPairMasses = std::vector<double>(2, ParticleConstants::muonMassInMeV);
+        std::vector<double> muonQuadMasses = std::vector<double>(4, ParticleConstants::muonMassInMeV);
         
         bool doPt   = (m_DoVertexType & 1) != 0;
         bool doA0   = (m_DoVertexType & 2) != 0;

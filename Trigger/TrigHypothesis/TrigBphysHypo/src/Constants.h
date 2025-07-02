@@ -5,12 +5,14 @@
 #ifndef TRIGBPHYSHYPO_CONSTANTS_H
 #define TRIGBPHYSHYPO_CONSTANTS_H
 
+#include "TruthUtils/ParticleConstants.h"
+
 // PDG'2020
 struct PDG20 {
   static constexpr double
-    mElectron   =    0.5109989461,
-    mMuon       =  105.6583745,
-    mPion       =  139.57039,
+    mElectron   = ParticleConstants::electronMassInMeV,
+    mMuon       = ParticleConstants::muonMassInMeV,
+    mPion       = ParticleConstants::chargedPionMassInMeV,
     mPion0      =  134.9768,
     mKaon       =  493.677,
     mK_S0       =  497.611,

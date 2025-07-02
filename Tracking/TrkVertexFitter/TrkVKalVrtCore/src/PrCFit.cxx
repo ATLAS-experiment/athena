@@ -4,6 +4,7 @@
 
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/ForCFT.h"
+#include "TruthUtils/ParticleConstants.h"
 #include <cmath>
 #include <iostream>
 
@@ -129,7 +130,7 @@ ForCFT::ForCFT() noexcept{
   RobustScale = 1.; irob=0;
   for (int ic=0; ic<vkalMaxNMassCnst; ++ic) wmfit[ic] = -10000.;
   for (int it=0; it<vkalNTrkM; ++it) {
-     wm[it] = 139.57018;
+     wm[it] = ParticleConstants::chargedPionMassInMeV;
      robres[it] = 1.;
      for(int ic=0; ic<vkalMaxNMassCnst; ic++) indtrkmc[ic][it]=0;
   }

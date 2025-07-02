@@ -38,6 +38,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "AtlasHepMC/Operators.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 namespace ISFTesting {
@@ -785,7 +786,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
 
     ISF::ISFParticle convertedParticle(position,
                                        momentum,
-                                       0.510999*Gaudi::Units::MeV,  // e- mass
+                                       ParticleConstants::electronMassInMeV,  // e- mass
                                        -1.,  // charge
                                        11,  // e- PDG code
                                        1, ///status

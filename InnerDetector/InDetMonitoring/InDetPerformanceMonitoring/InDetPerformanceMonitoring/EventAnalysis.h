@@ -12,6 +12,7 @@
 
 // Crap that may stay or go
 #include "CLHEP/Vector/LorentzVector.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include <map>
 #include <vector>
@@ -23,8 +24,8 @@ class TProfile2D;
 
 namespace EAna
 {
-  const float g_fMuonMass  =  0.1056f;
-  const float g_fElecMass  =  0.0005f;
+  const float g_fMuonMass  =  ParticleConstants::muonMassInMeV/1000.; // Convert MeV to GeV
+  const float g_fElecMass  =  ParticleConstants::electronMassInMeV/1000.; // Convert MeV to GeV
   const float CGeV         =  1.0e-3;
 }
 

@@ -34,6 +34,7 @@
 #include "TLorentzVector.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 
 class xAODMuDstarFilter:public GenFilter {
 public:
@@ -71,8 +72,8 @@ private:
         Gaudi::Property<double>  m_DstarMu_m_Max{this, "DstarMu_m_Max", 12000.};
 
        // PDG 2022:
-       const double m_MuonMass = 105.6583755;
-       const double m_PionMass = 139.57039;
+       const double m_MuonMass = ParticleConstants::muonMassInMeV;
+       const double m_PionMass = ParticleConstants::chargedPionMassInMeV;
        const double m_KaonMass = 493.677;
 
        // ReadHandle for the Gen TruthParticles 

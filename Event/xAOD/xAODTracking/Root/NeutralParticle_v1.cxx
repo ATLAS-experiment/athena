@@ -12,6 +12,7 @@
 // Local include(s):
 #include "xAODTracking/versions/NeutralParticle_v1.h"
 // #include "xAODTracking/VertexContainer.h" FIXME - need to get ELs working to vertices for neutrals - currently causes compilation failure EJWM
+#include "TruthUtils/ParticleConstants.h"
 
 
 namespace xAOD {
@@ -51,7 +52,7 @@ namespace xAOD {
 
 
   double NeutralParticle_v1::m() const {
-    return 139.570; /// @todo Get value from somewhere. Also, the TrackParticle took the Pion mass - do we really want to do this? We have ParticleHypo?
+    return ParticleConstants::chargedPionMassInMeV; /// @todo Get value from somewhere. Also, the TrackParticle took the Pion mass - do we really want to do this? We have ParticleHypo?
   }
 
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( NeutralParticle_v1, float, double, e)
