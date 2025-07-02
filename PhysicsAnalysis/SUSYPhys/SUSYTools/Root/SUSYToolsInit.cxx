@@ -1881,8 +1881,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     } else if (m_BtagTagger=="GN2v01"){
       if(!m_isRun3){
         MCshowerID= "default";                              // PowhegPythia8EvtGen (410470)
-        if (m_showerType == 1)      MCshowerID = "410480";  // PYTHIA8EVTGEN517 (410480)
-        else if (m_showerType == 2) MCshowerID = "411233";  // POWHEGHERWIG7 - 411233
+        if (m_showerType == 2) MCshowerID = "411233";  // POWHEGHERWIG7 - 411233
         else if (m_showerType == 3) MCshowerID = "600666";  // PhH7EG_H7UE - 600666
         else if (m_showerType == 4) MCshowerID = "700660"; // Sh_2210 FTAGAnalysisConfig uses this, but docs say only 11-16 can be used
         else if (m_showerType == 5) MCshowerID = "700660"; // Sh_2211
@@ -1898,8 +1897,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       }
       else {
         MCshowerID= "default";                              // PowhegPythia8EvtGen (601229)
-        if (m_showerType == 1)      MCshowerID = "601398";  // PYTHIA8EVTGEN517 (601398)
-        else if (m_showerType == 3) MCshowerID = "601414";  // PhH7EG_H7UE - 601414 
+        if (m_showerType == 3) MCshowerID = "601414";  // PhH7EG_H7UE - 601414 
         else if (m_showerType == 5) MCshowerID = "700808"; // Sh_2211
         else if (m_showerType == 6) MCshowerID = "700808"; // Sh_2212
         else if (m_showerType == 7) MCshowerID = "700808"; // Sh_2214
