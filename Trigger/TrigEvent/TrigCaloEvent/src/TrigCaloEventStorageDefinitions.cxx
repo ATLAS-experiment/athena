@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCaloEvent/RingerRingsContainer.h"
 #include "TrigCaloEvent/TrigT2JetContainer.h"
 #include "TrigCaloEvent/TrigT2MbtsBitsContainer.h"
 #include "TrigCaloEvent/TrigT2ZdcSignalsContainer.h"
-#include "TrigCaloEvent/TrigTauClusterContainer.h"    
+#include "TrigCaloEvent/TrigTauClusterContainer.h" 
 #include "TrigCaloEvent/TrigTauClusterDetailsContainer.h"
 #include "TrigCaloEvent/TrigEMClusterContainer.h"
 #include "TrigCaloEvent/TrigCaloClusterContainer.h"

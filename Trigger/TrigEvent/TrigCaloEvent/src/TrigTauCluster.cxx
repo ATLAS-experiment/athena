@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,6 +21,7 @@ DATE:           October 17th, 2005
 
 
 #include "TrigCaloEvent/TrigTauCluster.h"
+#include <cmath>
 
 TrigTauCluster::TrigTauCluster(float energy, float eta, float phi, long roi_word) :
 				TrigCaloCluster(energy, eta, phi), m_valid(false)
@@ -187,20 +188,20 @@ bool operator== (const TrigTauCluster& clus1, const TrigTauCluster& clus2 )
 	}
 
 	double epsilon=0.001;
-	if(fabs(clus1.EMenergy() - clus2.EMenergy()) > epsilon) return false;
-	if(fabs(clus1.HADenergy() - clus2.HADenergy()) > epsilon) return false;
-	if(fabs(clus1.eCalib() - clus2.eCalib()) > epsilon) return false;
-	if(fabs(clus1.EMRadius2() - clus2.EMRadius2()) > epsilon) return false;
-	if(fabs(clus1.CaloRadius() - clus2.CaloRadius()) > epsilon) return false;
-	if(fabs(clus1.IsoFrac() - clus2.IsoFrac()) > epsilon) return false;
-	if(abs(clus1.numStripCells() - clus2.numStripCells()) > epsilon) return false;
-	if(abs(clus1.numTotCells() - clus2.numTotCells()) > epsilon) return false;
-	if(fabs(clus1.stripWidth() - clus2.stripWidth()) > epsilon) return false;
-	if(fabs(clus1.stripWidthOffline() - clus2.stripWidthOffline() ) > epsilon) return false;
-	if(fabs(clus1.EMRadius3S() - clus2.EMRadius3S()) > epsilon) return false;
-	if(fabs(clus1.CoreFrac() - clus2.CoreFrac()) > epsilon) return false;
-	if(fabs(clus1.EMFrac() - clus2.EMFrac()) > epsilon) return false;
-    if(fabs(clus1.HadRadius() - clus2.HadRadius()) > epsilon) return false;
+	if(std::fabs(clus1.EMenergy() - clus2.EMenergy()) > epsilon) return false;
+	if(std::fabs(clus1.HADenergy() - clus2.HADenergy()) > epsilon) return false;
+	if(std::fabs(clus1.eCalib() - clus2.eCalib()) > epsilon) return false;
+	if(std::fabs(clus1.EMRadius2() - clus2.EMRadius2()) > epsilon) return false;
+	if(std::fabs(clus1.CaloRadius() - clus2.CaloRadius()) > epsilon) return false;
+	if(std::fabs(clus1.IsoFrac() - clus2.IsoFrac()) > epsilon) return false;
+	if(std::abs(clus1.numStripCells() - clus2.numStripCells()) > epsilon) return false;
+	if(std::abs(clus1.numTotCells() - clus2.numTotCells()) > epsilon) return false;
+	if(std::fabs(clus1.stripWidth() - clus2.stripWidth()) > epsilon) return false;
+	if(std::fabs(clus1.stripWidthOffline() - clus2.stripWidthOffline() ) > epsilon) return false;
+	if(std::fabs(clus1.EMRadius3S() - clus2.EMRadius3S()) > epsilon) return false;
+	if(std::fabs(clus1.CoreFrac() - clus2.CoreFrac()) > epsilon) return false;
+	if(std::fabs(clus1.EMFrac() - clus2.EMFrac()) > epsilon) return false;
+    if(std::fabs(clus1.HadRadius() - clus2.HadRadius()) > epsilon) return false;
 
 	if(clus1.clusterDetails() != 0 && clus2.clusterDetails() != 0 && clus1.clusterDetails() != clus2.clusterDetails())
 	{
@@ -247,59 +248,59 @@ void diff(const TrigTauCluster& clus1, const TrigTauCluster& clus2, std::map< st
 	const double epsilon = 0.001;
 	diff((const TrigCaloCluster&)clus1, (const TrigCaloCluster&)clus2, varChange);
 
-	if(fabs(clus1.EMenergy() - clus2.EMenergy()) > epsilon)
+	if(std::fabs(clus1.EMenergy() - clus2.EMenergy()) > epsilon)
 	{
 		varChange["EMEnergy"] = clus1.EMenergy() - clus2.EMenergy();
 	}
-	if(fabs(clus1.HADenergy() - clus2.HADenergy()) > epsilon)
+	if(std::fabs(clus1.HADenergy() - clus2.HADenergy()) > epsilon)
 	{
 		varChange["HADenergy"] = clus1.HADenergy() - clus2.HADenergy();
 	}
-	if(fabs(clus1.eCalib() - clus2.eCalib()) > epsilon)
+	if(std::fabs(clus1.eCalib() - clus2.eCalib()) > epsilon)
 	{
 		varChange["eCalib"] = clus1.eCalib() - clus2.eCalib();
 	}
-	if(fabs(clus1.EMRadius2() - clus2.EMRadius2()) > epsilon)
+	if(std::fabs(clus1.EMRadius2() - clus2.EMRadius2()) > epsilon)
 	{
 		varChange["EMRadius2"] = clus1.EMRadius2() - clus2.EMRadius2();
 	}
-	if(fabs(clus1.CaloRadius() - clus2.CaloRadius()) > epsilon)
+	if(std::fabs(clus1.CaloRadius() - clus2.CaloRadius()) > epsilon)
 	{
 		varChange["CaloRadius"] = clus1.CaloRadius() - clus2.CaloRadius();
 	}
-	if(fabs(clus1.IsoFrac() - clus2.IsoFrac()) > epsilon)
+	if(std::fabs(clus1.IsoFrac() - clus2.IsoFrac()) > epsilon)
 	{
 		varChange["IsoFrac"] = clus1.IsoFrac() - clus2.IsoFrac();
 	}
-	if(abs(clus1.numStripCells() - clus2.numStripCells()) > epsilon)
+	if(std::abs(clus1.numStripCells() - clus2.numStripCells()) > epsilon)
 	{
 		varChange["numStripCells"] = clus1.numStripCells() - clus2.numStripCells();
 	}
-	if(abs(clus1.numTotCells() - clus2.numTotCells()) > epsilon)
+	if(std::abs(clus1.numTotCells() - clus2.numTotCells()) > epsilon)
 	{
 		varChange["numTotCells"] = clus1.numTotCells() - clus2.numTotCells();
 	}
-	if(fabs(clus1.stripWidth() - clus2.stripWidth()) > epsilon)
+	if(std::fabs(clus1.stripWidth() - clus2.stripWidth()) > epsilon)
 	{
 		varChange["stripWidth"] = clus1.stripWidth() - clus2.stripWidth();
 	}
-	if(fabs(clus1.stripWidthOffline() - clus2.stripWidthOffline()) > epsilon)
+	if(std::fabs(clus1.stripWidthOffline() - clus2.stripWidthOffline()) > epsilon)
 	{
 		varChange["stripWidthOffline"] = clus1.stripWidthOffline() - clus2.stripWidthOffline();
 	}
-	if(fabs(clus1.EMRadius3S() - clus2.EMRadius3S()) > epsilon)
+	if(std::fabs(clus1.EMRadius3S() - clus2.EMRadius3S()) > epsilon)
 	{
 		varChange["EMRadius3S"] = clus1.EMRadius3S() - clus2.EMRadius3S();
 	}
-	if(fabs(clus1.CoreFrac() - clus2.CoreFrac()) > epsilon)
+	if(std::fabs(clus1.CoreFrac() - clus2.CoreFrac()) > epsilon)
 	{
 		varChange["CoreFrac"] = clus1.CoreFrac() - clus2.CoreFrac();
 	}
-	if(fabs(clus1.EMFrac() - clus2.EMFrac()) > epsilon)
+	if(std::fabs(clus1.EMFrac() - clus2.EMFrac()) > epsilon)
 	{
 		varChange["EMFrac"] = clus1.EMFrac() - clus2.EMFrac();
 	}
-	if(fabs(clus1.HadRadius() - clus2.HadRadius()) > epsilon)
+	if(std::fabs(clus1.HadRadius() - clus2.HadRadius()) > epsilon)
 	{
 		varChange["HadRadius"] = clus1.HadRadius() - clus2.HadRadius();
 	}
