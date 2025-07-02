@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from enum import Enum
@@ -148,7 +148,7 @@ def selName(recoSequenceName, hypoType=JetHypoAlgType.STANDARD):
 
 def hypoToolGenerator(hypoType):
     """returns function (that in turn returns hypo tool) for menu sequence"""
-    def trigStreamerHypoTool(chainDict):
+    def trigStreamerHypoTool(flags, chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"])
     return {
         JetHypoAlgType.STANDARD:    trigJetHypoToolFromDict,

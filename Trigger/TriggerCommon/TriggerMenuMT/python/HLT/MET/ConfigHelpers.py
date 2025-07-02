@@ -25,7 +25,7 @@ from TrigMissingETHypo.TrigMissingETHypoConfig import TrigMETHypoToolFromDict
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 import functools
 
-def streamer_hypo_tool(chainDict):
+def streamer_hypo_tool(flags, chainDict):
     return CompFactory.TrigStreamerHypoTool(chainDict["chainName"])
 
 

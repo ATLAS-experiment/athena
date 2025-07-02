@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
@@ -16,7 +16,6 @@ from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
 from collections.abc import MutableSequence
 import functools
-import inspect
 import re
 import types
 
@@ -127,8 +126,6 @@ class AlgNode(Node):
 class HypoToolConf(object):
     """ Class to group info on hypotools for ChainDict"""
     def __init__(self, hypoToolGen):
-        # Check if the generator function takes flags:
-        self.hasFlags = 'flags' in inspect.signature(hypoToolGen).parameters
         self.hypoToolGen = hypoToolGen
         self.name=hypoToolGen.__name__
 
@@ -139,10 +136,7 @@ class HypoToolConf(object):
 
     def create(self, flags):
         """creates instance of the hypo tool"""
-        if self.hasFlags:
-            return self.hypoToolGen( flags, self.chainDict )
-        else:
-            return self.hypoToolGen( self.chainDict )
+        return self.hypoToolGen( flags, self.chainDict )
 
     def confAndCreate(self, flags, chainDict):
         """sets the configuration and creates instance of the hypo tool"""
