@@ -38,11 +38,6 @@ atlas_add_test( getMessageSvc_test
    LOG_IGNORE_PATTERN "^Wall clock time"
    LINK_LIBRARIES GaudiKernel TestTools AthenaKernel )
 
-atlas_add_test( DirSearchPath_test
-   SOURCES test/DirSearchPath_test.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel )
-
 atlas_add_test( Chrono_test
    SOURCES test/Chrono_test.cxx
    LINK_LIBRARIES GaudiKernel AthenaKernel )
