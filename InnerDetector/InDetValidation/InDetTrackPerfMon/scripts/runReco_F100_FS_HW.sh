@@ -21,6 +21,7 @@ usage () {
     exit 0
 }
 
+cwd=$(pwd)
 
 run () {
     name="${1}"
