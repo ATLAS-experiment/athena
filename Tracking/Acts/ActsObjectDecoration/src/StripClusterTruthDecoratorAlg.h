@@ -16,8 +16,10 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadHandleKeyArray.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
 
@@ -42,9 +44,19 @@ namespace ActsTrk {
     virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
+    // This function is used to mark the clusters and decide which one to keep
+    // and which one to skip. It does so by filling a std::vector<bool>, which
+    // size is the same as the cluster collection.
+    StatusCode labelMeasurementToKeep(const EventContext& ctx,
+				      const xAOD::StripClusterContainer& clusters,
+				      std::vector<bool>& labels) const;
+    
+  private:
     SG::ReadHandleKey<xAOD::StripClusterContainer> m_clustercontainer_key{this,"ClusterContainer", "", "Input Strip Cluster container"};
     SG::ReadHandleKey<MeasurementToTruthParticleAssociation> m_associationMap_key{this,"AssociationMapOut", "", "Association map between measurements and truth particles"};
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey{this, "StripDetectorElements", "ITkStripDetectorElementCollection"};
+
+    SG::ReadHandleKeyArray< xAOD::TrackParticleContainer > m_trackParticlesKey {this, "TrackParticles", {}, "Input xAOD::TrackParticles"};
     
     SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key{this,"MeasurementContainer","", "Output Strip Validation Clusters"};
 
@@ -70,6 +82,8 @@ namespace ActsTrk {
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_side {this, "MeasurementSide", m_write_xaod_key, "side"};
     
     Gaudi::Property<bool> m_useTruthInfo {this, "UseTruthInfo", true};
+    Gaudi::Property<bool> m_keepOnlyOnTrackMeasurements {this, "KeepOnlyOnTrackMeasurements", false, "Keep on on-track measurements instead of the full collection"};
+
     const SCT_ID* m_stripHelper {nullptr};
   };
 }

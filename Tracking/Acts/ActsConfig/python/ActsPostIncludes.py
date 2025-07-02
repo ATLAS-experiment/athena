@@ -92,6 +92,10 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
 def ACTSClusterPostInclude(flags) -> ComponentAccumulator:
     # Schedule ACTS Data Preparation and Measurement persistification
     # This is used for technical efficiencies studies of tracking pipelines
+    if flags.Tracking.PRDInfo.KeepOnlyOnTrackMeasurements:
+        raise ValueError("The ACTSClusterPostInclude is to be used for technical efficiency computation, however the " \
+                         f"config flag 'Tracking.PRDInfo.KeepOnlyOnTrackMeasurements' is set to {flags.Tracking.PRDInfo.KeepOnlyOnTrackMeasurements}, " \
+                         "which is incompatible with this purpose")
     
     acc = ComponentAccumulator()
     
