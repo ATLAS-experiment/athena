@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TABLE_UTILS_H
 #define TABLE_UTILS_H
@@ -13,6 +13,8 @@
 #include <vector>
 #include <utility>
 #include <limits>
+
+class MsgStream;
 
 // Utility class to wrap a constant variable length array interface over static sized arrays
 // This avoid duplication of compiled code for arrays which only differ
@@ -642,7 +644,7 @@ TableUtils::MultiColumnTable<T> makeTable(const std::vector<T> &counter,
    return makeTable(counter, 0u, column_label.size(), row_label, column_label, top_left_label);
 }
 
-#ifdef GAUDIKERNEL_MSGSTREAM_H
+
 // convenience method to dump wrapped arrays in table form to a MsgStream
 // Usage:   msg(MSG::INFO) << makeTable( array, labels);
 //          ATH_MSG_INFO( makeTable( array, labels) );
@@ -681,7 +683,7 @@ inline MsgStream &operator<<(MsgStream &out,
                     stat.m_separateLastRow,
                     stat.m_precision);
 }
-#endif
+
 
 // convenience method to dump wrapped two dimensional arrays in table form to a std output stream
 // Usage:   out << makeTable( array2d, row_labels, column_labels);
