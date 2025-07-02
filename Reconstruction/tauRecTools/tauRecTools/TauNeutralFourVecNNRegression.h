@@ -15,6 +15,8 @@
 #include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 
+#include "GaudiKernel/SystemOfUnits.h"
+
 // lwtnn include(s)
 #include "lwtnn/LightweightGraph.hh"
 #include "lwtnn/parse_json.hh"
