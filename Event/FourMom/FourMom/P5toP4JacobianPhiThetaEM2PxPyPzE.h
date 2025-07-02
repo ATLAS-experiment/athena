@@ -16,10 +16,11 @@
 
 #include "CLHEP/Matrix/Matrix.h"
 //#include "FourMom/ParamDefs.h"
+#include "TruthUtils/ParticleConstants.h"
 
 class P5toP4JacobianPhiThetaEM2PxPyPzE : public CLHEP::HepMatrix {
     public:
-    P5toP4JacobianPhiThetaEM2PxPyPzE( const double phi0, const double theta, const double E, const double mass = 105.6583692  );
+    P5toP4JacobianPhiThetaEM2PxPyPzE( const double phi0, const double theta, const double E, const double mass = ParticleConstants::muonMassInMeV  );
     ~P5toP4JacobianPhiThetaEM2PxPyPzE(){}
 };
 

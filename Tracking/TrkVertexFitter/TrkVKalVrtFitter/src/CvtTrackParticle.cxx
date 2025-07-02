@@ -61,7 +61,7 @@ namespace Trk {
        tmpMat.trkRefGlobPos=Amg::Vector3D( perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z());
        tmpMat.extrapolationType=2;                   // Perigee point strategy
        tmpMat.TrkPnt=mPer;
-       tmpMat.prtMass = 139.5702;
+       tmpMat.prtMass = ParticleConstants::chargedPionMassInMeV;
        if(counter<(int)state.m_MassInputParticles.size())tmpMat.prtMass = state.m_MassInputParticles[counter];
        tmpMat.TrkID=counter; state.m_trkControl.push_back(tmpMat);
        counter++;
@@ -158,7 +158,7 @@ namespace Trk {
        tmpMat.trkRefGlobPos=Amg::Vector3D( perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z());
        tmpMat.extrapolationType=2;                   // Perigee point strategy
        tmpMat.TrkPnt=nullptr;           //No reference point for neutral particle for the moment
-       tmpMat.prtMass = 139.5702;
+       tmpMat.prtMass = ParticleConstants::chargedPionMassInMeV;
        if(counter<(int)state.m_MassInputParticles.size())tmpMat.prtMass = state.m_MassInputParticles[counter];
        tmpMat.TrkID=counter; state.m_trkControl.push_back(tmpMat);
        counter++;

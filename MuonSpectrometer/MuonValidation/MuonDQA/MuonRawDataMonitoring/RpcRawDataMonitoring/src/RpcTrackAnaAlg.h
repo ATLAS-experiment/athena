@@ -31,6 +31,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTrigger/MuonRoIContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // local
 #include "RPCDQUtils.h"
@@ -134,7 +135,7 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm {
     FloatProperty m_barrelMinEta{this, "barrelMinEta", 0.1};
     FloatProperty m_barrelMaxEta{this, "barrelMaxEta", 1.05};
 
-    FloatProperty m_muonMass{this, "MuonMass", 105.6583755,
+    FloatProperty m_muonMass{this, "MuonMass", ParticleConstants::muonMassInMeV,
                              "muon invariant mass in MeV"};
     FloatProperty m_zMass_lowLimit{
         this, "zMass_lowLimit", 50000.,

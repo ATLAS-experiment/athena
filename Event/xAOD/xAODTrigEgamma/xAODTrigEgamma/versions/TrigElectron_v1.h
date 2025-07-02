@@ -18,6 +18,7 @@ extern "C" {
 #include "xAODBase/IParticle.h"
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // ROOT include(s):
 #include "Math/Vector4D.h"
@@ -52,7 +53,7 @@ namespace xAOD {
       /// The azimuthal angle (\f$\phi\f$) of the particle
       virtual double           phi() const { return caloPhi(); }
       /// The invariant mass of the particle
-      virtual double           m() const { return 0.510998928; }
+      virtual double           m() const { return ParticleConstants::electronMassInMeV; }
       /// The total energy of the particle
       virtual double           e() const;
       /// The true rapidity (y) of the particle

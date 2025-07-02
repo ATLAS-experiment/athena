@@ -5,9 +5,10 @@
 #include "egammaUtils/EMFourMomBuilder.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "EventPrimitives/EventPrimitives.h"
+#include "TruthUtils/ParticleConstants.h"
 
 namespace {
-constexpr float el_mass = 0.510998;
+constexpr float el_mass = ParticleConstants::electronMassInMeV;
 constexpr float ph_mass = 0.0;
 
 void

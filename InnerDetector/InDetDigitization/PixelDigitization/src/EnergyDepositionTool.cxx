@@ -12,6 +12,7 @@
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -32,7 +33,7 @@ namespace{
   //iBetaGamma function returning zero for the error case
   double iBetaGammaFn(const double k){
     double result(0.);
-    constexpr double me =0.51099906; //electron mass in MeV, directly from CLHEP file
+    constexpr double me =ParticleConstants::electronMassInMeV; //electron mass in MeV, directly from CLHEP file
     if (auto subCalc = 2. * me + k; subCalc>0){
       result = std::sqrt(k*subCalc)/me;
     }

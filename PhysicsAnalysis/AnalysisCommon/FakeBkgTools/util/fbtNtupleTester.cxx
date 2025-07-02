@@ -32,6 +32,7 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODMuon/Muon.h"
 #include "FakeBkgTools/ApplyFakeFactor.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #ifndef READ_TREE_ADDRESSES
 #define READ_TREE_ADDRESSES(typeName, name)			\
@@ -285,7 +286,7 @@ int main(int argc, char* argv[])
       if (lepType == xAOD::Type::Electron){
         xAOD::Electron* particle = new xAOD::Electron();
         particle->makePrivateStore();
-        particle->setP4(lepPt.at(i)*convertToMeV,lepEta.at(i),lepPhi.at(i),0.511);
+        particle->setP4(lepPt.at(i)*convertToMeV,lepEta.at(i),lepPhi.at(i),ParticleConstants::electronMassInMeV);
         particle->setCharge(lepCharge.at(i));
         tightDecor(*particle) = passesSignal;
         particles.push_back(static_cast<xAOD::IParticle*>(particle));

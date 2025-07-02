@@ -24,6 +24,7 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkParameters/TrackParameters.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include <bitset>
 
@@ -72,7 +73,7 @@ double SimHitHandle_TRTHit::actualMomentum() const
   if (!ok) {
     VP1Msg::message("SimHitHandle_TRTHit constructor WARNING: Could not determine mass for pdg code "
 		    +QString::number(pdg())+". Assuming charged pion mass.");
-    mass = 139.57019*CLHEP::MeV;//Charged pion mass
+    mass = ParticleConstants::chargedPionMassInMeV;//Charged pion mass
   }
   const double ekin = m_d->thehit->GetKineticEnergy()*CLHEP::MeV;
   const double gamma = 1.0 + ekin/mass;

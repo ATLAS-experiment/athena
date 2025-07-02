@@ -413,7 +413,7 @@ double ElectronMuonTopoInfo::invariantMass(const TrigElectron* electron1,
   double phi1   = electron1->phi();
   double phi2   = muon1->IDTrack()->param()->phi0();
 
-  return invariantMass(Pt1, eta1, phi1, 0.511, Pt2, eta2, phi2, 105.6);
+  return invariantMass(Pt1, eta1, phi1, ParticleConstants::electronMassInMeV, Pt2, eta2, phi2, ParticleConstants::muonMassInMeV);
 }
 
 // L2 tautau
@@ -447,7 +447,7 @@ double ElectronMuonTopoInfo::invariantMass( const TrigTau* tau1,
   double phi1   = tau1->phi();
   double phi2   = electron1->phi();
 
-  return invariantMass(Pt1, eta1, phi1, 1777., Pt2, eta2, phi2, 0.511);//tau mass used
+  return invariantMass(Pt1, eta1, phi1, 1777., Pt2, eta2, phi2, ParticleConstants::electronMassInMeV);//tau mass used
 }
 
 // L2 tau mu 
@@ -464,7 +464,7 @@ double ElectronMuonTopoInfo::invariantMass( const TrigTau* tau1,
   double phi1   = tau1->phi();
   double phi2   = muon1->IDTrack()->param()->phi0();
 
-  return invariantMass(Pt1, eta1, phi1, 1777., Pt2, eta2, phi2, 105.6);//tau mass used
+  return invariantMass(Pt1, eta1, phi1, 1777., Pt2, eta2, phi2, ParticleConstants::muonMassInMeV);//tau mass used
 }
 
 // EF tautau
@@ -499,7 +499,7 @@ double ElectronMuonTopoInfo::invariantMass( const Analysis::TauJet* tau1,
   double phi1   = tau1->phi();
   double phi2   = electron1->trackParticle()->phi();
 
-  return invariantMass(Pt1, eta1, phi1, 1777., Pt2, eta2, phi2, 0.511);//tau mass used
+  return invariantMass(Pt1, eta1, phi1, 1777., Pt2, eta2, phi2, ParticleConstants::electronMassInMeV);//tau mass used
 }
 // EF tautau
 double ElectronMuonTopoInfo::invariantMass( const Analysis::TauJet* tau1, 
@@ -515,7 +515,7 @@ double ElectronMuonTopoInfo::invariantMass( const Analysis::TauJet* tau1,
   double phi1   = tau1->phi();
   double phi2 = muon1->parameters()[Trk::phi];
 
-  return invariantMass(Pt1, eta1, phi1, 1777., Pt2, eta2, phi2, 105.6);//tau mass used
+  return invariantMass(Pt1, eta1, phi1, 1777., Pt2, eta2, phi2, ParticleConstants::muonMassInMeV);//tau mass used
 }
 
 double ElectronMuonTopoInfo::invariantMass(double Pt1, double  eta1, double phi1, double m1,
@@ -585,7 +585,7 @@ double ElectronMuonTopoInfo::invariantMass(const egamma* electron1,
   double phi1   = electron1->trackParticle()->phi();
   double phi2 = muon1->parameters()[Trk::phi];
 
-  return  invariantMass(Pt1, eta1, phi1, 0.511, Pt2,  eta2, phi2,  105.6);
+  return  invariantMass(Pt1, eta1, phi1, ParticleConstants::electronMassInMeV, Pt2,  eta2, phi2,  ParticleConstants::muonMassInMeV);
 }
 
 

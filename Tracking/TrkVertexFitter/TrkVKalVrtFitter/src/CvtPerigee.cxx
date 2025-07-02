@@ -63,7 +63,7 @@ namespace Trk{
       // Perigee point strategy
       tmpMat.extrapolationType = 2;
       tmpMat.TrkPnt = mPer;
-      tmpMat.prtMass = 139.5702;
+      tmpMat.prtMass = ParticleConstants::chargedPionMassInMeV;
       if(counter < static_cast<int>(state.m_MassInputParticles.size())){
 	tmpMat.prtMass = state.m_MassInputParticles[counter];
       }

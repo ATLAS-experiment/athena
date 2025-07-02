@@ -31,6 +31,7 @@
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgAnalysisInterfaces/IFakeBkgTool.h"
 #include "AsgAnalysisInterfaces/ILinearFakeBkgTool.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 bool successful(bool arg) { return arg; }
@@ -219,7 +220,7 @@ bool eventLoop(asg::AnaToolHandle<Interface>& tool, Store_t& store, Result& resu
   static const SG::Accessor<char> TightAcc("Tight");
   for(int i=eventOffset;i<nEvents+eventOffset;++i)
     {
-      e->setP4((1 + (i%3))*1e4, 0., 0. ,0.511);
+      e->setP4((1 + (i%3))*1e4, 0., 0. ,ParticleConstants::electronMassInMeV);
       TightAcc(*e) = (i%4)? 0 : 1;
       FBT_CHECK( tool->addEvent(particles) );
       FBT_CHECK( addEventWeight(tool, result) );

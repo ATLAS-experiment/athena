@@ -30,6 +30,7 @@ DATE:		V4.0 May 5th, 2008
 #include "EventKernel/INavigable4Momentum.h"
 #include "FourMom/P4PtEtaPhiMBase.h"
 #include "Navigation/NavigableTerminalNode.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // Forward declaration(s):
 class MsgStream;
@@ -67,7 +68,7 @@ public:
   double charge(void) const {return fabs(m_QMu)>0?m_QMu:(m_PtMu>0?1.0:-1.0); }
   double eta(void)    const {return m_EtaMu; }
   double phi(void)    const {return m_PhiMu; }
-  double m(void)      const {return 105.658367;}
+  double m(void)      const {return ParticleConstants::muonMassInMeV;}
 
   //Setters
   /** Set calorimetric infos. */

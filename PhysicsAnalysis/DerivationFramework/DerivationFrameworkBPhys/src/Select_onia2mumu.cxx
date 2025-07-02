@@ -16,6 +16,7 @@
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "xAODTracking/VertexContainer.h"
 #include "CxxUtils/checker_macros.h"
+#include "TruthUtils/ParticleConstants.h"
 #include <vector>
 #include <string>
 
@@ -35,7 +36,7 @@ namespace DerivationFramework {
     
     declareProperty("HypothesisName"       , m_hypoName              = "A");
     declareProperty("InputVtxContainerName", m_inputVtxContainerName = "JpsiCandidates");
-    declareProperty("TrkMasses"            , m_trkMasses             = std::vector<double>(2, 105.658) );    
+    declareProperty("TrkMasses"            , m_trkMasses             = std::vector<double>(2, ParticleConstants::muonMassInMeV) );    
     declareProperty("VtxMassHypo"          , m_massHypo              = 3096.916 );                  
     declareProperty("MassMax"              , m_massMax               = 6000);                   
     declareProperty("MassMin"              , m_massMin               = 2000);                   

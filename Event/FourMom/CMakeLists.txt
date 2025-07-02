@@ -14,7 +14,7 @@ atlas_add_library( FourMom
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-		           LINK_LIBRARIES ${CLHEP_LIBRARIES} EventKernel EventPrimitives CxxUtils)
+		           LINK_LIBRARIES ${CLHEP_LIBRARIES} EventKernel EventPrimitives CxxUtils TruthUtils)
 
 atlas_add_dictionary( FourMomDict
                       FourMom/FourMomDict.h

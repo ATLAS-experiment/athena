@@ -5,13 +5,14 @@
 #ifndef _VrtSecInclusive_Constants_H
 #define _VrtSecInclusive_Constants_H
 
+#include "TruthUtils/ParticleConstants.h"
 #include <cmath>
 
 namespace VKalVrtAthena {
   
   namespace PhysConsts {
-    constexpr double mass_chargedPion = 139.57018;
-    constexpr double mass_electron    = 0.511;
+    constexpr double mass_chargedPion = ParticleConstants::chargedPionMassInMeV;
+    constexpr double mass_electron    = ParticleConstants::electronMassInMeV;
     constexpr double mass_proton      = 938.27205;
   }
   

@@ -46,7 +46,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackDecoKey{ this, "PassTrackDstarKey", m_trackKey, "trackPassDstar"};
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vertexDecoKey{ this, "PassVertexDstarKey", m_inputVtxContainerName, "passed_Dstar"};
     
-    const double m_pionMass = 139.570;
+    const double m_pionMass = ParticleConstants::chargedPionMassInMeV;
     const double m_kaonMass = 493.677;
     std::string m_hypoName; //!< name of the mass hypothesis prefix for decorations
   }; 

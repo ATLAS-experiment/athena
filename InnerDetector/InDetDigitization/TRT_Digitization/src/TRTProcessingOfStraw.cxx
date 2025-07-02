@@ -32,6 +32,7 @@
 // Particle data table
 #include "HepPDT/ParticleData.hh"
 #include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // For the Athena-based random numbers.
 #include "CLHEP/Random/RandPoisson.h" //randpoissonq? (fixme)
@@ -420,7 +421,7 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
             ATH_MSG_WARNING ( "Data for sim. particle with pdgcode "<<particleEncoding
                               <<"  is not a nucleus and could not be retrieved from PartPropSvc. Assuming mass and charge as pion. Please investigate." );
             particleCharge = 1.;
-            particleMass = 139.57018*CLHEP::MeV;
+            particleMass = ParticleConstants::chargedPionMassInMeV;
           }
           else {
             particleCharge = MC::charge(particleEncoding);

@@ -58,7 +58,7 @@ namespace InDet{
     Amg::Vector3D norm2=pnt2.cross(mom2);
     Amg::Vector3D t=norm1.cross(norm2); t.normalize(); if(t.dot(mom1+mom2)<0.) t*=-1.;
     double aveP=(trk1->p4()+trk2->p4()).P()/2.;
-    TLorentzVector tl;  tl.SetXYZM(t.x()*aveP,t.y()*aveP,t.z()*aveP,139.57); //Crossing line of 2 planes
+    TLorentzVector tl;  tl.SetXYZM(t.x()*aveP,t.y()*aveP,t.z()*aveP,ParticleConstants::chargedPionMassInMeV); //Crossing line of 2 planes
     if( tl.DeltaR(trk1->p4()) >dRLim || tl.DeltaR(trk2->p4()) >dRLim ) {V1*=0.; V2*=0.; return tl;}//Too big dR between tracks and found "B line"
 //------------------------------------------------------------------------
     double X;

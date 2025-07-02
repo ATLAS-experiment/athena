@@ -395,7 +395,7 @@ namespace DerivationFramework {
           vtxdPhi  = P4Helpers::deltaPhi( vtxdPhi, caloCluster->phiBE(2) );
           vtxdEta -= caloCluster->etaBE(2);
 
-          xAOD::TrackParticle::FourMom_t vertex4P = m_V0Tools->V04Momentum(myVertex.get(), 0.511);
+          xAOD::TrackParticle::FourMom_t vertex4P = m_V0Tools->V04Momentum(myVertex.get(), ParticleConstants::electronMassInMeV);
           vtxE = vertex4P.E();
           vtxPhi = vertex4P.Phi();
           vtxEta = vertex4P.Eta();

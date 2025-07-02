@@ -96,7 +96,7 @@ class TrackJet
   double thisEnergy(const Trk::Track* i)
     {
       HepGeom::Vector3D<double> moment = i->perigeeParameters()->momentum();
-      return sqrt(moment.dot(moment) +139.5*139.5 );
+      return sqrt(moment.dot(moment) +ParticleConstants::chargedPionMassInMeV*ParticleConstants::chargedPionMassInMeV );
     }
 };
 

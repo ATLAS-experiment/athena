@@ -100,7 +100,7 @@ namespace Analysis {
             sumpx += perigee->momentum().x();
             sumpy += perigee->momentum().y();
             sumpz += perigee->momentum().z();
-            sume += std::hypot(perigee->momentum().mag(), 139.5702);
+            sume += std::hypot(perigee->momentum().mag(), ParticleConstants::chargedPionMassInMeV);
           }else{
             ATH_MSG_WARNING("#BTAG# perigee for VxTrackAtVertex not found");
           }
@@ -198,7 +198,7 @@ namespace Analysis {
             sumpx += perigee->momentum().x();
             sumpy += perigee->momentum().y();
             sumpz += perigee->momentum().z();
-            sume += std::hypot(perigee->momentum().mag(), 139.5702);
+            sume += std::hypot(perigee->momentum().mag(), ParticleConstants::chargedPionMassInMeV);
           }else{
             ATH_MSG_WARNING("#BTAG# perigee for VxTrackAtVertex not found");
           }

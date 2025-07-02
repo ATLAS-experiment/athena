@@ -6,10 +6,11 @@
 #define FOURMOM_EIGENP5TOP4JACOBIANPHITHETAEM2PXPYPZE_H
 
 #include "EventPrimitives/EventPrimitives.h"
+#include "TruthUtils/ParticleConstants.h"
 
 class EigenP5toP4JacobianPhiThetaEM2PxPyPzE : public AmgMatrix(4,5) {
     public:
-    EigenP5toP4JacobianPhiThetaEM2PxPyPzE( const double phi0, const double theta, const double E, const double mass = 105.6583692  );
+    EigenP5toP4JacobianPhiThetaEM2PxPyPzE( const double phi0, const double theta, const double E, const double mass = ParticleConstants::muonMassInMeV  );
     ~EigenP5toP4JacobianPhiThetaEM2PxPyPzE(){}
 };
 

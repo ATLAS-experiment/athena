@@ -8,6 +8,7 @@
 #include "CLHEP/Random/RandGauss.h"
 #include "HepPDT/ParticleData.hh"
 #include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/ParticleConstants.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitBase.h"
@@ -618,7 +619,7 @@ void TFCSEnergyAndHitGANV2::test_path(const std::string &path,
   if (!truth) {
     ATH_MSG_NOCLASS(logger, "New particle");
     TFCSTruthState *t = new TFCSTruthState();
-    t->SetPtEtaPhiM(65536, 0, 0, 139.6);
+    t->SetPtEtaPhiM(65536, 0, 0, ParticleConstants::chargedPionMassInMeV);
     t->set_pdgid(pid);
     truth = t;
   }

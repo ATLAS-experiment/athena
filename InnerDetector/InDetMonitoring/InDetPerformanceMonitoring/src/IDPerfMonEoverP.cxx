@@ -46,6 +46,7 @@ PURPOSE:  Create  a simple ntuple to perform EoverP studies with
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLorentzVector.h"
+#include "TruthUtils/ParticleConstants.h"
 
 using namespace std;
 using namespace Trk;
@@ -1234,7 +1235,7 @@ bool IDPerfMonEoverP::passWenuSelection(std::vector<int>& electrons)
 double IDPerfMonEoverP::getMassCluster(int el1, int el2)
 {
   ATH_MSG_VERBOSE("In getMassCluster()");
-  double ELECTRON_MASS  = 0.5109989; //MeV
+  double ELECTRON_MASS  = ParticleConstants::electronMassInMeV; //MeV
   TLorentzVector v0,v1;
   double pt1 = m_ClusterEnergy[el1]*std::sin(m_electronTheta[0][el1]);
   double pt2 = m_ClusterEnergy[el2]*std::sin(m_electronTheta[0][el2]);

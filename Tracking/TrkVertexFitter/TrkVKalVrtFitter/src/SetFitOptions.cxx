@@ -24,7 +24,7 @@ namespace Trk{
       if( it<(int)state.m_MassInputParticles.size() ) {
         state.m_vkalFitControl.vk_forcft.wm[it]  = (double)(state.m_MassInputParticles[it]);
       }
-      else { state.m_vkalFitControl.vk_forcft.wm[it]=(double)(139.5702); }
+      else { state.m_vkalFitControl.vk_forcft.wm[it]=ParticleConstants::chargedPionMassInMeV; }
     }
     // Set reference vertex for different pointing constraints
     if(state.m_VertexForConstraint.size() >= 3){

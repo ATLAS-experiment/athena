@@ -13,6 +13,8 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTau/TauJet.h"
 
+#include "TruthUtils/ParticleConstants.h"
+
 #include <cmath>
 
 namespace xAOD {
@@ -26,7 +28,7 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauTrack_v1, float, double, phi)
 
   // Pion mass, as assumed for the track:
-  static const double PION_MASS = 139.570;
+  static const double PION_MASS = ParticleConstants::chargedPionMassInMeV;
 
   TauTrack_v1::FourMom_t TauTrack_v1::p4() const {
     FourMom_t p4;

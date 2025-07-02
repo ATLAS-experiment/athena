@@ -40,10 +40,11 @@ Modified: RG Mar 8 2006: replaced EMShowerMinimal with TrigEMCluster
 */
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "TrigParticle/TrigElectron.h"
+#include "TruthUtils/ParticleConstants.h"
 
 /** Default constructor */
 TrigElectron::TrigElectron() : 
-  P4PtEtaPhiM(0, 0, 0, 0.511*CLHEP::MeV), 
+  P4PtEtaPhiM(0, 0, 0, ParticleConstants::electronMassInMeV), 
   NavigableTerminalNode(), 
   m_roiWord(0), 
   m_valid(false),
@@ -83,7 +84,7 @@ TrigElectron::TrigElectron(unsigned int roi,                                    
 			   float trkEtaAtCalo, float trkPhiAtCalo, float EToverPT,        // track-cluster match variables
 			   const TrigEMClusterContainer* cl_coll, unsigned int cl_index,  // links to track and cluster
 			   const TrigInDetTrackCollection* tr_coll, unsigned int tr_index) 
-  :   P4PtEtaPhiM(0,0,0,0.511*CLHEP::MeV), 
+  :   P4PtEtaPhiM(0,0,0,ParticleConstants::electronMassInMeV), 
       NavigableTerminalNode(), 
       m_roiWord(roi), 
       m_valid(true), 
@@ -263,7 +264,7 @@ TrigElectron::TrigElectron(float pt,
                            float Zvtx,
                            int nTRTHits,
                            int nTRTHiThresholdHits) 
-  :   P4PtEtaPhiM(pt,eta,phi,0.511*CLHEP::MeV),
+  :   P4PtEtaPhiM(pt,eta,phi,ParticleConstants::electronMassInMeV),
       m_roiWord(roi),
       m_valid(valid),
       m_tr_Algo(trackAlgo),
