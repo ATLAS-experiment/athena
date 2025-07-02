@@ -310,7 +310,7 @@ L1TopoParams = {
 'TeAsymmetry' : {'comment': '',
                 'parameters': ['deltaAbsMin', 'asymFactor', 'asymOffset', 'maxTeProduct']},
 'TeATIME' : {'comment': '',
-                'parameters': ['algoLogic', 'nextBcOffset', 'nextBcFactor']},
+                'parameters': ['algoLogic', 'nextBcFactor', 'nextBcOffset']},
  'eEmNoSort': {'comment': '', 'parameters': ['REtaMin', 'RHadMin', 'WsTotMin']},
  'eEmSelect': {'comment': '',
                'parameters': ['MinET', 'REtaMin', 'RHadMin', 'WsTotMin']},
