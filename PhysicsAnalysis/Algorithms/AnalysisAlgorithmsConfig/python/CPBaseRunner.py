@@ -86,11 +86,10 @@ class CPBaseRunner(ABC):
         return parser
 
     def _readYamlConfig(self):
-        from ROOT import PathResolver
-        yamlconfig = PathResolver.find_file(
-            self.args.text_config, "DATAPATH", PathResolver.RecursiveSearch)
+        from AthenaCommon.Utils.unixtools import find_datafile
+        yamlconfig = find_datafile(self.args.text_config)
         if not yamlconfig:
-            raise FileNotFoundError(f'PathResolver failed to locate \"{self.args.text_config}\" config file!'
+            raise FileNotFoundError(f'Failed to locate \"{self.args.text_config}\" config file!'
                                     'Check if you have a typo in -t/--text-config argument or missing file in the analysis configuration sub-directory.')
         self.logger.info("Setting up configuration based on YAML config:")
         from AnalysisAlgorithmsConfig.ConfigText import TextConfig
