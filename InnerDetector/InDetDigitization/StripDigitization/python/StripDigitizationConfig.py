@@ -203,8 +203,8 @@ def ITkStripFrontEndCfg(flags, name="ITkStripFrontEnd", **kwargs):
     log = logging.getLogger("ITkStripFrontEndCfg")
     log.info("ITkStripDigitization:::: Turned off Noise in ITkStripFrontEnd")
     log.info("ITkStripDigitization:::: Overriding Digitization.DoInnerDetectorNoise flag")
-    kwargs.setdefault("NoiseOn", False)
-    kwargs.setdefault("AnalogueNoiseOn", False)
+    kwargs.setdefault("NoiseOn", flags.Digitization.DoITkStripDetectorNoise)
+    kwargs.setdefault("AnalogueNoiseOn", flags.Digitization.DoITkStripDetectorNoise)
     #else:
     #    kwargs.setdefault("NoiseOn", True)
     #    kwargs.setdefault("AnalogueNoiseOn", True)
