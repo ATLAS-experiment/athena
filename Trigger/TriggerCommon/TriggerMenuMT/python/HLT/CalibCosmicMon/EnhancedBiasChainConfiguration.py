@@ -67,7 +67,7 @@ def enhancedBiasReco(flags):
     return reco
 
 
-def EnhancedBiasHypoToolGen(chainDict):
+def EnhancedBiasHypoToolGen(flags, chainDict):
     tool = CompFactory.L1InfoHypoTool(chainDict['chainName'],
                                       CTPUnpackingTool = CompFactory.CTPUnpackingTool(UseTBPBits = True))
 

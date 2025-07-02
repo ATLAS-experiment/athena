@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components
@@ -44,7 +44,7 @@ def fastTrackingSequenceGenCfg(flags, variant='', is_probe_leg = False):
     fastElectronHypoAlg = CompFactory.TrigStreamerHypoAlg("ElectronfastTrackingHypo"+variant)
     fastElectronHypoAlg.FeatureIsROI = False
     selAcc.addHypoAlgo(fastElectronHypoAlg)
-    def acceptAllHypoToolGen(chainDict):
+    def acceptAllHypoToolGen(flags, chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
     return MenuSequence(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
 

@@ -563,7 +563,7 @@ def TrigmuCombHypoToolwORFromDict( flags, chainDict ):
 
 
 # muComb Hypo for L2 inside-out
-def Trigl2IOHypoToolwORFromDict( chainDict ):
+def Trigl2IOHypoToolwORFromDict( flags, chainDict ):
 
     thresholds = getThresholdsFromDict( chainDict )
     if chainDict['chainParts'][0]['multiplicity']=="0":
@@ -593,7 +593,7 @@ def Trigl2IOHypoToolwORFromDict( chainDict ):
 
 
 # muComb Hypo for L2 multi-track SA mode
-def Trigl2mtCBHypoToolwORFromDict( chainDict ):
+def Trigl2mtCBHypoToolwORFromDict( flags, chainDict ):
 
     if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo'] :
        thresholds = ['passthrough']

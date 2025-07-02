@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -40,7 +40,7 @@ def AFPTrkRecoBaseSequenceCfg(flags):
 
 @AccumulatorCache
 def AFPTrkSequenceGenCfg(flags):
-    def trigStreamerAFPHypoTool(chainDict):
+    def trigStreamerAFPHypoTool(flags, chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
 
     recoAcc = AFPTrkRecoBaseSequenceCfg(flags)
@@ -121,7 +121,7 @@ def AFPGlobalRecoSequenceCfg(flags):
 
 @AccumulatorCache
 def AFPGlobalSequenceGenCfg(flags):
-    def trigStreamerAFPToFHypoTool(chainDict):
+    def trigStreamerAFPToFHypoTool(flags, chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
     
     recoAcc = AFPGlobalRecoSequenceCfg(flags)
@@ -134,7 +134,7 @@ def AFPGlobalSequenceGenCfg(flags):
 
     return MenuSequence(flags, selAcc, HypoToolGen=trigStreamerAFPToFHypoTool)
 
-def AFPToFDeltaZToolGen(chainDict):
+def AFPToFDeltaZToolGen(flags, chainDict):
     hypotool = CompFactory.TrigAFPToFHypoTool(chainDict['chainName'])
     if "afpdz5" in chainDict["chainName"]:
         hypotool.deltaZCut = 5.0
