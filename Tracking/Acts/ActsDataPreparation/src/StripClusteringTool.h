@@ -69,7 +69,8 @@ private:
     unpackRDOs(const InDetRawDataCollection<StripRDORawData>& RDOs,
 	       const StripID& idHelper,
 	       const InDet::SiDetectorElementStatus *sctDetElStatus,
-         const EventContext& ctx) const;
+	       const InDetDD::SiDetectorDesign& design,
+	       const EventContext& ctx) const;
 
     bool isBadStrip(const EventContext& ctx,
         const InDet::SiDetectorElementStatus *sctDetElStatus,
