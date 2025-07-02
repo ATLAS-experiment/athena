@@ -77,7 +77,7 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
                                           doMultComp = doMultComp,
                                           forceCTPasHdw=forceCtp,
                                           MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
-                                          AlgorithmVetoList   =["jXE40delay"])
+                                          AlgorithmVetoList   =["jXE40delay","TeATIME"])
     if logLevel : alg.OutputLevel=logLevel
     alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
