@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 import collections
 
@@ -49,23 +49,6 @@ def getSequenceChildren(comp):
         return []
 
 
-def getAllSequenceNames(seq, depth=0):
-    """ Generate a list of sequence names and depths in the graph, e.g.
-    [('AthAlgSeq', 0), ('seq1', 1), ('seq2', 1), ('seq1', 2)]
-    represents
-    \\__ AthAlgSeq (seq: PAR AND)
-        \\__ seq1 (seq: SEQ AND)
-           \\__ seq2 (seq: SEQ AND)
-    """
-
-    seqNameList = [(seq.getName(), depth)]
-    for c in getSequenceChildren(seq):
-      if isSequence(c):
-        seqNameList +=  getAllSequenceNames(c, depth+1)
-
-    return seqNameList
-
-
 def checkSequenceConsistency( seq ):
     """ Enforce rules for sequence graph - identical items can not be added to itself (even indirectly) """
 
@@ -84,13 +67,6 @@ def checkSequenceConsistency( seq ):
     __noSubSequenceOfName( seq, seq.getName() )
     for c in getSequenceChildren( seq ):
         checkSequenceConsistency(c)
-
-
-def stepSeq(name, filterAlg, rest):
-    """ elementary HLT step sequencer, filterAlg is gating, rest is anything that needs to happen within the step """
-    stepReco = parOR(name+"_reco", rest)
-    stepAnd = seqAND(name, [ filterAlg, stepReco ])
-    return stepAnd
 
 
 def isSequence( obj ):
