@@ -102,33 +102,43 @@ def ZdcMonitoringConfig(inputFlags):
     
     zdcMonAlg.IsPEBStream = 'calibration_' in inputFlags.Input.TriggerStream
     zdcMonAlg.IsPPMode = 'pp' in config
-    
-    # zdcMonAlg.IspOMode = 'data25_' in inputFlags.Input.ProjectName # SET TO TRUE FOR ALL DATA25 TAGS FOR OO DEV TESTING ||| [PRODUCTION] 'pO' in config
-    zdcMonAlg.IspOMode = True
+    zdcMonAlg.IspOMode = 'pO' in config
     zdcMonAlg.IsOOMode = 'OO' in config
-    zdcMonAlg.EnableOOpOTriggers = (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and inputFlags.DQ.useTrigger and ('physics_' in inputFlags.Input.TriggerStream or inputFlags.Input.TriggerStream == 'calibration_ZDCCalib') # DEVELOPMENT STAGE: enable track reco for any ANY stream (including PEB) ||| [PRODUCTION] (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and inputFlags.DQ.useTrigger and inputFlags.Input.TriggerStream == 'physics_MinBias' # enable OOpO triggers for O+O run
-    zdcMonAlg.TrkInfoOn = (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and 'physics_' in inputFlags.Input.TriggerStream # DEVELOPMENT STAGE: enable track reco for any physics stream ||| [PRODUCTION] (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and inputFlags.Input.TriggerStream == 'physics_MinBias' # enable track reco for O+O run
+    zdcMonAlg.EnableOOpOTriggers = (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and inputFlags.DQ.useTrigger and ('physics_' in inputFlags.Input.TriggerStream or inputFlags.Input.TriggerStream == 'calibration_ZDCCalib')
+    zdcMonAlg.TrkInfoOn = (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and (inputFlags.Input.TriggerStream == 'physics_MinBias' or inputFlags.Input.TriggerStream == 'physics_Standby')
 
     phys_stream_trig_map = {
-        "physics_MinBias": ["L1_MBTS_1","L1_jTE20","L1_ZDC_A_C_VjTE50","HLT_noalg_L1MBTS_1", "HLT_noalg_L1jTE20", "HLT_mb_sptrk_L1ZDC_A_C_VjTE50"],
+        "physics_MinBias": ['HLT_mb_sptrk_L1TRT_FILLED', 'HLT_mb_sptrk_L1jTE10', 'HLT_mb_sptrk_L1ZDC_OR', 'HLT_mb_sptrk_L1ZDC_LOR', 'HLT_noalg_L1ZDC_OR_EMPTY', 'HLT_noalg_L1ZDC_OR_UNPAIRED_NONISO', 'HLT_noalg_L1ZDC_LOR_EMPTY', 'HLT_noalg_L1ZDC_LOR_UNPAIRED_NONISO'],
         "physics_UPC": ["L1_ZDC_XOR_jTE10_VjTE200", "L1_TRT_VjTE50", "L1_1ZDC_NZDC_jTE10_VjTE200", "L1_5ZDC_A_5ZDC_C_jTE5_VjTE200", "HLT_noalg_L1TRT_VjTE50"],
         "physics_PC": ["HLT_mb_sptrk_L1ZDC_A_C_VTE50", "L1_ZDC_A_C_VTE50", "HLT_noalg_pc_L1TE50_VTE600.0ETA49", "L1_TE50_VTE600.0ETA49"], #Run2; ["HLT_noalg_L1jTE50_VjTE600", "HLT_mb_sptrk_pc_L1ZDC_A_C_VjTE50", "L1_jTE50_VjTE600", "L1_ZDC_A_C_VjTE50"] for #Run3 
-        "physics_Standby": ["L1_ZDC_OR", "L1_ZDC_LOR", "L1_ZDC_A_AND_C", "L1_TRT_FILLED", "L1_jTE20"]
+        "physics_Standby": ["HLT_noalg_L1Standby"]
     }
 
     OOpOTriggerChains = phys_stream_trig_map.get(inputFlags.Input.TriggerStream, [])
 
-    OOpOZdcCalibL1TriggerMap = {
-        331: "L1_ZDC_OR",
-        332: "L1_ZDC_A_AND_C",
-        345: "L1_ZDC_LOR"
+    OOpOCTPIDtoL1TriggerStreamMap = {
+        "calibration_ZDCCalib": {
+            331: "L1_ZDC_OR",
+            345: "L1_ZDC_LOR",
+            200: "L1_ZDC_A_C"
+        },
+        "physics_MinBias": {
+            120: 'L1_jTE10',
+        },
+        "physics_Standby": {
+            331: "L1_ZDC_OR",
+            345: "L1_ZDC_LOR",
+            1: "L1_TRT_FILLED",
+            121: "L1_jTE20"
+        }
     }
 
-    if inputFlags.Input.TriggerStream == 'calibration_ZDCCalib':
-        OOpOTriggerChains = list(OOpOZdcCalibL1TriggerMap.values())
+    OOpOCTPIDtoL1TriggerMap = OOpOCTPIDtoL1TriggerStreamMap.get(inputFlags.Input.TriggerStream, {})
+    OOpOL1TriggerChainsFromCTP = list(OOpOCTPIDtoL1TriggerMap.values())
+    OOpOTriggerChains += OOpOL1TriggerChainsFromCTP
 
     zdcMonAlg.OOpOTriggers = OOpOTriggerChains
-    zdcMonAlg.OOpOPEBtriggerMap = OOpOZdcCalibL1TriggerMap
+    zdcMonAlg.OOpOL1TriggerFromCTPIDMap = OOpOCTPIDtoL1TriggerMap
 
     zdcMonAlg.RunNumber = inputFlags.Input.RunNumbers[0] if len(inputFlags.Input.RunNumbers) > 0 else 0
     if (len(inputFlags.Input.RunNumbers) == 0):
@@ -185,7 +195,7 @@ def ZdcMonitoringConfig(inputFlags):
     zdcMonAlg.ZDCModuleChisqOverAmpHistMaxvalue = module_chisq_over_amp_max
     zdcMonAlg.ZDCModuleChisqOverAmpHistNumBins = module_chisq_over_amp_nbins
     
-    zdcMonAlg.EnergyCutForModuleFractMonitor = 402 if zdcMonAlg.IsPPMode else 13400
+    zdcMonAlg.EnergyCutForModuleFractMonitor = 400 if zdcMonAlg.IsPPMode or zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode else 13400
     zdcMonAlg.triggerSideA = "L1_ZDC_PP_A" if zdcMonAlg.IsPPMode else "L1_ZDC_A"
     zdcMonAlg.triggerSideC = "L1_ZDC_PP_C" if zdcMonAlg.IsPPMode else "L1_ZDC_C"
 # --------------------------------------------------------------------------------------------------
@@ -328,9 +338,9 @@ def ZdcMonitoringConfig(inputFlags):
 
     elif zdcMonAlg.IspOMode:  ########### overwrite for OO mode ###########
         print ("looking at pO data")
-        energy_sum_xmax = 53600. # 20N
-        energy_sum_two_sides_xmax_TeV = 120. #22.4N per side
-        energy_sum_single_side_xmax_TeV = 60.0
+        energy_sum_xmax = 30000.
+        energy_sum_two_sides_xmax_TeV = 40. #22.4N per side
+        energy_sum_single_side_xmax_TeV = 20.0
         energy_sum_zoomin_xmax = 13000.0 #4.85N (tail of 4N)
         uncalib_amp_sum_zoomin_xmax = 7200.0 #tail of 4N
         time_in_data_buffer = 75. #75 ns (3 BCID's) in buffer
@@ -348,14 +358,14 @@ def ZdcMonitoringConfig(inputFlags):
         module_amp_1Nmonitor_xmax = 1250.0 #about 5N / 4 * 2.7TeV
         module_calib_amp_1Nmonitor_xmax = 3400.0 #about 5N / 4 * 2.7TeV
         fCal_single_side_min = -0.05 # overwrite FCal binning
-        fCal_single_side_max = 0.75
-        fCal_sum_min = -0.1
-        fCal_sum_max = 1.5
-        fCal_single_side_nbins = 160
-        fCal_sum_nbins = 160
+        fCal_single_side_max = 0.2
+        fCal_sum_min = -0.05
+        fCal_sum_max = 0.35
+        fCal_single_side_nbins = 100
+        fCal_sum_nbins = 100
         total_Et_sum_min = -0.1 # overwrite total ET binning 
-        total_Et_sum_max = 1.5
-        total_Et_sum_nbins = 160
+        total_Et_sum_max = 0.5
+        total_Et_sum_nbins = 120
         ntrack_min = 0 # overwrite NTrk binning 
         ntrack_max = 1200
         ntrack_nbins = 120

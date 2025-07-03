@@ -14,7 +14,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 from ZdcRecConfig import ZdcGenericFlagSetting, ZdcStreamDependentFlagSetting
 
-from ZdcPhysRecConfig import FCalRecCfg, ZdcFCalAdditionalFlagSetting
+from ZdcPhysRecConfig import FCalRecCfg, PhysStreamAdditionalFlagSetting
 
 import os
 import ispy
@@ -60,7 +60,7 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
     
     log.debug ('Setting additional flags for online environment')
 
-    flags.Concurrency.NumThreads = 1 
+    flags.Concurrency.NumThreads = 1
     flags.Common.isOnline = True
     flags.DQ.Environment = 'online'
     flags.DQ.enableLumiAccess = False
@@ -68,7 +68,7 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
     flags.DQ.doStreamAwareMon = False
     flags.DQ.FileKey = ""
 
-    flags.IOVDb.GlobalTag="CONDBR2-HLTP-2024-02"
+    flags.IOVDb.GlobalTag='CONDBR2-HLTP-2025-02'
     flags.Trigger.triggerConfig = 'DB'
 
     flags.LAr.doHVCorr = False
@@ -92,7 +92,8 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
             flags.addFlag('DQ.Steering.' + flag, False)
 
     # ------------------------------- turn off trigger flags for online environment -------------------------------
-    _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1.doCTP', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doCalo', 'doID', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
+    # _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doCalo', 'doID', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
+    _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
 
     for flag in _triggerFlags:
         if flags.hasFlag('Trigger.' + flag):
@@ -258,12 +259,12 @@ def ZdcOnlineRecoFlagSettings(flags):
         flags.Output.doWriteAOD=True
 
     # Manually set the Input.TriggerStream flag based on the environmental variable ZDC_STREAM_NAME
-    # Must preceed calling ZdcFCalAdditionalFlagSetting and ZdcStreamDependentFlagSetting
+    # Must preceed calling PhysStreamAdditionalFlagSetting and ZdcStreamDependentFlagSetting
     if partition.isValid():
         ZdcOnlineProjectNameManualSetting(flags, isTestbed)
         ZdcOnlineTriggerStreamManualSetting(flags, partition, isTestbed)
     
-    ZdcFCalAdditionalFlagSetting(flags)
+    PhysStreamAdditionalFlagSetting(flags)
 
     # stream-dependent flag setting
     isLED, isInj, isCalib, pn = ZdcStreamDependentFlagSetting(flags)
@@ -271,7 +272,8 @@ def ZdcOnlineRecoFlagSettings(flags):
     from ZdcRec.ZdcRecConfig import SetConfigTag
     config = SetConfigTag(flags)
 
-    flags.Trigger.decodeHLT = flags.DQ.useTrigger and 'physics_' in flags.Input.TriggerStream # development stage ||| [PRODUCTION] ('pO' in config or 'OO' in config) and flags.DQ.useTrigger and flags.Input.TriggerStream == 'physics_MinBias'
+    #decode HLT for when HLT trigger selections are needed (OO/pO/NeNe - adjust if needed)
+    flags.Trigger.decodeHLT = ('pO' in config or 'OO' in config) and flags.DQ.useTrigger and flags.Input.TriggerStream == 'physics_MinBias'
 
     return isLED, isInj, isCalib, pn, config
 
