@@ -10,9 +10,18 @@
 
 
 def SCTErrMonAlgConfig(flags):
+    import logging
+    local_logger = logging.getLogger('AthenaMonitoringCfg')
+    info = local_logger.info
+    info('SCTErrMonAlgConfig')
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
+
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if flags.Common.isOnline:
+        result.merge(addFolders(flags,'/TDAQ/RunCtrl/DataTakingMode','TDAQ',className='AthenaAttributeList'))
+        info('SCTErrMonAlgConfig: added DATA COOL folders')
 
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, 'SCTErrMonCfg')

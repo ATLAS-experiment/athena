@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
@@ -10,7 +10,6 @@ from AthenaCommon.CFElements import parOR, seqAND, findAlgorithmByPredicate
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
-import GaudiConfig2
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
@@ -59,10 +58,6 @@ class AlgNode(Node):
         self.outputProp = outputProp
         self.inputProp = inputProp
 
-    def addDefaultOutput(self):
-        if self.outputProp != '':
-            self.addOutput(("%s_%s"%(self.Alg.getName(),self.outputProp)))
-
     def setPar(self, propname, value):
         cval = getattr( self.Alg, propname)
         if isinstance(cval, MutableSequence):
@@ -70,22 +65,6 @@ class AlgNode(Node):
             return setattr(self.Alg, propname, cval)
         else:
             return setattr(self.Alg, propname, value)
-
-    def resetPar(self, prop):
-        cval = getattr(self.Alg, prop)
-        if isinstance(cval, MutableSequence):
-            return setattr(self.Alg, prop, [])
-        else:
-            return setattr(self.Alg, prop, "")
-
-    def getPar(self, prop):
-        return getattr(self.Alg, prop)
-
-    def resetOutput(self):
-        self.resetPar(self.outputProp)
-
-    def resetInput(self):
-        self.resetPar(self.inputProp)
 
     def addOutput(self, name):
         outputs = self.readOutputList()
@@ -99,7 +78,7 @@ class AlgNode(Node):
         Node.addOutput(self, name)
 
     def readOutputList(self):
-        cval = self.getPar(self.outputProp)
+        cval = getattr(self.Alg, self.outputProp)
         return (cval if isinstance(cval, MutableSequence) else
                 ([str(cval)] if cval else []))
 
@@ -116,7 +95,7 @@ class AlgNode(Node):
         return len(self.readInputList())
 
     def readInputList(self):
-        cval = self.getPar(self.inputProp)
+        cval = getattr(self.Alg, self.inputProp)
         return (cval if isinstance(cval, MutableSequence) else
                 ([str(cval)] if cval else []))
 
@@ -124,7 +103,7 @@ class AlgNode(Node):
         return "Alg::%s  [%s] -> [%s]"%(self.Alg.getName(), ' '.join(map(str, self.getInputList())), ' '.join(map(str, self.getOutputList())))
 
 
-class HypoToolConf(object):
+class HypoToolConf:
     """ Class to group info on hypotools for ChainDict"""
     def __init__(self, hypoToolGen):
         # Check if the generator function takes flags:
@@ -201,8 +180,6 @@ class InputMakerNode(AlgNode):
     def __init__(self, Alg):
         assert isInputMakerBase(Alg), "Error in creating InputMakerNode from Alg "  + Alg.name
         AlgNode.__init__(self,  Alg, 'InputMakerInputDecisions', 'InputMakerOutputDecisions')
-        self.resetInput()
-        self.resetOutput() ## why do we need this in CA mode??
         input_maker_output = CFNaming.inputMakerOutName(self.Alg.name)
         self.addOutput(input_maker_output)
 
@@ -210,8 +187,6 @@ class InputMakerNode(AlgNode):
 class ComboHypoNode(AlgNode):
     """AlgNode for Combo HypoAlgs"""
     def __init__(self, name, comboHypoCfg):
-        self.prop1 = "MultiplicitiesMap"
-        self.prop2 = "LegToInputCollectionMap"
         self.comboHypoCfg = comboHypoCfg
         self.acc = self.create( name )        
         thealgs= self.acc.getEventAlgos()
@@ -223,11 +198,6 @@ class ComboHypoNode(AlgNode):
 
         log.debug("ComboHypoNode init: Alg %s", name)
         AlgNode.__init__(self,  Alg, 'HypoInputDecisions', 'HypoOutputDecisions')
-        self.resetInput()
-        self.resetOutput() ## why do we need this in CA mode??
-        # reset the chains, why do we need to do it?
-        setattr(self.Alg, self.prop1, {})
-        setattr(self.Alg, self.prop2, {})
 
     def __del__(self):
         self.acc.wasMerged()
@@ -265,26 +235,16 @@ class ComboHypoNode(AlgNode):
             log.error("Check why ComboHypoNode.addInput(...) was not called exactly once per leg.")
             raise Exception("[createDataFlow] Error in ComboHypoNode.addChain. Cannot proceed.")
 
-        cval1 = getattr(self.Alg, self.prop1)  # check necessary to see if chain was added already?
-        cval2 = getattr(self.Alg, self.prop2)
-        if type(cval1) is dict or isinstance(cval1, GaudiConfig2.semantics._DictHelper):
-            if chainName in cval1.keys():
-                log.error("ERROR in configuration: ComboAlg %s has already been configured for chain %s", self.Alg.name, chainName)
-                raise Exception("[createDataFlow] Error in ComboHypoNode.addChain. Cannot proceed.")
-            else:
-                cval1[chainName] = chainMult
-                cval2[chainName] = legsToInputCollections
+        if chainName in self.Alg.MultiplicitiesMap:
+            log.error("ComboAlg %s has already been configured for chain %s", self.Alg.name, chainName)
+            raise Exception("[createDataFlow] Error in ComboHypoNode.addChain. Cannot proceed.")
         else:
-            cval1 = {chainName : chainMult}
-            cval2 = {chainName : legsToInputCollections} 
+            self.Alg.MultiplicitiesMap[chainName] = chainMult
+            self.Alg.LegToInputCollectionMap[chainName] = legsToInputCollections
 
-        setattr(self.Alg, self.prop1, cval1)
-        setattr(self.Alg, self.prop2, cval2)
-        
 
     def getChains(self):
-        cval = getattr(self.Alg, self.prop1)
-        return cval.keys()
+        return self.Alg.MultiplicitiesMap.keys()
 
 
     def createComboHypoTools(self, flags, chainDict, comboToolConfs):
