@@ -27,13 +27,11 @@
 #include <memory>
 #include <algorithm>
 #include "FolderTypes.h"
-#include "BasicFolder.h"
 #include "IovStore.h"
 
 #include <map> 
 #include "nlohmann/json.hpp"
 
-#include "CrestFunctions.h"
 #include "CoralCrestManager.h"
 
 class MsgStream;
@@ -47,7 +45,6 @@ class ITagInfoMgr;
 
 namespace IOVDbNamespace {
   class Cool2Json;
-  class BasicFolder;
 }
 
 class IOVDbFolder : public AthMessaging {
@@ -242,11 +239,7 @@ private:
   std::vector<IOVHash> fetchCrestIOVs(cool::ValidityKey since, cool::ValidityKey until); 
 
   // Function which reads CREST objects by the cache IOV boundaries
-  std::vector<IOVDbNamespace::BasicFolder> fetchCrestObjects(cool::ValidityKey since
-		                                             , cool::ValidityKey until
-					                     , bool vectorPayloadFlag
-					                     , cool::ValidityKey vkey /* Temporary! */
-							     , const std::string& nodeDesc);
+  std::vector<IOVHash> fetchCrestObjects(cool::ValidityKey since, cool::ValidityKey until, cool::ValidityKey vkey);
 
   // __________________________________________________________
 
@@ -255,9 +248,8 @@ private:
 		, const cool::ValidityKey& vkey
 		, IOVDbNamespace::Cool2Json* json          // Argument for dumping COOL data
 		, bool skipCoolIoV                         // Argument for dumping COOL data
-		, IOVDbNamespace::BasicFolder* basicFolder // Argument for dumping CREST data
-		, const std::string& crestNodeDescr        // Argument for dumping CREST data
-		, const std::string& specString            // Argument for dumping CREST data
+		, CoralCrestManager* mng=NULL              // Argument for dumping CREST data
+		, const cool::ValidityKey crestVkey=0      // Argument for dumping CREST data
 	       ) const;
 
   ITagInfoMgr*         p_tagInfoMgr{nullptr};   // pointer to TagInfoMgr
@@ -330,7 +322,6 @@ private:
   const std::string m_crestServer;
   const std::string m_crestTag;
 
-  std::optional<IOVDbNamespace::CrestFunctions> m_cfunctions;
   std::optional<CoralCrestManager> m_crest_mng;
 };
 

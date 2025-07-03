@@ -25,7 +25,7 @@ void Crest::CrestContainer::setVectorPayload(bool isVectorPayload)
   m_isVectorPayload = isVectorPayload;
 }
 
-bool Crest::compareStrTimestamp(std::string& as, std::string& bs) {
+bool compareStrTimestamp(std::string& as, std::string& bs) {
     auto a = std::stol(as);
     auto b = std::stol(bs);   
     return a < b;
@@ -62,7 +62,6 @@ void Crest::CrestContainer::addNullRecord(const std::string&name)
 
 void Crest::CrestContainer::addRecord(const std::string&name, int number, ...)
 {
-
   va_list ap;
   va_start(ap, number);
 
@@ -76,7 +75,7 @@ void Crest::CrestContainer::addRecord(const std::string&name, int number, ...)
     switch (column.second)
     {
     case TypeId::Bool:
-      m_row[name] = va_arg(ap, int);
+      m_row[name] = va_arg(ap, int)==1;
       break;
     case TypeId::UChar:
       m_row[name] = static_cast<unsigned char>(va_arg(ap, int));
@@ -103,8 +102,10 @@ void Crest::CrestContainer::addRecord(const std::string&name, int number, ...)
     case TypeId::String4k:
     case TypeId::String64k:
     case TypeId::String16M:
+    case TypeId::String128M:
     case TypeId::Blob64k:
     case TypeId::Blob16M:
+    case TypeId::Blob128M:
       m_row[name] = std::string(va_arg(ap, const char *));
       break;
     default:
@@ -184,7 +185,7 @@ std::vector<std::string> Crest::CrestContainer::channelIds(){
   for (auto& x : m_iov_data["data"].items()){
     chs.push_back(x.key());
   }
-  sort(chs.begin(), chs.end(), Crest::compareStrTimestamp);
+  sort(chs.begin(), chs.end(), compareStrTimestamp);
   return chs;
 }
 const std::vector<std::pair<std::string, Crest::TypeId>> &Crest::CrestContainer::getMPayloadSpec()
@@ -489,6 +490,7 @@ void Crest::CrestContainer::parseOldFormat(const std::string& colName, const Typ
     throw std::runtime_error(e.what());	  
   }
 }
+
 void Crest::CrestContainer::parseData(const nlohmann::json & values){
         if (values.is_array() && values.size() == m_payload_spec.size())
         {
@@ -558,8 +560,8 @@ void Crest::CrestContainer::parseData(const nlohmann::json & values){
             std::cerr << "CrestContainer::parseData values number="<<values.size() << " m_payload_spec.size()="<<m_payload_spec.size()<<std::endl;		  
 	  throw CommonCrestException("CrestContainer::parseData: Mismatch in number of values.");	
 	}
-
 }
+
 std::vector<uint64_t> Crest::CrestContainer::fromJson(uint64_t since,const nlohmann::json &j_in){
   if(m_modeId==Crest::ModeId::Standard)
   { 

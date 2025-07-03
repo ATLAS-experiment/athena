@@ -21,6 +21,10 @@
 #include "CrestApi/CrestApiBase.h"
 #include "CrestApi/CrestRequest.h"
 #include "FolderTypes.h"
+#include "CoolKernel/ChannelSelection.h"
+#include "CoolKernel/ValidityKey.h"
+#include "CoolKernel/IFolder.h"
+#include "CrestContainer.h"
 
 class CoralCrestManager {
 public:
@@ -47,6 +51,15 @@ public:
 
   bool isVectorPayload();
 
+  coral::AttributeListSpecification* getAttributeListSpec();
+  std::vector<std::pair<cool::ValidityKey,std::string>> getIovsForTag(uint64_t since, uint64_t until);
+  std::vector<uint64_t> loadPayloadForHash(uint64_t since,const std::string & hash);
+  std::vector<coral::AttributeList> getVectorPayload(coral::AttributeListSpecification*  pSpec,const std::string & chId);
+  std::string dumpPayload(cool::ValidityKey since);
+  coral::AttributeList getPayload(coral::AttributeListSpecification*  pSpec,const std::string & chId);
+  void selectIov(cool::ValidityKey since);
+  std::vector<std::string> channelIds(cool::ValidityKey since);
+
 private:
   std::unique_ptr<Crest::CrestApiBase> m_crestCl;
   const std::string m_crestTag;
@@ -54,5 +67,11 @@ private:
   std::optional<Crest::TagDto> m_Tag;
   std::optional<bool> m_isVectorPayload;
   std::string parseTypeName(const std::string & description);
+  coral::AttributeList createAttributeList(coral::AttributeListSpecification * pSpec,nlohmann::json& j ,const std::vector<std::pair<std::string, Crest::TypeId>> & tSpec);
+  std::pair<uint64_t,uint64_t> getIovInterval(const std::string&  tag, const uint64_t since, const uint64_t until);
+  std::pair<uint64_t,uint64_t> getSinceUntilPair(std::vector<uint64_t>& v, const uint64_t since, const uint64_t until);
+  void initCrestContainer();
+  std::optional<Crest::CrestContainer> m_crest_cont;
+
 };
 #endif
