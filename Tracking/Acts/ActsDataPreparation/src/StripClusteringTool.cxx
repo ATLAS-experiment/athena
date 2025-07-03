@@ -156,9 +156,8 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
       : dynamic_cast<const InDetDD::StripStereoAnnulusDesign&>(element->design()).phiPitchPhi();
     Eigen::Matrix<float,1,1> localCov(pitch * pitch * ONE_TWELFTH);
 
-    
     std::optional<std::pair<CellCollection,bool>> unpckd
-	= unpackRDOs(RDOs, stripID, stripDetElStatus, ctx);
+      = unpackRDOs(RDOs, stripID, stripDetElStatus, design, ctx);
     if (not unpckd.has_value()) {
 	ATH_MSG_FATAL("Error encountered while unpacking strip RDOs!");
 	return StatusCode::FAILURE;
@@ -191,6 +190,7 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 	// }
 
 	try {
+
 	  ATH_CHECK(makeCluster(cl,
 				lorentzShift,
 				localCov,
@@ -317,6 +317,7 @@ std::optional<std::pair<StripClusteringTool::CellCollection, bool>>
 StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& RDOs,
 				const StripID& stripID,
 				const InDet::SiDetectorElementStatus *stripDetElStatus,
+				const InDetDD::SiDetectorDesign& design,
 				const EventContext& ctx) const
 {
     CellCollection cells;
@@ -324,13 +325,13 @@ StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& R
     cells.reserve(60);
     bool badStripOnModule{false};
 
-    
+    size_t ncells = static_cast<size_t>(dynamic_cast<const InDetDD::SCT_ModuleSideDesign&>(design).cells());
+        
     // Simple single-entry cache
     Identifier::value_type waferId_compact_cache = 0;
     IdentifierHash waferHash_cache(0);
     bool cache_valid = false;
-    std::size_t strip_max_cache = 0;
-    
+        
     for (const StripRDORawData * raw : RDOs) {
 	const SCT3_RawData* raw3 = dynamic_cast<const SCT3_RawData*>(raw);
 	if (!raw3) {
@@ -346,21 +347,24 @@ StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& R
 
 	Identifier firstStripId = raw->identify();
 	Identifier waferId = stripID.wafer_id(firstStripId);
+
+	
 	Identifier::value_type waferId_compact = waferId.get_compact();
+
 	
 	// Check cache - will be invalid when switching wafer groups
 	if (!cache_valid || waferId_compact != waferId_compact_cache) {
 	  waferId_compact_cache = waferId_compact;
 	  waferHash_cache = stripID.wafer_hash(waferId);
-	  strip_max_cache = static_cast<std::size_t>(stripID.strip_max(waferId));
 	  cache_valid = true;
 	}
 	
 	size_t iFirstStrip = static_cast<size_t>(stripID.strip(firstStripId));
+	
 	size_t iMaxStrip = std::min(
 	    iFirstStrip + raw->getGroupSize(),
-	    strip_max_cache + 1
-        );
+	    ncells
+	    );
 	
 	for (size_t i = iFirstStrip; i < iMaxStrip; i++) {
 	    Identifier stripIdent = stripID.strip_id(waferId, i);
