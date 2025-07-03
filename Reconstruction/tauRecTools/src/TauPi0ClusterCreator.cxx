@@ -389,7 +389,7 @@ StatusCode TauPi0ClusterCreator::configureNeutralPFO(const xAOD::CaloCluster& cl
   if (!cluster.retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_MAG, CENTER_MAG)) {
     ATH_MSG_WARNING("Couldn't retrieve CENTER_MAG moment. Set it to 0.");
   }
-  neutralPFO.setCenterMag( (float) CENTER_MAG);
+  neutralPFO.setCenterMag( static_cast<float>(CENTER_MAG));
   
   // -- Number of photons 
   std::vector<unsigned> shotsInCluster = getShotsMatchedToCluster(shotPFOs, shotToClusterMap, cluster);

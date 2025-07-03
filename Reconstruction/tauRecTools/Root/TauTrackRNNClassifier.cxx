@@ -120,14 +120,14 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
     charge += trk->track()->charge();
   }
   xTau.setCharge(charge);
-  xTau.setDetail(xAOD::TauJetParameters::nChargedTracks, (int) xTau.nTracks());
-  xTau.setDetail(xAOD::TauJetParameters::nIsolatedTracks, (int) xTau.nTracks(xAOD::TauJetParameters::classifiedIsolation));
+  xTau.setDetail(xAOD::TauJetParameters::nChargedTracks, static_cast<int>(xTau.nTracks()));
+  xTau.setDetail(xAOD::TauJetParameters::nIsolatedTracks, static_cast<int>(xTau.nTracks(xAOD::TauJetParameters::classifiedIsolation)));
 
   // decorations for now, may be turned into Aux
   static const SG::Accessor<int> nTrkConv("nConversionTracks");
   static const SG::Accessor<int> nTrkFake("nFakeTracks");
-  nTrkConv(xTau) = (int) xTau.nTracks(xAOD::TauJetParameters::classifiedConversion);
-  nTrkFake(xTau) = (int) xTau.nTracks(xAOD::TauJetParameters::classifiedFake);
+  nTrkConv(xTau) = static_cast<int>(xTau.nTracks(xAOD::TauJetParameters::classifiedConversion));
+  nTrkFake(xTau) = static_cast<int>(xTau.nTracks(xAOD::TauJetParameters::classifiedFake));
 
   //set modifiedIsolationTrack
   for (xAOD::TauTrack* xTrack : vTracks) {
@@ -138,7 +138,7 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
       xTrack->setFlag(xAOD::TauJetParameters::modifiedIsolationTrack, false);
     }
   }
-  xTau.setDetail(xAOD::TauJetParameters::nModifiedIsolationTracks, (int) xTau.nTracks(xAOD::TauJetParameters::modifiedIsolationTrack));
+  xTau.setDetail(xAOD::TauJetParameters::nModifiedIsolationTracks, static_cast<int>(xTau.nTracks(xAOD::TauJetParameters::modifiedIsolationTrack)));
 
   return StatusCode::SUCCESS;
 }
@@ -368,13 +368,13 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
       valueMap["tanh(d0SigTJVA/10)"][i] = std::tanh( xTrack->d0SigTJVA()/10. );
       valueMap["tanh(d0TJVA/10)"][i] = std::tanh( xTrack->d0TJVA()/10. );
       valueMap["qOverP*1000"][i] = xTrackParticle->qOverP()*1000.;
-      valueMap["numberOfInnermostPixelLayerHits"][i] = (double) numberOfInnermostPixelLayerHits;
-      valueMap["numberOfPixelSharedHits"][i] = (double) nPixelSharedHits;
-      valueMap["numberOfSCTSharedHits"][i] = (double) nSCTSharedHits;
-      valueMap["numberOfTRTHits"][i] = (double) nTRTHits;
+      valueMap["numberOfInnermostPixelLayerHits"][i] = numberOfInnermostPixelLayerHits;
+      valueMap["numberOfPixelSharedHits"][i] = nPixelSharedHits;
+      valueMap["numberOfSCTSharedHits"][i] = nSCTSharedHits;
+      valueMap["numberOfTRTHits"][i] = nTRTHits;
       valueMap["eProbabilityHT"][i] = eProbabilityHT;
-      valueMap["nPixHits"][i] = (double) (nPixelHits + nPixelDeadSensors);
-      valueMap["nSCTHits"][i] = (double) (nSCTHits + nSCTDeadSensors);
+      valueMap["nPixHits"][i] = nPixelHits + nPixelDeadSensors;
+      valueMap["nSCTHits"][i] = nSCTHits + nSCTDeadSensors;
       valueMap["dz0_TV_PV0"][i] = dz0_TV_PV0;
       valueMap["log_sumpt_TV"][i] = log_sumpt_TV;
       valueMap["log_sumpt2_TV"][i] = log_sumpt2_TV;
@@ -383,8 +383,8 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
       valueMap["charge"][i] = xTrackParticle->charge();
       // used by RNN track classifier for upgrade
       valueMap["(trackPt/jetSeedPt)"][i] = xTrackParticle->pt()/xTau.ptJetSeed();
-      valueMap["numberOfInnermostPixelLayerEndcapHits"][i] = (double) numberOfInnermostPixelLayerEndcapHits;
-      valueMap["nSiHits"][i] = (double) nSiHits;
+      valueMap["numberOfInnermostPixelLayerEndcapHits"][i] = numberOfInnermostPixelLayerEndcapHits;
+      valueMap["nSiHits"][i] = nSiHits;
 
       ++i;
       if(m_nMaxNtracks > 0 && i >= m_nMaxNtracks) {
