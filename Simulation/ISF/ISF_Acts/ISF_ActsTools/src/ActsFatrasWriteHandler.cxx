@@ -63,7 +63,7 @@ void ActsFatrasWriteHandler::createHits(const ISF::ISFParticle& isp,
 {
     ATH_MSG_VERBOSE(name() << " particle " << isp << " with " << hits.size() << " hits");
     for (auto& hit:hits){
-      double energyDeposit = hit.depositedEnergy();
+      double energyDeposit = hit.depositedEnergy() * Acts::UnitConstants::MeV;
       double time          = hit.time();
 
       // get the ACTS geo identifier
