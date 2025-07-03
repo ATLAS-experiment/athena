@@ -86,7 +86,7 @@ def createTrigDisappearingTrackHypoAlgCfg(flags: AthConfigFlags, name : str) -> 
 
 
 
-def TrigDisappearingTrackHypoToolFromDict( chainDict ):
+def TrigDisappearingTrackHypoToolFromDict( flags, chainDict ):
 
     log = logging.getLogger('TrigDisappearingTrackHypoTool')
 

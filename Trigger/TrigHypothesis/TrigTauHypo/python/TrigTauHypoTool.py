@@ -191,7 +191,7 @@ def TrigTauPrecisionDiKaonHypoToolFromDict(flags, chainDict):
 #============================================================================================
 # Precision Tracking step hypothesis tool (without selection)
 #============================================================================================
-def TrigTauPrecTrackHypoToolFromDict(chainDict):
+def TrigTauPrecTrackHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
 
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -204,7 +204,7 @@ def TrigTauPrecTrackHypoToolFromDict(chainDict):
 #============================================================================================
 # FTF steps hypothesis tools (without selection)
 #============================================================================================
-def TrigTauFastTrackHypoToolFromDict(chainDict):
+def TrigTauFastTrackHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
 
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -217,7 +217,7 @@ def TrigTauFastTrackHypoToolFromDict(chainDict):
 #============================================================================================
 # CaloMVA step hypothesis tool
 #============================================================================================
-def TrigTauCaloMVAHypoToolFromDict(chainDict):
+def TrigTauCaloMVAHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
     threshold = float(chainDict['chainParts'][0]['threshold'])
 

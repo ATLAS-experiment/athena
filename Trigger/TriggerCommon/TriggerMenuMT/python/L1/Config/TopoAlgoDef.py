@@ -1809,8 +1809,8 @@ class TopoAlgoDef:
             alg.addgeneric('NumResultBits', len(toponames))
             for bitId in range(len(d.teFlavor)):
                 alg.addvariable('algoLogic', d.teFlavor[bitId] + ( d.combination[bitId] << 2 ) , bitId)  #two bit fields (of 2 bits each) merged into on FW register
-                alg.addvariable('nextBcOffset', round(d.nextBcOffset[bitId] * _et_conversion), bitId) #converted to units of 100MeV
                 alg.addvariable('nextBcFactor', round(d.nextBcFactor[bitId] * pow(2,8)), bitId) #integer representation of factor corresponding to 8 fractional bits
+                alg.addvariable('nextBcOffset', round(d.nextBcOffset[bitId] * _et_conversion), bitId) #converted to units of 100MeV
             tm.registerTopoAlgo(alg)
 
 

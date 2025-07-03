@@ -76,7 +76,7 @@ def getBeamspotVtxSequenceGenCfg(flags):
         beamspotViewsSequence.addHypoAlgo(beamspotHypoAlg)
 
         # Reject every event
-        def getRejectingHypoTool(chainDict): 
+        def getRejectingHypoTool(flags, chainDict): 
                 return CompFactory.TrigStreamerHypoTool(chainDict['chainName'],Pass=False)
 
         return  MenuSequence( flags,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import re
 
@@ -18,7 +18,7 @@ def createIDCalibHypoAlg(flags, name):
     return theHypo
 
 
-def IDCalibHypoToolFromDict( chainDict ):
+def IDCalibHypoToolFromDict(flags, chainDict):
 
     log = logging.getLogger('IDCalibHypoTool')
 

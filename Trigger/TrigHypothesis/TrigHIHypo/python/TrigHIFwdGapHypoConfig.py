@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TrigHIFwdGapHypoToolFromDict(chainDict):
+def TrigHIFwdGapHypoToolFromDict(flags, chainDict):
   """Configure the FCal-based forward gap hypo tool"""
 
   tool = CompFactory.TrigHIFwdGapHypoTool(chainDict['chainName'])

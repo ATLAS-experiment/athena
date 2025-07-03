@@ -31,8 +31,7 @@ from .PhaseII import (MC23PhaseIIPileUp1, MC23PhaseIIPileUp60, MC23PhaseIIPileUp
   MC23PhaseIISimulationNoIoV, MC23PhaseIISimulationSingleIoV, MC23PhaseIISimulation)
 from .Run2 import (Run2_2015_HeavyIons)
 
-from .DataOverlayRun2 import DataOverlayPPTest
-from .DataOverlayRun3 import DataOverlay2023
+from .DataOverlayRun3 import DataOverlay2023, DataOverlay2024
 from .Run1 import (Run1_2010NoPileUp, Run1_2011NoPileUp, Run1_2012NoPileUp, Run1_SimulationNoIoV,
                    Run1_2010_SimulationSingleIoV, Run1_2011_SimulationSingleIoV, Run1_2012_SimulationSingleIoV)
 
@@ -67,7 +66,7 @@ __all__ = [
   'MC23PhaseIIPileUpMC21a', 'MC23PhaseIINoPileUp',
   'MC23PhaseIISimulationNoIoV', 'MC23PhaseIISimulationSingleIoV', 'MC23PhaseIISimulation',
   'Run2_2015_HeavyIons',
-  'DataOverlayPPTest', 'DataOverlay2023',
+  'DataOverlay2023', 'DataOverlay2024',
   'Run1_2010NoPileUp', 'Run1_2011NoPileUp', 'Run1_2012NoPileUp', 'Run1_SimulationNoIoV',
   'Run1_2010_SimulationSingleIoV', 'Run1_2011_SimulationSingleIoV', 'Run1_2012_SimulationSingleIoV',
 ]

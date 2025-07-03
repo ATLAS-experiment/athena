@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -11,7 +11,7 @@ import AthenaCommon.SystemOfUnits as Units
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 
-def TrackCountHypoToolGen(chainDict):
+def TrackCountHypoToolGen(flags, chainDict):
     hypo = CompFactory.TrackCountHypoTool(chainDict["chainName"])
     hypo.minNtrks = 1
     return hypo

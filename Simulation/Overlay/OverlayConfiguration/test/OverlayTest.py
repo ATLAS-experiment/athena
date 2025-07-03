@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run tests for MC+MC or MC+data overlay
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 
@@ -62,8 +62,8 @@ if args.dump:
     pass
 acc.merge(DigitizationMessageSvcCfg(flags))
 if flags.Overlay.DataOverlay:
-    from OverlayConfiguration.DataOverlayConditions import PPTestCfg
-    acc.merge(PPTestCfg(flags))
+    from OverlayConfiguration.DataOverlayConditions import DataOverlay2023Cfg
+    acc.merge(DataOverlay2023Cfg(flags))
 
 # Count algorithm misses
 if flags.Concurrency.NumThreads > 0:

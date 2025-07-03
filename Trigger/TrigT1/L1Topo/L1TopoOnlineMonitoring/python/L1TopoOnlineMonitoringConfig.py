@@ -9,7 +9,7 @@ def getL1TopoOnlineMonitorHypo(flags):
     hypo = CompFactory.L1TopoOnlineMonitorHypo()
     return hypo
 
-def L1TopoOnlineMonitorHypoToolGen(chainDict):
+def L1TopoOnlineMonitorHypoToolGen(flags, chainDict):
     tool = CompFactory.L1TopoOnlineMonitorHypoTool(
         chainDict['chainName'],
         # Select error flags to accept events

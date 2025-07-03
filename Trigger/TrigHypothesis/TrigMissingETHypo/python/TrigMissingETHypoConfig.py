@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TrigMETHypoToolFromDict(chainDict):
+def TrigMETHypoToolFromDict(flags, chainDict):
     """Configure the Missing ET hypo tool"""
     return CompFactory.TrigMissingETHypoTool(
             chainDict["chainName"],
