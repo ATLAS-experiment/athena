@@ -13,6 +13,7 @@ usage () {
     -i  |  --inputRDO       STRING      full path to input RDO file (mandatory)
     -o  |  --outputAOD      STRING      name of the output AOD file (mandatory)
     -x  |  --xclbin         STRING      path to the xclbin that needs to be run
+    -b  |  --bdfid          STRING      bdfid of the FPGA to run on
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
     -s  |  --skipCheck                  skip checks on output AOD file
     -f  |  --runF110                    run F110 Integration algo
@@ -24,6 +25,7 @@ usage () {
 }
 
 xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin"
+bdfid="0000:c3:00.1"
 
 # ttbar sample
 inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"
@@ -45,6 +47,7 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
+        -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    storeClusters=True ;;
         -f  | --runF110 )       runF110=True ;;
@@ -70,7 +73,7 @@ Reco_tf.py --CA \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
     --preExec "flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
-                flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
+                flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
