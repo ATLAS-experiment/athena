@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from typing import Optional
 import importlib, re, string
@@ -669,7 +669,4 @@ def makeHLTTree(flags, chainConfigs):
     from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
     generateDefaultMonitoringJSON(flags, HLTMenuConfig.dictsList())
 
-
-    from AthenaCommon.CFElements import checkSequenceConsistency 
-    checkSequenceConsistency(steps)
     return acc, CFseq_list
