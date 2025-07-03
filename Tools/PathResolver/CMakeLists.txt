@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PathResolver )
@@ -35,8 +35,9 @@ set( _dpath "${CMAKE_CURRENT_SOURCE_DIR}/test/A:${_dpath}" )
 # Test(s) in the package:
 atlas_add_test( PathResolver_test
    SOURCES test/PathResolver_test.cxx
-   LINK_LIBRARIES PathResolver
-   ENVIRONMENT "DATAPATH=${_dpath}:$ENV{DATAPATH}" )
+   LINK_LIBRARIES CxxUtils PathResolver
+   ENVIRONMENT "DATAPATH=${_dpath}:$ENV{DATAPATH}"
+   LOG_IGNORE_PATTERN "MessageSvc not found" )
 
 # Skip the runtime environment setup in release rebuilding mode:
 if( ATLAS_RELEASE_MODE )

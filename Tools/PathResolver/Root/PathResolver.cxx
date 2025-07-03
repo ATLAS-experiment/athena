@@ -77,7 +77,7 @@ namespace {
       case DevAreaResponse::ERROR: level = MSG::ERROR; break;
       default: /* do nothing use the cases above */ ;
       }
-      asgmsg.msg(level) << "Locating dev file " << logical_file_name << ". Do not let this propagate to a release" << endmsg;
+      asgmsg.msg(level) << "Locating dev file " << logical_file_name << ". Do not let this propagate to a release!" << endmsg;
       if (dev_area_response == DevAreaResponse::THROW) {
         throw std::runtime_error(
           "dev area file " + logical_file_name + " is not allowed! "
