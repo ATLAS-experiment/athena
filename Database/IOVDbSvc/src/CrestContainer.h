@@ -53,7 +53,7 @@ namespace Crest {
   /**
     * @brief It compares timestamp in string format.
   */
-  static bool compareStrTimestamp(std::string& as, std::string& bs);
+  //static bool compareStrTimestamp(std::string& as, std::string& bs);
 
   class CrestContainer{
     public:

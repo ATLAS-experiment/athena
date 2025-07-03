@@ -19,7 +19,6 @@
 #include "../src/IOVDbParser.h"
 #include "../src/IOVDbConn.h"
 #include "../src/IOVDbFolder.h"
-#include "../src/CrestFunctions.h"
 #include "../src/IOVDbStringFunctions.h"
 #include "../src/CoralCrestManager.h"
 //
@@ -110,7 +109,6 @@ public:
   void startCrest(){
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
     std::map<std::string, std::string> cresttagmap;
-    IOVDbNamespace::CrestFunctions cfunctions(m_crest_str);
     cresttagmap.clear();
     cresttagmap = CoralCrestManager::getGlobalTagMap(m_crest_str,m_gTagCrest);
     m_crest_tag = cresttagmap[m_folder];
