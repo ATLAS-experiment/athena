@@ -79,7 +79,6 @@ if __name__ == "__main__":
     flags.Acts.doRotCorrection = False
     # IDPVM flags
     flags.PhysVal.IDPVM.doExpertOutput   = True
-    flags.PhysVal.IDPVM.doPhysValOutput  = False
     flags.PhysVal.IDPVM.doHitLevelPlots = True
     flags.PhysVal.IDPVM.runDecoration = True
     flags.PhysVal.IDPVM.validateExtraTrackCollections = [f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"]
