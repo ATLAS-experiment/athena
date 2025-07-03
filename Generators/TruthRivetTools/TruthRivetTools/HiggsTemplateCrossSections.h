@@ -320,12 +320,19 @@ namespace Rivet {
     /// @{
 
     /// @brief Return bin index of x given the provided bin edges. 0=first bin, -1=underflow bin.
-    int getBin(double x, const std::vector<double>& bins) const {
-      if (bins.size()==0||x<bins[0]) return -1; // should not happen!
-      for (size_t i=1;i<bins.size();++i)
-        if (x<bins[i]) return i-1;
-      return bins.size()-1;
+int getBin(double x, const std::vector<double>& bins) const {
+    if (bins.empty() || x < bins.front()) {
+        throw std::invalid_argument("Input value is out of bin range or bins vector is empty.");
     }
+
+    for (size_t i = 1; i < bins.size(); ++i) {
+        if (x < bins[i]) {
+            return static_cast<int>(i - 1);
+        }
+    }
+
+    return static_cast<int>(bins.size() - 1);
+}
 
     /// @brief VBF topolog selection
     /// 0 = fail loose selction: m_jj > 400 GeV and Dy_jj > 2.8
