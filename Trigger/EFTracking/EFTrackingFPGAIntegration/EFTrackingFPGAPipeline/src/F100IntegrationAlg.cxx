@@ -168,9 +168,11 @@ namespace EFTrackingFPGAIntegration
 
         // Create EDMPrep kernel object and connect to buffers
         cl::Kernel edmPrepKernel(m_program, m_edmKernelName.value().data());
-        cl::Kernel pixelEdmPrepKernel(m_program, m_pixelEdmKernelName.value().data());
-        cl::Kernel stripEdmPrepKernel(m_program, m_stripEdmKernelName.value().data());
+        cl::Kernel pixelEdmPrepKernel;
+        cl::Kernel stripEdmPrepKernel;
         if (m_doF110) {
+            pixelEdmPrepKernel = cl::Kernel(m_program, m_pixelEdmKernelName.value().data());
+            stripEdmPrepKernel = cl::Kernel(m_program, m_stripEdmKernelName.value().data());
             pixelEdmPrepKernel.setArg<cl::Buffer>(0, m_pixelClusterEDMOutputBufferList[bufferIndex]);
             pixelEdmPrepKernel.setArg<cl::Buffer>(1, m_edmPixelOutputBufferList[bufferIndex]);
             stripEdmPrepKernel.setArg<cl::Buffer>(0, m_stripL2GEDMOutputBufferList[bufferIndex]);

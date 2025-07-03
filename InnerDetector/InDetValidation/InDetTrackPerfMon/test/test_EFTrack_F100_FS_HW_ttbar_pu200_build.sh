@@ -30,6 +30,11 @@ IDTPMjsonConfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -nam
 dcubeXmlIDTPMconfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXmlIDTPMconfig -print -quit 2>/dev/null )
 cwd=$(pwd)
 
+doF110=0
+xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin"
+bdfid="0000:c3:00.1"
+
+
 run () {
     name="${1}"
     cmd="${@:2}"
@@ -57,7 +62,9 @@ run () {
 while [ $# -ge 1 ]; do
     case "$1" in
         --) shift ; break ;;
-        -f | --doF110 ) doF110="1" ;;
+        -f  | --doF110 )        if [ $# -lt 1 ] ; then usage ; fi ; doF110="1" ;;
+        -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
+        -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         *) shift ;;
     esac
     shift
@@ -76,13 +83,17 @@ if [ "$doF110" == "1" ]; then
       runReco_F100_FS_HW.sh \
         -i ${InputRDOfiles} \
         -f \
-        -o "${OutSampleName}.AOD.pool.root"
+        -o "${OutSampleName}.AOD.pool.root" \
+        -x ${xclbinPath} \
+        -b ${bdfid}
         #-n 10
 else
     run "${pipelineName}" \
       runReco_F100_FS_HW.sh \
         -i ${InputRDOfiles} \
-        -o "${OutSampleName}.AOD.pool.root"
+        -o "${OutSampleName}.AOD.pool.root" \
+        -x ${xclbinPath} \
+        -b ${bdfid}
         #-n 10
 fi
 

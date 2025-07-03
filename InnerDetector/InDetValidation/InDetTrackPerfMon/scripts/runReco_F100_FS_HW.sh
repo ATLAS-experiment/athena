@@ -13,8 +13,10 @@ usage () {
     -i  |  --inputRDO       STRING      full path to input RDO file (mandatory)
     -o  |  --outputAOD      STRING      name of the output AOD file (mandatory)
     -x  |  --xclbin         STRING      path to the xclbin that needs to be run
+    -b  |  --bdfid          STRING      bdfid of the FPGA to run on
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
     -s  |  --skipCheck                  skip checks on output AOD file
+    -f  |  --doF110                     run F110 Integration algo
     -h  |  --help                       this help
     "
     [ $# -gt 0 ] && exit $1
@@ -46,7 +48,9 @@ inputRDO=""
 outputAOD=""
 nEvents="-1"
 skipCheck=0
+doF110=0
 xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin"
+bdfid="0000:c3:00.1"
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -56,6 +60,7 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
+        -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; doClusters="1" ;;
         -f  | --doF110 )        if [ $# -lt 1 ] ; then usage ; fi ; doF110="1" ;;
@@ -87,6 +92,7 @@ if [ "$doClusters" == "1" ]; then
             -o ${outputAOD} \
             -n ${nEvents} \
             -x ${xclbinPath} \
+            -b ${bdfid} \
             -f \
             -c
     else
@@ -96,6 +102,7 @@ if [ "$doClusters" == "1" ]; then
             -o ${outputAOD} \
             -n ${nEvents} \
             -x ${xclbinPath} \
+            -b ${bdfid} \
             -c
     fi
 elif [ "$doF110" == "1" ]; then
@@ -105,6 +112,7 @@ elif [ "$doF110" == "1" ]; then
         -o ${outputAOD} \
         -n ${nEvents} \
         -x ${xclbinPath} \
+        -b ${bdfid} \
         -f \
         -c
 else
@@ -113,6 +121,7 @@ else
         -i ${inputRDO} \
         -o ${outputAOD} \
         -x ${xclbinPath} \
+        -b ${bdfid} \
         -n ${nEvents}
 fi
 
