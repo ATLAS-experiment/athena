@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.Enums import LHCPeriod
 import AthenaCommon.SystemOfUnits as Units
@@ -21,7 +21,6 @@ def createIDPVMConfigFlags():
     icf.addFlag("doValidateMergedLargeD0Tracks", False )
     icf.addFlag("doValidateLowPtRoITracks",False)
     icf.addFlag("doRecoOnly", False )
-    icf.addFlag("doPhysValOutput", False )
     icf.addFlag("doExpertOutput", False )
     icf.addFlag("doTruthOriginPlots", False )
     icf.addFlag("doPerAuthorPlots", False )

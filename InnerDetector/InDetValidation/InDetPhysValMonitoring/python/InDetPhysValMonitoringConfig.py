@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetPhysValMonitoringConfig.py
@@ -225,11 +225,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
                                                else [flags.Tracking.MainPass.minClusters]) # Configurable hits per eta bins for determining a "reconstructable" particle
 
     # Control the number of output histograms
-    if flags.PhysVal.IDPVM.doPhysValOutput:
-        kwargs.setdefault("DetailLevel", 100)
-
-    elif flags.PhysVal.IDPVM.doExpertOutput:
-        kwargs.setdefault("DetailLevel", 200)
+    kwargs.setdefault("DetailLevel", 200 if flags.PhysVal.IDPVM.doExpertOutput else 100)
 
     kwargs.setdefault("doPRW", flags.PhysVal.IDPVM.doPRW)
 

@@ -70,7 +70,6 @@ if MyArgs.truthMinPt is None:
                                 
 flags.PhysVal.IDPVM.setTruthStrategy = MyArgs.HSFlag
 flags.PhysVal.IDPVM.doExpertOutput   = MyArgs.doExpertPlots or MyArgs.doPerAuthor
-flags.PhysVal.IDPVM.doPhysValOutput  = not MyArgs.doExpertPlots
 flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple = MyArgs.doTruthToRecoNtuple
 flags.PhysVal.IDPVM.doIDTIDE= MyArgs.doIDTIDE
 if MyArgs.doTracksInJets:
