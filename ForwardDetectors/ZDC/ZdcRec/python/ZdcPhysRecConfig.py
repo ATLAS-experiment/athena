@@ -10,18 +10,20 @@ from ZdcNtuple.ZdcNtupleConfig import ZdcNtupleCfg
 from ZdcRecConfig import ZdcGenericFlagSetting, ZdcStreamDependentFlagSetting
 
 # -------------------------------- Configuration function for calorimeter & HIGlocal reconstructions -------------------------------- 
-def ZdcFCalAdditionalFlagSetting(flags):
+def PhysStreamAdditionalFlagSetting(flags):
     """additional flag settings in possible scenarios we may need FCal info"""
 
     # turn necessary trigger inputs on if need ZDC triggers (ZdcCalib or UCC stream)
-    if (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_UCC"):
-        flags.Trigger.L1.doCaloInputs = True
+    
+    IsPhysicsStream = "physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express"
+
+    if flags.Input.TriggerStream == "calibration_ZDCCalib" or IsPhysicsStream:
         flags.Trigger.L1.doCTP = True
 
-    # turn off Detector.EnableCalo for none-physics stream
-    if not (flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC"):
-        flags.Detector.EnableCalo = False
+    if IsPhysicsStream:
+        flags.Trigger.L1.doCaloInputs = True
 
+    flags.Detector.EnableCalo = IsPhysicsStream
 
 def FCalRecCfg(flags):
     """Calorimeter and HIGlobal reconstruction config for ZDC-FCal correlations"""
@@ -79,7 +81,7 @@ if __name__ == '__main__':
 
     ZdcGenericFlagSetting(flags) # set generic (stream-independent) ZDC flags
     
-    ZdcFCalAdditionalFlagSetting(flags)
+    PhysStreamAdditionalFlagSetting(flags)
 
     flags.Output.AODFileName="AOD.pool.root"
     flags.Output.HISTFileName="HIST.root"
@@ -90,7 +92,8 @@ if __name__ == '__main__':
     from ZdcRecConfig import SetConfigTag
     config = SetConfigTag(flags)
 
-    flags.Trigger.decodeHLT = flags.DQ.useTrigger and 'physics_' in flags.Input.TriggerStream # development stage ||| [PRODUCTION] ('pO' in config or 'OO' in config) and flags.DQ.useTrigger and flags.Input.TriggerStream == 'physics_MinBias'
+    #decode HLT for when HLT trigger selections are needed (OO/pO/NeNe - adjust if needed)
+    flags.Trigger.decodeHLT = ('pO' in config or 'OO' in config) and flags.DQ.useTrigger and flags.Input.TriggerStream == 'physics_MinBias'
 
     flags.lock()
     flags.dump(evaluate=True) # uncomment this line if needed for testing
