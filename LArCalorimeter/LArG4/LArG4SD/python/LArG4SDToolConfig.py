@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -225,17 +225,34 @@ def LArEMECSensitiveDetectorCfg(flags, name="LArEMECSensitiveDetector", **kwargs
                                                     merger_input_property,
                                                     region)
     result.merge(acc)
-
-    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2002","tb_LArH6EC_2002"]:
+    # Configuration when the EMEC is described with the custom solid implementation
+    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2002","tb_LArH6EC_2002"] and  not flags.GeoModel.EMECStandard :
         kwargs.setdefault("NegIWVolumes",["LArMgr::LAr::EMEC::Neg::InnerWheel"])
         kwargs.setdefault("NegOWVolumes",["LArMgr::LAr::EMEC::Neg::OuterWheel"])
         kwargs.setdefault("NegBOBarretteVolumes",["LArMgr::LAr::EMEC::Neg::BackOuterBarrette::Module::Phidiv"])
-    if flags.GeoModel.AtlasVersion !="tb_LArH6EC_2002":
+    if flags.GeoModel.AtlasVersion !="tb_LArH6EC_2002" and not flags.GeoModel.EMECStandard :
         kwargs.setdefault("PosIWVolumes",["LArMgr::LAr::EMEC::Pos::InnerWheel"])
         kwargs.setdefault("PosOWVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel"])
         kwargs.setdefault("PosBOBarretteVolumes",["LArMgr::LAr::EMEC::Pos::BackOuterBarrette::Module::Phidiv"])
+    
+    # If the EMEC is described with standard G4 shapes (G4GenericTrap) add the corresponding Slices volumes to the SD definition
+    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2002","tb_LArH6EC_2002"] and flags.GeoModel.EMECStandard :
+        kwargs.setdefault("NegIWVolumes",["LArMgr::LAr::EMEC::Neg::InnerWheel",
+                                         "LArMgr::LAr::EMEC::Neg::InnerWheel::Slice*"])
+        kwargs.setdefault("NegOWVolumes",["LArMgr::LAr::EMEC::Neg::OuterWheel",
+                                         "LArMgr::LAr::EMEC::Neg::OuterWheel::Slice*"])
+        kwargs.setdefault("NegBOBarretteVolumes",["LArMgr::LAr::EMEC::Neg::BackOuterBarrette::Module::Phidiv"])
+    if flags.GeoModel.AtlasVersion !="tb_LArH6EC_2002" and flags.GeoModel.EMECStandard:
+        kwargs.setdefault("PosIWVolumes",["LArMgr::LAr::EMEC::Pos::InnerWheel",
+                                         "LArMgr::LAr::EMEC::Pos::InnerWheel::Slice*"])
+        kwargs.setdefault("PosOWVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel",
+                                         "LArMgr::LAr::EMEC::Pos::OuterWheel::Slice*"])
+        kwargs.setdefault("PosBOBarretteVolumes",["LArMgr::LAr::EMEC::Pos::BackOuterBarrette::Module::Phidiv"])
+
     kwargs.setdefault("PresVolumes", ["LArMgr::LAr::Endcap::Presampler::LiquidArgon"])
     kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
+
+
 
     # Hook for fast simulation
     kwargs.setdefault("UseFrozenShowers", flags.Sim.LArParameterization is LArParameterization.FrozenShowers)

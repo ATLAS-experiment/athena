@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator
@@ -60,6 +60,8 @@
 #include "G4TouchableHistory.hh"
 #include "G4ThreeVector.hh"
 #include "G4Step.hh"
+#include "G4Navigator.hh"
+#include "G4TransportationManager.hh"
 #include "globals.hh"
 
 #include "LArG4Code/LArG4BirksLaw.h"
@@ -642,10 +644,22 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   //	p = (startPoint + endPoint) * 0.5;
   const G4ThreeVector& p = startPoint;  // middle point may be out of volume
 
-  const G4AffineTransform transformation =
+  const G4AffineTransform topTransform =
     pre_step_point->GetTouchable()->GetHistory()->GetTopTransform();
 
-  startPointLocal = transformation.TransformPoint(startPoint);
+  const G4TouchableHandle& preStepTouch = pre_step_point->GetTouchableHandle();
+  const G4VPhysicalVolume* preStepVolume = preStepTouch->GetVolume();
+  G4AffineTransform transf;
+
+  int profundis=pre_step_point->GetTouchable()->GetHistoryDepth();
+  if (preStepVolume->GetName().contains("Slice"))
+        transf=pre_step_point->GetTouchable()->GetHistory()->GetTransform(profundis-1);
+  else
+        transf=pre_step_point->GetTouchable()->GetHistory()->GetTopTransform();
+
+  const G4AffineTransform transformation=transf;
+
+  startPointLocal = transformation.TransformPoint(startPoint); 
   endPointLocal = transformation.TransformPoint(endPoint);
   //	pinLocal = (startPointLocal + endPointLocal) * 0.5;
   const G4ThreeVector pinLocal = startPointLocal;  // middle point may be out of volume
