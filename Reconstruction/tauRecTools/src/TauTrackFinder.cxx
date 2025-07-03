@@ -228,8 +228,8 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
   }
 
   //These are set again in TauTrackClassifier                                                                                                                  
-  pTau.setDetail(xAOD::TauJetParameters::nChargedTracks, (int) pTau.nTracks());
-  pTau.setDetail(xAOD::TauJetParameters::nIsolatedTracks, (int) pTau.nTracks(xAOD::TauJetParameters::classifiedIsolation));
+  pTau.setDetail(xAOD::TauJetParameters::nChargedTracks, static_cast<int>(pTau.nTracks()));
+  pTau.setDetail(xAOD::TauJetParameters::nIsolatedTracks, static_cast<int>(pTau.nTracks(xAOD::TauJetParameters::classifiedIsolation)));
 
   for (unsigned int i = 0; i < otherTracks.size(); ++i) {
     const xAOD::TrackParticle* trackParticle = otherTracks.at(i);
@@ -263,9 +263,9 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
     pTau.addTauTrackLink(linkToTauTrack);
   }
 
-  pTau.setDetail(xAOD::TauJetParameters::nLargeRadiusTracks, (int) pTau.nTracks(xAOD::TauJetParameters::LargeRadiusTrack));
+  pTau.setDetail(xAOD::TauJetParameters::nLargeRadiusTracks, static_cast<int>(pTau.nTracks(xAOD::TauJetParameters::LargeRadiusTrack)));
   // keep track of total number of associated tracks, in case of tau track thinning
-  pTau.setDetail(xAOD::TauJetParameters::nAllTracks, (int) pTau.nAllTracks());
+  pTau.setDetail(xAOD::TauJetParameters::nAllTracks, static_cast<int>(pTau.nAllTracks()));
 
   ATH_MSG_DEBUG("numTrack: " << "/" << pTau.nTracks());
   ATH_MSG_DEBUG("charge: " << "/" << pTau.charge());
@@ -323,8 +323,8 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
       if(myIPandSigma) {
 	dec_d0TJVA(*track) = myIPandSigma->IPd0;
 	dec_z0sinthetaTJVA(*track) = myIPandSigma->IPz0SinTheta;
-	dec_d0SigTJVA(*track) = (myIPandSigma->sigmad0 != 0.) ? (float)( myIPandSigma->IPd0 / myIPandSigma->sigmad0 ) : -999.;
-	dec_z0sinthetaSigTJVA(*track) = (myIPandSigma->sigmaz0SinTheta != 0.) ? (float)( myIPandSigma->IPz0SinTheta / myIPandSigma->sigmaz0SinTheta ) : -999.;
+	dec_d0SigTJVA(*track) = (myIPandSigma->sigmad0 != 0.) ? static_cast<float>( myIPandSigma->IPd0 / myIPandSigma->sigmad0 ) : -999.f;
+	dec_z0sinthetaSigTJVA(*track) = (myIPandSigma->sigmaz0SinTheta != 0.) ? static_cast<float>( myIPandSigma->IPz0SinTheta / myIPandSigma->sigmaz0SinTheta ) : -999.f;
       }
     }
   }

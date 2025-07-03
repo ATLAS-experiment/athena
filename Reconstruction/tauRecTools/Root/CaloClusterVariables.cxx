@@ -16,8 +16,8 @@ const double CaloClusterVariables::DEFAULT = -1111.;
 //****************************************
 
 CaloClusterVariables::CaloClusterVariables() :
-  m_numConstit((int) DEFAULT),
-  m_effNumConstit_int((int) DEFAULT),
+  m_numConstit(static_cast<int>(DEFAULT)),
+  m_effNumConstit_int(static_cast<int>(DEFAULT)),
   m_effNumConstit(DEFAULT),
   m_aveRadius(DEFAULT),
   m_aveEffRadius(DEFAULT),
@@ -42,7 +42,7 @@ bool CaloClusterVariables::update(const xAOD::TauJet& pTau) {
     clusterP4Vector.push_back(vertexedCluster.p4());
   }
 
-  this->m_numConstit = (int) clusterP4Vector.size();
+  this->m_numConstit = std::ssize(clusterP4Vector);
 
   // Order constituents by energy
   sort(clusterP4Vector.begin(), clusterP4Vector.end(), CaloClusterCompare());
