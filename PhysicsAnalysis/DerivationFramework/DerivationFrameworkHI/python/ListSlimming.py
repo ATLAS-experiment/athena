@@ -354,6 +354,39 @@ def HION5ExtraContainersTrigger():
     return variables    
 
 #################################################################################
+#HION7
+
+def HION7SmartCollections():
+    variables  = []
+    variables += ["EventInfo"]
+    variables += ["Electrons"]
+    variables += ["Photons"]
+    variables += ["Muons"]
+    variables += ["PrimaryVertices"]
+    variables += ["InDetTrackParticles"]
+
+    return variables
+
+def HION7AllVarContent():
+    variables  = []
+    variables += ["AntiKt2HIJets"]
+    variables += ["AntiKt4HIJets"]
+    variables += ["CaloSums"]
+    variables += ["ZdcModules"]
+
+    return variables
+
+def HION7AllVarTruthContent():
+    variables  = []
+    variables += ["AntiKt2TruthJets"]
+    variables += ["AntiKt4TruthJets"]
+    variables += ["TruthEvents"]
+    variables += ["TruthParticles"]
+    variables += ["TruthVertices"]
+
+    return variables
+
+#################################################################################
 #HION12
 
 def HION12SmartCollections():
