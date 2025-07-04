@@ -144,6 +144,9 @@ double GeomHelpers::EtaFromTheta(double theta)
     return -log(tan(theta / 2.0));
 }
 
+
+
+
 double GeomHelpers::zFromPars(double r, const FPGATrackSimTrackPars &pars)
 {
     double theta = ThetaFromEta(pars.eta);

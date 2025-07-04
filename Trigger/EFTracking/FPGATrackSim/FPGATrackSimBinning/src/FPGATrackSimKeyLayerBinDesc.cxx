@@ -11,8 +11,12 @@
 #include "FPGATrackSimKeyLayerBinDesc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
+#include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "src/FPGATrackSimKeyLayerTool.h"
+
+
 
 using FPGATrackSimBinUtil::IdxSet;
 using FPGATrackSimBinUtil::StoredHit;
@@ -45,7 +49,8 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
     bool passesEta = true;
 
     FPGATrackSimTrackPars trackpars = parSetToTrackPars(step.binCenter(idx));
-
+    bool isTruthBin = ((m_truthbin.size()>step.stepNum())&&(m_truthbin[step.stepNum()]==idx));
+    
     if (stepIsRPhi(step)) {
         // distance of hit from bin center
         storedhit.phiShift =
@@ -59,15 +64,14 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         double xrange = xshift + r1 * step.binWidth(2) / 2.0
                         + ((r2*step.binWidth(3) - r1*step.binWidth(2)) / (r2 - r1) * (hitr - r1))/2.0;
         double padding = 0.0;
-        int etamod =0;
-        double stripLength = 97.621; //barrel strip length
+        double stripLength = 25.0;
         if (storedhit.hitptr->getDetType() == SiliconTech::strip) {
           if (!storedhit.hitptr->isBarrel()) {
               // varying strip lengths per eta mod in endcap
-              etamod = storedhit.hitptr->getEtaModule();
-              stripLength = m_slPerEtaMod[etamod];
+              int etamod = storedhit.hitptr->getEtaModule();
+              stripLength = m_slPerEtaMod[etamod]/2.0;
           }
-          padding = hitr*stripLength*std::abs(FPGATrackSimBinUtil::GeomHelpers::dPhiHitTrkFromPars(hitr,trackpars));;
+          padding += hitr*stripLength*std::abs(FPGATrackSimBinUtil::GeomHelpers::dPhiHitTrkFromPars(hitr,trackpars));;
         }
         // add phiShift resolution padding
         padding += m_d0pad + hitr*m_phipad + hitr*m_qptpad*1000*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr);
@@ -80,26 +84,30 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
     
         double width_z_in  = step.binWidth(0)/2.0;
         double width_z_out = step.binWidth(1)/2.0;
-        double zrange = width_z_in + (width_z_out-width_z_in) * (hitr-r1)/(r2-r1);
+        double zrange = width_z_in + (width_z_out-width_z_in) * std::abs((hitr-r1))/(r2-r1);
 
         // pad for strip length or imprecise SP.
         double padding = 0;
-        int etamod = 0;
-        double stripLength = 97.621; //barrel strip length
+        double stripLength = 25.0; //barrel strip length
         if (storedhit.hitptr->getDetType() == SiliconTech::strip) {
           if (!storedhit.hitptr->isBarrel()) {
               // varying strip lengths per eta mod in endcap
-              etamod = storedhit.hitptr->getEtaModule();
-              stripLength = m_slPerEtaMod[etamod];
+              int etamod = storedhit.hitptr->getEtaModule();
+              stripLength = m_slPerEtaMod[etamod]/2.0;
           }
           // length of longest correspinding to endcap or barrel strip
-          padding = stripLength;
+          padding += stripLength;
         }
         // add etaShift resolution padding
         padding += (m_z0pad + std::abs(hitr*FPGATrackSimBinUtil::GeomHelpers::dZdEta(m_etapad)));
         passesEta = std::abs(storedhit.etaShift) < (zrange+padding);
-
+        if (isTruthBin and !passesEta)
+          ATH_MSG_DEBUG("Hit in truth bin failed Eta cut"
+                        << storedhit.etaShift << " " << zrange + padding << " " <<zrange << " "<< padding);        
     }
+   
+    
+    if (isTruthBin) ATH_MSG_DEBUG("Hit in truth bin" << " passesPhi=" << passesPhi << " passesEta=" << passesEta);
 
     return passesPhi && passesEta;
 }

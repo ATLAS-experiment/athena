@@ -25,6 +25,7 @@ def FPGATrackSimWriteOutputCfg(flags):
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutput")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     FPGATrackSimWriteOutput.OutputTreeName = FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimLogicalEventTree")
+    FPGATrackSimWriteOutput.EventLimit = 100
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
@@ -222,6 +223,8 @@ def FPGATrackSimRoadUnionTool1DCfg(flags,name="FPGATrackSimRoadUnionTool1D"):
 
 def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGenScan"):
     result=ComponentAccumulator()
+    
+    print("logLevel",flags.Trigger.FPGATrackSim.loglevel)
 
     # read the cuts from a seperate python file specified by FPGATrackSim.GenScan.genScanCuts
     cutset=None
@@ -303,7 +306,6 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     Monitor.dir = "/GENSCAN/"
     Monitor.THistSvc = CompFactory.THistSvc()
     Monitor.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
-    Monitor.THistSvc = CompFactory.THistSvc()
     Monitor.phiScale = 10.0
     Monitor.etaScale = 100.0
     Monitor.drScale = 20.0
@@ -312,6 +314,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool = CompFactory.FPGATrackSimGenScanTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanTool"))
     tool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     tool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    tool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
     tool.Monitoring = Monitor
     tool.BinnedHits = BinnnedHits
     tool.rin=cutset["rin"]
@@ -867,8 +870,8 @@ if __name__ == "__main__":
                                                 perEventReports = ((flags.Trigger.FPGATrackSim.sampleType != 'skipTruth') and flags.Exec.MaxEvents<=10 ) )) # disable perEventReports for pileup samples or many events
 
         acc.store(open('AnalysisConfig.pkl','wb'))
-
-        acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+      
+        acc.foreach_component("*FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         if flags.Trigger.FPGATrackSim.msgLimit!=-1:
             acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
             acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit

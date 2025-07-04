@@ -91,6 +91,12 @@ def createFPGATrackSimConfigFlags():
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createGenScanFPGATrackSimConfigFlags
         return createGenScanFPGATrackSimConfigFlags()
     cf.addFlagsCategory("GenScan", __httGenScanFlags, prefix=True )
+    
+    def __httSecondStageFlags():
+        """Additional function delays import"""
+        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createSecondStageFPGATrackSimConfigFlags
+        return createSecondStageFPGATrackSimConfigFlags()
+    cf.addFlagsCategory("SecondStage", __httSecondStageFlags, prefix=True )
 
     def __httSecondStageFlags():
         """Additional function delays import"""

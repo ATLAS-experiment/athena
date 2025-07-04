@@ -12,11 +12,13 @@
 #include "FPGATrackSimBinning/IFPGATrackSimBinDesc.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinnedHits.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TTree.h"
 #include <algorithm>
 #include <bit>
+#include <numbers>
 
 FPGATrackSimLayerStudyTool::FPGATrackSimLayerStudyTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
   AthAlgTool(algname, name, ifc)
@@ -104,6 +106,17 @@ StatusCode FPGATrackSimLayerStudyTool::registerHistograms(const FPGATrackSimBinn
   ATH_CHECK(makeAndRegHist(m_phiShift2D_road, "phiShift2D_road", ";Phi Shift; R", 400, -m_phiScale, m_phiScale, 100, 0, 400));
   ATH_CHECK(makeAndRegHist(m_etaShift2D_road, "etaShift2D_road", ";Phi Shift; R", 400, -m_etaScale, m_etaScale, 100, 0, 400));
 
+  // Efficiency monitoring
+  ATH_CHECK(makeAndRegHistVector(m_ptDist, m_distPlotClasses.size(), &m_distPlotClasses,
+                                 "ptDist", "pT [GeV]",400, 0, 100));
+  ATH_CHECK(makeAndRegHistVector(m_etaDist, m_distPlotClasses.size(), &m_distPlotClasses,
+                                 "etaDist", "#eta",1000, -5, 5));
+  ATH_CHECK(makeAndRegHistVector(m_phiDist, m_distPlotClasses.size(), &m_distPlotClasses,
+                                 "phiDist", "#phi",640, 0, 2*std::numbers::pi));
+  ATH_CHECK(makeAndRegHistVector(m_d0Dist, m_distPlotClasses.size(), &m_distPlotClasses,
+                                 "d0Dist", "d_{0} [mm]",120, -3.0, 3.0));
+  ATH_CHECK(makeAndRegHistVector(m_z0Dist, m_distPlotClasses.size(), &m_distPlotClasses,
+                                 "z0Dist", "z_{0} [mm]",400, -200.0, 200.0));
 
   return StatusCode::SUCCESS;
 }
@@ -157,7 +170,12 @@ void FPGATrackSimLayerStudyTool::fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const 
 {
   setBinPlotsActive(idx);
 
-
+  // fill all truth 
+  m_ptDist[0]->Fill(std::abs(1/m_truthpars.qOverPt));
+  m_etaDist[0]->Fill(1/m_truthpars.eta);
+  m_phiDist[0]->Fill(1/m_truthpars.phi);
+  m_d0Dist[0]->Fill(1/m_truthpars.d0);
+  m_z0Dist[0]->Fill(1/m_truthpars.z0);
 
   if (m_binPlotsActive) {
     for (auto& hit : data.hits) {
@@ -165,6 +183,19 @@ void FPGATrackSimLayerStudyTool::fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const 
       m_etaShift_road->Fill(hit.etaShift);
       m_phiShift2D_road->Fill(hit.phiShift, hit.hitptr->getR());
       m_etaShift2D_road->Fill(hit.etaShift, hit.hitptr->getR());
+    }
+
+    // fill param monitoring
+    for (int i = 0; i < 2; i++) {
+      // i=0 all, i=1 no missed layers, i=2 is one missed layer
+      if ((i == 0)|| (data.lyrCnt() >= m_binnedhits->getNLayers() - (i - 1))) {
+          // all layer hit
+          m_ptDist[i]->Fill(std::abs(1 / m_truthpars.qOverPt));
+          m_etaDist[i]->Fill(1 / m_truthpars.eta);
+          m_phiDist[i]->Fill(1 / m_truthpars.phi);
+          m_d0Dist[i]->Fill(1 / m_truthpars.d0);
+          m_z0Dist[i]->Fill(1 / m_truthpars.z0);
+        }
     }
 
     // Module mapping and Layer definition studies
@@ -228,13 +259,8 @@ void FPGATrackSimLayerStudyTool::fillHitLevelInput(const FPGATrackSimHit *hit) {
       m_etaResidual_v_r[ptbin]->Fill(hit->getR(), bindesc->etaResidual(m_truthparset, hit));
       m_phiResidual_v_r[ptbin]->Fill(hit->getR(), bindesc->phiResidual(m_truthparset, hit));
 
-      double center_to_hit_eta = bindesc->etaResidual(m_binnedhits->getBinTool().center(), hit);
-      double truth_to_hit_eta = bindesc->etaResidual(m_truthparset, hit);
-      double etascale = center_to_hit_eta / (center_to_hit_eta - truth_to_hit_eta);
-      double center_to_hit_phi = bindesc->phiResidual(m_binnedhits->getBinTool().center(), hit);
-      double truth_to_hit_phi = bindesc->phiResidual(m_truthparset, hit);
-      double phiscale = center_to_hit_phi / (center_to_hit_phi-truth_to_hit_phi);
-      m_etaScale_v_r[ptbin]->Fill(hit->getR(),etascale);
+      double expectedshift = FPGATrackSimBinUtil::GeomHelpers::dPhiHitTrkFromPars(hit->getR(), m_truthpars);
+      double phiscale = -1.0*(hit->getGPhi()-m_truthpars[FPGATrackSimTrackPars::IPHI])/expectedshift;
       m_phiScale_v_r[ptbin]->Fill(hit->getR(), phiscale);
 
 
