@@ -37,7 +37,7 @@ lite_primary_keys_to_keep = [
     'eventTypes', 'processingTags', 'itemList']
 lite_TagInfo_keys_to_keep = [
     'beam_energy', 'beam_type', 'GeoAtlas', 'IOVDbGlobalTag',
-    'AODFixVersion', 'project_name', 'mc_campaign']
+    'AODFixVersion', 'project_name', 'mc_campaign', 'keywords']
 
 trigger_keys = [
     'TriggerConfigInfo',
@@ -1403,6 +1403,7 @@ def make_peeker(meta_dict):
                 'mc_campaign',
                 'hepmc_version',
                 'generators',
+                'keywords',
                 'data_year',
             ]
             for item in list(meta_dict[filename]['/TagInfo']):
