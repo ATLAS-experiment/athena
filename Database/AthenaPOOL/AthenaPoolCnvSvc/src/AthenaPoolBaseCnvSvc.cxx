@@ -349,8 +349,9 @@ StatusCode AthenaPoolBaseCnvSvc::commitOutput(const std::string& outputConnectio
       ATH_MSG_DEBUG("commitOutput failed process POOL container attributes.");
    }
    std::size_t merge = outputConnection.find("?pmerge="); // Used to remove trailing TMemFile
-   m_fileCommitCounter[outputConnection.substr(0, merge)]++;
-   if (merge != std::string::npos && m_fileFlushSetting[outputConnection.substr(0, merge)] > 0 && m_fileCommitCounter[outputConnection.substr(0, merge)] % m_fileFlushSetting[outputConnection.substr(0, merge)] == 0) {
+   const std::string baseOutputConnection = outputConnection.substr(0, merge);
+   m_fileCommitCounter[baseOutputConnection]++;
+   if (merge != std::string::npos && m_fileFlushSetting[baseOutputConnection] > 0 && m_fileCommitCounter[baseOutputConnection] % m_fileFlushSetting[baseOutputConnection] == 0) {
       doCommit = true;
       ATH_MSG_DEBUG("commitOutput sending data.");
    }
@@ -372,7 +373,7 @@ StatusCode AthenaPoolBaseCnvSvc::commitOutput(const std::string& outputConnectio
       ATH_MSG_ERROR("commitOutput - caught exception: " << e.what());
       return(StatusCode::FAILURE);
    }
-   if (!this->cleanUp(outputConnection).isSuccess()) {
+   if (!this->cleanUp(baseOutputConnection).isSuccess()) {
       ATH_MSG_ERROR("commitOutput FAILED to cleanup converters.");
       return(StatusCode::FAILURE);
    }
