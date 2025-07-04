@@ -100,13 +100,13 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 {
   std::vector<const xAOD::TruthParticle*> vTruthMatch;
   std::vector<TruthMatchedParticleType> vTruthMatchedParticleType;
+  std::vector<const xAOD::Jet*> vTruthJetMatch;
+
 
   xAOD::TruthParticleContainer xRemainingTruthTaus = xTruthTauContainer;
 
   static const SG::Decorator<char> decIsTruthMatched("IsTruthMatched");
   static const SG::Decorator<char> decIsTruthHadronic("IsTruthHadronic");
-  static const SG::Decorator<char> decIsTruthHadMu("IsTruthHadMu");
-  static const SG::Decorator<char> decIsTruthHadEl("IsTruthHadEl");
   static const SG::ConstAccessor<int> accNSubjets("n_subjets");
   static const SG::ConstAccessor<char> accIsTruthHadronic("IsTruthHadronic");
 
@@ -118,6 +118,9 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 
       vTruthMatch.push_back(xTruthMatch);
       vTruthMatchedParticleType.push_back(eTruthMatchedParticleType);
+
+      const xAOD::Jet* xTruthJetMatch = nullptr;
+      vTruthJetMatch.push_back(xTruthJetMatch);
     }
 
   // truthmatching for subjets:
@@ -131,6 +134,7 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
       if ( truthMatch(vSubjetTLV,
 		      xRemainingTruthTaus,
 		      vTruthMatch.at(i),
+		      vTruthJetMatch.at(i),
 		      vTruthMatchedParticleType.at(i)).isFailure() )
 	{
 	  ATH_MSG_WARNING("There was a failure in matching truth taus with subjet " << i);
@@ -143,7 +147,27 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 					       vTruthMatch.at(i)) );
 	}
     }
-  
+
+  // create links for jets
+  std::vector< ElementLink < xAOD::JetContainer > > vTruthJetLinks;
+  for (int i = 0; i < accNSubjets(xDiTau); ++i)
+  {
+      const xAOD::Jet* xTruthJetMatch = vTruthJetMatch.at(i); 
+      if(xTruthJetMatch){
+          ElementLink < xAOD::JetContainer > lTruthParticleLink(xTruthJetMatch, *m_truthTausEvent.m_xTruthJetContainerConst);
+          vTruthJetLinks.push_back(lTruthParticleLink);
+      }
+      else
+      {
+          ElementLink < xAOD::JetContainer > lTruthParticleLink;
+          vTruthJetLinks.push_back(lTruthParticleLink);
+      }    
+  }
+  static const SG::Decorator<std::vector<ElementLink<xAOD::JetContainer>>>
+    decTruthJetLinks ("truthJetLinks");
+  decTruthJetLinks(xDiTau) = std::move(vTruthJetLinks);
+
+
   bool bTruthMatched = true;
 
   // create link to the original TruthParticle
@@ -276,22 +300,11 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
   
   return StatusCode::SUCCESS;
 }
-
-//______________________________________________________________________________
-ElementLink<xAOD::TruthParticleContainer> DiTauTruthMatchingTool::checkTruthLepton(const xAOD::IParticle* pLepton) const {
-  ElementLink<xAOD::TruthParticleContainer> truthParticleLink;
-  static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> accTruthParticleLink("truthParticleLink");
-  if(!accTruthParticleLink.isAvailable(*pLepton)){
-    return truthParticleLink;
-  }
-  truthParticleLink = accTruthParticleLink(*pLepton);
-  return truthParticleLink;
-}
-
 //______________________________________________________________________________
 StatusCode DiTauTruthMatchingTool::truthMatch(const TLorentzVector& vSubjetTLV,
                                               const xAOD::TruthParticleContainer& xTruthTauContainer,
                                               const xAOD::TruthParticle* &xTruthMatch,
+					      const xAOD::Jet* &xTruthJetMatch,
                                               TruthMatchedParticleType &eTruthMatchedParticleType) const
 {
   for (auto xTruthTauIt : xTruthTauContainer)
@@ -346,6 +359,21 @@ StatusCode DiTauTruthMatchingTool::truthMatch(const TLorentzVector& vSubjetTLV,
 	    }
 	}
     }
+
+  if (m_truthTausEvent.m_xTruthJetContainerConst)
+  {
+    double dPtMax = 0.;
+    for (auto xTruthJetIt : *m_truthTausEvent.m_xTruthJetContainerConst)
+    {
+      if (vSubjetTLV.DeltaR(xTruthJetIt->p4()) <= m_dMaxDeltaR)
+      {
+        if (xTruthJetIt->pt()<dPtMax)
+          continue;
+        xTruthJetMatch = xTruthJetIt;
+        dPtMax = xTruthJetIt->pt();
+      }
+    }
+  }
 
   return StatusCode::SUCCESS;
 }
