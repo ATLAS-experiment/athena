@@ -60,9 +60,6 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.ROD.forceIter",False)
     # NN based energy reconstruction
     lcf.addFlag("LAr.ROD.NNRawChannelBuilding", False)
-    lcf.addFlag("LAr.ROD.nnJson", "")
-    lcf.addFlag("LAr.ROD.nnOutputNode", "")
-    lcf.addFlag("LAr.ROD.nnInputNode", "")
     # default LArRawSC container 
     lcf.addFlag("LAr.LATOME.DTInfoForL1","SC_ET_ID")
     # storing SC CaloCellContainer with bcid'ed energies

@@ -68,7 +68,7 @@ public:
   virtual StatusCode execute(const EventContext& context) const;
 
 protected:
-  static constexpr int s_MaxNSamples = 8;
+  static constexpr int s_MaxNSamples = 32;
   using staticVecDouble_t = boost::container::static_vector<double,s_MaxNSamples> ;
   using staticVecFloat_t = boost::container::static_vector<float,s_MaxNSamples> ;
 

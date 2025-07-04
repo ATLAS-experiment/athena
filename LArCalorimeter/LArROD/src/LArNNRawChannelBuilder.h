@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef LARROD_LARNNRAWCHANNELBUILDER_H
@@ -18,10 +18,14 @@
 #include "LArRawConditions/LArADC2MeV.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
 
 #include "LArRawConditions/LArDSPThresholdsComplete.h"
 #include "LArElecCalib/ILArOFC.h"
 #include "LArElecCalib/ILArShape.h"
+#include "CaloIdentifier/CaloCell_ID.h"
+#include <map>
+
 
 #include <vector>
 
@@ -57,16 +61,16 @@ SG::ReadCondHandleKey<ILArOFC> m_ofcKey{this,"OFCKey","LArOFC","SG Key of OFC co
 SG::ReadCondHandleKey<ILArShape> m_shapeKey{this,"ShapeKey","LArShape","SG Key of Shape conditions object"}; 
 SG::ReadCondHandleKey<LArDSPThresholdsComplete> m_run1DSPThresholdsKey{this, "Run1DSPThresholdsKey","", "SG Key for thresholds to compute time and quality, run 1"};
 SG::ReadCondHandleKey<AthenaAttributeList> m_run2DSPThresholdsKey{this, "Run2DSPThresholdsKey","", "SG Key for thresholds to compute time and quality, run 2"};
+SG::ReadCondHandleKey<CondAttrListCollection> m_nnClustersDb{this, "nnClustersDbFolder","/LAR/IdentifierOfl/OnnxMap","Folder name for the NN clustering map"};
+ServiceHandle<AthOnnx::IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc/OnnxRuntimeSvc", "The Onnx runtime service"};
 
 //The following matters only in the MC case, when we have a 32 sample shapes
 Gaudi::Property<int>m_firstSample{this, "firstSample", 0, "first of the 32 sampels of the MC shape to be used"};
 
 //Identifier helper
 const LArOnlineID* m_onlineId = nullptr;
+const CaloCell_ID* m_calocellID = nullptr;
 
-Gaudi::Property<std::string>m_nn_json{this, "NNJsonPath", "", "Path to json containing the lwtnn network"};
-Gaudi::Property<std::string>m_input_node{this, "NetworkInputNode", "", "Name of the input node"};
-Gaudi::Property<std::string>m_network_output{this, "NetworkOutputNode", "", "Name of the output node"};
 
 //This flag decides, wheter to use DB or constant threshold
 Gaudi::Property<bool> m_useDBFortQ{this,"useDB",true,"Use DB for cut on t,Q"};

@@ -1,28 +1,27 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
 from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 from LArRecUtils.LArRecUtilsConfig import LArOFCCondAlgCfg
 from LArConfiguration.LArConfigFlags import RawChannelSource
+from IOVDbSvc.IOVDbSvcConfig import addFolders
 
+def LArNNRawChannelBuilderCfg(flags, name="LArNNRawChannelBuilder", **kwargs):
+    acc = LArADC2MeVCondAlgCfg(flags)
 
-
-def LArNNRawChannelBuilderCfg(configFlags, name="LArNNRawChannelBuilder", **kwargs):
-
-    acc = LArADC2MeVCondAlgCfg(configFlags)
+    acc.merge(addFolders(flags,"/LAR/IdentifierOfl/OnnxMap", "LAR_OFL", className="CondAttrListCollection", db="OFLP200", tag="LARIdentifierOflOnnxMap-RUN4-000"))
 
     # the NN always requires 1 sample in the past
-    kwargs.setdefault("firstSample", (configFlags.LAr.ROD.nPreceedingSamples-1) if configFlags.LAr.ROD.nPreceedingSamples!=0 else configFlags.LAr.ROD.FirstSample)
+    kwargs.setdefault("firstSample", flags.LAr.ROD.nPreceedingSamples if flags.LAr.ROD.nPreceedingSamples!=0 else flags.LAr.ROD.FirstSample)
     obj = "AthenaAttributeList" 
     dspkey = 'Run2DSPThresholdsKey'
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
 
-    if configFlags.Input.isMC:
-        acc.merge(LArOFCCondAlgCfg(configFlags))
+    if flags.Input.isMC:
+        acc.merge(LArOFCCondAlgCfg(flags))
         kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
 
-        if configFlags.GeoModel.Run is LHCPeriod.Run1:  # back to flat threshold
+        if flags.GeoModel.Run is LHCPeriod.Run1:  # back to flat threshold
            kwargs.setdefault("useDB", False)
            dspkey = ''
         else:
@@ -30,21 +29,21 @@ def LArNNRawChannelBuilderCfg(configFlags, name="LArNNRawChannelBuilder", **kwar
            sgkey=fld
            dbString="OFLP200"
            dbInstance="LAR_OFL"
-           acc.merge(addFolders(configFlags,fld, dbInstance, className=obj, db=dbString))
+           acc.merge(addFolders(flags,fld, dbInstance, className=obj, db=dbString))
 
-        if configFlags.Common.ProductionStep is ProductionStep.PileUpPresampling:
-            kwargs.setdefault("LArDigitKey", configFlags.Overlay.BkgPrefix + "LArDigitContainer_MC")
+        if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+            kwargs.setdefault("LArDigitKey", flags.Overlay.BkgPrefix + "LArDigitContainer_MC")
         else:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
     else:
-        acc.merge(LArElecCalibDBCfg(configFlags,("OFC","Shape","Pedestal")))
-        if configFlags.Overlay.DataOverlay:
+        acc.merge(LArElecCalibDBCfg(flags,("OFC","Shape","Pedestal")))
+        if flags.Overlay.DataOverlay:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
             kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
         else:
             kwargs.setdefault("LArRawChannelKey", "LArRawChannels_FromDigits")
         
-        if 'COMP200' in configFlags.IOVDb.DatabaseInstance:
+        if 'COMP200' in flags.IOVDb.DatabaseInstance:
             fld='/LAR/Configuration/DSPThreshold/Thresholds'
             obj='LArDSPThresholdsComplete'
             dspkey = 'Run1DSPThresholdsKey'
@@ -55,11 +54,11 @@ def LArNNRawChannelBuilderCfg(configFlags, name="LArNNRawChannelBuilder", **kwar
             sgkey=fld
             dbString="CONDBR2"
         dbInstance="LAR_ONL"
-        acc.merge(addFolders(configFlags,fld, dbInstance, className=obj, db=dbString))
+        acc.merge(addFolders(flags,fld, dbInstance, className=obj, db=dbString))
 
     kwargs.setdefault(dspkey, sgkey)
 
-    if configFlags.LAr.ROD.forceIter or configFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
+    if flags.LAr.ROD.forceIter or flags.LAr.RawChannelSource is RawChannelSource.Calculated:
         # iterative OFC procedure
         LArRawChannelBuilderIterAlg=CompFactory.LArRawChannelBuilderIterAlg
         kwargs.setdefault('minSample',2)
@@ -69,7 +68,7 @@ def LArNNRawChannelBuilderCfg(configFlags, name="LArNNRawChannelBuilder", **kwar
         kwargs.setdefault('defaultPhase',12)
         nominalPeakSample=2
         from LArConditionsCommon.LArRunFormat import getLArFormatForRun
-        larformat=getLArFormatForRun(configFlags.Input.RunNumbers[0],connstring="COOLONL_LAR/"+configFlags.IOVDb.DatabaseInstance)
+        larformat=getLArFormatForRun(flags.Input.RunNumbers[0],connstring="COOLONL_LAR/"+flags.IOVDb.DatabaseInstance)
         if larformat is not None:
           nominalPeakSample = larformat.firstSample()
         else:
@@ -82,10 +81,6 @@ def LArNNRawChannelBuilderCfg(configFlags, name="LArNNRawChannelBuilder", **kwar
 
         acc.addEventAlgo(LArRawChannelBuilderIterAlg(**kwargs))
     else:
-
-        kwargs.setdefault('NNJsonPath', configFlags.LAr.ROD.nnJson)
-        kwargs.setdefault('NetworkOutputNode', configFlags.LAr.ROD.nnOutputNode)
-        kwargs.setdefault('NetworkInputNode', configFlags.LAr.ROD.nnInputNode)
        
         acc.addEventAlgo(CompFactory.LArNNRawChannelBuilder(name, **kwargs))
 
