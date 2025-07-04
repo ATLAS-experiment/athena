@@ -408,6 +408,9 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             // check explicitly tau160 as the root file for this trigger was renamed      
             if (m_sTriggerName.value().find("tau160") != std::string::npos) {
 	       m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data161718_comb_HLT_tau160_medium1_tracktwo_v1.root";   	    
+	    } else if (m_sTriggerName.value().find("tau125") != std::string::npos) {
+               // fall back to R21 recommendations for tau125 as currently SFs are not available for this trigger  		    
+               m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data161718_comb_HLT_tau125_medium1_tracktwo.root";
 	    } else {		    
                m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data161718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
 	    }
