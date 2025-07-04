@@ -194,7 +194,10 @@ StatusCode DiTauEfficiencyCorrectionsTool::initializeTools_2017_moriond()
     if (iEfficiencyCorrectionType == SFJetIDHadTau)
     {
       // only set vars if they have been configured by the user
-      if (m_sInputFilePathJetIDHadTau.empty()) m_sInputFilePathJetIDHadTau = sDirectory+"JetID_TrueHadDiTau_2017-fall.root";
+      if (m_sInputFilePathJetIDHadTau.empty()) {
+         sDirectory = "TauAnalysisTools/00-04-00/EfficiencyCorrections/"; 	      
+         m_sInputFilePathJetIDHadTau = sDirectory+"JetID_TrueHadDiTau_2017-fall.root";
+      }
       if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "DiTauScaleFactorJetIDHadTau";
 
       asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>("JetIDHadTauTool", this);
