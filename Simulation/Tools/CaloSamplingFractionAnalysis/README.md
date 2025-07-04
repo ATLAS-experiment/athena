@@ -43,44 +43,47 @@ Input files with 10k events each can be found in:
 ## G4 Simulation
 Simulation is run with calibration hits in batches of 5000 events per job with the following simulation command
 ```
-Sim_tf.py --simulator 'FullG4MT' \
---conditionsTag 'default:OFLCOND-MC16-SDR-14' \
---physicsList 'FTFP_BERT_ATL' \
---truthStrategy 'MC15aPlus' \
---postInclude 'default:PyJobTransforms.UseFrontier' \
---preExec 'from SimulationConfig.SimEnums import VertexSource;flags.Sim.VertexSource=VertexSource.AsGenerated;from SimulationConfig.G4Optimizations import enableBeamPipeKill;enableBeamPipeKill(flags);from SimulationConfig.G4Optimizations import enableCalHits;enableCalHits(flags);from SimulationConfig.G4Optimizations import enableParticleID;enableParticleID(flags);from SimulationConfig.G4Optimizations import enableTightMuonStepping;enableTightMuonStepping;enableTightMuonStepping(flags)' \
---geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
---inputEVNTFile INPUTEVNTfile \
---outputHITSFile OUTPUTEVNTfile \
---maxEvents 5000 \
---skipEvent 0 \
+Sim_tf.py \
+--CA \
+--multithreaded \
+--conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-04' \
+--physicsList "$physlist" \
+--simulator 'FullG4MT_QS' \
+--postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
+--preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits,SimulationConfig.disablePhotonRussianRoulette,SimulationConfig.disableNeutronRussianRoulette,SimulationConfig.disableFrozenShowersFCalOnly' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+--inputEVNTFile "$inputEVNT" \
+--outputHITSFile "$outfile_job" \
+--maxEvents $nevents \
+--skipEvent $skip \
+--postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
 --imf False
 ```
 
-For the LAr EM and HEC input files this can be done interactively in a shell with the commands below. When running this, maxjobs will say how many jobs should be launched simulateously from the shell
+For the LAr EM and HEC input files this can be done interactively in a shell with the commands below
 ```
-maxjobs=4
 eosdir=/eos/atlas/atlascerngroupdisk/proj-simul/G4Run3/SamplingFractions
-G4version=10.1
+G4version=11.3
 PhysList=FTFP_BERT_ATL
 resultdir=$PWD/"$G4version"-$PhysList
 mkdir -p $resultdir
 
-for file in $eosdir/LArEM/mc.PG_pid11_Mom50000_*.EVNT.pool.root; do outfile=$resultdir/$(basename $file); source run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 8 $maxjobs;done
-for file in $eosdir/HEC/mc.PG_pid*_Mom100000_*EVNT.pool.root; do outfile=$resultdir/$(basename $file); source run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 1 $maxjobs;done
+get_files run_LAr_SamplingFraction_simulation.sh
+for file in $eosdir/LArEM/mc.PG_pid11_Mom50000_*.EVNT.pool.root; do outfile=$resultdir/$(basename $file); source ./run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 40000 ;done
+for file in $eosdir/HEC/mc.PG_pid*_Mom100000_*EVNT.pool.root; do outfile=$resultdir/$(basename $file); source ./run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 5000;done
 ```
 
 ## LAr EM NTuple creation and analysis
 For a sufficient precision, ~40k electrons in the barrel and ~40k electrons in the endcap are needed for LAr EM.
 
 ```
-G4version=10.1
+G4version=11.3
 PhysList=FTFP_BERT_ATL
 resultdir=$PWD/"$G4version"-$PhysList
-athena.py --filesInput="'$resultdir'/mc.PG_pid11_Mom50000_Radius1500000*.HITS.*.pool.root" LArEMSamplingFractionCfg.py
+athena.py --filesInput="$resultdir/mc.PG_pid11_Mom50000_Radius1500000*.HITS.pool.root" LArEMSamplingFractionConfig.py
 mv LArEM_SF.root $resultdir/LArEM_SF_barrel.root
 
-athena.py --filesInput="'$resultdir'/mc.PG_pid11_Mom50000_Z3740500*.HITS.*.pool.root"' LArEMSamplingFractionCfg.py
+athena.py --filesInput="$resultdir/mc.PG_pid11_Mom50000_Z37*.HITS.pool.root" LArEMSamplingFractionConfig.py
 mv LArEM_SF.root $resultdir/LArEM_SF_endcap.root
 
 get_files LarEMSamplingFraction_analysis.C
@@ -92,10 +95,10 @@ mv SF_LAr_barrel.pdf SF_LAr_endcap.pdf $resultdir/
 For a sufficient precision, 5k events per pdgid and Z position are needed, so in total 30k events
 
 ```
-G4version=10.1
+G4version=11.3
 PhysList=FTFP_BERT_ATL
 resultdir=$PWD/"$G4version"-$PhysList
-for file in $resultdir/mc.PG_pid*Mom100000_Z[45]*HITS.*.pool.root;do echo $file;athena.py -c 'inFileName=["'$file'"]' LArEMSamplingFractionCfg.py;a=$file;b=${a/Z4319500_bec_eta_150_330.HITS/HECfwh.NTUP};c=${b/Z5175000_bec_eta_160_330.HITS/HECrwh.NTUP};mv LArEM_SF.root $c;done
+for file in $resultdir/mc.PG_pid*Mom100000_Z[45]*HITS.pool.root;do echo $file;athena.py --filesInput="$file" LArEMSamplingFractionConfig.py;a=$file;b=${a/Z4319500_bec_eta_150_330.HITS/HECfwh.NTUP};c=${b/Z5175000_bec_eta_160_330.HITS/HECrwh.NTUP};mv LArEM_SF.root $c;done
 
 get_files HEC_SF_analysis
 root -b -q HEC_SF_analysis/init.C 'HEC_SF_analysis/store_eta.C("'$G4version'","'$PhysList'","'$PWD'")' 'HEC_SF_analysis/get_SF.C("'$G4version'","'$PhysList'")'
