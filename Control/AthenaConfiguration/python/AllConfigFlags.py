@@ -84,6 +84,10 @@ def initConfigFlags():
                return 2000 + int(prevFlags.Input.ProjectName[4:6])
         return 0
 
+    def _keywordsFromFlags(prevFlags):
+        keywords_string = GetFileMD(prevFlags.Input.Files).get("keywords", "")
+        return [keyword.strip() for keyword in keywords_string.split(',') if keyword.strip()]
+
     acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", ""), help='project name')
     acf.addFlag('Input.DataYear', _dataYearFromFlags, help='year of input data')
     acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), type=Campaign, help='Monte Carlo campaign')
@@ -92,6 +96,7 @@ def initConfigFlags():
     acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, type=Format, help='input format type')
     acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []), help='list of stream names in this file')
     acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : getGeneratorsInfo(prevFlags), help='generator version')
+    acf.addFlag('Input.Keywords', _keywordsFromFlags, type=list, help='evtgen keywords')
     acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags), help='special configuration options read from input file metadata')
 
     def _inputCollections(inputFile):
