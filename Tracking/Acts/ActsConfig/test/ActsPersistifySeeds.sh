@@ -14,7 +14,6 @@ Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Exec.FPE=-1; \
     	       flags.Tracking.doStoreTrackSeeds=True; \
-	       flags.Tracking.doTruth=True; \
 	       flags.Tracking.doStoreSiSPSeededTracks=True; \
 	       flags.Tracking.writeExtendedSi_PRDInfo=True; \
 	       flags.Tracking.doStoreTrackSeeds=True;" \
@@ -37,7 +36,6 @@ Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateSeedsFlags" \
     --preExec "flags.Exec.FPE=-1; \
     	       flags.Tracking.doStoreTrackSeeds=True; \
-	       flags.Tracking.doTruth=True; \
 	       flags.Tracking.doStoreSiSPSeededTracks=True; \
 	       flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True; \
 	       flags.Tracking.ITkActsValidateSeedsPass.storeSiSPSeededTracks=True; \
@@ -62,8 +60,7 @@ Reco_tf.py \
     --preExec 'flags.Exec.FPE=-2; \
     	       flags.Tracking.writeExtendedSi_PRDInfo=True; \
 	       flags.Tracking.doStoreSiSPSeededTracks=True; \
-	       flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True; \
-	       flags.Tracking.doTruth=True' \
+	       flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; \
     	        toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
 		cfg.merge(addToAOD(flags, toAOD));" \

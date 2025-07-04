@@ -57,7 +57,7 @@ if [ "$doClusters" == "1" ]; then
   Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
-    --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";flags.Tracking.doTruth=True;\
+    --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
               flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
@@ -67,7 +67,7 @@ else
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,\
                   FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
-    --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";flags.Tracking.doTruth=True;"\
+    --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}

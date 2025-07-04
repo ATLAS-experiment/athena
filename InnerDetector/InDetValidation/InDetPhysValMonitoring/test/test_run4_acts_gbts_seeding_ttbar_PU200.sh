@@ -44,7 +44,6 @@ run "Reconstruction-acts" \
      --outputAODFile AOD.acts.pool.root \
      --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
      --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;flags.Tracking.doStoreTrackSeeds=True; \
-flags.Tracking.doTruth=True; \
 flags.Tracking.doStoreSiSPSeededTracks=True;\
 flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True;\
 flags.Tracking.ITkActsValidateSeedsPass.storeSiSPSeededTracks=True; \
