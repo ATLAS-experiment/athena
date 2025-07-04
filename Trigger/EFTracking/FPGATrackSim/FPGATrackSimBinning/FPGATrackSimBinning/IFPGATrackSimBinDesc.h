@@ -76,8 +76,13 @@ public:
   // but to generate constants for the firmware
   virtual void writeLUTs([[maybe_unused]] const FPGATrackSimBinStep &step) const {}
 
-private:
-  
+  // Set truthbin for debugging
+  // This does not need to be set but can be useful for debuging
+  void setTruthBin(const std::vector<FPGATrackSimBinUtil::IdxSet>& truthbin){ m_truthbin=truthbin;}
+
+protected:
+  std::vector<FPGATrackSimBinUtil::IdxSet> m_truthbin{};
+
 };
 
 #endif // IFPGATrackSimBinDesc_H

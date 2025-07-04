@@ -125,6 +125,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
 {
   ATH_MSG_DEBUG("In getRoads, Processing Event# " << ++m_evtsProcessed << " hit size = " << hits.size());
 
+  
   roads.clear();
   m_roads.clear();
   m_monitoring->resetDataFlowCounters();

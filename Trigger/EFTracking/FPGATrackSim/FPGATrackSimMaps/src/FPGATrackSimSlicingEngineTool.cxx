@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "FPGATrackSimMaps/FPGATrackSimSlicingEngineTool.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 #include "FPGATrackSimObjects/FPGATrackSimTowerInputHeader.h"
 #include <nlohmann/json.hpp>
@@ -47,6 +48,8 @@ void FPGATrackSimSlicingEngineTool::readLayerMap() {
             m_layerMapModules.merge(modules);
         }
     }
+
+    ATH_MSG_DEBUG("Region Modules: " << m_layerMapModules);
 }
 
 // While this method returns *two* streams, it outputs *three* branches since in the firmware

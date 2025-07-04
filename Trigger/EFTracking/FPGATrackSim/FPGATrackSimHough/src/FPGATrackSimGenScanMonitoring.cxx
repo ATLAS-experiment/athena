@@ -81,8 +81,8 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(const FPGATrackSimB
   ATH_CHECK(
       makeAndRegHist(m_inputHits, "InputHits", ";Input Hits", 200, 0, 100000));
   ATH_CHECK(makeAndRegHistVector(m_hitsPerStepBin, bintool.steps().size(),
-                                 &bintool.stepNames(), "hitsPerStep",
-                                 "; Hits per bin in step", 20, 0, m_isSingleParticle ? 50 : 10000));
+                                 &bintool.stepNames(), "hitsPerStepBin_",
+                                 "; Hits per bin in step", 1000, 0, 1000));
   ATH_CHECK(makeAndRegHist(m_pairs, "pairs", ";pairs;", 100, 0, 500));
   ATH_CHECK(makeAndRegHist(m_pairinghits, "pairinghits", ";Pairing Hits;", 50,
                            0, 50));
@@ -100,12 +100,12 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(const FPGATrackSimB
 
   // Road statistics
   ATH_CHECK(makeAndRegHist(m_roadFilterFlow , "roadFilterFlow" , "road filter flow", 10, 0, 10));
-  ATH_CHECK(makeAndRegHist(m_phiShift_road, "phiShift_road", ";Phi Shift", 2000, -m_phiScale, m_phiScale));
-  ATH_CHECK(makeAndRegHist(m_etaShift_road, "etaShift_road", ";Eta Shift", 2000, -m_etaScale, m_etaScale));
+  ATH_CHECK(makeAndRegHist(m_phiShift_road, "phiShift_road", ";Phi Shift", 2000, -1.0*m_phiScale, m_phiScale));
+  ATH_CHECK(makeAndRegHist(m_etaShift_road, "etaShift_road", ";Eta Shift", 2000, -1.0*m_etaScale, m_etaScale));
   ATH_CHECK(makeAndRegHist(m_phiShift2D_road, "phiShift2D_road", ";Phi Shift; R", 
-                          400, -m_phiScale, m_phiScale, 100, 0, 400));
+                          400, -1.0*m_phiScale, m_phiScale, 100, 0, 400));
   ATH_CHECK(makeAndRegHist(m_etaShift2D_road, "etaShift2D_road", ";Phi Shift; R", 
-                          400, -m_etaScale, m_etaScale, 100, 0, 400));
+                          400, -1.0*m_etaScale, m_etaScale, 100, 0, 400));
 
   ATH_CHECK(makeAndRegHist(m_hitsPerLayer_bin, "HitsPerLayer_bin",
                            "; Layer; Hits in Bin Passing Threshold",
@@ -119,8 +119,8 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(const FPGATrackSimB
     ";Phi Out Extrap w/ Curve Limit", 2000, -1.0*m_phiScale, m_phiScale));
   ATH_CHECK(makeAndRegHist(m_phiInExtrapCurveLimit, "PhiInExtrapCurveLimit", 
     ";Phi In Extrap w/ Curve Limit", 2000, -1.0*m_phiScale, m_phiScale));
-  ATH_CHECK(makeAndRegHist(m_etaOutExtrap, "EtaOutExtrap", ";Eta Out Extrap", 2000, -m_etaScale, m_etaScale));
-  ATH_CHECK(makeAndRegHist(m_etaInExtrap, "EtaInExtrap", ";Eta In Extrap", 2000, -m_etaScale, m_etaScale));
+  ATH_CHECK(makeAndRegHist(m_etaOutExtrap, "EtaOutExtrap", ";Eta Out Extrap", 2000, -1.0*m_etaScale, m_etaScale));
+  ATH_CHECK(makeAndRegHist(m_etaInExtrap, "EtaInExtrap", ";Eta In Extrap", 2000, -1.0* m_etaScale, m_etaScale));
   ATH_CHECK(makeAndRegHist(m_deltaPhi, "DeltaPhi", ";Delta Phi [rad]", 2000, -1.0*m_phiScale, m_phiScale));
   ATH_CHECK(makeAndRegHist(m_deltaEta, "DeltaEta", ";Delta Eta [rad]", 2000, -1.0*m_etaScale, m_etaScale));
   ATH_CHECK(makeAndRegHist(m_deltaPhiDR, "DeltaPhiDR", ";Delta Phi / Delta R", 2000, -0.1 * m_phiScale, 0.1 * m_phiScale));
@@ -132,11 +132,11 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(const FPGATrackSimB
   ATH_CHECK(makeAndRegHistVector(
       m_pairSetMatchPhi, m_twoPairClasses.size(), &m_twoPairClasses,
       "PairSetMatchPhi", ";PairSet Match Phi [mm]", 500,
-      -1*m_phiScale / m_drScale, m_phiScale / m_drScale));
+      -1.0*m_phiScale / m_drScale, m_phiScale / m_drScale));
   ATH_CHECK(makeAndRegHistVector(
       m_pairSetMatchEta, m_twoPairClasses.size(), &m_twoPairClasses,
       "PairSetMatchEta", ";PairSet Match Eta [mm]", 500,
-      -1*m_etaScale / m_drScale, m_etaScale / m_drScale));
+      -1.0*m_etaScale / m_drScale, m_etaScale / m_drScale));
   ATH_CHECK(makeAndRegHistVector(
       m_deltaDeltaPhi, m_twoPairClasses.size(), &m_twoPairClasses,
       "DeltaDeltaPhi", ";DeltaDelta   Phi [mm]", 500, -1.0*m_phiScale / m_drScale,
@@ -147,19 +147,19 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(const FPGATrackSimB
       1.0 * m_etaScale / m_drScale));
   ATH_CHECK(makeAndRegHistVector(m_phiCurvature, m_twoPairClasses.size(),
                                &m_twoPairClasses, "PhiCurvature",
-                               ";Phi Curvature ", 500,
-                               -0.1 * m_phiScale / m_drScale / m_drScale,
-                               0.1 * m_phiScale / m_drScale / m_drScale));
+                               ";Phi Curvature ", 5000,
+                               -1.0 * m_phiScale / m_drScale / m_drScale,
+                               1.0 * m_phiScale / m_drScale / m_drScale));
   ATH_CHECK(makeAndRegHistVector(m_etaCurvature, m_twoPairClasses.size(),
                                &m_twoPairClasses, "EtaCurvature",
                                ";Eta Curvature ", 5000,
-                               m_etaScale / m_drScale / m_drScale,
-                               m_etaScale / m_drScale / m_drScale));
+                               -1.0 * m_etaScale / m_drScale / m_drScale,
+                               1.0 * m_etaScale / m_drScale / m_drScale));
   ATH_CHECK(makeAndRegHistVector(m_deltaPhiCurvature, m_twoPairClasses.size(),
                                &m_twoPairClasses, "DeltaPhiCurvature",
-                               ";Delta Phi Curvature ", 500,
-                               -0.1 * m_phiScale / m_drScale / m_drScale,
-                               0.1 * m_phiScale / m_drScale / m_drScale));
+                               ";Delta Phi Curvature ", 5000,
+                               -1.0 * m_phiScale / m_drScale / m_drScale,
+                               1.0 * m_phiScale / m_drScale / m_drScale));
   ATH_CHECK(makeAndRegHistVector(m_deltaEtaCurvature, m_twoPairClasses.size(),
                                &m_twoPairClasses, "DeltaEtaCurvature",
                                ";Delta Eta Curvature ", 500,
@@ -167,11 +167,11 @@ StatusCode FPGATrackSimGenScanMonitoring::registerHistograms(const FPGATrackSimB
                                0.1 * m_etaScale / m_drScale / m_drScale));
   ATH_CHECK(makeAndRegHistVector(m_phiOutExtrapCurved, m_twoPairClasses.size(),
                                &m_twoPairClasses, "PhiOutExtrapCurved",
-                               ";Phi Out Extrap Curved", 2000, -m_phiScale,
+                               ";Phi Out Extrap Curved", 2000, -1.0*m_phiScale,
                                m_phiScale));
   ATH_CHECK(makeAndRegHistVector(m_phiInExtrapCurved, m_twoPairClasses.size(),
                                &m_twoPairClasses, "PhiInExtrapCurved",
-                               ";Phi In Extrap Curved ", 2000, -m_phiScale,
+                               ";Phi In Extrap Curved ", 2000, -1.0*m_phiScale,
                                m_phiScale));
   ATH_CHECK(makeAndRegHist(m_pairMatchPhi2D, "PairSetMatchPhi2D",
                          ";PairSet Match Phi vs dRin [mm]", 100, 0, 100, 500,
@@ -597,14 +597,17 @@ void FPGATrackSimGenScanMonitoring::eventDispSet::AddPoint(
   g->SetPoint(g->GetN(), x, y);
 }
 
+
 void FPGATrackSimGenScanMonitoring::eventDispSet::addEvent(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits) {
   unsigned int count = m_rZ.size(); // both graph sets should have the same size
 
   // If over limit on number of event displays just return
-  if (count > m_maxEvts) return;
-
+  if (count > m_maxEvts)
+    return;
+  
   m_rZ.push_back(initGraph("EventDisp_RZ_" + m_name + std::to_string(count)));
   m_xY.push_back(initGraph("EventDisp_XY_" + m_name + std::to_string(count)));
+
   for (auto &hit : hits) {
     AddPoint(m_rZ.back(), hit->getZ(), hit->getR());
     AddPoint(m_xY.back(), hit->getX(), hit->getY());

@@ -59,6 +59,8 @@ class TH2D;
     // Takes the truthtracks as input and parses it into a useful form for later use
     // (e.g. stores which bin the true track is in)
     void parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vector<FPGATrackSimTruthTrack> const & truthtracks);
+    FPGATrackSimBinUtil::IdxSet& truthBin(unsigned stepnum) { return m_truthbin[stepnum]; }
+    std::vector<FPGATrackSimBinUtil::IdxSet>& truthBin() { return m_truthbin; }
 
     // Fill methods
     void fillHitLevelInput(const FPGATrackSimHit* hit);
@@ -130,6 +132,16 @@ class TH2D;
     TH1D * m_hitsPerLayer = 0;
     TH2D * m_hitsPerLayer2D = 0;
     TH2D *m_hitsPerLayer_bin = 0;
+
+    // distributions for efficiency monitoring
+    std::vector<std::string> m_distPlotClasses{"truth","ThrshNlayer","ThrshNlayerm1"}; // 0=truth distribution, 1=passes n-1 binning selection
+    std::vector<TH1D *> m_ptDist;
+    std::vector<TH1D *> m_etaDist;
+    std::vector<TH1D *> m_phiDist;
+    std::vector<TH1D *> m_d0Dist;
+    std::vector<TH1D *> m_z0Dist;
+    
+
 
     private:
 

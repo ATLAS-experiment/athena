@@ -3,6 +3,7 @@
    */
 
 #include "FPGATrackSimClusteringTool.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include "CxxUtils/trapping_fp.h"
@@ -38,7 +39,7 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
         for (auto& hit : tower.hits()) {
             hits.push_back(std::make_unique<FPGATrackSimHit>(hit));
         }
-        
+
         HitPtrContainer hitsPerModule;
         std::vector<FPGATrackSimCluster> towerClusters;
 

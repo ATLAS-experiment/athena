@@ -178,7 +178,9 @@ StatusCode FPGATrackSimOutputHeaderTool::writeData() {
 
   ATH_MSG_DEBUG ("Writing data in TTree");
 
-  m_EventTree->Fill();
+  if  (m_event < m_eventLimit) {
+    m_EventTree->Fill();
+  }
 
   // Reset any input headers that we wrote out (with debugging prints).
   for (unsigned i = 0; i < m_eventInputHeaders.size(); i++) {

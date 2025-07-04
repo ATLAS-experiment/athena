@@ -1,12 +1,15 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Logging import AthenaLogger
+from AthenaCommon.Logging import logging
+
+
 import AthenaCommon.Utils.unixtools as unixtools
 import importlib
 import os
+from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
 
-log = AthenaLogger(__name__)
+log = logging.getLogger ('FPGATrackSim')
 
 #### Now inmport Data Prep config from other file
 from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
@@ -15,6 +18,7 @@ from FPGATrackSimConfTools import FPGATrackSimAnalysisConfig
 def FPGATrackSimBinnedHitsToolCfg(flags):
     # This can probably be imported in the future from the analysis config, but for now it's here.
     result = ComponentAccumulator()
+    log.info("Setting binning parameters")
 
     # Allow the initial set of cuts to be read in via config flags, instead of the cuts file.
     # This effectively eliminates the need to make a "step 0" cut file.
@@ -101,6 +105,9 @@ def FPGATrackSimLayerStudyToolCfg(flags):
     Monitor = CompFactory.FPGATrackSimLayerStudyTool("BinMonitoring")
     Monitor.THistSvc = CompFactory.THistSvc()
     Monitor.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    Monitor.phiScale = 10.0
+    Monitor.etaScale = 100.0
+    Monitor.drScale = 20.0
 
     result.setPrivateTools(Monitor)
     return result
@@ -130,6 +137,7 @@ def FPGATrackSimLayerStudyCfg(inputFlags):
     return result
 
 if __name__ == "__main__":
+
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
@@ -157,6 +165,8 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
+    ConfigureMultiRegionFlags(flags)
+
 
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
         log.info("wrapperFile is string, converting to list")
@@ -203,9 +213,9 @@ if __name__ == "__main__":
     acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
     acc.merge(FPGATrackSimLayerStudyCfg(flags))
 
-    acc.store(open('AnalysisConfig.pkl','wb'))
 
-    acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    acc.store(open('AnalysisConfig.pkl','wb'))
+    acc.foreach_component("*FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
     if flags.Trigger.FPGATrackSim.msgLimit!=-1:
         acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
         acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
