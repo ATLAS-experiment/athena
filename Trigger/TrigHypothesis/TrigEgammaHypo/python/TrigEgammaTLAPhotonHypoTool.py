@@ -3,5 +3,5 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def  TrigEgammaTLAPhotonHypoToolFromDict(chain_dict):
+def  TrigEgammaTLAPhotonHypoToolFromDict(flags, chain_dict):
     return  CompFactory.TrigEgammaTLAPhotonHypoTool(chain_dict['chainName'])

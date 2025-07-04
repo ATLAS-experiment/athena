@@ -50,16 +50,16 @@ def overlayTestFlags(flags, args):
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep = ProductionStep.Overlay
     if args.data:
-        flags.Input.isMC = False
-        flags.Input.Files = defaultTestFiles.HITS_DATA_OVERLAY
-        flags.Input.SecondaryFiles = defaultTestFiles.RAW_BKG
-        flags.Output.RDOFileName = "dataOverlayRDO.pool.root"
-        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
-        flags.IOVDb.DatabaseInstance = "CONDBR2"
         flags.Overlay.DataOverlay = True
-        flags.Overlay.ByteStream = True
-        from Campaigns import DataOverlayPPTest
-        DataOverlayPPTest(flags)
+        flags.Input.isMC = False
+        flags.Input.Files = defaultTestFiles.RDO_BKG_HI_RUN3_2023
+        flags.Input.SecondaryFiles = defaultTestFiles.HITS_DATA_OVERLAY_HI_RUN3_2023
+        flags.Output.RDOFileName = "dataOverlayRDO.pool.root"
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA23
+        flags.IOVDb.DatabaseInstance = "CONDBR2"
+        flags.Overlay.ByteStream = False
+        from Campaigns import DataOverlay2023
+        DataOverlay2023(flags)
     else:
         if args.run is LHCPeriod.Run2:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN2

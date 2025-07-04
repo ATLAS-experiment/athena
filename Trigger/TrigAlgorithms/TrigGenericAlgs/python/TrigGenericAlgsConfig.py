@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -10,7 +10,7 @@ _log = logging.getLogger( __name__ )
 def TimeBurnerCfg(flags, name="TimeBurner", **kwargs):
     return CompFactory.TimeBurner(name, **kwargs)
 
-def TimeBurnerHypoToolGen(chainDict):
+def TimeBurnerHypoToolGen(flags, chainDict):
     # Dummy HypoTool (it is not even called by TimeBurner)
     return CompFactory.TrigGenericHypoTool(chainDict['chainName'],
                                            PassString = "")

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 import functools
 from TrigEDMConfig import DataScoutingInfo
@@ -291,7 +291,7 @@ def pebMenuSequenceGenCfg(flags, chain, eventBuildType, chainDict):
     Return the MenuSequence for the PEB input maker for this chain.
     '''
 
-    def pebInfoWriterToolGenerator(chainDict):
+    def pebInfoWriterToolGenerator(flags, chainDict):
         return pebInfoWriterToolCfg(flags, chainDict['chainName'], eventBuildType)
 
     suffix = getPEBBuildSuffix(chain, eventBuildType)
