@@ -31,7 +31,7 @@ _DataScoutingIdentifiers = {
 # Each stream should correspond to exactly one event building type
 _DataScoutingStreams = {
     'calibration_CostMonitoring': 'CostMonDS',
-    'calibration_MuonDS':'MuonDS',
+    'calibration_MuonDSCalib':'MuonDS',
     'physics_TLA': 'PhysicsTLA',
     'physics_DarkJetPEBTLA': 'DarkJetPEBTLA',
     'physics_FTagPEBTLA': 'FTagPEBTLA',
