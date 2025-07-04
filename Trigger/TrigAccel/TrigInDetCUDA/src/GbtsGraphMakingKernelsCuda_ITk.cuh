@@ -25,8 +25,7 @@ __global__ static void graphEdgeMakingKernel_ITk(const uint4* d_bin_pair_views, 
 	__shared__ float maxOuterRad;
 	__shared__ float min_zU;
 	__shared__ float max_zU;
-	__shared__ float max_kappa_high;
-	__shared__ float max_kappa_low;
+	__shared__ float max_kappa;
 
 	__shared__ float tau_min[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
 	__shared__ float tau_max[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
@@ -44,14 +43,13 @@ __global__ static void graphEdgeMakingKernel_ITk(const uint4* d_bin_pair_views, 
 		num_nodes1 = views.y - begin_bin1;
 		num_nodes2 = views.w - begin_bin2;
 		
-		minDeltaRad    = d_algo_params[2];
-		min_z0         = d_algo_params[3];
-		max_z0         = d_algo_params[4];
-		maxOuterRad    = d_algo_params[5];
-		min_zU         = d_algo_params[6];
-		max_zU         = d_algo_params[7];
-		max_kappa_low  = d_algo_params[8];
-		max_kappa_high = d_algo_params[9];
+		minDeltaRad    = d_algo_params[4];
+		min_z0         = d_algo_params[5];
+		max_z0         = d_algo_params[6];
+		maxOuterRad    = d_algo_params[7];
+		min_zU         = d_algo_params[8];
+		max_zU         = d_algo_params[9];
+		max_kappa  = d_algo_params[10];
 	}
 
 	__syncthreads();
@@ -118,8 +116,7 @@ __global__ static void graphEdgeMakingKernel_ITk(const uint4* d_bin_pair_views, 
 			}
 			else {
 				if(phi1 > max_phi1 && phi1 < min_phi1) {
-					//if(n1Idx < last_n1) n1Idx = last_n1 - 1; // skip to high wraparound after the lower part is done
-					//else last_n1 = n1Idx;
+					if(n1Idx < last_n1) n1Idx = last_n1 - 1; // skip to high wraparound after the lower part is done
 					continue;
 				}
 			}
@@ -157,19 +154,16 @@ __global__ static void graphEdgeMakingKernel_ITk(const uint4* d_bin_pair_views, 
 				else if (dphi >  CUDART_PI_F) dphi -= 2.0f * CUDART_PI_F;
 			}
 
+			//needed for sliding phi window consistancy
 			if(fabsf(dphi) > deltaPhi) continue;
 
 			float curv = dphi/dr;
-
-			float abs_curv = fabsf(curv);
- 
-			if(ftau < 4.0) {//for eta < 2.1
-				if(abs_curv > max_kappa_low) continue;
+			float d0_for_max_curv = r1*r2*(fabsf(curv) - max_kappa);
+			if(tau < 4.0f) {
+				if(d0_for_max_curv > 0.2f) continue;
 			}
-			else { 
-				if(abs_curv > max_kappa_high) continue;
-			}
-		
+			else if(d0_for_max_curv > 1.0f) continue;
+			
 			int nEdges = atomicAdd(&d_counters[0], 1);
 
 			if(nEdges < nMaxEdges) {
@@ -187,13 +181,12 @@ __global__ static void graphEdgeLinkingKernel_ITk(const int2* d_edge_nodes, int*
 	int edge_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
 	if(edge_idx >= nEdges) return;
-
+	
 	int n2Idx = d_edge_nodes[edge_idx].y;//global index of n2
-
+	
 	int pos = atomicSub(&d_num_outgoing_edges[n2Idx], 1); //this converts num_outgoing_edges to the start postion for each node in d_edge_links
-
+	
 	d_edge_links[pos-1] = edge_idx; //this edge starts from n2, matching will check edge's n1 and then loop over edges outgoing from that node
-
 }
 
 __global__ static void graphEdgeMatchingKernel_ITk(const float* d_algo_params, const half4* d_edge_params, const int2* d_edge_nodes, 
@@ -206,9 +199,9 @@ __global__ static void graphEdgeMatchingKernel_ITk(const float* d_algo_params, c
 	__shared__ __half PI_2_h;
 	__shared__ __half ONE_h;
 	if(threadIdx.x == 0) {
-		cut_dphi_max      = __float2half(d_algo_params[10]);
-		cut_dcurv_max     = __float2half(d_algo_params[11]);	
-		cut_tau_ratio_max = __float2half(d_algo_params[12]);
+		cut_dphi_max      = __float2half(d_algo_params[11]);
+		cut_dcurv_max     = __float2half(d_algo_params[12]);	
+		cut_tau_ratio_max = __float2half(d_algo_params[13]);
 		
 		PI_h   = __float2half(CUDART_PI_F);
 		PI_2_h = __float2half(2*CUDART_PI_F);
@@ -304,7 +297,6 @@ __global__ static void graphCompressionKernel_ITk(float4* d_sp_params, const int
 
 		int newIdx = d_reIndexer[idx];
 		if (newIdx == -1) continue;
-		 
 		int pos = edge_size*newIdx;
 		int node1_idx = d_orig_node_index[d_edge_nodes[2*idx]];
 		d_output_graph[pos + TrigAccel::ITk::node1] = node1_idx;

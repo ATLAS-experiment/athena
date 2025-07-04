@@ -24,11 +24,11 @@ __global__ static void CCA_IterationKernel_ITk(const int* d_output_graph, char* 
 
 	__shared__ int nEdgesLeft;
 	int edge_size = 2 + 1 + TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;	
-
+	
 	int toggle     = iter%2;	
 	int levelLoad  = toggle*nEdges;	
 	int levelStore = (1-toggle)*nEdges;
-
+	
 	if(threadIdx.x == 0) {
 		nEdgesLeft = d_counters[3+toggle];//from the previous iteration
 	}
@@ -41,7 +41,7 @@ __global__ static void CCA_IterationKernel_ITk(const int* d_output_graph, char* 
 		int edge_pos = edge_size*edgeIdx;
 		
 		int nNei = d_output_graph[edge_pos + TrigAccel::ITk::nNei];
-
+		
 		char next_level = d_levels[levelLoad + edgeIdx];
 
 		bool localChange = false;
@@ -281,11 +281,10 @@ inline __device__ void add_seed_proposal(const int int_m_J, const int mini_idx, 
 	
 	d_seed_proposals[prop_idx] = make_int2(int_m_J, mini_idx);
 	d_seed_ambiguity[prop_idx] = 0;
-
+		
 	int2 mini_state;
 	for(int next_mini = mini_idx; next_mini != -1;) {
 		mini_state = d_mini_states[next_mini];
-
 		unsigned long long int competing_offer = atomicMax(&d_edge_bids[mini_state.x], seed_bid);	
 		
 		if(competing_offer > seed_bid) {d_seed_ambiguity[prop_idx] = -1;} 
@@ -327,7 +326,6 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 	__shared__ edgeState current_states[TrigAccel::ITk::GBTS_MAX_SHARED_STATES];
 	
 	int edge_size = 2 + 1 + TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;
-
 	//TO-DO? each block to take the same distribution of levels
 	if(threadIdx.x == 0) {
 		total_live_states = 0;
@@ -358,7 +356,6 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 		
 		current_states[root_idx].initialize(node1_params, node2_params);
 		current_states[root_idx].m_edge_idx = edge_idx;		
-		
 		int mini_idx = atomicAdd(&d_counters[7], 1);
 		d_mini_states[mini_idx] = make_int2(edge_idx, -1); //prev mini -1 for roots with no prev
 		current_states[root_idx].m_mini_idx = mini_idx; 			
@@ -368,8 +365,8 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 	
 	edgeState state;
 	edgeState new_state;
-	__syncthreads();	
 	
+	__syncthreads();	
 	while(total_live_states>0) { 
 		// propogate to next level 
 		bool has_state = false;
@@ -382,9 +379,9 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 			nStates = (nStates < blockDim.x) ? 0 : nStates - blockDim.x;
 			
 			nSharedSpace = total_live_states + TrigAccel::ITk::GBTS_MAX_SHARED_STATES - nStates; //total state count when shared memory is filled
+
 		} 
 		__syncthreads();
-		
 		if(has_state) {
 
 			int edge_idx = state.m_edge_idx;
@@ -417,7 +414,6 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 					if(d_output_graph[edge_size*nei_idx + TrigAccel::ITk::nNei] == 0) { //no neighbours so will fail next round anyway so save shared
 						if(new_state.m_length >= minLevel) {
 							unsigned int prop_idx = atomicAdd(&d_counters[8], 1);
-							
 							if(prop_idx < nMaxProps) add_seed_proposal(qual_FtoI(new_state.m_J), new_state.m_mini_idx, prop_idx, d_seed_ambiguity, d_seed_proposals, d_edge_bids, d_mini_states);
 						}
 					}
@@ -440,21 +436,23 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 		__syncthreads(); //wait for current_states to repopulate
 	}
 	__syncthreads();
+	
 	//move remianing seed props to seeds after all tracking for this set is done //seperate kernel?
 	if(threadIdx.x == 0) nStates = atomicAdd(&d_counters[10], 1);
 			
 	__syncthreads();
 	if(nStates != gridDim.x-1) return;
-	
 	unsigned int nProps = d_counters[8];
+	if(nProps > nMaxProps) nProps = nMaxProps;
+	else if(nProps == 0) return;
 	__syncthreads();
 	//reset for next launch
-	if(threadIdx.x == 0) { 
+	if(threadIdx.x == 0) {
 		d_counters[10] = 0;
 		d_counters[7] = 0;
 		d_counters[8] = 0;
 		nStates = 1; //re-using as #maybe states
-	}		
+	}	
 	__syncthreads();	
 	for(int round=0; round<5 && nStates > 0 ;round++) { //re-check maybe seeds that don't clash with a definte seed
 		if(threadIdx.x == 0) nStates = 0;
@@ -470,13 +468,11 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 
 			int2 mini_state;
 			for(int next_mini = prop.y; next_mini != -1;) {
-				
 				mini_state = d_mini_states[next_mini];
 				next_mini = mini_state.y;
-				
 				unsigned long long int best_bid = d_edge_bids[mini_state.x];
 				if(best_bid == 0) continue; //already reset
-					
+				
 				if(d_seed_ambiguity[best_bid & 0xFFFFFFFFLL] == 0) {isgood = false; break;} //clashes with definate seed
 				d_edge_bids[mini_state.x] = 0; //reset edge bid from (possibly) fake seed	
 			}
