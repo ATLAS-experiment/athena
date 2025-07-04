@@ -54,8 +54,12 @@ def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwarg
     acc = ComponentAccumulator()
 
     objStr = flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject
+    objQuality = flags.PhysVal.IDTPM.currentTrkAna.ObjectQuality
+    if objQuality == "Medium" and "Jet" in objStr :
+        ## changing default for jets
+        objQuality = "DRtruthJet"
     kwargs.setdefault( "ObjectType",    objStr )
-    kwargs.setdefault( "ObjectQuality", flags.PhysVal.IDTPM.currentTrkAna.ObjectQuality )
+    kwargs.setdefault( "ObjectQuality", objQuality )
 
     if "Tau" in objStr:
         kwargs.setdefault( "TauType",    flags.PhysVal.IDTPM.currentTrkAna.TauType )

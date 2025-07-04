@@ -266,6 +266,7 @@ def getLabel( flags, key ) :
         "OfflineElectron"     : [ "offEle",     "Offline e^{#pm} track",    "Offline e^{#pm} vertex"    ],
         "OfflineMuon"         : [ "offMu",      "Offline #mu^{#pm} track",  "Offline #mu^{#pm} vertex"  ],
         "OfflineTau"          : [ "offTau",     "Offline #tau^{#pm} track", "Offline #tau^{#pm} vertex" ],
+        "OfflineJet"          : [ "offlJet",    "Offline track in jet",     "Offline vertex in jet"  ],
         "Truth"               : [ "truth",      "Truth particle",           "Truth vertex"              ],
         "TruthElectron"       : [ "truthEle",   "Truth e^{#pm}",            "Truth e^{#pm} vertex"      ],
         "TruthMuon"           : [ "truthMu",    "Truth #mu^{#pm}",          "Truth #mu^{#pm} vertex"    ],

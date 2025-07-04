@@ -54,9 +54,13 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Track parameters plots
   if( m_trkAnaDefSvc->plotTrackParameters() ) {
     m_plots_trkParam_vsTest = std::make_unique< TrackParametersPlots >(
-        this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->testTag() );
+        this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->testTag(),
+        ( not m_trkAnaDefSvc->isTestTruth() ) and m_trkAnaDefSvc->plotTrackParametersErrors(),
+        m_trkAnaDefSvc->plotTracksInJets() );
     m_plots_trkParam_vsRef = std::make_unique< TrackParametersPlots >(
-        this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->referenceTag() );
+        this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->referenceTag(),
+        ( not m_trkAnaDefSvc->isReferenceTruth() ) and m_trkAnaDefSvc->plotTrackParametersErrors(),
+        m_trkAnaDefSvc->plotTracksInJets() );
   } 
 
   /// Track multiplicity plots

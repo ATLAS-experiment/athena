@@ -110,6 +110,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
         return None
 
     kwargs.setdefault( "plotTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParameters )
+    kwargs.setdefault( "plotTrackParametersErrors", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParametersErrors )
     kwargs.setdefault( "plotTrackMultiplicities", flags.PhysVal.IDTPM.currentTrkAna.plotTrackMultiplicities )
     kwargs.setdefault( "plotEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotEfficiencies )
     kwargs.setdefault( "plotTechnicalEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotTechnicalEfficiencies )
@@ -126,6 +127,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "plotOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.plotOfflineElectrons )
     kwargs.setdefault( "ResolutionMethod", flags.PhysVal.IDTPM.currentTrkAna.ResolutionMethod )
     kwargs.setdefault( "isITk", flags.Detector.GeometryITk )
+    kwargs.setdefault( "plotTracksInJets", "Jet" in flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject )
 
     kwargs.setdefault("EtaBins", flags.Tracking.ITkMainPass.etaBins if flags.Detector.GeometryITk else [-1, 9999.]) # for technical efficiencies
     kwargs.setdefault("MinSilHits", flags.Tracking.ITkMainPass.minClusters if flags.Detector.GeometryITk else [flags.Tracking.MainPass.minClusters]) # for technical efficiencies
