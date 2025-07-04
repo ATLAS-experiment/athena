@@ -51,7 +51,7 @@ namespace MuonR4{
                    m_spGlobPos.set(lToGlob * sp->positionInChamber(), idx);
                    const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*sp->primaryMeasurement());
                    m_muonP4->push_back(hitPartMap[simHit]);
-                   m_truthLink += m_muonP4->find(hitPartMap[simHit]);
+                   m_truthLink[idx] = m_muonP4->find(hitPartMap[simHit]);
                 }
             }
         }
