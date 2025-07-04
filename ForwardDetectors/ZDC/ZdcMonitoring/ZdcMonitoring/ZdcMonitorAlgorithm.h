@@ -93,7 +93,7 @@ private:
     Gaudi::Property<float> m_minVInjToImposeAmpRequirementLGInjectorPulse {this, "MinVInjToImposeAmpRequirementLGInjectorPulse", 0.002, "Minimum input voltage to impose LG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel LG minimum-amplitude requirement"};
 
     Gaudi::Property<std::vector<std::string>> m_OOpOtriggerChains {this, "OOpOTriggers", {}, "List of trigger chains to monitor"};
-    Gaudi::Property<std::map<int,std::string>> m_OOpOPEBTriggerMap {this, "OOpOPEBtriggerMap", {}, "Map of CTP ID to trigger name for ZdcCalib PEB stream pO/OO monitoring"};
+    Gaudi::Property<std::map<int,std::string>> m_OOpOL1TriggerFromCTPIDMap {this, "OOpOL1TriggerFromCTPIDMap", {}, "Map of CTP ID to trigger name for ZdcCalib PEB stream pO/OO monitoring"};
 
     Gaudi::Property<std::string > m_lbTimeCoolFolderName{ this, "LumiBlockTimeCoolFolderName", "/TRIGGER/LUMI/LBLB", "COOL folder in COOLONL_TRIGGER holding info about start and stop times for luminosity blocks" };
 

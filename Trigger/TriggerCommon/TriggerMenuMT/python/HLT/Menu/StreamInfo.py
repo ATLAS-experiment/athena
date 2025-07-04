@@ -61,8 +61,8 @@ _all_streams = [
     StreamInfo('IDMonitoring', 'monitoring', True, True),
     StreamInfo('CSC', 'monitoring', True, False),
     # CALIBRATION STREAMS
-    StreamInfo('Muon_Calibration','calibration',False,True),
-    StreamInfo('MuonDS','calibration',True,False),
+    StreamInfo('MuonCalib','calibration',False,True),
+    StreamInfo('MuonDSCalib','calibration',False,False),
     StreamInfo('BphysPEB','calibration',True,False),
     StreamInfo('BeamSpot', 'calibration', True, False),
     StreamInfo('LArCells', 'calibration', False, False),
