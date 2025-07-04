@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/SystemOfUnits.h"
@@ -188,7 +188,7 @@ bool TrigMufastHypoTool::decideOnSingleObject(TrigMufastHypoTool::MuonClusterInf
       zatBeam = -9999.;
    }
 
-   if(m_doCalib){
+   if(m_doCalib && !m_acceptAll){ 
       result = false;
       ATH_MSG_DEBUG("This muoncalib chain is only monitored.");
       return result;

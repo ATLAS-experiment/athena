@@ -244,7 +244,7 @@ auto vushortAccessors = initAccessors<std::vector<unsigned short>>("robs_status"
 
 auto vuintAccessors = initAccessors<std::vector<unsigned>>("robs_history");
 
-auto vuint32Accessors = initAccessors<std::vector<uint32_t>>("robs_id", "robs_size", "PEBROBList", "PEBSubDetList", "MuonCalibrationStream");
+auto vuint32Accessors = initAccessors<std::vector<uint32_t>>("robs_id", "robs_size", "PEBROBList", "PEBSubDetList", "muCalibDS");
 
 auto vuint8Accessors = initAccessors<std::vector<uint8_t>>("parameterPosition");
 
