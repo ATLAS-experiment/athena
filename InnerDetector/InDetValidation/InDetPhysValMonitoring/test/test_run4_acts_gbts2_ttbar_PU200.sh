@@ -48,7 +48,6 @@ run "Reconstruction-gbts" \
     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2; \
                flags.Tracking.writeExtendedSi_PRDInfo=True; \
-               flags.Tracking.doTruth=True; \
                flags.Acts.doMonitoring=True; \
                flags.Acts.doAnalysis=True; \
                flags.Acts.doAnalysisNtuples=False; \
@@ -90,7 +89,6 @@ run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-               flags.Tracking.doTruth=True; \
                flags.Acts.doMonitoring=True; \
                flags.Acts.doAnalysis=True; \
                flags.Acts.doAnalysisNtuples=False; \

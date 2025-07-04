@@ -79,8 +79,7 @@ fi
 run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-               flags.Tracking.doTruth=True;" \
+    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True;" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \

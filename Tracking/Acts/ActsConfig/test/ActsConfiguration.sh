@@ -68,8 +68,7 @@ activate_all_flags="flags.Acts.doITkConversion=True; \
         	    flags.Acts.EDM.PersistifySpacePoints=True; \
 		    flags.Detector.EnableCalo=True; \
 		    flags.Tracking.writeExtendedSi_PRDInfo=True; \
-		    flags.Acts.storeTrackStateInfo=True; \
-		    flags.Tracking.doTruth=True;"
+		    flags.Acts.storeTrackStateInfo=True;"
 		   
 activate_all_collections="\"InDet\" \
         \"InDetActsLegacy\" \
@@ -146,7 +145,6 @@ source ActsMainConfiguration.sh \
 	flags.Acts.EDM.PersistifyTracks=True; \
 	flags.Acts.doAmbiguityResolution=False; \
 	flags.Tracking.writeExtendedSi_PRDInfo=True; \
-	flags.Tracking.doTruth=True; \
        " \
        >& ActsConfiguration3.log
 
@@ -207,8 +205,7 @@ fi
 # Run on Heavy Ions
 echo "Running Configuration 6: Heavy Ion"
 source ActsHeavyConfiguration.sh \
-       "flags.Tracking.doTruth=True; \
-        flags.Tracking.ITkActsHeavyIonPass.storeSeparateContainer=True; \
+       "flags.Tracking.ITkActsHeavyIonPass.storeSeparateContainer=True; \
 	flags.Tracking.ITkActsHeavyIonPass.storeTrackSeeds=True; \
 	flags.Tracking.ITkActsHeavyIonPass.storeSiSPSeededTracks=True; \
 	flags.Tracking.writeExtendedSi_PRDInfo=True; \

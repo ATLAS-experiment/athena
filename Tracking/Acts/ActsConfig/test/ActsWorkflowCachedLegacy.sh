@@ -16,7 +16,6 @@ Reco_tf.py \
   	     flags.Acts.doITkConversion=True; \
 	     flags.Acts.doLargeRadius=True; \
 	     flags.Acts.useCache=True; \
-	     flags.Tracking.doTruth=True; \
 	     flags.Detector.EnableCalo=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \

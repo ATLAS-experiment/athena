@@ -75,7 +75,6 @@ run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-               flags.Tracking.doTruth=True; \
 	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${ArtInFile} \
