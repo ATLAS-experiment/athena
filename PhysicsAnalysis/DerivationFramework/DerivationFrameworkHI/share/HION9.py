@@ -118,15 +118,15 @@ for collection_number in [2, 3, 4, 5, 6, 8, 10]:
     if HIDerivationFlags.isPP() and MainJetCollection != "":
         if HasCollection(collection_name): largeRcollections.append(collection_name)
 
-for collection in largeRcollections :
-   
-    if collection in ptThreshDict:
+collectionsForConstituents = ["DFAntiKt4HIJets", "DFAntiKt6HIJets"]
+for collection in collectionsForConstituents :
         #Use fixed value for pt threshold for the moment. Might go back to dictionary based threshhold in the future
         #ptThrsh = ptThreshDict.get(collection)
-        ptThrsh = 1000000
+        ptThrsh = 30
+        #ptThrsh = 1000000
         #Only clusters associated with jets (high pT)
         thinningTools.append(addJetClusterThinningTool(collection,DerivationName,ptThrsh))
-
+        
 
 if HIDerivationFlags.isSimulation() :
     from DerivationFrameworkMCTruth.DerivationFrameworkMCTruthConf import DerivationFramework__GenericTruthThinning
