@@ -139,8 +139,16 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "truthMinAbsQoPT" , -9999., help="Apply minimum |q/pt| cut to truth particle" )
     icf.addFlag( "truthMaxAbsQoPT" , -9999., help="Apply maximum |q/pt| cut to truth particle" )
     icf.addFlag( "truthPdgId"   , -9999., help="Apply pdgId selection to truth particle" )
+    # Jet-track matching properties
+    icf.addFlag( "JetContainerName", "InTimeAntiKt4TruthJets" )
+    icf.addFlag( "maxTrkJetDR", 0.4 )
+    icf.addFlag( "jetMinAbsEta", -9999. )
+    icf.addFlag( "jetMaxAbsEta", 4.0 )
+    icf.addFlag( "jetMinPt", 1000.0 )
+    icf.addFlag( "jetMaxPt", 5000000.0 )
     # Histogram properties
     icf.addFlag( "plotTrackParameters"      , True )
+    icf.addFlag( "plotTrackParametersErrors", False )
     icf.addFlag( "plotTrackMultiplicities"  , True )
     icf.addFlag( "plotEfficiencies"         , True )
     icf.addFlag( "plotTechnicalEfficiencies", False )

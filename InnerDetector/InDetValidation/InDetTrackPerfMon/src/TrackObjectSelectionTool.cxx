@@ -145,6 +145,20 @@ bool IDTPM::TrackObjectSelectionTool::accept(
     return true;
   }
 
+  /// Jet
+  if( m_objectType.value().find("Jet") != std::string::npos ) {
+    const xAOD::Jet* jet = getLinkedJet(
+        offTrack, m_objectQuality.value() );
+
+    if( not jet ) return false;
+
+    ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
+                   " is linked to a " << m_objectQuality.value() <<
+                   " jet with pT = " << jet->pt() );
+
+    return true;
+  }
+
   /// Truth
   if( m_objectType.value().find("Truth") != std::string::npos ) {
 

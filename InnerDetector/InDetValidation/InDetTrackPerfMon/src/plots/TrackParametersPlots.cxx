@@ -10,6 +10,7 @@
 /// local include(s)
 #include "TrackParametersPlots.h"
 #include "../TrackParametersHelper.h"
+#include "../OfflineObjectDecorHelper.h"
 
 
 /// -----------------------
@@ -17,9 +18,11 @@
 /// -----------------------
 IDTPM::TrackParametersPlots::TrackParametersPlots(
     PlotMgr* pParent, const std::string& dirName, 
-    const std::string& anaTag, const std::string& trackType ) :
+    const std::string& anaTag, const std::string& trackType,
+    bool plotErrors, bool recomputeIP ) :
         PlotMgr( dirName, anaTag, pParent ), 
-        m_trackType( trackType ) { }
+        m_trackType( trackType ),
+        m_plotErrors( plotErrors ), m_recomputeIP( recomputeIP ) { }
 
 
 /// ---------------------------
@@ -64,6 +67,26 @@ StatusCode IDTPM::TrackParametersPlots::bookPlots()
   ATH_CHECK( retrieveAndBook( m_z0_vs_d0, m_trackType+"_z0_vs_d0" ) );
   ATH_CHECK( retrieveAndBook( m_z0sin_vs_d0, m_trackType+"_z0sin_vs_d0" ) );
 
+  if( m_plotErrors ) {
+    /// sigma plots - defined in ResPlotsDef.json
+    ATH_CHECK( retrieveAndBook( m_sigma_pt, "sigma_"+m_trackType+"_pt" ) );
+    ATH_CHECK( retrieveAndBook( m_sigma_eta, "sigma_"+m_trackType+"_eta" ) );
+    ATH_CHECK( retrieveAndBook( m_sigma_phi, "sigma_"+m_trackType+"_phi" ) );
+    ATH_CHECK( retrieveAndBook( m_sigma_d0, "sigma_"+m_trackType+"_d0" ) );
+    ATH_CHECK( retrieveAndBook( m_sigma_z0, "sigma_"+m_trackType+"_z0" ) );
+    ATH_CHECK( retrieveAndBook( m_sigma_z0sin, "sigma_"+m_trackType+"_z0sin" ) );
+    ATH_CHECK( retrieveAndBook( m_sigma_theta, "sigma_"+m_trackType+"_theta" ) );
+
+    /// significance plots - defined in ResPlotsDef.json
+    ATH_CHECK( retrieveAndBook( m_significance_pt, "significance_"+m_trackType+"_pt" ) );
+    ATH_CHECK( retrieveAndBook( m_significance_eta, "significance_"+m_trackType+"_eta" ) );
+    ATH_CHECK( retrieveAndBook( m_significance_phi, "significance_"+m_trackType+"_phi" ) );
+    ATH_CHECK( retrieveAndBook( m_significance_d0, "significance_"+m_trackType+"_d0" ) );
+    ATH_CHECK( retrieveAndBook( m_significance_z0, "significance_"+m_trackType+"_z0" ) );
+    ATH_CHECK( retrieveAndBook( m_significance_z0sin, "significance_"+m_trackType+"_z0sin" ) );
+    ATH_CHECK( retrieveAndBook( m_significance_theta, "significance_"+m_trackType+"_theta" ) );
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -80,6 +103,7 @@ StatusCode IDTPM::TrackParametersPlots::fillPlots(
   float peta   = eta( particle );
   float pphi   = phi( particle );
   float pd0    = d0( particle );
+  if( m_recomputeIP ) pd0 = getD0TrackInJet( particle ); 
   float pz0    = z0( particle );
   float pz0sin = z0SinTheta( particle );
   float ptheta = theta( particle );
@@ -127,6 +151,40 @@ StatusCode IDTPM::TrackParametersPlots::fillPlots(
   ATH_CHECK( fill( m_eta_vs_phi, pphi, peta, weight ) );
   ATH_CHECK( fill( m_z0_vs_d0, pd0, pz0, weight ) );
   ATH_CHECK( fill( m_z0sin_vs_d0, pz0*std::sin(ptheta), pd0, weight ) );
+
+  if( m_plotErrors ) {
+    float ppt_err = pTError( particle ) / Gaudi::Units::GeV;
+    float peta_err = etaError( particle );
+    float pphi_err = error( particle, Trk::phi );
+    float pd0_err = error( particle, Trk::d0 );
+    float pz0_err = error( particle, Trk::z0 );
+    float pz0sin_err = z0SinThetaError( particle );
+    float ptheta_err = error( particle, Trk::theta );
+
+    ATH_CHECK( fill( m_sigma_pt,    ppt_err,    weight ) );
+    ATH_CHECK( fill( m_sigma_eta,   peta_err,   weight ) );
+    ATH_CHECK( fill( m_sigma_phi,   pphi_err,   weight ) );
+    ATH_CHECK( fill( m_sigma_d0,    pd0_err,    weight ) );
+    ATH_CHECK( fill( m_sigma_z0,    pz0_err,    weight ) );
+    ATH_CHECK( fill( m_sigma_z0sin, pz0sin_err, weight ) );
+    ATH_CHECK( fill( m_sigma_theta, ptheta_err, weight ) );
+
+    float ppt_sig = ppt_err > 0. ? ppt / ppt_err : -9999.;
+    float peta_sig = peta_err > 0. ? peta / peta_err : -9999.;
+    float pphi_sig = pphi_err > 0. ? pphi / pphi_err : -9999.;
+    float pd0_sig = pd0_err > 0. ? pd0 / pd0_err : -9999.;
+    float pz0_sig = pz0_err > 0. ? pz0 / pz0_err : -9999.;
+    float pz0sin_sig = pz0sin_err > 0. ? pz0sin / pz0sin_err  : -9999.;
+    float ptheta_sig = ptheta_err > 0. ? ptheta / ptheta_err : -9999.;
+
+    ATH_CHECK( fill( m_significance_pt,     ppt_sig,    weight ) );
+    ATH_CHECK( fill( m_significance_eta,    peta_sig,   weight ) );
+    ATH_CHECK( fill( m_significance_phi,    pphi_sig,   weight ) );
+    ATH_CHECK( fill( m_significance_d0,     pd0_sig,    weight ) );
+    ATH_CHECK( fill( m_significance_z0,     pz0_sig,    weight ) );
+    ATH_CHECK( fill( m_significance_z0sin,  pz0sin_sig, weight ) );
+    ATH_CHECK( fill( m_significance_theta,  ptheta_sig, weight ) );
+  }
 
   return StatusCode::SUCCESS;
 }

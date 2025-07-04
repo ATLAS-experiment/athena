@@ -21,6 +21,7 @@
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
+#include "xAODJet/JetContainer.h"
 
 #include "TrackParametersHelper.h"
 
@@ -72,6 +73,19 @@ namespace IDTPM {
                                     const int requiredNtracks,
                                     const std::string& type="RNN",
                                     const std::string& quality="" );
+
+  /// For jets
+  const xAOD::Jet* getLinkedJet( const xAOD::TrackParticle& track,
+                                 const std::string& quality="DRtruthJet" );
+
+  float getD0TrackInJet( const xAOD::TrackParticle& track,
+                         const std::string& quality="DRtruthJet" );
+
+  inline const xAOD::Jet* getLinkedJet( const xAOD::TruthParticle&,
+                         const std::string& ="" ) { return nullptr; }; // dummy - to avoid compilation errors
+
+  inline float getD0TrackInJet( const xAOD::TruthParticle&,
+                         const std::string& ="" ) { return -999.; }; // dummy - to avoid compilation errors
 
   /// For truth particles
   bool isUnlinkedTruth( const xAOD::TrackParticle& track );

@@ -67,6 +67,7 @@ public:
   virtual bool hasFullPileupTruth() const override { return m_hasFullPileupTruth.value(); };
 
   virtual bool plotTrackParameters() const override { return m_plotTrackParameters.value(); };
+  virtual bool plotTrackParametersErrors() const override { return m_plotTrackParametersErrors.value(); };
   virtual bool plotTrackMultiplicities() const override { return m_plotTrackMultiplicities.value(); };
   virtual bool plotEfficiencies() const override { return m_plotEfficiencies.value(); };
   virtual bool plotTechnicalEfficiencies() const override { return m_plotTechnicalEfficiencies.value(); };
@@ -81,6 +82,7 @@ public:
   virtual bool plotVertexParameters() const override { return m_plotVertexParameters.value(); };
   virtual bool useSelectedVertexTracks() const override { return m_useSelectedVertexTracks.value(); };
   virtual bool plotOfflineElectrons() const override { return m_plotOfflineElectrons.value(); };
+  virtual bool plotTracksInJets() const override { return m_plotTracksInJets.value(); };
   virtual unsigned int resolutionMethod() const override;
   virtual bool isITk() const override { return m_isITk.value(); };
 
@@ -115,6 +117,7 @@ private:
   /// histogram properties
   BooleanProperty m_sortPlotsByChain { this, "sortPlotsByChain", false, "Save plots in <mainDir>/<chain>/<subDir/TrkAnaName>/... instead of the default <mainDir>/<subDir/TrkAnaName>/<chain>/..." };
   BooleanProperty m_plotTrackParameters { this, "plotTrackParameters", true, "Book/fill track parameters histograms" };
+  BooleanProperty m_plotTrackParametersErrors { this, "plotTrackParametersErrors", false, "Book/fill track parameters errors histograms" };
   BooleanProperty m_plotTrackMultiplicities { this, "plotTrackMultiplicities", true, "Book/fill track multiplicities histograms" };
   BooleanProperty m_plotEfficiencies { this, "plotEfficiencies", true, "Book/fill track efficiencies histograms" };
   BooleanProperty m_plotTechnicalEfficiencies { this, "plotTechnicalEfficiencies", true, "Book/fill track technical efficiencies histograms" };
@@ -129,6 +132,7 @@ private:
   BooleanProperty m_plotVertexParameters { this, "plotVertexParameters", true, "Book/fill vertex parameters histograms" };
   BooleanProperty m_useSelectedVertexTracks { this, "useSelectedVertexTracks", false, "Get only vertex-associated tracks which pass the track selection" };
   BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
+  BooleanProperty m_plotTracksInJets { this, "plotTracksInJets", false, "plot tracks in jets" };
   StringProperty m_resolMethod { this, "ResolutionMethod", "iterRMS", "Type of computation method for resolutions" };
   BooleanProperty m_isITk { this, "isITk", true, "Use ITk configuration for plots, etc." };
 };
