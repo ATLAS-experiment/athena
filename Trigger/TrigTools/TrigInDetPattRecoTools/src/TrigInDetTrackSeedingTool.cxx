@@ -74,7 +74,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
   TrigInDetTrackSeedingResult seedStats;
   
-  output.clear();
+	output.clear();
 
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };  
   const Amg::Vector3D &vertex = beamSpotHandle->beamPos();
@@ -287,7 +287,6 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
     ATH_MSG_DEBUG("Found "<<output.size()<<" tracklets");  
   }
   else {//GPU-accelerated graph building
-
 		//1. data export
 
 		std::vector<const Trk::SpacePoint*> vSP;
@@ -382,11 +381,12 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 			nLayers++;
 		}
 
+		if(spIdx == 0) return seedStats;
 		pJobData->m_nSpacepoints = spIdx;
 		pJobData->m_nLayers      = nLayers;
 		pJobData->m_nEtaBins     = nEtaBins;
 		pJobData->m_maxEtaBin    = MaxEtaBin;
-		pJobData->m_nMaxEdges    = m_nBufferEdges + 5*spIdx; 
+		pJobData->m_nMaxEdges    = static_cast<unsigned int>(7*spIdx); 
 
 		//load bin pairs
 
@@ -402,7 +402,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 				pairIdx++;
 			}
 		}
-
+		
 		pJobData->m_nBinPairs = pairIdx;
 		
 		//add algorithm parameters
@@ -413,36 +413,41 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
 		float maxCurv = ptCoeff/tripletPtMin;
 
-		const float min_deltaPhi      = 0.001;
-		const float dphi_coeff        = 0.68*maxCurv;
-		const float cut_dphi_max      = m_LRTmode ? 0.07 : 0.012;
-		const float cut_dcurv_max     = m_LRTmode ? 0.015 : 0.001;
-		const float cut_tau_ratio_max = m_LRTmode ? 0.015 : 0.007;
-		const float min_z0            = m_LRTmode ? -600.0 : internalRoI.zedMinus();
-		const float max_z0            = m_LRTmode ? 600.0 : internalRoI.zedPlus();
+		const float pt_scale = 900/m_minPt;
+		
+		const float min_deltaPhi_low_dr = 0.002*pt_scale;
+		const float dphi_coeff_low_dr   = 4.33e-4*pt_scale;
+		const float min_deltaPhi        = 0.015*pt_scale;
+		const float dphi_coeff          = 2.2e-4*pt_scale;
+		
+		const float cut_dphi_max        = m_LRTmode ? 0.07 : 0.012;
+		const float cut_dcurv_max       = m_LRTmode ? 0.015 : 0.001;
+		const float cut_tau_ratio_max   = m_LRTmode ? 0.015 : 0.007;
+		const float min_z0              = m_LRTmode ? -600.0 : internalRoI.zedMinus();
+		const float max_z0              = m_LRTmode ? 600.0 : internalRoI.zedPlus();
 
-		const float maxOuterRadius    = m_LRTmode ? 1050.0 : 550.0;  
-		const float minDeltaRadius    = 2.0;
+		const float maxOuterRadius      = m_LRTmode ? 1050.0 : 550.0;  
+		const float minDeltaRadius      = 2.0;
 				
 		const float cut_zMinU = min_z0 + maxOuterRadius*internalRoI.dzdrMinus();
 		const float cut_zMaxU = max_z0 + maxOuterRadius*internalRoI.dzdrPlus();
 
-		const float maxKappa_high_eta          = m_LRTmode ? 1.0*maxCurv : std::sqrt(0.8)*maxCurv;
-		const float maxKappa_low_eta           = m_LRTmode ? 1.0*maxCurv : std::sqrt(0.6)*maxCurv;
-
-		pJobData->m_algo_params[0] = min_deltaPhi;
-		pJobData->m_algo_params[1] = dphi_coeff;
-		pJobData->m_algo_params[2] = minDeltaRadius;
-		pJobData->m_algo_params[3] = min_z0;
-		pJobData->m_algo_params[4] = max_z0;
-		pJobData->m_algo_params[5] = maxOuterRadius;
-		pJobData->m_algo_params[6] = cut_zMinU;
-		pJobData->m_algo_params[7] = cut_zMaxU;
-		pJobData->m_algo_params[8] = maxKappa_low_eta;
-		pJobData->m_algo_params[9] = maxKappa_high_eta;
-		pJobData->m_algo_params[10]= cut_dphi_max;
-		pJobData->m_algo_params[11]= cut_dcurv_max;
-		pJobData->m_algo_params[12]= cut_tau_ratio_max;
+		const float maxKappa            = m_LRTmode ? 1.0*maxCurv : 0.9*maxCurv;
+		
+		pJobData->m_algo_params[0]  = min_deltaPhi;
+		pJobData->m_algo_params[1]  = dphi_coeff;
+		pJobData->m_algo_params[2]  = min_deltaPhi_low_dr;
+		pJobData->m_algo_params[3]  = dphi_coeff_low_dr;
+		pJobData->m_algo_params[4]  = minDeltaRadius;
+		pJobData->m_algo_params[5]  = min_z0;
+		pJobData->m_algo_params[6]  = max_z0;
+		pJobData->m_algo_params[7]  = maxOuterRadius;
+		pJobData->m_algo_params[8]  = cut_zMinU;
+		pJobData->m_algo_params[9]  = cut_zMaxU;
+		pJobData->m_algo_params[10] = maxKappa;
+		pJobData->m_algo_params[11] = cut_dphi_max;
+		pJobData->m_algo_params[12] = cut_dcurv_max;
+		pJobData->m_algo_params[13] = cut_tau_ratio_max;	
 		
 		int minLevel = 3;//a triplet + 1 confirmation
 
@@ -452,13 +457,13 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
 		pJobData->m_minLevel = minLevel;
 
-		pJobData->m_useGPUseedExtraction = m_useGPUseedExtraction;		
+		pJobData->m_useGPUseedExtraction = m_useGPUseedExtraction;			
 
 		seedStats.m_nPixelSPs = nPixels;
 		seedStats.m_nStripSPs = nStrips;
 
 		ATH_MSG_DEBUG("Loaded "<<nPixels<< " Pixel Spacepoints and "<<nStrips<< " Strip SpacePoints");
-    
+		
 		std::shared_ptr<TrigAccel::OffloadBuffer> pBuff = std::make_shared<TrigAccel::OffloadBuffer>(dataBuffer.get());
     
 		std::unique_ptr<TrigAccel::Work> pWork = std::unique_ptr<TrigAccel::Work>(m_accelSvc->createWork(TrigAccel::InDetJobControlCode::RUN_GBTS, pBuff));
@@ -468,14 +473,12 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 			return seedStats;
 		}
 
-		ATH_MSG_DEBUG("Work item created for task "<<TrigAccel::InDetJobControlCode::RUN_GBTS);
-
 		bool workSuccess = pWork->run();
 		if(!workSuccess) {
 			ATH_MSG_WARNING("Work item failed to complete");
 			return seedStats;
 		}    
-
+		
 		std::shared_ptr<TrigAccel::OffloadBuffer> pOutput = pWork->getOutput();
 		
 		TrigAccel::ITk::GRAPH_AND_SEEDS_OUTPUT* pGraphAndSeeds = reinterpret_cast<TrigAccel::ITk::GRAPH_AND_SEEDS_OUTPUT*>(pOutput->m_rawBuffer);
@@ -483,6 +486,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 		TrigAccel::ITk::OUTPUT_SEEDS* pSeeds = &pGraphAndSeeds->m_OutputSeeds;
 		
 		if(m_useGPUseedExtraction) {
+			if(pSeeds->m_nSeeds == 0) return seedStats;
 			//converting tracklet into GBTS-CPU format
 			for(unsigned int seed=0; seed<pSeeds->m_nSeeds; seed++) {
 				
@@ -617,12 +621,9 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 				}
 			}
 		}
-
 		ATH_MSG_DEBUG("Found "<<output.size()<<" tracklets");
   }
-  
-  return seedStats;
-  
+  return seedStats;  
 }
 
 void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spColl, std::vector<GNN_Node>& tmpColl, std::vector<const Trk::SpacePoint*>& vSP, unsigned short layer, float shift_x, float shift_y) const {
@@ -652,4 +653,3 @@ void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spC
     idx++;
   }
 }
-
