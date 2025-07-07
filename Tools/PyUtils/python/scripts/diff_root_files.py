@@ -147,9 +147,13 @@ def main(args):
     # considerably.
     import gc
     gc.set_threshold (100000)
-    
+
     import PyUtils.RootUtils as ru
     root = ru.import_root()  # noqa: F841
+    try:
+        RNTupleReader = root.RNTupleReader
+    except AttributeError:
+        RNTupleReader = root.Experimental.RNTupleReader
 
     # Force load some dictionaries to work around ATLASRECTS-6261/ROOT-10940/ATEAM-942
     if 'AtlasProject' in environ and environ['AtlasProject'] == 'Athena':
@@ -168,7 +172,7 @@ def main(args):
 
     if args.entries == '':
         args.entries = -1
-        
+
     msg.info('comparing tree [%s] in files:', args.tree_name)
     msg.info(' old: [%s]', args.old)
     msg.info(' new: [%s]', args.new)
@@ -188,8 +192,16 @@ def main(args):
         fold = ru.RootFileDumper(args.old, args.tree_name)
         fnew = ru.RootFileDumper(args.new, args.tree_name)
         pass
-    
-    def tree_infos(tree, args):
+
+    def obj_info(obj, args):
+        if isinstance(obj, root.TTree):
+            return _tree_info(obj, args)
+        elif isinstance(obj, RNTupleReader):
+            return _reader_info(obj, args)
+        else:
+            raise NotImplementedError(f"'obj_info' not implemented for object of {type(obj)=}")
+
+    def _tree_info(tree, args):
         nentries = tree.GetEntriesFast()
         # l.GetBranch().GetName() gives the full leaf path name
         leaves = [l.GetBranch().GetName() for l in tree.GetListOfLeaves()
@@ -200,8 +212,118 @@ def main(args):
             'entries': nentries,
             'leaves': set(leaves),
             }
-    
-    def ordered_indices(tree, reverse_order = False):
+
+    def _reader_info(reader, args):
+        nentries = reader.GetNEntries()
+        try:
+            RFieldVisitor = root.Detail.RFieldVisitor
+        except AttributeError:
+            RFieldVisitor = root.Experimental.Detail.RFieldVisitor
+        class NameVisitor(RFieldVisitor):
+            def __init__(self, names):
+                super().__init__()
+                self.names = names
+            def VisitField(self, field):
+                if field.GetFieldName()[0] == '_':
+                    return
+                self.names.append(field.GetQualifiedFieldName())
+                try:
+                    # ROOT Version: 6.35.01
+                    subFields = field.GetConstSubfields()
+                except AttributeError:
+                    subFields = field.GetSubFields()
+                for f in subFields:
+                # ROOT Version: 6.35.01
+                # for f in field.GetConstSubfields():
+                    f.AcceptVisitor(self)
+            def VisitFieldZero(self, field):
+                try:
+                    # ROOT Version: 6.35.01
+                    subFields = field.GetConstSubfields()
+                except AttributeError:
+                    subFields = field.GetSubFields()
+                for f in subFields:
+                # ROOT Version: 6.35.01
+                # for f in field.GetConstSubfields():
+                    f.AcceptVisitor(self)
+
+        fieldZero = reader.GetModel().GetConstFieldZero()
+        names = list()
+        visitor = NameVisitor(names)
+        fieldZero.AcceptVisitor(visitor)
+        leaves = visitor.names
+        leaves = [l for l in leaves if l not in args.ignore_leaves]
+        if args.leaves_prefix:
+            leaves = [l.replace(args.leaves_prefix, '') for l in leaves]
+        return {
+            'entries': nentries,
+            'leaves': set(leaves),
+            }
+
+    def ordered_indices(obj, reverse_order=False):
+        if isinstance(obj, root.TTree):
+            return _tree_ordered_indices(obj, reverse_order)
+        elif isinstance(obj, RNTupleReader):
+            return _reader_ordered_indices(obj, reverse_order)
+        else:
+            raise NotImplementedError(f"'ordered_indices' not implemented for object of {type(obj)=}")
+
+    def _reader_ordered_indices(reader, reverse_order=False):
+        import operator
+
+        dict_in = {}
+        nevts = reader.GetNEntries()
+
+        eiDict = {(): ['EventInfoAuxDyn:eventNumber'],
+                  ('eventNumber',): ['EventInfoAux:',
+                                     'Bkg_EventInfoAux:',
+                                     'xAOD::EventAuxInfo_v3_EventInfoAux:',
+                                     'xAOD::EventAuxInfo_v2_EventInfoAux:',
+                                     'xAOD::EventAuxInfo_v1_EventInfoAux:',
+                                     'xAOD::EventAuxInfo_v3_Bkg_EventInfoAux:',
+                                     'xAOD::EventAuxInfo_v2_Bkg_EventInfoAux:',
+                                     'xAOD::EventAuxInfo_v1_Bkg_EventInfoAux:'],
+                  ('m_event_ID', 'm_event_number'): ['McEventInfo',
+                                                     'ByteStreamEventInfo',
+                                                     'EventInfo_p4_McEventInfo',
+                                                     'EventInfo_p4_ByteStreamEventInfo']}
+
+        def find_attrs():
+            """Find the relevant attributes for reading the event number"""
+            try:
+                kInvalidDescriptorId = root.kInvalidDescriptorId
+            except AttributeError:
+                kInvalidDescriptorId = root.Experimental.kInvalidDescriptorId
+            for path, names in eiDict.items():
+                for name in names:
+                    if (fieldId := reader.GetDescriptor().FindFieldId(name)) != kInvalidDescriptorId:
+                        typeName = reader.GetDescriptor().GetFieldDescriptor(fieldId).GetTypeName()
+                        return (name, typeName), path
+            else:
+                return None, None
+
+        name, attrs = find_attrs()
+        if name is None or attrs is None:
+            msg.error('Cannot read event info, will bail out.')
+            msg.error(f"Tried {name=} and attributes {attrs=}")
+            return []
+
+        view = reader.GetView[name[1]](name[0])
+        for idx in range(nevts):
+            if idx % 100 == 0:
+                msg.debug('Read {} events from the input so far'.format(idx))
+            value = view(idx)
+            event_number = reduce(getattr, attrs, value)
+            msg.debug('Idx : EvtNum {:10d} : {}'.format(idx, event_number))
+            dict_in[idx] = event_number
+
+        # Sort the dictionary by event numbers
+        dict_out = dict(sorted(dict_in.items(), key=operator.itemgetter(1), reverse=reverse_order))
+
+        # Write out the ordered index and event number pairs
+        return list(dict_out.items())
+
+    def _tree_ordered_indices(tree, reverse_order=False):
         from collections import OrderedDict
         import operator
 
@@ -258,10 +380,11 @@ def main(args):
         # Write out the ordered index and event number pairs
         return [(idx, ival) for idx, ival in dict_out.items()]
 
-    def diff_tree(fold, fnew, args):
+    def diff_obj(fold, fnew, args):
+
         infos = {
-            'old' : tree_infos(fold.tree, args),
-            'new' : tree_infos(fnew.tree, args),
+            'old' : obj_info(fold.obj, args),
+            'new' : obj_info(fnew.obj, args),
             }
 
         nentries = min(infos['old']['entries'],
@@ -318,7 +441,7 @@ def main(args):
         skipset = frozenset(args.ignore_leaves)
         removed_leaves = infos['old']['leaves'] - infos['new']['leaves']
         added_leaves = infos['new']['leaves'] - infos['old']['leaves']
-        
+
         if args.branches_of_interest:
             removed_leaves = filter_branches(removed_leaves)
             added_leaves = filter_branches(added_leaves)
@@ -349,14 +472,20 @@ def main(args):
                 for l in added_leaves_list:
                     msg.warning(' - [%s]', l)
 
-        # need to remove trailing dots as they confuse reach_next()
+        # need to remove trailing dots as they confuse reach_next()?
         skip_leaves = [ l.rstrip('.') for l in removed_leaves | added_leaves | set(args.ignore_leaves) ]
         for l in skip_leaves:
             msg.debug('skipping [%s]', l)
         skip_leaves = frozenset (skip_leaves)
-        
-        oldBranches = set(b.GetName().rstrip('\0') for b in fold.tree.GetListOfBranches())
-        newBranches = set(b.GetName().rstrip('\0') for b in fnew.tree.GetListOfBranches())
+
+        if isinstance(fold.obj, root.TTree):
+            oldBranches = set(b.GetName().rstrip('\0') for b in fold.tree.GetListOfBranches())
+        elif isinstance(fold.obj, RNTupleReader):
+            oldBranches = {f.GetFieldName() for f in fold.obj.GetDescriptor().GetTopLevelFields()}
+        if isinstance(fnew.obj, root.TTree):
+            newBranches = set(b.GetName().rstrip('\0') for b in fnew.tree.GetListOfBranches())
+        elif isinstance(fnew.obj, root.RNTupleReader):
+            newBranches = {f.GetFieldName() for f in fnew.obj.GetDescriptor().GetTopLevelFields()}
         branches = oldBranches & newBranches
 
         if args.branches_of_interest:
@@ -418,8 +547,8 @@ def main(args):
 
         if args.order_trees:
             smin, smax = get_event_range(itr_entries)
-            idx_old = ordered_indices(fold.tree)[smin:smax]
-            idx_new = ordered_indices(fnew.tree)[smin:smax]
+            idx_old = ordered_indices(fold.obj)[smin:smax]
+            idx_new = ordered_indices(fnew.obj)[smin:smax]
             itr_entries_old, event_numbers_old = list(map(list,zip(*idx_old)))
             itr_entries_new, event_numbers_new = list(map(list,zip(*idx_new)))
             msg.debug(f"List of old indices {itr_entries_old}")
@@ -446,7 +575,7 @@ def main(args):
                 return None
             else:
                 return '.'.join([s for s in entry[2] if not s.isdigit()])
-        
+
         def elindices_fromdump(entry):
             if entry is None:
                 return None
@@ -462,7 +591,10 @@ def main(args):
                     return None
 
                 entry2_orig = entry[2][0]
-                entry[2][0] = entry[2][0].rstrip('.\0')  # clean branch name
+                if isinstance(fold.obj, root.TTree):
+                    entry[2][0] = entry[2][0].rstrip('.\0')  # clean branch name
+                elif isinstance(fold.obj, RNTupleReader):
+                    entry[2][0] = entry[2][0].rstrip(':')  # clean branch name
                 if leaves_prefix:
                     entry[2][0] = entry[2][0].replace(leaves_prefix, '')
 
@@ -489,23 +621,23 @@ def main(args):
         read_new = True
         d_old = None
         d_new = None
-        
+
         while True:
             if read_old:
                 d_old = reach_next(old_dump_iter, skip_leaves, old_skip_dict, args.leaves_prefix)
             if read_new:
                 d_new = reach_next(new_dump_iter, skip_leaves, new_skip_dict, args.leaves_prefix)
-                
+
             if not d_new and not d_old:
                 break
-            
+
             read_old = True
             read_new = True
 
             if (args.order_trees and d_old and d_new and d_old[2:] == d_new[2:]) or d_old == d_new:
                 n_good += 1
                 continue
-            
+
             if d_old:    
                 tree_name, ientry, iname, iold = d_old
             if d_new:
@@ -530,7 +662,7 @@ def main(args):
             # FIXME: that's a plain (temporary?) hack
             if iname[-1] in args.known_hacks or jname[-1] in args.known_hacks:
                 continue
-            
+
             n_bad += 1
 
             # Identifiers are event numbers if we're ordering the trees, otherwise tree indices
@@ -610,12 +742,12 @@ def main(args):
                         summary[leaf_old] += 1
                         summary[leaf_new] += 1
                         break
- 
+
                 if _is_exit_early(args):
                     msg.info('*** exit on first error ***')
                     break
                 continue
-            
+
             if not args.order_trees:
                 n = '.'.join(list(map(str, ["%03i"%ientry]+iname)))
             else:
@@ -635,7 +767,7 @@ def main(args):
                 msg.info("don't compare further")
                 break
             pass # loop over events/branches
-        
+
         msg.info('Found [%s] identical leaves', n_good)
         msg.info('Found [%s] different leaves', n_bad)
 
@@ -646,15 +778,19 @@ def main(args):
                 msg.info(' [%s]: %i leaves differ', n, v)
                 pass
             pass
-        
+
         if (not fold.allgood) or (not fnew.allgood):
             msg.error('NOTE: there were errors during the dump')
             msg.info('fold.allgood: %s' , fold.allgood)
             msg.info('fnew.allgood: %s' , fnew.allgood)
             n_bad += 0.5
         return n_bad
-    
-    ndiff = diff_tree(fold, fnew, args)
+
+    if (isinstance(fold.obj, root.TTree) and isinstance(fnew.obj, root.TTree) or
+        isinstance(fold.obj, RNTupleReader) and isinstance(fnew.obj, RNTupleReader)):
+            ndiff = diff_obj(fold, fnew, args)
+    else:
+        raise NotImplementedError("Cannot compare object of type=%s to object of type=%s" % (type(fold.obj), type(fnew.obj)))
     if ndiff != 0:
         msg.error('files differ!')
         return 2
