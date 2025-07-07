@@ -113,6 +113,7 @@ def ActsPixelClusterizationAlgCfg(flags,
     kwargs.setdefault("IDHelper", "PixelID")
     kwargs.setdefault("RDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("ClustersKey", "ITkPixelClusters")
+    kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
     # Regional selection
     kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
@@ -126,6 +127,11 @@ def ActsPixelClusterizationAlgCfg(flags,
     if 'ClusteringTool' not in kwargs:
         kwargs.setdefault("ClusteringTool", acc.popToolsAndMerge(ActsPixelClusteringToolCfg(flags)))
 
+    if 'DetElStatus' not in kwargs:
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
+        acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault('DetElStatus', 'ITkPixelDetectorElementStatus')
+                
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelClusterizationMonitoringToolCfg(flags)))
@@ -146,6 +152,7 @@ def ActsStripClusterizationAlgCfg(flags,
     kwargs.setdefault("ClustersKey", "ITkStripClusters")
     kwargs.setdefault("expectedClustersPerRDO", 6)
     kwargs.setdefault("IDHelper", "SCT_ID")
+    kwargs.setdefault("DetEleCollKey", "ITkStripDetectorElementCollection")
     # Regional selection
     kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
@@ -155,6 +162,11 @@ def ActsStripClusterizationAlgCfg(flags,
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
+
+    if 'DetElStatus' not in kwargs :
+        from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  ITkStripDetectorElementStatusAlgCfg
+        acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("DetElStatus", "ITkStripDetectorElementStatus")
 
     if 'ClusteringTool' not in kwargs:
         kwargs.setdefault("ClusteringTool", acc.popToolsAndMerge(ActsStripClusteringToolCfg(flags)))

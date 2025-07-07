@@ -22,30 +22,25 @@ namespace ActsTrk {
 
 class PixelClusteringTool : public extends<AthAlgTool,IPixelClusteringTool> {
 public:
-
-    using Cell = InDet::UnpackedPixelRDO;
-    using CellCollection = std::vector<Cell>;
-
-    struct Cluster {
-        std::vector<Identifier::value_type> ids;
-	std::vector<int> tots;
-	int lvl1min = std::numeric_limits<int>::max();
-    };
-
-    using ClusterCollection = std::vector<Cluster>;
-
     PixelClusteringTool(const std::string& type,
 			const std::string& name,
 			const IInterface* parent);
 
     virtual StatusCode
-    clusterize(const InDetRawDataCollection<PixelRDORawData>& RDOs,
-	       const PixelID& pixelID,
-	       const EventContext& ctx,
-	       xAOD::PixelClusterContainer& container) const override;
-
+    clusterize(const EventContext& ctx,
+               const RawDataCollection& RDOs,
+               const InDet::SiDetectorElementStatus& pixelDetElStatus,
+               const InDetDD::SiDetectorElement& element,
+               std::vector<ClusterCollection>& collection) const override;
+  
+    virtual StatusCode
+    makeClusters(const EventContext& ctx,
+                 typename IPixelClusteringTool::ClusterCollection& clusters,
+                 const InDetDD::SiDetectorElement& element,
+		 typename ClusterContainer::iterator itrContainer) const override;
+  
     virtual StatusCode initialize() override;
-
+  
 private:
     // N.B. the cluster is added to the container
     // and the tots and charges vectors will be moved to the xAOD object
@@ -59,6 +54,7 @@ private:
 			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 			 xAOD::PixelCluster& container) const;
 
+    
 private:  
   ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "InDetDD::ITk::PixelReadoutManager",
       "Pixel readout manager" };
@@ -72,6 +68,8 @@ private:
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};
   Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false};
   Gaudi::Property<bool> m_broadErrors {this, "UseBroadErrors", false};
+
+  const PixelID* m_pixelID {nullptr};
 };
   
 } // namespace ActsTrk 

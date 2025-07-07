@@ -13,6 +13,7 @@
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
 #include <IRegionSelector/IRegSelTool.h>
 #include "src/Cache.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 namespace ActsTrk {
 
@@ -50,6 +51,9 @@ private:
     ToolHandle<IRegSelTool> m_regionSelector {this, "RegSelTool", "",
       "Region selector tool"};
 
+    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_detEleCollKey {this, "DetEleCollKey", ""};
+    SG::ReadHandleKey<InDet::SiDetectorElementStatus> m_detElStatus {this, "DetElStatus", ""};
+  
     SG::ReadHandleKey<RDOContainer> m_rdoContainerKey {this, "RDOContainerKey", "",
       "Input RDO container key"};
 
