@@ -810,8 +810,6 @@
       <hist1D name="Tau_TauJets_Nominal_Fake_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigVeryLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigVeryLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>
@@ -844,8 +842,6 @@
       <hist1D name="Tau_TauJets_Nominal_Matched_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigVeryLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigVeryLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>
@@ -878,8 +874,6 @@
       <hist1D name="Tau_TauJets_Nominal_RecTau_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigVeryLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigVeryLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>

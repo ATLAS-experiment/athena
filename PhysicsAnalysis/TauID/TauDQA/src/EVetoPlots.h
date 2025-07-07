@@ -16,10 +16,7 @@ class EVetoPlots: public PlotBase {
     virtual ~EVetoPlots();
     void fill(const xAOD::TauJet& tau, float weight);
 
-    TH1* m_HadRadius{};	 
-    TH1* m_EMRadius{};	 
-    TH1* m_IsoFrac{};	 
-    TH1* m_CentFrac{};	 
+
     TH1* m_id_RNNEleScore{};
     TH1* m_id_RNNEleScoreSigTrans{};
     TH1* m_pt_eleRNNloose{};
