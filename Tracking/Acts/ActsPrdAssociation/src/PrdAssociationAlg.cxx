@@ -131,8 +131,8 @@ namespace ActsTrk {
       case RecordStatus::ALREADYSTORED:
 	// do not stop execution, right now it is still possible at this stage two
 	// tracks use the same measurement
-	{ ATH_MSG_WARNING("There was a problem when storing the Prd collections");
-	  ATH_MSG_WARNING("Measurement was already stored."); }
+	{ ATH_MSG_DEBUG("There was a problem when storing the Prd collections");
+	  ATH_MSG_DEBUG("Measurement was already stored."); }
 	break;
       default:
 	{ ATH_MSG_WARNING("There was a problem when storing the Prd collections");
