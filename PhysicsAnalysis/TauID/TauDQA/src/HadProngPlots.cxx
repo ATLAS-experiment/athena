@@ -35,8 +35,6 @@ void HadProngPlots::initializePlots(){
    m_mEflowApprox       = Book1D("mEflowApprox",m_sTauJetContainerName + "Tau mEflowApprox; mEflowApprox; #Taus",30,0.0,3000.0);   
    m_ChPiEMEOverCaloEME = Book1D("ChPiEMEOverCaloEME",m_sTauJetContainerName + "Tau ChPiEMEOverCaloEME; ChPiEMEOverCaloEME; # of Taus", 30, -15, 15);
    m_EMPOverTrkSysP     = Book1D("EMPOverTrkSysP",m_sTauJetContainerName + "Tau EMPOverTrkSysP; EMPOverTrkSysP; # of Taus", 21, -1, 20);   
-   m_HadRadius = Book1D("HadRadius",m_sTauJetContainerName + " Had Radius; HadRadius; # Part",20,0,2.);
-   m_EMRadius  = Book1D("EMRadius",m_sTauJetContainerName + " EM Radius; EMRadius; # Part",20,0,2.);
    m_IsoFrac   = Book1D("IsoFrac",m_sTauJetContainerName + " Iso Frac; Iso Frac; # Part",20,0,1.);
    m_tauSflight    = Book1D("Sflight",m_sTauJetContainerName + " Tau flight sign. ; Sflight; # Taus",100,-10.,20.);
 }
@@ -83,12 +81,6 @@ void HadProngPlots::fill(const xAOD::TauJet& tau, float weight) {
 
   test = tau.detail(xAOD::TauJetParameters::EMPOverTrkSysP, avariable);
   if(test) m_EMPOverTrkSysP->Fill(avariable, weight);
-
-  test = tau.detail(xAOD::TauJetParameters::hadRadius, avariable);
-  if(test) m_HadRadius->Fill(avariable, weight);
-
-  test = tau.detail(xAOD::TauJetParameters::EMRadius, avariable);
-  if(test) m_EMRadius->Fill(avariable, weight);
 
   test = tau.detail(xAOD::TauJetParameters::isolFrac, avariable);
   if (test) m_IsoFrac->Fill(avariable, weight);

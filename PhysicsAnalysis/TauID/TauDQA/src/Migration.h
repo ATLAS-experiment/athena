@@ -58,7 +58,6 @@ namespace Tau{
 	
 	TH1* m_migration_panTau{};
 	TH1* m_migration_panTauProto{};
-	TH1* m_migration_cellBased{};
     private:
 	void initializePlots();
 	std::string m_sTauJetContainerName;

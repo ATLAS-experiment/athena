@@ -20,19 +20,11 @@ class NewCorePlots: public PlotBase {
     TH1*  m_etOverPtLeadTrk{};
     TH1*  m_ipSigLeadTrk{};
     TH1*  m_massTrkSys{};
-    TH1*  m_trkWidth2{};
     TH1*  m_trFlightPathSig{};
     TH1*  m_tauDRMax{};
-    TH1*  m_EMRadius{};
-    TH1*  m_hadRadius{};
     TH1*  m_isolFrac{};
     TH1*  m_centFrac{};
-    TH1*  m_stripWidth2{};
-    TH1*  m_nStrip{};
     TH1*  m_trkAvgDist{};
-    TH1*  m_lead2ClusterEOverAllClusterE{};
-    TH1*  m_lead3ClusterEOverAllClusterE{};
-    TH1*  m_caloIso{};
     TH1*  m_mEflowTopo{};
     TH1*  m_ptRatioEflowTopo{};
     TH1*  m_PSSFraction{};
@@ -57,9 +49,7 @@ class NewCorePlots: public PlotBase {
     TH1* m_track_dRJetSeedAxis{};
     TH1* m_track_nInnermostPixHits{};
     TH1* m_track_nPixHits{};
-    TH1* m_track_nPixelSharedHits{};
     TH1* m_track_nSiHits{};
-    TH1* m_track_nSCTSharedHits{};
     TH1* m_track_nTRTHits{};
     TH1* m_track_eProbabilityHT{};
     TH1* m_track_eProbabilityNN{};
@@ -67,7 +57,6 @@ class NewCorePlots: public PlotBase {
     TH1* m_track_idScoreCharged{};
     TH1* m_track_idScoreIso{};
     TH1* m_track_idScoreConv{};
-    TH1* m_track_idScoreFake{};
 
     TH1* m_cluster_logEt{};
     TH1* m_cluster_eta{};

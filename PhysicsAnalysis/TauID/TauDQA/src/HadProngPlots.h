@@ -34,8 +34,6 @@ class HadProngPlots: public PlotBase {
     TH1* m_ChPiEMEOverCaloEME{};
     TH1* m_EMPOverTrkSysP{};
 
-    TH1* m_HadRadius{};
-    TH1* m_EMRadius{};
     TH1* m_IsoFrac{};
 
     TH1* m_tauSflight{}; 
