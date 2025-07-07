@@ -6,6 +6,7 @@
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
 #include "ZdcAnalysis/RpdSubtractCentroidTool.h"
 #include "ZdcAnalysis/RPDDataAnalyzer.h"
+#include "AthContainers/ConstAccessor.h"
 
 ZdcMonitorAlgorithm::ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator){
@@ -308,7 +309,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     fill(zdcTool, uccTrigBits, lumiBlock);
 
 //  ----------------------- OOpO triggers -----------------------
-    int nOOpOTriggers = m_IsPEBStream? m_OOpOPEBTriggerMap.size() : m_OOpOtriggerChains.size();
+    int nOOpOTriggers = m_OOpOtriggerChains.size();
+    int nOOpOL1TriggersFromCTP = m_OOpOL1TriggerFromCTPIDMap.size();
     std::vector<float> oopoTrigBitsArr(nOOpOTriggers+2, 0.); // enabled, trigger bits, disabled
 
     std::vector<Monitored::Scalar<bool>> oopoTrigPassBoolVec;
@@ -318,50 +320,45 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         oopoTrigBitsArr[0] += 1; // OOpO trigger enabled
         
         const auto &trigDecTool = getTrigDecisionTool();
-        // ATH_MSG_INFO ( " L1 items : " << trigDecTool->getChainGroup("L1_.*")->getListOfTriggers() );
-        // ATH_MSG_INFO ( " HLT items : " << trigDecTool->getChainGroup("HLT_.*")->getListOfTriggers() );
 
+        try {
+            const xAOD::TrigDecision* trigDecision = nullptr;
+            ANA_CHECK(evtStore()->retrieve( trigDecision, "xTrigDecision"));
 
-        if (m_IsPEBStream){
-            try {
-                const xAOD::TrigDecision* trigDecision = nullptr;
-                ANA_CHECK(evtStore()->retrieve( trigDecision, "xTrigDecision"));
-
-                if (!trigDecision){
-                    throw std::runtime_error("Trigger decision NOT retrieved for PEB stream!");
-                }
-                std::vector<uint32_t> tbp = trigDecision->tbp();
-
-                for (const auto& [ctp_id, trig_name] : m_OOpOPEBTriggerMap) {
-                    int ind = ctp_id / 32; // index in vector tbp
-                    int bit = ctp_id % 32; // bit in tax[ind]
-                    const bool pass = ((tbp.at(ind) >> bit) & 1);
-                    std::string varName = "pass" + trig_name;
-                    oopoTrigPassBoolVec.emplace_back( varName, pass );
-                    oopoTrigBitsArr.at(oopoTrigPassBoolVec.size()) += pass;
-                }
-            } catch (const std::out_of_range& e) {
-                ATH_MSG_WARNING("Out of range error captured when fetching L1 trigger bits for PEB stream: " << e.what());
-            } catch (const std::runtime_error& e) {
-                ATH_MSG_WARNING("Runtime error captured when fetching L1 trigger bits for PEB stream: " << e.what());
-            } catch (const std::exception& e) {
-                ATH_MSG_WARNING("Other std::exception captured when fetching L1 trigger bits for PEB stream: " << e.what());
-            } catch (...) {
-                ATH_MSG_WARNING("Error captured when fetching L1 trigger bits for PEB stream. Likely either no L1 trigger looked at or no L1 trigger will show to be passed.");
+            if (!trigDecision){
+                throw std::runtime_error("Trigger decision NOT retrieved for PEB stream!");
             }
-        }else{
-            for (int i = 0; i < nOOpOTriggers; ++i) {
-                const bool pass = (trigDecTool->isPassed( m_OOpOtriggerChains[i] ));
+            std::vector<uint32_t> tbp = trigDecision->tbp();
 
-                // Histogram variable name:  “pass<L1-name>”
-                std::string varName = "pass" + m_OOpOtriggerChains[i];
-                //  *Optionally sanitise if you have funky characters*
-                std::replace_if( varName.begin(), varName.end(),
-                                 [](char c){ return c=='-'; }, '_' );
-
+            for (const auto& [ctp_id, trig_name] : m_OOpOL1TriggerFromCTPIDMap) {
+                int ind = ctp_id / 32; // index in vector tbp
+                int bit = ctp_id % 32; // bit in tax[ind]
+                const bool pass = ((tbp.at(ind) >> bit) & 1);
+                ATH_MSG_INFO("what's the size of xAOD::TrigDecision::tbp()? " << tbp.size());
+                std::string varName = "pass" + trig_name;
                 oopoTrigPassBoolVec.emplace_back( varName, pass );
-                oopoTrigBitsArr[i+1] += pass;
+                oopoTrigBitsArr.at(oopoTrigPassBoolVec.size()) += pass;
             }
+        } catch (const std::out_of_range& e) {
+            ATH_MSG_WARNING("Out of range error captured when fetching L1 trigger bits from CTP ID: " << e.what());
+        } catch (const std::runtime_error& e) {
+            ATH_MSG_WARNING("Runtime error captured when fetching L1 trigger bits from CTP ID: " << e.what());
+        } catch (const std::exception& e) {
+            ATH_MSG_WARNING("Other std::exception captured when fetching L1 trigger bits from CTP ID: " << e.what());
+        } catch (...) {
+            ATH_MSG_WARNING("Error captured when fetching L1 trigger bits from CTP ID. Likely either no L1 trigger looked at or no L1 trigger will show to be passed.");
+        }
+        for (int i = 0; i < nOOpOTriggers - nOOpOL1TriggersFromCTP; ++i) {
+            const bool pass = (trigDecTool->isPassed( m_OOpOtriggerChains[i] ));
+
+            // Histogram variable name:  “pass<L1-name>”
+            std::string varName = "pass" + m_OOpOtriggerChains[i];
+            //  *Optionally sanitise if you have funky characters*
+            std::replace_if( varName.begin(), varName.end(),
+                             [](char c){ return c=='-'; }, '_' );
+
+            oopoTrigPassBoolVec.emplace_back( varName, pass );
+            oopoTrigBitsArr[i+1] += pass;
         }
     }else{
         oopoTrigBitsArr[nOOpOTriggers + 1] += 1; // OOpO trigger disabled
@@ -954,9 +951,14 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         // Find primary vertex
         const xAOD::Vertex* primaryVertex = nullptr;
         for (const auto& vtx : *vertices) {
-            if (vtx->vertexType() == xAOD::VxType::PriVtx) {
-                primaryVertex = vtx;
-                break;
+            static const SG::ConstAccessor<short> vertexTypeAcc ("vertexType");
+            if (vertexTypeAcc.isAvailable(*vtx)) {
+                if (vtx->vertexType() == xAOD::VxType::PriVtx) {
+                    primaryVertex = vtx;
+                    break;
+                }
+            }else{
+                ATH_MSG_WARNING("The decoration vertexType does not exist! #Tracks(primary vertex) will always be zero.");
             }
         }
         

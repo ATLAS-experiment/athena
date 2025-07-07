@@ -422,7 +422,12 @@ def ZdcRecRun3Cfg(flags):
             doTimeCalib = True
             doFADCCorr = False
             doNonLinCorr = False
-        elif flags.Input.ProjectName == "data25_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
+        elif flags.Input.ProjectName in ["data25_hip","data25_hipcomm"]: # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
+            doCalib = True
+            doTimeCalib = False
+            doFADCCorr = False
+            doNonLinCorr = False
+        elif flags.Input.ProjectName in ["data25_hi","data25_hicomm"]: # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = False
             doFADCCorr = False
@@ -698,9 +703,9 @@ if __name__ == '__main__':
             if flags.Input.TriggerStream != "calibration_DcmDummyProcessor": #after ntuple works for standalone data, take this line out
                 acc.merge(ZdcNtupleLocalCfg(flags))
         if isInj:
-            #from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
-            #zdcMonitorAcc = ZdcMonitoringConfig(flags)
-            #acc.merge(zdcMonitorAcc)
+            from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
+            zdcMonitorAcc = ZdcMonitoringConfig(flags)
+            acc.merge(zdcMonitorAcc)
             acc.merge(ZdcInjNtupleCfg(flags))            
     else:
         acc.merge(ZdcRecCfg(flags))

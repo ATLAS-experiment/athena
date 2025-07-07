@@ -9,6 +9,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
+from TrigEDMConfig.TriggerEDM import recordable
 
 # Get Rpc data decoder for MuFast data preparator
 def RpcDataPreparatorCfg( flags ):
@@ -220,7 +221,7 @@ def muFastSteeringCfg( flags, roisKey="", setup="", **kwargs ):
         FtfRoadDefiner         = CompFactory.TrigL2MuonSA.FtfRoadDefiner(
             IOExtrapolator=acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))),
         CalibrationStreamer    = MuCalStreamerTool,
-        MuonCalibrationStream = "MuonCalibrationStream"+setup,
+        MuonCalibrationStream = recordable("HLT_MuonCalibrationStream") if setup == "Calib" else "",
         CscSegmentMaker        = CscSegmentMaker,
         MuRoIs                 = roisKey,
         R_WIDTH_TGC_FAILED     = 200,

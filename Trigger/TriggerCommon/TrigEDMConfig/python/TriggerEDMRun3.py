@@ -562,8 +562,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_MuonLRT_FTFAux.',          'BS ESD AODFULL', 'Muon'),
 
     #Muon DS calibration
-    ('xAOD::TrigCompositeContainer#MuonCalibrationStream',                    'MuonDS', 'Muon'),
-    ('xAOD::TrigCompositeAuxContainer#MuonCalibrationStreamAux.MuonCalibrationStream',             'MuonDS', 'Muon'),
+    ('xAOD::TrigCompositeContainer#HLT_MuonCalibrationStream',                    'MuonDS', 'Muon', [InViews('L2MuFastCalibRecoViews')]),
+    ('xAOD::TrigCompositeAuxContainer#HLT_MuonCalibrationStreamAux.muCalibDS',    'MuonDS', 'Muon'),
 
     
 

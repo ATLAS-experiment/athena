@@ -33,10 +33,17 @@ def addCommonP1Signatures(chains):
 
     chainsP1['Muon'] = [
         # ATR-20650
-        ChainProp(name='HLT_mu0_muoncalib_L1MU3V_EMPTY', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon']),
-        ChainProp(name='HLT_mu0_muoncalib_L1MU14FCH', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon'],monGroups=['detMon']),
-        ChainProp(name='HLT_mu0_muoncalib_L1MU3V', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon']),
-        ChainProp(name='HLT_mu0_muoncalib_L1MU5VF', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_L1MU3V_EMPTY', stream=['MuonCalib'], groups=['RATE:MuonCalibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_L1MU14FCH', stream=['MuonCalib'], groups=['RATE:MuonCalibration','BW:Muon'],monGroups=['detMon']),
+        ChainProp(name='HLT_mu0_muoncalib_L1MU3V', stream=['MuonCalib'], groups=['RATE:MuonCalibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_L1MU5VF', stream=['MuonCalib'], groups=['RATE:MuonCalibration','BW:Muon']),
+
+        # ATR-31030: Phase-II style muon calibration chains / streams
+        ChainProp(name='HLT_mu0_muoncalib_MuonDS_L1MU3V_EMPTY', stream=['MuonDSCalib'], groups=['RATE:MuonDSCalibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_MuonDS_L1MU14FCH', stream=['MuonDSCalib'], groups=['RATE:MuonDSCalibration','BW:Muon'],monGroups=['detMon']),
+        ChainProp(name='HLT_mu0_muoncalib_MuonDS_L1MU3V', stream=['MuonDSCalib'], groups=['RATE:MuonDSCalibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_MuonDS_L1MU5VF', stream=['MuonDSCalib'], groups=['RATE:MuonDSCalibration','BW:Muon']),
+
     ]
     
     chainsP1['Egamma'] = [
@@ -340,7 +347,8 @@ def addHighMuP1Signatures(chains):
     ]
 
     chainsP1['Muon'] = [
-        ChainProp(name='HLT_mu0_muoncalib_L1MU18VFCH', stream=['Muon_Calibration'], groups=['RATE:Muon_Calibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_L1MU18VFCH', stream=['MuonCalib'], groups=['RATE:MuonCalibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_MuonDS_L1MU18VFCH', stream=['MuonDSCalib'], groups=['RATE:MuonDSCalibration','BW:Muon']),
     ]
 
     chainsP1['Calib'] = [

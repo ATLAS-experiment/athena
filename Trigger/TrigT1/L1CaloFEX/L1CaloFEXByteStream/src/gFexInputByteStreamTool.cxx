@@ -34,8 +34,8 @@ StatusCode gFexInputByteStreamTool::initialize() {
     ConversionMode gTowersmode = getConversionMode(m_gTowersReadKey, m_gTowersWriteKey, msg());
     ATH_CHECK(gTowersmode!=ConversionMode::Undefined);
     ATH_CHECK(m_gTowersWriteKey.initialize(gTowersmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gTowers50WriteKey.initialize(gTowersmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gTowers200WriteKey.initialize(gTowersmode==ConversionMode::Decoding));
+    ATH_CHECK(m_gTowers50WriteKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_gTowers200WriteKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_gTowersReadKey.initialize(gTowersmode==ConversionMode::Encoding));
     ATH_MSG_DEBUG((gTowersmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gTowers ");
     
@@ -56,13 +56,24 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     //WriteHandle for gFEX EDMs
     
     //---gTower EDM
-    SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowers200WriteKey, ctx);
-    ATH_CHECK(gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexTowerContainer (200 MeV resolution, default) with key " << m_gTowers200WriteKey.key());
+    xAOD::gFexTowerContainer*  gTowers200ContainerPtr = nullptr;
+    SG::WriteHandle <xAOD::gFexTowerContainer> gTowersContainer(m_gTowers200WriteKey, ctx);
+    if(!m_gTowers200WriteKey.empty()) {
+        ATH_CHECK(gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(),
+                                          std::make_unique<xAOD::gFexTowerAuxContainer>()));
+        ATH_MSG_DEBUG(
+                "Recorded gFexTowerContainer (200 MeV resolution, default) with key " << m_gTowers200WriteKey.key());
+        gTowers200ContainerPtr = &*gTowersContainer;
+    }
 
-    SG::WriteHandle<xAOD::gFexTowerContainer> gTowers50Container(m_gTowers50WriteKey, ctx);
-    ATH_CHECK(gTowers50Container.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexTower50Container (50 MeV resolution) with key " << gTowers50Container.key());
+    xAOD::gFexTowerContainer*  gTowers50ContainerPtr = nullptr;
+    SG::WriteHandle <xAOD::gFexTowerContainer> gTowers50Container(m_gTowers50WriteKey, ctx);
+    if(!m_gTowers50WriteKey.empty()) {
+        ATH_CHECK(gTowers50Container.record(std::make_unique<xAOD::gFexTowerContainer>(),
+                                            std::make_unique<xAOD::gFexTowerAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexTower50Container (50 MeV resolution) with key " << gTowers50Container.key());
+        gTowers50ContainerPtr = &*gTowers50Container;
+    }
 
     SG::WriteHandle<xAOD::gFexTowerContainer> gFexDataTowersContainer(m_gTowersWriteKey, ctx);
     ATH_CHECK(gFexDataTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
@@ -257,10 +268,14 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 IsSaturated = Asatur[irow][icol];
 
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
-                gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
-                gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID);
+                if(gTowers200ContainerPtr) {
+                    gTowers200ContainerPtr->push_back( std::make_unique<xAOD::gFexTower>() );
+                    gTowers200ContainerPtr->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+                }
+                if(gTowers50ContainerPtr) {
+                    gTowers50ContainerPtr->push_back(std::make_unique<xAOD::gFexTower>());
+                    gTowers50ContainerPtr->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID);
+                }
                 towerID += 1;
   
             }
@@ -278,10 +293,14 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 EtF = BtwrF[irow][icol];
                 IsSaturated = Bsatur[irow][icol];
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
-                gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID); 
-                gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID); 
+                if(gTowers200ContainerPtr) {
+                    gTowers200ContainerPtr->push_back( std::make_unique<xAOD::gFexTower>() );
+                    gTowers200ContainerPtr->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+                }
+                if(gTowers50ContainerPtr) {
+                    gTowers50ContainerPtr->push_back(std::make_unique<xAOD::gFexTower>());
+                    gTowers50ContainerPtr->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID);
+                }
                 towerID += 1;
 
             }
@@ -298,11 +317,15 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 EtF = CtwrF[irow][icol];
                 IsSaturated = Csatur[irow][icol];
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
-                gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
-                gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID); 
-                towerID += 1;   
+                if(gTowers200ContainerPtr) {
+                    gTowers200ContainerPtr->push_back( std::make_unique<xAOD::gFexTower>() );
+                    gTowers200ContainerPtr->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+                }
+                if(gTowers50ContainerPtr) {
+                    gTowers50ContainerPtr->push_back(std::make_unique<xAOD::gFexTower>());
+                    gTowers50ContainerPtr->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID);
+                }
+                towerID += 1;
             }
             for (int icol = twr_cols/2; icol < twr_cols; icol++){                
                 iEta = icol + 26;
@@ -311,10 +334,14 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 EtF = CtwrF[irow][icol];
                 IsSaturated = Csatur[irow][icol];
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
-                gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
-                gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID); 
+                if(gTowers200ContainerPtr) {
+                    gTowers200ContainerPtr->push_back( std::make_unique<xAOD::gFexTower>() );
+                    gTowers200ContainerPtr->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+                }
+                if(gTowers50ContainerPtr) {
+                    gTowers50ContainerPtr->push_back(std::make_unique<xAOD::gFexTower>());
+                    gTowers50ContainerPtr->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID);
+                }
                 towerID += 1;
 
             }

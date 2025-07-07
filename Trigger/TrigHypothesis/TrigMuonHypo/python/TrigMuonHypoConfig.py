@@ -315,6 +315,7 @@ class TrigMufastHypoToolConfig:
         self.__multiplicity = int(cpart['multiplicity'])
         self.__isPassThrough = 'mucombTag' in cpart['extra']
         self.__isCalibration = 'muoncalib' in cpart['extra']
+        self.__isMuonDSCalibration = 'MuonDS' in cpart['extra']
         self.__isBarrelOnly = '0eta105' in cpart['etaRange']
         self.__useGeV_v15a = any(x in cpart['addInfo'] for x in ['idperf', 'idtp', '3layersEC'])
         self.__doL2MT = 'l2mt' in cpart['l2AlgInfo']
@@ -342,6 +343,9 @@ class TrigMufastHypoToolConfig:
 
     def isCalibration(self):
         return self.__isCalibration
+
+    def isMuonDSCalibration(self):
+        return self.__isMuonDSCalibration
 
     def isBarrelOnly(self):
         return self.__isBarrelOnly
@@ -412,7 +416,10 @@ class TrigMufastHypoToolConfig:
 
         nt = self.multiplicity()
         if self.isCalibration():
-            self.tool().AcceptAll = False
+            if self.isMuonDSCalibration():
+                self.tool().AcceptAll = True
+            else: 
+                self.tool().AcceptAll = False
             self.tool().DoCalib = True
             self.tool().PtBins = [ [ 0.0, 2.5 ] ] * nt
 
