@@ -118,6 +118,35 @@ def get_input(keyword):
 
         data_object = data[keyword]
 
+        # for ART tests running on RAW data:
+        # - build tests use small files on cvmfs
+        # - grid tests running interactively must copy large files from EOS to the local area
+        if data_object["format"] == "BS":
+            grid = False
+            Nfiles = 0
+            import sys
+            with open(sys.argv[0], 'r') as f:
+                for line in f:
+                    if "# art-type:" in line:
+                        grid = line.split()[2]=="grid"
+                    if "# art-input-nfiles:" in line:
+                        Nfiles = int(line.split()[2])
+            if grid:
+                data_object["paths"] = [path for path in data_object["paths"] if "/eos/" in path]
+                import subprocess
+                local_files = []
+                for i in range(Nfiles):
+                    f = data_object["paths"][i].split('/')[-1]
+                    if not (os.path.exists(f)) and not os.environ.get('TRIGVALSTEERING_DRY_RUN'):
+                        print(f'copying {data_object["paths"][i]}')
+                        result = subprocess.run(['xrdcp',f'root://eosatlas.cern.ch/{data_object["paths"][i]}','.'])
+                        if result.returncode != 0:
+                            raise Exception("xrdcp failed, please check you have a valid kerberos ticket")
+                    local_files.append(f)
+                data_object["paths"] = local_files
+            else:
+                data_object["paths"] = [path for path in data_object["paths"] if "/cvmfs/" in path]
+
     result = TrigValInput(
         keyword,
         data_object["source"],
