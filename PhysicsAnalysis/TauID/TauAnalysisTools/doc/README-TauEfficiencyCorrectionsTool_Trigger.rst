@@ -28,13 +28,13 @@ To get started you can do the following (for example for Run3 data)::
   TauAnalysisTools::TauEfficiencyCorrectionsTool TauTriggerEffTool( "TauTriggerEfficiencyCorrectionsTool" );
 
   CHECK(TauTriggerEffTool.setProperty("EfficiencyCorrectionTypes", std::vector<int>({SFTriggerHadTau}) ));
-  CHECK(TauTriggerEffTool.setProperty("IDLevel", (int)JETIDRNNMEDIUM ));
+  CHECK(TauTriggerEffTool.setProperty("IDLevel", static_cast<int>(JETIDRNNMEDIUM) ));
   CHECK(TauTriggerEffTool.setProperty("TriggerName", "HLT_tau25_mediumRNN_tracktwoMVA" ));
 
   CHECK(TauTriggerEffTool.initialize());
 
 Remember to use the cast to
-int for enums, like in the setting of ``IDLevel`` to ``(int)JETIDRNNMEDIUM``.
+int for enums, like in the setting of ``IDLevel`` to ``static_cast<int>(JETIDRNNMEDIUM)``.
 
 Then in your loop you can apply or get scale factors from the tool by::
 

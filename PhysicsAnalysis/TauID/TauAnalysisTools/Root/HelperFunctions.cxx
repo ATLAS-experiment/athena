@@ -294,7 +294,7 @@ bool TauAnalysisTools::testFileForEOFContainsCharacters(const std::string& sFile
     char ch;
     fInputFile.get(ch);
 
-    if((int)fInputFile.tellg() <= 1)
+    if(static_cast<int>(fInputFile.tellg()) <= 1)
     {
       fInputFile.seekg(0);
       bKeepLooping = false;
@@ -504,7 +504,7 @@ TruthMatchedParticleType TauAnalysisTools::getTruthParticleType(const xAOD::TauJ
     if (xTruthParticle->isTau())
       {
       static const SG::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
-      if ((bool)accIsHadronicTau(*xTruthParticle))
+      if (static_cast<bool>(accIsHadronicTau(*xTruthParticle)))
         return TruthHadronicTau;
       else
         return TruthLeptonicTau;

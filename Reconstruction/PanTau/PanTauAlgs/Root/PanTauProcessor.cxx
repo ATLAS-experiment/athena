@@ -77,7 +77,7 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
   int numTrack = curTauJet->nTracks();
   if(numTrack == 0 || numTrack > 5) {
     ATH_MSG_DEBUG("Flagging tau for algorithm CellBased as invalid, because numTrack is " << numTrack);
-    pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoValidInputTau) = 1;
+    pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_NoValidInputTau)) = 1;
   }
 
   // if there is substructure info available, get constituents, perform selection and recombination
@@ -85,18 +85,18 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
   std::vector<TauConstituent*> list_TauConstituents = std::vector<TauConstituent*>(0);
   std::vector<TauConstituent*> list_SelectedTauConstituents = std::vector<TauConstituent*>(0);
     
-  if(pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoValidInputTau) == 0) {
+  if(pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_NoValidInputTau)) == 0) {
     // Get the constituents for the current tau
     ATH_CHECK( m_Tool_TauConstituentGetter->GetTauConstituents(curTauJet, list_TauConstituents) );
     if(list_TauConstituents.empty())  {
-      pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoConstituentsAtAll) = 1;
+      pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_NoConstituentsAtAll)) = 1;
       ATH_MSG_DEBUG("Seed has no associated constituents!");
     }
       
     // Call the TauConstituentSelector tool to throw out bad constituents
     ATH_CHECK(m_Tool_TauConstituentSelector->SelectTauConstituents(list_TauConstituents, list_SelectedTauConstituents) );
     if(list_SelectedTauConstituents.empty()) {
-      pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoSelectedConstituents) = 1;
+      pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_NoSelectedConstituents)) = 1;
       ATH_MSG_DEBUG("Seed has no associated constituents that pass selection!");
     }
       
@@ -110,20 +110,20 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
     }
       
     if(!hasCoreConstituents) {
-      pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoSelectedConstituents) = 1; //use this flag at the moment as a quick hack
+      pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_NoSelectedConstituents)) = 1; //use this flag at the moment as a quick hack
     }      
   }
         
   //to be consistent, taus without substructure algs run on them also have no constituents
-  if(pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoValidInputTau) == 1) {
-    pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoConstituentsAtAll) = 1;
-    pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoSelectedConstituents) = 1;
+  if(pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_NoValidInputTau)) == 1) {
+    pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_NoConstituentsAtAll)) = 1;
+    pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_NoSelectedConstituents)) = 1;
   }
     
   //check for the pT flag
   double tauJet_pT = curTauJet->ptIntermediateAxis();
   if(tauJet_pT < m_Config_MinPt || tauJet_pT > m_Config_MaxPt) {      
-    pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_BadPtValue) = 1;
+    pantauSeed_TechnicalQuality.at(static_cast<int>(PanTau::PanTauSeed::t_BadPtValue)) = 1;
   }
     
   // Now build the PanTauSeed with the new Constituents

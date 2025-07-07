@@ -87,7 +87,7 @@ const xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xT
   }
   
   // if matched to a truth particle return its pointer, else return a null pointer
-  if ((bool)accIsTruthMatched(xTau))
+  if (static_cast<bool>(accIsTruthMatched(xTau)))
     {
       if (accTruthParticleLink(xTau).isValid())
       {
@@ -329,7 +329,7 @@ StatusCode TauTruthMatchingTool::checkTruthMatch (const xAOD::TauJet& xTau, cons
     if (xTau.p4().DeltaR(vTruthVisTLV) <= m_dMaxDeltaR)
     {
       static const SG::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
-      if ((bool)accIsHadronicTau(*xTruthTauIt))
+      if (static_cast<bool>(accIsHadronicTau(*xTruthTauIt)))
         eTruthMatchedParticleType = TruthHadronicTau;
       else
         eTruthMatchedParticleType = TruthLeptonicTau;

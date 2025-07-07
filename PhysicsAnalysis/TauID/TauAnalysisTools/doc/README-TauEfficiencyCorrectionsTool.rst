@@ -269,7 +269,7 @@ Jet ID scale factors are provided for a couple of working points:
 
 These can be accessed, for example via::
 
-  TauEffTool.setProperty("IDLevel", (int)JETIDRNNLOOSE);
+  TauEffTool.setProperty("IDLevel", static_cast<int>(JETIDRNNLOOSE));
 
 SFEleIDElectron
 ----------------
@@ -295,7 +295,7 @@ points:
 
 These can be accessed, for example via::
 
-  TauEffTool.setProperty("EleIDLevel", (int)ELEIDRNNLOOSE);
+  TauEffTool.setProperty("EleIDLevel", static_cast<int>(ELEIDRNNLOOSE));
 
 ---
 FAQ
@@ -335,7 +335,7 @@ FAQ
      TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffTool( "TauEfficiencyCorrectionsTool" );
 
      // set the IDLevel property to the loose working point
-     TauEffTool.setProperty("IDLevel",(int)JETIDRNNLOOSE)
+     TauEffTool.setProperty("IDLevel",static_cast<int>(JETIDRNNLOOSE))
 
      // initialize the tool
      TauEffTool.initialize();

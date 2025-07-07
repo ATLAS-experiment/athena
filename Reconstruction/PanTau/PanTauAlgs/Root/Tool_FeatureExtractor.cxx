@@ -98,7 +98,7 @@ void PanTau::Tool_FeatureExtractor::addFeatureWrtSeedEnergy(PanTau::TauFeature* 
   std::map<std::string, double>::const_iterator it = denominatorMap.begin();
   for(; it!=denominatorMap.end(); ++it) {
     std::string FullName = featName + it->first;
-    float       value    = (float)it->second;
+    float       value    = static_cast<float>(it->second);
     if(value <= 0. || std::isnan(value) || std::isinf(value) ) continue; 
     targetMap->addFeature(FullName, numerator / it->second);
   }
@@ -169,11 +169,11 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateBasicFeatures(PanTau::PanTauS
     featureMap->addFeature(name + "_N" + typeName + "Consts", nConstituents);        
         
     //count charge, i.e. skip if not charged
-    if(iType != (int)PanTau::TauConstituent::t_Charged) continue;
+    if(iType != static_cast<int>(PanTau::TauConstituent::t_Charged)) continue;
     for(unsigned int iConst=0; iConst<nConstituents; iConst++) {
       PanTau::TauConstituent* curConstituent = curList[iConst];
       SumCharge += curConstituent->getCharge();
-      AbsCharge += std::abs((double)curConstituent->getCharge());
+      AbsCharge += std::abs(static_cast<double>(curConstituent->getCharge()));
     }
   }
     
@@ -197,7 +197,7 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateBasicFeatures(PanTau::PanTauS
 StatusCode PanTau::Tool_FeatureExtractor::addConstituentMomenta(PanTau::PanTauSeed* inSeed) const {
   TauFeature* tauFeatureMap = inSeed->getFeatures();
   std::string prefixVARType = m_varTypeName_HLV;
-  for(int iType=0; iType<(int)PanTau::TauConstituent::t_nTypes; iType++) {
+  for(int iType=0; iType<static_cast<int>(PanTau::TauConstituent::t_nTypes); iType++) {
     bool isOK;
     std::vector<PanTau::TauConstituent*>    list_TypeConstituents   = inSeed->getConstituentsOfType(iType, isOK); // list of constituents of current type
     unsigned int                            n_Constituents_Type     = list_TypeConstituents.size();          // number of objects of current type
@@ -349,7 +349,7 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
       value_BDT = value_BDT - mvaCorrection;
     }
         
-    std::string iConst = m_HelperFunctions.convertNumberToString((double)(iTypeConst+1));
+    std::string iConst = m_HelperFunctions.convertNumberToString(static_cast<double>(iTypeConst+1));
     tauFeatureMap->addFeature("CellBased_" + curTypeName + "_" + prefixVARType + "_BDTValues_BDTSort_" + iConst, value_BDT);
 
   }
@@ -383,7 +383,7 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
       totalTLV_SumShots   += tlv_SumShots;
       totalPhotonsInSeed  += totalPhotonsInNeutral;
             
-      std::string iConstStr = m_HelperFunctions.convertNumberToString((double)(iConst+1));
+      std::string iConstStr = m_HelperFunctions.convertNumberToString(static_cast<double>(iConst+1));
                        
       tauFeatureMap->addFeature("CellBased_" + curTypeName + "_" + prefixVARType + "_nPhotons_BDTSort_" + iConstStr, totalPhotonsInNeutral);
 
@@ -467,7 +467,7 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
     tlv_1st_OK[iType]   = false;
   }
     
-  for(int iType=0; iType<(int)PanTau::TauConstituent::t_nTypes; iType++) {
+  for(int iType=0; iType<static_cast<int>(PanTau::TauConstituent::t_nTypes); iType++) {
     name_EFOType[iType] = PanTau::TauConstituent::getTypeName((PanTau::TauConstituent::Type)iType);
         
     tlv_System[iType] = inSeed->getSubsystemHLV(iType, tlv_Sys_OK[iType]);
@@ -501,12 +501,12 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
     
   for(int iType=0; iType<PanTau::TauConstituent::t_nTypes; iType++) {
         
-    if(iType == (int)PanTau::TauConstituent::t_NoType) continue;
+    if(iType == static_cast<int>(PanTau::TauConstituent::t_NoType)) continue;
     int type_Denom = iType;
         
     for(int jType=0; jType<PanTau::TauConstituent::t_nTypes; jType++) {
             
-      if(jType == (int)PanTau::TauConstituent::t_NoType) continue;
+      if(jType == static_cast<int>(PanTau::TauConstituent::t_NoType)) continue;
       int type_Nom = jType;
             
       if(jType == iType) continue;

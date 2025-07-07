@@ -86,7 +86,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
   // get type (based on charge and DR to tau)
   std::vector<int> typeFlags = std::vector<int>((unsigned int)PanTau::TauConstituent::t_nTypes, 0);
   if (typeFlags.size() < (unsigned int)PanTau::TauConstituent::t_nTypes) std::abort(); // suppress cppcheck warning
-  typeFlags.at((int)PanTau::TauConstituent::t_NoType) = 1;
+  typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_NoType)) = 1;
     
   double mvaValue = PanTau::TauConstituent::DefaultBDTValue();
 
@@ -95,17 +95,17 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     
   if (deltaR_toTauJet > m_Config_TauConstituents_Types_DeltaRCore) {
     if (pfo->isCharged()) {
-      typeFlags.at((int)PanTau::TauConstituent::t_Charged) = 1;
+      typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_Charged)) = 1;
     }
   }//end if pfo is not in core
     
   if (deltaR_toTauJet <= m_Config_TauConstituents_Types_DeltaRCore) {
     
     if (pfo->isCharged()) {
-      typeFlags.at((int)PanTau::TauConstituent::t_Charged) = 1;
+      typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_Charged)) = 1;
     }
     else {
-      typeFlags.at((int)PanTau::TauConstituent::t_Neutral) = 1;
+      typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_Neutral)) = 1;
             
       //neutral PFO arranging --- check for pi0 tag
       mvaValue = pfo->bdtPi0Score();
@@ -115,7 +115,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
 	ATH_MSG_WARNING("WARNING: Could not retrieve nPi0Proto. Will set it to 1.");
 	nPi0sPerCluster = 1;
       }
-      if (nPi0sPerCluster > 0) typeFlags.at((int)PanTau::TauConstituent::t_Pi0Neut) = 1;
+      if (nPi0sPerCluster > 0) typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_Pi0Neut)) = 1;
 
     }
   }//end if pfo is in core

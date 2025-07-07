@@ -39,8 +39,8 @@ double PanTau::HelperFunctions::stddev(double sumOfSquares, double sumOfValues, 
   // sigma^2 = (sum_i x_i^2) / N - ((sum_i x_i)/N)^2 (biased maximum-likelihood estimate)
   // directly set sigma^2 to 0 in case of N=1, otherwise numerical effects may yield very small negative sigma^2
   if(numConsts == 1) return 0;
-  double a = sumOfSquares / ((double)numConsts);
-  double b = sumOfValues / ((double)numConsts);
+  double a = sumOfSquares / (static_cast<double>(numConsts));
+  double b = sumOfValues / (static_cast<double>(numConsts));
   double stdDev = a - b*b;
   if(stdDev < 0.) stdDev = 0;
   return std::sqrt(stdDev);

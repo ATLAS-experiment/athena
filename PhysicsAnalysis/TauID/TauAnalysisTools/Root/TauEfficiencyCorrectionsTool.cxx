@@ -341,9 +341,9 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         }
 
         if(m_sCampaign=="mc23"){
-            if( m_iJetIDLevel == (int)JETIDRNNLOOSE){
+            if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
                 m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2022_looseRNNTauID_1p.root"; 
-            } else if( m_iJetIDLevel == (int)JETIDRNNMEDIUM){
+            } else if( m_iJetIDLevel == static_cast<int>(JETIDRNNMEDIUM)){
                 m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2022_mediumRNNTauID_1p.root";
             }
             else {
@@ -351,9 +351,9 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 		return StatusCode::FAILURE;
             }
         } else if(m_sCampaign=="mc20"){
-            if( m_iJetIDLevel == (int)JETIDRNNLOOSE){
+            if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
                 m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseRNNTauID_1p.root";
-            } else if( m_iJetIDLevel == (int)JETIDRNNMEDIUM){
+            } else if( m_iJetIDLevel == static_cast<int>(JETIDRNNMEDIUM)){
                 m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_mediumRNNTauID_1p_v1.root";
             }
             else {

@@ -101,8 +101,8 @@ After calling getTruth(xDiTau) those information can be retrieved via::
 
   static const SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
   static const SG::ConstAccessor<char> acc_IsTruthHadronic("IsTruthHadronic");
-  bool bMatched = (bool)acc_IsTruthMatched(xDiTau);
-  bool bHadronic = (bool)acc_IsTruthHadronic(xDiTau);
+  bool bMatched = static_cast<bool>(acc_IsTruthMatched(xDiTau));
+  bool bHadronic = static_cast<bool>(acc_IsTruthHadronic(xDiTau));
 
 
 ----------

@@ -233,8 +233,8 @@ PanTau::PanTauSeed::PanTauSeed( xAOD::TauJet*                           tauJet,
     for(unsigned int curType=0; curType<curTypes.size(); curType++) {
       if(curTypes.at(curType) == 0) continue;
 
-      if(curType == (int)PanTau::TauConstituent::t_Charged) nCharged++;
-      if(curType == (int)PanTau::TauConstituent::t_Pi0Neut) nPi0Neut++;
+      if(curType == static_cast<int>(PanTau::TauConstituent::t_Charged)) nCharged++;
+      if(curType == static_cast<int>(PanTau::TauConstituent::t_Pi0Neut)) nPi0Neut++;
 
       if((unsigned int)curType >= m_Constituents.size()) {
 	continue;
@@ -292,19 +292,19 @@ int PanTau::PanTauSeed::getDecayMode(int nCharged, int nNeutral) {
   int decayMode;
 
   // 1 Prong modes
-  if(nCharged == 1 && nNeutral == 0) decayMode = (int)xAOD::TauJetParameters::Mode_1p0n;
-  else if(nCharged == 1 && nNeutral == 1) decayMode = (int)xAOD::TauJetParameters::Mode_1p1n;
-  else if(nCharged == 1 && nNeutral >  1) decayMode = (int)xAOD::TauJetParameters::Mode_1pXn;
+  if(nCharged == 1 && nNeutral == 0) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_1p0n);
+  else if(nCharged == 1 && nNeutral == 1) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_1p1n);
+  else if(nCharged == 1 && nNeutral >  1) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_1pXn);
   // 3 prong modes
-  else if(nCharged == 3 && nNeutral == 0) decayMode = (int)xAOD::TauJetParameters::Mode_3p0n;
-  else if(nCharged == 3 && nNeutral >  0) decayMode = (int)xAOD::TauJetParameters::Mode_3pXn;
+  else if(nCharged == 3 && nNeutral == 0) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_3p0n);
+  else if(nCharged == 3 && nNeutral >  0) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_3pXn);
   // other mode
-  else if(nCharged == 2) decayMode = (int)xAOD::TauJetParameters::Mode_Other;
-  else if(nCharged == 4) decayMode = (int)xAOD::TauJetParameters::Mode_Other;
-  else if(nCharged == 5) decayMode = (int)xAOD::TauJetParameters::Mode_Other;
-  else if(nCharged == 0) decayMode = (int)xAOD::TauJetParameters::Mode_NotSet;
-  else if(nCharged >= 6) decayMode = (int)xAOD::TauJetParameters::Mode_NotSet;
-  else decayMode = (int)xAOD::TauJetParameters::Mode_Error;
+  else if(nCharged == 2) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_Other);
+  else if(nCharged == 4) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_Other);
+  else if(nCharged == 5) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_Other);
+  else if(nCharged == 0) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_NotSet);
+  else if(nCharged >= 6) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_NotSet);
+  else decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_Error);
 
   return decayMode;
 }
@@ -341,7 +341,7 @@ std::vector<PanTau::TauConstituent*> PanTau::PanTauSeed::getConstituentsOfType(i
     return std::vector<TauConstituent*>(0);
   }
   foundit = true;
-  if(tauConstituent_Type == (int)PanTau::TauConstituent::t_NoType) return m_ConstituentsList_AllSelected;
+  if(tauConstituent_Type == static_cast<int>(PanTau::TauConstituent::t_NoType)) return m_ConstituentsList_AllSelected;
   return m_Constituents.at(tauConstituent_Type);
 }
 
@@ -350,7 +350,7 @@ int PanTau::PanTauSeed::getNumberOfConstituentsOfType(int tauConstituent_Type) {
   bool isOK = false;
   std::vector<PanTau::TauConstituent*> consts = this->getConstituentsOfType(tauConstituent_Type, isOK);
   if(isOK) {
-    return (int)consts.size();
+    return static_cast<int>(consts.size());
   }
   return -1;
 }
