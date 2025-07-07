@@ -149,6 +149,14 @@ namespace MuonR4{
                     const Amg::Vector3D& dirInChamber,
                     const CalibratedSpacePoint& calibHit,
                     MsgStream& msg);
+      /** @brief Extrapolates the segment line onto the plane defined by the by the space-point's 
+        *        position & plane normal vector
+        *  @param posInChamber: Position of the segment in the sector frame
+        *  @param dirInChamber: Direction of flight of the  segment expressed in the sector frame
+        *  @param sp: Reference to the space point defining the plane */
+      Amg::Vector3D extrapolateToPlane(const Amg::Vector3D& pos,
+                                       const Amg::Vector3D& dir,
+                                       const SpacePoint& hit);
     }
 }
 

@@ -73,14 +73,18 @@ namespace MuonR4 {
             assert(chi2 >=0.);
             return chi2;
         }
+        Amg::Vector3D extrapolateToPlane(const Amg::Vector3D& pos, const Amg::Vector3D& dir,
+                                         const SpacePoint& hit) {
+            const Amg::Vector3D normal = hit.planeNormal();
+            std::optional<double> travelledDist = Amg::intersect<3>(pos, dir, normal, normal.dot(hit.positionInChamber()));
+            return pos + travelledDist.value_or(0) * dir;
+        }
         double chiSqTermStrip(const Amg::Vector3D& segPos,
                               const Amg::Vector3D& segDir,
                               const MuonR4::SpacePoint& stripSP,
                               MsgStream& msg){
-            const Amg::Vector3D normal = stripSP.planeNormal();
-            std::optional<double> travelledDist = Amg::intersect<3>(segPos, segDir, normal, normal.dot(stripSP.positionInChamber()));
-            const Amg::Vector3D planeCrossing = segPos + travelledDist.value_or(0) * segDir; 
 
+            const Amg::Vector3D planeCrossing = extrapolateToPlane(segPos, segDir, stripSP);
             const Amg::Vector2D residual{(planeCrossing - stripSP.positionInChamber()).block<2,1>(0,0)};
             const double chi2 = residual.dot(stripSP.covariance().inverse()* residual);
             if (msg.level() <= printLvl) {
