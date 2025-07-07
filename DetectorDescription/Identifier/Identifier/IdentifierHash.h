@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,15 +31,15 @@ public:
     IdentifierHash (value_type value);
     ///@{ 
     ///Get the value 
-    operator unsigned int() const;
-    unsigned int value() const;
+    operator value_type() const;
+    value_type value() const;
     ///@}
     /// Check if id is in a valid state
     bool is_valid () const;
     /// Assignment operators
     IdentifierHash& operator = (value_type value);
-    IdentifierHash& operator += (unsigned int value);
-    IdentifierHash& operator -= (unsigned int value);
+    IdentifierHash& operator += (value_type value);
+    IdentifierHash& operator -= (value_type value);
 
 private:
     ///default value, and indicator of invalid state
