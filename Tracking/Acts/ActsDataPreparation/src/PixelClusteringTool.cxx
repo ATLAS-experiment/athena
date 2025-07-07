@@ -10,6 +10,8 @@
 #include <xAODInDetMeasurement/PixelClusterContainer.h>
 #include <xAODInDetMeasurement/PixelClusterAuxContainer.h>
 #include <xAODInDetMeasurement/Utilities.h>
+#include <InDetPrepRawData/SiWidth.h>
+#include <TrkSurfaces/Surface.h>
 
 #include <unordered_set>
 #include <stdexcept>
@@ -20,30 +22,26 @@ using CLHEP::micrometer;
 // Put these in the InDet namespace so that ACTS can find them
 // via ADL.
 //
-namespace InDet {
-  static inline int getCellRow(const InDet::UnpackedPixelRDO& cell) { return cell.ROW; }
-  static inline int getCellColumn(const InDet::UnpackedPixelRDO& cell) { return cell.COL; }
-  static inline int& getCellLabel(InDet::UnpackedPixelRDO& cell) { return cell.NCL; }
-}
-
 namespace ActsTrk {
-  
-static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
-		    const PixelClusteringTool::Cell& cell)
-{
-  cl.ids.push_back(cell.ID.get_compact());
-  cl.tots.push_back(cell.TOT);
-  if (cell.LVL1 < cl.lvl1min)
-    cl.lvl1min = cell.LVL1;
-}
+  static inline int getCellRow(const typename PixelClusteringTool::Cell& cell) { return cell.ROW; }
+  static inline int getCellColumn(const typename PixelClusteringTool::Cell& cell) { return cell.COL; }
+  static inline int& getCellLabel(typename PixelClusteringTool::Cell& cell) { return cell.NCL; }
+
+  static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
+				    const PixelClusteringTool::Cell& cell)
+  {
+    cl.ids.push_back(cell.ID.get_compact());
+    cl.tots.push_back(cell.TOT);
+    if (cell.LVL1 < cl.lvl1min)
+      cl.lvl1min = cell.LVL1;
+  }
 
 StatusCode PixelClusteringTool::initialize()
 {
   ATH_MSG_DEBUG("Initializing " << name() << " ...");
-  ATH_CHECK(m_pixelRDOTool.retrieve());
   ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
-  if (not m_chargeDataKey.empty()) ATH_CHECK(m_pixelReadout.retrieve());
-  
+  ATH_CHECK(m_pixelReadout.retrieve());
+
   ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
 
   ATH_CHECK( detStore()->retrieve(m_pixelID, "PixelID") );
@@ -60,7 +58,6 @@ PixelClusteringTool::PixelClusteringTool(
 StatusCode
 PixelClusteringTool::makeCluster(const EventContext& ctx,
 				 PixelClusteringTool::Cluster &cluster,
-				 const PixelID& pixelID,
 				 const InDetDD::SiDetectorElement* element,
 				 const InDetDD::PixelModuleDesign& design,
 				 const PixelChargeCalibCondData *calibData,
@@ -81,7 +78,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 
   // We temporary comment this since it is not used
   // bool hasGanged = false;
-  
+
   Identifier moduleID = element->identify();
   IdentifierHash moduleHash = element->identifyHash();
 
@@ -113,7 +110,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
       // The calibration strategy is updated for each element 
       // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
       // Single FE modules could have an optimized getCharge function where the calib constants are cached
-      int feValue = multiChip ? m_pixelReadout->getFE(id, moduleID, element) : 0;
+      std::uint32_t feValue = multiChip ? m_pixelReadout->getFE(id, moduleID, element) : 0;
       charge = calibData->getCharge(m_pixelReadout->getDiodeType(id,element),
 				    calibStrategy,
 				    moduleHash,
@@ -122,11 +119,11 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
       chargeList.push_back(charge);
     }
     
-    const int row = pixelID.phi_index(id);
+    const int row = m_pixelID->phi_index(id);
     rowmax = std::max(rowmax, row);
     rowmin = std::min(rowmin, row);
            
-    const int col = pixelID.eta_index(id);
+    const int col = m_pixelID->eta_index(id);
     colmax = std::max(colmax, col);
     colmin = std::min(colmin, col);
     
@@ -191,7 +188,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   localCovariance(1, 1) = width1 * width1 / 12.0;
   
   xaodcluster.setMeasurement<2>(moduleHash, localPosition, localCovariance);
-  xaodcluster.setIdentifier( element->identifierOfPosition(locpos).get_compact() );
+  xaodcluster.setIdentifier( cluster.ids.front() );
   xaodcluster.setRDOlist(std::move(cluster.ids));
   xaodcluster.globalPosition() = globalPos.cast<float>();
   xaodcluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(cluster.tots) );
@@ -209,7 +206,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 }
 
 StatusCode
-PixelClusteringTool::clusterize(const EventContext& ctx,
+PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
 				const RawDataCollection& RDOs,
 				const InDet::SiDetectorElementStatus& pixelDetElStatus,
 				const InDetDD::SiDetectorElement& element,
@@ -222,8 +219,7 @@ PixelClusteringTool::clusterize(const EventContext& ctx,
   }
 
   // Retrieve the cells from the detector element
-  std::vector<InDet::UnpackedPixelRDO> cells =
-    m_pixelRDOTool->getUnpackedPixelRDOs(RDOs, *m_pixelID, &element, ctx);
+  CellCollection cells = unpackRDOs(RDOs, pixelDetElStatus, element);
   
   ClusterCollection clusters =
     Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
@@ -261,12 +257,11 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
   // Get the calibration strategy for this module. 
   // Default to RD53 if the calibData is not available. That is fine because it won't be used anyway
   auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element.identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
-
+  
   for (typename IPixelClusteringTool::Cluster& cl : clusters) {
     xAOD::PixelCluster* xaodCluster = *itrContainer;
     ATH_CHECK(makeCluster(ctx,
 			  cl,
-			  *m_pixelID,
 			  &element,
 			  design,
 			  calibData,
@@ -278,4 +273,65 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
   return StatusCode::SUCCESS;
 }
 
+typename IPixelClusteringTool::CellCollection
+PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
+				const InDet::SiDetectorElementStatus& pixelDetElStatus,
+				const InDetDD::SiDetectorElement& element) const
+{
+  CellCollection cells;
+  cells.reserve(300);
+
+  const IdentifierHash& idHash = RDOs.identifyHash();
+  
+  for (const auto *const rdo : RDOs) {
+    const Identifier& rdoID = rdo->identify();
+
+    // check if good RDO
+    // the pixel RDO tool here says always good if m_useModuleMap is false
+    const Identifier& waferId = element.identify();
+    const std::uint32_t fe = m_pixelReadout->getFE(rdoID, waferId, &element);
+    if (not pixelDetElStatus.isChipGood(idHash, fe)) {
+      continue;
+    }
+    
+    const int lvl1 = rdo->getLVL1A();
+    const int tot = rdo->getToT();
+
+    cells.emplace_back(-1,
+		       m_pixelID->phi_index(rdoID),
+		       m_pixelID->eta_index(rdoID),
+		       tot,
+		       lvl1,
+		       rdoID);
+
+    if ( m_checkGanged ) {
+      std::optional<Identifier> gangedID = isGanged(rdoID, element);
+      if (gangedID.has_value()) {
+	cells.emplace_back(-1,
+			   m_pixelID->phi_index(*gangedID),
+			   m_pixelID->eta_index(*gangedID),
+			   tot,
+			   lvl1,
+			   *gangedID);
+      }
+    }
+    
+  }
+
+  return cells;
+}
+
+inline std::optional<Identifier>
+PixelClusteringTool::isGanged(const Identifier& rdoID,
+			      const InDetDD::SiDetectorElement& element)
+{
+  // If the pixel is ganged, returns a new identifier for it
+  InDetDD::SiCellId cellID = element.cellIdFromIdentifier( rdoID );
+  if ( element.numberOfConnectedCells( cellID ) > 1 ) {
+    InDetDD::SiCellId gangedCellID = element.connectedCell( cellID, 1 );
+    return element.identifierFromCellId( gangedCellID );
+  } 
+  return std::nullopt;
+}
+  
 } // namespace ActsTrk
