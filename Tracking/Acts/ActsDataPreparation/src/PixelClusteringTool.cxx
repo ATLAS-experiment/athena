@@ -46,6 +46,8 @@ StatusCode PixelClusteringTool::initialize()
   
   ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
 
+  ATH_CHECK( detStore()->retrieve(m_pixelID, "PixelID") );
+  
   ATH_MSG_DEBUG(name() << " successfully initialized");
   return StatusCode::SUCCESS;
 }
@@ -206,72 +208,74 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   return StatusCode::SUCCESS;
 }
 
+StatusCode
+PixelClusteringTool::clusterize(const EventContext& ctx,
+				const RawDataCollection& RDOs,
+				const InDet::SiDetectorElementStatus& pixelDetElStatus,
+				const InDetDD::SiDetectorElement& element,
+				std::vector<ClusterCollection>& collection) const
+{
+  IdentifierHash idHash = RDOs.identifyHash();
+  if ( not pixelDetElStatus.isGood(idHash) ) {
+    // the module being flagged as bad is not a failure
+    return StatusCode::SUCCESS;
+  }
+
+  // Retrieve the cells from the detector element
+  std::vector<InDet::UnpackedPixelRDO> cells =
+    m_pixelRDOTool->getUnpackedPixelRDOs(RDOs, *m_pixelID, &element, ctx);
+  
+  ClusterCollection clusters =
+    Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
+    (cells, Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
+  collection.push_back( std::move(clusters) );
+  
+  return StatusCode::SUCCESS;
+}
+
 
 StatusCode
-PixelClusteringTool::clusterize(const RawDataCollection& RDOs,
-				const PixelID& pixelID,
-				const EventContext& ctx,
-				ClusterContainer& container) const
+PixelClusteringTool::makeClusters(const EventContext& ctx,
+				  typename IPixelClusteringTool::ClusterCollection& clusters,
+				  const InDetDD::SiDetectorElement& element,
+				  typename ClusterContainer::iterator itrContainer) const
 {
-
-    // Retrieve the detector element
-    const InDetDD::SiDetectorElement* element = m_pixelRDOTool->checkCollection(RDOs, ctx);
-    if (element == nullptr) {
-       // the RDO tool will return nullptr if the module is flagged bad, which is not a failure.
-       return StatusCode::SUCCESS;
-    }
-
-    // Retrieve the calibration data
-    const PixelChargeCalibCondData *calibData = nullptr;
-    if (not m_chargeDataKey.empty()) {
-      SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
-      calibData = calibDataHandle.cptr();
-      
-      if (!calibData) {
+  // We'd need a smarter move here!!!
+  
+  // Retrieve the calibration data
+  const PixelChargeCalibCondData *calibData = nullptr;
+  if (not m_chargeDataKey.empty()) {
+    SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle = SG::makeHandle( m_chargeDataKey, ctx );
+    calibData = calibDataHandle.cptr();
+    
+    if (!calibData) {
       ATH_MSG_ERROR("PixelChargeCalibCondData requested but couldn't be retrieved from " << m_chargeDataKey.key());
       return StatusCode::FAILURE;
-      }
     }
-
-    // Retrieve the cells from the detector element
-    std::vector<InDet::UnpackedPixelRDO> cells =
-	  m_pixelRDOTool->getUnpackedPixelRDOs(RDOs, pixelID, element, ctx);
-
-    // Get the calibration strategy for this module. 
-    // Default to RD53 if the calibData is not available. That is fine because it won't be used anyway
-    auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element->identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
-
-    // Get the element design
-    const InDetDD::PixelModuleDesign& design = 
-     static_cast<const InDetDD::PixelModuleDesign&>(element->design());
-        
-    ClusterCollection clusters =
-      Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
-      (cells, Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
-
-
-    std::size_t previousSizeContainer = container.size();
-    // Fast insertion trick
-    std::vector<xAOD::PixelCluster*> toAddCollection;
-    toAddCollection.reserve(clusters.size());
-    for (std::size_t i(0); i<clusters.size(); ++i)
-      toAddCollection.push_back(new xAOD::PixelCluster());
-    container.insert(container.end(), toAddCollection.begin(), toAddCollection.end());
-    
-    for (std::size_t i(0); i<clusters.size(); ++i) {
-      Cluster& cluster = clusters[i];
-      
-      ATH_CHECK(makeCluster(ctx,
-			    cluster,
-			    pixelID,
-			    element,
-			    design,
-			    calibData,
-			    calibrationStrategy,
-			    *container[previousSizeContainer+i]));
-    }
-
-    return StatusCode::SUCCESS;
-}
+  }
   
+  // Get the element design
+  const InDetDD::PixelModuleDesign& design = 
+    static_cast<const InDetDD::PixelModuleDesign&>(element.design());
+  
+  // Get the calibration strategy for this module. 
+  // Default to RD53 if the calibData is not available. That is fine because it won't be used anyway
+  auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element.identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
+
+  for (typename IPixelClusteringTool::Cluster& cl : clusters) {
+    xAOD::PixelCluster* xaodCluster = *itrContainer;
+    ATH_CHECK(makeCluster(ctx,
+			  cl,
+			  *m_pixelID,
+			  &element,
+			  design,
+			  calibData,
+			  calibrationStrategy,
+			  *xaodCluster));
+    ++itrContainer;
+  }
+  
+  return StatusCode::SUCCESS;
+}
+
 } // namespace ActsTrk
