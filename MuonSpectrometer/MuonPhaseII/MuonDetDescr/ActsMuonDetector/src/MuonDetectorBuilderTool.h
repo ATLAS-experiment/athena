@@ -11,6 +11,8 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/Surface.hpp>
+#include <Acts/Utilities/BoundFactory.hpp>
+
 
 struct GeoChildNodeWithTrf;
 class GeoMaterial;
@@ -20,7 +22,7 @@ namespace ActsTrk{
     
     public:
         /** @brief Standard tool constructor **/
-        MuonDetectorBuilderTool( const std::string& type, const std::string& name, const IInterface* parent );
+        using base_class::base_class;
 
         virtual ~MuonDetectorBuilderTool() = default;
 
@@ -34,14 +36,14 @@ namespace ActsTrk{
                                  const GeoChildNodeWithTrf& node, 
                                  const std::string& name, 
                                  std::vector<std::shared_ptr<Acts::Experimental::DetectorVolume>>& passiveVolumes, 
-                                 const GeoTrf::Transform3D& transform) const;
+                                 const GeoTrf::Transform3D& transform,
+                                 Acts::VolumeBoundFactory& boundFactory) const;
 
         
-        using BlendedBoundSet = ActsTrk::SurfaceBoundSet<Acts::TrapezoidBounds>;
         std::shared_ptr<Acts::Surface> getChamberMaterial(const MuonGMR4::Chamber& chamber, 
                                                           const Amg::Transform3D& chamberTransform,                                                          
                                                           const int totalMaterials,
-                                                          BlendedBoundSet& boundSet) const;
+                                                          Acts::SurfaceBoundFactory& boundSet) const;
 
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
