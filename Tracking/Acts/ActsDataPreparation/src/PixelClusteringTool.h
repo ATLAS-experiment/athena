@@ -7,10 +7,9 @@
 
 
 #include "ActsToolInterfaces/IPixelClusteringTool.h"
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetIdentifier/PixelID.h"
-#include "InDetRawData/InDetRawDataCollection.h"
 #include "InDetRawData/PixelRDORawData.h"
-#include "SiClusterizationTool/PixelRDOTool.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
@@ -47,19 +46,26 @@ private:
   
   StatusCode makeCluster(const EventContext& ctx,
 			 PixelClusteringTool::Cluster &cluster,
-			 const PixelID& pixelID,
 			 const InDetDD::SiDetectorElement* element,
 			 const InDetDD::PixelModuleDesign& design,
 			 const PixelChargeCalibCondData *calibData,
 			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 			 xAOD::PixelCluster& container) const;
 
-    
+  typename IPixelClusteringTool::CellCollection
+  unpackRDOs(const RawDataCollection& RDOs,
+	     const InDet::SiDetectorElementStatus& stripDetElStatus,
+	     const InDetDD::SiDetectorElement& element) const;
+
+  static inline
+  std::optional<Identifier>
+  isGanged(const Identifier& rdoID,
+	   const InDetDD::SiDetectorElement& element);
+
 private:  
   ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "InDetDD::ITk::PixelReadoutManager",
       "Pixel readout manager" };
   
-  ToolHandle< InDet::PixelRDOTool > m_pixelRDOTool {this, "PixelRDOTool", "", "The Pixel RDO tool"};
   ToolHandle< ISiLorentzAngleTool > m_pixelLorentzAngleTool {this, "PixelLorentzAngleTool", "", "Tool to retreive Lorentz angle of Pixel"};
   
   SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "ITkPixelChargeCalibCondData",
@@ -68,6 +74,7 @@ private:
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};
   Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false};
   Gaudi::Property<bool> m_broadErrors {this, "UseBroadErrors", false};
+  Gaudi::Property<bool> m_checkGanged {this, "CheckGanged", false};
 
   const PixelID* m_pixelID {nullptr};
 };

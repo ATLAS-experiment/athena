@@ -61,10 +61,6 @@ def ActsPixelClusteringToolCfg(flags,
     from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
     acc.merge(ITkPixelReadoutManagerCfg(flags))
     
-    if 'PixelRDOTool' not in kwargs:
-        from InDetConfig.SiClusterizationToolConfig import ITkPixelRDOToolCfg
-        kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(ITkPixelRDOToolCfg(flags)))
-
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
