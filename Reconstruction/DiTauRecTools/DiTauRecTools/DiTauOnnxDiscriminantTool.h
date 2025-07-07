@@ -92,11 +92,6 @@ private:
   SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_d0_leadtrack_lead_DecorKey{ this, "DiTauD0LeadTrackLeadName", "DiTauJets.d0_leadtrack_lead", "Name of the DiTau dR between the leading track within the lead subjet with respect to the lead subjet"};
   SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_d0_leadtrack_sublead_DecorKey{ this, "DiTauD0SubleadTrackLeadName", "DiTauJets.d0_leadtrack_subl", "Name of the DiTau dR between the leading track within the sublead subjet with respect to the sublead subjet"};
   SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_f_isotracks_DecorKey{ this, "DiTauFIsotracks", "DiTauJets.f_isotracks", "Name of the DiTau energy fraction carried by isolated tracks"};
-  SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_numberOfInrmstPxlLyrHits_DecorKey{ this, "DiTauNumberOfInrmstPxlLyrHits", "DiTauJets.numberOfInnermostPixelLayerHits", "Name of Number of the Hits in Innermost Layer of Pixel detector decoration"};
-  SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_numberOfPixelHits_DecorKey{ this, "DiTauNumberOfPixelHits", "DiTauJets.numberOfPixelHits", "Name of the number of hits in the Pixel detector decoration"};
-  SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_numberOfSCTHits_DecorKey{ this, "DiTauNumberOfSCTHits", "DiTauJets.numberOfSCTHits", "Name of the nnumber of hits in the SCT detector decoration"};
-  SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_z0_DecorKey{ this, "DiTauZ0", "DiTauJets.z0", "Name of the track z0 decoration"};
-  SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_d0_DecorKey{ this, "DiTauD0", "DiTauJets.d0", "Name of the track d0 decoration"};
 
 };
 
