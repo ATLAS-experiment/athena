@@ -52,7 +52,7 @@ public:
   IOVDbFolder(IOVDbConn* conn, const IOVDbParser& folderprop, MsgStream& msg,
               IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
               const bool checklock, const bool outputToFile=false,
-              const std::string & source="COOL_DATABASE", const bool crestToFile=false,
+              const std::string & source="COOL_DATABASE",
               const std::string & crestServer="",const std::string & crestTag="",const bool crestCoolToFile=false);
   ~IOVDbFolder();
   
@@ -316,7 +316,6 @@ private:
   std::vector<unsigned int> m_cacheccend;
   IOVDbNamespace::IovStore m_iovs;
   const bool m_outputToFile{false};
-  const bool m_crestToFile{false};
   const bool m_crestCoolToFile{false};
   const std::string m_source;
   const std::string m_crestServer;

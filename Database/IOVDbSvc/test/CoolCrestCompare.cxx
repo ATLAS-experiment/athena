@@ -102,7 +102,7 @@ public:
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection(m_cool_con_str, true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "COOL_DATABASE",false,"http://unknown","unknown",true);
+    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "COOL_DATABASE","http://unknown","unknown",true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
     f.loadCache(m_vkey, 0,m_gTagCool, true);
   }
@@ -120,7 +120,7 @@ public:
     m_crest_folder_desc=mg.getFolderDescription();
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection("", true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",false,m_crest_str,m_crest_tag,true);
+    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",m_crest_str,m_crest_tag,true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
     f.loadCache(m_vkey, 0,m_gTagCrest, true);
   }

@@ -488,7 +488,7 @@
           }
         default:
           {
-	    std::string errorMessage("UNTREATED TYPE! " + typespec);  
+	    std::string errorMessage("UNTREATED TYPE! " + std::to_string(typespec));  
             MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
 	    gLog << MSG::ERROR << "LoadPayloadForHash:" <<errorMessage<<endmsg;
             throw std::runtime_error(errorMessage);

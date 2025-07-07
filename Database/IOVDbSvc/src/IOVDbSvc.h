@@ -228,7 +228,6 @@ private:
   StringProperty m_par_format{this,"Format",{},"Format of data; default is empty string (default for a given source)"};
   // Can output to file for debugging purposes
   BooleanProperty m_outputToFile{this,"OutputToFile",false,"output to file for debugging purposes"};
-  BooleanProperty m_crestToFile{this,"CrestToFile",false,"output to file crest data for debugging purposes"};
   BooleanProperty m_crestCoolToFile{this,"CrestCoolToFile",false,"output to file crest or cool data in the same format for debugging purposes"};
   // internal parameters  
   // handles to other services and tools
