@@ -23,7 +23,7 @@ find_package(OpenCL)
 # Component(s) in the package.
 atlas_add_library( AthXRTInterfacesLib
    AthXRTInterfaces/*.h src/*.cxx
-   OBJECT
+   INTERFACE
    INCLUDE_DIRS ${OpenCL_INCLUDE_DIRS}
    PUBLIC_HEADERS AthXRTInterfaces
    LINK_LIBRARIES GaudiKernel XRTLib ${OpenCL_LIBRARIES})
