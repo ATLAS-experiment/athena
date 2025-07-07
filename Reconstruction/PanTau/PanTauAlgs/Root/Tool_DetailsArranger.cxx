@@ -143,11 +143,11 @@ void PanTau::Tool_DetailsArranger::addPanTauDetailToTauJet(PanTauSeed* inSeed,
 
   switch(detailType) {
   case PanTau::Tool_DetailsArranger::t_Int:
-    valueToAddInt   = (int)theValue;
+    valueToAddInt   = static_cast<int>(theValue);
     tauJet->setPanTauDetail(detailEnum, valueToAddInt);
     break;
   case PanTau::Tool_DetailsArranger::t_Float:
-    valueToAddFloat = (float)theValue;
+    valueToAddFloat = static_cast<float>(theValue);
     tauJet->setPanTauDetail(detailEnum, valueToAddFloat);
     break;
   default:
@@ -186,7 +186,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
   tauJet->setChargedPFOLinks(chrgPFOLinks);
   tauJet->setNeutralPFOLinks(neutralPFOLinks);
     
-  tauJet->setDetail(xAOD::TauJetParameters::nCharged, (int)chrgPFOLinks.size());
+  tauJet->setDetail(xAOD::TauJetParameters::nCharged, static_cast<int>(chrgPFOLinks.size()));
 
   //arrange pi0 pfos: depends on decay mode classification
   int decayModeProto = inSeed->getDecayModeBySubAlg();

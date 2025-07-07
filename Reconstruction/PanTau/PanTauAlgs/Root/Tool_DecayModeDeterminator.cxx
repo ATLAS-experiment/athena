@@ -214,7 +214,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
       std::vector<PanTau::TauConstituent*> shots = pi0Neut->getShots();
 
       for(unsigned int iShot=0; iShot<shots.size(); iShot++) {
-	nPhotons = nPhotons + (double)(shots.at(iShot)->getNPhotonsInShot());
+	nPhotons = nPhotons + static_cast<double>(shots.at(iShot)->getNPhotonsInShot());
       }
 
       if(nPhotons > 2.) {
@@ -233,9 +233,9 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
   
   //update mode of seed and store in features
   inSeed->setDecayModeByPanTau(decayMode_PanTau);
-  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode", (double)decayMode_SubAlg);
-  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTau", (double)decayMode_PanTau);
-  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTauExtended", (double)decayMode_PanTauExtended);
+  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode", static_cast<double>(decayMode_SubAlg));
+  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTau", static_cast<double>(decayMode_PanTau));
+  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTauExtended", static_cast<double>(decayMode_PanTauExtended));
 
   tauJet->setPanTauDetail(xAOD::TauJetParameters::PanTauDetails::PanTau_DecayModeExtended, decayMode_PanTauExtended);
     

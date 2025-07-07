@@ -154,8 +154,8 @@ int main( int argc, char* argv[] )
   // ===========================================================================
   TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffCorrTool( "TauEfficiencyCorrectionsTool" );
   TauEffCorrTool.msg().setLevel( MSG::VERBOSE );
-  CHECK(TauEffCorrTool.setProperty("JetIDLevel", (int)TauAnalysisTools::JetID::JETIDRNNMEDIUM));
-  CHECK(TauEffCorrTool.setProperty("EfficiencyCorrectionTypes", (int)TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau));
+  CHECK(TauEffCorrTool.setProperty("JetIDLevel", static_cast<int>(TauAnalysisTools::JetID::JETIDRNNMEDIUM)));
+  CHECK(TauEffCorrTool.setProperty("EfficiencyCorrectionTypes", static_cast<int>(TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau)));
   CHECK(TauEffCorrTool.setProperty("RecommendationTag","2025-prerec"));
   CHECK(TauEffCorrTool.setProperty("Campaign", "mc23")); // can be also set to mc20 depending on the mc campaign 
   CHECK(TauEffCorrTool.initialize());
@@ -180,7 +180,7 @@ int main( int argc, char* argv[] )
     TauEffTrigTool.msg().setLevel( MSG::DEBUG );
     CHECK(TauEffTrigTool.setProperty("EfficiencyCorrectionTypes", std::vector<int>({SFTriggerHadTau}) ));
     CHECK(TauEffTrigTool.setProperty("TriggerName", "HLT_tau25_mediumRNN_tracktwoMVA" ));
-    CHECK(TauEffTrigTool.setProperty("JetIDLevel", (int)JETIDRNNMEDIUM ));
+    CHECK(TauEffTrigTool.setProperty("JetIDLevel", static_cast<int>(JETIDRNNMEDIUM) ));
     CHECK(TauEffTrigTool.setProperty("Campaign", "mc23a")); // can be also set to mc23d depending on the mc campaign 
     CHECK(TauEffTrigTool.initialize());
 
@@ -255,11 +255,11 @@ int main( int argc, char* argv[] )
       // perform truth matching
       auto xTruthTau = T2MT.getTruth(*xTau);
 
-      if ((bool)acc_IsTruthMatched(*xTau))
+      if (static_cast<bool>(acc_IsTruthMatched(*xTau)))
       {
         if (xTruthTau->isTau())
         {
-          if ((bool)acc_IsHadronicTau(*xTruthTau))
+          if (static_cast<bool>(acc_IsHadronicTau(*xTruthTau)))
             Info( "TauAnalysisToolsExample",
                   "Tau was matched to a truth hadronic tau, which has %i prongs and a charge of %i",
                   int(acc_numCharged(*xTruthTau)),
@@ -306,7 +306,7 @@ int main( int argc, char* argv[] )
         CHECK( TauSmeTool.applySystematicVariation(sSystematicSet)) ;
         CHECK( TauSmeTool.applyCorrection(*xTau) );
         //Skip TES uncertainty print out for non-had taus
-        if ((bool)acc_IsTruthMatched(*xTau) && xTruthTau->isTau() && (bool)acc_IsHadronicTau(*xTruthTau)){
+        if (static_cast<bool>(acc_IsTruthMatched(*xTau)) && xTruthTau->isTau() && static_cast<bool>(acc_IsHadronicTau(*xTruthTau))){
         Info( "TauAnalysisToolsExample",
               "Smeared tau pt: %g for type %s ",
               xTau->pt(),

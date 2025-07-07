@@ -317,7 +317,7 @@ StatusCode DiTauTruthMatchingTool::truthMatch(const TLorentzVector& vSubjetTLV,
       if (vSubjetTLV.DeltaR(vTruthVisTLV) <= m_dMaxDeltaR)
 	{
 	  static const SG::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
-	  if ((bool)accIsHadronicTau(*xTruthTauIt))
+	  if (static_cast<bool>(accIsHadronicTau(*xTruthTauIt)))
 	    eTruthMatchedParticleType = TruthHadronicTau;
 	  else
 	    continue; // don't let leptonic taus steal truthmatch just by chance
