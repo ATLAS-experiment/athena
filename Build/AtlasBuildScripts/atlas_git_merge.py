@@ -110,8 +110,12 @@ def sweep_ignore_mrs():
       if choice[0]=="a" or str(i) in choice:
          print(f"Restoring files from {mr.web_url}")
          for s in mr.diff_status:
-            restore_file(mr, s)
-
+            try:
+               restore_file(mr, s)
+            except Exception as e:
+               print(e)
+               filename = s.split()[1]
+               warn(f"Problem restoring {filename} of sweep:ignore MR !{mr.iid}. Manual resolution is required.")
 
 def restore_file(mr, status):
    """Given a --name-status line, restore the file. The format is:
