@@ -266,7 +266,7 @@ read_md("{filename}")
 
                 cgen = clidGenerator("")
                 for item in result["m_itemList"]:
-                    item_list.append((cgen.getNameFromClid(item["_0"]), item["_1"].encode("utf-8")))
+                    item_list.append((cgen.getNameFromClid(item["_0"]), item["_1"]))
                 meta_dict[filename]["itemList"] = item_list
                 event_types = []
                 for event_type in result["m_eventTypes"]:
