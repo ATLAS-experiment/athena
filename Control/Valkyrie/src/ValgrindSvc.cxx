@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ValgrindSvc.cxx 
@@ -83,18 +83,7 @@ StatusCode ValgrindSvc::initialize()
   
   // Use incidents in case there is no auditor configured
   if (!m_algs.empty() || !m_intervals.empty()) {
-
-    // FIXME: We create the auditor here in C++ due to the lack of a
-    // configurable auditor.
-    makeAuditor("ValgrindAuditor",auditorSvc()).ignore();
-    
-    if ((auditorSvc()==0) || auditorSvc()->getAuditor("ValgrindAuditor")==0) {
-      ATH_MSG_ERROR ("Cannot find [ValgrindAuditor]. ");
-      return StatusCode::FAILURE;
-    }
-    else {
-      ATH_MSG_VERBOSE ("Found [ValgrindAuditor].");
-    }
+    ATH_CHECK( auditorSvc()->addAuditor("ValgrindAuditor") );
   }
 
   // Register incidents
@@ -200,55 +189,4 @@ void ValgrindSvc::callgrindDumpStats( std::ostream& /*out*/ )
 void ValgrindSvc::valgrindDoLeakCheck()
 {
   VALGRIND_DO_LEAK_CHECK;
-}
-
-
-// Copied from PerfMonComps/PerfMonUtils
-// Would rather create the auditor from python but couldn't make it work
-StatusCode ValgrindSvc::makeAuditor (const std::string& audName, 
-				     IAuditorSvc* audSvc)
-{
-  if ( 0 == audSvc ) {
-    ATH_MSG_ERROR ("Null pointer to IAuditorSvc !!");
-    return StatusCode::FAILURE;
-  }
-
-  if ( 0 != audSvc->getAuditor( audName ) ) {
-    ATH_MSG_VERBOSE ("AuditorSvc already knows about ["
-		     << audName << "]... good.");
-    return StatusCode::SUCCESS;
-  }
-
-  const std::string propName = "Auditors";
-  IProperty * audSvcProp = dynamic_cast<IProperty*>(audSvc);
-
-  if ( 0 == audSvcProp ) {
-    ATH_MSG_ERROR ("Could not dyn-cast IAuditorSvc to an IProperty !!");
-    return StatusCode::FAILURE;
-  }
-
-  StringArrayProperty audNames;
-  audNames.assign( audSvcProp->getProperty(propName) );
-  std::vector<std::string> updatedNames( audNames.value() );
-  updatedNames.push_back( audName );
-  audNames.set( updatedNames );
-  audNames.setName( propName );
-  if ( !audSvcProp->setProperty( audNames ).isSuccess() ) {
-    ATH_MSG_ERROR
-      ("Could not add [" << audName 
-       << "] to the list of auditors of [AuditorSvc] !!"
-	<< endmsg
-       << audSvcProp->getProperty(propName));
-    return StatusCode::FAILURE;
-  }
-
-  // make sure the auditor has been created...
-  if ( 0 == audSvc->getAuditor( audName ) ) {
-    ATH_MSG_ERROR ("Failed to make AuditorSvc instantiating [" 
-		   << audName << "] !!");
-    return StatusCode::FAILURE;
-  }
-
-  ATH_MSG_VERBOSE ("[" << audName << "] successfully created.");
-  return StatusCode::SUCCESS;
 }

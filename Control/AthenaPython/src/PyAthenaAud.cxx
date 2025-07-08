@@ -22,6 +22,7 @@
 #include "RootUtils/PyAthenaGILStateEnsure.h"
 
 // STL includes
+#include <algorithm>
 
 // FrameWork includes
 #include "GaudiKernel/System.h"
@@ -39,7 +40,7 @@ namespace PyAthena {
 ////////////////
 
 Aud::Aud( const std::string& name, ISvcLocator* svcLocator ) :
-  ::Auditor( name, svcLocator ),
+  Gaudi::Auditor( name, svcLocator ),
   m_self   ( nullptr )
 {}
 
@@ -79,7 +80,7 @@ Aud::sysInitialize()
   }
 
   // re-route to usual sysInit...
-  return ::Auditor::sysInitialize();
+  return Gaudi::Auditor::sysInitialize();
 }
 
 StatusCode 
@@ -103,105 +104,23 @@ Aud::typeName() const
 // Non-const methods: 
 /////////////////////////////////////////////////////////////////// 
 
-void 
-Aud::before(StandardEventType evt, INamedInterface* comp)
+void
+Aud::before(const std::string& evt, const std::string& name,
+            const EventContext&)
 {
-  py_before (evt, comp->name());
-}
-
-void 
-Aud::before(StandardEventType evt, const std::string& comp)
-{
-  py_before (evt, comp);
-}
-
-void 
-Aud::before(CustomEventTypeRef evt, INamedInterface* comp)
-{
-  py_before (evt, comp->name());
+  std::string evtname = evt;
+  std::transform(evt.begin(), evt.end(), evtname.begin(), ::tolower);
+  PyAthena::pyAudit (m_self, "before", evtname.c_str(), name.c_str());
 }
 
 void
-Aud::before(CustomEventTypeRef evt, const std::string& comp)
+Aud::after(const std::string& evt, const std::string& name,
+           const EventContext&, const StatusCode& sc)
 {
-  py_before (evt, comp);
+  std::string evtname = evt;
+  std::transform(evt.begin(), evt.end(), evtname.begin(), ::tolower);
+  PyAthena::pyAudit (m_self, "after", evtname.c_str(), name.c_str(), sc);
 }
-
-void 
-Aud::after(StandardEventType evt, INamedInterface* comp, const StatusCode& sc)
-{
-  py_after (evt, comp->name(), sc);
-}
-
-void 
-Aud::after(StandardEventType evt, const std::string& comp, const StatusCode& sc)
-{
-  py_after (evt, comp, sc);
-}
-
-void 
-Aud::after(CustomEventTypeRef evt, INamedInterface* comp, const StatusCode& sc)
-{
-  py_after (evt, comp->name(), sc);
-}
-
-void 
-Aud::after(CustomEventTypeRef evt, const std::string& comp, 
-	   const StatusCode& sc)
-{
-  py_after (evt, comp, sc);
-}
-
-/// Audit the start of a standard "event".
-void 
-Aud::py_before (IAuditor::StandardEventType evt, const std::string& component)
-{
-  const char* evtname = 0;
-  switch (evt) {
-  case Initialize:   evtname = "initialize";   break;
-  case ReInitialize: evtname = "reinitialize"; break;
-  case Execute:      evtname = "execute";      break;
-  case Finalize:     evtname = "finalize";     break;
-  case Start:        evtname = "start";        break;
-  case Stop:         evtname = "stop";         break;
-  case ReStart:      evtname = "restart";      break;
-  }
-  return PyAthena::pyAudit (m_self, "before", evtname, component.c_str());
-}
-
-void 
-Aud::py_before(IAuditor::CustomEventTypeRef evt, const std::string& component)
-{
-  return PyAthena::pyAudit (m_self, "before", evt.c_str(), component.c_str());
-}
-
-void 
-Aud::py_after(IAuditor::StandardEventType evt,
-	      const std::string& component,
-	      const StatusCode& sc)
-{
-  const char* evtname = 0;
-  switch (evt) {
-  case Initialize:   evtname = "initialize";   break;
-  case ReInitialize: evtname = "reinitialize"; break;
-  case Execute:      evtname = "execute";      break;
-  case Finalize:     evtname = "finalize";     break;
-  case Start:        evtname = "start";        break;
-  case Stop:         evtname = "stop";         break;
-  case ReStart:      evtname = "restart";      break;
-  }
-  return PyAthena::pyAudit (m_self, "after", evtname, component.c_str(), sc);
-}
-
-void 
-Aud::py_after(IAuditor::CustomEventTypeRef evt,
-	      const std::string& component,
-	      const StatusCode& sc)
-{
-  return PyAthena::pyAudit (m_self, 
-			    "after", evt.c_str(), component.c_str(), sc);
-}
-
 
 /////////////////////////////////////////////////////////////////// 
 // Non-const methods: 

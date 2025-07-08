@@ -15,7 +15,7 @@
 #include <string>
 
 // FrameWork includes
-#include "GaudiKernel/Auditor.h"
+#include "Gaudi/Auditor.h"
 #include "AthenaPython/IPyComponent.h"
 #include "CxxUtils/checker_macros.h"
 
@@ -28,7 +28,7 @@ typedef _object PyObject;
 namespace PyAthena {
 
 class ATLAS_NOT_THREAD_SAFE Aud : virtual public ::IPyComponent,
-                                  public ::Auditor
+                                  public Gaudi::Auditor
 { 
  public: 
 
@@ -54,22 +54,14 @@ class ATLAS_NOT_THREAD_SAFE Aud : virtual public ::IPyComponent,
    */
   virtual const char* typeName() const override;
 
+  /// @c Auditor interface
+  //@{
+  virtual void before(const std::string& evt, const std::string& name,
+                      const EventContext& ctx) override;
 
-  /// Audit the start of a standard "event".
-  virtual void py_before(IAuditor::StandardEventType, const std::string&);
-
-  /// Audit the start of a custom "event".
-  virtual void py_before(IAuditor::CustomEventTypeRef, const std::string&);
-
-  /// Audit the end of a standard "event".
-  virtual void py_after(IAuditor::StandardEventType,
-			const std::string&,
-			const StatusCode&);
-
-  /// Audit the end of a custom "event".
-  virtual void py_after(IAuditor::CustomEventTypeRef,
-			const std::string&,
-			const StatusCode&);
+  virtual void after(const std::string& evt, const std::string& name,
+                     const EventContext& ctx, const StatusCode& sc) override;
+  //@}
 
   /** @brief return associated python object. BORROWED reference.
    */ 
@@ -80,20 +72,6 @@ class ATLAS_NOT_THREAD_SAFE Aud : virtual public ::IPyComponent,
   /** attach the C++ component to its python cousin
    */
   virtual bool setPyAttr( PyObject* pyobj ) override;
-
-  /// @c Auditor interface
-
-  virtual void before(StandardEventType, INamedInterface*) override;
-  virtual void before(StandardEventType, const std::string&) override;
-
-  virtual void before(CustomEventTypeRef, INamedInterface*) override;
-  virtual void before(CustomEventTypeRef, const std::string&) override;
-
-  virtual void after(StandardEventType, INamedInterface*, const StatusCode&) override;
-  virtual void after(StandardEventType, const std::string&, const StatusCode&) override;
-
-  virtual void after(CustomEventTypeRef, INamedInterface*, const StatusCode&) override;
-  virtual void after(CustomEventTypeRef, const std::string&, const StatusCode&) override;
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 
