@@ -8,14 +8,15 @@ def FPGAOutputValidationCfg(flags, **kwargs):
     kwargs.setdefault("stripKeys", [])
     kwargs.setdefault("doDiffHistograms", False)
     kwargs.setdefault("matchByID", False)
-    kwargs.setdefault("allowedRdoMisses", 0)
+    kwargs.setdefault("allowedRdoMisses", 500)
+    kwargs.setdefault("checkClusterRdos", False)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monitoringTool = GenericMonitoringTool(flags, 'FPGAOutputValidationMonitoringTool')
     monitoringTool.HistPath = "/"
 
     for histName in ["all", "barrel", "endcap"]:
-
+        
         if len(kwargs["pixelKeys"]) == 2 and kwargs["doDiffHistograms"]:
             key0 = kwargs["pixelKeys"][0]
             key1 = kwargs["pixelKeys"][1]
@@ -32,19 +33,26 @@ def FPGAOutputValidationCfg(flags, **kwargs):
             monitoringTool.defineHistogram("diff_pixel_channelseta_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1I", title = f"{name}:channels in eta;Channels in #eta;", xbins = 11, xmin = -5.5, xmax = 5.5)
             monitoringTool.defineHistogram("diff_pixel_widtheta_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:width in eta;Channels in #phi;", xbins = 100, xmin = -5, xmax = 5)
             monitoringTool.defineHistogram("diff_pixel_tot_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1I", title = f"{name}:tot;Total TOT;", xbins = 101, xmin = -50.5, xmax = 50.5)
+            monitoringTool.defineHistogram("diff_pixel_rdos_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1I", title = f"{name}:rdos;number of rdos;", xbins = 101, xmin = -50.5, xmax = 50.5)
+            monitoringTool.defineHistogram(f"pixel_globalZ_ref_{histName},pixel_globalR_ref_{histName},diff_pixel_rdos_{histName};diff_pixel_RDOs_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:RDOs;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1000)
+            monitoringTool.defineHistogram(f"pixel_globalZ_ref_{histName},pixel_globalR_ref_{histName},diff_pixel_locx_{histName};diff_pixel_locx_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:locx;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1000, zmin = -0.02, zmax = 0.02)
+            monitoringTool.defineHistogram(f"pixel_globalZ_ref_{histName},pixel_globalR_ref_{histName},diff_pixel_locy_{histName};diff_pixel_locy_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:locy;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1000, zmin = -0.02, zmax = 0.02)
 
         if len(kwargs["stripKeys"]) == 2 and kwargs["doDiffHistograms"]:
             key0 = kwargs["stripKeys"][0]
             key1 = kwargs["stripKeys"][1]
             name = f"{key0} - {key1}"
             monitoringTool.defineHistogram("nmatched_strip_clusters_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1I", title = f"{name}: number of matched clusters", xbins = 100, xmin=0, xmax = 100)
-            monitoringTool.defineHistogram("diff_strip_locx_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:locx;Local position x;", xbins = 200, xmin = -0.02, xmax = 0.02)
+            monitoringTool.defineHistogram("diff_strip_locx_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:locx;Local position x;", xbins = 200, xmin = -0.2, xmax = 0.2)
             monitoringTool.defineHistogram("diff_strip_covxx_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:covxx;Local covariance xx;", xbins = 100, xmin = -0.1, xmax = 0.1)
             monitoringTool.defineHistogram("diff_strip_globalx_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:globalx;Global position x;", xbins = 200, xmin = -0.1, xmax = 0.1)
             monitoringTool.defineHistogram("diff_strip_globaly_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:globaly;Global position y;", xbins = 200, xmin = -0.1, xmax = 0.1)
             monitoringTool.defineHistogram("diff_strip_globalz_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:globalz;Global position z;", xbins = 200, xmin = -0.1, xmax = 0.1)        
             monitoringTool.defineHistogram("diff_strip_channelsphi_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:channels in phi;Channels in #phi;", xbins = 10, xmin = -5, xmax = 5)
-
+            monitoringTool.defineHistogram("diff_strip_rdos_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1I", title = f"{name}:rdos;number of rdos;", xbins = 101, xmin = -50.5, xmax = 50.5)
+            monitoringTool.defineHistogram(f"strip_globalZ_ref_{histName},strip_globalR_ref_{histName},diff_strip_rdos_{histName};diff_strip_RDOs_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:RDOs;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1200)
+            monitoringTool.defineHistogram(f"strip_globalZ_ref_{histName},strip_globalR_ref_{histName},diff_strip_locx_{histName};diff_strip_locx_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:locx;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1200, zmin = -0.2, zmax = 0.2)
+            
         for key in kwargs["pixelKeys"]:
             monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_X_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_LOCALPOSITION_X;Local position x;", xbins = 800, xmin = -40, xmax = 40)
             monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_Y_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_LOCALPOSITION_Y;Local position y;", xbins = 800, xmin = -40, xmax = 40)

@@ -37,7 +37,8 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
     "Create extra histograms for cluster parameter diffs between matched clusters."
   };
   Gaudi::Property<bool> m_matchByID{this, "matchByID", false, "Use hash to match clusters. If false, use only the rdo list."};
-  Gaudi::Property<size_t> m_allowedRdoMisses {this, "allowedRdoMisses", 0, "Use hash to match clusters. If false, use only the rdo list."};
+  Gaudi::Property<size_t> m_allowedRdoMisses {this, "allowedRdoMisses", 0, "Allowed number of RDOs that don't have to match between clusters. Setting this to a very large number means essentially that 1 common RDO is enough to match clusters."};
+  Gaudi::Property<bool> m_checkClusterRdos {this, "checkClusterRdos", false, "If true, check if FPGA clusters share any RDOs"};
 
   SG::ReadHandleKeyArray<xAOD::PixelClusterContainer> m_pixelKeys{this, "pixelKeys", {}};
   SG::ReadHandleKeyArray<xAOD::StripClusterContainer> m_stripKeys{this, "stripKeys", {}};
