@@ -65,7 +65,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 				 xAOD::PixelCluster& xaodcluster) const
 { 
 
-  InDetDD::SiLocalPosition pos_acc(0,0);
+  Amg::Vector2D pos_acc(0,0);
   int tot_acc = 0;
 
   std::vector<float> chargeList;
@@ -75,6 +75,10 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   int rowmax = std::numeric_limits<int>::min();
   int colmin = std::numeric_limits<int>::max();
   int rowmin = std::numeric_limits<int>::max();
+  InDetDD::PixelDiodeParametersProxy colmin_diode{};
+  InDetDD::PixelDiodeParametersProxy colmax_diode{};
+  InDetDD::PixelDiodeParametersProxy rowmin_diode{};
+  InDetDD::PixelDiodeParametersProxy rowmax_diode{};
 
   // We temporary comment this since it is not used
   // bool hasGanged = false;
@@ -119,16 +123,26 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
       chargeList.push_back(charge);
     }
     
-    const int row = m_pixelID->phi_index(id);
-    rowmax = std::max(rowmax, row);
-    rowmin = std::min(rowmin, row);
-           
-    const int col = m_pixelID->eta_index(id);
-    colmax = std::max(colmax, col);
-    colmin = std::min(colmin, col);
-    
     InDetDD::SiCellId si_cell = element->cellIdFromIdentifier(id);
-    InDetDD::SiLocalPosition pos = design.localPositionOfCell(si_cell);
+    const int row = si_cell.phiIndex();
+    const int col = si_cell.etaIndex();
+    InDetDD::PixelDiodeParametersProxy si_param = design.parametersProxy(si_cell);
+    if (row>rowmax) {
+       rowmax=row;
+       rowmax_diode = si_param;
+    }
+    if (row<rowmin) {
+       rowmin=row;
+       rowmin_diode = si_param;
+    }
+    if (col>colmax) {
+       colmax=col;
+       colmax_diode = si_param;
+    }
+    if (col<colmin) {
+       colmin=col;
+       colmin_diode = si_param;
+    }
 
     // We compute the digital position as a sum of all RDO positions
     // all with the same weight of 1
@@ -136,10 +150,10 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     // we observe it to be worse than the digital position
     // ToT-weighted center of gravity must not be used
     if (m_useWeightedPos) {
-      pos_acc += charge * pos;
+      pos_acc += charge * si_param.position();
       tot_acc += charge;
     } else {
-      pos_acc += pos;
+      pos_acc += si_param.position();
       tot_acc += 1;
     }
     
@@ -151,9 +165,9 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   
   const int colWidth = colmax - colmin + 1;
   const int rowWidth = rowmax - rowmin + 1;
-  double etaWidth = design.widthFromColumnRange(colmin, colmax);
-  double phiWidth = design.widthFromRowRange(rowmin, rowmax);
-  InDet::SiWidth siWidth(Amg::Vector2D(rowWidth,colWidth), Amg::Vector2D(phiWidth,etaWidth));
+
+  double etaWidth = colmax_diode.xEtaMax() - colmin_diode.xEtaMin(); // design.widthFromColumnRange(colmin, colmax);
+  double phiWidth = rowmax_diode.xPhiMax() - rowmin_diode.xPhiMin(); // design.widthFromColumnRange(colmin, colmax);
 
   // ask for Lorentz correction, get global position
   double shift = m_pixelLorentzAngleTool->getLorentzShift(moduleHash, ctx);
@@ -172,12 +186,12 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   float width0, width1;
   if (m_broadErrors) {
       // Use cluster width
-      width0 = siWidth.phiR();
-      width1 = siWidth.z();
+      width0 = phiWidth;
+      width1 = etaWidth;
   } else {
       // Use average pixel width
-      width0 = siWidth.phiR() / siWidth.colRow().x();
-      width1 = siWidth.z() / siWidth.colRow().y();
+      width0 = phiWidth / rowWidth;
+      width1 = etaWidth / colWidth;
   }
 
   // Actually create the cluster (i.e. fill the values)
@@ -196,9 +210,8 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   xaodcluster.setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(chargeList) );
   xaodcluster.setChargelist(std::move(chargeList));
   xaodcluster.setLVL1A(cluster.lvl1min);
-  xaodcluster.setChannelsInPhiEta(siWidth.colRow()[0],
-				  siWidth.colRow()[1]);
-  xaodcluster.setWidthInEta(static_cast<float>(siWidth.widthPhiRZ()[1]));
+  xaodcluster.setChannelsInPhiEta(rowWidth,colWidth);
+  xaodcluster.setWidthInEta(static_cast<float>(etaWidth));
   xaodcluster.setIsSplit(false);
   xaodcluster.setSplitProbabilities(0.0, 0.0);
     

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -250,7 +250,9 @@ namespace InDetDD {
       /** Debug string representation */
       std::string debugStringRepr() const;
 
-
+      PixelDiodeParametersProxy parametersProxy(const SiCellId & cellId) const {
+         return m_diodeMap.parametersProxy(cellId);
+      }
       ///////////////////////////////////////////////////////////////////
       // Private methods:
       ///////////////////////////////////////////////////////////////////
