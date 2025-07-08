@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaPython/python/Bindings.py
 # @author: Sebastien Binet <binet@cern.ch>
@@ -187,13 +187,13 @@ def py_tool(toolName, createIf=True, iface=None):
     return tool
 
 ### helper method to easily retrieve algorithms by name -----------------------
-def py_alg(algName, iface='IAlgorithm'):
+def py_alg(algName, iface=None):
     """
     Helper function to retrieve an IAlgorithm (managed by the IAlgManager_) by
     name, using Gaudi python bindings.
      @param algName: the name of the algorithm's instance one wants to retrieve
             ex: 'McAodBuilder'
-     @param iface: type one wants to cast the tool to (can be a string or the
+     @param iface: type one wants to cast the algorithm to (can be a string or the
             cppyy type)
 
     Ex:
@@ -215,10 +215,13 @@ def py_alg(algName, iface='IAlgorithm'):
     
     # handle pycomponents...
     from .Configurables import PyComponents
-    import ROOT
-    alg = ROOT.MakeNullPointer(iface)
-    if not algmgr.getAlgorithm(algName, alg).isSuccess():
+    alg = algmgr.algorithm(algName)
+    if not alg:
         return
+
+    if iface is not None:
+        from GaudiPython.Bindings import InterfaceCast
+        alg = InterfaceCast(iface).cast(alg)
 
     # if the component is actually a py-component,
     # retrieve the python object from the registry
