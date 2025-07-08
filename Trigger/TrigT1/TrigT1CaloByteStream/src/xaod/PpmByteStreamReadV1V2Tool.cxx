@@ -627,9 +627,9 @@ StatusCode PpmByteStreamReadV1V2Tool::processPpmCompressedR4V1_(State& state) co
       if (present == 1) {
         interpretPpmHeaderR4V1_(br, numAdc, encoding, minIndex);
         CHECK((encoding != -1) && (minIndex != -1));
-        // First get the LIT related quantities
+        // First get the LUT related quantities
         if (encoding < 3) {
-          // Get the peal finder bits
+          // Get the peak finder bits
           for(uint i=0; i < numLut; ++i) {
             lcpPeak[i] = br.getField(1);
           }
@@ -712,23 +712,26 @@ StatusCode PpmByteStreamReadV1V2Tool::processPpmCompressedR4V1_(State& state) co
         }
       }
 
-    for(uint8_t i=0; i < numLut; ++i){
-      lcpBcidVec[i] = uint8_t((lcpPeak[i] << 2) | (lcpSat[i] << 1) | lcpExt[i]);
-      ljeSat80Vec[i] = uint8_t((ljeRes[i] << 2) | (ljeHigh[i] << 1) | ljeLow[i]);
-    }
-    CHECK(addTriggerTowerV2_(state,
-                             state.m_subBlockHeader.crate(), state.m_subBlockHeader.module(),
-                             chan,
-                             std::move(lcpVal), std::move(lcpBcidVec),
-                             std::move(ljeVal), std::move(ljeSat80Vec),
-                             std::move(adcVal), std::move(adcExt),
-                             std::move(pedCor), std::move(pedEn)));
-    } // for
+      for(uint8_t i=0; i < numLut; ++i){
+	lcpBcidVec[i] = uint8_t((lcpPeak[i] << 2) | (lcpSat[i] << 1) | lcpExt[i]);
+	ljeSat80Vec[i] = uint8_t((ljeRes[i] << 2) | (ljeHigh[i] << 1) | ljeLow[i]);
+      }
+      CHECK(addTriggerTowerV2_(state,
+			       state.m_subBlockHeader.crate(), state.m_subBlockHeader.module(),
+			       chan,
+			       std::move(lcpVal), std::move(lcpBcidVec),
+			       std::move(ljeVal), std::move(ljeSat80Vec),
+			       std::move(adcVal), std::move(adcExt),
+			       std::move(pedCor), std::move(pedEn)));
+    } // End for loop: done with that channel, move on to the next one.
+    // Finally decode the error and status blocks (if any).
+    processPpmErrorBits_(state,
+			 state.m_subBlockHeader.crate(), state.m_subBlockHeader.module(), br);
   } catch (const std::out_of_range& ex) {
       ATH_MSG_WARNING("Excess Data in Sub-block");
       m_errorTool->rodError(state.m_rodSourceId, L1CaloSubBlock::UNPACK_EXCESS_DATA);
   }
-  //Check status workd
+  //Check status word
   return StatusCode::SUCCESS;
 
 }
@@ -908,10 +911,6 @@ StatusCode PpmByteStreamReadV1V2Tool::processPpmStandardR3V1_(State& state) cons
 void PpmByteStreamReadV1V2Tool::processSubBlockStatus_(State& state,
                                                        uint8_t crate, uint8_t module, uint32_t payload) const
 {
-  LVL1::DataError errorBits(0);
-  errorBits.set(LVL1::DataError::SubStatusWord, payload);
-
-  const uint32_t error = errorBits.error();
   int curr = state.m_triggerTowers->size() - 1;
   for(int i=0; i < s_channels; ++i){
     if (curr < 0){
@@ -919,9 +918,76 @@ void PpmByteStreamReadV1V2Tool::processSubBlockStatus_(State& state,
     }
     auto tt = (*state.m_triggerTowers)[curr--];
     if (tt->coolId() >> 16 & crateModuleMask(crate, module)){
-      tt->setErrorWord(error);
+      LVL1::DataError errorBits( tt->errorWord() );
+      errorBits.set(LVL1::DataError::SubStatusWord, payload);
+      tt->setErrorWord( errorBits.error() );
     }else{
       break;
+    }
+  }
+}
+
+
+void PpmByteStreamReadV1V2Tool::processPpmErrorBits_(State& state,
+						     uint8_t crate, uint8_t module, BitReader& br) const
+{
+  // These bits come at the end of a PPM block. This code assumes the main part of the block
+  // has already been decoded and the pointer is set to the start of the error bits.
+  uint8_t haveStatus = br.getField(1);
+  uint8_t haveErrors = br.getField(1);
+
+  // If either or both of these bits is set, then follows a single 16 bit map to indicate the MCM
+  if (haveStatus || haveErrors) {
+    uint16_t mcmMap = br.getField(s_submodules);
+    std::vector<uint16_t> mcmErrors(s_submodules);
+    uint16_t errorWord = 0;
+
+    // For each so indicated MCM, there is either the 5 bit status block, or the 6 bit error block, or both
+    for(int i=0; i < s_submodules; ++i){
+      errorWord = 0;
+      if ((mcmMap & (1 << i)) != 0) {
+	uint16_t blockStatus = 0;
+	uint16_t blockErrors = 0;
+
+	if (haveStatus) {
+	  blockStatus = br.getField(5);
+	  errorWord |= blockStatus;
+	}
+	if (haveErrors) {
+	  blockErrors = br.getField(6);
+	  errorWord |= (blockErrors<<5);
+	}
+      }
+      mcmErrors.at(i)=errorWord;
+    }
+
+    int curr = state.m_triggerTowers->size() - 1;
+    for(int i=0; i < s_channels; ++i){
+      if (curr < 0){
+	break;
+      }
+      auto tt = (*state.m_triggerTowers)[curr--];
+      if (tt->coolId() >> 16 & crateModuleMask(crate, module)){
+	uint16_t mcmID = (tt->coolId() >> 8) & 0xff;
+	uint16_t chnID = tt->coolId() & 0xff;
+	uint16_t error = mcmErrors.at(mcmID);
+
+	// Now translate the error into Athena language
+	LVL1::DataError errorBits( tt->errorWord() );
+	if ( error & (1<<chnID) ) { errorBits.set(LVL1::DataError::ChannelDisabled); }
+	if ( error &     (1<<4) ) { errorBits.set(LVL1::DataError::MCMAbsent); }
+	if ( error &     (1<<5) ) { errorBits.set(LVL1::DataError::Timeout); }
+	if ( error &     (1<<6) ) { errorBits.set(LVL1::DataError::ASICFull); }
+	if ( error &     (1<<7) ) { errorBits.set(LVL1::DataError::EventMismatch); }
+	if ( error &     (1<<8) ) { errorBits.set(LVL1::DataError::BunchMismatch); }
+	if ( error &     (1<<9) ) { errorBits.set(LVL1::DataError::FIFOCorrupt); }
+	if ( error &    (1<<10) ) { errorBits.set(LVL1::DataError::PinParity); }
+
+	// Set the modified error word for this channel
+	tt->setErrorWord( errorBits.error() );
+      }else{
+	break;
+      }
     }
   }
 }
