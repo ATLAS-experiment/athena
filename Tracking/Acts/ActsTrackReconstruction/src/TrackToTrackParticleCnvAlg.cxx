@@ -419,8 +419,10 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::pixelTotal),
 			xAOD::numberOfPixelSharedHits);
-	// do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
-	std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
+	// Only check if computeExpectedLayerPattern is true. TODO:: move this computation to the track finding to avoid calling propagator steps here.
+	// Do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
+	std::array<unsigned int,4> expect_layer_pattern = (m_computeExpectedLayerPattern.value()
+							   && (!m_expectIfPixelContributes.value()
 							       || hitInfo.contributingLayers(ActsTrk::detail::HitSummaryData::pixelTotal))
 							   ? detail::expectedLayerPattern(ctx,
 											  *m_extrapolationTool,

@@ -99,13 +99,15 @@ namespace ActsTrk
        {this, "ExtrapolationPathLimit",std::numeric_limits<double>::max(), "PathLimit for extrapolating track parameters." }; // @TODO (unit?mm?)
     Gaudi::Property<bool>  m_firstAndLastParamOnly
        {this, "FirstAndLastParameterOnly",true, "Only convert the first and the last parameter." };
+    Gaudi::Property<bool>  m_computeExpectedLayerPattern
+       {this, "ComputeExpectedLayerPattern",false, "Compute the expected layer pattern. CPU expensive" };
     Gaudi::Property<bool>  m_expectIfPixelContributes
        {this, "expectIfPixelContribution",true, "Only expect pixel hits if there are pixel hits on track." };
 
      Gaudi::Property<double>  m_pixelExpectLayerPathLimitInMM
        {this, "PixelExpectLayerPathLimitInMM",1000,
         "PathLimit for extrapolating to get the expected pixel layer pattern in mm." };
-
+    
       Gaudi::Property<std::string> m_perigeeExpression{this, "PerigeeExpression", "BeamLine"};
 
     enum class expressionStrategy {BeamLine, Vertex};
