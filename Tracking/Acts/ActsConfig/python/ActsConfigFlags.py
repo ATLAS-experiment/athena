@@ -85,6 +85,7 @@ def createActsConfigFlags():
 
     # Cluster
     actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)
+    actscf.addFlag("Acts.Clusters.RetrieveChargeInformation", lambda pcf: not pcf.Tracking.doPixelDigitalClustering)
     
     # SpacePoint
     actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy

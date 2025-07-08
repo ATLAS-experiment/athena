@@ -68,7 +68,7 @@ private:
   
   ToolHandle< ISiLorentzAngleTool > m_pixelLorentzAngleTool {this, "PixelLorentzAngleTool", "", "Tool to retreive Lorentz angle of Pixel"};
   
-  SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "ITkPixelChargeCalibCondData",
+  SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "",
     "Pixel charge calibration data"};
   
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};

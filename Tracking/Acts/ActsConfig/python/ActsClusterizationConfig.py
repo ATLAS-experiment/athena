@@ -54,9 +54,11 @@ def ActsPixelClusteringToolCfg(flags,
                                **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelChargeCalibCondAlgCfg, ITkPixelOfflineCalibCondAlgCfg
-    acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
-    acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))
+    if flags.Acts.Clusters.RetrieveChargeInformation:
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelChargeCalibCondAlgCfg, ITkPixelOfflineCalibCondAlgCfg
+        acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
+        acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))        
+        kwargs.setdefault('PixelChargeCalibCondData', 'ITkPixelChargeCalibCondData')
 
     from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
     acc.merge(ITkPixelReadoutManagerCfg(flags))

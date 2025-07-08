@@ -122,10 +122,10 @@ namespace ActsTrk {
     const auto& globalPos = cluster->globalPosition();
     Amg::Vector3D globalPosition(globalPos(0, 0), globalPos(1, 0), globalPos(2, 0));
 
-    const std::vector<float> charges = cluster->chargeList();
-    const std::vector<int> tots = cluster->totList();
+    const std::vector<int>& tots = cluster->totList();
+    std::vector<float> charges = cluster->chargeList();
     if (charges.size() != tots.size()) {
-      throw std::runtime_error("Wrong sizes of charge and tot collections");
+      charges.resize(tots.size(), 0);
     }
 
     const auto& [omegax, omegay] = TrackingUtilities::computeOmegas(*cluster,
