@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -678,6 +678,8 @@ private:
   bool m_checkForCompundLayers;     //!<  use the multi-layer tests for compound layers
   unsigned int m_maxNavigSurf;
   unsigned int m_maxNavigVol;
+  unsigned int m_maxRecursion;
+
   bool m_dumpCache;
   //------------ Magnetic field properties
   bool m_fastField;
@@ -718,6 +720,8 @@ private:
   mutable Gaudi::Accumulators::Counter<> m_meotSearchCallsBw;      //!< how often the meot search is called: backward
   mutable Gaudi::Accumulators::Counter<> m_meotSearchSuccessfulFw; //!< how often the meot search was successful: forward
   mutable Gaudi::Accumulators::Counter<> m_meotSearchSuccessfulBw; //!< how often the meot search was successful: backward
+
+  mutable Dbg::PropStat m_propStat ATLAS_THREAD_SAFE;
 };
 
 } // end of namespace

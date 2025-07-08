@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
  
 #ifndef TRKEXTOOLS_LOCALEXCACHE_H
@@ -21,7 +21,16 @@
    class EnergyLoss;
    class TrackStateOnSurface;
  }
- 
+
+namespace Dbg {
+   // counters to gather statistics for abort conditions
+   struct PropStat {
+      std::atomic<unsigned int> m_maxRecursionCount{};
+      std::atomic<unsigned int> m_maxPropagations{};
+      std::atomic<unsigned int> m_maxMethodSequence{};
+   };
+}
+
 namespace Trk{
 struct Cache
   {
@@ -89,9 +98,16 @@ struct Cache
     std::vector<std::pair<const Trk::Surface*, Trk::BoundaryCheck>> m_navigSurfs;
     std::vector<const Trk::DetachedTrackingVolume*> m_navigVols;
     std::vector<std::pair<const Trk::TrackingVolume*, unsigned int>> m_navigVolsInt;
-    
+
+    // To gether statistics to tune abort condition based for to large call depth, or too many propagations
+    Dbg::PropStat *m_statPtr=nullptr;
+    enum ERecursionValues {kCurrentRecursionCount,kMaxRecursionCount, kNRecursionValues};
+    std::array<unsigned short,kNRecursionValues> m_recursionCount {}; // current-recursion-level, max
+    unsigned int m_nPropagations {};
+    enum EStatus {kContinue, kRecursionCountExceeded} m_status=kContinue;
+
     //methods
-    Cache();
+    Cache(Dbg::PropStat &stat);
     ~Cache();
     Cache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
 

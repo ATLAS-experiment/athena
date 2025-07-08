@@ -1,17 +1,27 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 #include "TrkSurfaces/Surface.h"
 #include "TrkExUtils/ExtrapolationCache.h" 
 #include "TrkExTools/LocalExtrapolatorCache.h"
 
-
+namespace {
+   inline void setMaxAtomic(unsigned int new_value, std::atomic<unsigned int> &destination) {
+      for(;;) {
+         unsigned int is_value = destination;
+         unsigned int max_value = std::max(is_value,new_value);
+         if (max_value == is_value) break;
+         else if (destination.compare_exchange_weak(is_value,max_value)) { break; }
+      }
+   }
+}
 namespace Trk{
 
-  Cache::Cache()
+  Cache::Cache(Dbg::PropStat &stat)
       : m_trackParmContainer(128)
       , m_lastValidParameters(m_trackParmContainer)
       , m_parametersAtBoundary(m_trackParmContainer)
+      , m_statPtr(&stat)
     {
       m_navigSurfs.reserve(1024);
       m_navigVols.reserve(64);
@@ -27,7 +37,21 @@ namespace Trk{
     populateMatEffUpdatorCache(updaters);
   }
 
-  Cache::~Cache() = default;
+  Cache::~Cache(){
+     if (m_statPtr) {
+        if (m_recursionCount[kMaxRecursionCount]>10) {
+           // only consider cases with some depth
+           setMaxAtomic(m_recursionCount[kMaxRecursionCount], m_statPtr->m_maxRecursionCount);
+        }
+        if (m_nPropagations > 200 ) {
+           // only consider cases with some propagations.
+           setMaxAtomic(m_nPropagations, m_statPtr->m_maxPropagations);
+        }
+        if (m_methodSequence>100 ) {
+           setMaxAtomic(m_methodSequence, m_statPtr->m_maxMethodSequence);
+        }
+     }
+  }
 
   IMaterialEffectsUpdator::ICache&
   Cache::subMaterialEffectsUpdatorCache( const TrackingVolume& tvol){
