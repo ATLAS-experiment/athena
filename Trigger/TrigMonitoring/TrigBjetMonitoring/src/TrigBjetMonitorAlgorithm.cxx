@@ -97,6 +97,11 @@ float phiCorr(float phi) {
 StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
   using namespace Monitored;
 
+  if(m_trigDecTool->ExperimentalAndExpertMethods().isHLTTruncated()){
+    ATH_MSG_WARNING("HLTResult truncated, skip trigger analysis");
+    return StatusCode::SUCCESS; 
+  }  // ATR-31454
+
 
   // Read off-line PV's  and fill histograms
 
