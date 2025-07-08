@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger GPU test on data
+# art-description: Trigger BS->RDO_TRIG athena CaloGPU test of the Dev_pp_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
-# Skipping art-output which has no effect for build tests.
-# If you create a grid version, check art-output in existing grid tests.
+# art-input: group.trig-hlt.data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW
+# art-input-nfiles: 2
+# art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log
@@ -15,7 +16,8 @@
 # art-output: *.log.tar.gz
 # art-output: *.new
 # art-output: *.json
-# art-output: *.root
+# art-output: expert-monitoring.root
+# art-output: rootcomp.root
 # art-output: *.pmon.gz
 # art-output: *perfmon*
 # art-output: prmon*
@@ -25,13 +27,15 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.input = 'data'
-ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
+ex.input = 'data'
+ex.threads = 8
+ex.concurrent_events = 8
+ex.max_events = 2000
+ex.flags = ['CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
+            'Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
             'Trigger.doLVL1=True',
-            'Trigger.doRuntimeNaviVal=True',
-            'Trigger.InDetTracking.doGPU=True' ]
+            'Trigger.doRuntimeNaviVal=True']
 
 test = Test.Test()
 test.art_type = 'grid'
