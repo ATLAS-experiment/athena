@@ -1673,12 +1673,12 @@ def setupMenu():
         
         # Boosted high-pT di-tau chains (ATR-30999)
         # Primaries (NTrack <= 5)
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk5_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
 
         # Backup primaries (NTrack <= 3)
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk33_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk33_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk3_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
 
 
         # HH->2b2tau: di-tau support chains (ATR-28890)
@@ -2350,8 +2350,8 @@ def setupMenu():
         ChainProp(name='HLT_g140_loose_tau20_mediumGNTau_probe_L1eTAU12_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEeTAU12'], groups=TagAndProbePhIGroup+TauPhotonGroup),
         ChainProp(name='HLT_g140_loose_tau20_mediumGNTau_probe_L1eTAU12_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M', 'PROBEeTAU12'], groups=TagAndProbePhIGroup+TauPhotonGroup),
 
-        ChainProp(name='HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1eEM26M', l1SeedThresholds=['eEM26M', 'FSNOSEED'], groups=TagAndProbePhIGroup+DiTauPhotonGroup),
-        ChainProp(name='HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk55_pf_jes_ftf_preselj200_L1eEM28M', l1SeedThresholds=['eEM28M', 'FSNOSEED'], groups=TagAndProbePhIGroup+DiTauPhotonGroup),
+        ChainProp(name='HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk5_pf_jes_ftf_preselj200_L1eEM26M', l1SeedThresholds=['eEM26M', 'FSNOSEED'], groups=TagAndProbePhIGroup+DiTauPhotonGroup),
+        ChainProp(name='HLT_g140_loose_j250_a10sd_cssk_ditauOmni1Trk5_pf_jes_ftf_preselj200_L1eEM28M', l1SeedThresholds=['eEM28M', 'FSNOSEED'], groups=TagAndProbePhIGroup+DiTauPhotonGroup),
         
 
         # MET + Tau T&P chains (ATR-23507)     

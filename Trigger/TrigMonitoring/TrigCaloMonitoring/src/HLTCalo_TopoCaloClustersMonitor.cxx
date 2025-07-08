@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTCalo_TopoCaloClustersMonitor.h"
@@ -54,6 +54,13 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
 
   if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO))
 	return StatusCode::SUCCESS;
+
+  // Protect against HLT truncated results
+  if (m_trigDecTool->ExperimentalAndExpertMethods().isHLTTruncated()){
+    ATH_MSG_WARNING("HLTResult truncated, skipping event");
+    return StatusCode::SUCCESS;
+  }
+
   // Get HLT cluster collections
   SG::ReadHandle<xAOD::CaloClusterContainer> hltCluster_readHandle(m_HLT_cont_key, ctx);
   if (! hltCluster_readHandle.isValid() ) {
