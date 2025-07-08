@@ -33,7 +33,7 @@ ANA_MSG_HEADER(testBTagSelection)
 ANA_MSG_SOURCE(testBTagSelection, "BtaggingToolsTester")
 using namespace testBTagSelection;
 
-int main(int argc, char* argv[]) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   const char* TEST_NAME = argv[0];
 
@@ -42,6 +42,8 @@ int main(int argc, char* argv[]) {
     ANA_MSG_ERROR (  "Usage: " << TEST_NAME << " [DAOD file name] [CDI path] [b-tagger name] [WP name]" );
     return 1;
   }
+
+  POOL::Init();
 
   std::string inputDAOD = argv[1];
   std::string CDIPath = argv[2];
@@ -59,7 +61,7 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
   StatusCode code1 = btagSelTool.setProperty( "FlvTagCutDefinitionsFileName", CDIPath);
   StatusCode code2 = btagSelTool.setProperty( "TaggerName",                   taggerName);
   StatusCode code3 = btagSelTool.setProperty( "OperatingPoint",               workingPointName);
-  StatusCode code4 = btagSelTool.setProperty( "MinPt",                        20000);
+  StatusCode code4 = StatusCode::SUCCESS;
   StatusCode code5 = btagSelTool.setProperty( "OutputLevel",                  MSG::WARNING);
   StatusCode code6 = btagSelTool.initialize();
   std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6};
@@ -76,9 +78,9 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
   
   asg::StandaloneToolHandle<IBTaggingSelectionTool> btagSelTool_bveto("BTaggingSelectionTool/BTagselecTest");
   code1 = btagSelTool_bveto.setProperty( "FlvTagCutDefinitionsFileName", CDIPath);
-  code2 = btagSelTool_bveto.setProperty( "TaggerName",                   taggerName);
+  code2 = StatusCode::SUCCESS;
   code3 = btagSelTool_bveto.setProperty( "OperatingPoint", "FixedCutBEff_77");
-  code4 = btagSelTool_bveto.setProperty( "MinPt",                        20000);
+  code4 = StatusCode::SUCCESS;
   code5 = btagSelTool_bveto.setProperty( "OutputLevel",                  MSG::WARNING);
   code6 = btagSelTool_bveto.initialize();
   std::vector<StatusCode> codes_veto = {code1, code2, code3, code4, code5, code6};
@@ -95,13 +97,13 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
   //------------------------------------------------------------------------------
   asg::StandaloneToolHandle<IBTaggingEfficiencyTool> btagEffTool("BTaggingEfficiencyTool/BTagEffTest");
   code1 = btagEffTool.setProperty( "ScaleFactorFileName",  CDIPath); 
-  code2 = btagEffTool.setProperty( "TaggerName",           taggerName);
+  code2 = StatusCode::SUCCESS;
   if (tagScheme == "1d") {
     code3 = btagEffTool.setProperty( "OperatingPoint",       "Continuous");
   } else {
     code3 = btagEffTool.setProperty( "OperatingPoint",       "Continuous2D");
   }
-  code4 = btagEffTool.setProperty( "MinPt",                20000);
+  code4 = StatusCode::SUCCESS;
   code5 = btagEffTool.setProperty( "IgnoreOutOfValidityRange", true);
   code6 = btagEffTool.setProperty( "EfficiencyCalibrations", sample_dsid);
   StatusCode code7 = btagEffTool.setProperty( "OutputLevel", MSG::WARNING);
@@ -121,8 +123,8 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
   //------------------------------------------------------------------------------
   TEVENT event(TEVENT::kClassAccess);
   gErrorIgnoreLevel = kError;
-  std::unique_ptr<TFile> m_file {TFile::Open(inputDAOD.c_str(), "READ")};
-  if(!event.readFrom(m_file.get()).isSuccess()) {
+  std::unique_ptr<TFile> root_file {TFile::Open(inputDAOD.c_str(), "READ")};
+  if(!event.readFrom(root_file.get()).isSuccess()) {
     ANA_MSG_ERROR ( "Accessing events in input file " << inputDAOD << "failed! " );
     return 1;
   }
@@ -190,6 +192,6 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
     }
   }
 
-  m_file->Close();
+  root_file->Close();
   return 0;
 }
