@@ -289,9 +289,9 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         }
 
 	if(m_sCampaign=="mc23"){  
-            m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc23_v1.root";
+            m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc23_v2.root";
         } else if (m_sCampaign=="mc20"){
-	    m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc20_v0.root";   	
+	    m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc20_v1.root";   	
         }
       }
       if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "TauScaleFactorJetIDHadTau";
