@@ -12,7 +12,6 @@
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <sstream>
 
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
@@ -74,37 +73,37 @@ double ChamberAssembleTool::trapezoidEdgeDist(const Amg::Vector3D& linePos,
 
 std::shared_ptr<ChamberAssembleTool::BoundType> 
       ChamberAssembleTool::boundingBox(const MuonReadoutElement* chambEle,
-                                       ActsTrk::SurfaceBoundSet<BoundType>& boundSet) {
+                                       Acts::VolumeBoundFactory& boundSet) {
 
    switch(chambEle->detectorType()) {
       case ActsTrk::DetectorType::Mdt: {
          const auto* techEle = static_cast<const MdtReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.shortHalfX, pars.longHalfX, 
+         return boundSet.makeBounds<BoundType>(pars.shortHalfX, pars.longHalfX, 
                                      pars.halfY, pars.halfHeight );
          break;
       } case ActsTrk::DetectorType::Rpc: {
          const auto* techEle = static_cast<const RpcReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.halfWidth, pars.halfWidth, 
+         return boundSet.makeBounds<BoundType>(pars.halfWidth, pars.halfWidth, 
                                      pars.halfLength, pars.halfThickness );
          break;
       } case ActsTrk::DetectorType::Tgc: {
          const auto* techEle = static_cast<const TgcReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.halfWidthShort, pars.halfWidthLong, 
+         return boundSet.makeBounds<BoundType>(pars.halfWidthShort, pars.halfWidthLong, 
                                      pars.halfHeight, pars.halfThickness );
          break;
       } case ActsTrk::DetectorType::sTgc: {
          const auto* techEle = static_cast<const sTgcReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.sHalfChamberLength, pars.lHalfChamberLength, 
+         return boundSet.makeBounds<BoundType>(pars.sHalfChamberLength, pars.lHalfChamberLength, 
                                      pars.halfChamberHeight, pars.halfChamberTck );
          break;
       } case ActsTrk::DetectorType::Mm: {
          const auto* techEle = static_cast<const MmReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.halfShortWidth, pars.halfLongWidth, 
+         return boundSet.makeBounds<BoundType>(pars.halfShortWidth, pars.halfLongWidth, 
                                      pars.halfHeight, pars.halfThickness );
          break;
       } default:
@@ -157,7 +156,7 @@ ChamberAssembleTool::BoundTrfPair
       ChamberAssembleTool::boundingBox(const ActsGeometryContext& gctx,
                                        const std::vector<const MuonReadoutElement*>& readoutEles,
                                        const Amg::Transform3D& toCenter,
-                                       ActsTrk::SurfaceBoundSet<BoundType>& boundSet,
+                                       Acts::VolumeBoundFactory& boundSet,
                                        const double margin) const {
 
       std::shared_ptr<BoundType> envelopeBounds{};
@@ -265,7 +264,7 @@ ChamberAssembleTool::BoundTrfPair
             const double lHalfX = 0.5*(newTrapBounds[3].x() - newTrapBounds[1].x());
             const double sHalfX = 0.5*(newTrapBounds[2].x() - newTrapBounds[0].x());
             const double halfZ  = 0.5*(newTrapBounds[4].z() - newTrapBounds[0].z());
-            envelopeBounds = boundSet.make_bounds(sHalfX, lHalfX, halfY, halfZ);
+            envelopeBounds = boundSet.makeBounds<BoundType>(sHalfX, lHalfX, halfY, halfZ);
             ATH_MSG_VERBOSE(m_idHelperSvc->toStringDetEl(chambEle->identify())<<" "<<(*envelopeBounds));
          
             /// Finally re-center the trapezoid 
@@ -275,7 +274,7 @@ ChamberAssembleTool::BoundTrfPair
                            <<Amg::toString(newCentreTrf));
       }
       
-      envelopeBounds = boundSet.make_bounds(envelopeBounds->get(BoundEnum::eHalfLengthXnegY)+margin,
+      envelopeBounds = boundSet.makeBounds<BoundType>(envelopeBounds->get(BoundEnum::eHalfLengthXnegY)+margin,
                                             envelopeBounds->get(BoundEnum::eHalfLengthXposY)+margin,
                                             envelopeBounds->get(BoundEnum::eHalfLengthY)+margin,
                                             envelopeBounds->get(BoundEnum::eHalfLengthZ)+margin);
@@ -362,7 +361,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
     ActsGeometryContext gctx{};    
 
 
-   ActsTrk::SurfaceBoundSet<BoundType> boundSet{};    
+   Acts::VolumeBoundFactory boundSet{};    
    for (chamberArgs& candidate : envelopeCandidates) {
          std::unordered_set<Identifier> reIds{};
          const MuonReadoutElement* refEle = candidate.detEles.front();

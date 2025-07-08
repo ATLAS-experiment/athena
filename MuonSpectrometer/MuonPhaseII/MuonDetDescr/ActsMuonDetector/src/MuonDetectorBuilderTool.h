@@ -6,7 +6,6 @@
 
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <ActsGeometryInterfaces/IDetectorVolumeBuilderTool.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <Acts/Surfaces/PlanarBounds.hpp>

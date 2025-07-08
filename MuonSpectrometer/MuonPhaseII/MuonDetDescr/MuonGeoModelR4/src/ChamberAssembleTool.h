@@ -44,14 +44,14 @@ class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
       BoundTrfPair boundingBox(const ActsGeometryContext& gctx,
                                const std::vector<const MuonReadoutElement*>& readoutEles,
                                const Amg::Transform3D& globToLoc,
-                               ActsTrk::SurfaceBoundSet<BoundType>& boundSet,
+                               Acts::VolumeBoundFactory& boundSet,
                                const double margin = 1.*Gaudi::Units::cm) const;
 
       /** @brief Builds the trapezoidal bounding box enclosing a single readout element
         * @param reEle: Pointer to the readout element to fetch the bounds from
         * @param boundSet: Cache of create bounds to share the same bounds across multiple volumes */
       static std::shared_ptr<BoundType> boundingBox(const MuonReadoutElement* reEle,
-                                                    ActsTrk::SurfaceBoundSet<BoundType>& boundSet);
+                                                    Acts::VolumeBoundFactory& boundSet);
 
       /** @brief Returns the 4 corners of the trapezoid in the x-y plane
         * @param localToGlob: Transform from the trapezoid restframe -> chambers frame

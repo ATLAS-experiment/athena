@@ -4,7 +4,6 @@
 
 #include "MmReadoutGeomTool.h"
 
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <RDBAccessSvc/IRDBAccessSvc.h>
 #include <RDBAccessSvc/IRDBRecordset.h>
@@ -21,7 +20,7 @@
 
 
 #ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Utilities/BoundFactory.hpp"
 #endif
 
 using namespace ActsTrk;
@@ -164,7 +163,7 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     /// Retrieve the list of full physical volumes & alignable nodes and connect them together afterwards
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
 #ifndef SIMULATIONBASE
-    SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds= std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
+    auto layerBounds= std::make_shared<Acts::SurfaceBoundFactory>();
 #endif 
 
     for (auto& [key, pv] : mapFPV) {

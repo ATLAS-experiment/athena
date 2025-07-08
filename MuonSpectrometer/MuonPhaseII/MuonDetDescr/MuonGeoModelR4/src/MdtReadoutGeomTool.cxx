@@ -19,8 +19,6 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
-
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #ifndef SIMULATIONBASE
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
 #   include "Acts/Surfaces/LineBounds.hpp"
@@ -124,8 +122,7 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     // Get the list of full phys volumes from SQLite, and create detector elements
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
 #ifndef SIMULATIONBASE
-    SurfaceBoundSetPtr<Acts::LineBounds> tubeBounds = std::make_shared<SurfaceBoundSet<Acts::LineBounds>>();
-    SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
+    auto boundFactory = std::make_shared<Acts::SurfaceBoundFactory>();   
 #endif
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
@@ -163,8 +160,7 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         }
         static_cast<parameterBook&>(define) = book_itr->second;
 #ifndef SIMULATIONBASE        
-        define.tubeBounds = tubeBounds;
-        define.layerBounds = layerBounds;
+        define.boundFactory = boundFactory;
  #endif       
         /// Chamber dimensions are given from the GeoShape
         ATH_CHECK(loadDimensions(facCache, define));

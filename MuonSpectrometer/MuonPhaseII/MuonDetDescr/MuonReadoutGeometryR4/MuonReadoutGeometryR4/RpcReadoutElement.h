@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_H
@@ -8,9 +8,9 @@
 #include <MuonReadoutGeometryR4/StripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
 
-namespace Acts{
-    class RectangleBounds;
-}
+#ifndef SIMULATIONBASE
+#   include "Acts/Utilities/BoundFactory.hpp"
+#endif
 
 namespace MuonGMR4 {
 
@@ -38,7 +38,7 @@ class RpcReadoutElement : public MuonReadoutElement {
         StripDesignPtr phiDesign{nullptr};
         StripDesignPtr etaDesign{nullptr};
 #ifndef SIMULATIONBASE
-        ActsTrk::SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds;
+        std::shared_ptr<Acts::SurfaceBoundFactory> layerBounds{};
 #endif
     };
 

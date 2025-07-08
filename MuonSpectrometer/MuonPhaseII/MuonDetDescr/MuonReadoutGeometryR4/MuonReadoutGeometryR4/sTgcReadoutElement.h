@@ -11,10 +11,9 @@
 #include <MuonReadoutGeometryR4/StripLayer.h>
 #include <bit>
 
-
-namespace Acts{
-    class TrapezoidBounds;
-} 
+#ifndef SIMULATIONBASE
+#   include "Acts/Utilities/BoundFactory.hpp"
+#endif
 
 namespace MuonGMR4 {
 
@@ -72,7 +71,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
         PadDesignPtr padDesign{nullptr};
 
 #ifndef SIMULATIONBASE
-        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds;
+        std::shared_ptr<Acts::SurfaceBoundFactory> layerBounds{};
 #endif
 
     };

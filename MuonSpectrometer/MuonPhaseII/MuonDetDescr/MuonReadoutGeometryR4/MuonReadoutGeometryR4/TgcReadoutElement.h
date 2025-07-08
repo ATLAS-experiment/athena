@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_TGCREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_TGCREADOUTELEMENT_H
@@ -9,11 +9,11 @@
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
 
+#ifndef SIMULATIONBASE
+#   include "Acts/Utilities/BoundFactory.hpp"
+#endif
 
 
-namespace Acts{
-    class TrapezoidBounds;
-}
 namespace MuonGMR4 {
 
 class TgcReadoutElement : public MuonReadoutElement {
@@ -37,7 +37,7 @@ class TgcReadoutElement : public MuonReadoutElement {
         std::array<StripLayerPtr, 6> sensorLayouts{};
 #ifndef SIMULATIONBASE
         /// Set of surface boundaries
-        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds;
+        std::shared_ptr<Acts::SurfaceBoundFactory> layerBounds;
 #endif
     };
 
