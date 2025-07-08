@@ -14,7 +14,6 @@
 #include <GeoModelKernel/GeoBox.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
@@ -24,7 +23,7 @@
 #include <MuonDetDescrUtils/MuonSectorMapping.h>
 
 #ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Utilities/BoundFactory.hpp"
 #endif
 
 using namespace CxxUtils;
@@ -164,7 +163,7 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     ATH_CHECK(readParameterBook(facCache));
 
 #ifndef SIMULATIONBASE
-    SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
+    auto layerBounds = std::make_shared<Acts::SurfaceBoundFactory>();
 #endif    
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
     // Get the list of full phys volumes from SQLite, and create detector elements

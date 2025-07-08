@@ -19,10 +19,8 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
-
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Utilities/BoundFactory.hpp"
 #endif
 
 using namespace CxxUtils;
@@ -214,7 +212,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     /// Retrieve the list of full physical volumes & alignable nodes and connect them together afterwards
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
 #ifndef SIMULATIONBASE
-    SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::RectangleBounds>>();
+    auto layerBounds = std::make_shared<Acts::SurfaceBoundFactory>();
 #endif
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like

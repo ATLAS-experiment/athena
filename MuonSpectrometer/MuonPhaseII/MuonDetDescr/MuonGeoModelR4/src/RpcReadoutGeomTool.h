@@ -64,7 +64,7 @@ class RpcReadoutGeomTool : public extends<AthAlgTool,IMuonReadoutGeomTool> {
        std::set<StripLayerPtr, StripLayerSorter> stripLayers{};
        ParamBookTable parameterBook{};
       /** @brief Helper object to turn Amg::Transforms into GeoModel tree transform nodes */
-      GeoDeDuplicator trfNodeMaker{};
+       GeoDeDuplicator trfNodeMaker{};
           
     };
 

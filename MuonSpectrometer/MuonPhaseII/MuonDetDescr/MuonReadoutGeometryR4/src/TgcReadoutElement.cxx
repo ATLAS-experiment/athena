@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
 
-
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
@@ -13,7 +11,6 @@
 #ifndef SIMULATIONBASE
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
 #   include "Acts/Surfaces/Surface.hpp"
-
 #endif
 
 
@@ -59,9 +56,9 @@ StatusCode TgcReadoutElement::initElement() {
     }
 #ifndef SIMULATIONBASE
     ATH_CHECK(planeSurfaceFactory(geoTransformHash(),
-                                  m_pars.layerBounds->make_bounds(m_pars.halfWidthShort,
-                                                                  m_pars.halfWidthLong,
-                                                                  m_pars.halfHeight)));
+                                  m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(m_pars.halfWidthShort,
+                                                                                       m_pars.halfWidthLong,
+                                                                                       m_pars.halfHeight)));
 #endif
     for (unsigned int gap = 1; gap <= nGasGaps(); ++gap) {
          if (numWireGangs(gap)) {
@@ -69,10 +66,10 @@ StatusCode TgcReadoutElement::initElement() {
             ATH_CHECK(insertTransform<TgcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
             const StripDesign& layout{wireGangLayout(gap)};
-            ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(layout.shortHalfHeight(),
-                                                                                   layout.longHalfHeight(),
-                                                                                   layout.halfWidth(),
-                                                                                   90.* Gaudi::Units::deg)));
+            ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(layout.shortHalfHeight(),
+                                                                                                         layout.longHalfHeight(),
+                                                                                                         layout.halfWidth(),
+                                                                                                         90.* Gaudi::Units::deg)));
 #endif
          }
          if (numStrips(gap)) {
@@ -81,9 +78,9 @@ StatusCode TgcReadoutElement::initElement() {
 #ifndef SIMULATIONBASE
             const StripDesign& layout{stripLayout(gap)};
             /// Strips are rotated bounds
-            ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(layout.shortHalfHeight(),
-                                                                                   layout.longHalfHeight(),
-                                                                                   layout.halfWidth())));
+            ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(layout.shortHalfHeight(),
+                                                                                                         layout.longHalfHeight(),
+                                                                                                         layout.halfWidth())));
 #endif
          }
     }

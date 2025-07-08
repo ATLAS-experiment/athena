@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <GeoModelHelpers/TransformToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
@@ -62,9 +61,9 @@ StatusCode MdtReadoutElement::initElement() {
   }
 #ifndef SIMULATIONBASE
   /// Create bounds that are representing the surface planes of each tube layer & the readout element itself
-  ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.shortHalfX, 
-                                                                                    m_pars.longHalfX, 
-                                                                                    m_pars.halfY)));
+  ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.boundFactory->makeBounds<Acts::TrapezoidBounds>(m_pars.shortHalfX, 
+                                                                                                           m_pars.longHalfX, 
+                                                                                                           m_pars.halfY)));
 #endif
   /// Coordinate system of the trapezoid is in the center while the tubes are defined 
   /// w.r.t. to the chamber edge. Move first tube into the proper position
@@ -76,9 +75,9 @@ StatusCode MdtReadoutElement::initElement() {
      const IdentifierHash layHash = measurementHash(lay,0);
      ATH_CHECK(insertTransform<MdtReadoutElement>(layHash));
 #ifdef SIMULATIONBASE_REMOVEPLANESURFACE
-     ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(m_pars.shortHalfX, 
-                                                                            m_pars.longHalfX, 
-                                                                            m_pars.halfY)));
+     ATH_CHECK(planeSurfaceFactory(layHash, m_pars.boundFactory->makeBounds<Acts::TrapezoidBounds>(m_pars.shortHalfX, 
+                                                                                                   m_pars.longHalfX, 
+                                                                                                   m_pars.halfY)));
 #endif
     /// Cache the transformations to the tube layers
     std::optional<Amg::Vector3D> prevTubePos{std::nullopt};
@@ -92,7 +91,7 @@ StatusCode MdtReadoutElement::initElement() {
       }
       ATH_CHECK(insertTransform<MdtReadoutElement>(idHash));
 #ifndef SIMULATIONBASE
-      ATH_CHECK(strawSurfaceFactory(idHash, m_pars.tubeBounds->make_bounds(innerTubeRadius(), 0.5*tubeLength(idHash))));
+      ATH_CHECK(strawSurfaceFactory(idHash, m_pars.boundFactory->makeBounds<Acts::LineBounds>(innerTubeRadius(), 0.5*tubeLength(idHash))));
 #endif
       ///Ensure that all linear transformations are rotations
       GeoTrf::Transform3D tubeFrame = layer.tubeTransform(tubeNumber(idHash));
@@ -135,8 +134,7 @@ StatusCode MdtReadoutElement::initElement() {
     }
   }
 #ifndef SIMULATIONBASE
-  m_pars.tubeBounds.reset();
-  m_pars.layerBounds.reset();
+  m_pars.boundFactory.reset();
 #endif
   return StatusCode::SUCCESS;
 }
