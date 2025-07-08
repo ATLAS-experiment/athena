@@ -1,4 +1,4 @@
-INFO     Reading events from /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data20_test/data_test.00386043.physics_Main.daq.RAW._lb0007._SFO-1._0001.data and metadata from /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1
+INFO     Reading events from /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_Main.daq.RAW._lb0247._SFO-11._0006.data_150evt and metadata from /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1_80evt
 INFO     Writing file ./newMeta._0001.data
 Py:MetaReader        INFO Current mode used: full
 Py:MetaReader        INFO Current filenames: ['newMeta._0001.data']
@@ -18,10 +18,10 @@ Py:MetaReader        INFO Current filenames: ['newMeta._0001.data']
     |-- conditions_tag    : None
     |-- detectorMask      : [32353976271262187511]
     |-- eventTypes        : ['IS_DATA', 'IS_ATLAS', 'IS_PHYSICS']
-    |-- evt_number        : [1857736]
+    |-- evt_number        : [413632081]
     |-- file_comp_alg     : 1
     |-- file_comp_level   : 1
-    |-- file_size         : 5552580
+    |-- file_size         : 9637760
     |-- file_type         : BS
     |-- lumiBlockNumbers  : [151]
     |-- nentries          : 5

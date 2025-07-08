@@ -29,15 +29,15 @@ atlas_install_scripts( bin/*.py python/trigbs_modifyEvent.py python/trigbs_presc
 atlas_install_data( share/*.ref )
 
 # Unit tests
-set( trigbs_testFileRun2 "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1")
-set( trigbs_testFileRun3 "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data20_test/data_test.00386043.physics_Main.daq.RAW._lb0007._SFO-1._0001.data")
+set( trigbs_testFileRun2 "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1_80evt")
+set( trigbs_testFileRun3 "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_Main.daq.RAW._lb0247._SFO-11._0006.data_150evt")
 
 atlas_add_test( dumpHLTContentInBS_run3
-                SCRIPT trigbs_dumpHLTContentInBS_run3.py -n 5 -s 371 --l1 --hlt --hltres --stag --sizes --sizeSummary --confKeys ${trigbs_testFileRun3}
+                SCRIPT trigbs_dumpHLTContentInBS_run3.py -n 5 -s 71 --l1 --hlt --hltres --stag --sizes --sizeSummary --confKeys ${trigbs_testFileRun3}
                 LOG_IGNORE_PATTERN "^----.*(bytes|B/ev)" )
 
 atlas_add_test( dumpHLTNav
-                SCRIPT trigbs_dumpHLTNav.py -n 3 -s 371 ${trigbs_testFileRun3}
+                SCRIPT trigbs_dumpHLTNav.py -n 3 -s 71 ${trigbs_testFileRun3}
                 LOG_IGNORE_PATTERN "no dictionary for class" )
 
 atlas_add_test( updateMetadata
