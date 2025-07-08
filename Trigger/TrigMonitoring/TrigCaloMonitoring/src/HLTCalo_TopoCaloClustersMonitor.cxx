@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTCalo_TopoCaloClustersMonitor.h"
@@ -53,6 +53,13 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
 
   if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO))
 	return StatusCode::SUCCESS;
+
+  // Protect against HLT truncated results
+  if (m_trigDecTool->ExperimentalAndExpertMethods().isHLTTruncated()){
+    ATH_MSG_WARNING("HLTResult truncated, skipping event");
+    return StatusCode::SUCCESS;
+  }
+
   // Get HLT cluster collections
   SG::ReadHandle<xAOD::CaloClusterContainer> hltCluster_readHandle(m_HLT_cont_key, ctx);
   if (! hltCluster_readHandle.isValid() ) {
@@ -166,8 +173,9 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   auto HLT_type = Monitored::Collection("HLT_type", vec_hlt_clusters, []( const clus_kin& clus) { return clus.parent->clusterSize(); } );
   // nCells is a decorated variable not available for older input files
   auto HLT_size = Monitored::Collection("HLT_size", vec_hlt_clusters, []( const clus_kin& clus) { 
-	if (clus.parent->isAvailable<int>("nCells")) return clus.parent->auxdata<int>("nCells"); 
-	return 0;
+    static const SG::ConstAccessor<int> acc_nCells("nCells");
+    if (acc_nCells.isAvailable(*clus.parent)) return acc_nCells(*clus.parent);
+    return 0;
   });
   auto HLT_time = Monitored::Collection("HLT_time", vec_hlt_clusters, []( const clus_kin& clus) { return clus.parent->time(); } );
 
