@@ -206,9 +206,9 @@ if __name__ == "__main__":
             "pixelKeys": ["FPGAPixelClusters", "ITkPixelClusters"],
             "stripKeys": ["FPGAStripClusters", "ITkStripClusters"],
             'doDiffHistograms':True,
-            'matchByID' : True,
+            'matchByID' : False,
             'allowedRdoMisses': 1000}))
-        
+
         
         # Prepare output
         from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
