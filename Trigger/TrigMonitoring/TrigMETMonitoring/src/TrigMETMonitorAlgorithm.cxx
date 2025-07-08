@@ -59,6 +59,13 @@ StatusCode TrigMETMonitorAlgorithm::initialize() {
 StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
     using namespace Monitored;
 
+    
+    if(m_trigDecTool->ExperimentalAndExpertMethods().isHLTTruncated()){
+    ATH_MSG_WARNING("HLTResult truncated, skip trigger analysis");
+    return StatusCode::SUCCESS; 
+  }  // ATR-31454
+
+    
     // access event info container
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);
     if (! eventInfo.isValid() ){
