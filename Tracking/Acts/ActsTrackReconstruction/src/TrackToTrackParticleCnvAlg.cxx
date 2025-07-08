@@ -249,6 +249,16 @@ namespace ActsTrk
       trackContainers.push_back( handle.cptr() );
       nTracks += trackContainers.back()->size();
     }
+
+    // Fast Insertion Trick
+    std::vector<xAOD::TrackParticle*> toAddParticles;
+    toAddParticles.reserve(nTracks);
+    for (std::size_t i(0); i<nTracks; ++i) {
+      toAddParticles.push_back( new xAOD::TrackParticle() );
+    }
+    track_particles->insert(track_particles->end(),
+			    toAddParticles.begin(),
+			    toAddParticles.end());
     
     SG::ReadCondHandle<AtlasFieldCacheCondObj> fieldHandle = SG::makeHandle( m_fieldCacheCondObjInputKey, ctx );
     ATH_CHECK(fieldHandle.isValid());
@@ -263,7 +273,6 @@ namespace ActsTrk
     } else if (m_expression_strategy == expressionStrategy::Vertex) {
       perigee_surface = makePerigeeSurface(*primaryVertex);
     }
-    track_particles->reserve( nTracks );
 
     std::array<const InDetDD::SiDetectorElementCollection *,ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl {};
     for (unsigned int idx=0; idx <m_siDetEleCollToMeasurementType.size(); ++idx ) {
@@ -287,11 +296,11 @@ namespace ActsTrk
 
     unsigned int converted_track_states=0;
 
+    std::size_t particleCounter = 0ul;
     using namespace Acts::UnitLiterals;
     for (const ActsTrk::TrackContainer *tracksContainer : trackContainers) {
       for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
-	track_particles->push_back( new xAOD::TrackParticle );
-	xAOD::TrackParticle *track_particle=track_particles->back();
+	xAOD::TrackParticle *track_particle = track_particles->at(particleCounter++);
 	
 	// convert defining parameters
 	// @TODO add support for other modes available in the legacy converter : wrt a vertex, origin, beamspot ?
