@@ -57,7 +57,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     
     //---gTower EDM
     xAOD::gFexTowerContainer*  gTowers200ContainerPtr = nullptr;
-    SG::WriteHandle <xAOD::gFexTowerContainer> gTowersContainer(m_gTowers200WriteKey, ctx);
+    SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer = (!m_gTowers200WriteKey.empty()) ? SG::WriteHandle<xAOD::gFexTowerContainer>(m_gTowers200WriteKey, ctx) : SG::WriteHandle<xAOD::gFexTowerContainer>();
     if(!m_gTowers200WriteKey.empty()) {
         ATH_CHECK(gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(),
                                           std::make_unique<xAOD::gFexTowerAuxContainer>()));
@@ -67,7 +67,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     }
 
     xAOD::gFexTowerContainer*  gTowers50ContainerPtr = nullptr;
-    SG::WriteHandle <xAOD::gFexTowerContainer> gTowers50Container(m_gTowers50WriteKey, ctx);
+    SG::WriteHandle<xAOD::gFexTowerContainer> gTowers50Container = (!m_gTowers50WriteKey.empty()) ? SG::WriteHandle<xAOD::gFexTowerContainer>(m_gTowers50WriteKey, ctx) : SG::WriteHandle<xAOD::gFexTowerContainer>();
     if(!m_gTowers50WriteKey.empty()) {
         ATH_CHECK(gTowers50Container.record(std::make_unique<xAOD::gFexTowerContainer>(),
                                             std::make_unique<xAOD::gFexTowerAuxContainer>()));
