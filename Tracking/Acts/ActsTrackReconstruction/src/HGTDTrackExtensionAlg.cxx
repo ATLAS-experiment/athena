@@ -690,7 +690,7 @@ bool HGTDTrackExtensionAlg::getExtrapolationPosition(
   Acts::GeometryContext geoContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   track.container().trackStateContainer().visitBackwards(
       track.tipIndex(),
-      [this, &foundHGTDSurface, &x, &y, &z, &ctx, geoContext](const auto& state) {
+      [this, &foundHGTDSurface, &x, &y, &z, geoContext](const auto& state) {
           // Skip if already found or no reference surface
           if (foundHGTDSurface || !state.hasReferenceSurface()) {
               return;
