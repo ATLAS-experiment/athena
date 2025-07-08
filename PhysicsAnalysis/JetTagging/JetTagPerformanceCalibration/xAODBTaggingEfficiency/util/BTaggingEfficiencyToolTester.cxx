@@ -4,6 +4,8 @@
 #include <AsgTools/StandaloneToolHandle.h>
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
 
+#include "POOLRootAccess/TEvent.h"
+
 #include <string>
 #include <iomanip>
 
@@ -12,7 +14,7 @@ ANA_MSG_HEADER(testBTagEfficiency)
 ANA_MSG_SOURCE(testBTagEfficiency, "BtaggingEfficiencyToolTester")
 using namespace testBTagEfficiency;
 
-int main(int argc, char* argv[]) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   const char* TEST_NAME = argv[0];
   if (argc < 3) {
@@ -20,6 +22,8 @@ int main(int argc, char* argv[]) {
     ANA_MSG_ERROR ( "Usage: " << TEST_NAME << "[CDI path] [b-tagger name] [WP name]" );
     return 1;
   }
+
+  POOL::Init();
 
   std::string CDIPath = argv[1];
   std::string taggerName = argv[2];
@@ -30,10 +34,10 @@ int main(int argc, char* argv[]) {
 
   asg::StandaloneToolHandle<IBTaggingEfficiencyTool> tool("BTaggingEfficiencyTool/BTagEffTest");
   StatusCode code1 = tool.setProperty("ScaleFactorFileName", CDIPath);
-  StatusCode code2 = tool.setProperty("TaggerName",          taggerName);
-  StatusCode code3 = tool.setProperty("OperatingPoint",      workingPointName);
-  StatusCode code4 = tool.setProperty("JetAuthor",           JetCollectionName);
-  StatusCode code5 = tool.setProperty("MinPt",               20000);
+  StatusCode code2 = tool.setProperty( "EfficiencyCalibrations", sample_dsid);
+  StatusCode code3 = tool.setProperty("TaggerName",          taggerName);
+  StatusCode code4 = StatusCode::SUCCESS;
+  StatusCode code5 = StatusCode::SUCCESS;
   StatusCode code6 = tool.setProperty("OutputLevel",         MSG::WARNING);
   StatusCode code7 = tool.initialize();
   std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code7};
@@ -44,8 +48,6 @@ int main(int argc, char* argv[]) {
     }
   }
   ANA_MSG_INFO("Initialization of tool " << tool->name() << " finished.");
-  
-  tool->setMapIndex(sample_dsid);
 
   ANA_MSG_INFO( "-----------------------------------------------------");
   const std::map<CP::SystematicVariation, std::vector<std::string> > allowed_variations = tool->listSystematics();

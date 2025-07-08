@@ -29,7 +29,7 @@ using TEVENT = POOL::TEvent;
 using CP::CorrectionCode;
 using namespace asg::msgUserCode;
 
-int main(int argc, char* argv[]) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
   // Those lines are only included if using AthAnalysis
   POOL::Init();
   #endif
-  
+
   // this is needed for the so called MC/MC efficiency map, details
   // can be found here:
   // https://ftag.docs.cern.ch/algorithms/activities/mcmc/
@@ -86,8 +86,8 @@ int main(int argc, char* argv[]) {
   // //------------------------------------------------------------------------------
   TEVENT event(TEVENT::kClassAccess);
   gErrorIgnoreLevel = kError;
-  std::unique_ptr<TFile> m_file {TFile::Open(inputDAOD.c_str(), "READ")};
-  if(!event.readFrom(m_file.get()).isSuccess()) {
+  std::unique_ptr<TFile> root_file {TFile::Open(inputDAOD.c_str(), "READ")};
+  if(!event.readFrom(root_file.get()).isSuccess()) {
     ANA_MSG_ERROR ( "Accessing events in input file " << inputDAOD << "failed! " );
     return 1;
   }
@@ -163,6 +163,6 @@ int main(int argc, char* argv[]) {
     
   }
 
-  m_file->Close();
+  root_file->Close();
   return 0;
 }

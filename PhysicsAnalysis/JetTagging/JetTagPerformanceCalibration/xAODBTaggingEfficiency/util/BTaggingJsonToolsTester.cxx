@@ -35,7 +35,7 @@ bool containNoSF(const std::string& str) {
   return (it != str.end());
 }
 
-int main(int argc, char* argv[]) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   const char* TEST_NAME = argv[0];
 
@@ -44,6 +44,8 @@ int main(int argc, char* argv[]) {
     ANA_MSG_ERROR (  "Usage: " << TEST_NAME << " [DAOD file name] [CDI path] [b-tagger name] [WP name]" );
     return 1;
   }
+
+  POOL::Init();
 
   std::string inputDAOD = argv[1];
   std::string JsonConfigFile = argv[2];
@@ -94,8 +96,8 @@ int main(int argc, char* argv[]) {
 
   TEVENT event(TEVENT::kClassAccess);
   gErrorIgnoreLevel = kError;
-  std::unique_ptr<TFile> m_file {TFile::Open(inputDAOD.c_str(), "READ")};
-  if(!event.readFrom(m_file.get()).isSuccess()) {
+  std::unique_ptr<TFile> root_file {TFile::Open(inputDAOD.c_str(), "READ")};
+  if(!event.readFrom(root_file.get()).isSuccess()) {
     ANA_MSG_ERROR ( "Accessing events in input file " << inputDAOD << "failed! " );
     return 1;
   }
@@ -131,8 +133,8 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  m_file->Close();
-  m_file.reset();
+  root_file->Close();
+  root_file.reset();
   return 0;
 }
 
