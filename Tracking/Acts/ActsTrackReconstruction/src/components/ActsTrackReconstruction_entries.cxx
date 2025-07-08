@@ -10,6 +10,7 @@
 #include "src/ProtoTrackCreationAndFitAlg.h"
 #include "src/TrackExtensionAlg.h"
 #include "src/ProtoTrackReportingAlg.h"
+#include "src/HGTDTrackExtensionAlg.h"
 
 // Tools
 #include "src/ITkAnalogueClusteringTool.h"
@@ -30,6 +31,7 @@ DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
 DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
+DECLARE_COMPONENT( ActsTrk::HGTDTrackExtensionAlg)
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
