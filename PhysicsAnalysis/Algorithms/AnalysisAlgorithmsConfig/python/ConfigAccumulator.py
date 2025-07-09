@@ -508,6 +508,9 @@ class ConfigAccumulator :
         excludeFrom --- a set of string names of selection sources to exclude
                         e.g. to exclude OR selections from MET
         """
+        if "." in containerName:
+            raise ValueError (f'invalid containerName argument: {containerName} , it contains a "." '
+            'which is used to indicate container+selection. You should only pass the container.')
         if containerName not in self._containerConfig :
             return ""
 
