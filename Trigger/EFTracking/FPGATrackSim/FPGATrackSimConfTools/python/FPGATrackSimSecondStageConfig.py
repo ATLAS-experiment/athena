@@ -286,6 +286,7 @@ def FPGATrackSimWindowExtensionToolCfg(flags,name="FPGATrackSimWindowExtensionTo
     FPGATrackSimWindowExtensionTool.IdealGeoRoads = False # (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     FPGATrackSimWindowExtensionTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
     FPGATrackSimWindowExtensionTool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    FPGATrackSimWindowExtensionTool.addAllHits=flags.Trigger.FPGATrackSim.ActiveConfig.addAllHits
     result.setPrivateTools(FPGATrackSimWindowExtensionTool)
     return result
 

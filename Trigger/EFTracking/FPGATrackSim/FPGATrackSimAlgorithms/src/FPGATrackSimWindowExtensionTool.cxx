@@ -297,7 +297,12 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
 
         // Apply the actual layer check, only accept hits that fall into a track's window.
         ATH_MSG_DEBUG("Hit in region, comparing phi: " << diffphi << " to " << m_windows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
-        if (diffphi < m_windows[layer] && diffz < m_zwindows[layer]) {
+        if (m_addAllHits) {
+          numHits[layer]++;
+          road_hits[layer].push_back(hit);
+          hitLayers |= 1 << layer;
+        }
+        else if (diffphi < m_windows[layer] && diffz < m_zwindows[layer]) {
             numHits[layer]++;
             road_hits[layer].push_back(hit);
             hitLayers |= 1 << layer;

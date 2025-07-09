@@ -69,7 +69,7 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};
         Gaudi::Property<bool> m_idealGeoRoads {this, "IdealGeoRoads", true, "Do sector assignment of second stage roads"};
         Gaudi::Property<bool> m_doBinning {this, "doBinning", false, "Use second stage binning to sort hits, not the plane map"};
-
+        Gaudi::Property<bool> m_addAllHits {this, "addAllHits", false, "If set to true ignore the window and just add all the hits"};
         // Options only needed for sector assignment.
         // The eta pattern option here should probably be dropped, because we're not using it
         // and supporting it requires having two sets of eta patterns (one for the first stage, one for the second)
