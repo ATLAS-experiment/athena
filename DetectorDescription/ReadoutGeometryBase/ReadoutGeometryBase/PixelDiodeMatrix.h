@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -120,20 +120,25 @@ namespace InDetDD {
           size of the cell. */
       const PixelDiodeMatrix *cellIdOfPosition(const Amg::Vector2D & position, SiCellId & cellId) const;
       
-      /** Return position correspong to cell with relative id withing the matrix.
-          Returns the relative position added to the position passed in.
-          A pointer to the correspond cell is returned. This can be used to get the
-          size of the cell. */
+      /** Search diode matching the given cell id and compute its position.
+       * @param cellId the cell id relative to this matrix
+       * @param position storage for the position of the diode relative to this matrix.
+       * @return pointer to the sub-matrix which is representative for the diode.
+       * The position will be overwritten with newly computed diode position, and the position will be
+       * relative to this matrix.
+       */
       const PixelDiodeMatrix *positionOfCell(const SiCellId & cellId, Amg::Vector2D & position) const;
-      
+
       /** Width in phi (x) direction.*/
       double phiWidth() const;
+      double phiHalfWidth() const;
 
       /** Inverse of width in phi (x) direction.*/
       double phiWidthInverse() const;
 
       /** Width in eta (y) direction. */
       double etaWidth() const;
+      double etaHalfWidth() const;
 
       /** Inverse of width in eta (y) direction. */
       double etaWidthInverse() const;
@@ -172,6 +177,15 @@ namespace InDetDD {
       /** Create debug representation for a specific level */
       std::string createDebugStringRepr(unsigned int level) const;
 
+      /** Search diode matching the given cell id and compute its position.
+       * @param matrix the diode matrix in which the search is started
+       * @param cellId the cell id relative to the given matrix
+       * @param position storage for the position of the diode.
+       * @return pointer to the sub-matrix which is representative for the diode.
+       */
+      static const PixelDiodeMatrix *
+      positionOfCell(const PixelDiodeMatrix *matrix, const SiCellId & cellId, Amg::Vector2D & position);
+
       double        m_phiWidth = 0;
       double        m_phiWidthInverse = 0;
       double        m_etaWidth = 0;
@@ -188,8 +202,13 @@ namespace InDetDD {
     };
     
     inline double PixelDiodeMatrix::phiWidth() const
-    { 
+    {
       return m_phiWidth;
+    }
+
+    inline double PixelDiodeMatrix::phiHalfWidth() const
+    {
+      return m_phiWidth*0.5;
     }
 
     inline double PixelDiodeMatrix::phiWidthInverse() const
@@ -198,10 +217,15 @@ namespace InDetDD {
     }
     
     inline double PixelDiodeMatrix::etaWidth() const
-    { 
+    {
       return m_etaWidth;
     }
-    
+
+    inline double PixelDiodeMatrix::etaHalfWidth() const
+    {
+      return m_etaWidth*0.5;
+    }
+
     inline double PixelDiodeMatrix::etaWidthInverse() const
     { 
       return m_etaWidthInverse;
@@ -227,6 +251,10 @@ namespace InDetDD {
       return this->createDebugStringRepr(0);
     }
 
+    inline const PixelDiodeMatrix *
+    PixelDiodeMatrix::positionOfCell(const SiCellId & cellId, Amg::Vector2D & position) const {
+       return InDetDD::PixelDiodeMatrix::positionOfCell(this, cellId, position);
+    }
 } // end namespace
 
 #endif //READOUTGEOMETRYBASE_PIXELDIODEMATRIX_H

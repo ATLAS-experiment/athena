@@ -209,8 +209,6 @@ class PixelDiodeMatrix;
 
     inline PixelDiodeParametersProxy PixelDiodeMap::parametersProxy(const SiCellId &cellId) const {
        PixelDiodeParametersProxy ret;
-       ret.position() =   Amg::Vector2D(-0.5*width(),
-                                        -0.5*length());
        ret.cell_ptr() = m_matrix->positionOfCell(cellId, ret.position());
        return ret;
     }

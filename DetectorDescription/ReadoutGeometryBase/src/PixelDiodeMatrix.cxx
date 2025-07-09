@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ReadoutGeometryBase/PixelDiodeMatrix.h"
@@ -252,7 +252,7 @@ PixelDiodeMatrix::cellIdOfPosition(const Amg::Vector2D & relPosition, SiCellId &
 
 
 const PixelDiodeMatrix *
-PixelDiodeMatrix::positionOfCell(const SiCellId & cellId, Amg::Vector2D & position) const
+PixelDiodeMatrix::positionOfCell(const PixelDiodeMatrix *matrix, const SiCellId & cellId, Amg::Vector2D & dest_position)
 
   /// Description.
   /// Overview of algoritm:
@@ -272,75 +272,78 @@ PixelDiodeMatrix::positionOfCell(const SiCellId & cellId, Amg::Vector2D & positi
 {
   using Trk::distPhi;
   using Trk::distEta;
+  Amg::Vector2D position{
+     -matrix->phiHalfWidth(),
+     -matrix->etaHalfWidth()
+  };
 
-  if (m_singleCell) {
-    position[distPhi] += 0.5*m_phiWidth;
-    position[distEta] += 0.5*m_etaWidth;
-    return this;
+  int rel_phi_index = cellId.phiIndex();
+  int rel_eta_index = cellId.etaIndex();
+  for( ;!matrix->m_singleCell; ) {
+
+     int relIndex = 0; // Relative index along m_direction
+     double pitch = 0;
+     int nMiddleCells = 0;
+     double startPos = 0;
+     const auto direction = matrix->m_direction;
+
+     if (direction == PixelDiodeMatrix::phiDir) {
+
+        relIndex = rel_phi_index;
+
+        const PixelDiodeMatrix *lowerCell = matrix->m_lowerCell.get();
+        if (lowerCell) {
+           if (relIndex < lowerCell->phiCells()) {
+              matrix = lowerCell;
+              continue;
+           } else {
+              relIndex -=  lowerCell->phiCells();
+	      startPos +=  lowerCell->phiWidth();
+           }
+        }
+        const PixelDiodeMatrix *middleCells = matrix->m_middleCells.get();
+        assert(middleCells);
+        pitch = middleCells->phiWidth();
+        nMiddleCells = middleCells->phiCells();
+
+     } else { // etaDir
+
+        relIndex = rel_eta_index;
+        const PixelDiodeMatrix *lowerCell = matrix->m_lowerCell.get();
+        if (lowerCell) {
+           if (relIndex < lowerCell->etaCells()) {
+              matrix = lowerCell;
+              continue;
+           } else {
+	      relIndex -=  lowerCell->etaCells();
+	      startPos +=  lowerCell->etaWidth();
+           }
+        }
+        const PixelDiodeMatrix *middleCells = matrix->m_middleCells.get();
+        assert(middleCells);
+        pitch = middleCells->etaWidth();
+        nMiddleCells = middleCells->etaCells();
+
+     }
+
+     int index = std::min(relIndex / nMiddleCells,matrix->m_numCells); // @TODO upper bound correct ?
+     relIndex -= index * nMiddleCells;
+     startPos += index * pitch;
+
+     matrix = (matrix->m_upperCell && index == matrix->m_numCells ) ? matrix->m_upperCell.get() : matrix->m_middleCells.get();
+
+     if (direction == PixelDiodeMatrix::phiDir) {
+        rel_phi_index = relIndex;
+        position[distPhi] += startPos;
+     } else {
+        rel_eta_index = relIndex;
+        position[distEta] += startPos;
+     }
   }
-
-  int relIndex = 0; // Relative index along m_direction
-  double pitch = 0;
-  int middleCells = 0;
-  double startPos = 0;
-
-  if (m_direction == phiDir) {
-
-    relIndex = cellId.phiIndex();
-    pitch = m_middleCells->phiWidth();
-    middleCells = m_middleCells->phiCells();
-
-    if (m_lowerCell) {
-      if (relIndex < m_lowerCell->phiCells()) {
-        return m_lowerCell->positionOfCell(cellId, position);
-      } else {
-        relIndex -=  m_lowerCell->phiCells();
-	      startPos +=  m_lowerCell->phiWidth();
-      }
-    }
-
-  } else { // etaDir
-
-    relIndex = cellId.etaIndex();
-    pitch = m_middleCells->etaWidth();
-    middleCells = m_middleCells->etaCells();
-
-    if (m_lowerCell) {
-      if (relIndex < m_lowerCell->etaCells()) {
-        return m_lowerCell->positionOfCell(cellId, position);
-      } else {
-	      relIndex -=  m_lowerCell->etaCells();
-	      startPos +=  m_lowerCell->etaWidth();
-      }
-    }
-  }
-
-  int index = relIndex / middleCells;
-  if (index > m_numCells) index = m_numCells;
-  relIndex -= index * middleCells;
-  startPos += index * pitch;
-
-  const PixelDiodeMatrix *nextCell{};
-  if (m_upperCell && (index == m_numCells)) {
-    // We are in the upper cell.
-    nextCell = m_upperCell.get();
-  } else {
-    // We are in the middle cells
-    nextCell = m_middleCells.get();
-  }
-
-  const PixelDiodeMatrix *cell{};
-  if (m_direction == phiDir) {
-    SiCellId relId(relIndex,cellId.etaIndex());
-    position[distPhi] += startPos;
-    cell = nextCell->positionOfCell(relId, position);
-  } else {
-    SiCellId relId(cellId.phiIndex(),relIndex);
-    position[distEta] += startPos;
-    cell = nextCell->positionOfCell(relId, position);
-  }
-
-  return cell;
+  position[distPhi] += matrix->phiHalfWidth();
+  position[distEta] += matrix->etaHalfWidth();
+  dest_position = position;
+  return matrix;
 }
 
 std::string
