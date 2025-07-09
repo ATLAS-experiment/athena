@@ -318,10 +318,6 @@ This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
         "Set option to write data to file"
         self.iovdbsvc.OutputToFile=writeData
 
-    def setCrestToFile(self, crestData=False):
-        "Set option to write CREST data to file"
-        self.iovdbsvc.CrestToFile=crestData
-
     def setCrestCoolToFile(self, crestCoolData=False):
         "Set option to write CREST or COOL data in the same format"
         self.iovdbsvc.CrestCoolToFile=crestCoolData

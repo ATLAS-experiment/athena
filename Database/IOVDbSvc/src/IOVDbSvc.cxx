@@ -235,7 +235,6 @@ StatusCode IOVDbSvc::initialize() {
   ATH_MSG_INFO( "Initialised with " << m_connections.size() << 
     " connections and " << m_foldermap.size() << " folders" );
   if (m_outputToFile.value()) ATH_MSG_INFO("Db dump to file activated");
-  if (m_crestToFile.value()) ATH_MSG_INFO("Crest dump to file activated");
   if (m_crestCoolToFile.value())ATH_MSG_INFO("Crest or Cool dump to file activated");
   ATH_MSG_INFO( "Service IOVDbSvc initialised successfully" );
 
@@ -1057,7 +1056,7 @@ StatusCode IOVDbSvc::setupFolders() {
     }
     
     IOVDbFolder* folder=new IOVDbFolder(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
-                                        m_par_checklock, m_outputToFile.value(), m_par_source, m_crestToFile.value(), m_par_crestServer, crestTag, m_crestCoolToFile);
+                                        m_par_checklock, m_outputToFile.value(), m_par_source, m_par_crestServer, crestTag, m_crestCoolToFile);
     const std::string& key=folder->key();
     if (m_foldermap.find(key)==m_foldermap.end()) {  //This check is too weak. For POOL-based folders, the SG key is in the folder description (not known at this point).
       m_foldermap[key]=folder;
