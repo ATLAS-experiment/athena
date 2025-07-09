@@ -15,17 +15,21 @@ if __name__ == "__main__":
     flags.Concurrency.NumConcurrentEvents = 1
     flags.DQ.useTrigger = False
     flags.ITk.doTruth = False
-    flags.Exec.MaxEvents = 2
+    flags.Exec.MaxEvents = 10
     flags.Output.HISTFileName = "ActsMonitoringOutput.root"
+    flags.Acts.doAnalysisNtuples = True
+    flags.Tracking.doITkFastTracking = True
+
 
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
 
-
+    from ActsConfig.ActsCIFlags import actsWorkflowFlags
+    actsWorkflowFlags(flags)
 
     # Set the Main Pass
     flags = flags.cloneAndReplace(
         "Tracking.ActiveConfig",
-        "Tracking.ITkMainPass")
+        "Tracking.ITkActsPass")
  
     flags.lock()
     flags.dump()

@@ -2887,7 +2887,8 @@ SiSpacePointForSeed *SiSpacePointsSeedMaker::newSpacePoint(EventData &data, cons
   if (m_fastTracking)
   {
     float R2 = r[0] * r[0] + r[1] * r[1];
-    if (std::abs(r[2]) > m_dzMaxFast && R2 < m_R2MaxFast)
+    // cotTheta=18.2855 corresponds to eta=3.6
+    if (std::abs(r[2]) > m_dzMaxFast && R2 < m_R2MaxFast && std::abs(r[2]) < 18.2855 * std::sqrt(R2))
       return nullptr;
     if (std::abs(r[2]) - m_zmax > data.dzdrmax * std::sqrt(R2))
       return nullptr;
