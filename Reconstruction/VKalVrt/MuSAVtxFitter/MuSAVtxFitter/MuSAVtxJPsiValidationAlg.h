@@ -13,7 +13,7 @@
 
 namespace Analysis { class JpsiFinder; }
 
-namespace Rec{
+namespace Rec {
 class MuSAVtxJPsiValidationAlg : public AthAlgorithm {
 public:
   MuSAVtxJPsiValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -27,6 +27,7 @@ protected:
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{ this, "EventInfo", "EventInfo", "event info" };
 
   SG::WriteHandleKey<xAOD::MuonContainer> m_JPsiMuonContainer{ this, "JPsiMuonContainer", "JPsiMuons", "output J/Psi muon collection" };
+  SG::WriteHandleKey<xAOD::VertexContainer> m_JPsiVertexContainer{ this, "JPsiVertexContainer", "JPsiVertices", "output J/Psi vertex collection" };
 
   ToolHandle<Analysis::JpsiFinder> m_JPsiFinderTool{ this, "JpsiFinderTool", "Analysis::JpsiFinder/JpsiFinder", "find J/Psi -> mumu" };
 };

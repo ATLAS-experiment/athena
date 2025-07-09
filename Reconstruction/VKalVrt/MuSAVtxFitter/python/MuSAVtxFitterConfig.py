@@ -50,17 +50,56 @@ def MuSAVtxFitterConfig(flags, name="MuSAVtxFitter", **kwargs):
 def MuSAVtxJPsiValidationAlgCfg(flags, name="MuSAVtxJPsiValidationAlg", **kwargs):
     acc = ComponentAccumulator()
 
+    # Define J/Psi mass window
+    Jpsi_lo = 2000  # MeV
+    Jpsi_hi = 4000  # MeV
+
+    # Get required tools
+    from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
+    vkalvrt = acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags))
+    
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    
+    from InDetConfig.InDetTrackSelectorToolConfig import InDetTrackSelectorToolCfg
+    trackselect = acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, Extrapolator=extrapolator))
+    acc.addPublicTool(trackselect)
+    
+    from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags))
+    acc.addPublicTool(vpest)
+
     # Configure the JpsiFinder tool
-    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import JpsiFinderCfg
-    jpsiFinderTool = acc.popToolsAndMerge(JpsiFinderCfg(flags))
+    jpsiFinderTool = CompFactory.Analysis.JpsiFinder(
+        name = "JPsiFinderTool",
+        muAndMu = True,  # Default: m_mumu = true
+        muAndTrack = False,  # Default: m_mutrk = false
+        TrackAndTrack = False,  # Default: m_trktrk = false
+        assumeDiMuons = True,  # Default: m_diMuons = true
+        invMassLower = Jpsi_lo,  # Default: m_invMassLower = 0.0
+        invMassUpper = Jpsi_hi,  # Default: m_invMassUpper = 100000.0
+        Chi2Cut = 50.,  # Default: m_Chi2Cut = 50.
+        oppChargesOnly = True,  # Default: m_oppChOnly = true
+        atLeastOneComb = True,  # Default: m_atLeastOneComb = true
+        useCombinedMeasurement = False,  # Default: m_useCombMeasurement = false
+        muonCollectionKey = "StdWithLRTMuons",  # Default: not explicitly set
+        TrackParticleCollection = "InDetWithLRTTrackParticles",  # Default: not explicitly set
+        useV0Fitter = False,  # Default: m_useV0Fitter = false
+        TrkVertexFitterTool = vkalvrt,  # Default: not explicitly set
+        TrackSelectorTool = trackselect,  # Default: not explicitly set
+        VertexPointEstimator = vpest,  # Default: not explicitly set
+        useMCPCuts = False  # Default: m_mcpCuts = true
+    )
+    
+    acc.addPublicTool(jpsiFinderTool)
     kwargs.setdefault("JpsiFinderTool", jpsiFinderTool)
 
-    # Set default input/output container names if not provided
-    kwargs.setdefault("MuonContainer", "Muons")
+    kwargs.setdefault("MuonContainer", "StdWithLRTMuons")
     kwargs.setdefault("EventInfo", "EventInfo")
     kwargs.setdefault("JPsiMuonContainer", "JPsiMuons")
-    
-    acc.addEventAlgo( CompFactory.Rec.MuSAVtxJPsiValidationAlg(name, **kwargs) )
+    kwargs.setdefault("JPsiVertexContainer", "JPsiVertices") 
+
+    acc.addEventAlgo(CompFactory.Rec.MuSAVtxJPsiValidationAlg(name, **kwargs))
 
     return acc
 
