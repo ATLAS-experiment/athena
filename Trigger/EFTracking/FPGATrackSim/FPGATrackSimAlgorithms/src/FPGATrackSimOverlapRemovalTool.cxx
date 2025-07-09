@@ -121,7 +121,7 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATra
 
   ATH_MSG_DEBUG("Tracks in event: " << tracks.size());
 
-  return ::runOverlapRemoval(tracks, m_minChi2.value(), m_NumOfHitPerGrouping, getAlgorithm(), m_monTool);
+  return ::runOverlapRemoval(tracks, m_minChi2.value(), m_NumOfHitPerGrouping, getAlgorithm(), m_monTool, m_compareAllHits);
 }
 
 

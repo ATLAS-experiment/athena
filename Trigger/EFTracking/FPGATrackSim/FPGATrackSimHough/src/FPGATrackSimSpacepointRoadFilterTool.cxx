@@ -152,6 +152,9 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             // This can now only happen due to eta pattern filtering, so don't drop the road, but leave a way to track.
             retval = false;
 
+            // Debug message. Let's see if this still happens, now.
+            ATH_MSG_DEBUG("Found inconsistent number of spacepoints in road with x = " << initial_road->getXBin() << ", y = " << initial_road->getYBin() << ": spacepoints_in = " << spacepoints_in << ", spacepoints_out = " << spacepoints_out);
+
             // Update the spacepoint vectors.
             spacepoints_in = std::move(new_sp_in);
             spacepoints_out = std::move(new_sp_out);
@@ -164,13 +167,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_out = spacepoints_out;
             new_all_out.insert(std::end(new_all_out), std::begin(strip_hits_out), std::end(strip_hits_out));
             initial_road->setHits(layer + 1, std::move(new_all_out));
-
-            // Debug message.
-            ATH_MSG_DEBUG("Found inconsistent number of spacepoints in road with x = " << initial_road->getXBin() << ", y = " << initial_road->getYBin());
         }
-
-        strip_hits.emplace(layer, strip_hits_in);
-        strip_hits.emplace(layer + 1, strip_hits_out);
 
         // Update our spacepoint maps now that any uniques have been eliminated.
         inner_spacepoints.emplace(layer, spacepoints_in);
@@ -179,6 +176,14 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             ATH_MSG_WARNING("Handling of unique spacepoints failed, " << spacepoints_in.size() << " != " << spacepoints_out.size());
             return false;
         }
+
+        // If told to do so, filter out any strip hits if there were ALSO spacepoints.
+        if (spacepoints_in.size() > 0 && !m_dropUnpairedIfSP) {
+            strip_hits_in.clear();
+            strip_hits_out.clear();
+        }
+        strip_hits.emplace(layer, strip_hits_in);
+        strip_hits.emplace(layer + 1, strip_hits_out);
 
         layer += 1;
     }

@@ -30,6 +30,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('oldRegionDefs', False)
     cf.addFlag('phiShift', 0.0)
     cf.addFlag('minSpacePlusPixel', 3)
+    cf.addFlag('dropUnpairedIfSP', False)
     cf.addFlag('baseName', '')
     cf.addFlag('CheckGood2ndStage', True)
     cf.addFlag('Is2ndStage', False)
