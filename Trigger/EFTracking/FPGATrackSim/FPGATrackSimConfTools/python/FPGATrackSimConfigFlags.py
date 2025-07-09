@@ -185,6 +185,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('localMaxWindowSize', 0)
     cf.addFlag('roadSliceOR', False)
     cf.addFlag('fieldCorrection', True)
+    cf.addFlag('addAllHits',False)
     cf.addFlag('phiMin', 0.0)
     cf.addFlag('phiMax', 0.0)
     cf.addFlag('xBins', 216)
