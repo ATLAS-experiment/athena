@@ -50,8 +50,9 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.muonSFs:
                 alg.muonSFs = self.muonSFs
             else:
-                alg.muonSFs = [ f'muon_reco_effSF_{self.muons.split(".")[1]}_%SYS%',
-                                f'muon_TTVA_effSF_{self.muons.split(".")[1]}_%SYS%' ]
+                alg.muonSFs = [ f'muon_reco_effSF_{self.muons.split(".")[1]}_%SYS%']
+                if 'trackSelection' in alg.muonSelection:
+                    alg.muonSFs += [ f'muon_TTVA_effSF_{self.muons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.muonSelection:
                     alg.muonSFs += [ f'muon_isol_effSF_{self.muons.split(".")[1]}_%SYS%' ]
 
