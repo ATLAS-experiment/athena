@@ -454,6 +454,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                       MuonContainerName=MergedMuonContainer))
 
     if flags.Derivation.LLP.doMuSAValidation:
+        #Create JPsi tagged muon container
         acc.merge(MuSAVtxJPsiValidationAlgCfg(flags, 
                                            MuonContainer=MergedMuonContainer,
                                            JPsiMuonContainer="JPsiMuons"))
@@ -462,7 +463,6 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         acc.merge(MuSAVtxFitterValidationConfig(flags,
                                                 name="MuSAVtxFitterValidationJPsi",
                                                 MuonContainerName="JPsiMuons"))
-        
         # all MSTPs validation MuSA Vertices
         acc.merge(MuSAVtxFitterValidationConfig(flags,
                                                 MuonContainerName=MergedMuonContainer,
@@ -470,9 +470,6 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                 MuSAExtrapolatedTracksName="ValidationMuSAExtrapolatedTrackParticles",
                                                 MSTPContainerName="MuonSpectrometerTrackParticles"))
                                             
-
-    
-
 
     # NewVSI: LepTrack variation
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import NewVrtSecInclusiveAlgLLPCfg
@@ -974,6 +971,8 @@ def LLP1Cfg(flags):
     if flags.Derivation.LLP.doMuSAValidation:
         StaticContent += ["xAOD::VertexContainer#JPsiMuSAVertices"]
         StaticContent += ["xAOD::VertexAuxContainer#JPsiMuSAVerticesAux."]
+        StaticContent += ["xAOD::VertexContainer#JPsiVertices"]
+        StaticContent += ["xAOD::VertexAuxContainer#JPsiVerticesAux."]
         StaticContent += ["xAOD::TrackParticleContainer#JPsiMuSAExtrapolatedTrackParticles"]
         StaticContent += ["xAOD::TrackParticleAuxContainer#JPsiMuSAExtrapolatedTrackParticlesAux."]
         StaticContent += ["xAOD::VertexContainer#ValidationMuSAVertices"]

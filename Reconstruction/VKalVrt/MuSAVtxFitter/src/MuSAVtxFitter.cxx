@@ -150,9 +150,11 @@ StatusCode MuSAVtxFitter::fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>
         chi2_assocAcc(*MuSAVertex) = workVertex.chi2;
         ndof_assocAcc(*MuSAVertex) = workVertex.ndof();
 
-        TLorentzVector sumP4_pion;
+        TLorentzVector sumP4_muon;
         TLorentzVector sumP4_electron;
         TLorentzVector sumP4_selected;
+
+        constexpr double muonMass = 105.658; // Muon mass in MeV
 
         for (size_t i = 0; i < workVertex.newExtrapolatedTracks.size(); i++) {
             const xAOD::TrackParticle* track = workVertex.newExtrapolatedTracks[i].get();
@@ -160,15 +162,15 @@ StatusCode MuSAVtxFitter::fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>
             double eta_wrtSV = track->eta();
             double phi_wrtSV = track->phi();
 
-            TLorentzVector p4wrtSV_pion;
+            TLorentzVector p4wrtSV_muon;
             TLorentzVector p4wrtSV_electron;
 
-            p4wrtSV_pion.SetPtEtaPhiM(pt_wrtSV, eta_wrtSV, phi_wrtSV, VKalVrtAthena::PhysConsts::mass_chargedPion);
+            p4wrtSV_muon.SetPtEtaPhiM(pt_wrtSV, eta_wrtSV, phi_wrtSV, muonMass);
             p4wrtSV_electron.SetPtEtaPhiM(pt_wrtSV, eta_wrtSV, phi_wrtSV, VKalVrtAthena::PhysConsts::mass_electron);
 
-            sumP4_pion += p4wrtSV_pion;
+            sumP4_muon += p4wrtSV_muon;
             sumP4_electron += p4wrtSV_electron;
-            sumP4_selected += p4wrtSV_pion;
+            sumP4_selected += p4wrtSV_muon;
 
             xAOD::TrackParticle* containerTrack = MuSAExtrapolatedTracksContainer->at(i);
 
@@ -203,7 +205,7 @@ StatusCode MuSAVtxFitter::fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>
             sqrQoPErr_wrtSVAcc(*containerTrack) = sqrQoPErr_wrtSV;
         }
 
-        massAcc(*MuSAVertex) = sumP4_pion.M();
+        massAcc(*MuSAVertex) = sumP4_muon.M();
         mass_eAcc(*MuSAVertex) = sumP4_electron.M();
         mass_selectedTracksAcc(*MuSAVertex) = sumP4_selected.M();
         num_trksAcc(*MuSAVertex) = workVertex.nTracksTotal();
