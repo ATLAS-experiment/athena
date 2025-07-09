@@ -129,6 +129,8 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
       offlinepvy = offlinepv->front()->y();
       OffNVtx = offlinepv->size() ;
       for (unsigned int j = 0; j<offlinepv->size(); j++){
+	if ( (*(offlinepv))[j]->nTrackParticles()==0 ) continue; // MS 9/7/2025
+	if ( (*(offlinepv))[j]->vertexType()==0 ) continue;      // MS 9/7/2025 
 	OffxVtx = (*(offlinepv))[j]->x();
 	OffyVtx = (*(offlinepv))[j]->y();
 	OffzVtx = (*(offlinepv))[j]->z();
