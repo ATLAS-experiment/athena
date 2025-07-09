@@ -550,6 +550,8 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
                                        name: str = "ActsSeedingAlgorithmAnalysis",
                                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    
+    addOtherSeedingAlgorithms = kwargs.pop("addOtherSeedingAlgorithms", False)
 
     MonitoringGroupNames = []
 
@@ -562,42 +564,50 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
         from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerToolCfg
         # The default Acts pixel seeding tool performs by default a seed selection after the seed finding
         # We have to disable it or a fair comparison with the other seed computations
-        from ActsConfig.ActsSeedingConfig import ActsPixelSeedingToolCfg
-        seedToolPixel = acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags, doSeedQualitySelection=False))
+        from ActsConfig.ActsSeedingConfig import ActsFastPixelSeedingToolCfg
+        seedToolPixel = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags, doSeedQualitySelection=False))
         # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
         ActsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags, SeedToolPixel=seedToolPixel))
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
-        from ActsConfig.ActsSeedingConfig import ActsPixelGbtsSeedingToolCfg
-        gbtsSeedToolPixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
-        # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
-        # Strip will not be Gbts ... so we ignore it
-        ActsGbtsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
-                                                                                                   name="ActsSiSpacePointsSeedMakerGbts",
-                                                                                                   SeedToolPixel=gbtsSeedToolPixel))
-        ActsGbtsITkSiSpacePointsSeedMaker.doSeedConversion = False
-        MonitoringGroupNames.append("ActsGbtsITkSiSpacePointSeedMaker")
-        
-        from ActsConfig.ActsSeedingConfig import ActsPixelOrthogonalSeedingToolCfg, ActsStripOrthogonalSeedingToolCfg
-        pixel_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
-        strip_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
-        ActsITkSiSpacePointsSeedMakerOrthogonal = \
-          acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
-                                                                 name="ActsSiSpacePointsSeedMakerOrthogonal",
-                                                                 SeedToolPixel=pixel_orthogonal_seeding_tool,
-                                                                 SeedToolStrip=strip_orthogonal_seeding_tool))
-        ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
-        MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
+        if addOtherSeedingAlgorithms:
+            from ActsConfig.ActsSeedingConfig import ActsPixelGbtsSeedingToolCfg
+            gbtsSeedToolPixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
+            # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
+            # Strip will not be Gbts ... so we ignore it
+            ActsGbtsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
+                                                                                                       name="ActsSiSpacePointsSeedMakerGbts",
+                                                                                                       SeedToolPixel=gbtsSeedToolPixel))
+            ActsGbtsITkSiSpacePointsSeedMaker.doSeedConversion = False
+            MonitoringGroupNames.append("ActsGbtsITkSiSpacePointSeedMaker")
 
+            from ActsConfig.ActsSeedingConfig import ActsPixelOrthogonalSeedingToolCfg, ActsStripOrthogonalSeedingToolCfg
+            pixel_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
+            strip_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
+            ActsITkSiSpacePointsSeedMakerOrthogonal = \
+                acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
+                                                                       name="ActsSiSpacePointsSeedMakerOrthogonal",
+                                                                       SeedToolPixel=pixel_orthogonal_seeding_tool,
+                                                                       SeedToolStrip=strip_orthogonal_seeding_tool))
+            ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
+            MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
+
+            
+            
         from GaudiKernel.GaudiHandles import PrivateToolHandleArray
+        
+        privateSeedingTools = [ITkSiSpacePointsSeedMaker, ActsITkSiSpacePointsSeedMaker]
+
+        if addOtherSeedingAlgorithms:
+            privateSeedingTools.append(ActsGbtsITkSiSpacePointsSeedMaker)
+            privateSeedingTools.append(ActsITkSiSpacePointsSeedMakerOrthogonal)
+        
         kwargs.setdefault("SeedingTools",
-                          PrivateToolHandleArray([ITkSiSpacePointsSeedMaker,
-                                                  ActsITkSiSpacePointsSeedMaker,
-                                                  ActsGbtsITkSiSpacePointsSeedMaker,
-                                                  ActsITkSiSpacePointsSeedMakerOrthogonal]))
+                          PrivateToolHandleArray(privateSeedingTools))
 
     kwargs.setdefault("MonitorNames", MonitoringGroupNames)
+    kwargs.setdefault("DoStrip", not flags.Tracking.doITkFastTracking)
 
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, 'SeedingAlgorithmAnalysisAlgCfg')
