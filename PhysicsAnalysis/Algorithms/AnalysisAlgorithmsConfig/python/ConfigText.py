@@ -355,6 +355,7 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
 # See the README for more info on how this works
 #
 def combineConfigFiles(local, config_path, fragment_key="include"):
+    combined = False
 
     # if this isn't an iterable there's nothing to combine
     if isinstance(local, dict):
@@ -362,15 +363,15 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
     elif isinstance(local, list):
         to_combine = local
     else:
-        return
+        return combined
 
     # otherwise descend into all the entries here
     for sub in to_combine:
-        combineConfigFiles(sub, config_path, fragment_key=fragment_key)
+        combined = combineConfigFiles(sub, config_path, fragment_key=fragment_key) or combined
 
     # if there are no fragments to include we're done
     if fragment_key not in local:
-        return
+        return combined
 
     fragment_path = _find_fragment(
         pathlib.Path(local[fragment_key]),
@@ -399,6 +400,10 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
 
     # delete the fragment so we don't stumble over it again
     del local[fragment_key]
+
+
+    # if we came to here we merged a fragment, so return True
+    return True
 
 
 def _find_fragment(fragment_path, config_path):
