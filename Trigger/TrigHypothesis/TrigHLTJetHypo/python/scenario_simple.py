@@ -145,14 +145,14 @@ def get_condition_args_from_chainpart(cp):
                 #This dictionary maps the bgntwoxt efficiency into the WP cut to be applied to the GN2XTrig output
                 gn2xt_WPs = {
                     '':   float('-inf'),
-                    '95': -1.34433357,
-                    '90': -0.2032497,
-                    '85': 0.54181841,
-                    '80': 1.08486011,
-                    '75': 1.52567965,
-                    '70': 1.90616319,
-                    '65': 2.2397737,
-                    '60': 2.55173745,
+                    '95': -1.35026,
+                    '90': -0.25403,
+                    '85': 0.50616,
+                    '80': 1.10348,
+                    '75': 1.57464,
+                    '70': 1.96391,
+                    '65': 2.29533,
+                    '60': 2.58698,
                 }
 
                 assert (values[0] in gn2xt_WPs.keys()),f"The efficiency of the specified gn2xt cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the gn2xt WP dictionary."
@@ -165,7 +165,6 @@ def get_condition_args_from_chainpart(cp):
                     'namePb': 'GN2XTrig_phbb',
                     'namePc': 'GN2XTrig_ptop',
                     'namePu': 'GN2XTrig_pqcd',
-                    'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
                 condargs.append((k, vals))
 
@@ -194,7 +193,6 @@ def get_condition_args_from_chainpart(cp):
                     'namePb': 'GN2Xv01_phbb', 
                     'namePc': 'GN2Xv01_ptop', 
                     'namePu': 'GN2Xv01_pqcd',
-                    'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
                 condargs.append((k, vals))
 
