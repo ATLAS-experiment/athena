@@ -8819,13 +8819,13 @@ HLT_j110_a10sd_cssk_91bgntwox_pf_jes_ftf_preselj80_L1jJ60:
   stepFeatures:
     0: 7
 HLT_j110_a10sd_cssk_96bgntwox_pf_jes_ftf_preselj80_L1jJ60:
-  eventCount: 2
+  eventCount: 1
   stepCounts:
     0: 7
-    1: 2
+    1: 1
   stepFeatures:
     0: 7
-    1: 2
+    1: 1
 HLT_j110_a10sd_cssk_pf_jes_ftf_preselj80_L1gLJ80p0ETA25:
   eventCount: 5
   stepCounts:

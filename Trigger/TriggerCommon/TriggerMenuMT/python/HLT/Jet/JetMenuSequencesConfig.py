@@ -318,6 +318,10 @@ def jetRoITrackJetTagSelCfg(flags, preselJetDef, isPresel=True):
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
     reco.mergeReco(ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.inputMaker().name))
 
+    # Decorate EventInfo with online beamspot info in global context -- avoid multiple executes
+    from ..Bjet.BjetFlavourTaggingConfig import OnlineBeamspotAugmenterCfg
+    reco.mergeReco(OnlineBeamspotAugmenterCfg(flags))
+
     # Add to top-level serial sequence to ensure it is ready for in-view reco
     from .JetRecoSequencesConfig import (
         FastFtaggedJetCopyAlgCfg, JetRoITrackJetTagSequenceCfg, JetViewAlgCfg, formatFilteredJetsName, JET_DEFAULT_VIEW_PT_MIN_GEV
@@ -334,6 +338,12 @@ def jetRoITrackJetTagSelCfg(flags, preselJetDef, isPresel=True):
     # Explicitly add the sequence here that is to run in the super-RoI view
     seqname = f"JetRoITrackJetTag_{trkopt}_RecoSequence"
     reco.addSequence(parOR(seqname),primary=True)
+    verifier = CompFactory.AthViews.ViewDataVerifier("roiftf_ftag_ViewDataVerifier")
+    verifier.DataObjects = [
+        ('SG::AuxElement',f'EventInfo.{dec}')
+        for dec in ['onlineBeamPosSigmaXY','onlineBeamPosX','onlineBeamPosY','onlineBeamPosZ']
+    ]
+    reco.addEventAlgo(verifier,seqname)
     reco.merge(track_acc,seqname)
     reco.inputMaker().ViewNodeName = seqname
 
