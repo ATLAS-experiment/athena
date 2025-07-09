@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 def LArSuperCellMonConfig(flags, **kwargs):
@@ -432,7 +432,7 @@ if __name__=='__main__':
     #from AthenaConfiguration.TestDefaults import defaultTestFiles
     #flags.Input.Files = defaultTestFiles.ESD
     # to test tier0 workflow:
-    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1']
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1_200evt']
 
     flags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
     flags.DQ.enableLumiAccess = True
