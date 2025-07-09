@@ -41,7 +41,7 @@ public:
   virtual StatusCode initialize() override;
 
   /// Incident handler
-  virtual void handle( const Incident& incident );
+  virtual void handle( const Incident& incident ) override;
 
   /// \name Auditor hooks
   //@{
