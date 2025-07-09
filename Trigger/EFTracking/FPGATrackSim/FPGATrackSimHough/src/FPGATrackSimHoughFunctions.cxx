@@ -12,7 +12,7 @@ using namespace asg::msgUserCode;
 // EPSILON for hit position float comparisons
 constexpr float EPSILON = 1e-5;
 
-StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> & monTool)
+StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float minChi2, const int NumOfHitPerGrouping, ORAlgo orAlgo, ToolHandle<GenericMonitoringTool> & monTool, bool compareAllHits)
 {
   ANA_MSG_DEBUG("Beginning runOverlapRemoval()");
   ANA_MSG_DEBUG("Tracks in event: " << tracks.size());
@@ -62,9 +62,11 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
         //  Based on the algorithm choose common hit of non-common hit
         if(orAlgo == ORAlgo::Normal)
         {
-          // Find the number of common hits between two tracks
+          // Find the number of common hits between two tracks. We have two ways to do this:
+          // * only compare hits in the same 'layer', requires tracks to be the same size.
+          // * compare every hit to every other hit; allows for tracks to be different sizes.
           int nOverlappingHits = 0;
-          nOverlappingHits=findNCommonHits(tracks.at(i),tracks.at(j));
+          nOverlappingHits= (compareAllHits) ? findNCommonHitsGlobal(tracks.at(i),tracks.at(j)) : findNCommonHits(tracks.at(i),tracks.at(j));
 
           // Group overlapping tracks into a vector for removal if at least [NumOfHitPerGrouping] hits are the same
           if(nOverlappingHits >= NumOfHitPerGrouping)
@@ -252,6 +254,51 @@ void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrack
   }
 }
 
+// New algorithm which loops over all of the hits in track 1 to compare to each hit in track 2
+int findNCommonHitsGlobal(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2)
+{
+  int nCommHits = 0;
+  std::vector<bool> hit2_matched(Track2.getFPGATrackSimHits().size(), false);
+
+  for (const auto& hit1 : Track1.getFPGATrackSimHits())
+  {
+    for (size_t j = 0; j < Track2.getFPGATrackSimHits().size(); ++j)
+    {
+      const auto& hit2 = Track2.getFPGATrackSimHits()[j];
+
+      if (hit2_matched[j]) continue; // already used this hit
+      else if (!hit1.isReal() || !hit2.isReal()) continue; // Check if hit is missing
+      else if (hit1.getLayer() != hit2.getLayer()) continue; // Check if hit on the same plane
+      else if (hit1.getIdentifierHash() != hit2.getIdentifierHash()) continue; // Check if two hits have the same hashID
+
+      // Check if two hits have same coordinate. this is difficult due to spacepoints,
+      // since the same hit can be used to make multiple spacepoints.
+      else if (hit1.getHitType() == HitType::spacepoint && hit2.getHitType() == HitType::spacepoint)
+      {
+        if (std::abs(hit1.getX() - hit2.getX()) < EPSILON &&
+            std::abs(hit1.getY() - hit2.getY()) < EPSILON &&
+            std::abs(hit1.getZ() - hit2.getZ()) < EPSILON)
+        {
+          nCommHits++;
+          hit2_matched[j] = true;
+          break;
+        }
+      }
+
+      // If both hits aren't spacepoints, we should be able to do this comparison.
+      else if (std::abs(hit1.getGPhi() - hit2.getGPhi()) < EPSILON &&
+               std::abs(hit1.getZ() - hit2.getZ()) < EPSILON &&
+               std::abs(hit1.getR() - hit2.getR()) < EPSILON)
+      {
+        nCommHits++;
+        hit2_matched[j] = true;
+        break;
+      }
+    }
+  }
+
+  return nCommHits;
+}
 
 int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2)
 {

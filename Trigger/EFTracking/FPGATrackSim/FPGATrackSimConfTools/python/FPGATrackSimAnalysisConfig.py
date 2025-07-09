@@ -534,6 +534,7 @@ def SPRoadFilterToolCfg(flags,secondStage=False,name="FPGATrackSimSpacepointRoad
     SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
     SPRoadFilter.minSpacePlusPixel = flags.Trigger.FPGATrackSim.minSpacePlusPixel
     SPRoadFilter.isSecondStage = secondStage
+    SPRoadFilter.dropUnpairedIfSP = flags.Trigger.FPGATrackSim.dropUnpairedIfSP
 
     # This threshold is the number of *missing* hits allowed. For now, assume that if 1st stage this is always 1.
     # We don't actually run this tool in the first stage anymore, so this is more to preserve backwards compatibility

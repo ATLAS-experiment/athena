@@ -21,10 +21,11 @@
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 
+#include "FourMomUtils/P4Helpers.h"
+
 #include <sstream>
 #include <cmath>
 #include <algorithm>
-
 
 StatusCode FPGATrackSimWindowExtensionTool::initialize() {
 
@@ -307,6 +308,56 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
             road_hits[layer].push_back(hit);
             hitLayers |= 1 << layer;
         }
+    }
+
+    // Post-processing. sort the hits by distance. NOTE: should also prioritize SPs here.
+    double zScale = m_zScale.value();
+    double phiScale = m_phiScale.value();
+    for (unsigned layer = 0; layer < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); layer++) {
+        // This raises an interesting question, should we use hit r or the average idealized predicted R?
+        // The code above uses the actual hit radius. But here, that's a bit tricky, so for now just use the avg one.
+        double predr = m_FPGATrackSimMapping->RegionMap_2nd()->getAvgRadius(0, layer);
+        double predphi = trackphi - std::asin(predr * fpgatracksim::A * 1000 * trackqoverpt - trackd0/predr);
+        double predz = trackz0 + predr*cottracktheta;
+        if (road_hits.at(layer).size() < 2) continue;
+        ATH_MSG_DEBUG("Sorting hits in layer " << layer << " using predz = " << predz << ", predr = " << predr);
+        std::ranges::sort(road_hits.at(layer), [predphi, predz, phiScale, zScale](auto& a, auto& b){
+
+            // Prioritize SP vs non-SP
+            if (a->getHitType() == HitType::spacepoint && b->getHitType() != HitType::spacepoint) return true;
+            else if (b->getHitType() == HitType::spacepoint && a->getHitType() != HitType::spacepoint) return false;
+
+            // HitA
+            double hitphi = a->getGPhi();
+            double hitz = a->getZ();
+            double dz = std::abs(hitz - predz);
+            double dphi = std::abs(P4Helpers::deltaPhi(hitphi, predphi));
+
+            // scaled distance because z and phi are not in same units
+            // these scales are the same as what the pathfinder uses for the time being,
+            // I don't't really know if that makes sense.
+            float distance_a = dphi*dphi*phiScale*phiScale + dz*dz*zScale*zScale;
+
+            // HitB
+            hitphi = b->getGPhi();
+            hitz = b->getZ();
+            dz = std::abs(hitz - predz);
+            dphi = std::abs(P4Helpers::deltaPhi(hitphi, predphi));
+
+            // scaled distance because z and phi are not in same units
+            float distance_b = dphi*dphi*phiScale*phiScale + dz*dz*zScale*zScale;
+
+            return distance_a < distance_b;
+        });
+
+        // Remove any hits over the cutoff, whatever that is.
+        if (m_maxHits.value().size() > layer && m_maxHits.value().at(layer) > 0) {
+            while (numHits.at(layer) > m_maxHits.value().at(layer)) {
+                road_hits.at(layer).pop_back();
+                numHits.at(layer)--;
+            }
+        }
+
     }
 
     return true;

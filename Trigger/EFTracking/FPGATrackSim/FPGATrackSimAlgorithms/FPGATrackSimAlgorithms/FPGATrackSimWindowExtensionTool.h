@@ -70,6 +70,8 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         Gaudi::Property<bool> m_idealGeoRoads {this, "IdealGeoRoads", true, "Do sector assignment of second stage roads"};
         Gaudi::Property<bool> m_doBinning {this, "doBinning", false, "Use second stage binning to sort hits, not the plane map"};
         Gaudi::Property<bool> m_addAllHits {this, "addAllHits", false, "If set to true ignore the window and just add all the hits"};
+        Gaudi::Property<std::vector<int>> m_maxHits {this, "maxHits", {}, "If set to positive number, maximum number of hits allowed per layer"};
+
         // Options only needed for sector assignment.
         // The eta pattern option here should probably be dropped, because we're not using it
         // and supporting it requires having two sets of eta patterns (one for the first stage, one for the second)
@@ -77,6 +79,10 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         Gaudi::Property <bool> m_doRegionalMapping { this, "RegionalMapping", false,  "Use the sub-region maps to define the sector"};
         Gaudi::Property <bool> m_doEtaPatternConsts { this, "doEtaPatternConsts", false, "Whether to use the eta pattern tool for constant generation"};
         Gaudi::Property <bool> m_useSpacePoints { this, "useSpacePoints", false, "Whether we are using spacepoints."};
+
+        // Temporary, used in the hit sorting implementation, borrowed from the NN pathfinder tool. Likely to change.
+        Gaudi::Property <double> m_phiScale {this, "phiScale", 3.15, "Phi scale used when calculating distance from predicted window position" };
+        Gaudi::Property <double> m_zScale {this, "zScale", 1015, "z scale used when calculating distance from predicted window position" };
 
         std::vector<FPGATrackSimRoad> m_roads;
         //This is a map(dict python equivalent) of slice IDs that have a map of layer IDs in it. That map has a vector of hits associated with it
