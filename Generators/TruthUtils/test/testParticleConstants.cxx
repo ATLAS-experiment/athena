@@ -39,7 +39,19 @@ int main ()
   std::vector<std::pair<int,double>> particleMasses = {
     {11, ParticleConstants::electronMassInMeV},
     {13, ParticleConstants::muonMassInMeV},
-    {211, ParticleConstants::chargedPionMassInMeV}
+    {15, ParticleConstants::tauMassInMeV},
+    {23, ParticleConstants::ZMassInMeV},
+    {111, ParticleConstants::piZeroMassInMeV},
+    {211, ParticleConstants::chargedPionMassInMeV},
+    {311, ParticleConstants::KZeroMassInMeV},
+    {321, ParticleConstants::chargedKaonMassInMeV},
+    {443, ParticleConstants::JpsiMassInMeV},
+    {511, ParticleConstants::BZeroMassInMeV},
+    {521, ParticleConstants::BPlusMassInMeV},
+    {531, ParticleConstants::BsMassInMeV},
+    {2112, ParticleConstants::neutronMassInMeV},
+    {2212, ParticleConstants::protonMassInMeV},
+    {3122, ParticleConstants::lambdaMassInMeV},
   };
 
   bool error = false;
