@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ByteStreamCnvSvc )
@@ -44,26 +44,26 @@ atlas_add_executable( AtlListBSEvents test/AtlListBSEvents.cxx
 # Test(s) in the package:
 atlas_add_test( AtlCopyBSEvent1
    PRE_EXEC_SCRIPT "rm -f test.data*"
-   SCRIPT "AtlCopyBSEvent -e 186882810,187403142,187404922,187419528 -o test.data /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"
+   SCRIPT "AtlCopyBSEvent -e 186515186,186524730,186588956,186602200 -o test.data /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1_50evt"
    DEPENDS BSEventSelector )
 
 atlas_add_test( AtlFindBSEvent2
-   SCRIPT "AtlFindBSEvent -e 187403142 test.data"
+   SCRIPT "AtlFindBSEvent -e 186524730 test.data"
    DEPENDS AtlCopyBSEvent1 )
 
 atlas_add_test( AtlCopyBSEvent3
    PRE_EXEC_SCRIPT "rm -f test_defl.data*"
-   SCRIPT "AtlCopyBSEvent -d -e 186882810,187403142,187419528 -o test_defl.data test.data"
+   SCRIPT "AtlCopyBSEvent -d -e 186515186,186524730,186602200 -o test_defl.data test.data"
    DEPENDS AtlCopyBSEvent1 )
 
 atlas_add_test( AtlFindBSEvent4
-   SCRIPT "AtlFindBSEvent -e 187403142 test_defl.data"
+   SCRIPT "AtlFindBSEvent -e 186524730 test_defl.data"
    LOG_IGNORE_PATTERN "^Timestamp"
    DEPENDS AtlCopyBSEvent3 )
 
 atlas_add_test( AtlCopyBSEvent5
    PRE_EXEC_SCRIPT "rm -f test_infl.data*"
-   SCRIPT "AtlCopyBSEvent -e 186882810,187403142,187419528 -o test_infl.data test_defl.data"
+   SCRIPT "AtlCopyBSEvent -e 186515186,186524730,186602200 -o test_infl.data test_defl.data"
    DEPENDS AtlCopyBSEvent3 )
 
 atlas_add_test( AtlCopyBSEvent6
