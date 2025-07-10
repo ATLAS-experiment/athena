@@ -23,7 +23,6 @@
 #include "StoreGate/SGHiveEventSlot.h"
 
 #include <GaudiKernel/ClassID.h>        // for CLID
-#include <GaudiKernel/IInterface.h>     // for InterfaceID
 #include <GaudiKernel/IMessageSvc.h>    // for Level
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -113,14 +112,12 @@ namespace SG {
  *  to the hive store rather than to the default one.
  *
  *  @author ATLAS Collaboration
- *  $Id: SGStoreGateSvc.h 549999 2013-06-06 00:26:39Z calaf $
  **/
-class StoreGateSvc :
-  public Service, 
-  public IProxyDict, 
-  virtual public IHiveStore,
-  public IHiveStoreMgr,
-  public IIncidentListener
+class StoreGateSvc : public extends<Service,
+                                    IProxyDict,
+                                    IHiveStore,
+                                    IHiveStoreMgr,
+                                    IIncidentListener>
 {
 
 public:
@@ -767,11 +764,7 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode stop() override;
   virtual StatusCode finalize() override;
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
   //@}
-  /// Should rather be in IStoreGateSvc.h if we had one
-  static const InterfaceID& interfaceID();
-
 
   //////////////////////////////////////////////////////////////////
   /// \name Gaudi IIncidentListener implementation

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/IIncidentSvc.h"
@@ -26,7 +26,7 @@ namespace {
 
 /// Standard Constructor
 StoreGateSvc::StoreGateSvc(const std::string& name,ISvcLocator* svc) : 
-  Service(name,svc), 
+  base_class(name,svc),
   m_defaultStore(0),
   m_pPPSHandle("ProxyProviderSvc", name),
   m_incSvc("IncidentSvc", name),
@@ -461,33 +461,6 @@ StoreGateSvc::clearStore(bool forceRemove)
 void
 StoreGateSvc::emptyTrash() {
   _SGVOIDCALL( emptyTrash, () );
-}
-
-const InterfaceID& 
-StoreGateSvc::interfaceID() { 
-  static const InterfaceID IDStoreGateSvc("StoreGateSvc", 1, 0);
-  return IDStoreGateSvc; 
-}
-StatusCode StoreGateSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (StoreGateSvc*)this;
-  }
-  else if ( IProxyDict::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IProxyDict*)this;
-  }
-  else if ( IHiveStore::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IHiveStore*)this;
-  }
-  else if ( IHiveStoreMgr::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IHiveStoreMgr*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 /// The current store is becoming the active store.  Make this the current
