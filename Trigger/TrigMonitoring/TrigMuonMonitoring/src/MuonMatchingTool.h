@@ -19,6 +19,7 @@
 #include <string>
 #include <memory>
 #include <tuple>
+#include "TrigT1Interfaces/ITrigThresholdDecisionTool.h"
 
 
 /**
@@ -451,8 +452,12 @@ class MuonMatchingTool : public AthAlgTool {
   Gaudi::Property<bool> m_use_extrapolator {this, "UseExtrapolator", false, "Flag to enable the extrapolator for matching offline and trigger muons"};
 
   // tools
+  ToolHandle<LVL1::ITrigThresholdDecisionTool> m_thresholdTool{
+    this, "TrigThresholdDecisionTool", "LVL1::TrigThresholdDecisionTool/LVL1__TrigThresholdDecisionTool",
+    "Tool to get pass/fail of each trigger threshold"};
   PublicToolHandle<Trig::TrigDecisionTool> m_trigDec {this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "TrigDecisionTool"};
   PublicToolHandle<Trk::IExtrapolator> m_extrapolator {"Trk::Extrapolator/AtlasExtrapolator"};
+  
   //The extrapolator is currently not available. Once it gets available, initialize it with the following, which attempts to retrieve:
   //{this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator", "Track extrapolator"}; 
 };
