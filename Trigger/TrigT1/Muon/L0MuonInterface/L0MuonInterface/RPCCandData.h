@@ -1,22 +1,22 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MuonInterface_BARRELCANDDATA_H
-#define L0MuonInterface_BARRELCANDDATA_H
+#ifndef L0MuonInterface_RPCCANDDATA_H
+#define L0MuonInterface_RPCCANDDATA_H
 
 #include "L0MuonInterface/ICandData.h"
 
 namespace L0Muon
 {
 
-  class BarrelCandData : public ICandData
+  class RPCCandData : public ICandData
   {
   public:
     // default constructor
-    BarrelCandData() = default;
-    ~BarrelCandData() = default;
+    RPCCandData() = default;
+    ~RPCCandData() = default;
 
-    BarrelCandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag);
+    RPCCandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag);
     /// quality of the candidate
     enum class Quality
     {
@@ -53,6 +53,6 @@ namespace L0Muon
     
   };
 
-} // namespace L0Muon
+}  // namespace L0Muon
 
-#endif // L0MuonInterface_BARRELCANDDATA_H
+#endif  // L0MuonInterface_RPCCANDDATA_H

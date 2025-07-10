@@ -18,7 +18,7 @@
 #include "xAODTrigger/MuonRoIContainer.h"
 #include "xAODMuonSimHit/MuonSimHit.h"
 
-#include "L0MuonInterface/BarrelCandDataContainer.h"
+#include "L0MuonInterface/RPCCandDataContainer.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 namespace L0Muon
@@ -35,7 +35,7 @@ namespace L0Muon
 
   private:
     /// build the candidates from the MC truth
-    StatusCode buildFromTruth(L0Muon::BarrelCandDataContainer& outputCands,
+    StatusCode buildFromTruth(L0Muon::RPCCandDataContainer& outputCands,
                               const EventContext &ctx) const;
 
     std::vector<const xAOD::MuonSimHit*> collectHits(const xAOD::TruthParticle& truthPart,
@@ -50,8 +50,8 @@ namespace L0Muon
     SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_keyRpcRdo{this, "NrpcRdoKey", "NRPCRDO", "Location of input RpcRDO"};
 
     /// Output Trigger candidates
-    SG::WriteHandleKey<L0Muon::BarrelCandDataContainer> m_outputCandKey{this, "L0MuonBarrelCandKey", "L0MuonBarrelCand",
-                                                                        "LVL0 trigger candidates in the Muon Barrel"};
+    SG::WriteHandleKey<L0Muon::RPCCandDataContainer> m_outputCandKey{this, "L0MuonRPCCandKey", "L0MuonRPCCand",
+                                                                        "LVL0 Barrel trigger candidates in the Muon RPC"};
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
 
     /// truth containers

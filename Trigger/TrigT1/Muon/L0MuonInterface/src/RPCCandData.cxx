@@ -1,12 +1,12 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "L0MuonInterface/BarrelCandData.h"
+#include "L0MuonInterface/RPCCandData.h"
 
 namespace L0Muon
 {
 
-  BarrelCandData::BarrelCandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag)
+  RPCCandData::RPCCandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag)
       : ICandData(subdetectorId, sectorId, bcTag)
 
   {
@@ -18,7 +18,7 @@ namespace L0Muon
     m_coinType = 0;
   }
 
-  void BarrelCandData::setZPos(float zPos, int index)
+  void RPCCandData::setZPos(float zPos, int index)
   {
     if (index < 0 || index > 3)
     {
@@ -27,13 +27,13 @@ namespace L0Muon
     /// convert z position to binary
     m_zPos[index] = (uint16_t)(zPos / s_zPosRange * (float)s_zPosBitRange);
   }
-  void BarrelCandData::setCoinType(uint8_t coinType)
+  void RPCCandData::setCoinType(uint8_t coinType)
   {
     /// convert the coincidence type to binary
     m_coinType = (uint8_t)(coinType / s_coinTypeRange * (float)s_coinTypeBitRange);
   }
 
-  float BarrelCandData::zPos(int index) const
+  float RPCCandData::zPos(int index) const
   {
     if (index < 0 || index > 3)
     {
@@ -41,7 +41,7 @@ namespace L0Muon
     }
     return (float)m_zPos[index] / (float)s_zPosBitRange * s_zPosRange;
   }
-  uint8_t BarrelCandData::coinType() const
+  uint8_t RPCCandData::coinType() const
   {
     return (uint8_t)(m_coinType / s_coinTypeRange * (float)s_coinTypeBitRange);
   }

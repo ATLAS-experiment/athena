@@ -46,7 +46,7 @@ namespace L0Muon
 
     // output candidates container
     SG::WriteHandle outputCands(m_outputCandKey, ctx);
-    ATH_CHECK(outputCands.record(std::make_unique<L0Muon::BarrelCandDataContainer>()));
+    ATH_CHECK(outputCands.record(std::make_unique<L0Muon::RPCCandDataContainer>()));
 
     if (m_useTruth)
     {
@@ -101,7 +101,7 @@ namespace L0Muon
       return rpcHits;
   }
 
-  StatusCode RPCSimulation::buildFromTruth(L0Muon::BarrelCandDataContainer& outputCands,
+  StatusCode RPCSimulation::buildFromTruth(L0Muon::RPCCandDataContainer& outputCands,
                                            const EventContext &ctx) const
   {
     const ActsGeometryContext* geoContextHandle{nullptr};
@@ -133,7 +133,7 @@ namespace L0Muon
       /// create the candidate
       /// do not set the sectorId and bcTag for the moment
       uint16_t subdetectorId = eta > 0 ? 0x65 : 0x66;
-      auto cand = std::make_unique<L0Muon::BarrelCandData>(subdetectorId, 0, 0);
+      auto cand = std::make_unique<L0Muon::RPCCandData>(subdetectorId, 0, 0);
 
       cand->setEta(eta);
       cand->setPhi(phi);
@@ -183,10 +183,10 @@ namespace L0Muon
             // Normalize the Z position to the range of 12 bits
             // The range is from 0 to +12500, so we map it to 0-4095
             cand->setZPos(static_cast<uint16_t>(zPos[i]/
-              L0Muon::BarrelCandData::s_zPosRange*L0Muon::BarrelCandData::s_zPosBitRange), i);
+              L0Muon::RPCCandData::s_zPosRange*L0Muon::RPCCandData::s_zPosBitRange), i);
           }
       }
-      cand->setQuality(L0Muon::BarrelCandData::Quality::Q_BEST);
+      cand->setQuality(L0Muon::RPCCandData::Quality::Q_BEST);
       outputCands.push_back(std::move(cand));        
     }
     // Implementation of building candidates from truth
