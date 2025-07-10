@@ -45,8 +45,9 @@ private:
   std::string m_crest_tag;
   std::string m_crest_folder_desc;
   cool::ValidityKey m_vkey;
+  bool m_head;
 public:
-  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, cool::ValidityKey vkey):m_msgSvc("msgSvc","test"),
+  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, cool::ValidityKey vkey,bool isHead):m_msgSvc("msgSvc","test"),
   m_cool_con_str(cool_str),
   m_crest_str(crest_str),
   m_gTagCrest(gTagCrest),
@@ -56,7 +57,8 @@ public:
   m_clidSvc("ClassIDSvc","test"),
   m_crest_tag(""),
   m_crest_folder_desc(""),
-  m_vkey(vkey)
+  m_vkey(vkey),
+  m_head(isHead)	
   {
   }
   void compareFiles() {
@@ -118,6 +120,10 @@ public:
     }
     CoralCrestManager mg(m_crest_str,m_crest_tag); 
     m_crest_folder_desc=mg.getFolderDescription();
+    if(m_head)
+      m_crest_folder_desc+="<tag>HEAD</tag>";
+    else if(m_crest_tag.ends_with("-HEAD"))
+      m_crest_folder_desc+="<tag>HEAD</tag>";    
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection("", true, m_log);
     IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",m_crest_str,m_crest_tag,true);
@@ -136,7 +142,8 @@ int main(int argc, char ** argv)
         ( "globalTagCrest,g", boost::program_options::value<std::string>(), "Global tag for CREST" )
 	( "globalTagCool,G", boost::program_options::value<std::string>(), "Global tag for COOL" )
 	( "folder,f", boost::program_options::value<std::string>(), "name of Folder" )
-        ( "timestamp,t", boost::program_options::value<uint64_t>(), "time of data" );
+        ( "timestamp,t", boost::program_options::value<uint64_t>(), "time of data" )
+	( "head,H", boost::program_options::bool_switch()->default_value(false), "Use HEAD tag" );
 
     boost::program_options::variables_map arguments;
     try {
@@ -160,6 +167,7 @@ int main(int argc, char ** argv)
     std::string globalTagCool;
     std::string conStr="";
     std::string crestStr="";
+    bool isHead = false; 
     cool::ValidityKey vkey;
     if (arguments.count("folder")) {
       folder = arguments["folder"].as<std::string>();
@@ -203,7 +211,9 @@ int main(int argc, char ** argv)
       std::cerr <<"Error do not define timestamp"<<std::endl;
       return -1;
     }
-    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vkey);
+    if (arguments.count("head"))
+      isHead=arguments["head"].as<bool>();
+    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vkey,isHead);
     pr.startCrest();
     pr.startCool();
     pr.compareFiles();
