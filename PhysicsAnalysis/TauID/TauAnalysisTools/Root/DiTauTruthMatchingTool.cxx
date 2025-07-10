@@ -110,8 +110,19 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
   static const SG::ConstAccessor<int> accNSubjets("n_subjets");
   static const SG::ConstAccessor<char> accIsTruthHadronic("IsTruthHadronic");
 
+  int n_subjets = 0; 
+  if(!(accNSubjets.isAvailable(xDiTau))){
+    // n_subjets decoration is not available, recalculation on the fly
+    while (xDiTau.subjetPt(n_subjets) > 0. )
+    {
+      n_subjets++;
+    }
+  } else {
+    n_subjets = accNSubjets(xDiTau); 	  
+  }	  
+
   // set default values for each subjet
-  for (int i = 0; i < accNSubjets(xDiTau); ++i)
+  for (int i = 0; i < n_subjets; ++i)
     {
       const xAOD::TruthParticle* xTruthMatch = nullptr;
       TruthMatchedParticleType eTruthMatchedParticleType = Unknown;
@@ -124,7 +135,7 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
     }
 
   // truthmatching for subjets:
-  for (int i = 0; i < accNSubjets(xDiTau); ++i)
+  for (int i = 0; i < n_subjets; ++i)
     {
       TLorentzVector vSubjetTLV;
       vSubjetTLV.SetPtEtaPhiE(xDiTau.subjetPt(i),
@@ -150,7 +161,7 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 
   // create links for jets
   std::vector< ElementLink < xAOD::JetContainer > > vTruthJetLinks;
-  for (int i = 0; i < accNSubjets(xDiTau); ++i)
+  for (int i = 0; i < n_subjets; ++i)
   {
       const xAOD::Jet* xTruthJetMatch = vTruthJetMatch.at(i); 
       if(xTruthJetMatch){
@@ -172,7 +183,7 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 
   // create link to the original TruthParticle
   std::vector< ElementLink < xAOD::TruthParticleContainer > > vTruthLinks;
-  for (int i = 0; i < accNSubjets(xDiTau); ++i)
+  for (int i = 0; i < n_subjets; ++i)
     {
       const xAOD::TruthParticle* xTruthMatch = vTruthMatch.at(i);
       TruthMatchedParticleType eTruthMatchedParticleType = vTruthMatchedParticleType.at(i);
@@ -228,7 +239,7 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
   static const SG::Decorator<float> decTruthMass("TruthVisMass");
 
   // the ditau candidate should have at least 2 subjets to be truth matched
-  if ( accNSubjets(xDiTau) < 2) {
+  if ( n_subjets < 2) {
     decIsTruthMatched(xDiTau) = (char)false;
     decIsTruthHadronic(xDiTau) = (char)false;
     decTruthLeadPt(xDiTau) = -1234.;
