@@ -68,6 +68,7 @@ class  LArBadChannel {
        OffScaleBit=15,
        lowLightFibreBit=16,
        transmissionErrorFibreBit=17,
+       pedestalJumpBit = 18,
        unflaggedByLADIeSBit = 30,
        reflaggedByLADIeSBit = 31
     };
@@ -102,6 +103,7 @@ class  LArBadChannel {
   bool offScale() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::OffScaleBit); else return false;}
   bool lowLightFibre() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::lowLightFibreBit); else return false;}
   bool transmissionErrorFibre() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::transmissionErrorFibreBit); else return false;}
+  bool pedestalJump() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::pedestalJumpBit); else return false;}
 
 
   //Common cases (regular and supercell)
