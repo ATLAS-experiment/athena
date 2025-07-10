@@ -27,24 +27,8 @@ namespace {
 /// Standard Constructor
 StoreGateSvc::StoreGateSvc(const std::string& name,ISvcLocator* svc) : 
   base_class(name,svc),
-  m_defaultStore(0),
-  m_pPPSHandle("ProxyProviderSvc", name),
-  m_incSvc("IncidentSvc", name),
-  m_storeID (StoreID::findStoreID(name)),
-  m_algContextSvc ("AlgContextSvc", name)
+  m_storeID (StoreID::findStoreID(name))
 {
-  
-
-  //our properties
-  //properties of SGImplSvc
-  declareProperty("Dump", m_DumpStore=false, "Dump contents at EndEvent");
-  declareProperty("ActivateHistory", m_ActivateHistory=false, "record DataObjects history");
-  declareProperty("DumpArena", m_DumpArena=false, "Dump Arena usage stats");
-  declareProperty("ProxyProviderSvc", m_pPPSHandle);
-  declareProperty("IncidentSvc", m_incSvc);
-
-  //add handler for Service base class property
-  //FIXME m_outputLevel.declareUpdateHandler(&SGImplSvc::msg_update_handler, this);
 }
  
 /// Standard Destructor

@@ -797,11 +797,20 @@ public:
 
 
 private:
+  /// Properties
+  //@{
+  ServiceHandle<IProxyProviderSvc> m_pPPSHandle{this, "ProxyProviderSvc", "ProxyProviderSvc"};
+  ServiceHandle<IIncidentSvc> m_incSvc{this, "IncidentSvc", "IncidentSvc"};
+  ServiceHandle<IAlgContextSvc> m_algContextSvc{this, "AlgContextSvc", "AlgContextSvc"};
+  Gaudi::Property<bool> m_DumpStore{this, "Dump", false, "Dump contents at EndEvent"};
+  Gaudi::Property<bool> m_ActivateHistory{this, "ActivateHistory", false, "record DataObjects history"};
+  Gaudi::Property<bool> m_DumpArena{this, "DumpArena", false, "Dump Arena usage stats"};
+  //@}
 
-  SGImplSvc* m_defaultStore;
-  ServiceHandle<IProxyProviderSvc> m_pPPSHandle; ///< property
-  ServiceHandle<IIncidentSvc> m_incSvc; ///< property
+  /// Cache store type in the facade class.
+  StoreID::type m_storeID;
 
+  SGImplSvc* m_defaultStore{nullptr};
 
   friend class SG::TestHiveStoreSvc;
   static SG::HiveEventSlot* currentSlot();
@@ -907,16 +916,6 @@ private:
   void addAutoSymLinks (const std::string& key, CLID clid, SG::DataProxy* dp,
                         const std::type_info* tinfo,
                         bool warn_nobib = true);
-
-  bool m_DumpStore; ///<  property Dump: triggers dump() at EndEvent
-  bool m_ActivateHistory; ///< property: activate the history service
-  bool m_DumpArena; ///< DumpArena Property flag : trigger m_arena->report() at clearStore
-
-  /// Cache store type in the facade class.
-  StoreID::type m_storeID;
-
-  /// Algorithm context, for tracking bad calls.
-  ServiceHandle<IAlgContextSvc> m_algContextSvc;
 
   struct BadListItem
     : public DataObjID
