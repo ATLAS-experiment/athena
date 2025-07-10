@@ -12,9 +12,8 @@
 //include below in your header file!
 #include "AthenaKernel/CLASS_DEF.h"
 
-//HIVE wrapper implementation
-//base classes
 #include "GaudiKernel/Service.h"
+#include "GaudiKernel/SmartIF.h"
 #include "AthenaKernel/IProxyDict.h"
 
 #include "AthenaKernel/IHiveStore.h"
@@ -810,7 +809,7 @@ private:
   /// Cache store type in the facade class.
   StoreID::type m_storeID;
 
-  SGImplSvc* m_defaultStore{nullptr};
+  SmartIF<SGImplSvc> m_defaultStore;
 
   friend class SG::TestHiveStoreSvc;
   static SG::HiveEventSlot* currentSlot();

@@ -37,9 +37,7 @@ StoreGateSvc::~StoreGateSvc()
 
 void 
 StoreGateSvc::setDefaultStore(SGImplSvc* pStore) {
-  if (m_defaultStore) m_defaultStore->release();
   m_defaultStore = pStore;
-  if (m_defaultStore) m_defaultStore->addRef();  
 }
 
 void 
@@ -124,9 +122,7 @@ StatusCode StoreGateSvc::initialize()    {
   std::string implStoreFullName = "SGImplSvc/" + implStoreName;
   debug() << "trying to create store " << implStoreFullName << endmsg;
   
-  ISvcManager* pSM(dynamic_cast<ISvcManager*>(&*serviceLocator()));
-  if (!pSM) std::abort();
-  m_defaultStore = dynamic_cast<SGImplSvc*>( (pSM->createService(implStoreFullName)).get() );
+  m_defaultStore = serviceLocator().as<ISvcManager>()->createService(implStoreFullName);
 
   if (!m_defaultStore) {
     error() << "Could not create store " << implStoreFullName << endmsg;
@@ -134,10 +130,6 @@ StatusCode StoreGateSvc::initialize()    {
   }
   
   if ( m_defaultStore->sysInitialize().isSuccess() ) {
-    // createService returns to us a reference to the service; we shouldn't
-    // increment it again.
-    //m_defaultStore->addRef();
-
     // If this is the default event store (StoreGateSvc), then declare
     // our arena as the default for memory allocations.
     if (name()  == "StoreGateSvc") {
@@ -170,9 +162,7 @@ StatusCode StoreGateSvc::stop()    {
   //by setting an ad-hoc priority for event store(s) we make sure they are finalized and hence cleared first
   // see e.g. https://savannah.cern.ch/bugs/index.php?99993
   if (m_defaultStore->store()->storeID() == StoreID::EVENT_STORE) {
-    ISvcManager* pISM(dynamic_cast<ISvcManager*>(serviceLocator().get()));
-    if (!pISM)
-      return StatusCode::FAILURE;
+    auto pISM = serviceLocator().as<ISvcManager>();
     pISM->setPriority(name(), pISM->getPriority(name())+1).ignore();
     verbose() << "stop: setting service priority to " << pISM->getPriority(name()) 
           << " so that event stores get finalized and cleared before other stores" <<endmsg;
@@ -193,7 +183,6 @@ StoreGateSvc::finalize() {
   if (m_defaultStore) {
     // m_defaultStore is not active, so ServiceManager won't finalize it!
     CHECK( m_defaultStore->finalize());
-    m_defaultStore->release();
   }
 
   printBadList (m_badRetrieves, "retrieve()");
