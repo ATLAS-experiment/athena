@@ -297,10 +297,9 @@ namespace ActsTrk {
 
     // A conservative guess of the size of the vectors needed for seeding
     
-    
-    static constexpr float m_ExpCutrMin = 45.;
-    
-    static inline bool itkFastTrackingSPselect(const value_type& sp) {
+    Gaudi::Property<float> m_ExpCutrMin {this, "SpSelectionExpCutrMin", 45. * Acts::UnitConstants::mm};
+
+    inline bool spacePointSelectionFunction(const value_type& sp) const {
       // At small r we remove points beyond |z| > 200.
       float r = sp.radius();
       float zabs = std::abs(sp.z());
@@ -325,7 +324,7 @@ namespace ActsTrk {
       return true;
     }
 
-    static inline bool itkFastDoubletCut(float bottomRadius, float cotTheta) {
+    inline bool doubletSelectionFunction(float bottomRadius, float cotTheta) const {
       // We remove here some seeds, in case the bottom space point radius is
       // too small (i.e. < fastTrackingRMin)
 
