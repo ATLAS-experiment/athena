@@ -27,6 +27,7 @@
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/Decorator.h"
+#include "TruthUtils/ParticleConstants.h"
 
 //**********************************************************************
 using namespace Trig;
@@ -512,7 +513,7 @@ float TrigEgammaMonitorTagAndProbeAlgorithm::getPseudoLifetime(const xAOD::Elect
   float den = (0.299792458*ptEECalo);
   if(fabs(den) < 1e-6) return simple;
 
-  return lxy*3096.916/den;
+  return lxy*ParticleConstants::JpsiMassInMeV/den;
 
 }
 
