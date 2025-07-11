@@ -238,7 +238,7 @@ def HION4ExtraVariablesEventShape():
 #################################################################################
 #HION5
 
-def HION5Extravariables():
+def HION5ExtraVariables():
     variables  = []
     variables += [
         ".".join(["InDetTrackParticles", field]) for field in [
@@ -332,6 +332,18 @@ def HION5AllVariables():
     variables += ["ZdcTriggerTowers"]
     variables += ["PeripheralCaloCalTopoClusters"]
     
+    return variables
+
+def HION5AllTruthVariables():
+    variables  = []
+    variables += ["TruthEvents"]
+    variables += ["TruthParticles"]
+    variables += ["TruthVertices"]
+    variables += ["egammaTruthParticles"]
+    variables += ["MuonTruthParticles"]
+    variables += ["AntiKt2TruthJets"]
+    variables += ["AntiKt4TruthJets"]
+
     return variables
 
 def HION5SmartCollections():

@@ -171,9 +171,11 @@ def HION5Cfg(flags):
     AllVariables  = []    
     AllVariables += ListSlimming.HION5AllVariables()
     AllVariables += ListSlimming.HION5ExtraContainersTrigger()
+    if flags.Input.isMC:
+        AllVariables += ListSlimming.HION5AllTruthVariables()
 
     HION5SlimmingHelper.SmartCollections = ListSlimming.HION5SmartCollections()
-    HION5SlimmingHelper.ExtraVariables   = ListSlimming.HION5Extravariables()
+    HION5SlimmingHelper.ExtraVariables   = ListSlimming.HION5ExtraVariables()
     HION5SlimmingHelper.ExtraVariables   += PhotonsCPDetailedContent
     HION5SlimmingHelper.ExtraVariables   += ExtraElectronShowerShapes
     HION5SlimmingHelper.ExtraVariables   += ExtraElectronGSFVar
