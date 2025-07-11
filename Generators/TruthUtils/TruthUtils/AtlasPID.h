@@ -544,6 +544,12 @@ inline bool isExcited(const DecodedPID& p) {
 }
 template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
 
+
+template<class T> inline bool isExcitedLepton(const T& p) { return isExcitedLepton(p->pdg_id()); }
+template<> inline bool isExcitedLepton(const DecodedPID& p){ auto pp = p.shift(1); return (p.ndigits() == 7 && (p(0) == 4 && p(1) == 0) && isSMLepton(pp));}
+template<> inline bool isExcitedLepton(const int& p){ auto value_digits = DecodedPID(p); return isExcitedLepton(value_digits);}
+
+
 /// PDG rule 11g:
 /// Within several scenarios of new physics, it is possible to have colored particles suﬃciently long-lived for color-singlet hadronic
 /// states to form around them. In the context of supersymmetric scenarios, these states are called R-hadrons, since they carry odd
