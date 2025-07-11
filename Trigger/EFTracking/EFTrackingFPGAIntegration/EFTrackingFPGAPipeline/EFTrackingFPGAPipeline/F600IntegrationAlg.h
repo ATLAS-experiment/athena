@@ -54,7 +54,9 @@
         // Tool for output conversion
         ToolHandle<OutputConversionTool> m_outputConversionTool{this, "OutputConversionTool", "OutputConversionTool", "tool for output conversion"};
 
-
+       mutable std::atomic<cl_ulong> m_kernelTime{0};       //!< Time for kernel execution
+       mutable std::atomic<cl_ulong> m_sum_kernelTime{0};  //!< Sum for the average time of the kernel execution
+       mutable std::atomic<ulonglong> m_num_Events{0}; //!< Number of events for the average time of the kernel execution
 
      };
  }
