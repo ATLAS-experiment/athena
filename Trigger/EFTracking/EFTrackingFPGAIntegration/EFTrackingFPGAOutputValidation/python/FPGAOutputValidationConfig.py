@@ -15,6 +15,8 @@ def FPGAOutputValidationCfg(flags, **kwargs):
     monitoringTool = GenericMonitoringTool(flags, 'FPGAOutputValidationMonitoringTool')
     monitoringTool.HistPath = "/"
 
+    pixelLayers = {"barrel": 5, "endcap": 9}
+    stripLayers = {"barrel": 4, "endcap": 6}
     for histName in ["all", "barrel", "endcap"]:
         
         if len(kwargs["pixelKeys"]) == 2 and kwargs["doDiffHistograms"]:
@@ -37,6 +39,23 @@ def FPGAOutputValidationCfg(flags, **kwargs):
             monitoringTool.defineHistogram(f"pixel_globalZ_ref_{histName},pixel_globalR_ref_{histName},diff_pixel_rdos_{histName};diff_pixel_RDOs_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:RDOs;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1000)
             monitoringTool.defineHistogram(f"pixel_globalZ_ref_{histName},pixel_globalR_ref_{histName},diff_pixel_locx_{histName};diff_pixel_locx_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:locx;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1000, zmin = -0.02, zmax = 0.02)
             monitoringTool.defineHistogram(f"pixel_globalZ_ref_{histName},pixel_globalR_ref_{histName},diff_pixel_locy_{histName};diff_pixel_locy_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:locy;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1000, zmin = -0.02, zmax = 0.02)
+            if "all" not in histName:
+                for layer in range(pixelLayers[histName]):
+                    monitoringTool.defineHistogram(f"diff_pixel_locx_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                   title=f"{name}: Layer {layer}: Local position x", xbins=200, xmin=-0.2, xmax=0.2)
+                    monitoringTool.defineHistogram(f"diff_pixel_locy_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                   title=f"{name}: Layer {layer}: Local position y", xbins=200, xmin=-0.2, xmax=0.2)
+                    monitoringTool.defineHistogram(f"diff_pixel_covxx_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Local covariance xx", xbins=1000, xmin=-0.001, xmax=0.001)
+                    monitoringTool.defineHistogram(f"diff_pixel_covyy_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Local covariance yy", xbins=1000, xmin=-0.001, xmax=0.001)
+                    monitoringTool.defineHistogram(f"diff_pixel_globalX_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Global position x", xbins=200, xmin=-0.05, xmax=0.05)
+                    monitoringTool.defineHistogram(f"diff_pixel_globalY_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Global position y", xbins=200, xmin=-0.05, xmax=0.05)
+                    monitoringTool.defineHistogram(f"diff_pixel_globalZ_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Global position z", xbins=200, xmin=-0.05, xmax=0.05)
+                        
 
         if len(kwargs["stripKeys"]) == 2 and kwargs["doDiffHistograms"]:
             key0 = kwargs["stripKeys"][0]
@@ -52,6 +71,19 @@ def FPGAOutputValidationCfg(flags, **kwargs):
             monitoringTool.defineHistogram("diff_strip_rdos_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1I", title = f"{name}:rdos;number of rdos;", xbins = 101, xmin = -50.5, xmax = 50.5)
             monitoringTool.defineHistogram(f"strip_globalZ_ref_{histName},strip_globalR_ref_{histName},diff_strip_rdos_{histName};diff_strip_RDOs_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:RDOs;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1200)
             monitoringTool.defineHistogram(f"strip_globalZ_ref_{histName},strip_globalR_ref_{histName},diff_strip_locx_{histName};diff_strip_locx_RZ", path= "FPGAOutputValidation/"+histName, type = "TProfile2D", title = f"{name}:locx;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1200, zmin = -0.2, zmax = 0.2)
+            if "all" not in histName:
+                for layer in range(stripLayers[histName]):
+                    monitoringTool.defineHistogram(f"diff_strip_locx_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                   title=f"{name}: Layer {layer}: Local position x", xbins=200, xmin=-0.2, xmax=0.2)
+                    monitoringTool.defineHistogram(f"diff_strip_covxx_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Local covariance xx", xbins=100, xmin=-0.1, xmax=0.1)
+                    monitoringTool.defineHistogram(f"diff_strip_globalX_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Global position x", xbins=200, xmin=-0.1, xmax=0.1)
+                    monitoringTool.defineHistogram(f"diff_strip_globalY_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Global position y", xbins=200, xmin=-0.1, xmax=0.1)
+                    monitoringTool.defineHistogram(f"diff_strip_globalZ_{histName}Layer{layer}", path=f"FPGAOutputValidation/{histName}/layers/{layer}", type="TH1F",
+                                                    title=f"{name}: Layer {layer}: Global position z", xbins=200, xmin=-0.1, xmax=0.1)
+            
             
         for key in kwargs["pixelKeys"]:
             monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_X_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_LOCALPOSITION_X;Local position x;", xbins = 800, xmin = -40, xmax = 40)

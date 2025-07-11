@@ -16,6 +16,13 @@ namespace {
       : clusters(cluster1, cluster2), commonRDOs(commonRDOsCount) {};
   };
 
+  /**
+   * @brief Compares the contents of two clusters and returns the number of common RDOs.
+   * @param cluster1 The first cluster to compare.
+   * @param cluster2 The second cluster to compare.
+   * The clusters do not have to be of the container, so this can be used either when checking clusters from the same or from different containers of the same type.
+   * @return The number of RDOs that are common to both clusters.
+   */
   template <typename T>
   size_t compareClusters(const T* cluster1, const T* cluster2, size_t* nonCommonRdo1 = nullptr, size_t* nonCommonRdo2 = nullptr) {
     const auto& rdoList1 = cluster1->rdoList();
@@ -35,6 +42,15 @@ namespace {
     return nCommonRdo;
   }
 
+  /**
+   * @brief Finds clusters in another container that match the given cluster
+   * @param cluster0 The cluster to find matches for.
+   * @param clusterMap A map of clusters from the other container, keyed by DetectorIdentType (identifier).
+   * @param clusterMapHashIdMap A map of clusters from the other container, keyed by DetectorIDHashType (hashID).
+   * @param matchByID If true, matching is done by the cluster indentifier. If false, matching is done by the hashID and by a minimum number of hits (RDOs) between the two.
+   * @param allowedMisses The number of RDOs that can be missing from the matching cluster.
+   * @return A vector of pointers to clusters that match the given cluster.
+   */
   template <typename T>
   std::vector<const T*> findMatchingCluster(const T* cluster0, 
                                             const std::unordered_multimap<xAOD::DetectorIdentType, const T*>& clusterMap,
@@ -68,8 +84,18 @@ namespace {
     return matchedClusters;
   }
 
-  
 
+/**
+ * @brief Identifies and returns pairs of clusters that are not yet merged.
+ *
+ * This function iterates over a map of clusters, grouped by their hashID,
+ * and finds pairs of clusters within the same group that have common RDOs.
+ * It returns a list of such pairs along with the count of common RDOs.
+ *
+ * @tparam T The type of the cluster objects.
+ * @param clusterMap An unordered multimap where each key is the hashID of the clusters and each value is a pointer to a cluster.
+ * @return A vector of ClusterPair objects, each representing a pair of clusters with common RDOs.
+ */
   template <typename T>
   std::vector<ClusterPair<T>> findNonMergedClusters(const std::unordered_multimap<xAOD::DetectorIDHashType, const T*>& clusterMap) {
     std::vector<ClusterPair<T>> clusterPairs;
@@ -212,6 +238,26 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
                                                                        cluster1->globalPosition()[1]*cluster1->globalPosition()[1])),
           Monitored::Scalar<float>("pixel_globalZ_ref_" + region, cluster1->globalPosition()[2])
         );
+        if(region != "all")
+        {
+          Monitored::Group(
+            m_monitoringTool,
+              Monitored::Scalar<float>("diff_pixel_locx_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->localPosition<2>()[0] - cluster1->localPosition<2>()[0]),
+              Monitored::Scalar<float>("diff_pixel_locy_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->localPosition<2>()[1] - cluster1->localPosition<2>()[1]),
+              Monitored::Scalar<float>("diff_pixel_covxx_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->localCovariance<2>()(0, 0) - cluster1->localCovariance<2>()(0, 0)),
+              Monitored::Scalar<float>("diff_pixel_covyy_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->localCovariance<2>()(1, 1) - cluster1->localCovariance<2>()(1, 1)),
+              Monitored::Scalar<float>("diff_pixel_globalX_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
+              Monitored::Scalar<float>("diff_pixel_globalY_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
+              Monitored::Scalar<float>("diff_pixel_globalZ_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->globalPosition()[2] - cluster1->globalPosition()[2])
+            );
+        }
       }
     }
     m_chrono->chronoStop("FPGAOutputValidationAlg::pixel diff");
@@ -304,6 +350,22 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
                                                                        cluster1->globalPosition()[1]*cluster1->globalPosition()[1])),
           Monitored::Scalar<float>("strip_globalZ_ref_" + region, cluster1->globalPosition()[2])
         );
+        if(region != "all")
+        {
+          Monitored::Group(
+            m_monitoringTool,
+              Monitored::Scalar<float>("diff_strip_locx_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->localPosition<1>()[0] - cluster1->localPosition<1>()[0]),
+              Monitored::Scalar<float>("diff_strip_covxx_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->localCovariance<1>()(0, 0) - cluster1->localCovariance<1>()(0, 0)),
+              Monitored::Scalar<float>("diff_strip_globalX_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
+              Monitored::Scalar<float>("diff_strip_globalY_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
+              Monitored::Scalar<float>("diff_strip_globalZ_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->globalPosition()[2] - cluster1->globalPosition()[2])
+            );
+        }
       }
     }
     m_chrono->chronoStop("FPGAOutputValidationAlg::strip diff");
