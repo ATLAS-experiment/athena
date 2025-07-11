@@ -6,10 +6,9 @@
 
 # Set the environment variable(s):
 
-set( ATLAS_POWHEGVER "08-04" CACHE STRING
-   "Version of the Powheg configuration files" )
-set( ATLAS_POWHEGPATH "/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-${ATLAS_POWHEGVER}-${CMAKE_HOST_SYSTEM_PROCESSOR}"
-   CACHE PATH "Path to the Powheg configuration files" )
+set( ATLAS_POWHEGVER "08-05" CACHE STRING "Version of the Powheg configuration files" )
+set( ATLAS_POWHEGPATH ${COMPILEBOX_LCGROOT})
+
 find_package( OpenLoops )
 find_package( Lhapdf )
 
@@ -33,4 +32,6 @@ set( POWHEGENVIRONMENT_ENVIRONMENT
 # Silently declare the module found.
 set( POWHEGENVIRONMENT_FOUND TRUE )
 endif()
+set(COMPILEBOX_FOUND TRUE)
+lcg_need_rpm(compilebox)
 
