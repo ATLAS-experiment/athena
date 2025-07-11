@@ -22,9 +22,10 @@ Modified:
 */
 
 #include "TrigParticle/TrigTau.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // default constructor
-TrigTau::TrigTau() : P4PtEtaPhiM(0,0,0,1777*CLHEP::MeV), NavigableTerminalNode(),
+TrigTau::TrigTau() : P4PtEtaPhiM(0,0,0,ParticleConstants::tauMassInMeV), NavigableTerminalNode(),
 		     m_roiID(-1),    m_Zvtx(0), 
 		      m_err_Zvtx(0), 
 		     m_etCalibCluster(0), m_simpleEtFlow(0), m_nMatchedTracks(0),
@@ -39,7 +40,7 @@ TrigTau::TrigTau(int roi,
 		 float etCalibClusterr, float etFlowr, int nMatchedTracks,
 		 const TrigTauCluster* cluster, const TrigInDetTrackCollection* tracks,
 		 const TrigTauTracksInfo * tracksInfo) : 
-  P4PtEtaPhiM(pt,eta,phi, 1777*CLHEP::MeV), NavigableTerminalNode(),
+  P4PtEtaPhiM(pt,eta,phi, ParticleConstants::tauMassInMeV), NavigableTerminalNode(),
   m_roiID(roi),   m_Zvtx(zvtx), 
    m_err_Zvtx(err_zvtx), 
   m_etCalibCluster(etCalibClusterr), m_simpleEtFlow(etFlowr),  m_nMatchedTracks(nMatchedTracks), 
@@ -54,7 +55,7 @@ TrigTau::TrigTau(int roi,
 		 float etFLow, int nMatchedTracks,
 		 const TrigTauCluster* cluster, const TrigInDetTrackCollection* tracks,
 		 const TrigTauTracksInfo * tracksInfo) :
-  P4PtEtaPhiM(pt,eta,phi, 1777*CLHEP::MeV), NavigableTerminalNode(),
+  P4PtEtaPhiM(pt,eta,phi, ParticleConstants::tauMassInMeV), NavigableTerminalNode(),
    m_roiID(roi),  
    m_Zvtx(zvtx), 
    m_err_Zvtx(0), 
