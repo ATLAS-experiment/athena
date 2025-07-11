@@ -8,7 +8,7 @@ atlas_add_library( TrigParticle
                    src/*.cxx
                    PUBLIC_HEADERS TrigParticle
                    LINK_LIBRARIES AthContainers AthLinks AthenaKernel EventKernel FourMom Navigation Particle TrigCaloEvent TrigInDetEvent TrigNavigationLib TrigSerializeCnvSvcLib VxVertex egammaEvent tauEvent
-                   PRIVATE_LINK_LIBRARIES CaloGeoHelpers JetEvent TrigNavigationLib xAODBTagging xAODEgamma xAODJet xAODTau xAODTrigEgamma )
+                   PRIVATE_LINK_LIBRARIES CaloGeoHelpers JetEvent TrigNavigationLib xAODBTagging xAODEgamma xAODJet xAODTau xAODTrigEgamma TruthUtils )
 
 atlas_add_sercnv_library( TrigParticleSerCnv
                           FILES TrigParticle/TrigElectron.h TrigParticle/TrigElectronContainer.h TrigParticle/TrigPhoton.h TrigParticle/TrigPhotonContainer.h TrigParticle/TrigTau.h TrigParticle/TrigTauContainer.h TrigParticle/TrigL2Bjet.h TrigParticle/TrigL2BjetContainer.h TrigParticle/TrigEFBjet.h TrigParticle/TrigEFBjetContainer.h TrigParticle/TrigL2Bphys.h TrigParticle/TrigL2BphysContainer.h TrigParticle/TrigEFBphys.h TrigParticle/TrigEFBphysContainer.h egammaEvent/egammaContainer.h egammaEvent/egDetailContainer.h tauEvent/TauJetContainer.h tauEvent/TauDetailsContainer.h JetEvent/JetCollection.h JetEvent/JetMomentMap.h JetEvent/JetMomentMapCollection.h JetEvent/JetKeyDescriptor.h JetEvent/JetKeyDescriptorCollection.h
