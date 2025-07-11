@@ -99,7 +99,7 @@ ClusterMessage::ClusterMessage(const ClusterMessage::WireMsg& wire_msg) {
   if (body.has_value()) {
     const auto& body_2 = *body;
     if (messageType == ClusterMessageType::Data) {
-      payload = std::move(DataDescr(body_2));
+      payload = DataDescr(body_2);
     } else {
       WorkerStatus status{};
       status.status = StatusCode(body_2[0]);
