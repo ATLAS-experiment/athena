@@ -5,6 +5,8 @@
 #ifndef TRT_PAI_physicsConstants_h
 #define TRT_PAI_physicsConstants_h
 
+#include "TruthUtils/ParticleConstants.h"
+
 /**
  * Physics constants
  */
@@ -15,7 +17,7 @@ namespace TRT_PAI_physicsConstants{
   const double mb         = 1.e-18;             /**< 1mb to cm2           */
   const double Me         = 9.10943e-28;        /**< Electron mass {g}    */
   const double MeeV       = Me*(c*c)/erg;       /**< same in ev           */
-  const double MProtonMeV = 938.271998;         /**< Proton mass in MeV   */
+  const double MProtonMeV = ParticleConstants::protonMassInMeV;         /**< Proton mass in MeV   */
   const double Qe         = 4.80321e-10;        /**< Electron charge{ESU} */
   const double r0         = Qe*Qe/Me/(c*c);     /**< electron radius{cm}  */
   const double h          = 1.05457e-27;        /**< Plank constant{erg}  */
