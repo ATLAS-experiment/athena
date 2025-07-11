@@ -7,6 +7,7 @@
 // local include(s)
 #include "TauAnalysisTools/HelperFunctions.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/ParticleConstants.h"
 #include "AthContainers/ConstAccessor.h"
 #include "TF1.h"
 
@@ -334,9 +335,8 @@ void TauAnalysisTools::createPi0Vectors(const xAOD::TauJet* xTau, std::vector<TL
 
   if (iDecayMode == xAOD::TauJetParameters::DecayMode::Mode_1p1n && iNumPi0PFO > 1)
   {
-    // TODO: find out if the pi0 mass is defined elsewhere in atlas code!
-    // float fMassPi0 = 134.98;
-    float fMassPi0Squared = 18219.6004;
+    // float fMassPi0 = ParticleConstants::piZeroMassInMeV;
+    float fMassPi0Squared = ParticleConstants::piZeroMassInMeV*ParticleConstants::piZeroMassInMeV;
 
     // combine both photons (with 0 mass from Pantau) to one pi0 vector:
     const xAOD::PFO* xPfo1 = xTau->pi0PFO(0);
@@ -421,7 +421,7 @@ void TauAnalysisTools::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector
 
     //Scale the pi0s with X and recalculate the new pi0 energy
     double px_scaled, py_scaled, pz_scaled, e;
-    double mPi0 = 134.977;
+    double mPi0 = ParticleConstants::piZeroMassInMeV;
     for(unsigned int i = 0; i < vPi0s.size() ; i++){
       px_scaled = vPi0s[i].Px() * X;
       py_scaled = vPi0s[i].Py() * X;
