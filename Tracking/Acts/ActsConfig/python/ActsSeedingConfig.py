@@ -66,6 +66,7 @@ def ActsFastPixelSeedingToolCfg(flags,
                                 **kwargs) -> ComponentAccumulator:
     ## Additional cuts for fast seed configuration
     kwargs.setdefault("minPt", 900 * UnitConstants.MeV)
+    kwargs.setdefault("maxSeedsPerSpM", 3)
     kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
     kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
     kwargs.setdefault("maxPhiBins", 200)
