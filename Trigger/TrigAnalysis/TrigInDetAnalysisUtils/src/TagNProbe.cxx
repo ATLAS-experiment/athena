@@ -43,7 +43,7 @@ TagNProbe::TagNProbe( const std::string& refName,
 void TagNProbe::construct() { 
   const double muonMass     = ParticleConstants::muonMassInMeV/1000.; // Convert MeV to GeV
   const double electronMass = ParticleConstants::electronMassInMeV/1000.; // Convert MeV to GeV
-  const double tauMass      = 1.77686;  // GeV
+  const double tauMass      = ParticleConstants::tauMassInMeV/1000.; // Convert MeV to GeV
 
   if      ( m_particleType0.find("Muon")!=std::string::npos )      m_mass0 = muonMass;
   else if ( m_particleType0.find("Electron")!=std::string::npos )  m_mass0 = electronMass;
