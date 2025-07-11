@@ -45,6 +45,9 @@ def initConfigFlags():
     acf.addFlag('Exec.MTEventService', False, help='use multi-threaded event service')
     acf.addFlag('Exec.MTEventServiceChannel', 'EventService_EventRanges', help='name of YAMPL communication channel between AthenaMT and pilot')
 
+    #Multi-node with MPI
+    acf.addFlag('Exec.MPI', False, help='run in MPI mode')
+
     #Activate per-event log-output of StoreGate content
     acf.addFlag('Debug.DumpEvtStore', False, help='dump event store on each event')
     acf.addFlag('Debug.DumpDetStore', False, help='dump detector store on each event')

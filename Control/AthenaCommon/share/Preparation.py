@@ -110,6 +110,10 @@ if opts.do_leak_chk:
 
 from AthenaCommon.ConcurrencyFlags import jobproperties as jps
 if opts.nprocs and (opts.nprocs >= 1 or opts.nprocs==-1):
+   # MPI and AthenaMP don't mix
+   if opts.mpi:
+      _msg.error("Cannot run AthenaMP with MPI")
+      sys.exit()
    jps.ConcurrencyFlags.NumProcs = opts.nprocs
    _msg.info ("configuring AthenaMP with [%s] sub-workers", 
               jps.ConcurrencyFlags.NumProcs())

@@ -14,7 +14,11 @@
 #include "GaudiKernel/FileIncident.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
 
+#include <charconv>
+#include <format>
+#include <string_view>
 #include <sstream>
+
 
 //________________________________________________________________________________
 OutputStreamSequencerSvc::OutputStreamSequencerSvc(const std::string& name, ISvcLocator* pSvcLocator)
@@ -64,7 +68,7 @@ StatusCode OutputStreamSequencerSvc::initialize() {
 }
 //__________________________________________________________________________
 StatusCode OutputStreamSequencerSvc::finalize() {
-   // Release MetaDataSvc 
+   // Release MetaDataSvc
    if (!m_metaDataSvc.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release MetaDataSvc.");
    }
@@ -93,12 +97,18 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
    ATH_MSG_INFO("Handling incident of type " << m_lastIncident << " for slot=" << slot
                 << (!has_context? " NO event context":"") );
 
-   if( inc.type() == incidentName() ) {  // NextEventRange 
+   if( inc.type() == incidentName() ) {  // NextEventRange
       std::string rangeID;
       const FileIncident* fileInc  = dynamic_cast<const FileIncident*>(&inc);
       if (fileInc != nullptr) {
-         rangeID = fileInc->fileName();
-         ATH_MSG_DEBUG("Requested (through incident) Next Event Range filename extension: " << rangeID);
+        rangeID = fileInc->fileName();
+        // Handle BeginInputFile
+        if (inc.type() == IncidentType::BeginInputFile) {
+          rangeID = "INFILE";
+        }
+        ATH_MSG_DEBUG(
+            "Requested (through incident) Next Event Range filename extension: "
+            << rangeID);
       }
 
       if( rangeID == "dummy" ) {
@@ -125,7 +135,10 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
             n << "_" << std::setw(4) << std::setfill('0') << m_fileSequenceNumber;
             rangeID = n.str();
             ATH_MSG_DEBUG("Default next event range filename extension: " << rangeID);
-         } 
+         }
+         else if (rangeID == "INFILE") {
+             rangeID = std::to_string(m_fileSequenceNumber);
+         }
          if( slot >= m_rangeIDinSlot.size() ) {
             // MN - late resize, is there a better place for it?
             m_rangeIDinSlot.resize( std::max(slot+1, Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents()) );
@@ -168,16 +181,67 @@ std::string OutputStreamSequencerSvc::buildSequenceFileName(const std::string& o
    }
    std::string rangeID = currentRangeID();
    std::lock_guard lockg( m_mutex );
-   // build the full output file name for this event range
-   std::string fileNameCore = orgFileName, fileNameExt;
-   std::size_t sepPos = orgFileName.find('[');
-   if (sepPos != std::string::npos) {
-      fileNameCore = orgFileName.substr(0, sepPos);
-      fileNameExt = orgFileName.substr(sepPos);
+   if (!m_replaceRangeMode) {
+     // build the full output file name for this event range
+     std::string fileNameCore = orgFileName, fileNameExt;
+     std::size_t sepPos = orgFileName.find('[');
+     if (sepPos != std::string::npos) {
+       fileNameCore = orgFileName.substr(0, sepPos);
+       fileNameExt = orgFileName.substr(sepPos);
+     }
+     std::ostringstream n;
+     n << fileNameCore << "." << rangeID << fileNameExt;
+     m_lastFileName = n.str();
+   } else {
+     std::string_view origFileNameView = orgFileName;
+     std::size_t open = origFileNameView.find('[');
+     std::size_t close = origFileNameView.find(']');
+     // If we don't find a [  ] enclosed section, just append the rangeID to the
+     // end
+     if (open == std::string_view::npos || close == std::string_view::npos) {
+       m_lastFileName = std::format("{}.{}", origFileNameView, rangeID);
+     } else {
+       // build list of elems to substitute from
+       ATH_MSG_DEBUG("Building element list");
+       std::vector<std::string_view> elems{};
+       std::size_t pos = open + 1;
+       for (std::size_t comma = origFileNameView.find(',', pos);
+            comma < close;
+            comma = origFileNameView.find(',', pos)) {
+	 std::string_view item = origFileNameView.substr(pos, comma - pos);
+	 ATH_MSG_DEBUG("(start) pos = " << pos << ", (end) comma = " << comma << ", item = " << item);
+         elems.push_back(item);
+         pos = comma + 1;
+       }
+       std::string_view last_item = origFileNameView.substr(pos, close - pos);
+       ATH_MSG_DEBUG("(start) pos = " << pos << ", (end) close = " << close << ", item = " << last_item);
+       elems.push_back(last_item);
+       // substitute
+       std::size_t rangeIdx{};
+       auto rangeIdxParseRes = std::from_chars(
+           rangeID.data(), rangeID.data() + rangeID.size(), rangeIdx);
+       if (rangeIdxParseRes.ec != std::errc()) {
+         ATH_MSG_ERROR(
+             "Error parsing rangeID to integer. Replacing [] list with "
+             "rangeID.");
+         m_lastFileName =
+             std::format("{}{}{}", origFileNameView.substr(0, open), rangeID,
+                         origFileNameView.substr(close + 1));
+       } else if (rangeIdx >= elems.size()) {
+         ATH_MSG_WARNING(
+             "Number of elements in [] list <= rangeID. Replacing [] list with "
+             "rangeID.");
+         m_lastFileName =
+             std::format("{}{}{}", origFileNameView.substr(0, open), rangeID,
+                         origFileNameView.substr(close + 1));
+       } else {
+         m_lastFileName = std::format(
+             "{}{}{}", origFileNameView.substr(0, open), elems.at(rangeIdx),
+             origFileNameView.substr(close + 1));
+         ATH_MSG_DEBUG("Output file: " << m_lastFileName);
+       }
+     }
    }
-   std::ostringstream n;
-   n << fileNameCore << "." << rangeID << fileNameExt;
-   m_lastFileName = n.str();
 
    if( m_reportingOn.value() ) {
       m_fnToRangeId.insert( std::pair(m_lastFileName, rangeID) );
@@ -191,7 +255,7 @@ std::string OutputStreamSequencerSvc::currentRangeID() const
 {
    if( !inUse() )  return "";
    auto slot = Gaudi::Hive::currentContext().slot();
-   if( slot == EventContext::INVALID_CONTEXT_ID )  slot = 0; 
+   if( slot == EventContext::INVALID_CONTEXT_ID )  slot = 0;
    std::lock_guard lockg( m_mutex );
    if( slot >= m_rangeIDinSlot.size() ) return "";
    return m_rangeIDinSlot[ slot ];

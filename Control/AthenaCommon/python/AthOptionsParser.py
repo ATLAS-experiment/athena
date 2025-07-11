@@ -188,12 +188,15 @@ def getArgumentParser(legacy_args=False, **kwargs):
     g.add_argument('--mtes-channel', metavar='NAME', default='EventService_EventRanges',
                    help='yampl channel name between pilot and AthenaMT in event service mode')
 
+    g.add_argument("--mpi", action="store_true", default=None, help="activate MPI mode")
+
     g.add_argument('--version', action='version', version=get_version(),
                    help='print version number')
 
     g.add_argument('-h', '--help', metavar='FLAGS', nargs='?', action=AthHelpFlags,
                    help='show help message (for FLAGS, "flags" for all categories)' if __athenaCLI
                    else 'show help message (for FLAGS category)')
+
 
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Monitoring and debugging')

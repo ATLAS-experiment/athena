@@ -80,6 +80,56 @@ def AthenaEventLoopMgrCfg(flags):
     return cfg
 
 
+def MPIHiveEventLoopMgrCfg(flags):
+    """Sets up an MPIHive EventLoopMgr along with it's dependencies"""
+    from SQLiteDBSvc.SQLiteDBSvcConfig import SQLiteDBSvcCfg
+    cfg = ComponentAccumulator()
+    nConcurrentEvents = flags.Concurrency.NumConcurrentEvents
+    nThreads = flags.Concurrency.NumThreads
+
+    hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc", NSlots=nConcurrentEvents)
+    cfg.addService(hivesvc)
+
+    arp = CompFactory.AlgResourcePool(
+        TopAlg=["AthMasterSeq"]
+    )  # this should enable control flow
+    cfg.addService(arp)
+
+    scheduler = cfg.getPrimaryAndMerge(
+        AvalancheSchedulerSvcCfg(flags, ThreadPoolSize=nThreads)
+    )
+
+    cfg.merge(SQLiteDBSvcCfg(flags, name="LogDBSvc", dbPath="mpilog.db"))
+    cfg.addService(CompFactory.MPIClusterSvc("ClusterSvc", LogDatabaseSvc="LogDBSvc"))
+    elmgr = CompFactory.MPIHiveEventLoopMgr(
+        MPIClusterSvc="ClusterSvc",
+        WhiteboardSvc="EventDataSvc",
+        SchedulerSvc=scheduler.getName(),
+        FirstEventIndex=flags.Exec.SkipEvents,
+    )
+
+    from AthenaServices.OutputStreamSequencerSvcConfig import (
+        OutputStreamSequencerSvcCfg,
+    )
+
+    cfg.merge(
+        OutputStreamSequencerSvcCfg(
+            flags, incidentName="BeginInputFile", reportingOn=False, replaceRangeMode=True
+        )
+    )
+    if flags.Input.OverrideRunNumber:
+        from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
+
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+
+    if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
+        elmgr.RequireInputAttributeList = True
+        elmgr.UseSecondaryEventNumber = True
+
+    cfg.addService(elmgr)
+
+    return cfg
+
 def AthenaHiveEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
     hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc",
@@ -275,6 +325,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
                                 "which will not process events!")
             if flags.Exec.MTEventService:
                 LoopMgr = "AthenaMtesEventLoopMgr"
+            elif flags.Exec.MPI:
+                LoopMgr = "MPIHiveEventLoopMgr"
             else:
                 LoopMgr = "AthenaHiveEventLoopMgr"
 
@@ -329,6 +381,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     if flags.Concurrency.NumThreads > 0:
         if flags.Exec.MTEventService:
             cfg.merge(AthenaMtesEventLoopMgrCfg(flags,True,flags.Exec.MTEventServiceChannel))
+        elif flags.Exec.MPI:
+            cfg.merge(MPIHiveEventLoopMgrCfg(flags))
         else:
             cfg.merge(AthenaHiveEventLoopMgrCfg(flags))
         # Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute

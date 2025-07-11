@@ -34,6 +34,7 @@ import PyJobTransforms.trfExceptions as trfExceptions
 import PyJobTransforms.trfValidation as trfValidation
 import PyJobTransforms.trfArgClasses as trfArgClasses
 import PyJobTransforms.trfEnv as trfEnv
+import PyJobTransforms.trfMPITools as mpi
 
 
 # Depending on the setting of LANG, sys.stdout may end up with ascii or ansi
@@ -827,10 +828,13 @@ class scriptExecutor(transformExecutor):
         if 'checkEventCount' in self.conf.argdict and self.conf.argdict['checkEventCount'].returnMyValue(exe=self) is False:
             msg.info('Event counting for substep {0} is skipped'.format(self.name))
         else:
-            checkcount=trfValidation.eventMatch(self)
-            checkcount.decide()
-            self._eventCount = checkcount.eventCount
-            msg.info('Event counting for substep {0} passed'.format(self.name))
+            if 'mpi' in self.conf.argdict and not mpi.mpiShouldValidate():
+                msg.info('MPI mode -- skipping output event count check')
+            else:
+                checkcount=trfValidation.eventMatch(self)
+                checkcount.decide()
+                self._eventCount = checkcount.eventCount
+                msg.info('Event counting for substep {0} passed'.format(self.name))
 
         self._valStop = os.times()
         msg.debug('valStop time is {0}'.format(self._valStop))
@@ -1149,6 +1153,10 @@ class athenaExecutor(scriptExecutor):
         else:
             self._athenaMPWorkerTopDir = self._athenaMPFileReport = None
 
+        ## Handle MPI setup
+        if 'mpi' in self.conf.argdict:
+            msg.info("Running in MPI mode")
+            mpi.setupMPIConfig(output, self.conf.dataDictionary)
 
         ## Write the skeleton file and prep athena
         if self._skeleton or self._skeletonCA:
@@ -1232,6 +1240,9 @@ class athenaExecutor(scriptExecutor):
                 
     def postExecute(self):
         super(athenaExecutor, self).postExecute()
+        # MPI merging
+        if 'mpi' in self.conf.argdict:
+            mpi.mergeOutputs()
 
         # Handle executor substeps
         if self.conf.totalExecutorSteps > 1:
@@ -1540,6 +1551,10 @@ class athenaExecutor(scriptExecutor):
                 if not ('athenaopts' in self.conf.argdict and
                         any('--nprocs' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
                         self._cmd.append('--nprocs=%s' % str(self._athenaMP))
+
+        #Switch to ComponentAccumulator based config if requested
+        if self._isCAEnabled():
+            self._cmd.append("--CA")
 
         # Add topoptions
         if self._skeleton or self._skeletonCA:

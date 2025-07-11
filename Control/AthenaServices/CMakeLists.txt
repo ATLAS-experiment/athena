@@ -4,7 +4,8 @@
 atlas_subdir( AthenaServices )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread unit_test_framework)
+find_package( Boost COMPONENTS thread serialization unit_test_framework)
+find_package( bmpi3 REQUIRED )
 find_package( CLHEP )
 find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS Core )
@@ -17,8 +18,9 @@ atlas_add_component( AthenaServices
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
    ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${YAMPL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES} ${YAMPL_LIBRARIES}
-   ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
+   ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES}
+   AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
    AthContainers AthContainersInterfaces DataModelRoot SGTools
    StoreGateLib PersistentDataModel EventInfo xAODCore
    xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIOHeaders )
