@@ -54,7 +54,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     m_massP   =  Trk::ParticleMasses::mass[Trk::proton];
     m_massE   =  Trk::ParticleMasses::mass[Trk::electron];
     m_massK0  =  Trk::ParticleMasses::mass[Trk::k0];
-    m_massLam =  1115.683  ;
+    m_massLam =  ParticleConstants::lambdaMassInMeV  ;
 
    }
 
