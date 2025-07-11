@@ -29,14 +29,19 @@ def JetTLASequenceCfg(flags, jetsIn):
     return recoAcc
 
 @AccumulatorCache
-def JetTLAMenuSequenceGenCfg( flags, jetsIn, attachBtag=True ):
+def JetTLAMenuSequenceGenCfg( flags, jetsIn, attachBtag=False ):
     
     jetsOut = recordable(jetsIn+"_TLA")
-    # retrieves the sequence
     recoAcc = JetTLASequenceCfg(flags, jetsIn=jetsIn)
-    #  add the hypo
+
     hypo = CompFactory.TrigJetTLAHypoAlg("TrigJetTLAHypoAlg_"+jetsIn) 
-    hypo.AttachBtag = attachBtag  # avoid attaching btag if creating EMTopo Jets with no tracking
+
+    # step designed to run for both "pflow jet" and "bjet" chains using same hypo,
+    # hence identical setup with additional btag properties.
+    # if AttachBtag True: Runs hypo tool to record b-jet info and
+    # link to TLA jets; empty if no btag info (e.g. pure pflow jet chains).
+    hypo.AttachBtag = attachBtag
+
     btagJetTool = CompFactory.TrigBtagTLATool("BtagTLATool_"+jetsIn)
 
     if hypo.AttachBtag:
