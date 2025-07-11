@@ -13,7 +13,7 @@ namespace VKalVrtAthena {
   namespace PhysConsts {
     constexpr double mass_chargedPion = ParticleConstants::chargedPionMassInMeV;
     constexpr double mass_electron    = ParticleConstants::electronMassInMeV;
-    constexpr double mass_proton      = 938.27205;
+    constexpr double mass_proton      = ParticleConstants::protonMassInMeV;
   }
   
   namespace AlgConsts {
