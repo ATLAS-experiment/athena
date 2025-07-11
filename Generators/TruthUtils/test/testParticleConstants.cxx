@@ -45,6 +45,7 @@ int main ()
     {211, ParticleConstants::chargedPionMassInMeV},
     {311, ParticleConstants::KZeroMassInMeV},
     {321, ParticleConstants::chargedKaonMassInMeV},
+    {421, ParticleConstants::DZeroMassInMeV},
     {443, ParticleConstants::JpsiMassInMeV},
     {511, ParticleConstants::BZeroMassInMeV},
     {521, ParticleConstants::BPlusMassInMeV},

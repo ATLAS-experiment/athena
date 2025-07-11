@@ -46,6 +46,9 @@ namespace ParticleConstants
     /// the mass of the charged kaon (in MeV)
     constexpr double chargedKaonMassInMeV = 493.677;
 
+    /// the mass of the D0 meson (in MeV)
+    constexpr double DZeroMassInMeV = 1864.8;
+
     // the mass of the J/psi meson (in MeV)
     constexpr double JpsiMassInMeV = 3096.916;
 
@@ -93,6 +96,9 @@ namespace ParticleConstants
 
     /// the mass of the charged kaon (in MeV)
     constexpr double chargedKaonMassInMeV = 493.677;
+
+    /// the mass of the D0 meson (in MeV)
+    constexpr double DZeroMassInMeV = 1864.84;
 
     // the mass of the J/psi meson (in MeV)
     constexpr double JpsiMassInMeV = 3096.900;
