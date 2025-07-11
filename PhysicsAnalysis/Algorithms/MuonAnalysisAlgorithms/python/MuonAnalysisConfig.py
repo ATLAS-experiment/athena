@@ -36,7 +36,7 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834)")
-        self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the MuonCalibTool needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS)')
+        self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the MuonCalibTool needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS), see https://atlas-mcp.docs.cern.ch/guidelines/muonmomentumcorrections/index.html#cpmuoncalibtool-tool')
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
         self.addOption ('writeTrackD0Z0', False, type = bool,
