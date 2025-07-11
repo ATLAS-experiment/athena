@@ -193,7 +193,7 @@ StatusCode JpsiExample::execute() {
     m_jpsiChi2->push_back(jpsiCandidate->chiSquared());
     m_jpsiMassRec->push_back(orig_mass);
     m_jpsiMassPullRec->push_back((mass-orig_mass)/error);
-    m_jpsiMassPullMC->push_back((mass-3096.88)/error);
+    m_jpsiMassPullMC->push_back((mass-ParticleConstants::JpsiMassInMeV)/error);
     
   }
      
