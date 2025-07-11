@@ -34,9 +34,9 @@ namespace TrigVtx
       ParticleConstants::electronMassInMeV, // electron mass
       ParticleConstants::muonMassInMeV, // muon mass
       ParticleConstants::chargedPionMassInMeV, // charged pion mass
-      493.67700*Gaudi::Units::MeV, // charged kaon mass
-      938.27203*Gaudi::Units::MeV, // proton mass
-      0                            // photon mass
+      ParticleConstants::chargedKaonMassInMeV, // charged kaon mass
+      ParticleConstants::protonMassInMeV, // proton mass
+      ParticleConstants::photonMassInMeV // photon mass
     };
   };
 }
