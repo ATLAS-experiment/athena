@@ -40,7 +40,7 @@ namespace {
     bool m = false;
 
     auto add = [&c, a, t](auto f, auto compression, float mult = 1.0) {
-      c.add<float>(
+      c.add(
         t,
         [a, f, mult](I in) -> float {
           const auto* associated = a(in);
@@ -92,7 +92,7 @@ namespace {
     if (m) return;
 
     if (s == "valid") {
-      c.add<bool>(s, [](I) {return true; }, false);
+      c.add(s, [](I) {return true; }, false);
       return;
     }
     throw std::logic_error("unknow known custom primitive: " + s);
@@ -141,7 +141,7 @@ namespace {
   {
     using CountIn_t = CountWriter_t::input_type;
     CountWriter_t::consumer_type c;
-    c.add<CountIn_t>("count", [](CountIn_t i) { return i; });
+    c.add("count", [](CountIn_t i) { return i; });
     return c;
   }
 

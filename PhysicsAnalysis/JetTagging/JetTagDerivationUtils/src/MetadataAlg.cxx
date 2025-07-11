@@ -27,11 +27,11 @@ namespace {
 
   void addCounts(H5::Group& grp, const OriginalAodCounts& counts){
     H5Utils::Consumers<const OriginalAodCounts&> cons;
-#define ADD(NAME, TYPE)                                                 \
-    cons.add<TYPE>(#NAME,[](const OriginalAodCounts& c) {return c.NAME;})
-    ADD(nEventsProcessed, long long);
-    ADD(sumOfWeights, double);
-    ADD(sumOfWeightsSquared, double);
+#define ADD(NAME)                                                 \
+    cons.add(#NAME,[](const OriginalAodCounts& c) {return c.NAME;})
+    ADD(nEventsProcessed);
+    ADD(sumOfWeights);
+    ADD(sumOfWeightsSquared);
 #undef ADD
     H5Utils::Writer<0, const OriginalAodCounts&> writer(grp, "counts", cons);
     writer.fill(counts);
