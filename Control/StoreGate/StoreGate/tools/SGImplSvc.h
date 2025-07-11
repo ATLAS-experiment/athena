@@ -101,13 +101,11 @@ namespace SG {
  * @param "FolderNameList" property (default ""): data folders to be created 
  *                                                in this store
  * @author ATLAS Collaboration
- * $Id: SGImplSvc.h 797595 2017-02-16 18:36:10Z ssnyder $
  **/
-class SGImplSvc final :
-  public Service, 
-  public IProxyDict, 
-  public IHiveStoreMgr,
-  public IIncidentListener
+class SGImplSvc final : public extends<Service,
+                                       IProxyDict,
+                                       IHiveStoreMgr,
+                                       IIncidentListener>
 {
 
 public:
@@ -459,10 +457,7 @@ public:
   virtual StatusCode start() override final;
   virtual StatusCode stop() override final;
   virtual StatusCode finalize() override final;
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override final;
   //@}
-  /// Should rather be in ISGImplSvc.h if we had one
-  static const InterfaceID& interfaceID();
 
 
   //////////////////////////////////////////////////////////////////
