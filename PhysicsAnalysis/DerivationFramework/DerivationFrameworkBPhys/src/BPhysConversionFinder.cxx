@@ -366,7 +366,7 @@ namespace DerivationFramework {
                       // Only bother with the fit if di-muon mass is within the relveant range,
                       // but still fill an dummy 4-vector to preserve one to one correspondance with "DiMuonLinks"
                       if(passed_Psi) {
-                          ATH_CHECK( doCascadeFit(*vtxItr,constConvVertex,3096.916,fitResult_Psi1S,fitChiSq_Psi1S) );
+                          ATH_CHECK( doCascadeFit(*vtxItr,constConvVertex,ParticleConstants::JpsiMassInMeV,fitResult_Psi1S,fitChiSq_Psi1S) );
                       }
 
                       fit_Psi1S_Px.push_back(fitResult_Psi1S.Px());

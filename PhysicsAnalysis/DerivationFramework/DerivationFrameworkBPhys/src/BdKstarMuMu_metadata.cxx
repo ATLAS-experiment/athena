@@ -41,13 +41,13 @@ namespace DerivationFramework {
       */
       recordPropertyD("mass_mu"   ,  ParticleConstants::muonMassInMeV); // PDG: 105.6583745
       recordPropertyD("mass_e"    ,    ParticleConstants::electronMassInMeV); // PDG:   0.5109989461
-      recordPropertyD("mass_K"    ,  493.677); // PDG: 493.677
+      recordPropertyD("mass_K"    ,  ParticleConstants::chargedKaonMassInMeV); // PDG: 493.677
       recordPropertyD("mass_pi"   ,  ParticleConstants::chargedPionMassInMeV ); // PDG: 139.57039
-      recordPropertyD("mass_p"    ,  938.272); // PDG: 938.272081
-      recordPropertyD("mass_Jpsi" , 3096.916); // PDG:3096.900
+      recordPropertyD("mass_p"    ,  ParticleConstants::protonMassInMeV); // PDG: 938.272081
+      recordPropertyD("mass_Jpsi" , ParticleConstants::JpsiMassInMeV); // PDG:3096.900
       recordPropertyD("mass_Kstar",  891.66 ); // PDG: 891.66
       recordPropertyD("mass_Bd"   , 5279.65 ); // PDG:5279.65
-      recordPropertyD("mass_Bs"   , 5366.88 ); // PDG:5366.88
+      recordPropertyD("mass_Bs"   , ParticleConstants::BsMassInMeV ); // PDG:5366.88
 
     } // AthAlgTool
 } // namespace
