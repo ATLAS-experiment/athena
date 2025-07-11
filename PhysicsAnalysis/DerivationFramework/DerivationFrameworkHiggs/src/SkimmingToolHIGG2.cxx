@@ -17,6 +17,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 // Constructor
@@ -822,5 +823,5 @@ double DerivationFramework::SkimmingToolHIGG2::getDeltaR(const double eta1, cons
   return dR;
 }
 
-const double DerivationFramework::SkimmingToolHIGG2::s_MZ(91187.6*CLHEP::MeV); 
-const double DerivationFramework::SkimmingToolHIGG2::s_MKplus(493.677*CLHEP::MeV); 
+const double DerivationFramework::SkimmingToolHIGG2::s_MZ(ParticleConstants::ZMassInMeV); 
+const double DerivationFramework::SkimmingToolHIGG2::s_MKplus(ParticleConstants::chargedKaonMassInMeV); 
