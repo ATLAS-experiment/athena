@@ -1261,7 +1261,7 @@ bool InDetIterativeSecVtxFinderTool::V0kine( const std::vector< Amg::Vector3D > 
   double eGam = std::sqrt( Pv[0] + ParticleConstants::electronMassInMeV*ParticleConstants::electronMassInMeV ) + std::sqrt( Pv[1] + ParticleConstants::electronMassInMeV*ParticleConstants::electronMassInMeV ) ;
   double mGam = eGam*eGam - mnt2 ;
  
-  double prtn2 = 938.27205*938.27205 ;
+  double prtn2 = ParticleConstants::protonMassInMeV*ParticleConstants::protonMassInMeV ;
   double eLam = Pv[0] > Pv[1] ?  std::sqrt( Pv[0] + prtn2 ) + std::sqrt( Pv[1] + pi2 ) : 
                           sqrt( Pv[0] + pi2 ) + std::sqrt( Pv[1] + prtn2 )  ;
   double mLam = eLam*eLam - mnt2 ;
@@ -1270,9 +1270,9 @@ bool InDetIterativeSecVtxFinderTool::V0kine( const std::vector< Amg::Vector3D > 
                  <<" "<< ( mGam >= 0 ? std::sqrt( mGam ) : std::sqrt( -mGam ) )
                  <<" "<< ( mLam >= 0 ? std::sqrt( mLam ) : std::sqrt( -mLam ) ) );
 
-  if (   ( std::abs( mass - 497.614 ) < 100. )   // K short 
+  if (   ( std::abs( mass - ParticleConstants::KZeroMassInMeV ) < 100. )   // K short 
       || ( mGam > 0 && sqrt( mGam ) < 40. )  // gamma conversion ;
-      || ( mLam > 0 && std::abs( sqrt( mLam ) - 1115.683 ) < 200.  ) //  Lambda 
+      || ( mLam > 0 && std::abs( sqrt( mLam ) - ParticleConstants::lambdaMassInMeV ) < 200.  ) //  Lambda 
      )  return true ;
 
   return false ;
