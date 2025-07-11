@@ -32,6 +32,8 @@
 #include "../DecisionAlg.h"
 #include "../AthReadAlg.h"
 #include "../../test/MetaDataToolStub.h"
+#include "../MPIHiveEventLoopMgr.h"
+#include "../MPIClusterSvc.h"
 #include "../ROOTMessageFilterSvc.h"
 
 DECLARE_COMPONENT( AthenaOutputStream )
@@ -42,6 +44,8 @@ DECLARE_COMPONENT( AthenaEventLoopMgr )
 DECLARE_COMPONENT( AthenaHiveEventLoopMgr )
 DECLARE_COMPONENT( AthenaMtesEventLoopMgr )
 DECLARE_COMPONENT( PyAthenaEventLoopMgr )
+DECLARE_COMPONENT( MPIHiveEventLoopMgr )
+DECLARE_COMPONENT( MPIClusterSvc )
 DECLARE_COMPONENT( MixingEventSelector )
 DECLARE_COMPONENT( FPEControlSvc )
 DECLARE_COMPONENT( JobIDSvc )

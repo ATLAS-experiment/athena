@@ -99,6 +99,14 @@ private: // properties
    BooleanProperty            m_reportingOn {this, "ReportingOn", false,
          "If True, keep info about Ranges for getRangeReport() calls"};
 
+   /// Flag to put in ReplaceRangeMode (i.e. everything between [ and ]
+   /// (inclusive) is replaced with the range_idth element of that list)
+   BooleanProperty m_replaceRangeMode{
+       this, "ReplaceRangeMode", false,
+       "If True, everything between [ and ] in the output filename is treated "
+       "as a comma-separated list, and the range_idth element of the list is "
+       "selected"};
+
    std::map<std::string,std::string> m_fnToRangeId;
    std::map<std::string,std::string>::iterator m_finishedRange;
 

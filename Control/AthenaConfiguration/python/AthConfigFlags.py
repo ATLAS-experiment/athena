@@ -782,6 +782,8 @@ class AthConfigFlags(object):
             # Save stats to file at exit
             atexit.register(functools.partial(dumpPythonProfile, args.profile_python))
 
+        if arg_set('mpi'):
+            self.Exec.MPI = args.mpi
 
         # All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
         for arg in leftover:

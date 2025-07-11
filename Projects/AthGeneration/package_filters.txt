@@ -89,6 +89,7 @@
 + Database/PersistentDataModelTPCnv
 + Database/RDBAccessSvc
 #+ Database/RegistrationServices
++ Database/SQLiteDBSvc
 + Database/TPTools
 #+ DataQuality/GoodRunsLists
 + DetectorDescription/AtlasDetDescr

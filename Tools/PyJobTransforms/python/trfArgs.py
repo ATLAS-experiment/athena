@@ -123,6 +123,8 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
     parser.add_argument('--multithreaded', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Multithreaded mode active')
+    parser.add_argument("--mpi", type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True), nargs="?",
+                        const=trfArgClasses.argBool("True"), help="MPI mode active",)
     parser.add_argument('--multiprocess', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Multiprocess mode active')

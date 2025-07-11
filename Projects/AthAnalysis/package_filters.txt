@@ -182,6 +182,8 @@
 + Control/PerformanceMonitoring/PerfMonComps
 + Control/PerformanceMonitoring/PerfMonGPerfTools
 + Control/Navigation
+# AthenaServices dependency
++ Database/SQLiteDBSvc
 
 #scripts package contains useful commands like get_files
 + Tools/Scripts
