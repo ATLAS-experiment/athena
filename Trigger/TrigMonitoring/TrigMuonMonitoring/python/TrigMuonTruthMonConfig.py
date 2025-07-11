@@ -1,14 +1,16 @@
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  
 def TrigMuonTruthMonConfig(helper):
-    
-    from AthenaConfiguration.ComponentFactory import CompFactory
- 
-    GroupName = 'TruthMon'
 
+    from AthenaConfiguration.ComponentFactory import CompFactory
+
+    GroupName = 'TruthMon'
+    
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from .MuonMatchingToolConfig import MuonMatchingToolConfig
     monAlg = helper.addAlgorithm(CompFactory.TrigMuonTruthMon,'TrigMuonTruthMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)), 
+                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess

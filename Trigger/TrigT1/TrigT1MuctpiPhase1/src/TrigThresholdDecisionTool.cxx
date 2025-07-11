@@ -26,6 +26,10 @@ namespace LVL1
     ATH_CHECK(RoIThresholdsTool::initialize());
     ATH_CHECK( m_rpcTool.retrieve() );
     ATH_CHECK( m_tgcTool.retrieve() );
+
+    if(m_MenuFromxAOD) {
+        ATH_CHECK( m_configSvc.retrieve() );
+    }
     return StatusCode::SUCCESS;
   }
   
@@ -38,43 +42,56 @@ namespace LVL1
     m_parsed_flags.clear();
     m_tgcFlag_decisions.clear();
 
-    //front-load the TGC flag parsing and all possible 3-bit decisions for the menu
-    SG::ReadHandle<TrigConf::L1Menu> l1Menu = SG::makeHandle(m_l1MenuKey);
-    ATH_CHECK(l1Menu.isValid());
-    std::optional<ThrVecRef> menuThresholds = getMenuThresholds(*l1Menu);
-    ATH_CHECK(menuThresholds.has_value());
-
-    for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds.value().get()) {
-      auto thr = static_cast<TrigConf::L1Threshold_MU*>(thrBase.get());
-
-      //parse the tgc flags and buffer them
-      std::string tgcFlags = getShapedFlags( thr->tgcFlags() );
-      parseFlags(tgcFlags);
-
-      //loop over all 3-bit flag combinations
-      for (unsigned flags=0;flags<8;flags++)
-      {
-	bool F=flags&0b100;
-	bool C=flags&0b010;
-	bool H=flags&0b001;
-	makeTGCDecision(tgcFlags, F, C, H);
-      }
-
-      //parse the rpc flags and buffer them
-      std::string rpcFlags = getShapedFlags( thr->rpcFlags() );
-      parseFlags(rpcFlags);
-
-      //loop over all 2-bit flag combinations
-      for (unsigned flags=0;flags<2;flags++)
-      {
-	bool M=flags&0b1;
-	makeRPCDecision(rpcFlags, M);
-      }
+    // we configure the tool here only if we are not running from xAOD
+    if (!m_MenuFromxAOD){
+        
+        SG::ReadHandle<TrigConf::L1Menu> l1Menu = SG::makeHandle(m_l1MenuKey);
+        ATH_CHECK(l1Menu.isValid());
+        ATH_CHECK(configureToolFromMenu(*l1Menu));
     }
-
     return StatusCode::SUCCESS;
   }
   
+StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Menu& l1Menu) const {
+
+    std::lock_guard guard{m_mutex};
+    if (m_isInitialized) {
+        return StatusCode::SUCCESS;
+    }
+
+    //front-load the TGC flag parsing and all possible 3-bit decisions for the menu
+    std::optional<ThrVecRef> menuThresholds = getMenuThresholds(l1Menu);
+    ATH_CHECK(menuThresholds.has_value());
+
+    for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds.value().get()) {
+        auto thr = static_cast<TrigConf::L1Threshold_MU*>(thrBase.get());
+
+        //parse the tgc flags and buffer them
+        std::string tgcFlags = getShapedFlags( thr->tgcFlags() );
+        parseFlags(tgcFlags);
+
+        //loop over all 3-bit flag combinations
+        for (unsigned flags=0;flags<8;flags++) {
+            bool F=flags&0b100;
+            bool C=flags&0b010;
+            bool H=flags&0b001;
+            makeTGCDecision(tgcFlags, F, C, H);
+        }
+
+        //parse the rpc flags and buffer them
+        std::string rpcFlags = getShapedFlags( thr->rpcFlags() );
+        parseFlags(rpcFlags);
+
+        //loop over all 2-bit flag combinations
+        for (unsigned flags=0;flags<2;flags++){
+            bool M=flags&0b1;
+            makeRPCDecision(rpcFlags, M);
+        }
+    }
+    m_isInitialized = true;
+    return StatusCode::SUCCESS;
+}
+
   uint64_t TrigThresholdDecisionTool::getPattern(const xAOD::MuonRoI& roi,
                                                  const ThrVec& menuThresholds,
                                                  const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const {
@@ -84,6 +101,13 @@ namespace LVL1
   uint64_t TrigThresholdDecisionTool::getPattern(uint32_t dataWord,
                                                  const ThrVec& menuThresholds,
                                                  const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const {
+    if (m_MenuFromxAOD and !m_isInitialized){
+        const TrigConf::L1Menu& l1Menu = m_configSvc->l1Menu( Gaudi::Hive::currentContext());
+        if (configureToolFromMenu(l1Menu) != StatusCode::SUCCESS){
+            throw std::runtime_error("Error configuring the TrigThresholdDecisionTool from metadata!");
+        }
+    }
+
     uint64_t thresholdsPattern = 0;
 
     //first figure out if we need to use the RPC or TGC tool for decoding the ROI
@@ -182,7 +206,20 @@ namespace LVL1
   TrigThresholdDecisionTool::getThresholdDecisions(uint32_t dataWord,
                                                    const EventContext& eventContext) const {
     // Retrieve the L1 menu configuration
-    SG::ReadHandle<TrigConf::L1Menu> l1Menu = SG::makeHandle(m_l1MenuKey, eventContext);
+    const TrigConf::L1Menu* l1Menu;
+    if (m_MenuFromxAOD){
+        l1Menu = &m_configSvc->l1Menu( eventContext );
+        if (!m_isInitialized){
+            if (configureToolFromMenu(*l1Menu) != StatusCode::SUCCESS){
+                throw std::runtime_error("Error configuring the TrigThresholdDecisionTool from metadata!");
+            }
+        } 
+    }
+    else{
+        SG::ReadHandle<TrigConf::L1Menu> l1MenuHandle = SG::makeHandle(m_l1MenuKey, eventContext);
+        l1Menu = l1MenuHandle.cptr();
+    }
+
     std::optional<ThrVecRef> menuThresholds = getMenuThresholds(*l1Menu);
     std::optional<ExtraInfoRef> menuExtraInfo = getMenuThresholdExtraInfo(*l1Menu);
     // Call the other overload
@@ -193,6 +230,12 @@ namespace LVL1
   TrigThresholdDecisionTool::getThresholdDecisions(uint32_t dataWord,
                                                    const ThrVec& menuThresholds,
                                                    const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const {
+    if (m_MenuFromxAOD and !m_isInitialized){
+        const TrigConf::L1Menu& l1Menu = m_configSvc->l1Menu( Gaudi::Hive::currentContext());
+        if (configureToolFromMenu(l1Menu) != StatusCode::SUCCESS){
+            throw std::runtime_error("Error configuring the TrigThresholdDecisionTool from metadata!");
+        }
+    }
 
     const uint64_t pattern = getPattern(dataWord, menuThresholds, menuExtraInfo);
 
@@ -207,7 +250,14 @@ namespace LVL1
   }
 
   std::pair<std::string, double> TrigThresholdDecisionTool::getMinThresholdNameAndValue(const std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> >& decisions, const double& eta) const
-  {
+  { 
+    if (m_MenuFromxAOD and !m_isInitialized){
+        const TrigConf::L1Menu& l1Menu = m_configSvc->l1Menu( Gaudi::Hive::currentContext());
+        if (configureToolFromMenu(l1Menu) != StatusCode::SUCCESS){
+            throw std::runtime_error("Error configuring the TrigThresholdDecisionTool from metadata!");
+        }
+    }
+
     //find the highest pt threshold passed - depite the name of this function
     std::string thrName="";
     double thrVal=0;
@@ -275,7 +325,7 @@ namespace LVL1
     return false;
   }
 
-  void TrigThresholdDecisionTool::makeTGCDecision(const std::string& tgcFlags, const bool F, const bool C, const bool H)
+  void TrigThresholdDecisionTool::makeTGCDecision(const std::string& tgcFlags, const bool F, const bool C, const bool H) const
   {
     //check if the word has been checked before for this string of flags
     TGCFlagDecision decision(F,C,H);
@@ -322,7 +372,7 @@ namespace LVL1
     return false;
   }
 
-  void TrigThresholdDecisionTool::makeRPCDecision(const std::string& rpcFlags, const bool M)
+  void TrigThresholdDecisionTool::makeRPCDecision(const std::string& rpcFlags, const bool M) const
   {
     //check if the word has been checked before for this string of flags
     RPCFlagDecision decision(M);
@@ -355,7 +405,7 @@ namespace LVL1
     }	  
   }
 
-  void TrigThresholdDecisionTool::parseFlags(const std::string& flags)
+  void TrigThresholdDecisionTool::parseFlags(const std::string& flags) const
   {
     //parse the logic of the quality flag into a 2D vector, where outer layer contains the logic |'s and inner layer contains the logical &'s.
     //save the 2D vector in a map so we don't have to parse it each time we want to check the flags.

@@ -14,6 +14,7 @@
 #include "TrigConfData/L1ThrExtraInfo.h"
 #include "TrigConfData/L1Threshold.h"
 #include "TrigConfData/L1Menu.h"
+#include "TrigConfInterfaces/ITrigConfigSvc.h"
 
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 #include "TrigT1Interfaces/ITrigThresholdDecisionTool.h"
@@ -70,6 +71,8 @@ namespace LVL1 {
 							       const double& eta = 0) const override;
 
   protected:
+    //Function that performs the actual initialization of the tool. 
+    StatusCode configureToolFromMenu(const TrigConf::L1Menu& l1Menu) const;
 
     struct TGCFlagDecision
     {
@@ -99,12 +102,12 @@ namespace LVL1 {
                           bool isSideC) const;
 
     bool getTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H) const;
-    void makeTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H);
+    void makeTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H) const;
 
     bool getRPCDecision(const std::string& rpcFlags, bool M) const;
-    void makeRPCDecision(const std::string& rpcFlags, bool M);
+    void makeRPCDecision(const std::string& rpcFlags, bool M) const;
 
-    void parseFlags(const std::string& flags);
+    void parseFlags(const std::string& flags) const;
     std::vector<std::string> parseString(const std::string& str, const std::string& sep) const;
     std::string getShapedFlags(const std::string& flags) const;
 
@@ -112,11 +115,17 @@ namespace LVL1 {
     ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_tgcTool{this, "TGCRecRoiTool", "LVL1::TrigT1TGCRecRoiTool/LVL1__TrigT1TGCRecRoiTool", "Tool to get the eta/phi coordinates in the TGC"};
 
     //buffered parsed TGC/RPC flags
-    std::map<std::string, std::vector<std::vector<std::string> > > m_parsed_flags;
+    mutable std::map<std::string, std::vector<std::vector<std::string> > > m_parsed_flags ATLAS_THREAD_SAFE{};
 
     //buffered set of decisions for words that have been checked for each TGC/RPC flag
-    std::map<std::string, std::set<TGCFlagDecision> > m_tgcFlag_decisions;
-    std::map<std::string, std::set<RPCFlagDecision> > m_rpcFlag_decisions;
+    mutable std::map<std::string, std::set<TGCFlagDecision> > m_tgcFlag_decisions ATLAS_THREAD_SAFE{};
+    mutable std::map<std::string, std::set<RPCFlagDecision> > m_rpcFlag_decisions ATLAS_THREAD_SAFE{};
+    
+    //configuration that toddle the L1menu loading sfrom xAOD as metadata or from det store
+    ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", "TrigConf::xAODConfigSvc"};
+    Gaudi::Property<bool> m_MenuFromxAOD {this, "MenuFromxAOD", false, "Flag to enable loading the L1 menu from xAOD as metadata instead of the detector store"};
+    mutable std::atomic<bool> m_isInitialized ATLAS_THREAD_SAFE{false};
+    mutable std::mutex m_mutex ATLAS_THREAD_SAFE{};
   };
 
 }
