@@ -9,6 +9,7 @@
 #include "TrkParameters/TrackParameters.h" //typedef
 #include "xAODTracking/VertexFwd.h"
 #include "GeoPrimitives/GeoPrimitives.h" //Amg::Vector3D typedef
+#include "TruthUtils/ParticleConstants.h"
 #include <vector>
 
 
@@ -77,9 +78,9 @@ namespace InDet {
 
 
     /** Masses and mass ranges for different V0 hypotheses */
-    static constexpr double m_massK0 = 497.672;
+    static constexpr double m_massK0 = ParticleConstants::KZeroMassInMeV;
     static constexpr double m_sigmaK0 = 8.5;
-    static constexpr double m_massLambda = 1115.683;
+    static constexpr double m_massLambda = ParticleConstants::lambdaMassInMeV;
     static constexpr double m_sigmaLambda = 3.5;
     IntegerProperty m_nsig{this, "NSigma", 5};
 
