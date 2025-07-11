@@ -32,7 +32,7 @@ namespace Analysis {
 
     // Set masses
     constexpr double muMass = ParticleConstants::muonMassInMeV;
-    constexpr double kMass = 493.677;
+    constexpr double kMass = ParticleConstants::chargedKaonMassInMeV;
     constexpr double piMass = ParticleConstants::chargedPionMassInMeV;
 
     StatusCode JpsiPlus1Track::initialize() {
@@ -434,7 +434,7 @@ namespace Analysis {
         // Can be set by user (m_altMassConstraint) - default is -1.0.
         // If < 0.0, uses J/psi (default)
         // If > 0.0, uses the value provided
-        constexpr double jpsiTableMass = 3096.916;
+        constexpr double jpsiTableMass = ParticleConstants::JpsiMassInMeV;
 
         if (m_useMassConst) {
             m_VKVFitter->setMassInputParticles(m_muonMasses, *state);
