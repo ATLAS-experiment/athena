@@ -40,6 +40,9 @@ namespace ParticleConstants
     /// the mass of the charged pion (in MeV)
     constexpr double chargedPionMassInMeV = 139.57018;
 
+    /// the mass of the eta meson (in MeV)
+    constexpr double etaMassInMeV = 547.853;
+
     /// the mass of the neutral kaon (K0) (in MeV)
     constexpr double KZeroMassInMeV = 497.614;
 
@@ -88,6 +91,9 @@ namespace ParticleConstants
     /// the mass of the charged pion (in MeV)
     constexpr double chargedPionMassInMeV = 139.57039;
 
+    /// the mass of the eta meson (in MeV)
+    constexpr double etaMassInMeV = 547.862;
+
     /// the mass of the neutral kaon (K0) (in MeV)
     constexpr double KZeroMassInMeV = 497.611;
 
@@ -122,6 +128,9 @@ namespace ParticleConstants
   /// This exists just to allow using a symbolic name to indicate what a
   /// given value `0.0` means.
   constexpr double photonMassInMeV = 0.0;
+  constexpr double electronNeutrinoMassInMeV = 0.0;
+  constexpr double muonNeutrinoMassInMeV = 0.0;
+  constexpr double tauNeutrinoMassInMeV = 0.0;
 }
 
 #endif
