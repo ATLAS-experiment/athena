@@ -5,21 +5,6 @@ from GaudiKernel.DataHandle import DataHandle
 import re
 
 
-class AppendListSemantics(GaudiConfig2.semantics.SequenceSemantics):
-    '''
-    Extend the sequence-semantics with a merge-method that appends the lists
-    Use 'appendList<T>' as fifth parameter of the Gaudi::Property<T> constructor 
-    to invoke this merging method. The template parameter is important, also
-    in the string that forms the fifth argument. 
-    '''
-    __handled_types__ = (re.compile(r"^appendList<.*>$"),)
-    def __init__(self, cpp_type):
-        super(AppendListSemantics, self).__init__(cpp_type)
-
-    def merge(self,b,a):
-        a.extend(b)
-        return a
-
 class MapMergeNoReplaceSemantics(GaudiConfig2.semantics.MappingSemantics):
     '''
     Extend the mapping-semantics with a merge-method that merges two mappings as long as they do not have different values for the same key
@@ -101,7 +86,6 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
 
 from AthenaServices.ItemListSemantics import OutputStreamItemListSemantics
 
-GaudiConfig2.semantics.SEMANTICS.append(AppendListSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleKeySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleArraySematics)
 GaudiConfig2.semantics.SEMANTICS.append(MapMergeNoReplaceSemantics)
