@@ -102,9 +102,6 @@ VSIVarsToKeep = ['vsi_mass', 'vsi_pT', 'vsi_charge', 'vsi_isFake',
                  'vsi_fastRcut', 'vsi_fitErrcut', 'vsi_chi2cut']
 VSIVars = '.'.join(VSIVarsToKeep)
 
-TLAMuonVarsToKeep = ["pt","eta","phi","charge","muonType","quality","inDetTrackParticleLink","muonSpectrometerTrackParticleLink","combinedTrackParticleLink","clusterLink"]
-TLAMuonVars='.'.join(TLAMuonVarsToKeep)
-
 # ==============
 # === EGAMMA ===
 ElToKeep = ['ptcone20', 'ptvarcone20', 'ptcone30', 'ptvarcone30', 'trk_d0','cl_eta2','cl_phi2', 'deltaEta1PearDistortion']
@@ -888,8 +885,8 @@ TriggerHLTListRun3 = [
     ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA EgammaPEBTLA ESD', 'Egamma'),
 
     # TLA Muons
-    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS PhysicsTLA ESD', 'Muon'),
-    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.'+TLAMuonVars,                                'BS PhysicsTLA ESD', 'Muon'),
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS ESD', 'Muon'),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.',                                'BS ESD', 'Muon'),
     
     # FS vertices
     ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD AODFULL AODSLIM', 'Jet' ),
@@ -1099,8 +1096,8 @@ TriggerHLTListRun3 = [
     ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingAux.'+BTagVars,          'BS ESD AODFULL AODSLIM', 'Bjet'),
 
     # TLA bjet b-tagging
-    ('xAOD::BTaggingContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTagging',                      'BS PhysicsTLA ESD', 'Bjet'),
-    ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTaggingAux.'+BTagVars,       'BS PhysicsTLA ESD', 'Bjet'),
+    ('xAOD::BTaggingContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTagging',                      '', 'Bjet'),
+    ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTaggingAux.'+BTagVars,       '', 'Bjet'),
 
     # MinBias
 
