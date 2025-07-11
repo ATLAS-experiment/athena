@@ -60,7 +60,7 @@ private:
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey { this, "EventInfo", "EventInfo" };
   SG::ReadHandleKey<InDet::SiClusterContainer> m_pixelClusterContainerKey { this, "pixelClustersName", "ITkPixelClusters" };
-  SG::ReadHandleKey<InDet::SiClusterContainer> m_sctClusterContainerKey { this, "SCT_ClustersName", "SCT_Clusters" };
+  SG::ReadHandleKey<InDet::SiClusterContainer> m_sctClusterContainerKey { this, "SCT_ClustersName", "ITkStripClusters" };
 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_offlineTracksKey  { this, "OfflineTracks", "InDetTrackParticles"};
   SG::ReadHandleKey<McEventCollection> m_mcCollectionKey  { this, "McTruth", "TruthEvent" };
