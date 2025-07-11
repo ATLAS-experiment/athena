@@ -428,8 +428,8 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
 
             const int A(static_cast<int>(MC::baryonNumber(particleEncoding)));
             const int Z(static_cast<int>(std::abs(MC::numberOfProtons(particleEncoding))));
-            static constexpr double Mp(938.272*CLHEP::MeV);
-            static constexpr double Mn(939.565*CLHEP::MeV);
+            static constexpr double Mp(ParticleConstants::protonMassInMeV);
+            static constexpr double Mn(ParticleConstants::neutronMassInMeV);
             particleMass = std::abs( Z*Mp+(A-Z)*Mn );
 
             if (!alreadyPrintedPDGcodeWarning) {
