@@ -71,10 +71,9 @@ private:
         //
         Gaudi::Property<double>  m_DstarMu_m_Max{this, "DstarMu_m_Max", 12000.};
 
-       // PDG 2022:
        const double m_MuonMass = ParticleConstants::muonMassInMeV;
        const double m_PionMass = ParticleConstants::chargedPionMassInMeV;
-       const double m_KaonMass = 493.677;
+       const double m_KaonMass = ParticleConstants::chargedKaonMassInMeV;
 
        // ReadHandle for the Gen TruthParticles 
        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_xaodTruthParticleContainerNameGenKey{this, "TruthParticlesKey", "TruthGen", "ReadHandleKey for the xAODTruthParticlesGen"};

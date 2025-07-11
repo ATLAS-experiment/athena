@@ -74,10 +74,9 @@ private:
 	double m_DstarMu_m_Max;
         //
 
-       // PDG 2022:
        const double m_MuonMass = ParticleConstants::muonMassInMeV;
        const double m_PionMass = ParticleConstants::chargedPionMassInMeV;
-       const double m_KaonMass = 493.677;
+       const double m_KaonMass = ParticleConstants::chargedKaonMassInMeV;
 
   // Private Methods:=
 
