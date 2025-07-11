@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MAKEEVENTSTREAMINFO_H
@@ -54,8 +54,6 @@ private:
 
    /// Key, the StoreGate key for the xAOD::EventInfo object.
    StringProperty m_eventInfoKey{this, "EventInfoKey", "EventInfo", "name of the xAOD::EventInfo"};
-   /// Key, the StoreGate key for the old EventInfo object, ix there is no xAOD::EventInfo.
-   StringProperty m_oEventInfoKey{this, "OldEventInfoKey", "McEventInfo", "name of the legacy EventInfo"};
 
    /// Pointer to the data stores
    ServiceHandle<IAthMetaDataSvc> m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};

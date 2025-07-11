@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file MakeEventStreamInfo.cxx
@@ -13,9 +13,6 @@
 
 #include "PersistentDataModel/DataHeader.h"
 #include "EventInfo/EventStreamInfo.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "EventInfoUtils/EventInfoFromxAOD.h"
 
@@ -87,15 +84,8 @@ StatusCode MakeEventStreamInfo::postExecute() {
       lumiN = xEventInfo->lumiBlock();
       evtype = eventTypeFromxAOD(xEventInfo.get());
    } else {
-      SG::ReadHandle<EventInfo> oEventInfo(m_oEventInfoKey);
-      if (oEventInfo.isValid()) {
-         runN = oEventInfo->event_ID()->run_number();
-         lumiN = oEventInfo->event_ID()->lumi_block();
-         evtype = *oEventInfo->event_type();
-      } else {
-         ATH_MSG_ERROR("Unable to retrieve EventInfo object");
-         return(StatusCode::FAILURE);
-      }
+      ATH_MSG_ERROR("Unable to retrieve xAOD::EventInfo object");
+      return(StatusCode::FAILURE);
    }
 
    EventStreamInfo* pEventStream = m_metaDataSvc->tryRetrieve<EventStreamInfo>(m_key.value());
