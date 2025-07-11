@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PyAthenaUtils.cxx 
@@ -150,11 +150,7 @@ void PyAthena::throw_py_exception (bool display)
       // With py3, need to explicitly flush the python stderr
       // for the error to be visible.
       PyObject* f = PySys_GetObject (const_cast<char*>("stderr"));
-#if PY_VERSION_HEX < 0x03000000
-      PyObject* fstr = PyString_FromString ("flush");
-#else
       PyObject* fstr = PyUnicode_FromString ("flush");
-#endif
       PyObject* x = PyObject_CallMethodObjArgs (f, fstr, NULL);
       Py_XDECREF (x);
       Py_XDECREF (fstr);
@@ -187,13 +183,8 @@ PyAthena::callPyMethod ATLAS_NOT_THREAD_SAFE ( PyObject* self,
     throw_py_exception();
   }
   
-#if PY_VERSION_HEX < 0x03000000
-  if ( PyInt_Check( r ) || PyLong_Check(r) ) {
-    StatusCode sc(PyInt_AS_LONG( r ));
-#else
   if ( PyLong_Check( r ) ) {
     StatusCode sc(PyLong_AS_LONG( r ));
-#endif
     Py_DECREF( r );
     return sc;
   }
