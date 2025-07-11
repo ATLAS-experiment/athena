@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2024-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "LArNNRawChannelBuilder.h"
@@ -11,17 +11,20 @@
 
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArIdentifier/LArOnlineID.h"
+#include "CaloIdentifier/CaloCell_ID.h"
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
 #include "LArElecCalib/LArProvenance.h"
-#include <cmath>
 
-#include <map>
-#include <fstream>
-#include <sstream>
 #include <onnxruntime_cxx_api.h>
 #include "CoraCool/CoraCoolDatabase.h"
 #include "CoraCool/CoraCoolDatabaseSvcFactory.h"
 #include "CoraCool/CoraCoolDatabaseSvc.h"
+//
+#include <cmath>
+#include <map>
+#include <vector>
+#include <fstream>
+#include <sstream>
 #include <typeinfo>
 
 using namespace cool;
@@ -154,7 +157,12 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     const std::vector<short>& samples = digit->samples();
     const int gain = digit->gain();
     const float pedestal_value = peds->pedestal(id, gain);
-    int clusterFromHash = hashIdToCluster[oflHash];
+    const int clusterFromHash = hashIdToCluster[oflHash];
+    if (clusterFromHash<0){
+      ATH_MSG_ERROR("LArNNRawChannelBuilder::execute: clusterFromHash returned"<<clusterFromHash);
+      return StatusCode::FAILURE;
+    
+    }
     unsigned nnNumInputs = clusterToOnnx[clusterFromHash]->GetInputCount();
     unsigned nnNumOutputs = clusterToOnnx[clusterFromHash]->GetOutputCount();
 
@@ -242,13 +250,8 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     }
 
     std::vector<Ort::Value> outputs;
-    if(clusterFromHash != -1){     
-      outputs = clusterToOnnx[clusterFromHash]->Run(Ort::RunOptions{nullptr}, input_names.data(), input_tensors.data(), input_tensors.size(), output_names.data(), output_names.size());
-    }
-    else{
-        ATH_MSG_ERROR("Hardware ID --> " << id.get_identifier32().get_compact() << " or HashId --> " << oflHash << " not in the input mapping file");
-        return StatusCode::FAILURE;
-    }
+         
+    outputs = clusterToOnnx[clusterFromHash]->Run(Ort::RunOptions{nullptr}, input_names.data(), input_tensors.data(), input_tensors.size(), output_names.data(), output_names.size());
 
     //normalised output
     An = outputs.front().GetTensorMutableData<float>()[0];

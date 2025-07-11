@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2024-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef LARROD_LARNNRAWCHANNELBUILDER_H
@@ -23,18 +23,11 @@
 #include "LArRawConditions/LArDSPThresholdsComplete.h"
 #include "LArElecCalib/ILArOFC.h"
 #include "LArElecCalib/ILArShape.h"
-#include "CaloIdentifier/CaloCell_ID.h"
-#include <map>
 
 
-#include <vector>
-
-
-//Event classes
-class LArDigitContainer;
-class LArRawChannelContainer;
 
 class LArOnlineID;
+class CaloCell_ID;
 
 
 class LArNNRawChannelBuilder : public AthReentrantAlgorithm {
