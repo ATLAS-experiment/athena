@@ -394,6 +394,8 @@ template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
 template<class T> inline bool isMSSMHiggs(const T& p){return isMSSMHiggs(p->pdg_id());}
 template<> inline bool isMSSMHiggs(const int& p){ return p == HIGGS2 || p == HIGGS3 || std::abs(p) == HIGGSPLUS; }
 
+template<class T> inline bool isBSMBoson(const T& p){return isHeavyBoson(p) || isMSSMHiggs(p);}
+
 template<class T> inline bool isGraviton(const T& p) {return isGraviton(p->pdg_id());}
 template<> inline bool isGraviton(const int& p){ return p == GRAVITON; }
 
