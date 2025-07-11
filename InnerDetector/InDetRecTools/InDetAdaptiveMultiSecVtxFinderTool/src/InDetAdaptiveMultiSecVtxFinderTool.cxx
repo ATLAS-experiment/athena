@@ -661,15 +661,15 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
         double eGam = std::sqrt(Pv[0] + ParticleConstants::electronMassInMeV * ParticleConstants::electronMassInMeV) + std::sqrt(Pv[1] + ParticleConstants::electronMassInMeV * ParticleConstants::electronMassInMeV);
         double mGam = eGam * eGam - mnt2;
 
-        double prtn2 = 938.27205 * 938.27205;
+        double prtn2 = ParticleConstants::protonMassInMeV * ParticleConstants::protonMassInMeV;
         double eLam = Pv[0] > Pv[1] ? std::sqrt(Pv[0] + prtn2) + std::sqrt(Pv[1] + pi2) : std::sqrt(Pv[0] + pi2) + std::sqrt(Pv[1] + prtn2);
         double mLam = eLam * eLam - mnt2;
 
         ATH_MSG_DEBUG(" V0 masses : " << mass << " " << std::sqrt(std::abs(mGam)) << " " << std::sqrt(std::abs(mLam)));
 
-        return ((fabs(mass - 497.614) < 100.)                                 // K short
+        return ((fabs(mass - ParticleConstants::KZeroMassInMeV) < 100.)                                 // K short
                 || (mGam > 0 && std::sqrt(mGam) < 40.)                        // gamma conversion ;
-                || (mLam > 0 && std::abs(std::sqrt(mLam) - 1115.683) < 200.)  //  Lambda
+                || (mLam > 0 && std::abs(std::sqrt(mLam) - ParticleConstants::lambdaMassInMeV) < 200.)  //  Lambda
         );
     }
 
