@@ -53,6 +53,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_seedLabels);
     ATH_MSG_DEBUG("   " << m_dumpAllStatEtaBins);
     ATH_MSG_DEBUG("   " << m_useTopSpRZboundary);
+    ATH_MSG_DEBUG("   " << m_seedMeasOffset);
 
     ATH_CHECK(m_seedContainerKeys.initialize());
     ATH_CHECK(m_detEleCollKeys.initialize());
@@ -151,8 +152,10 @@ namespace ActsTrk
     if (m_trackStatePrinter.isSet()) {
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
     }
-
-    detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
+    
+    detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds,
+							m_seedMeasOffset.value(),
+							m_skipDuplicateSeeds);
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
     {
       duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex);
