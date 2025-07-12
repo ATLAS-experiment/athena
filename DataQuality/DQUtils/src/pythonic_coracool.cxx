@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Efficient pythonic CoraCool bindings
@@ -139,11 +139,7 @@ bool make_fetchers(
     for (Py_ssize_t i = 0; i < count; i++)
     {
         PyObject *py_name = PySequence_GetItem(to_fetch, i);
-#if PY_VERSION_HEX < 0x03000000
-        const char *name = PyString_AsString(py_name);
-#else
         const char *name = _PyUnicode_AsString(py_name);
-#endif
         const string type = attribute_list[name].specification().typeName();
                        
         coral_attribute_fetcher_t pf = create_attribute_fetcher(name, type);
