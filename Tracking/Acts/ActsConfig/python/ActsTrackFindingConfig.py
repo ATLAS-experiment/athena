@@ -101,6 +101,7 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
+    kwargs.setdefault("seedMeasOffset", 1)
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)

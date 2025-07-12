@@ -5,12 +5,15 @@
 #include "src/detail/DuplicateSeedDetector.h"
 
 #include "src/detail/MeasurementIndex.h"
+#include <stdexcept>
 
 namespace ActsTrk::detail {
 
   DuplicateSeedDetector::DuplicateSeedDetector(std::size_t numSeeds,
+					       unsigned int measOffset,
                                                bool enabled)
       : m_disabled(!enabled),
+	m_measOffset(measOffset),
         m_nUsedMeasurements(enabled ? numSeeds : 0ul, 0ul),
         m_nSeedMeasurements(enabled ? numSeeds : 0ul, 0ul),
         m_isDuplicateSeed(enabled ? numSeeds : 0ul, false) {
