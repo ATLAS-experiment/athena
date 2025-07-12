@@ -64,6 +64,9 @@ static const int SQUARK = 3;
 static const int CQUARK = 4;
 static const int BQUARK = 5;
 static const int TQUARK = 6;
+static const int BPRIME = 7; // 4th Generation quark
+static const int TPRIME = 8; // 4th Generation quark
+static const int QUARK_LIMIT = BPRIME; // Quark pdg_ids less than this are considered in (R-)Hadrons and Diquarks
 
 static const int ELECTRON = 11;
 static const int POSITRON = -ELECTRON;
@@ -72,6 +75,8 @@ static const int MUON = 13;
 static const int NU_MU = 14;
 static const int TAU = 15;
 static const int NU_TAU = 16;
+static const int LPRIME = 17; // 4th Generation charged lepton
+static const int NUPRIME = 18; // 4th Generation neutrino
 
 static const int GLUON = 21;
 // APID: 9 rather than 21 is used to denote a gluon/gluino in composite states. (From PDG 11g)
@@ -146,48 +151,50 @@ static const int REGGEON = 110;
 /// Codes 81–100 are reserved for generator-specific pseudoparticles and concepts.
 /// Codes 901–930, 1901–1930, 2901–2930, and 3901–3930 are for additional components
 /// of Standard Modelparton distribution functions, where the latter three ranges are intended
-/// to distinguish left/right/ longitudinal components. Codes 998 and 999 are reserved for GEANT tracking pur-poses.
+/// to distinguish left/right/ longitudinal components. Codes 998 and 999 are reserved for GEANT tracking purposes.
 static const int GEANTINOPLUS = 998;
 static const int GEANTINO0 = 999;
 
 
 /// PDG rule 2:
 /// Quarks and leptons are numbered consecutively starting from 1 and 11
-/// respectively; to dothis they are first ordered by family and within
+/// respectively; to do this they are first ordered by family and within
 /// families by weak isospin.
 /// APID: the fourth generation quarks are quarks.
 template<class T> inline bool isQuark(const T& p) {return isQuark(p->pdg_id());}
-template<> inline bool isQuark(const int& p) { return p != 0 && (std::abs(p) <= 8 || std::abs(p) == MAVTOP);}
+template<> inline bool isQuark(const int& p) { return p != 0 && (std::abs(p) <= TPRIME || std::abs(p) == MAVTOP);}
 template<> inline bool isQuark(const DecodedPID& p){ return isQuark(p.pid()); }
 
+// APID: the fourth generation quarks are not standard model quarks
 template<class T> inline bool isSMQuark(const T& p) {return isSMQuark(p->pdg_id());}
 template<> inline bool isSMQuark(const int& p) { return p != 0 && std::abs(p) <= TQUARK;}
 template<> inline bool isSMQuark(const DecodedPID& p){ return isSMQuark(p.pid()); }
 
 template<class T> inline bool isStrange(const T& p) {return isStrange(p->pdg_id());}
-template<> inline bool isStrange(const int& p){ return std::abs(p) == 3;}
+template<> inline bool isStrange(const int& p){ return std::abs(p) == SQUARK;}
 
 template<class T> inline bool isCharm(const T& p){return isCharm(p->pdg_id());}
-template<> inline bool isCharm(const int& p){ return std::abs(p) == 4;}
+template<> inline bool isCharm(const int& p){ return std::abs(p) == CQUARK;}
 
 template<class T> inline bool isBottom(const T& p){return isBottom(p->pdg_id());}
-template<> inline bool isBottom(const int& p){ return std::abs(p) == 5;}
+template<> inline bool isBottom(const int& p){ return std::abs(p) == BQUARK;}
 
 template<class T> inline bool isTop(const T& p){return isTop(p->pdg_id());}
-template<> inline bool isTop(const int& p){ return std::abs(p) == 6;}
+template<> inline bool isTop(const int& p){ return std::abs(p) == TQUARK;}
 
 /// APID: the fourth generation leptons are leptons.
 template<class T> inline bool isLepton(const T& p){return isLepton(p->pdg_id());}
-template<> inline bool isLepton(const int& p){ auto sp = std::abs(p); return sp >= 11 && sp <= 18; }
+template<> inline bool isLepton(const int& p){ auto sp = std::abs(p); return sp >= ELECTRON && sp <= NUPRIME; }
 template<> inline bool isLepton(const DecodedPID& p){ return isLepton(p.pid()); }
 
+/// APID: the fourth generation leptons are not standard model leptons.
 template<class T> inline bool isSMLepton(const T& p){return isSMLepton(p->pdg_id());}
-template<> inline bool isSMLepton(const int& p){ auto sp = std::abs(p); return sp >= 11 && sp <= 16; }
+template<> inline bool isSMLepton(const int& p){ auto sp = std::abs(p); return sp >= ELECTRON && sp <= NU_TAU; }
 template<> inline bool isSMLepton(const DecodedPID& p){ return isSMLepton(p.pid()); }
 
 /// APID: the fourth generation leptons are leptons.
 template<class T> inline bool isChLepton(const T& p){return isChLepton(p->pdg_id());}
-template<> inline bool isChLepton(const int& p){ auto sp = std::abs(p); return sp >= 11 && sp <= 18 && sp%2 == 1; }
+template<> inline bool isChLepton(const int& p){ auto sp = std::abs(p); return sp >= ELECTRON && sp <= LPRIME && sp%2 == 1; }
 
 template<class T> inline bool isElectron(const T& p){return isElectron(p->pdg_id());}
 template<> inline bool isElectron(const int& p){ return std::abs(p) == ELECTRON;}
@@ -200,18 +207,24 @@ template<> inline bool isTau(const int& p){ return std::abs(p) == TAU;}
 
 /// APID: the fourth generation neutrinos are neutrinos.
 template<class T> inline bool isNeutrino(const T& p){return isNeutrino(p->pdg_id());}
-template<> inline bool isNeutrino(const int& p){ auto sp = std::abs(p); return sp == NU_E || sp == NU_MU || sp == NU_TAU || sp == 18;  }
+template<> inline bool isNeutrino(const int& p){ auto sp = std::abs(p); return sp == NU_E || sp == NU_MU || sp == NU_TAU || sp == NUPRIME;  }
 
 template<class T> inline bool isSMNeutrino(const T& p){return isSMNeutrino(p->pdg_id());}
 template<> inline bool isSMNeutrino(const int& p){ auto sp = std::abs(p); return sp == NU_E || sp == NU_MU || sp == NU_TAU;  }
 
+/// Is this a 4th generation fermion?
+/// APID: 4th generation fermions are not standard model particles
+template<class T> inline bool isFourthGeneration(const T& p){return isFourthGeneration(p->pdg_id());}
+template<> inline bool isFourthGeneration(const int& p) {return std::abs(p) == BPRIME || std::abs(p) == TPRIME || std::abs(p) == LPRIME || std::abs(p) == NUPRIME;}
+
 /// PDG rule 4
 /// Diquarks have 4-digit numbers with nq1 >= nq2 and nq3 = 0
-/// APID: the diquarks with fourth generation are not diquarks
+/// APID: states with top quarks are diquarks
+/// APID: states with fourth generation quarks are not diquarks
 template<class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
 template<> inline bool isDiquark(const DecodedPID& p){
-  if ( p.ndigits() == 4 &&  p(0) >= p(1) && p(2) == 0 &&  p.last() % 2 == 1
-       && p.max_digit(2,4) <= TQUARK
+  if ( p.ndigits() == 4 && p(0) >= p(1) && p(1) !=0 && p(2) == 0 && (p.last() == 1 || p.last() == 3)
+       && p.max_digit(2,4) < QUARK_LIMIT
        ) return true;
   return false;
 }
@@ -224,6 +237,7 @@ template<> inline bool isDiquark(const int& p){ auto value_digits = DecodedPID(p
 /// PDG rule 5C:
 /// The special numbers 310 and 130 are given to the K0S and K0L respectively.
 /// APID: The special code K0 is used when a generator uses K0S/K0L
+/// APID: states with fourth generation quarks are not mesons
 template<class T> inline bool isMeson(const T& p){return isMeson(p->pdg_id());}
 template<> inline bool isMeson(const DecodedPID& p){
   if (p.ndigits() < 3 ) return false;
@@ -232,34 +246,41 @@ template<> inline bool isMeson(const DecodedPID& p){
   if (std::abs(p.pid()) == K0L) return true;
   if (std::abs(p.pid()) == K0) return true;
   if (p.last() % 2 != 1 ) return false;
-  if (p.max_digit(1,3) >= 6 ) return false;
-  if (p.max_digit(1,3) == 0 ) return false;
-  if (p.ndigits() > 3 && *(p.second.rbegin() + 3) != 0 ) return false;
-
-  if (p.ndigits() == 3 && p(0) == p(1) && p.pid() < 0 ) return false;
-  if (p.ndigits() == 5 && p(2) == p(3) && p.pid() < 0 ) return false;
-  if (p.ndigits() == 7 && p(4) == p(5) && p.pid() < 0 ) return false;
-
-
-  if (p.ndigits() == 3 && p(0) >= p(1) && p(1) != 0  ) return true;
-  if (p.ndigits() == 5 && p(2) >= p(3) && p(3) != 0 && p(0) == 1 && p(1) == 0) return true;
-  if (p.ndigits() == 5 && p(2) >= p(3) && p(3) != 0 && p(0) == 2 && p(1) == 0 && p.last() > 1 ) return true;
-  if (p.ndigits() == 5 && p(2) >= p(3) && p(3) != 0 && p(0) == 3 && p(1) == 0 && p.last() > 1 ) return true;
-
-  if (p.ndigits() == 6 && p(3) >= p(4) && p(4) != 0 && p.last() % 2 == 1  ) return true;
-
-  if (p.ndigits() == 7 && p(0) == 9 && p(1) == 0 && p(4) >= p(5) && p(5) != 0) return true;
+  if (p.max_digit(1,3) >= QUARK_LIMIT ) return false; // Ignore pdg_ids which would describe states including fourth generation quarks
+  if (p.min_digit(1,3) == 0 ) return false;
+  if (*(p.second.rbegin() + 2) < *(p.second.rbegin() + 1) ) return false; // Quark ordering (nq2 >= nq3)
+  if (*(p.second.rbegin() + 2) == *(p.second.rbegin() + 1) && p.pid() < 0 ) return false; // Illegal antiparticle check (nq2 == nq3)
+  if (p.ndigits() == 3 ) return true;
+  if (*(p.second.rbegin() + 3) != 0 ) return false; // Only two quarks! (nq1 == 0)
+  if (p.ndigits() == 5 && p(0) == 1 ) return true;
+  if (p.ndigits() == 5 && p(0) == 2 && p.last() > 1 ) return true;
+  if (p.ndigits() == 5 && p(0) == 3 && p.last() > 1 ) return true;
+  if (p.ndigits() == 6 && p.last() % 2 == 1 ) return true;
+  if (p.ndigits() == 7 && p(0) == 9 && p(1) == 0 ) return true;
 
   return false;
 }
 template<> inline bool isMeson(const int& p){ auto value_digits = DecodedPID(p); return isMeson(value_digits);}
 
+/// Is this a heavy-flavour quarkonium meson?
+///
+/// @note Original by LHCb in Rivet analysis LHCB_2016_I1504058
+///
+/// @note phi = s,sbar is not considered quarkonium
+template<class T> inline bool isQuarkonium(const T& p){return isQuarkonium(p->pdg_id());}
+template<> inline bool isQuarkonium(const DecodedPID& p) {
+  if (!isMeson(p)) return false; //< all quarkonia are mesons
+  return (*(p.second.rbegin() + 2) > SQUARK && p.last() > 0 && *(p.second.rbegin() + 1) == *(p.second.rbegin() + 2));
+}
+template<> inline bool isQuarkonium(const int& p){ auto value_digits = DecodedPID(p); return isQuarkonium(value_digits);}
+
 ///Table 43.2
+/// APID: states with fourth generation quarks are not baryons
 template<class T> inline bool isBaryon(const T& p){return isBaryon(p->pdg_id());}
 template<> inline bool isBaryon(const DecodedPID& p){
   if (p.ndigits() < 4 ) return false;
-  if (p.max_digit(1,4) >= 6 ) return false;
-  if (p.min_digit(1,4) == 0) return false;
+  if (p.max_digit(1,4) >= QUARK_LIMIT ) return false; // Ignore pdg_ids which would describe states including fourth generation quarks
+  if (p.min_digit(1,4) == 0) return false; // Ignore pdg_ids with zero for nq1, nq2, nq3
   if (p.ndigits() == 4 && (p.last() == 2 || p.last() == 4|| p.last() == 6|| p.last() == 8) ) return true;
 
   if (p.ndigits() == 5 && p(0) == 1 &&  (p.last() == 2 || p.last() == 4) ) return true;
@@ -267,17 +288,16 @@ template<> inline bool isBaryon(const DecodedPID& p){
 
   if (p.ndigits() == 6 ) {
     if (p(0) == 1 && p(1) == 0 && p.last() == 2 ) return true;
+    if (p(0) == 1 && p(1) == 0 && p.last() == 4 ) return true;
+    if (p(0) == 1 && p(1) == 0 && p.last() == 6 ) return true;
     if (p(0) == 1 && p(1) == 1 && p.last() == 2 ) return true;
     if (p(0) == 1 && p(1) == 2 && p.last() == 4 ) return true;
 
     if (p(0) == 2 && p(1) == 0 && p.last() == 2 ) return true;
     if (p(0) == 2 && p(1) == 0 && p.last() == 4 ) return true;
-    if (p(0) == 2 && p(1) == 1 && p.last() == 2 ) return true;
-
-    if (p(0) == 1 && p(1) == 0 && p.last() == 4 ) return true;
-    if (p(0) == 1 && p(1) == 0 && p.last() == 6 ) return true;
     if (p(0) == 2 && p(1) == 0 && p.last() == 6 ) return true;
     if (p(0) == 2 && p(1) == 0 && p.last() == 8 ) return true;
+    if (p(0) == 2 && p(1) == 1 && p.last() == 2 ) return true;
   }
 
   if (p.ndigits() == 5 ) {
@@ -293,30 +313,33 @@ template<> inline bool isBaryon(const DecodedPID& p){
 template<> inline bool isBaryon(const int& p){ auto value_digits = DecodedPID(p); return isBaryon(value_digits);}
 
 /// PDG rule 14
-///The 9-digit tetra-quark codes are±1nrnLnq1nq20nq3nq4nJ. For the particleq1q2is a diquarkand
-/// ̄q3 ̄q4an antidiquark, sorted such thatnq1≥nq2,nq3≥nq4,nq1≥nq3, andnq2≥nq4ifnq1=nq3.
-///For the antiparticle, given with a negative sign, ̄q1 ̄q2is an antidiquark andq3q4a diquark,
-/// with the same sorting except that eithernq1> nq3ornq2> nq4(so thatflavour-diagonal states are particles).
-/// Thenr,nL, andnJnumbers have the same meaningas for ordinary hadrons.
+///The 9-digit tetra-quark codes are ±1nrnLnq1nq20nq3nq4nJ. For the particle q1q2 is a diquark and
+/// ̄q3 ̄q4 an antidiquark, sorted such that nq1≥nq2, nq3≥nq4, nq1≥nq3, and nq2≥nq4 if nq1=nq3.
+///For the antiparticle, given with a negative sign,  ̄q1 ̄q2 is an antidiquark and q3q4 a diquark,
+/// with the same sorting except that either nq1>nq3 or nq2>nq4 (so that flavour-diagonal states are particles).
+/// The nr, nL, and nJ numbers have the same meaning as for ordinary hadrons.
+/// APID: states with fourth generation quarks are not tetraquarks
 template<class T> inline bool isTetraquark(const T& p){return isTetraquark(p->pdg_id());}
 template<> inline bool isTetraquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 && p(5) == 0 &&
-          p.max_digit(1,3) <= 6  && p.min_digit(1,3) > 0 &&
-          p.max_digit(1+3,3+3) <= 6  && p.min_digit(1+3,3+3) > 0 &&
-          ( p(3) >= p(4)  && p(6) >= p(7) ) &&  ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7))))
+          p.max_digit(1,3) < QUARK_LIMIT && p.min_digit(1,3) > 0 && // ignore 4th generation quarks for nq3 and nq4
+          p.max_digit(4,6) < QUARK_LIMIT && p.min_digit(4,6) > 0 && // ignore 4th generation quarks for nq1 and nq2
+          ( p(3) >= p(4) && p(6) >= p(7) ) && ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7))))
           );
 }
 template<> inline bool isTetraquark(const int& p){ auto value_digits = DecodedPID(p); return isTetraquark(value_digits);}
 
 /// PDG rule 15
-///The 9-digit penta-quark codes are±1nrnLnq1nq2nq3nq4nq5nJ, sorted such thatnq1≥nq2≥nq3≥nq4.
-///In the particle the first four are quarks and the fifth an antiquark while t
-/// heopposite holds in the antiparticle, which is given with a negative sign.
-///Thenr,nL, andnJnumbers have the same meaning as for ordinary hadrons.
+///The 9-digit penta-quark codes are ±1nrnLnq1nq2nq3nq4nq5nJ, sorted
+///such that nq1≥nq2≥nq3≥nq4.  In the particle the first four are
+///quarks and the fifth an antiquark while the opposite holds in the
+///antiparticle, which is given with a negative sign.  The nr, nL, and
+///nJ numbers have the same meaning as for ordinary hadrons.
+// APID: states with fourth generation quarks are not pentaquarks
 template<class T> inline bool isPentaquark(const T& p){return isPentaquark(p->pdg_id());}
 template<> inline bool isPentaquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 &&
-          p.max_digit(1,6) <= 6  && p.min_digit(1,6) > 0 &&
+          p.max_digit(1,6) < QUARK_LIMIT && p.min_digit(1,6) > 0 && // ignore 4th generation (anti-)quarks
           ( p(3) >= p(4) && p(4) >= p(5) && p(5) >= p(6)) );
 }
 template<> inline bool isPentaquark(const int& p){ auto value_digits = DecodedPID(p); return isPentaquark(value_digits);}
@@ -415,8 +438,8 @@ template<class T> inline bool isGlueball(const T& p) { return isGlueball(p->pdg_
 template<> inline bool isGlueball(const DecodedPID& p) {
   if (p.ndigits() > 4) return false; // APID avoid classifying R-Glueballs as SM Glueballs
   return
-    ( ( p.ndigits() == 3 && p(0) == COMPOSITEGLUON && p(1) == COMPOSITEGLUON && (p(2) == 1 || p(2) == 5) ) ||
-      ( p.ndigits() == 4 && p(0) == COMPOSITEGLUON && p(1) == COMPOSITEGLUON && p(2) == COMPOSITEGLUON &&  (p(3) == 3 || p(3) == 7) )  );
+    ( ( p.ndigits() == 3 && p(0) == COMPOSITEGLUON && p(1) == COMPOSITEGLUON && (p.last() == 1 || p.last() == 5) ) ||
+      ( p.ndigits() == 4 && p(0) == COMPOSITEGLUON && p(1) == COMPOSITEGLUON && p(2) == COMPOSITEGLUON &&  (p.last() == 3 || p.last() == 7) )  );
 }
 template<> inline bool isGlueball(const int& p) {  auto value_digits = DecodedPID(p); return isGlueball(value_digits); }
 
