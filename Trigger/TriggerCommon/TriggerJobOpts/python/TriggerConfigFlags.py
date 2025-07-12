@@ -542,7 +542,7 @@ def createTriggerRecoFlags():
                   help='calibration config file for HLT large-R PFlow jets')
 
     # chooses config directory for jet vertex tagger with neural network
-    flags.addFlag("Trigger.Jet.nnJVTConfigDir", lambda prevFlags: "JetPileupTag/NNJvt/HLT-2025-02-05",
+    flags.addFlag("Trigger.Jet.nnJVTConfigDir", lambda prevFlags: "JetPileupTag/NNJvt/HLT-2025-05-21",
                   help='config directory containing cut files and neural network for HLT nnjvt')
 
     flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2,
