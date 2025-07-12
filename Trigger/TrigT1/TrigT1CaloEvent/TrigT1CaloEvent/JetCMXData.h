@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  //***************************************************************************
@@ -13,8 +13,8 @@
   #ifndef JETCMXDATA_H
   #define JETCMXDATA_H
   
-  #include "AthenaKernel/CLASS_DEF.h"
   #include "TrigT1CaloEvent/JEMTobRoI.h"
+  #include <vector>
 
   namespace LVL1 {
   
@@ -54,8 +54,6 @@
     };
   } // end of namespace
 
-#ifndef JetCMXData_ClassDEF_H
 #include "TrigT1CaloEvent/JetCMXData_ClassDEF.h"
-#endif
 
 #endif

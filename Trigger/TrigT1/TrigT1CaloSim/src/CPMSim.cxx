@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // /***************************************************************************
@@ -27,7 +27,7 @@
 #include "TrigT1Interfaces/TrigT1Interfaces_ClassDEF.h"
 #include "xAODTrigL1Calo/CPMTowerContainer.h"
 #include "TrigT1CaloEvent/CPMTobRoI_ClassDEF.h"
-#include "TrigT1CaloEvent/CPMCMXData_ClassDEF.h"
+#include "TrigT1CaloEvent/CPMCMXData.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"

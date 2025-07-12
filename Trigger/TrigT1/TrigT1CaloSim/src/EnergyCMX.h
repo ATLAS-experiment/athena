@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  /***************************************************************************
@@ -12,10 +12,8 @@
  #ifndef ENERGYCMX_H
  #define ENERGYCMX_H
 
- // STL
- #include <string>
- #include <vector>
- #include <map>
+ 
+ 
 
  // Athena/Gaudi
  #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -29,16 +27,17 @@
  #include "TrigT1CaloUtils/CrateEnergy.h"
  #include "TrigT1CaloUtils/SystemEnergy.h"
  #include "TrigT1CaloEvent/EnergyRoI_ClassDEF.h"
- #include "TrigT1CaloEvent/EnergyCMXData_ClassDEF.h"
+ #include "TrigT1CaloEvent/EnergyCMXData.h"
  #include "TrigT1Interfaces/EnergyCTP.h"
  #include "TrigT1CaloEvent/CMXEtSums_ClassDEF.h"
- #include "TrigT1CaloEvent/EnergyTopoData_ClassDEF.h"
+ #include "TrigT1CaloEvent/EnergyTopoData.h"
  #include "TrigT1CaloEvent/CMXRoI.h"
  #include "TrigT1CaloToolInterfaces/IL1EtTools.h"
  #include "TrigT1Interfaces/TrigT1CaloDefs.h"
  #include "TrigConfL1Data/L1DataDef.h"
  #include "TrigConfData/L1Menu.h"
-
+ // STL
+ #include <string>
 
  namespace LVL1 {
    //using namespace TrigConf;
