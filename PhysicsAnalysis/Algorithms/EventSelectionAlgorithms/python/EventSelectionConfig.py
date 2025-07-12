@@ -783,8 +783,8 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if len(items) != 1:
             self.raise_misconfig(text, "number of arguments")
-        if not self.electrons and not self.muons:
-            self.raise_missinginput("electrons or muons")
+        if not self.electrons and not self.muons and not self.taus:
+            self.raise_missinginput("electrons or muons or taus")
         thisalg = f'{self.name}_OS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
         if self.electrons:
@@ -797,6 +797,11 @@ class EventSelectionConfig(ConfigBlock):
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if self.taus:
+            if "Particle" in self.taus or "Truth" in self.taus:
+                alg.truthTaus, alg.truthTauSelection = config.readNameAndSelection(self.taus)
+            else:
+                alg.taus, alg.tauSelection = config.readNameAndSelection(self.taus)
         alg.OS = True
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
