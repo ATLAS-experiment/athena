@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_ACTIVESTORESVC_H
@@ -9,9 +9,9 @@
 #include "GaudiKernel/StatusCode.h"
 
 #include "AthenaKernel/IProxyDict.h"
+#include "AthenaKernel/StoreID.h"
 
 class StoreGateSvc;
-class ISvcLocator;
 
 
 /** @class ActiveStoreSvc
@@ -26,10 +26,11 @@ class ISvcLocator;
  *  @author ATLAS Collaboration
  **/
 
-class ActiveStoreSvc : public IProxyDict,
-                       public Service
+class ActiveStoreSvc : public extends<Service, IProxyDict>
 {
 public:
+  /// Constructor from base class
+  using base_class::base_class;
 
   ///returns pointer to the active store as StoreGateSvc
   inline StoreGateSvc* activeStore() const {
@@ -141,22 +142,11 @@ public:
                     CLID clid) override;
 
 
-  //@{ @name Gaudi Service boilerplate
   virtual StatusCode initialize() override;
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
-  //@}
-
-  /// not really kosher: should be in IActiveStoreSvc
-  static const InterfaceID& interfaceID(); 
-  
-  /// Standard Service Constructor. sets active store to default event store
-  ActiveStoreSvc(const std::string& name, ISvcLocator* svc);
-
-  virtual ~ActiveStoreSvc() override;
 
 private:
   StoreGateSvc* activeStoreOOL() const;
-  std::string m_storeName; //< property: StoreGate instance name
+  Gaudi::Property<std::string> m_storeName{this, "StoreName", StoreID::storeName(StoreID::EVENT_STORE), "StoreGate instance name"};
 
 };
 #endif // STOREGATE_ACTIVESTORESVC_H
