@@ -1,5 +1,5 @@
 /*                                                                                                                      
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigThresholdDecisionTool.h"
@@ -194,7 +194,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
 
       if (passed) {
         // set the corresponding bit in the pattern
-        thresholdsPattern |= (1 << thr->mapping());
+        thresholdsPattern |= (1ull << thr->mapping());
       }
 
     } // loop over thresholds
@@ -417,7 +417,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
       {
 	vec_flags.push_back(parseString(vec_ors[ior],"&"));
       }
-      m_parsed_flags[flags] = vec_flags;
+      m_parsed_flags[flags] = std::move(vec_flags);
     }
   }
 
