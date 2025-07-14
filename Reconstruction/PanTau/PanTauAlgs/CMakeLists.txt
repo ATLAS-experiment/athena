@@ -12,7 +12,7 @@ atlas_add_library( PanTauAlgsLib
    PUBLIC_HEADERS PanTauAlgs
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AsgTools xAODBase
-   xAODParticleEvent xAODPFlow xAODTau tauRecToolsLib MVAUtils
+   xAODParticleEvent xAODPFlow xAODTau tauRecToolsLib MVAUtils TruthUtils
    PRIVATE_LINK_LIBRARIES xAODTracking PathResolver )
 
 atlas_add_dictionary( PanTauAlgsDict
