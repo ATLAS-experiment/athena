@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTDIGITIZATIONTOOL_H
@@ -10,7 +10,6 @@
  * @author Paolo Calafiura - ATLAS Collaboration
  */
 
-#include "xAODEventInfo/EventInfo.h"  /*SubEvent*/
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "PileUpTools/PileUpToolBase.h"
 #include "PileUpTools/PileUpMergeSvc.h"
@@ -29,7 +28,6 @@
 // For magneticfield
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
-#include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -106,8 +104,6 @@ private:
                             Identifier& layerID,
                             bool& statusok ) const;
 
-  StatusCode ConditionsDependingInitialization (const EventContext& ctx);
-
   StatusCode lateInitialize(const EventContext& ctx);
   StatusCode processStraws(const EventContext& ctx,
                            TimedHitCollection<TRTUncompressedHit>& thpctrt,
@@ -168,7 +164,6 @@ private:
   // const  ComTime* m_ComTime{};
   double m_cosmicEventPhase{0.0};     // local replacement for the comTime service
   const HepPDT::ParticleDataTable* m_particleTable{};
-  SG::ReadCondHandleKey<AthenaAttributeList> m_digverscontainerkey{ this, "DigVersContainerKey", "", "" };
   bool m_first_event{true};
 
   bool m_HardScatterSplittingSkipper{false};
