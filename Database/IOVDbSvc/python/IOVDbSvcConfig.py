@@ -174,6 +174,26 @@ def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className
     return addFolders(flags, folders, detDb, className, extensible, tag=tag, db=forceDb, modifiers=modifiers)
 
 
+def blockFolder(cfg, folder):
+    """Block use of specified conditions DB folder so data can be read from elsewhere"""
+    cfg.merge(IOVDbSvcCfg(flags))
+    
+    IOVDbSvc = cfg.getService("IOVDbSvc")
+    condInputLoader = cfg.getCondAlgo("CondInputLoader")
+    
+    # check existing list of folders and remove it if found
+    for i in range(0, len(IOVDbSvc.Folders)):
+        if (IOVDbSvc.Folders[i].find(folder) >= 0):
+            IOVDbSvc.Folders.pop(i)
+            break
+
+    folderName = _extractFolder(folder)
+
+    for f in condInputLoader.Load:
+        if (f[-1] == folderName):
+            condInputLoader.Load.remove(f)
+            break
+
 _dblist = {
     'INDET':'COOLONL_INDET',
     'INDET_ONL':'COOLONL_INDET',
