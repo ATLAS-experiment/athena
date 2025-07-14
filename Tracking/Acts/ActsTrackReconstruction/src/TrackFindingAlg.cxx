@@ -284,18 +284,21 @@ namespace ActsTrk
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << seeds.size() << ' ' << seedType << " seeds.");
 
+      
     std::size_t nPrinted = 0;
-    auto printSeed = [&](unsigned int iseed, const Acts::BoundTrackParameters &seedParameters, bool isKF = false)
-    {
-      if (!m_trackStatePrinter.isSet())
-        return;
-      if (!nPrinted++)
-      {
-        ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
-      }
-      m_trackStatePrinter->printSeed(detContext.geometry, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
-    };
+    
+    // Function for Estimate Track Parameters
+    auto retrieveSurfaceFunction = 
+      [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& { 
+	const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
+	const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(useTopSp ? sp->elementIdList().back()
+										   : sp->elementIdList().front());
+	const Trk::Surface& atlas_surface = element->surface();
+	return m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+      };
+    
 
+    
     // Loop over the track finding results for all initial parameters
     for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
     {
@@ -308,17 +311,10 @@ namespace ActsTrk
       const bool refitSeeds = typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex];
       const bool useTopSp = reverseSearch && !refitSeeds;
 
-      auto getSeedCategory = [this, useTopSp](std::size_t typeIndex, const ActsTrk::Seed& seed) -> std::size_t {
-        const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
-        const xAOD::SpacePoint::ConstVectorMap pos = sp->globalPosition();
-        double etaSeed = std::atanh(pos[2] / pos.norm());
-        return getStatCategory(typeIndex, etaSeed);
-      };
-
       const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
       if (isDupSeed) {
         ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
-        category_i = getSeedCategory(typeIndex, seed);
+        category_i = getSeedCategory(typeIndex, seed, useTopSp);
         ++event_stat[category_i][kNTotalSeeds];
         ++event_stat[category_i][kNDuplicateSeeds];
         if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
@@ -330,20 +326,8 @@ namespace ActsTrk
       secondOptions.targetSurface = reverseSearch ? nullptr : pSurface.get();
       // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
 
-      // Estimate Track Parameters
-      auto retrieveSurfaceFunction = 
-        [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& { 
-          const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
-          const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
-                useTopSp ? sp->elementIdList().back()
-                                : sp->elementIdList().front());
-          const Trk::Surface& atlas_surface = element->surface();
-          return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
-        };
-
       std::optional<Acts::BoundTrackParameters> optTrackParams =
-        m_paramEstimationTool->estimateTrackParameters(
-						       seed,
+        m_paramEstimationTool->estimateTrackParameters(seed,
 						       useTopSp,
 						       detContext.geometry,
 						       detContext.magField,
@@ -352,7 +336,7 @@ namespace ActsTrk
       if (!optTrackParams) {
         ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
         if (!isDupSeed) {
-          category_i = getSeedCategory(typeIndex, seed);
+          category_i = getSeedCategory(typeIndex, seed, useTopSp);
           ++event_stat[category_i][kNTotalSeeds];
           ++event_stat[category_i][kNNoEstimatedParams];
         }
@@ -360,7 +344,7 @@ namespace ActsTrk
       }
 
       Acts::BoundTrackParameters *initialParameters = &(*optTrackParams);
-      printSeed(iseed, *initialParameters);
+      printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType);
       if (isDupSeed) continue;  // skip now if not done before
 
       double etaInitial = -std::log(std::tan(0.5 * initialParameters->theta()));
@@ -377,13 +361,12 @@ namespace ActsTrk
         }
         if (refitSeedParameters.get() != initialParameters) {
           initialParameters = refitSeedParameters.get();
-          printSeed(iseed, *initialParameters, true);
+          printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType, true);
         }
       }
 
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
-
       auto result = trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
 
       // The result for this seed
@@ -426,12 +409,6 @@ namespace ActsTrk
         ++ntracks;
         ++event_stat[category_i][kNOutputTracks];
 
-        auto selectPixelStripCountsFinal = [this](const detail::RecoTrackContainer::TrackProxy &track) {
-          if (!m_addPixelStripCounts) return true;
-          double eta = -std::log(std::tan(0.5 * track.theta()));
-          auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] = selectPixelStripCounts(track, eta);
-          return enoughMeasurementsPS && !tooManyHolesPS && !tooManyOutliersPS;
-        };
         if (trackFinder().trackSelector.isValidTrack(track) &&
             selectPixelStripCountsFinal(track)) {
 
@@ -584,4 +561,33 @@ namespace ActsTrk
                    << counter.n_missing_detector_elements);
      return StatusCode::SUCCESS;
    }
+
+  std::size_t TrackFindingAlg::getSeedCategory(std::size_t typeIndex,
+					       const ActsTrk::Seed& seed,
+					       bool useTopSp) const
+  {
+    const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
+    const xAOD::SpacePoint::ConstVectorMap pos = sp->globalPosition();
+    double etaSeed = std::atanh(pos[2] / pos.norm());
+    return getStatCategory(typeIndex, etaSeed);
+  }
+
+  void TrackFindingAlg::printSeed(unsigned int iseed,
+				  const DetectorContextHolder& detContext,
+				  const ActsTrk::SeedContainer& seeds,
+				  const Acts::BoundTrackParameters &seedParameters,
+				  const detail::MeasurementIndex &measurementIndex,
+				  std::size_t& nPrinted,
+				  const char *seedType,
+				  bool isKF) const
+  {
+    if (not m_trackStatePrinter.isSet()) return;
+    
+    if (nPrinted == 0) {
+      ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
+    }
+    ++nPrinted;
+    m_trackStatePrinter->printSeed(detContext.geometry, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
+  }
+  
 } // namespace

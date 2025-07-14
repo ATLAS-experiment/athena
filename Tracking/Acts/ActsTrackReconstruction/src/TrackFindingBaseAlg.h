@@ -307,6 +307,8 @@ namespace ActsTrk {
     void checkPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
     std::array<bool, 3> selectPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;
 
+    bool selectPixelStripCountsFinal(const detail::RecoTrackContainer::TrackProxy &track) const;
+    
     /// Private access to the logger
     const Acts::Logger &logger() const
     {

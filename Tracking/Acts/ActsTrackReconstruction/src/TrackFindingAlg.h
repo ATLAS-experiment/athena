@@ -51,6 +51,20 @@ namespace ActsTrk
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
+    std::size_t getSeedCategory(std::size_t typeIndex,
+				const ActsTrk::Seed& seed,
+				bool useTopSp) const;
+
+    void printSeed(unsigned int iseed,
+		   const DetectorContextHolder& detContext,
+		   const ActsTrk::SeedContainer& seeds,
+		   const Acts::BoundTrackParameters &seedParameters,
+		   const detail::MeasurementIndex &measurementIndex,
+		   std::size_t& nPrinted,
+		   const char *seedType,
+		   bool isKF = false) const;
+
+  private:
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKeys{this, "SeedContainerKeys", {}, "Seed containers"};
