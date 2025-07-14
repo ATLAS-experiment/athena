@@ -39,9 +39,6 @@ namespace LVL1
     ATH_MSG_DEBUG( "Start for Phase1 TrigThresholdDecisionTool"  );
     ATH_MSG_DEBUG( "==========================================" );
 
-    m_parsed_flags.clear();
-    m_tgcFlag_decisions.clear();
-
     // we configure the tool here only if we are not running from xAOD
     if (!m_MenuFromxAOD){
         
@@ -58,6 +55,10 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     if (m_isInitialized) {
         return StatusCode::SUCCESS;
     }
+
+    m_parsed_flags.clear();
+    m_tgcFlag_decisions.clear();
+    m_rpcFlag_decisions.clear();
 
     //front-load the TGC flag parsing and all possible 3-bit decisions for the menu
     std::optional<ThrVecRef> menuThresholds = getMenuThresholds(l1Menu);
