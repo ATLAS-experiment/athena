@@ -25,6 +25,7 @@ namespace MuonR4{
             virtual StatusCode finalize() override final;
         private:
 
+            std::size_t fillSpacePoint(const ActsGeometryContext& gctx, const SpacePoint& sp);
             SG::ReadHandleKeyArray<SpacePointContainer> m_spacePointKeys{this, "SpacePointKeys", {"MuonSpacePoints"}, 
                                                      "Key to the space point container"};
 
@@ -39,6 +40,11 @@ namespace MuonR4{
 
             std::shared_ptr<MuonValR4::SpacePointTesterModule> m_spCollection{};
             MuonVal::ThreeVectorBranch m_spGlobPos{m_tree, "spacePoint_globPos"};
+            MuonVal::ThreeVectorBranch m_spGlobEdgeLow{m_tree, "spacePoint_globEdgeLow"};
+            MuonVal::ThreeVectorBranch m_spGlobEdgeHigh{m_tree, "spacePoint_globEdgeHigh"};
+            MuonVal::VectorBranch<char>& m_spReadoutSide{m_tree.newVector<char>("spacePoint_readOutSide")};
+            MuonVal::VectorBranch<float>& m_spTime{m_tree.newVector<float>("spacePoint_time")};
+            
             MuonVal::VectorBranch<char>& m_truthLink{m_tree.newVector<char>("spacePoint_truthLink")};
 
     };
