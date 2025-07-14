@@ -174,7 +174,7 @@ def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className
     return addFolders(flags, folders, detDb, className, extensible, tag=tag, db=forceDb, modifiers=modifiers)
 
 
-def blockFolder(cfg, folder):
+def blockFolder(cfg, flags, folder):
     """Block use of specified conditions DB folder so data can be read from elsewhere"""
     cfg.merge(IOVDbSvcCfg(flags))
     
