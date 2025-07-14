@@ -541,11 +541,19 @@ def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
     acc=ComponentAccumulator()
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
     acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
-        'xAODPixelClusterFromFPGAClusterKey': 'ITkPixelClusters',
-        'xAODStripClusterFromFPGAClusterKey': 'ITkStripClusters',
+        'xAODPixelClusterFromFPGAClusterKey': 'FPGAPixelClusters',
+        'xAODStripClusterFromFPGAClusterKey': 'FPGAStripClusters',
         'doActsTrk': False,
         'doSP': False,
     }))
+    
+    from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg
+    ClusterSorting = FPGAClusterSortingAlgCfg(flags,**{'xAODPixelClusterContainer': 'FPGAPixelClusters',
+                                                       'xAODStripClusterContainer': 'FPGAStripClusters',
+                                                       'sortedxAODPixelClusterContainer': 'ITkPixelClusters',
+                                                       'sortedxAODStripClusterContainer': 'ITkStripClusters'})
+    
+    acc.merge(ClusterSorting)
     
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
     acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
