@@ -42,7 +42,7 @@ namespace InDet {
     ATH_CHECK( m_stripClusterContainerLinkKey.initialize(m_processStrip) );
     ATH_CHECK( m_outputStripClusterContainerKey.initialize(m_processStrip) );
 
-    ATH_CHECK( m_lorentzAngleTool.retrieve() );
+    ATH_CHECK( m_lorentzAngleTool.retrieve(EnableTool{not m_lorentzAngleTool.empty()}) );
 
     // Hgtd Clusters
     ATH_CHECK( m_HGTDDetEleCollKey.initialize(m_processHgtd) );
