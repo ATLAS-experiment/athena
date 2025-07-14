@@ -30,7 +30,7 @@ def defineInputsMenu():
                     for group in conn["algorithmGroups"]:
                         if group["fpga"]==0 and group["clock"]==1:
                             group["algorithms"] += [
-                                    TopoMenuDef( '0DR04-MU5VFab-CjJ20ab' , outputbits = 14 ),
+                                    TopoMenuDef( '0DR04-MU5VFab-CjJ40ab' , outputbits = 14 ),
                                     TopoMenuDef( '0DR04-MU3VFab-CjJ20ab' , outputbits = 15 ),
                             ]
                         elif group["fpga"]==1 and group["clock"]==1:
