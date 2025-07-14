@@ -199,26 +199,26 @@ namespace ActsTrk {
       const detail::TrackFindingMeasurements &measurements,
       const Acts::PerigeeSurface* pSurface) const {
     Acts::PropagatorPlainOptions plainOptions{detContext.geometry, detContext.magField};
-    Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
-
     plainOptions.maxSteps = m_maxPropagationStep;
     plainOptions.direction = Acts::Direction::Forward();
     plainOptions.endOfWorldVolumeIds = m_endOfWorldVolumeIds;
-    plainSecondOptions.maxSteps = m_maxPropagationStep;
-    plainSecondOptions.direction = plainOptions.direction.invert();
 
     // Set the CombinatorialKalmanFilter options
     TrackFinderOptions options(detContext.geometry, detContext.magField, detContext.calib,
                                trackFinder().ckfExtensions, plainOptions, pSurface);
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(measurements, options);
+    
+    Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
+    plainSecondOptions.maxSteps = m_maxPropagationStep;
+    plainSecondOptions.direction = plainOptions.direction.invert();
 
     TrackFinderOptions secondOptions(detContext.geometry, detContext.magField, detContext.calib,
                                      options.extensions, plainSecondOptions, pSurface);
     secondOptions.targetSurface = pSurface;
     secondOptions.skipPrePropagationUpdate = true;
 
-    return {options, secondOptions, std::move(measurementSelector)};
+    return {std::move(options), std::move(secondOptions), std::move(measurementSelector)};
   };
 
   const Acts::TrackSelector::Config& TrackFindingBaseAlg::getCuts (double eta) const {
@@ -779,5 +779,11 @@ namespace ActsTrk {
     return out;
   }
 
-
+  bool TrackFindingBaseAlg::selectPixelStripCountsFinal(const detail::RecoTrackContainer::TrackProxy &track) const {
+    if (not m_addPixelStripCounts) return true;
+    double eta = -std::log(std::tan(0.5 * track.theta()));
+    auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] = selectPixelStripCounts(track, eta);
+    return enoughMeasurementsPS && !tooManyHolesPS && !tooManyOutliersPS;
+  }
+  
 }  // namespace ActsTrk
