@@ -26,15 +26,13 @@ l1seeds = { 'low'  : \
                 'L1_2eEM18',\
                 'L1_2MU3V',\
                 'L1_MU5VF_3MU3V',\
-                'L1_BPH-0DR3-eEM9jJ40_2MU3V',\
-                'L1_BPH-0DR3-eEM9jJ40_MU5VF',\
+                'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25',\
                 'L1_BPH-0M9-eEM9-eEM7_MU5VF',\
                 'L1_BPH-2M9-2DR15-2MU5VF',\
                 'L1_BPH-2M9-0DR15-C-MU5VFMU3V',\
                 'L1_BPH-7M11-25DR99-2MU3VF',\
                 'L1_BPH-8M15-0DR22-2MU5VF',\
                 'L1_BPH-8M15-0DR22-MU5VFMU3V-BO',\
-                'L1_BTAG-MU3VjJ40',\
                 'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20',\
                 'L1_DY-BOX-2MU5VF',\
                 'L1_DY-BOX-2MU3VF',\
