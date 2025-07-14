@@ -449,15 +449,11 @@ template<> inline bool isGlueball(const int& p) {  auto value_digits = DecodedPI
 /// of a boson or a left-handed fermion has n = 1 while the superpartner of a right-handed fermion has n = 2. When mixing
 /// occurs, such as between the winos and charged Higgsinos to give charginos, or between left and right sfermions, the
 /// lighter physical state is given the smaller basis state number.
-template<class T> inline bool isSUSY(const T& p){return isSUSY(p->pdg_id());}
-template<> inline bool isSUSY(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2) && !isGenSpecific(p.shift(2).pid()));}
-template<> inline bool isSUSY(const int& p){ auto value_digits = DecodedPID(p); return isSUSY(value_digits);}
-
 
 // APID: Super-partners of standard model quarks only
 template<class T> inline bool isSquark(const T& p) { return isSquark(p->pdg_id()); }
 template<> inline bool isSquark(const DecodedPID& p){
-  auto pp = p.shift(1); return isSUSY(p) && isSMQuark(pp);
+  auto pp = p.shift(1); return (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2) && isSMQuark(pp));
 }
 template<> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p); return isSquark(value_digits);}
 
@@ -465,7 +461,7 @@ template<> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p)
 // APID: Super-partners of left-handed standard model quarks only
 template<class T> inline bool isSquarkLH(const T& p) { return isSquarkLH(p->pdg_id()); }
 template<> inline bool isSquarkLH(const DecodedPID& p){
-  return isSquark(p) && (p(0) == 1);
+  auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 1 && isSMQuark(pp));
 }
 template<> inline bool isSquarkLH(const int& p){ auto value_digits = DecodedPID(p); return isSquarkLH(value_digits);}
 
@@ -473,42 +469,48 @@ template<> inline bool isSquarkLH(const int& p){ auto value_digits = DecodedPID(
 // APID: Super-partners of right-handed standard model quarks only
 template<class T> inline bool isSquarkRH(const T& p) { return isSquarkRH(p->pdg_id()); }
 template<> inline bool isSquarkRH(const DecodedPID& p){
-  return isSquark(p) && (p(0) == 2);
+  auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 2 && isSMQuark(pp));
 }
 template<> inline bool isSquarkRH(const int& p){ auto value_digits = DecodedPID(p); return isSquarkRH(value_digits);}
 
 
-template<class T> inline bool hasSquark(const T& p, const int& q) { return hasSquark(p->pdg_id(), q); }
-template<> inline bool hasSquark(const DecodedPID& p, const int& q){
-  auto pp = p.shift(1); return isSUSY(p) && pp.ndigits() != 2 && pp(0) == q; // skip lepton and boson super-partners by vetoing ndigits==2
-}
-template<> inline bool hasSquark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasSquark(value_digits, q);}
-
-
 // APID: Super-partners of standard model leptons only
 template<class T> inline bool isSlepton(const T& p) { return isSlepton(p->pdg_id()); }
-template<> inline bool isSlepton(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isSMLepton(pp);}
+template<> inline bool isSlepton(const DecodedPID& p){ auto pp = p.shift(1); return (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2) && isSMLepton(pp));}
 template<> inline bool isSlepton(const int& p){ auto value_digits = DecodedPID(p); return isSlepton(value_digits);}
 
 
 // APID: Super-partners of left-handed standard model leptons only
 template<class T> inline bool isSleptonLH(const T& p) { return isSleptonLH(p->pdg_id()); }
-template<> inline bool isSleptonLH(const DecodedPID& p){ return isSlepton(p) && (p(0) == 1); }
+template<> inline bool isSleptonLH(const DecodedPID& p){
+  auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 1 && isSMLepton(pp));
+}
 template<> inline bool isSleptonLH(const int& p){ auto value_digits = DecodedPID(p); return isSleptonLH(value_digits);}
 
 
 // APID: Super-partners of right-handed standard model leptons only
 template<class T> inline bool isSleptonRH(const T& p) { return isSleptonRH(p->pdg_id()); }
-template<> inline bool isSleptonRH(const DecodedPID& p){ return isSlepton(p) && (p(0) == 2); }
+template<> inline bool isSleptonRH(const DecodedPID& p){
+  auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 2 && isSMLepton(pp));
+}
 template<> inline bool isSleptonRH(const int& p){ auto value_digits = DecodedPID(p); return isSleptonRH(value_digits);}
 
 
 // APID: Super-partners of gauge bosons including gravitons
 template<class T> inline bool isGaugino(const T& p) { return isGaugino(p->pdg_id()); }
 template<> inline bool isGaugino(const DecodedPID& p){
-  auto pp = p.shift(1); return isSUSY(p) && isBoson(pp.pid());
+  auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 1 && isBoson(pp.pid()));
 }
 template<> inline bool isGaugino(const int& p){ auto value_digits = DecodedPID(p); return isGaugino(value_digits);}
+
+
+// APID: Super-partners of fundamental particles
+template<class T> inline bool isSuperpartner(const T& p) { return isSuperpartner(p->pdg_id()); }
+template<> inline bool isSuperpartner(const DecodedPID& p){
+  return isSlepton(p) || isSquark(p) || isGaugino(p);
+}
+template<> inline bool isSuperpartner(const int& p){ auto value_digits = DecodedPID(p); return isSuperpartner(value_digits);}
+
 
 /// PDG rule 11e
 /// Technicolor states have n = 3, with technifermions treated like ordinary fermions. States which are ordinary color singlets
@@ -555,11 +557,11 @@ template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p
 /// PDG_IDs.
 template<class T> inline bool isRGlueball(const T& p) { return isRGlueball(p->pdg_id()); }
 template<> inline bool isRGlueball(const DecodedPID& p) {
-  if (p.ndigits() != 7 || p(0)  != 1) return false;
+  if (p.ndigits() != 7 || p(0) != 1) return false;
   auto pp = p.shift(1);
   return
-    ( ( pp.ndigits() == 3 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && (pp(2) == 1 || pp(2) == 3) ) ||
-      ( pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && pp(2) == COMPOSITEGLUON &&  (pp(3) == 1 || pp(3) == 5) )  );
+    ( ( pp.ndigits() == 3 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && (pp.last() == 1 || pp.last() == 3) ) ||
+      ( pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && pp(2) == COMPOSITEGLUON && (pp.last() == 1 || pp.last() == 5) )  );
 }
 template<> inline bool isRGlueball(const int& p) {  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
 
@@ -571,9 +573,9 @@ template<> inline bool isRMeson(const DecodedPID& p) {
   auto pp = p.shift(1);
   return (
           // Handle ~gluino-quark-antiquark states
-          (pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON  && pp.max_digit(1,3) < COMPOSITEGLUON  && pp(2) <= pp(1) && isSMQuark(pp(1)) && isSMQuark(pp(2)) && (pp.last() == 1 || pp.last() == 3)) ||
+          (pp.ndigits() == 4 && p(0) == 1 && pp(0) == COMPOSITEGLUON && pp.min_digit(1,3) > 0 && pp.max_digit(1,3) < QUARK_LIMIT && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3)) ||
           // Handle squark-antiquark states (previously called Smeson/mesoninos)
-          (pp.ndigits() == 3 && pp.max_digit(1,3) < COMPOSITEGLUON && pp(1) <= pp(0) && isSMQuark(pp(0)) && isSMQuark(pp(1)) && pp.last() == 2)
+          (pp.ndigits() == 3 && pp.min_digit(1,3) > 0 && pp.max_digit(1,3) < QUARK_LIMIT && pp(1) <= pp(0) && pp.last() == 2)
           );
 }
 template<> inline bool isRMeson(const int& p) { auto value_digits = DecodedPID(p); return isRMeson(value_digits); }
@@ -586,12 +588,38 @@ template<> inline bool isRBaryon(const DecodedPID& p) {
   auto pp = p.shift(1);
   return (
           // Handle ~gluino-quark-quark-quark states
-          (pp.ndigits() == 5 && pp(0) == COMPOSITEGLUON && pp.max_digit(1,4) < COMPOSITEGLUON && pp(2) <= pp(1) && pp(3) <= pp(2) && isSMQuark(pp(1)) && isSMQuark(pp(2)) && isSMQuark(pp(3))  && (pp.last() == 2 || pp.last() == 4)) ||
+          (pp.ndigits() == 5 && p(0) == 1 && pp(0) == COMPOSITEGLUON && pp.min_digit(1,4) > 0 && pp.max_digit(1,4) < QUARK_LIMIT && pp(2) <= pp(1) && pp(3) <= pp(2) && (pp.last() == 2 || pp.last() == 4)) ||
           // Handle squark-quark-quark states (previously called Sbaryons)
-          (pp.ndigits() == 4 && pp.max_digit(1,4) < COMPOSITEGLUON && pp(1) <= pp(0) && pp(2) <= pp(1) && isSMQuark(pp(0))  && isSMQuark(pp(1)) && isSMQuark(pp(2)) && (pp.last() == 1 || pp.last() == 3))
+          (pp.ndigits() == 4 && pp.min_digit(1,4) > 0 && pp.max_digit(1,4) < QUARK_LIMIT && pp(1) <= pp(0) && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3))
           );
 }
 template<> inline bool isRBaryon(const int& p) { auto value_digits = DecodedPID(p); return isRBaryon(value_digits); }
+
+
+template<class T> inline bool isRHadron(const T& p) { return isRHadron(p->pdg_id()); }
+template<> inline bool isRHadron(const DecodedPID& p) {
+  return (isRBaryon(p) || isRMeson(p) || isRGlueball(p));
+}
+template<> inline bool isRHadron(const int& p) { auto value_digits = DecodedPID(p); return isRHadron(value_digits); }
+
+
+template<class T> inline bool hasSquark(const T& p, const int& q) { return hasSquark(p->pdg_id(), q); }
+template<> inline bool hasSquark(const DecodedPID& p, const int& q){
+  auto pp = p.shift(1); return (
+                                (isSquark(p) || isRHadron(p))
+                                && pp.ndigits() != 2 // skip lepton and boson super-partners by vetoing ndigits==2
+                                && pp(0) == q // After shifting, the first digit will always represent the squark in R-Hadron (and squark) PIDs
+                                );
+}
+template<> inline bool hasSquark(const int& p, const int& q){ auto value_digits = DecodedPID(p); return hasSquark(value_digits, q);}
+
+
+// APID Define isSUSY to return true for Superpartners of standard model particles and R-Hadrons
+// TODO Should this include the MSSM extended Higgs sector??
+template<class T> inline bool isSUSY(const T& p){return isSUSY(p->pdg_id());}
+template<> inline bool isSUSY(const DecodedPID& p){return (isSuperpartner(p) || isRHadron(p));}
+template<> inline bool isSUSY(const int& p){ auto value_digits = DecodedPID(p); return isSUSY(value_digits);}
+
 
 /// PDG rule 11h
 /// A black hole in models with extra dimensions has code 5000040. Kaluza-Klein excitations in models with extra dimensions
@@ -1069,11 +1097,6 @@ template<class T> inline double spin(const T& p) { return spin(p->pdg_id()); }
 template<> inline double spin(const DecodedPID& p) { return 1.0*spin2(p)/2.0; }
 template<> inline double spin(const int& p){ auto value_digits = DecodedPID(p); return spin(value_digits);}
 
-template<class T> inline bool isRHadron(const T& p) { return isRHadron(p->pdg_id()); }
-template<> inline bool isRHadron(const DecodedPID& p) {
-  return (isRBaryon(p) || isRMeson(p) || isRGlueball(p));
-}
-template<> inline bool isRHadron(const int& p) { auto value_digits = DecodedPID(p); return isRHadron(value_digits); }
 
 // APID: Returns an unordered list of the quarks contained by the current particle
 template<class T> inline std::vector<int> containedQuarks(const T& p) { return containedQuarks(p->pdg_id()); }
