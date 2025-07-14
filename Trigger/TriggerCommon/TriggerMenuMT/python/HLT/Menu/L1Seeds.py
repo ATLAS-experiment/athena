@@ -271,8 +271,6 @@ def getL1BKeePrescaled():
         'L1_BPH-2M9-0DR15-2MU3V', #disabled
         'L1_BPH-2M9-0DR15-2MU3VF',
         'L1_BPH-0M9-eEM9-eEM7_MU5VF', # legacy 'L1_BPH-0M9-EM7-EM5_MU5VF',
-        'L1_BPH-0DR3-eEM9jJ40_MU5VF', # legacy 'L1_BPH-0DR3-EM7J15_MU5VF'
-        'L1_BPH-0DR3-eEM9jJ40_2MU3V', # legacy 'L1_BPH-0DR3-EM7J15_2MU3V'
         'L1_JPSI-1M5-eEM9', # legacy 'L1_JPSI-1M5-EM7'
         'L1_JPSI-1M5-eEM15', # legacy 'L1_JPSI-1M5-EM12'
         'L1_jJ90', # legacy 'L1_J50'

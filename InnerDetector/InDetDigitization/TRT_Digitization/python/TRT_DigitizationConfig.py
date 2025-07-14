@@ -39,7 +39,6 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     acc.merge(AtlasFieldCacheCondAlgCfg(flags))
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
     kwargs.setdefault('PartPropSvc', acc.getPrimaryAndMerge(PartPropSvcCfg(flags))) # Property from GenBase
-    kwargs.setdefault("DigVersContainerKey", "")
     # default arguments
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
     kwargs.setdefault("InDetTRTStrawStatusSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
@@ -164,12 +163,6 @@ def TRT_DigitizationSplitNoMergePUToolCfg(flags, name="TRT_DigitizationToolSplit
 def TRT_OverlayDigitizationToolCfg(flags, name="TRT_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured Overlay TRT digitization tool"""
     acc = ComponentAccumulator()
-    if flags.Overlay.DataOverlay:
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        # TODO: remove the hardcode
-        acc.merge(addFolders(flags, "/TRT/Cond/DigVers", "TRT_OFL", tag="TRTCondDigVers-Collisions-01", db="OFLP200", className="AthenaAttributeList"))
-        kwargs.setdefault("DigVersContainerKey", "/TRT/Cond/DigVers")
-
     kwargs.setdefault("OnlyUseContainerName", False)
     kwargs.setdefault("OutputObjectName", flags.Overlay.SigPrefix + "TRT_RDOs")
     kwargs.setdefault("OutputSDOName", flags.Overlay.SigPrefix + "TRT_SDO_Map")
