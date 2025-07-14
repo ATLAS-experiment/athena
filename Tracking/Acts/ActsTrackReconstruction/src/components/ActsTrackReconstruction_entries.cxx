@@ -11,6 +11,7 @@
 #include "src/TrackExtensionAlg.h"
 #include "src/ProtoTrackReportingAlg.h"
 #include "src/HGTDTrackExtensionAlg.h"
+#include "src/HGTDTruthTrackDecorationAlg.h"
 
 // Tools
 #include "src/ITkAnalogueClusteringTool.h"
@@ -32,6 +33,7 @@ DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
 DECLARE_COMPONENT( ActsTrk::HGTDTrackExtensionAlg)
+DECLARE_COMPONENT( ActsTrk::HGTDTruthTrackDecorationAlg )
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
