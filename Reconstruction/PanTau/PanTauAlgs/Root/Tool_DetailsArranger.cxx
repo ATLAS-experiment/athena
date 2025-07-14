@@ -446,8 +446,7 @@ void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::v
 
   if (iDecayMode == xAOD::TauJetParameters::Mode_1p1n && iNumPi0PFO > 1) {
 
-    // TODO: find out if the pi0 mass is defined elsewhere in atlas code!
-    // float fMassPi0 = 134.98;
+    // float fMassPi0 = ParticleConstants::piZeroMassInMeV;
     float fMassPi0Squared = MASS_PI0*MASS_PI0;
     
     // combine both photons (with 0 mass that is already set) to one pi0 vector:

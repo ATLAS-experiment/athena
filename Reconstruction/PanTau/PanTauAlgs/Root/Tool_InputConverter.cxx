@@ -10,6 +10,7 @@
 #include "xAODTau/TauJet.h"
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/PFODefs.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 PanTau::Tool_InputConverter::Tool_InputConverter( const std::string& name ) :
@@ -76,7 +77,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     
     // clusters: don't touch the measured energy. set mass to pion mass, so momentum will be altered
     if (!pfo->isCharged()) {
-      constituentMass = 134.98;
+      constituentMass = ParticleConstants::piZeroMassInMeV;
     }
   }
  
