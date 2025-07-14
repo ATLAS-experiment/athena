@@ -69,7 +69,11 @@ void Photospp_i::setupPhotos() {
     Photos::forceMass(11, ParticleConstants::electronMassInMeV); // The assumption that units are MEV will be checked later
     Photos::forceMassFromEventRecord(211);
     Photos::setTopProcessRadiation(false);
+#ifdef HEPMC3
+    Photos::createHistoryEntries(m_createHistory, 0);
+#else
     Photos::createHistoryEntries(m_createHistory, 3);
+#endif
 
     if(m_exponentiation) {
         Photos::setExponentiation(true);
