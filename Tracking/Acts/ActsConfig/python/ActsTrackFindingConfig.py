@@ -408,7 +408,7 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
 
     kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
     kwargs.setdefault('FirstAndLastParameterOnly',True)
-    kwargs.setdefault('ComputeExpectedLayerPattern',False)
+    kwargs.setdefault('ComputeExpectedLayerPattern',True)
 
     det_elements=[]
     element_types=[]

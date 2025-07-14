@@ -100,7 +100,7 @@ namespace ActsTrk
     Gaudi::Property<bool>  m_firstAndLastParamOnly
        {this, "FirstAndLastParameterOnly",true, "Only convert the first and the last parameter." };
     Gaudi::Property<bool>  m_computeExpectedLayerPattern
-       {this, "ComputeExpectedLayerPattern",false, "Compute the expected layer pattern. CPU expensive" };
+       {this, "ComputeExpectedLayerPattern",true, "Compute the expected layer pattern. CPU expensive" };
     Gaudi::Property<bool>  m_expectIfPixelContributes
        {this, "expectIfPixelContribution",true, "Only expect pixel hits if there are pixel hits on track." };
 
