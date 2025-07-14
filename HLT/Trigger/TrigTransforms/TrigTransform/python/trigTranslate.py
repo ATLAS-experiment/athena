@@ -52,8 +52,11 @@ def getOption(runArgs, name, substep, first, output):
     # Added support for multithread option of trfArgs
     from PyJobTransforms.trfMTTools import detectAthenaMTThreads
     athenaMT, athenaConcurrentEvents = detectAthenaMTThreads(runArgs, name, False)
-    option['threads'] = athenaMT
-    option['concurrent-events'] = athenaConcurrentEvents
+    # skip the options if not set (detectAthenaMTThreads returns 0)
+    if athenaMT != 0:
+        option['threads'] = athenaMT
+    if athenaConcurrentEvents != 0:
+        option['concurrent-events'] = athenaConcurrentEvents
 
     # TODO (ATR-11854) l1psk, hltpsk, smk should be compared to triggerConfig
     # example below based on old comparison but needs work to retrieve keys and do comparisons of all three keys
