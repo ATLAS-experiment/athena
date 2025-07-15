@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "TRTDetectorFactory_Full.h"
 #include "TRT_DetDescrDB_ParameterInterface.h"
 
@@ -14,7 +13,6 @@
 #include "InDetReadoutGeometry/Version.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 
-#include "IdDictDetDescr/IdDictManager.h"
 #include "InDetIdentifier/TRT_ID.h"
 
 #include "ArrayFunction.h"
@@ -37,7 +35,6 @@
 #include "GeoModelKernel/GeoShapeUnion.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
 #include "GeoModelKernel/GeoSerialIdentifier.h"
-#include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/Units.h"
@@ -47,8 +44,6 @@
 #include "GeoGenericFunctions/Sin.h"
 #include "GeoGenericFunctions/Cos.h"
 
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "DetDescrConditions/AlignableTransformContainer.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include <vector>
@@ -86,7 +81,6 @@ TRTDetectorFactory_Full::TRTDetectorFactory_Full(InDetDD::AthenaComps * athenaCo
 						 const ITRT_StrawStatusSummaryTool* sumTool, // added for Argon
 						 bool useOldActiveGasMixture,
 						 bool DC2CompatibleBarrelCoordinates,
-						 int overridedigversion,
 						 bool alignable,
 						 bool doArgon,
 						 bool doKrypton,
@@ -94,7 +88,6 @@ TRTDetectorFactory_Full::TRTDetectorFactory_Full(InDetDD::AthenaComps * athenaCo
   : InDetDD::DetectorFactoryBase(athenaComps), 
     m_useOldActiveGasMixture(useOldActiveGasMixture),
     m_DC2CompatibleBarrelCoordinates(DC2CompatibleBarrelCoordinates),
-    m_overridedigversion(overridedigversion),
     m_alignable(alignable),
     m_sumTool(sumTool),
     m_strawsvcavailable(0),
@@ -334,18 +327,6 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 
   //Uncomment for testing:
   //  m_data->ShowValues();
-
-  //---------- Digitization Version Info for dig. and recon r-t -----------//
-  if (m_overridedigversion < 0 ) {
-    m_detectorManager->setDigitizationVersion(m_data->digversion,m_data->digversionname);
-  } else {
-    m_detectorManager->setDigitizationVersion(m_overridedigversion,"CUSTOMOVERRIDDEN");
-    ATH_MSG_INFO( "Digversion overridden via joboptions from " 
-		  << m_data->digversion << " ('" << m_data->digversionname << "') to " 
-		  << m_detectorManager->digitizationVersion()<< " ('" 
-		  << m_detectorManager->digitizationVersionName()<<"')" );
-  }
-
 
   //----------------------Initialize the numerology------------------------//
 
