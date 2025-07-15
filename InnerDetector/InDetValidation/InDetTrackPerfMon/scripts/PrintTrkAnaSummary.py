@@ -22,20 +22,25 @@ if not MyArgs.testFile:
     print( "ERROR: input test file not provided" )
     sys.exit(1)
 
-def processFile( inFileName, dirName, label, data, index, updateIndex=True ):
+def processFile( inFileName, dirName, label, data, index, updateIndex=True, printMultiplicity=True ):
+    if updateIndex: index.clear()
     sList = []
     inFile = ROOT.TFile.Open( inFileName, "READ" )
 
     ## multiplicities
-    hs = inFile.Get( dirName+"Multiplicities/summary" )
-    if hs:
-        for i in range( 1, hs.GetNbinsX()+1 ) :
-            if updateIndex : index.append( hs.GetXaxis().GetBinLabel(i) )
-            c = hs.GetBinContent(i)
-            e = hs.GetBinError(i)
-            sList.append( f"{c:.1f} +/- {e:.1f}" )
+    if printMultiplicity:
+        hs = inFile.Get( dirName+"Multiplicities/summary" )
+        for i in range( 1, 8 ) :
+            if hs:
+                if updateIndex : index.append( hs.GetXaxis().GetBinLabel(i) )
+                c = hs.GetBinContent(i)
+                e = hs.GetBinError(i)
+                sList.append( f"{c:.1f} +/- {e:.1f}" )
+            else:
+                if updateIndex : index.append(" ")
+                sList.append( "-" )
 
-    ## efficiency
+    # efficiencies
     he = inFile.Get( dirName+"Efficiencies/eff_vs_truth_inclusive" )
     if updateIndex : index.append( " " )
     sList.append( " " )
@@ -131,13 +136,23 @@ for anaName in anaList :
     anaDirName = MyArgs.dirName.replace( "&TrkAnaName&", anaName )
     anaOutName = MyArgs.outName.replace( "&TrkAnaName&", anaName )
 
+    testFile = ROOT.TFile.Open( MyArgs.testFile, "READ" )
+    testMultiplicity = testFile.Get( anaDirName+"Multiplicities/summary" )
+    testFile.Close()
+
+    refFile = ROOT.TFile.Open( MyArgs.refFile, "READ" )
+    refMultiplicity = refFile.Get( anaDirName+"Multiplicities/summary" )
+    refFile.Close()
+
+    printMultiplicity = refMultiplicity or testMultiplicity
     ## Processing test file
     processFile(
         inFileName  = MyArgs.testFile,
         dirName     = anaDirName,
         label       = MyArgs.testLabel,
         data        = data,
-        index       = index
+        index       = index,
+        printMultiplicity = printMultiplicity
     )
 
     ## Processing reference file
@@ -148,7 +163,8 @@ for anaName in anaList :
             label       = MyArgs.refLabel,
             data        = data,
             index       = index,
-            updateIndex=False
+            updateIndex = not testMultiplicity,
+            printMultiplicity = printMultiplicity
         )
 
     ## printing table to screen
