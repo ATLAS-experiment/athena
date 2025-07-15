@@ -58,7 +58,10 @@ def ActsPixelSeedingToolCfg(flags,
         [40, 260],
         [140, 260],
         [0, 0]])
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
+    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+        acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
+    else:
+        acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
 def ActsFastPixelSeedingToolCfg(flags,
@@ -131,8 +134,11 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("zBinNeighborsBottom" , [(0,0),(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0),(0,0)])
     # Any other
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
-        
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
+
+    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+        acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
+    else:
+        acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
 def ActsPixelOrthogonalSeedingToolCfg(flags,
@@ -324,7 +330,10 @@ def ActsPixelSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelSeedingMonitoringToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
+    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+        acc.addEventAlgo(CompFactory.ActsTrk.GridTripletSeedingAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 
@@ -357,7 +366,10 @@ def ActsStripSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkStripSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripSeedingMonitoringToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
+    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+        acc.addEventAlgo(CompFactory.ActsTrk.GridTripletSeedingAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 
