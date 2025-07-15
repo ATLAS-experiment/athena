@@ -78,6 +78,8 @@ namespace ActsTrk
     SG::ReadHandleKeyArray<InDet::SiDetectorElementStatus> m_detElStatus
        {this, "DetElStatus", {}, "Keys for detector element status conditions data."};
 
+    SG::WriteHandleKeyArray< std::vector<int> > m_seedDestiny {this, "SeedDestiny", {}}; 
+    
     // Configuration
     Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
     Gaudi::Property<unsigned int> m_seedMeasOffset{this,"seedMeasOffset", {}, "Reduce the requirement on the space points on seed to mark a seed as duplicate, e.g seedMeasOffset=1, only N-1 measurements on seed are sufficient deduplicate the seed"};
@@ -117,7 +119,8 @@ namespace ActsTrk
                ActsTrk::MutableTrackContainer &tracksContainer,
                std::size_t seedCollectionIndex,
                const char *seedType,
-               EventStats &event_stat) const;
+               EventStats &event_stat,
+	       std::vector<int>& destiny) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
@@ -126,6 +129,8 @@ namespace ActsTrk
                        const detail::MeasurementIndex &measurementIndex) const;
 
     using TrackFindingBaseAlg::CKF_pimpl;
+
+    enum DestinyType : int {UNKNOWN=0, SUCCEED, DUPLICATE, FAILURE};
   };
 
 } // namespace
