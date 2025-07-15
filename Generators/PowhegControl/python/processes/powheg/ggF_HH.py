@@ -187,7 +187,7 @@ class ggF_HH(PowhegV2):
         logger.info(f'Parameters are: chhh={chhh_str}, ct={ct_str}, ctt={ctt_str}, cggh={cggh_str}, cgghh={cgghh_str}')
         try:
             import creategrid as cg
-            cg.combinegrids(grid_file_name, chhh_str, ct_str, ctt_str, cggh_str, cgghh_str)
+            cg.combinegrids(grid_file_name, float(chhh_str), float(ct_str), float(ctt_str), float(cggh_str), float(cgghh_str))
         except RuntimeError:
             logger.error('Impossible to use creategrid.py to create the Virt_full_*.grid file')
             raise
