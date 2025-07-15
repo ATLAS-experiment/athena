@@ -138,9 +138,22 @@ class ttll(PowhegV2):
         import os
         import shutil
 
-        # copy original file to current directory
-        original = os.path.dirname(self.executable) + '/testrun/nlox_parameters.par'
-        shutil.copyfile(original,'./nlox_parameters.par-old')
+        # First attempt: look in testrun under executable directory
+        original_path = os.path.join(os.path.dirname(self.executable), 'testrun', 'nlox_parameters.par')
+
+        # Fallback: try one directory above executable
+        fallback_path = os.path.join(os.path.dirname(os.path.dirname(self.executable)), 'testrun', 'nlox_parameters.par')
+
+        # Determine which file exists
+        if os.path.exists(original_path):
+            source_file = original_path
+        elif os.path.exists(fallback_path):
+            source_file = fallback_path
+        else:
+            raise FileNotFoundError("No valid nlox_parameters.par found in expected locations.")
+
+        # Copy the file
+        shutil.copyfile(source_file, './nlox_parameters.par-old')
 
         # edit some of the parameters
         lines = []
