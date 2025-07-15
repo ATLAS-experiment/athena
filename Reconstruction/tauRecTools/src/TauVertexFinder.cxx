@@ -67,9 +67,6 @@ StatusCode TauVertexFinder::executeVertexFinder(xAOD::TauJet& pTau,
   if (vxContainer->empty()) return StatusCode::SUCCESS;
 
   // find default PrimaryVertex (needed if TJVA is switched off or fails)
-  // see: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/VertexReselectionOnAOD
-  // code adapted from
-  // https://svnweb.cern.ch/trac/atlasoff/browser/Tracking/TrkEvent/VxVertex/trunk/VxVertex/PrimaryVertexSelector.h
   const xAOD::Vertex* primaryVertex = nullptr;
   if (inTrigger()) { // trigger: find default PrimaryVertex (highest sum pt^2)
     primaryVertex = (*vxContainer)[0];
@@ -80,12 +77,6 @@ StatusCode TauVertexFinder::executeVertexFinder(xAOD::TauJet& pTau,
         primaryVertex = vertex;
         break;
       }
-    }
-    
-    // FIXME: this is kept for consistency but can probably be dropped
-    // cases where we would have a non-empty PrimaryVertices container but no vertex of type xAOD::VxType::PriVtx, is that even possible?
-    if(primaryVertex==nullptr && pTau.jet()!=nullptr) {
-      primaryVertex = tauRecTools::getJetVertex(*pTau.jet());
     }
   }
 
