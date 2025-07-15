@@ -174,7 +174,7 @@ def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className
     return addFolders(flags, folders, detDb, className, extensible, tag=tag, db=forceDb, modifiers=modifiers)
 
 
-def blockFolder(cfg, flags, folder):
+def blockFolder(cfg, flags, folderName):
     """Block use of specified conditions DB folder so data can be read from elsewhere"""
     cfg.merge(IOVDbSvcCfg(flags))
     
@@ -182,17 +182,26 @@ def blockFolder(cfg, flags, folder):
     condInputLoader = cfg.getCondAlgo("CondInputLoader")
     
     # check existing list of folders and remove it if found
-    for i in range(0, len(IOVDbSvc.Folders)):
-        if (IOVDbSvc.Folders[i].find(folder) >= 0):
-            IOVDbSvc.Folders.pop(i)
+    folder_to_remove = None
+    
+    for folder in IOVDbSvc.Folders:
+        if (folder.find(folderName) >= 0):
+            folder_to_remove = folder
             break
 
-    folderName = _extractFolder(folder)
+    if folder_to_remove:
+        IOVDbSvc.Folders.remove(folder_to_remove)
+        
+    folderName = _extractFolder(folderName)
+    folder_to_remove = None
 
-    for f in condInputLoader.Load:
-        if (f[-1] == folderName):
-            condInputLoader.Load.remove(f)
+    for folder in condInputLoader.Load:
+        if (folder[-1] == folderName):
+            folder_to_remove = folder
             break
+            
+    if folder_to_remove:
+        condInputLoader.Load.remove(folder_to_remove)
 
 _dblist = {
     'INDET':'COOLONL_INDET',
