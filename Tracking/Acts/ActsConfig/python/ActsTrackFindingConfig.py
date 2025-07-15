@@ -94,6 +94,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("SeedLabels", seedOrder(flags, pixel=["PPP"], strip=["SSS"]))
     kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
     kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=['ITkPixelDetectorElementCollection'], strip=['ITkStripDetectorElementCollection']))
+    kwargs.setdefault("SeedDestiny", [f'{seedkey}Destiny' for seedkey in kwargs["SeedContainerKeys"]])
 
     kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"], strip=["ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"], hgtd=["HGTD_Clusters"]))
 
@@ -269,6 +270,29 @@ def ActsTrackFindingCfg(flags,
         acc.merge(ActsTrackAnalysisAlgCfg(flags,
                                           name=f"{flags.Tracking.ActiveConfig.extension}TrackAnalysisAlg",
                                           TracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks"))
+
+        # Seed To Track Monitoring
+        if len(kwargs["SeedContainerKeys"]) != len(kwargs["DetectorElementsKeys"]):
+            raise AttributeError("SeedContainerKeys and DetectorElementsKeys must have same size")
+
+        for i in range(0, len(kwargs["SeedContainerKeys"])):
+            seedKey = kwargs["SeedContainerKeys"][i]
+            detElKey = kwargs["DetectorElementsKeys"][i]
+
+            # make seed params
+            from ActsConfig.ActsAnalysisConfig import ActsBaseSeedsToTrackParamsAlgCfg
+            acc.merge(ActsBaseSeedsToTrackParamsAlgCfg(flags,
+                                                       name = f'{seedKey}SeedsToTrackParamsAlg',
+                                                       InputSeedContainerKey = seedKey,
+                                                       DetectorElementsKey = detElKey,
+                                                       OutputTrackParamsCollectionKey = f'{seedKey}Params'))
+
+            from ActsConfig.ActsAnalysisConfig import ActsSeedToTrackAnalysisAlgCfg
+            acc.merge(ActsSeedToTrackAnalysisAlgCfg(flags,
+                                                    name = f'{seedKey}ToTrackAnalysisAlg',
+                                                    InputSeedCollection = seedKey,
+                                                    InputTrackParamsCollection = f'{seedKey}Params',
+                                                    InputDestinyCollection = f'{seedKey}Destiny'))
 
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:

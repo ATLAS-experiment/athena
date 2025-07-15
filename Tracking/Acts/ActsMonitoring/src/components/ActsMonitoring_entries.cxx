@@ -8,6 +8,7 @@
 #include "src/HgtdClusterAnalysisAlg.h"
 #include "src/SpacePointAnalysisAlg.h"
 #include "src/SeedAnalysisAlg.h"
+#include "src/SeedToTrackAnalysisAlg.h"
 #include "src/EstimatedTrackParamsAnalysisAlg.h"
 #include "src/SeedingAlgorithmAnalysisAlg.h"
 #include "src/TrackAnalysisAlg.h"
@@ -24,6 +25,7 @@ DECLARE_COMPONENT( ActsTrk::StripClusterAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::HgtdClusterAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SpacePointAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedAnalysisAlg )
+DECLARE_COMPONENT( ActsTrk::SeedToTrackAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedingAlgorithmAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::EstimatedTrackParamsAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::TrackAnalysisAlg )

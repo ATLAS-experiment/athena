@@ -3,6 +3,116 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
+def ActsSeedToTrackAnalysisAlgCfg(flags,
+                                  name: str = "ActsSeedToTrackAnalysisAlg",
+                                  **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("InputSeedCollection", "")
+    kwargs.setdefault("InputTrackParamsCollection", "")
+    kwargs.setdefault("InputDestinyCollection", "")
+
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, kwargs['InputDestinyCollection'] + 'AnalysisAlgCfg')
+
+    monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedToTrackAnalysisAlg, name, **kwargs)
+    destinyTypes = ['UNKNOWN', 'SUCCEED', 'DUPLICATE', 'FAILURE', 'INCLUSIVE']
+    nTypes = len(destinyTypes)
+    
+    histoPath = f'/ActsAnalysis/{kwargs["InputDestinyCollection"]}'
+    # define the variables now
+    seedVars = helper.addArray([nTypes], monitoringAlgorithm, 'seedVars', topPath=histoPath)
+
+    for postfix, tool in seedVars.Tools.items():
+        layer = destinyTypes[ int(postfix.split("_")[1]) ]
+        tool.defineHistogram(f"eta,bottomR;Eta_Vs_bottomR_{layer}", title=f"Bottom R vs Eta for {layer}", type='TH2F', path='2D',
+                             xbins=50, xmin=-4.5, xmax=4.5,
+                             ybins=320, ymin=0, ymax=320)        
+        tool.defineHistogram(f"eta,middleR;Eta_Vs_middleR_{layer}", title=f"Middle R vs Eta for {layer}", type='TH2F', path='2D',
+                             xbins=50, xmin=-4.5, xmax=4.5,
+                             ybins=320, ymin=0, ymax=320)
+        tool.defineHistogram(f"eta,topR;Eta_Vs_topR_{layer}", title=f"Top R vs Eta for {layer}", type='TH2F', path='2D',
+                             xbins=50, xmin=-4.5, xmax=4.5,
+                             ybins=320, ymin=0, ymax=320)
+        
+        tool.defineHistogram(f"deltaR_BT,deltaR_BM;DeltaR_BT_vs_Delta_BM_{layer}", title=f"Delta Radius BT vs BM for {layer}", type='TH2F', path='2D',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=320, ymin=0, ymax=320)
+        tool.defineHistogram(f"deltaR_BT,deltaR_MT;DeltaR_BT_vs_Delta_MT_{layer}", title=f"Delta Radius BT vs MT for {layer}", type='TH2F', path='2D',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=320, ymin=0, ymax=320)
+        tool.defineHistogram(f"deltaR_BM,deltaR_MT;DeltaR_BM_vs_Delta_MT_{layer}", title=f"Delta Radius MB vs MT for {layer}", type='TH2F', path='2D',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=320, ymin=0, ymax=320)
+
+        tool.defineHistogram(f"cotTheta_BM;cotTheta_BM_{layer}", title=f"CotTheta bottom-middle for {layer}", type='TH1F', path='SPVars',
+                             xbins=80, xmin=0, xmax=40,
+                             ybins=80, ymin=0, ymax=40)
+        tool.defineHistogram(f"cotTheta_MT;cotTheta_MR_{layer}", title=f"CotTheta middle-top for {layer}", type='TH1F', path='SPVars',
+                             xbins=80, xmin=0, xmax=40,
+                             ybins=80, ymin=0, ymax=40)
+        tool.defineHistogram(f"cotTheta_BM;cotTheta_BT_{layer}", title=f"CotTheta bottom-top for {layer}", type='TH1F', path='SPVars',
+                             xbins=80, xmin=0, xmax=40,
+                             ybins=80, ymin=0, ymax=40)
+
+        tool.defineHistogram(f"deltaCotTheta_BM_MT;deltaCotTheta_BM_MT_{layer}", title=f"Delta CotTheta bottom-top vs middle-top for {layer}", type='TH1F', path='SPVars',
+                             xbins=80, xmin=-2, xmax=2,
+                             ybins=80, ymin=-2, ymax=2)
+
+        tool.defineHistogram(f"bottomR,quality;Quality_vs_BottomR_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='2D',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=100, ymin=-400, ymax=1000)
+        tool.defineHistogram(f"vtxZ,quality;Quality_vs_vtxZ_{layer}", title=f"Seed Vtxz Vs Quality for {layer};vtx Z;Quality", type='TH2F', path='2D',
+                             xbins=100, xmin=-200, xmax=200,
+                             ybins=100, ymin=-400, ymax=1000)
+        
+        tool.defineHistogram(f"eta;Eta_{layer}", title=f"Eta for {layer}", type='TH1F', path='SeedVars',
+                             xbins=50, xmin=-4.5, xmax=4.5)
+        tool.defineHistogram(f"pt;Pt_{layer}", title=f"Pt for {layer}", type='TH1F', path='SeedVars',
+                             xbins=100, xmin=0, xmax=100)
+        tool.defineHistogram(f"quality;Quality_{layer}", title=f"Quality for {layer}", type='TH1F', path='SeedVars',
+                             xbins=100, xmin=-400, xmax=1000)
+        tool.defineHistogram(f"vtxZ;VtxZ_{layer}", title=f"Vtx Z for {layer}", type='TH1F', path='SeedVars',
+                             xbins=100, xmin=-200, xmax=200)
+        
+        tool.defineHistogram(f"bottomX;BottomX_{layer}", title=f"Bottom X for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"bottomY;BottomY_{layer}", title=f"Bottom Y for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"bottomZ;BottomZ_{layer}", title=f"Bottom Z for {layer}", type='TH1F', path='SPVars',
+                             xbins=500, xmin=-3000, xmax=3000)
+        tool.defineHistogram(f"bottomR;BottomR_{layer}", title=f"Bottom Radius for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+        
+        tool.defineHistogram(f"middleX;MiddleX_{layer}", title=f"Middle X for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"middleY;MiddleY_{layer}", title=f"Middle Y for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"middleZ;MiddleZ_{layer}", title=f"Middle Z for {layer}", type='TH1F', path='SPVars',
+                             xbins=500, xmin=-3000, xmax=3000)
+        tool.defineHistogram(f"middleR;MiddleR_{layer}", title=f"Middle Radius for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+        
+        tool.defineHistogram(f"topX;TopX_{layer}", title=f"Top X for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"topY;TopY_{layer}", title=f"Top Y for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"topZ;TopZ_{layer}", title=f"Top Z for {layer}", type='TH1F', path='SPVars',
+                             xbins=500, xmin=-3000, xmax=3000)
+        tool.defineHistogram(f"topR;TopR_{layer}", title=f"Top Radius for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+
+        tool.defineHistogram(f"deltaR_BT;DeltaR_BT_{layer}", title=f"Delta Radius between Bottom and Top for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+        tool.defineHistogram(f"deltaR_BM;DeltaR_BM_{layer}", title=f"Delta Radius between Bottom and Middle for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+        tool.defineHistogram(f"deltaR_MT;DeltaR_MT_{layer}", title=f"Delta Radius between Middle and Top for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+                
+    acc.merge(helper.result())
+    return acc
+
+
 def ActsTrackAnalysisAlgCfg(flags,
                             name: str = "ActsTrackAnalysisAlg",
                             **kwargs) -> ComponentAccumulator:
