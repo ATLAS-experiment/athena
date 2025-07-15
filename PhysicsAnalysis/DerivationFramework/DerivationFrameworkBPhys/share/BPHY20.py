@@ -629,6 +629,7 @@ ExtraVariables += ["Muons.etaLayer1Hits.etaLayer2Hits.etaLayer3Hits.etaLayer4Hit
                    "CombinedMuonTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits", 
                    "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.radiusOfFirstHit.TRTdEdx.TRTdEdxUsedHits.pixeldEdx",
                    "LowPtRoITrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.radiusOfFirstHit.TRTdEdx.TRTdEdxUsedHits.pixeldEdx",
+                   "LowPtRoITrackParticles.truthParticleLink",
                    "PrimaryVertices.chiSquared.covariance"]
 
 
