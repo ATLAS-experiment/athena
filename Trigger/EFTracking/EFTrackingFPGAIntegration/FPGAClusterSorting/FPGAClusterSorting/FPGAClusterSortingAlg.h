@@ -6,6 +6,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include <AthContainers/ConstDataVector.h>
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
@@ -23,9 +24,9 @@ private:
     SG::ReadHandleKey <xAOD::PixelClusterContainer> m_xAODPixelClusterContainerKey{ this, "xAODPixelClusterContainer", "", "" };
     SG::ReadHandleKey <xAOD::StripClusterContainer> m_xAODStripClusterContainerKeys{ this, "xAODStripClusterContainer", "", "" }; 
 
-    SG::WriteHandleKey <xAOD::PixelClusterContainer> m_sortedxAODPixelClusterContainerKey{ this, "sortedxAODPixelClusterContainer", "", "" };
-    SG::WriteHandleKey <xAOD::StripClusterContainer> m_sortedxAODStripClusterContainerKeys{ this, "sortedxAODStripClusterContainer", "", "" }; 
-
+    SG::WriteHandleKey <ConstDataVector<xAOD::PixelClusterContainer>> m_sortedxAODPixelClusterContainerKey{ this, "sortedxAODPixelClusterContainer", "", "" };
+    SG::WriteHandleKey <ConstDataVector<xAOD::StripClusterContainer>> m_sortedxAODStripClusterContainerKeys{ this, "sortedxAODStripClusterContainer", "", "" }; 
+    
 };
 
 #endif
