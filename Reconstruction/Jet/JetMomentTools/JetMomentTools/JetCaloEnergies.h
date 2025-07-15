@@ -1,7 +1,7 @@
 // this file is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMOMENTTOOLS_JETCALOENERGIES_H
@@ -12,6 +12,7 @@
 #include "JetInterface/IJetDecorator.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "xAODJet/JetContainer.h"
+#include "xAODCaloEvent/CaloCluster.h"
 #include <vector>
 
 class JetCaloEnergies : public asg::AsgTool,
@@ -57,6 +58,13 @@ private:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_effNClustsFracClusterKey{this, "EffNClustsClusterName", "EffNClustsCaloBased", "SG key for the EffNClusts attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_fracSamplingMaxClusterKey{this, "FracSamplingMaxClusterName", "FracSamplingMaxCaloBased", "SG key for the FracSamplingMax (clus) attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_fracSamplingMaxIndexClusterKey{this, "FracSamplingMaxIndexClusterName", "FracSamplingMaxIndexCaloBased", "SG key for FracSamplingMaxIndex (clus) attribute"};
+  
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_lambdaLeadingClusterKey{this, "LambdaLeadingClusterName", "LambdaLeadingCluster", "SG key for the longitudinal distance between the leading (highest energy) cluster and the jet’s geometrical center"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_meanRadialDistanceSquaredKey{this, "MeanRadialDistanceSquaredName", "MeanRadialDistanceSquared", "SG key for the weighted mean of the squared radial distances of the clusters from jet’s geometrical center"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_meanLongitudinalDistanceSquaredKey{this, "MeanLongitudinalDistanceSquaredName", "MeanLongitudinalDistanceSquared", "SG key for the weighted mean of the squared Longitudinal distances of the clusters from jet’s geometrical center"};
+
+private:
+  float getMoment(const xAOD::CaloCluster* cluster, const xAOD::CaloCluster::MomentType& momentType) const;
 
 };
 
