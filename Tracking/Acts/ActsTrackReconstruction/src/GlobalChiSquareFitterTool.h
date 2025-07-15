@@ -174,7 +174,9 @@ class GlobalChiSquareFitterTool
     /** @brief Chi2 cut used by the outlier finder */
     Gaudi::Property<double> m_option_outlierChi2Cut{this, "OutlierChi2Cut", 12.5};
     /** @brief Maximum number of steps per propagation call */
-    Gaudi::Property<int> m_option_maxPropagationStep{this, "MaxPropagationStep", 5000};
+    Gaudi::Property<unsigned> m_option_maxPropagationStep{this, "MaxPropagationStep", 5000};
+    /** @brief Number of maximum surfaces to be tried before the navigrator aborts */
+    Gaudi::Property<unsigned> m_option_maxNavSurfaces{this, "MaxSurfacesPerNavStep", 100};
     /** @brief Consider particle's energy loss in the fit  */
     Gaudi::Property<bool> m_option_includeELoss{this, "IncludeELoss", true};
     /** @brief Consider multiple scattering of the particle */
