@@ -89,7 +89,7 @@ namespace DerivationFramework
         }
         if (!foundRange) {
             // Top possible range
-            centralityMin = 80.;
+            centralityMin = 0.;
         }
 
         // Decorate eventInfo with centrality values    
