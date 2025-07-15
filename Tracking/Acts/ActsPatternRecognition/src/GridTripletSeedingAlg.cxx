@@ -96,7 +96,6 @@ StatusCode GridTripletSeedingAlg::execute(const EventContext& ctx) const {
   std::vector<const xAOD::SpacePointContainer*> allInputCollections;
   allInputCollections.reserve(m_spacePointKey.size());
 
-  std::size_t numberInputSpacePoints = 0;
   for (const auto& spacePointKey : m_spacePointKey) {
     ATH_MSG_DEBUG("Retrieving from Input Collection '" << spacePointKey.key()
                                                        << "' ...");
@@ -104,7 +103,6 @@ StatusCode GridTripletSeedingAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(SG::get(spCont, spacePointKey, ctx));
     allInputCollections.push_back(spCont);
     ATH_MSG_DEBUG("    \\__ " << spCont->size() << " elements!");
-    numberInputSpacePoints += spCont->size();
   }
 
   // Apply selection on which SPs you want to use from the input container
