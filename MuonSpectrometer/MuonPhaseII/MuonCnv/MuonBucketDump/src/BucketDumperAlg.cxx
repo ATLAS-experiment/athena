@@ -12,10 +12,34 @@
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "GeoModelHelpers/TransformSorter.h"
 #include <fstream>
-#include <TString.h>
 #include <AthenaKernel/RNGWrapper.h>
 #include "CLHEP/Random/RandFlat.h"
+
+namespace {
+    struct LocalSegSorter{
+        bool operator()(const xAOD::MuonSegment* a, const xAOD::MuonSegment* b) const {
+             if(a == b) {
+                return false;
+             }
+             if (a->chamberIndex() != b->chamberIndex()) {
+                return a->chamberIndex() < b->chamberIndex();
+             }
+             if (a->sector() != b->sector()) {
+                return a->sector() < b->sector();
+             }
+             if (a->etaIndex() != b->etaIndex()) {
+                return a->etaIndex() < b->etaIndex();
+             }
+            const GeoTrf::TransformSorter trfSorter{};
+            using namespace MuonR4::SegmentFit;
+            auto locParsA = localSegmentPars(*a);
+            auto locParsB = localSegmentPars(*b);
+            return trfSorter.compare(locParsA.cast<double>(), locParsB.cast<double>())<0;
+        }
+    };
+}
 
 namespace MuonR4{
     StatusCode BucketDumperAlg::initialize() {
@@ -60,14 +84,16 @@ namespace MuonR4{
                                               const SG::ReadHandleKey<SpacePointContainer>& spacePointKey,
                                               const SG::ReadHandleKey<xAOD::MuonSegmentContainer>& segmentKey) {
 
-        std::unordered_map <const SpacePointBucket*, 
-                            std::vector<const xAOD::MuonSegment*>> segmentMap;  // MuonR4Segment 
+        using SegmentsPerBucket_t = std::unordered_map <const SpacePointBucket*, 
+                                                       std::set<const xAOD::MuonSegment*, LocalSegSorter>>;
+
+        SegmentsPerBucket_t segmentMap{};
         
         const xAOD::MuonSegmentContainer* readSegment{nullptr};
         ATH_CHECK(SG::get(readSegment, segmentKey, ctx));
         if (readSegment) {
             for (const xAOD::MuonSegment* segment : *readSegment) {
-                segmentMap[detailedSegment(*segment)->parent()->parentBucket()].push_back(segment);
+                segmentMap[detailedSegment(*segment)->parent()->parentBucket()].insert(segment);
             }
         }
 
@@ -82,32 +108,41 @@ namespace MuonR4{
         const SpacePointPerLayerSorter layerSorter{m_idHelperSvc.get()};
 
         for(const SpacePointBucket* bucket : *spContainer) {
-
+            /// Filter random noise
             if (!m_isMC && segmentMap[bucket].empty() && m_fracToKeep < 1. &&
                 CLHEP::RandFlat::shoot(rndEngine,0.,1.) > m_fracToKeep) {
                 ATH_MSG_VERBOSE("Skipping bucket without segment");
                 continue;
-            }            
-
+            }
+            /// Bucket identifier
+            m_bucket_sector     = bucket->msSector()->sector();
+            m_bucket_chamberIdx = static_cast<uint8_t>(bucket->msSector()->chamberIndex());
+            m_bucket_side = bucket->msSector()->side();
+            //// Bucket dimension
             m_bucket_min      = bucket->coveredMin();
             m_bucket_max      = bucket->coveredMax();
-            m_bucket_truthHit = std::ranges::any_of(*bucket,[this](const SpacePointBucket::value_type & sp){
-                return m_visionTool->isLabeled(*sp);
-            });
+
+            /// Global bucket position
             const Amg::Vector3D bucketPos = bucket->msSector()->localToGlobalTrans(*gctx) * 
                                             (0.5*(bucket->coveredMin() + bucket->coveredMax()) * Amg::Vector3D::UnitY());
-
             m_bucket_posX = bucketPos.x();
             m_bucket_posY = bucketPos.y();
             m_bucket_posZ = bucketPos.z();
+
+            /// Flag whether the bucket contains at least one good hit
+            m_bucket_truthHit = std::ranges::any_of(*bucket,[this](const SpacePointBucket::value_type & sp){
+                return m_visionTool->isLabeled(*sp);
+            });
+
+            /// Number of reconstructed segments in the bucket
             m_bucket_segments   = segmentMap[bucket].size();
-            m_bucket_sector     = bucket->msSector()->sector();
-            m_bucket_chamberIdx = static_cast<uint8_t>(bucket->msSector()->chamberIndex());
 
-            std::unordered_map<const SpacePoint*, std::vector<int16_t>> spacePointToSegment;
-            
+
+
+            std::unordered_map<const SpacePoint*, std::vector<int16_t>> spacePointToSegment{};
+            std::set<const xAOD::MuonSegment*, LocalSegSorter> truthSegments{};
+            /// Associate the Space points to the reconstructed segments
             auto match_itr = segmentMap.find(bucket);
-
             if (match_itr != segmentMap.end()) {
                 for (const xAOD::MuonSegment* segment : match_itr->second) {
                     for (const auto& meas : detailedSegment(*segment)->measurements()) {
@@ -127,8 +162,11 @@ namespace MuonR4{
                     if (const xAOD::TruthParticle* truthPart = getTruthMatchedParticle(*segment)) {
                          truthLink = truthPart->index();
                     }
+                    /** Truth segment parameters */
+                    if (const xAOD::MuonSegment* truthSeg = getMatchedTruthSegment(*segment)) {
+                        truthSegments.insert(truthSeg);
+                    }
                     m_segmentTruthIdx+=truthLink;
-
                     m_segmentPos.push_back(segment->position());
                     m_segmentDir.push_back(segment->direction());
                     m_segment_chiSquared.push_back(segment->chiSquared());
@@ -137,8 +175,20 @@ namespace MuonR4{
             }
 
             std::unordered_map<Identifier, unsigned> layNumbers{};
-
+            std::unordered_map<const SpacePoint*, std::vector<const xAOD::MuonSegment*>> spToTrueSeg{};
+            if (m_isMC) {
+                using SegLinkVec_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
+                static const SG::ConstAccessor<SegLinkVec_t> segAcc{"truthSegmentLinks"};
+                for (const auto& sp : *bucket){
+                    for (const auto& link : segAcc(*sp->primaryMeasurement())) {
+                        spToTrueSeg[sp.get()].push_back(*link);
+                        truthSegments.insert(*link);
+                    }
+                }
+            }
+            
             for(const SpacePointBucket::value_type& sp : *bucket) {
+                /// Calculate the layer of the space point
                 const unsigned layer{layNumbers.insert(
                                         std::make_pair(layerSorter.detectorLayerId(sp->identify()), 
                                                        layNumbers.size())).first->second};
@@ -166,8 +216,11 @@ namespace MuonR4{
 
 
                 const std::vector<int16_t>& segIdxs = spacePointToSegment[sp.get()];
-
                 m_spoint_mat[m_spoint_mat.size()] = segIdxs;
+                auto& trueSegLinks = m_spoint_trueSeg[m_spoint_trueSeg.size()];
+                for (const xAOD::MuonSegment* matchedSeg : spToTrueSeg[sp.get()]) {
+                    trueSegLinks.push_back(std::distance(truthSegments.begin(), truthSegments.find(matchedSeg)));
+                }
                 m_spoint_nSegments.push_back(segIdxs.size());
                 
                 m_bucket_spacePoints = bucket->size();
@@ -189,6 +242,15 @@ namespace MuonR4{
 
                 Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
                 m_spoint_globalPosition.push_back( globalPos );
+            }
+
+            for (const xAOD::MuonSegment* truthSeg: truthSegments) {
+                using namespace SegmentFit;
+                const auto truthPars = localSegmentPars(*truthSeg);
+                m_truthSegLocX     += truthPars[toInt(ParamDefs::x0)];
+                m_truthSegLocY     += truthPars[toInt(ParamDefs::y0)];
+                m_truthSegLocTheta += truthPars[toInt(ParamDefs::theta)];
+                m_truthSegLocPhi   += truthPars[toInt(ParamDefs::phi)];
             }
 
             m_bucket_layers = layNumbers.size();
