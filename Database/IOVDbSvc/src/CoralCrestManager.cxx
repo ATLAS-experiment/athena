@@ -389,8 +389,16 @@
         cool::StorageType::TypeId typespec=cool::StorageType::Bool;
         for(auto &p : tSpec){
           if(p.first.compare(att.specification().name())==0){
-            std::string str_spec = Crest::s_typeToString.find(p.second)->second;
-            typespec=typeCorrespondance.find(str_spec)->second;
+            auto pElement = Crest::s_typeToString.find(p.second);
+            if (pElement == Crest::s_typeToString.end()){
+              throw std::runtime_error("CoralCrestManager::createAttributeList: name not found.");
+            }
+            std::string str_spec = pElement ->second;
+            auto pTypespec = typeCorrespondance.find(str_spec);
+            if (pTypespec == typeCorrespondance.end()){
+              throw std::runtime_error("CoralCrestManager::createAttributeList: typespec not found.");
+            }
+            typespec=pTypespec->second;
             break;
           }
         }

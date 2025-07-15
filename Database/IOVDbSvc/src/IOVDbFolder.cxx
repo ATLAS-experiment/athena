@@ -427,11 +427,11 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     std::vector<IOVHash> iovs = fetchCrestObjects(since,until,vkey);
     if (m_cachespec==nullptr)
       m_cachespec=m_crest_mng.value().getAttributeListSpec();
-    for(auto iovHash : iovs) {
-       m_crest_mng.value().selectIov(iovHash.first.first);
-       const auto & channelNumbers=m_crest_mng.value().channelIds(iovHash.first.first);
+    for(const auto & [iov, hash] : iovs) {
+       m_crest_mng.value().selectIov(iov.first);
+       const auto & channelNumbers=m_crest_mng.value().channelIds(iov.first);
       for (auto const & chan: channelNumbers){
-         addIOVtoCache(iovHash.first.first, iovHash.first.second);
+         addIOVtoCache(iov.first, iov.second);
          std::string token;
          std::istringstream tokenStream(chan);
          std::getline(tokenStream, token, ':');
