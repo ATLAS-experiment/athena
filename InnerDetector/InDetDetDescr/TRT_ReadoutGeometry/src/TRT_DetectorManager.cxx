@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
-#include "TRT_ReadoutGeometry/TRT_BarrelCode.h"
-#include "TRT_ReadoutGeometry/TRT_EndcapCode.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
 #include "InDetReadoutGeometry/ExtendedAlignableTransform.h"
@@ -17,7 +15,6 @@
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
 #include "DetDescrConditions/AlignableTransform.h"
-#include "DetDescrConditions/AlignableTransformContainer.h"
 
 #include "StoreGate/StoreGateSvc.h"
 #include "TRT_ConditionsData/StrawDxContainer.h"
@@ -219,21 +216,6 @@ namespace InDetDD {
     void TRT_DetectorManager::setGasType(const ActiveGasType & activeGasType)
     {
         m_gasType = activeGasType;
-    }
-
-    unsigned int TRT_DetectorManager::digitizationVersion() const
-    {
-        return m_digvers;
-    }
-
-    const std::string& TRT_DetectorManager::digitizationVersionName() const
-    {
-        return m_digversname;
-    }
-
-    void TRT_DetectorManager::setDigitizationVersion(const unsigned int & dv, const std::string& name )
-    {
-        m_digvers = dv; m_digversname = name;
     }
 
     // Register the call back for this key and the corresponding level in

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -22,7 +22,6 @@
 
 #include <map>
 #include <string>
-#include <vector>
 
 class Algorithm;
 class AlgTool;
@@ -43,8 +42,6 @@ public:
    * Initialize: fill defaults and overwrite by user values where appropriate
    */
   void initialize( const InDetDD::TRT_DetectorManager* detmgr);
-
-  StatusCode DigSettingsFromCondDB(int m_dig_vers_from_condDB);
 
   /** Add properties for overrideable parameters */
   void addPropertiesForOverrideableParameters( Algorithm * alg );
@@ -238,7 +235,6 @@ private:
   void processOverrides();
 
   //---First a list of data members used for holding the parameters:
-  unsigned int m_digversion;
   bool m_useMagneticFieldMap = false;
   bool m_getT0FromData = false;
   unsigned int m_storeSDO = 0U;            /**< Time window in which to store SDOs*/

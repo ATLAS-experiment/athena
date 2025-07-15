@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "TRTDetectorFactory_Lite.h"
 #include "TRT_DetDescrDB_ParameterInterface.h"
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
@@ -12,14 +11,12 @@
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
 #include "InDetReadoutGeometry/Version.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
-#include "IdDictDetDescr/IdDictManager.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "GeoModelRead/ReadGeoModel.h"
 #include "ArrayFunction.h"
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoCountVolAndSTAction.h"
 #include "GeoModelKernel/GeoAccessVolAndSTAction.h"
@@ -30,17 +27,13 @@
 #include "GeoGenericFunctions/Variable.h"
 #include "GeoGenericFunctions/Sin.h"
 #include "GeoGenericFunctions/Cos.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "DetDescrConditions/AlignableTransformContainer.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
 
-
 #include <vector>
-#include <sstream>
 #include <cmath>
 
 //TK: get rid of these and use GeoGenfun:: and GeoXF:: instead
@@ -55,14 +48,12 @@ TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqlit
 						 const ITRT_StrawStatusSummaryTool* sumTool, // added for Argon. Will be used in later revisions
 						 bool useOldActiveGasMixture,
 						 bool DC2CompatibleBarrelCoordinates,
-						 int overridedigversion,
 						 bool alignable,
 						 bool useDynamicAlignmentFolders)
   : InDetDD::DetectorFactoryBase(athenaComps), 
     m_sqliteReader (sqliteReader),
     m_useOldActiveGasMixture(useOldActiveGasMixture),
     m_DC2CompatibleBarrelCoordinates(DC2CompatibleBarrelCoordinates),
-    m_overridedigversion(overridedigversion),
     m_alignable(alignable),
     m_sumTool(sumTool),
     m_useDynamicAlignFolders(useDynamicAlignmentFolders)
@@ -325,18 +316,6 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 
   //Uncomment for testing:
   //  m_data->ShowValues();
-
-  //---------- Digitization Version Info for dig. and recon r-t -----------//
-  if (m_overridedigversion < 0 ) {
-    m_detectorManager->setDigitizationVersion(m_data->digversion,m_data->digversionname);
-  } else {
-    m_detectorManager->setDigitizationVersion(m_overridedigversion,"CUSTOMOVERRIDDEN");
-    ATH_MSG_INFO( "Digversion overridden via joboptions from " 
-		  << m_data->digversion << " ('" << m_data->digversionname << "') to " 
-		  << m_detectorManager->digitizationVersion()<< " ('" 
-		  << m_detectorManager->digitizationVersionName()<<"')" );
-  }
-
 
   //----------------------Initialize the numerology------------------------//
 
