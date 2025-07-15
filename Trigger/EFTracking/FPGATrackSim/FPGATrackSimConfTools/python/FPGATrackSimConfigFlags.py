@@ -127,6 +127,7 @@ def createFPGATrackSimConfigFlags():
 
     # Monitoring
     cf.addFlag('writeAdditionalOutputData', True)
+    cf.addFlag('writeOutputEventLimit', -1)
     cf.addFlag('readOfflineObjects', True)
 
     # ACTS Tracking

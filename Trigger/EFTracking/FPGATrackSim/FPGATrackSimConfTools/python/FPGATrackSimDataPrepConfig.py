@@ -162,6 +162,10 @@ def FPGATrackSimDataPrepOutputCfg(flags):
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputDataPrep")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimDataPrepTree"
+    if not flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+        FPGATrackSimWriteOutput.EventLimit = 0
+    else:
+        FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
