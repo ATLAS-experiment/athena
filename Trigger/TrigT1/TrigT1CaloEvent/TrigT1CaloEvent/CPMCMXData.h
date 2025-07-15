@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  //***************************************************************************
@@ -13,8 +13,8 @@
   #ifndef CPMCMXDATA_H
   #define CPMCMXDATA_H
   
-  #include "AthenaKernel/CLASS_DEF.h"
   #include "TrigT1CaloEvent/CPMTobRoI.h"
+  #include <vector>
 
   namespace LVL1 {
   
@@ -56,8 +56,6 @@
     };
   } // end of namespace
 
-#ifndef CPMCMXData_ClassDEF_H
 #include "TrigT1CaloEvent/CPMCMXData_ClassDEF.h"
-#endif
 
 #endif

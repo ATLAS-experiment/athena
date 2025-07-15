@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,7 +25,6 @@
 #include "Identifier/Identifier.h"
 #include "InDetSimData/InDetSimData.h"
 #include "InDetSimData/InDetSimDataCollection.h"
-#include "InDetSimEvent/TRTHitIdHelper.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 
@@ -38,26 +37,17 @@
 #include "InDetRawData/TRT_RDO_Collection.h"
 
 // Gaudi includes
-#include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
-
 //CondDB
 #include "StoreGate/ReadCondHandle.h"
-#include "AthenaPoolUtilities/AthenaAttributeList.h"
-#include "TRT_ConditionsData/StrawStatusMultChanContainer.h"
-#include <limits>
-#include <cstdint>
 
 // Random Number Generation
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 
-#include "CxxUtils/checker_macros.h"
-
-//#include "driftCircle.h" // local copy for debugging and development
 
 //_____________________________________________________________________________
 TRTDigitizationTool::TRTDigitizationTool(const std::string& type,
@@ -93,8 +83,6 @@ StatusCode TRTDigitizationTool::initialize()
   ATH_MSG_DEBUG ( "Retrieved TRT_DetectorManager with version "  << m_manager->getVersion().majorNum() );
 
   ATH_CHECK(detStore()->retrieve(m_trt_id, "TRT_ID"));
-
-  ATH_CHECK( m_digverscontainerkey.initialize (SG::AllowEmpty) );
 
   // Fill setting defaults and process joboption overrides:
   m_settings->initialize(m_manager);
@@ -243,19 +231,6 @@ StatusCode TRTDigitizationTool::lateInitialize(const EventContext& ctx) {
   CLHEP::HepRandomEngine *noiseThreshRndmEngine = getRandomEngine("TRT_Noise_ThresholdFluctuations", m_randomSeedOffset, ctx);
   CLHEP::HepRandomEngine *noiseElecResetRndmEngine = getRandomEngine("TRT_ElectronicsNoiseReset", m_randomSeedOffset, ctx);
   m_first_event=false;
-
-  if (!m_digverscontainerkey.empty()) {
-
-    if ( ConditionsDependingInitialization(ctx).isFailure() ) {
-      ATH_MSG_ERROR ( "Folder holder TRT digitization version exists in condDB, but tag is faulty" );
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_DEBUG ( "Using Digitization version as defined in conditions tag" );
-    }
-
-  } else {
-    ATH_MSG_DEBUG ( "No folder containing TRT digitization version found in CondDB. Using default from Det Desc tag: " << m_settings->digVers() );
-  }
 
   //Resuming initialiazation. Section below had to be moved into event loop due to dependence on conditions data
 
@@ -856,34 +831,6 @@ StatusCode TRTDigitizationTool::finalize() {
   ATH_MSG_INFO ( "TRTDigitizationTool::finalize()" );
 
   return StatusCode::SUCCESS;
-}
-
-//_____________________________________________________________________________
-
-StatusCode TRTDigitizationTool::ConditionsDependingInitialization(const EventContext& ctx)
-{
-  SG::ReadCondHandle<AthenaAttributeList> digvers (m_digverscontainerkey, ctx);
-  int dig_vers_from_condDB = (**digvers)["TRT_Dig_Vers"].data<int>();
-
-  if (dig_vers_from_condDB!=0) {
-
-    if (StatusCode::SUCCESS == m_settings->DigSettingsFromCondDB(dig_vers_from_condDB)) {
-      ATH_MSG_INFO ( "Retrieved TRT_Settings from CondDB with TRT digitization version: digversion = " <<
-                     dig_vers_from_condDB );
-    } else {
-      ATH_MSG_WARNING ( "Unknown TRT digitization version: digversion = " << dig_vers_from_condDB <<
-                        " read from CondDB. Overriding to use default from Det Desc tag: " <<
-                        m_settings->digVers() );
-    }
-
-  } else {
-    ATH_MSG_WARNING ( "TRT digitization version: digversion = " << dig_vers_from_condDB <<
-                      " read from CondDB. Overriding to use default from Det Desc tag: " <<
-                      m_settings->digVers() );
-  }
-
-  return StatusCode::SUCCESS;
-
 }
 
 //_____________________________________________________________________________

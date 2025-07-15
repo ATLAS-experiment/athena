@@ -1,5 +1,5 @@
 /*                                                                                                                      
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigThresholdDecisionTool.h"
@@ -39,9 +39,6 @@ namespace LVL1
     ATH_MSG_DEBUG( "Start for Phase1 TrigThresholdDecisionTool"  );
     ATH_MSG_DEBUG( "==========================================" );
 
-    m_parsed_flags.clear();
-    m_tgcFlag_decisions.clear();
-
     // we configure the tool here only if we are not running from xAOD
     if (!m_MenuFromxAOD){
         
@@ -58,6 +55,10 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     if (m_isInitialized) {
         return StatusCode::SUCCESS;
     }
+
+    m_parsed_flags.clear();
+    m_tgcFlag_decisions.clear();
+    m_rpcFlag_decisions.clear();
 
     //front-load the TGC flag parsing and all possible 3-bit decisions for the menu
     std::optional<ThrVecRef> menuThresholds = getMenuThresholds(l1Menu);
@@ -194,7 +195,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
 
       if (passed) {
         // set the corresponding bit in the pattern
-        thresholdsPattern |= (1 << thr->mapping());
+        thresholdsPattern |= (1ull << thr->mapping());
       }
 
     } // loop over thresholds
@@ -417,7 +418,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
       {
 	vec_flags.push_back(parseString(vec_ors[ior],"&"));
       }
-      m_parsed_flags[flags] = vec_flags;
+      m_parsed_flags[flags] = std::move(vec_flags);
     }
   }
 

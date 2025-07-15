@@ -154,7 +154,8 @@ class MonitorDef:
                 "L1_2eEM10L_MU8F", "L1_MU3V_jJ40",
                 # L1Topo (Topo2 always in)
                 "L1_LLPDPHI-jXE40-jJ40",
-                "L1_BPH-0DR3-eEM9jJ40_MU5VF", "L1_BPH-0M9-eEM9-eEM7_MU5VF", "L1_BPH-0DR3-eEM9jJ40_2MU3V",
+                "L1_BPH-0M9-eEM9-eEM7_MU5VF",
+                "L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25",
                 "L1_BPH-0M9-eEM9-eEM7",  "L1_BPH-0M10-3MU3V", "L1_BPH-0M10-3MU3VF",
                 "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
                 "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ80",

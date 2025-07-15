@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  /***************************************************************************
@@ -16,9 +16,7 @@
  #ifndef TRIGT1CALOSIM_CPMSIM_H
  #define TRIGT1CALOSIM_CPMSIM_H
 
- // STL
- #include <string>
- #include <vector>
+ 
 
  // Athena/Gaudi
  #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -44,7 +42,9 @@
 
  #include "TrigT1CaloEvent/CPMCMXData.h"
  #include "TrigT1CaloEvent/CPMTobRoI.h"
-
+ // STL
+ #include <string>
+ #include <memory>
 
  namespace LVL1 {
 
