@@ -178,7 +178,8 @@ StatusCode FPGATrackSimOutputHeaderTool::writeData() {
 
   ATH_MSG_DEBUG ("Writing data in TTree");
 
-  if  (m_event < m_eventLimit) {
+  // Interpret -1 as no limit.
+  if (m_event < static_cast<unsigned>(m_eventLimit) || m_eventLimit < 0) {
     m_EventTree->Fill();
   }
 

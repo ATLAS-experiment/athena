@@ -70,7 +70,7 @@ private:
   ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
 
   // Max output events
-  Gaudi::Property<unsigned> m_eventLimit {this, "EventLimit", 10000 , "Maximum Number of Events to Output"};
+  Gaudi::Property<int> m_eventLimit {this, "EventLimit", 10000 , "Maximum Number of Events to Output"};
 
   // internal counters  
   std::atomic<unsigned> m_event = 0;
