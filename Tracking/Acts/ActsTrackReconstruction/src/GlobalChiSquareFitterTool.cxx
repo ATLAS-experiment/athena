@@ -122,6 +122,7 @@ GlobalChiSquareFitterTool::Gx2FitterOptions_t
                                             detail::SourceLinkType slType) const {
     Acts::PropagatorPlainOptions propagationOption{tgContext, mfContext};
     propagationOption.maxSteps = m_option_maxPropagationStep;
+    propagationOption.maxTargetSkipping = m_option_maxNavSurfaces;
     // Set the Gx2Fitter options
     return Gx2FitterOptions_t{tgContext, mfContext, calContext, 
                               m_gx2fExtensions[static_cast<int>(slType)], 
