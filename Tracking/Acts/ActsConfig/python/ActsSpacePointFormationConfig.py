@@ -43,7 +43,11 @@ def ActsSpacePointCacheCreatorAlgCfg(flags,
 def ActsPixelSpacePointToolCfg(flags,
                                name: str = "ActsPixelSpacePointTool",
                                **kwargs: dict) -> ComponentAccumulator:
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+
     acc = ComponentAccumulator()
+    if isFastPrimaryPass(flags):
+        kwargs.setdefault('UseMaxVariance', True)
     acc.setPrivateTools(CompFactory.ActsTrk.PixelSpacePointFormationTool(name, **kwargs))
     return acc
 

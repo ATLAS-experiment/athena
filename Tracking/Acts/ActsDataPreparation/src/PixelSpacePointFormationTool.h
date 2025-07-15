@@ -49,6 +49,17 @@ namespace ActsTrk {
     const PixelID* m_pixelId{};
     //@}
 
+    /// Whether to use maximum variance for space point covariance
+    /// If true, the covariance terms will be capped at the values specified by MaxVarianceZ and MaxVarianceR.
+    /// If false, the covariance terms will be calculated based on the cluster width and the rotation of the detector element.
+    Gaudi::Property<bool> m_useMaxVariance{this, "UseMaxVariance", false};
+    /// Maximum variance for the z component of the space point covariance.
+    /// Default value was around the minimum observed value in the pixel barrel.
+    Gaudi::Property<float> m_maxVarianceZ{this, "MaxVarianceZ", 0.0014f};
+    /// Maximum variance for the r component of the space point covariance.
+    /// Default value was around the minimum observed value in the pixel barrel.
+    Gaudi::Property<float> m_maxVarianceR{this, "MaxVarianceR", 0.015f};
+
     /// @name Static constant expression
     /// @brief Values used in calculating covariance terms
     static constexpr double s_oneOverTwelve{0.08333};
