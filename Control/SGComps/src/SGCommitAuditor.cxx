@@ -28,8 +28,11 @@ SGCommitAuditor::initialize() {
 
 
 void
-SGCommitAuditor::after(const std::string& /*event*/, const std::string& /*name*/,
+SGCommitAuditor::after(const std::string& event, const std::string& /*name*/,
                        const EventContext&, const StatusCode&) {
+  if (event != Gaudi::IAuditor::Execute) {
+    return;
+  }
   p_sg->commitNewDataObjects();
 }
 
