@@ -31,6 +31,7 @@ class FPGADataFormatTool
     virtual StatusCode convertPixelHitsToFPGADataFormat(
         const PixelRDO_Container &pixelRDO,
         std::vector<uint64_t> &encodedData,
+        const std::vector<IdentifierHash>& hashList,
         const EventContext &ctx) const override;
     /**
      * @brief Covert the Strip RDOs to the test vector format as requited by FPGA EF tracking alogrithms
@@ -38,6 +39,7 @@ class FPGADataFormatTool
     virtual StatusCode convertStripHitsToFPGADataFormat(
         const SCT_RDO_Container &stripRDO,
         std::vector<uint64_t> &encodedData,
+        const std::vector<IdentifierHash>& hashList,
         const EventContext &ctx) const override;
   
     virtual  StatusCode convertFPGATracksToFPGADataFormat(
@@ -57,6 +59,7 @@ class FPGADataFormatTool
     StatusCode convertPixelRDO(
         const PixelRDO_Container &pixelRDO,
         std::vector<uint64_t> &encodedData,
+        const std::vector<IdentifierHash>& hashList,
         const EventContext &ctx
         ) const;
 
@@ -64,6 +67,7 @@ class FPGADataFormatTool
     StatusCode convertStripRDO(
         const SCT_RDO_Container &stripRDO,
         std::vector<uint64_t> &encodedData,
+        const std::vector<IdentifierHash>& hashList,
         const EventContext &ctx
         ) const;
 

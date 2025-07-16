@@ -29,7 +29,10 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
 
   std::vector<uint64_t> outputData;
 
-  ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, outputData, ctx));
+  std::vector<IdentifierHash> listOfPixelIds;
+  std::vector<IdentifierHash> listOfStripIds;
+
+  ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, outputData, listOfPixelIds, ctx));
 
   // Report the output
   ATH_MSG_DEBUG("ITK pixel encoded data");
@@ -44,7 +47,7 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
 
   {
     Athena::Chrono chrono("ConvertStripHitsToFPGADataFormat", m_chronoSvc.get());
-    ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, outputData, ctx));
+    ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, outputData, listOfStripIds, ctx));
   }
 
   // Report the output

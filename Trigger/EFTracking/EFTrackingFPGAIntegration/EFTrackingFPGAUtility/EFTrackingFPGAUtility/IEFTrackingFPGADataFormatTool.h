@@ -23,11 +23,13 @@ class IEFTrackingFPGADataFormatTool : virtual public IAlgTool {
   virtual StatusCode convertPixelHitsToFPGADataFormat(
       const PixelRDO_Container &pixelRDO,
       std::vector<uint64_t> &encodedData,
+      const std::vector<IdentifierHash>& hashList,
       const EventContext &ctx) const = 0;
 
   virtual StatusCode convertStripHitsToFPGADataFormat(
       const SCT_RDO_Container &stripRDO,
       std::vector<uint64_t> &encodedData,
+      const std::vector<IdentifierHash>& hashList,
       const EventContext &ctx) const = 0;
 
   virtual  StatusCode convertFPGATracksToFPGADataFormat(

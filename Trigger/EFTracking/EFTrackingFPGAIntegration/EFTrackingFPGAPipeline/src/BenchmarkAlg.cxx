@@ -162,9 +162,12 @@ namespace EFTrackingFPGAIntegration
         std::vector<uint64_t> encodedPixelRDO;
         std::vector<uint64_t> encodedStripRDO;
 
+        std::vector<IdentifierHash> listOfPixelIds;
+        std::vector<IdentifierHash> listOfStripIds;
+
         // Encode RDOs into byte stream
-        ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, encodedPixelRDO, ctx));
-        ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, encodedStripRDO, ctx));
+        ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, encodedPixelRDO, listOfPixelIds, ctx));
+        ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, encodedStripRDO, listOfStripIds, ctx));
 
         for (unsigned int i = 0; i < encodedPixelRDO.size(); i++)
         {
