@@ -75,14 +75,14 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   std::vector<float> chargeList;
   if (calibData) chargeList.reserve(cluster.ids.size());
   
-  int colmax = std::numeric_limits<int>::min();
-  int rowmax = std::numeric_limits<int>::min();
-  int colmin = std::numeric_limits<int>::max();
-  int rowmin = std::numeric_limits<int>::max();
-  InDetDD::PixelDiodeParametersProxy colmin_diode{};
-  InDetDD::PixelDiodeParametersProxy colmax_diode{};
-  InDetDD::PixelDiodeParametersProxy rowmin_diode{};
-  InDetDD::PixelDiodeParametersProxy rowmax_diode{};
+  InDetDD::PixelDiodeTree::CellIndexType rowmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
+  InDetDD::PixelDiodeTree::CellIndexType colmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
+  InDetDD::PixelDiodeTree::CellIndexType rowmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  InDetDD::PixelDiodeTree::CellIndexType colmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmin_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmax_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition rowmin_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition rowmax_diode{};
 
   // We temporary comment this since it is not used
   // bool hasGanged = false;
@@ -128,9 +128,11 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     }
     
     InDetDD::SiCellId si_cell = element->cellIdFromIdentifier(id);
-    const int row = si_cell.phiIndex();
-    const int col = si_cell.etaIndex();
-    InDetDD::PixelDiodeParametersProxy si_param = design.parametersProxy(si_cell);
+    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(si_cell.phiIndex(),si_cell.etaIndex());
+    const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];
+    const InDetDD::PixelDiodeTree::CellIndexType &col = diode_idx[1];
+    InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
     if (row>rowmax) {
        rowmax=row;
        rowmax_diode = si_param;

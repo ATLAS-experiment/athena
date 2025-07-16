@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ReadoutGeometryBase )
@@ -26,3 +26,8 @@ atlas_add_test( SiCellId_test
    LINK_LIBRARIES ${Boost_LIBRARIES}  CxxUtils TestTools ReadoutGeometryBase
    POST_EXEC_SCRIPT "nopost.sh" )
 
+atlas_add_test( PixelDiodeTree_test
+   SOURCES test/PixelDiodeTree_test.cxx
+   INCLUDE_DIRS
+   LINK_LIBRARIES ReadoutGeometryBase
+   POST_EXEC_SCRIPT "nopost.sh" )

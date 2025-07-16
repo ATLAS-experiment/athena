@@ -20,7 +20,6 @@
 #include <cmath>
 #include <utility>
 
-
 namespace InDetDD {
 
 using std::abs;
@@ -37,23 +36,26 @@ PixelModuleDesign::PixelModuleDesign(const double thickness,
                                     const int cellRowsPerCircuit,
                                     const int diodeColumnsPerCircuit,
                                     const int diodeRowsPerCircuit,
-                                    std::shared_ptr<const PixelDiodeMatrix> matrix,
+                                    PixelDiodeTree &&diode_tree,
                                     InDetDD::CarrierType carrierType,
                                     int readoutSide,
                                     bool is3D,
-                                    InDetDD::DetectorType detectorType) :
+                                    InDetDD::DetectorType detectorType,
+                                    PixelReadoutTechnology readoutTechnology
+                                    ) :
 
   SiDetectorDesign(thickness, 
 		   phiSymmetric, etaSymmetric, depthSymmetric,
 		   carrierType,
 		   readoutSide),
-  m_diodeMap(std::move(matrix)),
+  m_diodeTree(std::move(diode_tree)),
   m_readoutScheme(circuitsPerColumn,circuitsPerRow,
 		  cellColumnsPerCircuit,cellRowsPerCircuit,
 		  diodeColumnsPerCircuit,diodeRowsPerCircuit),
   m_bounds(),
-  m_is3D(is3D),
-  m_detectorType(detectorType)
+  m_detectorType(detectorType),
+  m_readoutTechnology(readoutTechnology),
+  m_is3D(is3D)
 {
 }
 
@@ -64,16 +66,18 @@ PixelModuleDesign::PixelModuleDesign(const double thickness,
                                     const int cellRowsPerCircuit,
                                     const int diodeColumnsPerCircuit,
                                     const int diodeRowsPerCircuit,
-                                    std::shared_ptr<const PixelDiodeMatrix> matrix,
+                                    PixelDiodeTree &&diode_tree,
                                     InDetDD::CarrierType carrierType,
                                     int readoutSide,
                                     bool is3D,
-                                    InDetDD::DetectorType detectorType) :
+                                    InDetDD::DetectorType detectorType,
+                                    PixelReadoutTechnology readoutTechnology
+                                    ) :
     PixelModuleDesign(thickness, 
     true,true,true, //if symmetry not explicitly  set, assume fully symmetric
     circuitsPerColumn,circuitsPerRow,cellColumnsPerCircuit,cellRowsPerCircuit,
-    diodeColumnsPerCircuit,diodeRowsPerCircuit,matrix,carrierType,readoutSide,
-    is3D,detectorType)
+    diodeColumnsPerCircuit,diodeRowsPerCircuit,std::move(diode_tree),carrierType,readoutSide,
+    is3D,detectorType, readoutTechnology)
 {
 }
 
@@ -102,12 +106,20 @@ PixelModuleDesign::distanceToDetectorEdge(const SiLocalPosition & localPosition,
  
 SiDiodesParameters PixelModuleDesign::parameters(const SiCellId & cellId) const
 {
-  return m_diodeMap.parameters(cellId);
+   std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(cellId.phiIndex(),cellId.etaIndex());
+   InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( m_diodeTree.diodeProxyFromIdxCachePosition(diode_idx));
+
+   return SiDiodesParameters(SiLocalPosition(Amg::Vector2D{si_param.position()[0],si_param.position()[1]}),
+                             SiLocalPosition(Amg::Vector2D{si_param.width()[0],si_param.width()[1]}));
 }
 
 SiLocalPosition PixelModuleDesign::localPositionOfCell(const SiCellId & cellId) const
 {
-  return m_diodeMap.parameters(cellId).centre(); 
+   std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(cellId.phiIndex(),cellId.etaIndex());
+   auto pos=m_diodeTree.findFromIdx(diode_idx);
+   return SiLocalPosition(Amg::Vector2D{pos[0],pos[1]});
 }
 
 
@@ -129,13 +141,13 @@ std::pair<SiLocalPosition,SiLocalPosition> PixelModuleDesign::endsOfStrip(const 
 // Methods to calculate length of a module
 double PixelModuleDesign::length() const
 {
-  return m_diodeMap.length();  
+   return m_diodeTree.totalWidth()[1]; // eta
 }
 
 // Methods to calculate average width of a module
 double PixelModuleDesign::width() const
 {
-  return m_diodeMap.width();
+  return m_diodeTree.totalWidth()[0]; // phi
 }
 
 // Methods to calculate minimum width of a module
@@ -201,9 +213,13 @@ PixelModuleDesign::etaPitch() const
 
 SiCellId PixelModuleDesign::cellIdOfPosition(const SiLocalPosition & localPosition) const
 {
-  return m_diodeMap.cellIdOfPosition(localPosition);
+   InDetDD::PixelDiodeTree::Vector2D pos{ localPosition.xPhi(),localPosition.xEta() };
+   auto idx=m_diodeTree.findFromPos(pos);
+   if (!isInsideMatrix(idx)) {
+      return SiCellId();
+   }
+   return SiCellId(idx[0],idx[1]);
 }
-
 
 int PixelModuleDesign::numberOfConnectedCells(const SiReadoutCellId & readoutId) const
 {
@@ -230,9 +246,11 @@ PixelModuleDesign::readoutIdOfCell(const SiCellId & cellId) const
 
 
 SiReadoutCellId 
-PixelModuleDesign::readoutIdOfPosition(const SiLocalPosition & localPos) const
+PixelModuleDesign::readoutIdOfPosition(const SiLocalPosition & localPosition) const
 {
-  return m_readoutScheme.readoutIdOfCell(m_diodeMap.cellIdOfPosition(localPos));
+  InDetDD::PixelDiodeTree::Vector2D pos{ localPosition.xPhi(),localPosition.xEta() };
+  auto idx=m_diodeTree.findFromPos(pos);
+  return m_readoutScheme.readoutIdOfCell(SiCellId(idx[0],idx[1]));
 }
 
 // Given row and column index of diode, returns position of diode center
@@ -257,7 +275,7 @@ PixelModuleDesign::bounds() const
 SiCellId 
 PixelModuleDesign::cellIdInRange(const SiCellId & cellId) const
 {
-  return m_diodeMap.cellIdInRange(cellId);
+  return (isInsideMatrix(cellId) ? cellId : SiCellId());
 }
 
 DetectorType PixelModuleDesign::type() const

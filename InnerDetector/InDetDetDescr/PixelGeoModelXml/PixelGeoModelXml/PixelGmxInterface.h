@@ -21,7 +21,7 @@ namespace GeoModelIO{
 namespace InDetDD {
 
 class PixelDetectorManager;
-class PixelDiodeMatrix;
+class PixelDiodeTree;
 class SiCommonItems;
 class SiDetectorDesign;
 
@@ -46,14 +46,6 @@ public:
                             std::map<std::string, int> &index,
                             GeoVFullPhysVol *fpv,
                             GeoAlignableTransform *transform) override final;
-
-  std::shared_ptr<const PixelDiodeMatrix> buildMatrix(double pitchPhi, double pitchEta,
-						      double pitchPhiLong, double pitchPhiEnd,
-						      double pitchEtaLong, double pitchEtaEnd,
-						      int nPhiLong, int nPhiEnd,
-						      int nEtaLong, int nEtaEnd,
-						      int circuitsPerPhi, int circuitsPerEta,
-						      int columnsPerCircuit, int rowsPerCircuit) const;
 
    void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PLRGmxInterface.h"
@@ -10,7 +10,8 @@
 #include <InDetSimEvent/SiHitIdHelper.h>
 #include <PixelReadoutGeometry/PixelDetectorManager.h>
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
-#include <ReadoutGeometryBase/PixelDiodeMatrix.h>
+#include "ReadoutGeometryBase/PixelDiodeTree.h"
+#include "ReadoutGeometryBase/PixelDiodeTreeBuilder.h"
 #include <ReadoutGeometryBase/SiCommonItems.h>
 #include <InDetGeoModelUtils/WaferTree.h>
 
@@ -162,8 +163,8 @@ void PLRGmxInterface::makePLRModule(const std::string &typeName,
   int nPhiLongPerSide{};
   int nEtaEndPerSide{};
   int nPhiEndPerSide{};
-  int rowsPerChip{};
-  int columnsPerChip{};
+  int rowsPerCircuit{};
+  int columnsPerCircuit{};
 
   // unused
   InDetDD::CarrierType carrier{InDetDD::electrons};
@@ -175,8 +176,8 @@ void PLRGmxInterface::makePLRModule(const std::string &typeName,
   getParameter(typeName, parameters, "circuitsPerPhi", circuitsPerPhi);
   getParameter(typeName, parameters, "thickness", thickness);
   getParameter(typeName, parameters, "is3D", is3D);
-  getParameter(typeName, parameters, "rows", rowsPerChip);
-  getParameter(typeName, parameters, "columns", columnsPerChip);
+  getParameter(typeName, parameters, "rows", rowsPerCircuit);
+  getParameter(typeName, parameters, "columns", columnsPerCircuit);
   getParameter(typeName, parameters, "pitchEta", pitchEta);
   getParameter(typeName, parameters, "pitchPhi", pitchPhi);
   getParameter(typeName, parameters, "pitchEtaLong", pitchEtaLong);
@@ -188,29 +189,34 @@ void PLRGmxInterface::makePLRModule(const std::string &typeName,
   getParameter(typeName, parameters, "nPhiEndPerSide", nPhiEndPerSide);
   getParameter(typeName, parameters, "nEtaEndPerSide", nEtaEndPerSide);
 
-  //
-  // Make Module Design and add to DetectorManager
-  //
-  std::shared_ptr<const PixelDiodeMatrix> fullMatrix = buildMatrix(pitchPhi, pitchEta,
-                                                                   pitchPhiLong, pitchPhiEnd,
-                                                                   pitchEtaLong, pitchEtaEnd,
-                                                                   nPhiLongPerSide, nPhiEndPerSide,
-                                                                   nEtaLongPerSide, nEtaEndPerSide,
-                                                                   circuitsPerPhi, circuitsPerEta,
-                                                                   columnsPerChip, rowsPerChip);
+  constexpr InDetDD::PixelReadoutTechnology readoutTechnology = InDetDD::PixelReadoutTechnology::RD53;
 
-  ATH_MSG_DEBUG("fullMatrix = buildMatrix(" << pitchPhi << ", " << pitchEta << ", "
-                                            << pitchPhiLong << ", " << pitchPhiEnd << ", "
-                                            << pitchEtaLong << ", " << pitchEtaEnd << ", "
-                                            << nPhiLongPerSide << ", " << nPhiEndPerSide << ", "
-                                            << nEtaLongPerSide << ", " << nEtaEndPerSide << ", "
-                                            << circuitsPerPhi << ", " << circuitsPerEta << ", "
-                                            << columnsPerChip << ", " << rowsPerChip << ")");
-  ATH_MSG_DEBUG("readout geo - design " << thickness << " "
-                                        << circuitsPerPhi << " " << circuitsPerEta << " "
-                                        << columnsPerChip << " " << rowsPerChip << " "
-                                        << columnsPerChip << " " << rowsPerChip << " "
-                                        << carrier << " " << readoutSide);
+  // helper function to associate attributes to sub-matrices and diodes.
+  const auto attributePassThrough = []([[maybe_unused]] const std::array<PixelDiodeTree::IndexType,2> &split_idx,
+                                       [[maybe_unused]] const PixelDiodeTree::Vector2D &diode_width,
+                                       [[maybe_unused]] const std::array<bool,4> &ganged,
+                                       [[maybe_unused]] unsigned int split_i,
+                                       PixelDiodeTree::AttributeType current_matrix_attribute,
+                                       PixelDiodeTree::AttributeType current_diode_attribute)
+     -> std::tuple<PixelDiodeTree::AttributeType,PixelDiodeTree::AttributeType>
+     { return std::make_tuple(current_matrix_attribute, current_diode_attribute); };
+
+  PixelDiodeTree diode_tree
+        = createPixelDiodeTree(std::array<unsigned int,2>{static_cast<unsigned int>(circuitsPerPhi),static_cast<unsigned int>(circuitsPerEta)},
+                               std::array<unsigned int,2>{static_cast<unsigned int>(rowsPerCircuit),static_cast<unsigned int>(columnsPerCircuit)},
+                               PixelDiodeTree::Vector2D{pitchPhi,pitchEta},  // regular ptich
+                               std::array<std::array<unsigned int,2>, 2>{ std::array<unsigned int,2>{static_cast<unsigned int>(nPhiEndPerSide),
+                                                                                                     static_cast<unsigned int>(nEtaEndPerSide)},   // outer edge in pixels
+                                                                          std::array<unsigned int,2>{static_cast<unsigned int>(nPhiLongPerSide),
+                                                                                                     static_cast<unsigned int>(nEtaLongPerSide)}}, // inner edge in pixels
+                               std::array<PixelDiodeTree::Vector2D,2>{PixelDiodeTree::Vector2D{pitchPhiEnd,  pitchEtaEnd},      // outer edge pitch (correct?)
+                                                                      PixelDiodeTree::Vector2D{pitchPhiLong,pitchEtaLong}       // inner edge pitch
+                               },
+                               std::array<std::array<unsigned int,2>, 2>{ std::array<unsigned int,2>{0u,0u},   // @TODO add dead zone for run1-3 pixels
+                                                                          std::array<unsigned int,2>{0u,0u}    // @TODO add dead zone for run1-3 pixels
+                               },
+                               attributePassThrough,
+                               nullptr);
 
   // Setting module identifier to InDetDD::PLR
   // (so far) primarily useful to avoid orientation warnings
@@ -218,13 +224,18 @@ void PLRGmxInterface::makePLRModule(const std::string &typeName,
 
   auto design = std::make_unique<PixelModuleDesign>(thickness,
                                                     circuitsPerPhi, circuitsPerEta,
-                                                    columnsPerChip, rowsPerChip,
-                                                    columnsPerChip, rowsPerChip,
-                                                    fullMatrix, carrier,
-                                                    readoutSide, is3D, detectorType);
-  
+                                                    columnsPerCircuit, rowsPerCircuit,
+                                                    columnsPerCircuit, rowsPerCircuit,
+                                                    std::move(diode_tree), carrier,
+                                                    readoutSide, is3D, detectorType,
+                                                    readoutTechnology);
 
-  ATH_MSG_DEBUG("readout geo - design : " << design->width() << " " << design->length() << " " << design->thickness() << " " <<design->rows() << " " << design->columns());
+  ATH_MSG_DEBUG("readout geo - design " << typeName << " " << design->width() << "x" << design->length() << "x" << design->thickness()
+                << " " << design->rows() << "x" << design->columns()
+                << ", " << circuitsPerPhi << "x" << circuitsPerEta << " "
+                << rowsPerCircuit << "x" << columnsPerCircuit
+                << " carrier " << carrier << " readout side " << readoutSide << ":\n"
+                << diode_tree.debugStringRepr());
 
   [[maybe_unused]] auto observedPtr = m_detectorManager->addDesign(std::move(design));
 
