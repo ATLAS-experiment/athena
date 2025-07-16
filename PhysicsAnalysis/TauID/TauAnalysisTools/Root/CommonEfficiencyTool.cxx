@@ -229,6 +229,10 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
         (sHistName.find("1P") != std::string::npos && sHistName.find("3p") != std::string::npos)) 
         continue;
 
+    if( (sHistName.find("1520") != std::string::npos && sHistName.find("loose") != std::string::npos) ){
+        continue;
+    }
+
     // get the uncertainty from the histogram
     tmpCorrectionCode = getValue(sHistName,
                                  xTau,
