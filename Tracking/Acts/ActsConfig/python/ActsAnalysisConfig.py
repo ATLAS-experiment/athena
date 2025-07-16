@@ -45,6 +45,16 @@ def ActsSeedToTrackAnalysisAlgCfg(flags,
                              xbins=320, xmin=0, xmax=320,
                              ybins=320, ymin=0, ymax=320)
 
+        tool.defineHistogram(f"bottomZ,bottomR;BottomZR_{layer}", title=f"Bottom SP ZR for {layer}", type='TH2F', path='2D',
+                             xbins=12000, xmin=-3000, xmax=3000,
+                             ybins=1000, ymin=0, ymax=320)
+        tool.defineHistogram(f"middleZ,middleR;MiddleZR_{layer}", title=f"Middle SP ZR for {layer}", type='TH2F', path='2D',
+                             xbins=12000, xmin=-3000, xmax=3000,
+                             ybins=1000, ymin=0, ymax=320)
+        tool.defineHistogram(f"topZ,topR;TopZR_{layer}", title=f"Top SP ZR for {layer}", type='TH2F', path='2D',
+                             xbins=12000, xmin=-3000, xmax=3000,
+                             ybins=1000, ymin=0, ymax=320)
+
         tool.defineHistogram(f"cotTheta_BM;cotTheta_BM_{layer}", title=f"CotTheta bottom-middle for {layer}", type='TH1F', path='SPVars',
                              xbins=80, xmin=0, xmax=40,
                              ybins=80, ymin=0, ymax=40)
