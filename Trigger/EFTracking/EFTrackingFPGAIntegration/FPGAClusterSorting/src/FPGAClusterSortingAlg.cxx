@@ -43,12 +43,17 @@ StatusCode FPGAClusterSortingAlg::execute(const EventContext& ctx) const {
     }
 
 
-    auto sortedxAODPixelClusters = std::make_unique<ConstDataVector<xAOD::PixelClusterContainer>>(SG::VIEW_ELEMENTS);
-    SG::WriteHandle<ConstDataVector<xAOD::PixelClusterContainer>> sortedxAODPixelClustersHandle(m_sortedxAODPixelClusterContainerKey, ctx);
+    std::unique_ptr<xAOD::PixelClusterContainer> sortedxAODPixelClusters = std::make_unique<xAOD::PixelClusterContainer>();
+    std::unique_ptr<xAOD::PixelClusterAuxContainer> sortedxAODPixelClustersAux = std::make_unique<xAOD::PixelClusterAuxContainer>();
+    sortedxAODPixelClusters->setStore (sortedxAODPixelClustersAux.get());
+
+    SG::WriteHandle<xAOD::PixelClusterContainer> sortedxAODPixelClustersHandle(m_sortedxAODPixelClusterContainerKey, ctx);
     
     
-    auto sortedxAODStripClusters = std::make_unique<ConstDataVector<xAOD::StripClusterContainer>>(SG::VIEW_ELEMENTS);
-    SG::WriteHandle<ConstDataVector<xAOD::StripClusterContainer>> sortedxAODStripClustersHandle(m_sortedxAODStripClusterContainerKeys, ctx);
+    std::unique_ptr<xAOD::StripClusterContainer> sortedxAODStripClusters = std::make_unique<xAOD::StripClusterContainer>();
+    std::unique_ptr<xAOD::StripClusterAuxContainer> sortedxAODStripClustersAux = std::make_unique<xAOD::StripClusterAuxContainer>();
+    sortedxAODStripClusters->setStore (sortedxAODStripClustersAux.get());
+    SG::WriteHandle<xAOD::StripClusterContainer> sortedxAODStripClustersHandle(m_sortedxAODStripClusterContainerKeys, ctx);
 
 
     // Copy pixel clusters into a vector for sorting
@@ -66,7 +71,9 @@ StatusCode FPGAClusterSortingAlg::execute(const EventContext& ctx) const {
 
     // Copy sorted clusters to output container
     for (const xAOD::PixelCluster* cl : pixelClustersVec) {
-        sortedxAODPixelClusters->push_back(cl);
+        xAOD::PixelCluster* newCl = new xAOD::PixelCluster();
+        sortedxAODPixelClusters->push_back(newCl);
+        *newCl = *cl;
     }
 
     // Copy strip clusters into a vector for sorting
@@ -84,11 +91,14 @@ StatusCode FPGAClusterSortingAlg::execute(const EventContext& ctx) const {
 
     // Copy sorted clusters to output container
     for (const xAOD::StripCluster* cl : stripClustersVec) {
-        sortedxAODStripClusters->push_back(cl);
+        xAOD::StripCluster* newCl = new xAOD::StripCluster();
+        sortedxAODStripClusters->push_back(newCl);
+        *newCl = *cl;
     }
 
-    ATH_CHECK(sortedxAODPixelClustersHandle.record(std::move(sortedxAODPixelClusters)));
-    ATH_CHECK(sortedxAODStripClustersHandle.record(std::move(sortedxAODStripClusters)));
+
+    ATH_CHECK(sortedxAODPixelClustersHandle.record(std::move(sortedxAODPixelClusters), std::move(sortedxAODPixelClustersAux)).isSuccess());
+    ATH_CHECK(sortedxAODStripClustersHandle.record(std::move(sortedxAODStripClusters), std::move(sortedxAODStripClustersAux)).isSuccess());
 
 
 
