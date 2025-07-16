@@ -64,6 +64,8 @@ class SeedingToolBase: public AthAlgTool {
   BooleanProperty m_useGPUseedExtraction{this, "UseGPUseedExtraction", true};
   BooleanProperty m_useOldTunings{this, "UseOldTunings", false};
 
+  FloatProperty m_tau_ratio_cut{this, "tau_ratio_cut", 0.007};
+
   float m_phiSliceWidth = 0.;
 
   std::unique_ptr<GNN_FasTrackConnector> m_connector = nullptr;
