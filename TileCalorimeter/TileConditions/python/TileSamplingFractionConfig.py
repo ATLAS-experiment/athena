@@ -33,7 +33,7 @@ def TileSamplingFractionCondAlgCfg(flags, **kwargs):
 
         samplingFractionTag = None # Tag connected to global conditions tag is used by default
         from SimulationConfig.SimEnums import LArParameterization
-        if flags.GeoModel.Run >= LHCPeriod.Run4 or flags.Overlay.DataOverlay or flags.Sim.ISF.Simulator.usesFastCaloSim() or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        if flags.GeoModel.Run >= LHCPeriod.Run4 or flags.Sim.ISF.Simulator.usesFastCaloSim() or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             samplingFractionTag = 'TileOfl02CalibSfr-SIM-07'
 
         from IOVDbSvc.IOVDbSvcConfig import addFolders
