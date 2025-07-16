@@ -110,7 +110,12 @@ namespace MuonR4{
         if (!fitResult.nPhiMeas) {
             ATH_MSG_VERBOSE("No phi measurements are left.");
             fitResult.segmentPars[toInt(ParamDefs::phi)] = 90. * Gaudi::Units::deg; 
-            fitResult.segmentPars[toInt(ParamDefs::x0)] = 0;
+            const double nHits = fitResult.calibMeasurements.size();
+            double avgX{0.};
+            std::ranges::for_each(fitResult.calibMeasurements,[&avgX, nHits](const HitType& hit) {
+                return avgX += hit->positionInChamber().x() / nHits;
+            });
+            fitResult.segmentPars[toInt(ParamDefs::x0)] = avgX;
         }
 
         fitResult.nDoF = fitResult.nDoF - 2 - (fitResult.nPhiMeas > 0 ? 2 : 0);
