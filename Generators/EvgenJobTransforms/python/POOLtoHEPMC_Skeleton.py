@@ -92,7 +92,7 @@ def fromRunArgs(runArgs):
     cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
                       OutputFile = my_output_HepMCFile,
                       McEventKey = McEventKey ) )
-
+    # Here one should set the output format
     # Post-include
     processPostInclude(runArgs, flags, cfg)
 
