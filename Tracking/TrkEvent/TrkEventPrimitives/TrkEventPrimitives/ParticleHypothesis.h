@@ -58,12 +58,12 @@ namespace Trk {
        (ParticleConstants::electronMassInMeV), // electron mass
        (ParticleConstants::muonMassInMeV), // muon mass
        (ParticleConstants::chargedPionMassInMeV), // charged pion mass
-       (493.677*Gaudi::Units::MeV),    // kaon mass
-       (938.272013*Gaudi::Units::MeV), // proton mass
-       (0.*Gaudi::Units::MeV),         // photon rest mass
-       (939.565346*Gaudi::Units::MeV), // neutron rest mass
-       (134.9766*Gaudi::Units::MeV),  // pi0 rest mass
-       (497.614*Gaudi::Units::MeV),    // K0 rest mass
+       (ParticleConstants::chargedKaonMassInMeV),    // kaon mass
+       (ParticleConstants::protonMassInMeV), // proton mass
+       (ParticleConstants::photonMassInMeV),         // photon rest mass
+       (ParticleConstants::neutronMassInMeV), // neutron rest mass
+       (ParticleConstants::piZeroMassInMeV),  // pi0 rest mass
+       (ParticleConstants::KZeroMassInMeV),    // K0 rest mass
        (ParticleConstants::muonMassInMeV) // muon mass
      }; 
    };
