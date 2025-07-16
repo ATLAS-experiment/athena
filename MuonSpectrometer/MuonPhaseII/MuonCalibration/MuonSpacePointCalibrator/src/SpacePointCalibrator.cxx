@@ -259,6 +259,8 @@ namespace MuonR4{
         const ActsGeometryContext* gctx = geoctx.get<const ActsGeometryContext*>();
         const EventContext* ctx = cctx.get<const EventContext*>();
         const auto* muonMeas = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(link);
+        ATH_MSG_VERBOSE("Calibrate measurement "<<m_idHelperSvc->toString(xAOD::identify(muonMeas))
+                     <<" @ surface "<<trackState.referenceSurface().geometryId());
         switch (muonMeas->type()){
             using enum xAOD::UncalibMeasType;
             case MdtDriftCircleType: {

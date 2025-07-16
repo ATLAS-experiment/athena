@@ -25,6 +25,8 @@
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/SympyStepper.hpp"
+#include "Acts/Propagator/StraightLineStepper.hpp"
+
 #include "Acts/TrackFitting/GlobalChiSquareFitter.hpp"
 
 // PACKAGE
@@ -141,13 +143,28 @@ class GlobalChiSquareFitterTool
 
 
     /// Type erased track fitter function.
-    using Fitter = Acts::Experimental::Gx2Fitter<Acts::Propagator<Acts::SympyStepper, Acts::Navigator>,
-                                                 MutableTrackStateBackend>;
+    using StraightPropagator_t = Acts::Propagator<Acts::StraightLineStepper, Acts::Navigator>;
+    using CurvedPropagator_t   = Acts::Propagator<Acts::SympyStepper, Acts::Navigator>;
+
+    using StraightFitter_t = Acts::Experimental::Gx2Fitter<StraightPropagator_t, MutableTrackStateBackend>;
+    using CurvedFitter_t   = Acts::Experimental::Gx2Fitter<CurvedPropagator_t, MutableTrackStateBackend>;
+
     /** @brief Abbrivation of the configuration to launch the fit  */
     using Gx2FitterOptions_t = Acts::Experimental::Gx2FitterOptions<MutableTrackStateBackend>;
     /** @brief Abbrivation of the fitter extensions */
     using Gx2FitterExtension_t = Acts::Experimental::Gx2FitterExtensions<MutableTrackStateBackend>;
+   
   private:
+   using TrackFitResult_t = IActsToTrkConverterTool::TrackFitResult_t;
+    /** @brief Calls the underlying Acts::Gx2Fitter for a given configuration of measurements
+     *  @param sourceLinks: List of measurements to fit
+     *  @param initialPars: Initial estimate of the track parameters 
+     *  @param gx2fOptions: Configuration options needed to execute the fit
+     *  @param tracks: Track container into which the new track is appended */
+    TrackFitResult_t fit(const std::vector<Acts::SourceLink>& soureLinks,
+                         const Acts::BoundTrackParameters& initialPars,
+                         const Gx2FitterOptions_t& gx2fOptions, 
+                         MutableTrackContainer& tracks) const;
     /** @brief Helper method to pack the last information (Calibration, Alignment, B-Field, etc.)
      *         for the fit. The parsed context objects need to prevail the call of the fit
      * @param tgContext: Reference to the geometry context
@@ -163,13 +180,12 @@ class GlobalChiSquareFitterTool
                                     detail::SourceLinkType slType) const;
    
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+    PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
 
     ToolHandle<MuonR4::ISpacePointCalibrator> m_muonCalibrator{this, "MuonCalibrationTool", ""};
 
     ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator{this, "RotCreatorTool", ""};
-
     
     /** @brief Chi2 cut used by the outlier finder */
     Gaudi::Property<double> m_option_outlierChi2Cut{this, "OutlierChi2Cut", 12.5};
@@ -183,6 +199,8 @@ class GlobalChiSquareFitterTool
     Gaudi::Property<bool> m_option_includeScat{this, "IncludeScattering", true};
     /** @brief Convert the PRD to a ROT during the calibration */
     Gaudi::Property<bool> m_doReFitFromPRD{this, "DoReFitFromPRD", false};
+    /** @brief Option to toggle whether a straight line fitter shall be used */
+    Gaudi::Property<bool> m_doStraightLine{this, "DoStraightLine" , false};
 
     /** @brief Pass through calibrator of the Trk::MeasurementBase objects from the TrackState container */
     detail::TrkMeasurementCalibrator m_trkMeasCalibrator{};
@@ -199,8 +217,10 @@ class GlobalChiSquareFitterTool
     /** @brief Array of all configured fitter extensions depending on which source link type is in use */
     static constexpr unsigned s_nExtensions = static_cast<unsigned>(detail::SourceLinkType::nTypes);
     std::array<Gx2FitterExtension_t, s_nExtensions>  m_gx2fExtensions{};
-    /** @brief The underlying Acts fitter */
-    std::unique_ptr<Fitter> m_fitter{nullptr};
+    /** @brief The underlying curved Acts fitter */
+    std::unique_ptr<CurvedFitter_t> m_fitter{nullptr};
+    /** @brief The underlying straight line Acts fitter */
+    std::unique_ptr<StraightFitter_t> m_slFitter{nullptr};
 
     detail::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
 
