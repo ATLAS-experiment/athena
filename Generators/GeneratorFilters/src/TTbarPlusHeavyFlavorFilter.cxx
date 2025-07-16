@@ -253,7 +253,7 @@ bool TTbarPlusHeavyFlavorFilter::isFinalHadron(const HepMC::ConstGenParticlePtr&
     if(!end) return true;
     int type = hadronType(part->pdg_id());
 #ifdef HEPMC3
-    for(const auto& firstChild: end->particles_in()){
+    for(const auto& firstChild: end->particles_out()){
       int childtype = hadronType( firstChild->pdg_id() );
       if( childtype == type ){
 	return false;
