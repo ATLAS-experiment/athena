@@ -20,13 +20,14 @@ StatusCode FPGADataFormatTool::initialize() {
 StatusCode FPGADataFormatTool::convertPixelHitsToFPGADataFormat(
     const PixelRDO_Container &pixelRDO,
     std::vector<uint64_t> &encodedData,
+    const std::vector<IdentifierHash>& hashList,
     const EventContext &ctx) const {
 
   // Fill the event header
   ATH_CHECK(fillHeader(encodedData));
 
   // Convert the strip RDO
-  ATH_CHECK(convertPixelRDO(pixelRDO, encodedData, ctx));
+  ATH_CHECK(convertPixelRDO(pixelRDO, encodedData, hashList, ctx));
 
   // Fill the event footer
   ATH_CHECK(fillFooter(encodedData));
@@ -38,13 +39,14 @@ StatusCode FPGADataFormatTool::convertPixelHitsToFPGADataFormat(
 StatusCode FPGADataFormatTool::convertStripHitsToFPGADataFormat(
     const SCT_RDO_Container &stripRDO,
     std::vector<uint64_t> &encodedData,
+    const std::vector<IdentifierHash>& hashList,
     const EventContext &ctx) const {
 
   // Fill the event header
   ATH_CHECK(fillHeader(encodedData));
 
   // Convert the strip RDO
-  ATH_CHECK(convertStripRDO(stripRDO, encodedData, ctx));
+  ATH_CHECK(convertStripRDO(stripRDO, encodedData, hashList, ctx));
 
   // Fill the event footer
   ATH_CHECK(fillFooter(encodedData));
@@ -167,6 +169,7 @@ StatusCode FPGADataFormatTool::convertFPGATracks(
 StatusCode FPGADataFormatTool::convertPixelRDO(
     const PixelRDO_Container &pixelRDO,
     std::vector<uint64_t> &encodedData,
+    const std::vector<IdentifierHash>& hashList,
     const EventContext &/*ctx*/
     ) const {
 
@@ -181,6 +184,11 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
       Identifier rdoId = pixelRawData->identify();
       // get the det element from the det element collection
       const InDetDD::SiDetectorElement* sielement = m_PIX_mgr->getDetectorElement(rdoId); 
+      // if hash list has elements, check if the current Si in the list otherwise, continue
+      if(hashList.size() > 0)
+      {
+        if(std::find(hashList.begin(), hashList.end(), sielement->identifyHash()) == hashList.end()) continue;
+      }
 
       // Fill the module header
       if(!filledHeader)
@@ -215,6 +223,7 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
 StatusCode FPGADataFormatTool::convertStripRDO(
     const SCT_RDO_Container &stripRDO,
     std::vector<uint64_t> &encodedData,
+    const std::vector<IdentifierHash>& hashList,
     const EventContext &/*ctx*/
 ) const {
     constexpr int MaxChannelinStripRow = 128;
@@ -280,6 +289,12 @@ StatusCode FPGADataFormatTool::convertStripRDO(
             const SCT_RDORawData* sctRawData = stripEncodingForITKToRDO[stripID];
             const Identifier rdoId = sctRawData->identify();
             const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(rdoId);
+
+            // if hash list has elements, check if the current Si in the list otherwise, continue
+            if(hashList.size() > 0)
+            {
+              if(std::find(hashList.begin(), hashList.end(), sielement->identifyHash()) == hashList.end()) continue;
+            }
 
             // Fill the module header if not already filled
             if (!filledHeader) {

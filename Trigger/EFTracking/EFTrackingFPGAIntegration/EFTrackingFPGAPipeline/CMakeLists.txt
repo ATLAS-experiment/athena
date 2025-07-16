@@ -41,10 +41,12 @@ atlas_add_component(EFTrackingFPGAPipeline
                                    InDetPrepRawData 
                                    InDetIdentifier 
                                    InDetReadoutGeometry
+                                   IRegionSelector
+                                   TrigSteeringEvent
                                    LibXRT 
                                    LibXOCL
                                    FPGATrackSimObjectsLib
-                                   EFTrackingFPGAUtilityLib)
+				   EFTrackingFPGAUtilityLib TrigSteeringEvent)
 
 atlas_install_python_modules(python/*.py)
 atlas_install_scripts(test/*.sh test/FPGARunScripts/*.sh)

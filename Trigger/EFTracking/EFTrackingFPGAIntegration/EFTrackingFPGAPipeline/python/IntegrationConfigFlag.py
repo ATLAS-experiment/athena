@@ -5,7 +5,6 @@
 
 def addFPGADataPrepFlags(flags):
 
-
     flags.addFlag("FPGADataPrep.xclbin", "/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin")
     flags.addFlag("FPGADataPrep.bdfID", "0000:c3:00.1")
 
@@ -22,6 +21,8 @@ def addFPGADataPrepFlags(flags):
     flags.addFlag("FPGADataPrep.DoEmulation", False)
     flags.addFlag("FPGADataPrep.ForTiming", False)
     flags.addFlag("FPGADataPrep.doF110", False)
+    flags.addFlag("FPGADataPrep.NpixelCU", 1)
+    flags.addFlag("FPGADataPrep.NstripCU", 1)
 
     
     return flags

@@ -36,8 +36,8 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
 	auto pixelRDOHandle = SG::makeHandle(m_pixelRDOKey, ctx);
 
 	std::vector<uint64_t> inbufPixClustVec;
-
-	if(!m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, inbufPixClustVec, ctx)) {
+    std::vector<IdentifierHash> listOfIds;
+	if(!m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, inbufPixClustVec, listOfIds, ctx)) {
 		return StatusCode::FAILURE;
 	}
 
@@ -270,31 +270,31 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
 		}
 
 		row++;
-		pcAux.localPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+		pcAux.localPosition.push_back(std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 		ATH_MSG_DEBUG("local x = " << pcAux.localPosition.back());
 
 		row++;
-		pcAux.localPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+		pcAux.localPosition.push_back(std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 		ATH_MSG_DEBUG("local y = " << pcAux.localPosition.back());
 
 		row++;
-		pcAux.localCovariance.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+		pcAux.localCovariance.push_back(std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 		ATH_MSG_DEBUG("local covariance [0, 0] = " << pcAux.localCovariance.back());
 
 		row++;
-		pcAux.localCovariance.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+		pcAux.localCovariance.push_back(std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 		ATH_MSG_DEBUG("local covariance [1, 1] = " << pcAux.localCovariance.back());
 
 		row++;
-		pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+		pcAux.globalPosition.push_back(std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 		ATH_MSG_DEBUG("global x = " << pcAux.globalPosition.back());
 
 		row++;
-		pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+		pcAux.globalPosition.push_back(std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 		ATH_MSG_DEBUG("global y = " << pcAux.globalPosition.back());
 
 		row++;
-		pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+		pcAux.globalPosition.push_back(std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 		ATH_MSG_DEBUG("global z = " << pcAux.globalPosition.back());
 
 		row++;
@@ -306,7 +306,7 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
 		ATH_MSG_DEBUG("chanels in eta = " << pcAux.channelsInEta.back());
 
 		row++;
-		pcAux.widthInEta.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+		pcAux.widthInEta.push_back(std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 		ATH_MSG_DEBUG("width in eta = " << pcAux.widthInEta.back());
 
 		row++;

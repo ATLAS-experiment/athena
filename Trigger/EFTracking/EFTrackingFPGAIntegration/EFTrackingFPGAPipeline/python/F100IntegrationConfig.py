@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def F100IntegrationCFG(flags, name = 'F100IntegrationAlog', **kwarg):
+def F100IntegrationCfg(flags, name = 'F100IntegrationAlg', **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
@@ -16,18 +16,10 @@ def F100IntegrationCFG(flags, name = 'F100IntegrationAlog', **kwarg):
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
     kwarg.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
+    kwarg.setdefault('NpixelCU', flags.FPGADataPrep.NpixelCU)
+    kwarg.setdefault('NstripCU', flags.FPGADataPrep.NstripCU)
     kwarg.setdefault('doEmulation', flags.FPGADataPrep.DoEmulation)
     kwarg.setdefault('doF110', flags.FPGADataPrep.doF110)
-    
-    # Set up Cluster maker tool
-    from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
-    clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
-    kwarg.setdefault('xAODClusterMaker', clusterMakerTool)
-    
-    # Set up TestVectorTool
-    from EFTrackingFPGAUtility.FPGADataFormatter import FPGATestVectorToolCfg
-    testVectorTool = acc.popToolsAndMerge(FPGATestVectorToolCfg(flags))
-    kwarg.setdefault('TestVectorTool', testVectorTool)
 
     # Set up Chrono service
     acc.addService(CompFactory.ChronoStatSvc(
@@ -36,9 +28,32 @@ def F100IntegrationCFG(flags, name = 'F100IntegrationAlog', **kwarg):
         PrintEllapsedTime = True
     ))
 
-    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100IntegrationAlg(**kwarg))
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100IntegrationAlg(name, **kwarg))
 
     return acc
+
+def F100DataEncodingCfg(flags, name = 'F100DataEncodingAlg', **kwarg):
+    acc = ComponentAccumulator()
+
+    kwarg.setdefault('isRoI_Seeded', False)
+    
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100DataEncodingAlg(name, **kwarg))
+
+    return acc
+
+def F100EDMConversionCfg(flags, name = 'F100EDMConversionAlg', **kwarg):
+    acc = ComponentAccumulator()
+    
+    # Set up Cluster maker tool
+    if("xAODClusterMaker" not in kwarg):
+        from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
+        clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
+        kwarg.setdefault('xAODClusterMaker', clusterMakerTool)
+
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100EDMConversionAlg(name, **kwarg))
+
+    return acc
+
 
 def FPGAClusterSortingCfg(flags,**kwargs):
     acc = ComponentAccumulator()
@@ -49,9 +64,6 @@ def FPGAClusterSortingCfg(flags,**kwargs):
     return acc
 
 def F100FlagsCfg(flags):
-    flags.Concurrency.NumThreads=1
-    flags.Concurrency.NumConcurrentEvents=1
-    flags.Concurrency.NumProcs=0
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False
@@ -64,7 +76,9 @@ def F100FlagsCfg(flags):
 
 def FPGADataPreparation(flags): # thsi is used to run the F100 through Reco_tf
     acc = ComponentAccumulator()
-    acc.merge(F100IntegrationCFG(flags))
+    acc.merge(F100DataEncodingCfg(flags))
+    acc.merge(F100IntegrationCfg(flags))
+    acc.merge(F100EDMConversionCfg(flags))
     acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'ITkPixelClusters',
                                              'sortedxAODStripClusterContainer': 'ITkStripClusters'}))
     
@@ -159,7 +173,7 @@ if __name__ == "__main__":
         cfg.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
 
 
-    acc = F100IntegrationCFG(flags, **kwarg)
+    acc = F100IntegrationCfg(flags, **kwarg)
     cfg.merge(acc)
     
     OutputItemList = []

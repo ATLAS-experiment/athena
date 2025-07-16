@@ -12,15 +12,15 @@
 // EFTracking include
 #include "EFTrackingFPGAPipeline/IntegrationBase.h"
 #include "EFTrackingFPGAUtility/xAODClusterMaker.h"
-#include "EFTrackingFPGAUtility/TestVectorTool.h"
-#include "EFTrackingFPGAUtility/FPGADataFormatTool.h"
 #include "EFTrackingFPGAUtility/EFTrackingTransient.h"
 
 // Athena include
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/SCT_RDO_Container.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ServiceHandle.h"        
 #include "GaudiKernel/IChronoSvc.h"
+#include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
+#include <IRegionSelector/IRegSelTool.h>
 
 namespace EFTrackingFPGAIntegration
 {
@@ -41,26 +41,18 @@ namespace EFTrackingFPGAIntegration
         StatusCode runDataPrep(std::vector<uint64_t> &pixelChainOutput, std::vector<uint64_t> &stripChainOutput, const EventContext &ctx) const;
 
     private:
-        ServiceHandle<IChronoSvc> m_chronoSvc{
-            "ChronoStatSvc", name()}; //!< Service for timing the algorithm
+        ServiceHandle<IChronoSvc> m_chronoSvc{"ChronoStatSvc", name()}; //!< Service for timing the algorithm
 
-        ToolHandle<xAODClusterMaker> m_xaodClusterMaker{
-            this,
-            "xAODClusterMaker",
-            "xAODClusterMaker",
-            "Tool for creating xAOD cluster containers"}; //!< Tool for creating xAOD containers
+        SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAPixelRDO{this, "FPGAEncodedPixelKey", "FPGAEncodedPixelRDOs", "Pixel RDO converted to FPGA format"};
+        SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAStripRDO{this, "FPGAEncodedStripKey", "FPGAEncodedStripRDOs", "Strip RDO converted to FPGA format"};
 
-        ToolHandle<TestVectorTool> m_testVectorTool{
-            this, "TestVectorTool", "TestVectorTool", "Tool for preparing test vectors"}; //!< Tool for preparing test vectors
+        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
+        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
 
-        ToolHandle<FPGADataFormatTool> m_FPGADataFormatTool{
-            this, "FPGADataFormatTool", "FPGADataFormatTool", "Tool for formatting FPGA data"}; //!< Tool for formatting FPGA data
-
-        SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this, "PixelRDO", "ITkPixelRDOs"};
-
-        SG::ReadHandleKey<SCT_RDO_Container> m_stripRDOKey{this, "StripRDO", "ITkStripRDOs"};
 
         Gaudi::Property<int> m_FPGAThreads{this, "FPGAThreads", 1, "number of FPGA threads to initialize"}; 
+        Gaudi::Property<int> m_NpixelCU{this, "NpixelCU", 1, "number of pixel CU in for pixel"}; 
+        Gaudi::Property<int> m_NstripCU{this, "NstripCU", 1, "number of FPGA threads to initialize"}; 
         
         Gaudi::Property<std::string> m_xclbin{
             this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
@@ -89,7 +81,6 @@ namespace EFTrackingFPGAIntegration
         Gaudi::Property<std::string> m_stripL2GKernelName{
             this, "StripL2GKernelName", "", "Name of the strip L2G kernel"}; //!< Name of the strip L2G kernelS
 
-
         mutable std::atomic<ulonglong> m_numEvents{0};          //!< Number of events processed
         mutable std::atomic<cl_ulong> m_pixelInputTime{0};      //!< Time for pixel input buffer write
         mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write
@@ -103,6 +94,20 @@ namespace EFTrackingFPGAIntegration
         mutable std::atomic<cl_ulong> m_pixelOutputTime{0};     //!< Time for pixel output buffer read
         mutable std::atomic<cl_ulong> m_stripOutputTime{0};     //!< Time for strip output buffer read
         mutable std::atomic<cl_ulong> m_kernelTime{0};          //!< Time for kernel execution
+
+        // Kernels
+        // Clustering
+        mutable std::vector<cl::Kernel> m_pixelClusteringKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_stripClusteringKernels ATLAS_THREAD_SAFE;
+
+        // L2G
+        mutable std::vector<cl::Kernel> m_pixelL2GKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_stripL2GKernels ATLAS_THREAD_SAFE;
+
+        // EDM prep
+        mutable std::vector<cl::Kernel> m_edmPrepKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_pixelEdmPrepKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_stripEdmPrepKernels ATLAS_THREAD_SAFE;
 
         // Buffers for input
         std::vector<cl::Buffer> m_pixelClusterInputBufferList;
@@ -122,7 +127,8 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Buffer> m_edmStripOutputBufferList;
 
         // Command queue
-        cl::CommandQueue m_acc_queue;
+        std::vector<cl::CommandQueue> m_acc_queues;
+
 
     };
 }
