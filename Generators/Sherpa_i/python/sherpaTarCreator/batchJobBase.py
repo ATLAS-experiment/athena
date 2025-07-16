@@ -24,7 +24,7 @@ class batchJobBase:
     self.dependsOnOk = []
     self.dependsOnAny = []
 
-  def write(self, useSingularity=False, useApptainer=True, extraDirs=[]):
+  def write(self, useSingularity=True, useApptainer=False, extraDirs=[]):
     executable =  "#!/bin/sh -\n"
 
     # COMPILER_PATH
