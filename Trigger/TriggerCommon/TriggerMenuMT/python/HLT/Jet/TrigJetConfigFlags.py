@@ -6,20 +6,6 @@ from AthenaCommon.SystemOfUnits import GeV
 def createTrigJetConfigFlags():
     flags = AthConfigFlags()
 
-    # PFO-muon removal option for the full-scan hadronic signatures.
-    # Options are:
-    #   "None": Do no PFO-muon removal
-    #   "Calo": Use the calo-tagging tools from the muon slice
-    #   "Iso" : Use the mainly isolation-based selections based on the MET associator package
-    flags.addFlag("Trigger.FSHad.PFOMuonRemoval", "Calo",
-                  help='PFO-muon removal option: None, Calo, Iso)')
-
-    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV,
-                  help='minimum pT threshold to use for the muon removal')
-
-    flags.addFlag("Trigger.FSTrk.doJetRestrictedVertexSort", False,
-                  help='use tracks in jets for computing sumpt2 for vertex sorting')
-
     flags.addFlag('Trigger.Jet.doJetSuperPrecisionTracking', False,
                   help='enable precision tracking in jet super-ROI before fast b-tagging (EMTopo jets)')
 
@@ -59,6 +45,26 @@ def createTrigJetConfigFlags():
 
     return flags
 
+
+def createTrigFSHadConfigFlags():
+    flags = AthConfigFlags()
+
+    # PFO-muon removal option for the full-scan hadronic signatures.
+    # Options are:
+    #   "None": Do no PFO-muon removal
+    #   "Calo": Use the calo-tagging tools from the muon slice
+    #   "Iso" : Use the mainly isolation-based selections based on the MET associator package
+    flags.addFlag("Trigger.FSHad.PFOMuonRemoval", "Calo",
+                  help='PFO-muon removal option: None, Calo, Iso)')
+
+    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV,
+                  help='minimum pT threshold to use for the muon removal')
+
+    flags.addFlag("Trigger.FSHad.doJetRestrictedVertexSort", False,
+                  help='use tracks in jets for computing sumpt2 for vertex sorting')
+
+    return flags
+
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
@@ -66,4 +72,4 @@ if __name__ == "__main__":
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.lock()
     flags.loadAllDynamicFlags()
-    flags.dump("Trigger.(Jet|FSTrk|FSHad)",evaluate=True)
+    flags.dump("Trigger.(Jet|FSHad)",evaluate=True)

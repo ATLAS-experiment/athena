@@ -529,6 +529,11 @@ def createTriggerRecoFlags():
         return createTrigJetConfigFlags()
     flags.addFlagsCategory('Trigger.Jet', __jet )
 
+    def __fshad():
+        from TriggerMenuMT.HLT.Jet.TrigJetConfigFlags import createTrigFSHadConfigFlags
+        return createTrigFSHadConfigFlags()
+    flags.addFlagsCategory('Trigger.FSHad', __fshad )
+
     return flags
 
 

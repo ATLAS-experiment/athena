@@ -4,12 +4,8 @@ def _DataOverlayRun3Cfg(flags):
     """Common configuration for HI data overlay for Run 3"""
     flags.Beam.NumberOfCollisions = 0.
 
-    from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
-    LArConfigRun3PileUp(flags)
-
-    flags.LAr.OFCShapeFolder = "4samples1phase"
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags)
 
     flags.Reco.EnableHI = True
     from AthenaConfiguration.Enums import HIMode
