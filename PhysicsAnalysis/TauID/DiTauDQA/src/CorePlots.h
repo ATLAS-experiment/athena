@@ -26,6 +26,13 @@ class CorePlots: public PlotBase {
     TH2* eta_phi{};
     TH2* eta_pt{};
 
+    TH1* lead_subjet_eta{};
+    TH1* lead_subjet_phi{};
+    TH1* lead_subjet_pt{};
+
+    TH1* sublead_subjet_eta{};
+    TH1* sublead_subjet_phi{};
+    TH1* sublead_subjet_pt{};
 
   private:
     void initializePlots();
