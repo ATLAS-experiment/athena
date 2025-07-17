@@ -34,9 +34,9 @@
 #undef _INFO_FSM_
 
 
-LArFastShower::LArFastShower(const std::string& name, const FastShowerConfigStruct& config,
+LArFastShower::LArFastShower(const std::string& name, G4Region* region, const FastShowerConfigStruct& config,
                              IFastSimDedicatedSD* fastSimDedicatedSD):
-  G4VFastSimulationModel(name),
+  G4VFastSimulationModel(name, region),
   m_configuration(config),
   m_fastSimDedicatedSD(fastSimDedicatedSD),
   m_showerLibSvc(nullptr),

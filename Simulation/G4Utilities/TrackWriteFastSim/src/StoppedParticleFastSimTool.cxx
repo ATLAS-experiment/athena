@@ -23,5 +23,5 @@ G4VFastSimulationModel* StoppedParticleFastSimTool::makeFastSimModel()
   ATH_MSG_DEBUG( "Initializing Fast Sim Model" );
 
   // Create a fresh Fast Sim Model
-  return new StoppedParticleFastSim(name(),m_trackFastSimSDTool->name());
+  return new StoppedParticleFastSim(name(), getRegion(), m_trackFastSimSDTool->name());
 }

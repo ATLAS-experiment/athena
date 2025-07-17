@@ -21,5 +21,5 @@ G4VFastSimulationModel* DeadMaterialShowerTool::makeFastSimModel()
   ATH_MSG_DEBUG( "Initializing Fast Sim Model" );
 
   // Create a fresh Fast Sim Model
-  return new DeadMaterialShower(name(), m_highEnergy, m_lowEnergy, m_zcutoff);
+  return new DeadMaterialShower(name(), getRegion(), m_highEnergy, m_lowEnergy, m_zcutoff);
 }

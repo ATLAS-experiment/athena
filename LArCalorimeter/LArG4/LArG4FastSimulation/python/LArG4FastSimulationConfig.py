@@ -23,7 +23,7 @@ def LArG4ShowerLibSvcCfg(flags, **kwargs):
 def EMBFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     result.merge(LArG4ShowerLibSvcCfg(flags))
-    kwargs.setdefault("RegionNames",        ["EMB"])
+    kwargs.setdefault("RegionName",        "EMB")
     kwargs.setdefault("EFlagToShowerLib",   False)
     kwargs.setdefault("GFlagToShowerLib",   False)
     kwargs.setdefault("NeutFlagToShowerLib",False)
@@ -45,7 +45,7 @@ def EMBFastShowerCfg(flags, **kwargs):
 def EMECFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     result.merge(LArG4ShowerLibSvcCfg(flags))
-    kwargs.setdefault("RegionNames",        ["EMECPara"])
+    kwargs.setdefault("RegionName",        "EMECPara")
     kwargs.setdefault("EFlagToShowerLib",   False)
     kwargs.setdefault("GFlagToShowerLib",   False)
     kwargs.setdefault("NeutFlagToShowerLib",False)
@@ -67,7 +67,7 @@ def EMECFastShowerCfg(flags, **kwargs):
 def FCALFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     result.merge(LArG4ShowerLibSvcCfg(flags))
-    kwargs.setdefault("RegionNames",        ["FCALPara"])
+    kwargs.setdefault("RegionName",        "FCALPara")
     kwargs.setdefault("EFlagToShowerLib",   True)
     kwargs.setdefault("GFlagToShowerLib",   True)
     kwargs.setdefault("NeutFlagToShowerLib",True)
@@ -86,7 +86,7 @@ def FCALFastShowerCfg(flags, **kwargs):
 def FCAL2FastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     result.merge(LArG4ShowerLibSvcCfg(flags))
-    kwargs.setdefault("RegionNames",        ["FCAL2Para"])
+    kwargs.setdefault("RegionName",        "FCAL2Para")
     kwargs.setdefault("EFlagToShowerLib",   True)
     kwargs.setdefault("GFlagToShowerLib",   True)
     kwargs.setdefault("NeutFlagToShowerLib",True)

@@ -6,14 +6,14 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def SimpleFastKillerCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("RegionNames" , ["BeampipeFwdCut"] )
+    kwargs.setdefault("RegionName" , "BeampipeFwdCut")
     result.setPrivateTools(CompFactory.SimpleFastKillerTool(name="SimpleFastKiller", **kwargs))
     return result
 
 
 def DeadMaterialShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("RegionNames",        ["DeadMaterial"])
+    kwargs.setdefault("RegionName", "DeadMaterial")
     result.setPrivateTools(CompFactory.DeadMaterialShowerTool(name="DeadMaterialShower", **kwargs))
     return result
 
@@ -26,7 +26,7 @@ def FastCaloSimCfg(flags, **kwargs):
     from ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig import FastCaloSimCaloExtrapolationCfg
     kwargs.setdefault("FastCaloSimCaloExtrapolation", result.addPublicTool(result.popToolsAndMerge(FastCaloSimCaloExtrapolationCfg(flags))))
     # Name of region where FastCaloSim will be triggered
-    kwargs.setdefault("RegionNames", ["CALO"])
+    kwargs.setdefault("RegionName", "CALO")
     kwargs.setdefault('CaloCellContainerSDName', "ToolSvc.SensitiveDetectorMasterTool.CaloCellContainerSD")
     
     if flags.Sim.SimplifiedGeoPath:

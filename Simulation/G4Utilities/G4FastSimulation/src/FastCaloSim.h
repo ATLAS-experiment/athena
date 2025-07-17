@@ -34,7 +34,8 @@ class FastCaloSim: public G4VFastSimulationModel
 {
  public:
 
-  FastCaloSim(const std::string& name, 
+  FastCaloSim(const std::string& name,
+              G4Region* region,
               const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
               const std::string& randomEngineName,
               const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,

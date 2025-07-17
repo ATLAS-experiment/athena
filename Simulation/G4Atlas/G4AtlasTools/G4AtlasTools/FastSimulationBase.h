@@ -10,6 +10,7 @@
 #include "G4AtlasInterfaces/IFastSimulation.h"
 
 // Members
+#include <G4Region.hh>
 #include "G4Types.hh"
 #include "G4VFastSimulationModel.hh"
 #ifdef G4MULTITHREADED
@@ -49,8 +50,11 @@ class FastSimulationBase : public extends<AthAlgTool, IFastSimulation> {
   /// Fast Simulation Model.
   G4VFastSimulationModel* getFastSimModel();
 
-  /// All the regions to which this fast sim is assigned
-  Gaudi::Property<std::vector<std::string> > m_regionNames{this, "RegionNames", {}};
+  // Helper to retrieve the region to which this fast simulation is assigned from the region store.
+  G4Region* getRegion() const;
+
+  /// The region to which this fast sim is assigned.
+  Gaudi::Property<std::string> m_regionName{this, "RegionName", ""};
   /// This Fast Simulation has no regions associated with it.
   Gaudi::Property<bool> m_noRegions{this, "NoRegions", false};
 
