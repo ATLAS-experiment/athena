@@ -10,3 +10,9 @@ def DiTauSelectionToolCfg(flags, name, **kwargs):
    acc.setPrivateTools(DiTauSelectionTool(name, **kwargs))
    return acc
 
+def DiTauTruthMatchingToolCfg(flags, name, **kwargs):
+   acc = ComponentAccumulator()
+   tool = CompFactory.TauAnalysisTools.DiTauTruthMatchingTool(name, **kwargs)
+   acc.setPrivateTools(tool)
+   return acc
+
