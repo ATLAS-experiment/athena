@@ -156,13 +156,7 @@ namespace InDetDD {
            of the two axis, or 0 in case of no intersection or problem
           input: the two diodes for which the intersection length is computed */
       double intersectionLength(const SiCellId &diode1, const SiCellId &diode2) const;
-    
-      /** Global sensor size: */
-      double sensorLeftColumn() const;
-      double sensorRightColumn() const;
-      double sensorLeftRow() const;
-      double sensorRightRow() const;
-    
+
       /** Total number of diodes: */
       int numberOfDiodes() const;
     
@@ -287,26 +281,6 @@ namespace InDetDD {
     							const std::vector<int> &connections)
     {
       m_readoutScheme.addMultipleRowConnection(lowerRow,connections);
-    }
-    
-    inline double PixelModuleDesign::sensorLeftColumn() const
-    {
-      return m_diodeMap.leftColumn();
-    }
-    
-    inline double PixelModuleDesign::sensorRightColumn() const
-    {
-      return m_diodeMap.rightColumn();
-    }
-    
-    inline double PixelModuleDesign::sensorLeftRow() const
-    {
-      return m_diodeMap.leftRow();
-    }
-    
-    inline double PixelModuleDesign::sensorRightRow() const
-    {
-      return m_diodeMap.rightRow();
     }
     
     inline int PixelModuleDesign::numberOfDiodes() const
