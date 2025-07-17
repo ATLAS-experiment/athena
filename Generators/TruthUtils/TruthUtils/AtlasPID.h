@@ -421,12 +421,13 @@ template<> inline bool isNeutrinoRH(const int& p){ return (std::abs(p) ==  RH_NU
 /// for MC internal use 81–100,901–930,998-999,1901–1930,2901–2930, and 3901–3930
 template<class T> inline bool isGenSpecific(const T& p){return isGenSpecific(p->pdg_id());}
 template<> inline bool isGenSpecific(const int& p){
-  if (p >= 81 && p <= 100) return true;
-  if (p >= 901 && p <= 930) return true;
-  if (p >= 998 && p <= 999) return true;
-  if (p >= 1901 && p <= 1930) return true;
-  if (p >= 2901 && p <= 2930) return true;
-  if (p >= 3901 && p <= 3930) return true;
+  int ap = std::abs(p);
+  if (ap >= 81 && ap <= 100) return true;
+  if (ap >= 901 && ap <= 930) return true;
+  if (ap >= 998 && ap <= 999) return true;
+  if (ap >= 1901 && ap <= 1930) return true;
+  if (ap >= 2901 && ap <= 2930) return true;
+  if (ap >= 3901 && ap <= 3930) return true;
   return false;
 }
 
