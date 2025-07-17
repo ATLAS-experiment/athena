@@ -12,7 +12,9 @@ Additional detailed documentation on each c++ file can be found in [doxygen](htt
 
 The physics logic that was used in the algorithm in 2017 is in the 2017 ATLAS [paper](https://arxiv.org/abs/1703.10485) on particle flow. Furthermore modifications to the physics of the algorithm logic were subsequently made which are documented [here](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ParticleFlowChargeSubtraction).
 
-# Further Details
+Below you can find details of the reconstruction algorithms for particle flow. This is followed by a list of variables, with explanations of their meaning, that the particle flow objects contain.
+
+#  Details of Reconstruction Algorithms
 
 To further understand what eflowRec does one could start with the python configuration code, [PFCfg in PFRun3Config.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/python/PFRun3Config.py#L59), which specifies which algorithms are run
 
@@ -35,7 +37,21 @@ Finally it creates [FlowElement](https://gitlab.cern.ch/atlas/athena/-/blob/main
  - [PFMuonFlowElementAssoc](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/eflowRec/PFMuonFlowElementAssoc.h) - same thing for muons
  - [PFTauFlowElementAssoc](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/eflowRec/PFTauFlowElementAssoc.h) - same thing for taus
 
+# Charged Object Variables (Standard Reconstruction)
+In addition to the 4-vector variables (which are taken from the ID track, at perigee, that the object represents) the following variables are available and have dedicated access functions:
 
+- ChargedObjectLinks - a vector of ElementLink to IParticles. IN paractice this is always of size 1 and contains an ElementLink to the ID track represented by this object. Access via [chargedObjects()](https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODPFlow/xAODPFlow/versions/FlowElement_v1.h)
+- Charge - the electric charge of the ID track that this object represents. Access via [charge()](SignalType - defines the type of particle flow object, which in this case is "ChargedPFlow". Available signal types are defined in the [FlowElement](https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODPFlow/xAODPFlow/versions/FlowElement_v1.h) object. Access via [signalType()](https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODPFlow/xAODPFlow/versions/FlowElement_v1.h).).
+- OtherObjectsAndWeights - a vector of pairs, where each pair corresponds to an ElementLink to a CaloCluster and a double. The link represents a topocluster that the track was matched to AND that had energy removed in the charged shower subtraction procedure, whlst the double represents the amount of energy. Access via [otherObjectsAndWeights()](https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODPFlow/xAODPFlow/versions/FlowElement_v1.h)
+- SignalType - defines the type of particle flow object, which in this case is "ChargedPFlow". Available signal types are defined in the [FlowElement](https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODPFlow/xAODPFlow/versions/FlowElement_v1.h) object. Access via [signalType()](https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODPFlow/xAODPFlow/versions/FlowElement_v1.h).
 
+The following variables can be accessed using accessors (or ReadDecorHandle):
+
+- IsInDenseEnvironment - if the particle, which this object represents, is defined to pass through a dense environment of the calorimeter this is set to be true. For such particles no charged shower subtraction is performed in the matched topocluster(s).
+- TracksExpectedEnergyDeposit - the amount of energy the track was expected to deposit in the calorimeter. This is calculated by a looking up a reference value, e/p (calorimeter energy/track momentum), and then multiplying the measured track energy by that reference value.
+- FE_ElectronLinks - a vector of ElementLinks to Electrons. Any Electron which shares the ID track with this object is included in the list.
+- FE_PhotonLinks - a vector of ElementLinks to Photons. Any Photon which shares the ID track with this object is included in the list.
+- FE_MuonLinks - a vector of ElementLinks to Muons. Any Muon which shares the ID track with this object is included in the list.
+- FE_TauLinks - a vector of ElementLinks to Taus. Any Tau which has a track, retrieved using the [tracks()](https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODTau/xAODTau/versions/TauJet_v3.h) method, which is the same ID track represented by this object is included in this list.
 
 
