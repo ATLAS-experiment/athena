@@ -30,6 +30,13 @@
 #include <TVectorD.h>
 #include "Math/VectorUtil.h"
 
+#include "TruthUtils/ParticleConstants.h"
+
+namespace {
+  constexpr double GEV = 1000.0;
+}
+
+
 using namespace DiTauMassTools;
 using ROOT::Math::PtEtaPhiMVector;
 using ROOT::Math::PxPyPzMVector;
@@ -91,7 +98,7 @@ MissingMassCalculator::MissingMassCalculator(
 
   preparedInput.m_METScanScheme = 1; // MET-scan scheme: 0- use JER; 1- use simple sumEt & missingHt
                                    // for Njet=0 events in (lep-had winter 2012)
-  //  MnuScanRange=1.777; // range of M(nunu) scan
+  //  MnuScanRange=ParticleConstants::tauMassInMeV / GEV; // range of M(nunu) scan
   m_MnuScanRange = 1.5;         // better value (sacha)
   preparedInput.m_LFVmode = -1; // by default consider case of H->mu+tau(->ele)
   preparedInput.ClearInput();
@@ -754,7 +761,7 @@ int MissingMassCalculator::NuPsolutionLFV(const XYVector &met_vec,
   PxPyPzMVector nu(met_vec.X(), met_vec.Y(), 0.0, l_nu);
   PxPyPzMVector nu2(met_vec.X(), met_vec.Y(), 0.0, l_nu);
 
-  const double Mtau = 1.777;
+  const double Mtau = ParticleConstants::tauMassInMeV / GEV;
   //   double msq = (Mtau*Mtau-tau.M()*tau.M())/2;
   double msq = (Mtau * Mtau - tau.M() * tau.M() - l_nu * l_nu) /
                2; // to take into account the fact that 2-nu systema has mass
@@ -939,8 +946,8 @@ int MissingMassCalculator::DitauMassCalculatorV9walk() {
 
     //---- setting 4-vecs
     PxPyPzMVector fulltau1, fulltau2;
-    fulltau1.SetCoordinates(Px1, Py1, Pz1, 1.777);
-    fulltau2.SetCoordinates(Px2, Py2, Pz2, 1.777);
+    fulltau1.SetCoordinates(Px1, Py1, Pz1, ParticleConstants::tauMassInMeV / GEV);
+    fulltau2.SetCoordinates(Px2, Py2, Pz2, ParticleConstants::tauMassInMeV / GEV);
     //    PtEtaPhiMVector fulltau1(_fulltau1.Pt(), _fulltau1.Eta(), _fulltau1.Phi(), _fulltau1.M());
     //PtEtaPhiMVector fulltau2(_fulltau2.Pt(), _fulltau2.Eta(), _fulltau2.Phi(), _fulltau2.M());
     
@@ -1019,7 +1026,7 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv(bool refit) {
   //------- Settings -------------------------------
   int NiterMET = m_niter_fit2; // number of iterations for each MET scan loop
   int NiterMnu = m_niter_fit3; // number of iterations for Mnu loop
-  const double Mtau = 1.777;
+  const double Mtau = ParticleConstants::tauMassInMeV / GEV;
   double Mnu_binSize = m_MnuScanRange / NiterMnu;
 
   double METresX = preparedInput.m_METsigmaL; // MET resolution in direction parallel to
@@ -1447,11 +1454,11 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv(bool refit) {
     PxPyPzMVector nu2_tmp(0.0, 0.0, 0.0, 0.0);
     if (preparedInput.m_type_visTau1 == 8) {
       nu1_tmp = preparedInput.m_vistau1;
-      nu2_tmp.SetCoordinates(Px1, Py1, Pz1, 1.777);
+      nu2_tmp.SetCoordinates(Px1, Py1, Pz1, ParticleConstants::tauMassInMeV / GEV);
     }
     if (preparedInput.m_type_visTau2 == 8) {
       nu2_tmp = preparedInput.m_vistau2;
-      nu1_tmp.SetCoordinates(Px1, Py1, Pz1, 1.777);
+      nu1_tmp.SetCoordinates(Px1, Py1, Pz1, ParticleConstants::tauMassInMeV / GEV);
     }
     m_fDitauStuffHisto.nutau1 = nu1_tmp - preparedInput.m_vistau1;
     m_fDitauStuffHisto.nutau2 = nu2_tmp - preparedInput.m_vistau2;
@@ -2355,7 +2362,7 @@ void MissingMassCalculator::SpaceWalkerInit() {
   m_Mnu10 = 0.;
   m_Mnu20 = 0.;
 
-  m_mTau = 1.777;
+  m_mTau = ParticleConstants::tauMassInMeV / GEV;
 
   // seeds the random generator in a reproducible way from the phi of both tau;
   double aux = std::abs(m_tauVec1Phi + double(m_tauVec2Phi) / 100. / TMath::Pi()) * 100;
@@ -2635,7 +2642,7 @@ inline bool MissingMassCalculator::precomputeCache() {
   same = updateDouble(m_tauVec1.P(), m_tauVec1P) && same;
   same = updateDouble(m_tauVec2.P(), m_tauVec2P) && same;
 
-  same = updateDouble(1.777, m_mTau) && same;
+  same = updateDouble(ParticleConstants::tauMassInMeV / GEV, m_mTau) && same;
   same = updateDouble(std::pow(m_mTau, 2), m_mTau2) && same;
   same = updateDouble(cos(preparedInput.m_METcovphi), m_metCovPhiCos) && same;
   same = updateDouble(sin(preparedInput.m_METcovphi), m_metCovPhiSin) && same;
@@ -2821,7 +2828,6 @@ void MissingMassCalculator::FinalizeSettings(const xAOD::IParticle *part1,
                                                         const xAOD::IParticle *part2,
                                                         const xAOD::MissingET *met,
                                                         const int &njets) {
-  const double GEV = 1000.;
   int mmcType1 = mmcType(part1);
   if (mmcType1 < 0)
     return; // return CP::CorrectionCode::Error;
