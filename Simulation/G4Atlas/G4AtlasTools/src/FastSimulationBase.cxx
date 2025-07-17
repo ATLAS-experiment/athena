@@ -3,6 +3,7 @@
 */
 
 #include "G4AtlasTools/FastSimulationBase.h"
+#include <G4Region.hh>
 
 // Geant4 includes used in functions
 #include "G4RegionStore.hh"
@@ -16,6 +17,14 @@ FastSimulationBase::FastSimulationBase(const std::string& type, const std::strin
 FastSimulationBase::~FastSimulationBase()
 {
   deleteFastSimModel();
+}
+
+G4Region* FastSimulationBase::getRegion() const
+{
+  if (m_regionName.value().empty()) {
+    return nullptr;
+  }
+  return G4RegionStore::GetInstance()->GetRegion(m_regionName.value());
 }
 
 
@@ -36,36 +45,6 @@ StatusCode FastSimulationBase::initializeFastSim(){
   // Set the verbosity information on this thing - this will have to go into the makeFastSimModel methods...
   //if(msgLvl(MSG::VERBOSE)) m_FastSimModel->SetVerboseLevel(10);
   //else if(msgLvl(MSG::DEBUG)) m_FastSimModel->SetVerboseLevel(5);
-
-  // Go through the regions and hook the fast simulation up
-  G4RegionStore* regionStore = G4RegionStore::GetInstance();
-  bool missedOne = false;
-  for (const auto& myreg : m_regionNames.value()){
-    int found=0; // Regions with more than one name...
-    for (auto* areg : *regionStore){
-      if (myreg.data()==areg->GetName()){
-        ++found;
-        G4FastSimulationManager* theFastSimulationManager = areg->GetFastSimulationManager();
-
-        // Build a new fast sim manager if necessary
-        if ( theFastSimulationManager == 0 ) theFastSimulationManager = new G4FastSimulationManager(areg);
-        theFastSimulationManager->AddFastSimulationModel(getFastSimModel());
-        theFastSimulationManager->ActivateFastSimulationModel(getFastSimModel()->GetName());
-      }
-    } // Loop over regions
-    if (0==found){
-      ATH_MSG_ERROR( "Region " << myreg << " not found." );
-      missedOne=true;
-    } else {
-      ATH_MSG_VERBOSE( found << " copies of region " << myreg << " found; fast simulation " << name() << " assigned." );
-    }
-  } // Loop over regions I want
-
-  // Crash out if we have failed to assign a volume - this is bad news!
-  if (missedOne && !m_noRegions){
-    ATH_MSG_ERROR( "Failed to assign at least one volume to Fast Simulation Model " << name() );
-    return StatusCode::FAILURE;
-  }
 
   return StatusCode::SUCCESS;
 }

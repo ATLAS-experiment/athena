@@ -74,5 +74,5 @@ G4VFastSimulationModel* LArFastShowerTool::makeFastSimModel()
   G4SDManager::GetSDMpointer()->AddNewDetector(fastSD);
 
   // Create a fresh Fast Sim Model
-  return new LArFastShower(name(), m_configuration, fastSD);
+  return new LArFastShower(name(), getRegion(), m_configuration, fastSD);
 }

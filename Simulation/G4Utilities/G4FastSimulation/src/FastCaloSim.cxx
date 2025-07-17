@@ -36,6 +36,7 @@
 #undef FCS_DEBUG
 
 FastCaloSim::FastCaloSim(const std::string& name,
+                         G4Region* region,
                          const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
                          const std::string& randomEngineName,
                          const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,
@@ -57,7 +58,7 @@ FastCaloSim::FastCaloSim(const std::string& name,
                          bool doPunchThrough,
                          FastCaloSimTool * FastCaloSimTool)
 
-: G4VFastSimulationModel(name),
+: G4VFastSimulationModel(name, region),
   m_rndmGenSvc(rndmGenSvc), m_randomEngineName(randomEngineName),
   m_FastCaloSimCaloTransportation(FastCaloSimCaloTransportation), 
   m_FastCaloSimCaloExtrapolation(FastCaloSimCaloExtrapolation),
