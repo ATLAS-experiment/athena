@@ -18,5 +18,13 @@ def DiTauDQANominalDiTauSelectionToolCfg(flags, **kwargs):
 
     return nominalseltool
 
+def DiTauDQATauTruthMatchingToolCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    
+    from TauAnalysisTools.DiTauAnalysisToolsConfig import DiTauTruthMatchingToolCfg
+    matchingtool = acc.popToolsAndMerge(DiTauTruthMatchingToolCfg(flags, "DiTauTruthMatchingTool", **kwargs))
+
+    return matchingtool
+
 
 
