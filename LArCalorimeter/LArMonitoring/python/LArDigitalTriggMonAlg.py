@@ -19,7 +19,7 @@ selStr["zeroET"] = "for unmasked SCs with ET == 0 GeV"
 
 selStr["passSCNom"] = "for unmasked SCs with non-zero ET < 10 GeV"
 #selStr["passSCNom0_0p325"] = "for unmasked SCs which pass #tau selection with non-zero ET < 0.2 GeV"
-selStr["passSCNomInvalid"] = "for unmasked SCs with raw E -99999" # notMasked && NotSaturated && notOFCbOF
+selStr["passSCNomInvalid"] = "for unmasked SCs with raw E = -99999" # notMasked && NotSaturated && notOFCbOF
 selStr["passSCNom0_0p325"] = "for unmasked SCs with 0 GeV < ET < 0.325 GeV"
 #selStr["passSCNom0p325_1"] = "for unmasked SCs which pass #tau selection with 0.2 GeV < ET < 1 GeV"
 selStr["passSCNom0p325_1"] = "for unmasked SCs with 0.325 GeV < ET < 1 GeV"
