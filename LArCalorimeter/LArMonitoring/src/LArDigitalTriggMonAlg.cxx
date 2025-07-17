@@ -230,7 +230,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 
 
   //auto passSCNom = Monitored::Scalar<bool>("passSCNom",false);  // pass tau, not satur, not OFCb OF, not masked  nonZeroET < 10 GeV
-  auto passSCNomInvalid = Monitored::Scalar<bool>("passSCNomInvalid",false);  // pass tau, not satur, not OFCb OF, not masked  ET <  0.0 , should be equal to -999? 
+  auto passSCNomInvalid = Monitored::Scalar<bool>("passSCNomInvalid",false);  // pass tau, not satur, not OFCb OF, not masked and raw E = -99999
   auto passSCNom0_0p325 = Monitored::Scalar<bool>("passSCNom0_0p325",false);  // pass tau, not satur, not OFCb OF, not masked  nonZeroET < 0.2 GeV
   auto passSCNom0p325_1 = Monitored::Scalar<bool>("passSCNom0p325_1",false);  // pass tau, not satur, not OFCb OF, not masked  0.2 < ET < 1 GeV
   auto passSCNom1 = Monitored::Scalar<bool>("passSCNom1",false);  // pass tau, not satur, not OFCb OF, not masked eTgt1GeV
@@ -537,6 +537,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         notMaskedEoflGt1 = false;
         nonZeroETofl = false;
         eToflGt1GeV = false;
+        passSCNomInvalid = false;
         // Check if this is a maskedOSUM SC
         if (!m_bcMask.cellShouldBeMasked(bcCont, id)) {
           notMasked = true;
