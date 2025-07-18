@@ -35,6 +35,9 @@ namespace met {
 
   using namespace xAOD;
 
+  //accessor for PV
+  const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+
   // Constructors
   ////////////////
   METEgammaAssociator::METEgammaAssociator(const std::string& name) : 
@@ -79,7 +82,7 @@ namespace met {
   }
 
 
-  //**********************************************************************
+  // **********************************************************************
   // Get Egamma constituents
   StatusCode METEgammaAssociator::extractTopoClusters(const xAOD::IParticle* obj,
                                                       std::vector<const xAOD::IParticle*>& tclist,
@@ -464,6 +467,88 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
+
+  // add HR implementation from release 21.2
+  // extractFE for W precision-type measurements
+  StatusCode METEgammaAssociator::extractFEHR(const xAOD::IParticle* obj,
+                                              std::vector<const xAOD::IParticle*> hardObjs,
+                                              std::vector<const xAOD::IParticle*>& felist,
+                                              const met::METAssociator::ConstitHolder& constits,
+                                              std::map<const IParticle*,MissingETBase::Types::constvec_t> & /*momenta*/,
+                                              float& UEcorr) const
+  {
+    // Constructing association electron-FE map
+    if(obj->type() != xAOD::Type::ObjectType::Electron){
+      UEcorr=0.0;
+      felist={};
+      return StatusCode::SUCCESS;
+    }
+    const xAOD::Egamma *eg = static_cast<const xAOD::Egamma*>(obj);
+
+    // Preselect charged and neutral FEs, based on proximity: dR < m_Drcone
+    for(const auto& fe : *constits.feCont) {
+      if(eg && P4Helpers::isInDeltaR(*fe, *eg, m_Drcone, m_useRapidity)) {
+        if( ( !fe->isCharged() && fe->e() > FLT_MIN ) ||
+            ( fe->isCharged() && PVMatchedAcc(*fe)  && ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) ) {
+          felist.push_back(fe);
+        } // quality cuts
+      } // DeltaR check
+    } // FE loop
+
+    // Step 2. Calculating Uncorrected HR and UE energy correction
+    if(eg){
+      // Vectoral sum of all FEs
+      TLorentzVector HR;  // uncorrected HR (initialized with 0,0,0,0 automatically)
+      for(const auto& fe_itr : *constits.feCont) {
+        if( fe_itr->pt() < 0 || fe_itr->e() < 0 ) { // sanity check
+          continue;
+        }
+
+        //remove charged FE that are not matched to the PV
+        if(fe_itr->isCharged() && !PVMatchedAcc(*fe_itr)){
+          continue;
+        }
+        HR += fe_itr->p4();
+      }
+
+      // Create a vector of egamma form hardObjs (all electrons)
+      std::vector<const xAOD::Egamma*> v_eg;
+      for(const auto& obj_i : hardObjs){
+        const xAOD::Egamma* eg_curr = static_cast<const xAOD::Egamma*>(obj_i); // current egamma object
+        v_eg.push_back( eg_curr );
+      }
+
+      // Subtruct FEs which are in the cone around egamma (gives uncorrected HR)
+      for(const auto& fe_i : *constits.feCont) {  // charged and neutral FEs
+        if( fe_i->pt() < 0 || fe_i->e() < 0 ) { // sanity check
+          continue;
+        }
+        //std::cout << "new eg candidate" << std::endl;
+        for(const auto& eg_i : v_eg) { // loop over v_eg
+          double dR = P4Helpers::deltaR( fe_i->eta(), fe_i->phi(), eg_i->eta(), eg_i->phi() );
+          if( dR < m_Drcone ) {
+            HR -= fe_i->p4();
+            break;
+          }
+        } // over v_eg
+      } // over FEs
+
+      // Save v_eg as a vector TLV (as commonn type for electrons and muons)
+      std::vector<TLorentzVector> v_egTLV;
+      v_egTLV.reserve(v_eg.size());
+      for(const auto& eg_i : v_eg) { // loop over v_eg
+        v_egTLV.push_back( eg_i->p4() );
+      }
+
+      // Save current eg as TLV
+      TLorentzVector egTLV = eg->p4();
+
+      // Get UE correction
+      ATH_CHECK( GetUEcorr(constits, v_egTLV, egTLV, HR, m_Drcone, m_MinDistCone, UEcorr) );
+    } // eg existance requirement
+
+    return StatusCode::SUCCESS;
+  }
 
   //**********************************************************************
   // Select Egamma tracks & clusters

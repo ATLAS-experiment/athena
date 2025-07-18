@@ -21,12 +21,14 @@ defaultInputKey = {
    'LCJet'     :'AntiKt4LCTopoJets',
    'EMJet'     :'AntiKt4EMTopoJets',
    'PFlowJet'  :'AntiKt4EMPFlowJets',
+   'PFlowJetHR':'AntiKt4EMPFlowJets',
    'Muon'      :'Muons',
    'MuonLRT'   :'MuonsLRT',
    'Soft'      :'',
    'Clusters'  :'CaloCalTopoClusters',
    'Tracks'    :'InDetTrackParticles',
    'PFlowObj'  :'CHSGParticleFlowObjects',
+   'PFlowObjHR':'CHSGParticleFlowObjects',
    'PrimVxColl':'PrimaryVertices',
    'Truth'     :'TruthEvents',
    }
@@ -41,7 +43,7 @@ class AssocConfig:
         self.objType = objType
         self.inputKey = inputKey
 
-def getAssociator(configFlags, config,suffix,doPFlow=False,
+def getAssociator(configFlags, config,suffix,doPFlow=False,doRecoil=False,
                   trkseltool=None,
                   trkisotool=None,caloisotool=None,
                   useFELinks=False,
@@ -68,6 +70,8 @@ def getAssociator(configFlags, config,suffix,doPFlow=False,
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_EMJetAssocTool_'+suffix)
     if config.objType == 'PFlowJet':
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_PFlowJetAssocTool_'+suffix)
+    if config.objType == 'PFlowJetHR':
+        tool = CompFactory.getComp("met::METJetAssocTool")('MET_PFlowJetAssocTool_HR_'+suffix)
     if config.objType == 'CustomJet':
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_CustomJetAssocTool_'+suffix)
     if config.objType == 'Muon':
@@ -85,9 +89,14 @@ def getAssociator(configFlags, config,suffix,doPFlow=False,
         tool.RecoJetKey = config.inputKey
     if doPFlow:
         tool.PFlow = True
-        tool.FlowElementCollection = modConstKey if modConstKey!="" else defaultInputKey["PFlowObj"]
+        if doRecoil:
+            tool.FlowElementCollection = modConstKey if modConstKey!="" else defaultInputKey["PFlowObjHR"]
+        else:
+            tool.FlowElementCollection = modConstKey if modConstKey!="" else defaultInputKey["PFlowObj"]
     else:
         tool.UseModifiedClus = doModClus
+    if doRecoil and (config.objType == 'Muon' or config.objType == 'Ele'): #we only need the recoil implementation for e and mu
+        tool.HRecoil = True
     tool.UseFELinks = False if config.objType == 'MuonLRT' or config.objType == 'LRTEle' else  useFELinks
     # set input/output key names
     if config.inputKey == '' and defaultInputKey[config.objType] != '':
@@ -126,6 +135,7 @@ class METAssocConfig:
             else:
                 associator = getAssociator(configFlags, config=config,suffix=self.suffix,
                                            doPFlow=self.doPFlow,
+                                           doRecoil=self.doRecoil,
                                            useFELinks=self.useFELinks,
                                            trkseltool=self.trkseltool,
                                            trkisotool=self.trkisotool,
@@ -137,7 +147,7 @@ class METAssocConfig:
                 metlog.info("{} Added {} tool named {}".format(prefix,config.objType,associator.name))
     #
     def __init__(self,suffix,inputFlags,buildconfigs=[],
-                 doPFlow=False, doTruth=False,
+                 doPFlow=False, doRecoil=False, doTruth=False,
                  usePFOLinks=False,
                  trksel=None,
                  modConstKey="",
@@ -149,7 +159,7 @@ class METAssocConfig:
         modClusColls_tmp = modClusColls
         if doPFlow:
             # Ideally this should not be hardcoded but linked to the JetDefinition with which this MET is built
-            # TODO : in new config, if possible use something like: jetdef.inputdef.containername             
+            # TODO : in new config, if possible use something like: jetdef.inputdef.containername
             if modConstKey_tmp == "": modConstKey_tmp = "CHSGParticleFlowObjects"
         else:
             if modConstKey_tmp == "": modConstKey_tmp = "OriginCorr"
@@ -161,6 +171,7 @@ class METAssocConfig:
             metlog.info("{} Creating MET Assoc config {}".format(prefix,suffix))
         self.suffix = suffix
         self.doPFlow = doPFlow
+        self.doRecoil = doRecoil
         self.useFELinks = usePFOLinks
         self.modConstKey=modConstKey_tmp
         self.modClusColls=modClusColls_tmp
