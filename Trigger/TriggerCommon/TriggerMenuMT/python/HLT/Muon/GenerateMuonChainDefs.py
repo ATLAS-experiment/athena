@@ -10,6 +10,7 @@ logging.getLogger().info("Importing %s",__name__)
 from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
 from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
 from .MuonChainConfiguration import MuonChainConfiguration
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 
 def generateChainConfigs(flags, chainDict, perSig_lengthOfChainConfigs):
@@ -30,5 +31,13 @@ def generateChainConfigs(flags, chainDict, perSig_lengthOfChainConfigs):
         theChainDef = listOfChainDefs[0]
 
     return theChainDef, perSig_lengthOfChainConfigs
+
+def prepareDefaultSignatureFlags(inflags : AthConfigFlags) -> AthConfigFlags:
+    """
+    invoked before generateChainConfigs method to prevent repeated cloning of flags within chain generation
+    """
+    from TrigInDetConfig.utils import cloneFlagsToActiveConfig
+    flags = cloneFlagsToActiveConfig(inflags, "muon", log)
+    return flags
 
 
