@@ -360,9 +360,10 @@ StatusCode TrigFastTrackFinder::initialize() {
   ATH_MSG_DEBUG("	m_LRTmode                  : " <<  m_LRTmode           );
   ATH_MSG_DEBUG("	m_dodEdxTrk                : " <<  m_dodEdxTrk         );
   ATH_MSG_DEBUG("	m_ITkMode                  : " <<  m_ITkMode         );
+  ATH_MSG_DEBUG(" m_useGBTSeedingTool        : " << m_useGBTSeedingTool  );
 
   ATH_MSG_DEBUG(" Initialized successfully");
-
+  
 
   return StatusCode::SUCCESS;
 }
@@ -586,31 +587,40 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
       if (m_doZFinder && m_doFastZVseeding) seedGen.createSeedsZv();
       else {
 
-	std::vector<GNN_TrigTracklet> vGNN_Tracks;
-
-	seedGen.getTracklets(tmpRoi.get(), vGNN_Tracks);
-	
-	for(auto& track : vGNN_Tracks) {
-	  for(auto& seed : track.m_seeds) {
-	    triplets.emplace_back(seed);
-	  }
-	  ATH_MSG_DEBUG("GNN tracklet has " << track.m_track.size()<<" spacepoints");
-	}
-	vGNN_Tracks.clear();
+	      std::vector<GNN_TrigTracklet> vGNN_Tracks;
+	      seedGen.getTracklets(tmpRoi.get(), vGNN_Tracks);
+	    
+	      for(auto& track : vGNN_Tracks) {
+	        for(auto& seed : track.m_seeds) {
+		        triplets.emplace_back(seed);
+	        }
+	        ATH_MSG_DEBUG("GNN tracklet has " << track.m_track.size()<<" spacepoints");
+	      }
+	    vGNN_Tracks.clear();
       }
     } else {
-      TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
-      
-      seedGen.loadSpacePoints(convertedSpacePoints);
-      
-      if (m_doZFinder && m_doFastZVseeding) {
-	seedGen.createSeeds(tmpRoi.get(), vZv);
+
+      if (m_useGBTSeedingTool) {
+
+        ATH_MSG_ERROR("Calling GBTS Tool that is not yet implemented");
+        return StatusCode::FAILURE;
+        
       }
       else {
-	seedGen.createSeeds(tmpRoi.get());
-      }
+
+          TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
       
-      seedGen.getSeeds(triplets);
+          seedGen.loadSpacePoints(convertedSpacePoints);
+          
+          if (m_doZFinder && m_doFastZVseeding) {
+            seedGen.createSeeds(tmpRoi.get(), vZv);
+          }
+          else {
+            seedGen.createSeeds(tmpRoi.get());
+          }
+          
+          seedGen.getSeeds(triplets);
+      }
     }
   }
   else {
