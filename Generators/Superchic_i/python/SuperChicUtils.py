@@ -332,13 +332,13 @@ def SuperChicInitialize(Init, stdin=None):
     os.makedirs('inputs', exist_ok=True)
     os.makedirs('evrecs', exist_ok=True)
     os.makedirs('outputs', exist_ok=True)
-    if not os.exists("param_card.dat"):
-      if os.exists(Init.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat"):
+    if not os.path.exists("param_card.dat"):
+      if os.path.exists(Init.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat"):
         shutil.copyfile(Init.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat","param_card.dat")
       else:
         raise Exception('Unexpected error in superchic init execution: probably absent param_card.dat')
-    if not os.exists("ident_card.dat"):
-      if os.exists(Init.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat"):
+    if not os.path.exists("ident_card.dat"):
+      if os.path.exists(Init.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat"):
         shutil.copyfile(Init.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat","ident_card.dat")
       else:
         raise Exception('Unexpected error in superchic init execution: probably absent ident_card.dat')
