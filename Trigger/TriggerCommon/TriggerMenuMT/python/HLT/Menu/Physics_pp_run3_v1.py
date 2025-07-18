@@ -1680,12 +1680,12 @@ def setupMenu():
         
         # Boosted high-pT di-tau chains (ATR-30999)
         # Primaries (NTrack <= 5)
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk5_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk5_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
 
         # Backup primaries (NTrack <= 3)
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk3_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk3_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
 
 
         # HH->2b2tau: di-tau support chains (ATR-28890)
