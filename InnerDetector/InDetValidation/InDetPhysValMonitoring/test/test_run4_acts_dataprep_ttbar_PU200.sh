@@ -44,8 +44,7 @@ run "Reconstruction-acts" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.acts.root \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --postInclude "ActsConfig.ActsRegionsOfInterestConfig.ActsMainRegionsOfInterestCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsMainClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsMainSpacePointFormationCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --ignorePatterns "${ignore_pattern}" \
     --maxEvents ${nEvents} \
