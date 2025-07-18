@@ -13,6 +13,7 @@ from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
 from .TauChainConfiguration import TauChainConfiguration
 from ..Ditau.DitauChainConfiguration import DitauChainConfiguration
 from ..Jet.JetChainConfiguration import JetChainConfiguration
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 def generateJetChainConfigs(flags, subChainDict):
     jet_cfg = JetChainConfiguration(subChainDict)
@@ -48,4 +49,12 @@ def generateChainConfigs(flags, chainDict, perSig_lengthOfChainConfigs):
     log.debug("theChainDef: %s" , theChainDef)
     return theChainDef, perSig_lengthOfChainConfigs
 
+
+def prepareDefaultSignatureFlags(inflags : AthConfigFlags) -> AthConfigFlags:
+    """
+    invoked before generateChainConfigs method to prevent repeated cloning of flags within chain generation
+    """
+    from TrigInDetConfig.utils import cloneFlagsToActiveConfig
+    flags = cloneFlagsToActiveConfig(inflags, "tauIso", log)      #tauIso is most frequently invoked
+    return flags
 

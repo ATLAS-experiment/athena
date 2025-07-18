@@ -40,7 +40,7 @@ def DVRecoFragment(flags):
     
     reco = InViewRecoCA('DVRecoStep',viewMaker=inputMakerAlg)
 
-    flagsWithTrk = cloneFlagsToActiveConfig(flags, flags.Trigger.InDetTracking.DVtxLRT.name)
+    flagsWithTrk = cloneFlagsToActiveConfig(flags, flags.Trigger.InDetTracking.DVtxLRT.input_name, log)
 
     lrt_algs = trigInDetLRTCfg(
         flagsWithTrk,
