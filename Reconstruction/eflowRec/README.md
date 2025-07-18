@@ -75,18 +75,18 @@ The following variables can be accessed using accessors (or ReadDecorHandle):
 
 The following list of cluster moments are stored. They correspond to the moments on the topoclusters that this object represents. All cluster moments are defined [here](https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/ClusterMoments).
 
-- CENTER_MAG 1
-- SECOND_R 1
-- CENTER_LAMBDA 1
-- ENG_BAD_CELLS 1
-- N_BAD_CELLS 1
-- BADLARQ_FRAC 1
-- ENG_POS 1
-- AVG_LAR_Q 1
-- AVG_TILE_Q 1
-- ISOLATION 1 
-- SECOND_LAMBDA 1
-- EM_PROBABILITY 1
+- CENTER_MAG
+- SECOND_R
+- CENTER_LAMBDA
+- ENG_BAD_CELLS
+- N_BAD_CELLS
+- BADLARQ_FRAC
+- ENG_POS
+- AVG_LAR_Q
+- AVG_TILE_Q
+- ISOLATION 
+- SECOND_LAMBDA
+- EM_PROBABILITY
 
 The following list of calorimeter sampling energies are stored. They correspond to the energy in that calorimeter layer in the topocluster that this object represents.
 
