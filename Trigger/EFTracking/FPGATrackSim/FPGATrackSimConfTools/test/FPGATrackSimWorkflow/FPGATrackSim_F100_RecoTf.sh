@@ -65,9 +65,9 @@ if [ "$doClusters" == "1" ]; then
 else
   Reco_tf.py --CA \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,\
-                  FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
-    --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
+    --preExec "flags.Tracking.doPixelDigitalClustering=True;\
+               flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
