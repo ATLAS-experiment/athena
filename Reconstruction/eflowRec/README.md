@@ -119,6 +119,52 @@ The following list of calorimeter sampling energies are stored. They correspond 
 - LAYERENERGY_MINIFCAL2
 - LAYERENERGY_MINIFCAL3
 
+# Charged Object Variables (CP Mode)
+
+This mode can be enabled in reconstruction by setting the flag PF.addCPData to true. The data is to be used by experts to further understand the performance of the algorithm.
+
+The contents are identical to standard reconstruction with the addition of the following variables which can be accessed via an accessor or ReadDecorHandle:
+
+
+- dRPrimes - list of deltaPrime values corresponding to the deltaRPrime value used in the initial track-cluster matching. Only values for matched topoclusters are stored. 
+- EtaEM2 - the ID track that this object represents is extrapolated to the second layer of either the EMB or EME in the calorimeter. This is the eta coordinate of the extrapolated coordinate in that layer.
+- isRecovered - if true it means the ID track that which this object represents underwent the split shower recovery process.
+- numMatchedClusters - number of topoclusters that were matched to the ID track that this object represents.
+- PhiEM2 - the ID track that this object represents is extrapolated to the second layer of either the EMB or EME in the calorimeter. This is the phi coordinate of the extrapolated coordinate in that layer.
+- Pull15 - this is a fraction where the numerator is the sum of energy of matched topoclusters (to the ID track represented by this object) in a cone of size 0.15 minus the expected energy deposit. The denominator is the expected energy sigma - this is calculated by multiplying the ID track energy by the width of the reference e/p distribution.
+- SubtractedCaloCells (called cellCPData in older AOD) - list of pairs, where each pair is an ElementLink to a CaloCell and a double. The double corresponds to the cell weight. Every cell which was removed from a topocluster by the ID track represented by this object is included in the list.
+
+# Neutral Object Variables (CP Mode)
+
+This mode can be enabled in reconstruction by setting the flag PF.addCPData to true. The data is to be used by experts to further understand the performance of the algorithm.
+
+The contents are identical to standard reconstruction with the addition of the following variables which can be accessed via an accessor or ReadDecorHandle:
+
+- ClusterWidthEta - variance of the cluster eta coordinate.
+- ClusterWidthPhi - variance of the cluster phi coordinate.
+
+# Charged Object Variables (EOverP Mode)
+
+This mode can be enabled in reconstruction by setting the flag PF.EOverPMode to true. This mode disables the charged shower subtraction procedure so that the particle flow objects can be used to measure e/p. 
+
+The contents are (mostly - see below) identical to standard reconstruction with the addition of the following variables which can be accessed via an accessor or ReadDecorHandle:
+
+- LayerHED - using the matched topoclusters, to the ID track represented by this object, the longitudinal shower profile is measured.  This variable is the calorimeter layer in which the high density shower core is measured to be  located.
+
+The following 3 vectors (also can be accessed via an accessor or ReadDecorHandle) correspond to lists of properties of the calorimeter cells found in the matched topocluster(s) (to the ID track represented by this object)
+
+- LayerVectorCellOrdering - this is a vector of calorimeter layer values.
+- RadiusVectorCellOrdering - this is vector of calorimeter cell ring indices, each multiplied by the ring thickness (which is a fixed value for each calorimeter layer)
+- AvgEdensityVectorCellOrdering - this is a vector of cell energy densities. Within a cell ring all cells get given the average cell energy density in that ring.
+
+The following variables are modified compared to the default reconstruction mode:
+
+- eta - the ID track that this object represents is extrapolated to the second layer of either the EMB or EME in the calorimeter. This is the eta coordinate of the extrapolated coordinate in that layer.
+- phi - the ID track that this object represents is extrapolated to the second layer of either the EMB or EME in the calorimeter. This is the phi coordinate of the extrapolated coordinate in that layer.
+
+
+
+
 
 
 
