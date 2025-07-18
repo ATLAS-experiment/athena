@@ -22,6 +22,9 @@
 // Tracking EDM
 #include "xAODTracking/Vertex.h"
 
+// DeltaR calculation
+#include "FourMomUtils/xAODP4Helpers.h"
+
 
 using MuonLink_t = ElementLink<xAOD::MuonContainer>;
 using FELink_t = ElementLink<xAOD::FlowElementContainer>;
@@ -29,6 +32,9 @@ using FELink_t = ElementLink<xAOD::FlowElementContainer>;
 namespace met {
 
   using namespace xAOD;
+
+  //accessor for PV
+  const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
 
   // Constructors
   ////////////////
@@ -77,7 +83,7 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  //*********************************************************************************************************
+  // *********************************************************************************************************
   // Get constituents
   StatusCode METMuonAssociator::extractTopoClusters(const xAOD::IParticle* obj,
                                                     std::vector<const xAOD::IParticle*>& tclist,
@@ -130,13 +136,13 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  //*********************************************************************************************************
+  // *********************************************************************************************************
   // Get constituents
   StatusCode METMuonAssociator::extractPFO(const xAOD::IParticle* obj,
                                            std::vector<const xAOD::IParticle*>& pfolist,
                                            const met::METAssociator::ConstitHolder& constits,
                                            std::map<const IParticle*,MissingETBase::Types::constvec_t>& /*momenta*/) const
-  {  
+  {
     const xAOD::Muon *mu = static_cast<const xAOD::Muon*>(obj);
     const TrackParticle* idtrack = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
     const CaloCluster* muclus = mu->cluster();
@@ -176,7 +182,7 @@ namespace met {
         // get neutral PFOs by matching the muon cluster
         if(muclus && m_doMuonClusterMatch) {
 
-          SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName); 
+          SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName);
                 for(const auto& matchel : tcLinkAcc(*muclus)) {
             if(!matchel.isValid()) {
               ATH_MSG_DEBUG("Invalid muon-cluster elementLink");
@@ -194,13 +200,13 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METMuonAssociator::extractFE(const xAOD::IParticle* obj, 
+
+  StatusCode METMuonAssociator::extractFE(const xAOD::IParticle* obj,
                                             std::vector<const xAOD::IParticle*>& felist,
                                             const met::METAssociator::ConstitHolder& constits,
                                             std::map<const IParticle*,MissingETBase::Types::constvec_t> &/*momenta*/) const
   {
     const xAOD::Muon *mu = static_cast<const xAOD::Muon*>(obj);
-
     if (m_useFELinks)
       ATH_CHECK( extractFEsFromLinks(mu, felist,constits) );
     else
@@ -232,8 +238,8 @@ namespace met {
           const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
           if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
             ATH_MSG_DEBUG("Accept cFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() );
-            felist.push_back(fe); 
-          } 
+            felist.push_back(fe);
+          }
         }
       }
     } // end cFE loop
@@ -244,10 +250,10 @@ namespace met {
       const xAOD::FlowElement* fe_init = *feLink;
       for (const auto *const fe : *constits.feCont){
         if (fe->index() == fe_init->index() && !fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
-          if( ( !fe->isCharged()&& fe->e() > FLT_MIN ) ){ 
+          if( ( !fe->isCharged()&& fe->e() > FLT_MIN ) ){
             ATH_MSG_DEBUG("Accept nFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() << " in sum.");
             felist.push_back(fe);
-          }   
+          }
         }
       }
     } // end nFE links loop
@@ -256,10 +262,10 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METMuonAssociator::extractFEs(const xAOD::Muon* mu, 
+  StatusCode METMuonAssociator::extractFEs(const xAOD::Muon* mu,
 				 std::vector<const xAOD::IParticle*>& felist,
 				 const met::METAssociator::ConstitHolder& constits) const
-  {  
+  {
     const TrackParticle* idtrack = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
     const CaloCluster* muclus = mu->cluster();
     ATH_MSG_VERBOSE("Muon " << mu->index() << " with pt " << mu->pt()
@@ -309,10 +315,99 @@ namespace met {
             }
           }
         } // muon has linked cluster
-      } 
+      }
     } // end of cluster loop
 
     return StatusCode::SUCCESS;
   }
 
+  // add HR implementation from release 21.2
+  // extractFE for W precision-type measurements
+  StatusCode METMuonAssociator::extractFEHR(const xAOD::IParticle* obj,
+                                            std::vector<const xAOD::IParticle*> hardObjs,
+                                            std::vector<const xAOD::IParticle*>& felist,
+                                            const met::METAssociator::ConstitHolder& constits,
+                                            std::map<const IParticle*,MissingETBase::Types::constvec_t> & /*momenta*/,
+                                            float& UEcorr) const
+  {
+    if(obj->type() != xAOD::Type::ObjectType::Muon){
+      UEcorr=0.0;
+      felist={};
+      return StatusCode::SUCCESS;
+    }
+    const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(obj);
+
+    // Get PFOs associated to muons
+    for(const auto& fe : *constits.feCont) {
+      if( fe->isCharged()) { // Fill list with charged PFOs (using muon tracks)
+        if( mu && P4Helpers::isInDeltaR(*fe, *mu, m_Drcone, m_useRapidity) && PVMatchedAcc(*fe) &&
+          ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ){
+          felist.push_back(fe);
+        }
+      }
+      else{ // Fill list with neutral PFOs (using muon clusters)
+        if( mu && P4Helpers::isInDeltaR(*fe, *mu, m_Drcone, m_useRapidity) ){
+          felist.push_back(fe);
+        }
+      } // neutral PFO condition
+    } // loop over all PFOs
+
+    // Calculating UE energy correction for a given lepton (using mu)
+    if(mu){
+      // Vectoral sum of all FE
+      TLorentzVector HR;  // uncorrected HR (initialized with 0,0,0,0 automatically)
+      for(const auto& fe_itr : *constits.feCont) {
+        if( fe_itr->pt() < 0 || fe_itr->e() < 0 ) { // sanity check
+          continue;
+        }
+
+        //remove charged FE that are not matched to the PV
+        if(fe_itr->isCharged() && !PVMatchedAcc(*fe_itr)){
+          continue;
+        }
+        HR += fe_itr->p4();
+      }
+
+      // Create vectors of muons
+      std::vector<const xAOD::Muon*> v_mu;
+      for(const auto& obj_i : hardObjs) {
+        if(obj_i->pt()<5e3 && obj_i->type() != xAOD::Type::Muon) { // sanity check
+          continue;
+        }
+        const xAOD::Muon* mu_curr = static_cast<const xAOD::Muon*>(obj_i); // current muon
+        v_mu.push_back(mu_curr);
+      }
+
+
+      // Subtracting PFOs matched to muons from HR
+      for(const auto& fe_i : *constits.feCont) { // charged and neutral PFOs
+        if( fe_i->pt() < 0 || fe_i->e() < 0 ) { // sanity check
+          continue;
+        }
+        for(const auto& mu_i : v_mu) { // loop over muons
+          double dR = P4Helpers::deltaR( fe_i->eta(), fe_i->phi(), mu_i->eta(), mu_i->phi() );
+          if( dR < m_Drcone ) { // if PFO is in a cone around muon
+            HR -= fe_i->p4();
+            break;
+          } // cone requirement
+        } // over v_mu
+      } // over PFOs
+
+      // Save v_mu as a vector TLV (as commonn type for electrons and muons)
+      std::vector<TLorentzVector> v_muTLV;
+      v_muTLV.reserve(v_mu.size());
+      for(const auto& mu_i : v_mu) { // loop over v_mu
+        v_muTLV.push_back( mu_i->p4() );
+      }
+
+      // Save current mu as TLV
+      TLorentzVector muTLV = mu->p4();
+
+      // Get UE correction
+      ATH_CHECK( GetUEcorr(constits, v_muTLV, muTLV, HR, m_Drcone, m_MinDistCone, UEcorr) );
+    } // available mu requirement
+
+
+    return StatusCode::SUCCESS;
+  }
 }

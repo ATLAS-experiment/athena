@@ -17,6 +17,7 @@
 
 // METReconstruction includes
 #include "METReconstruction/METAssociator.h"
+#include "METReconstruction/METEgammaAssociator.h"
 #include "xAODMissingET/MissingETComposition.h"
 #include "xAODMissingET/MissingETContainer.h"
 #include "xAODMissingET/MissingETAssociationMap.h"
@@ -37,9 +38,18 @@
 // For DeltaR
 #include "FourMomUtils/xAODP4Helpers.h"
 
+#include "GaudiKernel/SystemOfUnits.h"
+
+#include "TRandom3.h"
+
+
 namespace met {
 
   using namespace xAOD;
+
+  // UE correction for each lepton
+  const static SG::Decorator<float> dec_UEcorr("UEcorr_Pt");
+
 
   ///////////////////////////////////////////////////////////////////
   // Public methods:
@@ -105,7 +115,6 @@ namespace met {
         return StatusCode::FAILURE;
       }
     }
-
     //initialise read handle keys
     ATH_CHECK( m_pvcollKey.initialize(m_useTracks));
     ATH_CHECK( m_trkcollKey.initialize(m_useTracks));
@@ -321,7 +330,15 @@ namespace met {
             return StatusCode::FAILURE;
           }
           std::map<const IParticle*, MissingETBase::Types::constvec_t> momentumOverride;
-          ATH_CHECK( this->extractFE(obj, constlist, constits, momentumOverride) );
+          if(m_recoil){ // HR part:
+            float UEcorr_Pt = 0.; // Underlying event correction for HR
+            ATH_CHECK(extractFEHR(obj,hardObjs_tmp,constlist,constits,momentumOverride, UEcorr_Pt));
+            ATH_MSG_DEBUG("Energy correction is: " << UEcorr_Pt);
+            dec_UEcorr(*obj) = UEcorr_Pt;
+          }
+          else{ // MET part:
+            ATH_CHECK( this->extractFE(obj, constlist, constits, momentumOverride) );
+          }
           MissingETComposition::insert(metMap, obj, constlist, momentumOverride);
         }
         else{
@@ -426,4 +443,87 @@ namespace met {
     return true;
   }
 
+  StatusCode METAssociator::GetUEcorr(const met::METAssociator::ConstitHolder& constits,  // all PFOs
+                                      std::vector<TLorentzVector>& v_clus, // TLV vector of all clusters of hard objects
+                                      TLorentzVector& clus,                // TLV of current cluster
+                                      TLorentzVector& HR,                  // uncorrected HR
+                                      const float Drcone,                       // Cone size for el-pfo association
+                                      const float MinDistCone,                  // Cone size for getting random Phi
+                                      float& UEcorr) const                 // UE correction (result)
+  {
+      // 1. Get random phi
+      unsigned int seed = 0;
+      TRandom3 hole;
+      if( !v_clus.empty() ){
+        seed = floor( v_clus.back().Pt() * Gaudi::Units::GeV );
+        hole.SetSeed(seed);
+      }
+
+      bool isNextToPart(true);
+      bool isNextToHR(true);
+      double phiRnd(0.);
+
+      int numOfRndTrials = 0; // Counter for trials to find random cone without overlaps
+      const int maxNumOfRndTrials = 100; // Max. number of trials to find random cone without overlaps
+
+      while(isNextToPart || isNextToHR ){
+        isNextToPart = false;
+        isNextToHR = true;
+
+        phiRnd = hole.Uniform( -std::numbers::pi, std::numbers::pi);
+        double dR = P4Helpers::deltaR( HR.Eta(), HR.Phi(), clus.Eta(), phiRnd );
+        if(dR > MinDistCone){
+          isNextToHR = false;
+        }
+
+        for(const auto& clus_j : v_clus) { // loop over leptons
+          dR = P4Helpers::deltaR( clus.Eta(), phiRnd, clus_j.Eta(), clus_j.Phi() );
+          if(dR < MinDistCone){
+            isNextToPart = true;
+            break;
+          }
+        } // swclus_j
+
+        numOfRndTrials++;
+        if(numOfRndTrials == maxNumOfRndTrials){ // check number of trials
+          UEcorr = 0.;
+          return StatusCode::SUCCESS;
+        }
+      } // while isNextToPart, isNextToHR
+
+      ATH_MSG_DEBUG("Found rnd phi: " << phiRnd);
+
+
+      // 2. Calculete UE correction
+      TLorentzVector tv_UEcorr; // TLV of UE correction (initialized with 0,0,0,0 automatically)
+      std::pair <double, double> eta_rndphi = std::make_pair(clus.Eta(), phiRnd); // pair of current cluser eta and random phi
+
+
+      // Calculate delta phi -> always the same angle so its sufficient to calculate it only once
+      float dphi_angle=P4Helpers::deltaPhi(clus.Phi(),eta_rndphi.second);
+
+      for(const auto& fe_itr : *constits.feCont){ // loop over PFOs
+        if(fe_itr->pt() < 0 || fe_itr->e() < 0){ //sanity check
+          continue;
+        }
+
+        //remove charged FE that are not matched to the PV
+        const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+        if(fe_itr->isCharged() && !PVMatchedAcc(*fe_itr)){
+          continue;
+        }
+
+        double dR = P4Helpers::deltaR( fe_itr->eta(), fe_itr->phi(), eta_rndphi.first,  eta_rndphi.second );
+        if( dR < Drcone ){
+          // Rotate on dphi_angle
+          TLorentzVector tv_fe = fe_itr->p4();
+          tv_fe.RotateZ(dphi_angle);
+          tv_UEcorr += tv_fe;  // summing PFOs of UE for correction
+        } // cone requirement
+      } // loop over PFOs
+
+      UEcorr = tv_UEcorr.Pt();  // Pt of UE correction
+
+      return StatusCode::SUCCESS;
+  }
 }
