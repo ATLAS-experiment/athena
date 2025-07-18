@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format, MetadataCategory, HIMode
@@ -234,6 +234,13 @@ def RecoSteering(flags):
     if flags.Reco.EnablePostProcessing:
         acc.merge(RecoPostProcessingCfg(flags))
         log.info("---------- Configured post-processing")
+
+    # Setup data overlay reconstruction
+    if flags.Overlay.DataOverlay:
+        # Override conditions for data overlay
+        if flags.Overlay.DataOverlayConditions:
+            from PyJobTransforms.TransformUtils import executeFromFragment
+            executeFromFragment(flags.Overlay.DataOverlayConditions, flags, acc)
 
     # setup output
     acc.flagPerfmonDomain('IO')

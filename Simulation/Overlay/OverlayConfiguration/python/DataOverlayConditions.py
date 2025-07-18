@@ -55,3 +55,8 @@ def DataOverlay2023Cfg(flags):
 def DataOverlay2024Cfg(flags):
     """Conditions for 2024 data overlay."""
     return DataOverlayConditionsBaseCfg(flags)
+
+
+def DataOverlay2025OOCfg(flags):
+    """Conditions for 2025 OO data overlay."""
+    return DataOverlayConditionsBaseCfg(flags)
