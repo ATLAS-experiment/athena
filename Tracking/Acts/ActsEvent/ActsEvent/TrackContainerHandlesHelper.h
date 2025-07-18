@@ -128,5 +128,5 @@ class ConstTrackContainerHandlesHelper {
 };
 
 }  // namespace ActsTrk
-#include "ActsEvent/TrackContainerHandlesHelper.ixx"
+#include "ActsEvent/TrackContainerHandlesHelper.icc"
 #endif
