@@ -255,6 +255,13 @@ namespace InDetDD {
          return m_diodeTree.diodeProxyFromPos(pos);
       }
 
+      static unsigned int getFE(const PixelDiodeTree::DiodeProxy &diode_proxy) {
+         return diode_proxy.subMatrixAttribute();
+      }
+      static InDetDD::PixelDiodeType getDiodeType(const PixelDiodeTree::DiodeProxy &diode_proxy) {
+         return static_cast<InDetDD::PixelDiodeType>(diode_proxy.diodeAttribute());
+      }
+
       ///////////////////////////////////////////////////////////////////
       // Private methods:
       ///////////////////////////////////////////////////////////////////

@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "PixelClusteringTool.h"
 
 #include <Acts/Clusterization/Clusterization.hpp>
@@ -87,12 +86,8 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   // We temporary comment this since it is not used
   // bool hasGanged = false;
 
-  Identifier moduleID = element->identify();
   IdentifierHash moduleHash = element->identifyHash();
 
-  // This could be moved outside the cluster loop
-  bool multiChip = design.numberOfCircuits() > 1;
-    
   for (size_t i = 0; i < cluster.ids.size(); i++) {
 
     //Construct the identifier class
@@ -107,19 +102,26 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 
     int tot = cluster.tots.at(i);
     float charge = tot;
-        
+
+    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(id),
+                                                m_pixelID->eta_index(id));
+    InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
+
     if (calibData) {
 
       if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
 	ATH_MSG_ERROR("Chip type is not recognized!");
 	return StatusCode::FAILURE;
       }
-      
-      // The calibration strategy is updated for each element 
+
+      // The calibration strategy is updated for each element
       // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
       // Single FE modules could have an optimized getCharge function where the calib constants are cached
-      std::uint32_t feValue = multiChip ? m_pixelReadout->getFE(id, moduleID, element) : 0;
-      charge = calibData->getCharge(m_pixelReadout->getDiodeType(id,element),
+      std::uint32_t feValue = design.getFE(si_param);
+      auto diode_type = design.getDiodeType(si_param);
+
+      charge = calibData->getCharge(diode_type,
 				    calibStrategy,
 				    moduleHash,
 				    feValue,
@@ -127,12 +129,8 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
       chargeList.push_back(charge);
     }
     
-    InDetDD::SiCellId si_cell = element->cellIdFromIdentifier(id);
-    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
-       = InDetDD::PixelDiodeTree::makeCellIndex(si_cell.phiIndex(),si_cell.etaIndex());
     const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];
     const InDetDD::PixelDiodeTree::CellIndexType &col = diode_idx[1];
-    InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
     if (row>rowmax) {
        rowmax=row;
        rowmax_diode = si_param;
@@ -297,18 +295,23 @@ PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
 				const InDet::SiDetectorElementStatus& pixelDetElStatus,
 				const InDetDD::SiDetectorElement& element) const
 {
+  // Get the element design
+  const InDetDD::PixelModuleDesign& design =
+    static_cast<const InDetDD::PixelModuleDesign&>(element.design());
   CellCollection cells;
   cells.reserve(300);
 
   const IdentifierHash& idHash = RDOs.identifyHash();
-  
   for (const auto *const rdo : RDOs) {
     const Identifier& rdoID = rdo->identify();
+    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(rdoID),
+                                                m_pixelID->eta_index(rdoID));
+    InDetDD::PixelDiodeTree::DiodeProxy si_param ( design.diodeProxyFromIdx(diode_idx));
+    std::uint32_t fe = design.getFE(si_param);
 
     // check if good RDO
     // the pixel RDO tool here says always good if m_useModuleMap is false
-    const Identifier& waferId = element.identify();
-    const std::uint32_t fe = m_pixelReadout->getFE(rdoID, waferId, &element);
     if (not pixelDetElStatus.isChipGood(idHash, fe)) {
       continue;
     }
