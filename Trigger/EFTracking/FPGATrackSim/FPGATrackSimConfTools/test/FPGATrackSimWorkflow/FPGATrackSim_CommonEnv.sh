@@ -39,7 +39,7 @@ ONNX_INPUT_VOL="NN/2ndStage/${NN_2ND}/NNPathfinderVol_4Hits_V006_200e_162_98_34.
 # GNN
 GNN_MODULE_MAP="GNN/v0.10/FPGATrackSim_DoubletModuleMap_v1.root" # New training will be done later
 GNN_ONNX_MODEL="GNN/v0.10/edge_classifier-InteractionGNN2-v1.onnx" # New training will be done later
-GNN_METRIC_LEARNING="GNN/v0.10/graph_construction-MetricLearning-v2.onnx" # New training will be done in the future
+GNN_METRIC_LEARNING="GNN/v0.12/graph_construction-MetricLearning-FPGATrackSim.onnx" # New training will be done later
 
 # set default values
 RUN_CKF=True

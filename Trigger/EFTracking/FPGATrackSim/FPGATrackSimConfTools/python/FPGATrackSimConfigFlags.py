@@ -403,7 +403,7 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("moduleMapTol",0.0000000001) # 1e-10
     cf.addFlag("moduleMapPath",'')
     cf.addFlag("metricLearningR",0.1)
-    cf.addFlag("metricLearningMaxN", 50)
+    cf.addFlag("metricLearningMaxN", 512)
     cf.addFlag("MLModelPath",'')
     cf.addFlag("GNNModelPath",'')
     cf.addFlag("roadMakerTool", roadMakerTool.ConnectedComponents, type=roadMakerTool)
