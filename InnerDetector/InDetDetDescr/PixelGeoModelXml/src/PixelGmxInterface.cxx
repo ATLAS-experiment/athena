@@ -92,6 +92,20 @@ void PixelGmxInterface::addSensorType(const std::string& clas,
 
   if (clas == "SingleChip_RD53" || clas == "QuadChip_RD53") {
     makePixelModule(typeName, parameters);
+    // @TODO remove once all endcap modules are oriented consistently i.e. there is
+    // one relation between local "hardware" coordinates and local offline coordinates.
+    // Currently all endcap modules have a surface normal (defined by the transform),
+    // which points outwards. This is the case for endcap modules for which the sensor
+    // facing side points towards the IP (even phi index), and those for which the sensor
+    // facing side points outwards (odd phi index). By introducing separate module design
+    // objects for endcap modules with even or odd phi index, the module design can
+    // provide extra information to indicate the translation scheme between hardware
+    // coordinates and offline coordinates.
+    if (   typeName.find("Quad")!= std::string::npos
+        && (   typeName.find("endcap")!= std::string::npos
+            || typeName.find("inclined")!= std::string::npos)) {
+       makePixelModule(typeName+"_even",parameters);
+    }
   } else {
     ATH_MSG_ERROR("addSensorType: unrecognised module class: " << clas);
     ATH_MSG_ERROR("No module design created");
@@ -234,10 +248,20 @@ void PixelGmxInterface::addSensor(const std::string& typeName,
     return;
   }
 
+  // @TODO remove once all endcap modules are oriented consistently i.e. there is
+  // one relation between local "hardware" coordinates and local offline coordinates
+  // Currently all endcap modules have a surface normal (defined by the transform),
+  // which points outwards. This is the case for endcap modules for which the sensor
+  // facing side points towards the IP (even phi index), and those for which the sensor
+  // facing side points outwards (odd phi index). By introducing separate module design
+  // objects for endcap modules with even or odd phi index, the module design can
+  // provide extra information to indicate the translation scheme between hardware
+  // coordinates and offline coordinates.
+  bool flipFE=index["barrel_endcap"]!=0 && index["phi_module"]%2==0 && typeName.find("Quad") != std::string::npos;
   //
   // Create the detector element and add to the DetectorManager
   //
-  auto it = m_geometryMap.find(typeName);
+  auto it = m_geometryMap.find( (flipFE ? typeName+"_even" : typeName));
   if(it == m_geometryMap.end()) {
     ATH_MSG_ERROR("addSensor: Error: Readout sensor type " << typeName << " not found.");
     throw std::runtime_error("readout sensor type " + typeName + " not found.");
@@ -460,6 +484,13 @@ void PixelGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
         }
            std::string rd35_Name = (*rd53)[iR]->getString("SensorType");
            makePixelModule(rd35_Name,rd53_Map);
+           // @TODO remove once all endcap modules are oriented consistently i.e. there is
+           // one relation between local "hardware" coordinates and local offline coordinates
+           if (   rd35_Name.find("Quad")!= std::string::npos
+               && (   rd35_Name.find("endcap")!= std::string::npos
+                   || rd35_Name.find("inclined")!= std::string::npos)) {
+              makePixelModule(rd35_Name+"_even",rd53_Map);
+           }
           } 
        }
     else ATH_MSG_WARNING("Could not retrieve "<<sType<<" table");
