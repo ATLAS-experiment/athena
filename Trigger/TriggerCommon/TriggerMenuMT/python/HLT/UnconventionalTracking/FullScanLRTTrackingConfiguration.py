@@ -16,7 +16,7 @@ def FullScanLRTMenuSequenceGenCfg(flags):
     reco = InEventRecoCA("UncFSLRTreco",inputMaker=getTrackingInputMaker(flags,"ftf"))
 
     from TrigInDetConfig.utils import cloneFlagsToActiveConfig
-    flagsLRT = cloneFlagsToActiveConfig(flags, "fullScanLRT")
+    flagsLRT = cloneFlagsToActiveConfig(flags, "fullScanLRT", log)
 
     reco.mergeReco( getCommonInDetFullScanLRTCfg(flags, flagsLRT) )
 
