@@ -39,7 +39,7 @@ namespace ActsTrk{
                     /** @brief Default move constructor */
                     MeasurementProvider(MeasurementProvider&& other) = default;
                     /** @brief Default move assignment operator */
-                    MeasurementProvider& operator=(MeasurementProvider&& other) = default;
+                    MeasurementProvider& operator=(MeasurementProvider&& other) = delete;
                     /** @brief Delete the copy constructor */
                     MeasurementProvider(const MeasurementProvider& other) = delete;
                     /** @brief Delete the copy assignment */
