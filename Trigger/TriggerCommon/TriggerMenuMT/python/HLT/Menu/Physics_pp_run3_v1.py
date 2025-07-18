@@ -98,7 +98,9 @@ def setupMenu():
 
         #ATR-31517
         ChainProp(name='HLT_mu24_idReuse_ivarmedium_L1MU14FCH', groups=SupportGroup+SingleMuonGroup, stream=[PhysicsStream], monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='HLT_mu24_idReuse_ivarmedium_L1MU18VFCH', groups=SupportGroup+SingleMuonGroup, stream=[PhysicsStream], monGroups=['muonMon:shifter','muonMon:online']),
         ChainProp(name='HLT_mu50_idReuse_L1MU14FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_mu50_idReuse_L1MU18VFCH', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
         ChainProp(name='HLT_mu4_l2io_idReuse_L1MU3V', stream=[PhysicsStream], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU3V'], monGroups=['muonMon:shifter']),
         ChainProp(name='HLT_mu10_l2mt_idReuse_L1MU10BOM', groups=SupportGroup+SingleMuonGroup),
         ChainProp(name='HLT_2mu14_idReuse_L12MU8F', groups=SupportGroup+MultiMuonGroup, stream=[PhysicsStream], monGroups=['muonMon:online','muonMon:shifter']),

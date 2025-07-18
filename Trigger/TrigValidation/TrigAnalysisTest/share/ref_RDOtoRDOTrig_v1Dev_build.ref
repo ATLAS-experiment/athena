@@ -22176,6 +22176,20 @@ HLT_mu24_idReuse_ivarmedium_L1MU14FCH:
     2: 4
     3: 4
     4: 4
+HLT_mu24_idReuse_ivarmedium_L1MU18VFCH:
+  eventCount: 4
+  stepCounts:
+    0: 6
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+  stepFeatures:
+    0: 6
+    1: 4
+    2: 4
+    3: 4
+    4: 4
 HLT_mu24_idperf_L1MU14FCH:
   eventCount: 4
   stepCounts:
@@ -28262,6 +28276,18 @@ HLT_mu50_L1MU18VFCH:
     2: 2
     3: 1
 HLT_mu50_idReuse_L1MU14FCH:
+  eventCount: 1
+  stepCounts:
+    0: 6
+    1: 6
+    2: 2
+    3: 1
+  stepFeatures:
+    0: 6
+    1: 6
+    2: 2
+    3: 1
+HLT_mu50_idReuse_L1MU18VFCH:
   eventCount: 1
   stepCounts:
     0: 6
