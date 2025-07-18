@@ -48,6 +48,7 @@
 - Event/xAOD/.*Cnv
 - Event/xAOD/xAODInDetMeasurement
 - Event/xAOD/xAODMuonRDO
+- Event/xAOD/xAODAuxillaryMeasurement
 + Event/xAOD/.*
 + ForwardDetectors/ZDC/ZdcAnalysis
 + ForwardDetectors/ZDC/ZdcUtils

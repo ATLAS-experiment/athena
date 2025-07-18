@@ -1,0 +1,22 @@
+<!-- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+    <class name="xAOD::AuxillaryMeasurement_v1" >
+       <field name="m_surface" transient="true" />
+    </class>
+    <class name="xAOD::AuxillaryMeasurementContainer_v1"
+           id="B9C4D272-5C52-4A7E-85CF-924B432FEA4C" />
+    <typedef name="xAOD::AuxillaryMeasurement" />
+    <typedef name="xAOD::AuxillaryMeasurementContainer" />
+    
+    <class name="xAOD::AuxillaryMeasurementAuxContainer1D_v1"
+           id="215C0128-13B3-4115-A358-ECEA9AD532BA" />
+    <typedef name = "xAOD::AuxillaryMeasurementAuxContainer1D" />
+
+    <class name="xAOD::AuxillaryMeasurementAuxContainer2D_v1"
+           id="C35EA203-1A20-4978-907D-CD5953D41BEA" />
+    <typedef name = "xAOD::AuxillaryMeasurementAuxContainer2D" />
+
+    <class name="xAOD::AuxillaryMeasurementAuxContainer3D_v1"
+           id="A3365629-7EC4-4314-B7D0-67E087E1DDE7" />
+    <typedef name = "xAOD::AuxillaryMeasurementAuxContainer3D" />
+</lcgdict>
