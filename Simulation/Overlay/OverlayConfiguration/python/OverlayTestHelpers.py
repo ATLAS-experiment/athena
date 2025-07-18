@@ -51,6 +51,7 @@ def overlayTestFlags(flags, args):
     flags.Common.ProductionStep = ProductionStep.Overlay
     if args.data:
         flags.Overlay.DataOverlay = True
+        flags.Overlay.DataOverlayConditions = "OverlayConfiguration.DataOverlayConditions.DataOverlay2023Cfg"
         flags.Input.isMC = False
         flags.Input.Files = defaultTestFiles.RDO_BKG_HI_RUN3_2023
         flags.Input.SecondaryFiles = defaultTestFiles.HITS_DATA_OVERLAY_HI_RUN3_2023

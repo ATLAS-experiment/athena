@@ -28,11 +28,8 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self, inflags):
+    def assembleChainImpl(self, flags):
         log.debug("Assembling chain %s", self.chainName)
-        
-        from TrigInDetConfig.utils import getFlagsForActiveConfig
-        flags = getFlagsForActiveConfig(inflags, "fullScan", log)
         
         chainSteps = []
 

@@ -1,6 +1,8 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from AthenaCommon.Logging import logging
+log = logging.getLogger( __name__ )
 
 
 def TrigFastTrackFinderMonitoring(flags):
@@ -429,28 +431,34 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
 
     acc.addPublicTool( CompFactory.TrigInDetTrackFitter( "TrigInDetTrackFitter_"+signature ) )
   
+
   else:
   
-    spTool = acc.popToolsAndMerge(TrigSpacePointConversionToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
-    numberingTool = acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
+    if flags.Tracking.ActiveConfig.useGBTSeedingTool:
+      log.error ("Gaudi Property initialzed but packages required are not ready yet")
 
-    from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
-    TrackMaker_FTF = acc.popToolsAndMerge(
-        TrigSiTrackMaker_xkCfg(flags, name = 'InDetTrigSiTrackMaker_FTF_'+signature)
-    )
-    from TrkConfig.TrkRIO_OnTrackCreatorConfig import TrigRotCreatorCfg
-    TrigRotCreator = acc.popToolsAndMerge(TrigRotCreatorCfg(flags))
-    acc.addPublicTool(TrigRotCreator)
+    else:
 
-    acc.addPublicTool(
-        CompFactory.TrigInDetTrackFitter(
-            name = "TrigInDetTrackFitter_"+signature,
-            doBremmCorrection = flags.Tracking.ActiveConfig.doBremRecoverySi,
-            correctClusterPos = True,  #improved err(z0) estimates in Run 2
-            ROTcreator = TrigRotCreator,
-        )
-    )
-  
+      spTool = acc.popToolsAndMerge(TrigSpacePointConversionToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
+      numberingTool = acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
+
+      from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
+      TrackMaker_FTF = acc.popToolsAndMerge(
+          TrigSiTrackMaker_xkCfg(flags, name = 'InDetTrigSiTrackMaker_FTF_'+signature)
+      )
+      from TrkConfig.TrkRIO_OnTrackCreatorConfig import TrigRotCreatorCfg
+      TrigRotCreator = acc.popToolsAndMerge(TrigRotCreatorCfg(flags))
+      acc.addPublicTool(TrigRotCreator)
+
+      acc.addPublicTool(
+          CompFactory.TrigInDetTrackFitter(
+              name = "TrigInDetTrackFitter_"+signature,
+              doBremmCorrection = flags.Tracking.ActiveConfig.doBremRecoverySi,
+              correctClusterPos = True,  #improved err(z0) estimates in Run 2
+              ROTcreator = TrigRotCreator,
+          )
+      )
+
   acc.addPublicTool(TrackMaker_FTF)
 
   theTrigInDetTrackFitter = acc.getPublicTool("TrigInDetTrackFitter_"+signature)
@@ -495,6 +503,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         TrackInitialD0Max     = flags.Tracking.ActiveConfig.TrackInitialD0Max,
         TrackZ0Max            = flags.Tracking.ActiveConfig.TrackZ0Max,
         TripletDoPPS    = flags.Tracking.ActiveConfig.TripletDoPPS,
+        useGBTSeedingTool = flags.Tracking.ActiveConfig.useGBTSeedingTool,
         TripletDoPSS    = False,
         pTmin           = flags.Tracking.ActiveConfig.minPT[0] if flags.Detector.GeometryITk else flags.Tracking.ActiveConfig.minPT,
         DoubletDR_Max   = flags.Tracking.ActiveConfig.DoubletDR_Max,
