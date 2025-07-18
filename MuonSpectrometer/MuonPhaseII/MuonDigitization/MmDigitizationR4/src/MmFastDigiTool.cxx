@@ -56,6 +56,15 @@ namespace MuonR4 {
               if (m_digitizeMuonOnly && !MC::isMuon(simHit)){
                     continue;
                 }
+
+                const double hitKineticEnergy = simHit->kineticEnergy();
+                // Don't consider electron hits below m_energyThreshold.
+                // Electrons aren't consider for now in any case due to the cut above.
+                // But this may change.
+                if (hitKineticEnergy < m_energyThreshold && MC::isElectron(simHit)) {
+                    continue;
+                }
+                
                 const Identifier hitId{simHit->identify()};
  
                 const MuonGMR4::MmReadoutElement* readOutEle = m_detMgr->getMmReadoutElement(hitId);
