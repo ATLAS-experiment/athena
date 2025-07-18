@@ -343,6 +343,8 @@ def HION5AllTruthVariables():
     variables += ["MuonTruthParticles"]
     variables += ["AntiKt2TruthJets"]
     variables += ["AntiKt4TruthJets"]
+    variables += ["TruthElectrons"]
+    variables += ["TruthMuons"]
 
     return variables
 
