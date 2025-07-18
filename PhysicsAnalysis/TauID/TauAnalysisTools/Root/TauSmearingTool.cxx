@@ -36,8 +36,7 @@ StatusCode TauSmearingTool::initialize()
     std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/Smearing/";
 
     if(m_sRecommendationTag == "2025-prerec") {
-      ATH_MSG_WARNING("2025-prerec is under development and not complete yet.");
-
+      
       if (m_sCampaign!="mc23" && m_sCampaign!="mc20"){
         ATH_MSG_ERROR("unknown campaign (mc20|mc23):" << m_sCampaign);
         return StatusCode::FAILURE;
@@ -54,6 +53,8 @@ StatusCode TauSmearingTool::initialize()
       }
 
     } else if (m_sRecommendationTag == "2022-prerec") {
+
+      ATH_MSG_WARNING("2022-prerec tag are pre-recommendations are superseeded by 2025-prerec");
 
       if (m_sCampaign!="mc21" && m_sCampaign!="mc20"){
         ATH_MSG_ERROR("unknown campaign (mc20|mc21):" << m_sCampaign);
