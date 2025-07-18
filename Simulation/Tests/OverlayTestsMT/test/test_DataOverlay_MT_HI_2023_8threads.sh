@@ -28,7 +28,6 @@ Overlay_tf.py \
 --conditionsTag "default:CONDBR2-BLKPA-2023-07" \
 --geometryVersion "default:ATLAS-R3S-2021-03-02-00" \
 --preInclude "Campaigns.DataOverlay2023" \
---postInclude "OverlayConfiguration.DataOverlayConditions.DataOverlay2023Cfg" \
 --postExec "with open('ConfigOverlay.pkl', 'wb') as f: cfg.store(f)" \
 --imf False
 

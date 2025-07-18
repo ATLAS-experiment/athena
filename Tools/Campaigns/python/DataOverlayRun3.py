@@ -16,7 +16,18 @@ def DataOverlay2023(flags):
     """Configuration for HI data overlay for year 2023"""
     _DataOverlayRun3Cfg(flags)
 
+    flags.Overlay.DataOverlayConditions = "OverlayConfiguration.DataOverlayConditions.DataOverlay2023Cfg"
+
 
 def DataOverlay2024(flags):
     """Configuration for HI data overlay for year 2024"""
     _DataOverlayRun3Cfg(flags)
+
+    flags.Overlay.DataOverlayConditions = "OverlayConfiguration.DataOverlayConditions.DataOverlay2024Cfg"
+
+
+def DataOverlay2025OO(flags):
+    """Configuration for OO data overlay for year 2025"""
+    _DataOverlayRun3Cfg(flags)
+
+    flags.Overlay.DataOverlayConditions = "OverlayConfiguration.DataOverlayConditions.DataOverlay2025OO"

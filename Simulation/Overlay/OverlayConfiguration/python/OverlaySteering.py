@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Main steering for MC+MC and MC+data overlay
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -13,6 +13,7 @@ from DigitizationConfig.DigitizationParametersConfig import writeDigitizationPar
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \
     CopyTrackRecordCollectionsCfg, CopyBackgroundVertexCfg
+from PyJobTransforms.TransformUtils import executeFromFragment
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
 
@@ -135,7 +136,11 @@ def OverlayMainContentCfg(configFlags):
            acc.merge(CopyTRT_DriftCircleContainerCfg(configFlags))
 
     if configFlags.Overlay.DataOverlay:
+        # Copy background vertex collection
         acc.merge(CopyBackgroundVertexCfg(configFlags))
+        # Override conditions for data overlay
+        if configFlags.Overlay.DataOverlayConditions:
+            executeFromFragment(configFlags.Overlay.DataOverlayConditions, configFlags, acc)
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
