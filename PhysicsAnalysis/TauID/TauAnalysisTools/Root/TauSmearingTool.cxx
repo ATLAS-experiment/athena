@@ -54,7 +54,7 @@ StatusCode TauSmearingTool::initialize()
 
     } else if (m_sRecommendationTag == "2022-prerec") {
 
-      ATH_MSG_WARNING("2022-prerec tag are pre-recommendations are superseeded by 2025-prerec");
+      ATH_MSG_WARNING("2022-prerec tag are pre-recommendations superseeded by 2025-prerec");
 
       if (m_sCampaign!="mc21" && m_sCampaign!="mc20"){
         ATH_MSG_ERROR("unknown campaign (mc20|mc21):" << m_sCampaign);
