@@ -30,27 +30,27 @@
 #include "FolderTypes.h"
 #include "IOVDbStringFunctions.h"
 #include "Base64Codec.h"
-
+#include <regex>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 namespace {
   std::string     
   spec2String(const cool::IFolderPtr & pFolder){
     //open bracket, close bracket for json objects
     const std::string ob="";
-    const std::string cb="";
     const std::string objName="\"folder_payloadspec\": \"";
     std::string result=ob+objName;
     const auto & rspec = pFolder->payloadSpecification();
     std::string sep{""};
+    json chJson = json::array();
     for (unsigned int i(0); i<rspec.size();++i){
-      if (i==1) sep=", ";
       const auto & f = rspec[i];
-      result+=sep;
-      result+=f.name();
-      result+=": ";
-      result+=f.storageType().name();
+      json obj = {};
+      obj[f.name()] = f.storageType().name();
+      chJson.push_back(obj);
     }
+    result+=chJson.dump();
     result+='\"';
-    result+=cb;
     return result;
   }
 }
@@ -80,6 +80,7 @@ namespace IOVDbNamespace {
   std::string 
   Cool2Json::description() const{
     std::string saneXml=sanitiseXml(m_desc);
+    saneXml = std::regex_replace(saneXml, std::regex("\\\\\""), "\"");
     std::string out = "\"node_description\" : \"";
     out += saneXml;
     out += '\"';
