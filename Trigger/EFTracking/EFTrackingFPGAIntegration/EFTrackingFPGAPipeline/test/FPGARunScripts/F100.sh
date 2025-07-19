@@ -47,6 +47,7 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
+        -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    storeClusters=True ;;
@@ -61,15 +62,19 @@ while [ $# -ge 1 ];do
 if [ -z $inputRDO ]; then usage ; fi
 if [ -z $outputAOD ]; then usage ; fi
 
-if [ ! -f $inputRDO ]; then
-    echo "runReco_C100_FS.sh result: 1 ${inputRDO} not found"
-    exit 1
-fi
+IFS=',' read -ra FILES <<< "$inputRDO"
+for file in "${FILES[@]}"; do
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File not found: $file"
+        exit 1
+    fi
+done
 export ATHENA_CORE_NUMBER=1
 ## running reconstruction
 
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
+    --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
     --preExec "flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
                 flags.Tracking.doPixelDigitalClustering=True;\
