@@ -37,16 +37,7 @@ namespace xAODMaker {
 TauJetCnvAlg::TauJetCnvAlg( const std::string& name, 
 			  ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator )
-  , m_inputTauJetContainerName("TauRecContainer")
-  , m_xaodTauJetContainerName("TauRecContainer")
-{
-  //
-  // Property declaration
-  // 
-  declareProperty( "InputTauJetContainer", m_inputTauJetContainerName );
-  declareProperty( "xAODTauJetContainer", m_xaodTauJetContainerName );
-  declareProperty("CnvTool", m_cnvTool, "The converter tool for TauJets");
-}
+{}
 
 // Destructor
 ///////////////
