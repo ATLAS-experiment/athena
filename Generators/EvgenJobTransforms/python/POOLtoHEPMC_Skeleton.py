@@ -57,6 +57,10 @@ def fromRunArgs(runArgs):
     else:
         log.error('OutputHEPMCFile required for POOLtoHEPMC')
 
+    hepMCFormat = 'hepmc2'
+    if hasattr(runArgs, 'hepmcFormat'):
+       hepMCFormat = runArgs.hepmcFormat
+
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
     setPerfmonFlagsFromRunArgs(flags, runArgs)
@@ -91,6 +95,7 @@ def fromRunArgs(runArgs):
     # Use the WriteHepMC AlgTool from TruthIO to do the conversion
     cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
                       OutputFile = my_output_HepMCFile,
+                      Format = hepMCFormat,
                       McEventKey = McEventKey ) )
     # Here one should set the output format
     # Post-include
