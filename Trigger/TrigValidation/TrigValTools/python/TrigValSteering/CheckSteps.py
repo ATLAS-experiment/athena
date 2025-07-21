@@ -161,8 +161,7 @@ class LogMergeStep(Step):
                     with open(log_name, encoding='utf-8') as log_file:
                         merged_file.write('### {} ###\n'.format(log_name))
                         # temporary workaround to ignore false positives in AOD->DAOD log parsing
-                        # FIXME: drop AODtoDAOD once test_trigAna_AODtoDAOD_run2_build.py is migrated to Derivation_tf
-                        if log_name == 'log.Derivation' or log_name == 'log.AODtoDAOD':
+                        if "Derivation" in log_name:
                             for line in log_file:
                                 merged_file.write(line.replace('Selected dynamic Aux', 'Selected Dynamic Aux'))
                         else:
