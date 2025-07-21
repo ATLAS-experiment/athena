@@ -56,7 +56,7 @@ void Make_plots(TString infile_hit, TString infile_truth, TString outfile, bool 
   c_g4->Divide(2,2);
 
   c_g4->cd(1);
-  t.Draw("truth.mcpart_pt[0]>>h_ptgen","","histo");
+  t.Draw("truth.mc_pt>>h_ptgen","truth.mc_status==1","histo");
   h_ptgen->SetXTitle("Energy (MeV)");
   HistArray.Add(h_ptgen);
 
@@ -68,7 +68,7 @@ void Make_plots(TString infile_hit, TString infile_truth, TString outfile, bool 
   HistArray.Add(h_totalE);
 
   c_g4->cd(3);
-  t.Draw("(h32.totalE):(truth.mcvtx_y):(truth.mcvtx_z)>>hp_EvsYvsZ","","prof");
+  t.Draw("(h32.totalE):(truth.mc_vx_y):(truth.mc_vx_z)>>hp_EvsYvsZ","truth.mc_status==1","prof");
   hp_EvsYvsZ->SetXTitle("ZVGen (mm)");
   hp_EvsYvsZ->SetYTitle("YVGen (mm)");
   //hp_EvsYvsZ->GetZaxis()->SetRangeUser(h_ptgen->GetMean()*0.01,h_ptgen->GetMean()*0.05);
@@ -76,7 +76,7 @@ void Make_plots(TString infile_hit, TString infile_truth, TString outfile, bool 
   HistArray.Add(hp_EvsYvsZ);
 
   c_g4->cd(4);
-  t.Draw("(h32.totalE):(truth.mcvtx_z)>>hp_totalEvsZ","","prof");
+  t.Draw("(h32.totalE):(truth.mc_vx_z)>>hp_totalEvsZ","truth.mc_status==1","prof");
   hp_totalEvsZ->SetXTitle("ZVGen (mm)");
   hp_totalEvsZ->SetYTitle("Energy (MeV)");
   hp_totalEvsZ->GetYaxis()->SetRangeUser(h_ptgen->GetMean()*0.01,h_ptgen->GetMean()*0.05);
