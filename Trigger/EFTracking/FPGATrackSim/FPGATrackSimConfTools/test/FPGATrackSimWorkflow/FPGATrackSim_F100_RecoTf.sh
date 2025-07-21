@@ -26,6 +26,7 @@ outputAOD="AOD.root"
 nEvents="1"
 skipCheck=0
 doClusters="0"
+skipEvents=0
 
 ## parsing flags
 while [ $# -ge 1 ];do

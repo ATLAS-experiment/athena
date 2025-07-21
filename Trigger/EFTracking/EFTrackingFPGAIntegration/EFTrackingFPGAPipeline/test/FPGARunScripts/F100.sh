@@ -39,6 +39,8 @@ nEvents="100"
 skipCheck=0
 storeClusters=False
 runF110=False
+skipEvents=0
+
 ## parsing flags
 while [ $# -ge 1 ];do
     case "$1" in
