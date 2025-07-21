@@ -930,6 +930,12 @@ std::array<int, 3> RpcDigitizationTool::physicalClusterSize(const EventContext& 
     std::array<int, 3> result{};
 
     const Amg::Vector3D position = fromSimHitToLayer(ele, id) * gapCentre;
+    // protect against numerical errors
+    if (std::abs(position.x()) > 1e12 || std::abs(position.y()) > 1e12) {
+        ATH_MSG_WARNING("RpcDigitizationTool::physicalClusterSize: position is too large, x=" << position.x() << " y=" << position.y() << " gapCentre=" << Amg::toString(gapCentre));
+        return make_array<int, 3>(-1);
+    }
+
     const int doubletPhi = m_idHelper->doubletPhi(id);
     const int gasGap = m_idHelper->gasGap(id);
     const bool measuresPhi = m_idHelper->measuresPhi(id);
