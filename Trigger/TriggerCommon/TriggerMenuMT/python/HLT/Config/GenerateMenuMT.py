@@ -83,6 +83,7 @@ class GenerateMenuMT(metaclass=Singleton):
         self.sigDicts = {}
 
         self.chainDefModule = {}   # Generate[SIG]ChainDefs module for each SIGnature
+        self.defaultFlagsForSignature = {}
 
 
     # Define which signatures (folders) are required for each slice
@@ -403,10 +404,24 @@ class GenerateMenuMT(metaclass=Singleton):
             if currentSig in self.availableSignatures:
                 try:
                     log.debug("[__generateChainConfigs] Trying to get chain config for %s", currentSig)
-                    if currentSig in ['Electron', 'Photon', 'Muon', 'Tau', 'Bphysics'] :
-                        chainPartConfig, perSig_lengthOfChainConfigs = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict, perSig_lengthOfChainConfigs)
+                    if currentSig in self.defaultFlagsForSignature:
+                        sigFlags = self.defaultFlagsForSignature[currentSig]
                     else:
-                        chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict)
+                        try:
+                            sigFlags = self.chainDefModule[currentSig].prepareDefaultSignatureFlags(flags)
+                        except AttributeError:
+                            log.debug("prepareDefaultSignatureFlags not present")
+                            sigFlags = flags
+                        except Exception as e:
+                            log.error(f"Unexpected error invoking prepareDefaultSignatureFlags {e}")
+                            sigFlags = flags
+                            
+                        self.defaultFlagsForSignature[currentSig] = sigFlags
+                    
+                    if currentSig in ['Electron', 'Photon', 'Muon', 'Tau', 'Bphysics'] :
+                        chainPartConfig, perSig_lengthOfChainConfigs = self.chainDefModule[currentSig].generateChainConfigs(sigFlags, chainPartDict, perSig_lengthOfChainConfigs)
+                    else:
+                        chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(sigFlags, chainPartDict)
                         if currentSig == 'Test' and isinstance(chainPartConfig, tuple):
                             chainPartConfig = chainPartConfig[0]
                 except Exception:

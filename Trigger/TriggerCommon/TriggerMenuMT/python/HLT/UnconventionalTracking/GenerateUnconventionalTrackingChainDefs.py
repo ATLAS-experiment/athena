@@ -3,6 +3,7 @@
 from .UnconventionalTrackingChainConfiguration import UnconventionalTrackingChainConfiguration
 from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
 from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 import pprint
 from AthenaCommon.Logging import logging
@@ -32,3 +33,11 @@ def generateChainConfigs(flags,  chainDict ):
 
     log.debug('ChainDef %s', chainDef)
     return chainDef
+
+def prepareDefaultSignatureFlags(inflags : AthConfigFlags) -> AthConfigFlags:
+    """
+    invoked before generateChainConfigs method to prevent repeated cloning of flags within chain generation
+    """
+    from TrigInDetConfig.utils import cloneFlagsToActiveConfig
+    flags = cloneFlagsToActiveConfig(inflags, "fullScan", log)
+    return flags

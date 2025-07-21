@@ -43,7 +43,6 @@ FastChain_tf.py \
    --digiSeedOffset1 511 \
    --digiSeedOffset2 727 \
    --preInclude "Campaigns.DataOverlay2023" \
-   --postInclude "OverlayConfiguration.DataOverlayConditions.DataOverlay2023Cfg" \
    --conditionsTag "default:CONDBR2-BLKPA-2023-07" \
    --geometryVersion "default:ATLAS-R3S-2021-03-02-00" \
    --postExec 'with open("Config.pkl", "wb") as f: cfg.store(f)' \
@@ -62,7 +61,6 @@ if [ $rc1 -eq 0 ]; then
       --maxEvents ${events} \
       --skipEvents 0 \
       --preInclude "Campaigns.DataOverlay2023" \
-      --postInclude "OverlayConfiguration.DataOverlayConditions.DataOverlay2023Cfg" \
       --conditionsTag "default:CONDBR2-BLKPA-2023-07" \
       --geometryVersion "default:ATLAS-R3S-2021-03-02-00" \
       --imf False

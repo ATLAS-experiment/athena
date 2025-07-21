@@ -89,7 +89,7 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("trkTracks_IDTrig","")
   flags.addFlag("tracks_FTF",      "")        
   flags.addFlag("tracks_IDTrig",   "")  
-
+  flags.addFlag("useGBTSeedingTool",  False)
 
 def defaultInDetTrigTrackingFlags() -> AthConfigFlags:
 

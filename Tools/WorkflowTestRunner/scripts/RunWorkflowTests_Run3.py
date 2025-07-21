@@ -43,10 +43,10 @@ def main():
             tests_to_run.append(OverlayTest(ami_tag, run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229 --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08'"))
         if not options.workflow or options.workflow is WorkflowType.DataOverlay:
             ami_tag = "d2029" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229"))
+            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229 --postInclude \"default:PyJobTransforms.UseFrontier\""))
         if not options.workflow or options.workflow is WorkflowType.DataOverlayChain:
             ami_tag = "d2030" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlayChain, ["EVNTtoRDO"], setup, options.extra_args + " --runNumber 603398"))
+            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlayChain, ["EVNTtoRDO"], setup, options.extra_args + " --runNumber 603398 --postInclude \"default:PyJobTransforms.UseFrontier\""))
     elif options.pileup:
         if setup.parallel_execution:
             log.error("Parallel execution not supported for pile-up workflow")

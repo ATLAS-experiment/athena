@@ -12,6 +12,8 @@ def createOverlayConfigFlags():
     flags = AthConfigFlags()
     # Data overlay flag
     flags.addFlag("Overlay.DataOverlay", lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("IsDataOverlay", "False") == "True")
+    # Data overlay conditions
+    flags.addFlag("Overlay.DataOverlayConditions", "")
     # Overlay skip secondary events
     flags.addFlag("Overlay.SkipSecondaryEvents", -1)
     # Overlay flag when reading from ByteStream
