@@ -3,6 +3,7 @@
 */
 
 #include "src/SeedToTrackAnalysisAlg.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace ActsTrk {
 
@@ -19,6 +20,9 @@ namespace ActsTrk {
     ATH_CHECK( m_destiniesKey.initialize() );
     ATH_CHECK( m_beamSpotKey.initialize() );    
 
+    ATH_CHECK( m_pixelAssociuationMapKey.initialize( not m_pixelAssociuationMapKey.empty() ) );
+    ATH_CHECK( m_stripAssociuationMapKey.initialize( not m_stripAssociuationMapKey.empty() ) );
+    
     m_seedVars = Monitored::buildToolMap<int>(m_tools, "seedVars", m_nLayers);
 
     return AthMonitorAlgorithm::initialize();
@@ -48,7 +52,7 @@ namespace ActsTrk {
     Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
                            beamSpotData->beamPos().y() * Acts::UnitConstants::mm,
                            beamSpotData->beamPos().z() * Acts::UnitConstants::mm );
-    
+
     if (seeds->size() != params->size() or
 	seeds->size() != destinies->size()) {
       ATH_MSG_ERROR("Inconsistent size of collections");
@@ -58,6 +62,23 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
 
+
+    std::vector< const ActsTrk::MeasurementToTruthParticleAssociation* > truthAssociationMaps (DetectorType::nTypes, nullptr);
+    if ( not m_pixelAssociuationMapKey.empty() ) {
+      SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> pixelAssociuationMapHandle =
+	SG::makeHandle( m_pixelAssociuationMapKey, ctx );
+      ATH_CHECK( pixelAssociuationMapHandle.isValid() );
+      truthAssociationMaps[DetectorType::PIXEL] = pixelAssociuationMapHandle.cptr();
+    }
+
+    if ( not m_stripAssociuationMapKey.empty() ) {
+      SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> stripAssociuationMapHandle =
+	SG::makeHandle( m_stripAssociuationMapKey, ctx );
+      ATH_CHECK( stripAssociuationMapHandle.isValid() );
+      truthAssociationMaps[DetectorType::STRIP] = stripAssociuationMapHandle.cptr();
+    }
+
+    
     std::size_t nElements = seeds->size();
     
     for (std::size_t i(0); i<nElements; ++i) {
@@ -87,6 +108,11 @@ namespace ActsTrk {
       float topY = top->y() - beamPos.y();
       float topZ = top->z();
       float topR = std::sqrt( topX * topX + topY * topY );      
+
+      float probability = 0.f;
+      ATH_CHECK( getTruthProbability(*seed,
+				     truthAssociationMaps,
+				     probability) );
       
       auto monitor_bottom_x = Monitored::Scalar<float>( "bottomX", bottomX );
       auto monitor_bottom_y = Monitored::Scalar<float>( "bottomY", bottomY );
@@ -118,6 +144,8 @@ namespace ActsTrk {
       auto monitor_seed_quality = Monitored::Scalar<float>( "quality",  seed->seedQuality() );
       auto monitor_seed_vtx_z = Monitored::Scalar<float>( "vtxZ", seed->z() );
 
+      auto monitor_seed_probability = Monitored::Scalar<float>( "truthProb", probability );
+      
       // fill inclusive
       fill(m_tools[m_seedVars[4]],
 	   monitor_bottom_x, monitor_bottom_y, monitor_bottom_z, monitor_bottom_r,
@@ -126,7 +154,8 @@ namespace ActsTrk {
 	   monitor_seed_eta, monitor_seed_pt, monitor_seed_quality, monitor_seed_vtx_z,
 	   monitor_delta_r_bt, monitor_delta_r_bm, monitor_delta_r_mt,
 	   monitor_cotTheta_bm, monitor_cotTheta_mt, monitor_cotTheta_bt,
-	   monitor_delta_cotTheta_bm_mt);
+	   monitor_delta_cotTheta_bm_mt,
+	   monitor_seed_probability);
 
       fill(m_tools[m_seedVars[destiny]],
 	   monitor_bottom_x, monitor_bottom_y, monitor_bottom_z, monitor_bottom_r,
@@ -135,11 +164,73 @@ namespace ActsTrk {
 	   monitor_seed_eta, monitor_seed_pt, monitor_seed_quality, monitor_seed_vtx_z,
 	   monitor_delta_r_bt, monitor_delta_r_bm, monitor_delta_r_mt,
 	   monitor_cotTheta_bm, monitor_cotTheta_mt, monitor_cotTheta_bt,
-           monitor_delta_cotTheta_bm_mt);
+           monitor_delta_cotTheta_bm_mt,
+	   monitor_seed_probability);
     }
 
     return StatusCode::SUCCESS;
   }
 
+  StatusCode SeedToTrackAnalysisAlg::getTruthProbability(const ActsTrk::Seed& seed,
+							 const std::vector< const ActsTrk::MeasurementToTruthParticleAssociation* >& associationMaps,
+							 float& probability) const
+  {
+    bool hasTruthInfo = false;
+    for ( const ActsTrk::MeasurementToTruthParticleAssociation* map : associationMaps ) {
+      if (not map) continue;
+      hasTruthInfo = true;
+      break;
+    }
+    if (not hasTruthInfo)
+      return StatusCode::SUCCESS;
+
+    std::size_t nMeasurements = 0ul;
+    std::unordered_map<std::size_t, int> particleIds {};
+
+    const auto& sps = seed.sp();
+    for (const xAOD::SpacePoint* sp : sps) {
+      const auto& measurements = sp->measurements();
+      for (const xAOD::UncalibratedMeasurement* meas : measurements ) {
+	++nMeasurements;
+
+	const ActsTrk::MeasurementToTruthParticleAssociation* truth = nullptr;
+	const xAOD::UncalibMeasType measType = meas->type();
+	if (measType == xAOD::UncalibMeasType::PixelClusterType) {
+	  truth = associationMaps.at(DetectorType::PIXEL);
+	} else if (measType == xAOD::UncalibMeasType::StripClusterType) {
+	  truth = associationMaps.at(DetectorType::STRIP);
+	} else {
+	  ATH_MSG_ERROR("Cluster type is not supported");
+	  return StatusCode::FAILURE;
+	}
+	
+	if (not truth) {
+	  ATH_MSG_ERROR("Cannot use truth information");
+	  return StatusCode::FAILURE;
+	}
+	
+	auto tps = truth->at(meas->index());	
+	if (tps.empty()) continue;
+	
+	for (const auto* tp : tps) {
+	  if ( HepMC::is_simulation_particle(*tp) ) continue;
+	  
+	  std::size_t pid = HepMC::uniqueID(tp);
+	  particleIds.try_emplace( pid, 0 );
+	  ++particleIds[pid];
+	} // loop on tps
+	
+      } // loop on measurements
+    } // loop on sps
+
+    // probability
+    for (const auto [pid, nEntries] : particleIds) {
+      float prob = static_cast<float>(nEntries) / nMeasurements;
+      probability = std::max(probability, prob);
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+  
 }
 

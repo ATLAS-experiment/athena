@@ -12,6 +12,12 @@ def ActsSeedToTrackAnalysisAlgCfg(flags,
     kwargs.setdefault("InputTrackParamsCollection", "")
     kwargs.setdefault("InputDestinyCollection", "")
 
+    if flags.Tracking.doTruth:
+        if flags.Detector.EnableITkPixel:
+            kwargs.setdefault("PixelTruthAssociationMap", "ITkPixelClustersToTruthParticles")
+        if flags.Detector.EnableITkStrip:
+            kwargs.setdefault("StripTruthAssociationMap", "ITkStripClustersToTruthParticles")
+    
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, kwargs['InputDestinyCollection'] + 'AnalysisAlgCfg')
 
@@ -75,6 +81,15 @@ def ActsSeedToTrackAnalysisAlgCfg(flags,
         tool.defineHistogram(f"vtxZ,quality;Quality_vs_vtxZ_{layer}", title=f"Seed Vtxz Vs Quality for {layer};vtx Z;Quality", type='TH2F', path='2D',
                              xbins=100, xmin=-200, xmax=200,
                              ybins=100, ymin=-400, ymax=1000)
+
+        tool.defineHistogram(f"truthProb;Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH1F", path='SeedVars',
+                             xbins=12, xmin=0, xmax=1.2)
+        tool.defineHistogram(f"eta,truthProb;Truth_Probability_vs_Eta_{layer}", title=f"Seed Truth Probability VS Eta for {layer}", type="TH2F", path='SeedVars',
+                             xbins=50, xmin=-4.5, xmax=4.5,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"quality,truthProb;Truth_Probability_vs_Quality_{layer}", title=f"Seed Truth Probability VS Eta for {layer}", type="TH2F", path='SeedVars',
+                             xbins=100, xmin=-400, xmax=1000,
+                             ybins=12, ymin=0, ymax=1.2)
         
         tool.defineHistogram(f"eta;Eta_{layer}", title=f"Eta for {layer}", type='TH1F', path='SeedVars',
                              xbins=50, xmin=-4.5, xmax=4.5)

@@ -10,6 +10,7 @@
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParametersContainer.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
+#include "ActsEvent/MeasurementToTruthParticleAssociation.h"
 
 namespace ActsTrk {
 
@@ -23,11 +24,21 @@ namespace ActsTrk {
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
   private:
+    StatusCode getTruthProbability(const ActsTrk::Seed& seed,
+				   const std::vector< const ActsTrk::MeasurementToTruthParticleAssociation* >& associationMaps,
+				   float& probability) const;
+  
+  private:
     SG::ReadHandleKey< ActsTrk::SeedContainer > m_seedsKey {this, "InputSeedCollection", ""};
     SG::ReadHandleKey< ActsTrk::BoundTrackParametersContainer > m_paramsKey {this, "InputTrackParamsCollection", ""};
     SG::ReadHandleKey< std::vector<int> > m_destiniesKey {this, "InputDestinyCollection", ""};
     SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 
+    // Truth
+    enum DetectorType : std::uint8_t {PIXEL=0, STRIP, nTypes};
+    SG::ReadHandleKey<ActsTrk::MeasurementToTruthParticleAssociation> m_pixelAssociuationMapKey {this, "PixelTruthAssociationMap", ""};
+    SG::ReadHandleKey<ActsTrk::MeasurementToTruthParticleAssociation> m_stripAssociuationMapKey {this, "StripTruthAssociationMap", ""};
+    
     static const int m_nLayers{5};
     std::vector<int> m_seedVars {};
   };
