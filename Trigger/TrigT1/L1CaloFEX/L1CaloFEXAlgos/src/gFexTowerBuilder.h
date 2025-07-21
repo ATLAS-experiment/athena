@@ -5,11 +5,10 @@
 //***************************************************************************
 //                           gFexTowerBuilder  -  description
 //                              -------------------
-// Builds an eFexTowerContainer from CaloCellContainer (for supercells)
-// TriggerTowerContainer (for ppm tile towers)
-//      Information about SCellContainer objects are in:
-//          -
-//          https://gitlab.cern.ch/atlas/athena/-/blob/22.0/Calorimeter/CaloEvent/CaloEvent/CaloCell.h
+//         Builds a gFexTowerContainer from CaloCellContainer (for supercells)
+//                  TriggerTowerContainer (for ppm tile towers)
+//         Information about SCellContainer objects are in:
+//         - https://gitlab.cern.ch/atlas/athena/-/blob/22.0/Calorimeter/CaloEvent/CaloEvent/CaloCell.h
 //
 //     begin                : 22 04 2025
 //     email                : jared.little@cern.ch
@@ -32,7 +31,7 @@ namespace LVL1 {
 
     class gFexTowerBuilder : public AthReentrantAlgorithm {
       public:
-        using AthReentrantAlgorithm ::AthReentrantAlgorithm;
+        gFexTowerBuilder(const std::string& name, ISvcLocator* svc);
 
         /// Function initialising the algorithm
         virtual StatusCode initialize() override;
@@ -50,15 +49,16 @@ namespace LVL1 {
                 this, "xODTriggerTowers", "xAODTriggerTowers",
                 "xAODTriggerTowers container"};
 
-        // Writehanlde for EmulatedTowers container
+        // Writehandle for EmulatedTowers container
         SG::WriteHandleKey<xAOD::gFexTowerContainer> m_gTowersWriteKey{
-                this, "gTowersWriteKey", "L1_gFexEmulatedFiberTowers",
+                this, "gTowersWriteKey", "L1_gFexDataTowers",
                 "Write gFexEDM Trigger Tower container"};
 
         // FiberMapping property required by the interface
         Gaudi::Property<std::string> m_FiberMapping{
                 this, "gFexFiberTowerMapping",
-                PathResolver::find_calib_file("L1CaloFEXAlgos/gFexFiberTowerMap.txt"),
+                // PathResolver::find_calib_file("L1CaloFEXAlgos/gFexFibrTowerMap.txt"),
+                PathResolver::find_calib_file("Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gFex_gCaloTowerMap_weighted_v1.txt"),
                 "Text file to convert from hardware fiber to eta-phi location"};
 
         // property for gFEX mapping
@@ -71,16 +71,16 @@ namespace LVL1 {
 
         Gaudi::Property<std::string> m_gFEX2Scellmapping{
                 this, "gFEX2SCmapping",
-                "L1CaloFEXByteStream/gFEX_maps/2023_02_23/gfexSuperCellMap.txt",
+                "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gCaloTowers_to_scells_v1.txt",
                 "Text file to convert from simulation ID to SuperCell Identifier"};
 
         Gaudi::Property<std::string> m_gFEX2Tilemapping{
                 this, "gFEX2Tilemapping",
-                "L1CaloFEXByteStream/gFEX_maps/2023_02_23/gfexTileMap.txt",
+                "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gCaloTowers_to_tile_v1.txt",
                 "Text file to convert from simulation ID to Tile Identifier"};
 
 
-        // Read mapping fucntions
+        // Read mapping functions
         StatusCode ReadFibersfromFile(const std::string&);
         StatusCode ReadTilefromFile(const std::string&);
         StatusCode ReadSCfromFile(const std::string&);
@@ -90,7 +90,7 @@ namespace LVL1 {
         std::unordered_map<uint32_t, std::vector<uint64_t> > m_map_TTower2SCells;
         std::unordered_map<uint32_t, std::vector<uint32_t> > m_map_TTower2Tile;
 
-        std::unordered_map<unsigned int, std::array<float, 5> > m_Firm2Tower_map;  /// {map index(towerid), {fpga, eta, phi, iEta, iPhi}}
+        std::unordered_map<unsigned int, std::array<float, 4> > m_Firm2Tower_map;  /// {map index(towerid), {fpga, eta, phi, source}}
 
     };
 }  // namespace LVL1
