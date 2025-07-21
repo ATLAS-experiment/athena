@@ -4,7 +4,7 @@ Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 void TileSamplingFraction_analysis()
 {
-  std::vector< std::string > thetalist={"-00","-05","+05","-10","+10","-15","+15","-20","+20","-25","+25","-30","+30","-35","+35",
+  std::vector< std::string > thetalist={"-00","-5","+5","-10","+10","-15","+15","-20","+20","-25","+25","-30","+30","-35","+35",
                                         "-40","+40","-45","+45","-50","+50","-55","+55","-60","+60","-90","+90"};
 
   TH1F* SF=new TH1F("TileSamplingFractions","Tile Sampling Fractions",25,-62.5,62.5);
