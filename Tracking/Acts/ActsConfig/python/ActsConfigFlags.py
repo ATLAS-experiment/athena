@@ -93,7 +93,7 @@ def createActsConfigFlags():
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, type=SeedingStrategy)  # Define Seeding Strategy
-
+    
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClusteringAfterSelection, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.doRotCorrection', True)
