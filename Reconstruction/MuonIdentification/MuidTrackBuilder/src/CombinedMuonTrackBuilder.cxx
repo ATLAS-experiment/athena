@@ -1095,7 +1095,7 @@ namespace Rec {
 
             // Don't run the outliers anymore at this stage
             std::unique_ptr<Trk::Track> refittedTrack(fit(ctx, *newTrack, false, Trk::muon));
-            if (msgLevel(MSG::DEBUG)) { countAEOTs(*refittedTrack, " SA track after refit "); }
+            if (msgLevel(MSG::DEBUG) && refittedTrack) { countAEOTs(*refittedTrack, " SA track after refit "); }
             dumpCaloEloss(refittedTrack.get(), " SA refit after refine IDMS ");
             if (checkTrack("standaloneFit", refittedTrack.get())) {
                 // Here we swap
