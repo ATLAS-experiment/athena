@@ -15,7 +15,6 @@ CreateWorkerRunManager() const
   // TODO: maybe better to just use the pseudo-singleton mechanism
   auto* workerRunManager = G4AtlasWorkerRunManager::GetG4AtlasWorkerRunManager();
   workerRunManager->SetDetGeoSvc(m_detGeoSvcName);
-  workerRunManager->SetFastSimMasterTool(m_fastSimToolName);
   workerRunManager->SetQuietMode(m_quietMode);
   return workerRunManager;
 }

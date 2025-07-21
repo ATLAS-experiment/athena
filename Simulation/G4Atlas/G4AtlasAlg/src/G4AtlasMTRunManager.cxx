@@ -27,7 +27,6 @@ G4AtlasMTRunManager::G4AtlasMTRunManager()
   , AthMessaging("G4AtlasMTRunManager")
   , m_detGeoSvc("DetectorGeometrySvc", "G4AtlasMTRunManager")
   , m_physListSvc("PhysicsListSvc", "G4AtlasMTRunManager")
-  , m_fastSimTool("FastSimulationMasterTool")
 {}
 
 
@@ -102,18 +101,6 @@ void G4AtlasMTRunManager::InitializePhysics()
     abort(); // to keep Coverity happy
   }
   m_physListSvc->SetPhysicsOptions();
-
-  // Setup the fast simulations
-  const std::string methodName = "G4AtlasMTRunManager::InitializePhysics";
-  if(m_fastSimTool.retrieve().isFailure()) {
-    throw GaudiException("Could not retrieve FastSims master tool",
-                         methodName, StatusCode::FAILURE);
-  }
-  if(m_fastSimTool->initializeFastSims().isFailure()) {
-    throw GaudiException("Failed to initialize FastSims for master thread",
-                         methodName, StatusCode::FAILURE);
-  }
-
   // TODO: parallel worlds stuff here
 }
 

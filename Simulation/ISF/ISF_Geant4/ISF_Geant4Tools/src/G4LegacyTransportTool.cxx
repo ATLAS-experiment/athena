@@ -10,6 +10,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "G4AtlasAlg/G4AtlasActionInitialization.h"
 #include "G4AtlasAlg/G4AtlasRunManager.h"
+#include "G4AtlasAlg/G4AtlasUserWorkerInitialization.h"
 #include "ISFFluxRecorder.h"
 
 // ISF classes
@@ -121,12 +122,12 @@ void iGeant4::G4LegacyTransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
   m_pRunMgr->SetRecordFlux( m_recordFlux, std::make_unique<ISFFluxRecorder>() );
   m_pRunMgr->SetLogLevel( int(msg().level()) ); // Synch log levels
   m_pRunMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
-  m_pRunMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
   m_pRunMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
   m_pRunMgr->SetQuietMode( m_quietMode );
   std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
     std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
   m_pRunMgr->SetUserInitialization(actionInitialization.release());
+  m_pRunMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
 
   G4UImanager *ui = G4UImanager::GetUIpointer();
 

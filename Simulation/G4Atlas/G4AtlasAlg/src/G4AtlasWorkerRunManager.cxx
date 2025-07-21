@@ -34,7 +34,6 @@ G4AtlasWorkerRunManager::G4AtlasWorkerRunManager()
   , AthMessaging("G4AtlasWorkerRunManager")
     // TODO: what if we need to make these configurable?
   , m_detGeoSvc("DetectorGeometrySvc", "G4AtlasWorkerRunManager")
-  , m_fastSimTool("FastSimulationMasterTool")
 {}
 
 
@@ -123,16 +122,6 @@ void G4AtlasWorkerRunManager::InitializePhysics()
 
   // Call the base class
   G4RunManager::InitializePhysics();
-
-  // Setup the fast simulations
-  if(m_fastSimTool.retrieve().isFailure()) {
-    throw GaudiException("Could not retrieve FastSims master tool",
-                         methodName, StatusCode::FAILURE);
-  }
-  if(m_fastSimTool->initializeFastSims().isFailure()) {
-    throw GaudiException("Failed to initialize FastSims for worker thread",
-                         methodName, StatusCode::FAILURE);
-  }
 }
 
 

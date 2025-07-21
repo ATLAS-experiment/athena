@@ -13,7 +13,6 @@
 #include "G4MTRunManager.hh"
 
 // Framework includes
-#include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "CxxUtils/checker_macros.h"
@@ -21,7 +20,6 @@
 // G4Atlas includes
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
 #include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
-#include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
 
 
 /// @class G4AtlasMTRunManager
@@ -57,11 +55,6 @@ public:
   /// Configure the detector geometry service handle
   void SetDetGeoSvc(const std::string& typeAndName) {
     m_detGeoSvc.setTypeAndName(typeAndName);
-  }
-
-  /// Configure the Fast Simulation Master Tool handle
-  void SetFastSimMasterTool(const std::string& typeAndName) {
-    m_fastSimTool.setTypeAndName(typeAndName);
   }
 
   /// Configure the Physics List Tool handle
@@ -101,10 +94,6 @@ private:
   /// Handle to the physics list tool.
   /// Not ideal, because we can't configure this.
   ServiceHandle<IPhysicsListSvc> m_physListSvc;
-
-  /// Handle to the fast sim tool.
-  /// Not ideal, because we can't configure this.
-  ToolHandle<IFastSimulationMasterTool> m_fastSimTool;
 
   /// Quiet Mode for production
   bool m_quietMode{true};
