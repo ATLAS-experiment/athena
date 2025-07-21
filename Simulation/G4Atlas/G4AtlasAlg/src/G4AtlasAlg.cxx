@@ -6,6 +6,7 @@
 #include "G4AtlasAlg.h"
 #include "G4AtlasFluxRecorder.h"
 #include "G4AtlasAlg/G4AtlasActionInitialization.h"
+#include "G4AtlasAlg/G4AtlasUserWorkerInitialization.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CxxUtils/checker_macros.h"
@@ -153,19 +154,18 @@ void G4AtlasAlg::initializeOnce()
       G4AtlasMTRunManager::GetG4AtlasMTRunManager();
     m_physListSvc->SetPhysicsList();
     runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
-    runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
     runMgr->SetPhysListSvc( m_physListSvc.typeAndName() );
     runMgr->SetQuietMode( m_quietMode );
     // Worker Thread initialization used to create worker run manager on demand.
     std::unique_ptr<G4AtlasUserWorkerThreadInitialization> workerInit =
       std::make_unique<G4AtlasUserWorkerThreadInitialization>();
     workerInit->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
-    workerInit->SetFastSimMasterTool( m_fastSimTool.typeAndName() );
     workerInit->SetQuietMode( m_quietMode );
     runMgr->SetUserInitialization( workerInit.release() );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
+    runMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
 #else
     throw std::runtime_error("Trying to use multi-threading in non-MT build!");
 #endif
@@ -178,12 +178,12 @@ void G4AtlasAlg::initializeOnce()
     runMgr->SetRecordFlux( m_recordFlux, std::make_unique<G4AtlasFluxRecorder>() );
     runMgr->SetLogLevel( int(msg().level()) ); // Synch log levels
     runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
-    runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
     runMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
     runMgr->SetQuietMode( m_quietMode );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
+    runMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
   }
 
   // G4 user interface commands

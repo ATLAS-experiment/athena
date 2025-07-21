@@ -37,11 +37,6 @@ public:
     m_detGeoSvcName = typeAndName;
   }
 
-  /// Configure the Fast Simulation Master Tool handle
-  void SetFastSimMasterTool(const std::string& typeAndName) {
-    m_fastSimToolName = typeAndName;
-  }
-
   /// Configure the QuietMode option
   void SetQuietMode(bool quietMode) {
     m_quietMode = quietMode;
@@ -49,7 +44,6 @@ public:
 
 private:
   std::string m_detGeoSvcName{"DetectorGeometrySvc"};
-  std::string m_fastSimToolName{"FastSimulationMasterTool"};
   bool m_quietMode{false};
 
 }; // class G4AtlasUserWorkerThreadInitialization
