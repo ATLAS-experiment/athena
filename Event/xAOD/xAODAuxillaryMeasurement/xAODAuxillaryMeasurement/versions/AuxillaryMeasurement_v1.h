@@ -13,7 +13,7 @@
 #include "AthLinks/ElementLink.h"
 #include "CxxUtils/CachedValue.h"
 #include "ActsCalibBase/MeasurementCalibratorBase.h"
-#include "Acts/Acts/Surfaces/Surface.hpp"
+#include "Acts/Surfaces/Surface.hpp"
 
 
 
