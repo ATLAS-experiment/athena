@@ -5,11 +5,10 @@
 //***************************************************************************
 //                           gFexTowerBuilder  -  description
 //                              -------------------
-// Builds an gFexTowerContainer from CaloCellContainer (for supercells)
-// TriggerTowerContainer (for ppm tile towers)
-//      Information about SCellContainer objects are in:
-//          -
-//          https://gitlab.cern.ch/atlas/athena/-/blob/22.0/Calorimeter/CaloEvent/CaloEvent/CaloCell.h
+//         Builds a gFexTowerContainer from CaloCellContainer (for supercells)
+//                  TriggerTowerContainer (for ppm tile towers)
+//         Information about SCellContainer objects are in:
+//         - https://gitlab.cern.ch/atlas/athena/-/blob/22.0/Calorimeter/CaloEvent/CaloEvent/CaloCell.h
 //
 //     begin                : 22 04 2025
 //     email                : jared.little@cern.ch
@@ -29,13 +28,16 @@
 
 namespace LVL1 {
 
+    gFexTowerBuilder::gFexTowerBuilder(const std::string& name, ISvcLocator* svc)
+            : AthReentrantAlgorithm(name, svc) {}
+
     StatusCode gFexTowerBuilder::initialize() {
 
-        ATH_MSG_DEBUG(
+        ATH_MSG_INFO(
                 "Initializing L1CaloFEXAlgos/gFexEmulatedTowers algorithm with name: "
                         << name());
-        ATH_MSG_DEBUG("Writing into SG key: " << m_gTowersWriteKey);
-        ATH_MSG_DEBUG("SCell masking: " << m_apply_masking);
+        ATH_MSG_INFO("Writing into SG key: " << m_gTowersWriteKey);
+        ATH_MSG_INFO("SCell masking: " << m_apply_masking);
 
         ATH_CHECK(m_SCellKey.initialize());
         ATH_CHECK(m_triggerTowerKey.initialize());
@@ -71,11 +73,9 @@ namespace LVL1 {
 
         // WriteHandle for gFEX EDMs
         SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey, ctx);
-        ATH_CHECK(
-                gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(),
-                                        std::make_unique<xAOD::gFexTowerAuxContainer>()));
-        ATH_MSG_DEBUG("Recorded gFexEmulatedTower container with key "
-                              << gTowersContainer.key());
+        ATH_CHECK( gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(),
+                                        std::make_unique<xAOD::gFexTowerAuxContainer>()) );
+        ATH_MSG_DEBUG("Recorded gFexEmulatedTower container with key " << gTowersContainer.key());
 
         if (ScellContainer->empty() || triggerTowerContainer->empty()) {
             ATH_MSG_WARNING(
@@ -100,19 +100,23 @@ namespace LVL1 {
         for (const xAOD::TriggerTower* tower : *triggerTowerContainer) {
             map_TileID2ptr[tower->coolId()] = tower;
         }
-
-        for (const auto& [towerID, element] : m_Firm2Tower_map) {
-            const auto [fpga, eta, phi, iEta, iPhi] = element;
+        for (const auto& [key, element] : m_Firm2Tower_map) {
+            unsigned int towerID = key;
+            const auto [fpga, eta, phi, source] = element;
 
             // the summed encoded Et from LAr or Tile
             uint16_t total_et_encoded = 0;
             char gTower_sat = 0;
             // Note input fpga distinguishes between LAr (0,1,2), Tile (3) and duplicated channels (4)
-            if (fpga < 3) {
+            if (source == 0) {
+
+                const std::unordered_map<uint32_t, std::vector<uint64_t> >*
+                        ptr_TTower2Cells;
+                ptr_TTower2Cells = &m_map_TTower2SCells;
 
                 // check if the towerID exists in the LAr map
-                auto it_TTower2SCells = m_map_TTower2SCells.find(towerID);
-                if (it_TTower2SCells == m_map_TTower2SCells.end()) {
+                auto it_TTower2SCells = (*ptr_TTower2Cells).find(towerID);
+                if (it_TTower2SCells == (*ptr_TTower2Cells).end()) {
                     ATH_MSG_ERROR("gFEX ID: " << towerID
                                               << " not found on map m_map_TTower2SCells");
                     return StatusCode::FAILURE;
@@ -136,6 +140,7 @@ namespace LVL1 {
                     }
 
                     // check if other SCells are in the map
+                    std::string str_hex = std::format("{:x}", scellID);
 
                     if (it_ScellID2ptr == map_ScellID2ptr.end()) {
                         if (m_isDATA)
@@ -151,18 +156,24 @@ namespace LVL1 {
                             (12.5 * std::cosh(scell->eta())));  // 12.5 is b.c. energy is in
                     // units of 12.5 MeV per count
 
-                    bool isMasked = m_apply_masking && ((scell)->provenance() & 0x80);
-                    bool isInvalid = (m_apply_masking&&m_isDATA) && ((scell)->provenance()&0x40);
-                    bool isSaturated = m_isDATA && scell->quality(); // saturation algorithm not implemented in MC yet
+                    bool isMasked =
+                            m_apply_masking ? ((scell)->provenance() & 0x80) : false;
+                    bool isInvalid =
+                            (m_apply_masking&&m_isDATA) ? ((scell)->provenance()&0x40) : false;
+                    bool isSaturated = (m_isDATA) ? scell->quality() : false; // saturation algorithm not implemented in MC yet
 
                     invalid &= isInvalid;
                     masked &= isMasked;
                     gTower_sat |= isSaturated;
 
-                    if (isMasked || (isInvalid&&m_isDATA)) {
+                    if (isMasked) {
+                        val = 0;
+                    } else if( isInvalid&&m_isDATA) {
                         val = 0;
                     }
-                    total_Et += val;
+
+                    if (val != 0)
+                        total_Et += val;
 
                 }  // end of SCell loop
 
@@ -178,7 +189,7 @@ namespace LVL1 {
                 }
 
 
-            } else if (fpga == 3) {
+            } else if (source == 1) {
 
                 // Tile
                 // check that the gFEX Tower ID exists in the Tile map
@@ -189,8 +200,6 @@ namespace LVL1 {
                     auto it_TileID2ptr = map_TileID2ptr.find(TileTowerID);
                     if (it_TileID2ptr == map_TileID2ptr.end()) {
                         if(m_isDATA) {
-                            // this can happen in data if e.g. there is a dropped ROB fragment so that the TriggerTower readout is incomplete
-                            // Just warn about this (it is what jFex version of this class does)
                             ATH_MSG_WARNING("Tile cool ID: " << TileTowerID
                                                              << " not found in the xAOD::TriggerTower (map_TileID2ptr)");
                         }
@@ -203,7 +212,7 @@ namespace LVL1 {
                 }
                 total_et_encoded = Tile_Et;
 
-            } else if (fpga == 4) {
+            } else if (source == 2) {
                 // duplicated Towers, LATOME sends 0
                 total_et_encoded = 0;
             }
@@ -211,9 +220,12 @@ namespace LVL1 {
             // the EDM requires a float
             float total_et_encoded_flt = total_et_encoded;
 
-            unsigned fpga_out = (towerID < 10000) ? 0 : ((towerID < 20000) ? 1 : 2);
+            unsigned int fpga_out = (towerID < 10000) ? 0 : (towerID < 20000) ? 1 : 2;
+            unsigned int iEta = 0;
+            unsigned int iPhi = 0;
 
-            gTowersContainer->push_back(std::make_unique<xAOD::gFexTower>())->initialize(iEta, iPhi, eta, phi,
+            gTowersContainer->push_back(std::make_unique<xAOD::gFexTower>());
+            gTowersContainer->back()->initialize(iEta, iPhi, eta, phi,
                                                  total_et_encoded_flt, fpga_out,
                                                  gTower_sat, towerID);
         }
@@ -222,7 +234,6 @@ namespace LVL1 {
     }
 
     StatusCode gFexTowerBuilder::ReadFibersfromFile(const std::string& fileName) {
-
         // opening file with ifstream
         std::ifstream file(fileName);
 
@@ -230,18 +241,14 @@ namespace LVL1 {
             ATH_MSG_ERROR("Could not open file:" << fileName);
             return StatusCode::FAILURE;
         }
-
         std::string line;
         // loading the mapping information
         while (std::getline(file, line)) {
-
             // removing the header of the file (it is just information!)
-            if (line[0] == '#')
-                continue;
+            if (line[0] == '#') continue;
 
             // Splitting line in different substrings
             std::stringstream oneLine(line);
-
             // reading elements
             std::vector<float> elements;
             std::string element;
@@ -249,21 +256,23 @@ namespace LVL1 {
                 elements.push_back(std::stof(element));
             }
 
-            // It should have 6 elements
-            // ordered as: fpga towerID iEta iPhi eta phi
-            if (elements.size() != 6) {
+            // It should have 5 elements
+            // ordered as: towerID fpga source eta phi
+
+            if (elements.size() != 5) {
                 ATH_MSG_ERROR(
-                        "Unexpected number of elements (6 expected) in file: " << fileName);
+                        "Unexpected number of elements (5 expected) in file: " << fileName);
                 return StatusCode::FAILURE;
             }
-            // building array of  <fpga, eta, phi, iEta, iPhi>
-            std::array<float, 5> aux_arr{{elements.at(0), elements.at(4),
-                                          elements.at(5), elements.at(2),
-                                          elements.at(3)}};
+
+            // building array of  <fpga, eta, phi, source>
+            std::array<float, 4> aux_arr{{elements.at(1), elements.at(3),
+                                          elements.at(4), elements.at(2)}};
 
             // filling the map with the hash given by mapIndex()
-            m_Firm2Tower_map[elements.at(1)] = aux_arr;
+            m_Firm2Tower_map[elements.at(0)] = aux_arr;
         }
+
         file.close();
 
         return StatusCode::SUCCESS;
@@ -354,6 +363,7 @@ namespace LVL1 {
         while (std::getline(myfile, myline)) {
 
             std::vector<uint32_t> Tilevector;
+            Tilevector.clear();
             // removing the header of the file
             myline.erase(myline.begin(),
                          std::find_if(myline.begin(), myline.end(),

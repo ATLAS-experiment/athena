@@ -77,9 +77,9 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
     Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
 
     //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
-    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowersWriteKey   {this,"gTowersWriteKey"  ,"L1_gFexDataTowers","Name of the gFEX Input Data Towers"};  // TODO: This will be the only output of this class in the future
-    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowers50WriteKey   {this,"gTowers50WriteKey"  ,"L1_gFexDataTowers50","Write gFexEDM Trigger Tower container with 50 MeV resolution"};
-    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowers200WriteKey   {this,"gTowers200WriteKey"  ,"L1_gFexDataTowers200","Write gFexEDM Trigger Tower container with 200 MeV resolution (default)"};
+    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowersWriteKey   {this,"gTowersWriteKey"  ,"L1_gFexDataTowers", "Name of the gFEX Input Data Towers"};  // TODO: This will be the only output of this class in the future
+    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowers50WriteKey   {this,"gTowers50WriteKey"  ,"", "Write gFexEDM Trigger Tower container with 50 MeV resolution"};
+    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowers200WriteKey   {this,"gTowers200WriteKey"  ,"", "Write gFexEDM Trigger Tower container with 200 MeV resolution (default)"};
 
     // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
     SG::ReadHandleKey < xAOD::gFexTowerContainer> m_gTowersReadKey    {this,"gTowersReadKey"   ,"L1_gFexDataTowers","Read gFexEDM Trigger Tower container"};
@@ -104,7 +104,8 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
                                     gTypeChar XMPD_DTYP_ARR,
                                     const std::array<int, gPos::MAX_FIBERS> &XMSK,
                                     gtFPGA &Xsatur,
-                                    std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> &FiberTower) const;
+                                    std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> &FiberTower,
+                                    std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> &FiberTowerSatur) const;
 
     virtual int crc9d32(const std::array<uint32_t, 6> &inWords,int numWords,int reverse) const;
 

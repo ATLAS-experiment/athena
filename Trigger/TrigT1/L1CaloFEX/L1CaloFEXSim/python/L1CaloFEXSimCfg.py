@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -246,25 +246,24 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputgFexTool], MaybeMissingROBs=maybeMissingRobs)
             acc.addEventAlgo(decoderAlg)
 
-        if flags.Input.isMC and "L1_gFexEmulatedTowers" not in flags.Input.Collections:
-            # need to create the Emulated gFexTowers container from supercells
-            from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
-            acc.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
+        from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
+        acc.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
 
-
+        gFEXTowerSummer = CompFactory.LVL1.gFexTowerSummer('gFexTowerSummer')
+        gFEXTowerSummer.gFexDataTowers = "L1_gFexEmulatedTowers" if flags.Input.isMC else "L1_gFexDataTowers"
+        gFEXTowerSummer.gTowers200WriteKey = "L1_gFexEmulatedTowers200" if flags.Input.isMC else "L1_gFexDataTowers200"
+        gFEXTowerSummer.gTowers50WriteKey = "L1_gFexEmulatedTowers50" if flags.Input.isMC else "L1_gFexDataTowers50"
+        gFEXTowerSummer.gTowersEMWriteKey = ""
+        gFEXTowerSummer.gTowersHADWriteKey = ""
+        acc.addEventAlgo(gFEXTowerSummer)
 
         gFEXInputs = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers')
-        gFEXInputs.IsMC = flags.Input.isMC
-        gFEXInputs.InputDataTowers = "L1_gFexDataTowers200"
-        gFEXInputs.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
-        gFEXInputs.gSuperCellTowerMapperTool.SCellMasking = True
+        gFEXInputs.InputDataTowers =  "L1_gFexEmulatedTowers200" if flags.Input.isMC else "L1_gFexDataTowers200"
+        gFEXInputs.MyGTowers = "gTowerContainer"
 
         gFEXInputs50 = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers50')
-        gFEXInputs50.InputDataTowers = "L1_gFexDataTowers50"
+        gFEXInputs50.InputDataTowers = "L1_gFexEmulatedTowers50" if flags.Input.isMC else "L1_gFexDataTowers50"
         gFEXInputs50.MyGTowers = "gTower50Container"
-        gFEXInputs50.IsMC = flags.Input.isMC
-        gFEXInputs50.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper50', SCell=sCellType)
-        gFEXInputs50.gSuperCellTowerMapperTool.SCellMasking = True
 
         from L1CaloFEXCond.L1CaloFEXCondConfig import gFexDBConfig
         acc.merge(gFexDBConfig(flags))
