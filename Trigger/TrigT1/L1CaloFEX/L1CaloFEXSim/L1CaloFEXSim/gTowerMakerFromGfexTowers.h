@@ -34,22 +34,11 @@ class gTowerMakerFromGfexTowers : public AthAlgorithm
         
         // Decoded input data
         SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gDataTowerKey {this, "InputDataTowers", "L1_gFexDataTowers", "gfexTowers with 200 MeV resolution (default) (use L1_gFexEmulatedTowers for built from SC, or L1_gFexDataTowers for efex readout"};
-        // SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gDataTower50Key {this, "InputDataTowers", "L1_gFexDataTowers50", "gfexTowers with 50 MeV resolution (use L1_gFexEmulatedTowers for built from SC, or L1_gFexDataTowers for efex readout"};
-        
-        //Emulated input data
-        // the use-case for this second input tower collection is in monitoring when running in prescaled readout mode
-        // we want to use the input data readout when we have it, but otherwise fallback to the calo readout
-        SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gEmulTowerKey {this, "InputEmulatedTowers", "L1_gFexEmulatedTowers", "If specified, will fallback to this collection of towers if the first collection is incomplete/empty"};
-        
-        //Gaudi properties
-        Gaudi::Property<bool> m_UseEmulated {this, "UseEmulated", false, "It switches off the CaloCell -> Jtower path. It uses instead L1_gFexDataTowers and L1_gFexEmulatedTowers "};
-        Gaudi::Property<bool> m_isMC {this, "IsMC", false, "Is used to know when we run on data. So L1_gFexDataTowers can be present"};
 
-        
         // SG object for the gFEX simulation input
         SG::WriteHandleKey<LVL1::gTowerContainer> m_gTowerContainerSGKey {this, "MyGTowers", "gTowerContainer", "MyGTowers"};
         
-        ToolHandle<IgTowerBuilder> m_gTowerBuilderTool {this, "gTowerBuilderTool", "LVL1::gTowerBuilder", "Tool that builds jTowers for simulation"};
+        ToolHandle<IgTowerBuilder> m_gTowerBuilderTool {this, "gTowerBuilderTool", "LVL1::gTowerBuilder", "Tool that builds gTowers for simulation"};
         ToolHandle<IgSuperCellTowerMapper> m_gSuperCellTowerMapperTool {this, "gSuperCellTowerMapperTool", "LVL1::gSuperCellTowerMapper", "Tool that maps supercells to gTowers"};
 };
 
