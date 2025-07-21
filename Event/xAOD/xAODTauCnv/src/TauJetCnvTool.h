@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TauJetCnvTool.h 
@@ -16,6 +16,7 @@
 
 // FrameWork includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "xAODTauCnv/ITauJetCnvTool.h"
 
@@ -75,8 +76,8 @@ namespace xAODMaker {
     ElementLink<xAOD::JetContainer> getNewJetLink(const ElementLink<JetCollection>& oldLink, const std::string& name) const;
 
     /// Containers
-    std::string m_inDetTrackParticles; //!< Location/Key for TrackParticles from ID. 
-    std::string m_jets; //!< Location/Key for jets. 
+    Gaudi::Property<std::string> m_inDetTrackParticles{this, "TrackContainerName", "InDetTrackParticles"}; //!< Location/Key for TrackParticles from ID. 
+    Gaudi::Property<std::string> m_jets{this, "JetContainerName", "AntiKt4LCTopoJets"}; //!< Location/Key for jets. 
   }; 
 
 }

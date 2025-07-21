@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJetReaderAlg.h 632174 2014-11-29 15:23:36Z krasznaa $
@@ -10,6 +10,7 @@
 
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "AsgTools/PropertyWrapper.h"
 
 namespace xAODMaker {
 
@@ -36,7 +37,7 @@ namespace xAODMaker {
 
    private:
       /// The StoreGate key of the container to be tested
-      std::string m_sgKey;
+      Gaudi::Property<std::string> m_sgKey{this, "SGKey", "TauRecContainer", "StoreGate key of the container to test"};      
 
    }; // class TauJetReaderAlg
 

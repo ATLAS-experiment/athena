@@ -31,15 +31,8 @@ namespace xAODMaker {
 				const std::string& name, 
 				const IInterface* parent ) : 
     ::AthAlgTool( type, name, parent )
-    , m_inDetTrackParticles("InDetTrackParticles")
-    , m_jets("AntiKt4LCTopoJets")
   {
     declareInterface< ITauJetCnvTool > (this);
-    //
-    // Property declaration
-    // 
-    declareProperty( "TrackContainerName", m_inDetTrackParticles );
-    declareProperty( "JetContainerName", m_jets );
   }
 
   // Destructor
