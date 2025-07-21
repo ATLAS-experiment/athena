@@ -61,14 +61,16 @@ class EventLoopCPRunScript(CPBaseRunner):
         # move ntuple file if it exists
         if rootfilePath.exists():
             self.logger.info(f"Moving {rootfilePath} to {currentDir / f'{self.outputName}.root'}")
-            rootfileSymlink.unlink()
+            if rootfileSymlink.is_symlink(): # The check is needed to avoid FileNotFoundError if using direct driver
+                rootfileSymlink.unlink()
             shutil.move(str(rootfilePath), str(currentDir / f"{self.outputName}.root"))
         else:
             self.logger.warning(f"Root file {rootfilePath} does not exist or merging is enabled, skipping move.")
         #move histogram file if it exists    
         if histfilePath.exists():
             self.logger.info(f"Moving {histfilePath} to {currentDir / f'hist-{self.outputName}.root'}")
-            histfileSymlink.unlink()
+            if histfileSymlink.is_symlink(): # The check is needed to avoid FileNotFoundError if using direct driver
+                histfileSymlink.unlink()
             shutil.move(str(histfilePath), str(currentDir / f"hist-{self.outputName}.root"))
         else:
             self.logger.warning(f"Histogram file {histfilePath} does not exist or merging, skipping move.")
@@ -108,7 +110,8 @@ class EventLoopCPRunScript(CPBaseRunner):
         self.job.options().setDouble(ROOT.EL.Job.optFilesPerWorker, 100)
         self.job.options().setDouble(ROOT.EL.Job.optMaxEvents, self.flags.Exec.MaxEvents)
         self.job.options().setString(ROOT.EL.Job.optSubmitDirMode, 'unique-link')
-    
+        self.job.options().setDouble(ROOT.EL.Job.optSkipEvents, self.flags.Exec.SkipEvents)
+        
         for alg in self.makeAlgSequence():
             self.job.algsAdd(alg)
         if self.args.merge_output_files:
