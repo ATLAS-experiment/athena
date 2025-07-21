@@ -199,28 +199,6 @@ In addition the following properties are available for further configurations:
      - ``std::string``
      - ``""``  
 
-   * - ``VarNameRecoHadTau``
-     - ``std::string``
-     - ``""`` 
-
-   * - ``VarNameEleIDHadTau``
-     - ``std::string``
-     - ``""`` 
-
-   * - ``VarNameEleIDElectron``
-     - ``std::string``
-     - ``""`` 
-
-   * - ``VarNameJetIDHadTau``
-     - ``std::string``
-     - ``""`` 
-
-   * - ``VarNameTriggerHadTau``
-     - ``std::string``
-     - ``""`` 
-
-
-
 Details
 =======
 
