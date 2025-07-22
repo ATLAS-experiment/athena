@@ -23,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <format>
 
 #include "L1CaloFEXSim/gFEXCompression.h"
 
