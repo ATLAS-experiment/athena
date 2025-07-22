@@ -14,6 +14,7 @@
 #include "eformat/Status.h"
 
 #include <span>
+#include <fstream>
 
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 using WROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
@@ -33,6 +34,7 @@ StatusCode gFexInputByteStreamTool::initialize() {
     // Conversion mode for gTowers
     ConversionMode gTowersmode = getConversionMode(m_gTowersReadKey, m_gTowersWriteKey, msg());
     ATH_CHECK(gTowersmode!=ConversionMode::Undefined);
+    ATH_CHECK(ReadFibersfromFile(PathResolver::find_calib_file(m_FiberMapping)));
     ATH_CHECK(m_gTowersWriteKey.initialize(gTowersmode==ConversionMode::Decoding));
     ATH_CHECK(m_gTowers50WriteKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_gTowers200WriteKey.initialize(SG::AllowEmpty));
@@ -45,7 +47,6 @@ StatusCode gFexInputByteStreamTool::initialize() {
         ATH_MSG_INFO("Logging errors to " << m_monTool.name() << " monitoring tool");
         m_UseMonitoring = true;
     }
-    
 
     return StatusCode::SUCCESS;
 }
@@ -353,16 +354,15 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
 
             }
         }
-
-	// Save the Fiber towers
+        // Save the Fiber towers (DataTowers)
         unsigned int n_fiber_twrs = FiberTowerA.size();
         Fpga = 0;
         towerID = 0;
         for (unsigned int i = 0; i < n_fiber_twrs; i++){
             iEta = i; // iEta and iPhi not so much meaning for fiber towers
             iPhi = i;
-            Eta = 0.; // eta and phi could be filled with averaged values
-            Phi = 0.;
+            Eta = m_Firm2Tower_map.at(towerID)[1]; // eta from the mapping
+            Phi = m_Firm2Tower_map.at(towerID)[2]; // phi from the mapping
             Et = FiberTowerA[i];
             IsSaturated = FiberTowerAsatur[i];
             gFexDataTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
@@ -374,8 +374,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         for (unsigned int i = 0; i < n_fiber_twrs; i++){
             iEta = i;
             iPhi = i;
-            Eta = 0.;
-            Phi = 0.;
+            Eta = m_Firm2Tower_map.at(towerID)[1];
+            Phi = m_Firm2Tower_map.at(towerID)[2];
             Et = FiberTowerB[i];
             IsSaturated = FiberTowerBsatur[i];
             gFexDataTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
@@ -389,8 +389,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         for (unsigned int i = 0; i < n_fiber_twrsC; i++){
             iEta = i;
             iPhi = i;
-            Eta = 0.;
-            Phi = 0.;
+            Eta = m_Firm2Tower_map.at(towerID)[1];
+            Phi = m_Firm2Tower_map.at(towerID)[2];
             Et = FiberTowerC[i];
             IsSaturated = FiberTowerCsatur[i];
             gFexDataTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
@@ -1756,7 +1756,50 @@ void gFexInputByteStreamTool::gtCalib(gtFPGA &gtf, int towerLSB,  int fpga, unsi
   }
 }
 
+StatusCode gFexInputByteStreamTool::ReadFibersfromFile(const std::string& fileName) {
+    // opening file with ifstream
+    std::ifstream file(fileName);
 
+    if (!file.is_open()) {
+        ATH_MSG_ERROR("Could not open file:" << fileName);
+        return StatusCode::FAILURE;
+    }
+    std::string line;
+    // loading the mapping information
+    while (std::getline(file, line)) {
+        // removing the header of the file (it is just information!)
+        if (line[0] == '#') continue;
+
+        // Splitting line in different substrings
+        std::stringstream oneLine(line);
+        // reading elements
+        std::vector<float> elements;
+        std::string element;
+        while (std::getline(oneLine, element, ' ')) {
+            elements.push_back(std::stof(element));
+        }
+
+        // It should have 5 elements
+        // ordered as: towerID fpga source eta phi
+
+        if (elements.size() != 5) {
+            ATH_MSG_ERROR(
+                    "Unexpected number of elements (5 expected) in file: " << fileName);
+            return StatusCode::FAILURE;
+        }
+
+        // building array of  <fpga, eta, phi, source>
+        std::array<float, 4> aux_arr{{elements.at(1), elements.at(3),
+            elements.at(4), elements.at(2)}};
+
+        // filling the map, key is towerID
+        m_Firm2Tower_map[elements.at(0)] = aux_arr;
+    }
+
+    file.close();
+
+    return StatusCode::SUCCESS;
+    }
 
 /// xAOD->BS conversion
 StatusCode gFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {
