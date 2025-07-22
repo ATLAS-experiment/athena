@@ -385,7 +385,8 @@ GaussianSumFitterTool::fit(const ActsTrk::Seed & /*seed*/,
         const Acts::BoundTrackParameters& /*initialParams*/,
         const Acts::GeometryContext& /*tgContext*/,
         const Acts::MagneticFieldContext& /*mfContext*/,
-        const Acts::CalibrationContext& /*calContext*/) const
+	const Acts::CalibrationContext& /*calContext*/,
+	const Acts::Surface& /*targetSurface*/) const
 {
   ATH_MSG_VERBOSE("ACTS seed refit is not implemented in GaussianSumFitterTool");
   return nullptr;
@@ -407,7 +408,8 @@ GaussianSumFitterTool::fit(const std::vector< ActsTrk::ATLASUncalibSourceLink> &
 StatusCode GaussianSumFitterTool::fit(
   const EventContext& ctx,  
   const ActsTrk::TrackContainer::ConstTrackProxy& track,          
-  ActsTrk::MutableTrackContainer& trackContainer) const {
+  ActsTrk::MutableTrackContainer& trackContainer,
+  const Acts::PerigeeSurface& pSurface) const {
   ATH_MSG_VERBOSE("GaussianSumFitterTool::fit(TrackProxy) called");
 
   const Acts::BoundTrackParameters initialParams = track.createParametersAtReference();
@@ -430,14 +432,11 @@ StatusCode GaussianSumFitterTool::fit(
     return StatusCode::SUCCESS;
   }
 
-  // Construct a perigee surface as the target surface
-  std::shared_ptr<Acts::PerigeeSurface> pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
-
   Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
   Acts::CalibrationContext calContext{};
 
-  Acts::GsfOptions<ActsTrk::MutableTrackStateBackend> gsfOptions = prepareOptions(tgContext, mfContext, calContext, *pSurface);
+  Acts::GsfOptions<ActsTrk::MutableTrackStateBackend> gsfOptions = prepareOptions(tgContext, mfContext, calContext, pSurface);
   const Acts::TrackingGeometry* actsTrackingGeometry = m_trackingGeometryTool->trackingGeometry().get();
 
   if (!actsTrackingGeometry) {

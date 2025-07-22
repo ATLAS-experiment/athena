@@ -508,28 +508,27 @@ KalmanFitterTool::fit(const Seed &seed,
                       const Acts::BoundTrackParameters& initialParams,
                       const Acts::GeometryContext& tgContext,
                       const Acts::MagneticFieldContext& mfContext,
-                      const Acts::CalibrationContext& calContext) const {
+                      const Acts::CalibrationContext& calContext,
+		      const Acts::Surface& targetSurface) const {
   
   std::vector<ATLASUncalibSourceLink> sourceLinks;
   sourceLinks.reserve(6);
 
-  std::vector<const Acts::Surface*> surfaces;
-  surfaces.reserve(6);
-  
   const auto& sps = seed.sp();
   for (const xAOD::SpacePoint* sp : sps) {
     const auto& measurements = sp->measurements();
     for (const xAOD::UncalibratedMeasurement *umeas : measurements) {     
       sourceLinks.emplace_back(umeas);
-      surfaces.push_back(m_unalibMeasSurfAcc.get(umeas));
     }
   }
-  return fit(sourceLinks, initialParams, tgContext, mfContext, calContext, surfaces.front());
+  return fit(sourceLinks, initialParams, tgContext, mfContext, calContext, &targetSurface);
 }
+  
   StatusCode
   KalmanFitterTool::fit(const EventContext& /*ctx*/,
       const TrackContainer::ConstTrackProxy& /*track*/,          
-      MutableTrackContainer& /*trackContainer*/) const
+      MutableTrackContainer& /*trackContainer*/,
+      const Acts::PerigeeSurface& /*pSurface*/) const
   {
     ATH_MSG_ERROR("Track refit method not implemented in KalmanFitterTool yet");
     return StatusCode::FAILURE;

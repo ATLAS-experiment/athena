@@ -133,13 +133,15 @@ class GlobalChiSquareFitterTool
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
-      const Acts::CalibrationContext& calContext) const override;
+      const Acts::CalibrationContext& calContext,
+      const Acts::Surface& targetSurface) const override;
 
 
   virtual StatusCode fit(
     const EventContext& ctx,
-        const TrackContainer::ConstTrackProxy& track,          
-    MutableTrackContainer& trackContainer) const override;
+    const TrackContainer::ConstTrackProxy& track,          
+    MutableTrackContainer& trackContainer,
+    const Acts::PerigeeSurface& pSurface) const override;
 
 
     /// Type erased track fitter function.

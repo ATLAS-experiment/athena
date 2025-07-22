@@ -132,13 +132,15 @@ public:
         const Acts::BoundTrackParameters& initialParams,
         const Acts::GeometryContext& tgContext,
         const Acts::MagneticFieldContext& mfContext,
-        const Acts::CalibrationContext& calContext) const override;
+        const Acts::CalibrationContext& calContext,
+	const Acts::Surface& targetSurface) const override;
 
 
     virtual StatusCode fit(
         const EventContext& ctx,
-                const ActsTrk::TrackContainer::ConstTrackProxy& track,          
-        ActsTrk::MutableTrackContainer& trackContainer) const override;
+	const ActsTrk::TrackContainer::ConstTrackProxy& track,          
+        ActsTrk::MutableTrackContainer& trackContainer,
+	const Acts::PerigeeSurface& pSurface) const override;
   
   ///////////////////////////////////////////////////////////////////
   // Private methods:
