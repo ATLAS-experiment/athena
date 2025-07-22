@@ -75,6 +75,7 @@ else
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
     --preExec "flags.Tracking.doPixelDigitalClustering=True;\
                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
+    --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
