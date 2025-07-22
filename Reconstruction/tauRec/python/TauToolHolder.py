@@ -745,7 +745,6 @@ def TauGNNEvaluatorCfg(flags, version=0, applyTrackSel=False):
                                               MinTauPt = flags.Tau.MinPtDAOD,
                                               ApplyTrackSel = applyTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
-                                              DecorateTracks = False,
                                               InputLayerScalar = "tau_vars",
                                               InputLayerTracks = "track_vars",
                                               InputLayerClusters = "cluster_vars",
