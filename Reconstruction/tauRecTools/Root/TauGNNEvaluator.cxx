@@ -162,13 +162,6 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
 
     out_ptau(tau) = out_f.at(m_outnode_tau);
     out_pjet(tau) = out_f.at(m_outnode_jet);
-
-    if(m_decorateTracks) {
-      for(size_t i = 0; i < tracks.size(); i++) {
-        if(i < out_vc.at("track_class").size()) out_trkclass(*tracks.at(i)) = out_vc.at("track_class").at(i);
-        else out_trkclass(*tracks.at(i)) = '9'; //Dummy value for tracks outside range of out_vc
-      }
-    }
   }
 
   return StatusCode::SUCCESS;
