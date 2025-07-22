@@ -49,6 +49,7 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
     bool passesEta = true;
 
     FPGATrackSimTrackPars trackpars = parSetToTrackPars(step.binCenter(idx));
+
     bool isTruthBin = ((m_truthbin.size()>step.stepNum())&&(m_truthbin[step.stepNum()]==idx));
     
     if (stepIsRPhi(step)) {
@@ -61,8 +62,14 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         half_xm_bin_pars.xm = step.binWidth(4)/2.0; // 4 = xm par
         double xshift =
             m_keylyrtool.xExpected(half_xm_bin_pars, storedhit.hitptr.get());
-        double xrange = xshift + r1 * step.binWidth(2) / 2.0
+        double xrange = std::abs(xshift) + r1 * step.binWidth(2) / 2.0
                         + ((r2*step.binWidth(3) - r1*step.binWidth(2)) / (r2 - r1) * (hitr - r1))/2.0;
+
+        if (xrange < 0) {
+          ATH_MSG_ERROR("Negative xrange: " << std::abs(xshift) << " " << r1 * step.binWidth(2) / 2.0 << " " 
+            << ((r2*step.binWidth(3) - r1*step.binWidth(2)) / (r2 - r1) * (hitr - r1))/2.0);
+        }
+
         double padding = 0.0;
         double stripLength = 25.0;
         if (storedhit.hitptr->getDetType() == SiliconTech::strip) {
@@ -71,11 +78,16 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
               int etamod = storedhit.hitptr->getEtaModule();
               stripLength = m_slPerEtaMod[etamod]/2.0;
           }
-          padding += hitr*stripLength*std::abs(FPGATrackSimBinUtil::GeomHelpers::dPhiHitTrkFromPars(hitr,trackpars));;
+          padding += stripLength*std::abs(FPGATrackSimBinUtil::GeomHelpers::dPhiHitTrkFromPars(hitr,trackpars));
         }
         // add phiShift resolution padding
-        padding += m_d0pad + hitr*m_phipad + hitr*m_qptpad*1000*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr);
+        padding += m_d0pad + hitr*m_phipad + hitr*m_qptpad*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr);
         passesPhi = std::abs(storedhit.phiShift) < (xrange+padding);
+        if (isTruthBin && !passesPhi) ATH_MSG_DEBUG("Hit fails Phi cut, lyr=" << storedhit.hitptr->getPhysLayer() << " "
+                        << storedhit.phiShift << " " << xrange + padding << " " <<xrange << " "<< padding
+                        << " " << m_d0pad << " "  << hitr*m_phipad  << " "  << hitr*m_qptpad*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr)
+                        << " "  << ((storedhit.hitptr->getDetType() == SiliconTech::strip) ?  (stripLength*std::abs(FPGATrackSimBinUtil::GeomHelpers::dPhiHitTrkFromPars(hitr,trackpars))) : 99999)
+                        << " " << hitr << " " << trackpars);
     }
 
     if (stepIsREta(step)) {
@@ -99,15 +111,14 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
           padding += stripLength;
         }
         // add etaShift resolution padding
-        padding += (m_z0pad + std::abs(hitr*FPGATrackSimBinUtil::GeomHelpers::dZdEta(m_etapad)));
+        padding += (m_z0pad + std::abs(hitr*m_etapad*FPGATrackSimBinUtil::GeomHelpers::dZdEta(trackpars.eta)));
         passesEta = std::abs(storedhit.etaShift) < (zrange+padding);
-        if (isTruthBin and !passesEta)
-          ATH_MSG_DEBUG("Hit in truth bin failed Eta cut"
-                        << storedhit.etaShift << " " << zrange + padding << " " <<zrange << " "<< padding);        
+        if (isTruthBin && !passesEta) ATH_MSG_DEBUG("Hit fails Eta cut , lyr=" << storedhit.hitptr->getPhysLayer() << " r=" << hitr << " " 
+                        << storedhit.etaShift << " " << zrange + padding << " " <<zrange << " "<< padding << " " << hitr << " " << trackpars);        
     }
    
     
-    if (isTruthBin) ATH_MSG_DEBUG("Hit in truth bin" << " passesPhi=" << passesPhi << " passesEta=" << passesEta);
+    if (isTruthBin && !(passesPhi && passesEta)) ATH_MSG_DEBUG("Hit in truth bin fails cuts: " << " passesPhi=" << passesPhi << " passesEta=" << passesEta);
 
     return passesPhi && passesEta;
 }

@@ -8,6 +8,7 @@ import AthenaCommon.Utils.unixtools as unixtools
 import importlib
 import os
 from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
+from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import getPadding
 
 log = logging.getLogger ('FPGATrackSim')
 
@@ -70,6 +71,16 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
         BinDesc.rin=cutset["rin"]
         BinDesc.rout=cutset["rout"]
 
+
+        #resolution padding
+        BinDesc.D0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["d0"]
+        BinDesc.EtaPad=getPadding(flags.Trigger.FPGATrackSim.region)["eta"]
+        BinDesc.QPtPad=getPadding(flags.Trigger.FPGATrackSim.region)["qpt"]
+        BinDesc.PhiPad=getPadding(flags.Trigger.FPGATrackSim.region)["phi"]
+        BinDesc.Z0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["z0"]
+        BinDesc.fieldCorrection=True
+        BinDesc.fieldCorRegion=flags.Trigger.FPGATrackSim.region
+
         # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
         step1 = CompFactory.FPGATrackSimBinStep("PhiBinning")
         step1.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
@@ -108,6 +119,13 @@ def FPGATrackSimLayerStudyToolCfg(flags):
     Monitor.phiScale = 10.0
     Monitor.etaScale = 100.0
     Monitor.drScale = 20.0
+    Monitor.plotAllBins = False
+
+    Monitor.D0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["d0"]
+    Monitor.EtaPad=getPadding(flags.Trigger.FPGATrackSim.region)["eta"]
+    Monitor.QPtPad=getPadding(flags.Trigger.FPGATrackSim.region)["qpt"]
+    Monitor.PhiPad=getPadding(flags.Trigger.FPGATrackSim.region)["phi"]
+    Monitor.Z0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["z0"]
 
     result.setPrivateTools(Monitor)
     return result

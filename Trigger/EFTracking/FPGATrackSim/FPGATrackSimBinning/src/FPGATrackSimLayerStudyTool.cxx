@@ -75,6 +75,8 @@ StatusCode FPGATrackSimLayerStudyTool::registerHistograms(const FPGATrackSimBinn
                                  "; Hits per bin in step", 20, 0, m_isSingleParticle ? 50 : 10000));
   ATH_CHECK(makeAndRegHist(m_hitsPerLayer, "hitsPerLayer", "; Layer ; Hits ", nLyrs, 0, nLyrs));
   ATH_CHECK(makeAndRegHist(m_hitsPerLayer2D, "hitsPerLayer2D", "; Layer ; Hits ", nLyrs, 0, nLyrs, 20, 0, m_isSingleParticle ? 20 : 10000));
+  ATH_CHECK(makeAndRegHist(m_binsFilled, "binsFilled", "; Bins Filled per Event", 200, 0, 200));
+
 
   // All Hit level histograms
   ATH_CHECK(makeAndRegHistVector(m_rZ_allhits, nLyrs + 1, NULL, "RZ_allhits",
@@ -223,6 +225,7 @@ void FPGATrackSimLayerStudyTool::fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const 
       m_bin_tree_detzone.push_back((int)hit.hitptr->getDetectorZone());
     }
     m_bin_tree->Fill();
+    m_binsFilledCnt++;
   }
 }
 
@@ -243,6 +246,10 @@ void FPGATrackSimLayerStudyTool::fillBinningSummary ATLAS_NOT_THREAD_SAFE(
       m_hitsPerLayer2D->Fill(lyr, cnt);
     }
   }
+
+  m_binsFilled->Fill(m_binsFilledCnt);
+  m_binsFilledCnt=0;
+
 }
 
 void FPGATrackSimLayerStudyTool::fillHitLevelInput(const FPGATrackSimHit *hit) {
@@ -352,4 +359,43 @@ void FPGATrackSimLayerStudyTool::parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vecto
       m_truthIsValid = false;
     }
   }
+}
+
+
+void FPGATrackSimLayerStudyTool::setBinPlotsActive(const FPGATrackSimBinUtil::IdxSet &idx)
+{
+  m_binPlotsActive = (!m_isSingleParticle);
+
+  // this finds the parameters at all 2^5 corners of the bin and then finds the min and max of those
+  std::vector<FPGATrackSimBinUtil::IdxSet> idxsets = FPGATrackSimBinUtil::makeVariationSet(std::vector<unsigned>({0,1,2,3,4}),idx);
+  const FPGATrackSimBinTool &bintool = m_binnedhits->getBinTool();
+  const IFPGATrackSimBinDesc* bindesc = bintool.binDesc();
+
+  // get window in std parameters for bin
+  FPGATrackSimTrackPars minpars = bindesc->parSetToTrackPars(bintool.lastStep()->binCenter(idx));   
+  FPGATrackSimTrackPars maxpars = bindesc->parSetToTrackPars(bintool.lastStep()->binCenter(idx));   
+  for (FPGATrackSimBinUtil::IdxSet & idxset : idxsets) {
+    FPGATrackSimTrackPars trackpars = bindesc->parSetToTrackPars(bintool.lastStep()->binLowEdge(idxset));      
+    for (unsigned par =0; par < FPGATrackSimTrackPars::NPARS; par++) {
+      minpars[par] = std::min(minpars[par],trackpars[par]);
+      maxpars[par] = std::max(maxpars[par],trackpars[par]);
+    }
+  }
+
+  // check if truth track is in bin within padding
+  FPGATrackSimTrackPars padding;
+  padding[FPGATrackSimTrackPars::ID0] = m_d0pad;
+  padding[FPGATrackSimTrackPars::IZ0] = m_z0pad;
+  padding[FPGATrackSimTrackPars::IETA] = m_etapad;
+  padding[FPGATrackSimTrackPars::IPHI] = m_phipad;
+  padding[FPGATrackSimTrackPars::IHIP] = m_qptpad;
+  bool inRange = true;
+  for (unsigned par =0; par < FPGATrackSimTrackPars::NPARS; par++) {
+      inRange = inRange &&  (m_truthpars[par] > minpars[par]-padding[par]);
+      inRange = inRange &&  (m_truthpars[par] < maxpars[par]+padding[par]);
+  }
+  //m_binPlotsActive |= inRange;
+  m_binPlotsActive = m_binPlotsActive||(m_truthbin.back()==idx)||(m_plotAllBins) ;
+
+
 }
