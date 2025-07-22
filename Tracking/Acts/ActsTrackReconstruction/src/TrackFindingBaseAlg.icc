@@ -30,8 +30,22 @@ namespace ActsTrk {
       const DetectorContextHolder &detContext,
       const bool paramsAtOutermostSurface) const {
     // Perform KF before CKF
+    const Acts::Surface* targetSurface = nullptr;
+    // get the proper surface
+    if (not paramsAtOutermostSurface) {
+      // inner-most surface
+      targetSurface = m_unalibMeasSurfAcc.get(measurement.sp().front()->measurements().front());
+    } else {
+      // outer-most surface
+      targetSurface = m_unalibMeasSurfAcc.get(measurement.sp().back()->measurements().back());
+    }
+    if (not targetSurface) {
+      ATH_MSG_VERBOSE("Could not identify the target surface for fitting the provided seed");
+      return nullptr;
+    }
     const auto fittedSeedCollection = m_fitterTool->fit(measurement, initialParameters,
-                                                        detContext.geometry, detContext.magField, detContext.calib);
+                                                        detContext.geometry, detContext.magField, detContext.calib,
+							*targetSurface);
     if (not fittedSeedCollection) {
       ATH_MSG_WARNING("KF Fitted Track is nullptr");
     }

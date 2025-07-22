@@ -39,7 +39,8 @@ namespace ActsTrk {
                                                        const Acts::BoundTrackParameters& initialParams,
                                                        const Acts::GeometryContext& tgContext,
                                                        const Acts::MagneticFieldContext& mfContext,
-                                                       const Acts::CalibrationContext& calContext) const = 0;
+                                                       const Acts::CalibrationContext& calContext,
+						       const Acts::Surface& targetSurface) const = 0;
                                                
     /** @brief Attempt to fit a trajectory from a list of uncalibrated measurements. The measurements need
      *         to be sorted such that the associated surfaces are passed in consecutive order by the 
@@ -60,7 +61,8 @@ namespace ActsTrk {
 
     virtual StatusCode fit(const EventContext& ctx,
                            const TrackContainer::ConstTrackProxy& track,          
-                           MutableTrackContainer& trackContainer) const = 0;
+                           MutableTrackContainer& trackContainer,
+			   const Acts::PerigeeSurface& pSurface) const = 0;
     
   };
   

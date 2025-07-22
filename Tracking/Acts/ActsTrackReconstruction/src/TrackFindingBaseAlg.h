@@ -17,6 +17,7 @@
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 // ACTS
 #include "Acts/EventData/ProxyAccessor.hpp"
@@ -78,6 +79,9 @@ namespace ActsTrk {
 
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
+    detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc {};
+
+    
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};

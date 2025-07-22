@@ -15,6 +15,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODTracking/TrackParticleContainerFwd.h"
 #include "xAODTracking/TrackParticleFwd.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
@@ -77,6 +78,8 @@ class ActsEMBremCollectionBuilder : public AthReentrantAlgorithm {
       this, "RefittedTracksLocation", "",
       "Ambiguity resolved output track collection"};
 
+  SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
+  
   mutable std::atomic_uint m_nInputTracks{0};
   mutable std::atomic_uint m_nRefittedTracks{0};
 };

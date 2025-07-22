@@ -160,6 +160,8 @@ namespace ActsTrk {
 
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
 
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometryTool.get()};
+    
     initStatTables();
 
     return StatusCode::SUCCESS;

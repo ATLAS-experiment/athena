@@ -475,24 +475,24 @@ std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
     const Acts::BoundTrackParameters& initialParams,
     const Acts::GeometryContext& tgContext,
     const Acts::MagneticFieldContext& mfContext,
-    const Acts::CalibrationContext& calContext) const {
+    const Acts::CalibrationContext& calContext,
+    const Acts::Surface& targetSurface) const {
   
   std::vector<ATLASUncalibSourceLink> sourceLinks;
   sourceLinks.reserve(6);
-
   
   for (const xAOD::SpacePoint* sp : seed.sp()) {
     sourceLinks.insert(sourceLinks.end(), sp->measurements().begin(), sp->measurements().end());
   }
-  return fit(sourceLinks, initialParams, tgContext, mfContext, calContext,
-             m_unalibMeasSurfAcc.get(sourceLinks.front()));
+  return fit(sourceLinks, initialParams, tgContext, mfContext, calContext, &targetSurface);
 }
 
 
 StatusCode GlobalChiSquareFitterTool::fit(
   const EventContext& /*ctx*/,
-    const TrackContainer::ConstTrackProxy& /*track*/,          
-  MutableTrackContainer& /*trackContainer*/) const 
+  const TrackContainer::ConstTrackProxy& /*track*/,          
+  MutableTrackContainer& /*trackContainer*/,
+  const Acts::PerigeeSurface& /*pSurface*/) const
 {
   ATH_MSG_ERROR("Track refit method not implemented in GlobalChiSquareFitterTool yet");
   return StatusCode::FAILURE;
