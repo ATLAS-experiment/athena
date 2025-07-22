@@ -25,6 +25,7 @@
 #include "Gaudi/Property.h"
 
 #include "L1CaloFEXByteStream/gFexPos.h"
+#include "PathResolver/PathResolver.h"
 #include <array>
 #include <vector>
 #include <cstdint>
@@ -34,8 +35,6 @@ namespace gPos = LVL1::gFEXPos;
  *  @brief Implementation of a tool for L1 input data conversion from BS to xAOD and from xAOD to BS
  *  (IL1TriggerByteStreamTool interface)
  **/
-
-
 
 
 class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> {
@@ -73,6 +72,14 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
     ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
     bool m_UseMonitoring = false;
 
+    // FiberMapping property required by the interface
+    Gaudi::Property<std::string> m_FiberMapping{
+          this, "gFexFiberTowerMapping",
+          "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gFex_gCaloTowerMap_weighted_v1.txt",
+          "Text file to convert from hardware fiber to eta-phi location"};
+
+    std::unordered_map<unsigned int, std::array<float, 4> > m_Firm2Tower_map;  /// {map index(towerid), {fpga, eta, phi, source}}
+
     // ROBIDs property required by the interface
     Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
 
@@ -85,9 +92,7 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
     SG::ReadHandleKey < xAOD::gFexTowerContainer> m_gTowersReadKey    {this,"gTowersReadKey"   ,"L1_gFexDataTowers","Read gFexEDM Trigger Tower container"};
 
     virtual void a_gtrx_map( const gfiber &inputData, gfiber &jf_lar_rx_data) const;
-
     virtual void b_gtrx_map( const gfiber &inputData, gfiber &jf_lar_rx_data) const;
-
     virtual void c_gtrx_map( const gfiber &inputData, gfiber &outputData) const;
 
     virtual void gtReconstructABC(  int XFPGA,
@@ -108,7 +113,6 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
                                     std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> &FiberTowerSatur) const;
 
     virtual int crc9d32(const std::array<uint32_t, 6> &inWords,int numWords,int reverse) const;
-
     uint32_t crc9d23(uint32_t inword, uint32_t in_crc, int  reverse ) const;
 
     virtual void undoMLE(int &datumPtr ) const;
@@ -119,7 +123,7 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
 
     virtual void gtCalib(gtFPGA &gtf, int towerLSB,  int fpga, unsigned int offset) const;
 
-
+    StatusCode ReadFibersfromFile(const std::string&);
 
     void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
 
