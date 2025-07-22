@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -157,6 +157,6 @@ MsgStream& operator<< (MsgStream& m, const TrigT2Jet& d);
 
 CLASS_DEF(TrigT2Jet, 198767871, 1)
 
-#include "TrigCaloEvent/TrigT2JetContainer.h"
+
 
 #endif
