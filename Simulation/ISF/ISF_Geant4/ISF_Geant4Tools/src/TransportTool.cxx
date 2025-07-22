@@ -10,7 +10,7 @@
 #include "G4AtlasAlg/G4AtlasActionInitialization.h"
 #include "G4AtlasAlg/G4AtlasMTRunManager.h"
 #include "G4AtlasAlg/G4AtlasRunManager.h"
-#include "G4AtlasAlg/G4AtlasUserWorkerInitialization.h"
+#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 #include "G4AtlasAlg/G4AtlasUserWorkerThreadInitialization.h"
 #include "G4AtlasAlg/G4AtlasWorkerRunManager.h"
 #include "ISFFluxRecorder.h"

@@ -10,7 +10,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "G4AtlasAlg/G4AtlasActionInitialization.h"
 #include "G4AtlasAlg/G4AtlasRunManager.h"
-#include "G4AtlasAlg/G4AtlasUserWorkerInitialization.h"
+#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 #include "ISFFluxRecorder.h"
 
 // ISF classes

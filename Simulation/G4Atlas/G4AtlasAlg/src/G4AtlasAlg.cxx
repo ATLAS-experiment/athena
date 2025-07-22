@@ -6,7 +6,7 @@
 #include "G4AtlasAlg.h"
 #include "G4AtlasFluxRecorder.h"
 #include "G4AtlasAlg/G4AtlasActionInitialization.h"
-#include "G4AtlasAlg/G4AtlasUserWorkerInitialization.h"
+#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CxxUtils/checker_macros.h"
