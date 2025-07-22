@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MSVTXVALIDATIONALGUTILS_H
@@ -7,9 +7,13 @@
 
 #include <vector>
 #include <cmath>
+#include <unordered_set>
+#include <algorithm>
 
-#include "GaudiKernel/SystemOfUnits.h"
 #include "CxxUtils/fpcompare.h"
+#include "GaudiKernel/SystemOfUnits.h"
+#include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
@@ -30,7 +34,17 @@ namespace MSVtxValidationAlgUtils {
 
     // decay chain utils
     std::vector<const xAOD::TruthParticle*> getChildren(const xAOD::TruthParticle* mother);
-    std::vector<const xAOD::TruthParticle*> getGenStableChildren(const xAOD::TruthParticle* mother);
+    std::vector<const xAOD::TruthParticle*> getStableChildren(const xAOD::TruthParticle* particle, bool findOnlyGenStable);
+    std::vector<const xAOD::TruthParticle*> getStableChildrenRecursive(const xAOD::TruthParticle* particle, bool findOnlyGenStable, std::unordered_set<const xAOD::TruthParticle*>& visited);
+
+    // displaced vertex approximation within jets
+    struct JetVtxApprox {
+        const xAOD::TruthVertex* vtx{nullptr};
+        size_t nChildren{0};
+        size_t decayDepth{0};
+    };
+
+    JetVtxApprox getJetVtxApprox(const xAOD::Jet* jet, const xAOD::TruthParticleContainer& truthParticles);
 
     // vertex isolation
     struct VtxIso {
