@@ -6,13 +6,13 @@
 
 #include "AthContainers/DataVector.h"
 
-#include "xAODAuxillaryMeasurement/AuxillaryMeasurement.h"
-#include "xAODAuxillaryMeasurement/versions/AuxillaryMeasurementContainer_v1.h"
+#include "xAODAuxiliaryMeasurement/AuxiliaryMeasurement.h"
+#include "xAODAuxiliaryMeasurement/versions/AuxiliaryMeasurementContainer_v1.h"
 namespace xAOD{
-    using AuxillaryMeasurementContainer = AuxillaryMeasurementContainer_v1;
+    using AuxiliaryMeasurementContainer = AuxiliaryMeasurementContainer_v1;
 }
 
 // Set up a CLID for the container:
 #include "xAODCore/CLASS_DEF.h"
-CLASS_DEF( xAOD::AuxillaryMeasurementContainer , 1160886801 , 1 );
+CLASS_DEF( xAOD::AuxiliaryMeasurementContainer , 1160886801 , 1 );
 #endif

@@ -28,7 +28,7 @@ atlas_add_library( ActsEventLib
    xAODMeasurementBase
    xAODTracking
    xAODTruth
-   xAODAuxillaryMeasurement
+   xAODAuxiliaryMeasurement
    PRIVATE_LINK_LIBRARIES
       ActsGeoUtils
 )

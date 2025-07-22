@@ -6,9 +6,9 @@
 #include "xAODCore/AddDVProxy.h"
 
 // Local include(s):
-#include "xAODAuxillaryMeasurement/AuxillaryMeasurement.h"
-#include "xAODAuxillaryMeasurement/AuxillaryMeasurementContainer.h"
+#include "xAODAuxiliaryMeasurement/AuxiliaryMeasurement.h"
+#include "xAODAuxiliaryMeasurement/AuxiliaryMeasurementContainer.h"
 
 
 // Set up the collection proxies:
-ADD_NS_DV_PROXY(xAOD, AuxillaryMeasurementContainer_v1);
+ADD_NS_DV_PROXY(xAOD, AuxiliaryMeasurementContainer_v1);

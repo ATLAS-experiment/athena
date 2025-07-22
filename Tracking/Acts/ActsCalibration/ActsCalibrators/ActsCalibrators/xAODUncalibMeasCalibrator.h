@@ -65,7 +65,7 @@ namespace ActsTrk::detail{
                                    const Acts::CalibrationContext& cctx,
                                    const Acts::SourceLink& sl,
                                    MutableTrackStateBackend::TrackStateProxy trackState) const;
-            /** @brief Delegate method for the Auxillary measurements. 
+            /** @brief Delegate method for the Auxiliary measurements. 
              *  @param gctx: Geometry context passed to access the global alignment
              *  @param cctx: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
              *               extra information from store gate
