@@ -133,10 +133,10 @@ private:
       "Default time resolution used for tracks without HGTD timing info"};
 
   CleaningResult
-  runTimeConsistencyCuts(const xAOD::TrackParticle* track_particle) const;
+  runTimeConsistencyCuts(const xAOD::TrackParticle& track_particle) const;
 
   std::array<Hit, n_hgtd_layers>
-  getValidHits(const xAOD::TrackParticle* track_particle) const;
+  getValidHits(const xAOD::TrackParticle& track_particle) const;
 
   /**
    * @brief Calculates the chi2 of the hit times given their resolution.

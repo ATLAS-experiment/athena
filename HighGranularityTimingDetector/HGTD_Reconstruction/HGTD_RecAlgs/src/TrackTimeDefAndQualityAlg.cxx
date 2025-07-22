@@ -41,6 +41,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
 
   SG::ReadHandle<xAOD::TrackParticleContainer> trk_ptkl_container_handle(
       m_trackParticleContainerKey, ctx);
+  ATH_CHECK( trk_ptkl_container_handle.isValid() );
   const xAOD::TrackParticleContainer* track_particles =
       trk_ptkl_container_handle.cptr();
   if (not track_particles) {
@@ -63,7 +64,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
 
     // runs the time consistency checks
     // if no hits are found in HGTD, returns a default time
-    CleaningResult res = runTimeConsistencyCuts(track_ptkl);
+    CleaningResult res = runTimeConsistencyCuts(*track_ptkl);
 
     // check if the last hit on track was within the predefined area
     if (lastHitIsOnLastSurface(*track_ptkl)) {
@@ -95,7 +96,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
 
 TrackTimeDefAndQualityAlg::CleaningResult
 TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
-    const xAOD::TrackParticle* track_particle) const {
+    const xAOD::TrackParticle& track_particle) const {
 
   // get all available hits (see the struct Hit) in a first step
   std::array<Hit, n_hgtd_layers> valid_hits = getValidHits(track_particle);
@@ -181,20 +182,20 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
 
 std::array<TrackTimeDefAndQualityAlg::Hit, n_hgtd_layers>
 TrackTimeDefAndQualityAlg::getValidHits(
-    const xAOD::TrackParticle* track_particle) const {
+    const xAOD::TrackParticle& track_particle) const {
 
   SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<float>>
       layerClusterTimeHandle(m_layerClusterTimeKey);
-  std::vector<float> times = layerClusterTimeHandle(*track_particle);
+  std::vector<float> times = layerClusterTimeHandle(track_particle);
 
   SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>>
       layerHasExtensionHandle(m_layerHasExtensionKey);
-  std::vector<bool> has_clusters = layerHasExtensionHandle(*track_particle);
+  std::vector<bool> has_clusters = layerHasExtensionHandle(track_particle);
 
   SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<int>>
       layerClusterTruthClassHandle(m_layerClusterTruthClassKey);
   std::vector<int> hit_classification =
-      layerClusterTruthClassHandle(*track_particle);
+      layerClusterTruthClassHandle(track_particle);
 
   std::array<Hit, n_hgtd_layers> valid_hits;
 
@@ -346,7 +347,9 @@ TrackTimeDefAndQualityAlg::getLastHitOnTrack(const Trk::Track& track) const {
 bool TrackTimeDefAndQualityAlg::lastHitIsOnLastSurface(
     const xAOD::TrackParticle& track_particle) const {
   const Trk::Track* track = track_particle.track();
+  if (not track) return false;
   const Trk::TrackParameters* last_hit_param = getLastHitOnTrack(*track);
+  if (not last_hit_param) return false;
   float radius = std::hypot(last_hit_param->position().x(),
                              last_hit_param->position().y());
   float abs_z = std::abs(last_hit_param->position().z());
