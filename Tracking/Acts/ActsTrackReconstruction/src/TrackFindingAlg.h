@@ -23,6 +23,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
 #include "ActsGeometry/ActsVolumeIdToDetectorElementCollectionMap.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 
 // STL
 #include <string>
@@ -79,6 +80,7 @@ namespace ActsTrk
        {this, "DetElStatus", {}, "Keys for detector element status conditions data."};
 
     SG::WriteHandleKeyArray< std::vector<int> > m_seedDestiny {this, "SeedDestiny", {}}; 
+    SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
     
     // Configuration
     Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
@@ -120,7 +122,8 @@ namespace ActsTrk
                std::size_t seedCollectionIndex,
                const char *seedType,
                EventStats &event_stat,
-	       std::vector<int>& destiny) const;
+	       std::vector<int>& destiny,
+	       const Acts::PerigeeSurface& pSurface) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,

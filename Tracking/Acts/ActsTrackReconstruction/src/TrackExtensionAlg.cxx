@@ -68,6 +68,7 @@ namespace ActsTrk{
     ATH_CHECK(m_truthParticlesKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
     ATH_CHECK(m_actsFitter.retrieve());
+    ATH_CHECK(m_beamSpotKey.initialize());
     m_logger = makeActsAthenaLogger(this, name());
 
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
@@ -109,14 +110,27 @@ namespace ActsTrk{
 
 
   StatusCode TrackExtensionAlg::execute(const EventContext& context) const {
-    SG::ReadHandle<ActsTrk::ProtoTrackCollection> protoTracksHandle(m_protoTrackCollectionKey, context);
-
+    SG::ReadHandle<ActsTrk::ProtoTrackCollection> protoTracksHandle = SG::makeHandle(m_protoTrackCollectionKey, context);
+    ATH_CHECK(protoTracksHandle.isValid());
+    
     // track finding goes here
     ActsTrk::MutableTrackContainer trackContainer;
     Acts::VectorTrackContainer trackBackend;
     Acts::VectorMultiTrajectory trackStateBackend;
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
-    std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
+
+    // Get Beam pos and make pSurface
+    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, context );
+    ATH_CHECK( beamSpotHandle.isValid() );
+    const InDet::BeamSpotData* beamSpotData = beamSpotHandle.cptr();
+    
+    // Beam Spot Position
+    Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
+			   beamSpotData->beamPos().y() * Acts::UnitConstants::mm,
+			   0 );
+    
+    // Construct a perigee surface as the target surface
+    std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(beamPos);
 
     const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
     const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);

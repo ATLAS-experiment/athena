@@ -27,6 +27,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 
 // STL
 #include <memory>
@@ -67,6 +68,10 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
       "Output track collection (ActsTrk variant)"};
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
+  SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{
+    this, "BeamSpotKey", "BeamSpotData",
+    "SG key for beam spot"};
+  
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{
