@@ -173,12 +173,15 @@ def FPGATrackSimBinnedHitsToolCfg_2nd(flags,name="FPGATrackSimBinnedHitsTool_2nd
         step2 = CompFactory.FPGATrackSimBinStep(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimFullBinning_2nd"))
         step2.parBins = cutset["parBins"]
         binsteps = [step1,step2]
+
         #resolution padding
         BinDesc.D0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["d0"]
         BinDesc.EtaPad=getPadding(flags.Trigger.FPGATrackSim.region)["eta"]
         BinDesc.QPtPad=getPadding(flags.Trigger.FPGATrackSim.region)["qpt"]
         BinDesc.PhiPad=getPadding(flags.Trigger.FPGATrackSim.region)["phi"]
         BinDesc.Z0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["z0"]
+        BinDesc.fieldCorrection=True
+        BinDesc.fieldCorRegion=flags.Trigger.FPGATrackSim.region
     else:
         log.fatal("Unknown Binning Setup: ",cutset["parSet"])
 
@@ -278,7 +281,9 @@ def FPGATrackSimWindowExtensionToolCfg(flags,name="FPGATrackSimWindowExtensionTo
     # If we're doing binning, i.e. genscan.
     if flags.Trigger.FPGATrackSim.ActiveConfig.genScan:
         FPGATrackSimWindowExtensionTool.doBinning = True
-        FPGATrackSimWindowExtensionTool.BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg_2nd(flags))
+        BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg_2nd(flags))
+        BinningTool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+        FPGATrackSimWindowExtensionTool.BinningTool = BinningTool
 
     # Cut the number of branches, equivalent to 610 option.
     FPGATrackSimWindowExtensionTool.maxHits = [1] * 5 + [flags.Trigger.FPGATrackSim.maxBranches] * 8

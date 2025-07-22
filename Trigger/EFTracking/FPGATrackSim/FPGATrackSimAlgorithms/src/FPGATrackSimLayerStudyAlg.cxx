@@ -168,7 +168,6 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
 
     // Bin the hits, depending on m_stage we either use phits_1st, phits_2nd, or all the hits.
     ATH_CHECK(m_hitBinningTool->fill(phits));
-    m_binMonitoring->fillBinningSummary(phits);
 
     // scan over image building pairs for bins over threshold
     for (FPGATrackSimBinArray<FPGATrackSimBinnedHits::BinEntry>::ConstIterator &bin : m_hitBinningTool->lastStepBinnedHits()) {
@@ -184,6 +183,7 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
         // Monitor contents of bins passing threshold
         m_binMonitoring->fillBinLevelOutput(bin.idx(), bin.data());
     }
+    m_binMonitoring->fillBinningSummary(phits);
 
 
     // Reset the hit binning tool.

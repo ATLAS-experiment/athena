@@ -37,6 +37,8 @@
 #include <string>
 #include <vector>
 
+#include"FPGATrackSimObjects/FPGATrackSimFunctions.h"
+
 class FPGATrackSimKeyLayerBinDesc : public  extends<AthAlgTool, IFPGATrackSimBinDesc> {
 
 public:
@@ -49,9 +51,17 @@ public:
 
     // convert back and forth from pT, eta, phi, d0, z0 and internal paramater set
     virtual const FPGATrackSimBinUtil::ParSet
-    trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
-      return keyparsToParSet(m_keylyrtool.trackParsToKeyPars(pars));
+    trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {   
+      FPGATrackSimKeyLayerTool::KeyLyrPars keypars = m_keylyrtool.trackParsToKeyPars(pars);
+      if (m_fieldCorrection) {
+        keypars.phi1+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R1());
+        keypars.phi2+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R2());
+      }
+      return keyparsToParSet(keypars);
     }
+
+    
+
     virtual const FPGATrackSimTrackPars parSetToTrackPars(const FPGATrackSimBinUtil::ParSet &parset) const override {
       return m_keylyrtool.keyParsToTrackPars(parSetToKeyPars(parset));
     }
@@ -97,6 +107,10 @@ public:
         "Strip length per eta eta mod"
     };
 
+
+    Gaudi::Property<unsigned> m_fieldCorRegion  { this, "fieldCorRegion", 2, "region for fieldCorrection"};
+    Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};
+        
   
     // convert to/from the KeyLyrPars struct and the ParSet
     FPGATrackSimBinUtil::ParSet keyparsToParSet(const FPGATrackSimKeyLayerTool::KeyLyrPars& keypars) const {

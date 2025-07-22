@@ -43,7 +43,8 @@ IdxSet::operator const std::vector<unsigned>() const {
 // ----------------------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream &os, const StoredHit &hit)
 {
-  os << "lyr: " << hit.layer << " ";
+  os << " lyr: " << hit.layer << " ";
+  os << " hash: " << hit.hitptr->getIdentifierHash() << " ";
   os << "(" << hit.hitptr->getR() << ", " << hit.hitptr->getGPhi() << ", " << hit.hitptr->getZ() << ") ";
   os << "[" << hit.phiShift << ", " << hit.etaShift << "]";
   return os;

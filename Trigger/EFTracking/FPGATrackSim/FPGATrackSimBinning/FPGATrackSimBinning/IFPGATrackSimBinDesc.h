@@ -28,6 +28,7 @@
 
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 
+#include <functional>
 #include <string>
 
 class FPGATrackSimBinStep;

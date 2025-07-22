@@ -266,9 +266,9 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
     FPGATrackSimBinUtil::ParSet parSet = binDesc->trackParsToParSet(trackPars);
     if (!m_hitBinningTool->getBinTool().inRange(parSet)) {
         ATH_MSG_DEBUG("Track doesn't pass binning tool track parameter cuts");
-        return false;
     }
-    ATH_MSG_DEBUG("Found inside out parameters as " << parSet);
+    ATH_MSG_DEBUG("Found inside out parameters as " << parSet);    
+
     FPGATrackSimBinUtil::IdxSet binPars = binStep->binIdx(parSet);
     ATH_MSG_DEBUG("Attempting to look up bin entry using binpars = " << binPars);
     FPGATrackSimBinnedHits::BinEntry entry = (m_hitBinningTool->lastStepBinnedHits())[binPars];

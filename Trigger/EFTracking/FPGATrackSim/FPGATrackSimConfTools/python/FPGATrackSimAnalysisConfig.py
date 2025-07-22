@@ -879,6 +879,7 @@ if __name__ == "__main__":
         if flags.Trigger.FPGATrackSim.msgLimit!=-1:
             acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
             acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
+            acc.getService("MessageSvc").verboseLimit = flags.Trigger.FPGATrackSim.msgLimit
 
         statusCode = acc.run(flags.Exec.MaxEvents)
         assert statusCode.isSuccess() is True, "Application execution did not succeed"
