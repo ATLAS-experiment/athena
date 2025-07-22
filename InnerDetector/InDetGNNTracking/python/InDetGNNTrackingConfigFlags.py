@@ -54,6 +54,7 @@ def createGNNTrackingConfigFlags():
     # Triton Tool
     icf.addFlag("Tracking.GNN.Triton.url", "localhost")
     icf.addFlag("Tracking.GNN.Triton.model", "MetricLearning")
+    icf.addFlag("Tracking.GNN.Triton.port", 8001)
 
     return icf
 

@@ -15,8 +15,8 @@ AthInfer::TritonTool::TritonTool( const std::string& type,
 StatusCode AthInfer::TritonTool::initialize() {
 
     m_options = std::make_unique<tc::InferOptions>(m_modelName.value());
-    m_options->model_version_ = "";
-    m_options->client_timeout_ = 0;
+    m_options->model_version_ = m_modelVersion;
+    m_options->client_timeout_ = m_clientTimeout;
 
     return getClient()? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
@@ -24,10 +24,12 @@ StatusCode AthInfer::TritonTool::initialize() {
 tc::InferenceServerGrpcClient* AthInfer::TritonTool::getClient() const {
     thread_local std::unique_ptr<tc::InferenceServerGrpcClient> threadClient;
     if (!threadClient) {
-        std::string url = m_url.value() + ":8001"; // always use the gRPC port
+        std::string url = m_url.value() + ":" + std::to_string(m_port); // always use the gRPC port
         
-        
-        tc::Error err = tc::InferenceServerGrpcClient::Create(&threadClient, url, false);
+        bool verbose = false;
+        bool use_ssl = true;
+
+        tc::Error err = tc::InferenceServerGrpcClient::Create(&threadClient, url, verbose, use_ssl);
         if (!err.IsOk()) {
             ATH_MSG_ERROR("Failed to create Triton gRPC client for model: " + m_modelName.value() + " at url: " + url);
             ATH_MSG_ERROR("Error message: " + err.Message());

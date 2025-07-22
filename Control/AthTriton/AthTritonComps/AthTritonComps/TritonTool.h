@@ -43,6 +43,9 @@ class TritonTool: public extends<AthAlgTool, ITritonTool>
     TritonTool &operator=(const TritonTool&) = delete;
 
     StringProperty m_modelName{this, "ModelName", "", "Model name"};
+    IntegerProperty m_port{this, "Port", 8001, "Port ID for Triton server"};
+    StringProperty m_modelVersion{this, "ModelVersion", "", "Model version, empty for latest"};
+    FloatProperty m_clientTimeout{this, "ClientTimeout", 0, "Client timeout in milliseconds, 0 for no timeout"};
     StringProperty m_url{this, "URL", "", "Triton URL"};
     
   private:
