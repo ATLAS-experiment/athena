@@ -2490,9 +2490,9 @@ HLT_noalg_L1gJ20p0ETA25:
 HLT_noalg_L1gJ400p0ETA25:
   eventCount: 0
 HLT_noalg_L1gLJ80p0ETA25:
-  eventCount: 15
+  eventCount: 13
 HLT_noalg_L1gXEJWOJ100:
-  eventCount: 7
+  eventCount: 5
 HLT_noalg_L1jJ40:
   eventCount: 20
 HLT_noalg_L1jJ50:
