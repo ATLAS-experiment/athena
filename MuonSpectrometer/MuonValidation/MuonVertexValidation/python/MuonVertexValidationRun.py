@@ -39,10 +39,12 @@ def setupHistSvcCfg(flags, out_file="out.root", out_stream="MSVtxValidation"):
 
 def MSVtxValidationCfg(flags, name="MSVertexValidationAlg", outStream="MSVtxValidation", outFile="out.root", **kwargs):
     # outStream defines the steam to place the tree and histograms 
+    from TriggerMatchingTool.TriggerMatchingToolConfig import TriggerMatchingToolCfg
     result = ComponentAccumulator()
     # setting algorithm properties here via kwargs.setdefault("<property name>", <property value>)
     alg = CompFactory.MSVtxValidationAlg(name, **kwargs)
     result.merge(setupHistSvcCfg(flags,out_file=outFile, out_stream=outStream))
+    result.getPrimaryAndMerge(TriggerMatchingToolCfg(flags, name='R3MatchingTool'))
     result.addEventAlgo(alg)
 
     return result
