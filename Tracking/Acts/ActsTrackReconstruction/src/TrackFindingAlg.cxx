@@ -60,7 +60,8 @@ namespace ActsTrk
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
     ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
     ATH_CHECK(m_detElStatus.initialize());
-
+    ATH_CHECK(m_beamSpotKey.initialize());
+    
     ATH_CHECK(m_seedDestiny.initialize());
     
     if (m_seedContainerKeys.size() != m_detEleCollKeys.size())
@@ -175,6 +176,19 @@ namespace ActsTrk
       duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex);
     }
 
+    // Get Beam pos and make pSurface
+    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, ctx );
+    ATH_CHECK( beamSpotHandle.isValid() );
+    const InDet::BeamSpotData* beamSpotData = beamSpotHandle.cptr();
+    
+    // Beam Spot Position
+    Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
+			   beamSpotData->beamPos().y() * Acts::UnitConstants::mm,
+			   0 );
+    
+    // Construct a perigee surface as the target surface
+    std::shared_ptr<Acts::PerigeeSurface> pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(beamPos);
+        
     // ================================================== //
     // ===================== CONDS ====================== // 
     // ================================================== //
@@ -204,7 +218,8 @@ namespace ActsTrk
                            icontainer,
                            icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : m_seedContainerKeys[icontainer].key().c_str(),
                            event_stat,
-			   *destinies.at(icontainer).get()));
+			   *destinies.at(icontainer).get(),
+			   *pSurface.get()));
     }
 
     ATH_MSG_DEBUG("    \\__ Created " << tracksContainer.size() << " tracks");
@@ -265,12 +280,10 @@ namespace ActsTrk
                               std::size_t typeIndex,
                               const char *seedType,
                               EventStats &event_stat,
-			      std::vector<int>& destiny) const
+			      std::vector<int>& destiny,
+			      const Acts::PerigeeSurface& pSurface) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-
-    // Construct a perigee surface as the target surface
-    auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
 
     DetectorContextHolder detContext {
       .geometry = m_trackingGeometryTool->getGeometryContext(ctx).context(),
@@ -279,7 +292,7 @@ namespace ActsTrk
       .calib = getCalibrationContext(ctx)
     };
 
-    auto [options, secondOptions, measurementSelector] = getDefaultOptions(detContext, measurements, pSurface.get());
+    auto [options, secondOptions, measurementSelector] = getDefaultOptions(detContext, measurements, &pSurface);
 
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
     Acts::VectorTrackContainer trackBackend;
@@ -347,8 +360,8 @@ namespace ActsTrk
 
       options.propagatorPlainOptions.direction = reverseSearch ? Acts::Direction::Backward() : Acts::Direction::Forward();
       secondOptions.propagatorPlainOptions.direction = options.propagatorPlainOptions.direction.invert();
-      options.targetSurface = reverseSearch ? pSurface.get() : nullptr;
-      secondOptions.targetSurface = reverseSearch ? nullptr : pSurface.get();
+      options.targetSurface = reverseSearch ? &pSurface : nullptr;
+      secondOptions.targetSurface = reverseSearch ? nullptr : &pSurface;
       // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
 
       std::optional<Acts::BoundTrackParameters> optTrackParams =
@@ -413,7 +426,7 @@ namespace ActsTrk
         // yet.
         if (!track.hasReferenceSurface()) {
            auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(
-                   track, *pSurface, trackFinder().extrapolator, extrapolationOptions,
+                   track, pSurface, trackFinder().extrapolator, extrapolationOptions,
                    extrapolationStrategy, logger());
            if (!extrapolationResult.ok()) {
               ATH_MSG_WARNING("Extrapolation for seed "
