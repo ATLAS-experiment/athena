@@ -3,6 +3,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from ActsConfig.ActsConfigFlags import SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
 from ActsInterop import UnitConstants
 
@@ -150,8 +151,11 @@ def ActsMainTrackFindingAlgCfg(flags,
     # The shared hits are not calculated until *after* the track selection, so maxSharedHits is not used.
     # Even if that were not the case, we need the ambiguity solver to decide which track to drop.
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
-    kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
-    kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
+
+    # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
+    if flags.Acts.SeedingStrategy is not SeedingStrategy.Gbts2:
+        kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
+        kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
