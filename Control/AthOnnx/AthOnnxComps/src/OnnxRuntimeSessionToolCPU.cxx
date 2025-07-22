@@ -15,16 +15,9 @@ StatusCode AthOnnx::OnnxRuntimeSessionToolCPU::initialize()
     // Get the Onnx Runtime service.
     ATH_CHECK(m_onnxRuntimeSvc.retrieve());
     ATH_MSG_INFO(" OnnxRuntime release: " << OrtGetApiBase()->GetVersionString());
-    
-    // Create the session options.
-    // TODO: Make this configurable.
-    // other threading options: https://onnxruntime.ai/docs/performance/tune-performance/threading.html
-    // 1) SetIntraOpNumThreads( 1 );
-    // 2) SetInterOpNumThreads( 1 );
-    // 3) SetGraphOptimizationLevel( GraphOptimizationLevel::ORT_ENABLE_EXTENDED );
-
     Ort::SessionOptions sessionOptions;
     sessionOptions.SetGraphOptimizationLevel( GraphOptimizationLevel::ORT_ENABLE_ALL );
+    sessionOptions.DisablePerSessionThreads(); // use global thread pool.
 
     // Create the session.
     ATH_MSG_INFO("Asking model from: " << m_modelFileName.value());
