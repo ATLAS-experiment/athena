@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef XAODAUXILLARYMEASUREMENT_XAODAUXILLARYMEASUREMENTAUXCONTAINER_1D_v1_H
-#define XAODAUXILLARYMEASUREMENT_XAODAUXILLARYMEASUREMENTAUXCONTAINER_1D_v1_H
+#ifndef XAODAUXILLARYMEASUREMENT_XAODAUXILLARYMEASUREMENTAUXCONTAINER_3D_v1_H
+#define XAODAUXILLARYMEASUREMENT_XAODAUXILLARYMEASUREMENTAUXCONTAINER_3D_v1_H
  
 // System include(s):
 #include <stdint.h>
@@ -19,16 +19,16 @@
 namespace xAOD {
  
    ///
-   class AuxillaryMeasurementAuxContainer1D_v1 : public AuxContainerBase {
+   class AuxiliaryMeasurementAuxContainer3D_v1 : public AuxContainerBase {
  
    public:
       /// Default constructor
-      AuxillaryMeasurementAuxContainer1D_v1();
+      AuxiliaryMeasurementAuxContainer3D_v1();
  
    private:
      std::vector<char>                                calibProjector{};
-     std::vector<PosAccessor<1>::element_type>        localPosition{};
-     std::vector<CovAccessor<1>::element_type>        localCovariance{};
+     std::vector<PosAccessor<3>::element_type>        localPosition{};
+     std::vector<CovAccessor<3>::element_type>        localCovariance{};
       /// @name Links 
       /// @{    
       std::vector<ElementLink<TrackSurfaceContainer>> surfaceLink{};
@@ -37,6 +37,6 @@ namespace xAOD {
 } // namespace xAOD
  
 #include "xAODCore/BaseInfo.h"
-SG_BASE( xAOD::AuxillaryMeasurementAuxContainer1D_v1, xAOD::AuxContainerBase ); 
+SG_BASE( xAOD::AuxiliaryMeasurementAuxContainer3D_v1, xAOD::AuxContainerBase ); 
  
 #endif

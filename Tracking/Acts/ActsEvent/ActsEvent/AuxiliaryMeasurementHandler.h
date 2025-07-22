@@ -1,10 +1,10 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef ActsEvent_AuxillaryMeasurementHandler_H
-#define ActsEvent_AuxillaryMeasurementHandler_H
+#ifndef ActsEvent_AuxiliaryMeasurementHandler_H
+#define ActsEvent_AuxiliaryMeasurementHandler_H
 
-#include "xAODAuxillaryMeasurement/AuxillaryMeasurementContainer.h"
+#include "xAODAuxiliaryMeasurement/AuxiliaryMeasurementContainer.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteHandle.h"
@@ -13,27 +13,27 @@
 #include <unordered_map>
 
 namespace ActsTrk{
-    /** @brief Utility class to handle the creation of the Auxillary measurement used in an Acts track fit
-     *         This class declares the additionally written xAOD::AuxillaryMeasurementContainers to the 
+    /** @brief Utility class to handle the creation of the Auxiliary measurement used in an Acts track fit
+     *         This class declares the additionally written xAOD::AuxiliaryMeasurementContainers to the 
      *         AvalancheScheduler. Per event, the user creates an instance of the MeasurementProvider which
-     *         setups the storage backend for the measurements and writes the containers to StoreGate. Auxillary
+     *         setups the storage backend for the measurements and writes the containers to StoreGate. Auxiliary
      *         measurements are created by calling the newMeasurement method. */
-    class AuxillaryMeasurementHandler {
+    class AuxiliaryMeasurementHandler {
         public:
-            using SurfacePtr_t = xAOD::AuxillaryMeasurement::SurfacePtr_t;
+            using SurfacePtr_t = xAOD::AuxiliaryMeasurement::SurfacePtr_t;
             /** @brief Constructor taking the pointer to the class holding the object used to declare the 
              *         data dependency from the WriteHandleKeys to the AvalancheScheduler. The object should be
              *         defined in the header like
-             *             ActsTrk::AuxillaryMeasurementHandler m_pseudoHandle{this};*/ 
+             *             ActsTrk::AuxiliaryMeasurementHandler m_pseudoHandle{this};*/ 
             template <class PropOwner> 
-                AuxillaryMeasurementHandler(PropOwner* owner);
+                AuxiliaryMeasurementHandler(PropOwner* owner);
             /** @brief Initialize the write handle keys.
              *  @param preFix: Common prefix to be put in front of all keys */
             StatusCode initialize(const std::string& preFix);
             /** @brief Helper struct to create a new pseudo measurement.*/
             class MeasurementProvider {
                 public:
-                    friend class AuxillaryMeasurementHandler;
+                    friend class AuxiliaryMeasurementHandler;
                     /** @brief Default destructor */
                     ~MeasurementProvider() = default;
                     /** @brief Default move constructor */
@@ -45,9 +45,9 @@ namespace ActsTrk{
                     /** @brief Delete the copy assignment */
                     MeasurementProvider& operator=(const MeasurementProvider& other) = delete;
 
-                    using ProjectorType = xAOD::AuxillaryMeasurement::ProjectorType;
+                    using ProjectorType = xAOD::AuxiliaryMeasurement::ProjectorType;
                     template<size_t N>
-                        xAOD::AuxillaryMeasurement* newMeasurement(const SurfacePtr_t&  surface,
+                        xAOD::AuxiliaryMeasurement* newMeasurement(const SurfacePtr_t&  surface,
                                                                    const ProjectorType projector,
                                                                    const AmgSymMatrix(N)& locCov,
                                                                    const AmgVector(N) locPos = AmgVector(N)::Zero());
@@ -63,16 +63,16 @@ namespace ActsTrk{
                      *  @param surfaceBackend: Reference to the surface container into which
                      *                         all surfaces are stored. */
                     MeasurementProvider(const EventContext& ctx,
-                                      const AuxillaryMeasurementHandler* parent,
+                                      const AuxiliaryMeasurementHandler* parent,
                                       xAOD::TrackSurfaceContainer& surfaceBackend);
-                    /** @brief Setup method to record the Auxillary measurement containers into StoreGate */
+                    /** @brief Setup method to record the Auxiliary measurement containers into StoreGate */
                     StatusCode setupContainers();
 
                     const EventContext& m_ctx;
-                    const AuxillaryMeasurementHandler* m_parent{};
+                    const AuxiliaryMeasurementHandler* m_parent{};
                     xAOD::TrackSurfaceContainer& m_surfaceContainer;
                     /** @brief Abrivation of the WriteHandle */
-                    using WriteHandle_t = SG::WriteHandle<xAOD::AuxillaryMeasurementContainer>;
+                    using WriteHandle_t = SG::WriteHandle<xAOD::AuxiliaryMeasurementContainer>;
                     WriteHandle_t m_handle1D{m_parent->m_writeKey1D, m_ctx};
                     WriteHandle_t m_handle2D{m_parent->m_writeKey2D, m_ctx};
                     WriteHandle_t m_handle3D{m_parent->m_writeKey3D, m_ctx};
@@ -92,7 +92,7 @@ namespace ActsTrk{
                                        xAOD::TrackSurfaceContainer& surfaceBackend) const;
 
         private:
-            using Key_t = SG::WriteHandleKey<xAOD::AuxillaryMeasurementContainer>;
+            using Key_t = SG::WriteHandleKey<xAOD::AuxiliaryMeasurementContainer>;
             MsgStream& m_msg;
             Key_t m_writeKey1D;
             Key_t m_writeKey2D;
@@ -100,5 +100,5 @@ namespace ActsTrk{
             ActsGeometryContext m_gctx{};
     };
 }
-#include "ActsEvent/AuxillaryMeasurementHandler.icc"
+#include "ActsEvent/AuxiliaryMeasurementHandler.icc"
 #endif

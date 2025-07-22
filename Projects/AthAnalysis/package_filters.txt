@@ -31,8 +31,8 @@
 - Event/xAOD/.*Cnv
 - Event/xAOD/xAODMuonRDO
 - Event/xAOD/xAODMuonRDOAthenaPool
-- Event/xAOD/xAODAuxillaryMeasurement
-- Event/xAOD/xAODAuxillaryMeasurementAthenaPool
+- Event/xAOD/xAODAuxiliaryMeasurement
+- Event/xAOD/xAODAuxiliaryMeasurementAthenaPool
 + Event/xAOD/.*
 
 # Others:

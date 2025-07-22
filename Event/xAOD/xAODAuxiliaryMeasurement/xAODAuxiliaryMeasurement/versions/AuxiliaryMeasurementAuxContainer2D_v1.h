@@ -19,11 +19,11 @@
 namespace xAOD {
  
    ///
-   class AuxillaryMeasurementAuxContainer2D_v1 : public AuxContainerBase {
+   class AuxiliaryMeasurementAuxContainer2D_v1 : public AuxContainerBase {
  
    public:
       /// Default constructor
-      AuxillaryMeasurementAuxContainer2D_v1();
+      AuxiliaryMeasurementAuxContainer2D_v1();
  
    private:
      std::vector<char>                                calibProjector{};
@@ -37,6 +37,6 @@ namespace xAOD {
 } // namespace xAOD
  
 #include "xAODCore/BaseInfo.h"
-SG_BASE( xAOD::AuxillaryMeasurementAuxContainer2D_v1, xAOD::AuxContainerBase ); 
+SG_BASE( xAOD::AuxiliaryMeasurementAuxContainer2D_v1, xAOD::AuxContainerBase ); 
  
 #endif

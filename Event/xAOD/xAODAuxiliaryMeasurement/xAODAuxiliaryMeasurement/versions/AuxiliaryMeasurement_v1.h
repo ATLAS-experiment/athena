@@ -18,17 +18,17 @@
 
 
 namespace xAOD {
-    /** @brief Implementation of an uncalibrated AuxillaryMeasurement which may serve as 
+    /** @brief Implementation of an uncalibrated AuxiliaryMeasurement which may serve as 
      *         an external constraint in the track fit. The pseudo measurement is always
      *         expressed at the origin of the associated surface. */
-    class AuxillaryMeasurement_v1 : public UncalibratedMeasurement_v1 {
+    class AuxiliaryMeasurement_v1 : public UncalibratedMeasurement_v1 {
         public:
             /** @brief Returns the measurement type */
             UncalibMeasType type() const override final{
                 return UncalibMeasType::Other;
             }
             /** @brief Default constructor */
-            AuxillaryMeasurement_v1() = default;
+            AuxiliaryMeasurement_v1() = default;
             /** @brief number of dimensions */
             virtual unsigned numDimensions() const override final;
             /** @brief Surfaces are passed via xAOD::TrackSurfaces which are 
@@ -42,7 +42,7 @@ namespace xAOD {
             using SurfacePtr_t = std::shared_ptr<const Acts::Surface>;
             /** @brief Returns the reference to the Acts::Surface */
             const SurfacePtr_t& surface() const;
-            /** @brief Associates a surface with the Auxillary measurement together
+            /** @brief Associates a surface with the Auxiliary measurement together
              *         with its persitifiable surface link
              *  @param surfPtr: Pointer to the transient Acts::Surface
              *  @param surfLink: Link to the persitifiable surface */

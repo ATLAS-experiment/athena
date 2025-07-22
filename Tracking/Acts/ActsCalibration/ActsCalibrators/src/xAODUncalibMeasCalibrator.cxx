@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
-#include "xAODAuxillaryMeasurement/AuxillaryMeasurement.h"
+#include "xAODAuxiliaryMeasurement/AuxiliaryMeasurement.h"
 #include "GeoModelKernel/throwExcept.h"
 
 namespace ActsTrk::detail{
@@ -36,7 +36,7 @@ namespace ActsTrk::detail{
         const xAOD::UncalibratedMeasurement* meas = unpack(sl);
         assert(meas->type() == xAOD::UncalibMeasType::Other);
 
-        const auto* pMeas = dynamic_cast<const xAOD::AuxillaryMeasurement*>(meas);
+        const auto* pMeas = dynamic_cast<const xAOD::AuxiliaryMeasurement*>(meas);
         switch(pMeas->numDimensions()) {
             case 1:
                 setState<1, MutableTrackStateBackend>(pMeas->calibProjector(), pMeas->localPosition<1>(),

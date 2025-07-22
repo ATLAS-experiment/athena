@@ -4,10 +4,10 @@
 #ifndef XAODAUXILLARYMEASUREMENT_AUXILLARYMEASUREMENT_H
 #define XAODAUXILLARYMEASUREMENT_AUXILLARYMEASUREMENT_H
 
-#include "xAODAuxillaryMeasurement/versions/AuxillaryMeasurement_v1.h"
+#include "xAODAuxiliaryMeasurement/versions/AuxiliaryMeasurement_v1.h"
 
 namespace xAOD{
-    using AuxillaryMeasurement = AuxillaryMeasurement_v1;
+    using AuxiliaryMeasurement = AuxiliaryMeasurement_v1;
 }
 
 #endif

@@ -2,37 +2,37 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ActsEvent_AuxillaryMeasurementHandler_ICC
-#define ActsEvent_AuxillaryMeasurementHandler_ICC
+#ifndef ActsEvent_AuxiliaryMeasurementHandler_ICC
+#define ActsEvent_AuxiliaryMeasurementHandler_ICC
 
 #include "ActsGeoUtils/SurfaceEncoding.h"
 namespace ActsTrk{
     template <class PropOwner> 
-        AuxillaryMeasurementHandler::AuxillaryMeasurementHandler(PropOwner* owner):
+        AuxiliaryMeasurementHandler::AuxiliaryMeasurementHandler(PropOwner* owner):
             m_msg{owner->msgStream()},
-            m_writeKey1D{owner, "AuxillaryMeasKey1D", ""},
-            m_writeKey2D{owner, "AuxillaryMeasKey2D", ""},
-            m_writeKey3D{owner, "AuxillaryMeasKey3D", ""}{}
+            m_writeKey1D{owner, "AuxiliaryMeasKey1D", ""},
+            m_writeKey2D{owner, "AuxiliaryMeasKey2D", ""},
+            m_writeKey3D{owner, "AuxiliaryMeasKey3D", ""}{}
     
    
-    template<size_t N> xAOD::AuxillaryMeasurement* 
-        AuxillaryMeasurementHandler::MeasurementProvider::newMeasurement(const SurfacePtr_t& surface,
+    template<size_t N> xAOD::AuxiliaryMeasurement* 
+        AuxiliaryMeasurementHandler::MeasurementProvider::newMeasurement(const SurfacePtr_t& surface,
                                                                          const ProjectorType projector,
                                                                          const AmgSymMatrix(N)& locCov,
                                                                          const AmgVector(N) locPos) {
-        xAOD::AuxillaryMeasurement* meas{nullptr};
+        xAOD::AuxiliaryMeasurement* meas{nullptr};
         static_assert(N>=1 && N<=3, "Invalid measurement dimension");
         if constexpr(N == 1) {
-            meas = m_handle1D->push_back(std::make_unique<xAOD::AuxillaryMeasurement>());
+            meas = m_handle1D->push_back(std::make_unique<xAOD::AuxiliaryMeasurement>());
             assert(projector == ProjectorType::e1DimNoTime || 
                    projector == ProjectorType::e1DimRotNoTime);
         } else if constexpr(N == 2) {
-            meas = m_handle2D->push_back(std::make_unique<xAOD::AuxillaryMeasurement>());
+            meas = m_handle2D->push_back(std::make_unique<xAOD::AuxiliaryMeasurement>());
             assert(projector == ProjectorType::e2DimNoTime || 
                    projector == ProjectorType::e1DimWithTime ||
                    projector == ProjectorType::e1DimRotWithTime);
         } else if constexpr(N == 3) { 
-            meas = m_handle3D->push_back(std::make_unique<xAOD::AuxillaryMeasurement>());
+            meas = m_handle3D->push_back(std::make_unique<xAOD::AuxiliaryMeasurement>());
             assert(projector == ProjectorType::e2DimWithTime);
         }
         meas->setMeasurement<N>(0, xAOD::toStorage(locPos), xAOD::toStorage(locCov));
@@ -44,7 +44,7 @@ namespace ActsTrk{
 
             cached_itr = m_cachedSurfs.insert(std::make_pair(surface, persistSurf)).first;
         }
-        xAOD::AuxillaryMeasurement::SurfLink_t link{m_surfaceContainer, cached_itr->second->index(), m_ctx};
+        xAOD::AuxiliaryMeasurement::SurfLink_t link{m_surfaceContainer, cached_itr->second->index(), m_ctx};
         meas->setSurface(surface, std::move(link));
         return meas;
     }
