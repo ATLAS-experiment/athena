@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODELXML_PIXELGMXINTERFACE_H
@@ -47,13 +47,13 @@ public:
                             GeoVFullPhysVol *fpv,
                             GeoAlignableTransform *transform) override final;
 
-  std::shared_ptr<const PixelDiodeMatrix> buildMatrix(double phiPitch, double etaPitch,
-						      double phiPitchLong, double phiPitchEnd,
-						      double etaPitchLong, double etaPitchEnd,
+  std::shared_ptr<const PixelDiodeMatrix> buildMatrix(double pitchPhi, double pitchEta,
+						      double pitchPhiLong, double pitchPhiEnd,
+						      double pitchEtaLong, double pitchEtaEnd,
 						      int nPhiLong, int nPhiEnd,
 						      int nEtaLong, int nEtaEnd,
-						      int circuitsPhi, int circuitsEta,
-						      int diodeColPerCirc, int diodeRowPerCirc) const;
+						      int circuitsPerPhi, int circuitsPerEta,
+						      int columnsPerCircuit, int rowsPerCircuit) const;
 
    void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 

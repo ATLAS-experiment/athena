@@ -149,7 +149,7 @@ namespace InDetDD {
           Cell for which the neighbours must be found
           List of cells which are neighbours of the given one */
       virtual void neighboursOfCell(const SiCellId & cellId,
-    				std::vector<SiCellId> &neighbours) const;
+                                    std::vector<SiCellId> &neighbours) const;
         
       /** Compute the intersection length of two diodes:
           return: the intersection length when the two diodes are projected on one
