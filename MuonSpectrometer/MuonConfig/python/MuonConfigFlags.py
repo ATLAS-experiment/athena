@@ -145,7 +145,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.disableNSWForL2SA", True)
 
     mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project is not Project.AthSimulation \
-                                                      and (flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
+                                                      and not (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
     mcf.addFlag("Muon.enableTrigIDtrackReuse", False)
     # configuration of the DESDM_MCP output format 
 
