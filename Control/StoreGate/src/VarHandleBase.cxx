@@ -733,6 +733,10 @@ namespace SG {
       REPORT_ERROR (StatusCode::FAILURE) << "Attempt to record an object with a null key";
       return StatusCode::FAILURE;
     }
+    if (!dobj) {
+      REPORT_ERROR (StatusCode::FAILURE) << "Attempt to record null pointer";
+      return StatusCode::FAILURE;
+    }
 
     SG::DataObjectSharedPtr<DataObject> sptr (dobj.release());
     unsigned int initRefCount = sptr->refCount();
@@ -800,6 +804,10 @@ namespace SG {
     store = storeFromHandle (ctx);
     if (!store) {
       REPORT_ERROR (StatusCode::FAILURE) << "No store.";
+      return nullptr;
+    }
+    if (!dobj) {
+      REPORT_ERROR (StatusCode::FAILURE) << "Attempt to record null pointer.";
       return nullptr;
     }
 
