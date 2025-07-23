@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSelectorTools/MuonSelectionTool.h"
@@ -53,7 +53,11 @@ namespace {
 
 namespace CP {
 
-    MuonSelectionTool::MuonSelectionTool(const std::string& tool_name) : asg::AsgTool(tool_name), m_acceptInfo("MuonSelection"){}
+    MuonSelectionTool::MuonSelectionTool(const std::string& tool_name) : asg::AsgTool(tool_name), m_acceptInfo("MuonSelection"){
+
+        if (!m_calculateTightNNScore) m_onnxTool.setTypeAndName("");
+
+    }
 
     MuonSelectionTool::~MuonSelectionTool() = default;
 
@@ -62,7 +66,7 @@ namespace CP {
         // Greet the user:
         ATH_MSG_INFO("Initialising...");
         
-        m_geoOnTheFly ? ATH_MSG_INFO("Is Run-3 geometry: On-the-fly determination") 
+        m_geoOnTheFly ? ATH_MSG_INFO("Is Run-3 geometry: On-the-fly determination. THIS OPTION IS DEPRECATED AND WILL BE REMOVED SOON. Use IsRun3Geo property instead.") 
                       : ATH_MSG_INFO("Is Run-3 geometry: " << m_isRun3.value());
         ATH_MSG_INFO("Maximum muon |eta|: " << m_maxEta.value());
         ATH_MSG_INFO("Muon quality: "<< m_quality.value());
@@ -220,8 +224,23 @@ namespace CP {
                 m_reader_MUTAGIMO_etaBin3 = make_mva_reader_MuTagIMO(weightPath_MuTagIMO_etaBin3, true);
             }
         }
-        ATH_CHECK(m_eventInfo.initialize());
+        
+        ATH_MSG_INFO("TightNNScore calculation is " << (m_calculateTightNNScore ? "enabled." : "disabled."));
 
+        if (m_calculateTightNNScore) {
+            if (m_onnxTool.empty()) {
+                ATH_MSG_ERROR("Cannot calculate TightNNScore: ONNX tool not configured! "
+                            "Please set the ORTInferenceTool property to a valid AthOnnx::OnnxRuntimeInferenceTool instance.");
+                return StatusCode::FAILURE;
+            }
+
+            ATH_MSG_INFO("Retrieving ONNX tool: " << m_onnxTool.name());
+            ATH_CHECK(m_onnxTool.retrieve());
+        } else ATH_MSG_INFO("ONNX tool not configured — skipping retrieval.");
+
+        ATH_MSG_INFO("Finished ONNX tool setup");
+        
+        ATH_CHECK(m_eventInfo.initialize());
         // Return gracefully:
         return StatusCode::SUCCESS;
     }
@@ -985,9 +1004,9 @@ namespace CP {
             //::: BIS78
             if (isBIS78(etaMS, phiMS)) {
                 if (!isRun3() || !m_useBEEBISInHighPtRun3) {
-		            ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
+                    ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
                     return false;
-	    	    }	
+                }	
             }
             
             //// tentatively removed for r22, to be rechecked
@@ -1301,6 +1320,7 @@ namespace CP {
         // fakes rejection as function of pT in Z->mumu MC
 
         // Extract the relevant score variable (NN discriminant)
+       
         float CaloMuonScore{-999.0};
         retrieveParam(mu, CaloMuonScore, xAOD::Muon::CaloMuonScore);
         
@@ -1631,6 +1651,153 @@ namespace CP {
         }
 
         return false;
+    }
+
+    float MuonSelectionTool::getTightNNScore(const xAOD::Muon& mu) const {
+        if (!m_calculateTightNNScore)
+        {
+            ATH_MSG_ERROR("TightNNScore calculation is disabled. Please set the property CalculateTightNNScore to true.");
+            throw std::runtime_error("cannot calculate TightNNScore");  
+        }
+        //this score currently only can be calculated for combined muons
+        if (mu.muonType() != xAOD::Muon::Combined) return -999;
+        const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+            const xAOD::TrackParticle* metrack = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+        if(!idtrack || !metrack) return -999;
+        //the score is only calculated for muons which pass the Medium WP
+        if (getQuality(mu) > xAOD::Muon::Medium) return -999;
+        //only muons with pt > 4 GeV and |eta|<2.5 are considered
+        if (std::abs(mu.eta())>2.5) return -999;
+        if(mu.pt()<4000.) return -999;
+
+        std::vector<float> input_features;
+        // 1. Fill input features
+        int mu_author=mu.author();
+        float mu_rhoPrime=rhoPrime(mu);
+        float mu_scatteringCurvatureSignificance=0.;
+        retrieveParam(mu, mu_scatteringCurvatureSignificance, xAOD::Muon::scatteringCurvatureSignificance);
+        float mu_scatteringNeighbourSignificance=0.;
+        retrieveParam(mu, mu_scatteringNeighbourSignificance, xAOD::Muon::scatteringNeighbourSignificance);
+        float mu_momentumBalanceSignificance=0.;
+        retrieveParam(mu, mu_momentumBalanceSignificance, xAOD::Muon::momentumBalanceSignificance);
+        float mu_qOverPSignificance=qOverPsignificance(mu);
+        float mu_reducedChi2=mu.primaryTrackParticle()->chiSquared() / mu.primaryTrackParticle()->numberDoF();
+        float mu_reducedChi2_ID=idtrack->chiSquared() / idtrack->numberDoF();
+        float mu_reducedChi2_ME=metrack->chiSquared() / metrack->numberDoF();
+        float mu_spectrometerFieldIntegral=0.;
+        retrieveParam(mu, mu_spectrometerFieldIntegral, xAOD::Muon::spectrometerFieldIntegral);
+        float mu_segmentDeltaEta=0;
+        retrieveParam(mu, mu_segmentDeltaEta, xAOD::Muon::segmentDeltaEta);
+        uint8_t mu_numberOfPixelHits=0;
+        retrieveSummaryValue(mu, mu_numberOfPixelHits, xAOD::SummaryType::numberOfPixelHits);
+        uint8_t mu_numberOfPixelDeadSensors=0;
+        retrieveSummaryValue(mu, mu_numberOfPixelDeadSensors, xAOD::SummaryType::numberOfPixelDeadSensors);
+        uint8_t mu_innerLargeHits=0;
+        retrieveSummaryValue(mu, mu_innerLargeHits, xAOD::MuonSummaryType::innerLargeHits);
+        uint8_t mu_innerSmallHits=0;
+        retrieveSummaryValue(mu, mu_innerSmallHits, xAOD::MuonSummaryType::innerSmallHits);
+        uint8_t mu_middleLargeHits=0;
+        retrieveSummaryValue(mu, mu_middleLargeHits, xAOD::MuonSummaryType::middleLargeHits);
+        uint8_t mu_middleSmallHits=0;
+        retrieveSummaryValue(mu, mu_middleSmallHits, xAOD::MuonSummaryType::middleSmallHits);
+        uint8_t mu_outerLargeHits=0;
+        retrieveSummaryValue(mu, mu_outerLargeHits, xAOD::MuonSummaryType::outerLargeHits);
+        uint8_t mu_outerSmallHits=0;
+        retrieveSummaryValue(mu, mu_outerSmallHits, xAOD::MuonSummaryType::outerSmallHits);
+
+        if(!isRun3())
+        {
+            input_features =     {(float)mu_author,
+                                mu_rhoPrime,
+                                mu_scatteringCurvatureSignificance,
+                                mu_scatteringNeighbourSignificance,
+                                mu_momentumBalanceSignificance,
+                                mu_qOverPSignificance,
+                                mu_reducedChi2,
+                                mu_reducedChi2_ID,
+                                mu_reducedChi2_ME,
+                                mu_spectrometerFieldIntegral,
+                                mu_segmentDeltaEta,
+                                (float)mu_numberOfPixelHits,
+                                (float)mu_numberOfPixelDeadSensors,
+                                (float)mu_innerLargeHits,
+                                (float)mu_innerSmallHits,
+                                (float)mu_middleLargeHits,
+                                (float)mu_middleSmallHits,
+                                (float)mu_outerLargeHits,
+                                (float)mu_outerSmallHits};
+        }
+        else
+        {
+            uint8_t mu_phiLayer1STGCHits=0;
+            retrieveSummaryValue(mu, mu_phiLayer1STGCHits, xAOD::MuonSummaryType::phiLayer1STGCHits);
+            uint8_t mu_phiLayer2STGCHits=0;
+            retrieveSummaryValue(mu, mu_phiLayer2STGCHits, xAOD::MuonSummaryType::phiLayer2STGCHits);
+            uint8_t mu_etaLayer1STGCHits=0;
+            retrieveSummaryValue(mu, mu_etaLayer1STGCHits, xAOD::MuonSummaryType::etaLayer1STGCHits);
+            uint8_t mu_etaLayer2STGCHits=0;
+            retrieveSummaryValue(mu, mu_etaLayer2STGCHits, xAOD::MuonSummaryType::etaLayer2STGCHits);
+            uint8_t mu_MMHits=0;
+            retrieveSummaryValue(mu, mu_MMHits, xAOD::MuonSummaryType::MMHits);
+            input_features =     {(float)mu_author,
+                                mu_rhoPrime,
+                                mu_scatteringCurvatureSignificance,
+                                mu_scatteringNeighbourSignificance,
+                                mu_momentumBalanceSignificance,
+                                mu_qOverPSignificance,
+                                mu_reducedChi2,
+                                mu_reducedChi2_ID,
+                                mu_reducedChi2_ME,
+                                mu_spectrometerFieldIntegral,
+                                mu_segmentDeltaEta,
+                                (float)mu_numberOfPixelHits,
+                                (float)mu_numberOfPixelDeadSensors,
+                                (float)mu_innerLargeHits,
+                                (float)mu_innerSmallHits,
+                                (float)mu_middleLargeHits,
+                                (float)mu_middleSmallHits,
+                                (float)mu_outerLargeHits,
+                                (float)mu_outerSmallHits,
+                                (float)mu_phiLayer1STGCHits,
+                                (float)mu_phiLayer2STGCHits,
+                                (float)mu_etaLayer1STGCHits,
+                                (float)mu_etaLayer2STGCHits,
+                                (float)mu_MMHits};
+        }
+
+        float score=-999.;
+        std::vector<int64_t> inputShape = {1, static_cast<int64_t>(input_features.size())};
+
+        AthInfer::InputDataMap inputData;
+        inputData["flatten_input"] = std::make_pair(
+            inputShape, std::move(input_features)
+        );
+
+        AthInfer::OutputDataMap outputData;
+        outputData["TightNNScore"] = std::make_pair(
+            std::vector<int64_t>{1, 1}, std::vector<float>{}
+        );
+
+        if (!m_onnxTool->inference(inputData, outputData).isSuccess()) {
+            ATH_MSG_WARNING("ONNX inference failed!");
+            return -999.;
+        }
+        const auto& variant = outputData["TightNNScore"].second;
+        if (std::holds_alternative<std::vector<float>>(variant)) {
+            const auto& vec = std::get<std::vector<float>>(variant);
+            if (!vec.empty()) score = vec[0];
+            else {
+                ATH_MSG_WARNING("ONNX output vector is empty!");
+                return -999.;
+            }
+        } else {
+            ATH_MSG_WARNING("ONNX output is not a float vector!");
+            return -999.;
+        }
+        
+        ATH_MSG_DEBUG("TightNNScore for muon with pT " << mu.pt() << " GeV, eta " << mu.eta() << " is " << score);
+
+        return score;
     }
 
 }  // namespace CP
