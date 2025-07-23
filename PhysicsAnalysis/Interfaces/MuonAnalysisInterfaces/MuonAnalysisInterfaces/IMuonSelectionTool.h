@@ -99,6 +99,9 @@ namespace CP {
         /// Returns an integer corresponding to categorization of muons with different resolutions
         virtual int getResolutionCategory(const xAOD::Muon&) const = 0;
 
+        /// Returns the TightNNscore of the muon, an experimental ML-based score for the identification of muons from HF hadron decays
+        virtual float getTightNNScore(const xAOD::Muon& muon) const = 0;
+
     };  // class IMuonSelectionTool
 
 }  // namespace CP
