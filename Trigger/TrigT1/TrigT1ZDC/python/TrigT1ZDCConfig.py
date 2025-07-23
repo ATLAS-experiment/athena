@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ## @brief this function sets up the L1 simulation sequence with the ZDC
 ## it covers the case of rerunning the L1 on run2 HI data
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     flags = initConfigFlags()
-    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data15_hi.00287843.physics_EnhancedBias.merge.RAW._lb0226._SFO-2._0001.1']
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data15_hi.00287843.physics_EnhancedBias.merge.RAW._lb0226._SFO-2._0001.1_100evt']
     flags.Common.isOnline=False
     flags.Exec.MaxEvents=100
     flags.Concurrency.NumThreads = 1
