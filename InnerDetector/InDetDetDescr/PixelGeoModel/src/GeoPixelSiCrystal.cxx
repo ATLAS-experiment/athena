@@ -73,13 +73,22 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
   double pitchEta = m_gmt_mgr->DesignPitchZ(m_isModule3D);
 
   auto  readoutTechnology = getPixelReadoutTechnology(rowsPerCircuit,columnsPerCircuit );
+  auto circuitsPerPhi_corr = circuitsPerPhi;
+  auto rowsPerCircuit_corr = rowsPerCircuit;
+  if (readoutTechnology==InDetDD::PixelReadoutTechnology::FEI3 && circuitsPerPhi==1 && rowsPerCircuit==328) {
+     // FEI3 has 2x8 circuits and 160 + 4 rows per circuit not 1x8 circuits with 328 rows
+     // without this correction it is not possible to use the attribute associated to sub-matrices
+     // to assign FE numbers to sub-matrices.
+     circuitsPerPhi_corr*=2;
+     rowsPerCircuit_corr/=2;
+  }
   constexpr auto kNDirections = InDetDD::detail::kNDirections;
   constexpr auto kNPixelLocations = InDetDD::detail::kNPixelLocations;
   PixelDiodeTree diode_tree = InDetDD::detail::makePixelDiodeTree(m_gmt_mgr,
                                                     readoutTechnology,
-                                                    std::array<int,kNDirections>{circuitsPerPhi,circuitsPerEta},    // [0]=phi/row, [1]=eta/column
-                                                    std::array<int,kNDirections>{rowsPerCircuit,columnsPerCircuit}, // [0]=phi/row, [1]=eta/column
-                                                    std::array<std::array<double,kNDirections>,kNPixelLocations>{   // regular/central,longEnd/outer,long/inner
+                                                    std::array<int,kNDirections>{circuitsPerPhi_corr,circuitsPerEta},    // [0]=phi/row, [1]=eta/column
+                                                    std::array<int,kNDirections>{rowsPerCircuit_corr,columnsPerCircuit}, // [0]=phi/row, [1]=eta/column
+                                                    std::array<std::array<double,kNDirections>,kNPixelLocations>{        // regular/central,longEnd/outer,long/inner
                                                        std::array<double,kNDirections>{pitchPhi,pitchEta},
                                                        std::array<double,kNDirections>{0.,pitchEtaLongEnd},
                                                        std::array<double,kNDirections>{0.,pitchEtaLong}});
