@@ -79,6 +79,12 @@ namespace MuonValR4{
             m_postFitLocY  = segPars[toInt(ParamDefs::y0)];
             m_postFitTheta = segPars[toInt(ParamDefs::theta)];
             m_postFitPhi   = segPars[toInt(ParamDefs::phi)];
+            static const SG::ConstAccessor<xAOD::MeasVector<toInt(ParamDefs::nPars)>> acc_seed{"seedSegPars"};
+            m_seedFitLocY  = acc_seed(*seg)[toInt(ParamDefs::y0)];
+            m_seedFitTheta = acc_seed(*seg)[toInt(ParamDefs::theta)];
+            m_seedFitLocX  = acc_seed(*seg)[toInt(ParamDefs::x0)];
+            m_seedFitPhi   = acc_seed(*seg)[toInt(ParamDefs::phi)];
+            
             m_goodFit = true;
             ATH_CHECK(fillPrefit((*acc_segLink(*seg))));
         }
