@@ -145,10 +145,10 @@ def getGainDecorations(
 
     GainDecoratorTool = None
     for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
-        toolStr = f"{toolStr}"
-        splitStr = toolStr.split("/")
-        tool = acc.getPublicTool(splitStr[1])
-        if splitStr[0] == "DerivationFramework::GainDecorator":
+        toolString = f"{toolStr}"
+        splitStr = toolString.split("(")
+        tool = acc.getPublicTool(toolStr.getName())
+        if splitStr[0] == "GainDecorator":
             GainDecoratorTool = tool
 
     if GainDecoratorTool:
@@ -168,10 +168,10 @@ def getClusterEnergyPerLayerDecorations(acc, kernel):
     properties = "SGKey_photons", "SGKey_electrons"
     ClusterEnergyPerLayerDecorators = []
     for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
-        toolStr = f"{toolStr}"
-        splitStr = toolStr.split("/")
-        tool = acc.getPublicTool(splitStr[1])
-        if splitStr[0] == "DerivationFramework::ClusterEnergyPerLayerDecorator":
+        toolString = f"{toolStr}"
+        splitStr = toolString.split("(")
+        tool = acc.getPublicTool(toolStr.getName())
+        if splitStr[0] == "ClusterEnergyPerLayerDecorator":
             ClusterEnergyPerLayerDecorators.append(tool)
 
     decorations = []
