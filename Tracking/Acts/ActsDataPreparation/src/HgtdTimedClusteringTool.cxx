@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/HgtdTimedClusteringTool.h"
@@ -13,9 +13,6 @@ namespace Hgtd {
 
   static inline int getCellColumn(const Hgtd::UnpackedHgtdRDO& cell)
   { return cell.COL; }
-
-  static inline int& getCellLabel(Hgtd::UnpackedHgtdRDO& cell)
-  { return cell.NCL; }
 
   static inline double getCellTime(const Hgtd::UnpackedHgtdRDO& cell)
   { return cell.TOA; }
