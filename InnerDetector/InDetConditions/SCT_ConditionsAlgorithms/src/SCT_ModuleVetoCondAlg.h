@@ -28,7 +28,8 @@ class SCT_ModuleVetoCondAlg : public AthReentrantAlgorithm
 
  private:
   SG::ReadCondHandleKey<AthenaAttributeList> m_readKey{this, "ReadKey", "/ITk/Manual/BadModules", "Key of input (raw) bad module conditions folder"};
-  SG::WriteCondHandleKey<SCT_ModuleVetoCondData> m_writeKey{this, "WriteKey", "ITkStrip_ModuleVetoCondData", "Key of output (derived) bad module conditions data"};
+  //SG::WriteCondHandleKey<SCT_ModuleVetoCondData> m_writeKey{this, "WriteKey", "ITkStrip_ModuleVetoCondData", "Key of output (derived) bad module conditions data"};
+  SG::WriteCondHandleKey<SCT_ModuleVetoCondData> m_writeKey{this, "WriteKey", "SCT_ModuleVetoCondData", "Key of output (derived) bad module conditions data"}; //(AB) fix
 };
 
 #endif // SCT_MODULEVETOCONDALG
