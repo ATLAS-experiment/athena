@@ -610,7 +610,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
                    [](const auto &s) { return s->getSharedPtr(); });
 
     auto layer = m_cfg.layerCreator->discLayer(gctx, ownedSurfaces, nBinsR,
-                                               nBinsPhi, pl, transformNominal,
+                                               nBinsPhi, pl, Transform3::Identity(),
                                                std::move(approachDescriptor));
 
     layersOutput.push_back(layer);
