@@ -71,6 +71,14 @@ namespace MuonValR4{
             /** @brief Flag whether the fit has succeeded or not */
             MuonVal::ScalarBranch<unsigned char>& m_goodFit{m_tree.newScalar<unsigned char>("goodFit", false)};
             /** @brief Local X after the refit */
+            MuonVal::ScalarBranch<float>& m_seedFitLocX{m_tree.newScalar<float>("seedFitLocX", 0.f)};
+            /** @brief Local Y after the refit */
+            MuonVal::ScalarBranch<float>& m_seedFitLocY{m_tree.newScalar<float>("seedFitLocY", 0.f)};
+            /** @brief Local Theta after the refit */ 
+            MuonVal::ScalarBranch<float>& m_seedFitTheta{m_tree.newScalar<float>("seedFitTheta", 0.f)};
+            /** @brief Local Phi after the refit */
+            MuonVal::ScalarBranch<float>& m_seedFitPhi{m_tree.newScalar<float>("seedFitPhi", 0.f)};
+            /** @brief Local X after the refit */
             MuonVal::ScalarBranch<float>& m_postFitLocX{m_tree.newScalar<float>("postFitLocX", 0.f)};
             /** @brief Local Y after the refit */
             MuonVal::ScalarBranch<float>& m_postFitLocY{m_tree.newScalar<float>("postFitLocY", 0.f)};
