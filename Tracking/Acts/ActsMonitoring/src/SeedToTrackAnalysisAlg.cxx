@@ -22,9 +22,10 @@ namespace ActsTrk {
 
     ATH_CHECK( m_pixelAssociuationMapKey.initialize( not m_pixelAssociuationMapKey.empty() ) );
     ATH_CHECK( m_stripAssociuationMapKey.initialize( not m_stripAssociuationMapKey.empty() ) );
-    
-    m_seedVars = Monitored::buildToolMap<int>(m_tools, "seedVars", m_nLayers);
 
+    m_seedVars = Monitored::buildToolMap<int>(m_tools, "seedVars", m_nLayers);
+    m_elasticDecayUtil.setEnergyLossBinning( m_energyLossBinning );
+    
     return AthMonitorAlgorithm::initialize();
   }
 
@@ -80,7 +81,7 @@ namespace ActsTrk {
 
     
     std::size_t nElements = seeds->size();
-    
+
     for (std::size_t i(0); i<nElements; ++i) {
       const ActsTrk::Seed* seed = seeds->at(i);
       const Acts::BoundTrackParameters* pars = params->at(i);
@@ -88,7 +89,7 @@ namespace ActsTrk {
 
       // in case param estimation for this seed failed somehow
       if (not pars) continue;
-		       
+
       const auto& sps = seed->sp();
       const auto& bottom = sps[0];
       const auto& middle = sps[1];
@@ -113,7 +114,7 @@ namespace ActsTrk {
       ATH_CHECK( getTruthProbability(*seed,
 				     truthAssociationMaps,
 				     probability) );
-      
+
       auto monitor_bottom_x = Monitored::Scalar<float>( "bottomX", bottomX );
       auto monitor_bottom_y = Monitored::Scalar<float>( "bottomY", bottomY );
       auto monitor_bottom_z = Monitored::Scalar<float>( "bottomZ", bottomZ );
@@ -213,11 +214,18 @@ namespace ActsTrk {
 	if (tps.empty()) continue;
 	
 	for (const auto* tp : tps) {
-	  if ( HepMC::is_simulation_particle(*tp) ) continue;
-	  
 	  std::size_t pid = HepMC::uniqueID(tp);
 	  particleIds.try_emplace( pid, 0 );
 	  ++particleIds[pid];
+
+	  // get the mother particle
+	  const xAOD::TruthParticle* motherParticle = m_elasticDecayUtil.getMother(*tp, m_maxEnergyLoss);
+	  if (not motherParticle) continue;
+	  
+	  std::size_t motherPid = HepMC::uniqueID(motherParticle);
+	  if (pid == motherPid) continue;
+	  particleIds.try_emplace( motherPid, 0 );
+	  ++particleIds[motherPid];
 	} // loop on tps
 	
       } // loop on measurements
