@@ -45,14 +45,6 @@ PunchThroughG4Tool::PunchThroughG4Tool(const std::string& type, const std::strin
 StatusCode PunchThroughG4Tool::initialize(){
   ATH_MSG_DEBUG("[PunchThroughG4Tool] ==>" << name() << "::initialize()");
 
-  // resolving lookuptable file
-  std::string resolvedFileName = PathResolverFindCalibFile (m_filenameLookupTable);
-  if (resolvedFileName.empty()) {
-    ATH_MSG_ERROR( "[PunchThroughG4Tool] Parametrisation file '" << m_filenameLookupTable << "' not found" );
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG( "[PunchThroughG4Tool] Parametrisation file found: " << resolvedFileName );
-
   //retrieve inverse CDF config file
   if (!initializeInverseCDF(PathResolverFindCalibFile(m_filenameInverseCDF)))
   {
@@ -74,6 +66,52 @@ StatusCode PunchThroughG4Tool::initialize(){
     return StatusCode::FAILURE;
   }
 
+  ATH_MSG_INFO( "[PunchThroughG4Tool] initialization is successful" );
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PunchThroughG4Tool::initializeRegisterPunchThroughParticles(){
+  G4ParticleTable *ptable = G4ParticleTable::GetParticleTable(); 
+  for ( unsigned int num = 0; num < m_punchThroughParticles.size(); num++ )
+  {
+    const int pdg = m_punchThroughParticles[num];
+    // if no information is given on the creation of anti-particles -> do not simulate anti-particles
+    const bool doAnti = ( num < m_doAntiParticles.size() ) ? m_doAntiParticles[num] : false;
+    // if no information is given on the minimum energy -> take 50. MeV as default
+    const double minEnergy = ( num < m_minEnergy.size() ) ? m_minEnergy[num] : 50.;
+    // if no information is given on the maximum number of punch-through particles -> take -1 as default
+    const int maxNum = ( num < m_minEnergy.size() ) ? m_maxNumParticles[num] : -1;
+    // if no information is given on the scale factor for the number of particles -> take 1. as defaulft
+    const double numFactor = ( num < m_numParticlesFactor.size() ) ? m_numParticlesFactor[num] : 1.;
+    // if no information is given on the position angle factor -> take 1.
+    const double posAngleFactor = ( num < m_posAngleFactor.size() ) ? m_posAngleFactor[num] : 1.;
+    // if no information is given on the momentum angle factor -> take 1.
+    const double momAngleFactor = ( num < m_momAngleFactor.size() ) ? m_momAngleFactor[num] : 1.;
+    // if no information is given on the scale factor for the energy -> take 1. as default
+    const double energyFactor = ( num < m_energyFactor.size() ) ? m_energyFactor[num] : 1.;
+
+    // register the particle
+    ATH_MSG_VERBOSE("VERBOSE: [PunchThroughG4Tool] registering punch-through particle type with pdg = " << pdg );    
+    if (registerPunchThroughParticle( *ptable, pdg, doAnti, minEnergy, maxNum, numFactor, energyFactor, posAngleFactor, momAngleFactor ) != StatusCode::SUCCESS)
+    {
+      ATH_MSG_ERROR("[PunchThroughG4Tool] unable to register punch-through particle type with pdg = " << pdg);
+      return StatusCode::FAILURE;
+    }
+  }
+  // if all goes well
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PunchThroughG4Tool::initializePhysics(){
+  // resolving lookuptable file
+
+  ATH_MSG_INFO("[PunchThroughG4Tool] PunchThroughG4Tool::initializePhysics() called");
+  std::string resolvedFileName = PathResolverFindCalibFile (m_filenameLookupTable);
+  if (resolvedFileName.empty()) {
+    ATH_MSG_ERROR( "[PunchThroughG4Tool] Parametrisation file '" << m_filenameLookupTable << "' not found" );
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG( "[PunchThroughG4Tool] Parametrisation file found: " << resolvedFileName );
   // open the LookupTable file
   m_fileLookupTable = new TFile( resolvedFileName.c_str(), "READ");
   if (!m_fileLookupTable) {
@@ -118,40 +156,6 @@ StatusCode PunchThroughG4Tool::initialize(){
   const std::vector<std::pair<double, double>>* rzMS = &(m_envDefSvc->getMuonRZBoundary());  
   const std::vector<std::pair<double, double>>* rzCalo = &(m_envDefSvc->getCaloRZBoundary());  
   ATH_CHECK(checkCaloMSBoundaries(rzMS, rzCalo));
-
-  ATH_MSG_INFO( "[PunchThroughG4Tool] initialization is successful" );
-  return StatusCode::SUCCESS;
-}
-
-StatusCode PunchThroughG4Tool::initializeRegisterPunchThroughParticles(){
-  G4ParticleTable *ptable = G4ParticleTable::GetParticleTable(); 
-  for ( unsigned int num = 0; num < m_punchThroughParticles.size(); num++ )
-  {
-    const int pdg = m_punchThroughParticles[num];
-    // if no information is given on the creation of anti-particles -> do not simulate anti-particles
-    const bool doAnti = ( num < m_doAntiParticles.size() ) ? m_doAntiParticles[num] : false;
-    // if no information is given on the minimum energy -> take 50. MeV as default
-    const double minEnergy = ( num < m_minEnergy.size() ) ? m_minEnergy[num] : 50.;
-    // if no information is given on the maximum number of punch-through particles -> take -1 as default
-    const int maxNum = ( num < m_minEnergy.size() ) ? m_maxNumParticles[num] : -1;
-    // if no information is given on the scale factor for the number of particles -> take 1. as defaulft
-    const double numFactor = ( num < m_numParticlesFactor.size() ) ? m_numParticlesFactor[num] : 1.;
-    // if no information is given on the position angle factor -> take 1.
-    const double posAngleFactor = ( num < m_posAngleFactor.size() ) ? m_posAngleFactor[num] : 1.;
-    // if no information is given on the momentum angle factor -> take 1.
-    const double momAngleFactor = ( num < m_momAngleFactor.size() ) ? m_momAngleFactor[num] : 1.;
-    // if no information is given on the scale factor for the energy -> take 1. as default
-    const double energyFactor = ( num < m_energyFactor.size() ) ? m_energyFactor[num] : 1.;
-
-    // register the particle
-    ATH_MSG_VERBOSE("VERBOSE: [PunchThroughG4Tool] registering punch-through particle type with pdg = " << pdg );    
-    if (registerPunchThroughParticle( *ptable, pdg, doAnti, minEnergy, maxNum, numFactor, energyFactor, posAngleFactor, momAngleFactor ) != StatusCode::SUCCESS)
-    {
-      ATH_MSG_ERROR("[PunchThroughG4Tool] unable to register punch-through particle type with pdg = " << pdg);
-      return StatusCode::FAILURE;
-    }
-  }
-  // if all goes well
   return StatusCode::SUCCESS;
 }
 

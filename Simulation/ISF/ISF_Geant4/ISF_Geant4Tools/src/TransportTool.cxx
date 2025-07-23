@@ -112,19 +112,23 @@ void iGeant4::G4TransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
   if(m_physListSvc.retrieve().isFailure()) {
     throw std::runtime_error("Could not initialize ATLAS PhysicsListSvc!");
   }
+  ATH_MSG_INFO( "retireving the Detector Construction tool" );
+  if(m_detConstruction.retrieve().isFailure()) {
+    throw std::runtime_error("Could not initialize ATLAS DetectorConstruction!");
+  }
+
 
   // Create the (master) run manager
   if(m_useMT) {
 #ifdef G4MULTITHREADED
     auto* runMgr = G4AtlasMTRunManager::GetG4AtlasMTRunManager();
     m_physListSvc->SetPhysicsList();
-    runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
+    runMgr->SetDetConstructionTool( m_detConstruction.get() );
     runMgr->SetPhysListSvc( m_physListSvc.typeAndName() );
     runMgr->SetQuietMode( m_quietMode );
     // Worker Thread initialization used to create worker run manager on demand.
     std::unique_ptr<G4AtlasUserWorkerThreadInitialization> workerInit =
       std::make_unique<G4AtlasUserWorkerThreadInitialization>();
-    workerInit->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
     workerInit->SetQuietMode( m_quietMode );
     runMgr->SetUserInitialization( workerInit.release() );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
@@ -141,7 +145,7 @@ void iGeant4::G4TransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
     m_physListSvc->SetPhysicsList();
     runMgr->SetRecordFlux( m_recordFlux, std::make_unique<ISFFluxRecorder>() );
     runMgr->SetLogLevel( int(msg().level()) ); // Synch log levels
-    runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
+    runMgr->SetDetConstructionTool( m_detConstruction.get() );
     runMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
     runMgr->SetQuietMode( m_quietMode );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
@@ -190,9 +194,11 @@ void iGeant4::G4TransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
     rm->RunInitialization();
   }
 
-  ATH_MSG_INFO( "retireving the Detector Geometry Service" );
-  if(m_detGeoSvc.retrieve().isFailure()) {
-    throw std::runtime_error("Could not initialize ATLAS DetectorGeometrySvc!");
+  ATH_MSG_INFO("Initializing " << m_physicsInitializationTools.size() << " physics initialization tools");
+  for(auto& physicsTool : m_physicsInitializationTools) {
+    if (physicsTool->initializePhysics().isFailure()) {
+      throw std::runtime_error("Failed to initialize physics with tool " + physicsTool.name());
+    }
   }
 
   if(m_userLimitsSvc.retrieve().isFailure()) {
@@ -205,7 +211,7 @@ void iGeant4::G4TransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
       throw std::runtime_error("Failed dynamic_cast!! this is not a G4VModularPhysicsList!");
     }
 #if G4VERSION_NUMBER >= 1010
-    std::vector<std::string>& parallelWorldNames=m_detGeoSvc->GetParallelWorldNames();
+    std::vector<std::string>& parallelWorldNames=m_detConstruction->GetParallelWorldNames();
     for (auto& it: parallelWorldNames) {
       thePhysicsList->RegisterPhysics(new G4ParallelWorldPhysics(it,true));
     }

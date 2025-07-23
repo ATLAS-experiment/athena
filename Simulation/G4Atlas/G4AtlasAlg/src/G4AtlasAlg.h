@@ -21,10 +21,11 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "AthenaKernel/IAthRNGSvc.h"
+#include "G4AtlasInterfaces/IDetectorConstructionTool.h"
 #include "G4AtlasInterfaces/IUserActionSvc.h"
 #include "G4AtlasInterfaces/IUserActionTool.h"
-#include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 #include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
+#include "G4AtlasInterfaces/IPhysicsInitialization.h"
 #include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
 #include "G4AtlasInterfaces/IUserLimitsSvc.h"
@@ -137,8 +138,9 @@ private:
   ServiceHandle<IUserLimitsSvc> m_userLimitsSvc{this, "UserLimitsSvc", "UserLimitsSvc", ""};
   /// User Action Service
   ServiceHandle<G4UA::IUserActionSvc> m_userActionSvc{this, "UserActionSvc", "G4UA::UserActionSvc", ""};
-  /// Detector Geometry Service (builds G4 Geometry)
-  ServiceHandle<IDetectorGeometrySvc> m_detGeoSvc{this, "DetGeoSvc", "DetectorGeometrySvc", ""};
+
+  PublicToolHandle<IDetectorConstructionTool> m_detConstruction{this, "DetectorConstruction", "", "Tool handle of the DetectorConstruction"};
+  PublicToolHandleArray<IPhysicsInitializationTool> m_physicsInitializationTools{this, "PhysicsInitializationTools", {}, "Physics initialization happening after Geant4 initialization"};
 
   /// Quasi-Stable Particle Simulation Patcher
   ServiceHandle<Simulation::IZeroLifetimePatcher> m_qspatcher{this, "QuasiStablePatcher", "", "Quasi-Stable Particle Simulation Patcher"};

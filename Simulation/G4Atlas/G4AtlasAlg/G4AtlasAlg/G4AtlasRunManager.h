@@ -15,8 +15,8 @@
 // Athena headers
 #include "AthenaBaseComps/AthMessaging.h"
 #include "CxxUtils/checker_macros.h"
+#include "G4AtlasInterfaces/IDetectorConstructionTool.h"
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
-#include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 #include "G4AtlasInterfaces/IFluxRecorder.h"
 
 /// ATLAS custom singleton run manager.
@@ -43,9 +43,9 @@ public:
   /// G4 function called at end of run
   void RunTermination() override final;
 
-  /// Configure the detector geometry service handle
-  void SetDetGeoSvc(const std::string& typeAndName) {
-    m_detGeoSvc.setTypeAndName(typeAndName);
+  /// Configure the detector construction tool
+  void SetDetConstructionTool(IDetectorConstructionTool* detConstruction) {
+    m_detConstruction = detConstruction;
   }
 
   /// Configure the Physics List Tool handle
@@ -93,7 +93,7 @@ private:
 
   ServiceHandle<IPhysicsListSvc> m_physListSvc;
 
-  ServiceHandle<IDetectorGeometrySvc> m_detGeoSvc;
+  IDetectorConstructionTool* m_detConstruction{nullptr};
 
   /// Interface to flux recording
 

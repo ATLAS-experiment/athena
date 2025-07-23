@@ -30,20 +30,12 @@ public:
   /// @brief Create ATLAS worker run manager
   G4WorkerRunManager* CreateWorkerRunManager() const;
 
-  /// @name Methods to pass configuration in from G4AtlasAlg
-  /// @{
-  /// Configure the detector geometry service handle
-  void SetDetGeoSvc(const std::string& typeAndName) {
-    m_detGeoSvcName = typeAndName;
-  }
-
   /// Configure the QuietMode option
   void SetQuietMode(bool quietMode) {
     m_quietMode = quietMode;
   }
 
 private:
-  std::string m_detGeoSvcName{"DetectorGeometrySvc"};
   bool m_quietMode{false};
 
 }; // class G4AtlasUserWorkerThreadInitialization
