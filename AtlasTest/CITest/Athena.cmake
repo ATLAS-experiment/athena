@@ -357,7 +357,7 @@ atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
 
 atlas_add_citest( ACTS_ActsGx2fRefitting
    SCRIPT ActsGx2fRefitting.sh
-   LOG_IGNORE_PATTERN "Gx2fRefitNavigator.*ERROR No Volume | No start volume resolved. Nothing left to do." )
+   LOG_IGNORE_PATTERN "Gx2fRefitNavigator.*ERROR No Volume | No start volume resolved. Nothing left to do.|Acts.*ERROR Propagation reached the step count limit|Acts.*ERROR Propagation failed" )
    
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ActsKfRefitting.sh )

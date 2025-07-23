@@ -25,8 +25,12 @@ using CLHEP::micrometer;
 namespace ActsTrk {
   static inline int getCellRow(const typename PixelClusteringTool::Cell& cell) { return cell.ROW; }
   static inline int getCellColumn(const typename PixelClusteringTool::Cell& cell) { return cell.COL; }
-  static inline int& getCellLabel(typename PixelClusteringTool::Cell& cell) { return cell.NCL; }
-
+  static inline void clusterReserve(PixelClusteringTool::Cluster& cl,
+				    std::size_t n)
+  {
+    cl.ids.reserve(n);
+    cl.tots.reserve(n);
+  }  
   static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
 				    const PixelClusteringTool::Cell& cell)
   {
