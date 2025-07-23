@@ -6,6 +6,7 @@
 #define ACTSGEOMETRY_IACTSMATERIALJSONWRITERTOOL_H
 
 
+#include <Acts/Material/TrackingGeometryMaterial.hpp>
 #include "GaudiKernel/IAlgTool.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
@@ -21,7 +22,7 @@ public:
 
   virtual
   void
-  write(const ActsGeometryContext& gctx, const Acts::MaterialMapJsonConverter::DetectorMaterialMaps& detMaterial) const = 0;
+  write(const ActsGeometryContext& gctx, const Acts::TrackingGeometryMaterial& detMaterial) const = 0;
 
   virtual
   void

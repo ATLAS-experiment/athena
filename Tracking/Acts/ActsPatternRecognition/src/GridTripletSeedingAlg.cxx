@@ -107,18 +107,24 @@ StatusCode GridTripletSeedingAlg::execute(const EventContext& ctx) const {
 
   // Apply selection on which SPs you want to use from the input container
   Acts::Experimental::SpacePointContainer2 selectedSpacePoints;
-  selectedSpacePoints.createExtraColumns(
-      Acts::Experimental::SpacePointKnownExtraColumn::R |
-      Acts::Experimental::SpacePointKnownExtraColumn::Phi |
-      Acts::Experimental::SpacePointKnownExtraColumn::VarianceR |
-      Acts::Experimental::SpacePointKnownExtraColumn::VarianceZ |
-      Acts::Experimental::SpacePointKnownExtraColumn::Strip);
+  selectedSpacePoints.createColumns(
+      Acts::Experimental::SpacePointColumns::SourceLinks |
+      Acts::Experimental::SpacePointColumns::X |
+      Acts::Experimental::SpacePointColumns::Y |
+      Acts::Experimental::SpacePointColumns::Z |
+      Acts::Experimental::SpacePointColumns::R |
+      Acts::Experimental::SpacePointColumns::Phi |
+      Acts::Experimental::SpacePointColumns::VarianceR |
+      Acts::Experimental::SpacePointColumns::VarianceZ |
+      Acts::Experimental::SpacePointColumns::Strip);
 
   for (const auto* collection : allInputCollections) {
     for (const xAOD::SpacePoint* inputSp : *collection) {
-      auto newSp = selectedSpacePoints.createSpacePoint(
-          std::array<Acts::SourceLink, 1>{Acts::SourceLink(inputSp)},
-          inputSp->x(), inputSp->y(), inputSp->z());
+      auto newSp = selectedSpacePoints.createSpacePoint();
+      newSp.assignSourceLinks(std::array<Acts::SourceLink, 1>{Acts::SourceLink(inputSp)});
+      inputSp->x();
+      inputSp->y();
+      inputSp->z();
       newSp.phi() = std::atan2(inputSp->y(), inputSp->x());
       newSp.r() = std::hypot(inputSp->x(), inputSp->y());
       newSp.varianceR() = inputSp->varianceR();
