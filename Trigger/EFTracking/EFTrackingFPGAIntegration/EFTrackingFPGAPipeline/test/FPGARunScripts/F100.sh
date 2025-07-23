@@ -59,16 +59,23 @@ while [ $# -ge 1 ];do
     done
 
 ## checking valid inputs
-if [ -z $inputRDO ]; then usage ; fi
-if [ -z $outputAOD ]; then usage ; fi
+if [ -z "$inputRDO" ]; then usage ; fi
+if [ -z "$outputAOD" ]; then usage ; fi
 
-IFS=',' read -ra FILES <<< "$inputRDO"
-for file in "${FILES[@]}"; do
-    if [[ ! -f "$file" ]]; then
-        echo "Error: File not found: $file"
-        exit 1
-    fi
-done
+if [[ "$inputRDO" == *"*"* ]]; then
+    # Just pass the pattern as is to Reco_tf.py in case of regex-like input
+    inputRDO_arg="$inputRDO"
+else
+    # Check existence for comma-separated files
+    IFS=',' read -ra FILES <<< "$inputRDO"
+    for file in "${FILES[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            echo "Error: File not found: $file"
+            exit 1
+        fi
+    done
+    inputRDO_arg="$inputRDO"
+fi
 export ATHENA_CORE_NUMBER=1
 ## running reconstruction
 
@@ -82,7 +89,7 @@ Reco_tf.py --CA \
                 flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
-    --inputRDOFile ${inputRDO} \
+    --inputRDOFile ${inputRDO_arg} \
     --outputAODFile ${outputAOD}
 
 
