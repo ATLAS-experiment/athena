@@ -1,5 +1,6 @@
 # This comes after all Simplified Model setup files
-from MadGraphControl.MadGraphUtils import SUSY_Generation,modify_param_card,check_reset_proc_number
+from MadGraphControl.MadGraphUtils import modify_param_card,check_reset_proc_number
+from MadGraphControl.SUSY_Helpers import SUSY_Generation
 from MadGraphControl.MadGraphUtilsHelpers import get_physics_short
 
 phys_short = get_physics_short()
