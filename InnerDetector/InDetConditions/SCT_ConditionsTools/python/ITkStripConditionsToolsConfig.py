@@ -110,30 +110,22 @@ def ITkStripModuleVetoCfg(flags, name="ITkStripModuleVeto", **kwargs):
     """
     # For SCT_ID used in SCT_ModuleVetoTool
     acc = GeoModelCfg(flags)
-    print("ITkStripModuleVetoCfg - (AB) -HELLO!")
     
     
-    kwargs.setdefault("useDB", True) #(AB)
+    kwargs.setdefault("useDB", True) #(AB)  FIXME, this needs to be changed - for tests
     kwargs.setdefault("BadModuleIdentifiers", [])
 
     if kwargs["useDB"]:
-        #kwargs.setdefault("BadModuleIdentifiers", ["database"])
         kwargs["BadModuleIdentifiers"] = ["database"]
-        #flags.IOVDb.DBConnection="sqlite://;schema=/afs/cern.ch/work/a/anburger/COOLAthena/project/mycool.db;dbname=CONDBR2"
-        #flags.IOVDb.SqliteInput="/afs/cern.ch/work/a/anburger/COOLAthena/project/mycool.db"
-        #flags.IOVDb.GlobalTag = ""
-        #flags.IOVDb.DatabaseInstance = ""
-        print("ADD MY PERSONAL DATABASE - (AB)")
-        print("(AB) - BadModuleIdentifiers : {}".format(kwargs["BadModuleIdentifiers"]))
         # Condition folder
         acc.merge(addFolders(flags,
                              folderStrings="/ITk/Manual/BadModules",
-                             detDb="/afs/cern.ch/work/a/anburger/COOLAthena/project/mycool.db", #(AB)
-                             className="AthenaAttributeList", #AthenaAttributeList
-                            # tag=kwargs["folderTag"],
-                             tag="OFLCOND-MC15c-SDR-14-05",
-                             extensible=True,
-                             db="CONDBR2"
+                             detDb="/afs/cern.ch/work/a/anburger/COOLAthena/project/mycool.db", #(AB) - FIXME, this needs to be changed - for tests
+                             className="AthenaAttributeList",
+                            # tag=kwargs["folderTag"],  #(AB) - FIXME, this needs to be changed - for tests
+                             tag="OFLCOND-MC15c-SDR-14-05",  #(AB) - FIXME, this needs to be changed - for tests 
+                             extensible=True,  #(AB) - FIXME, this needs to be changed - for tests 
+                             db="CONDBR2"  #(AB) - FIXME, this needs to be changed - for tests
                              ))            
         # Condition algorithm
         acc.addCondAlgo(CompFactory.SCT_ModuleVetoCondAlg())
