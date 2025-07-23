@@ -14,12 +14,13 @@
 
 // Framework includes
 #include "GaudiKernel/ServiceHandle.h"
+#include <GaudiKernel/ToolHandle.h>
 #include "AthenaBaseComps/AthMessaging.h"
 #include "CxxUtils/checker_macros.h"
 
 // G4Atlas includes
+#include "G4AtlasInterfaces/IDetectorConstructionTool.h"
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
-#include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 
 
 /// @class G4AtlasMTRunManager
@@ -52,9 +53,9 @@ public:
   virtual void ThisWorkerReady() override final {};
   virtual void ThisWorkerEndEventLoop() override final {};
 
-  /// Configure the detector geometry service handle
-  void SetDetGeoSvc(const std::string& typeAndName) {
-    m_detGeoSvc.setTypeAndName(typeAndName);
+  /// Configure the detector construction tool
+  void SetDetConstructionTool(IDetectorConstructionTool* detConstruction) {
+    m_detConstruction = detConstruction;
   }
 
   /// Configure the Physics List Tool handle
@@ -87,9 +88,9 @@ private:
   G4AtlasMTRunManager();
 
 private:
-  /// Handle to the detector geometry service.
+  /// Handle to the detector construction tool.
   /// Not ideal, because we can't configure this.
-  ServiceHandle<IDetectorGeometrySvc> m_detGeoSvc;
+  IDetectorConstructionTool* m_detConstruction{nullptr};
 
   /// Handle to the physics list tool.
   /// Not ideal, because we can't configure this.

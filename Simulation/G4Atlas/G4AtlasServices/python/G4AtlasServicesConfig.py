@@ -5,17 +5,9 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from ExtraParticles.ExtraParticlesConfig import ExtraParticlesPhysicsToolCfg
 from SimulationConfig.SimEnums import CavernBackground
-from G4AtlasTools.G4GeometryToolConfig import G4AtlasDetectorConstructionToolCfg
 from G4ExtraProcesses.G4ExtraProcessesConfig import G4EMProcessesPhysicsToolCfg
 from G4StepLimitation.G4StepLimitationConfig import G4StepLimitationToolCfg
 from TRT_TR_Process.TRT_TR_ProcessConfig import TRTPhysicsToolCfg
-
-
-def DetectorGeometrySvcCfg(flags, name="DetectorGeometrySvc", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("DetectorConstruction", result.addPublicTool(result.popToolsAndMerge(G4AtlasDetectorConstructionToolCfg(flags))))
-    result.addService(CompFactory.DetectorGeometrySvc(name, **kwargs), primary = True)
-    return result
 
 
 @AccumulatorCache

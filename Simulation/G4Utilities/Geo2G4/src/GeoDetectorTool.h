@@ -7,7 +7,6 @@
 
 // Base classes
 #include "G4AtlasTools/DetectorGeometryBase.h"
-//#include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 #include "G4AtlasInterfaces/IGeo2G4Svc.h"
 
 #include "G4Transform3D.hh"

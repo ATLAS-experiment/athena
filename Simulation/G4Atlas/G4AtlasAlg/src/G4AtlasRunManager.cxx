@@ -26,7 +26,6 @@ G4AtlasRunManager::G4AtlasRunManager()
   , AthMessaging("G4AtlasRunManager")
   , m_recordFlux(false)
   , m_physListSvc("PhysicsListSvc", "G4AtlasRunManager")
-  , m_detGeoSvc("DetectorGeometrySvc", "G4AtlasRunManager")
   , m_volumeSmartlessLevel({})
 {  }
 
@@ -59,17 +58,10 @@ void G4AtlasRunManager::RunInitialization()
 void G4AtlasRunManager::InitializeGeometry()
 {
   ATH_MSG_DEBUG( "InitializeGeometry()" );
-  if (m_detGeoSvc.retrieve().isFailure()) {
-    ATH_MSG_ERROR ( "Could not retrieve the DetectorGeometrySvc" );
-    G4ExceptionDescription description;
-    description << "InitializeGeometry: Failed to retrieve IDetectorGeometrySvc.";
-    G4Exception("G4AtlasRunManager", "CouldNotRetrieveDetGeoSvc", FatalException, description);
-    abort(); // to keep Coverity happy
-  }
 
   // Create/assign detector construction
   G4RunManager::SetUserInitialization(
-      m_detGeoSvc->GetDetectorConstruction().release());
+      m_detConstruction->GetDetectorConstruction().release());
   if (userDetector) {
     G4RunManager::InitializeGeometry();
   }
