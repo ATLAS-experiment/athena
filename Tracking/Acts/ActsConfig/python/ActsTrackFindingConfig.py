@@ -7,6 +7,20 @@ from ActsConfig.ActsConfigFlags import SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
 from ActsInterop import UnitConstants
 
+
+from enum import Enum
+
+
+# Define the Ambiguity resolution strategy modes
+# OUTSIDE_TF : run the ambiguity resolution in a separate algorithm
+# END_OF_TF  : run the ambiguity resolution at the end of the track finding, on the track candidate container
+# DURING_TF  : remove the tracks that share too many hits during track finding, when deciding good candidates
+
+class AmbiSolverMode(Enum):
+    OUTSIDE_TF = 0
+    END_OF_TF = 1
+    DURING_TF = 2
+
 # Tools
 
 def isdet(flags,
@@ -104,6 +118,15 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
     kwargs.setdefault("seedMeasOffset", 1)
+
+    # Ambi strategy 0 means do the ambiguity resolution outside the track finding.
+    kwargs.setdefault("ambiStrategy", AmbiSolverMode.OUTSIDE_TF.value if flags.Acts.doAmbiguityResolution else AmbiSolverMode.END_OF_TF.value)
+    
+    if (not flags.Acts.doAmbiguityResolution) :
+        kwargs.setdefault("MaximumSharedHits", 3)
+        kwargs.setdefault("MaximumIterations", 10000)
+        kwargs.setdefault("NMeasurementsMin", 7)
+    
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)

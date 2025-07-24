@@ -33,20 +33,23 @@ namespace ActsTrk::detail {
     template <Acts::TrackContainerFrontend track_container_t>
     inline auto computeSharedHitsDynamic(typename track_container_t::TrackProxy &track,
                                          track_container_t &tracks,
-                                         MeasurementIndex &measurementIndex)
+                                         MeasurementIndex &measurementIndex,
+                                         bool removeSharedHits = false)
         -> ReturnSharedAndBad;
 
     template <Acts::TrackContainerFrontend track_container_t>
     inline auto computeSharedHits(typename track_container_t::TrackProxy &track,
                                   track_container_t &tracks,
-                                  const MeasurementIndex &measurementIndex)
+                                  const MeasurementIndex &measurementIndex,
+                                  bool removeSharedHits = false)
         -> ReturnSharedAndBad;
 
     template <Acts::TrackContainerFrontend track_container_t, typename IndexFun>
     inline auto computeSharedHits(typename track_container_t::TrackProxy &track,
                                   track_container_t &tracks,
                                   std::size_t indexSize,
-                                  IndexFun &&indexFun)
+                                  IndexFun &&indexFun,
+                                  bool removeSharedHits = false)
         -> ReturnSharedAndBad;
 
   private:
