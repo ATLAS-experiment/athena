@@ -41,8 +41,6 @@ run () {
     return $rc
 }
 
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,Acts.+FindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+SurfaceError:1,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
-
 export ATHENA_CORE_NUMBER=4
 
 # Run with Athena ambi. resolution
@@ -51,7 +49,6 @@ run "Reconstruction-ckf" \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --preExec 'flags.Acts.doMonitoring=True;' \
-    --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.ckf.root \
     --maxEvents ${n_events} \

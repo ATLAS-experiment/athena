@@ -13,7 +13,8 @@
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
-n_events=1000
+n_events=1
+rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
@@ -44,7 +45,7 @@ run "Reconstruction-athena" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Tracking.doITkFastTracking=True;" \
-    --inputRDOFile ${ArtInFile} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
     --maxEvents ${n_events}
 
@@ -68,16 +69,13 @@ if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
-
 # Run ACTS
 run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
 	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
-    --ignorePatterns "${ignore_pattern}" \
-    --inputRDOFile ${ArtInFile} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${n_events}
 
