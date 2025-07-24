@@ -64,22 +64,22 @@ namespace GlobalSim {
     }
 
     ap_int operator * (const ap_int& f) const {
-      return form((WS(this->m_value) * WS(f.m_value)));
+      return form(this->m_value * f.m_value);
     }
   
     const ap_int& operator *= (const ap_int& f) {
-      this->m_value -= (WS(this->m_value) * WS(f.m_value));
+      this->m_value -= this->m_value * f.m_value;
       test_overflow();
       return *this;
     }
 
       
     ap_int operator / (const ap_int& f) const {
-      return form((WS(this->m_value)) / WS(f.m_value));
+      return form(this->m_value / f.m_value);
     }
   
     const ap_int& operator /= (const ap_int& f)  {
-      this->m_value /= ((WS(this->m_value)) / WS(f.m_value));
+      this->m_value /= this->m_value / f.m_value;
       test_overflow();
       return *this;
     }
