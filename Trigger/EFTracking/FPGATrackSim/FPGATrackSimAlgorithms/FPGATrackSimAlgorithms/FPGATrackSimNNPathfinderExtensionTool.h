@@ -146,6 +146,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
 
         Gaudi::Property<unsigned> m_maxMiss { this, "threshold", 2, "Maximum number of missing hits to reject a road"};
+        Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
 
         // Options only needed for sector assignment.
         // The eta pattern option here should probably be dropped, because we're not using it
@@ -153,7 +154,8 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         // and then running the eta pattern filter a second time.
         Gaudi::Property<std::vector<float>> m_windowR { this, "windowR", {20.0}, "Window Size to search in for r, either pass one value for all layers or use the number of layers"};
         Gaudi::Property<std::vector<float>> m_windowZ { this, "windowZ", {20.0}, "Window Size to search in for z, either pass one value for all layers or use the number of layers"};
-        Gaudi::Property<std::vector<float>> m_windowPhi { this, "windowPhi", {0.4}, "Window Size to search in for phi, either pass one value for all layers or use the number of layers"};  
+        Gaudi::Property<std::vector<float>> m_windowPhi { this, "windowPhi", {0.4}, "Window Size to search in for phi, either pass one value for all layers or use the number of layers"};
+        Gaudi::Property<std::vector<int>> m_windowFineID { this, "windowFineID", {0}, "Fine ID indexing for windows"};
         Gaudi::Property <float> m_lowPtValueForWindowRScaling { this, "lowPtValueWindowR", -1, "Value in MeV below which we scale the r window size"};
         Gaudi::Property <float> m_lowPtWindowRScaling {this, "lowPtRScaling", 1.0, "Scaling factor for low pt in R"};
         Gaudi::Property <float> m_lowPtValueForWindowZScaling { this, "lowPtValueWindowZ", -1, "Value in MeV below which we scale the r window size"};
@@ -175,6 +177,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         std::vector<unsigned int> m_missingHitsOnRoad;
         std::vector<std::vector<unsigned long>> m_predictedHitsFineID;
         std::vector<std::vector<unsigned int>> m_foundHitITkLayer;
+        std::vector<std::vector<std::vector<float>>> m_distanceHitsInLayerToPrediction;
         std::vector<unsigned int> m_nHitsInSearchWindow;
         std::vector<std::vector<float>> m_distanceOfPredictedHitToFoundHit;
         std::vector<std::vector<bool>> m_foundHitIsSP;

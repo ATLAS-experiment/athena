@@ -560,6 +560,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg(**kwargs)
     theFPGATrackSimLogicalHitsProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
     theFPGATrackSimLogicalHitsProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
+    theFPGATrackSimLogicalHitsProcessAlg.SetTruthParametersForTracks = flags.Trigger.FPGATrackSim.SetTruthParametersForTracks
     theFPGATrackSimLogicalHitsProcessAlg.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemoval
     theFPGATrackSimLogicalHitsProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput1st = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput1st
@@ -658,13 +659,13 @@ def getChi2Cut(region):
     return eta_to_chi2.get(abs_etaRange, 20)
 
 def getChi2CutNN(region):
-    chi2cut_l = [0.9,0.9,0.9, ### 0.0-0.6
-                 0.9,0.9,0.9, ### 0.6-1.2,
-                 0.9,0.9,0.6, ### 1.2-1.8
-                 0.6,0.6,0.6, ### 1.8-2.4
-                 0.6,0.6,0.6, ### 2.4-3.0
-                 0.6,0.6,0.6, ### 3.0-3.6,
-                 0.6,0.6] ### 3.6-4.0
+    chi2cut_l = [0.97,0.97,0.99, ### 0.0-0.6
+                 0.7,0.86,0.99, ### 0.6-1.2,
+                 0.98,0.92,0.98, ### 1.2-1.8
+                 0.95,0.93,0.4, ### 1.8-2.4
+                 0.4,0.4,0.7, ### 2.4-3.0
+                 0.6,0.5,0.4, ### 3.0-3.6
+                 0.4,0.4] ### 3.6-4.0
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F

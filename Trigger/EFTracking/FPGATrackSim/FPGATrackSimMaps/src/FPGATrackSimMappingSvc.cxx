@@ -125,6 +125,7 @@ std::string FPGATrackSimMappingSvc::getExtensionNNHitMapString() const {
     }
 }
 
+
 std::string FPGATrackSimMappingSvc::getParamNNMapString() const {
     if (m_NNmap_param != nullptr) {
         return m_NNmap_param->getNNMap();
@@ -233,43 +234,49 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_extension_vol.value() << " for track extension");
         ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_extension_hit.value() << " for track extension");
 
+
+
+        if ( ! m_NNmap_path_extension_vol.empty() ) {
+	    std::string model_path = m_NNmap_path_extension_vol.value() + "_" + std::to_string(m_regionID) + "_cyl_condor.onnx";
+	    m_NNmap_extension_vol = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	} else {
+            m_NNmap_extension_vol = nullptr;
+	}
+
+	if ( ! m_NNmap_path_extension_hit.empty() ) {
+	  std::string model_path = m_NNmap_path_extension_hit.value() + "_" + std::to_string(m_regionID) + "_cyl_condor.onnx";
+	  m_NNmap_extension_hit = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	} else {
+            m_NNmap_extension_hit = nullptr;
+           
+        }
+
         if ( ! m_NNmap_path_fake.empty() ) {
-            m_NNmap_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_fake.value()));
-        } else {
+	    std::string model_path = m_NNmap_path_fake.value() + "_" + std::to_string(m_regionID) + "_condor.onnx";
+	    m_NNmap_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	} else {
             m_NNmap_fake = nullptr;
         }
 
         if ( ! m_NNmap2nd_path_fake.empty() ) {
-            m_NNmap2nd_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap2nd_path_fake.value()));
-        } else {
-            m_NNmap2nd_fake = nullptr;
+	  std::string model_path = m_NNmap2nd_path_fake.value() + "_" + std::to_string(m_regionID) + "_condor.onnx";
+	  m_NNmap2nd_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	} else {
+	  m_NNmap2nd_fake = nullptr;
+        }	
+
+	if ( ! m_NNmap_path_param.empty() ) {	  
+	  std::string model_path;
+	  if(m_regionID <= 354) model_path = m_NNmap_path_param.value() + "_34_354.onnx";
+	  else if (m_regionID <= 738)  model_path = m_NNmap_path_param.value() + "_418_738.onnx";
+	  else model_path = m_NNmap_path_param.value() + "_802_1250.onnx";	  
+	  m_NNmap_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
         }
-
-
-        if ( ! m_NNmap_path_extension_vol.empty() ) {
-            m_NNmap_extension_vol = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_extension_vol.value()));
-        } else {
-            m_NNmap_extension_vol = nullptr;
-        }
-
-        if ( ! m_NNmap_path_extension_hit.empty() ) {
-            m_NNmap_extension_hit = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_extension_hit.value()));
-        } else {
-            m_NNmap_extension_hit = nullptr;
-        }
-
-        if ( ! m_NNmap_path_param.empty() ) {
-            m_NNmap_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_param.value()));
-        } else {
-            m_NNmap_param = nullptr;
-        }
-
+	
         if ( ! m_NNmap2nd_path_param.empty() ) {
-            m_NNmap2nd_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap2nd_path_param.value()));
-        } else {
-            m_NNmap2nd_param = nullptr;
+	  std::string model_path = m_NNmap2nd_path_param.value() + "_" + std::to_string(m_regionID) + "_condor.onnx";
+	  m_NNmap2nd_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
         }
-
     }
     ATH_CHECK(checkAllocs());
     return StatusCode::SUCCESS;

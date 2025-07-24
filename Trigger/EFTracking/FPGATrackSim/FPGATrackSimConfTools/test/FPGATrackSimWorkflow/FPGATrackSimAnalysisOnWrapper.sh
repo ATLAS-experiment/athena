@@ -13,7 +13,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.Hough.secondStage=True \
     Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
     Trigger.FPGATrackSim.tracking=True \
-    Trigger.FPGATrackSim.bankDir=${BANKS_5L}
+    Trigger.FPGATrackSim.bankDir=${BANKS_5L} 
 ls -l
 echo "... analysis on wrapper, this part is done ..."
 
