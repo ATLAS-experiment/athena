@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file egammaD3PDMaker/python/ElectronD3PDObject.py
@@ -123,7 +123,7 @@ if D3PDMakerFlags.DoTruth:
         ElectronD3PDObject.defineBlock (1, 'TruthClassification',
                                         D3PD.egammaTruthClassificationFillerTool,
                                         DoBkgElecOrigin = True,
-                                        Classifier = D3PD.D3PDMCTruthClassifier)
+                                        Classifier = D3PD.D3PDMCTruthClassifier())
     def _truthClassificationHook (c, flags, acc, *args, **kw):
         from TruthD3PDMaker.MCTruthClassifierConfig \
             import D3PDMCTruthClassifierCfg
