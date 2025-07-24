@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_MonitoredCollection_h
@@ -327,7 +327,7 @@ namespace Monitored {
     ObjectsCollection(std::string name, const T& collection,
                       std::function<R(const const_value_type&)> converterToR)
         : IMonitoredVariable(std::move(name)),
-	  m_collection(std::move(collection)),
+	  m_collection(collection),
           m_converterToR(std::move(converterToR)) {}
 
     ObjectsCollection(ObjectsCollection const&) = delete;
