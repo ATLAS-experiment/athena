@@ -51,9 +51,9 @@ namespace CP {
       for (const xAOD::IParticle *obj : *objects){
         if (!m_objectSelection || m_objectSelection.getBool(*obj, sys)){
           if (m_useDressedProperties) {
-            if (acc_pt_dressed(*obj) > m_ptmin) count++;
+            if (acc_pt_dressed(*obj) >= m_ptmin) count++;
           } else {
-            if (obj->pt() > m_ptmin) count++;
+            if (obj->pt() >= m_ptmin) count++;
           }
         }
       }
