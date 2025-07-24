@@ -37,9 +37,9 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('taus', "", type=str,
             info="the input tau-jet container, with a possible selection, in "
             "the format `container` or `container.selection`")
-        self.addOption ('invisible', "", type=str,
-            info="any input container to be treated as invisible particles, "
-            "with a possible selection, in the format `container` or `container.selection`")
+        self.addOption ('invisible', [], type=None,
+            info="any input containers to be treated as invisible particles, "
+            "as a single string or a list of strings in the format `container` or `container.selection`")
         self.addOption ('metWP', "Tight", type=str,
             info="the MET working point to use: Loose, Tight, Tighter, "
             "Tenacious")
@@ -101,8 +101,10 @@ class MetAnalysisConfig (ConfigBlock):
             alg.photons, alg.photonsSelection = config.readNameAndSelection (self.photons, excludeFrom={'or'})
         if self.taus != "" :
             alg.taus, alg.tausSelection = config.readNameAndSelection (self.taus, excludeFrom={'or'})
-        if self.invisible != "" :
-            alg.invisible, alg.invisibleSelection = config.readNameAndSelection (self.invisible, excludeFrom={'or'})
+        if self.invisible:
+            if isinstance(self.invisible, str):
+                self.invisible = [self.invisible]
+            alg.invisible, alg.invisibleSelection = [config.readNameAndSelection (container, excludeFrom={'or'}) for container in self.invisible]
         alg.met = config.writeName (self.containerName, isMet = True)
 
 
