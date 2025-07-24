@@ -9,10 +9,10 @@
 //     email                : jacob.julian.kempster@cern.ch alison.elliot@cern.ch
 //  ***************************************************************************/
 
-#include "L1CaloFEXSim/eFEXSysSim.h"
-#include "L1CaloFEXSim/eFEXSim.h"
+#include "eFEXSysSim.h"
+#include "eFEXSim.h"
 #include "L1CaloFEXSim/eTower.h"
-#include "L1CaloFEXSim/eFEXTOBxTOBMatching.h"
+#include "eFEXTOBxTOBMatching.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 
 #include "StoreGate/WriteHandle.h"
@@ -37,7 +37,7 @@ namespace LVL1 {
   eFEXSysSim::eFEXSysSim(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent)
   {
-    declareInterface<IeFEXSysSim>(this);
+    declareInterface<eFEXSysSim>(this);
 
   }
 

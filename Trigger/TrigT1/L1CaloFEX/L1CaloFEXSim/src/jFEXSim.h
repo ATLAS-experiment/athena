@@ -15,7 +15,7 @@
 #include "L1CaloFEXToolInterfaces/IjFEXSim.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jFEXFPGA.h"
+#include "jFEXFPGA.h"
 #include "L1CaloFEXSim/jFEXTOB.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 #include <vector>

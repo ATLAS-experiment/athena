@@ -8,12 +8,12 @@
 //     begin                : 15 10 2019
 //     email                : jacob.julian.kempster@cern.ch
 //  ***************************************************************************/
-#include "L1CaloFEXSim/eFEXFPGA.h"
+#include "eFEXFPGA.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
-#include "L1CaloFEXSim/eFEXtauAlgo.h"
+#include "eFEXtauAlgo.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 #include <vector>
 #include "StoreGate/ReadHandle.h"
@@ -30,7 +30,7 @@ namespace LVL1 {
 eFEXFPGA::eFEXFPGA(const std::string& type,const std::string& name,const IInterface* parent):
   AthAlgTool(type,name,parent)
 {
-  declareInterface<IeFEXFPGA>(this);
+  declareInterface<eFEXFPGA>(this);
 }
  
     

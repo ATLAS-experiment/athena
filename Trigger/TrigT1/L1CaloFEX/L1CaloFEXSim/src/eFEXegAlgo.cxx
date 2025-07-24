@@ -23,7 +23,7 @@ namespace LVL1 {
     eFEXegAlgo::eFEXegAlgo(const std::string& type, const std::string& name, const IInterface* parent):
             AthAlgTool(type, name, parent)
     {
-        declareInterface<IeFEXegAlgo>(this);
+        declareInterface<eFEXegAlgo>(this);
     }
 
     /** Destructor */

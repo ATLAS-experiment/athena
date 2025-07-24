@@ -13,31 +13,33 @@
 #define eFEXFORMTOBS_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L1CaloFEXToolInterfaces/IeFEXFormTOBs.h"
 
 namespace LVL1 {
 
   //Doxygen class description below:
   /** The eFEXFormTOBs class provides functions for creating TOBs for eFEX objects
   */
+  static const InterfaceID IID_IeFEXFormTOBs("LVL1::eFEXFormTOBs", 1, 0);
 
-  class eFEXFormTOBs : public AthAlgTool, virtual public IeFEXFormTOBs {
+  class eFEXFormTOBs : public AthAlgTool {
 
   public:
-    /** Constructors */
+      static const InterfaceID& interfaceID() { return IID_IeFEXFormTOBs; };
+
+      /** Constructors */
     eFEXFormTOBs(const std::string& type, const std::string& name, const IInterface* parent);
 
     /** standard Athena-Algorithm method */
-    virtual StatusCode initialize() override;
+    virtual StatusCode initialize();
     /** Destructor */
     virtual ~eFEXFormTOBs();
 
     
-    virtual uint32_t formTauTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const override;
-    virtual std::vector<uint32_t> formTauxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const override;
+    virtual uint32_t formTauTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const;
+    virtual std::vector<uint32_t> formTauxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const;
 
-    virtual uint32_t formEmTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const override;
-    virtual std::vector<uint32_t> formEmxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const override;
+    virtual uint32_t formEmTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const;
+    virtual std::vector<uint32_t> formEmxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const;
 
     /** Internal data */
   private:

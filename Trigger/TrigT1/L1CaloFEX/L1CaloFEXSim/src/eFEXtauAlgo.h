@@ -23,10 +23,11 @@ namespace LVL1 {
   //Doxygen class description below:
   /** The eFEXtauAlgo class calculates the tau TOB variables
   */
-  
-  class eFEXtauAlgo : public eFEXtauAlgoBase{
+
+    class eFEXtauAlgo : public eFEXtauAlgoBase{
     
   public:
+
     /** Constructors */
     eFEXtauAlgo(const std::string& type, const std::string& name, const IInterface* parent);
 

@@ -2,7 +2,7 @@
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "L1CaloFEXSim/eFakeTower.h"
+#include "eFakeTower.h"
 #include <iostream>
 #include <fstream>
 
@@ -15,7 +15,7 @@
 LVL1::eFakeTower::eFakeTower(const std::string &type, const std::string &name, const IInterface *parent):
   AthAlgTool(type, name, parent)
 {
-  declareInterface<IeFakeTower>(this);
+  declareInterface<eFakeTower>(this);
 }
 
 LVL1::eFakeTower::~eFakeTower() {

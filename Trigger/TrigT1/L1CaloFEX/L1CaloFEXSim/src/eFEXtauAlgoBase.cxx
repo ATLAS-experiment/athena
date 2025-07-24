@@ -16,7 +16,7 @@ LVL1::eFEXtauAlgoBase::eFEXtauAlgoBase(const std::string &type,
                                        const std::string &name,
                                        const IInterface *parent)
     : AthAlgTool(type, name, parent) {
-  declareInterface<IeFEXtauAlgo>(this);
+  declareInterface<eFEXtauAlgoBase>(this);
 }
 
 LVL1::eFEXtauAlgoBase::~eFEXtauAlgoBase() {}

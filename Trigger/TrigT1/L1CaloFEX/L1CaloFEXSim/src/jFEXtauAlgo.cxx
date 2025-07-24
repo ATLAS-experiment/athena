@@ -8,7 +8,7 @@
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
 
-#include "L1CaloFEXSim/jFEXtauAlgo.h"
+#include "jFEXtauAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "PathResolver/PathResolver.h"

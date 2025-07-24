@@ -9,9 +9,9 @@
 //     email                : jacob.julian.kempster@cern.ch
 //  ***************************************************************************/
 
-#include "L1CaloFEXSim/eFEXSim.h"
+#include "eFEXSim.h"
 #include "L1CaloFEXSim/eTower.h"
-#include "L1CaloFEXSim/eFEXFPGA.h"
+#include "eFEXFPGA.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 
 namespace LVL1 {
@@ -19,7 +19,7 @@ namespace LVL1 {
   eFEXSim::eFEXSim(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent)
   {
-    declareInterface<IeFEXSim>(this);
+    declareInterface<eFEXSim>(this);
   }
 
 

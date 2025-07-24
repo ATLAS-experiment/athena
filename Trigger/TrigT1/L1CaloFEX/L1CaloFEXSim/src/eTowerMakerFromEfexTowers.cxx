@@ -6,7 +6,6 @@
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
 #include "L1CaloFEXSim/eTower.h"
-#include "L1CaloFEXSim/eTowerBuilder.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "./eTowerMakerFromEfexTowers.h"
 #include "L1CaloFEXSim/eFEXCompression.h"

@@ -10,7 +10,7 @@
 //  ***************************************************************************/
 
 
-#include "L1CaloFEXSim/jFEXSim.h"
+#include "jFEXSim.h"
 
 namespace LVL1 {
 
