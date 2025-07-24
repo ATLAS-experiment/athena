@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Pythonized version of MadGraph steering executables
 #    written by Zach Marshall <zach.marshall@cern.ch>
@@ -139,6 +139,9 @@ def error_check(errors_a, return_code):
                 mglog.info(err)
                 continue
             if 'python2 support will be removed' in err:
+                mglog.info(err)
+                continue
+            if 'python3.12 support is still experimental' in err:
                 mglog.info(err)
                 continue
             # silly ghostscript issue in 21.6.46 nightly
