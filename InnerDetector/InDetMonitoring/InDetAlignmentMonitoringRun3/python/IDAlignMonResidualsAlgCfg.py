@@ -41,7 +41,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_PhiModulesPerRingSCT = 52
     m_PhiModulesShift_sct_barrel = 208
     m_EtaModulesShift_sct_barrel = 84
-    m_PhiModulesShift_sct_ec = 500
+    m_PhiModulesShift_sct_ec = 548 #52 mod/disk x 9 disk + 10*8 gaps
     m_minTRTResWindow = -0.6
     m_maxTRTResWindow = 0.6
     m_TRTB_nSectorBins = 32
@@ -676,12 +676,6 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     varName = 'm_sct_eca_pullx;sct_eca_pulllx'
     title = 'UnBiased X Pull SCT EndCap A;Pull'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=-m_RangeOfPullHistos, xmax=m_RangeOfPullHistos)
-    
-    varName = 'm_modPhiShift_sct_eca,m_residualX_sct_eca;sct_eca_xresvsmodphi_2d'
-    title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECA;(Modified) Phi-ID;Residual [mm]'
-    residualGroup.defineHistogram(varName, title = title, type = 'TProfile', path=pathResiduals,
-                                  xbins = m_PhiModulesShift_sct_ec, xmin = 0, xmax = m_PhiModulesShift_sct_ec,
-                                  ybins = 100 * m_FinerBinningFactor, ymin=m_minSCTResFillRange, ymax=m_maxSCTResFillRange)
 
     varName = 'm_modPhiShift_sct_eca,m_residualX_sct_eca;sct_eca_xresvsmodphi_profile'
     title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECA;(Modified) Phi-ID;Residual [mm]'
@@ -724,12 +718,6 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     varName = 'm_sct_ecc_pullx;sct_ecc_pulllx'
     title = 'UnBiased X Pull SCT EndCap C;Pull'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=-m_RangeOfPullHistos, xmax=m_RangeOfPullHistos)
-
-    varName = 'm_modPhiShift_sct_ecc,m_residualX_sct_ecc;sct_ecc_xresvsmodphi_2d'
-    title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECC;(Modified) Phi-ID;Residual [mm]'
-    residualGroup.defineHistogram(varName, title = title, type = 'TProfile', path=pathResiduals,
-                                  xbins = m_PhiModulesShift_sct_ec, xmin = 0, xmax = m_PhiModulesShift_sct_ec,
-                                  ybins = 100 * m_FinerBinningFactor, ymin=m_minSCTResFillRange, ymax=m_maxSCTResFillRange)
 
     varName = 'm_modPhiShift_sct_ecc,m_residualX_sct_ecc;sct_ecc_xresvsmodphi_profile'
     title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECC;(Modified) Phi-ID;Residual [mm]'
