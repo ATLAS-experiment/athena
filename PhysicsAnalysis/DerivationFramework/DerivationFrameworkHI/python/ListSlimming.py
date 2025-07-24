@@ -331,7 +331,8 @@ def HION5AllVariables():
     variables += ["ZdcSums"]
     variables += ["ZdcTriggerTowers"]
     variables += ["PeripheralCaloCalTopoClusters"]
-    
+    variables += ["MET_Track1000", "MET_Track2000", "MET_Track3000", "MET_Track4000", "MET_Track5000"]
+
     return variables
 
 def HION5AllTruthVariables():
@@ -345,7 +346,6 @@ def HION5AllTruthVariables():
     variables += ["AntiKt4TruthJets"]
     variables += ["TruthElectrons"]
     variables += ["TruthMuons"]
-
     return variables
 
 def HION5SmartCollections():
