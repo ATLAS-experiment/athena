@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <fstream>
-#include "L1CaloFEXSim/jFEXForwardElecAlgo.h"
+#include "jFEXForwardElecAlgo.h"
 #include "L1CaloFEXSim/jFEXForwardElecTOB.h"
 #include "L1CaloFEXSim/jFEXForwardElecInfo.h"
 #include "L1CaloFEXSim/jTower.h"

@@ -13,7 +13,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IgFEXSysSim.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/gFEXSim.h"
+#include "gFEXSim.h"
 #include "L1CaloFEXSim/gTower.h"
 
 #include "xAODTrigger/gFexJetRoI.h"

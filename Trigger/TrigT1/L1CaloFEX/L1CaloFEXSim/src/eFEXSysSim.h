@@ -13,13 +13,12 @@
 #ifndef eFEXSysSim_H
 #define eFEXSysSim_H
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L1CaloFEXToolInterfaces/IeFEXSysSim.h"
-#include "L1CaloFEXToolInterfaces/IeFEXFillEDM.h"
+#include "eFEXFillEDM.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/eFEXSim.h"
+#include "eFEXSim.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
-#include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
+#include "eFEXFPGATowerIdProvider.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 
@@ -38,11 +37,12 @@ namespace LVL1 {
       detail as necessary to simulate the output of the system
       It will need to interact with eTowers and produce the eTOBs
   */
+  static const InterfaceID IID_IeFEXSysSim("LVL1::eFEXSysSim", 1, 0);
 
-  class eFEXSysSim : public AthAlgTool, virtual public IeFEXSysSim {
+  class eFEXSysSim : public AthAlgTool {
     
   public:
-    
+      static const InterfaceID& interfaceID() { return IID_IeFEXSysSim; };
     /** Constructors */
 
     eFEXSysSim(const std::string& type,const std::string& name,const IInterface* parent);
@@ -50,11 +50,11 @@ namespace LVL1 {
     eFEXSysSim&& operator= (const eFEXSysSim& ) = delete;
 
     /** standard Athena-Algorithm method */
-    virtual StatusCode initialize() override;
+    virtual StatusCode initialize();
 
-    virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection) override ;
+    virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection);
 
-    virtual int calcTowerID(int eta, int phi, int mod) const override;
+    virtual int calcTowerID(int eta, int phi, int mod) const;
 
     /** Internal data */
   private:
@@ -91,9 +91,9 @@ namespace LVL1 {
 		 SG::WriteHandleKey< xAOD::eFexTauRoIContainer >& eFexTauOutKey);
 
     // EM TOBs and xTOBS
-    ToolHandle<IeFEXSim> m_eFEXSimTool {this, "eFEXSimTool",    "LVL1::eFEXSim",    "Tool that creates the eFEX Simulation"};
+    ToolHandle<eFEXSim> m_eFEXSimTool {this, "eFEXSimTool",    "LVL1::eFEXSim",    "Tool that creates the eFEX Simulation"};
 
-    ToolHandle<IeFEXFillEDM> m_eFEXFillEDMTool {this, "eFEXFillEDMTool", "LVL1::eFEXFillEDM", "Tool to fille eFEX EDMs"};
+    ToolHandle<eFEXFillEDM> m_eFEXFillEDMTool {this, "eFEXFillEDMTool", "LVL1::eFEXFillEDM", "Tool to fille eFEX EDMs"};
 
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerSGKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 
@@ -104,7 +104,7 @@ namespace LVL1 {
     SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauActivexTOBOutKey {this,"Key_eFexTauxTOBOutputContainer","L1_eTauxRoI","Output eFexTau active (BDT/heuristic) algorithm xTOB container"};
     SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauAltOutKey {this,"Key_eFexAltTauOutputContainer","","Output eFexTau alternative (BDT/heuristic) algorithm TOB container"};
     SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauAltxTOBOutKey {this,"Key_eFexAltTauxTOBOutputContainer","","Output eFexTau alternative (BDT/heuristic) algorithm xTOB container"};
-    ToolHandle<IeFEXFPGATowerIdProvider> m_eFEXFPGATowerIdProviderTool {this, "eFEXFPGATowerIdProviderTool", "LVL1::eFEXFPGATowerIdProvider", "Tool that provides tower-FPGA mapping"};
+    ToolHandle<eFEXFPGATowerIdProvider> m_eFEXFPGATowerIdProviderTool {this, "eFEXFPGATowerIdProviderTool", "LVL1::eFEXFPGATowerIdProvider", "Tool that provides tower-FPGA mapping"};
 
     //std::map<int,eTower> m_eTowersColl;
 

@@ -3,8 +3,8 @@
 */
 
 
-#include "L1CaloFEXSim/eFEXDriver.h"
-#include "L1CaloFEXSim/eFEXSim.h"
+#include "eFEXDriver.h"
+#include "eFEXSim.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
 
 #include "StoreGate/WriteHandle.h"

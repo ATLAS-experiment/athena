@@ -4,7 +4,7 @@
 
 #undef NDEBUG
 
-#include "L1CaloFEXSim/jFEXDriver.h"
+#include "jFEXDriver.h"
 #include "L1CaloFEXSim/jFEXOutputCollection.h"
 #include "StoreGate/WriteHandle.h"
 #include "SGTools/TestStore.h"

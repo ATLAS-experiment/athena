@@ -6,8 +6,7 @@
 
 // Athena/Gaudi
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "L1CaloFEXToolInterfaces/IeFEXSysSim.h"
-#include "L1CaloFEXSim/eFEXSim.h"
+#include "eFEXSysSim.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
 
 namespace LVL1 {
@@ -28,7 +27,7 @@ class eFEXDriver : public AthAlgorithm
 
   SG::WriteHandleKey<eFEXOutputCollection> m_eFEXOutputCollectionSGKey {this, "MyOutputs", "eFEXOutputCollection", "MyOutputs"};
 
-  ToolHandle<IeFEXSysSim> m_eFEXSysSimTool {this, "eFEXSysSimTool", "LVL1::eFEXSysSim", "Tool that creates the eFEX System Simulation"};
+  ToolHandle<eFEXSysSim> m_eFEXSysSimTool {this, "eFEXSysSimTool", "LVL1::eFEXSysSim", "Tool that creates the eFEX System Simulation"};
 
 };
 

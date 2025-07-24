@@ -10,7 +10,7 @@
 //  ***************************************************************************/
 #include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
-#include "L1CaloFEXSim/eFEXtauAlgo.h"
+#include "eFEXtauAlgo.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include <vector>
 
@@ -21,7 +21,7 @@ namespace LVL1 {
 eFEXTOBEtTool::eFEXTOBEtTool(const std::string& type,const std::string& name,const IInterface* parent):
   AthAlgTool(type,name,parent)
 {
-  declareInterface<IeFEXTOBEtTool>(this);
+  declareInterface<eFEXTOBEtTool>(this);
 }
  
     

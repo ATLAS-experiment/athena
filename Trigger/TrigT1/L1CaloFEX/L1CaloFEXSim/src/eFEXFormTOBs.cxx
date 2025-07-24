@@ -9,7 +9,7 @@
 //     email                : nicholas.andrew.luongo@cern.ch
 //  ***************************************************************************/
 
-#include "L1CaloFEXSim/eFEXFormTOBs.h"
+#include "eFEXFormTOBs.h"
 
 namespace LVL1 {
 
@@ -18,7 +18,7 @@ namespace LVL1 {
 eFEXFormTOBs::eFEXFormTOBs(const std::string& type, const std::string& name, const IInterface* parent):
   AthAlgTool(type, name, parent)
   {
-    declareInterface<IeFEXFormTOBs>(this);
+    declareInterface<eFEXFormTOBs>(this);
   }
 
 /** Desctructor */

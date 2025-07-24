@@ -8,8 +8,8 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
-#include "L1CaloFEXSim/gSuperCellTowerMapper.h"
-#include "L1CaloFEXSim/gTowerBuilder.h"
+#include "gSuperCellTowerMapper.h"
+#include "gTowerBuilder.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
 

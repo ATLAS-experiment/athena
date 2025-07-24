@@ -10,7 +10,7 @@
 
 #include <vector>
 
-#include "L1CaloFEXSim/gFEXJetAlgo.h"
+#include "gFEXJetAlgo.h"
 #include "L1CaloFEXSim/gFEXJetTOB.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/gTower.h"

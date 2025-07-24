@@ -11,7 +11,7 @@
 LVL1::eFEXSuperCellTowerIdProvider::eFEXSuperCellTowerIdProvider(const std::string &type, const std::string &name, const IInterface *parent):
   AthAlgTool(type, name, parent)
 {
-  declareInterface<IeFEXSuperCellTowerIdProvider>(this);
+  declareInterface<eFEXSuperCellTowerIdProvider>(this);
 }
 
 LVL1::eFEXSuperCellTowerIdProvider::~eFEXSuperCellTowerIdProvider()

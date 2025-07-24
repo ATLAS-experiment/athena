@@ -19,7 +19,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 
 
-#include "L1CaloFEXToolInterfaces/IeFEXTOBEtTool.h"
+#include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "xAODTrigger/eFexEMRoIContainer.h"
 #include "xAODTrigger/eFexTauRoIContainer.h"
 
@@ -44,7 +44,7 @@ namespace LVL1 {
     SG::WriteDecorHandleKey<xAOD::eFexTauRoIContainer>  m_SCEtVec_tau { this, "TauDecorKey"  ,  m_eFEXtauEDMContainerKey, "SuperCells", "name of the decoration key for eFexTauRoI"};
 
   
-    ToolHandle<IeFEXTOBEtTool> m_eFEXTOBEtTool {this, "eFEXTOBEtTool", "LVL1::eFEXTOBEtTool", "Tool for reconstructing TOB ET s"};
+    ToolHandle<eFEXTOBEtTool> m_eFEXTOBEtTool {this, "eFEXTOBEtTool", "LVL1::eFEXTOBEtTool", "Tool for reconstructing TOB ET s"};
   };
 }
 #endif

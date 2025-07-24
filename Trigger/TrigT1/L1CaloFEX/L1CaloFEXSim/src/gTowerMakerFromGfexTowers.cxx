@@ -18,9 +18,9 @@
 #include "xAODTrigL1Calo/gFexTowerContainer.h"
 
 #include "L1CaloFEXSim/gTower.h"
-#include "L1CaloFEXSim/gTowerBuilder.h"
+#include "gTowerBuilder.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
-#include "L1CaloFEXSim/gTowerMakerFromGfexTowers.h"
+#include "gTowerMakerFromGfexTowers.h"
 #include "L1CaloFEXSim/gFEXCompression.h"
 
 #include "StoreGate/WriteHandle.h"

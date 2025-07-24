@@ -5,7 +5,7 @@
 
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 #include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerBuilder.h"
+#include "jTowerBuilder.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 // TOWER IS A COLLECTION OF SUPER CELLS
