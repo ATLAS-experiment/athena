@@ -49,7 +49,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 
 namespace {
-static constexpr unsigned short n_hgtd_layers = 4; // two double sided layers
+static constexpr unsigned short s_hgtd_layers = 4; // two double sided layers
 } // namespace
 
 namespace HGTD {
@@ -71,34 +71,39 @@ public:
   virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
+  std::pair<float, float> getRadiusAndZ(const xAOD::TrackParticle& track_particle) const;
+  
+private:
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerKey{
       this, "TrackParticleContainerName", "InDetTrackParticles",
       "Name of the TrackParticle container"};
 
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_layerHasExtensionKey{
-      this, "HGTD_has_extension", "InDetTrackParticles.HGTD_has_extension",
+    this, "HGTD_has_extension", m_trackParticleContainerKey, "HGTD_has_extension",
       "deco with a handle for an extension"};
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTimeKey{
-      this, "HGTD_cluster_time", "InDetTrackParticles.HGTD_cluster_time",
+    this, "HGTD_cluster_time", m_trackParticleContainerKey, "HGTD_cluster_time",
       "deco with a handle for cluster time"};
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer>
       m_layerClusterTruthClassKey{
-          this, "HGTD_cluster_truth_class",
-          "InDetTrackParticles.HGTD_cluster_truth_class",
+    this, "HGTD_cluster_truth_class", m_trackParticleContainerKey,
+          "HGTD_cluster_truth_class",
           "deco with a handle for a truth time"};
 
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_time_dec_key{
-      this, "time", "InDetTrackParticles.time", "Time assigned to this track"};
+    this, "time", m_trackParticleContainerKey, "time", "Time assigned to this track"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_time_res_dec_key{
-      this, "timeResolution", "InDetTrackParticles.timeResolution",
+    this, "timeResolution", m_trackParticleContainerKey, "timeResolution",
       "Time resolution assigned to this track"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_hasValidTime_dec_key{
-      this, "hasValidTime", "InDetTrackParticles.hasValidTime", "Time assigned to this track is valid"};
+    this, "hasValidTime", m_trackParticleContainerKey, "hasValidTime", "Time assigned to this track is valid"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>
-      m_summarypattern_dec_key{this, "HGTD_summaryinfo",
-                               "InDetTrackParticles.HGTD_summaryinfo",
+  m_summarypattern_dec_key{this, "HGTD_summaryinfo", m_trackParticleContainerKey,
+                               "HGTD_summaryinfo",
                                "Bitfield for working point definition"};
 
+  Gaudi::Property<bool> m_doActs {this, "doActs", false};
+  
   // TODO: the resolution is fixed to 0.035 ps, should add the resolution
   // calculation after the irradiation
   struct Hit {
@@ -110,7 +115,7 @@ private:
   };
 
   struct CleaningResult {
-    std::array<Hit, n_hgtd_layers> m_hits;
+    std::array<Hit, s_hgtd_layers> m_hits;
     uint32_t m_field = 0x0;
     float m_time;
     float m_resolution;
@@ -133,10 +138,14 @@ private:
       "Default time resolution used for tracks without HGTD timing info"};
 
   CleaningResult
-  runTimeConsistencyCuts(const xAOD::TrackParticle& track_particle) const;
+  runTimeConsistencyCuts(const std::vector<float>& times,
+			 const std::vector<bool>& has_clusters,
+			 const std::vector<int>& hit_classification) const;
 
-  std::array<Hit, n_hgtd_layers>
-  getValidHits(const xAOD::TrackParticle& track_particle) const;
+  std::array<Hit, s_hgtd_layers>
+  getValidHits(const std::vector<float>& times,
+	       const std::vector<bool>& has_clusters,
+	       const std::vector<int>& hit_classification) const;
 
   /**
    * @brief Calculates the chi2 of the hit times given their resolution.
@@ -145,7 +154,7 @@ private:
    *
    * @return Chi2 value.
    */
-  float calculateChi2(const std::array<Hit, n_hgtd_layers>& hits) const;
+  float calculateChi2(const std::array<Hit, s_hgtd_layers>& hits) const;
 
   // float calculateChi2(const std::vector<Hit>& hits) const;
 
@@ -156,7 +165,7 @@ private:
    *
    * @return Returns true if the times were in agreement.
    */
-  bool passesDeltaT(const std::array<Hit, n_hgtd_layers>& hits) const;
+  bool passesDeltaT(const std::array<Hit, s_hgtd_layers>& hits) const;
 
   /**
    * @brief Calculates the arithmetic mean of the valid hit times;
@@ -166,12 +175,12 @@ private:
    *
    * @return Returns true if the times were in agreement.
    */
-  float meanTime(const std::array<Hit, n_hgtd_layers>& hits) const;
+  float meanTime(const std::array<Hit, s_hgtd_layers>& hits) const;
 
   /**
    * @brief Calculates the combined resolution.
    */
-  float trackTimeResolution(const std::array<Hit, n_hgtd_layers>& hits) const;
+  float trackTimeResolution(const std::array<Hit, s_hgtd_layers>& hits) const;
 
   /**
    * @brief Identifies time outliers by finding the layer within which a hit
@@ -182,7 +191,7 @@ private:
    *
    * @return Layer with outlier time, value between 0 and 3.
    */
-  short findLayerWithBadChi2(std::array<Hit, n_hgtd_layers> hits) const;
+  short findLayerWithBadChi2(std::array<Hit, s_hgtd_layers> hits) const;
 
   /**
    * @brief Given a layer number, the hit sitting on this layer is flagged as
@@ -191,7 +200,7 @@ private:
    * @param [in] hits Array of hits.
    * @param [in] layer The layer that should be masked.
    */
-  void setLayerAsInvalid(std::array<Hit, n_hgtd_layers>& hits,
+  void setLayerAsInvalid(std::array<Hit, s_hgtd_layers>& hits,
                          short layer) const;
 
   /**
@@ -203,7 +212,7 @@ private:
    *
    * @return Bit pattern encoding valid hits in layers.
    */
-  short getValidPattern(const std::array<Hit, n_hgtd_layers>& hits) const;
+  short getValidPattern(const std::array<Hit, s_hgtd_layers>& hits) const;
 
   /**
    * @brief Checks if the last hit on track was found on a pre-specified set of

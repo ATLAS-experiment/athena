@@ -47,14 +47,12 @@ StatusCode HGTDTrackExtensionAlg::initialize()
   ATH_CHECK(m_HGTDClusterContainerName.initialize());
 
   // Initialize all WriteDecorHandleKeys
-  ATH_CHECK(m_timeDecorationKey.initialize());
   ATH_CHECK(m_layerHasExtensionKey.initialize());
   ATH_CHECK(m_layerExtensionChi2Key.initialize());
   ATH_CHECK(m_layerClusterRawTimeKey.initialize());
   ATH_CHECK(m_layerClusterTimeKey.initialize());
   ATH_CHECK(m_extrapXKey.initialize());
   ATH_CHECK(m_extrapYKey.initialize());
-  ATH_CHECK(m_extrapZKey.initialize());
   ATH_CHECK(m_numHGTDHitsKey.initialize());
 
   ATH_CHECK(m_actsTrackLinkKey.initialize());
@@ -63,11 +61,11 @@ StatusCode HGTDTrackExtensionAlg::initialize()
   ATH_CHECK(m_uncalibratedMeasurementContainerKey_HGTD.initialize());
 
   // Checks for logger
-  ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
   ATH_CHECK(m_extrapolationTool.retrieve());
-
+  
+  ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
+  ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
   ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
   ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
   ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
@@ -87,8 +85,8 @@ StatusCode HGTDTrackExtensionAlg::initialize()
   cfg.resolvePassive = true;
   cfg.resolveMaterial = true;
   cfg.resolveSensitive = true;
-  detail::Navigator navigator(cfg, m_logger->cloneWithSuffix("Navigator"));
-  detail::Propagator propagator(std::move(stepper), std::move(navigator), m_logger->cloneWithSuffix("Prop"));
+  detail::Navigator navigator(cfg, logger().cloneWithSuffix("Navigator"));
+  detail::Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
   // Using the CKF propagator as extrapolator
   detail::Extrapolator extrapolator = propagator;
@@ -108,7 +106,7 @@ StatusCode HGTDTrackExtensionAlg::initialize()
 
   detail::CKF_config ckfConfig{
       std::move(extrapolator),
-      detail::CKF{std::move(propagator), m_logger->cloneWithSuffix("CKF")},
+      detail::CKF{std::move(propagator), logger().cloneWithSuffix("CKF")},
       {},
       Acts::TrackSelector{trackSelectorCfg}};
 
@@ -137,20 +135,16 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Size of trackParticles collection " << trackParticles->size());
   
   // Create WriteDecorHandles for all decorations
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> timeDecorationHandle(m_timeDecorationKey, ctx);
-  
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerExtensionChi2Handle(m_layerExtensionChi2Key, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterRawTimeHandle(m_layerClusterRawTimeKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle(m_layerClusterTimeKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapXHandle(m_extrapXKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle(m_extrapYKey, ctx);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapZHandle(m_extrapZKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> numHGTDHitsHandle(m_numHGTDHitsKey, ctx);
 
   SG::ReadDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> actsTrackLink( m_actsTrackLinkKey, ctx );
   ATH_CHECK( actsTrackLink.isValid() );
-  
   // ================================================== //
   // ============ RETRIEVE MEASUREMENTS =============== //
   // ================================================== //
@@ -168,8 +162,8 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
 
   Acts::GeometryContext geoContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  
-  
+
+   
   // Get a list of all identifiers associated with HGTD clusters
   if (msgLvl(MSG::DEBUG)) { // DEBUG
     const xAOD::HGTDClusterContainer* hgtdInitHandle{nullptr};
@@ -197,17 +191,15 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
     }
     
     ATH_MSG_DEBUG("Found " << hgtdVolumes.size() << " different HGTD volumes");
-    for (uint32_t vol : hgtdVolumes) {
+    for (std::uint32_t vol : hgtdVolumes) {
       ATH_MSG_DEBUG("HGTD Volume " << vol << " has " << hgtdLayers[vol].size() << " layers:");
-      for (uint32_t lyr : hgtdLayers[vol]) {
+      for (std::uint32_t lyr : hgtdLayers[vol]) {
       	ATH_MSG_DEBUG(" - Layer " << lyr);
       }
     }
   } // DEBUG
   
-
-
-  detail::TrackFindingMeasurements measurements(1ul /* only one measurement collection: HGTD clusters*/);
+  detail::TrackFindingMeasurements measurements(1ul); // only one measurement collection: HGTD clusters
   ATH_CHECK( collectMeasurements(ctx, measurements) );
 
   using DefaultTrackStateCreator = Acts::TrackStateCreator<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator,detail::RecoTrackContainer>;
@@ -228,7 +220,6 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
     measurements.measurementOffsets());
   }
 
-  
   Acts::PropagatorPlainOptions plainOptions(geoContext, mfContext);
   plainOptions.direction = Acts::Direction::Forward(); 
   
@@ -257,7 +248,8 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
 
   // Loop over each track particle and decorate it with various information
   for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
-
+    // Default to empty track data
+    TrackExtensionData trackData;
     // Check if the TrackParticle has a link to an ACTS track
     ElementLink<ActsTrk::TrackContainer> link_to_track = actsTrackLink(*trackParticle);
     if (!link_to_track.isValid()) {
@@ -286,7 +278,17 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
       ATH_MSG_DEBUG("!!!!! ------  Track eta " << trackEta
 		    << " outside eta range [" << m_minEtaAcceptance.value() << ", " << m_maxEtaAcceptance.value()
 		    << "], skipping extension  ------ !!!!!");
-        continue;
+
+      // set default values
+      layerHasExtensionHandle(*trackParticle) = trackData.hasClusterVec;
+      layerExtensionChi2Handle(*trackParticle) = trackData.chi2Vec;
+      layerClusterRawTimeHandle(*trackParticle) = trackData.rawTimeVec;
+      layerClusterTimeHandle(*trackParticle) = trackData.timeVec;
+      extrapXHandle(*trackParticle) = trackData.extrapX;
+      extrapYHandle(*trackParticle) = trackData.extrapY;
+      numHGTDHitsHandle(*trackParticle) = trackData.numHGTDHits;
+
+      continue;
     }
 
     float trackpT = track.transverseMomentum();
@@ -319,8 +321,6 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
 
     ATH_MSG_DEBUG("Built " << tracksContainerTemp.size() << " tracks from it");
 
-    // Default to empty track data
-    TrackExtensionData trackData;
     for (const detail::RecoTrackContainer::TrackProxy trackProxy : tracksContainerTemp) {
       trackData = processTrackExtension(ctx, trackParticle, trackProxy);
     }
@@ -332,10 +332,10 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
     layerClusterTimeHandle(*trackParticle) = trackData.timeVec;
     extrapXHandle(*trackParticle) = trackData.extrapX;
     extrapYHandle(*trackParticle) = trackData.extrapY;
-    extrapZHandle(*trackParticle) = trackData.extrapZ;
     numHGTDHitsHandle(*trackParticle) = trackData.numHGTDHits;
-  }
+  } // loop on tracks
 
+  
   return StatusCode::SUCCESS;
 }
 
@@ -350,37 +350,39 @@ HGTDTrackExtensionAlg::collectMeasurements(const EventContext& context,
   
   ATH_MSG_DEBUG("Measurements (HGTD only) size: " << HGTDClustersHandle->size());
 
-  if (m_monTool) {
-    auto mon_nclusters = Monitored::Scalar("n_hgtd_clusters", HGTDClustersHandle->size());
-    auto mon = Monitored::Group(m_monTool, mon_nclusters);
+  if (not m_monTool.empty()) {
+    {
+      auto mon_nclusters = Monitored::Scalar("n_hgtd_clusters", HGTDClusters->size());
+      auto mon = Monitored::Group(m_monTool, mon_nclusters);
+    }
     
     // Add cluster position to monitoring tool
     for (const xAOD::HGTDCluster* cluster : *HGTDClustersHandle) {
-      const Acts::Surface* surface = m_surfAcc.get(cluster);
+      const Acts::Surface* surface = m_surfAcc.get(cluster);      
+      if (not surface) continue;
       
-      if (surface) {
-	Acts::Vector3 globalPos = surface->center(m_trackingGeometryTool->getGeometryContext(context).context());
-	
-	// Get the time from local position (3rd coordinate)
-	auto localPosition = cluster->localPosition<3>();  // Get 3D local position
-	double clusterTime = localPosition[2];  // Time is in the third coordinate
-	
-	ATH_MSG_DEBUG("HGTD Cluster: "<<Amg::toString(globalPos));
-	
-	auto cluster_x = Monitored::Scalar("cluster_x", globalPos.x());
-	auto cluster_y = Monitored::Scalar("cluster_y", globalPos.y());
-	auto cluster_z = Monitored::Scalar("cluster_z", globalPos.z());
-	auto cluster_t = Monitored::Scalar("cluster_t", clusterTime);
-	
-	auto mon = Monitored::Group(m_monTool, cluster_x, cluster_y, cluster_z,cluster_t);
-      }
+      Acts::Vector3 globalPos = surface->center(m_trackingGeometryTool->getGeometryContext(context).context());
+      
+      // Get the time from local position (3rd coordinate)
+      auto localPosition = cluster->localPosition<3>();  // Get 3D local position
+      double clusterTime = localPosition[2];  // Time is in the third coordinate
+      
+      ATH_MSG_DEBUG("HGTD Cluster: "<< Amg::toString(globalPos) );
 
+      auto mon_cluster_x = Monitored::Scalar("cluster_x", globalPos.x());
+      auto mon_cluster_y = Monitored::Scalar("cluster_y", globalPos.y());
+      auto mon_cluster_z = Monitored::Scalar("cluster_z", globalPos.z());
+      auto mon_cluster_t = Monitored::Scalar("cluster_t", clusterTime);
+      auto mon = Monitored::Group(m_monTool,
+				  mon_cluster_x, mon_cluster_y, mon_cluster_z,
+				  mon_cluster_t);
     }
   } // MONITORING
-    
+
   measurements.addMeasurements(0,
 			       *HGTDClusters,
 			       *m_trackingGeometryTool->surfaceIdMap());
+
   return StatusCode::SUCCESS;
 }
 
