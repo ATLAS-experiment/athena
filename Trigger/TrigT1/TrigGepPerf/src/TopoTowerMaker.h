@@ -16,7 +16,7 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
-#include "GepCellMap.h"
+#include "TrigGepPerf/GepCellMap.h"
 
 namespace Gep {
 

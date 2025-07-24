@@ -7,7 +7,7 @@
 
 #include "./Cluster.h"
 #include "./GepCaloCell.h"
-#include "GepCellMap.h"
+#include "TrigGepPerf/GepCellMap.h"
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"

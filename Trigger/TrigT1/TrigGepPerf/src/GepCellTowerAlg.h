@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
-#include "GepCellMap.h"
+#include "TrigGepPerf/GepCellMap.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 class EventContext;
