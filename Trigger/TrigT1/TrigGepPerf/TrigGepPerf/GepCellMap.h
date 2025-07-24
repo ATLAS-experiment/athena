@@ -5,7 +5,7 @@
 #ifndef TRIGGEPPERF_GEPCELLMAP_H
 #define TRIGGEPPERF_GEPCELLMAP_H
 
-#include "./GepCaloCell.h"
+#include "src/GepCaloCell.h"
 #include <map>
 #include <memory>
 #include "AthenaKernel/CLASS_DEF.h"
