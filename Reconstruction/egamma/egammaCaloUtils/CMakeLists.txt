@@ -7,5 +7,5 @@ atlas_add_library( egammaCaloUtils
    egammaUtils/*.h src/*.cxx
    PUBLIC_HEADERS egammaCaloUtils
    LINK_LIBRARIES CaloDetDescrLib CaloEvent CaloGeoHelpers 
-   CaloIdentifier CaloUtilsLib xAODCaloEvent)
+   CaloIdentifier CaloUtilsLib xAODCaloEvent FourMomUtils)
 

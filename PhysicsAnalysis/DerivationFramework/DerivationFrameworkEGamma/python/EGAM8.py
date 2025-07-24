@@ -156,6 +156,17 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         CaloDecoratorKernelCfg)
     acc.merge(CaloDecoratorKernelCfg(flags))
 
+    from DerivationFrameworkEGamma.EGammaToolsConfig import (
+        EGammaCookieCutClusterToolCfg)
+    cookieCutTool = acc.popToolsAndMerge(
+        EGammaCookieCutClusterToolCfg(flags,
+                                      name,
+                                      StoreInputMoments=True,
+                                      StoreCookedMoments=True,
+                                      OutputLevel = 3))
+    acc.addPublicTool(cookieCutTool)
+    augmentationTools.append(cookieCutTool)
+
     # thinning tools
     thinningTools = []
     streamName = kwargs["StreamName"]
@@ -308,7 +319,9 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
             ["(abs(TruthParticles.pdgId) == 22)", "(TruthParticles.pt > 1*GeV)"]
         )
         # stable particles
-        truth_cond_finalState = "(TruthParticles.isGenStable)"
+        truth_cond_finalState = " && ".join(
+            ["(TruthParticles.status == 1)", "(TruthParticles.barcode<200000)"]
+        )
         truth_expression = (
             "( "
             + truth_cond_WZH
@@ -523,6 +536,8 @@ def EGAM8Cfg(flags):
         "CaloCellContainer#AllCalo",
         "CaloClusterCellLinkContainer#egammaClusters_links",
         "CaloClusterCellLinkContainer#ForwardElectronClusters_links",
+        "xAOD::CaloClusterContainer#ForwardElectronCookieCutClusters",
+        "xAOD::CaloClusterAuxContainer#ForwardElectronCookieCutClustersAux.",
     ]
 
     EGAM8ItemList = EGAM8SlimmingHelper.GetItemList()
