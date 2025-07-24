@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArStripNeighborhood.h"
 
-#include <algorithm>
+#include <ostream>
 
 namespace GlobalSim {
   
@@ -14,9 +14,9 @@ namespace GlobalSim {
 					     const Coords& roi,
 					     const Coords& cell,
 					     std::size_t max_cell_pos) :
-    m_phi_low{std::move(phi_low)},
-    m_phi_center{std::move(phi_center)},
-    m_phi_high{std::move(phi_high)},
+    m_phi_low{phi_low},
+    m_phi_center{phi_center},
+    m_phi_high{phi_high},
     m_roiCoords{roi},
     m_cellCoords{cell},
     m_max_cell_pos{max_cell_pos}{

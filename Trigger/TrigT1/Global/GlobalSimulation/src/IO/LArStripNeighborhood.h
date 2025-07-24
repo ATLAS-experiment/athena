@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_LARSTRIPNEIGHBORHOOD_H
@@ -8,8 +8,8 @@
 #include "StripData.h"
 
 #include <vector>
-#include <memory>
-#include <ostream>
+#include <utility> //std::pair
+#include <iosfwd>
 
 namespace GlobalSim {
   class LArStripNeighborhood;
