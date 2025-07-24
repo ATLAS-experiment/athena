@@ -18,7 +18,7 @@
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
 
 #include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerBuilder.h"
+#include "jTowerBuilder.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "./jTowerMakerFromJfexTowers.h"
 #include "L1CaloFEXSim/jFEXCompression.h"

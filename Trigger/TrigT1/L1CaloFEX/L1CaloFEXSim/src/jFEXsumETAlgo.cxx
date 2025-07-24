@@ -11,7 +11,7 @@
 #include <vector>
 #include <stdio.h>
 #include <math.h>
-#include "L1CaloFEXSim/jFEXsumETAlgo.h"
+#include "jFEXsumETAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"

@@ -9,7 +9,7 @@
 //***************************************************************************
 
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
-#include "L1CaloFEXSim/gTowerBuilder.h"
+#include "gTowerBuilder.h"
 
 
 

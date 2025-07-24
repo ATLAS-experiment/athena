@@ -10,10 +10,10 @@
 
 // Athena/Gaudi
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "L1CaloFEXSim/gTowerBuilder.h"
+#include "gTowerBuilder.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "xAODTrigL1Calo/gFexTowerContainer.h"
-#include "L1CaloFEXSim/gSuperCellTowerMapper.h"
+#include "gSuperCellTowerMapper.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 class CaloIdManager;

@@ -15,15 +15,14 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXToolInterfaces/IeFEXTOBEtTool.h"
-#include "L1CaloFEXToolInterfaces/IeFEXtauAlgo.h"
-#include "L1CaloFEXToolInterfaces/IeFEXegAlgo.h"
+#include "L1CaloFEXSim/eFEXTOBEtTool.h"
+#include "L1CaloFEXSim/eFEXtauAlgoBase.h"
+#include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 
 #include <vector>
 
 namespace LVL1 {
-  
   //Doxygen class description below:
   /** The eFEXTOBEtTool class is a utility for recalculating the jet discriminant ("isolation")
       quantities that are not read out as part of the (x)TOB data
@@ -33,15 +32,17 @@ namespace LVL1 {
       - An eTower container has been filled before use (for the simulation tools to work)
       - That a TOB coordinate, seed cell and UpNotDown flag are provided
   */
-  
-  class eFEXTOBEtTool : public AthAlgTool, virtual public IeFEXTOBEtTool {
+  static const InterfaceID IID_IeFEXTOBEtTool("LVL1::eFEXTOBEtTool", 1, 0);
+
+    class eFEXTOBEtTool : public AthAlgTool {
     
   public:
+        static const InterfaceID& interfaceID() { return IID_IeFEXTOBEtTool; };
     /** Constructors */
     eFEXTOBEtTool(const std::string& type,const std::string& name,const IInterface* parent);
 
     /** standard Athena-Algorithm method */
-    virtual StatusCode initialize() override;
+    virtual StatusCode initialize();
     /** Destructor */
     virtual ~eFEXTOBEtTool();
 
@@ -51,25 +52,25 @@ namespace LVL1 {
                                   std::vector<unsigned int> &ClusterCellETs,
                                   std::vector<unsigned int> &RetaSums,
                                   std::vector<unsigned int> &RhadSums, 
-                                  std::vector<unsigned int> &WstotSums) override;
+                                  std::vector<unsigned int> &WstotSums);
 								  
     virtual
-    StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs) const override;
+    StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs) const;
 
 
     /** Tool to calculate eTaudiscriminant sums */
     virtual
     StatusCode gettauSums(float etaTOB, float phiTOB, int seed, int UnD, 
                                    std::vector<unsigned int> &RcoreSums,
-                                   std::vector<unsigned int> &RemSums) override;
+                                   std::vector<unsigned int> &RemSums);
 
     /** Tool to find eTower identifier from an eta, phi coordinate pair */
     virtual
-    unsigned int eTowerID(float eta, float phi) const override;
+    unsigned int eTowerID(float eta, float phi) const;
 
     /** Tool to find eFEX and FPGA numbers and eta index of a TOB within the FPGA */
     virtual
-    void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta) const override;
+    void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta) const;
 
     /** Internal data */
   private:
@@ -77,10 +78,10 @@ namespace LVL1 {
     const float m_dphiTower = M_PI/32;
     const float m_detaTower = 0.1;
 
-    ToolHandle<IeFEXtauAlgo> m_eFEXtauAlgoTool {
+    ToolHandle<eFEXtauAlgoBase> m_eFEXtauAlgoTool {
       this, "eFEXtauAlgoTool", "LVL1::eFEXtauAlgo", 
 	"Tool that runs the eFEX tau algorithm"};
-    ToolHandle<IeFEXegAlgo> m_eFEXegAlgoTool {
+    ToolHandle<eFEXegAlgo> m_eFEXegAlgoTool {
       this, "eFEXegAlgoTool", "LVL1::eFEXegAlgo", 
 	"Tool that runs the eFEX e/gamma algorithm"};
 	

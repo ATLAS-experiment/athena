@@ -12,8 +12,8 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
-#include "L1CaloFEXSim/eTowerBuilder.h"
-#include "L1CaloFEXSim/eSuperCellTowerMapper.h"
+#include "eTowerBuilder.h"
+#include "eSuperCellTowerMapper.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
 namespace LVL1 {

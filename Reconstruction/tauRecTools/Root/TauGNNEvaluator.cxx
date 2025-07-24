@@ -69,7 +69,12 @@ StatusCode TauGNNEvaluator::initialize() {
   if(m_output_discriminant < Discriminant::NegLogPJet || m_output_discriminant > Discriminant::PTau) {
     ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
   }
-  
+
+  if (!m_tauContainerName.empty()){
+    m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
+    ATH_CHECK(m_scoreHandleKey.initialize());    
+  }
+
   return StatusCode::SUCCESS;
 }
 

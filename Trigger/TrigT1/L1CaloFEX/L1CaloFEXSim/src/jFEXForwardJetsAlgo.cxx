@@ -11,7 +11,7 @@
 #include <vector>
 #include <string>
 #include <map>
-#include "L1CaloFEXSim/jFEXForwardJetsAlgo.h"
+#include "jFEXForwardJetsAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
