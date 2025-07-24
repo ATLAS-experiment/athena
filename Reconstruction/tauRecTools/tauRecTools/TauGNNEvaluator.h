@@ -1,16 +1,18 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUGNNEVALUATOR_H
 #define TAURECTOOLS_TAUGNNEVALUATOR_H
 
 #include "tauRecTools/TauRecToolBase.h"
-
 #include "tauRecTools/TauGNN.h"
 
 #include "xAODTau/TauJet.h"
+#include "xAODTau/TauJetContainer.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
+
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 
 #include <memory>
 
@@ -53,6 +55,10 @@ public:
     };
 
 private:
+
+    Gaudi::Property<std::string> m_tauContainerName{this, "TauContainerName", "", "Name of TauJetContainer, must be set when using "};
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_scoreHandleKey{this, "ScoreHandleKey","","Output Score"};
+   
     std::string m_output_varname;
     std::string m_output_ptau;
     std::string m_output_pjet;
