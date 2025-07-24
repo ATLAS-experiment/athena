@@ -13,7 +13,7 @@ lastref_dir=last_results
 #dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 ### uncomment this and other lines to enable technical efficiency
 dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
-n_events=-1
+n_events=1
 rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 
 
@@ -40,8 +40,6 @@ run () {
     echo "art-result: $rc ${name}"
     return $rc
 }
-
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,Acts.+FindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+SurfaceError:1,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
 
 export ATHENA_CORE_NUMBER=4
 
@@ -80,7 +78,6 @@ run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True;" \
-    --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${n_events} \
