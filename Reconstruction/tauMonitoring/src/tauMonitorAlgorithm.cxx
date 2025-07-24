@@ -23,6 +23,13 @@ tauMonitorAlgorithm::~tauMonitorAlgorithm() {}
 StatusCode tauMonitorAlgorithm::initialize() {
 
   ATH_CHECK(m_TauContainerKey.initialize());
+
+  m_offlineGNTauScoreDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauScoreDecorKey.key();
+  ATH_CHECK(m_offlineGNTauScoreDecorKey.initialize());
+ 
+  m_offlineGNTauTransScoreDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauTransScoreDecorKey.key();
+  ATH_CHECK(m_offlineGNTauTransScoreDecorKey.initialize());
+
   m_offlineGNTauLooseWPDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauLooseWPDecorKey.key();
   ATH_CHECK(m_offlineGNTauLooseWPDecorKey.initialize());
 
@@ -282,13 +289,14 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     muonVeto = tau->isTau(xAOD::TauJetParameters::MuonVeto);
 
     // check to understand which TauID we can use
-    static const SG::ConstAccessor<float> acc_GNTauScoreSigTrans("GNTauScoreSigTrans_v0prune");
-    if ( acc_GNTauScoreSigTrans.isAvailable(*tau) ) {
+    SG::ReadDecorHandle<xAOD::TauJetContainer, float> trans_score{m_offlineGNTauTransScoreDecorKey, ctx};
+    if( trans_score.isValid()) { 
+      
       // we are using a special container decorated with GNTau
-      static const SG::ConstAccessor<float> acc_GNTauScore("GNTauScore_v0prune");	    
-      JetScore = acc_GNTauScore(*tau);
+      SG::ReadDecorHandle<xAOD::TauJetContainer, float> score{m_offlineGNTauScoreDecorKey, ctx};
+      JetScore = score.isValid() ? score(*tau) : -1234; 
 
-      JetScoreSigTrans = acc_GNTauScoreSigTrans(*tau);
+      JetScoreSigTrans = trans_score(*tau);
 
       SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_loose{m_offlineGNTauLooseWPDecorKey, ctx};
       tauLoose = tauid_loose.isValid() ? tauid_loose(*tau) : -1234;

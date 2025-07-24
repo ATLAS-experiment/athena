@@ -161,6 +161,8 @@ StatusCode TauWPDecorator::initialize() {
     // temporarily need both accessor and decoration
     if (!m_tauContainerName.empty()) {
       m_decorHandleKeys.emplace_back(m_tauContainerName + "." + m_decorWPs[wpIndex]);
+      // add also decor handle for the trans score
+      m_decorHandleKeys.emplace_back(m_tauContainerName + "." + m_scoreNameTrans);  
     }
   }
   ATH_CHECK( m_decorHandleKeys.initialize() );

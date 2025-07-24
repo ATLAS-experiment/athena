@@ -851,7 +851,7 @@ def TauWPDecoratorJetDeepSetCfg(flags, version=None):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
-def TauGNNEvaluatorCfg(flags, version=0, applyTrackSel=False):
+def TauGNNEvaluatorCfg(flags, version=0, applyTrackSel=False, tauContainerName=""):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauGNN_v' + str(version)
 
@@ -873,7 +873,8 @@ def TauGNNEvaluatorCfg(flags, version=0, applyTrackSel=False):
                                               InputLayerTracks = "track_vars",
                                               InputLayerClusters = "cluster_vars",
                                               NodeNameTau=flags.Tau.GNTauNodeNameTau,
-                                              NodeNameJet=flags.Tau.GNTauNodeNameJet)
+                                              NodeNameJet=flags.Tau.GNTauNodeNameJet,
+                                              TauContainerName = tauContainerName,)
 
     result.setPrivateTools(myTauGNNEvaluator)
     return result
