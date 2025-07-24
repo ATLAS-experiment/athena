@@ -14,6 +14,12 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
+#include "xAODInDetMeasurement/PixelCluster.h"
+#include "xAODInDetMeasurement/StripCluster.h"
+#include "Acts/Utilities/TrackHelpers.hpp"
+
+#include "ActsEvent/TrackContainer.h"
+
 namespace HGTD {
 
 TrackTimeDefAndQualityAlg::TrackTimeDefAndQualityAlg(const std::string& name,
@@ -60,11 +66,29 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, uint32_t> summary_handle(
       m_summarypattern_dec_key, ctx);
 
-  for (const auto* track_ptkl : *track_particles) {
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<float>>
+    layerClusterTimeHandle(m_layerClusterTimeKey, ctx);
+  ATH_CHECK(layerClusterTimeHandle.isValid());
 
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>>
+      layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
+  ATH_CHECK(layerHasExtensionHandle.isValid());
+
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<int>>
+      layerClusterTruthClassHandle(m_layerClusterTruthClassKey, ctx);
+  ATH_CHECK(layerClusterTruthClassHandle.isValid());
+
+  
+  for (const auto* track_ptkl : *track_particles) {
     // runs the time consistency checks
     // if no hits are found in HGTD, returns a default time
-    CleaningResult res = runTimeConsistencyCuts(*track_ptkl);
+    const std::vector<float>& times = layerClusterTimeHandle(*track_ptkl);
+    const std::vector<bool>& has_clusters = layerHasExtensionHandle(*track_ptkl);
+    const std::vector<int>& hit_classification = layerClusterTruthClassHandle(*track_ptkl);
+
+    CleaningResult res = runTimeConsistencyCuts(times,
+						has_clusters,
+						hit_classification);
 
     // check if the last hit on track was within the predefined area
     if (lastHitIsOnLastSurface(*track_ptkl)) {
@@ -72,10 +96,10 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
     } else {
       res.m_field |= (0b0001 << m_holes_ptrn_sft);
     }
-
+    
     // keep which of the hits associated in reco were primary hits (truth info!)
     short prime_pattern = 0x0;
-    for (short i = 0; i < n_hgtd_layers; i++) {
+    for (short i = 0; i < s_hgtd_layers; i++) {
       if (res.m_hits.at(i).m_isprime) {
         prime_pattern |= (1 << i);
       }
@@ -95,11 +119,13 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
 ////////////////////////////////////////////////////////////////////////////////
 
 TrackTimeDefAndQualityAlg::CleaningResult
-TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
-    const xAOD::TrackParticle& track_particle) const {
-
+TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(const std::vector<float>& times,
+						  const std::vector<bool>& has_clusters,
+						  const std::vector<int>& hit_classification) const {
   // get all available hits (see the struct Hit) in a first step
-  std::array<Hit, n_hgtd_layers> valid_hits = getValidHits(track_particle);
+  std::array<Hit, s_hgtd_layers> valid_hits = getValidHits(times,
+							   has_clusters,
+							   hit_classification);
 
   CleaningResult result;
   result.m_hits = valid_hits;
@@ -180,44 +206,30 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
   }
 }
 
-std::array<TrackTimeDefAndQualityAlg::Hit, n_hgtd_layers>
-TrackTimeDefAndQualityAlg::getValidHits(
-    const xAOD::TrackParticle& track_particle) const {
+std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers>
+TrackTimeDefAndQualityAlg::getValidHits(const std::vector<float>& times,
+					const std::vector<bool>& has_clusters,
+					const std::vector<int>& hit_classification) const {
+  std::array<Hit, s_hgtd_layers> valid_hits {};
 
-  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<float>>
-      layerClusterTimeHandle(m_layerClusterTimeKey);
-  std::vector<float> times = layerClusterTimeHandle(track_particle);
-
-  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>>
-      layerHasExtensionHandle(m_layerHasExtensionKey);
-  std::vector<bool> has_clusters = layerHasExtensionHandle(track_particle);
-
-  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<int>>
-      layerClusterTruthClassHandle(m_layerClusterTruthClassKey);
-  std::vector<int> hit_classification =
-      layerClusterTruthClassHandle(track_particle);
-
-  std::array<Hit, n_hgtd_layers> valid_hits;
-
-  for (size_t i = 0; i < n_hgtd_layers; i++) {
-    Hit newhit;
+  for (size_t i = 0; i < s_hgtd_layers; i++) {
+    Hit& newhit = valid_hits[i];
     if (has_clusters.at(i)) {
       newhit.m_time = times.at(i);
       newhit.m_isprime = hit_classification.at(i) == 1;
       newhit.m_isvalid = true;
     }
     newhit.m_layer = i;
-    valid_hits.at(i) = newhit;
   }
 
   return valid_hits;
 }
 
 short TrackTimeDefAndQualityAlg::getValidPattern(
-    const std::array<TrackTimeDefAndQualityAlg::Hit, n_hgtd_layers>& hits)
+    const std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers>& hits)
     const {
   short pattern = 0x0;
-  for (short i = 0; i < n_hgtd_layers; i++) {
+  for (short i = 0; i < s_hgtd_layers; i++) {
     if (hits.at(i).m_isvalid) {
       pattern |= (1 << i);
     }
@@ -226,7 +238,7 @@ short TrackTimeDefAndQualityAlg::getValidPattern(
 }
 
 float TrackTimeDefAndQualityAlg::calculateChi2(
-    const std::array<Hit, n_hgtd_layers>& hits) const {
+    const std::array<Hit, s_hgtd_layers>& hits) const {
 
   float mean = meanTime(hits);
 
@@ -241,7 +253,7 @@ float TrackTimeDefAndQualityAlg::calculateChi2(
 }
 
 bool TrackTimeDefAndQualityAlg::passesDeltaT(
-    const std::array<TrackTimeDefAndQualityAlg::Hit, n_hgtd_layers>& hits)
+    const std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers>& hits)
     const {
   // don't trust the user here.
   short n_valid = std::count_if(hits.begin(), hits.end(),
@@ -264,7 +276,7 @@ bool TrackTimeDefAndQualityAlg::passesDeltaT(
 }
 
 float TrackTimeDefAndQualityAlg::meanTime(
-    const std::array<TrackTimeDefAndQualityAlg::Hit, n_hgtd_layers>& hits)
+    const std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers>& hits)
     const {
   float sum = 0.;
   short n = 0;
@@ -278,7 +290,7 @@ float TrackTimeDefAndQualityAlg::meanTime(
 }
 
 float TrackTimeDefAndQualityAlg::trackTimeResolution(
-    const std::array<TrackTimeDefAndQualityAlg::Hit, n_hgtd_layers>& hits)
+    const std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers>& hits)
     const {
 
   float sum = 0.;
@@ -292,7 +304,7 @@ float TrackTimeDefAndQualityAlg::trackTimeResolution(
 }
 
 short TrackTimeDefAndQualityAlg::findLayerWithBadChi2(
-    std::array<TrackTimeDefAndQualityAlg::Hit, n_hgtd_layers> hits) const {
+    std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers> hits) const {
   short remove_layer = -1;
   float local_min_chi2 = 999999;
   for (auto& hit : hits) {
@@ -310,7 +322,7 @@ short TrackTimeDefAndQualityAlg::findLayerWithBadChi2(
 }
 
 void TrackTimeDefAndQualityAlg::setLayerAsInvalid(
-    std::array<TrackTimeDefAndQualityAlg::Hit, n_hgtd_layers>& hits,
+    std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers>& hits,
     short layer) const {
   for (auto& hit : hits) {
     if (hit.m_layer == layer) {
@@ -335,24 +347,80 @@ TrackTimeDefAndQualityAlg::getLastHitOnTrack(const Trk::Track& track) const {
     if (not curr_last_tsos) {
       continue;
     }
+    
     if (curr_last_tsos->type(Trk::TrackStateOnSurface::Measurement) and
         curr_last_tsos->trackParameters() and
         curr_last_tsos->measurementOnTrack()) {
       return curr_last_tsos->trackParameters();
     }
   }
+  
   return nullptr;
 }
 
+std::pair<float, float> TrackTimeDefAndQualityAlg::getRadiusAndZ(const xAOD::TrackParticle& track_particle) const
+{
+  float radius = 0.f;
+  float abs_z = 0.f;
+
+  if (not m_doActs) {
+    const Trk::Track* track = track_particle.track();
+    if (not track) throw std::runtime_error("Cannot retrieve Trk track from Track Particle");
+    const Trk::TrackParameters* last_hit_param = getLastHitOnTrack(*track);
+    if (not last_hit_param) throw std::runtime_error("Cannot retrieve Trk track parameters from Trk track");
+
+    radius = std::hypot(last_hit_param->position().x(),
+			last_hit_param->position().y());
+    abs_z = std::abs(last_hit_param->position().z());
+  } else {
+    // ACTS
+    static const SG::ConstAccessor< ElementLink<ActsTrk::TrackContainer> > actsTrackLink("actsTrack");
+    if (not actsTrackLink.isAvailable(track_particle)) throw std::runtime_error("Track particle does not have link to acts track");
+
+    ElementLink<ActsTrk::TrackContainer> link_to_track = actsTrackLink(track_particle);
+    if (not link_to_track.isValid()) throw std::runtime_error("Element link to acts track is not valid");
+
+    std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *link_to_track;
+    if (not optional_track.has_value()) throw std::runtime_error("Link to acts track has no value");
+
+    const ActsTrk::TrackContainer::ConstTrackProxy& track = optional_track.value();
+    const auto lastMeasurementState = Acts::findLastMeasurementState(track);
+    const auto state = lastMeasurementState.value();
+
+    auto sl = state.getUncalibratedSourceLink().template get<ActsTrk::ATLASUncalibSourceLink>();
+    assert( sl != nullptr);
+    const xAOD::UncalibratedMeasurement &cluster = ActsTrk::getUncalibratedMeasurement(sl);
+    xAOD::UncalibMeasType clusterType = cluster.type();
+
+    switch (clusterType) {
+    case xAOD::UncalibMeasType::PixelClusterType:
+      {
+	auto glob = static_cast<const xAOD::PixelCluster*>(&cluster)->globalPosition();
+	radius = std::sqrt( glob(0, 0) * glob(0, 0) + glob(1, 0) * glob(1, 0) );
+	abs_z = std::abs( glob(2, 0) );
+      }
+      break;
+    case xAOD::UncalibMeasType::StripClusterType:
+      {
+	auto glob = static_cast<const xAOD::StripCluster*>(&cluster)->globalPosition();
+        radius = std::sqrt( glob(0, 0) * glob(0, 0) + glob(1, 0) * glob(1, 0) );
+        abs_z =	std::abs( glob(2, 0) );
+      }
+      break;
+    case xAOD::UncalibMeasType::HGTDClusterType:
+      // return some default numbers
+      return std::make_pair(700, 3000);
+    default:
+      return std::make_pair(radius, abs_z);
+    }; // switch
+  } // acts
+
+  return std::make_pair(radius, abs_z);
+}
+  
 bool TrackTimeDefAndQualityAlg::lastHitIsOnLastSurface(
     const xAOD::TrackParticle& track_particle) const {
-  const Trk::Track* track = track_particle.track();
-  if (not track) return false;
-  const Trk::TrackParameters* last_hit_param = getLastHitOnTrack(*track);
-  if (not last_hit_param) return false;
-  float radius = std::hypot(last_hit_param->position().x(),
-                             last_hit_param->position().y());
-  float abs_z = std::abs(last_hit_param->position().z());
+  auto [radius, abs_z] = getRadiusAndZ(track_particle);
 
   if (abs_z > 2700) {
     return true;
