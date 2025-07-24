@@ -63,11 +63,20 @@ def FPGATrackSimRegionMergeringAlgCfg(flagsIn,name="FPGATrackSimRegionMergingAlg
     kwargs.setdefault('FPGATrackSimHitsInRoadsCollections',HitsInRoadsCollections)
     
     regionMerging = CompFactory.FPGATrackSim.FPGATrackSimRegionMergingAlg(name,**kwargs)
-    regionMerging.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemoval
+    regionMerging.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions
+
+
     regionMerging.useRoads = not flags.Trigger.FPGATrackSim.tracking
+
+    if stage == "2nd":
+        from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import FPGATrackSimOverlapRemovalToolCfg
+        regionMerging.OverlapRemovalTool = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags,name="OLRMerge"))
+    elif stage == "1st":
+        from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimOverlapRemovalToolCfg
+        regionMerging.OverlapRemovalTool = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags,name="OLRMerge"))
     
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimOverlapRemovalToolCfg
-    regionMerging.OverlapRemovalTool = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
-    
+    ### disable chi2 cut for overlap removal tool
+    regionMerging.OverlapRemovalTool.MinChi2 = 1e15
+        
     acc.addEventAlgo(regionMerging)
     return acc

@@ -114,6 +114,7 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
                     inputTensorValues.push_back(xf_scaled);
                     inputTensorValues.push_back(yf_scaled);
                     inputTensorValues.push_back(zf_scaled);
+
 		  }
 		  else {
 		    float rf_scaled = (rf+tmp_rf) / (2.*getRScale());
@@ -151,42 +152,51 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
           if (inputTensorValues.size() < 15) {
             inputTensorValues.resize(15, 0.0f); // Resize to 15 and fill with 0.0f
           }
-          if (m_doGNNTracking) {
-            inputTensorValues.resize(m_nInputsGNN * 3);
-        }
-        }
-        else {
-          if (inputTensorValues.size() < 27) {
-            inputTensorValues.resize(27, 0.0f); // Resize to 27 and fill with 0.0f
+	  
+	  if (m_doGNNTracking) {
+	    inputTensorValues.resize(39);
+	  }
+	}
+	else {
+          if (inputTensorValues.size() < 39) {
+            inputTensorValues.resize(39, 0.0f); // Resize to 39 and fill with 0.0f
           }
-          else if (inputTensorValues.size() > 27) {
-            inputTensorValues.resize(27); // Resize to 27 and keep the first 27 elements
+          else if (inputTensorValues.size() > 39) {
+            inputTensorValues.resize(39); // Resize to 39 and keep the first e9 elements
           }
-        }
-
+	}
+	
+        if (m_doGNNTracking) {
+	  inputTensorValues.resize(m_nInputsGNN * 3);
+	}
+	
+	
         if (isFirst) paramNNoutputs = m_paramNN_1st.runONNXInference(inputTensorValues);
         else paramNNoutputs = m_paramNN_2nd.runONNXInference(inputTensorValues);
-
+	
         ATH_MSG_DEBUG("Estimated Track Parameters");
         for (unsigned int i = 0; i < paramNNoutputs.size(); i++) {
-            ATH_MSG_DEBUG(paramNNoutputs[i]);
+	  ATH_MSG_DEBUG(paramNNoutputs[i]);
         }
 
+	
 	double qopt = paramNNoutputs[0]*getQoverPtScale();
 	double eta = paramNNoutputs[1]*getEtaScale();
 	double phi = paramNNoutputs[2]*getPhiScale();
 	double d0 = paramNNoutputs[3]*getD0Scale();
 	double z0 = paramNNoutputs[4]*getZ0Scale();
-	if (qopt < min[FPGATrackSimTrackPars::IHIP]) qopt = min[FPGATrackSimTrackPars::IHIP];
-	if (qopt > max[FPGATrackSimTrackPars::IHIP]) qopt = max[FPGATrackSimTrackPars::IHIP];
-	if (eta < min[FPGATrackSimTrackPars::IETA]) eta = min[FPGATrackSimTrackPars::IETA];
-	if (eta > max[FPGATrackSimTrackPars::IETA]) eta = max[FPGATrackSimTrackPars::IETA];
-	if (phi < min[FPGATrackSimTrackPars::IPHI]) phi = min[FPGATrackSimTrackPars::IPHI];
-	if (phi > max[FPGATrackSimTrackPars::IPHI]) phi = max[FPGATrackSimTrackPars::IPHI];
-	if (d0 < min[FPGATrackSimTrackPars::ID0]) d0 = min[FPGATrackSimTrackPars::ID0];
-	if (d0 > max[FPGATrackSimTrackPars::ID0]) d0 = max[FPGATrackSimTrackPars::ID0];
-	if (z0 < min[FPGATrackSimTrackPars::IZ0]) z0 = min[FPGATrackSimTrackPars::IZ0];
-	if (z0 > max[FPGATrackSimTrackPars::IZ0]) z0 = max[FPGATrackSimTrackPars::IZ0];
+
+
+	 if (qopt < min[FPGATrackSimTrackPars::IHIP]) qopt = min[FPGATrackSimTrackPars::IHIP];
+	 if (qopt > max[FPGATrackSimTrackPars::IHIP]) qopt = max[FPGATrackSimTrackPars::IHIP];
+	 if (eta < min[FPGATrackSimTrackPars::IETA]) eta = min[FPGATrackSimTrackPars::IETA];
+	 if (eta > max[FPGATrackSimTrackPars::IETA]) eta = max[FPGATrackSimTrackPars::IETA];
+	 if (phi < min[FPGATrackSimTrackPars::IPHI]) phi = min[FPGATrackSimTrackPars::IPHI];
+	 if (phi > max[FPGATrackSimTrackPars::IPHI]) phi = max[FPGATrackSimTrackPars::IPHI];
+	 if (d0 < min[FPGATrackSimTrackPars::ID0]) d0 = min[FPGATrackSimTrackPars::ID0];
+	 if (d0 > max[FPGATrackSimTrackPars::ID0]) d0 = max[FPGATrackSimTrackPars::ID0];
+	 if (z0 < min[FPGATrackSimTrackPars::IZ0]) z0 = min[FPGATrackSimTrackPars::IZ0];
+	 if (z0 > max[FPGATrackSimTrackPars::IZ0]) z0 = max[FPGATrackSimTrackPars::IZ0];
 	
         track.setQOverPt(qopt);
         track.setEta(eta);
@@ -215,12 +225,19 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
 
         double y = iroad->getY();
 
-        // Get info on layers with missing hits
-        int nMissing = 0;
-        layer_bitmask_t missing_mask = 0;
-
         // Just used to get number of layers considered
         const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(iroad->getSubRegion());
+
+        // Get info on layers with missing hits
+        int nMissing = 0;
+        layer_bitmask_t missing_mask = iroad->getNWCLayers();
+	for (unsigned ilayer = 0; ilayer < planeMap->getNLogiLayers(); ilayer++) {
+	  if ((missing_mask >> ilayer) & 0x1) {
+	    nMissing++;
+	    if (planeMap->isPixel(ilayer)) nMissing++; /// should be 2 missing coords for pixel
+	  }
+	}
+	
 
         // Create a template track with common parameters filled already for
         // initializing below
@@ -287,7 +304,6 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
             float tmp_zf;
 	    float tmp_rf;
 	    float tmp_phif;
-	    
             // Loop over all hits
             for (const auto &hit : hit_list) {
                 // Need to rotate hits
@@ -377,8 +393,10 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
 	    
             inputTensorValuesAll.push_back(inputTensorValues);
             FPGATrackSimTrack track_cand;
+	    n_track++;
             track_cand.setTrackID(n_track);
             track_cand.setNLayers(planeMap->getNLogiLayers());
+	    track_cand.setNMissing(nMissing);
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
                 track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
             }
@@ -397,6 +415,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
         float nn_val = NNoutputs[itrack][0];
         ATH_MSG_DEBUG("NN output:" << nn_val);
         double chi2 = (1 - nn_val) * (tracks[itrack].getNCoords() - tracks[itrack].getNMissing() - 5);
+	//std::cout << "1st stage" <<  chi2 << std::endl;
 	tracks[itrack].setOrigChi2(chi2);
         tracks[itrack].setChi2(chi2);
     }
@@ -406,7 +425,6 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
         compute_truth(t);  // match the track to a geant particle using the
         // channel-level geant info in the hit data.
     }
-
     return StatusCode::SUCCESS;
 }
 
@@ -422,10 +440,17 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
 
         double y = iroad->getY();
 
+	const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_2nd(iroad->getSubRegion());
         // Get info on layers with missing hits
         int nMissing = 0;
-        layer_bitmask_t missing_mask = 0;
-
+        layer_bitmask_t missing_mask = iroad->getNWCLayers();
+	for (unsigned ilayer = 0; ilayer < 13; ilayer++) {
+	  if ((missing_mask >> ilayer) & 0x1) {
+	    nMissing++;
+	    if (planeMap->isPixel(ilayer)) nMissing++; /// should be 2 missing coords for pixel
+	  }
+	}
+		
         // Create a template track with common parameters filled already for
         // initializing below
         FPGATrackSimTrack temp;
@@ -443,7 +468,6 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
         temp.setHoughY(iroad->getY());
         temp.setHoughXBin(iroad->getXBin());
         temp.setHoughYBin(iroad->getYBin());
-
         ////////////////////////////////////////////////////////////////////////
         // Get a list of indices for all possible combinations given a certain
         // number of layers
@@ -574,19 +598,14 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
 		  }
 		}
 	    }
-	    
-            if (inputTensorValues.size() != 39) {
-	      inputTensorValues.resize(39);
-            }
 
-            if (!m_doGNNTracking) {
-                if (inputTensorValues.size() < 27) {
-                    inputTensorValues.resize(27, 0.0f); // Resize to 27 and fill with 0.0f
-                }
-                else if (inputTensorValues.size() > 27) {
-                    inputTensorValues.resize(27); // Resize to 27 and keep the first 27 elements
-                }
-            }
+	    
+	    if (inputTensorValues.size() < 39) {
+	      inputTensorValues.resize(39, 0.0f); // Resize to 39 and fill with 0.0f
+	    }
+	    else if (inputTensorValues.size() > 39) {
+	      inputTensorValues.resize(39); // Resize to 39 and keep the first 39 elements
+	    }
             inputTensorValuesAll.push_back(inputTensorValues);
 
             ATH_MSG_DEBUG("NN InputTensorValues:");
@@ -596,6 +615,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
             FPGATrackSimTrack track_cand;
             track_cand.setTrackID(n_track);
             track_cand.setNLayers(13);
+	    track_cand.setNMissing(nMissing);
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
                 track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
             }
@@ -606,13 +626,13 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
 
     /// now we have saved our values, time to run inference and get the output
     auto NNoutputs = m_fakeNN_2nd.runONNXInference(inputTensorValuesAll);
-
     for (unsigned itrack = 0; itrack < NNoutputs.size(); itrack++) {
 
         float nn_val = NNoutputs[itrack][0];
         ATH_MSG_DEBUG("NN output:" << nn_val);
 
         double chi2 = (1 - nn_val) * (tracks[itrack].getNCoords() - tracks[itrack].getNMissing() - 5);
+	
         tracks[itrack].setOrigChi2(chi2);
         tracks[itrack].setChi2(chi2);
     }
@@ -805,7 +825,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
         // NN Estimator needs 9 spacepoints -> 27 inputs
         // If there are more than 9 spacepoints entered, then it accepts the first 9
         // If there are less than 9 spacepoints, then it enters no values for it (although I actually probably need to just reject these)
-        inputTensorValues.resize(m_nInputsGNN*3); 
+        inputTensorValues.resize(27);
         
         inputTensorValuesAll.push_back(inputTensorValues);
         FPGATrackSimTrack track_cand;

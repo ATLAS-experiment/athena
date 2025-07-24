@@ -317,6 +317,26 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     if (m_doTracking && m_doNNTrack_2nd) {
       ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks,false,m_evtSel->getMin(), m_evtSel->getMax()));
     }
+
+    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
+    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
+    // Optionally loop over tracks and set track parameters to truth
+    //Loop over tracks and set the region for all of them, also optionally set track parameters to truth
+    if (m_SetTruthParametersForTracks >= 0 && truthtracks.size() > 0) {
+      for (auto track : tracks) {
+
+	if (m_SetTruthParametersForTracks != 0) 
+	  track.setQOverPt(truthtracks.front().getQOverPt());
+	else if (m_SetTruthParametersForTracks != 1)
+	  track.setD0(truthtracks.front().getD0());
+	else if	(m_SetTruthParametersForTracks != 2)
+	  track.setPhi(truthtracks.front().getPhi());
+	else if	(m_SetTruthParametersForTracks != 3)
+	  track.setZ0(truthtracks.front().getZ0());
+	else if	(m_SetTruthParametersForTracks != 4)
+	  track.setEta(truthtracks.front().getEta());
+      }
+    }
     
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks) {
@@ -341,8 +361,6 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     m_nTracksTot += tracks.size();
 
     // Do some simple monitoring of efficiencies. okay, we need truth tracks here.
-    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
-    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
     if (truthtracks.size() > 0) {
         m_evt_truth++;
         auto passroad = Monitored::Scalar<bool>("eff_road_2nd",(roads.size() > 0));
