@@ -77,9 +77,9 @@ def createActsLargeRadiusTrackingPassFlags():
     activateActsComponents(icf)
     # Mark as secondary pass 
     icf.isSecondaryPass = True
-    # For the time being we do not store sepate containers for LRT (to be revised)
+    # Store sepate container for LRT
     # In Athena this is handled by the Tracking.storeSeparateLargeD0Container flag
-    icf.storeSeparateContainer = False
+    icf.storeSeparateContainer = True
     return icf
 
 # Secondary ACTS Tracking pass for Conversion tracking
