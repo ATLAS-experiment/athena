@@ -112,7 +112,9 @@ def ITkStripModuleVetoCfg(flags, name="ITkStripModuleVeto", **kwargs):
     acc = GeoModelCfg(flags)
     
     
-    kwargs.setdefault("useDB", True) #(AB)  FIXME, this needs to be changed - for tests
+    kwargs.setdefault("useDB", False)
+    if flags.ITk.useDatabaseForModuleVeto:
+        kwargs["useDB"] = True    
     kwargs.setdefault("BadModuleIdentifiers", [])
 
     if kwargs["useDB"]:
@@ -122,9 +124,8 @@ def ITkStripModuleVetoCfg(flags, name="ITkStripModuleVeto", **kwargs):
                              folderStrings="/ITk/Manual/BadModules",
                              detDb="/afs/cern.ch/work/a/anburger/COOLAthena/project/mycool.db", #(AB) - FIXME, this needs to be changed - for tests
                              className="AthenaAttributeList",
-                            # tag=kwargs["folderTag"],  #(AB) - FIXME, this needs to be changed - for tests
-                             tag="OFLCOND-MC15c-SDR-14-05",  #(AB) - FIXME, this needs to be changed - for tests 
-                             extensible=True,  #(AB) - FIXME, this needs to be changed - for tests 
+                             #tag=kwargs["folderTag"],  #(AB) - FIXME, default but does not work
+                             tag="OFLCOND-MC15c-SDR-14-05",  #(AB) - FIXME, what to put here? 
                              db="CONDBR2"  #(AB) - FIXME, this needs to be changed - for tests
                              ))            
         # Condition algorithm
