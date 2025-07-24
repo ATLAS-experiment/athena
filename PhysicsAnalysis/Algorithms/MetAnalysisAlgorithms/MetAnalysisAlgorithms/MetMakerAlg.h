@@ -11,6 +11,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysReadHandle.h>
+#include <SystematicsHandles/SysHandleArray.h>
 #include <SystematicsHandles/SysWriteHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
@@ -126,13 +127,13 @@ namespace CP
 
     /// \brief the container to be marked as invisible particles 
   private:
-    SysReadHandle<xAOD::IParticleContainer> m_invisHandle {
-      this, "invisible", "", "Any particles to treat as invisible."};
+    SysHandleArray<SysReadHandle<xAOD::IParticleContainer>> m_invisHandles {
+      this, "invisible", {}, "Any particles to treat as invisible."};
 
     /// \brief the selection on the invisible container
   private:
-    SysReadSelectionHandle m_invisSelection {
-      this, "invisibleSelection", "", "the selection on the particles to be treated as invisible." };
+    SysReadSelectionHandleArray m_invisSelections {
+      this, "invisibleSelection", {}, "the selection on the particles to be treated as invisible." };
 
     /// \brief the key for \ref m_jetsHandle
   private:
