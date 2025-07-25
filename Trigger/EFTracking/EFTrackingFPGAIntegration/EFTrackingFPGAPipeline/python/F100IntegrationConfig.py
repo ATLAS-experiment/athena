@@ -121,7 +121,9 @@ if __name__ == "__main__":
     flags.FPGADataPrep.DoActs = True
     flags.Acts.doRotCorrection = False
     
-    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumThreads=1
+    flags.Concurrency.NumConcurrentEvents=1
+    flags.Concurrency.NumProcs=0
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"]
     # flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
     flags.Output.AODFileName = "FPGA.Benchmark.AOD.pool.root"
@@ -134,11 +136,11 @@ if __name__ == "__main__":
         # For Spacepoint formation
         if flags.FPGADataPrep.PassThrough.ClusterOnly:
             flags.Acts.useCache = False
-            flags.Tracking.ITkMainPass.doActsSeed = True
         
-        flags.Tracking.ITkMainPass.doAthenaToActsCluster = True
-        flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint = True
-        flags.Tracking.ITkMainPass.doAthenaSpacePoint = True
+        from ActsConfig.ActsCIFlags import actsWorkflowFlags
+        actsWorkflowFlags(flags)
+        flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
+        flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
     else:
         flags.Tracking.doTruth=False
         flags.ITk.doTruth=False
@@ -175,7 +177,8 @@ if __name__ == "__main__":
 
     acc = F100IntegrationCfg(flags, **kwarg)
     cfg.merge(acc)
-    
+    cfg.merge(F100DataEncodingCfg(flags))
+    cfg.merge(F100EDMConversionCfg(flags))
     OutputItemList = []
     # # Connection to ACTS
     if flags.FPGADataPrep.DoActs:
@@ -196,11 +199,7 @@ if __name__ == "__main__":
                                 'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["SortedFPGAPixelClusters","SortedFPGAStripClusters"],
                                 'PixelClusterToTruthAssociationAlg.Measurements' : 'SortedFPGAPixelClusters',
                                 'StripClusterToTruthAssociationAlg.Measurements' : 'SortedFPGAStripClusters'}))
-        if(not flags.FPGADataPrep.ForTiming):     
-
-            # Run the ACTS Fast Tracking (C-100) as an additional reference
-            cfg.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))
-            
+        if(not flags.FPGADataPrep.ForTiming):                 
             OutputItemList += [
                         "xAOD::TrackParticleContainer#FPGATrackParticles",
                         "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
@@ -217,8 +216,8 @@ if __name__ == "__main__":
 
         from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
         cfg.merge(FPGAOutputValidationCfg(flags, **{
-            "pixelKeys": ["FPGAPixelClusters", "ITkPixelClusters"],
-            "stripKeys": ["FPGAStripClusters", "ITkStripClusters"],
+            "pixelKeys": ["SortedFPGAPixelClusters", "ITkPixelClusters"],
+            "stripKeys": ["SortedFPGAStripClusters", "ITkStripClusters"],
             'doDiffHistograms':True,
             'matchByID' : False,
             'allowedRdoMisses': 1000}))

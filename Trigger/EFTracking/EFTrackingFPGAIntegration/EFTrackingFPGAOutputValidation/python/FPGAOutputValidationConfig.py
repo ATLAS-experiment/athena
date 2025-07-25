@@ -102,6 +102,7 @@ def FPGAOutputValidationCfg(flags, **kwargs):
             monitoringTool.defineHistogram(f"{key}_WIDTH_IN_ETA_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_WIDTH_IN_ETA;Width in #eta;", xbins = 100, xmin = 0, xmax = 1)
 
             monitoringTool.defineHistogram(f"{key}_TOTAL_TOT_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1I", title = f"{key}_TOTAL_TOT;Total ToT;", xbins = 101, xmin = -0.5, xmax = 100.5)
+            monitoringTool.defineHistogram(f"{key}_UNMATCHED_GLOBALPOSITION_Z_{histName},{key}_UNMATCHED_GLOBALPOSITION_R_{histName};{key}_UNMATCHED_CLUSTERS_RZ", path= "FPGAOutputValidation/"+histName, type = "TH2F", title = f"{key}:Unmatched cluster position;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1200)
 
         for key in kwargs["stripKeys"]:
             monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_X_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_LOCALPOSITION_X;Local position x;", xbins =  200, xmin =  -100, xmax =  100)             
@@ -112,6 +113,7 @@ def FPGAOutputValidationCfg(flags, **kwargs):
             monitoringTool.defineHistogram(f"{key}_GLOBALPOSITION_Z_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_GLOBALPOSITION_Z;Global position z [mm];", xbins =  200, xmin =  -3000, xmax =  3000) 
             
             monitoringTool.defineHistogram(f"{key}_CHANNELS_IN_PHI_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_CHANNELS_IN_PHI;Channels in #phi;", xbins =  100, xmin =  0, xmax =  100)
+            monitoringTool.defineHistogram(f"{key}_UNMATCHED_GLOBALPOSITION_Z_{histName},{key}_UNMATCHED_GLOBALPOSITION_R_{histName};{key}_UNMATCHED_CLUSTERS_RZ", path= "FPGAOutputValidation/"+histName, type = "TH2F", title = f"{key}:Unmatched cluster position;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1200)
 
     from AthenaConfiguration.ComponentFactory import CompFactory 
     FPGAOutputValidationAlg = CompFactory.FPGAOutputValidationAlg(

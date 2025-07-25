@@ -117,6 +117,24 @@ namespace {
     }
     return clusterPairs;
   }
+
+  template <typename T>
+  std::string logMultipleClusterMatches(const std::vector<const T*>& matchedClusters) {
+    std::string out;
+
+    out += "Found " + std::to_string(matchedClusters.size()) + " FPGA ";
+    out += (matchedClusters[0]->type() == xAOD::UncalibMeasType::PixelClusterType ? "Pixel" : "Strip");
+    out += " clusters matching to the same offline cluster:\n";
+    for (const auto& cluster : matchedClusters) {
+      out += std::to_string(cluster->identifier()) + " x: " + std::to_string(cluster->globalPosition()[0]) +
+             " y: " + std::to_string(cluster->globalPosition()[1]) + " z: " + std::to_string(cluster->globalPosition()[2]) + "\n";
+      for (const auto& rdo : cluster->rdoList()) {
+        out += "\t" + std::to_string(rdo.get_compact()) + "\n";
+      }
+      out += "\n";
+    }
+    return out;
+  }
 }
 
 FPGAOutputValidationAlg::FPGAOutputValidationAlg(
@@ -154,16 +172,16 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(handle1.isValid());
     
     if (m_checkClusterRdos) {
-      const xAOD::PixelClusterContainer pixelClusters0 = *handle0;
+      const auto& pixelClusters0 = *handle0;
       std::unordered_multimap<xAOD::DetectorIDHashType, const xAOD::PixelCluster*> pixelClustersHashIdMap0; // assumes that the first key is the FPGA one
       for (const auto* cluster0 : pixelClusters0) {
         const xAOD::DetectorIDHashType hashId0 = cluster0->identifierHash();
         pixelClustersHashIdMap0.insert(std::make_pair(hashId0, cluster0));
       }
-      const std::vector<ClusterPair<xAOD::PixelCluster>> pixelPairsWithCommonRdos = findNonMergedClusters(pixelClustersHashIdMap0);
-      if (pixelPairsWithCommonRdos.size() > 0) {
+      const std::vector<ClusterPair<xAOD::PixelCluster>> pixelClusterPairsWithCommonRdos = findNonMergedClusters(pixelClustersHashIdMap0);
+      if (pixelClusterPairsWithCommonRdos.size() > 0) {
         std::stringstream ss;
-        for (const auto& pair : pixelPairsWithCommonRdos) {
+        for (const auto& pair : pixelClusterPairsWithCommonRdos) {
           ss << "Found " << pair.commonRDOs << " common RDOs between clusters with hash "
             << pair.clusters.first->identifierHash() << ": "
             << pair.clusters.first->identifier() << " and "
@@ -188,27 +206,23 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
                                                                                          m_matchByID,
                                                                                          m_allowedRdoMisses);
 
-      Monitored::Group(
-        m_monitoringTool,
-        Monitored::Scalar<float>("nmatched_pixel_clusters", matchedClusters.size() - 0.5)
-      );
-
       if (matchedClusters.size() == 0) {
+        std::vector<std::string> regions {"all"};
+        if(m_pixelid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+        else regions.push_back("endcap");
+        for (const auto& region : regions) {
+          Monitored::Group(
+            m_monitoringTool,
+            Monitored::Scalar<float>(handle0.key() + "_UNMATCHED_GLOBALPOSITION_Z_" + region, cluster0->globalPosition()[2]),
+            Monitored::Scalar<float>(handle0.key() + "_UNMATCHED_GLOBALPOSITION_R_" + region, sqrt(cluster0->globalPosition()[0]*cluster0->globalPosition()[0] + 
+                                                                                                   cluster0->globalPosition()[1]*cluster0->globalPosition()[1])),
+            Monitored::Scalar<float>("nmatched_pixel_clusters_"+region, matchedClusters.size() - 0.5)
+          );
+        }
         continue;
       }
       if (matchedClusters.size() > 1) {
-        std::stringstream ss;
-        for (const auto& cluster : matchedClusters) {
-          ss << cluster->identifier()
-             << " x: " << cluster->globalPosition().x() 
-             << " y: " << cluster->globalPosition().y() 
-             << " z: " << cluster->globalPosition().z() << "\n";
-          for (const auto& rdo : cluster->rdoList()) {
-            ss << "\t" << rdo.get_compact() << "\n";
-          }
-          ss << "\n";
-        }
-        ATH_MSG_ERROR("Found " << matchedClusters.size() << " pixel cluster matches\n" << ss.str());
+        ATH_MSG_ERROR(logMultipleClusterMatches(matchedClusters));
         return StatusCode::FAILURE;
       }
 
@@ -236,7 +250,8 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
           Monitored::Scalar<int>("diff_pixel_rdos_" +region , cluster0->rdoList().size() - cluster1->rdoList().size()),
           Monitored::Scalar<float>("pixel_globalR_ref_" + region, sqrt(cluster1->globalPosition()[0]*cluster1->globalPosition()[0] + 
                                                                        cluster1->globalPosition()[1]*cluster1->globalPosition()[1])),
-          Monitored::Scalar<float>("pixel_globalZ_ref_" + region, cluster1->globalPosition()[2])
+          Monitored::Scalar<float>("pixel_globalZ_ref_" + region, cluster1->globalPosition()[2]),
+          Monitored::Scalar<float>("nmatched_pixel_clusters_"+region, matchedClusters.size() - 0.5)
         );
         if(region != "all")
         {
@@ -255,7 +270,8 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
               Monitored::Scalar<float>("diff_pixel_globalY_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
               cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
               Monitored::Scalar<float>("diff_pixel_globalZ_"+region+"Layer" + std::to_string(m_pixelid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
-              cluster0->globalPosition()[2] - cluster1->globalPosition()[2])
+              cluster0->globalPosition()[2] - cluster1->globalPosition()[2]),
+              Monitored::Scalar<float>("nmatched_pixel_clusters_"+region, matchedClusters.size() - 0.5)
             );
         }
       }
@@ -279,7 +295,11 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
         const xAOD::DetectorIDHashType hashId0 = cluster0->identifierHash();
         stripClustersHashIdMap0.insert(std::make_pair(hashId0, cluster0));
       }
+
+      // Find all pairs of clusters within the same detector element that share at least one RDO
       const std::vector<ClusterPair<xAOD::StripCluster>> stripPairsWithCommonRdos = findNonMergedClusters(stripClustersHashIdMap0);
+
+      // If any such pairs are found, log an error with details for debugging
       if (stripPairsWithCommonRdos.size() > 0) {
         std::stringstream ss;
         for (const auto& pair : stripPairsWithCommonRdos) {
@@ -301,36 +321,34 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       stripClustersHashIdMap1.insert(std::make_pair(hashId1, cluster1));
     }
 
+    
     for (auto cluster0 : *handle0) {
       const std::vector<const xAOD::StripCluster*> matchedClusters = findMatchingCluster(cluster0, stripClustersMap1, stripClustersHashIdMap1,
                                                                                          m_matchByID,
                                                                                          m_allowedRdoMisses);
 
-      Monitored::Group(
-        m_monitoringTool,
-        Monitored::Scalar<unsigned>("nmatched_strip_clusters", matchedClusters.size())
-      );
-
-      if (matchedClusters.size() == 0) {
+      if (matchedClusters.size() == 0 && handle1->size() > 0) {
+        std::vector<std::string> regions {"all"};
+        if(m_stripid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+        else regions.push_back("endcap");
+        for (const auto& region : regions) {
+          Monitored::Group(
+            m_monitoringTool,
+            Monitored::Scalar<float>(handle0.key() + "_UNMATCHED_GLOBALPOSITION_Z_" + region, cluster0->globalPosition()[2]),
+            Monitored::Scalar<float>(handle0.key() + "_UNMATCHED_GLOBALPOSITION_R_" + region, sqrt(cluster0->globalPosition()[0]*cluster0->globalPosition()[0] + 
+                                                                                                   cluster0->globalPosition()[1]*cluster0->globalPosition()[1])),
+            Monitored::Scalar<float>("nmatched_strip_clusters_"+region, matchedClusters.size() - 0.5)
+          );
+        }
         continue;
       }
       if (matchedClusters.size() > 1) {
-        std::stringstream ss;
-        for (const auto& cluster : matchedClusters) {
-          ss << cluster->identifier()
-             << " x: " << cluster->globalPosition().x() 
-             << " y: " << cluster->globalPosition().y() 
-             << " z: " << cluster->globalPosition().z() << "\n";
-          for (const auto& rdo : cluster->rdoList()) {
-            ss << "\t" << rdo.get_compact() << "\n";
-          }
-          ss << "\n";
-        }
-        ATH_MSG_ERROR("Found " << matchedClusters.size() << " strip cluster matches\n" << ss.str());
+        ATH_MSG_ERROR(logMultipleClusterMatches(matchedClusters));
         return StatusCode::FAILURE;
       }
 
       const xAOD::StripCluster *cluster1 = matchedClusters[0];
+
       std::vector<std::string> regions {"all"};
       if(m_stripid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
       else regions.push_back("endcap");
@@ -348,7 +366,8 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
           Monitored::Scalar<int>("diff_strip_rdos_" +region , cluster0->rdoList().size() - cluster1->rdoList().size()),
           Monitored::Scalar<float>("strip_globalR_ref_" + region, sqrt(cluster1->globalPosition()[0]*cluster1->globalPosition()[0] + 
                                                                        cluster1->globalPosition()[1]*cluster1->globalPosition()[1])),
-          Monitored::Scalar<float>("strip_globalZ_ref_" + region, cluster1->globalPosition()[2])
+          Monitored::Scalar<float>("strip_globalZ_ref_" + region, cluster1->globalPosition()[2]),
+          Monitored::Scalar<float>("nmatched_strip_clusters_"+region, matchedClusters.size() - 0.5)
         );
         if(region != "all")
         {
@@ -363,7 +382,8 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
               Monitored::Scalar<float>("diff_strip_globalY_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
               cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
               Monitored::Scalar<float>("diff_strip_globalZ_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
-              cluster0->globalPosition()[2] - cluster1->globalPosition()[2])
+              cluster0->globalPosition()[2] - cluster1->globalPosition()[2]),
+              Monitored::Scalar<float>("nmatched_strip_clusters_"+region, matchedClusters.size() - 0.5)
             );
         }
       }
