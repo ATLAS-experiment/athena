@@ -11,6 +11,7 @@ logCPGridRun = logging.getLogger('CPGridRun')
 class CPGridRun:
     def __init__(self):
         self.gridParser = self._parseGridArguments()
+        self.prunArgsDict = self._createPrunArgsDict()
         self._runscript = None
         if self.args.help:
             self._initRunscript()
@@ -71,9 +72,23 @@ class CPGridRun:
         submissionGroup.add_argument('--testRun', dest='testRun', action='store_true', help='Will submit job to the grid but greatly limit the number of files per job (10) and number of events (300)')
         submissionGroup.add_argument('--checkInputDS', dest='checkInputDS', action='store_true', help='Check if the input datasets are available on the AMI.')
         submissionGroup.add_argument('--recreateTar', dest='recreateTar', action='store_true', help='Re-compress the source code. Source code are compressed by default in submission, this is useful when the source code is updated')
-        self.args = parser.parse_args()
+        self.args, self.unknown_args = parser.parse_known_args()
         self.outputFilesParsing()
         return parser
+        
+    def _createPrunArgsDict(self) -> dict:
+        '''
+        converting unknown args to a dictionary
+        '''
+        unknownArgsDict = self._unknownArgsDict()
+        if unknownArgsDict and self.hasPrun():
+            self._checkPrunArgs(unknownArgsDict)
+            logCPGridRun.info(f"Adding prun exclusive arguments: {unknownArgsDict.keys()}")
+        elif unknownArgsDict:
+            logCPGridRun.warning(f"Unknown arguments detected: {unknownArgsDict}. Cannot check the availablility in Prun because Prun is not available / noSubmit is on.")
+        else:
+            pass
+        return unknownArgsDict
 
     @property
     def inputList(self):
@@ -152,7 +167,7 @@ class CPGridRun:
         if self.args.testRun:
             config['nEventsPerFile'] = 300
             config['nFiles'] = 10
-
+        config.update(self.prunArgsDict)
         cmd = 'prun \\\n'
         for k, v in config.items():
             if isinstance(v, bool) and v:
@@ -160,7 +175,43 @@ class CPGridRun:
             elif v is not None and v != '':
                 cmd += f'--{k} {v} \\\n'
         return cmd.rstrip(' \\\n')
-
+    
+    def _unknownArgsDict(self)->dict:
+        '''
+        Cleans the unknown args by removing leading dashes and ensuring they are in key-value pairs
+        '''
+        unknown_args_dict = {}
+        idx = 0
+        while idx < len(self.unknown_args):
+            if self.unknown_args[idx].startswith('-'):
+                if idx + 1 < len(self.unknown_args) and not self.unknown_args[idx + 1].startswith('-'):
+                    unknown_args_dict[self.unknown_args[idx].lstrip('-')] = self.unknown_args[idx + 1]
+                    idx += 2
+                else:
+                    unknown_args_dict[self.unknown_args[idx].lstrip('-')] = True
+                    idx += 1
+        return unknown_args_dict
+    
+    def _checkPrunArgs(self,argDict):
+        '''
+        check the arguments against the prun script to ensure they are valid
+        See https://github.com/PanDAWMS/panda-client/blob/master/pandaclient/PrunScript.py
+        '''
+        import pandaclient.PrunScript
+        # We need to temporarily clear the sys.argv to avoid the parser from PrunScript to fail
+        original_argv = sys.argv
+        sys.argv = ['prun']  # Reset sys.argv to only contain the script name
+        prunArgsDict = {}
+        prunArgsDict = pandaclient.PrunScript.main(get_options=True)
+        sys.argv = original_argv  # Restore the original sys.argv
+        nonPrunOrCPGridArgs = []
+        for arg in argDict:
+            if arg not in prunArgsDict:
+                nonPrunOrCPGridArgs.append(arg)
+        if nonPrunOrCPGridArgs:
+            logCPGridRun.error(f"Unknown arguments detected: {nonPrunOrCPGridArgs}. They do not belong to CPGridRun or Panda.")
+            raise ValueError(f"Unknown arguments detected: {nonPrunOrCPGridArgs}. They do not belong to CPGridRun or Panda.")
+        
     def printInputDetails(self):
         for key, cmd in self.cmd.items():
             parsed_name = CPGridRun.atlasProductionNameParser(key)
@@ -248,7 +299,7 @@ class CPGridRun:
                 logCPGridRun.info(f"{name} -> ptag: {ptag}")
     
         if notFound:
-            logCPGridRun.error("Some input datasets are not available in AMI:")
+            logCPGridRun.error("Some input datasets are not available in AMI, missing datasets are likely to fail on the grid:")
             logCPGridRun.error(", ".join(notFound))
             return False
     
@@ -554,16 +605,16 @@ class CPGridRun:
         if self.args.noSubmit:
             return
         if self.args.agreeAll:
-            logCPGridRun.info("You have agreed to all the submission details, jobs will be submitted without confirmation.")
+            logCPGridRun.info("You have agreed to all the submission details. Jobs will be submitted without confirmation.")
             self.submit()
             return
-        answer = input("Please confirm ALL the submission details are correct to submit [y/n]: ")
+        answer = input("Please confirm ALL the submission details are correct before submitting [y/n]: ")
         if answer.lower() == 'y':
             self.submit()
         elif answer.lower() == 'n':
-            logCPGridRun.info("Feel free to report any unexpected behavior to CPAlgorithms team!")
+            logCPGridRun.info("Feel free to report any unexpected behavior to the CPAlgorithms team!")
         else:
-            logCPGridRun.error("Invalid input. Please enter 'y' or 'n'. Jobs are not submitted")
+            logCPGridRun.error("Invalid input. Please enter 'y' or 'n'. Jobs are not submitted.")
 
 if __name__ == '__main__':
     cpgrid = CPGridRun()
