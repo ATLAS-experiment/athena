@@ -878,9 +878,9 @@ def TauNeutralFourVecNNRegressionCfg(flags):
 
     TauNeutralFourVecNNRegression = CompFactory.getComp("TauNeutralFourVecNNRegression")
     myTauNeutralFourVecNNRegression = TauNeutralFourVecNNRegression(name=_name,
-                                  WeightFile1p1n=flags.Tau.Pi0RecoNNConfig,
-                                  WeightFile1pXn=flags.Tau.Pi0RecoNNConfig,
-                                  WeightFile3pXn=flags.Tau.Pi0RecoNNConfig)
+                                  WeightFile_1p1n=flags.Tau.NeutralFourVecNNRegressionConfig1p1n,
+                                  WeightFile_1pXn=flags.Tau.NeutralFourVecNNRegressionConfig1pXn,
+                                  WeightFile_3pXn=flags.Tau.NeutralFourVecNNRegressionConfig3pXn)
 
     result.setPrivateTools(myTauNeutralFourVecNNRegression)
     return result

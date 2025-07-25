@@ -17,6 +17,7 @@
    <class name="TauJetRNNEvaluator" />
    <class name="TauGNNEvaluator" />
    <class name="TauDecayModeNNClassifier" />
+   <class name="TauNeutralFourVecNNRegression" />
    <class name="TauAODSelector" />
    <class name="TauAODMuonRemovalTool" />
 
