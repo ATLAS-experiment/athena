@@ -19,6 +19,7 @@
 #include <string>
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 
 class IThinningSvc;
 
