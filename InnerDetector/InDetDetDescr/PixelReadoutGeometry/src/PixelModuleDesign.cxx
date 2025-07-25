@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -252,13 +252,6 @@ PixelModuleDesign::bounds() const
   // created.
   if (not m_bounds) m_bounds.set(std::make_unique<Trk::RectangleBounds>(0.5*width(), 0.5*length()));
   return *m_bounds;
-}
-
-
-
-void PixelModuleDesign::setGeneralLayout()
-{
-  m_diodeMap.setGeneralLayout();
 }
 
 SiCellId 

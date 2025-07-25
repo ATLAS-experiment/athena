@@ -237,10 +237,6 @@ namespace InDetDD {
       void addMultipleRowConnection(const int lowerRow,
     				const std::vector<int> &connections);
     
-      /** Indicate that it is a more complex layout where cells are not 
-         lined up with each other. Eg bricking. Probably never will be needed. */
-      void setGeneralLayout();
-
       /** Debug string representation */
       std::string debugStringRepr() const;
 
