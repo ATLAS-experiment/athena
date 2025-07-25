@@ -94,21 +94,11 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
             // Get average of values for strip hit pairs
             // TODO: this needs to be fixed in the future, for this to work for other cases
             if (hit.isStrip()) {
-                if (!gotSecondSP) {
-                    tmp_xf = xf;
-                    tmp_yf = yf;
-                    tmp_zf = zf;
-		    tmp_rf = rf;
-		    tmp_phif = phif;
-                    gotSecondSP = true;
-                }
-                else {
-		  gotSecondSP = false;
-
+	      if (hit.getHitType() != HitType::spacepoint) { // this is a strip but not a SP!
 		  if (m_useCartesian) {
-                    float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
-                    float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
-                    float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+                    float xf_scaled = (xf) / (getXScale());
+                    float yf_scaled = (yf) / (getYScale());
+                    float zf_scaled = (zf) / (getZScale());
 		    
                     // Get average of two hits for strip hits 
                     inputTensorValues.push_back(xf_scaled);
@@ -117,15 +107,47 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
 
 		  }
 		  else {
-		    float rf_scaled = (rf+tmp_rf) / (2.*getRScale());
-		    float phif_scaled = (phif+tmp_phif) / (2.*getPhiScale());
-		    float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		    float rf_scaled = (rf) / (getRScale());
+		    float phif_scaled = (phif) / (getPhiScale());
+		    float zf_scaled = (zf) / (getZScale());
 		    // Get average of two hits for strip hits
                     inputTensorValues.push_back(rf_scaled);
                     inputTensorValues.push_back(phif_scaled);
                     inputTensorValues.push_back(zf_scaled);
 		  }
-                }
+	      }
+	      else if (!gotSecondSP) {
+		tmp_xf = xf;
+		tmp_yf = yf;
+		tmp_zf = zf;
+		tmp_rf = rf;
+		tmp_phif = phif;
+		gotSecondSP = true;
+	      }
+	      else {
+		gotSecondSP = false;
+		
+		if (m_useCartesian) {
+                    float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
+                    float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
+                    float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		    
+                    // Get average of two hits for strip hits 
+                    inputTensorValues.push_back(xf_scaled);
+                    inputTensorValues.push_back(yf_scaled);
+                    inputTensorValues.push_back(zf_scaled);
+		    
+		}
+		else {
+		  float rf_scaled = (rf+tmp_rf) / (2.*getRScale());
+		  float phif_scaled = (phif+tmp_phif) / (2.*getPhiScale());
+		  float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		  // Get average of two hits for strip hits
+		  inputTensorValues.push_back(rf_scaled);
+		  inputTensorValues.push_back(phif_scaled);
+		  inputTensorValues.push_back(zf_scaled);
+		}
+	      }
             }
             else {
 	      if (m_useCartesian) {
@@ -334,36 +356,59 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
                 // Get average of values for strip hit pairs
                 // TODO: this needs to be fixed in the future, for this to work for other cases
                 if (hit->isStrip()) {
-                    if (!gotSecondSP) {
-		      tmp_xf = xf;
-		      tmp_yf = yf;
-		      tmp_zf = zf;
-		      tmp_phif = phif;
-		      tmp_rf = rf;
-		      gotSecondSP = true;
-                    }
-                    else {
-		      gotSecondSP = false;
-		      if (m_useCartesian) {
-                        float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
-                        float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
-                        float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-			
-                        // Get average of two hits for strip hits 
-                        inputTensorValues.push_back(xf_scaled);
-                        inputTensorValues.push_back(yf_scaled);
-                        inputTensorValues.push_back(zf_scaled);
-                        index++;
-		      }
-		      else {
-                        float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
-                        float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
-                        float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-			inputTensorValues.push_back(rf_scaled);
-			inputTensorValues.push_back(phif_scaled);
-			inputTensorValues.push_back(zf_scaled);
-		      }
-                    }
+		  
+		  if (hit->getHitType() != HitType::spacepoint) { // this is a strip but not a SP!
+		    if (m_useCartesian) {
+		      float xf_scaled = (xf) / (getXScale());
+		      float yf_scaled = (yf) / (getYScale());
+		      float zf_scaled = (zf) / (getZScale());
+		      
+		      // Get average of two hits for strip hits
+		      inputTensorValues.push_back(xf_scaled);
+		      inputTensorValues.push_back(yf_scaled);
+		      inputTensorValues.push_back(zf_scaled);
+		      
+		    }
+		    else {
+		      float rf_scaled = (rf) / (getRScale());
+		      float phif_scaled = (phif) / (getPhiScale());
+		      float zf_scaled = (zf) / (getZScale());
+		      // Get average of two hits for strip hits
+		      inputTensorValues.push_back(rf_scaled);
+		      inputTensorValues.push_back(phif_scaled);
+		      inputTensorValues.push_back(zf_scaled);
+		    }
+		  }		    
+		  else if (!gotSecondSP) {
+		    tmp_xf = xf;
+		    tmp_yf = yf;
+		    tmp_zf = zf;
+		    tmp_phif = phif;
+		    tmp_rf = rf;
+		    gotSecondSP = true;
+		  }
+		  else {
+		    gotSecondSP = false;
+		    if (m_useCartesian) {
+		      float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
+		      float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
+		      float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		      
+		      // Get average of two hits for strip hits 
+		      inputTensorValues.push_back(xf_scaled);
+		      inputTensorValues.push_back(yf_scaled);
+		      inputTensorValues.push_back(zf_scaled);
+		      index++;
+		    }
+		    else {
+		      float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
+		      float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
+		      float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		      inputTensorValues.push_back(rf_scaled);
+		      inputTensorValues.push_back(phif_scaled);
+		      inputTensorValues.push_back(zf_scaled);
+		    }
+		  }
                 }
                 else {
 		  if (m_useCartesian) {
@@ -547,38 +592,60 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
                 // Get average of values for strip hit pairs
                 // TODO: this needs to be fixed in the future, for this to work for other cases
                 if (hit->isStrip()) {
-                    if (!gotSecondSP) {
-                        tmp_xf = xf;
-                        tmp_yf = yf;
-                        tmp_zf = zf;
-			tmp_rf = rf;
-			tmp_phif = phif;
-                        gotSecondSP = true;
-                    }
-                    else {
-		      gotSecondSP = false;
-		      if (m_useCartesian) {
-                        float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
-                        float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
-                        float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-			
-                        // Get average of two hits for strip hits
-                        inputTensorValues.push_back(xf_scaled);
-                        inputTensorValues.push_back(yf_scaled);
-                        inputTensorValues.push_back(zf_scaled);
-                        index++;
-		      }
-		      else {
-                        float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
-                        float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
-                        float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-                        inputTensorValues.push_back(rf_scaled);
-                        inputTensorValues.push_back(phif_scaled);
-                        inputTensorValues.push_back(zf_scaled);
-		      }
+
+		  if (hit->getHitType() != HitType::spacepoint) { // this is a strip but not a SP!
+		    if (m_useCartesian) {
+		      float xf_scaled = (xf) / (getXScale());
+		      float yf_scaled = (yf) / (getYScale());
+		      float zf_scaled = (zf) / (getZScale());
+		      
+		      // Get average of two hits for strip hits
+		      inputTensorValues.push_back(xf_scaled);
+		      inputTensorValues.push_back(yf_scaled);
+		      inputTensorValues.push_back(zf_scaled);		      
 		    }
+		    else {
+		      float rf_scaled = (rf) / (getRScale());
+		      float phif_scaled = (phif) / (getPhiScale());
+		      float zf_scaled = (zf) / (getZScale());
+		      // Get average of two hits for strip hits
+		      inputTensorValues.push_back(rf_scaled);
+		      inputTensorValues.push_back(phif_scaled);
+		      inputTensorValues.push_back(zf_scaled);
+		    }
+		  }
+		  else if (!gotSecondSP) {
+		    tmp_xf = xf;
+		    tmp_yf = yf;
+		    tmp_zf = zf;
+		    tmp_rf = rf;
+		    tmp_phif = phif;
+		    gotSecondSP = true;
+		  }
+		  else {
+		    gotSecondSP = false;
+		    if (m_useCartesian) {
+		      float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
+		      float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
+		      float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		      
+		      // Get average of two hits for strip hits
+		      inputTensorValues.push_back(xf_scaled);
+		      inputTensorValues.push_back(yf_scaled);
+		      inputTensorValues.push_back(zf_scaled);
+		      index++;
+		    }
+		    else {
+		      float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
+		      float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
+		      float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		      inputTensorValues.push_back(rf_scaled);
+		      inputTensorValues.push_back(phif_scaled);
+		      inputTensorValues.push_back(zf_scaled);
+		    }
+		  }
 		}
-                else {
+		else {
 		  if (m_useCartesian) {
                     float xf_scaled = (xf) / (getXScale());
                     float yf_scaled = (yf) / (getYScale());
@@ -598,7 +665,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
 		  }
 		}
 	    }
-
+	    
 	    
 	    if (inputTensorValues.size() < 39) {
 	      inputTensorValues.resize(39, 0.0f); // Resize to 39 and fill with 0.0f
@@ -767,36 +834,59 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
             // Get average of values for strip hit pairs
             // TODO: this needs to be fixed in the future, for this to work for other cases
             if (hit->isStrip()) {
-                if (!gotSecondSP) {
-                    tmp_xf = xf;
-                    tmp_yf = yf;
-                    tmp_zf = zf;
-		    tmp_phif = phif;
-		    tmp_rf = rf;
-                    gotSecondSP = true;
-                }
-                else {
-		  gotSecondSP = false;
-	          if (m_useCartesian) {
-                    float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
-                    float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
-                    float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-		    
-                    // Get average of two hits for strip hits 
-                    inputTensorValues.push_back(xf_scaled);
-                    inputTensorValues.push_back(yf_scaled);
-                    inputTensorValues.push_back(zf_scaled);
-                    index++;
-		  }
-		  else {
-		    float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
-		    float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
-		    float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
-		    inputTensorValues.push_back(rf_scaled);
-		    inputTensorValues.push_back(phif_scaled);
-		    inputTensorValues.push_back(zf_scaled);
-		  }
-                }
+
+	      if (hit->getHitType() != HitType::spacepoint) { // this is a strip but not a SP!
+		if (m_useCartesian) {
+		  float xf_scaled = (xf) / (getXScale());
+		  float yf_scaled = (yf) / (getYScale());
+		  float zf_scaled = (zf) / (getZScale());
+		  
+		  // Get average of two hits for strip hits
+		  inputTensorValues.push_back(xf_scaled);
+		  inputTensorValues.push_back(yf_scaled);
+		  inputTensorValues.push_back(zf_scaled);
+		  
+		}
+		else {
+		  float rf_scaled = (rf) / (getRScale());
+		  float phif_scaled = (phif) / (getPhiScale());
+		  float zf_scaled = (zf) / (getZScale());
+		  // Get average of two hits for strip hits
+		  inputTensorValues.push_back(rf_scaled);
+		  inputTensorValues.push_back(phif_scaled);
+		  inputTensorValues.push_back(zf_scaled);
+		}
+	      }
+	      else if (!gotSecondSP) {
+		tmp_xf = xf;
+		tmp_yf = yf;
+		tmp_zf = zf;
+		tmp_phif = phif;
+		tmp_rf = rf;
+		gotSecondSP = true;
+	      }
+	      else {
+		gotSecondSP = false;
+		if (m_useCartesian) {
+		  float xf_scaled = (xf + tmp_xf) / (2.*getXScale());
+		  float yf_scaled = (yf + tmp_yf) / (2.*getYScale());
+		  float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		  
+		  // Get average of two hits for strip hits 
+		  inputTensorValues.push_back(xf_scaled);
+		  inputTensorValues.push_back(yf_scaled);
+		  inputTensorValues.push_back(zf_scaled);
+		  index++;
+		}
+		else {
+		  float rf_scaled = (rf + tmp_rf) / (2.*getRScale());
+		  float phif_scaled = (phif + tmp_phif) / (2.*getPhiScale());
+		  float zf_scaled = (zf + tmp_zf) / (2.*getZScale());
+		  inputTensorValues.push_back(rf_scaled);
+		  inputTensorValues.push_back(phif_scaled);
+		  inputTensorValues.push_back(zf_scaled);
+		}
+	      }
             }
             else {
 	      if (m_useCartesian) {
