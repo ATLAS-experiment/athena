@@ -201,6 +201,17 @@ def BTaggingLargeRContent(jetcol, ConfigFlags = None):
     btagcontent = _getVariableList(jetcol, aux)
     return jetcontent + btagcontent
 
+def BTaggingVRContent(jetcol, ConfigFlags = None):
+    aux = JetStandardAux + [
+        "SV1_NGTinSvx", 
+        "SV1_masssvx",
+        "SV1_TrackParticleLinks"
+    ]
+    jetcontent = _getVariableList(jetcol, aux)
+    return jetcontent
+
+
+
 def BTagginglessContent(jetcol, ConfigFlags=None):
     # GN2v01 was the recommended tagger as of 30-06-2025
     BTaggingRun3AuxVar = _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['SimpleFlip'])
