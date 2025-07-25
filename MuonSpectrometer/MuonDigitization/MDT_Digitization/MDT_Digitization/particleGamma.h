@@ -33,6 +33,8 @@ Function particleGamma returns the value of gamma factor for Qball particle.
 #include "AtlasHepMC/GenParticle.h"
 //
 
+#include "TruthUtils/AtlasPID.h"
+
 double particleGamma(const MDTSimHit& hit, unsigned short eventId = 0) {
     double QGamma = -9999.;
     const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
@@ -42,8 +44,9 @@ double particleGamma(const MDTSimHit& hit, unsigned short eventId = 0) {
     if (genParticle) {
         int particleEncoding = genParticle->pdg_id();
         //      std::cout << "SB: pdgId=" << particleEncoding <<std::endl;
-        if ((((int)(abs(particleEncoding) / 10000000) == 1) && ((int)(abs(particleEncoding) / 100000) == 100)) ||
-            (((int)(abs(particleEncoding) / 10000000) == 2) && ((int)(abs(particleEncoding) / 100000) == 200))) {
+        if (  (((int)(abs(particleEncoding) / 10000000) == 1) && ((int)(abs(particleEncoding) / 100000) == 100)) ||
+              (((int)(abs(particleEncoding) / 10000000) == 2) && ((int)(abs(particleEncoding) / 100000) == 200)) ||
+	    isBSM(genParticle))  {
             double QPx = genParticle->momentum().px();
             double QPy = genParticle->momentum().py();
             double QPz = genParticle->momentum().pz();
@@ -62,6 +65,8 @@ double particleGamma(const MDTSimHit& hit, unsigned short eventId = 0) {
                 QGamma = -9999.;
             }
         }
+
+
     } else {
         QGamma = -9999.;
     }
