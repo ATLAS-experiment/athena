@@ -8,7 +8,7 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
-#include "L1CaloFEXSim/gFEXFPGA.h"
+#include "gFEXFPGA.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"

@@ -18,7 +18,7 @@ atlas_add_library( L1CaloFEXSimLib
 
 atlas_add_component( L1CaloFEXSim
                      src/components/*.cxx
-                     LINK_LIBRARIES L1CaloFEXSimLib PathResolver)
+		PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} L1CaloFEXSimLib)
                      
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

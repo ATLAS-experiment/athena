@@ -6,13 +6,14 @@
 #define TAURECTOOLS_TAUGNNEVALUATOR_H
 
 #include "tauRecTools/TauRecToolBase.h"
-
 #include "tauRecTools/TauGNN.h"
 
 #include "xAODTau/TauJet.h"
+#include "xAODTau/TauJetContainer.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 
 #include "AsgTools/PropertyWrapper.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 
 #include <memory>
 
@@ -56,6 +57,9 @@ public:
 
 private:
 
+    Gaudi::Property<std::string> m_tauContainerName{this, "TauContainerName", "", "Name of TauJetContainer, must be set when using "};
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_scoreHandleKey{this, "ScoreHandleKey","","Output Score"};
+   
     // properties
     Gaudi::Property<std::string> m_weightfile_inclusive{this, "NetworkFileInclusive", ""};
     Gaudi::Property<std::string> m_weightfile_0p{this, "NetworkFile0P", ""};

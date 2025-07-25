@@ -12,7 +12,8 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
-#include "L1CaloFEXSim/jSuperCellTowerMapper.h"
+#include "jSuperCellTowerMapper.h"
+#include "jTowerBuilder.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 class CaloIdManager;

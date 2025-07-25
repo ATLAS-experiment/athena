@@ -8,11 +8,11 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
-#include "L1CaloFEXSim/gFEXSim.h"
+#include "gFEXSim.h"
 #include "L1CaloFEXSim/gTower.h"
-#include "L1CaloFEXSim/gFEXFPGA.h"
+#include "gFEXFPGA.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
-#include "L1CaloFEXSim/gFEXJetAlgo.h"
+#include "gFEXJetAlgo.h"
 #include "L1CaloFEXSim/gFEXJetTOB.h"
 #include "L1CaloFEXSim/gFEXOutputCollection.h"
 

@@ -255,7 +255,7 @@ private:
     "If <=0 then the number of scheduler threads is used."};
 
   Gaudi::Property<int> m_maxIOWakeUpIntervalMs{
-    this, "MaxIOWakeUpIntervalMs", -1,
+    this, "MaxIOWakeUpIntervalMs", 5000,
     "Maximum time input or output handling thread will sleep unless notified. Negative value (default) means no limit, "
     "i.e. threads will only wake up on notifications. Zero means threads will never wait for notifications. "
     "Positive value means the number of milliseconds after which a thread will wake up if it's not notified earlier."};

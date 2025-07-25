@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-#include "L1CaloFEXSim/eFEXtauBDTAlgo.h"
+#include "eFEXtauBDTAlgo.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 #include "L1CaloFEXSim/eTower.h"
 #include <stdio.h> /* defines FILENAME_MAX */

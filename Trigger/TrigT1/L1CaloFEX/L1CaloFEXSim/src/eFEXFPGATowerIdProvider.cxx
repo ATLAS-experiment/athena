@@ -2,7 +2,7 @@
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
+#include "eFEXFPGATowerIdProvider.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -12,7 +12,7 @@
 LVL1::eFEXFPGATowerIdProvider::eFEXFPGATowerIdProvider(const std::string &type, const std::string &name, const IInterface *parent):
   AthAlgTool(type, name, parent)
 {
-  declareInterface<IeFEXFPGATowerIdProvider>(this);
+  declareInterface<eFEXFPGATowerIdProvider>(this);
 }
 
 StatusCode LVL1::eFEXFPGATowerIdProvider::initialize()

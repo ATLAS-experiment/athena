@@ -10,7 +10,7 @@
 #include <vector>
 #include <stdio.h>
 #include <math.h>
-#include "L1CaloFEXSim/jFEXmetAlgo.h"
+#include "jFEXmetAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"

@@ -10,8 +10,8 @@
 //  ***************************************************************************/
 
 
-#include "L1CaloFEXSim/jFEXSysSim.h"
-#include "L1CaloFEXSim/jFEXSim.h"
+#include "jFEXSysSim.h"
+#include "jFEXSim.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"

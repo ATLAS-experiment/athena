@@ -15,11 +15,10 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXToolInterfaces/IeFEXFPGA.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
-#include "L1CaloFEXToolInterfaces/IeFEXtauAlgo.h"
-#include "L1CaloFEXToolInterfaces/IeFEXegAlgo.h"
-#include "L1CaloFEXToolInterfaces/IeFEXFormTOBs.h"
+#include "L1CaloFEXSim/eFEXtauAlgoBase.h"
+#include "L1CaloFEXSim/eFEXegAlgo.h"
+#include "eFEXFormTOBs.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
 #include "TrigConfData/L1Menu.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
@@ -35,29 +34,30 @@ namespace LVL1 {
       - to emulate the steps taken in processing data for a single eFEX FPGA in hardware and firmware
       - It will need to interact with eTowers and produce the eTOBs.  It will be created and handed data by eFEXSim
   */
-  
-  class eFEXFPGA : public AthAlgTool, virtual public IeFEXFPGA {
+  static const InterfaceID IID_IeFEXFPGA("LVL1::eFEXFPGA", 1, 0);
+    class eFEXFPGA : public AthAlgTool {
     
   public:
+        static const InterfaceID& interfaceID() { return IID_IeFEXFPGA; };
     /** Constructors */
     eFEXFPGA(const std::string& type,const std::string& name,const IInterface* parent);
 
     /** standard Athena-Algorithm method */
-    virtual StatusCode initialize() override;
+    virtual StatusCode initialize();
     /** Destructor */
     virtual ~eFEXFPGA();
 
-    virtual StatusCode init(int id, int efexid) override ;
-    virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection) override ;
-    virtual void reset() override ;
-    virtual int getID() const override {return m_id;}
+    virtual StatusCode init(int id, int efexid);
+    virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection);
+    virtual void reset();
+    virtual int getID() const {return m_id;}
 
-    virtual void SetTowersAndCells_SG( int [][6] ) override ;
-    virtual void SetIsoWP(const std::vector<unsigned int>&, const std::vector<unsigned int>&, unsigned int &, unsigned int) const override;
+    virtual void SetTowersAndCells_SG( int [][6] );
+    virtual void SetIsoWP(const std::vector<unsigned int>&, const std::vector<unsigned int>&, unsigned int &, unsigned int) const;
 
-    virtual std::vector <std::unique_ptr<eFEXegTOB>> getEmTOBs() override;
-    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() override;
-    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() override;
+    virtual std::vector <std::unique_ptr<eFEXegTOB>> getEmTOBs();
+    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs();
+    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs();
 
   private:
     std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs(std::vector< std::unique_ptr<eFEXtauTOB> >& tauTobObjects);
@@ -81,19 +81,19 @@ namespace LVL1 {
       this, "MyETowers", "eTowerContainer", 
 	"Input container for eTowers"};
 
-    ToolHandle<IeFEXtauAlgo> m_eFEXtauAlgoTool {
+    ToolHandle<eFEXtauAlgoBase> m_eFEXtauAlgoTool {
       this, "eFEXtauAlgoTool", "LVL1::eFEXtauAlgo", 
 	"Tool that runs the eFEX tau algorithm"};
 
-    ToolHandle<IeFEXtauAlgo> m_eFEXtauBDTAlgoTool {
+    ToolHandle<eFEXtauAlgoBase> m_eFEXtauBDTAlgoTool {
       this, "eFEXtauBDTAlgoTool", "LVL1::eFEXtauBDTAlgo", 
 	"Tool that runs the eFEX BDT tau algorithm"};
 
-    ToolHandle<IeFEXegAlgo> m_eFEXegAlgoTool {
+    ToolHandle<eFEXegAlgo> m_eFEXegAlgoTool {
       this, "eFEXegAlgoTool", "LVL1::eFEXegAlgo", 
 	"Tool that runs the eFEX e/gamma algorithm"};
     
-    ToolHandle<IeFEXFormTOBs> m_eFEXFormTOBsTool {this, "eFEXFormTOBs", "LVL1::eFEXFormTOBs", "Tool that creates eFEX TOB words"};
+    ToolHandle<eFEXFormTOBs> m_eFEXFormTOBsTool {this, "eFEXFormTOBs", "LVL1::eFEXFormTOBs", "Tool that creates eFEX TOB words"};
   };
   
 } // end of namespace

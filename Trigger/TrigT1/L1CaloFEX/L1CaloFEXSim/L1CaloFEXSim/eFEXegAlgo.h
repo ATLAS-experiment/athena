@@ -14,7 +14,6 @@
 #define eFEXegAlgo_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L1CaloFEXToolInterfaces/IeFEXegAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
@@ -22,45 +21,48 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 namespace LVL1 {
-  
+
   //Doxygen class description below:
   /** The eFEXegAlgo class calculates the egamma TOB variables: Reta, Rhad and Wstot
   */
-  
-  class eFEXegAlgo : public AthAlgTool, virtual public IeFEXegAlgo {
+
+  static const InterfaceID IID_IeFEXegAlgo("LVL1::eFEXegAlgo", 1, 0);
+
+    class eFEXegAlgo : public AthAlgTool {
 
   public:
     /** Constructors */
     eFEXegAlgo(const std::string& type, const std::string& name, const IInterface* parent);
 
+    static const InterfaceID& interfaceID() { return IID_IeFEXegAlgo; };
     /** standard Athena-Algorithm method */
-    virtual StatusCode initialize() override;
+    virtual StatusCode initialize();
     
     /** Destructor */
     virtual ~eFEXegAlgo();
 
-    virtual StatusCode safetyTest() const override;
-    virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta) override; 
+    virtual StatusCode safetyTest() const;
+    virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta);
 
-    virtual void getReta(std::vector<unsigned int> & ) override;
-    virtual void getRhad(std::vector<unsigned int> & ) override;
-    virtual void getWstot(std::vector<unsigned int> & ) override;
-    virtual void getRealPhi(float & phi) override;
-    virtual void getRealEta(float & eta) override;
-    virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB() override;
-    virtual void getClusterCells(std::vector<unsigned int> &cellETs) override;
-    virtual unsigned int getET() override;
-    virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer) override;
-    virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) override;
-    virtual bool hasSeed() const override {return m_hasSeed;};
-    virtual unsigned int getSeed() const override {return m_seedID;};
-    virtual unsigned int getUnD() const override {return m_seed_UnD;};
-    virtual void getCoreEMTowerET(unsigned int & et) override;
-    virtual void getCoreHADTowerET(unsigned int & et) override;
+    virtual void getReta(std::vector<unsigned int> & );
+    virtual void getRhad(std::vector<unsigned int> & );
+    virtual void getWstot(std::vector<unsigned int> & );
+    virtual void getRealPhi(float & phi);
+    virtual void getRealEta(float & eta);
+    virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB();
+    virtual void getClusterCells(std::vector<unsigned int> &cellETs);
+    virtual unsigned int getET();
+    virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer);
+    virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &);
+    virtual bool hasSeed() const {return m_hasSeed;};
+    virtual unsigned int getSeed() const {return m_seedID;};
+    virtual unsigned int getUnD() const {return m_seed_UnD;};
+    virtual void getCoreEMTowerET(unsigned int & et);
+    virtual void getCoreHADTowerET(unsigned int & et);
     virtual void getSums(unsigned int seed, bool UnD, 
                          std::vector<unsigned int> & RetaSums, 
                          std::vector<unsigned int> & RhadSums, 
-                         std::vector<unsigned int> & WstotSums) override;
+                         std::vector<unsigned int> & WstotSums);
   private:
     void setSeed();
     bool m_seed_UnD = false; 

@@ -9,7 +9,7 @@
 //***************************************************************************
 
 #include <vector>
-#include "L1CaloFEXSim/jFEXLargeRJetAlgo.h"
+#include "jFEXLargeRJetAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
