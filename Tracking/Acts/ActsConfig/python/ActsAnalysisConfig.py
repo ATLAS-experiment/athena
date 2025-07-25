@@ -75,20 +75,58 @@ def ActsSeedToTrackAnalysisAlgCfg(flags,
                              xbins=80, xmin=-2, xmax=2,
                              ybins=80, ymin=-2, ymax=2)
 
-        tool.defineHistogram(f"bottomR,quality;Quality_vs_BottomR_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='2D',
+        rangeQuality = 10000
+        tool.defineHistogram(f"bottomR,quality;Quality_vs_BottomR_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='Quality',
                              xbins=320, xmin=0, xmax=320,
-                             ybins=100, ymin=-400, ymax=1000)
-        tool.defineHistogram(f"vtxZ,quality;Quality_vs_vtxZ_{layer}", title=f"Seed Vtxz Vs Quality for {layer};vtx Z;Quality", type='TH2F', path='2D',
-                             xbins=100, xmin=-200, xmax=200,
-                             ybins=100, ymin=-400, ymax=1000)
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+        tool.defineHistogram(f"middleR,quality;Quality_vs_MiddleR_{layer}", title=f"Seed Middle Radius Vs Quality for {layer};Middle SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+        tool.defineHistogram(f"topR,quality;Quality_vs_TopR_{layer}", title=f"Seed Top Radius Vs Quality for {layer};Top SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
 
-        tool.defineHistogram(f"truthProb;Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH1F", path='SeedVars',
+        tool.defineHistogram(f"deltaR_BT,quality;Quality_vs_deltaR_BT_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+        tool.defineHistogram(f"deltaR_BM,quality;Quality_vs_deltaR_BM_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+        tool.defineHistogram(f"deltaR_MT,quality;Quality_vs_deltaR_MT_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+
+        tool.defineHistogram(f"bottomR,truthProb;Truth_Probability_vs_bottomR_{layer}", title=f"bottom R vs truth prob. for {layer};R;Truth Prob.", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"middleR,truthProb;Truth_Probability_vs_middleR_{layer}", title=f"middle R vs truth prob. for {layer};R;Truth Prob.", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"topR,truthProb;Truth_Probability_vs_topR_{layer}", title=f"top R vs truth prob. for {layer};R;Truth Prob.", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        
+        tool.defineHistogram(f"vtxZ,quality;Quality_vs_vtxZ_{layer}", title=f"Seed Vtxz Vs Quality for {layer};vtx Z;Quality", type='TH2F', path='Quality',
+                             xbins=100, xmin=-200, xmax=200,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+
+        tool.defineHistogram(f"truthProb;Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH1F", path='Quality',
                              xbins=12, xmin=0, xmax=1.2)
-        tool.defineHistogram(f"eta,truthProb;Truth_Probability_vs_Eta_{layer}", title=f"Seed Truth Probability VS Eta for {layer}", type="TH2F", path='SeedVars',
+        tool.defineHistogram(f"eta,truthProb;Truth_Probability_vs_Eta_{layer}", title=f"Seed Truth Probability VS Eta for {layer}", type="TH2F", path='Quality',
                              xbins=50, xmin=-4.5, xmax=4.5,
                              ybins=12, ymin=0, ymax=1.2)
-        tool.defineHistogram(f"quality,truthProb;Truth_Probability_vs_Quality_{layer}", title=f"Seed Truth Probability VS Eta for {layer}", type="TH2F", path='SeedVars',
-                             xbins=100, xmin=-400, xmax=1000,
+        tool.defineHistogram(f"quality,truthProb;Truth_Probability_vs_Quality_{layer}", title=f"Seed Truth Probability VS Eta for {layer}", type="TH2F", path='Quality',
+                             xbins=1000, xmin=-rangeQuality, xmax=rangeQuality,
+                             ybins=12, ymin=0, ymax=1.2)
+
+        tool.defineHistogram(f"deltaR_BT,truthProb;deltaR_BT_vs_Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH2F", path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"deltaR_BM,truthProb;deltaR_BM_vs_Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH2F", path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"deltaR_MT,truthProb;deltaR_MT_vs_Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH2F", path='Quality',
+                             xbins=320, xmin=0, xmax=320,
                              ybins=12, ymin=0, ymax=1.2)
         
         tool.defineHistogram(f"eta;Eta_{layer}", title=f"Eta for {layer}", type='TH1F', path='SeedVars',
@@ -96,7 +134,7 @@ def ActsSeedToTrackAnalysisAlgCfg(flags,
         tool.defineHistogram(f"pt;Pt_{layer}", title=f"Pt for {layer}", type='TH1F', path='SeedVars',
                              xbins=100, xmin=0, xmax=100)
         tool.defineHistogram(f"quality;Quality_{layer}", title=f"Quality for {layer}", type='TH1F', path='SeedVars',
-                             xbins=100, xmin=-400, xmax=1000)
+                             xbins=1000, xmin=-rangeQuality, xmax=rangeQuality)
         tool.defineHistogram(f"vtxZ;VtxZ_{layer}", title=f"Vtx Z for {layer}", type='TH1F', path='SeedVars',
                              xbins=100, xmin=-200, xmax=200)
         

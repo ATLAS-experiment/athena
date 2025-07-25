@@ -9,6 +9,13 @@ find_package( HepPDT )
 # External dependencies:
 find_package( Acts COMPONENTS Core )
 
+atlas_add_library(ActsTruthLib
+                  ActsTruth/*.h ActsTruth/*.icc
+		  INTERFACE
+                  PUBLIC_HEADERS ActsTruth
+                  LINK_LIBRARIES ActsInteropLib )
+
+
 atlas_add_component( ActsTruth
                      src/*.h src/*.cxx
                      src/components/*.cxx
@@ -16,9 +23,9 @@ atlas_add_component( ActsTruth
                      PRIVATE_INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS}
                      LINK_LIBRARIES
                        ActsEventLib
+		       ActsTruthLib
 		       ActsGeometryLib
 		       ActsGeometryInterfacesLib
-		       ActsInteropLib
 		       AthenaBaseComps
 		       CxxUtils
 		       GaudiKernel
