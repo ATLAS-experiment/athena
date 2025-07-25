@@ -49,10 +49,10 @@ namespace LVL1 {
     ~eFEXSuperCellTowerIdProvider();
 
     /// @brief initialize the tool
-    StatusCode initialize();
+    virtual StatusCode initialize() override;
 
     /// @brief set the address to the csv file and load
-    StatusCode setAddress(std::string);
+    StatusCode setAddress(const std::string&);
 
     /**
      * @brief obtain ordered tower IDs in an eFEX
