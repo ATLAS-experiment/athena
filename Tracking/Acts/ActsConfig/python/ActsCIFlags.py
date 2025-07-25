@@ -112,3 +112,4 @@ def actsGSFEgammaFlags(flags) -> None:
 def actsValidateF100Flags(flags) -> None:
     actsWorkflowFlags(flags)
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateF100]
+    flags.Acts.doAmbiguityResolution = True
