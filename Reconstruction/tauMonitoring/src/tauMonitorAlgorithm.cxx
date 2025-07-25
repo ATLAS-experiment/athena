@@ -286,22 +286,22 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
     // check to understand which TauID we can use
     SG::ReadDecorHandle<xAOD::TauJetContainer, float> trans_score{m_offlineGNTauTransScoreDecorKey, ctx};
-    if( trans_score.isValid()) { 
+    if( trans_score.isAvailable()) { 
       
       // we are using a special container decorated with GNTau
       SG::ReadDecorHandle<xAOD::TauJetContainer, float> score{m_offlineGNTauScoreDecorKey, ctx};
-      JetScore = score.isValid() ? score(*tau) : -1234; 
+      JetScore = score.isAvailable() ? score(*tau) : -1234; 
 
       JetScoreSigTrans = trans_score(*tau);
 
       SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_loose{m_offlineGNTauLooseWPDecorKey, ctx};
-      tauLoose = tauid_loose.isValid() ? tauid_loose(*tau) : -1234;
+      tauLoose = tauid_loose.isAvailable() ? tauid_loose(*tau) : -1234;
 
       SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauMediumWPDecorKey, ctx};
-      tauMedium = tauid_medium.isValid() ? tauid_medium(*tau) : -1234;
+      tauMedium = tauid_medium.isAvailable() ? tauid_medium(*tau) : -1234;
 
       SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_tight{m_offlineGNTauTightWPDecorKey, ctx};
-      tauTight = tauid_tight.isValid() ? tauid_tight(*tau) : -1234;
+      tauTight = tauid_tight.isAvailable() ? tauid_tight(*tau) : -1234;
 
     } else{
       // GNTau is not present -> use RNN based TauID
