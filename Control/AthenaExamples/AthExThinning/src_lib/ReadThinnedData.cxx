@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReadThinnedData.cxx 
@@ -55,12 +55,8 @@ ReadThinnedData::ReadThinnedData( const std::string& name,
 		   m_elephantinoName = "PinkElephantino",
 		   "Input location of Elephantino" );
 
-  std::vector<std::string> testNames; testNames.reserve(3);
-  testNames.push_back("test1");
-  testNames.push_back("test2");
-  testNames.push_back("test3");
   declareProperty( "TestNames",
-		   m_testNames = testNames,
+		   m_testNames = {"test1", "test2", "test3"},
 		   "List of tests to proceed with" );
 
 }
