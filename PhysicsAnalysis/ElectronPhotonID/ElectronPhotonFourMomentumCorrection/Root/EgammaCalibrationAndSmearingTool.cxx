@@ -297,14 +297,16 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(
       m_set_seed_function([](const EgammaCalibrationAndSmearingTool& tool,
                              columnar::EgammaId egamma,
                              columnar::EventInfoId ei) {
+        const Accessors& acc = *tool.m_accessors;
         // avoid 0 as result, see
         // https://root.cern.ch/root/html/TRandom3.html#TRandom3:SetSeed
-        auto cluster = tool.caloClusterAcc(egamma)[0].value();
+        auto cluster = acc.caloClusterAcc(egamma)[0].value();
         return 1 + static_cast<RandomNumber>(
-                       std::abs(tool.clusterPhiAcc(cluster)) * 1E6 +
-                       std::abs(tool.clusterEtaAcc(cluster)) * 1E3 +
-                       tool.eventNumberAcc(ei));
-      }) {
+                       std::abs(acc.clusterPhiAcc(cluster)) * 1E6 +
+                       std::abs(acc.clusterEtaAcc(cluster)) * 1E3 +
+                       acc.eventNumberAcc(ei));
+      }),
+      m_accessors(std::make_unique<Accessors>(*this)) {
 
   declareProperty("ESModel", m_ESModel = "");
   declareProperty("decorrelationModel", m_decorrelation_model_name = "");
@@ -838,14 +840,14 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   }
   if (m_onlyElectrons.value()) {
     if (m_TESModel == egEnergyCorr::es2011c) {
-      resetAccessor (electronTrackAcc, *this, "trackParticleLinks");
+      resetAccessor (m_accessors->electronTrackAcc, *this, "trackParticleLinks");
     }
   }
   if (m_onlyPhotons.value()) {
-    resetAccessor (photonVertexAcc, *this, "vertexLinks");
+    resetAccessor (m_accessors->photonVertexAcc, *this, "vertexLinks");
   }
   if (m_decorateEmva)
-    resetAccessor (decEmva, *this, "E_mva_only");
+    resetAccessor (m_accessors->decEmva, *this, "E_mva_only");
 
   ANA_CHECK (initializeColumns ());
 
@@ -855,6 +857,8 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
 
 PATCore::ParticleType::Type EgammaCalibrationAndSmearingTool::xAOD2ptype(columnar::EgammaId particle) const
 {
+  const Accessors& acc = *m_accessors;
+
   // this is departing from the logic below, as we are now requiring the
   // user to specify at configuration time whether we run on electrons
   // or photons.  this is necessary to configure the columns we need
@@ -865,7 +869,7 @@ PATCore::ParticleType::Type EgammaCalibrationAndSmearingTool::xAOD2ptype(columna
   }
   if (m_onlyPhotons.value())
   {
-    if (photonVertexAcc(particle).size() > 0)
+    if (acc.photonVertexAcc(particle).size() > 0)
     {
       return PATCore::ParticleType::ConvertedPhoton;
     }
@@ -879,7 +883,7 @@ PATCore::ParticleType::Type EgammaCalibrationAndSmearingTool::xAOD2ptype(columna
   // (disabled by turning on onlyElectrons or onlyPhotons)
   auto ptype = PATCore::ParticleType::Electron;
   //no ForwardElectron ptype: consider them as Electron
-  if (xAOD::EgammaHelpers::isElectron(&particle.getXAODObject()) || authorAcc (particle) == xAOD::EgammaParameters::AuthorFwdElectron) { ptype = PATCore::ParticleType::Electron; }
+  if (xAOD::EgammaHelpers::isElectron(&particle.getXAODObject()) || acc.authorAcc (particle) == xAOD::EgammaParameters::AuthorFwdElectron) { ptype = PATCore::ParticleType::Electron; }
   else if (xAOD::EgammaHelpers::isPhoton(&particle.getXAODObject())) {
     if (xAOD::EgammaHelpers::isConvertedPhoton(&particle.getXAODObject())) { ptype = PATCore::ParticleType::ConvertedPhoton; }
     else { ptype = PATCore::ParticleType::UnconvertedPhoton; }
@@ -966,31 +970,32 @@ double EgammaCalibrationAndSmearingTool::getEnergy(
 
 CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     columnar::MutableEgammaId input, columnar::EventInfoId event_info) const {
+  const Accessors& acc = *m_accessors;
 
   // only used in simulation (for the smearing)
   RandomNumber seed = m_set_seed_function(*this, input, event_info);
 
-  columnar::ClusterId inputCluster = caloClusterAcc (input)[0].value();
+  columnar::ClusterId inputCluster = acc.caloClusterAcc (input)[0].value();
 
   if (m_layer_recalibration_tool) {
     ATH_MSG_DEBUG("applying energy recalibration before E0|E1|E2|E3 = "
-                  << energyBEAcc (inputCluster, 0) << "|"
-                  << energyBEAcc (inputCluster, 1) << "|"
-                  << energyBEAcc (inputCluster, 2) << "|"
-                  << energyBEAcc (inputCluster, 3));
+                  << acc.energyBEAcc (inputCluster, 0) << "|"
+                  << acc.energyBEAcc (inputCluster, 1) << "|"
+                  << acc.energyBEAcc (inputCluster, 2) << "|"
+                  << acc.energyBEAcc (inputCluster, 3));
     // for now just go back to the xAOD object to access the subtool
     const CP::CorrectionCode status_layer_recalibration = m_layer_recalibration_tool->applyCorrection(input.getXAODObject(), event_info.getXAODObject());
     if (status_layer_recalibration == CP::CorrectionCode::Error) { return CP::CorrectionCode::Error; }
-    ATH_MSG_DEBUG("eta|phi = " << etaAcc (input) << "|" << phiAcc (input));
+    ATH_MSG_DEBUG("eta|phi = " << acc.etaAcc (input) << "|" << acc.phiAcc (input));
     if (status_layer_recalibration == CP::CorrectionCode::Ok) {
       ATH_MSG_DEBUG("decoration E0|E1|E2|E3 = "
-                    << Es0Acc(inputCluster) << "|"
-                    << Es1Acc(inputCluster) << "|"
-                    << Es2Acc(inputCluster) << "|"
-                    << Es3Acc(inputCluster) << "|");
-      if (Es2Acc(inputCluster) == 0 and Es1Acc(inputCluster) == 0 and
-          Es3Acc(inputCluster) == 0 and Es0Acc(inputCluster) == 0 and
-          (std::abs(etaAcc (input)) < 1.37 or (std::abs(etaAcc (input)) > 1.55 and std::abs(etaAcc (input)) < 2.47)))
+                    << acc.Es0Acc(inputCluster) << "|"
+                    << acc.Es1Acc(inputCluster) << "|"
+                    << acc.Es2Acc(inputCluster) << "|"
+                    << acc.Es3Acc(inputCluster) << "|");
+      if (acc.Es2Acc(inputCluster) == 0 and acc.Es1Acc(inputCluster) == 0 and
+          acc.Es3Acc(inputCluster) == 0 and acc.Es0Acc(inputCluster) == 0 and
+          (std::abs(acc.etaAcc (input)) < 1.37 or (std::abs(acc.etaAcc (input)) > 1.55 and std::abs(acc.etaAcc (input)) < 2.47)))
       {
         ATH_MSG_WARNING("all layer energies are zero");
       }
@@ -1000,22 +1005,22 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   double energy = 0.;
   // apply MVA calibration
   if (!m_MVACalibSvc.empty()) {
-    if (authorAcc (input) !=
+    if (acc.authorAcc (input) !=
         xAOD::EgammaParameters::AuthorFwdElectron) {  // do not apply MVA
                                                       // calibration to fwd
                                                       // electrons
       m_MVACalibSvc->getEnergy(inputCluster.getXAODObject(), input.getXAODObject(), energy)
           .ignore();  // TODO check StatusCode
     } else {
-      energy = eAcc (input);
+      energy = acc.eAcc (input);
     }
     ATH_MSG_DEBUG("energy after MVA calibration = " << std::format("{:.2f}", energy));
   } else {
-    energy = input(eAcc);
+    energy = acc.eAcc (input);
   }
   if (m_decorateEmva)
   {
-    decEmva(input) = energy;
+    acc.decEmva(input) = energy;
   }
 
   if (m_TESModel == egEnergyCorr::es2011c) {
@@ -1024,8 +1029,8 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     const double etaden =
         ptype == PATCore::ParticleType::Electron
             ? static_cast<const xAOD::Electron&>(input.getXAODObject()).trackParticle()->eta()
-            : clusterEtaAcc(inputCluster);
-    energy *= m_rootTool->applyMCCalibration(clusterEtaAcc(inputCluster),
+            : acc.clusterEtaAcc(inputCluster);
+    energy *= m_rootTool->applyMCCalibration(acc.clusterEtaAcc(inputCluster),
                                              energy / cosh(etaden), ptype);
     ATH_MSG_DEBUG("energy after crack calibration es2011c = "
                   << std::format("{:.2f}", energy));
@@ -1036,7 +1041,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
    * The m_simulation flavour has already been configured
    */
   PATCore::ParticleDataType::DataType dataType =
-      (eventTypeAcc(event_info,xAOD::EventInfo::IS_SIMULATION))
+      (acc.eventTypeAcc(event_info,xAOD::EventInfo::IS_SIMULATION))
           ? m_simulation
           : PATCore::ParticleDataType::Data;
 
@@ -1045,22 +1050,22 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   // apply uniformity corrections to data
   if (dataType == PATCore::ParticleDataType::Data) {
     // Get run number
-    runNumber_for_tool = runNumberAcc(event_info);
+    runNumber_for_tool = acc.runNumberAcc(event_info);
     // Get etaCalo, phiCalo
-    const auto cl_eta = clusterEtaAcc(inputCluster);
+    const auto cl_eta = acc.clusterEtaAcc(inputCluster);
     double etaCalo = 0, phiCalo = 0;
     if (m_ADCLinearity_tool || m_gain_tool_run2 || m_usePhiUniformCorrection) {
-      etaCalo = etaCaloAcc(inputCluster, authorAcc(input), false);
+      etaCalo = acc.etaCaloAcc(inputCluster, acc.authorAcc(input), false);
       if (m_usePhiUniformCorrection) {
         phiCalo =
-            phiCaloAcc(inputCluster, authorAcc(input), false);
+            acc.phiCaloAcc(inputCluster, acc.authorAcc(input), false);
       }
     }
 
     // Intermodule
     if (m_useIntermoduleCorrection) {
       energy =
-          intermodule_correction(energy, clusterPhiAcc(inputCluster), cl_eta);
+          intermodule_correction(energy, acc.clusterPhiAcc(inputCluster), cl_eta);
       ATH_MSG_DEBUG("energy after intermodule correction = "
                     << std::format("{:.2f}", energy));
     }
@@ -1070,8 +1075,8 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
           m_TESModel == egEnergyCorr::es2023_R22_Run2_v1 || 
           m_TESModel == egEnergyCorr::es2024_Run3_v0) &&
         m_useCaloDistPhiUnifCorrection) {
-      double etaC = clusterEtaAcc(inputCluster);
-      double phiC = clusterPhiAcc(inputCluster);
+      double etaC = acc.clusterEtaAcc(inputCluster);
+      double phiC = acc.clusterPhiAcc(inputCluster);
       int ieta = m_caloDistPhiUnifCorr->GetXaxis()->FindBin(etaC);
       ieta = ieta == 0 ? 1
                        : (ieta > m_caloDistPhiUnifCorr->GetNbinsX()
@@ -1107,9 +1112,9 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
 
     // Gain
     if (m_gain_tool) {
-      const auto es2 = Es2Acc.isAvailable(inputCluster)
-                           ? Es2Acc(inputCluster)
-                           : energyBEAcc (inputCluster,2);
+      const auto es2 = acc.Es2Acc.isAvailable(inputCluster)
+                           ? acc.Es2Acc(inputCluster)
+                           : acc.energyBEAcc (inputCluster,2);
       if (!(std::abs(cl_eta) < 1.52 and std::abs(cl_eta) > 1.37) and
           std::abs(cl_eta) < 2.4)
         energy = m_gain_tool->CorrectionGainTool(
@@ -1124,8 +1129,8 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     ATH_MSG_DEBUG("energy after gain correction = " << std::format("{:.2f}", energy));
   } else {
     if (m_user_random_run_number == 0) {
-      if (randomrunnumber_getter.isAvailable(event_info)) {
-        runNumber_for_tool = randomrunnumber_getter(event_info);
+      if (acc.randomrunnumber_getter.isAvailable(event_info)) {
+        runNumber_for_tool = acc.randomrunnumber_getter(event_info);
       } else {
         ATH_MSG_ERROR(
             "Pileup tool not run before using "
@@ -1142,18 +1147,18 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     }
   }
 
-  const double eraw = ((Es0Acc.isAvailable(inputCluster)
-                            ? Es0Acc(inputCluster)
-                            : energyBEAcc(inputCluster,0)) +
-                       (Es1Acc.isAvailable(inputCluster)
-                            ? Es1Acc(inputCluster)
-                            : energyBEAcc(inputCluster,1)) +
-                       (Es2Acc.isAvailable(inputCluster)
-                            ? Es2Acc(inputCluster)
-                            : energyBEAcc(inputCluster,2)) +
-                       (Es3Acc.isAvailable(inputCluster)
-                            ? Es3Acc(inputCluster)
-                            : energyBEAcc(inputCluster,3)));
+  const double eraw = ((acc.Es0Acc.isAvailable(inputCluster)
+                            ? acc.Es0Acc(inputCluster)
+                            : acc.energyBEAcc(inputCluster,0)) +
+                       (acc.Es1Acc.isAvailable(inputCluster)
+                            ? acc.Es1Acc(inputCluster)
+                            : acc.energyBEAcc(inputCluster,1)) +
+                       (acc.Es2Acc.isAvailable(inputCluster)
+                            ? acc.Es2Acc(inputCluster)
+                            : acc.energyBEAcc(inputCluster,2)) +
+                       (acc.Es3Acc.isAvailable(inputCluster)
+                            ? acc.Es3Acc(inputCluster)
+                            : acc.energyBEAcc(inputCluster,3)));
 
 
   if (dataType == PATCore::ParticleDataType::Fast)
@@ -1166,12 +1171,12 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   // apply scale factors or systematics
   energy = m_rootTool->getCorrectedEnergy(
       runNumber_for_tool, dataType, xAOD2ptype(input),
-      inputCluster(clusterEtaAcc),
-      inputCluster(clusterEtaBEAcc,2),
-      etaCaloAcc(inputCluster, authorAcc (input), false), energy,
-      Es2Acc.isAvailable(inputCluster)
-          ? Es2Acc(inputCluster)
-          : inputCluster(energyBEAcc,2),
+      inputCluster(acc.clusterEtaAcc),
+      inputCluster(acc.clusterEtaBEAcc,2),
+      acc.etaCaloAcc(inputCluster, acc.authorAcc (input), false), energy,
+      acc.Es2Acc.isAvailable(inputCluster)
+          ? acc.Es2Acc(inputCluster)
+          : inputCluster(acc.energyBEAcc,2),
       eraw, seed, oldtool_scale_flag_this_event(input, event_info),
       oldtool_resolution_flag_this_event(input, event_info), m_TResolutionType,
       m_varSF);
@@ -1180,10 +1185,10 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
 
   // TODO: this check should be done before systematics variations
   const double new_energy2 = energy * energy;
-  const double m2 = mAcc (input) * mAcc (input);
+  const double m2 = acc.mAcc (input) * acc.mAcc (input);
   const double p2 = new_energy2 > m2 ? new_energy2 - m2 : 0.;
-  ptOutDec (input) = sqrt(p2) / cosh(etaAcc (input));
-  ATH_MSG_DEBUG("after setting pt, energy = " << eAcc (input));
+  acc.ptOutDec (input) = sqrt(p2) / cosh(acc.etaAcc (input));
+  ATH_MSG_DEBUG("after setting pt, energy = " << acc.eAcc (input));
   return CP::CorrectionCode::Ok;
 }
 
@@ -1197,7 +1202,8 @@ double EgammaCalibrationAndSmearingTool::getEnergy(
 egEnergyCorr::Scale::Variation
 EgammaCalibrationAndSmearingTool::oldtool_scale_flag_this_event(
     columnar::EgammaId p, columnar::EventInfoId event_info) const {
-  if (!eventTypeAcc (event_info, xAOD::EventInfo::IS_SIMULATION))
+  const Accessors& acc = *m_accessors;
+  if (!acc.eventTypeAcc (event_info, xAOD::EventInfo::IS_SIMULATION))
     return m_currentScaleVariation_data;
   if (m_currentScalePredicate(*this,p))
     return m_currentScaleVariation_MC;
@@ -1208,7 +1214,8 @@ EgammaCalibrationAndSmearingTool::oldtool_scale_flag_this_event(
 egEnergyCorr::Resolution::Variation
 EgammaCalibrationAndSmearingTool::oldtool_resolution_flag_this_event(
     columnar::EgammaId, columnar::EventInfoId event_info) const {
-  return eventTypeAcc (event_info, xAOD::EventInfo::IS_SIMULATION)
+  const Accessors& acc = *m_accessors;
+  return acc.eventTypeAcc (event_info, xAOD::EventInfo::IS_SIMULATION)
              ? m_currentResolutionVariation_MC
              : m_currentResolutionVariation_data;
 }
@@ -2502,9 +2509,10 @@ callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId eve
 void EgammaCalibrationAndSmearingTool ::
 callEvents (columnar::EventContextRange events) const
 {
+  const Accessors& acc = *m_accessors;
   for (auto event : events) {
-    auto eventInfo = m_eventHandle(event);
-    callSingleEvent (m_egammaHandle(event), eventInfo);
+    auto eventInfo = acc.m_eventHandle(event);
+    callSingleEvent (acc.m_egammaHandle(event), eventInfo);
   }
 }
 
