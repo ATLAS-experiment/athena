@@ -44,6 +44,19 @@ def HION7SkimmingToolCfg(flags):
 
     return(acc)                             
 
+def HION7GlobalAugmentationToolCfg(flags):
+    """Configure the example augmentation tool"""
+    acc = ComponentAccumulator()
+    
+    # Configure the augmentation tool
+    # This adds FCalEtA, FCalEtC, ...
+    augmentation_tool = CompFactory.DerivationFramework.HIGlobalAugmentationTool(name="HION7AugmentationTool",
+                                                                                nHarmonic=5 # to capture higher-order harmonics for anisotropic flow
+                                                                                )
+    acc.addPublicTool(augmentation_tool, primary=True)
+
+    return acc
+
 
 def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
@@ -101,7 +114,10 @@ def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
         thinningTools += [TruthParticleThinningTool]
 #########################################################################################
     skimmingTool = acc.getPrimaryAndMerge(HION7SkimmingToolCfg(flags))
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,ThinningTools = thinningTools, SkimmingTools = [skimmingTool]),sequenceName="HION7Sequence")       
+    globalAugmentationTool = acc.getPrimaryAndMerge(HION7GlobalAugmentationToolCfg(flags))
+    augmentationTool=[globalAugmentationTool]
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,ThinningTools = thinningTools, SkimmingTools = [skimmingTool], AugmentationTools=augmentationTool),sequenceName="HION7Sequence")       
     return acc
 
 

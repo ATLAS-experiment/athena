@@ -376,7 +376,6 @@ def HION7SmartCollections():
     variables += ["Electrons"]
     variables += ["Photons"]
     variables += ["Muons"]
-    variables += ["PrimaryVertices"]
     variables += ["InDetTrackParticles"]
 
     return variables
@@ -387,6 +386,8 @@ def HION7AllVarContent():
     variables += ["AntiKt4HIJets"]
     variables += ["CaloSums"]
     variables += ["ZdcModules"]
+    variables += ["PrimaryVertices"]
+    variables += ["EventInfo"]
 
     return variables
 
@@ -399,6 +400,7 @@ def HION7AllVarTruthContent():
     variables += ["TruthVertices"]
 
     return variables
+
 
 #################################################################################
 #HION12
