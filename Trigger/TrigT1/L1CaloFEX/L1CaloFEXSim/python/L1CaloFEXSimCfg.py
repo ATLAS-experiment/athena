@@ -224,7 +224,8 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver',jFEXSysSimTool=CompFactory.LVL1.jFEXSysSim(
                                             'jFEXSysSimTool',jFEXSimTool=CompFactory.LVL1.jFEXSim(
                                               'LVL1::jFEXSim',jFEXFPGATool=CompFactory.LVL1.jFEXFPGA(
-                                                'LVL1::jFEXFPGA',IjFEXFormTOBsTool=CompFactory.LVL1.jFEXFormTOBs(
+                                                'LVL1::jFEXFPGA',jFEXLargeRJetAlgoTool="", # disables jLJ algorithm - will produce empty container
+                                                IjFEXFormTOBsTool=CompFactory.LVL1.jFEXFormTOBs(
                                                  'LVL1::jFEXFormTOBs',IsMC=flags.Input.isMC)))))
         acc.addEventAlgo(jFEXInputs)
         acc.addEventAlgo(jFEX)
