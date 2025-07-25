@@ -18,8 +18,8 @@ class L1CaloMonitorCfgHelper(object):
     xmlConfigs = {} # flat dictionary of histograms that are in the shifter folders, so are used for online monitoring
     embargoed = [] # list of embargoed dqdm plots
 
-    SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gTEJWOJ","gXENC","gTENC","gXERHO","gTERHO","jJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
-    HELPURL = "https://codimd.web.cern.ch/s/678H65Tk9"
+    SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gXEJWOJMHT","gXEJWOJMST","gTEJWOJ","gXENC","gTENC","gXERHO","gTERHO","jJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
+    HELPURL = "" #"https://codimd.web.cern.ch/s/678H65Tk9" No longer adding a help url
 
     @staticmethod
     def createXmls():
@@ -326,7 +326,7 @@ thresholds th_AnyBinIsError {
         histName = argsCopy[0].split(";")[-1]
 
         # add help link for all expert plots
-        if splitPath[0] == "Expert":
+        if splitPath[0] == "Expert" and self.HELPURL!="":
             linkUrl = self.HELPURL + "#" + "".join(splitPath[1:]+[histName])
             linkUrl = f"<a href=\"{linkUrl}\">Help</a>"
             if "description" not in hanConfig and "Expert/descripton" not in hanConfig: hanConfig["description"] = linkUrl
