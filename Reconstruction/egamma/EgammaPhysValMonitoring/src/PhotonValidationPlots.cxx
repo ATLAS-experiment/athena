@@ -10,7 +10,6 @@ using CLHEP::GeV;
 PhotonValidationPlots::PhotonValidationPlots(PlotBase* pParent, const std::string& sDir):PlotBase(pParent, sDir),
 										  m_oAllPlots(this, "PhotAll/", "Reco All"),
 										  m_oPhotPlots(this, "Phot/", "Reco Phot"),
-										  m_oTopoPhotPlots(this, "PhotTopo/", "Reco Topo Phot"),
 										  m_oAmbPhotPlots(this, "PhotAmb/", "Reco Ambig Phot"),
 										  m_oConvPhotPlots(this, "Conv/", "Reco Converted"),
 										  m_oTruthAllPlots(this, "TruthAll/All/", "Truth Photon"),
@@ -60,11 +59,9 @@ void PhotonValidationPlots::fill(const xAOD::Photon& photon, const xAOD::EventIn
   author->Fill(photon.author(),weight);
   m_oAllPlots.fill(photon, eventInfo, isPrompt);
 
-  double photon_pt = photon.pt()/GeV;
-  if (photon.author()&xAOD::EgammaParameters::AuthorPhoton&&photon_pt>7.) m_oPhotPlots.fill(photon, eventInfo, isPrompt); 
-  if (photon_pt<7.) m_oTopoPhotPlots.fill(photon, eventInfo, isPrompt);    
-  if (photon.author()&xAOD::EgammaParameters::AuthorAmbiguous&&photon_pt>7.) m_oAmbPhotPlots.fill(photon, eventInfo, isPrompt); 
+  if (photon.author()&xAOD::EgammaParameters::AuthorPhoton) m_oPhotPlots.fill(photon, eventInfo, isPrompt); 
+  if (photon.author()&xAOD::EgammaParameters::AuthorAmbiguous) m_oAmbPhotPlots.fill(photon, eventInfo, isPrompt); 
 
   //Select converted photons 
-  if (photon_pt>7.)m_oConvPhotPlots.fill(photon, eventInfo, isPrompt);
+  m_oConvPhotPlots.fill(photon, eventInfo, isPrompt);
 }
