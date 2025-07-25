@@ -535,6 +535,13 @@ class FlagsFromArgsTest(unittest.TestCase):
 
         self.flags.fillFromArgs(['floatF=42'])  # implicit conversion
         self.assertEqual(self.flags.floatF, 42)
+    
+        with self.assertRaises(KeyError):
+            self.flags.fillFromArgs(['floatF=23','unknownFlag=42'],return_unknown=False)
+        _, unknown_args = self.flags.fillFromArgs(['floatF=23','unknownFlag=42'],return_unknown=True)
+        self.assertEqual(unknown_args,["unknownFlag=42"])
+    
+
 
 
 class FlagsHelpTest(unittest.TestCase):

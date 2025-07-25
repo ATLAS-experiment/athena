@@ -99,8 +99,13 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
                                           forceCTPasHdw=forceCtp)
 
     #Define the Monitoring plots for L1Calo DQ
-    helper.defineDQAlgorithm("L1TopoMismatchRate",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.001","PublishBins":"1"}, # counts bins with value>0.001
+    helper.defineDQAlgorithm("L1TopoAlgMismatchRate",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.002","PublishBins":"1","IgnoreBins":"\"*:125,*:123,*:96,*:94,*:92,*:90,*:37,*:20,*:18\""}, # counts bins with value>0.001. IgnoreBins: Masking MuonAD and VAEAD and TEaTime mismatches. Also ZEE-eEM24sm2
+                             thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
+                             )
+
+    helper.defineDQAlgorithm("L1TopoMultMismatchRate",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.002","PublishBins":"1","IgnoreBins":"\"*:120,*:119,*:115\""}, # counts bins with value>0.001. IgnoreBins: Masking gTE500, gTE200 and gXEJWOJ500 mismatches
                              thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
                              )
 
@@ -122,7 +127,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
     helper.defineHistogram(name,
                            fillGroup="L1TopoDQ_mismatches",
                            paths=['Expert/Sim'],
-                           hanConfig={"algorithm":"L1TopoMismatchRate","description":"Agreements and Mismatches between L1Topo Simulation and Hdw perLumi-Block","display":"SetPalette(87),Draw=COLZTEXT"},
+                           hanConfig={"algorithm":"L1TopoMultMismatchRate","description":"Agreements and Mismatches between L1Topo Simulation and Hdw perLumi-Block","display":"SetPalette(87),Draw=COLZTEXT"},
                            type='TProfile2D',
                            title="L1Topo Multiplicities Sim/Hdw mismatch rate", xbins=32, ybins=len(AllLabels),
                            xmin=0, xmax=32,
@@ -141,7 +146,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
 
         helper.defineHistogram(name,
                            fillGroup="L1TopoDQ_mismatches",
-                           paths=['Expert/Sim/detail/L1Topo/Multiplicities'],
+                           paths=['Developer/Sim/detail/L1Topo/Multiplicities'],
                            hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hdw per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
                            type='TH2D',
                            title=title, xbins=len(xlabels), ybins=3,
@@ -166,7 +171,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
     helper.defineHistogram(nameLB,
                            fillGroup="L1TopoDQ_mismatches",
                            paths=['Expert/Sim'],
-                           hanConfig={"algorithm":"L1TopoMismatchRate","description":"Mismatch Rate between L1Topo Simulation and Hardware vs Lumi-Block (x-axis)","display":"SetPalette(87),Draw=COLZTEXT"},
+                           hanConfig={"algorithm":"L1TopoAlgMismatchRate","description":"Mismatch Rate between L1Topo Simulation and Hardware vs Lumi-Block (x-axis)","display":"SetPalette(87),Draw=COLZTEXT"},
                            type='TProfile2D',
                            title="L1Topo Algorithms Sim/Hdw mismatch rate",xbins=32,ybins=128,
                            #weight=f'Phase1TopoWeight_{topo[0]}',
@@ -180,7 +185,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
         title = f'L1Topo_Algo_{topo[1]} Miss/Matches Summary'
         helper.defineHistogram(name,
                                fillGroup="L1TopoDQ_mismatches",
-                               paths=['Expert/Sim/detail/L1Topo/Algos'],
+                               paths=['Developer/Sim/detail/L1Topo/Algos'],
                                hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hardware per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
                                type='TH2F',
                                title=title,xbins=32,ybins=3,
