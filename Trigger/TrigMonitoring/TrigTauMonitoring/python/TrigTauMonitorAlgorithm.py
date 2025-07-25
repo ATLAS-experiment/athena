@@ -18,7 +18,7 @@ def TrigTauMonConfig(flags):
         from tauRec.TauToolHolder import TauVertexedClusterDecoratorCfg, TauGNNEvaluatorCfg, TauWPDecoratorGNNCfg
         tool_accs = [
             TauVertexedClusterDecoratorCfg(flags),
-            TauGNNEvaluatorCfg(flags, 0),
+            TauGNNEvaluatorCfg(flags, 0, tauContainerName=TauContainerCopy),
             TauWPDecoratorGNNCfg(flags, 0, TauContainerCopy),
         ]
 

@@ -57,7 +57,9 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOnlineTausAll(c
 {
     std::vector<const xAOD::TauJet*> tau_vec;
 
-    const std::string tau_container_name = getOnlineContainerKey(trigger).key();
+    
+    const TrigTauInfo& info = getTrigInfo(trigger);
+    const std::string tau_container_name = getOnlineContainerKey(info.getHLTTauType()).key();
     ATH_MSG_DEBUG("Tau container name is: " << tau_container_name);
     auto vec = m_trigDecTool->features<xAOD::TauJetContainer>(trigger, TrigDefs::Physics, tau_container_name);
     for(auto& featLinkInfo : vec) {
@@ -226,15 +228,15 @@ std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> TrigTau
     return roi_vec;
 }
 
-const SG::ReadHandleKey<xAOD::TauJetContainer>& TrigTauMonitorBaseAlgorithm::getOnlineContainerKey(const std::string& trigger) const
+
+const SG::ReadHandleKey<xAOD::TauJetContainer>& TrigTauMonitorBaseAlgorithm::getOnlineContainerKey(const std::string& sequence) const
 {
-    const TrigTauInfo& info = getTrigInfo(trigger);
-    if(info.getHLTTauType() == "tracktwoMVA" || info.getHLTTauType() == "tracktwoMVABDT") return m_hltTauJetKey;
-    else if(info.getHLTTauType() == "tracktwoLLP") return m_hltTauJetLLPKey;
-    else if(info.getHLTTauType() == "trackLRT") return m_hltTauJetLRTKey;
-    else if(info.getHLTTauType() == "ptonly") return m_hltTauJetCaloMVAOnlyKey;
+    if(sequence == "tracktwoMVA" || sequence == "tracktwoMVABDT") return m_hltTauJetKey;
+    else if(sequence == "tracktwoLLP") return m_hltTauJetLLPKey;
+    else if(sequence == "trackLRT") return m_hltTauJetLRTKey;
+    else if(sequence == "ptonly") return m_hltTauJetCaloMVAOnlyKey;
     else {
-        ATH_MSG_ERROR("Unknown HLT TauJet container for chain: \"" << trigger << "\", of type \"" << info.getHLTTauType() << "\". Returning the default \"" << m_hltTauJetKey.key() << "\"");
+        ATH_MSG_ERROR("Unknown HLT TauJet container for sequence \"" << sequence << "\". Returning the default \"" << m_hltTauJetKey.key() << "\"");
         return m_hltTauJetKey;
     }
 }
