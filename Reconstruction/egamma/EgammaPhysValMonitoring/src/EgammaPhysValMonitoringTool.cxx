@@ -507,7 +507,6 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
   ATH_CHECK(Photons.isValid());
   
   int numofPhot=0;
-  int numofTopo=0;
   int numofAmb=0; 
   int numPhotAll=0; 
   int numofCnv=0;
@@ -521,10 +520,9 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
           if (!PhotonHelpers::passOQquality(*photon)) continue;
         }
         
-        if(photon->author()&xAOD::EgammaParameters::AuthorPhoton&&photon->pt()/GeV>7.)           numofPhot++;
-        else if(photon->pt()*0.001<7.)  numofTopo++;
-        else if(photon->author()&xAOD::EgammaParameters::AuthorAmbiguous&&photon->pt()/GeV>7.)   numofAmb++;
-        if(xAOD::EgammaHelpers::isConvertedPhoton(photon)&&photon->pt()/GeV>7.)                  numofCnv++;
+        if(photon->author())           numofPhot++;
+        else if(photon->author()&xAOD::EgammaParameters::AuthorAmbiguous)   numofAmb++;
+        if(xAOD::EgammaHelpers::isConvertedPhoton(photon))                  numofCnv++;
         if(!m_isMC) m_oPhotonValidationPlots.fill(*photon,*eventInfo, isPhotPrompt);
         else {
             static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
@@ -554,16 +552,14 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
             
         }
     }
-  numPhotAll = numofPhot+numofTopo+numofAmb;
+  numPhotAll = numofPhot+numofAmb;
   m_oPhotonValidationPlots.m_oAllPlots.m_nParticles->Fill(numPhotAll);
   m_oPhotonValidationPlots.m_oPhotPlots.m_nParticles->Fill(numofPhot);
-  m_oPhotonValidationPlots.m_oTopoPhotPlots.m_nParticles->Fill(numofTopo);    
   m_oPhotonValidationPlots.m_oAmbPhotPlots.m_nParticles->Fill(numofAmb);
   m_oPhotonValidationPlots.m_oConvPhotPlots.m_nParticles->Fill(numofCnv);
 
   m_oPhotonValidationPlots.m_oAllPlots.m_nParticles_weighted->Fill(numPhotAll,weight);
   m_oPhotonValidationPlots.m_oPhotPlots.m_nParticles_weighted->Fill(numofPhot,weight);
-  m_oPhotonValidationPlots.m_oTopoPhotPlots.m_nParticles_weighted->Fill(numofTopo,weight);    
   m_oPhotonValidationPlots.m_oAmbPhotPlots.m_nParticles_weighted->Fill(numofAmb,weight);
   m_oPhotonValidationPlots.m_oConvPhotPlots.m_nParticles_weighted->Fill(numofCnv,weight);
  
