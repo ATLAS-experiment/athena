@@ -5,7 +5,9 @@
 #include "TrigBjetBtagHypoAlg.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TrigBjetHypo/safeLogRatio.h"
 
+#include <cmath>
 
 TrigBjetBtagHypoAlg::TrigBjetBtagHypoAlg( const std::string& name, 
 						ISvcLocator* pSvcLocator ) : 
@@ -332,29 +334,49 @@ StatusCode TrigBjetBtagHypoAlg::monitor_tracks( const EventContext& context, con
 StatusCode TrigBjetBtagHypoAlg::monitor_flavor_probabilities( const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL, const std::string& var_name ) const {
   auto monitor_pu = Monitored::Collection( "btag_"+var_name+"_pu", bTaggingEL,
     [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
+      auto jet = getJetFromBTagLink(**bTagLink);
       double pu = -1; 
-      (*bTagLink)->pu( var_name, pu );
+      SG::ConstAccessor<float> acc(var_name+"_pu");
+      pu = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
       return pu; 
     } );
 
   auto monitor_pb = Monitored::Collection( "btag_"+var_name+"_pb", bTaggingEL,
     [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      double pb = -1;
-      (*bTagLink)->pb( var_name, pb );
+      auto jet = getJetFromBTagLink(**bTagLink);
+      double pb = -1; 
+      SG::ConstAccessor<float> acc(var_name+"_pb");
+      pb = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
       return pb;
     } );
 
   auto monitor_pc = Monitored::Collection( "btag_"+var_name+"_pc", bTaggingEL,
     [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      double pc = -1;
-      (*bTagLink)->pc( var_name, pc );
+      auto jet = getJetFromBTagLink(**bTagLink);
+      double pc = -1; 
+      SG::ConstAccessor<float> acc(var_name+"_pc");
+      pc = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
       return pc;
     } );
 
   auto monitor_llr = Monitored::Collection( "btag_"+var_name+"_llr", bTaggingEL,
     [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      double llr = -1;
-      (*bTagLink)->loglikelihoodratio( var_name, llr );
+      auto jet = getJetFromBTagLink(**bTagLink);
+      SG::ConstAccessor<float> acc_pb(var_name+"_pb");
+      double pb = -1.0;
+      pb = (acc_pb.isAvailable(*jet) ? acc_pb(*jet) : acc_pb(**bTagLink));
+      SG::ConstAccessor<float> acc_pu(var_name+"_pu");
+      double pu = -1.0;
+      pu = (acc_pu.isAvailable(*jet) ? acc_pu(*jet) : acc_pu(**bTagLink));
+      if( !pb || !pu )  return -1.0f;
+      float llr = 0.;
+      if(pb<=0.) {
+        llr = -30.;
+      } else if(pu<=0.) {
+        llr = +100.;
+      } else {
+        llr = std::log(pb/pu);
+      }
       return llr;
     } );
 
@@ -367,18 +389,20 @@ StatusCode TrigBjetBtagHypoAlg::monitor_flavor_bb_probabilities( const ElementLi
 
   auto monitor_pb = Monitored::Collection( "bbtag_"+var_name+"_pb", bTaggingEL,
     [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
+      auto jet = getJetFromBTagLink(**bTagLink);
       double pb = -1;
       SG::ConstAccessor<float> acc(var_name+"_pb");
-      pb =  acc(**bTagLink);
+      pb = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
       return pb; 
     } );
 
   auto monitor_pbb = Monitored::Collection( "bbtag_"+var_name+"_pbb", bTaggingEL,
     [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
+      auto jet = getJetFromBTagLink(**bTagLink);
       double pbb = -1; 
       SG::ConstAccessor<float> acc(var_name+"_pbb");
-      pbb = acc(**bTagLink);
-      return pbb; 
+      pbb = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
+      return pbb;
     } );
 
   auto monitor_group_for_flavor_bb_tag_var = Monitored::Group( m_monTool, monitor_pb, monitor_pbb );
@@ -411,9 +435,6 @@ ElementLinkVector<xAOD::BTaggingContainer> TrigBjetBtagHypoAlg::collect_valid_li
 
 StatusCode TrigBjetBtagHypoAlg::monitor_btagging( const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL ) const {
   // Monitor high-level tagger flavor probabilites
-  CHECK( monitor_flavor_probabilities(bTaggingEL, "DL1r") );
-  CHECK( monitor_flavor_probabilities(bTaggingEL, "rnnip") );
-  CHECK( monitor_flavor_probabilities(bTaggingEL, "DL1d20211216") );
   CHECK( monitor_flavor_probabilities(bTaggingEL, "dips20211116") );
   CHECK( monitor_flavor_probabilities(bTaggingEL, "GN120220813") );
   CHECK( monitor_flavor_probabilities(bTaggingEL, "GN220240122") );

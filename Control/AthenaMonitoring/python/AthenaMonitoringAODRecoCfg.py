@@ -41,7 +41,7 @@ def AthenaMonitoringAODRecoCfg(flags):
             from BTagging.BTagConfig import BTagRecoSplitCfg
             # would rather use removesuffix below but need to wait for Python 3.9
             for container in jet_collections & btag_jet_collections:
-                result.merge(BTagRecoSplitCfg(flags, [container]))
+                result.merge(BTagRecoSplitCfg(flags, [container+"Jets"]))
 
         # MET can't be rebuilt when running over cosmics or HI AOD as taus are missing
         from .DQConfigFlags import DQDataType

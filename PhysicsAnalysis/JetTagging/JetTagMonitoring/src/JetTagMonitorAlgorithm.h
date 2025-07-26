@@ -67,8 +67,6 @@ class JetTagMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::JetContainer> m_JetContainerKey;
   SG::ReadHandleKey<xAOD::MuonContainer> m_MuonContainerKey;
   SG::ReadHandleKey<xAOD::ElectronContainer> m_ElectronContainerKey;
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_btagLinkKey{this,"BTagLinkKey","","RDHK for btag links"};
-  SG::ReadDecorHandleKey<xAOD::BTaggingContainer> m_btagResultKey{this,"BTagResultKey","","RDHK for monitored BTag variables"};
 
   SG::ReadDecorHandleKey<xAOD::MuonContainer> m_MuonEtIsoDecorKey {this,"MuonEtIsoDecorKey","Muons.topoetcone20"};
   SG::ReadDecorHandleKey<xAOD::MuonContainer> m_MuonPtIsoDecorKey {this,"MuonPtIsoDecorKey","Muons.ptvarcone30"};

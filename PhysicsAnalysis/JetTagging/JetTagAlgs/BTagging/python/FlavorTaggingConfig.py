@@ -7,7 +7,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg, JetParticleAssociationByVertexAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg, BTagTrackAugmenterByVertexAlgCfg
-from BTagging.BTagConfig import _get_flip_config
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 from FlavorTagInference.FlavorTagNNConfig import MultifoldGNNCfg
 from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactoryCfg
@@ -46,6 +45,28 @@ def _addDepsByDirname(cfgFlags, dirname: str, jetCollection: str) -> ComponentAc
             jetCollection=jetCollection,
         ))
     return acc
+
+def _get_flip_config(nn_path):
+    """
+    Schedule NN-based IP 'flip' taggers.
+
+    FlipConfig is "STANDARD" by default - for flip tagger set up with
+    option "NEGATIVE_IP_ONLY" (flip sign of d0 and use only (flipped)
+    positive d0 values).
+
+    Returns a list of flip configurations, or [] for things we don't flip.
+    """
+    nn_path = nn_path.lower()
+
+    #flipping of DL1r with 2019 taggers does not work at the moment
+    if (('dl1d' in nn_path) or ('dl1r' in nn_path and '201903' not in nn_path)):
+        return ['FLIP_SIGN']
+    if 'rnnip' in nn_path or 'dips' in nn_path:
+        return ['NEGATIVE_IP_ONLY']
+    if 'gn1' in nn_path or 'gn2' in nn_path or 'gn3' in nn_path:
+        return ['SIMPLE_FLIP']
+    else:
+        return []
 
 
 def FlavorTaggingCfg(
@@ -118,10 +139,8 @@ def FlavorTaggingCfg(
                 trackCollection,
                 JetTrackAssociator,
             ))
-     
         else:
-            args['remapping'].setdefault(
-                'BTagTrackToJetAssociator', 'GhostTrack')
+            args['remapping'].setdefault('BTagTrackToJetAssociator', 'GhostTrack')
 
         if '/GN2v01/' in dirname:
             args['tag_requirements'] = {'nonzeroTracks'}

@@ -97,14 +97,28 @@ NONZERO_TRACKS = 'nonzeroTracks'
 
 def FlavorTagNNCfg(
         flags,
-        BTaggingCollection,
+        JetCollection,
         TrackCollection,
         NNFile,
+        BTaggingCollection=None,
         FlipConfig="STANDARD",
         variableRemapping={}):
-
+    
+    if BTaggingCollection is not None:
+        warn('BTaggingCollection is deprecated, use JetCollection instead',
+             stacklevel=2)
+    if JetCollection is None:
+        raise ValueError(
+            'JetCollection is required,'
+            f' {BTaggingCollection=}, {JetCollection=}'
+        )
+    
+    tp_assoc = 'BTagTrackToJetAssociator'
+    ip_assoc = 'TracksForBTagging'
+    variableRemapping.setdefault(tp_assoc, ip_assoc)
+    trackLinkType = 'IPARTICLE'
     FTI = CompFactory.FlavorTagInference
-    alg = FTI.BTagDecoratorAlg
+    alg = FTI.JetTagDecoratorAlg
 
     acc = ComponentAccumulator()
 
@@ -112,7 +126,10 @@ def FlavorTagNNCfg(
     nn_opts = dict(
         NNFile=NNFile,
         flipTagConfig=FlipConfig,
-        variableRemapping=variableRemapping)
+        trackLinkType=trackLinkType,
+        variableRemapping=variableRemapping
+    )
+
     if NNFile_extension == "onnx":
         nn_name = NNFile.replace("/", "_").replace(".onnx", "")
         nn_opts["defaultZeroTracks"] = True
@@ -120,7 +137,7 @@ def FlavorTagNNCfg(
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 
-    name = '_'.join(['FtagNN', nn_name.lower(), BTaggingCollection])
+    name = '_'.join(['FtagNN', nn_name.lower(), JetCollection])
 
     # Ensure different names for standard and flip taggers
     if FlipConfig != "STANDARD":
@@ -130,7 +147,7 @@ def FlavorTagNNCfg(
 
     decorAlg = alg(
         name=name,
-        container=BTaggingCollection,
+        container=JetCollection,
         constituentContainer=TrackCollection,
         decorator=decorator,
         undeclaredReadDecorKeys=veto_list,
@@ -178,30 +195,26 @@ def MultifoldGNNCfg(
         )
     )
 
-    tp_assoc = 'BTagTrackToJetAssociator'
-    ip_assoc = 'TracksForBTagging'
-
     FTI = CompFactory.FlavorTagInference
-
-    if BTaggingCollection is not None:
-        Alg = FTI.BTagDecoratorAlg
-        trackLinkType = 'TRACK_PARTICLE'
-        container = BTaggingCollection
-    elif JetCollection is not None:
-        remapping.setdefault(tp_assoc, ip_assoc)
-        Alg = FTI.JetTagDecoratorAlg
-        trackLinkType = 'IPARTICLE'
-        algname += '_Jet'
-        container = JetCollection
-    else:
+    if JetCollection is None:
         raise ValueError(
-            'b-tagging or jet collection is required,'
+            'jet collection is required,'
             f' {BTaggingCollection=}, {JetCollection=}' )
-
+    if BTaggingCollection is not None:
+        warn('BTaggingCollection is deprecated,'
+             ' use JetCollection instead', stacklevel=2)
     # we don't remove this outright because it will complicate
     # sweeping between branches.
     if useBTaggingObject is not None:
         warn(f'the option {useBTaggingObject=} is deprecated', stacklevel=2)
+
+    tp_assoc = 'BTagTrackToJetAssociator'
+    ip_assoc = 'TracksForBTagging'
+    remapping.setdefault(tp_assoc, ip_assoc)
+    Alg = FTI.JetTagDecoratorAlg
+    trackLinkType = 'IPARTICLE'
+    algname += '_Jet'
+    container = JetCollection
 
     acc.addEventAlgo(
         Alg(
