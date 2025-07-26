@@ -25,7 +25,7 @@ from JetRecConfig.JetRecConfig import JetRecCfg
 from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
 
 # b-tagging imports
-from BTagging.BTagConfig import BTagAlgsCfg
+from BTagging.BTagLegacyConfig import BTagAlgsCfg
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 

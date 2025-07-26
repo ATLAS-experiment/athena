@@ -35,8 +35,8 @@ namespace FlavorTagDiscriminants {
 
     // returns 0 for success
     virtual void decorate(const xAOD::BTagging& btag) const override;
-    virtual void decorate(const xAOD::Jet& jet) const override;
-    virtual void decorateWithDefaults(const SG::AuxElement& jet) const override;
+    virtual void decorate(const xAOD::IParticle& i_jet) const override;
+    virtual void decorateWithDefaults(const xAOD::IParticle& i_jet) const override;
 
     virtual std::set<std::string> getDecoratorKeys() const override;
     virtual std::set<std::string> getAuxInputKeys() const override;

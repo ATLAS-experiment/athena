@@ -8,13 +8,6 @@
 #include "FlavorTagInference/GNNOptions.h"
 #include "FlavorTagInference/StringUtils.h"
 
-
-#include "FlavorTagInference/TracksLoader.h"
-#include "FlavorTagInference/FlowElementsLoader.h"
-#include "FlavorTagInference/HitsLoader.h"
-#include "FlavorTagInference/ElectronsLoader.h"
-
-#include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
 
 #include "PathResolver/PathResolver.h"
@@ -55,56 +48,23 @@ namespace FlavorTagInference {
 
   GNN::GNN(std::shared_ptr<const SaltModel> util, const GNNOptions& o):
     m_saltModel(util),
-    m_jetLink(jetLinkName)
+    m_jetLink(jetLinkName),
+    m_dataLoader(util, o)
   {
-
-    // Extract metadata from the ONNX file, primarily about the model's inputs.
-    auto graph_config = m_saltModel->getGraphConfig();
-
-    // Create configuration objects for data preprocessing.
-    auto [inputs, constituents_configs, options] = dataprep::createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>(
-        graph_config, o.flip_config, o.variable_remapping, o.track_link_type);
-
-    for (auto config : constituents_configs){
-      switch (config.type){
-      using enum ConstituentsType;
-      case TRACK:
-        m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
-        break;
-      case FLOW_ELEMENT:
-        m_constituentsLoaders.push_back(std::make_shared<FlowElementsLoader>(config, options));
-        break;
-      case HIT:
-        m_constituentsLoaders.push_back(std::make_shared<HitsLoader>(config, options));
-        break;
-      case ELECTRON:
-        m_constituentsLoaders.push_back(std::make_shared<ElectronsLoader>(config, options));
-        break;
-      default:
-        throw std::runtime_error("Unknown constituent type");
-      }
-    }
-
-    // Initialize jet and b-tagging input getters.
-    auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
-    m_varsFromBTag = vb;
-    m_varsFromJet = vj;
-    m_dataDependencyNames = ds;
-
     // Retrieve the configuration for the model outputs.
     SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
 
     // Create the output decorators.
-    auto [dd, rd] = createDecorators(gnn_output_config, options);
-    m_dataDependencyNames += dd;
+    auto [dd, rd] = createDecorators(gnn_output_config, m_dataLoader.ftag_options);
+    m_dataLoader.data_dependency_names += dd;
 
     // Update dependencies and used remap from the constituents loaders.
-    for (const auto& loader : m_constituentsLoaders){
-      m_dataDependencyNames += loader->getDependencies();
+    for (const auto& loader : m_dataLoader.constituents_loaders) {
+      m_dataLoader.data_dependency_names += loader->getDependencies();
       std::set<std::string> used_remap = loader->getUsedRemap();
       rd.merge(used_remap);
     }
-    dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
+    dataprep::checkForUnusedRemaps(m_dataLoader.ftag_options.remap_scalar, rd);
 
     // Build the default decorators. Note that this _must_ be called
     // after createDecorators.
@@ -135,92 +95,38 @@ namespace FlavorTagInference {
   GNN::GNN(const GNN&) = default;
   GNN::~GNN() = default;
 
-  void GNN::decorate(const xAOD::BTagging& btag) const {
-    /* tag a b-tagging object */
-    auto jetLink = m_jetLink(btag);
-    if (!jetLink.isValid()) {
-      throw std::runtime_error("invalid jetLink");
-    }
-    const xAOD::Jet& jet = **jetLink;
-    decorate(jet, btag);
-  }
-
-  void GNN::decorate(const xAOD::Jet& jet) const {
-    /* tag a jet */
-    decorate(jet, jet);
-  }
-
-  void GNN::decorateWithDefaults(const SG::AuxElement& jet) const {
+  void GNN::decorateWithDefaults(const xAOD::IParticle& i_jet) const {
     for (const auto& [dec, v]: m_defaultValues) {
-      dec(jet) = v;
+      dec(i_jet) = v;
     }
     // for some networks we need to set a lot of empty vectors as well
     if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1) {
       // vector outputs, e.g. track predictions
       for (const auto& dec: m_decorators.jetVecChar) {
-        dec.second(jet) = {};
+        dec.second(i_jet) = {};
       }
       for (const auto& dec: m_decorators.jetVecFloat) {
-        dec.second(jet) = {};
+        dec.second(i_jet) = {};
       }
       for (const auto& dec: m_decorators.jetTrackLinks) {
-        dec.second(jet) = {};
+        dec.second(i_jet) = {};
       }
     }
   }
 
-  void GNN::decorate(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
-    /* Main function for decorating a jet or b-tagging object with GNN outputs. */
-    using namespace internal;
+  void GNN::decorate(const xAOD::IParticle& i_jet) const {
+    /* Main function for decorating a i_jet object with GNN outputs. */
+    SaltModelData salt_model_data = m_dataLoader.loadInputs(&i_jet);
+    auto input_tracks = salt_model_data.constituents.at("track_features");
 
-    // prepare input
-    // -------------
-    std::map<std::string, Inputs> gnn_inputs;
-
-    // jet level inputs
-    std::vector<float> jet_feat;
-    for (const auto& getter: m_varsFromBTag) {
-      jet_feat.push_back(getter(btag).second);
-    }
-    for (const auto& getter: m_varsFromJet) {
-      jet_feat.push_back(getter(jet).second);
-    }
-    std::vector<int64_t> jet_feat_dim = {1, static_cast<int64_t>(jet_feat.size())};
-    Inputs jet_info(jet_feat, jet_feat_dim);
-    if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V2) {
-      gnn_inputs.insert({"jets", jet_info});
-    } else {
-      gnn_inputs.insert({"jet_features", jet_info});
-    }
-
-    // constituent level inputs
-    Tracks input_tracks;
-    int64_t num_inputs = 0;
-    for (const auto& loader : m_constituentsLoaders){
-      auto [input_name, input_data, input_objects] = loader->getData(jet, btag);
-      if (m_saltModel->getSaltModelVersion() != SaltModelVersion::V2) {
-        input_name.pop_back();
-        input_name.append("_features");
-      }
-      gnn_inputs.insert({input_name, input_data});
-      num_inputs += input_data.first.size();
-
-      // for now we only collect tracks for aux task decoration
-      // they have to be converted back from IParticle to TrackParticle first
-      if (loader->getType() == ConstituentsType::TRACK){
-        for (auto constituent : input_objects){
-          input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(constituent));
-        }
-      }
-    }
 
     // run inference
     // -------------
-    if (m_defaultZeroTracks && num_inputs == 0) {
-      this->decorateWithDefaults(btag);
+    if (m_defaultZeroTracks && salt_model_data.num_inputs == 0) {
+      this->decorateWithDefaults(i_jet);
       return;
     }
-    auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_inputs);
+    auto [out_f, out_vc, out_vf] = m_saltModel->runInference(salt_model_data.gnn_inputs);
 
     // decorate outputs
     // ----------------
@@ -231,34 +137,34 @@ namespace FlavorTagInference {
         if (out_vf.at(dec.first).size() != 1){
           throw std::logic_error("expected vectors of length 1 for float decorators");
         }
-        dec.second(btag) = out_vf.at(dec.first).at(0);
+        dec.second(i_jet) = out_vf.at(dec.first).at(0);
       }
     }
     // the new metadata format supports writing aux tasks
     else if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1) {
-      // float outputs, e.g. jet probabilities
+      // float outputs, e.g. i_jet probabilities
       for (const auto& dec: m_decorators.jetFloat) {
-        dec.second(btag) = out_f.at(dec.first);
+        dec.second(i_jet) = out_f.at(dec.first);
       }
       // vector outputs, e.g. track predictions
       for (const auto& dec: m_decorators.jetVecChar) {
-        dec.second(btag) = out_vc.at(dec.first);
+        dec.second(i_jet) = out_vc.at(dec.first);
       }
       for (const auto& dec: m_decorators.jetVecFloat) {
-        dec.second(btag) = out_vf.at(dec.first);
+        dec.second(i_jet) = out_vf.at(dec.first);
       }
 
       // decorate links to the input tracks to the b-tagging object
       for (const auto& dec: m_decorators.jetTrackLinks) {
         TrackLinks links;
-        for (const xAOD::TrackParticle* it: input_tracks) {
+        for (const xAOD::IParticle* it: input_tracks) {
           TrackLinks::value_type link;
           const auto* itc = dynamic_cast<const xAOD::TrackParticleContainer*>(
             it->container());
           link.toIndexedElement(*itc, it->index());
           links.push_back(link);
         }
-        dec.second(btag) = links;
+        dec.second(i_jet) = links;
       }
     }
     else {
@@ -268,13 +174,13 @@ namespace FlavorTagInference {
 
   // Dependencies
   std::set<std::string> GNN::getDecoratorKeys() const {
-    return m_dataDependencyNames.bTagOutputs;
+    return m_dataLoader.data_dependency_names.bTagOutputs;
   }
   std::set<std::string> GNN::getAuxInputKeys() const {
-    return m_dataDependencyNames.bTagInputs;
+    return m_dataLoader.data_dependency_names.bTagInputs;
   }
   std::set<std::string> GNN::getConstituentAuxInputKeys() const {
-    return m_dataDependencyNames.trackInputs;
+    return m_dataLoader.data_dependency_names.trackInputs;
   }
 
   std::tuple<FTagDataDependencyNames, std::set<std::string>>

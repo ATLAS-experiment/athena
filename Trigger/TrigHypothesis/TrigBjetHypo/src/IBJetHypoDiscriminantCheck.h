@@ -7,6 +7,8 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "AthContainers/AuxElement.h"
+#include "xAODJet/Jet.h"
+#include "xAODJet/JetContainer.h"
 
 class IBJetHypoDiscriminantCheck: virtual public ::IAlgTool {
 public:

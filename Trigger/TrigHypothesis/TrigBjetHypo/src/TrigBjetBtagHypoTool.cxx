@@ -17,6 +17,7 @@
 #include "TrigBjetBtagHypoTool.h"
 #include "xAODBTagging/BTagging.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TrigBjetHypo/safeLogRatio.h"
 
 TrigBjetBtagHypoTool::TrigBjetBtagHypoTool( const std::string& type,
     const std::string& name,
@@ -101,7 +102,12 @@ StatusCode TrigBjetBtagHypoTool::decide( std::vector< TrigBjetBtagHypoToolInfo >
       // monitor floats
       std::vector<Monitored::Scalar<float>> mons;
       for (const auto& monpair: m_monPairs) {
-        mons.emplace_back(monpair.second, monpair.first(*btagging));
+        if (monpair.first.isAvailable(*btagging)) {
+          mons.emplace_back(monpair.second, monpair.first(*btagging));
+        } else {
+          auto jet = getJetFromBTagLink(*btagging);
+          mons.emplace_back(monpair.second, monpair.first(*jet)); // default value if not available
+        }
       }
 
       std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> mons_wrappers(

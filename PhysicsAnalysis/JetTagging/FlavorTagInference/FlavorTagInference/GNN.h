@@ -16,12 +16,13 @@
 #include "FlavorTagInference/AssociationEnums.h"
 #include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "FlavorTagInference/GNNOptions.h"
+#include "FlavorTagInference/GNNDataLoader.h"
 
 #include "FlavorTagInference/DataPrepUtilities.h"
 
 // EDM includes
 #include "xAODBTagging/BTaggingFwd.h"
-#include "xAODJet/JetContainer.h"
+#include "xAODBase/IParticle.h"
 
 #include <memory>
 #include <string>
@@ -52,10 +53,8 @@ namespace FlavorTagInference {
     GNN(const GNN&);
     virtual ~GNN();
 
-    virtual void decorate(const xAOD::BTagging& btag) const;
-    virtual void decorate(const xAOD::Jet& jet) const;
-    virtual void decorateWithDefaults(const SG::AuxElement& jet) const;
-    void decorate(const xAOD::Jet& jet, const SG::AuxElement& decorated) const;
+    virtual void decorate(const xAOD::IParticle& i_jet) const;
+    virtual void decorateWithDefaults(const xAOD::IParticle& jet) const;
 
     virtual std::set<std::string> getDecoratorKeys() const;
     virtual std::set<std::string> getAuxInputKeys() const;
@@ -90,13 +89,10 @@ namespace FlavorTagInference {
 
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
-    std::vector<internal::VarFromBTag> m_varsFromBTag;
-    std::vector<internal::VarFromJet> m_varsFromJet;
-    std::vector<std::shared_ptr<IConstituentsLoader>> m_constituentsLoaders;
+    GNNDataLoader m_dataLoader;
 
     Decorators m_decorators;
     std::vector<std::pair<Dec<float>, float>> m_defaultValues;
-    FTagDataDependencyNames m_dataDependencyNames;
     bool m_defaultZeroTracks;
   };
 } // end namespace FlavorTagInference

@@ -33,9 +33,19 @@ StatusCode BJetThreeValueCheck::initialize() {
 
 bool BJetThreeValueCheck::passThreshold(const SG::AuxElement& btag) const
 {
-  float b = m_acc->b(btag);
-  float c = m_acc->c(btag);
-  float u = m_acc->u(btag);
+  float b = -1.0;
+  float c = -1.0;
+  float u = -1.0;
+  auto jet = getJetFromBTagLink(btag);
+  if (m_acc->b.isAvailable(*jet)) {
+    b = m_acc->b(*jet);
+    c = m_acc->c(*jet);
+    u = m_acc->u(*jet);
+  } else {
+    b = m_acc->b(btag);
+    c = m_acc->c(btag);
+    u = m_acc->u(btag);
+  }
   float f = m_cFraction;
   float llr = safeLogRatio(b, f*c + (1-f)*u);
   Monitored::Group(m_monTool, Monitored::Scalar(m_llrName, llr));
