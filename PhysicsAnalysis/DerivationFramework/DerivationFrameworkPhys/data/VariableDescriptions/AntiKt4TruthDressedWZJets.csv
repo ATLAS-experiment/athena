@@ -4,3 +4,4 @@ LineNumber,VariableName,Type,Description
 3,GhostCHadronsFinalCount,vector<int>,Number of ghost-associated c-hadrons
 4,PartonTruthLabelID,vector<int>,PDG identification of the highest-energy ghost-associated parton
 5,TrueFlavor,vector<int>,Attempt to merge Parton and Hadron truth labels into a single variable
+6,HFHadronOriginID,vector<int>,Matched hadron origin label (from W, top, ...) as determined by heavy-flavour classifier

@@ -11,17 +11,16 @@ namespace {
     using GEN_id = DerivationFramework::HadronOriginClassifier::GEN_id;
 
     /// Range of samples with low <= id <= high
-    Sample(int low, int high, GEN_id gen, bool ttbb=false) :
-      low(low), high(high), gen(gen), ttbb(ttbb) {}
+    Sample(int low, int high, GEN_id gen) :
+      low(low), high(high), gen(gen) {}
 
     /// Single sample with `id`
-    Sample(int id, GEN_id gen, bool ttbb=false) :
-      Sample(id, id, gen, ttbb) {}
+    Sample(int id, GEN_id gen) :
+      Sample(id, id, gen) {}
 
     int low{};
     int high{};
     GEN_id gen{GEN_id::Pythia6};
-    bool ttbb{false};
   };
 }
 
@@ -45,7 +44,7 @@ namespace DerivationFramework{
       {410232, 410233, GEN_id::HerwigPP}, //first attempt for Powheg+H7 / aMC@NLO+H7
       {410525, 410530, GEN_id::HerwigPP}, //New Powheg+H7 samples
       {407037, 407040, GEN_id::HerwigPP}, //Powheg+Hpp MET/HT sliced
-      {410536, 410537, GEN_id::HerwigPP}, {410245, GEN_id::HerwigPP, true}, //aMC@NLO+H++ , ttbb
+      {410536, 410537, GEN_id::HerwigPP}, {410245, GEN_id::HerwigPP}, //aMC@NLO+H++ , ttbb
       {410557, 410559, GEN_id::HerwigPP}, // new Powheg+H7, mc16
       {411082, 411090, GEN_id::HerwigPP}, //Powheg+H7 HF-filtered
       {407354, 407356, GEN_id::HerwigPP}, //Powheg+H7 ttbar HT-filtered
@@ -55,9 +54,9 @@ namespace DerivationFramework{
       {411335, 411337, GEN_id::HerwigPP}, //Powheg+H7.1.3 ttbar HT-filtered
       {412116, 412117, GEN_id::HerwigPP}, //amc@NLO+H7.1.3 ttbar
       {504329, GEN_id::HerwigPP}, {504333, GEN_id::HerwigPP}, {504341, GEN_id::HerwigPP}, //amc@NLO+H7.2.1 refined ttZ
-      {601239, 601240, GEN_id::HerwigPP, true},
-      {601668, GEN_id::HerwigPP, true},
-      {603905, 603906, GEN_id::HerwigPP, true}, // ttbb Powheg+H7 dilep, ljet, allhad
+      {601239, 601240, GEN_id::HerwigPP},
+      {601668, GEN_id::HerwigPP},
+      {603905, 603906, GEN_id::HerwigPP}, // ttbb Powheg+H7 dilep, ljet, allhad
 
       // all Pythia8 showered samples
       {410006, GEN_id::Pythia8}, //Powheg+P8 old main31
@@ -73,19 +72,19 @@ namespace DerivationFramework{
       {410276, 410278, GEN_id::Pythia8}, // aMC@NlO+P8 ttZ_lowMass
       {410225, 410227, GEN_id::Pythia8}, {410274, 410275, GEN_id::Pythia8}, //aMC@NLO+P8, new settings
       {410568, 410569, GEN_id::Pythia8}, // nonallhad boosted c-filtered
-      {410244, GEN_id::Pythia8, true}, //aMC@NLO+P8, ttbb (old)
+      {410244, GEN_id::Pythia8}, //aMC@NLO+P8, ttbb (old)
       {410441, 410442, GEN_id::Pythia8}, //new aMC@NLO+P8 mc16, new shower starting scale
       {410464, 410466, GEN_id::Pythia8}, //new aMC@NLO+P8 mc16, new shower starting scale, no shower weights
       {410470, 410472, GEN_id::Pythia8}, {410480, 410482, GEN_id::Pythia8}, //new Powheg+P8 mc16
       {410452, GEN_id::Pythia8}, //new aMC@NLO+P8 FxFx mc16
       {411073, 411081, GEN_id::Pythia8}, //Powheg+P8 HF-filtered
       {412066, 412074, GEN_id::Pythia8}, //aMC@NLO+P8 HF-filtered
-      {411068, 411070, GEN_id::Pythia8, true}, //Powheg+P8 ttbb
-      {410265, 410267, GEN_id::Pythia8, true}, //aMC@NLO+P8 ttbb
-      {411178, 411180, GEN_id::Pythia8, true}, {411275, GEN_id::Pythia8, true}, //Powheg+P8 ttbb OTF production - ATLMCPROD-7240
-      {600791, 600792, GEN_id::Pythia8, true}, //Powheg+P8 ttbb - ATLMCPROD-9179
-      {600737, 600738, GEN_id::Pythia8, true}, //Powheg+P8 ttbb - ATLMCPROD-9179
-      {601226, 601227, GEN_id::Pythia8, true}, // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
+      {411068, 411070, GEN_id::Pythia8}, //Powheg+P8 ttbb
+      {410265, 410267, GEN_id::Pythia8}, //aMC@NLO+P8 ttbb
+      {411178, 411180, GEN_id::Pythia8}, {411275, GEN_id::Pythia8}, //Powheg+P8 ttbb OTF production - ATLMCPROD-7240
+      {600791, 600792, GEN_id::Pythia8}, //Powheg+P8 ttbb - ATLMCPROD-9179
+      {600737, 600738, GEN_id::Pythia8}, //Powheg+P8 ttbb - ATLMCPROD-9179
+      {601226, 601227, GEN_id::Pythia8}, // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
       {407342, 407344, GEN_id::Pythia8}, //Powheg+P8 ttbar HT-filtered
       {407345, 407347, GEN_id::Pythia8}, //Powheg+P8 ttbar MET-filtered
       {407348, 407350, GEN_id::Pythia8}, //aMC@NLO+P8 ttbar HT-filtered
@@ -96,9 +95,10 @@ namespace DerivationFramework{
       {601237, GEN_id::Pythia8}, // mc23 ttbar allhad
       {601398, 601399, GEN_id::Pythia8}, // mc23 ttbar dilep, singlelep hdamp517p5
       {601491, GEN_id::Pythia8}, {601495, GEN_id::Pythia8}, {601497, GEN_id::Pythia8}, // mc23 ttbar pThard variations, dilep, singlelep, allhad
-      {601783, 601784, GEN_id::Pythia8, true}, // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
-      {603003, 603004, GEN_id::Pythia8, true}, // Powheg+P8 ttbb nominal and pthard1 allhad
-      {603190, 603193, GEN_id::Pythia8, true}, // Powheg+P8 ttbb nominal and pthard1 dilep, ljet
+      {601783, 601784, GEN_id::Pythia8}, // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
+      {603003, 603004, GEN_id::Pythia8}, // Powheg+P8 ttbb nominal and pthard1 allhad
+      {603190, 603193, GEN_id::Pythia8}, // Powheg+P8 ttbb nominal and pthard1 dilep, ljet
+      {604482, 604483, GEN_id::Pythia8}, // mc23 Powheg+P8 ttbar recoilToTop
 
       // all Sherpa showered samples
       {410186, 410189, GEN_id::Sherpa}, //Sherpa 2.2.0
@@ -108,20 +108,20 @@ namespace DerivationFramework{
       {410357, 410359, GEN_id::Sherpa}, //Sherpa 2.2.1 sys
       {410361, 410367, GEN_id::Sherpa}, //Sherpa 2.2.1 sys
       {410281, 410283, GEN_id::Sherpa}, //Sherpa BFilter
-      {410051, GEN_id::Sherpa, true}, //Sherpa ttbb (ICHEP sample)
-      {410323, 410325, GEN_id::Sherpa, true}, {410369, GEN_id::Sherpa, true}, //New Sherpa 2.2.1 ttbb
+      {410051, GEN_id::Sherpa}, //Sherpa ttbb (ICHEP sample)
+      {410323, 410325, GEN_id::Sherpa}, {410369, GEN_id::Sherpa}, //New Sherpa 2.2.1 ttbb
       {364345, 364348, GEN_id::Sherpa}, //Sherpa 2.2.4 (test)
       {410424, 410427, GEN_id::Sherpa}, //Sherpa 2.2.4
-      {410661, 410664, GEN_id::Sherpa, true}, //Sherpa 2.2.4 ttbb
+      {410661, 410664, GEN_id::Sherpa}, //Sherpa 2.2.4 ttbb
       {421152, 421158, GEN_id::Sherpa}, //Sherpa2.2.8 ttbar
       {413023, GEN_id::Sherpa}, // sherpa 2.2.1 ttZ
       {700000, GEN_id::Sherpa}, // Sherpa 2.2.8 ttW
       {700168, GEN_id::Sherpa}, // Sherpa 2.2.10 ttW
       {700205, GEN_id::Sherpa}, // Sherpa 2.2.10 ttW EWK
       {700309, GEN_id::Sherpa}, // Sherpa 2.2.11 ttZ
-      {700051, 700054, GEN_id::Sherpa, true}, //Sherpa2.2.8 ttbb
+      {700051, 700054, GEN_id::Sherpa}, //Sherpa2.2.8 ttbb
       {700121, 700124, GEN_id::Sherpa}, //Sherpa2.2.10 ttbar
-      {700164, 700167, GEN_id::Sherpa, true}, //Sherpa2.2.10 ttbb
+      {700164, 700167, GEN_id::Sherpa}, //Sherpa2.2.10 ttbb
       {700807, 700809, GEN_id::Sherpa}, //Sherpa2.2.14 ttbar
 
     };
@@ -130,7 +130,6 @@ namespace DerivationFramework{
     for (const auto& s : samples) {
       if (m_DSID>=s.low && m_DSID<=s.high) {
         m_GenUsed = s.gen;
-        m_ttbb = s.ttbb;
         return StatusCode::SUCCESS;
       }
     }
@@ -273,22 +272,22 @@ namespace DerivationFramework{
           else if(isDirectlyFromTop(part, islooping)){
             partonsOrigin[ part ] = b_from_top;
           }
-          else if(!IsTtBb()&&(IsHerwigPP()||IsSherpa())&&isDirectlyFSR(part,islooping)){
+          else if((IsHerwigPP()||IsSherpa())&&isDirectlyFSR(part,islooping)){
             partonsOrigin[ part ] = b_FSR;
           }
-          else if(!IsTtBb()&&IsPythia8()&&isDirectlyFSRPythia8(part,islooping)){
+          else if(IsPythia8()&&isDirectlyFSRPythia8(part,islooping)){
             partonsOrigin[ part ] = b_FSR;
           }
-          else if(!IsTtBb()&&IsPythia6()&&isDirectlyFSRPythia6(part,islooping)){
+          else if(IsPythia6()&&isDirectlyFSRPythia6(part,islooping)){
             partonsOrigin[ part ] = b_FSR;
           }
-          else if(!IsTtBb()&&IsPythia6()&&isDirectlyMPIPythia6(part, islooping)){
+          else if(IsPythia6()&&isDirectlyMPIPythia6(part, islooping)){
             partonsOrigin[ part ] = b_MPI;
           }
-          else if(!IsTtBb()&&IsPythia8()&&isDirectlyMPIPythia8(part, islooping)){
+          else if(IsPythia8()&&isDirectlyMPIPythia8(part, islooping)){
             partonsOrigin[ part ] = b_MPI;
           }
-          else if(!IsTtBb()&&IsSherpa()&&isDirectlyMPISherpa(part)){
+          else if(IsSherpa()&&isDirectlyMPISherpa(part)){
             partonsOrigin[ part ] = b_MPI;
           }
         }
@@ -303,22 +302,22 @@ namespace DerivationFramework{
           else if(isDirectlyFromTop(part, islooping)){
             partonsOrigin[ part ] = c_from_top;
           }
-          else if(!IsTtBb()&&(IsHerwigPP()&&IsSherpa())&&isDirectlyFSR(part,islooping)){
+          else if((IsHerwigPP()&&IsSherpa())&&isDirectlyFSR(part,islooping)){
             partonsOrigin[ part ] = c_FSR;
           }
-          else if(!IsTtBb()&&IsPythia8()&&isDirectlyFSRPythia8(part,islooping)){
+          else if(IsPythia8()&&isDirectlyFSRPythia8(part,islooping)){
             partonsOrigin[ part ] = c_FSR;
           }
-          else if(!IsTtBb()&&IsPythia6()&&isDirectlyFSRPythia6(part,islooping)){
+          else if(IsPythia6()&&isDirectlyFSRPythia6(part,islooping)){
             partonsOrigin[ part ] = c_FSR;
           }
-          else if(!IsTtBb()&&IsPythia6()&&isDirectlyMPIPythia6(part, islooping)){
+          else if(IsPythia6()&&isDirectlyMPIPythia6(part, islooping)){
             partonsOrigin[ part ] = c_MPI;
           }
-          else if(!IsTtBb()&&IsPythia8()&&isDirectlyMPIPythia8(part, islooping)){
+          else if(IsPythia8()&&isDirectlyMPIPythia8(part, islooping)){
             partonsOrigin[ part ] = c_MPI;
           }
-          else if(!IsTtBb()&&IsSherpa()&&isDirectlyMPISherpa(part)){
+          else if(IsSherpa()&&isDirectlyMPISherpa(part)){
             partonsOrigin[ part ] = c_MPI;
           }
         }
