@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.BTagConfig import GetTaggerTrainingMap
-from BTagging.BTagConfig import BTagAlgsCfg
+from BTagging.BTagLegacyConfig import BTagAlgsCfg
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 
 def FTagPEBJetTagConfig(
