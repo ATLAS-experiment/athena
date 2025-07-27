@@ -57,6 +57,7 @@ namespace DerivationFramework {
     ATH_MSG_INFO("Truth Particles Container Name " << m_truthParticlesKey.key());
     ATH_MSG_INFO("HF Classifier Name "             << m_hfDecorationName);
     ATH_MSG_INFO("Simple HF Classifier Name "      << m_SimplehfDecorationName);
+    ATH_MSG_INFO("Jet Origin ID Decoration Name "  << m_jetIDDecorationName);
 
     ATH_CHECK( m_truthParticlesKey.initialize() );
     ATH_CHECK( m_jetCollectionKey.initialize() );
@@ -65,6 +66,8 @@ namespace DerivationFramework {
     ATH_CHECK( m_hfDecorKey.initialize() );
     ATH_CHECK( m_SimplehfDecorKey.assign(m_eventInfoKey.key()+"."+m_SimplehfDecorationName) );
     ATH_CHECK( m_SimplehfDecorKey.initialize() );
+    ATH_CHECK( m_jetIDDecorationKey.assign(m_jetCollectionKey.key()+"."+m_jetIDDecorationName) );
+    ATH_CHECK( m_jetIDDecorationKey.initialize() );
 
     // Retrieve the necessary tools
     if(m_HFClassification_tool.retrieve().isFailure()){
@@ -143,6 +146,17 @@ namespace DerivationFramework {
 
     SG::WriteDecorHandle<xAOD::EventInfo, int> decorator_SimpleHFClassification(m_SimplehfDecorKey, ctx);
     decorator_SimpleHFClassification(*EventInfo) = simpleclassif;
+
+    // Decorate truth jets with origin ID
+    SG::WriteDecorHandle<xAOD::JetContainer, int> jetIdDecorator(m_jetIDDecorationKey, ctx);
+    for (const auto& jet : *JetCollection) {
+      int id = -999;
+      SG::ConstAccessor<int> hfidAcc(m_hfDecorationName + "_id");
+      if(hfidAcc.isAvailable(*jet)){
+        id = hfidAcc(*jet);
+      }
+      jetIdDecorator(*jet) = id;
+    }
 
     return StatusCode::SUCCESS;
   }

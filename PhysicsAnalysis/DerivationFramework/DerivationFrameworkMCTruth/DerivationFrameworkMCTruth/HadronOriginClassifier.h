@@ -87,14 +87,12 @@ namespace DerivationFramework{
     inline bool IsPythia8() const {return m_GenUsed==GEN_id::Pythia8;};
     inline bool IsPythia6() const {return m_GenUsed==GEN_id::Pythia6;};
     inline bool IsSherpa() const {return m_GenUsed==GEN_id::Sherpa;};
-    inline bool IsTtBb() const {return m_ttbb;}
 
     Gaudi::Property<std::string> m_mcName{this, "MCCollectionName", "TruthEvents"};
     Gaudi::Property<double> m_HadronPtMinCut{this, "HadronpTMinCut", 5000.}; /// MeV
     Gaudi::Property<double> m_HadronEtaMaxCut{this, "HadronetaMaxCut", 2.5};
     Gaudi::Property<int> m_DSID{this, "DSID", 410000};
     GEN_id m_GenUsed{};
-    bool m_ttbb{false};
     
   };
 

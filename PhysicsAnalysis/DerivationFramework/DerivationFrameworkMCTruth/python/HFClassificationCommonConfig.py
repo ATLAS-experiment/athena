@@ -92,10 +92,11 @@ def ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number):
   
   ClassifyAndCalculateHFAugmentation = CompFactory.DerivationFramework.ClassifyAndCalculateHFAugmentation(name = "DFCommonClassifyAndCalculateHFAugmentation")
 
-  ClassifyAndCalculateHFAugmentation.jetCollectionName          = "AntiKt4TruthWZJets"
-  ClassifyAndCalculateHFAugmentation.TruthParticleContainerName = "TruthParticles"
-  ClassifyAndCalculateHFAugmentation.hfDecorationName           = "HF_Classification"
-  ClassifyAndCalculateHFAugmentation.SimplehfDecorationName     = "HF_SimpleClassification"
+  ClassifyAndCalculateHFAugmentation.jetCollectionName            = "AntiKt4TruthDressedWZJets"
+  ClassifyAndCalculateHFAugmentation.TruthParticleContainerName   = "TruthParticles"
+  ClassifyAndCalculateHFAugmentation.hfDecorationName             = "HF_Classification"
+  ClassifyAndCalculateHFAugmentation.SimplehfDecorationName       = "HF_SimpleClassification"
+  ClassifyAndCalculateHFAugmentation.HadronOriginIDDecorationName = "HFHadronOriginID"
 
   ClassifyAndCalculateHFAugmentation.ClassifyAndComputeHFtool   = ClassifyAndCalculateHFTool
   ClassifyAndCalculateHFAugmentation.HadronOriginClassifierTool = HadronOriginClassifierTool
