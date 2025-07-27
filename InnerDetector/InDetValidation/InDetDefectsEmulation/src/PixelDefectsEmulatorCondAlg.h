@@ -12,6 +12,7 @@
 #include "PixelModuleHelper.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "DefectsEmulatorCondAlgImpl.h"
+#include "InDetIdentifier/PixelID.h"
 
 namespace InDet {
 
