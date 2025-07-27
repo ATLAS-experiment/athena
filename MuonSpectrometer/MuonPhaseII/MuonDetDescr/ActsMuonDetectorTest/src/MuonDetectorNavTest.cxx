@@ -108,20 +108,19 @@ StatusCode MuonDetectorNavTest::finalize() {
 StatusCode MuonDetectorNavTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
     ATH_MSG_DEBUG("Execute in event "<<ctx.eventID().event_number());
-    m_event = ctx.eventID().event_number();
-    SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles{m_truthParticleKey, ctx};
-    SG::ReadCondHandle<AtlasFieldCacheCondObj> magFieldHandle{m_fieldCacheCondObjInputKey, ctx};
-    if (!gctx.isValid() or !truthParticles.isValid() or !magFieldHandle.isValid()) {
-        ATH_MSG_FATAL("Failed to retrieve either the geometry context, truth particles or magnetic field");
-        return StatusCode::FAILURE;
-    }
-    SG::ReadCondHandle detMgr{m_detMgrKey, ctx};
+    const ActsGeometryContext* gctx{nullptr};
+    const xAOD::TruthParticleContainer* truthParticles{nullptr};
+    const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
+    ATH_CHECK(SG::get(truthParticles, m_truthParticleKey, ctx));
+    ATH_CHECK(SG::get(fieldCondObj, m_fieldCacheCondObjInputKey, ctx));
+    ATH_CHECK(SG::get(detMgr, m_detMgrKey, ctx));
 
 
     const Acts::GeometryContext geoContext = gctx->context();
-    const AtlasFieldCacheCondObj* fieldCondObj{*magFieldHandle};
-    Acts::MagneticFieldContext mfContext = Acts::MagneticFieldContext(fieldCondObj);
+    const Acts::MagneticFieldContext mfContext = Acts::MagneticFieldContext(fieldCondObj);
 
 
     using Stepper = Acts::EigenStepper<>;
@@ -404,9 +403,8 @@ StatusCode MuonDetectorNavTest::execute() {
         }
         m_matchedTruthFraction = 1.f*nMatchedTruth / nTruth;
         m_matchedPropFraction = 1.f*nMatchedProp / propHitsSize;
-
+        m_event = ctx.eventID().event_number();
         m_tree.fill(ctx); 
-        
     }
 
     return StatusCode::SUCCESS;

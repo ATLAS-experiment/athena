@@ -18,6 +18,12 @@ def TruthSegmentMakerCfg(flags, name = "TruthSegmentMakerAlg", **kwargs):
     if flags.Detector.EnableTGC: containerNames+=["TGC_SDO"]
     if flags.Detector.EnableMM: containerNames+=["MM_SDO"]
     if flags.Detector.EnablesTGC: containerNames+=["sTGC_SDO"] 
+    #### Mdt calib db alg
+    from MuonConfig.MuonCalibrationConfig import MdtCalibDbAlgCfg, NswErrorCalibDbAlgCfg
+    if flags.Detector.EnableMDT:
+        result.merge(MdtCalibDbAlgCfg(flags))
+    if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
+        result.merge(NswErrorCalibDbAlgCfg(flags))
     kwargs.setdefault("SimHitKeys", containerNames)
 
     the_alg = CompFactory.MuonR4.TruthSegmentMaker(name, **kwargs)
