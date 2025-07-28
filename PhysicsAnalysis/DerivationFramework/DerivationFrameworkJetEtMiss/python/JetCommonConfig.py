@@ -40,9 +40,13 @@ def StandardJetsInDerivCfg(ConfigFlags):
         modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
     )
 
+    AntiKt10UFOCSSKSoftDrop_deriv = AntiKt10UFOCSSKSoftDrop.clone(
+        modifiers = AntiKt10UFOCSSKSoftDrop.modifiers+("toptransformer",)
+    )
+
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv,
                AntiKtVR30Rmax4Rmin02PV0Track,
-               AntiKt10UFOCSSKSoftDrop]
+               AntiKt10UFOCSSKSoftDrop_deriv]
 
     for jd in jetList:
         acc.merge(JetRecCfg(ConfigFlags,jd))

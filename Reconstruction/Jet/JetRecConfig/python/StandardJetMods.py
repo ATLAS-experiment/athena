@@ -304,12 +304,24 @@ stdJetModifiers.update(
     softdropobs = JetModifier("SoftDropObservablesTool", "softdropobs"),
 )
 
-# Substructure tagger tools 
+# Substructure tagger tools: q/g
 try :
     from JetMomentTools import JetMomentToolsConfig
     stdJetModifiers.update( 
         qgtransformer = JetModifier("BoostedJetTaggerTool", "qgtransformer",
-                            createfn=JetMomentToolsConfig.getBoostedJetTaggerTool,
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolQG,
+                            JetContainer = _jetname),
+    )
+except ModuleNotFoundError:
+    # In some releases (AthGeneration) JetMomentTools is not existing
+    pass
+
+# Substructure tagger tools: top
+try :
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update( 
+        toptransformer = JetModifier("BoostedJetTaggerTool", "toptransformer",
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolTop,
                             JetContainer = _jetname),
     )
 except ModuleNotFoundError:

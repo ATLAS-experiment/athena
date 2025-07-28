@@ -339,6 +339,101 @@ namespace AthONNX {
 
   } // end retrieve constituents score ----
 
+  // constituents transformer based with const/mask/inter variables
+  double JSSMLTool::retrieveConstituentsScore(std::vector<std::vector<float>> constituents, std::vector<std::vector<std::vector<float>>> interactions, std::vector<std::vector<float>> mask) const {
+      
+    // the format of the constituents/interaction variables is:
+    // constituents       ---> (nConstituents, 7)
+    // interactions       ---> (i, j, 4), with i, j in {nConstituents}
+    // masks              ---> (nConstituents, 1)
+    // the packing can be done for any kind of low level inputs
+    // i.e. PFO/UFO constituents, topo-towers, tracks, etc
+    // they can be concatened one after the other in case of multiple inputs
+
+    //*************************************************************************
+    // Score the model using sample data, and inspect values
+    // loading input data
+
+    std::vector<int> output_tensor_values_ = ReadOutputLabels();
+    
+    int testSample = 0;    
+    
+    //preparing container to hold output data
+    int output_tensor_values = output_tensor_values_[testSample]; 
+
+    // prepare the inputs
+    auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    std::vector<Ort::Value> input_tensors;
+
+    // unroll the inputs
+    std::vector<float> constituents_values; 
+    for (long unsigned int j=0; j<7; j++) {
+      for (long unsigned int i=0; i<constituents.size(); i++) {
+        constituents_values.push_back(constituents.at(i).at(j));
+      }
+    }
+
+    std::vector<float> interactions_values; 
+    for (long unsigned int k=0; k<4; k++) {
+      for (long unsigned int i=0; i<interactions.size(); i++) {
+        for (long unsigned int j=0; j<interactions.size(); j++) {
+          interactions_values.push_back(interactions.at(i).at(j).at(k));
+        }
+      }
+    }
+
+    std::vector<float> mask_values; 
+    for (long unsigned int j=0; j<1; j++) {
+      for (long unsigned int i=0; i<mask.size(); i++) {
+        mask_values.push_back(mask.at(i).at(j));
+      }
+    }
+
+    std::vector<int64_t> const_dim = {1, 7, static_cast<int64_t>(constituents.size())};
+    input_tensors.push_back(Ort::Value::CreateTensor<float>(
+      memory_info, 
+      constituents_values.data(), constituents_values.size(), const_dim.data(), const_dim.size()
+      )
+    );
+
+    std::vector<int64_t> inter_dim = {1, 4, static_cast<int64_t>(interactions.size()), static_cast<int64_t>(interactions.size())};
+    input_tensors.push_back(Ort::Value::CreateTensor<float>(
+      memory_info, 
+      interactions_values.data(), interactions_values.size(), inter_dim.data(), inter_dim.size()
+      )
+    );
+
+    std::vector<int64_t> mask_dim = {1, 1, static_cast<int64_t>(mask.size())};
+    input_tensors.push_back(Ort::Value::CreateTensor<float>(
+      memory_info, 
+      mask_values.data(), mask_values.size(), mask_dim.data(), mask_dim.size()
+      )
+    );
+
+    auto output_tensors = m_session->Run(Ort::RunOptions{nullptr}, m_input_node_names.data(), input_tensors.data(), m_input_node_names.size(), m_output_node_names.data(), m_output_node_names.size());
+    assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
+    
+    // Get pointer to output tensor float values
+    float* floatarr = output_tensors.front().GetTensorMutableData<float>();
+    int arrSize = sizeof(*floatarr)/sizeof(floatarr[0]);
+
+    // show  true label for the test input
+    ATH_MSG_DEBUG("Label for the input test data  = "<<output_tensor_values);
+    float ConstScore = -999;
+    int max_index = 0;
+    for (int i = 0; i < arrSize; i++){
+      ATH_MSG_VERBOSE("Score for class "<<i<<" = "<<floatarr[i]<<std::endl);
+      ATH_MSG_VERBOSE(" +++ Score for class "<<i<<" = "<<floatarr[i]<<std::endl);
+      if (ConstScore<floatarr[i]){
+        ConstScore = floatarr[i];
+        max_index = i;
+      }
+    }
+    ATH_MSG_DEBUG("Class: "<<max_index<<" has the highest score: "<<floatarr[max_index]);
+
+    return ConstScore;
+
+  } // end retrieve constituents score ----  
 
   // dedicated DisCo/DNN method ---
   double JSSMLTool::retrieveHighLevelScore(std::map<std::string, double> JSSVars) const {

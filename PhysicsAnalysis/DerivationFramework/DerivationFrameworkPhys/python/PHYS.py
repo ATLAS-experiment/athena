@@ -149,6 +149,9 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
     PHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
 
+    # boosted jet taggers
+    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore"]
+
     # Truth extra content
     if flags.Input.isMC:
 
