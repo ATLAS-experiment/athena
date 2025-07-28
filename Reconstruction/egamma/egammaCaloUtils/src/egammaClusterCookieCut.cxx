@@ -18,8 +18,9 @@ namespace {
                    T... momentIds) {
     for (const auto& momentId : {momentIds...}) {
       double moment {};
-      src.retrieveMoment(momentId, moment);
-      dest->insertMoment(momentId, moment);
+      if (src.retrieveMoment(momentId, moment)) {
+        dest->insertMoment(momentId, moment);
+      }
     }
   }
 }
