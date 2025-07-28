@@ -258,13 +258,11 @@ namespace ActsTrk {
      *
      * @return Number of found tracks
      */
-    std::size_t doTwoWayTrackFinding(
-        std::function<void(detail::RecoTrackContainerProxy &)> addTrack,
-        TrkProxy &trackProxy,
-        detail::RecoTrackContainer &tracksContainerTemp,
-        const TrackFinderOptions &options,
-        Acts::GeometryContext &tgContext,
-        const bool reverseSearch) const;
+    std::vector<typename detail::RecoTrackContainer::TrackProxy>
+    doTwoWayTrackFinding(const detail::RecoTrackStateContainerProxy& firstMeasurement,
+			 const TrkProxy &trackProxy,
+			 detail::RecoTrackContainer &tracksContainerTemp,
+			 const TrackFinderOptions &options) const;
 
     static xAOD::UncalibMeasType measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState);
 
