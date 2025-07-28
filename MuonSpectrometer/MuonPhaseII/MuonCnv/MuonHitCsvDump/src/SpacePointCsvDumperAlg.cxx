@@ -48,15 +48,18 @@ StatusCode SpacePointCsvDumperAlg::execute(){
     file<<"locSensorDirX"<<delim;
     file<<"locSensorDirY"<<delim;
     file<<"locSensorDirZ"<<delim;
+    /// Vector normal to the direction of the strip direction (inside plane)
+    file<<"locSensorNormX"<<delim;
+    file<<"locSensorNormY"<<delim;
+    file<<"locSensorNormZ"<<delim;
     /// Normal vector on the sensor plane
     file<<"locPlaneNormX"<<delim;
     file<<"locPlaneNormY"<<delim;
     file<<"locPlaneNormZ"<<delim;
     /// Covariance entries of the uncalibrated space point
-    file<<"covXX"<<delim;
-    file<<"covXY"<<delim;
-    file<<"covYX"<<delim;
-    file<<"covYY"<<delim;
+    file<<"covX"<<delim;
+    file<<"covY"<<delim;
+    file<<"covT"<<delim;   
     /// Drift radius
     file<<"driftR"<<delim;
     /// Properties of the space point Identifier
@@ -64,6 +67,7 @@ StatusCode SpacePointCsvDumperAlg::execute(){
     file<<"primaryCh"<<delim;
     file<<"measuresEta"<<delim;
     file<<"measuresPhi"<<delim;
+    file<<"measuresTime"<<delim;
     file<<std::endl;
 
    auto dumpToFile = [&](const unsigned bucketId,
@@ -116,6 +120,10 @@ StatusCode SpacePointCsvDumperAlg::execute(){
         file<<precCutOff(spacePoint.positionInChamber().y())<<delim;
         file<<precCutOff(spacePoint.positionInChamber().z())<<delim;
         //
+        file<<precCutOff(spacePoint.normalInChamber().x())<<delim;
+        file<<precCutOff(spacePoint.normalInChamber().y())<<delim;
+        file<<precCutOff(spacePoint.normalInChamber().z())<<delim;
+        //
         file<<precCutOff(spacePoint.directionInChamber().x())<<delim;
         file<<precCutOff(spacePoint.directionInChamber().y())<<delim;
         file<<precCutOff(spacePoint.directionInChamber().z())<<delim;
@@ -125,14 +133,16 @@ StatusCode SpacePointCsvDumperAlg::execute(){
         file<<precCutOff(spacePoint.planeNormal().z())<<delim;
         //
         file<<precCutOff(spacePoint.covariance()(Amg::x, Amg::x))<<delim;
-        file<<precCutOff(spacePoint.covariance()(Amg::x, Amg::y))<<delim;
-        file<<precCutOff(spacePoint.covariance()(Amg::y, Amg::x))<<delim;
         file<<precCutOff(spacePoint.covariance()(Amg::y, Amg::y))<<delim;
+        /// Dummy value for the moment
+        file<<1.<<delim;
         file<<precCutOff(spacePoint.driftRadius())<<delim;
         file<<gasGap<<delim;
         file<<primaryCh<<delim;
         file<<spacePoint.measuresEta()<<delim;
         file<<spacePoint.measuresPhi()<<delim;
+        /// Dummy value for the moment
+        file<<false<<delim;
         file<<std::endl;
    };
 
