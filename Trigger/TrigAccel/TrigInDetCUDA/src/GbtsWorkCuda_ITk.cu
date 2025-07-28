@@ -394,9 +394,8 @@ bool GbtsWorkCudaITk::run() {
 
 	m_context->m_nEdges = nStats[0];
 		
-	if(ctx.m_nEdges > ctx.m_nMaxEdges) m_context->m_nEdges = ctx.m_nMaxEdges;
+	if(ctx.m_nEdges >= ctx.m_nMaxEdges) m_context->m_nEdges = ctx.m_nMaxEdges-1;
 	else if(ctx.m_nEdges == 0) return true;
-
 	//4. import incoming edges counters and calculate prefix sum
 
 	unsigned int* cusum = new unsigned int[ctx.m_nNodes+1];
@@ -407,9 +406,8 @@ bool GbtsWorkCudaITk::run() {
 
 	cudaStreamSynchronize(ctx.m_stream);
 	
-	cusum[ctx.m_nNodes-1] = 0;
 	for(int k=0;k<ctx.m_nNodes;k++) cusum[k+1] += cusum[k];
-
+	
 	cudaMemcpyAsync(ctx.d_num_incoming_edges, &cusum[0], data_size, cudaMemcpyHostToDevice, ctx.m_stream);
 	
 	delete[] cusum;
@@ -493,7 +491,6 @@ bool GbtsWorkCudaITk::run() {
 	m_context->m_nUniqueEdges = nStats[2];
 
 	//printf("created %d edge links, found %d unique edges for export\n",m_context->m_nLinks, m_context->m_nUniqueEdges);
-	
 	if(m_context->m_nUniqueEdges == 0) return true;
 
 	int nIntsPerEdge = 2 + 1 + TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;
@@ -520,7 +517,17 @@ bool GbtsWorkCudaITk::run() {
 		printf("graph compression: CUDA error: %s\n", cudaGetErrorString(error));
 		return false;
 	}
-	if(ctx.m_useGPUseedExtraction && ctx.m_nUniqueEdges > 1) {  
+	if(!ctx.m_useGPUseedExtraction) {
+		//export graph for CPU seed extraction
+		pOutput->m_CompressedGraph.m_nEdges = ctx.m_nUniqueEdges;
+		pOutput->m_CompressedGraph.m_nMaxNeighbours = TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;
+		pOutput->m_CompressedGraph.m_nLinks = ctx.m_nLinks;
+		if(ctx.m_nUniqueEdges > 0) {
+			pOutput->m_CompressedGraph.m_graphArray = std::make_unique<int[]>(ctx.m_nUniqueEdges*nIntsPerEdge);
+			cudaMemcpyAsync(&pOutput->m_CompressedGraph.m_graphArray[0], ctx.d_output_graph, sizeof(int)*ctx.m_nUniqueEdges*nIntsPerEdge, cudaMemcpyDeviceToHost, ctx.m_stream);
+		}
+	}
+	else {
 	// 8. Message-passing CCA
 		
 		data_size = ctx.m_nUniqueEdges*sizeof(int);
@@ -574,42 +581,41 @@ bool GbtsWorkCudaITk::run() {
 		}
 	
 		int nEdgesByLevel_cuml[TrigAccel::ITk::GBTS_MAX_CCA_ITERATIONS + 1];
-		
+		nEdgesByLevel_cuml[TrigAccel::ITk::GBTS_MAX_CCA_ITERATIONS] = 0;		
 		cudaMemcpyAsync(&nEdgesByLevel_cuml[0], ctx.d_level_boundaries, sizeof(nEdgesByLevel_cuml), cudaMemcpyDeviceToHost, ctx.m_stream);
 		int level_max = TrigAccel::ITk::GBTS_MAX_CCA_ITERATIONS; for(;nEdgesByLevel_cuml[level_max-1] == 0; level_max--); 
+		
 		if(level_max < ctx.m_minLevel) return true;	
-	
 		checkError();
 		
 		//9. seed extraction
 		int device; cudaGetDevice(&device);
 		int SM_count; cudaDeviceGetAttribute(&SM_count, cudaDevAttrMultiProcessorCount, device);
 		int smem; cudaDeviceGetAttribute(&smem, cudaDevAttrMaxSharedMemoryPerMultiprocessor, device);
-		int minMalloc = 100;	
 
-		nThreads = 448; //two blocks limited by registers
+		nThreads = 896; //448 for two blocks per SM limited by registers
 		
 		nBlocks = 0;
 		int soft_max_blocks = 0.8*SM_count*(smem/(sizeof(edgeState)*TrigAccel::ITk::GBTS_MAX_SHARED_STATES)); 
 
 		//TO-DO better fit malloc sizes
-		int nMaxMini = minMalloc+ctx.m_nUniqueEdges*3; 
+		int nMaxMini = 10000 + ctx.m_nUniqueEdges*3;
 		cudaMalloc((void**) &m_context->d_mini_states, sizeof(int2)*nMaxMini);
 		m_context->d_size+=sizeof(int2)*nMaxMini;	
 
-		int nMaxStateStore = minMalloc+ctx.m_nUniqueEdges*3.5;
+		int nMaxStateStore = 2000 + ctx.m_nUniqueEdges*4;
 		cudaMalloc((void**) &m_context->d_state_store, sizeof(edgeState)*nMaxStateStore);
 		m_context->d_size+=sizeof(edgeState)*nMaxStateStore;	
-
-		int nMaxProps = minMalloc+ctx.m_nUniqueEdges/1.5;
+		
+		int nMaxProps = 4000 + ctx.m_nUniqueEdges;
 		cudaMalloc((void**) &m_context->d_seed_proposals, sizeof(int2)*nMaxProps); 
 		cudaMalloc((void**) &m_context->d_seed_ambiguity, sizeof(char)*nMaxProps); 
 		m_context->d_size+=(sizeof(int2)+sizeof(char))*nMaxProps;	
-
+		
 		cudaMalloc((void**) &m_context->d_edge_bids, sizeof(unsigned long long int)*ctx.m_nUniqueEdges);
 		m_context->d_size+=sizeof(unsigned long long int)*ctx.m_nUniqueEdges;	
 
-		int nMaxSeeds = minMalloc+ctx.m_nUniqueEdges/5;
+		int nMaxSeeds = 20 + ctx.m_nUniqueEdges/4;
 		cudaMalloc((void**) &m_context->d_seeds, sizeof(TrigAccel::ITk::Tracklet)*nMaxSeeds);
 		m_context->d_size+=sizeof(TrigAccel::ITk::Tracklet)*nMaxSeeds;	
 		
@@ -619,48 +625,39 @@ bool GbtsWorkCudaITk::run() {
 				
 			if(nRootEdges == 0) continue;
 			nBlocks += std::ceil(nRootEdges*std::pow(1.3f, 1.0f*(level+1))/TrigAccel::ITk::GBTS_MAX_SHARED_STATES);
-			if(nBlocks > soft_max_blocks || level_max-level>3 || level+1==ctx.m_minLevel) {
+			if(nBlocks > soft_max_blocks || level_max-level>1 || level+1==ctx.m_minLevel) {
 
 				int view_min = view_shift-nEdgesByLevel_cuml[level]; 
 				int view_max = view_shift-nEdgesByLevel_cuml[level_max];	
-				cudaMemset(m_context->d_edge_bids, 0, sizeof(unsigned long long int)*ctx.m_nUniqueEdges);
 				
 				if(view_min == view_max || nBlocks < 1) continue;	
+				
+				cudaMemset(m_context->d_edge_bids, 0, sizeof(unsigned long long int)*ctx.m_nUniqueEdges);
 				
 				seed_extracting_kernel_ITk<<<nBlocks, nThreads, 0, ctx.m_stream>>>(view_min, view_max, ctx.d_level_views, ctx.d_levels, 
 				            reinterpret_cast<float4*>(ctx.d_sp_params), ctx.d_output_graph,
 				            reinterpret_cast<int2*>(ctx.d_mini_states), reinterpret_cast<edgeState*>(ctx.d_state_store),
 				            ctx.d_edge_bids, ctx.d_seed_ambiguity, reinterpret_cast<int2*>(ctx.d_seed_proposals), ctx.d_seeds, 
-				            ctx.d_counters, ctx.m_nEdges, ctx.m_minLevel, nMaxMini, nMaxProps, nMaxStateStore/nBlocks, nMaxSeeds);	
+				            ctx.d_counters, ctx.m_minLevel, nMaxMini, nMaxProps, nMaxStateStore/nBlocks, nMaxSeeds);	
 				level_max = level;
 				nBlocks = 0;
 			}
 		}
 		cudaStreamSynchronize(ctx.m_stream);
+	
 		error = cudaGetLastError();
 
 		if(error != cudaSuccess) {
 			printf("seed-extracting kalman filter: CUDA error: %s\n", cudaGetErrorString(error));
 			return false;
 		}
-	}	
-	if(ctx.m_useGPUseedExtraction) {
 		
 		cudaMemcpyAsync(&m_context->m_nSeeds, &ctx.d_counters[9], sizeof(unsigned int) ,cudaMemcpyDeviceToHost, ctx.m_stream);
+		if(m_context->m_nSeeds > nMaxSeeds) m_context->m_nSeeds = nMaxSeeds;
 		pOutput->m_OutputSeeds.m_nSeeds = m_context->m_nSeeds;
 		if(m_context->m_nSeeds > 0) {
 			pOutput->m_OutputSeeds.m_seedsArray = std::make_unique<TrigAccel::ITk::Tracklet[]>(m_context->m_nSeeds);
 			cudaMemcpyAsync(&pOutput->m_OutputSeeds.m_seedsArray[0], ctx.d_seeds, sizeof(TrigAccel::ITk::Tracklet)*m_context->m_nSeeds, cudaMemcpyDeviceToHost, ctx.m_stream);
-		}
-	}
-	else {
-		//export graph for CPU seed extraction
-		pOutput->m_CompressedGraph.m_nEdges = ctx.m_nUniqueEdges;
-		pOutput->m_CompressedGraph.m_nMaxNeighbours = TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;
-		pOutput->m_CompressedGraph.m_nLinks = ctx.m_nLinks;
-		if(ctx.m_nUniqueEdges > 0) {
-			pOutput->m_CompressedGraph.m_graphArray = std::make_unique<int[]>(ctx.m_nUniqueEdges*nIntsPerEdge);
-			cudaMemcpyAsync(&pOutput->m_CompressedGraph.m_graphArray[0], ctx.d_output_graph, sizeof(int)*ctx.m_nUniqueEdges*nIntsPerEdge, cudaMemcpyDeviceToHost, ctx.m_stream);
 		}
 	}
 	checkError();
