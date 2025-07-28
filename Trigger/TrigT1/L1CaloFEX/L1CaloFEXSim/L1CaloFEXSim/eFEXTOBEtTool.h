@@ -14,8 +14,6 @@
 #define eFEXTOBEtTool_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "L1CaloFEXSim/eFEXtauAlgoBase.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
@@ -92,7 +90,6 @@ namespace LVL1 {
   
 } // end of namespace
 
-//CLASS_DEF( LVL1::eFEXTOBEtTool , 32201201 , 1 )
 
 
 #endif
