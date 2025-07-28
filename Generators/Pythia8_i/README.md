@@ -200,6 +200,9 @@ Consistently merging processes helps eliminate duplicate counts and overlaps bet
 For more information about the CKKWL merging scheme, please check the following link:
 https://pythia.org/latest-manual/CKKWLMerging.html
 
+> Detailed information on MLM matching and FxFx/CKKWL merging with MadGraph can be found here: https://gitlab.cern.ch/atlas/athena/-/tree/main/Generators/MadGraphControl?ref_type=heads
+
+
 # The steps to use the UserHook and activate the merging procedure:
 
 1) Create multiple JOs depending on the jet multiplicity of your hard process.
