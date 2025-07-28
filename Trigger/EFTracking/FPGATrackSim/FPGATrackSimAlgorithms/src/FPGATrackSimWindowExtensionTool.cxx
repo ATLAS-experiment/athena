@@ -275,6 +275,9 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
 
     ATH_MSG_DEBUG("Matched track to new bin containing " << entry.lyrCnt() << " layers with " << entry.hitCnt << " hits total");
 
+    std::vector<std::vector<std::tuple<float, float, std::shared_ptr<const FPGATrackSimHit>>>> road_hits_sortable;
+    road_hits_sortable.resize(m_nLayers_1stStage + m_nLayers_2ndStage);
+
     for (FPGATrackSimBinUtil::StoredHit& storedHit : entry.hits) {
         // These may need more adjustment if we try to bin deduplicated SPs in the future.
         unsigned layer = storedHit.layer + m_nLayers_1stStage;
@@ -300,12 +303,12 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
         ATH_MSG_DEBUG("Hit in region, comparing phi: " << diffphi << " to " << m_windows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
         if (m_addAllHits) {
           numHits[layer]++;
-          road_hits[layer].push_back(hit);
+          road_hits_sortable[layer].push_back({diffphi, diffz, hit});
           hitLayers |= 1 << layer;
         }
         else if (diffphi < m_windows[layer] && diffz < m_zwindows[layer]) {
             numHits[layer]++;
-            road_hits[layer].push_back(hit);
+            road_hits_sortable[layer].push_back({diffphi, diffz, hit});
             hitLayers |= 1 << layer;
         }
     }
@@ -314,48 +317,42 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
     double zScale = m_zScale.value();
     double phiScale = m_phiScale.value();
     for (unsigned layer = 0; layer < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); layer++) {
-        // This raises an interesting question, should we use hit r or the average idealized predicted R?
-        // The code above uses the actual hit radius. But here, that's a bit tricky, so for now just use the avg one.
-        double predr = m_FPGATrackSimMapping->RegionMap_2nd()->getAvgRadius(0, layer);
-        double predphi = trackphi - std::asin(predr * fpgatracksim::A * 1000 * trackqoverpt - trackd0/predr);
-        double predz = trackz0 + predr*cottracktheta;
-        if (road_hits.at(layer).size() < 2) continue;
-        ATH_MSG_DEBUG("Sorting hits in layer " << layer << " using predz = " << predz << ", predr = " << predr);
-        std::ranges::sort(road_hits.at(layer), [predphi, predz, phiScale, zScale](auto& a, auto& b){
+        if (road_hits_sortable.at(layer).size() >= 2) {
+            ATH_MSG_DEBUG("Sorting hits in layer " << layer);
+            std::ranges::sort(road_hits_sortable.at(layer), [zScale, phiScale](auto& a, auto& b){
 
-            // Prioritize SP vs non-SP
-            if (a->getHitType() == HitType::spacepoint && b->getHitType() != HitType::spacepoint) return true;
-            else if (b->getHitType() == HitType::spacepoint && a->getHitType() != HitType::spacepoint) return false;
+                // Prioritize SP vs non-SP
+                if (std::get<2>(a)->getHitType() == HitType::spacepoint && std::get<2>(b)->getHitType() != HitType::spacepoint) return true;
+                else if (std::get<2>(b)->getHitType() == HitType::spacepoint && std::get<2>(a)->getHitType() != HitType::spacepoint) return false;
 
-            // HitA
-            double hitphi = a->getGPhi();
-            double hitz = a->getZ();
-            double dz = std::abs(hitz - predz);
-            double dphi = std::abs(P4Helpers::deltaPhi(hitphi, predphi));
+                // HitA
+                double dphi = std::get<0>(a);
+                double dz = std::get<1>(a);
 
-            // scaled distance because z and phi are not in same units
-            // these scales are the same as what the pathfinder uses for the time being,
-            // I don't't really know if that makes sense.
-            float distance_a = dphi*dphi*phiScale*phiScale + dz*dz*zScale*zScale;
+                // scaled distance because z and phi are not in same units
+                // these scales are the same as what the pathfinder uses for the time being,
+                // I don't't really know if that makes sense.
+                float distance_a = dphi*dphi*phiScale*phiScale + dz*dz*zScale*zScale;
 
-            // HitB
-            hitphi = b->getGPhi();
-            hitz = b->getZ();
-            dz = std::abs(hitz - predz);
-            dphi = std::abs(P4Helpers::deltaPhi(hitphi, predphi));
+                // HitB
+                dphi = std::get<0>(b);
+                dz = std::get<1>(b);
 
-            // scaled distance because z and phi are not in same units
-            float distance_b = dphi*dphi*phiScale*phiScale + dz*dz*zScale*zScale;
+                // scaled distance because z and phi are not in same units
+                float distance_b = dphi*dphi*phiScale*phiScale + dz*dz*zScale*zScale;
 
-            return distance_a < distance_b;
-        });
+                return distance_a < distance_b;
+            });
+        }
 
         // Remove any hits over the cutoff, whatever that is.
+        int cutoff = road_hits_sortable.at(layer).size();
         if (m_maxHits.value().size() > layer && m_maxHits.value().at(layer) > 0) {
-            while (numHits.at(layer) > m_maxHits.value().at(layer)) {
-                road_hits.at(layer).pop_back();
-                numHits.at(layer)--;
-            }
+            cutoff = std::min(cutoff, m_maxHits.value().at(layer));
+        }
+        for (int ihit = 0; ihit < cutoff; ihit++) {
+            auto& road_hit = std::get<2>(road_hits_sortable.at(layer).at(ihit));
+            road_hits.at(layer).push_back(road_hit);
         }
 
     }
