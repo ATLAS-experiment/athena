@@ -63,12 +63,14 @@ namespace ChainNameParser {
             else
                 return xAODType::Photon;
         }
-        else if (signature == "j")
+        else if (signature == "j" or signature == "dispjet")
             return xAODType::Jet;
         else if (signature == "mu")
             return xAODType::Muon;
         else if (signature == "tau")
             return xAODType::Tau;
+        else if (signature == "isotrk")
+            return xAODType::TrackParticle;
         else
             return xAODType::Other;
     }
@@ -188,15 +190,26 @@ namespace ChainNameParser {
     const std::vector<std::string> &allSignatures()
     {
         const static std::vector<std::string> signatures{
-            "e", "g", "j", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb",
-            "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp"
+            "e", "g", "j", "dispjet", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb",
+            "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp", "distrk", 
+            "hitdvjet", "isotrk", "dedxtrk"
         };
         return signatures;
     }
 
+    const std::vector<std::string> &allSignaturePostfixQualifiers()
+    {
+        const static std::vector<std::string> postfixQualifiers{
+            "noL1", "vtx", "c", "f", "a"
+        };
+        return postfixQualifiers;
+    }
+
     std::string legHeadPattern()
     {
-        return "(\\d*)("+join(allSignatures(), "|")+")(\\d*)"+"(noL1)?";
+        // Pattern looks like an expanded version of "(\d*)(e|g|j|mu|tau|xe)(\d*)(noL1|vtx|c|f|a)?";
+        // i.e. between 0-inf digits, followed by a signature, followed by another 0-inf digits, optionally followed by 0-1 a postfix qualifiers
+        return "(\\d*)("+join(allSignatures(), "|")+")(\\d*)"+"("+join(allSignaturePostfixQualifiers(), "|")+")?";
     }
 
     std::vector<int> multiplicities(const std::string &chain)
