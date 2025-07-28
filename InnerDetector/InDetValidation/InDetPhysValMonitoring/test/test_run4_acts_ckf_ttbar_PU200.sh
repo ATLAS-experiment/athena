@@ -43,12 +43,15 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
+ignore_pattern="ActsValidateTracksTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsValidateTracksTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
+
 # Run with Athena ambi. resolution
 run "Reconstruction-ckf" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --preExec 'flags.Acts.doMonitoring=True;' \
+    --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.ckf.root \
     --maxEvents ${n_events} \

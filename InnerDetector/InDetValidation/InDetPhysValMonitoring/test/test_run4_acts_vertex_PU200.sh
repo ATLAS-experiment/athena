@@ -34,10 +34,12 @@ run () {
     return $rc
 }
 
+ignore_pattern="ActsLegacyTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLegacyTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
 
 run "Reconstruction-acts" \
     Reco_tf.py --CA \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
+    --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${n_events}
