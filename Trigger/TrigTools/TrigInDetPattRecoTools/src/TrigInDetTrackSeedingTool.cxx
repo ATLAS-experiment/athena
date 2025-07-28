@@ -382,6 +382,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 		}
 
 		if(spIdx == 0) return seedStats;
+		
 		pJobData->m_nSpacepoints = spIdx;
 		pJobData->m_nLayers      = nLayers;
 		pJobData->m_nEtaBins     = nEtaBins;
@@ -422,7 +423,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 		
 		const float cut_dphi_max        = m_LRTmode ? 0.07 : 0.012;
 		const float cut_dcurv_max       = m_LRTmode ? 0.015 : 0.001;
-		const float cut_tau_ratio_max   = m_LRTmode ? 0.015 : 0.007;
+		const float cut_tau_ratio_max = m_LRTmode ? 0.015f : 0.01;
 		const float min_z0              = m_LRTmode ? -600.0 : internalRoI.zedMinus();
 		const float max_z0              = m_LRTmode ? 600.0 : internalRoI.zedPlus();
 
@@ -431,9 +432,9 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 				
 		const float cut_zMinU = min_z0 + maxOuterRadius*internalRoI.dzdrMinus();
 		const float cut_zMaxU = max_z0 + maxOuterRadius*internalRoI.dzdrPlus();
-
+	
 		const float maxKappa            = m_LRTmode ? 1.0*maxCurv : 0.9*maxCurv;
-		
+			
 		pJobData->m_algo_params[0]  = min_deltaPhi;
 		pJobData->m_algo_params[1]  = dphi_coeff;
 		pJobData->m_algo_params[2]  = min_deltaPhi_low_dr;
@@ -484,7 +485,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 		TrigAccel::ITk::GRAPH_AND_SEEDS_OUTPUT* pGraphAndSeeds = reinterpret_cast<TrigAccel::ITk::GRAPH_AND_SEEDS_OUTPUT*>(pOutput->m_rawBuffer);
 		TrigAccel::ITk::COMPRESSED_GRAPH* pGraph = &pGraphAndSeeds->m_CompressedGraph;
 		TrigAccel::ITk::OUTPUT_SEEDS* pSeeds = &pGraphAndSeeds->m_OutputSeeds;
-		
+			
 		if(m_useGPUseedExtraction) {
 			if(pSeeds->m_nSeeds == 0) return seedStats;
 			//converting tracklet into GBTS-CPU format
