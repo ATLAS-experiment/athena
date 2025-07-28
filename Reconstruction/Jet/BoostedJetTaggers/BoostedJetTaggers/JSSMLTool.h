@@ -57,6 +57,7 @@ class JSSMLTool
     virtual double retrieveConstituentsScore(std::vector<TH2D> Images) const override;
     virtual double retrieveConstituentsScore(std::vector<std::vector<float>> constituents) const override;
     virtual double retrieveConstituentsScore(std::vector<std::vector<float>> constituents, std::vector<std::vector<std::vector<float>>> interactions) const override;
+    virtual double retrieveConstituentsScore(std::vector<std::vector<float>> constituents, std::vector<std::vector<std::vector<float>>> interactions, std::vector<std::vector<float>> mask) const override;
     virtual double retrieveHighLevelScore(std::map<std::string, double> JSSVars) const override;
 
     // basic tool functions

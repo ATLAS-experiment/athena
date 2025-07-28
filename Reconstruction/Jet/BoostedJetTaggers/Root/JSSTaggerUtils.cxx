@@ -10,9 +10,8 @@ bool DescendingPtSorterConstituents(const xAOD::JetConstituent p1, const xAOD::J
   return CxxUtils::fpcompare::greater(p1.pt(), p2.pt());
 }
 
-float Clip(float in){
+float Clip(float in, float low=1.e-36, float high=1.e+30){
   float out;
-  float low (1.e-36), high (1.e+30);
 
   if(in < low) out = low;
   else if(in > high) out = high;
@@ -647,3 +646,199 @@ StatusCode JSSTaggerUtils::ReadScaler(){
     return *Image;
 
   }
+
+StatusCode JSSTaggerUtils::GetTopConstScore(const xAOD::JetContainer& jets) const {
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
+
+  for(const xAOD::Jet *jet : jets){
+
+    // init value
+    float score (-99.);
+    int parity (1);
+
+    // get constituents
+    std::vector<xAOD::JetConstituent> constituents = jet -> getConstituents().asSTLVector();
+    std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
+
+    // skim constituents
+    // nMaxConstituents: used to compute the sum_pT and sum_E for the pre-processing
+    // nInputConstituents: actual input to the network
+    long unsigned int nMaxConstituents (100);
+    long unsigned int nInputConstituents (80);
+
+    std::vector<float> pT_nMax, E_nMax;
+    for(auto cnst : constituents){
+      pT_nMax.push_back( cnst -> pt() );
+      E_nMax.push_back( cnst -> e() );
+      if(pT_nMax.size()==nMaxConstituents) break;
+    }
+
+    // remove non physical constituents
+    constituents.erase( std::remove_if( constituents.begin(), constituents.end(),
+                        [] (xAOD::JetConstituent constituent) -> bool {return log(constituent -> pt()) < 0.1;}), 
+                        constituents.end()) ;
+
+    // use ML tool on constituents
+    std::vector<float> pT, eta, phi, E, isValid, px, py, pz;
+    for(auto cnst : constituents){
+      pT.push_back( cnst -> pt() );
+      eta.push_back( cnst -> eta() );
+      phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
+      isValid.push_back(1.);
+      px.push_back( cnst -> pt() * std::cos(cnst -> phi()) );
+      py.push_back( cnst -> pt() * std::sin(cnst -> phi()) );
+      pz.push_back( cnst -> pt() * std::sinh(cnst -> eta()) );
+    }
+    
+
+    // global aux variables
+    float sum_features_E = std::accumulate(E_nMax.begin(), E_nMax.end(), 0.);
+    float sum_features_pT_scalar = std::accumulate(pT_nMax.begin(), pT_nMax.end(), 0.);
+
+    TLorentzVector constituent0;
+    if(constituents.size() > 0)
+      constituent0.SetPtEtaPhiE(pT.at(0), eta.at(0), phi.at(0), E.at(0));
+
+    float angle (0.);
+    if(constituents.size() > 1){
+      float deta01 = eta.at(1) - eta.at(0);
+      float dphi01 = phi.at(1) - phi.at(0);
+      if(dphi01 > std::numbers::pi) dphi01 -= 2*std::numbers::pi;
+      else if(dphi01 < -std::numbers::pi) dphi01 += 2*std::numbers::pi;
+
+      angle = std::atan2(dphi01, deta01) + std::numbers::pi/2;
+    }
+
+    // build constituents, mask and base momentum for interaction variables
+    std::vector<std::vector<float>> const_vars;
+    std::vector<std::vector<float>> masks_vars;
+    std::vector<std::vector<std::vector<float>>> inter_vars;
+
+    for(long unsigned int i=0; i<constituents.size(); i++){
+
+      // up to nInputConstituents constituents
+      if(const_vars.size()==nInputConstituents) break;
+
+      // put the constituent in a tlv for help
+      TLorentzVector constituent_i;
+      constituent_i.SetPtEtaPhiE(pT.at(i), eta.at(i), phi.at(i), E.at(i));
+
+      // flip/rot of constituents: center
+      float eta_center = eta.at(i) - eta.at(0);
+      float phi_center = constituent_i.DeltaPhi(constituent0);
+
+      // flip/rot of constituents: rotate
+      // ToDo: this does not make sense when nConst == 1, 
+      // but it also true that the score is not retrieved for those jets,
+      // should we add a further protection?
+      float eta_rot =  eta_center * cos(angle) + phi_center * sin(angle);
+      float phi_rot = -eta_center * sin(angle) + phi_center * cos(angle);
+
+      // flip/rot of constituents: parity
+      if(i==2 && eta_rot<0.) parity = -1;
+      float eta_flip = eta_rot * parity;
+      
+      // calculate constituents variables
+      float log_pT = log( pT.at(i));
+      float log_E = log( E.at(i));
+      float log_pT_rel = log( pT.at(i) / sum_features_pT_scalar);
+      float log_E_rel = log( E.at(i) / sum_features_E);
+      float Deta = eta_flip;
+      float Dphi = phi_rot;
+      float DR = sqrt(Deta*Deta + Dphi*Dphi);
+
+      // pack: constituents variables
+      std::vector<float> vars = {log_pT, log_E, log_pT_rel, log_E_rel, DR, Deta, Dphi};
+      const_vars.push_back(vars);
+
+      // pack: mask variable
+      vars = {1.};
+      masks_vars.push_back(vars);
+      
+      // explict interaction variables
+      // calculate variables: interactions
+      std::vector<std::vector<float>> inter_vars_int;
+      for(long unsigned int j=0; j<constituents.size(); j++){
+
+        // tlv for constituents
+        // todo: harmonise with the previous one
+        TLorentzVector constituent_j;
+        constituent_j.SetPtEtaPhiE(pT.at(j), eta.at(j), phi.at(j), E.at(j));
+  
+        // preparing variables
+
+        // custom rapidity calculation
+        double rap_i = 0.5 * log( 1 + (2 * pz.at(i)) / Clip(E.at(i) - pz.at(i), 1.e-8) );
+        double rap_j = 0.5 * log( 1 + (2 * pz.at(j)) / Clip(E.at(j) - pz.at(j), 1.e-8) );
+        double deltaY = rap_i - rap_j;
+        double deltaPhi = TVector2::Phi_mpi_pi(constituent_i.Phi() - constituent_j.Phi());
+        double delta = std::sqrt(deltaY * deltaY + deltaPhi * deltaPhi);
+
+        float min = pT.at(i) != pT.at(j) ? std::min(pT.at(i), pT.at(j)): pT.at(i);
+        float mass2 = (E.at(i) + E.at(j)) * (E.at(i) + E.at(j));
+        mass2 -= (px.at(i) + px.at(j)) * (px.at(i) + px.at(j));
+        mass2 -= (py.at(i) + py.at(j)) * (py.at(i) + py.at(j));
+        mass2 -= (pz.at(i) + pz.at(j)) * (pz.at(i) + pz.at(j));
+
+        // final values
+        float log_delta = log(Clip(delta, 1.e-8));
+        float log_mindelta = log(Clip(min * delta, 1.e-8));
+        float log_min_over_pT = log(Clip(min / (pT.at(i) + pT.at(j)), 1.e-8));
+        float log_mass = log(Clip(mass2, 1.e-8));
+
+        std::vector<float> vars = { log_mindelta,
+                                    log_min_over_pT,
+                                    log_delta,
+                                    log_mass
+                                  };
+        inter_vars_int.push_back(vars);
+
+      }
+      inter_vars.push_back(inter_vars_int);
+
+    }
+
+    for(long unsigned int i=constituents.size(); i<nInputConstituents; i++){
+      // pack: constituents variables
+      std::vector<float> vars = {-18.4207, -18.4207, -18.4207, -18.4207, -18.4207, -18.4207, -18.4207};
+      const_vars.push_back(vars);
+
+      // pack: interaction variables
+      vars = {-18.4207, -18.4207, -18.4207, -18.4207};
+      std::vector<std::vector<float>> vars_inter;
+      for(long unsigned int j=0; j<nInputConstituents; j++){
+        vars_inter.push_back(vars);
+      }
+      inter_vars.push_back(vars_inter);
+
+      // pack: mask variable
+      vars = {0.};
+      masks_vars.push_back(vars);
+    }
+
+    // further adjustment for interaction variables
+    for(long unsigned int i=0; i<constituents.size(); i++){
+      std::vector<float> vars = {0., 0., 0., 0.};
+      vars = {-18.4207, -18.4207, -18.4207, -18.4207};
+      for(long unsigned int j=constituents.size(); j<nInputConstituents; j++){
+        inter_vars.at(i).push_back(vars);
+      }
+    }
+
+    // evaluate the model
+    if( constituents.size() > 1 ) 
+      score = m_MLBosonTagger -> retrieveConstituentsScore(const_vars, inter_vars, masks_vars);
+
+    // save decorator
+    // the model return the qcd node score
+    // therefore, we use 1 - score to have 
+    // top jet: 1, q/g jet: 0
+    decConstScore(*jet) = 1 - score;
+
+  }
+
+  return StatusCode::SUCCESS;
+
+}
