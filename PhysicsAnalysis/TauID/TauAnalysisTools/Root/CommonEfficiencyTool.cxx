@@ -145,7 +145,7 @@ StatusCode CommonEfficiencyTool::initialize()
 
 //______________________________________________________________________________
 CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::TauJet& xTau,
-    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/, unsigned int iMu)
+    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/)
 {
   // check which true state is requested
   if (!m_bSkipTruthMatchCheck and getTruthParticleType(xTau) != m_eCheckTruth)
@@ -185,11 +185,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
      sMode = ConvertProngToString(xTau.nTracks());
   }
 
-  std::string sMu = "";
-  std::string sMCCampaign = "";
-
-  if (m_bSplitMu) sMu = ConvertMuToString(iMu);
-  std::string sHistName = m_sSFHistName + sMode + sMu;
+  std::string sHistName = m_sSFHistName + sMode;
 
   // get standard scale factor
   CP::CorrectionCode tmpCorrectionCode = getValue(sHistName,
@@ -222,7 +218,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
     if (dDirection>0.)  sHistName+="_up";
     else                sHistName+="_down";
     if (!m_sWP.empty()) sHistName+="_"+m_sWP;
-    sHistName += sMode + sMu + sMCCampaign;
+    sHistName += sMode;
 
     // filter unwanted combinations
     if( (sHistName.find("3P") != std::string::npos && sHistName.find("1p") != std::string::npos) ||
@@ -269,7 +265,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
 */
 //______________________________________________________________________________
 CP::CorrectionCode CommonEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::TauJet& xTau,
-  unsigned int iRunNumber, unsigned int iMu)
+  unsigned int iRunNumber)
 {
   double dSf = 0.;
 
@@ -288,7 +284,7 @@ CP::CorrectionCode CommonEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::
     return CP::CorrectionCode::Ok;
 
   // retrieve scale factor
-  CP::CorrectionCode tmpCorrectionCode = getEfficiencyScaleFactor(xTau, dSf, iRunNumber, iMu);
+  CP::CorrectionCode tmpCorrectionCode = getEfficiencyScaleFactor(xTau, dSf, iRunNumber);
   // adding scale factor to tau as decoration
   decor(xTau) = dSf;
 
@@ -389,19 +385,6 @@ StatusCode CommonEfficiencyTool::applySystematicVariation ( const CP::Systematic
 std::string CommonEfficiencyTool::ConvertProngToString(const int fProngness) const
 {
   return fProngness == 1 ? "_1p" : "_3p";
-}
-
-/*
-  mu converter, returns "_highMu" for average number of vertices higher than 35 and
-  "_lowMu" for everything below
-*/
-//______________________________________________________________________________
-std::string CommonEfficiencyTool::ConvertMuToString(const int iMu) const
-{
-  if (iMu > 35 )
-    return "_highMu";
-
-  return "_lowMu";
 }
 
 /*

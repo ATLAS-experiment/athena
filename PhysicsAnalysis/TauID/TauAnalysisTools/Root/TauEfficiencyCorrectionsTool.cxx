@@ -22,7 +22,6 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   , m_bIsData(false)
   , m_bIsConfigured(false)
   , m_iRunNumber(0)
-  , m_iMu(0)
 {
   declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );
 }
@@ -126,7 +125,6 @@ StatusCode TauEfficiencyCorrectionsTool::beginEvent()
 
   const xAOD::EventInfo* xEventInfo = nullptr;
   ATH_CHECK(evtStore()->retrieve(xEventInfo, "EventInfo"));
-  m_iMu = xEventInfo->averageInteractionsPerCrossing();
 
   if (m_bReadRandomRunNumber)
   {
@@ -161,7 +159,7 @@ void TauEfficiencyCorrectionsTool::printConfig() const
 
 //______________________________________________________________________________
 CP::CorrectionCode TauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const xAOD::TauJet& xTau,
-    double& eff, unsigned int /*iRunNumber*/, unsigned int /*iMu*/)
+    double& eff, unsigned int /*iRunNumber*/)
 {
   eff = 1.;
 
@@ -176,7 +174,7 @@ CP::CorrectionCode TauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const
     if ( !(**it)->isSupportedRunNumber(m_iRunNumber) )
       continue;
     double dToolEff = 1.;
-    CP::CorrectionCode tmpCorrectionCode = (**it)->getEfficiencyScaleFactor(xTau, dToolEff, m_iRunNumber, m_iMu);
+    CP::CorrectionCode tmpCorrectionCode = (**it)->getEfficiencyScaleFactor(xTau, dToolEff, m_iRunNumber);
     if (tmpCorrectionCode != CP::CorrectionCode::Ok)
       return tmpCorrectionCode;
     eff *= dToolEff;
@@ -195,7 +193,7 @@ CP::CorrectionCode TauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const
 }
 
 //______________________________________________________________________________
-CP::CorrectionCode TauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::TauJet& xTau, unsigned int /*iRunNumber*/, unsigned int /*iMu*/)
+CP::CorrectionCode TauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::TauJet& xTau, unsigned int /*iRunNumber*/)
 {
   if (m_bIsData)
     return CP::CorrectionCode::Ok;
@@ -205,7 +203,7 @@ CP::CorrectionCode TauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( con
 
   for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
   {
-    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xTau, m_iRunNumber, m_iMu);
+    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xTau, m_iRunNumber);
     if (tmpCorrectionCode != CP::CorrectionCode::Ok)
       return tmpCorrectionCode;
   }
@@ -213,7 +211,7 @@ CP::CorrectionCode TauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( con
   {
     if ( !(**it)->isSupportedRunNumber(m_iRunNumber) )
       continue;
-    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xTau, m_iRunNumber, m_iMu);
+    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xTau, m_iRunNumber);
     if (tmpCorrectionCode != CP::CorrectionCode::Ok)
       return tmpCorrectionCode;
   }

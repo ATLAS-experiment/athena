@@ -54,7 +54,7 @@ StatusCode TauEfficiencyTriggerTool::initialize()
 
 //______________________________________________________________________________
 CP::CorrectionCode TauEfficiencyTriggerTool::getEfficiencyScaleFactor(const xAOD::TauJet& xTau,
-    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/, unsigned int /*iMu*/)
+    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/)
 {
   // check which true state is requested
   if (!m_bSkipTruthMatchCheck and getTruthParticleType(xTau) != m_eCheckTruth)

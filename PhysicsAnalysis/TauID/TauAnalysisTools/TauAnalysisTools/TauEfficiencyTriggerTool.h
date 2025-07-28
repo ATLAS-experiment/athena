@@ -42,7 +42,7 @@ public:
 
   StatusCode initialize();
 
-  virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::TauJet& tau, double& dEfficiencyScaleFactor, unsigned int iRunNumber = 0, unsigned int iMu = 0);
+  virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::TauJet& tau, double& dEfficiencyScaleFactor, unsigned int iRunNumber = 0);
 
   virtual StatusCode applySystematicVariation ( const CP::SystematicSet& sSystematicSet);
 

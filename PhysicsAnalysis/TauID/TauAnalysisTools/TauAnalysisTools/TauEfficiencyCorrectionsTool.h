@@ -52,11 +52,11 @@ public:
 
   /// Get the tau efficiency scale factor
   virtual CP::CorrectionCode getEfficiencyScaleFactor( const xAOD::TauJet& xTau,
-      double& eff, unsigned int iRunNumber = 0, unsigned int iMu = 0);
+      double& eff, unsigned int iRunNumber = 0);
 
   /// Decorate the tau with its efficiency scale factor
   virtual CP::CorrectionCode applyEfficiencyScaleFactor( const xAOD::TauJet& xTau,
-      unsigned int iRunNumber = 0, unsigned int iMu = 0);
+      unsigned int iRunNumber = 0);
 
   /// returns: whether this tool is affected by the given systematics
   virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const;
@@ -118,7 +118,6 @@ private:
   bool m_bIsConfigured;
   bool m_firstEvent = false;
   unsigned int m_iRunNumber;
-  unsigned int m_iMu;
 
 }; // class TauEfficiencyCorrectionsTool
 
