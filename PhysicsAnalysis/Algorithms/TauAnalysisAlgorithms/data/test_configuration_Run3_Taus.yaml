@@ -18,9 +18,17 @@ TauJets:
       2022:
       - HLT_tau25_mediumRNN_tracktwoMVA
       - HLT_tau35_mediumRNN_tracktwoMVA
+      - HLT_tau40_mediumRNN_tracktwoMVA
+      - HLT_tau60_mediumRNN_tracktwoMVA
+      - HLT_tau80_mediumRNN_tracktwoMVA
+      - HLT_tau160_mediumRNN_tracktwoMVA  
       2023:
       - HLT_tau25_mediumRNN_tracktwoMVA
       - HLT_tau35_mediumRNN_tracktwoMVA
+      - HLT_tau40_mediumRNN_tracktwoMVA
+      - HLT_tau60_mediumRNN_tracktwoMVA
+      - HLT_tau80_mediumRNN_tracktwoMVA
+      - HLT_tau160_mediumRNN_tracktwoMVA  
   MCTCClassification:
     prefix: truth_
 
