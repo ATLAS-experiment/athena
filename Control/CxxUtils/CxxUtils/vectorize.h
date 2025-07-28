@@ -26,7 +26,6 @@
  * -ftree-vectorize            		[enabled]
  * -fvect-cost-model=[unlimited|dynamic|cheap|very-cheap]  cheap
  *
- *
  * Add
  * ATH_ENABLE_VECTORIZATION;
  * at the start of a compilation unit
@@ -36,13 +35,17 @@
  * ATH_ENABLE_FUNCTION_VECTORIZATION
  * before a function to enable it for just
  * this function
+ *
+ * We disable the functionality for gcc 14
+ * and later. Since spot tests do not show
+ * any noticeable difference.
  */
 #include "CxxUtils/features.h"
 
 #ifndef CXXUTILS_VECTORIZE_H
 #define CXXUTILS_VECTORIZE_H
 
-#if HAVE_GCC_CLANG_EXTENSIONS && !defined(__clang__) && !defined(SIMULATIONBASE)
+#if HAVE_GCC_CLANG_EXTENSIONS && !defined(__clang__) && (__GNUC__ < 14)
 # define ATH_ENABLE_VECTORIZATION                     \
   _Pragma("GCC optimize (\"tree-vectorize\")") class ATH_ENABLE_VECTORIZATION_SWALLOW_SEMICOLON
 #else
