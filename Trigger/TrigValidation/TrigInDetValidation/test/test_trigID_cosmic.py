@@ -36,8 +36,8 @@ Events  = 4000
 Threads = 8 
 Slots   = 8
 Release = "current"
-preexec_reco = ["from AthenaConfiguration.Enums import BeamType", "flags.Beam.Type=BeamType.Cosmics",
-                "flags.Tracking.doTRTStandalone=False",
+preexec_all = ["from AthenaConfiguration.Enums import BeamType;flags.Beam.Type=BeamType.Cosmics"]
+preexec_reco = ["flags.Tracking.doTRTStandalone=False",
                 "flags.Tracking.doForwardTracks=False",
                 "flags.Tracking.doLargeD0=False"]
 Input   = 'mc_cosmics'    # defined in TrigValTools/share/TrigValInputs.json  
