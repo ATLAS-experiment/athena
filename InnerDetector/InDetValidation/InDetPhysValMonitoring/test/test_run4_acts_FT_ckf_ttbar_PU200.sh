@@ -13,7 +13,7 @@ lastref_dir=last_results
 #dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 ### uncomment this and other lines to enable technical efficiency
 dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
-n_events=1
+n_events=-1
 rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 
 
