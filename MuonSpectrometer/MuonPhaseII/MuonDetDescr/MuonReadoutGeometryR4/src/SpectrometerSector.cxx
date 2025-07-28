@@ -3,6 +3,7 @@
 */
 #ifndef SIMULATIONBASE
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
+#include <Acts/Surfaces/PlaneSurface.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Geometry/Volume.hpp>
 #include <ActsGeoUtils/NoDeletePtr.h>
@@ -48,8 +49,11 @@ std::string SpectrometerSector::identString() const {
                        side() == 1 ? 'A' : 'C' , sector());
 }
 const ChamberSet& SpectrometerSector::chambers() const{ return m_args.chambers; }
-const Amg::Transform3D& SpectrometerSector::localToGlobalTrans(const ActsGeometryContext& /*gctx*/) const {
-    return m_args.locToGlobTrf;
+const Acts::PlaneSurface& SpectrometerSector::surface() const {
+    return *m_args.surface;
+}
+const Amg::Transform3D& SpectrometerSector::localToGlobalTrans(const ActsGeometryContext& gctx) const {
+    return surface().transform(gctx.context());
 }            
 Amg::Transform3D SpectrometerSector::globalToLocalTrans(const ActsGeometryContext& gctx) const {
     return localToGlobalTrans(gctx).inverse(); 
@@ -84,7 +88,6 @@ std::ostream& operator<<(std::ostream& ostr,
         <<"/"<<args.bounds->get(BoundEnums::eHalfLengthXposY)<<" [mm], ";
     ostr<<"halfY: "<<args.bounds->get(BoundEnums::eHalfLengthY)<<" [mm], ";
     ostr<<"halfZ: "<<args.bounds->get(BoundEnums::eHalfLengthZ)<<" [mm], ";
-    ostr<<"loc -> global: "<<Amg::toString(args.locToGlobTrf, 2)<<std::endl;
     ostr<<"************************************************************************"<<std::endl;
     for (const SpectrometerSector::ChamberPtr& ch : args.chambers) {
         ostr<<" --- "<<(*ch)<<std::endl;

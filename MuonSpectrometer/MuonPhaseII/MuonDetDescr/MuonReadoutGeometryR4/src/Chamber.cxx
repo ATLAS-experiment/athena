@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 #include "MuonReadoutGeometryR4/Chamber.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
+#include <Acts/Surfaces/PlaneSurface.hpp>
 #include <format>
 
 namespace MuonGMR4{
@@ -17,11 +18,9 @@ namespace MuonGMR4{
             <<"/"<<args.bounds->get(BoundEnums::eHalfLengthXposY)<<" [mm], ";
         ostr<<"halfY: "<<args.bounds->get(BoundEnums::eHalfLengthY)<<" [mm], ";
         ostr<<"halfZ: "<<args.bounds->get(BoundEnums::eHalfLengthZ)<<" [mm], ";
-        ostr<<"loc -> global: "<<Amg::toString(args.locToGlobTrf, 2);
         return ostr;
     }
-    std::ostream& operator<<(std::ostream& ostr,
-                             const Chamber& chamber) {
+    std::ostream& operator<<(std::ostream& ostr, const Chamber& chamber) {
 
         ostr<<chamber.identString()<<" "<<chamber.parameters();
         return ostr;
@@ -72,8 +71,11 @@ namespace MuonGMR4{
     const Chamber::ReadoutSet& Chamber::readoutEles() const {
         return m_args.detEles;
     }
-    const Amg::Transform3D& Chamber::localToGlobalTrans(const ActsGeometryContext& /*gctx*/) const {
-        return m_args.locToGlobTrf;
+    const Acts::PlaneSurface& Chamber::surface() const {
+        return *m_args.surface;
+    }
+    const Amg::Transform3D& Chamber::localToGlobalTrans(const ActsGeometryContext& gctx) const {
+        return surface().transform(gctx.context());
     }
     Amg::Transform3D Chamber::globalToLocalTrans(const ActsGeometryContext& gctx) const {
         return localToGlobalTrans(gctx).inverse();

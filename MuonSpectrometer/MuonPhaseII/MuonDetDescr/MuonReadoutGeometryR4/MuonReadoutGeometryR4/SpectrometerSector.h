@@ -16,6 +16,7 @@
 
 namespace Acts {
     class Volume;
+    class PlaneSurface;
 }
 namespace MuonGMR4{
     class SpectrometerSector;
@@ -109,9 +110,9 @@ namespace MuonGMR4 {
                 ChamberSet chambers{};
                 /** @brief Surrouding box chamber bounds */
                 std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds{};
-                /// Transformation to the chamber volume
-                Amg::Transform3D locToGlobTrf{Amg::Transform3D::Identity()};
-
+                /// Surface in the centre of the chamber plane
+                std::shared_ptr<const Acts::PlaneSurface> surface{};
+                
                 std::vector<chamberLocation> detectorLocs{}; 
             };
 
@@ -142,6 +143,8 @@ namespace MuonGMR4 {
             const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& gctx) const;
             /** @brief Returns the global -> local transformation from the ATLAS global */
             Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& gctx) const;
+            /** @brief Returns the associated surface */
+            const Acts::PlaneSurface& surface() const;
             /** @brief Returns the associated chambers with this sector */
             const ChamberSet& chambers() const;
             /** @brief Long-extend of the chamber in the x-direction at positive Y */

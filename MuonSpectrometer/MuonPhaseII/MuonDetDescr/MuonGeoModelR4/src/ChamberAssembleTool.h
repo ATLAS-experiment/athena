@@ -14,9 +14,14 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeoUtils/Defs.h>
 
+#include "Acts/Surfaces/SurfaceBounds.hpp"
+#include "Acts/Geometry/VolumeBounds.hpp"
 
+#include <tuple>
 namespace Acts{
     class TrapezoidVolumeBounds;
+    class VolumeBounds;
+    class PlanarBounds;
 }
 
 namespace MuonGMR4 {
@@ -31,39 +36,42 @@ class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
       virtual StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
 
    private:
-      using BoundType = Acts::TrapezoidVolumeBounds;
-
-      using BoundTrfPair = std::pair<std::shared_ptr<BoundType>,
-                                     Amg::Transform3D>;
+      using TrapVolBound_t = Acts::TrapezoidVolumeBounds;
+      using SurfBoundPtr_t = std::shared_ptr<const Acts::PlanarBounds>;
+      using VolBoundPtr_t = std::shared_ptr<Acts::TrapezoidVolumeBounds>;
+ 
+      /** @brief Abrivation of the volume transform together with a set of volume & surface bounds */
+      using TrfWithBounds = std::tuple<Amg::Transform3D, VolBoundPtr_t, SurfBoundPtr_t>;
       /** @brief builds the bounding box trapezoidal volume bounds from the set of readout elements
        *         Returns a pair of the volume bounds & the transformation to center the volume
        *  @param gctx: Geometry context holding the alignment & global transformations
        *  @param readoutEles: List of readout elements around which the bounding box shall be built
        *  @param globToLoc: Transformation to go from the global -> local chamber's frame 
        *  @param boundSet: Cache of create bounds to share the same bounds across multiple volumes */
-      BoundTrfPair boundingBox(const ActsGeometryContext& gctx,
+      TrfWithBounds boundingBox(const ActsGeometryContext& gctx,
                                const std::vector<const MuonReadoutElement*>& readoutEles,
                                const Amg::Transform3D& globToLoc,
-                               Acts::VolumeBoundFactory& boundSet,
+                               Acts::VolumeBoundFactory& volBoundSet,
+                               Acts::SurfaceBoundFactory& surfBoundSet,
                                const double margin = 1.*Gaudi::Units::cm) const;
 
       /** @brief Builds the trapezoidal bounding box enclosing a single readout element
         * @param reEle: Pointer to the readout element to fetch the bounds from
         * @param boundSet: Cache of create bounds to share the same bounds across multiple volumes */
-      static std::shared_ptr<BoundType> boundingBox(const MuonReadoutElement* reEle,
-                                                    Acts::VolumeBoundFactory& boundSet);
+      static VolBoundPtr_t boundingBox(const MuonReadoutElement* reEle,
+                                        Acts::VolumeBoundFactory& boundSet);
 
       /** @brief Returns the 4 corners of the trapezoid in the x-y plane
         * @param localToGlob: Transform from the trapezoid restframe -> chambers frame
         * @param bounds: Reference to the trapezoidal bounds defining the volume */
       static std::array<Amg::Vector3D, 4> cornerPointsPlane(const Amg::Transform3D& localToGlob, 
-                                                            const BoundType& bounds);
+                                                            const TrapVolBound_t& bounds);
 
       /** @brief Returns the 8 corners marking the trapezoid 
         * @param localToGlob: Transform from the trapezoid restframe -> chambers frame
         * @param bounds: Reference to the trapezoidal bounds defining the volume */
       static std::array<Amg::Vector3D, 8> cornerPoints(const Amg::Transform3D& localToGlob, 
-                                                       const BoundType& bounds);
+                                                       const TrapVolBound_t& bounds);
 
       /** @brief Returns the translation transform centering the 8 corner points of the trapezoid.
         *        The centre is defined as the centre point of the surrounding box
