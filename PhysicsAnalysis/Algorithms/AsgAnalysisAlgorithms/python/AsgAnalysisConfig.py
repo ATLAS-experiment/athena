@@ -325,10 +325,10 @@ class GeneratorAnalysisBlock (ConfigBlock):
             alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg' + self.streamName)
             alg.RootStreamName = self.streamName
             alg.runNumber = self.runNumber
-            if self.cutBookkeepersSystematics:
-                alg.enableSystematics = self.cutBookkeepersSystematics
-            else:
+            if self.cutBookkeepersSystematics is None:
                 alg.enableSystematics = not config.noSystematics()
+            else:
+                alg.enableSystematics = self.cutBookkeepersSystematics
             if self.histPattern:
                 alg.histPattern = self.histPattern
             config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
