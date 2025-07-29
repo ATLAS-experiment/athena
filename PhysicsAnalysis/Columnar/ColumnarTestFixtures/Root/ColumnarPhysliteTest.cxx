@@ -54,7 +54,7 @@ namespace columnar
     const auto targetTime = std::chrono::seconds(1);
 
     // the number of events per batch in columnar mode
-    const unsigned int batchSize = 1;
+    const unsigned int batchSize = 1000;
 
 
     class Benchmark final
@@ -1370,6 +1370,7 @@ namespace columnar
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisPhotons.sfOut", 0));
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisPhotons.validOut", 0));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisPhotons.selection", 0));
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisMuons.objectType", xAOD::Type::Muon));
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.m", 0));
