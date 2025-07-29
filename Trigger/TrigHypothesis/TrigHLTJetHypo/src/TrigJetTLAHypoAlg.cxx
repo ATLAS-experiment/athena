@@ -25,7 +25,6 @@ TrigJetTLAHypoAlg::TrigJetTLAHypoAlg( const std::string& name,
 StatusCode TrigJetTLAHypoAlg::initialize() {
   CHECK( m_hypoTools.retrieve() );
   CHECK( m_TLAjetsKey.initialize() );
-  if (m_attach_btag) CHECK(m_btag_record_tool.retrieve());
   return StatusCode::SUCCESS;
 }
 
@@ -101,15 +100,6 @@ StatusCode TrigJetTLAHypoAlg::execute( const EventContext& context ) const {
   }
 
   ATH_MSG_DEBUG("Saved "<<nSavedJets<<" TLA jets from "<<nDecision<<" input decisions.");
-  
-  if(m_attach_btag){
-      ATH_MSG_DEBUG("Attaching any available b-tag information to TLA  jets.");
-      const DecisionContainer* previousDecisions = previousDecisionHandle.get();
-      // ** Calling record_btag() on this tool will create a new TLA HLT Btagging container 
-      //    which will be filled with copies of BTagging elements attached to the previous decision
-      //    and linked to matching jets in h_TLAJets. **
-      CHECK(m_btag_record_tool->record_btag(previousDecisions, *h_TLAJets, context));
-  }
 
   for (const auto& tool: m_hypoTools) {
 
