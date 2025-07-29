@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigDecisionTool/FeatureRequestDescriptor.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 
 namespace Trig {
 
@@ -21,15 +21,8 @@ namespace Trig {
     setRestrictRequestToLeg(restrictToLegIndex);
   }
 
-
-  FeatureRequestDescriptor::FeatureRequestDescriptor(const std::string& chainGroupName) {
-    reset();
-    setChainGroup(chainGroupName);
-  }
-
-
   void FeatureRequestDescriptor::reset() {
-    m_chainGroupName = "HLT_.*";
+    m_chainGroupName = "";
     m_condition = TrigDefs::Physics;
     m_containerSGKey = "";
     m_featureCollectionMode = TrigDefs::lastFeatureOfType;
@@ -41,6 +34,9 @@ namespace Trig {
   void FeatureRequestDescriptor::print(MsgStream& msg, const MSG::Level level) {
     msg << level << "Feature Request Descriptor configuration:" << endmsg;
     msg << level << "-- Chain Group name:'" << chainGroup() << "'." << endmsg;
+    if (chainGroup().empty()) {
+      msg << MSG::ERROR << "Empty chain group name " << endmsg;
+    }
     /////////////////////////
     if (condition() == TrigDefs::Physics) {
       msg << level << "-- Condition: TrigDefs::Physics, only paths which accepted chains in the ChainGroup will be explored." << endmsg;
@@ -117,6 +113,9 @@ namespace Trig {
 
 
   const std::string& FeatureRequestDescriptor::chainGroup() const {
+    if (m_chainGroupName.empty()) {
+      throw std::runtime_error("FeatureRequestDescriptor::chainGroup() No chain group string was supplied to this FeatureRequestDescriptor.");
+    }
     return m_chainGroupName;
   }
 
