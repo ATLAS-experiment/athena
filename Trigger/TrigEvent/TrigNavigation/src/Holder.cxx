@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -197,7 +197,7 @@ bool HLTNavDetails::IHolder::deserializePayload(const std::vector<uint32_t>& dat
   addr.add(first);
   DataObject* dobj(0);
 
-  if (m_objectserializerSvc->createObj((IOpaqueAddress*)&addr, dobj).isFailure() ){
+  if (m_objectserializerSvc->createObj(&addr, dobj).isFailure() ){
     ATH_MSG_WARNING("deserialize main: failed");
     return false;
   }
@@ -216,7 +216,7 @@ bool HLTNavDetails::IHolder::deserializePayload(const std::vector<uint32_t>& dat
     TrigStreamAddress auxaddr(auxClidOrZero(), sgkeyaux, "", 0, 0);
     auxaddr.add(second);
 
-    if (m_objectserializerSvc->createObj((IOpaqueAddress*)&auxaddr, dobjaux).isFailure() ){
+    if (m_objectserializerSvc->createObj(&auxaddr, dobjaux).isFailure() ){
       ATH_MSG_WARNING("Aux Store deserialization failed");
       return false;
     }
