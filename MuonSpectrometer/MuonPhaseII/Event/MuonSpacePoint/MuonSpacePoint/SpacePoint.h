@@ -29,13 +29,13 @@ namespace MuonR4 {
                        const xAOD::UncalibratedMeasurement* secondMeas = nullptr);
 
             /*** @brief  Setter for the measurement covariance */
-            void setCovariance(const AmgSymMatrix(2)& cov){ m_measCovariance = cov; };
+            void setCovariance(AmgSymMatrix(2)&& cov){ m_measCovariance = std::move(cov); };
             /*** @brief  Setter for the direction of the measurement channel in the sector frame */
-            void setDirection(const Amg::Vector3D& dir){ m_dir = dir; };
+            void setDirection(Amg::Vector3D&& dir){ m_dir = std::move(dir); };
             /*** @brief  Setter for the direction of the precision axis of the measurement in the sector frame */
-            void setNormal(const Amg::Vector3D& normal){ m_normal = normal; };
+            void setNormal(Amg::Vector3D&& normal){ m_normal = std::move(normal); };
             /*** @brief  Setter for the position of the uncalibrated muon measurement in the sector frame */
-            void setPosition(const Amg::Vector3D& pos){ m_pos = pos; };
+            void setPosition(Amg::Vector3D&& pos){ m_pos = std::move(pos); };
             
             /*** @brief: Pointer to the primary measurement */
             const xAOD::UncalibratedMeasurement* primaryMeasurement() const;

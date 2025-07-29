@@ -32,6 +32,7 @@ namespace MuonR4 {
 
 template<class MeasType>
 Amg::Transform3D SpacePointMakerAlg::toChamberTransform(const ActsGeometryContext& gctx, 
+                                                        const Amg::Transform3D& sectorTrans,
                                                         const MeasType* meas) const{
     IdentifierHash hash = {};
     if constexpr(std::is_same_v<MeasType, xAOD::MdtDriftCircle>) {
@@ -40,7 +41,7 @@ Amg::Transform3D SpacePointMakerAlg::toChamberTransform(const ActsGeometryContex
         hash = meas->layerHash();
     }
     const MuonGMR4::MuonReadoutElement* reEle{meas->readoutElement()};
-    return reEle->msSector()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, hash);
+    return sectorTrans * reEle->localToGlobalTrans(gctx, hash);
 }
 
 template<class MeasType>
@@ -195,15 +196,10 @@ void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
     pointColl.emplace_back(primaryMeas);
     SpacePoint& sp {pointColl.back()};
 
-    Amg::Vector3D pos {positionInChamber(primaryMeas, toChamberTrans)};
-    Amg::Vector3D dir {channelDirInChamber(primaryMeas, toChamberTrans)};
-    Amg::Vector3D nor {channelNormalInChamber(primaryMeas, toChamberTrans)};
-    AmgSymMatrix(2) cov {computeCov(primaryMeas,dir,nor)};
-
-    sp.setDirection(dir);
-    sp.setPosition(pos);
-    sp.setNormal(nor);
-    sp.setCovariance(cov);
+    sp.setDirection(channelDirInChamber(primaryMeas, toChamberTrans));
+    sp.setNormal(channelNormalInChamber(primaryMeas, toChamberTrans));
+    sp.setPosition(positionInChamber(primaryMeas, toChamberTrans));
+    sp.setCovariance(computeCov(primaryMeas,sp.directionInChamber(),sp.normalInChamber()));
 }
 
 template<class MeasType>
@@ -215,20 +211,20 @@ void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
     pointColl.emplace_back(primaryMeas, secondaryMeas);
     SpacePoint& sp {pointColl.back()};
 
-    Amg::Vector3D dir1 {channelDirInChamber(primaryMeas, toChamberTrans_eta)};
-    Amg::Vector3D nor1 {channelNormalInChamber(primaryMeas, toChamberTrans_eta)};
+    sp.setDirection(channelDirInChamber(primaryMeas, toChamberTrans_eta));
+    sp.setNormal(channelNormalInChamber(primaryMeas, toChamberTrans_eta));
+
     Amg::Vector3D pos1 {positionInChamber(primaryMeas, toChamberTrans_eta)};
-
     Amg::Vector3D dir2 {channelDirInChamber(secondaryMeas, toChamberTrans_phi)};
-    Amg::Vector3D nor2 {channelNormalInChamber(secondaryMeas, toChamberTrans_phi)};
     Amg::Vector3D pos2 {positionInChamber(secondaryMeas, toChamberTrans_phi)};
-    
-    AmgSymMatrix(2) cov {computeCov(primaryMeas,secondaryMeas,nor1,nor2)};
+    sp.setPosition(pos1 + Amg::intersect<3>(pos2,dir2, pos1, sp.directionInChamber()).value_or(0) * sp.directionInChamber());
 
-    sp.setDirection(dir1);
-    sp.setPosition(pos1 + Amg::intersect<3>(pos2,dir2, pos1, dir1).value_or(0) * dir1);
-    sp.setNormal(nor1);
-    sp.setCovariance(cov);
+    sp.setCovariance(computeCov(primaryMeas,
+                                    secondaryMeas,
+                                    sp.normalInChamber(),
+                                    channelNormalInChamber(secondaryMeas, toChamberTrans_phi))
+                    );
+    
 }
 
 bool SpacePointMakerAlg::SpacePointStatistics::FieldKey::operator<(const FieldKey& other) const{
@@ -359,6 +355,7 @@ template <class ContType>
     do {
 
       SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];
+      const Amg::Transform3D& sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTrans(*gctx);
       ATH_MSG_DEBUG("Fill space points for chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
       if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer> ||
                     std::is_same_v<ContType, xAOD::MMClusterContainer>) {
@@ -368,7 +365,7 @@ template <class ContType>
                 ATH_MSG_VERBOSE("Create space point from "<<m_idHelperSvc->toString(prd->identify())
                               <<", hash: "<<prd->identifierHash());
 
-                Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, prd)};
+                Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, sectorTrans,prd)};
                 fillSpacePoint(pointsInChamb.etaHits, prd, toChamberTrans);
             }
        } else {
@@ -387,7 +384,7 @@ template <class ContType>
                 if constexpr(std::is_same_v<ContType, xAOD::sTgcMeasContainer>) {
                     /// Make directly to a space point
                     if (prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                        Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, prd)};
+                        Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, sectorTrans, prd)};
                         fillSpacePoint(pointsInChamb.etaHits, prd, toChamberTrans);
                         continue;
                     }
@@ -413,10 +410,10 @@ template <class ContType>
 
                 Amg::Transform3D toChamberTrans_eta {}, toChamberTrans_phi {};
                 if (!etaHits.empty()){
-                    toChamberTrans_eta = toChamberTransform(*gctx, etaHits.at(0));
+                    toChamberTrans_eta = toChamberTransform(*gctx, sectorTrans, etaHits.at(0));
                 }
                 if (!phiHits.empty()){
-                    toChamberTrans_phi = toChamberTransform(*gctx, phiHits.at(0));
+                    toChamberTrans_phi = toChamberTransform(*gctx, sectorTrans, phiHits.at(0));
                 }
 
                 if (!passOccupancy2D(etaHits, phiHits)) {
@@ -511,6 +508,9 @@ void SpacePointMakerAlg::distributePointsAndStore(SpacePointsPerChamber&& hitsPe
     distributePhiPoints(std::move(hitsPerChamber.phiHits), splittedHits);
     
     for (SpacePointBucket& bucket : splittedHits) {
+
+        std::ranges::sort(bucket, MuonR4::SpacePointPerLayerSorter{});
+
         if (msgLvl(MSG::VERBOSE)){
             std::stringstream spStr{};
             for (const std::shared_ptr<SpacePoint>& sp : bucket){
@@ -521,7 +521,6 @@ void SpacePointMakerAlg::distributePointsAndStore(SpacePointsPerChamber&& hitsPe
             ATH_MSG_VERBOSE("Created a bucket, printing all spacepoints..."<<std::endl<<spStr.str());
         }
 
-        std::ranges::sort(bucket, MuonR4::SpacePointPerLayerSorter{m_idHelperSvc.get()});
         bucket.populateChamberLocations();
         finalContainer.push_back(std::make_unique<SpacePointBucket>(std::move(bucket)));
     }

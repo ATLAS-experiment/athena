@@ -416,7 +416,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         // add phi measurements - will be filtered for compatibility in separate algorithm
         extendWithPhiHits(hitList, bucket);
         // sort hits by layer 
-        SpacePointPerLayerSorter sorter{m_idHelperSvc.get()};
+        const SpacePointPerLayerSorter sorter{};
         std::ranges::stable_sort(hitList, sorter);
         // create hough maximum instance and add it to the event data for later writing! 
         const HoughMaximum& houghMax{data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket)};

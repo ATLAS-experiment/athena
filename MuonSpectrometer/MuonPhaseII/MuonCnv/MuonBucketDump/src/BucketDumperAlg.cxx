@@ -105,7 +105,7 @@ namespace MuonR4{
 
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
 
-        const SpacePointPerLayerSorter layerSorter{m_idHelperSvc.get()};
+        const SpacePointPerLayerSorter layerSorter{};
 
         for(const SpacePointBucket* bucket : *spContainer) {
             /// Filter random noise
@@ -174,7 +174,7 @@ namespace MuonR4{
                 }
             }
 
-            std::unordered_map<Identifier, unsigned> layNumbers{};
+            std::vector<unsigned int> layNumbers{};
             std::unordered_map<const SpacePoint*, std::vector<const xAOD::MuonSegment*>> spToTrueSeg{};
             if (m_isMC) {
                 using SegLinkVec_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
@@ -189,9 +189,11 @@ namespace MuonR4{
             
             for(const SpacePointBucket::value_type& sp : *bucket) {
                 /// Calculate the layer of the space point
-                const unsigned layer{layNumbers.insert(
-                                        std::make_pair(layerSorter.detectorLayerId(sp->identify()), 
-                                                       layNumbers.size())).first->second};
+                const unsigned int layNum = layerSorter.sectorLayerNum(*sp);
+                if (std::find(layNumbers.begin(), layNumbers.end(), layNum) == layNumbers.end()) {
+                    layNumbers.push_back(layNum);
+                }
+                const unsigned layer = layNumbers.size()-1;
     
                 const Identifier& id = sp->identify();
 
