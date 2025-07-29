@@ -1,6 +1,6 @@
 /**
  *
- * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauEfficiencyCorrectionsTool.cxx
  * @brief Class for ditau efficiency correction scale factors and uncertainties
@@ -104,7 +104,7 @@ void DiTauEfficiencyCorrectionsTool::printConfig() const
 
 //______________________________________________________________________________
 CP::CorrectionCode DiTauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau,
-    double& eff, unsigned int /*iRunNumber*/, unsigned int /*iMu*/ )
+    double& eff )
 {
   eff = 1.;
 
@@ -123,15 +123,14 @@ CP::CorrectionCode DiTauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( con
 }
 
 //______________________________________________________________________________
-CP::CorrectionCode DiTauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau, 
-  unsigned int iRunNumber, unsigned int iMu)
+CP::CorrectionCode DiTauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau )
 {
   if (m_bIsData)
     return CP::CorrectionCode::Ok;
 
   for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
   {
-    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xDiTau, iRunNumber, iMu);
+    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xDiTau);
     if (tmpCorrectionCode != CP::CorrectionCode::Ok)
     {
       return tmpCorrectionCode;
