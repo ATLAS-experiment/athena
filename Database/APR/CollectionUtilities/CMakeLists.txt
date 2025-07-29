@@ -41,5 +41,4 @@ collection_utility( CollListToken )
 collection_utility( CollQuery )
 
 # Install files from the package:
-atlas_install_scripts( scripts/*.exe scripts/*.py )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
