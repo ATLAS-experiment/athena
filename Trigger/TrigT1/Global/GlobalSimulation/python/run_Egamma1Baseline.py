@@ -43,7 +43,6 @@ if __name__ == '__main__':
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataFlow = True
     flags.Trigger.EDMVersion = 3
-    flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
 
     flags.fillFromArgs(parser=parser)

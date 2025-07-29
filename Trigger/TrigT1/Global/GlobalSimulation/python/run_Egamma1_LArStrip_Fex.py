@@ -31,12 +31,12 @@ if __name__ == '__main__':
         default=False)
 
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags, defaultConditionsTags
     flags.Input.Files = defaultTestFiles.RAW_RUN3
-        
-     
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA24
+    
     flags.Output.AODFileName = 'AOD.pool.root'
-    flags.Common.isOnline = not flags.Input.isMC
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
     flags.Trigger.doLVL1 = True
@@ -45,7 +45,6 @@ if __name__ == '__main__':
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataFlow = True
     flags.Trigger.EDMVersion = 3
-    flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
 
     # Enable only calo for this test
