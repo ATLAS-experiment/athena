@@ -50,10 +50,14 @@ class MetAnalysisConfig (ConfigBlock):
             "of this OR scheme, it should not be used in a regular analysis")
         self.addOption ('saveSignificance', True, type=bool,
             info="whether to save the MET significance (default=True)")
+        self.addOption ('addExtraSignificanceVars', False, type=bool,
+            info="whether to save some additional (event-based) MET significance variables (default=False)")
         self.addOption ('useLRT', False, type=bool,
             info="whether to use LRT MET Core and association map")
         self.addOption ('useCaloSoftTerm', False, type=bool,
             info="(expert) use calo- instead of track-based soft term")
+        self.addOption ('softTermResolution', -1.0, type=float,
+            info="(expert) override the default soft term resolution in METSignificance")
 
     def makeAlgs (self, config) :
 
@@ -125,10 +129,19 @@ class MetAnalysisConfig (ConfigBlock):
                     config.getContainerMeta(self.muons.split(".")[0], 'calibMode', failOnMiss=True))
 
             alg.significanceTool.SoftTermParam = 0
+            if self.softTermResolution > 0:
+                alg.significanceTool.SoftTermReso = self.softTermResolution
             alg.significanceTool.TreatPUJets = self.treatPUJets
             alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim
             alg.met = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, 'significance', 'significance')
+            config.addOutputVar (self.containerName, 'significance_%SYS%', 'significance')
+            if self.addExtraSignificanceVars:
+                alg.sigDirectionalDecoration = "sigDirectional_%SYS%"
+                alg.METOverSqrtSumETDecoration = "METOverSqrtSumET_%SYS%"
+                alg.METOverSqrtHTDecoration = "METOverSqrtHT_%SYS%"
+                config.addOutputVar (self.containerName, 'sigDirectional_%SYS%', 'sigDirectional')
+                config.addOutputVar (self.containerName, 'METOverSqrtSumET_%SYS%', 'METOverSqrtSumET')
+                config.addOutputVar (self.containerName, 'METOverSqrtHT_%SYS%', 'METOverSqrtHT')
 
         config.addOutputVar (self.containerName, 'met', 'met')
         config.addOutputVar (self.containerName, 'phi', 'phi')
