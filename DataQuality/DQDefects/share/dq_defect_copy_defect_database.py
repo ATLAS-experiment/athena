@@ -8,7 +8,7 @@ def parse_runlumi(instr):
     if instr is None: return None
     import re
     from DQUtils.sugar import RunLumi
-    m = re.match('\((\d+),(\d+)\)', instr.replace(' ', ''))
+    m = re.match(r'\((\d+),(\d+)\)', instr.replace(' ', ''))
     if m is None:
         raise ValueError('Unable to parse ' + instr + '; please specify the limits in the form (run, lb)')
     return RunLumi(int(m.group(1)), int(m.group(2)))
