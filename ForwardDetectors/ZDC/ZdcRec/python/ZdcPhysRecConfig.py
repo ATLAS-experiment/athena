@@ -120,10 +120,6 @@ if __name__ == '__main__':
     if ("physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express"):
         acc.merge(FCalRecCfg(flags))
 
-    if flags.Input.TriggerStream == "physics_MinBias": # disregard OO config / physics stream for testing stage ||| [PRODUCTION] if ('pO' in config or 'OO' in config) and flags.Input.TriggerStream == "physics_MinBias":
-        from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-        acc.merge(InDetTrackRecoCfg(flags))
-
     if not flags.Input.isMC:
         if (isLED):
             from ZdcMonitoring.ZdcLEDMonitorAlgorithm import ZdcLEDMonitoringConfig

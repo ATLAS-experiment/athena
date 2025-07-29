@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,7 +18,7 @@ def getEnvelopeMap(flags):
         elif "TRT_EC" in flags.Sim.CosmicFilterVolumeNames:
             envelopeMap['TRT::WheelA'] = 'TRTECAEntryLayer'
             envelopeMap['TRT::WheelB'] = 'TRTECBEntryLayer'
-        elif "TRT_EC" in flags.Sim.CosmicFilterVolumeNames:
+        elif "SCT_Barrel" in flags.Sim.CosmicFilterVolumeNames:
             envelopeMap['SCT::ThShieldOuterCly'] = 'SCTBarrelEntryLayer'# could be ThShieldInnerCly or Cyl..
         elif "Pixel" in flags.Sim.CosmicFilterVolumeNames:
             envelopeMap['Pixel::Pixel'] = 'PixelEntryLayer'
