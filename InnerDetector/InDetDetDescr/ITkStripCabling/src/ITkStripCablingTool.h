@@ -48,7 +48,7 @@ class ITkStripCablingTool: public extends<AthAlgTool, IITkStripCablingTool> {
   //@name ITkStripCablingTool methods implemented, these are visible to clients
   //@{
   
-  virtual IdentifierHash getHashFromOnlineId(const ITkStripOnlineId& onlineId, const EventContext& ctx, const bool withWarnings = true) const;
+  virtual IdentifierHash getHashFromOnlineId(const ITkStripOnlineId& onlineId, const EventContext& ctx, const bool withWarnings = true) const override;
 
   /// return the online Id, given a hash (used by simulation encoders)
   virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash, const EventContext& ctx) const override;
