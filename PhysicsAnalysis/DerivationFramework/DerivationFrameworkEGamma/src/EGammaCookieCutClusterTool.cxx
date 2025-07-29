@@ -190,9 +190,11 @@ DerivationFramework::EGammaCookieCutClusterTool::addBranches() const
     }
 
     if (success[iel]) {
-      ATH_MSG_DEBUG("Cookie cut cluster"
+      if (newCluster) {
+        ATH_MSG_DEBUG("Cookie cut cluster"
 		    << " pT = " << newCluster->pt()
 		    << " eta = " << newCluster->eta());
+      }
       outClusterContainer->push_back(std::move(newCluster));
       size_t index = outClusterContainer->size() - 1;
       ElementLink<xAOD::CaloClusterContainer> 
