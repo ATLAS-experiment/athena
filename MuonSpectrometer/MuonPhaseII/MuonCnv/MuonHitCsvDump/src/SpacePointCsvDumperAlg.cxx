@@ -146,22 +146,24 @@ StatusCode SpacePointCsvDumperAlg::execute(){
         file<<std::endl;
    };
 
-   for (const SG::ReadHandleKey<SpacePointContainer>& key : m_readKeys) {
+    for (const SG::ReadHandleKey<SpacePointContainer>& key : m_readKeys) {
         const SpacePointContainer* spContainer{nullptr};
         ATH_CHECK(SG::get(spContainer, key, ctx));
 
-        const SpacePointPerLayerSorter layerSorter{m_idHelperSvc.get()};
+        const SpacePointPerLayerSorter layerSorter{};
         for(const SpacePointBucket* bucket : *spContainer) {
-         std::unordered_map<Identifier, unsigned> gasNumbers{};
-         for (const SpacePointBucket::value_type& spacePoint:  *bucket) {
-                unsigned int gasGap{gasNumbers.insert(
-                                    std::make_pair(layerSorter.detectorLayerId(spacePoint->identify()), 
-                                                   gasNumbers.size())).first->second};
+            std::vector<unsigned int> layNumbers{};
+            for (const SpacePointBucket::value_type& spacePoint:  *bucket) {
+                const unsigned int layNum = layerSorter.sectorLayerNum(*spacePoint);
+                if (std::find(layNumbers.begin(), layNumbers.end(), layNum) == layNumbers.end()) {
+                    layNumbers.push_back(layNum);
+                }
+                const unsigned gasGap = layNumbers.size()-1;
                 dumpToFile(bucket->bucketId(), *spacePoint, gasGap);
             }
         }
-   }
-   return StatusCode::SUCCESS;
+    }
+    return StatusCode::SUCCESS;
 }
 }
 
