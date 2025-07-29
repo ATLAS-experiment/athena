@@ -28,6 +28,10 @@ def TrigJetHypoToolMonitoring(flags, histPath, histFlags):
         montool.defineHistogram("GN2Xv01_ptop", title='GN2X_ptop; p_{top}', xbins=50, xmin=0, xmax=1, path='EXPERT', type='TH1F')
         montool.defineHistogram("GN2Xv01_pqcd", title='GN2X_pqcd; p_{QCD}', xbins=50, xmin=0, xmax=1, path='EXPERT', type='TH1F')
         montool.defineHistogram("GN2Xv01_discriminant", title='GN2Xv01 discriminant (fcc=0, ftop=0.25); GN2Xv01 discriminant', xbins=50, xmin=-30, xmax=30, path='EXPERT', type='TH1F')
+        montool.defineHistogram("GN2XTrig_phbb", title='GN2XTrig_phbb; p_{Hbb}', xbins=50, xmin=0, xmax=1, path='EXPERT', type='TH1F')
+        montool.defineHistogram("GN2XTrig_ptop", title='GN2XTrig_ptop; p_{top}', xbins=50, xmin=0, xmax=1, path='EXPERT', type='TH1F')
+        montool.defineHistogram("GN2XTrig_pqcd", title='GN2XTrig_pqcd; p_{QCD}', xbins=50, xmin=0, xmax=1, path='EXPERT', type='TH1F')
+        montool.defineHistogram("GN2XTrig_discriminant", title='GN2XTrig discriminant (ftop=0.25); GN2XTrig discriminant', xbins=50, xmin=-30, xmax=30, path='EXPERT', type='TH1F')
     return montool
 
 
