@@ -13,7 +13,7 @@ atlas_add_library( TrigInDetAnalysisExampleLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigInDetAnalysisExample
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib AtlasHepMCLib EventInfo GaudiKernel GeneratorObjects  McParticleEvent TrigCompositeUtilsLib TrigDecisionToolLib TrigInDetAnalysis TrigInDetAnalysisUtils TrigSteeringEvent VxVertex egammaEvent muonEvent tauEvent xAODEventInfo xAODTracking
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib AtlasHepMCLib EventInfo GaudiKernel GeneratorObjects  McParticleEvent TrigCompositeUtilsLib TrigDecisionToolLib TrigAnalysisHelpersLib TrigInDetAnalysis TrigInDetAnalysisUtils TrigSteeringEvent VxVertex egammaEvent muonEvent tauEvent xAODEventInfo xAODTracking
                    PRIVATE_LINK_LIBRARIES TrkParameters TrkTrack xAODTruth )
 
 atlas_add_component( TrigInDetAnalysisExample

@@ -14,7 +14,7 @@ set( COMMON_LIBRARIES
     ${Boost_LIBRARIES} AsgTools CxxUtils xAODBase xAODTrigger 
     TrigConfHLTData TrigConfL1Data TrigNavStructure TrigRoiConversionLib 
     TrigConfInterfaces TrigDecisionInterface TrigCompositeUtilsLib
-    TrigConfHLTUtilsLib AsgDataHandlesLib)
+    TrigConfHLTUtilsLib AsgDataHandlesLib TrigAnalysisHelpersLib)
 set (COMMON_PRIVATE_LIBRARIES
     ${ROOT_LIBRARIES} TrigSteeringEvent TrigConfData)
 
