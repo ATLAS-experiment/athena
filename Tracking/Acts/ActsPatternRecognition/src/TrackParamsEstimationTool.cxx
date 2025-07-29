@@ -7,6 +7,9 @@
 #include "Acts/Seeding/EstimateTrackParamsFromSeed.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
 
+#include <algorithm>
+#include <ranges>
+
 namespace ActsTrk {
   TrackParamsEstimationTool::TrackParamsEstimationTool(const std::string& type,
 						       const std::string& name,
@@ -26,6 +29,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "   " << m_sigmaQOverP );
     ATH_MSG_DEBUG( "   " << m_sigmaT0 );
     ATH_MSG_DEBUG( "   " << m_initialVarInflation );
+    ATH_MSG_DEBUG( "   " << m_bFieldMode );
+    ATH_MSG_DEBUG( "   " << m_firstSp );
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -44,13 +49,17 @@ namespace ActsTrk {
   {
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
-    const auto& bottom_sp = useTopSp ? sp_collection.back() : sp_collection.front();
+    const auto& bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
 
     // Magnetic Field
     ATLASMagneticFieldWrapper magneticField;
     Acts::MagneticFieldProvider::Cache magFieldCache = magneticField.makeCache( magFieldContext );
     Acts::Vector3 bField = *magneticField.getField( Acts::Vector3(bottom_sp->x(), bottom_sp->y(), bottom_sp->z()),
                                                     magFieldCache );
+    if (m_bFieldMode == 1) {
+        bField[0] = 0.0;
+        bField[1] = 0.0;
+    }
 
     // Get the surface
     const Acts::Surface& surface = retrieveSurface(seed, useTopSp);
@@ -75,22 +84,34 @@ namespace ActsTrk {
   {
     // Get SPs
     const auto& sp_collection = seed.sp();
-    if ( sp_collection.size() < 3 ) return std::nullopt;
+    const std::size_t nSp = sp_collection.size();
+    if (nSp < 3) return std::nullopt;
+
+    // Function to return which 3 SPs to use
+    auto spIndices = [this, nSp]() -> std::array<std::size_t, 3> {
+      if (m_useLongSeeds == 2 && nSp > 3ul) {
+        return {0, nSp / 2ul, nSp - 1};
+      } else if (m_firstSp > 0ul && nSp > 3ul) {
+        std::size_t first = std::min(m_firstSp.value(), nSp - 3ul);
+        return {first, first + 1, first + 2};
+      } else {
+        return {0, 1, 2};
+      }
+    };
+
+    // Function to extract the values from sp_collection
+    auto sp_collection_extract = std::views::transform([&sp_collection, useTopSp](std::size_t i) {
+      return sp_collection.at(useTopSp ? sp_collection.size() - i - 1 : i);
+    });
 
     // Compute free parameters
-    Acts::FreeVector freeParams = useTopSp ?
-      Acts::estimateTrackParamsFromSeed(sp_collection | std::views::reverse | std::views::take(3),
-                                        bField) :
-      Acts::estimateTrackParamsFromSeed(sp_collection | std::views::take(3),
-                                        bField);
+    Acts::FreeVector freeParams = Acts::estimateTrackParamsFromSeed(spIndices() | sp_collection_extract, bField);
 
-    if (m_useLongSeeds && sp_collection.size() > 3ul) {
-      ActsTrk::Seed::container_type sp_collection2;
-      if (useTopSp)
-        sp_collection2.assign({sp_collection.back(), sp_collection.at(sp_collection.size()/2ul), sp_collection.front()});
-      else
-        sp_collection2.assign({sp_collection.front(), sp_collection.at(sp_collection.size()/2ul), sp_collection.back()});
-      Acts::FreeVector freeParams2 = Acts::estimateTrackParamsFromSeed(sp_collection2, bField);
+    if (m_useLongSeeds == 1 && nSp > 3ul) {
+      auto spIndices2 = [nSp]() -> std::array<std::size_t, 3> {
+        return {0, nSp / 2ul, nSp - 1};
+      };
+      Acts::FreeVector freeParams2 = Acts::estimateTrackParamsFromSeed(spIndices2() | sp_collection_extract, bField);
       ATH_MSG_DEBUG("update seed p = " << 1.0 / freeParams[Acts::eFreeQOverP] << " to " << 1.0 / freeParams2[Acts::eFreeQOverP]);
       freeParams[Acts::eFreeQOverP] = freeParams2[Acts::eFreeQOverP];
     }
