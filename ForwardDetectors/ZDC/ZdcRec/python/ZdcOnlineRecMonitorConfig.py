@@ -65,12 +65,12 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
     flags.DQ.Environment = 'online'
     flags.DQ.enableLumiAccess = False
     flags.Common.useOnlineLumi = True
-    flags.DQ.doStreamAwareMon = False
+    flags.DQ.doStreamAwareMon = False #try True
     flags.DQ.FileKey = ""
 
     flags.IOVDb.GlobalTag='CONDBR2-HLTP-2025-02'
     flags.Trigger.triggerConfig = 'DB'
-
+    
     flags.LAr.doHVCorr = False
     flags.InDet.useSctDCS = False
     flags.InDet.useDCS = False
@@ -83,8 +83,8 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
         flags.DQ.triggerDataAvailable = False  
 
     # ------------------------------- turn off steering flags for online environment -------------------------------
-    _steeringFlags = ['HLT.doBjet', 'HLT.doBphys', 'HLT.doCalo', 'HLT.doEgamma', 'HLT.doGeneral', 'HLT.doInDet', 'HLT.doJet', 'HLT.doMET', 'HLT.doMinBias', 'HLT.doMuon', 'HLT.doTau', 'InDet.doAlignMon', 'InDet.doGlobalMon', 'InDet.doPerfMon', 'LVL1Calo.doValidatio', 'Muon.doAlignMon', 'Muon.doCombinedMon', 'Muon.doPhysicsMon', 'Muon.doRawMon', 'Muon.doSegmentMon', 'Muon.doTrackMon', 'Muon.doTrkPhysMon', 'doAFPMon', 'doCTPMon', 'doCaloGlobalMon', 'doDataFlowMon', 'doEgammaMon', 'doGlobalMon', 'doHIMon', 'doHLTMon', 'doInDetMon', 'doJetInputsMon', 'doJetMon', 'doJetTagMon', 'doLArMon', 'doLVL1CaloMon', 'doLVL1InterfacesMon', 'doLucidMon', 'doMissingEtMon', 'doMuonMon', 'doPixelMon', 'doSCTMon', 'doTRTMon', 'doTauMon', 'doTileMon']
-
+    _steeringFlags = ['HLT.doBjet', 'HLT.doBphys', 'HLT.doCalo', 'HLT.doEgamma', 'HLT.doGeneral', 'HLT.doInDet', 'HLT.doJet', 'HLT.doMET', 'HLT.doMinBias', 'HLT.doMuon', 'HLT.doTau', 'InDet.doAlignMon', 'InDet.doGlobalMon', 'InDet.doPerfMon', 'LVL1Calo.doValidation', 'Muon.doAlignMon', 'Muon.doCombinedMon', 'Muon.doPhysicsMon', 'Muon.doRawMon', 'Muon.doSegmentMon', 'Muon.doTrackMon', 'Muon.doTrkPhysMon', 'doAFPMon', 'doCTPMon', 'doCaloGlobalMon', 'doDataFlowMon', 'doEgammaMon', 'doGlobalMon', 'doHIMon', 'doHLTMon', 'doInDetMon', 'doJetInputsMon', 'doJetMon', 'doJetTagMon', 'doLArMon', 'doLVL1CaloMon', 'doLVL1InterfacesMon', 'doLucidMon', 'doMissingEtMon', 'doMuonMon', 'doPixelMon', 'doSCTMon', 'doTRTMon', 'doTauMon', 'doTileMon']
+    
     for flag in _steeringFlags:
         if flags.hasFlag('DQ.Steering.' + flag):
             flags._set('DQ.Steering.' + flag, False)
@@ -92,7 +92,6 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
             flags.addFlag('DQ.Steering.' + flag, False)
 
     # ------------------------------- turn off trigger flags for online environment -------------------------------
-    # _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doCalo', 'doID', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
     _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
 
     for flag in _triggerFlags:
@@ -214,8 +213,7 @@ def ZdcOnlineByteStreamCfg(flags, partition, isTestbed):
     log.info('final bssvc key: %s', bsSvc.Key)
     bsSvc.KeyCount = int(os.environ.get("ZDC_KEY_COUNT","250"))
     log.info('final bssvc keycount: %s', bsSvc.KeyCount)
-    bsSvc.ISServer = "Histogramming" # IS server on which to create this provider
-    bsSvc.BufferSize = 10 # event buffer size for each sampler
+    bsSvc.BufferSize = 120 # event buffer size for each sampler
     bsSvc.UpdatePeriod = 30 # time in seconds between updating plots
     bsSvc.Timeout = 240000 # timeout (not sure what this does)
     bsSvc.PublishName = os.getenv("ZDC_ATHENA_JOB_NAME","ZDC_Athena_monitor_test") # set name of this publisher as it will appear in IS
@@ -226,6 +224,12 @@ def ZdcOnlineByteStreamCfg(flags, partition, isTestbed):
     bsSvc.StreamType = os.getenv("ZDC_STREAM_TYPE","physics") if isTestbed or partition.name() == "ATLAS" else "calibration" # if on testbed or at p1 in ATLAS partition: set the stream type from environmental (OKS) variables
     bsSvc.StreamNames = os.getenv("ZDC_STREAM_NAME","ZDCCalib:ZDCLEDCalib:MinBias").split(":") if isTestbed or partition.name() == "ATLAS" else "ZDCLEDCalib".split(":") # name of the stream (Egamma,JetTauEtmiss,MinBias,Standby, etc.), this can be a colon(:) separated list of streams that use the 'streamLogic' to combine stream for 2016 HI run
     bsSvc.StreamLogic = os.getenv("ZDC_STREAM_LOGIC","Or") if partition.name() == "ATLAS" else "Ignore"
+
+    bsSvc.ISServer = "Histogramming" # IS server on which to create this provider 
+    if os.getenv("ZDC_STREAM_NAME") == "MinBias" or os.getenv("ZDC_STREAM_NAME") == "Standby":
+        bsSvc.ISServer = 'Histogramming-ZDC-iss'  # write out the gatherer hsitograms to the correct server
+
+    log.info('the ISServer is: %s', bsSvc.ISServer)
 
     log.debug('Printing out for debugging at testing/developing stage')
     log.debug('Testing if settings of these variables in ZDC athena segment OKS are correctly picked up by the python code')
@@ -371,11 +375,6 @@ if __name__ == '__main__':
 
     if ("physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express"):
         acc.merge(FCalRecCfg(flags))
-
-    if "physics_" in flags.Input.TriggerStream: # disregard OO config / physics stream for testing stage ||| [PRODUCTION] if ('pO' in config or 'OO' in config) and flags.Input.TriggerStream == "physics_MinBias":
-        from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-        acc.merge(InDetTrackRecoCfg(flags))
-
 
     acc.merge(RunZdcOnlineMonitorCfg(flags, isLED, isInj, isCalib))
 
