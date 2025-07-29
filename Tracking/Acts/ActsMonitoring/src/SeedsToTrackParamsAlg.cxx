@@ -52,7 +52,7 @@ namespace ActsTrk {
     for (std::size_t iseed = 0; iseed < seeds.size(); ++iseed) {
       const ActsTrk::Seed& seed = *seeds[iseed];
 
-      bool useTopSp = false;
+      const bool useTopSp = m_autoReverseSearch && shouldReverseSearch(seed);
 
       auto retrieveSurfaceFunction = 
         [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& { 
@@ -82,5 +82,18 @@ namespace ActsTrk {
 
     return StatusCode::SUCCESS;
   }
+
+  bool SeedsToTrackParamsAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
+    const auto& bottom_sp = seed.sp().front();
+
+    const double r = bottom_sp->radius();
+    const double z = std::abs(bottom_sp->z());
+
+    const double rBoundary = m_useTopSpRZboundary.value()[0];
+    const double zBoundary = m_useTopSpRZboundary.value()[1];
+
+    return r > rBoundary || z > zBoundary;
+  }
+
 
 }

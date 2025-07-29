@@ -65,8 +65,12 @@ namespace ActsTrk {
         "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate tracks"};
-    Gaudi::Property< bool > m_useLongSeeds {this, "useLongSeeds", true,
-        "use seeds with 4 or more SPs for better pT measurement"};
+    Gaudi::Property< int > m_useLongSeeds {this, "useLongSeeds", 2,
+        "0=use 1st 3 SPs, 1=use first,middle,last SPs to improve pT measurement, 2=use for all parameters"};
+    Gaudi::Property<int> m_bFieldMode{this, "bFieldMode", 0,
+        "B-field mode: 0=B-field at first SP in search order; 1=z-component of B-field; 2=B-field at innermost SP, regardless of search direction"};
+    Gaudi::Property<std::size_t> m_firstSp{this, "firstSp", 0ul,
+        "Index of first SP to use"};
 
     using Stepper = Acts::SympyStepper;
     using Navigator = Acts::VoidNavigator;
