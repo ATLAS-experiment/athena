@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSGEOMETRYINTERFACES_GEOMETRYDEFS_H
 #define ACTSGEOMETRYINTERFACES_GEOMETRYDEFS_H
@@ -9,7 +9,7 @@
 /// Then load the Acts TypeDef definitions for Eigen
 #include <string>
 #ifndef SIMULATIONBASE 
-#   include "Acts/Definitions/Algebra.hpp"
+#   include "ActsInterop/UnitConverters.h"
 #endif
 namespace ActsTrk {
     /// Simple enum to Identify the Type of the
