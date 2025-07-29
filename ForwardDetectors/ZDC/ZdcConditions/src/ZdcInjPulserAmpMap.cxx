@@ -26,7 +26,7 @@ ZdcInjPulserAmpMap::ZdcInjPulserAmpMap() : asg::AsgMessaging("ZdcInjPulserAmpMap
 
   if (!filePath.empty())
     {
-      ATH_MSG_DEBUG( "ZdcInjPulserAmpMap::found ZDC JSON at " << filePath );
+      ATH_MSG_INFO( "ZdcInjPulserAmpMap::found ZDC JSON at " << filePath );
     }
   else
     {
@@ -150,16 +150,25 @@ ZdcInjPulserAmpMap::Token ZdcInjPulserAmpMap::lookupRun(unsigned int runNumber, 
       configName = std::get<2>(rangeDescr);
       scaleFactor = std::get<3>(rangeDescr);
 
-      ATH_MSG_DEBUG( "ZdcInjPulserAmpMap::lookupRun():  found config name " << configName  << " for run number " 
+      ATH_MSG_INFO( "ZdcInjPulserAmpMap::lookupRun():  found config name " << configName  << " for run number " 
 		     << runNumber);
     }
   }
 
+  if (configName == "Default") {
+    ATH_MSG_WARNING("ZdcInjPulserAmpMap::lookupRun(): no valid configuration found for run number " << runNumber
+        << ". Using Default configuration.");
+  }
+
+  if (configName == "_none_") {
+    ATH_MSG_ERROR("ZdcInjPulserAmpMap::lookupRun(): no valid configuration found for run number " << runNumber 
+        << "; Default configuration is NOT allowed. Will return an invalid (empty) token.");
+  }
 
   // Find the corresponding configuration -- we hope
   //
   auto findIter = m_stepsConfigs.find(configName);
-  if (findIter == m_stepsConfigs.end()) return Token();
+  if (findIter == m_stepsConfigs.end()) return Token(); // config name doesn't match to any step configuration: return an invalid token
 
   // Now we make a new active configuration -- the only thing that needs to be thread-protected
   //

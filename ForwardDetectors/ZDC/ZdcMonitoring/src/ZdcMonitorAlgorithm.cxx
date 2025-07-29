@@ -321,6 +321,19 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         
         const auto &trigDecTool = getTrigDecisionTool();
 
+        for (int i = 0; i < nOOpOTriggers - nOOpOL1TriggersFromCTP; ++i) {
+            const bool pass = (trigDecTool->isPassed( m_OOpOtriggerChains[i] ));
+
+            // Histogram variable name:  “pass<L1-name>”
+            std::string varName = "pass" + m_OOpOtriggerChains[i];
+            //  *Optionally sanitise if you have funky characters*
+            std::replace_if( varName.begin(), varName.end(),
+                             [](char c){ return c=='-'; }, '_' );
+
+            oopoTrigPassBoolVec.emplace_back( varName, pass );
+            oopoTrigBitsArr[i+1] += pass;
+        }
+
         try {
             const xAOD::TrigDecision* trigDecision = nullptr;
             ANA_CHECK(evtStore()->retrieve( trigDecision, "xTrigDecision"));
@@ -348,18 +361,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         } catch (...) {
             ATH_MSG_WARNING("Error captured when fetching L1 trigger bits from CTP ID. Likely either no L1 trigger looked at or no L1 trigger will show to be passed.");
         }
-        for (int i = 0; i < nOOpOTriggers - nOOpOL1TriggersFromCTP; ++i) {
-            const bool pass = (trigDecTool->isPassed( m_OOpOtriggerChains[i] ));
-
-            // Histogram variable name:  “pass<L1-name>”
-            std::string varName = "pass" + m_OOpOtriggerChains[i];
-            //  *Optionally sanitise if you have funky characters*
-            std::replace_if( varName.begin(), varName.end(),
-                             [](char c){ return c=='-'; }, '_' );
-
-            oopoTrigPassBoolVec.emplace_back( varName, pass );
-            oopoTrigBitsArr[i+1] += pass;
-        }
     }else{
         oopoTrigBitsArr[nOOpOTriggers + 1] += 1; // OOpO trigger disabled
     }
@@ -383,9 +384,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto rpdCosDeltaReactionPlaneAngle = Monitored::Scalar<float>("rpdCosDeltaReactionPlaneAngle",-1000.0);
     auto bothReactionPlaneAngleValid = Monitored::Scalar<bool>("bothReactionPlaneAngleValid",true);
     auto bothHasCentroid = Monitored::Scalar<bool>("bothHasCentroid",true); // the looser requirement that both centroids were calculated (ignore valid)
-    
-    Monitored::Scalar<int> nTracksPV{"nTracksPV", 0};
-    Monitored::Scalar<float> avgTracksPerVertex{"avgTracksPerVertex", 0};
 
     std::array<bool, 2> centroidSideValidArr;
     std::array<bool, 2> rpdSideValidArr = {false, false};
@@ -939,44 +937,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     }
 
 // ______________________________________________________________________________
-    // obtaining track info
-// ______________________________________________________________________________
-
-    if (m_enableZDCPhysics && m_TrkInfoOn) {
-    // Retrieve vertices
-    const xAOD::VertexContainer* vertices = nullptr;
-    if (!evtStore()->retrieve(vertices, m_vertexContainerKey).isSuccess()) {
-        ATH_MSG_WARNING("Failed to retrieve vertex container: " << m_vertexContainerKey);
-    } else {
-        // Find primary vertex
-        const xAOD::Vertex* primaryVertex = nullptr;
-        for (const auto& vtx : *vertices) {
-            static const SG::ConstAccessor<short> vertexTypeAcc ("vertexType");
-            if (vertexTypeAcc.isAvailable(*vtx)) {
-                if (vtx->vertexType() == xAOD::VxType::PriVtx) {
-                    primaryVertex = vtx;
-                    break;
-                }
-            }else{
-                ATH_MSG_WARNING("The decoration vertexType does not exist! #Tracks(primary vertex) will always be zero.");
-            }
-        }
-        
-        // Count tracks from primary vertex
-        if (primaryVertex) {
-            nTracksPV = primaryVertex->nTrackParticles();
-        }
-        
-        // Calculate average tracks per vertex
-        int totalTracks = 0;
-        for (const auto& vtx : *vertices) {
-            totalTracks += vtx->nTrackParticles();
-        }
-        avgTracksPerVertex = vertices->empty() ? 0 : static_cast<float>(totalTracks) / vertices->size();
-    }
-}
-
-// ______________________________________________________________________________
     // give warning if there is missing aux data but no decoding error
 // ______________________________________________________________________________
     if (!cur_event_ZDC_available && !zdcDecodingError){
@@ -1021,13 +981,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                     std::ref(zdcHadronicEnergySumTwoSidesTeV),
                     std::ref(fcalEtSumTwoSides),
                     std::ref(totalEt24)
-                });
-            }
-
-            if (m_TrkInfoOn){
-                vars_global.insert(vars_global.end(), {
-                    std::ref(nTracksPV),
-                    std::ref(avgTracksPerVertex)
                 });
             }
 
