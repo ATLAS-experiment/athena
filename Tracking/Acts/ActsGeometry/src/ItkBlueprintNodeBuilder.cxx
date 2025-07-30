@@ -1,13 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This absolutely needs to go first to ensure Eigen plugin is loaded
 #include "GeoPrimitives/GeoPrimitives.h"
 //
 
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include <GeoModelKernel/GeoTube.h>
 #include <GeoModelKernel/GeoVPhysVol.h>
+
+
+#include "ItkBlueprintNodeBuilder.h"
 
 #include <Acts/Definitions/Units.hpp>
 #include <Acts/Geometry/Blueprint.hpp>
@@ -20,32 +24,42 @@
 #include <Acts/Geometry/MaterialDesignatorBlueprintNode.hpp>
 #include <Acts/Geometry/ProtoLayer.hpp>
 #include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
+#include "Acts/Geometry/VolumeResizeStrategy.hpp"
+#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
 #include <Acts/Navigation/TryAllNavigationPolicy.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
-#include <Acts/Visualization/ObjVisualization3D.hpp>
+
+
 #include <format>
 #include <fstream>
 #include <ranges>
 
-#include "ActsBlueprintConstruction.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsElementVector.h"
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsInterop/Logger.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "BeamPipeGeoModel/BeamPipeDetectorManager.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "InDetReadoutGeometry/SiDetectorManager.h"
+
+
 
 using namespace Acts::UnitLiterals;
 
-namespace {
 
-constexpr std::size_t s_beamPipeVolumeId = 1;
+namespace{
+
+constexpr std::size_t s_stripVolumeId = 20;
 constexpr std::size_t s_innerPixelVolumeId = 5;
 constexpr std::size_t s_outerPixelVolumeId = 10;
-constexpr std::size_t s_stripVolumeId = 20;
+constexpr std::size_t s_beamPipeVolumeId = 1;
+
+using enum Acts::CylinderVolumeBounds::Face;
+using enum Acts::AxisDirection;
+using enum Acts::AxisBoundaryType;
+using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
+using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
+using ResizeStrategy = Acts::VolumeResizeStrategy;
 
 // Helper function to convert shared_ptr vector to const ptr vector
 std::vector<const Acts::Surface*> makeConstPtrVector(
@@ -112,180 +126,139 @@ std::vector<LayerData> mergeLayers(const Acts::GeometryContext& gctx,
   return mergedLayers;
 }
 
-}  // anonymous namespace
 
-namespace ActsTrk {
-
-std::shared_ptr<const Acts::TrackingGeometry>
-ActsBlueprintConstruction::buildBlueprintGeometry(
-    const Acts::GeometryContext& gctx) {
-  using enum Acts::AxisDirection;
-  Acts::Experimental::Blueprint::Config cfg;
-  cfg.envelope[AxisZ] = {20_mm, 20_mm};
-  cfg.envelope[AxisR] = {0_mm, 20_mm};
-
-  auto blueprint = std::make_unique<Acts::Experimental::Blueprint>(cfg);
-
-  auto& cylinder = blueprint->addCylinderContainer("Detector", AxisR);
-
-  if (m_cfg.beamPipeMgr) {
-    addBeamPipeToBlueprint(gctx, cylinder);
-  }
-
-  if (m_cfg.itkPixelManager) {
-    addITkPixelToBlueprint(gctx, cylinder);
-  }
-
-  if (m_cfg.itkStripManager) {
-    addITkStripToBlueprint(gctx, cylinder);
-  }
-
-  // if (buildSubdet.count("HGTD")) {
-  //     addHGTDToBlueprint(*blueprint);
-  // }
-
-  ATH_MSG_VERBOSE("Blueprint complete");
-
-  if (!m_cfg.graphviz.empty()) {
-    ATH_MSG_VERBOSE("Writing blueprint graph to file " << m_cfg.graphviz);
-    std::ofstream file(m_cfg.graphviz);
-    blueprint->graphviz(file);
-  }
-
-  ATH_MSG_VERBOSE("Executing tracking geometry construction from blueprint");
-  auto logger = makeActsAthenaLogger(m_msgSvc, std::string("Blueprint"), m_lvl,
-                                     std::nullopt);
-  auto trackingGeometry = blueprint->construct(
-      {}, gctx, *logger->clone(std::nullopt, Acts::Logging::DEBUG));
-
-  if (m_cfg.objDebugOutput) {
-    Acts::ObjVisualization3D vis;
-    trackingGeometry->visualize(vis, gctx, {.visible = false},
-                                {.visible = false}, {.visible = true});
-    vis.write("blueprint_sensitive.obj");
-    vis.clear();
-
-    trackingGeometry->visualize(vis, gctx, {.visible = true},
-                                {.visible = false}, {.visible = false});
-    vis.write("blueprint_volume.obj");
-    vis.clear();
-
-    trackingGeometry->visualize(vis, gctx, {.visible = false},
-                                {.visible = true}, {.visible = false});
-    vis.write("blueprint_portals.obj");
-  }
-
-#ifdef USE_ACTSVG
-  drawSvg(gctx, *trackingGeometry,
-          Acts::Extent{Acts::ExtentEnvelope({.phi = {-0.1, 0.1}})});
-#endif
-
-  return trackingGeometry;
-}
-
-void ActsBlueprintConstruction::addBeamPipeToBlueprint(
-    const Acts::GeometryContext& /*gctx*/,
-    Acts::Experimental::BlueprintNode& blueprint) {
-
+void addStripBarrelLayer(
+    Acts::Experimental::BlueprintNode& parent, std::size_t ilayer,
+    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
+  using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
   using enum Acts::AxisBoundaryType;
 
-  // Get beam pipe parameters from existing code
-  PVConstLink beamPipeTopVolume = m_cfg.beamPipeMgr->getTreeTop(0);
-  if (m_cfg.beamPipeMgr->getNumTreeTops() == 1) {
-    beamPipeTopVolume =
-        m_cfg.beamPipeMgr->getTreeTop(0)->getChildVol(0)->getChildVol(0);
+  auto addLayer = [ilayer, &surfaces](auto& node) {
+    node.addLayer("Strip_Brl_" + std::to_string(ilayer), [&](auto& layer) {
+      layer.setNavigationPolicyFactory(
+          Acts::NavigationPolicyFactory::make()
+              .add<Acts::SurfaceArrayNavigationPolicy>(
+                  Acts::SurfaceArrayNavigationPolicy::Config{
+                      .layerType = Cylinder, .bins = {30, 10}})
+              .add<Acts::TryAllNavigationPolicy>(
+                  Acts::TryAllNavigationPolicy::Config{.sensitives = false})
+              .asUniquePtr());
+
+      layer.setSurfaces(surfaces);
+      layer.setEnvelope(Acts::ExtentEnvelope{{
+          .z = {5_mm, 5_mm},
+          .r = {2_mm, 2_mm},
+      }});
+    });
+  };
+
+  if (ilayer < 3) {
+    // Inner 3 layers: add material on outer cylinder
+    parent.addMaterial("Strip_Brl_" + std::to_string(ilayer) + "_Material",
+                       [&addLayer](auto& lmat) {
+                         lmat.configureFace(OuterCylinder,
+                                            {AxisRPhi, Bound, 20},
+                                            {AxisZ, Bound, 20});
+                         addLayer(lmat);
+                       });
+  } else {
+    addLayer(parent);
   }
+}
 
-  Acts::Transform3 beamPipeTransform{Acts::Transform3::Identity()};
+void addStripEndcapLayer(
+    Acts::Experimental::BlueprintNode& parent, int bec, const std::string& name,
+    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
+  using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
+  using enum Acts::CylinderVolumeBounds::Face;
+  using enum Acts::AxisDirection;
+  using enum Acts::AxisBoundaryType;
+ 
+  parent.addMaterial(name + "_Material", [&](auto& mat) {
+    mat.configureFace(bec < 0 ? NegativeDisc : PositiveDisc, {AxisR, Bound, 20},
+                      {AxisPhi, Bound, 40});
 
-  beamPipeTransform =
-      Acts::Translation3(beamPipeTopVolume->getX().translation());
+    mat.addLayer(name, [&surfaces](auto& layer) {
+      layer.setNavigationPolicyFactory(
+          Acts::NavigationPolicyFactory::make()
+              .add<Acts::SurfaceArrayNavigationPolicy>(
+                  Acts::SurfaceArrayNavigationPolicy::Config{.layerType = Disc,
+                                                             .bins = {30, 30}})
+              .add<Acts::TryAllNavigationPolicy>(
+                  Acts::TryAllNavigationPolicy::Config{.sensitives = false})
+              .asUniquePtr());
 
-  // Extract radius similar to makeBeamPipeConfig
-  double beamPipeRadius = 20;  // Default value
-
-  const GeoLogVol* beamPipeLogVolume = beamPipeTopVolume->getLogVol();
-  // This should always be set, but let's be safe
-  if (beamPipeLogVolume == nullptr) {
-    ATH_MSG_ERROR("Beam pipe volume has no log volume");
-    throw std::runtime_error("Beam pipe volume has no log volume");
-  }
-
-  // Get the geoShape and translate
-  const GeoTube* beamPipeTube =
-      dynamic_cast<const GeoTube*>(beamPipeLogVolume->getShape());
-  if (beamPipeTube == nullptr) {
-    ATH_MSG_ERROR("BeamPipeLogVolume was not of type GeoTube");
-    throw std::runtime_error{"BeamPipeLogVolume was not of type GeoTube"};
-  }
-
-  // Look for SectionC03 to get the actual radius
-  for (unsigned int i = 0; i < beamPipeTopVolume->getNChildVols(); i++) {
-    if (beamPipeTopVolume->getNameOfChildVol(i) == "SectionC03") {
-      PVConstLink childTopVolume = beamPipeTopVolume->getChildVol(i);
-      const GeoLogVol* childLogVolume = childTopVolume->getLogVol();
-      if (childLogVolume) {
-        const GeoTube* childTube =
-            dynamic_cast<const GeoTube*>(childLogVolume->getShape());
-        if (childTube) {
-          beamPipeRadius = 0.5 * (childTube->getRMax() + childTube->getRMin());
-        }
-      }
-      break;
-    }
-  }
-
-  ATH_MSG_VERBOSE(
-      "BeamPipe constructed from Database: translation (yes) - radius "
-      << (beamPipeTube ? "(yes)" : "(no)") << " - r = " << beamPipeRadius);
-
-  ATH_MSG_VERBOSE("BeamPipe shift estimated as    : "
-                  << beamPipeTransform.translation().transpose());
-
-  // Add to blueprint following pattern from blueprint_itk.py
-  blueprint.withGeometryIdentifier([&](auto& geoId) {
-    geoId.setAllVolumeIdsTo(s_beamPipeVolumeId);
-
-    geoId.addMaterial("BeamPipe_Material", [&](auto& mat) {
-      mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20},
-                        {AxisZ, Bound, 20});
-
-      // Add static volume for beam pipe
-      mat.addStaticVolume(beamPipeTransform,
-                          std::make_shared<Acts::CylinderVolumeBounds>(
-                              0, beamPipeRadius * 1_mm, 3 * 1_m),
-                          "BeamPipe");
+      layer.setSurfaces(surfaces);
+      layer.setEnvelope(Acts::ExtentEnvelope{{
+          .z = {0.1_mm, 0.1_mm},
+          .r = {2_mm, 2_mm},
+      }});
     });
   });
 }
+}  // namespace
 
-void ActsBlueprintConstruction::addITkPixelToBlueprint(
-    const Acts::GeometryContext& gctx,
-    Acts::Experimental::BlueprintNode& blueprint) {
-  using enum Acts::CylinderVolumeBounds::Face;
-  using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
-  using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
-  using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
-  using ResizeStrategy = Acts::VolumeResizeStrategy;
+namespace ActsTrk{
+
+StatusCode ItkBlueprintNodeBuilder::initialize(){
+    ATH_CHECK(detStore()->retrieve(m_itkStripMgr, "ITkStrip"));
+    ATH_CHECK(detStore()->retrieve(m_itkPixelMgr, "ITkPixel"));
+    if(m_buildBeamPipe) {
+        ATH_CHECK(detStore()->retrieve(m_beamPipeMgr, "BeamPipe"));
+    } 
+    m_elementStore = std::make_shared<ActsElementVector>();
+    return StatusCode::SUCCESS;
+
+}
+
+std::shared_ptr<Acts::Experimental::BlueprintNode> ItkBlueprintNodeBuilder::buildBlueprintNode(
+    const Acts::GeometryContext& gctx, std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
+
+    if(childNode) {
+      ATH_MSG_ERROR("Child node for the Itk should be null - no child expected");
+      throw std::runtime_error("Child node is not null");
+    }
+    
+    // The itk node is a container node that will hold both the pixel and strip nodes  
+    auto itkNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("ItkNode", AxisR);
+
+    // Add the itk pixel to the node
+    buildItkPixelBlueprintNode(gctx, *itkNode);
+
+    // Add the itk strip to the node
+    buildItkStripBlueprintNode(gctx, *itkNode);
+
+    //Add the beam pipe to the node
+    if(m_buildBeamPipe) {
+
+    buildBeamPipeBlueprintNode(gctx, *itkNode);
+
+    }
+
+    return itkNode;
+
+}
+
+void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
+    const Acts::GeometryContext& gctx, Acts::Experimental::BlueprintNode& node) {
 
   // Get ITkPixel parameters from detector manager
-  if (!m_cfg.itkPixelManager) {
+  if (!m_itkPixelMgr) {
     ATH_MSG_ERROR("ITkPixel manager not available");
     throw std::runtime_error("ITkPixel manager not available");
   }
 
   ATH_MSG_DEBUG("Detector manager has "
-                << m_cfg.itkPixelManager->getDetectorElementCollection()->size()
+                << m_itkPixelMgr->getDetectorElementCollection()->size()
                 << " elements");
 
   std::vector<std::shared_ptr<ActsDetectorElement>> elements;
 
   InDetDD::SiDetectorElementCollection::const_iterator iter;
   for (const auto* element :
-       *m_cfg.itkPixelManager->getDetectorElementCollection()) {
+       *m_itkPixelMgr->getDetectorElementCollection()) {
     const InDetDD::SiDetectorElement* siDetElement =
         dynamic_cast<const InDetDD::SiDetectorElement*>(element);
     if (siDetElement == nullptr) {
@@ -297,11 +270,11 @@ void ActsBlueprintConstruction::addITkPixelToBlueprint(
   ATH_MSG_VERBOSE("Retrieved " << elements.size() << " elements");
 
   // Copy to service level store to extend lifetime
-  m_cfg.elementStore->vector().insert(m_cfg.elementStore->vector().end(),
+  m_elementStore->vector().insert(m_elementStore->vector().end(),
                                       elements.begin(), elements.end());
 
   // Create containers for inner and outer pixel parts
-  blueprint.addMaterial("InnerPixelMaterial", [&](auto& mat) {
+  node.addMaterial("InnerPixelMaterial", [&](auto& mat) {
     mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
 
     auto& innerPixelContainer = mat.addCylinderContainer("InnerPixel", AxisZ);
@@ -432,7 +405,7 @@ void ActsBlueprintConstruction::addITkPixelToBlueprint(
 
       // Merge overlapping layers
       std::vector<LayerData> mergedLayers;
-      if (m_cfg.doEndcapLayerMerging) {
+      if (m_doEndcapLayerMerging) {
         mergedLayers = mergeLayers(gctx, std::move(protoLayers));
       } else {
         mergedLayers = std::move(protoLayers);
@@ -446,7 +419,7 @@ void ActsBlueprintConstruction::addITkPixelToBlueprint(
                                  << " surfaces");
 
         pl.protoLayer.medium(AxisZ);
-        auto layerName = std::format("InnerPixel_{}EC_", key);
+        auto layerName = std::format("InnerPixel_{}EC_{}", key, s);
 
         auto addLayer = [&layerName, &pl](auto& parent) {
           // Add layer with surfaces
@@ -474,6 +447,8 @@ void ActsBlueprintConstruction::addITkPixelToBlueprint(
                         << key << " / " << mergedLayers.size()
                         << " at z = " << pl.protoLayer.medium(AxisZ));
         if (key < mergedLayers.size() - 1) {
+          ATH_MSG_VERBOSE("Adding material for layer "
+                          << layerName );
           ec.addMaterial(layerName + "_Material", [&](auto& lmat) {
             // Set binning for endcap layer
             lmat.configureFace(bec < 0 ? NegativeDisc : PositiveDisc,
@@ -488,7 +463,7 @@ void ActsBlueprintConstruction::addITkPixelToBlueprint(
   });
 
   // Add outer pixel part
-  blueprint.addMaterial("OuterPixelMaterial", [&](auto& mat) {
+  node.addMaterial("OuterPixelMaterial", [&](auto& mat) {
     mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
 
     auto& outerPixelContainer = mat.addCylinderContainer("OuterPixel", AxisZ);
@@ -645,214 +620,208 @@ void ActsBlueprintConstruction::addITkPixelToBlueprint(
       }
     }
   });
+
 }
 
-namespace {
+void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(const Acts::GeometryContext& gctx, 
+                                                        Acts::Experimental::BlueprintNode& node) {
 
-void addStripBarrelLayer(
-    Acts::Experimental::BlueprintNode& parent, std::size_t ilayer,
-    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
-  using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
-  using enum Acts::CylinderVolumeBounds::Face;
-  using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
+           // Get ITkStrip parameters from detector manager
+        if (!m_itkStripMgr) {
+            ATH_MSG_ERROR("ITkStrip manager not available");
+            throw std::runtime_error("ITkStrip manager not available");
+        }
 
-  auto addLayer = [ilayer, &surfaces](auto& node) {
-    node.addLayer("Strip_Brl_" + std::to_string(ilayer), [&](auto& layer) {
-      layer.setNavigationPolicyFactory(
-          Acts::NavigationPolicyFactory::make()
-              .add<Acts::SurfaceArrayNavigationPolicy>(
-                  Acts::SurfaceArrayNavigationPolicy::Config{
-                      .layerType = Cylinder, .bins = {30, 10}})
-              .add<Acts::TryAllNavigationPolicy>(
-                  Acts::TryAllNavigationPolicy::Config{.sensitives = false})
-              .asUniquePtr());
+        ATH_MSG_DEBUG("Detector manager has "
+                        << m_itkStripMgr->getDetectorElementCollection()->size()
+                        << " elements");
 
-      layer.setSurfaces(surfaces);
-      layer.setEnvelope(Acts::ExtentEnvelope{{
-          .z = {5_mm, 5_mm},
-          .r = {2_mm, 2_mm},
-      }});
-    });
-  };
+        std::vector<std::shared_ptr<ActsDetectorElement>> elements;
 
-  if (ilayer < 3) {
-    // Inner 3 layers: add material on outer cylinder
-    parent.addMaterial("Strip_Brl_" + std::to_string(ilayer) + "_Material",
-                       [&addLayer](auto& lmat) {
-                         lmat.configureFace(OuterCylinder,
-                                            {AxisRPhi, Bound, 20},
-                                            {AxisZ, Bound, 20});
-                         addLayer(lmat);
-                       });
-  } else {
-    addLayer(parent);
-  }
-}
+        InDetDD::SiDetectorElementCollection::const_iterator iter;
+        for (const auto* element :
+            *m_itkStripMgr->getDetectorElementCollection()) {
+            const InDetDD::SiDetectorElement* siDetElement =
+                dynamic_cast<const InDetDD::SiDetectorElement*>(element);
+            if (siDetElement == nullptr) {
+            ATH_MSG_ERROR("Detector element was nullptr");
+            throw std::runtime_error{"Corrupt detector element collection"};
+            }
+            elements.push_back(std::make_shared<ActsDetectorElement>(*siDetElement));
+        }
+        ATH_MSG_VERBOSE("Retrieved " << elements.size() << " elements");
 
-void addStripEndcapLayer(
-    Acts::Experimental::BlueprintNode& parent, int bec, const std::string& name,
-    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
-  using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
-  using enum Acts::CylinderVolumeBounds::Face;
-  using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
-  parent.addMaterial(name + "_Material", [&](auto& mat) {
-    mat.configureFace(bec < 0 ? NegativeDisc : PositiveDisc, {AxisR, Bound, 20},
-                      {AxisPhi, Bound, 40});
+        // Copy to service level store to extend lifetime
+        m_elementStore->vector().insert(m_elementStore->vector().end(),
+                                            elements.begin(), elements.end());
 
-    mat.addLayer(name, [&surfaces](auto& layer) {
-      layer.setNavigationPolicyFactory(
-          Acts::NavigationPolicyFactory::make()
-              .add<Acts::SurfaceArrayNavigationPolicy>(
-                  Acts::SurfaceArrayNavigationPolicy::Config{.layerType = Disc,
-                                                             .bins = {30, 30}})
-              .add<Acts::TryAllNavigationPolicy>(
-                  Acts::TryAllNavigationPolicy::Config{.sensitives = false})
-              .asUniquePtr());
+        // Create container for strip part
+        node.addMaterial("StripMaterial", [&](auto& mat) {
+            mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
 
-      layer.setSurfaces(surfaces);
-      layer.setEnvelope(Acts::ExtentEnvelope{{
-          .z = {0.1_mm, 0.1_mm},
-          .r = {2_mm, 2_mm},
-      }});
-    });
-  });
-}
-}  // namespace
+            mat.addCylinderContainer("Strip", AxisZ, [&](auto& strips) {
+            // Add barrel container
+            strips.withGeometryIdentifier([this, &elements](auto& geoId) {
+                geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
 
-void ActsBlueprintConstruction::addITkStripToBlueprint(
-    const Acts::GeometryContext& gctx,
-    Acts::Experimental::BlueprintNode& blueprint) {
+                geoId.addCylinderContainer(
+                    "Strip_Brl", AxisR, [this, &elements](auto& barrel) {
+                    barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
+                    barrel.setResizeStrategy(ResizeStrategy::Gap);
 
-  using enum Acts::CylinderVolumeBounds::Face;
-  using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
-  using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
-  using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
-  using ResizeStrategy = Acts::VolumeResizeStrategy;
+                    std::map<int, std::vector<std::shared_ptr<Acts::Surface>>>
+                        layers{};
 
-  // Get ITkStrip parameters from detector manager
-  if (!m_cfg.itkStripManager) {
-    ATH_MSG_ERROR("ITkStrip manager not available");
-    throw std::runtime_error("ITkStrip manager not available");
-  }
+                    for (auto& element : elements) {
+                        IdentityHelper id = element->identityHelper();
+                        if (id.bec() != 0) {
+                        continue;
+                        }
 
-  ATH_MSG_DEBUG("Detector manager has "
-                << m_cfg.itkStripManager->getDetectorElementCollection()->size()
-                << " elements");
+                        int elementLayer = id.layer_disk();
+                        layers[elementLayer].push_back(
+                            element->surface().getSharedPtr());
+                    }
 
-  std::vector<std::shared_ptr<ActsDetectorElement>> elements;
+                    ATH_MSG_DEBUG("Adding " << layers.size()
+                                            << " layers to Strip barrel");
 
-  InDetDD::SiDetectorElementCollection::const_iterator iter;
-  for (const auto* element :
-       *m_cfg.itkStripManager->getDetectorElementCollection()) {
-    const InDetDD::SiDetectorElement* siDetElement =
-        dynamic_cast<const InDetDD::SiDetectorElement*>(element);
-    if (siDetElement == nullptr) {
-      ATH_MSG_ERROR("Detector element was nullptr");
-      throw std::runtime_error{"Corrupt detector element collection"};
-    }
-    elements.push_back(std::make_shared<ActsDetectorElement>(*siDetElement));
-  }
-  ATH_MSG_VERBOSE("Retrieved " << elements.size() << " elements");
-
-  // Copy to service level store to extend lifetime
-  m_cfg.elementStore->vector().insert(m_cfg.elementStore->vector().end(),
-                                      elements.begin(), elements.end());
-
-  // Create container for strip part
-  blueprint.addMaterial("StripMaterial", [&](auto& mat) {
-    mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
-
-    mat.addCylinderContainer("Strip", AxisZ, [&](auto& strips) {
-      // Add barrel container
-      strips.withGeometryIdentifier([this, &elements](auto& geoId) {
-        geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
-
-        geoId.addCylinderContainer(
-            "Strip_Brl", AxisR, [this, &elements](auto& barrel) {
-              barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
-              barrel.setResizeStrategy(ResizeStrategy::Gap);
-
-              std::map<int, std::vector<std::shared_ptr<Acts::Surface>>>
-                  layers{};
-
-              for (auto& element : elements) {
-                IdentityHelper id = element->identityHelper();
-                if (id.bec() != 0) {
-                  continue;
-                }
-
-                int elementLayer = id.layer_disk();
-                layers[elementLayer].push_back(
-                    element->surface().getSharedPtr());
-              }
-
-              ATH_MSG_DEBUG("Adding " << layers.size()
-                                      << " layers to Strip barrel");
-
-              for (const auto& [ilayer, surfaces] : layers) {
-                ATH_MSG_DEBUG("- Layer " << ilayer << " has " << surfaces.size()
-                                         << " surfaces");
-                addStripBarrelLayer(barrel, ilayer, surfaces);
-              }
+                    for (const auto& [ilayer, surfaces] : layers) {
+                        ATH_MSG_DEBUG("- Layer " << ilayer << " has " << surfaces.size()
+                                                << " surfaces");
+                        addStripBarrelLayer(barrel, ilayer, surfaces);
+                    }
+                });
             });
-      });
 
-      // Add endcap containers
-      for (int bec : {-2, 2}) {  // Negative and positive endcaps
-        const std::string s = bec > 0 ? "p" : "n";
+            // Add endcap containers
+            for (int bec : {-2, 2}) {  // Negative and positive endcaps
+                const std::string s = bec > 0 ? "p" : "n";
 
-        std::map<int, std::vector<std::shared_ptr<Acts::Surface>>> layers{};
+                std::map<int, std::vector<std::shared_ptr<Acts::Surface>>> layers{};
 
-        for (auto& element : elements) {
-          IdentityHelper id = element->identityHelper();
-          if (id.bec() * bec <= 0) {
-            continue;  // Skip if not in the right endcap
-          }
-
-          layers[id.layer_disk()].push_back(element->surface().getSharedPtr());
-        }
-
-        ATH_MSG_DEBUG("Found " << layers.size() << " layers in Strip " << s
-                               << "EC");
-
-        // Sort layers by absolute z position
-        std::vector<std::vector<std::shared_ptr<Acts::Surface>>> sorted_layers;
-        sorted_layers.reserve(layers.size());
-        for (const auto& [key, surfaces] : layers) {
-          sorted_layers.push_back(surfaces);
-        }
-
-        std::sort(sorted_layers.begin(), sorted_layers.end(),
-                  [&gctx](const auto& a, const auto& b) {
-                    Acts::ProtoLayer pl_a(gctx, makeConstPtrVector(a));
-                    Acts::ProtoLayer pl_b(gctx, makeConstPtrVector(b));
-                    return std::abs(pl_a.min(AxisZ)) <
-                           std::abs(pl_b.min(AxisZ));
-                  });
-
-        strips.withGeometryIdentifier([&sorted_layers, bec, &s](auto& geoId) {
-          geoId.setAllVolumeIdsTo(s_stripVolumeId + std::floor(bec / 2))
-              .incrementLayerIds(1);
-
-          geoId.addCylinderContainer(
-              "Strip_" + s + "EC", AxisZ, [&sorted_layers, bec, &s](auto& ec) {
-                ec.setAttachmentStrategy(AttachmentStrategy::Gap);
-                ec.setResizeStrategy(ResizeStrategy::Gap);
-
-                // Create layers from sorted layers
-                for (size_t i = 0; i < sorted_layers.size(); ++i) {
-                  const auto& surfaces = sorted_layers[i];
-                  auto layerName = "Strip_" + s + "EC_" + std::to_string(i);
-
-                  addStripEndcapLayer(ec, bec, layerName, surfaces);
+                for (auto& element : elements) {
+                IdentityHelper id = element->identityHelper();
+                if (id.bec() * bec <= 0) {
+                    continue;  // Skip if not in the right endcap
                 }
-              });
+
+                layers[id.layer_disk()].push_back(element->surface().getSharedPtr());
+                }
+
+                ATH_MSG_DEBUG("Found " << layers.size() << " layers in Strip " << s
+                                    << "EC");
+
+                // Sort layers by absolute z position
+                std::vector<std::vector<std::shared_ptr<Acts::Surface>>> sorted_layers;
+                sorted_layers.reserve(layers.size());
+                for (const auto& [key, surfaces] : layers) {
+                sorted_layers.push_back(surfaces);
+                }
+
+                std::sort(sorted_layers.begin(), sorted_layers.end(),
+                        [&gctx](const auto& a, const auto& b) {
+                            Acts::ProtoLayer pl_a(gctx, makeConstPtrVector(a));
+                            Acts::ProtoLayer pl_b(gctx, makeConstPtrVector(b));
+                            return std::abs(pl_a.min(AxisZ)) <
+                                std::abs(pl_b.min(AxisZ));
+                        });
+
+                strips.withGeometryIdentifier([&sorted_layers, bec, &s](auto& geoId) {
+                    geoId.setAllVolumeIdsTo(s_stripVolumeId + std::floor(bec / 2))
+                        .incrementLayerIds(1);
+
+                    geoId.addCylinderContainer(
+                        "Strip_" + s + "EC", AxisZ, [&sorted_layers, bec, &s](auto& ec) {
+                            ec.setAttachmentStrategy(AttachmentStrategy::Gap);
+                            ec.setResizeStrategy(ResizeStrategy::Gap);
+
+                            // Create layers from sorted layers
+                            for (size_t i = 0; i < sorted_layers.size(); ++i) {
+                            const auto& surfaces = sorted_layers[i];
+                            auto layerName = "Strip_" + s + "EC_" + std::to_string(i);
+
+                            addStripEndcapLayer(ec, bec, layerName, surfaces);
+                            }
+                    });
+                });
+            }
+
+            });
         });
-      }
+    }
+
+  void ItkBlueprintNodeBuilder::buildBeamPipeBlueprintNode(const Acts::GeometryContext& /*gctx*/,
+                                                           Acts::Experimental::BlueprintNode& node) {
+
+
+  // Get beam pipe parameters from existing code
+  PVConstLink beamPipeTopVolume = m_beamPipeMgr->getTreeTop(0);
+  if (m_beamPipeMgr->getNumTreeTops() == 1) {
+    beamPipeTopVolume =
+        m_beamPipeMgr->getTreeTop(0)->getChildVol(0)->getChildVol(0);
+  }
+
+  const Amg::Transform3D beamPipeTransform{Amg::getTranslate3D(beamPipeTopVolume->getX().translation())};
+
+  // Extract radius similar to makeBeamPipeConfig
+  double beamPipeRadius = 20;  // Default value
+
+  const GeoLogVol* beamPipeLogVolume = beamPipeTopVolume->getLogVol();
+  // This should always be set, but let's be safe
+  if (beamPipeLogVolume == nullptr) {
+    ATH_MSG_ERROR("Beam pipe volume has no log volume");
+    throw std::runtime_error("Beam pipe volume has no log volume");
+  }
+
+  // Get the geoShape and translate
+  const GeoTube* beamPipeTube =
+      dynamic_cast<const GeoTube*>(beamPipeLogVolume->getShape());
+  if (beamPipeTube == nullptr) {
+    ATH_MSG_ERROR("BeamPipeLogVolume was not of type GeoTube");
+    throw std::runtime_error{"BeamPipeLogVolume was not of type GeoTube"};
+  }
+
+  // Look for SectionC03 to get the actual radius
+  for (unsigned int i = 0; i < beamPipeTopVolume->getNChildVols(); i++) {
+    auto childName = beamPipeTopVolume->getNameOfChildVol(i);
+    if (childName != "SectionC03") {
+      continue;  // Skip if not SectionC03
+    }
+    PVConstLink childTopVolume = beamPipeTopVolume->getChildVol(i);
+    const GeoLogVol* childLogVolume = childTopVolume->getLogVol();
+    const GeoTube* childTube =
+            dynamic_cast<const GeoTube*>(childLogVolume->getShape());
+    if (childTube) {
+        beamPipeRadius = 0.5 * (childTube->getRMax() + childTube->getRMin());
+        break;
+    }
+
+  }
+  
+
+  ATH_MSG_VERBOSE(
+      "BeamPipe constructed from Database: translation (yes) - radius "
+      << (beamPipeTube ? "(yes)" : "(no)") << " - r = " << beamPipeRadius);
+
+  ATH_MSG_VERBOSE("BeamPipe shift estimated as    : "
+                  << beamPipeTransform.translation().transpose());
+
+  // Add to blueprint following pattern from blueprint_itk.py
+  node.withGeometryIdentifier([&](auto& geoId) {
+    geoId.setAllVolumeIdsTo(s_beamPipeVolumeId);
+
+    geoId.addMaterial("BeamPipe_Material", [&](auto& mat) {
+      mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20},
+                        {AxisZ, Bound, 20});
+
+      // Add static volume for beam pipe
+      mat.addStaticVolume(beamPipeTransform,
+                          std::make_shared<Acts::CylinderVolumeBounds>(
+                              0, beamPipeRadius * 1_mm, 3 * 1_m),
+                          "BeamPipe");
     });
   });
 }
-}  // namespace ActsTrk
+
+} //namespace ActsTrk
