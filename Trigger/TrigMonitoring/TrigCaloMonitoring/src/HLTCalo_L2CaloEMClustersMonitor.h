@@ -13,7 +13,7 @@
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "LumiBlockData/BunchCrossingCondData.h"
-#include "TrigDecisionTool/FeatureRequestDescriptor.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 
 class HLTCalo_L2CaloEMClustersMonitor : public AthMonitorAlgorithm {
 

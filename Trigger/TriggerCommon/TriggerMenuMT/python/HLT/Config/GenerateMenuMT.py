@@ -630,6 +630,9 @@ def generateMenuMT(flags):
     from TriggerMenuMT.HLT.Config.Validation.CheckCPSGroups import checkCPSGroups
     checkCPSGroups(HLTMenuConfig.dictsList())
 
+    log.info("Checking that all chains streamed in express have a signature or detctor monGroup")
+    from TriggerMenuMT.HLT.Config.Validation.CheckMonGroups import checkMonGroups
+    checkMonGroups(HLTMenuConfig.dictsList())
 
     # Cleanup menu singletons to allow garbage collection (ATR-28855)
     GenerateMenuMT.clear()

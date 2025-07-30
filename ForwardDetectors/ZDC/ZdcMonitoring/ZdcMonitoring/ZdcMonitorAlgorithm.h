@@ -20,8 +20,6 @@
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/VertexContainer.h"
 #include <xAODTrigger/TrigDecision.h>
 //---------------------------------------------------
 #include "ZdcUtils/ZdcEventInfo.h"
@@ -126,7 +124,6 @@ private:
     Gaudi::Property<bool> m_isOnline {this,"IsOnline",false};
     Gaudi::Property<bool> m_isSim {this,"IsSim",false}; // is simulation
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
-    Gaudi::Property<bool> m_TrkInfoOn {this,"TrkInfoOn",false};
     Gaudi::Property<bool> m_EnableZDCSingleSideTriggers {this,"EnableZDCSingleSideTriggers",true};
     Gaudi::Property<bool> m_EnableUCCTriggers {this,"EnableUCCTriggers",false};
     Gaudi::Property<bool> m_EnableOOpOTriggers {this,"EnableOOpOTriggers",false};
@@ -156,9 +153,6 @@ private:
     // SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcBCIDKey {this, "ZdcBCIDKey", m_zdcSumContainerName + ".BCID" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_DAQModeKey {this, "ZdcDAQModeKey", m_zdcSumContainerName + ".DAQMode" + m_auxSuffix};
     
-    Gaudi::Property<std::string> m_vertexContainerKey{this, "VertexContainerKey", "PrimaryVertices", "Vertex container name"};
-    Gaudi::Property<std::string> m_trackContainerKey{this, "TrackContainerKey", "InDetTrackParticles", "Track container name"};    
-
     // Per-am (module sum) observables
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumCalibEnergyKey {this, "ZdcSumCalibEnergyKey", m_zdcSumContainerName + ".CalibEnergy" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumAverageTimeKey {this, "ZdcSumAverageTimeKey", m_zdcSumContainerName + ".AverageTime" + m_auxSuffix};
