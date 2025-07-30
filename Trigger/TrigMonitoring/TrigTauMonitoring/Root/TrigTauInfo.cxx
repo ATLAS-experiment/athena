@@ -51,7 +51,8 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
     std::regex l1_tau_rgx("(\\d*)(e|j|c|)TAU(\\d+)(L|M|T|HL|HM|HT|H|IM|I|)");
     std::regex l1_toposeparate_rgx("^(\\d{0,2})(DETA|DPHI)(\\d{0,2})$");
     std::regex topo_rgx("^.*(invm|dR|deta|dphi)AB.*$");
-    std::vector<std::regex*> all_regexes = {&tau_rgx, &elec_rgx, &muon_rgx, &gamma_rgx, &jet_rgx, &met_rgx, &l1_rgx};
+    std::regex ditauomni_rgx("^ditauOmni(\\d)+Trk(\\d)+$");
+    std::vector<std::regex*> all_regexes = {&tau_rgx, &elec_rgx, &muon_rgx, &gamma_rgx, &jet_rgx, &met_rgx, &l1_rgx, &ditauomni_rgx};
 
     std::regex tau_type_rgx("^(ptonly|tracktwoMVA|tracktwoMVABDT|tracktwoLLP|trackLRT)$");
     std::regex tau_ID_rgx("^(perf|idperf|veryloose.*|loose.*|medium.*|tight.*)$");
@@ -63,7 +64,6 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
     std::vector<std::string> leg;
     for(size_t i = 0; i < sections.size(); i++) {
         leg.push_back(sections[i]); // Attach to the current leg
-
         //Match the beginning of a new leg, or the end of the chain
         if(i == sections.size() - 1 || (std::any_of(all_regexes.begin(), all_regexes.end(), [&sections, i](const std::regex* rgx) { return std::regex_match(sections[i+1], *rgx); }))) {
             // Process the previous leg, which starts with the item, multiplicity, and threshold
@@ -119,7 +119,9 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                 m_HLTMETThr.push_back(threshold);
             } else if(std::regex_match(leg[0], match, noalg_rgx)) {
                 m_isStreamer = true;
-            } else if(std::regex_match(leg[0], l1_rgx)) { // Treat the L1 items as a leg
+            } else if (std::regex_match(leg[0], match, ditauomni_rgx)) {
+                m_HLTBoostedDitauName.push_back(leg[0]);
+            } else if(std::regex_match(leg[0], l1_rgx)){ // Treat the L1 items as a leg
                 for(size_t j = 0; j < leg.size(); j++) {
                     if(std::regex_match(leg[j], topo_rgx)) continue; // Remove HLT topo sections, not part of the L1 item
 
@@ -132,7 +134,7 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                             // Uses both TAU items, in the M isolation threshold
                             leg[0] = "L1TAU20IM";
                             leg.push_back("TAU12IM");
-                            // Even on combined chains using jets, we don't use the jets threshold
+                            // Even on combined  chains using jets, we don't use the jets threshold
                         }
                         else continue; // Remove the Phase 1 L1Topo items, since we always use a multiplicity threshold
                     }
