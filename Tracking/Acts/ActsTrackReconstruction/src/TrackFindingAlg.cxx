@@ -23,12 +23,15 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "src/detail/ExpectedHitUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
 
 // STL
+#include <Acts/Propagator/StandardAborters.hpp>
 #include <sstream>
 #include <functional>
+#include <stdexcept>
 #include <utility>
 #include <algorithm>
 #include <variant>
@@ -236,7 +239,10 @@ namespace ActsTrk
     if (m_addPixelStripCounts) {
       addPixelStripCounts(actsTracksContainer);
     }
-    
+
+    detail::ExpectedLayerPatternHelper::add(actsTracksContainer); 
+    detail::ExpectedLayerPatternHelper::add(tracksContainer); 
+        
     EventStats event_stat;
     event_stat.resize(m_stat.size());
     
@@ -372,7 +378,9 @@ namespace ActsTrk
     if (m_addPixelStripCounts) {
       addPixelStripCounts(tracksContainerTemp);
     }
-    
+
+    detail::ExpectedLayerPatternHelper::add(tracksContainerTemp); 
+
     std::size_t category_i = 0;
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
     auto stopBranchProxy = [&](const detail::RecoTrackContainer::TrackProxy &track,
@@ -492,6 +500,8 @@ namespace ActsTrk
           continue;
         }
         auto &tracksForSeed = result.value();
+
+
         
         std::size_t ntracks = 0ul;
         
@@ -528,7 +538,6 @@ namespace ActsTrk
             ATH_CHECK( addTrack(detContext,
                                 firstTrack,
                                 pSurface,
-                                extrapolationOptions,
                                 extrapolationStrategy,
                                 sharedHits,
                                 actsTracksContainer,
@@ -562,7 +571,6 @@ namespace ActsTrk
             ATH_CHECK( addTrack(detContext,
                                 firstTrack,
                                 pSurface,
-                                extrapolationOptions,
                                 extrapolationStrategy,
                                 sharedHits,
                                 actsTracksContainer,
@@ -602,7 +610,6 @@ namespace ActsTrk
             ATH_CHECK( addTrack(detContext,
                                 secondTrack,
                                 pSurface,
-                                extrapolationOptions,
                                 extrapolationStrategy,
                                 sharedHits,
                                 actsTracksContainer,
@@ -753,11 +760,101 @@ namespace ActsTrk
     ++nPrinted;
     m_trackStatePrinter->printSeed(detContext.geometry, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
   }
+
+namespace {
+struct Collector {
+
+  using result_type = TrackFindingAlg::ExpectedLayerPattern*;
+
+  template <typename propagator_state_t, typename stepper_t,
+  typename navigator_t>
+  void act(propagator_state_t& state, const stepper_t& /*stepper*/,
+           const navigator_t& navigator, result_type& result,
+           const Acts::Logger& /*logger*/) const {
+    const auto* currentSurface = navigator.currentSurface(state.navigation);
+    if (currentSurface == nullptr) {
+      return;
+    }
+
+    assert(result == nullptr && "Result type is nullptr");
+
+    if (currentSurface->associatedDetectorElement() != nullptr) {
+      const auto* detElem = dynamic_cast<const ActsDetectorElement*>(currentSurface->associatedDetectorElement());
+      if(detElem != nullptr) {
+        detail::addToExpectedLayerPattern(*result, *detElem);
+      }
+    }
+  };
+};
+}
   
+Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
+  const DetectorContextHolder& detContext,
+  detail::RecoTrackContainerProxy &track, 
+  const Acts::Surface &referenceSurface,
+  const detail::Extrapolator &propagator,
+  Acts::TrackExtrapolationStrategy strategy,
+  ExpectedLayerPattern& expectedLayerPattern) const {
+
+    Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
+                            Acts::ActorList<Acts::MaterialInteractor, Collector>>
+    options(detContext.geometry, detContext.magField);
+
+    auto findResult = findTrackStateForExtrapolation(
+        options.geoContext, track, referenceSurface, strategy, logger());
+
+    if (!findResult.ok()) {
+      ACTS_ERROR("failed to find track state for extrapolation");
+      return findResult.error();
+    }
+
+    auto &[trackState, distance] = *findResult;
+
+    options.direction = Acts::Direction::fromScalarZeroAsPositive(distance);
+
+    Acts::BoundTrackParameters parameters = track.createParametersFromState(trackState);
+    ACTS_VERBOSE("extrapolating track to reference surface at distance "
+                << distance << " with direction " << options.direction
+                << " with starting parameters " << parameters);
+
+    auto state = propagator.makeState<decltype(options), Acts::ForcedSurfaceReached>(referenceSurface, options);
+    ExpectedLayerPattern*& collectorResult = state.get<TrackFindingAlg::ExpectedLayerPattern*>();
+    collectorResult = &expectedLayerPattern;
+
+    auto initRes = propagator.initialize(state, parameters);
+    if(!initRes.ok()) {
+      ACTS_ERROR("Failed to initialize propgation state: " << initRes.error().message());
+      return initRes.error();
+    }
+
+
+    auto propagateOnlyResult =
+        propagator.propagate(state);
+
+    if (!propagateOnlyResult.ok()) {
+      ACTS_ERROR("failed to extrapolate track: " << propagateOnlyResult.error().message());
+      return propagateOnlyResult.error();
+    }
+
+    auto propagateResult = propagator.makeResult(
+        std::move(state), propagateOnlyResult, referenceSurface, options);
+
+    if (!propagateResult.ok()) {
+      ACTS_ERROR("failed to extrapolate track: " << propagateResult.error().message());
+      return propagateResult.error();
+    }
+
+    track.setReferenceSurface(referenceSurface.getSharedPtr());
+    track.parameters() = propagateResult->endParameters.value().parameters();
+    track.covariance() =
+        propagateResult->endParameters.value().covariance().value();
+
+    return Acts::Result<void>::success();
+ }
+
   StatusCode TrackFindingAlg::addTrack(const DetectorContextHolder& detContext,
                                        detail::RecoTrackContainerProxy &track,
                                        const Acts::Surface& pSurface,
-                                       const Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options, Acts::ActorList<Acts::MaterialInteractor>>& extrapolationOptions,
                                        const Acts::TrackExtrapolationStrategy& extrapolationStrategy,
                                        detail::SharedHitCounter &sharedHits,
                                        detail::RecoTrackContainer &actsTracksContainer,
@@ -771,16 +868,20 @@ namespace ActsTrk
                                        std::size_t category_i,
                                        const char *seedType) const
   {
+  
+    std::array<unsigned int, 4> expectedLayerPattern;
+
     // if the the perigeeSurface was not hit (in particular the case for the inside-out pass,
     // the track has no reference surface and the extrapolation to the perigee has not been done
     // yet.
     if (not track.hasReferenceSurface()) {
-      auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(track,
-                                                                          pSurface,
-                                                                          trackFinder().extrapolator,
-                                                                          extrapolationOptions,
-                                                                          extrapolationStrategy,
-                                                                          logger());
+      auto extrapolationResult =
+        extrapolateTrackToReferenceSurface(detContext, track,
+                                          pSurface,
+                                          trackFinder().extrapolator,
+                                          extrapolationStrategy,
+                                          expectedLayerPattern);
+
       if (not extrapolationResult.ok()) {
         ATH_MSG_WARNING("Extrapolation for seed "
                         << iseed << " and " << track.index()
@@ -788,6 +889,17 @@ namespace ActsTrk
                         << " dropping track candidate.");
         destiny.at(iseed) = DestinyType::FAILURE;
         return StatusCode::SUCCESS;
+      }
+    }
+
+    // Before trimming, inspect encountered surfaces from all track states
+    for(const auto& ts : track.trackStatesReversed()) {
+      const auto& surface = ts.referenceSurface();
+      if(surface.associatedDetectorElement() != nullptr) {
+        const auto* detElem = dynamic_cast<const ActsDetectorElement*>(surface.associatedDetectorElement());
+        if(detElem != nullptr) {
+          detail::addToExpectedLayerPattern(expectedLayerPattern, *detElem);
+        }
       }
     }
     
@@ -823,36 +935,37 @@ namespace ActsTrk
       storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector, measurementIndex);
     }
     
-    auto trackIndex      = actsTracksContainer.addTrack();
-    auto ActsDestProxy   = actsTracksContainer.getTrack(trackIndex);
-    ActsDestProxy.copyFrom(track, true);  // make sure we copy track states!
+    auto actsDestProxy   = actsTracksContainer.makeTrack();
+    actsDestProxy.copyFrom(track, true);  // make sure we copy track states!
+
+    detail::ExpectedLayerPatternHelper::set(actsDestProxy, expectedLayerPattern);
     
     if (not m_countSharedHits) {
       return StatusCode::SUCCESS;
     }
     
-    auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHits(ActsDestProxy, actsTracksContainer, measurementIndex);
+    auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHits(actsDestProxy, actsTracksContainer, measurementIndex);
     
     if (nBadTrackMeasurements > 0) {
       ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input for " << seedType << " seed " << iseed << " track");
     }
     
-    ATH_MSG_DEBUG("found " << ActsDestProxy.nSharedHits() << " shared hits in " << seedType << " seed " << iseed << " track");
+    ATH_MSG_DEBUG("found " << actsDestProxy.nSharedHits() << " shared hits in " << seedType << " seed " << iseed << " track");
     
     event_stat[category_i][kNTotalSharedHits] += nShared;
     
     if (m_ambiStrategy == 2) { // run the ambiguity during track selection
       
-      if (ActsDestProxy.nSharedHits() <= m_maximumSharedHits) {
+      if (actsDestProxy.nSharedHits() <= m_maximumSharedHits) {
         ++event_stat[category_i][kNSelectedTracks];
       }
       else { // track fails the shared hit selection
         
-        ATH_MSG_DEBUG("found " << ActsDestProxy.nSharedHits() << " shared hits in " << seedType << " seed " << iseed << " track");
+        ATH_MSG_DEBUG("found " << actsDestProxy.nSharedHits() << " shared hits in " << seedType << " seed " << iseed << " track");
         // Reset the original track shared hits by running coumputeSharedHits
         // with removeSharedHits flag to true
         // nSharedRemoved contains the total shared hits that will be removed
-        auto [nSharedRemoved, nRemoveBadTrackMeasurements] = sharedHits.computeSharedHits(ActsDestProxy, actsTracksContainer, measurementIndex, true);
+        auto [nSharedRemoved, nRemoveBadTrackMeasurements] = sharedHits.computeSharedHits(actsDestProxy, actsTracksContainer, measurementIndex, true);
         
         ATH_MSG_DEBUG("Removed " << nSharedRemoved << " shared hits in " << seedType << " seed " << iseed << " track and the matching track");
         
@@ -861,14 +974,14 @@ namespace ActsTrk
                         " track measurements not found in input for " << seedType << " seed " << iseed << " track");
         }
         
-        if (ActsDestProxy.nSharedHits() != 0) {
+        if (actsDestProxy.nSharedHits() != 0) {
           ATH_MSG_ERROR("computeSharedHits with remove flag ON returned " <<
-                        ActsDestProxy.nSharedHits()<< " while expecting 0 for" <<
+                        actsDestProxy.nSharedHits()<< " while expecting 0 for" <<
                         seedType << " seed " << iseed << " track");
         }
         
         // Remove the track from the container
-        actsTracksContainer.removeTrack(trackIndex);
+        actsTracksContainer.removeTrack(actsDestProxy.index());
         ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed shared hit selection");
       }  
     }
@@ -876,7 +989,7 @@ namespace ActsTrk
       ++event_stat[category_i][kNSelectedTracks];
       
       if (m_trackStatePrinter.isSet()) {
-        m_trackStatePrinter->printTrack(detContext.geometry, actsTracksContainer, ActsDestProxy, measurementIndex);
+        m_trackStatePrinter->printTrack(detContext.geometry, actsTracksContainer, actsDestProxy, measurementIndex);
       }
     }
     

@@ -108,9 +108,9 @@ namespace ActsTrk
        {this, "PixelExpectLayerPathLimitInMM",1000,
         "PathLimit for extrapolating to get the expected pixel layer pattern in mm." };
     
-      Gaudi::Property<std::string> m_perigeeExpression{this, "PerigeeExpression", "BeamLine"};
+      Gaudi::Property<std::string> m_perigeeExpression{this, "PerigeeExpression", "DontRecalculate"};
 
-    enum class expressionStrategy {BeamLine, Vertex};
+    enum class expressionStrategy {DontRecalculate, BeamLine, Vertex};
     expressionStrategy m_expression_strategy {expressionStrategy::BeamLine};
     
      std::unique_ptr<Propagator> m_propagator;

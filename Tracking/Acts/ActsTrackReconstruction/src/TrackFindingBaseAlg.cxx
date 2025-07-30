@@ -257,7 +257,7 @@ namespace ActsTrk {
       return {};
     }
     return secondResult.value();
-  };  
+  }
   
   xAOD::UncalibMeasType TrackFindingBaseAlg::measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState) {
     if (trackState.hasReferenceSurface()) {

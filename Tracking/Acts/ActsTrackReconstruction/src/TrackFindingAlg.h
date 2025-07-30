@@ -54,7 +54,9 @@ namespace ActsTrk
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
-    
+
+    using ExpectedLayerPattern = std::array<unsigned int, 4>;
+
   private:
     std::size_t getSeedCategory(std::size_t typeIndex,
                                 const ActsTrk::Seed& seed,
@@ -72,7 +74,6 @@ namespace ActsTrk
     StatusCode addTrack(const DetectorContextHolder& detContext,
                         detail::RecoTrackContainerProxy &track,
                         const Acts::Surface& pSurface,
-                        const Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options, Acts::ActorList<Acts::MaterialInteractor>>& extrapolationOptions,
                         const Acts::TrackExtrapolationStrategy& extrapolationStrategy,
                         detail::SharedHitCounter &sharedHits,
                         detail::RecoTrackContainer &actsTracksContainer,
@@ -127,7 +128,16 @@ namespace ActsTrk
     bool shouldReverseSearch(const ActsTrk::Seed& seed) const;
     
     std::optional<Acts::GreedyAmbiguityResolution> m_ambi;
-    
+
+
+    Acts::Result<void> extrapolateTrackToReferenceSurface(
+      const DetectorContextHolder& detContext,
+      detail::RecoTrackContainerProxy &track, 
+      const Acts::Surface &referenceSurface,
+      const detail::Extrapolator &propagator,
+      Acts::TrackExtrapolationStrategy strategy,
+      ExpectedLayerPattern& expectedLayerPattern) const;
+
     /**
      * @brief invoke track finding procedure
      *
