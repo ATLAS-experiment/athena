@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArStraightElectrodes.h"
@@ -56,9 +56,9 @@ void LArStraightElectrodes::initXYCentEle(const PhysicalVolumeAccessor& theElect
   else {
     const G4ThreeVector& tv2=pv2->GetTranslation();
     const G4LogicalVolume* lv = pv->GetLogicalVolume();
-    const G4Trap* trap = (G4Trap*) lv->GetSolid();
+    const G4Trap* trap = static_cast<G4Trap*> (lv->GetSolid());
     const G4LogicalVolume* lv2 = pv2->GetLogicalVolume();
-    const G4Trap* trap2 = (G4Trap*) lv2->GetSolid();
+    const G4Trap* trap2 = static_cast<G4Trap*> (lv2->GetSolid());
     double xl1=trap->GetYHalfLength1();
     double xl2=trap2->GetYHalfLength1();
     m_xcent[cellid][stackid] = (tv.x()*xl1+tv2.x()*xl2)/(xl1+xl2);
@@ -89,13 +89,13 @@ void LArStraightElectrodes::initHalfLength(const PhysicalVolumeAccessor& theElec
     l = 0.;
   } else {
     const G4LogicalVolume* lv = pv->GetLogicalVolume();
-    const G4Trap* trap = (G4Trap*) lv->GetSolid();
+    const G4Trap* trap = static_cast<G4Trap*> (lv->GetSolid());
     const G4VPhysicalVolume *pv2=theElectrodes.GetPhysicalVolume(1000000+id);
     if (!pv2){ 
       l = trap->GetYHalfLength1();
     } else {
       const G4LogicalVolume* lv2 = pv2->GetLogicalVolume();
-      const G4Trap* trap2 = (G4Trap*) lv2->GetSolid();
+      const G4Trap* trap2 = static_cast<G4Trap*> (lv2->GetSolid());
       l = trap->GetYHalfLength1()+trap2->GetYHalfLength1();
     }
   }
