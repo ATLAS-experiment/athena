@@ -15,6 +15,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h" //member
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h" //tool handle template param
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
+#include "FPGATrackSimSGInput/IFPGATrackSimInputTool.h"
 
 #include <fstream> //ofstream members
 #include <tuple> //typedef
@@ -44,6 +45,8 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
     private:
         // Handles
         ToolHandle<IFPGATrackSimEventInputHeaderTool>    m_hitInputTool { this, "InputTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimInputTool", "HitInput Tool" };
+        ToolHandle<IFPGATrackSimInputTool>               m_hitSGInputTool {this, "SGInputTool", "", "Input tool from SG"};
+
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "", "Event selection Svc"};
 
         FPGATrackSimEventInputHeader         m_eventHeader;

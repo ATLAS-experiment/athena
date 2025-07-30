@@ -306,7 +306,7 @@ def FPGATrackSimMappingCfg(flags,name="FPGATrackSimMappingSvc"):
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
     mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii.txt"
     mappingSvc.radiiFile2nd = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii_2nd.txt"
-    mappingSvc.loadRadii = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
+    mappingSvc.loadRadii = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN) and 0
     mappingSvc.FakeNNonnx1st = flags.Trigger.FPGATrackSim.FakeNNonnxFile1st
     mappingSvc.FakeNNonnx2nd = flags.Trigger.FPGATrackSim.FakeNNonnxFile2nd
     mappingSvc.ParamNNonnx1st = flags.Trigger.FPGATrackSim.ParamNNonnxFile1st
@@ -599,6 +599,50 @@ def FPGATrackSimDataPrepFlagCfg(flags): # to be used in the Reco_tf configuratio
     
     return flags
 
+def FixITkMainPassFlags(flags):
+    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
+    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
+    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
+    actsLegacyWorkflowFlags(flags)
+    flags.Acts.doRotCorrection = False
+    return flags
+
+
+def FPGATrackSimDataPrepSetup(flags,runReco=True):
+    acc = ComponentAccumulator()
+    if flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
+      return acc 
+
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    acc.merge(PoolReadCfg(flags))
+
+    if not runReco:
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+        acc.merge(EventInfoCnvAlgCfg(flags))
+    else:
+        if flags.Input.isMC:
+            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+            acc.merge(GEN_AOD2xAODCfg(flags))
+
+            from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
+            acc.merge(addTruthPileupJetsToOutputCfg(flags))
+        
+        if flags.Detector.EnableCalo:
+            from CaloRec.CaloRecoConfig import CaloRecoCfg
+            acc.merge(CaloRecoCfg(flags))
+
+        if not flags.Reco.EnableTrackOverlay:
+
+            from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+            acc.merge(InDetTrackRecoCfg(flags))
+            from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
+            acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
+            from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
+            acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+    return acc
+
+  
 def runDataPrepChain():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -611,11 +655,7 @@ def runDataPrepChain():
     
     ############################################    
     # ensure that the xAOD SP and cluster containers are available
-    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
-    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
-    actsLegacyWorkflowFlags(flags)
-    flags.Acts.doRotCorrection = False
+    flags = FixITkMainPassFlags(flags)
     
     ############################################
     flags.Concurrency.NumThreads=1
@@ -645,33 +685,9 @@ def runDataPrepChain():
         acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='dataprep.root', OPT='RECREATE'"]))
 
 
-    if not flags.Trigger.FPGATrackSim.wrapperFileName:
-        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        acc.merge(PoolReadCfg(flags))
+    acc.merge(FPGATrackSimDataPrepSetup(flags))
     
-        if flags.Input.isMC:
-            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-            acc.merge(GEN_AOD2xAODCfg(flags))
-
-            from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
-            acc.merge(addTruthPileupJetsToOutputCfg(flags))
-        
-        if flags.Detector.EnableCalo:
-            from CaloRec.CaloRecoConfig import CaloRecoCfg
-            acc.merge(CaloRecoCfg(flags))
-
-        if not flags.Reco.EnableTrackOverlay:
-
-            from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-            acc.merge(InDetTrackRecoCfg(flags))
-            from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
-            acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
-            from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
-            acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
-
-
     # Use the imported configuration function for the data prep algorithm.
-
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
 
     if flags.Trigger.FPGATrackSim.doEDMConversion:
