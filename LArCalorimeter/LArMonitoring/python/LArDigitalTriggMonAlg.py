@@ -389,6 +389,15 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            ybins=500, ymin=0, ymax=5000,
                                            pattern=[(part)])
 
+            partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_BCID_'+thisSel, 
+                                           title='ADC - Pedestal (all samples) vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
+                                           type='TProfile',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=3564,xmin=-0.5,xmax=3563.5,
+                                           ybins=500, ymin=-5, ymax=5,
+                                           pattern=[(part)])
+
         #### Plots from SC ET loop 
 
         #for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked", "onlofflEmismatch", "notMaskedEoflNe0", "notMaskedEoflGt1"]:
