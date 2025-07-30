@@ -16,13 +16,12 @@
 #include "InDetReadoutGeometry/SiDetectorDesign.h"
 
 // Data member classes
-#include "ReadoutGeometryBase/PixelDiodeMap.h"
+#include "ReadoutGeometryBase/PixelDiodeTree.h"
 #include "ReadoutGeometryBase/PixelReadoutScheme.h"
 #include "PixelReadoutDefinitions/PixelReadoutDefinitions.h"
 
 // Other includes
 #include "CxxUtils/CachedUniquePtr.h"
-#include "InDetIdentifier/PixelID.h"
 #include "TrkSurfaces/RectangleBounds.h"
 
 #include <memory>
@@ -33,8 +32,6 @@ namespace Trk{
 
 namespace InDetDD {
 
-    class PixelDiodeMatrix;
-    
     /** @class PixelModuleDesign
      Class used to describe the design of a module
       (diode segmentation and readout scheme)
@@ -75,14 +72,14 @@ namespace InDetDD {
                         const int cellRowsPerCircuit,
                         const int diodeColumnsPerCircuit,
                         const int diodeRowsPerCircuit,
-                        std::shared_ptr<const PixelDiodeMatrix> matrix,
+                        PixelDiodeTree &&diode_tree,
                         InDetDD::CarrierType carrierType,
-                        int readoutSide = -1,
-                        bool is3D=false,
-                        InDetDD::DetectorType detectorType = InDetDD::Undefined);
+                        int readoutSide /*= -1*/,
+                        bool is3D/*=false*/,
+                        InDetDD::DetectorType detectorType/* = InDetDD::Undefined*/,
+                        PixelReadoutTechnology readoutTechnology);
 
 //Allow also setting of symmetry parameters
-
       PixelModuleDesign(const double thickness,
                         const bool phiSymmetric,
                         const bool etaSymmetric,
@@ -93,12 +90,13 @@ namespace InDetDD {
                         const int cellRowsPerCircuit,
                         const int diodeColumnsPerCircuit,
                         const int diodeRowsPerCircuit,
-                        std::shared_ptr<const PixelDiodeMatrix> matrix,
+                        PixelDiodeTree &&diode_tree,
                         InDetDD::CarrierType carrierType,
-                        int readoutSide = -1,
-                        bool is3D=false,
-                        InDetDD::DetectorType detectorType = InDetDD::Undefined);
-    
+                        int readoutSide,
+                        bool is3D,
+                        InDetDD::DetectorType detectorType,
+                        PixelReadoutTechnology readoutTechnology);
+
       // Destructor:
       virtual ~PixelModuleDesign() = default;
       
@@ -132,6 +130,13 @@ namespace InDetDD {
     
       /** Check if cell is in range. Returns the original cellId if it is in range, otherwise it returns an invalid id. */
       virtual SiCellId cellIdInRange(const SiCellId & cellId) const;
+
+      /** Return true if the given index describes a pixel of this matrix.*/
+      bool isInsideMatrix(const SiCellId &cellId) const;
+      /** Return true if the given index describes a pixel of this matrix.*/
+      bool isInsideMatrix(const std::array<InDetDD::PixelDiodeTree::IndexType,2> &idx) const;
+      /** Return true if the given position is a position within one of the pixels of this matrix.*/
+      bool isInsideMatrix(const Amg::Vector2D &local_position) const;
     
       /** Helper method for stereo angle computation */
       virtual HepGeom::Vector3D<double> phiMeasureSegment(const SiLocalPosition&) const;
@@ -149,20 +154,14 @@ namespace InDetDD {
           Cell for which the neighbours must be found
           List of cells which are neighbours of the given one */
       virtual void neighboursOfCell(const SiCellId & cellId,
-    				std::vector<SiCellId> &neighbours) const;
+                                    std::vector<SiCellId> &neighbours) const;
         
       /** Compute the intersection length of two diodes:
           return: the intersection length when the two diodes are projected on one
            of the two axis, or 0 in case of no intersection or problem
           input: the two diodes for which the intersection length is computed */
       double intersectionLength(const SiCellId &diode1, const SiCellId &diode2) const;
-    
-      /** Global sensor size: */
-      double sensorLeftColumn() const;
-      double sensorRightColumn() const;
-      double sensorLeftRow() const;
-      double sensorRightRow() const;
-    
+
       /** Total number of diodes: */
       int numberOfDiodes() const;
     
@@ -243,16 +242,26 @@ namespace InDetDD {
       void addMultipleRowConnection(const int lowerRow,
     				const std::vector<int> &connections);
     
-      /** Indicate that it is a more complex layout where cells are not 
-         lined up with each other. Eg bricking. Probably never will be needed. */
-      void setGeneralLayout();
-
       /** Debug string representation */
       std::string debugStringRepr() const;
 
-      PixelDiodeParametersProxy parametersProxy(const SiCellId & cellId) const {
-         return m_diodeMap.parametersProxy(cellId);
+       PixelDiodeTree::DiodeProxy diodeProxyFromIdx(const std::array<PixelDiodeTree::IndexType,2> &idx) const {
+         return m_diodeTree.diodeProxyFromIdx(idx);
       }
+      PixelDiodeTree::DiodeProxyWithPosition diodeProxyFromIdxCachePosition(const std::array<PixelDiodeTree::IndexType,2> &idx) const {
+         return m_diodeTree.diodeProxyFromIdxCachePosition(idx);
+      }
+      PixelDiodeTree::DiodeProxy diodeProxyFromPosition(const Amg::Vector2D &pos) const {
+         return m_diodeTree.diodeProxyFromPos(pos);
+      }
+
+      static unsigned int getFE(const PixelDiodeTree::DiodeProxy &diode_proxy) {
+         return diode_proxy.subMatrixAttribute();
+      }
+      static InDetDD::PixelDiodeType getDiodeType(const PixelDiodeTree::DiodeProxy &diode_proxy) {
+         return static_cast<InDetDD::PixelDiodeType>(diode_proxy.diodeAttribute());
+      }
+
       ///////////////////////////////////////////////////////////////////
       // Private methods:
       ///////////////////////////////////////////////////////////////////
@@ -271,12 +280,12 @@ namespace InDetDD {
       // Private data:
       ///////////////////////////////////////////////////////////////////
     private:
-      PixelDiodeMap m_diodeMap;
+      PixelDiodeTree m_diodeTree;
       PixelReadoutScheme m_readoutScheme;
       CxxUtils::CachedUniquePtr<Trk::RectangleBounds> m_bounds;
-      bool m_is3D;
       InDetDD::DetectorType m_detectorType;
-    
+      PixelReadoutTechnology m_readoutTechnology;
+      bool m_is3D;
     };
     
     ///////////////////////////////////////////////////////////////////
@@ -289,29 +298,9 @@ namespace InDetDD {
       m_readoutScheme.addMultipleRowConnection(lowerRow,connections);
     }
     
-    inline double PixelModuleDesign::sensorLeftColumn() const
-    {
-      return m_diodeMap.leftColumn();
-    }
-    
-    inline double PixelModuleDesign::sensorRightColumn() const
-    {
-      return m_diodeMap.rightColumn();
-    }
-    
-    inline double PixelModuleDesign::sensorLeftRow() const
-    {
-      return m_diodeMap.leftRow();
-    }
-    
-    inline double PixelModuleDesign::sensorRightRow() const
-    {
-      return m_diodeMap.rightRow();
-    }
-    
     inline int PixelModuleDesign::numberOfDiodes() const
     {
-      return m_diodeMap.diodes();
+      return numberOfCircuits() * rowsPerCircuit() * columnsPerCircuit();
     }
     
     inline int PixelModuleDesign::numberOfCircuits() const
@@ -367,42 +356,56 @@ namespace InDetDD {
     
     
     inline void PixelModuleDesign::neighboursOfCell(const SiCellId & cellId,
-    						std::vector<SiCellId> &neighbours) const
+                                                    std::vector<SiCellId> &neighbours) const
     {
-      return m_diodeMap.neighboursOfCell(cellId, neighbours);
+
+       m_diodeTree.neighboursOfCell(PixelDiodeTree::makeCellIndex(cellId.phiIndex(),cellId.etaIndex()),
+                                    PixelDiodeTree::makeCellIndex(rows(),columns()),
+                                    neighbours);
     }
     
     inline double PixelModuleDesign::intersectionLength(const SiCellId &diode1,
-    						    const SiCellId &diode2) const
+                                                        const SiCellId &diode2) const
     {
-      return m_diodeMap.intersectionLength(diode1, diode2);
-    }  
+      PixelDiodeTree::DiodeProxy diode1_proxy=diodeProxyFromIdx(PixelDiodeTree::makeCellIndex(diode1.phiIndex(),
+                                                                                              diode1.etaIndex()));
+      std::array<int,2> abs_delta;
+      abs_delta[0] = std::abs(diode1.phiIndex() - diode2.phiIndex());
+      abs_delta[1] = std::abs(diode1.etaIndex() - diode2.etaIndex());
 
+      if (abs_delta[0]+abs_delta[1]==1) {
+         // i.e. delta[0]=1 or delta[1]=1 since delta[0]>=0 and delta[1]>=0
+         // diode1_proxy.width()[1] for delta[0]==1 && delta[1]==0 <= delta[0]==1 because sum delta[i]=1
+         // diode1_proxy.width()[0] for delta[0]==0 && delta[1]==1 <= delta[0]!=1
+         // ==
+         return diode1_proxy.width() [ abs_delta[0]==1 ];
+      }
+      return 0.;
+    }
 
-    
-    inline bool PixelModuleDesign::is3D() const 
+    inline bool PixelModuleDesign::is3D() const
     { 
       return m_is3D; 
     } 
 
     inline PixelReadoutTechnology PixelModuleDesign::getReadoutTechnology() const {
-      if (m_detectorType == InDetDD::DetectorType::PixelBarrel
-          || m_detectorType == InDetDD::DetectorType::PixelEndcap
-          || m_detectorType == InDetDD::DetectorType::PixelInclined
-          || m_detectorType == InDetDD::DetectorType::PLR)
-      {
-        return PixelReadoutTechnology::RD53;
-      }
-
-      const int maxRow = m_readoutScheme.rowsPerCircuit();
-      const int maxCol = m_readoutScheme.columnsPerCircuit();
-      if (maxRow*maxCol>26000) { return PixelReadoutTechnology::FEI4; }
-      else                     { return PixelReadoutTechnology::FEI3; }
+      return m_readoutTechnology;
     }
 
     inline std::string PixelModuleDesign::debugStringRepr() const
     {
-      return m_diodeMap.debugStringRepr();
+      return m_diodeTree.debugStringRepr();
+    }
+
+    inline bool PixelModuleDesign::isInsideMatrix(const SiCellId &cellId) const {
+       return m_diodeTree.isInsideMatrix( std::array<PixelDiodeTree::CellIndexType,2>{cellId.phiIndex(),
+                                                                                      cellId.etaIndex()});
+    }
+    inline bool PixelModuleDesign::isInsideMatrix(const std::array<PixelDiodeTree::IndexType,2> &idx) const {
+       return m_diodeTree.isInsideMatrix(idx);
+    }
+    inline bool PixelModuleDesign::isInsideMatrix(const Amg::Vector2D &local_position) const {
+       return m_diodeTree.isInsideMatrix(local_position);
     }
 
 } // namespace InDetDD

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_DBMMODULE_H
@@ -36,9 +36,6 @@ class DBM_Module : public GeoVPixelFactory {
   private:
 
   const InDetDD::SiDetectorDesign* m_design;
-
-  std::shared_ptr<const InDetDD::PixelDiodeMatrix> makeMatrix(double phiPitch, double etaPitch, double etaPitchLong, double etaPitchLongEnd,
-					 int circuitsPhi, int circuitsEta, int diodeRowPerCirc, int diodeColPerCirc);
 };
 
 #endif
