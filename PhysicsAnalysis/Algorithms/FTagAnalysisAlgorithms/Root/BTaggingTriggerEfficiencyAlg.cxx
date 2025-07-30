@@ -12,7 +12,7 @@
 
 #include <FTagAnalysisAlgorithms/BTaggingTriggerEfficiencyAlg.h>
 #include "TrigCompositeUtils/ChainNameParser.h"
-#include "TrigDecisionTool/FeatureRequestDescriptor.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 #include "xAODBTagging/BTagging.h"
 
 //
