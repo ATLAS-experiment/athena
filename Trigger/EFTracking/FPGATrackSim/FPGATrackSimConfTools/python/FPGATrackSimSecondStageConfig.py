@@ -7,6 +7,7 @@ from PathResolver import PathResolver
 import importlib
 import os
 import AthenaCommon.Utils.unixtools as unixtools
+import sys
 
 log = AthenaLogger(__name__)
 
@@ -374,7 +375,7 @@ def FPGATrackSimBinnedHitsToolCfg_2nd(flags,name="FPGATrackSimBinnedHitsTool_2nd
 
     return result
 
-def getWindowCuts(region):
+def getWindowCuts(region, path):
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F
@@ -385,52 +386,50 @@ def getWindowCuts(region):
     default_phi = [0]*5 + [0.75, 0.75, 1.5, 1.5, 3.24, 3.24, 4.5, 4.5]
     default_z   = [0]*5 + [2145, 2145, 3645, 3645, 4657.5, 4657.5, 8400, 8400]
 
-    # phi windows (optimized! but can be more opimized? also 1250  is not here since it has not yet been tested)
-    eta_to_phi = {(0.0, 0.2): [0.0, 0.0, 0.0, 0.0, 0.0, 0.089, 0.089, 0.021, 0.021, 0.028, 0.029, 0.041, 0.041],
-        (0.2, 0.4): [0.0, 0.0, 0.0, 0.0, 0.0, 0.014, 0.014, 0.018, 0.020, 0.075, 0.075, 0.038, 0.039],
-        (0.4, 0.6): [0.0, 0.0, 0.0, 0.0, 0.0, 0.112, 0.112, 0.035, 0.036, 0.05, 0.051, 0.075, 0.076],
-        (0.6, 0.8): [0.0, 0.0, 0.0, 0.0, 0.0, 0.029, 0.029, 0.037, 0.038, 0.052, 0.053, 0.077, 0.078],
-        (0.8, 1.0): [0.0, 0.0, 0.0, 0.0, 0.0, 0.031, 0.031, 0.081, 0.081, 0.054, 0.055, 0.079, 0.08],
-        (1.0, 1.2): [0.0, 0.0, 0.0, 0.0, 0.0, 0.026, 0.026, 0.035, 0.035, 0.095, 0.105, 0.074, 0.074],
-        (1.2, 1.4): [0.0, 0.0, 0.0, 0.0, 0.0, 0.047, 0.047, 0.06, 0.06, 0.084, 0.085, 0.1, 0.1],
-        (1.4, 1.6): [0.0, 0.0, 0.0, 0.0, 0.0, 0.065, 0.066, 0.088, 0.089, 0.12, 0.12, 0.15, 0.15],
-        (1.6, 1.8): [0.0, 0.0, 0.0, 0.0, 0.0, 0.098, 0.099, 0.14, 0.14, 0.16, 0.16, 0.21, 0.21],
-        (1.8, 2.0): [0.0, 0.0, 0.0, 0.0, 0.0, 0.11, 0.15, 0.15, 0.19, 0.19, 0.24, 0.25, 0.0],
-        (2.0, 2.2): [0.0, 0.0, 0.0, 0.0, 0.0, 0.11, 0.13, 0.17, 0.17, 0.21, 0.21, 0.0, 0.0],
-        (2.2, 2.4): [0.0, 0.0, 0.0, 0.0, 0.0, 0.097, 0.11, 0.12, 0.17, 0.17, 0.0, 0.0, 0.0],
-        (2.4, 2.6): [0.0, 0.0, 0.0, 0.0, 0.0, 0.096, 0.1, 0.11, 0.17, 0.17, 0.0, 0.0, 0.0],
-        (2.6, 2.8): [0.0, 0.0, 0.0, 0.0, 0.0, 0.096, 0.11, 0.11, 0.12, 0.0, 0.0, 0.0, 0.0],
-        (2.8, 3.0): [0.0, 0.0, 0.0, 0.0, 0.0, 0.049, 0.052, 0.068, 0.083, 0.0, 0.0, 0.0, 0.0],
-        (3.0, 3.2): [0.0, 0.0, 0.0, 0.0, 0.0, 0.105, 0.049, 0.06, 0.06, 0.0, 0.0, 0.0, 0.0],
-        (3.2, 3.4): [0.0, 0.0, 0.0, 0.0, 0.0, 0.051, 0.052, 0.055, 0.075, 0.0, 0.0, 0.0, 0.0],
-        (3.4, 3.6): [0.0, 0.0, 0.0, 0.0, 0.0, 0.093, 0.093, 0.093, 0.062, 0.0, 0.0, 0.0, 0.0],
-        (3.6, 3.8): [0.0, 0.0, 0.0, 0.0, 0.0, 0.065, 0.065, 0.065, 0.065, 0.0, 0.0, 0.0, 0.0]}
+    module_path = os.path.join(path, "windowCuts_2std.py")
+    spec = importlib.util.spec_from_file_location("windowCuts_2std", module_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["windowCuts_2std"] = module
+    spec.loader.exec_module(module)
 
-    # z windows (optimized! but can be more opimized? also 1250  is not here since it has not yet been tested)
-    eta_to_z = {(0.0, 0.2): [0.0, 0.0, 0.0, 0.0, 0.0, 29.0, 29.0, 38.0, 38.0, 48.0, 49.0, 61.0, 61.0],
-        (0.2, 0.4): [0.0, 0.0, 0.0, 0.0, 0.0, 22.0, 22.0, 30.0, 30.0, 113.0, 113.0, 52.0, 52.0],
-        (0.4, 0.6): [0.0, 0.0, 0.0, 0.0, 0.0, 75.0, 75.0, 58.2, 58.2, 67.0, 67.0, 56.0, 56.0],
-        (0.6, 0.8): [0.0, 0.0, 0.0, 0.0, 0.0, 27.0, 27.0, 23.0, 23.0, 44.0, 44.0, 82.0, 82.0],
-        (0.8, 1.0): [0.0, 0.0, 0.0, 0.0, 0.0, 81.0, 81.0, 144.0, 175.0, 110.0, 110.0, 130.0, 130.0],
-        (1.0, 1.2): [0.0, 0.0, 0.0, 0.0, 0.0, 43.0, 43.0, 121.0, 121.0, 244.0, 244.0, 73.0, 73.0],
-        (1.2, 1.4): [0.0, 0.0, 0.0, 0.0, 0.0, 75.0, 76.0, 190.0, 190.0, 99.0, 100.0, 192.0, 192.0],
-        (1.4, 1.6): [0.0, 0.0, 0.0, 0.0, 0.0, 254.0, 68.0, 325.0, 325.0, 192.0, 192.0, 159.0, 159.0],
-        (1.6, 1.8): [0.0, 0.0, 0.0, 0.0, 0.0, 300.0, 300.0, 105.0, 105.0, 371.0, 371.0, 195.0, 195.0],
-        (1.8, 2.0): [0.0, 0.0, 0.0, 0.0, 0.0, 133.0, 308.0, 308.0, 224.0, 169.0, 189.0, 189.0, 0.0],
-        (2.0, 2.2): [0.0, 0.0, 0.0, 0.0, 0.0, 284.0, 242.0, 87.0, 87.0, 135.0, 135.0, 0.0, 0.0],
-        (2.2, 2.4): [0.0, 0.0, 0.0, 0.0, 0.0, 32.0, 110.0, 110.0, 257.0, 257.0, 0.0, 0.0, 0.0],
-        (2.4, 2.6): [0.0, 0.0, 0.0, 0.0, 0.0, 231.0, 329.0, 329.0, 132.0, 132.0, 0.0, 0.0, 0.0],
-        (2.6, 2.8): [0.0, 0.0, 0.0, 0.0, 0.0, 170.0, 170.0, 170.0, 189.0, 0.0, 0.0, 0.0, 0.0],
-        (2.8, 3.0): [0.0, 0.0, 0.0, 0.0, 0.0, 59.0, 219.0, 219.0, 219.0, 0.0, 0.0, 0.0, 0.0],
-        (3.0, 3.2): [0.0, 0.0, 0.0, 0.0, 0.0, 230.0, 230.0, 230.0, 181.0, 0.0, 0.0, 0.0, 0.0],
-        (3.2, 3.4): [0.0, 0.0, 0.0, 0.0, 0.0, 82.0, 235.0, 235.0, 235.0, 0.0, 0.0, 0.0, 0.0],
-        (3.4, 3.6): [0.0, 0.0, 0.0, 0.0, 0.0, 108.0, 108.0, 108.0, 108.0, 0.0, 0.0, 0.0, 0.0],
-        (3.6, 3.8): [0.0, 0.0, 0.0, 0.0, 0.0, 149.0, 149.0, 149.0, 149.0, 0.0, 0.0, 0.0, 0.0]}
+    eta_to_phi = module.eta_to_phi
+    eta_to_z = module.eta_to_z
+
 
     phi_window = eta_to_phi.get(abs_etaRange, default_phi)
     z_window = eta_to_z.get(abs_etaRange, default_z)
 
     return phi_window, z_window
+
+def getDetectorZoneWindowCuts(region, path):
+    binSize = 0.2
+    side = (region >> 5) & 0x1
+    etaBin = (region >> 6) & 0x1F
+    etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
+    abs_etaRange = tuple(round(abs(val), 1) for val in etaRange)
+
+    # Default (very large windows)
+    default_phi = [0]*5 + [0.75, 0.75, 1.5, 1.5, 3.24, 3.24, 4.5, 4.5]
+    default_z   = [0]*5 + [2145, 2145, 3645, 3645, 4657.5, 4657.5, 8400, 8400]
+
+    module_path = os.path.join(path, "detectorZoneWindowCuts_99.py")
+    spec = importlib.util.spec_from_file_location("detectorZoneWindowCuts_99", module_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["detectorZoneWindowCuts_99"] = module
+    spec.loader.exec_module(module)
+
+    eta_to_phi_endcap = module.eta_to_phi_endcap
+    eta_to_z_endcap = module.eta_to_z_endcap
+    eta_to_phi_barrel = module.eta_to_phi_barrel
+    eta_to_z_barrel = module.eta_to_z_barrel
+
+    phi_window_endcap = eta_to_phi_endcap.get(abs_etaRange, default_phi)
+    z_window_endcap = eta_to_z_endcap.get(abs_etaRange, default_z)
+
+    phi_window_barrel= eta_to_phi_barrel.get(abs_etaRange, default_phi)
+    z_window_barrel = eta_to_z_barrel.get(abs_etaRange, default_z)
+
+    return phi_window_barrel, z_window_barrel, phi_window_endcap, z_window_endcap
 
 
 def FPGATrackSimWindowExtensionToolCfg(flags,name="FPGATrackSimWindowExtensionTool"):
@@ -445,11 +444,23 @@ def FPGATrackSimWindowExtensionToolCfg(flags,name="FPGATrackSimWindowExtensionTo
     # This threshold is the number of *missing* hits allowed
     FPGATrackSimWindowExtensionTool.threshold = flags.Trigger.FPGATrackSim.hitThreshold
 
+    pathBankSvc = flags.Trigger.FPGATrackSim.bankDir if flags.Trigger.FPGATrackSim.bankDir != '' else f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/'+FPGATrackSimDataPrepConfig.getBaseName(flags)+'/SectorBanks/'
+    pathBankSvc=PathResolver.FindCalibDirectory(pathBankSvc)
+
+
     # These MUST be of size equal to the full number of layers (13), though only the "new" layers
     # in the second stage are actually used.
     #removing the flag here since the function has built in defaults
-    FPGATrackSimWindowExtensionTool.zWindow =   getWindowCuts(flags.Trigger.FPGATrackSim.region)[1]
-    FPGATrackSimWindowExtensionTool.phiWindow = getWindowCuts(flags.Trigger.FPGATrackSim.region)[0]
+    FPGATrackSimWindowExtensionTool.zWindow =   getWindowCuts(flags.Trigger.FPGATrackSim.region, pathBankSvc)[1]
+    FPGATrackSimWindowExtensionTool.phiWindow = getWindowCuts(flags.Trigger.FPGATrackSim.region, pathBankSvc)[0]
+    
+    if flags.Trigger.FPGATrackSim.ActiveConfig.detectorZoneWindows:
+        FPGATrackSimWindowExtensionTool.detectorZoneWindows = flags.Trigger.FPGATrackSim.ActiveConfig.detectorZoneWindows
+        FPGATrackSimWindowExtensionTool.phiWindow_barrel = getDetectorZoneWindowCuts(flags.Trigger.FPGATrackSim.region, pathBankSvc)[0]
+        FPGATrackSimWindowExtensionTool.zWindow_barrel = getDetectorZoneWindowCuts(flags.Trigger.FPGATrackSim.region, pathBankSvc)[1]
+        FPGATrackSimWindowExtensionTool.phiWindow_endcap = getDetectorZoneWindowCuts(flags.Trigger.FPGATrackSim.region, pathBankSvc)[2]
+        FPGATrackSimWindowExtensionTool.zWindow_endcap = getDetectorZoneWindowCuts(flags.Trigger.FPGATrackSim.region, pathBankSvc)[3]
+
     # If we're doing binning, i.e. genscan.
     if flags.Trigger.FPGATrackSim.ActiveConfig.genScan:
         FPGATrackSimWindowExtensionTool.doBinning = True

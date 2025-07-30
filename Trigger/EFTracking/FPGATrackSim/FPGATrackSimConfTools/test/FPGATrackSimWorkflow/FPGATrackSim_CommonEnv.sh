@@ -6,11 +6,11 @@ RDO_EVT=50 # used for map/bank generation
 
 # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
 MAP_9L_VERSION="v0.23"
-MAP_5L_VERSION="v0.26"
+MAP_5L_VERSION="v0.33"
 MAP_9L_GNN_VERSION="v0.10"
 
 BANK_9L_VERSION="v0.20"
-BANK_5L_VERSION="v0.24"
+BANK_5L_VERSION="v0.33"
 
 NN_1ST="v0.11"
 NN_2ND="v0.11"

@@ -230,8 +230,8 @@ bool FPGATrackSimWindowExtensionTool::extendTrackSliced(std::shared_ptr<const FP
             double diffz = abs(hitz-pred_hitz);
 
             // Apply the actual layer check, only accept hits that fall into a track's window.
-            ATH_MSG_DEBUG("Hit in region, comparing phi: " << diffphi << " to " << m_windows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
-            if (diffphi < m_windows[layer] && diffz < m_zwindows[layer]) {
+            ATH_MSG_DEBUG("Hit in region, comparing phi: " << diffphi << " to " << m_phiwindows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
+            if (diffphi < m_phiwindows[layer] && diffz < m_zwindows[layer]) {
                 numHits[layer]++;
                 road_hits[layer].push_back(hit);
                 hitLayers |= 1 << hit->getLayer();
@@ -300,13 +300,37 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
         double diffz = abs(hitz-pred_hitz);
 
         // Apply the actual layer check, only accept hits that fall into a track's window.
-        ATH_MSG_DEBUG("Hit in region, comparing phi: " << diffphi << " to " << m_windows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
+        ATH_MSG_DEBUG("Hit in region -- standard window comparison: comparing phi " << diffphi << " to " << m_phiwindows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
         if (m_addAllHits) {
           numHits[layer]++;
           road_hits_sortable[layer].push_back({diffphi, diffz, hit});
           hitLayers |= 1 << layer;
         }
-        else if (diffphi < m_windows[layer] && diffz < m_zwindows[layer]) {
+        else if (m_detectorZoneWindows) {
+            if (hit->isBarrel()) { // Barrel
+              ATH_MSG_DEBUG("Hit in region -- detector zone window comparison comparing phi: " << diffphi << " to " << m_phiwindows_barrel[layer] << " and z " << diffz << " to " << m_zwindows_barrel[layer]);
+              if (m_phiwindows_barrel[layer] == -1 || m_zwindows_barrel[layer] == -1) {
+                  ATH_MSG_WARNING("There is a hit in layer: " << layer << " with track eta " << tracketa << " in the barrel!");
+              }
+              if (diffphi < m_phiwindows_barrel[layer] && diffz < m_zwindows_barrel[layer]) {
+                  numHits[layer]++;
+                  road_hits[layer].push_back(hit);
+                  hitLayers |= 1 << layer;
+              }
+            }
+            else { // Endcap
+                  ATH_MSG_DEBUG("Hit in region -- detector zone window comparison comparing phi: " << diffphi << " to " << m_phiwindows_endcap[layer] << " and z " << diffz << " to " << m_zwindows_endcap[layer]);
+                  if (m_phiwindows_endcap[layer] == -1 || m_zwindows_endcap[layer] == -1) {
+                      ATH_MSG_WARNING("There is a hit in layer: " << layer << " with track eta " << tracketa << " in the endcap!");
+                  }
+                  if (diffphi < m_phiwindows_endcap[layer] && diffz < m_zwindows_endcap[layer]) {
+                      numHits[layer]++;
+                      road_hits[layer].push_back(hit);
+                      hitLayers |= 1 << layer;
+                  }
+              }
+        }
+        else if (diffphi < m_phiwindows[layer] && diffz < m_zwindows[layer]) {
             numHits[layer]++;
             road_hits_sortable[layer].push_back({diffphi, diffz, hit});
             hitLayers |= 1 << layer;

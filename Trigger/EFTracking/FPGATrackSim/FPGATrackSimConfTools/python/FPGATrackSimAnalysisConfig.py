@@ -638,7 +638,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     return result
 
 def getChi2Cut(region):
-    chi2cut_l = [12, 16, 16, 17, 17, 19, 15, 17, 16, 16, 19, 15, 18, 15, 18, 15, 14, 14, 12, 16]
+    chi2cut_l = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 20] #from most recent run on this branch with new maps/banks, all chi2's are under 1
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F
@@ -657,6 +657,28 @@ def getChi2Cut(region):
     }
 
     return eta_to_chi2.get(abs_etaRange, 20)
+
+def getChi2Cut_2nd(region):
+    chi2cut_l = [10, 9, 9, 11, 16, 12, 12, 10, 12, 15, 12, 14, 14, 16, 17, 15, 11, 14, 13, 20] #from most recent run on this branch with new maps/banks
+    binSize = 0.2
+    side = (region >> 5) & 0x1
+    etaBin = (region >> 6) & 0x1F
+    etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
+
+    abs_etaRange = tuple(round(abs(val), 1) for val in etaRange)
+
+    eta_to_chi2 = {
+        (0.0, 0.2): chi2cut_l[0], (0.2, 0.4): chi2cut_l[1], (0.4, 0.6): chi2cut_l[2],
+        (0.6, 0.8): chi2cut_l[3], (0.8, 1.0): chi2cut_l[4], (1.0, 1.2): chi2cut_l[5],
+        (1.2, 1.4): chi2cut_l[6], (1.4, 1.6): chi2cut_l[7], (1.6, 1.8): chi2cut_l[8],
+        (1.8, 2.0): chi2cut_l[9], (2.0, 2.2): chi2cut_l[10], (2.2, 2.4): chi2cut_l[11],
+        (2.4, 2.6): chi2cut_l[12], (2.6, 2.8): chi2cut_l[13], (2.8, 3.0): chi2cut_l[14],
+        (3.0, 3.2): chi2cut_l[15], (3.2, 3.4): chi2cut_l[16], (3.4, 3.6): chi2cut_l[17],
+        (3.6, 3.8): chi2cut_l[18], (3.8, 4.0): chi2cut_l[19]
+    }
+
+    return eta_to_chi2.get(abs_etaRange, 20)
+
 
 def getChi2CutNN(region):
     chi2cut_l = [0.97,0.97,0.99, ### 0.0-0.6
@@ -729,7 +751,7 @@ if __name__ == "__main__":
 
     if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis:
         flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
-
+        flags.Trigger.FPGATrackSim.Hough.secondChi2Cut = getChi2Cut_2nd(flags.Trigger.FPGATrackSim.region)
     assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-5'),"ERROR You are trying to run an F-5* pipeline! This is not yet supported!"
 
     if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')):
