@@ -25,7 +25,7 @@ Finally, for parametrizations involving `eta`, the absolute value is used automa
 
 ### Statistical uncertainties
 
-These are read from the bin errors of the histograms containing the central values. They are treated as uncorrelated between different bins. 
+These are read from the bin errors of the histograms containing the central values, interpreted as absolute uncertainties (not relative). They are treated as uncorrelated between different bins. 
 
 ### Systematic uncertainties
 
@@ -38,9 +38,11 @@ FakeEfficiency_el_pt__PromptSubtr
 FakeEfficiency_el_pt__Trig
 ```
 
-Two formats are accepted for the uncertainties:
- * Set the histogram bin contents to correspond to the uncertainty only (not the central value plus or minus the uncertainty). Errors in each bin should be set to zero to avoid ambiguities.
- * Set the histograms to have the same bin content as the nominal, and the uncertainty is encoded in the err in each bin.
+Two alternative formats are accepted for the uncertainties:
+ * Set the histogram bin contents to correspond to the value of the uncertainty only (not the central value plus or minus the uncertainty). Error bars in all bins must be set to zero for consistency.
+ * Set the histograms to have the same bin content as the nominal, and provide the uncertainties via the bin errors, like done for statistical uncertainties.
+
+In either case, the values are interpreted, again, as absolute uncertainties (not relative).
 
 Histograms containing nominal values and uncertainties must have identical binnings. Only symmetric uncertainties are supported for the moment (therefore if asymmetric uncertainties are needed, one must switch to using an XML file).
 If systematic uncertainties with identical names affect different types of efficiencies, they will be treated as correlated, even if they were predefined in an XML file beforehand (in fact doing the latter is really not recommended, it will mess things up). 
