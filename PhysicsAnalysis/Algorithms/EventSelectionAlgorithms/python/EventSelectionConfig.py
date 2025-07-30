@@ -784,23 +784,23 @@ class EventSelectionConfig(ConfigBlock):
 
     def add_OS_selector(self, text, config):
         items = text.split()
-        if len(items) != 1:
+        if len(items) != 1 or len(items) > 4:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons and not self.taus:
             self.raise_missinginput("electrons or muons or taus")
         thisalg = f'{self.name}_OS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
-        if self.electrons:
+        if self.electrons and (len(items) == 1 or "el" in items):
             if "Particle" in self.electrons or "Truth" in self.electrons:
                 alg.truthElectrons, alg.truthElectronSelection = config.readNameAndSelection(self.electrons)
             else:
                 alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        if self.muons:
+        if self.muons and (len(items) == 1 or "mu" in items):
             if "Particle" in self.muons or "Truth" in self.muons:
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
-        if self.taus:
+        if self.taus and (len(items) == 1 or "tau" in items):
             if "Particle" in self.taus or "Truth" in self.taus:
                 alg.truthTaus, alg.truthTauSelection = config.readNameAndSelection(self.taus)
             else:
@@ -812,22 +812,27 @@ class EventSelectionConfig(ConfigBlock):
 
     def add_SS_selector(self, text, config):
         items = text.split()
-        if len(items) != 1:
+        if len(items) != 1 or len(items) > 4:
             self.raise_misconfig(text, "number of arguments")
-        if not self.electrons and not self.muons:
-            self.raise_missinginput("electrons or muons")
+        if not self.electrons and not self.muons and not self.taus:
+            self.raise_missinginput("electrons or muons or taus")
         thisalg = f'{self.name}_SS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
-        if self.electrons:
+        if self.electrons and (len(items) == 1 or "el" in items):
             if "Particle" in self.electrons or "Truth" in self.electrons:
                 alg.truthElectrons, alg.truthElectronSelection = config.readNameAndSelection(self.electrons)
             else:
                 alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        if self.muons:
+        if self.muons and (len(items) == 1 or "mu" in items):
             if "Particle" in self.muons or "Truth" in self.muons:
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if self.taus and (len(items) == 1 or "tau" in items):
+            if "Particle" in self.taus or "Truth" in self.taus:
+                alg.truthTaus, alg.truthTauSelection = config.readNameAndSelection(self.taus)
+            else:
+                alg.taus, alg.tauSelection = config.readNameAndSelection(self.taus)
         alg.OS = False
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
