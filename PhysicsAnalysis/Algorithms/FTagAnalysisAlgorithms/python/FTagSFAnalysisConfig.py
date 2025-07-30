@@ -190,7 +190,17 @@ class FTagJetSFBlock(ConfigBlock):
             triggers = trigger_set(config, self.triggerChainsPerYear,
                                    self.includeAllYearsPerRun, log)
             decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
+            
+            ChainDict = [
+                    "HLT_j80c_020jvt_j55c_020jvt_j28c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
+                    "HLT_j80c_020jvt_j55c_020jvt_j28c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
+                    "HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
+                    "HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25"]
+            
             for chain in triggers:
+                if  chain not in ChainDict: 
+                    raise ValueError(f"Trigger '{chain}' not supported — no known navigation issues") 
+                
                 chain_noHLT = chain.replace("HLT_", "")
                 chain_out = chain_noHLT if self.removeHLTPrefix else chain
 
