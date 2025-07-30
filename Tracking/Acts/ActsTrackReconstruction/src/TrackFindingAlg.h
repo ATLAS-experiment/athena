@@ -79,7 +79,7 @@ namespace ActsTrk
                         const detail::MeasurementIndex& measurementIndex,
                         const detail::RecoTrackContainer& tracksContainerTemp,
                         detail::DuplicateSeedDetector& duplicateSeedDetector,
-                        std::vector<int>& destiny,
+                        std::vector<int>* destiny,
                         EventStats& event_stat,
                         std::size_t& ntracks,
                         std::size_t iseed,
@@ -100,6 +100,7 @@ namespace ActsTrk
     SG::ReadHandleKeyArray<InDet::SiDetectorElementStatus> m_detElStatus
       {this, "DetElStatus", {}, "Keys for detector element status conditions data."};
     
+    bool m_storeDestinies {false};
     SG::WriteHandleKeyArray< std::vector<int> > m_seedDestiny {this, "SeedDestiny", {}}; 
     SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
     
@@ -155,7 +156,7 @@ namespace ActsTrk
                std::size_t seedCollectionIndex,
                const char *seedType,
                EventStats &event_stat,
-               std::vector<int>& destiny,
+               std::vector<int>* destiny,
                const Acts::PerigeeSurface& pSurface) const;
     
     // Create tracks from one seed's CKF result, appending to tracksContainer
