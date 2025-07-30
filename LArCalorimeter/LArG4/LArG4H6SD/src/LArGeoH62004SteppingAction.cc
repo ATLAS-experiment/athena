@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoH62004SteppingAction.h"
@@ -100,7 +100,7 @@ namespace G4UA
 
       LArG4SimpleSD* lsd = nullptr;
       if((!strncmp(vname,"LArMgr::LAr::EMEC",17)) || (!strncmp(vname,"LArMgr::LAr::HEC::Module",24)) ) {
-        lsd=(LArG4SimpleSD*)tacka->GetPhysicalVolume()->GetLogicalVolume()->GetSensitiveDetector();
+        lsd=static_cast<LArG4SimpleSD*>(tacka->GetPhysicalVolume()->GetLogicalVolume()->GetSensitiveDetector());
       }
       if(lsd) {
         //    This is all just for verbose print out -- it doesn't seem to make a lot of sense to me...
