@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -190,7 +190,7 @@ G4bool MinBiasScintillatorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* 
 
   const G4StepPoint *preStep = aStep->GetPreStepPoint();
   const G4ThreeVector preStepPointPosition = preStep->GetPosition();
-  const G4TouchableHistory *theTouchable = (G4TouchableHistory*)(preStep->GetTouchable());
+  const G4TouchableHistory *theTouchable = static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
   const G4VPhysicalVolume *physVol = theTouchable->GetVolume();
   //  G4LogicalVolume *logiVol = physVol->GetLogicalVolume();
   //if (verboseLevel>5) { G4cout << "GlobalTime = " << totalTime << G4endl; }
