@@ -231,7 +231,7 @@ namespace G4UA{
       stringStream << vol << "_" << particleName << "_" << suffix;
       hMap[particleName] = new TH2F(stringStream.str().c_str(), stringStream.str().c_str(), nbinsx, xmin, xmax, nbinsy, ymin, ymax);
     }
-    (static_cast<TH2*>(hMap[particleName]))->Fill(valuex, valuey, weight);
+    static_cast<TH2*>(hMap[particleName])->Fill(valuex, valuey, weight);
   }
 
   void StepHistogram::InitializeFillHistogram(HistoMapMap_t &hMapMap, const char* suffix,
