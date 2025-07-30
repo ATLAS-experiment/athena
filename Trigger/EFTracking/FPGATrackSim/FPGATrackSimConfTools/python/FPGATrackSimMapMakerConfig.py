@@ -74,12 +74,23 @@ def FPGATrackSimMapMakerCfg(flags):
         region=flags.Trigger.FPGATrackSim.region,
         trim=flags.trim,
         globalTrim=flags.globalTrim,
-        InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags)),
         eventSelector = acc.getPrimaryAndMerge(FPGATrackSimEventSelectionSvcCfg(flags)),
         planes = getFirstStagePlanes(flags),
         planes2 = getSecondStagePlanes(flags)
         )
-
+ 
+    if flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
+        alg.InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
+        alg.SGInputTool = ""
+    else:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
+        alg.InputTool = ""
+        from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
+        alg.SGInputTool = acc.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
+        alg.SGInputTool.ReadOfflineClusters=False
+        alg.SGInputTool.ReadOfflineTracks=False
+    
     acc.addEventAlgo(alg)
     return acc
 
@@ -97,16 +108,19 @@ if __name__ == "__main__":
     
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
-
+    
     flags.fillFromArgs()
-    if not flags.Trigger.FPGATrackSim.wrapperFileName and flags.Input.Files:
-        flags.Trigger.FPGATrackSim.wrapperFileName = flags.Input.Files
-        log.info("Taken wrapper input files from Input.Files(set via cmd line --filesInput option) property: %s", str(flags.Trigger.FPGATrackSim.wrapperFileName))
+
+    from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
+    flags = FPGATrackSimDataPrepConfig.FixITkMainPassFlags(flags)    
+
     flags.lock()
 
     acc=MainServicesCfg(flags)
     acc.store(open('FPGATrackSimMapMakerConfig.pkl','wb'))
     acc.merge(FPGATrackSimMapMakerCfg(flags))
+    acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepSetup(flags))
+    
 
     from AthenaConfiguration.Utils import setupLoggingLevels
     setupLoggingLevels(flags, acc)
