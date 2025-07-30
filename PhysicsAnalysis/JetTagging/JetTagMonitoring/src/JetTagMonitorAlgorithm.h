@@ -9,6 +9,8 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadDecorHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
 
 #include "xAODEventInfo/EventInfo.h"
 #include "LArRecEvent/LArEventBitInfo.h"
@@ -72,6 +74,10 @@ class JetTagMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadDecorHandleKey<xAOD::MuonContainer> m_MuonPtIsoDecorKey {this,"MuonPtIsoDecorKey","Muons.ptvarcone30"};
   SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_EleEtIsoDecorKey {this,"EleEtIsoDecorKey","Electrons.topoetcone20"};
   SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_ElePtIsoDecorKey {this,"ElePtIsoDecorKey","Electrons.ptvarcone20"};
+  // decorations from b-tagging 
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_JetTagDecorKey_pb {this,"JetTagDecorKey_pb", ""};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_JetTagDecorKey_pc {this,"JetTagDecorKey_pc", ""};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_JetTagDecorKey_pu {this,"JetTagDecorKey_pu", ""};
 
   ToolHandle<InDet::IInDetTrackSelectionTool> m_TrackSelectionTool{this, "TrackSelectionTool", "InDetTrackSelectionTool", "Tool for selecting tracks"};
 
