@@ -5,24 +5,6 @@ from GaudiKernel.DataHandle import DataHandle
 import re
 
 
-class MapMergeNoReplaceSemantics(GaudiConfig2.semantics.MappingSemantics):
-    '''
-    Extend the mapping-semantics with a merge-method that merges two mappings as long as they do not have different values for the same key
-    Use 'mapMergeNoReplace<T>' as fifth parameter of the Gaudi::Property<T> constructor
-    to invoke this merging method.
-    '''
-    __handled_types__ = (re.compile(r"^mapMergeNoReplace<.*>$"),)
-    def __init__(self, cpp_type):
-        super(MapMergeNoReplaceSemantics, self).__init__(cpp_type)
-
-    def merge(self,a,b):
-        for k in b.keys():
-            if k in a and b[k] != a[k]:
-                raise ValueError('conflicting values in map under key %r and %r %r' % (k, b[k], a[k]))
-            a[k] = b[k]
-        return a
-
-
 class VarHandleKeySemantics(GaudiConfig2.semantics.PropertySemantics):
     '''
     Semantics for all data handle keys (Read, Write, Decor, Cond).
@@ -88,5 +70,4 @@ from AthenaServices.ItemListSemantics import OutputStreamItemListSemantics
 
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleKeySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleArraySematics)
-GaudiConfig2.semantics.SEMANTICS.append(MapMergeNoReplaceSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(OutputStreamItemListSemantics)
