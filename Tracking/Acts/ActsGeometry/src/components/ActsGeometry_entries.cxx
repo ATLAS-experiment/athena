@@ -23,6 +23,8 @@
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "../ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 #include "../SimpleCylinderDetBuilderTool.h"
+#include "../ItkBlueprintNodeBuilder.h"
+
 
 DECLARE_COMPONENT(ActsExtrapolationAlg)
 DECLARE_COMPONENT(ActsWriteTrackingGeometry)
@@ -46,3 +48,6 @@ DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
 DECLARE_COMPONENT(ActsTrk::DetectorVolumeSvc)
 DECLARE_COMPONENT(ActsTrk::SimpleCylinderDetBuilderTool)
 DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)
+
+DECLARE_COMPONENT(ActsTrk::ItkBlueprintNodeBuilder)
+

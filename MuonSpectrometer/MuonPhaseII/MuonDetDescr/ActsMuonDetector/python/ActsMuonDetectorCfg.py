@@ -18,3 +18,12 @@ def MsTrackingVolumeBuilderCfg(flags, name = "MSTrackingVolumeBuilder", **kwargs
     the_tool = CompFactory.ActsTrk.MSTrackingVolumeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
+
+def MuonBlueprintNodeBuilderCfg(flags, name = "MuonBlueprintNodeBuilder", **kwargs):
+    result = ComponentAccumulator()
+    from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
+    the_tool = CompFactory.ActsTrk.MuonBlueprintNodeBuilder(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+

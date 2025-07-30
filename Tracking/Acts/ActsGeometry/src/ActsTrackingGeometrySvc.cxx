@@ -24,6 +24,8 @@
 
 // ACTS
 #include "Acts/ActsVersion.hpp"
+#include "Acts/Geometry/Blueprint.hpp"
+#include "Acts/Geometry/ContainerBlueprintNode.hpp"
 #include "Acts/Geometry/CylinderVolumeBounds.hpp"
 #include "Acts/Geometry/CylinderVolumeBuilder.hpp"
 #include "Acts/Geometry/CylinderVolumeHelper.hpp"
@@ -45,6 +47,7 @@
 #include <Acts/Surfaces/DiscSurface.hpp>
 #include <Acts/Surfaces/LineSurface.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
+#include <Acts/Visualization/ObjVisualization3D.hpp>
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IDetectorElement.h"
@@ -55,7 +58,6 @@
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/LoggerUtils.h"
-#include "src/ActsBlueprintConstruction.h"
 
 #include <Acts/Utilities/AxisDefinitions.hpp>
 #include <limits>
@@ -151,21 +153,61 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
   }
 
   if (m_useBlueprint) {
+
+
     ATH_MSG_INFO("Using Blueprint API for geometry construction");
-  std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
+    std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
                                     m_buildSubdetectors.end());
-    ActsTrk::ActsBlueprintConstruction::Config cfg;
-    cfg.beamPipeMgr = p_beamPipeMgr;
-    cfg.itkPixelManager = p_ITkPixelManager;
-    cfg.itkStripManager = p_ITkStripManager;
-    cfg.graphviz = m_blueprintGraphviz;
-    cfg.objDebugOutput = m_objDebugOutput;
-    cfg.elementStore = m_elementStore.get();
 
-    ActsTrk::ActsBlueprintConstruction helper(cfg, msgSvc().get(), msg(),
-                                              msgLevel());
+    ATH_CHECK(m_blueprintNodeBuilders.retrieve());
 
-    m_trackingGeometry = helper.buildBlueprintGeometry(getNominalContext().context());
+    using enum Acts::AxisDirection;
+  
+    std::vector<ActsTrk::IBlueprintNodeBuilder*> ptrBuilders;
+    std::transform(m_blueprintNodeBuilders.begin(), m_blueprintNodeBuilders.end(),
+               std::back_inserter(ptrBuilders),
+               [](ToolHandle<ActsTrk::IBlueprintNodeBuilder>& b) { return b.get(); });
+
+    auto logger = makeActsAthenaLogger(this, std::string("Blueprint"), std::string("ActsTGSvc"));
+    
+    Acts::Experimental::Blueprint::Config cfg;
+    cfg.envelope[AxisZ] = {20_mm, 20_mm};
+    cfg.envelope[AxisR] = {0_mm, 20_mm};
+
+    auto blueprint = std::make_unique<Acts::Experimental::Blueprint>(cfg);
+
+    auto& root = blueprint->addCylinderContainer("Detector", AxisZ);
+    //The starting top node 
+    std::shared_ptr<Acts::Experimental::BlueprintNode> currentTop{nullptr};
+
+    for (auto& builder : ptrBuilders) {
+      currentTop = builder->buildBlueprintNode(getNominalContext().context(), std::move(currentTop));
+      
+    }
+
+    root.addChild(std::move(currentTop));
+    
+    m_trackingGeometry = blueprint->construct(
+      {}, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
+
+    if (m_objDebugOutput) {
+    Acts::ObjVisualization3D vis;
+    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                {.visible = false}, {.visible = true});
+    vis.write("blueprint_sensitive.obj");
+    vis.clear();
+
+    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
+                                {.visible = false}, {.visible = false});
+    vis.write("blueprint_volume.obj");
+    vis.clear();
+
+    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                {.visible = true}, {.visible = false});
+    vis.write("blueprint_portals.obj");
+
+
+  }
 
     return StatusCode::SUCCESS;
   }

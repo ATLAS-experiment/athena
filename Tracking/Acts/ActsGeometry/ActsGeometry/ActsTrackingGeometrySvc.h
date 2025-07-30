@@ -11,6 +11,7 @@
 // PACKAGE
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IActsTrackingVolumeBuilder.h"
+#include "ActsGeometryInterfaces/IBlueprintNodeBuilder.h"
 #include "ActsGeometry/ActsLayerBuilder.h"
 #include "ActsGeometry/ActsElementVector.h"
 
@@ -140,6 +141,10 @@ private:
   ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, "CaloVolumeBuilder", ""};
 
   ToolHandle<IActsTrackingVolumeBuilder> m_msVolumeBuilder{this, "MSVolumeBuilder", ""};
+  
+  ToolHandleArray<ActsTrk::IBlueprintNodeBuilder> m_blueprintNodeBuilders{this, "BlueprintNodeBuilders", {}};
+
+
     /// Define the subdetectors for which the tracking geometry does not expect a valid alignment store
   Gaudi::Property<std::vector<unsigned int>> m_subDetNoAlignProp{this, "NotAlignDetectors", {}};
   std::set<ActsTrk::DetectorType> m_subDetNoAlign{};
