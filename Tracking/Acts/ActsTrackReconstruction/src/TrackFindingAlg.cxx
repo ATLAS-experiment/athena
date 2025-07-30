@@ -81,8 +81,9 @@ namespace ActsTrk
     ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
     ATH_CHECK(m_detElStatus.initialize());
     ATH_CHECK(m_beamSpotKey.initialize());
-    
-    ATH_CHECK(m_seedDestiny.initialize());
+
+    m_storeDestinies = not m_seedDestiny.empty();
+    ATH_CHECK(m_seedDestiny.initialize(m_storeDestinies));
     
     if (m_seedContainerKeys.size() != m_detEleCollKeys.size())
       {
@@ -110,11 +111,12 @@ namespace ActsTrk
       
       m_ambi.emplace(std::move(cfg), makeActsAthenaLogger(this, "Acts"));
     }
-    
-    if (m_seedDestiny.size() != m_seedContainerKeys.size()) {
-      ATH_MSG_ERROR("There are " << m_seedDestiny.size() << " seed destiny collections, but " << m_seedContainerKeys.size() << " seed collections");
-      return StatusCode::FAILURE;
-      
+
+    if (m_storeDestinies) {
+      if (m_seedDestiny.size() != m_seedContainerKeys.size()) {
+        ATH_MSG_ERROR("There are " << m_seedDestiny.size() << " seed destiny collections, but " << m_seedContainerKeys.size() << " seed collections");
+        return StatusCode::FAILURE;        
+      }
     }
     
     return StatusCode::SUCCESS;
@@ -147,10 +149,12 @@ namespace ActsTrk
     ATH_CHECK(getContainersFromKeys(ctx, m_seedContainerKeys, seedContainers, total_seeds));
     
     // DESTINIES
-    std::vector< std::unique_ptr< std::vector<int> > > destinies;
-    destinies.reserve( seedContainers.size() );
-    for (std::size_t i(0); i<seedContainers.size(); ++i) {
-      destinies.push_back( std::make_unique< std::vector<int> >( seedContainers.at(i)->size(), DestinyType::UNKNOWN) );
+    std::vector< std::unique_ptr< std::vector<int> > > destinies {};
+    if (m_storeDestinies) {
+      destinies.reserve( seedContainers.size() );
+      for (std::size_t i(0); i<seedContainers.size(); ++i) {
+        destinies.push_back( std::make_unique< std::vector<int> >( seedContainers.at(i)->size(), DestinyType::UNKNOWN) );
+      }
     }
     
     // MEASUREMENTS
@@ -234,7 +238,8 @@ namespace ActsTrk
     Acts::VectorMultiTrajectory actsTrackStateBackend;
     actsTrackBackend.reserve(10000);
     actsTrackStateBackend.reserve(400000);
-    detail::RecoTrackContainer actsTracksContainer(actsTrackBackend, actsTrackStateBackend);
+    detail::RecoTrackContainer actsTracksContainer(actsTrackBackend,
+                                                   actsTrackStateBackend);
     
     if (m_addPixelStripCounts) {
       addPixelStripCounts(actsTracksContainer);
@@ -267,7 +272,7 @@ namespace ActsTrk
                              icontainer,
                              icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : m_seedContainerKeys[icontainer].key().c_str(),
                              event_stat,
-                             *destinies.at(icontainer).get(),
+                             m_storeDestinies ? destinies.at(icontainer).get() : nullptr,
                              *pSurface.get()));
       }
     
@@ -327,12 +332,14 @@ namespace ActsTrk
       }
     
     // Save the seed destinies
-    for (std::size_t i(0); i<destinies.size(); ++i) {
-      const SG::WriteHandleKey< std::vector<int> >& writeKey = m_seedDestiny.at(i);
-      // make the handle and record
-      SG::WriteHandle< std::vector<int> > destinyHandle = SG::makeHandle( writeKey, ctx );
-      ATH_CHECK( destinyHandle.record( std::move(  destinies.at(i) )  ) );
-    }    
+    if (m_storeDestinies) {
+      for (std::size_t i(0); i<destinies.size(); ++i) {
+        const SG::WriteHandleKey< std::vector<int> >& writeKey = m_seedDestiny.at(i);
+        // make the handle and record
+        SG::WriteHandle< std::vector<int> > destinyHandle = SG::makeHandle( writeKey, ctx );
+        ATH_CHECK( destinyHandle.record( std::move(  destinies.at(i) )  ) );
+      }
+    }
     
     return StatusCode::SUCCESS;
   }
@@ -363,7 +370,7 @@ namespace ActsTrk
                               std::size_t typeIndex,
                               const char *seedType,
                               EventStats &event_stat,
-                              std::vector<int>& destiny,
+                              std::vector<int>* destiny,
                               const Acts::PerigeeSurface& pSurface) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
@@ -435,7 +442,7 @@ namespace ActsTrk
           category_i = getSeedCategory(typeIndex, seed, useTopSp);
           ++event_stat[category_i][kNTotalSeeds];
           ++event_stat[category_i][kNDuplicateSeeds];
-          destiny.at(iseed) = DestinyType::DUPLICATE;
+          if (m_storeDestinies) destiny->at(iseed) = DestinyType::DUPLICATE;
           if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
         }
         
@@ -460,7 +467,7 @@ namespace ActsTrk
             category_i = getSeedCategory(typeIndex, seed, useTopSp);
             ++event_stat[category_i][kNTotalSeeds];
             ++event_stat[category_i][kNNoEstimatedParams];
-            destiny.at(iseed) = DestinyType::FAILURE;
+            if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
           }
           continue;
         }
@@ -480,7 +487,7 @@ namespace ActsTrk
           refitSeedParameters = doRefit(seed, *initialParameters, detContext, reverseSearch);
           if (refitSeedParameters.get() == nullptr) {
             ++event_stat[category_i][kNRejectedRefinedSeeds];
-            destiny.at(iseed) = DestinyType::FAILURE;
+            if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
             continue;
           }
           if (refitSeedParameters.get() != initialParameters) {
@@ -496,7 +503,7 @@ namespace ActsTrk
         // The result for this seed
         if (not result.ok()) {
           ATH_MSG_WARNING("Track finding failed for " << seedType << " seed " << iseed << " with error" << result.error());
-          destiny.at(iseed) = DestinyType::FAILURE;
+          if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
           continue;
         }
         auto &tracksForSeed = result.value();
@@ -630,11 +637,13 @@ namespace ActsTrk
           
           nfirst++;
         } // loop on tracks from seed
-        
-        if (ntracks == 0) {
-          destiny.at(iseed) = DestinyType::FAILURE;
-        } else {
-          destiny.at(iseed) = DestinyType::SUCCEED;
+
+        if (m_storeDestinies) {
+          if (ntracks == 0) {
+            destiny->at(iseed) = DestinyType::FAILURE;
+          } else {
+            destiny->at(iseed) = DestinyType::SUCCEED;
+          }
         }
         
         if (ntracks == 0) {
@@ -861,7 +870,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                        const detail::MeasurementIndex& measurementIndex,
                                        const detail::RecoTrackContainer& tracksContainerTemp,
                                        detail::DuplicateSeedDetector& duplicateSeedDetector,
-                                       std::vector<int>& destiny,
+                                       std::vector<int>* destiny,
                                        EventStats& event_stat,
                                        std::size_t& ntracks,
                                        std::size_t iseed,
@@ -887,7 +896,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                         << iseed << " and " << track.index()
                         << " failed with error " << extrapolationResult.error()
                         << " dropping track candidate.");
-        destiny.at(iseed) = DestinyType::FAILURE;
+        if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
         return StatusCode::SUCCESS;
       }
     }
