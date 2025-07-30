@@ -68,6 +68,12 @@ StatusCode JetTagMonitorAlgorithm::initialize() {
   ATH_CHECK(m_MuonPtIsoDecorKey.initialize());
   ATH_CHECK(m_EleEtIsoDecorKey.initialize());
   ATH_CHECK(m_ElePtIsoDecorKey.initialize());
+  m_JetTagDecorKey_pb = m_JetContainerKey.objKey() + "." + m_TaggerName + "_pb";
+  ATH_CHECK(m_JetTagDecorKey_pb.initialize());
+  m_JetTagDecorKey_pc = m_JetContainerKey.objKey() + "." + m_TaggerName + "_pc";
+  ATH_CHECK(m_JetTagDecorKey_pc.initialize());
+  m_JetTagDecorKey_pu = m_JetContainerKey.objKey() + "." + m_TaggerName + "_pu";
+  ATH_CHECK(m_JetTagDecorKey_pu.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -680,10 +686,10 @@ bool JetTagMonitorAlgorithm::passJVTCut(const xAOD::Jet *jet) const {
 double JetTagMonitorAlgorithm::getTaggerWeight(const xAOD::Jet *jet) const {
 
   ATH_MSG_DEBUG("retrieving GN2* weight");
-  static const SG::AuxElement::Accessor<float> acc_pb(m_TaggerName + "_pb");
-  static const SG::AuxElement::Accessor<float> acc_pc(m_TaggerName + "_pc");
-  static const SG::AuxElement::Accessor<float> acc_pu(m_TaggerName + "_pu");
-  if (!acc_pb.isAvailable(*jet)) {
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pb (m_JetTagDecorKey_pb);
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pc (m_JetTagDecorKey_pc);
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pu (m_JetTagDecorKey_pu);
+  if (!acc_pb.isAvailable()) {
     ATH_MSG_DEBUG("GN2* tagger weight not available for jet, skipping");
     return 0.0; 
   }
@@ -1102,10 +1108,10 @@ void JetTagMonitorAlgorithm::fillSuspectJetHistos(const xAOD::Jet *jet) const {
 }
 
 void JetTagMonitorAlgorithm::fillExtraTaggerHistos(const xAOD::Jet *jet) const {
-  static const SG::AuxElement::Accessor<float> acc_pb(m_TaggerName + "_pb");
-  static const SG::AuxElement::Accessor<float> acc_pc(m_TaggerName + "_pc");
-  static const SG::AuxElement::Accessor<float> acc_pu(m_TaggerName + "_pu");
-  if (!acc_pb.isAvailable(*jet)) {
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pb (m_JetTagDecorKey_pb);
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pc (m_JetTagDecorKey_pc);
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pu (m_JetTagDecorKey_pu);
+  if (!acc_pb.isAvailable()) {
     ATH_MSG_DEBUG("GN2* weight not available, skipping...");
     return;
   }
