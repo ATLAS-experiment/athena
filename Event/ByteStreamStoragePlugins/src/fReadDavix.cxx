@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ers/ers.h"
@@ -153,13 +153,13 @@ void fReadDavix::setPositionFromEnd(int64_t p)
 fRead * fReadDavix::newReader() const
 {
   fReadDavix * nfr = new fReadDavix();
-  return static_cast<fRead *>(nfr);
+  return nfr;
 }
 
 extern "C" {
   fRead * fReadFactory()
   {
     fReadDavix * nfr = new fReadDavix();
-    return static_cast<fRead *>(nfr);
+    return nfr;
   }
 }
