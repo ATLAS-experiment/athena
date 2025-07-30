@@ -9801,6 +9801,8 @@ HLT_j260_a10sd_cssk_96bgntwox_pf_jes_ftf_preselj200_L1jJ125:
   eventCount: 0
 HLT_j260_a10sd_cssk_96bgntwox_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
+HLT_j260_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
 HLT_j260_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ125:
   eventCount: 0
 HLT_j260_a10t_lcw_jes_L1jJ125:
@@ -9808,6 +9810,8 @@ HLT_j260_a10t_lcw_jes_L1jJ125:
 HLT_j260_pf_ftf_preselj200_L1jJ125:
   eventCount: 0
 HLT_j260f_L1jJ125p30ETA49:
+  eventCount: 0
+HLT_j270_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
 HLT_j275_0eta290_020jvt_bgn170_pf_ftf_preselj225_L1jJ160:
   eventCount: 0
@@ -9829,7 +9833,11 @@ HLT_j280_0eta290_nnJvtv1_bgn270_pf_ftf_preselj225_L1jJ160:
   eventCount: 0
 HLT_j280_0eta290_nnJvtv1_bgn277_pf_ftf_preselj225_L1jJ160:
   eventCount: 0
+HLT_j280_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
 HLT_j280f_L1jJ125p30ETA49:
+  eventCount: 0
+HLT_j290_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
 HLT_j300_0eta290_020jvt_bgn170_pf_ftf_preselj225_L1jJ160:
   eventCount: 0
@@ -9852,6 +9860,8 @@ HLT_j300_2timing_L1jJ160:
 HLT_j300_3timeSig15_L1jJ160:
   eventCount: 0
 HLT_j300_3timeSig_L1jJ160:
+  eventCount: 0
+HLT_j300_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
 HLT_j300f_L1jJ125p30ETA49:
   eventCount: 0
@@ -9913,6 +9923,12 @@ HLT_j30_CLEANllp_momemfrac012_calratiovar186_roiftf_preselj20emf12_L1jMJJ-500-NF
   eventCount: 0
 HLT_j30_CLEANllp_momemfrac012_calratiovar_roiftf_preselj20emf12_L1jJ160:
   eventCount: 0
+HLT_j310_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+HLT_j320_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+HLT_j330_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
 HLT_j340_0eta290_020jvt_bgn177_pf_ftf_preselj225_L1jJ160:
   eventCount: 0
 HLT_j340_0eta290_020jvt_bgn185_pf_ftf_preselj225_L1jJ160:
@@ -9924,6 +9940,10 @@ HLT_j340_0eta290_020jvt_bgn285_pf_ftf_preselj225_L1jJ160:
 HLT_j340_0eta290_nnJvtv1_bgn277_pf_ftf_preselj225_L1jJ160:
   eventCount: 0
 HLT_j340_0eta290_nnJvtv1_bgn285_pf_ftf_preselj225_L1jJ160:
+  eventCount: 0
+HLT_j340_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
+  eventCount: 0
+HLT_j350_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
 HLT_j35_020jvt_pf_ftf_L1RD0_FILLED:
   eventCount: 14
