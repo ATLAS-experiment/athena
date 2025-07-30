@@ -45,6 +45,20 @@ namespace {
     const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());    
     return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
   }
+
+  static std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> getFirstMeasurementFromTrack(typename ActsTrk::detail::RecoTrackContainer::TrackProxy trackProxy) {
+    std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> firstMeasurement {std::nullopt};
+    for (auto st : trackProxy.trackStatesReversed()) {
+      // We are excluding non measurement states and outlier here. Those can
+      // decrease resolution because only the smoothing corrected the very
+      // first prediction as filtering is not possible.
+      if (not st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) continue;
+      if (st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag)) continue;
+      firstMeasurement = st;
+    }    
+    return firstMeasurement;
+  }
+  
 }
 
 
@@ -495,21 +509,6 @@ namespace ActsTrk
         
         std::size_t ntracks = 0ul;
         
-        // if two way we need the first measurement
-        // since tracks are made from the same seed (and the temporary container is always cleared)
-        // the first measurement corresponds to the first track state
-        detail::RecoTrackStateContainerProxy firstMeasurement = tracksContainerTemp.trackStateContainer().getTrackState(0);
-        if ( not firstMeasurement.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag) ) {
-          ATH_MSG_ERROR( "First track state is not a measurement" );
-          return StatusCode::FAILURE;
-        }
-        
-        if ( firstMeasurement.typeFlags().test(Acts::TrackStateFlag::OutlierFlag) ) {
-          ATH_MSG_ERROR( "First track state is an outlier" );
-          return StatusCode::FAILURE;
-        }
-        
-        
         // loop on the tracks we have just found from the seed
         std::size_t nfirst = 0;
         for (TrkProxy &firstTrack : tracksForSeed) {
@@ -546,6 +545,14 @@ namespace ActsTrk
           }
           
           // TWO WAY STARTS HERE
+          // We need the first measurement of the track
+          std::optional<detail::RecoTrackStateContainerProxy> firstMeas = getFirstMeasurementFromTrack(firstTrack);
+          // we are supposed to find a measurement
+          if (not firstMeas.has_value()) {
+            ATH_MSG_ERROR("Could not retrieve first measurement from track proxy. Is it ill-formed?");
+            return StatusCode::FAILURE;
+          }
+          detail::RecoTrackStateContainerProxy& firstMeasurement = firstMeas.value();
           
           // Get the tracks from the second track finding
           std::vector<typename detail::RecoTrackContainer::TrackProxy> secondTracksForSeed =
