@@ -287,19 +287,15 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
       } else {
         f = 2.0; // two rows per module
       }
-      size_t nBinsPhi = nModPhi / f;
+      size_t nBinsPhi = nModPhi;
       size_t nBinsZ = nModZ / f;
       layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
                                                 nBinsZ, pl, transform,
                                                 std::move(approachDescriptor));
     } else if (m_cfg.mode == Mode::ITkPixelInner ||
                m_cfg.mode == Mode::ITkPixelOuter) {
-      double f = 1.0;
-      if (key == 0) {
-        f = 2.0;
-      }
-      size_t nBinsPhi = nModPhi / f;
-      size_t nBinsZ = nModZ / f;
+      size_t nBinsPhi = nModPhi;
+      size_t nBinsZ = nModZ;
       layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
                                                 nBinsZ, pl, transform,
                                                 std::move(approachDescriptor));
