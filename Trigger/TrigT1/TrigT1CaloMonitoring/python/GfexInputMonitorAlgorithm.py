@@ -39,8 +39,8 @@ def GfexInputMonitoringConfig(flags):
                              )
 
 
-    helper.defineTree('LBNString,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEt,RefTowerEt,TowerSaturationflag,RefTowerSat;errors',
-                      "lbnString/string:error/string:eventNumber/l:id/i:eta/F:phi/F:et/I:ref_et/I:sat/B:ref_sat/B",
+    helper.defineTree('LBN,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEt,RefTowerEt,TowerSaturationflag,RefTowerSat;errors',
+                      "lbn/I:error/string:eventNumber/l:id/i:eta/F:phi/F:et/I:ref_et/I:sat/B:ref_sat/B",
                       title="errors tree;LBN;Error",fillGroup="errors")
 
     # histograms of gFex tower variables

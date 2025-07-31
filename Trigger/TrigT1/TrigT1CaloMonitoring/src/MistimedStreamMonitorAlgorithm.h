@@ -160,12 +160,8 @@ private:
     UnsuitableReadout,
     HLT_mistimemonj400,
     L1_Trigger,
-    badpeakTT,
-    badCentralTT,
-    badLateTT,
     lateTT,
     InTime,
-    TTEMLayer,
     EtaPhiOverlap
   };
    
