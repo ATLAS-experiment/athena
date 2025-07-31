@@ -6,6 +6,26 @@ import inspect
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgBlock = logging.getLogger('CPAlgCfgBlock')
 
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+import re
+
+def filter_dsids (filterList, config) :
+    """check whether the sample being run passes a"""
+    """possible DSID filter on the block"""
+    if len(filterList) == 0:
+        return True
+    for dsid_filter in filterList:
+        # Check if the pattern is enclosed in regex delimiters (e.g., starts with '^' or contains regex metacharacters)
+        if any(char in dsid_filter for char in "^$*+?.()|[]{}\\"):
+            pattern = re.compile(dsid_filter)
+            if pattern.match(str(config.dsid())):
+                return True
+        else:
+            # Otherwise it's an exact DSID (but could be int or string)
+            if str(dsid_filter) == str(config.dsid()):
+                return True
+    return False
+
 
 class ConfigBlockOption:
     """the information for a single option on a configuration block"""
@@ -78,13 +98,18 @@ class ConfigBlock:
     layer on top of this one, and this class will likely be extended
     and get data members at that point.
 
-    The child class needs to implement two methods,
-    `collectReferences` and `makeAlgs` which are each given a single
-    `ConfigAccumulator` type argument.  The first is for the first
-    configuration step, and should only collect references to the
-    containers to be used.  The second is for the second configuration
-    step, and should create the actual algorithms.
+    The child class needs to implement the method `makeAlgs` which is
+    given a single `ConfigAccumulator` type argument. This is meant to
+    create the sequence of algorithms that this block configures. This
+    is currently (28 Jul 2025) called twice and should do the same thing
+    during both calls, but the plan is to change that to a single call.
 
+    The child class should also implement the method `getInstanceName`
+    which should return a string that is used to distinguish between
+    multiple instances of the same block. This is used to append the
+    instance name to the names of all algorithms created by this block,
+    and may in the future also be used to distinguish between multiple
+    instances of the block.
     """
 
     # Class-level dictionary to keep track of instance counts for each derived class
@@ -113,6 +138,16 @@ class ConfigBlock:
                   ' (e.g. 410.* to select all 410xxx DSIDs, or'
                   ' ^(?!410) to veto them). An empty list means no'
                   ' DSID restriction.'))
+        self.addOption('propertyOverrides', {}, type=None,
+            info=('EXPERT USE ONLY: A dictionary of properties to'
+                  ' override at the end of configuration. This should'
+                  ' take the form'
+                  ' {"algName.toolName.propertyName": value, ...},'
+                  ' without any automatically applied postfixes for'
+                  ' the algorithm name. THIS IS MEANT TO BE EXPERT'
+                  ' USAGE ONLY. Properties that need to be set by'
+                  ' the user should be declared as options on the'
+                  ' block itself. EXPERT USE ONLY!'))
         # Increment the instance count for the current class
         cls = type(self)  # Get the actual class of the instance (also derived!)
         if cls not in ConfigBlock.instance_counts:
@@ -137,6 +172,69 @@ class ConfigBlock:
     def getBlockName(self):
         """Get blockName"""
         return self._blockName
+
+    def instanceName(self):
+        """Get the name of the instance
+
+        The name of the instance is used to distinguish between multiple
+        instances of the same block. Most importantly, this will be
+        appended to the names of all algorithms created by this block.
+        This defaults to an empty string, but block implementations
+        should override it with an appropriate name based on identifying
+        options set on this instance. A typical example would be the
+        name of the (main) container, plus potentially the selection or
+        working point.
+
+        Ideally all blocks should override this method, but for backward
+        compatibility (28 Jul 25) it defaults to an empty string.
+        """
+        return ''
+
+    def isUsedForConfig(self, config):
+        """
+        whether this block should be used for the given configuration
+
+        This is used by `ConfigSequence` to determine whether this block
+        should be included in the configuration.
+        """
+        if self.skipOnData and config.dataType() is DataType.Data:
+            return False
+        if self.skipOnMC and config.dataType() is DataType.MC:
+            return False
+        if self.onlyForDSIDs and not config.isInDSIDs(self.onlyForDSIDs):
+            return False
+        if self.skipOnData and config.dataType() is DataType.Data:
+            return False
+        if self.skipOnMC and config.dataType() is not DataType.Data:
+            return False
+        if not filter_dsids(self.onlyForDSIDs, config):
+            return False
+        return True
+
+    def applyConfigOverrides(self, config):
+        """
+        Apply any configuration overrides specified in the block's
+        `propertyOverrides` option. This is meant to be called at the
+        end of the configuration process, after all algorithms have been
+        created and configured.
+        """
+        for key, value in self.propertyOverrides.items():
+            # Split the key into algorithm name, tool name, and property name
+            parts = key.split('.')
+            if len(parts) < 2:
+                raise Exception(f"Invalid override key format: {key}")
+            alg = config.getAlgorithm(parts[0])
+            if alg is None:
+                raise Exception(f"Algorithm {parts[0]} not found in config for override: {key}")
+            for name in parts[1:-1]:
+                # Navigate through tools if necessary
+                if hasattr(alg, name):
+                    alg = getattr(alg, name)
+                else:
+                    raise Exception(f"Tool {name} not found for override: {key}")
+            # Set the property on the algorithm/tool. This is probably a
+            # horrible hack, but `setattr` didn't work for me.
+            alg.__setattr__(parts[-1], value)
 
     def addDependency(self, dependencyName, required=True):
         """
