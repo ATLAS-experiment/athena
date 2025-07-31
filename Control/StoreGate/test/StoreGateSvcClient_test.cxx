@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -244,7 +244,7 @@ void test_copy_conversions (StoreGateSvc& sg)
 
   const Athena_test::Y* cy = nullptr;
   assert (sg.retrieve (cy, "x").isSuccess());
-  assert ((char*)cy != (char*)px);
+  assert (reinterpret_cast<const char*>(cy) != reinterpret_cast<char*>(px));
   assert (cy->a == 20);
   assert (cy->b == 30);
 
