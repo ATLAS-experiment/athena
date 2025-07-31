@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT1MuctpiPhase1 )
@@ -13,7 +13,8 @@ atlas_add_library( TrigT1MuctpiL1TopoLib
 		   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
 
 atlas_add_component( TrigT1MuctpiPhase1
-                     src/*.cxx src/components/*.cxx
+                     src/M*.cxx src/S*.cxx src/T*.cxx
+                     src/components/*.cxx
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
                      LINK_LIBRARIES ${Boost_LIBRARIES} AnalysisTriggerEvent AthenaBaseComps GaudiKernel HLTSeedingLib PathResolver StoreGateLib TrigConfData 
 		     		    TrigConfMuctpi TrigT1Interfaces TrigT1Result xAODTrigger TrigT1MuctpiL1TopoLib TrigConfxAODLib)
