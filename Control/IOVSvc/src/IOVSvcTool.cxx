@@ -246,7 +246,7 @@ IOVSvcTool::handle(const Incident &inc) {
      }
      // cppcheck-suppress identicalInnerCondition
      if (m_first) {
-        for (auto e : m_ignoredProxyNames) {
+        for (const auto& e : m_ignoredProxyNames) {
            DataProxy* proxy = p_cndSvc->proxy(e.first,e.second);
            ATH_MSG_DEBUG("retrieving "<<fullProxyName(e.first,e.second));
            if (proxy == nullptr) {
@@ -1191,8 +1191,10 @@ IOVSvcTool::PrintProxyMap(const SG::DataProxy* dp) const {
     for (auto pitr=pi.first; pitr!=pi.second; ++pitr) {
       BFCN* fcn = pitr->second;
       map<BFCN*,CallBackID>::const_iterator fitr = m_fcnMap.find(fcn);
-      CallBackID cbid = fitr->second;
-      msg() << "         ->  " << fcn << "  " << cbid.name() << endl;
+      if (fitr != m_fcnMap.end()) {
+        CallBackID cbid = fitr->second;
+        msg() << "         ->  " << fcn << "  " << cbid.name() << endl;
+      }
     }
   }
 }

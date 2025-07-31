@@ -241,7 +241,7 @@ private:
   { return TADkey_t (t.clID(), t.name()); }
   std::set< TADkey_t > m_partPreLoad;
 
-  bool m_first{true};
+  std::atomic<bool> m_first{true};
   bool m_checkOnce{false};
   bool m_triggered{false};
   bool m_firstEventOfRun{false};
