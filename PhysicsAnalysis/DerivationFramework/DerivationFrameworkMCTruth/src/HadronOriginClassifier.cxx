@@ -39,6 +39,7 @@ namespace DerivationFramework{
 
     static const std::vector<Sample> samples = {
       // all Herwig++/Herwig7 showered samples
+      {346346, 346348, GEN_id::HerwigPP},
       {410003, GEN_id::HerwigPP}, {410008, GEN_id::HerwigPP}, //aMC@NLO+Hpp
       {410004, GEN_id::HerwigPP}, {410163, GEN_id::HerwigPP}, //Powheg+Hpp
       {410232, 410233, GEN_id::HerwigPP}, //first attempt for Powheg+H7 / aMC@NLO+H7
@@ -57,9 +58,18 @@ namespace DerivationFramework{
       {601239, 601240, GEN_id::HerwigPP},
       {601668, GEN_id::HerwigPP},
       {603905, 603906, GEN_id::HerwigPP}, // ttbb Powheg+H7 dilep, ljet, allhad
+      {504337, GEN_id::HerwigPP}, {504345, GEN_id::HerwigPP}, // aMC@NLO+H7 ttZ
+      {526034, GEN_id::HerwigPP}, // aMC@NLO+H7 4tops
+      {600666, 600667, GEN_id::HerwigPP}, // Powheg+H7 ttbar H7UE
+      {601414, 601415, GEN_id::HerwigPP}, // Powheg+H7 ttbar A14
+      {602635, 602635, GEN_id::HerwigPP}, // Powheg+H7 ttH PDF4LHC21
+      {602846, 602849, GEN_id::HerwigPP}, // Powheg+H7 ttW NNPDF30NLO EW
 
       // all Pythia8 showered samples
+      {304014, GEN_id::Pythia8}, // amc@NLO+P8 3top
+      {346229, 346234, GEN_id::Pythia8}, // amc@NLO+P8 tHjb
       {410006, GEN_id::Pythia8}, //Powheg+P8 old main31
+      {410081, GEN_id::Pythia8}, //amc@NLO+P8 ttV
       {410500, GEN_id::Pythia8}, //Powheg+P8 new main31, hdamp=mt
       {410501, 410508, GEN_id::Pythia8}, //Powheg+P8 new main31, hdamp=1.5m // Boosted samples are included 410507 410508
       {410511, 410524, GEN_id::Pythia8}, //Powheg+P8 new main31, hdamp=1.5mt, radiation systematics
@@ -78,14 +88,16 @@ namespace DerivationFramework{
       {410470, 410472, GEN_id::Pythia8}, {410480, 410482, GEN_id::Pythia8}, //new Powheg+P8 mc16
       {410452, GEN_id::Pythia8}, //new aMC@NLO+P8 FxFx mc16
       {411073, 411081, GEN_id::Pythia8}, //Powheg+P8 HF-filtered
+      {412043, 412044, GEN_id::Pythia8}, {500326, GEN_id::Pythia8}, //aMC@NLO+P8 4top
       {412066, 412074, GEN_id::Pythia8}, //aMC@NLO+P8 HF-filtered
       {411068, 411070, GEN_id::Pythia8}, //Powheg+P8 ttbb
       {410265, 410267, GEN_id::Pythia8}, //aMC@NLO+P8 ttbb
       {411178, 411180, GEN_id::Pythia8}, {411275, GEN_id::Pythia8}, //Powheg+P8 ttbb OTF production - ATLMCPROD-7240
+      {501720, GEN_id::Pythia8}, // aMC@NLO+P8 FxFx ttW
       {600791, 600792, GEN_id::Pythia8}, //Powheg+P8 ttbb - ATLMCPROD-9179
       {600737, 600738, GEN_id::Pythia8}, //Powheg+P8 ttbb - ATLMCPROD-9179
-      {601226, 601227, GEN_id::Pythia8}, // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
-      {407342, 407344, GEN_id::Pythia8}, //Powheg+P8 ttbar HT-filtered
+      {601226, 601228, GEN_id::Pythia8}, // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
+      {407342, 407344, GEN_id::Pythia8}, {411391, GEN_id::Pythia8}, //Powheg+P8 ttbar HT-filtered
       {407345, 407347, GEN_id::Pythia8}, //Powheg+P8 ttbar MET-filtered
       {407348, 407350, GEN_id::Pythia8}, //aMC@NLO+P8 ttbar HT-filtered
       {504330, 504332, GEN_id::Pythia8}, {504334, 504336, GEN_id::Pythia8}, {504338, GEN_id::Pythia8}, {504342, 504344, GEN_id::Pythia8}, {504346, GEN_id::Pythia8}, //aMC@NLO+P8 refined ttZ
@@ -99,6 +111,19 @@ namespace DerivationFramework{
       {603003, 603004, GEN_id::Pythia8}, // Powheg+P8 ttbb nominal and pthard1 allhad
       {603190, 603193, GEN_id::Pythia8}, // Powheg+P8 ttbb nominal and pthard1 dilep, ljet
       {604482, 604483, GEN_id::Pythia8}, // mc23 Powheg+P8 ttbar recoilToTop
+      {411369, 411374, GEN_id::Pythia8}, // PP8 ttbar Var1
+      {411290, GEN_id::Pythia8}, // PP8 ttbar rb1p05
+      {508792, GEN_id::Pythia8}, // aMC@NLO+P8 ttbar smeftsim
+      {510203, GEN_id::Pythia8}, // aMC@NLO+P8 4tops
+      {522035, 522038, GEN_id::Pythia8}, // aMC@NLO+P8 ttZqq
+      {523243, GEN_id::Pythia8}, // aMC@NLO+P8 4tops
+      {601356, 601357, GEN_id::Pythia8}, // PP8 ttbar Trec
+      {602067, 602072, GEN_id::Pythia8}, // PP8 ttH pthard1/2
+      {602637, GEN_id::Pythia8}, // PP8 ttH PDF4LHC21
+      {602852, 602853, GEN_id::Pythia8}, // PP8 ttH PDF4LHC21 pthard1
+      {602886, 602889, GEN_id::Pythia8}, // PP8 ttW NNPDF23
+      {603851, 603854, GEN_id::Pythia8}, // PP8 ggH
+      {604224, GEN_id::Pythia8}, // PP8 ttH allhad HTop
 
       // all Sherpa showered samples
       {410186, 410189, GEN_id::Sherpa}, //Sherpa 2.2.0
@@ -123,6 +148,10 @@ namespace DerivationFramework{
       {700121, 700124, GEN_id::Sherpa}, //Sherpa2.2.10 ttbar
       {700164, 700167, GEN_id::Sherpa}, //Sherpa2.2.10 ttbb
       {700807, 700809, GEN_id::Sherpa}, //Sherpa2.2.14 ttbar
+      {700659, 700662, GEN_id::Sherpa}, // Sherpa 2.2.12 ttbar maxHTavrgTopPT
+      {700712, GEN_id::Sherpa}, // Sherpa 2.2.14 4tops muQHT2
+      {700986, 700997, GEN_id::Sherpa}, // Sherpa 2.2.14 ttW
+      {701251, 701259, GEN_id::Sherpa}, // Sherpa ttW
 
     };
 
