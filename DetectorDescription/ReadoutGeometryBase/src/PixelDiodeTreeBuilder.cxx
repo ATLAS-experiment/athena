@@ -4,7 +4,6 @@
 #include "ReadoutGeometryBase/PixelDiodeTreeBuilder.h"
 #include <stdexcept>
 #include <iomanip>
-#include <iostream>
 #include <unordered_map>
 
 namespace InDetDD {
@@ -572,7 +571,6 @@ PixelDiodeTree createPixelDiodeTree(const std::array<unsigned int,2> &chip_dim,
       }
    }
    if (diode_tree.cloneSingleSplitsToUnusedHalf()>0) {
-      std::cout << diode_tree.debugStringRepr() << std::endl;
       throw std::logic_error("Some splits have invalid indices. That should not happen.");
    }
    // set the positions of the upper and lower corner of the matrix

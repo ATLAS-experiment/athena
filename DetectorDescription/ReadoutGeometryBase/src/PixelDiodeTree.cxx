@@ -5,7 +5,6 @@
 #include <sstream>
 #include <iomanip>
 #include <utility>
-#include <iostream>
 
 namespace InDetDD {
 
@@ -80,13 +79,6 @@ void PixelDiodeTree::computeMatrixCorner(const std::array<PixelDiodeTree::CellIn
       }
    }
    if (!isInsideMatrix(findFromPos(m_matrixCorner[0])) || !isInsideMatrix(findFromPos(m_matrixCorner[1]))) {
-      DiodeProxy upper_corner_proxy_from_idx(diodeProxyFromPos(m_matrixCorner[0]));
-      DiodeProxy lower_corner_proxy_from_idx(diodeProxyFromPos(m_matrixCorner[1]));
-      constexpr unsigned int n_secs=5;
-      for (unsigned int i=20; i-->0; ) {
-         std::cout <<  "wait " << (i *n_secs) << " : " << getpid() << std::endl;
-         sleep(n_secs);
-      }
       throw std::logic_error("Logic error! Matrix corner positions do not yield valid indices for this matrix!");
    }
 }

@@ -50,11 +50,6 @@ PixelDiodeTree PixelDiodeTreeMakerBase::make(InDetDD::PixelReadoutTechnology rea
 
      unsigned int n_large_dimensions = (  (std::abs(diode_width[0]-pitch[InDetDD::detail::kPhi])>pitch[InDetDD::detail::kPhi]*.25)
                                          +(std::abs(diode_width[1]-pitch[InDetDD::detail::kEta])>pitch[InDetDD::detail::kEta]*.25));
-     std::cout << "DEBUG compute diode-type for " << split_idx[0] << " " << split_idx[1] << " | " << split_i
-               << " width " << diode_width[0] << " " << diode_width[1]  << " normal pitch " << pitch[InDetDD::detail::kPhi] << " " << pitch[InDetDD::detail::kEta]
-               << " large dim " << n_large_dimensions
-               << std::endl;
-
      switch (n_large_dimensions) {
      case 1:
         current_diode_attribute=InDetDD::detail::makeAttributeType(InDetDD::PixelDiodeType::LONG);
