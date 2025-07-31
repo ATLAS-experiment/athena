@@ -76,7 +76,7 @@ public:
 
     while(len >= 4)
     {
-      uint32_t k = *(uint32_t*)data;
+      uint32_t k = *reinterpret_cast<const uint32_t*>(data);
 
       MurmurHash_mmix(m_hash,k);
 

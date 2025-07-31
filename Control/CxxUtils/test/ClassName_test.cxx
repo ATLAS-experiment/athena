@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/ClassName_test.cxx
@@ -18,11 +18,9 @@
 #include "expect_exception.icc"
 
 
-using CxxUtils::ClassName;
-
-
 void test1()
 {
+  using CxxUtils::ClassName;
   std::cout << "test1\n";
   
   {
@@ -139,6 +137,7 @@ void test1()
 
 void test_eq()
 {
+  using CxxUtils::ClassName;
   std::cout << "test_eq\n";
 
   assert (ClassName ("A::B<int>") == ClassName ("A::B<int>"));
@@ -153,6 +152,7 @@ void test_eq()
 
 void test_match()
 {
+  using CxxUtils::ClassName;
   std::cout << "test_match\n";
 
   ClassName pat1 ("A::B<int>");
@@ -191,6 +191,7 @@ void test_match()
 
 void test_subst()
 {
+  using CxxUtils::ClassName;
   std::cout << "test_subst\n";
 
   ClassName pat1 ("std::vector<$T, std::allocator<$T> >");
@@ -223,6 +224,7 @@ void test_subst()
 
 void test_rules()
 {
+  using CxxUtils::ClassName;
   std::cout << "test_rules\n";
 
   ClassName::Rules rules;
