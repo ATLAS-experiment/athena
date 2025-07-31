@@ -25,17 +25,16 @@ tc::InferenceServerGrpcClient* AthInfer::TritonTool::getClient() const {
     thread_local std::unique_ptr<tc::InferenceServerGrpcClient> threadClient;
     if (!threadClient) {
         std::string url = m_url.value() + ":" + std::to_string(m_port); // always use the gRPC port
-        
-        bool verbose = false;
-        bool use_ssl = true;
 
-        tc::Error err = tc::InferenceServerGrpcClient::Create(&threadClient, url, verbose, use_ssl);
+        bool verbose = false;
+
+        tc::Error err = tc::InferenceServerGrpcClient::Create(&threadClient, url, verbose, m_useSSL);
         if (!err.IsOk()) {
             ATH_MSG_ERROR("Failed to create Triton gRPC client for model: " + m_modelName.value() + " at url: " + url);
             ATH_MSG_ERROR("Error message: " + err.Message());
             return nullptr;
         }
-        
+
         ATH_MSG_INFO("Triton client created for model: "+ m_modelName.value() + " at url: "+ url);
 
     }
@@ -43,7 +42,7 @@ tc::InferenceServerGrpcClient* AthInfer::TritonTool::getClient() const {
 }
 
 StatusCode AthInfer::TritonTool::inference(InputDataMap& inputData, OutputDataMap& outputData) const {
-    
+
     // Create the tensor for the input data.
     // Use shared_ptr to manage the memory of the InferInput objects.
     std::vector<std::shared_ptr<tc::InferInput> > inputs_;
@@ -78,7 +77,7 @@ StatusCode AthInfer::TritonTool::inference(InputDataMap& inputData, OutputDataMa
         &rawResultPtr, *m_options, rawInputs, {}, http_headers, compression_algorithm),
         "unable to run model "+ m_modelName.value() + " error: " + err.Message()
     );
-    
+
     std::shared_ptr<tc::InferResult> results(rawResultPtr);
 
     // Get the result of the inference.

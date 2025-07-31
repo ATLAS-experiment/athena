@@ -47,9 +47,10 @@ class TritonTool: public extends<AthAlgTool, ITritonTool>
     StringProperty m_modelVersion{this, "ModelVersion", "", "Model version, empty for latest"};
     FloatProperty m_clientTimeout{this, "ClientTimeout", 0, "Client timeout in milliseconds, 0 for no timeout"};
     StringProperty m_url{this, "URL", "", "Triton URL"};
-    
+    BooleanProperty m_useSSL{this, "UseSSL", false, "Use SSL for Triton server connection"};
+
   private:
-    tc::InferenceServerGrpcClient* getClient() const;    
+    tc::InferenceServerGrpcClient* getClient() const;
     std::unique_ptr<tc::InferOptions> m_options;
 
     template <typename T>
