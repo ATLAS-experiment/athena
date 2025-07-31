@@ -30,3 +30,8 @@ atlas_add_test( TestCPRunFullSim
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 1000
    )
+atlas_add_test( TestCPRunMultiMuon
+   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AnalysisAlgorithmsConfig/test_configuration_multi_muon.yaml -e 150
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 1000
+   )

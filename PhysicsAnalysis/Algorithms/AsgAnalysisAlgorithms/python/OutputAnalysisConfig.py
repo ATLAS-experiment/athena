@@ -3,7 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AnalysisAlgorithmsConfig.ConfigSequence import filter_dsids
+from AnalysisAlgorithmsConfig.ConfigBlock import filter_dsids
 from AthenaCommon.Logging import logging
 import copy, re
 

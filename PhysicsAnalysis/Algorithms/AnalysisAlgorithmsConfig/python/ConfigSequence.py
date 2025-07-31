@@ -3,10 +3,9 @@
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgSeq = logging.getLogger('CPAlgCfgSeq')
 
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from functools import wraps
 from random import randrange
-import re
+
 def groupBlocks(func):
     """
     Decorates a configSequence or function with 'seq' as a
@@ -24,23 +23,6 @@ def groupBlocks(func):
         for block in kwargs['seq']:
             block.setOptionValue('groupName', groupName)
     return wrapper
-
-def filter_dsids (filterList, config) :
-    """check whether the sample being run passes a"""
-    """possible DSID filter on the block"""
-    if len(filterList) == 0:
-        return True
-    for dsid_filter in filterList:
-        # Check if the pattern is enclosed in regex delimiters (e.g., starts with '^' or contains regex metacharacters)
-        if any(char in dsid_filter for char in "^$*+?.()|[]{}\\"):
-            pattern = re.compile(dsid_filter)
-            if pattern.match(str(config.dsid())):
-                return True
-        else:
-            # Otherwise it's an exact DSID (but could be int or string)
-            if str(dsid_filter) == str(config.dsid()):
-                return True
-    return False
 
 class ConfigSequence:
     """a sequence of ConfigBlock objects
@@ -72,13 +54,24 @@ class ConfigSequence:
         how the blocks are configured right now.
         """
         for block in self._blocks:
-            if block.skipOnData and config.dataType() is DataType.Data:
+            if not block.isUsedForConfig(config):
                 continue
-            if block.skipOnMC and config.dataType() is not DataType.Data:
-                continue
-            if not filter_dsids(block.onlyForDSIDs, config):
-                continue
+            config.setAlgPostfix(block.instanceName())
             block.makeAlgs (config)
+        config.setAlgPostfix('')  # reset algPostfix after all blocks are configured
+
+
+    def applyConfigOverrides(self, config):
+        """
+        Apply any properties that were set in the block's
+        'propertyOverrides' option.
+        """
+        for block in self._blocks:
+            if not block.isUsedForConfig(config):
+                continue
+            config.setAlgPostfix(block.instanceName())
+            block.applyConfigOverrides(config)
+        config.setAlgPostfix('')  # reset algPostfix after all blocks are configured
 
     def reorderAlgs(self):
         """
@@ -137,6 +130,7 @@ class ConfigSequence:
         self.makeAlgs (config)
         config.nextPass ()
         self.makeAlgs (config)
+        self.applyConfigOverrides(config)
 
 
     def setOptionValue (self, name, value, **kwargs) :
