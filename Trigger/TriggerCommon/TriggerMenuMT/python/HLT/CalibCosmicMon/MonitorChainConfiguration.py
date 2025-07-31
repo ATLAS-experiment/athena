@@ -13,7 +13,7 @@ from L1TopoSimulation import L1TopoSimulationConfig as TopoSimConfig
 from TrigHypoCommonTools.TrigHypoCommonTools import TrigGenericHypoToolFromDict
 from TrigEDMConfig.TriggerEDM import recordable
 from AthenaCommon.CFElements import seqAND
-
+from TriggerMenuMT.HLT.CommonSequences.RejectSequences import RejectSequence
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO, 
 # so let's make them functions already now
@@ -50,19 +50,10 @@ def LArSuperCellMonitoringGenCfg(flags,appendName=""):
    )
    reco = InEventRecoCA('LArSuperCellMonitoring'+appendName,inputMaker=inputMaker)
    reco.merge( LArSuperCellMonConfigHLT(flags,name="LArSuperCellMonConfigHLT"+appendName) )
-   # TimeBurner alg works as a reject-all hypo
    selAcc = SelectionCA('LArSuperCellMonitoringSequence'+appendName)
    selAcc.mergeReco(reco)
-   selAcc.addHypoAlgo(
-       TimeBurnerCfg(flags,
-                     name="LArSuperCellMonHypoConfig"+appendName,
-                     SleepTimeMillisec=0
-       )
-   )
-
-   # TimeBurnerHypo is never even called
-   msca = MenuSequence(flags, selAcc,
-                         HypoToolGen=TimeBurnerHypoToolGen)
+   HypoName = "LArSuperCellMonHypoConfig"+appendName
+   msca = RejectSequence(flags, HypoName, selAcc)
    return msca
 
 def L1TopoOnlineMonitorSequenceCfg(flags):
@@ -125,14 +116,10 @@ def CaloClusterMonitorCfg(flags, suffix = ""):
    
    selAcc.mergeReco(reco)
    
-   selAcc.addHypoAlgo(
-       TimeBurnerCfg(flags,
-                     name="CaloClusterMonitoringHypoConfig" + suffix,
-                     SleepTimeMillisec=0
-       )
-   )
+   HypoName = "CaloClusterMonHypoConfig"+ suffix
+   msca = RejectSequence(flags, HypoName, selAcc)
 
-   return MenuSequence(flags, selAcc, HypoToolGen=TimeBurnerHypoToolGen)
+   return msca 
                       
 
 #----------------------------------------------------------------
