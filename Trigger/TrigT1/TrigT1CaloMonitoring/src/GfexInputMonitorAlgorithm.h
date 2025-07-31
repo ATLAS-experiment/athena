@@ -23,7 +23,7 @@ private:
   StringProperty m_packageName{this,"PackageName","GfexInputMonitor","group name for histograming"};
 
   // container keys including steering parameter and description
-  SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gFexTowerContainerKey{this, "gFexTowerContainer","L1_gFexDataTowers200","SG key of the input gFex Tower container"};
+  SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gFexTowerContainerKey{this, "gFexTowerContainer","L1_gFexDataTowers","SG key of the input gFex Tower container"};
   SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gFexEmulatedTowerKey{this, "gFexEmulatedTowerContainer","","SG key of the emulated gFex Tower container"};
 
     //funtions defined

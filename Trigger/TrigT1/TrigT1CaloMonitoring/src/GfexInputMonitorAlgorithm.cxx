@@ -82,7 +82,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
             if(eTowerItr == emulatedTowers.end()) {
                 // missing emulated tower?
                 Decision = "MissingTower";
-                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
                 continue;
             }
 
@@ -92,11 +92,11 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
             if(refTowerET != Toweret) {
                 Decision = "ETMismatch";
-                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
             if(refTowerSat != Towersaturationflag) {
                 Decision = "SatMismatch";
-                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
 
         }
