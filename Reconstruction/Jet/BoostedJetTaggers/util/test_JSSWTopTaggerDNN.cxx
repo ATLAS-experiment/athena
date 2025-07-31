@@ -155,7 +155,7 @@ int main( int argc, char* argv[] ) {
   chain->Add(fileName);
 
   // Create a TEvent object:
-  xAOD::TEvent event( static_cast<TTree*>(chain), xAOD::TEvent::kAthenaAccess );
+  xAOD::TEvent event( chain, xAOD::TEvent::kAthenaAccess );
   Info( APP_NAME, "Number of events in the file: %i", static_cast< int >( event.getEntries() ) );
 
   // Create a transient object store. Needed for the tools.
