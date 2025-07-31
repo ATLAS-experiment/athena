@@ -264,81 +264,121 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	
         if (L2bjetChain) {
           std::vector< TrigCompositeUtils::LinkInfo<xAOD::JetContainer> > onlinejets = m_trigDecTool->features<xAOD::JetContainer>(trigName, TrigDefs::Physics);
+	  
+	  std::string nJetH = "LargeR_nJet_"+trigName;
+	  auto nJet = Monitored::Scalar<int>(nJetH,0.0);
+	  nJet = onlinejets.size();
+	  ATH_MSG_DEBUG("   nJet: " << nJet);
+	  fill("TrigBjetMonitor",nJet);
 	  for(const auto& jetLinkInfo : onlinejets) {
 	    const xAOD::Jet* jet = *(jetLinkInfo.link);
-	    std::string nJetH = "LargeR_nJet_"+trigName;
-	    auto nJet = Monitored::Scalar<int>(nJetH,0.0);
-	    nJet = onlinejets.size();
-	    ATH_MSG_DEBUG("   nJet: " << nJet);
-	    fill("TrigBjetMonitor",nJet);
-	    if (nJet > 0) {
-
-	      bool theLLRW(false);
-
-	      std::string NameH = "GN2Xv01_pqcd_tr_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto GN2Xv01_pqcd = Monitored::Scalar<float>(NameH,0.0);
-	      const SG::AuxElement::ConstAccessor<float> pqcd_accessor("GN2Xv01_pqcd"); // DG 03-03-2025
-	      GN2Xv01_pqcd = pqcd_accessor(*jet);  // DG 03-03-2025
-	      ATH_MSG_DEBUG("       GN2Xv01_pqcd: " << GN2Xv01_pqcd);
-	      fill("TrigBjetMonitor",GN2Xv01_pqcd);        
+	    
+	    
+	    bool theLLRW(false);
+	    
+	    // GN2XTrig
+	    
+	    std::string NameH = "GN2XTrig_pqcd_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2XTrig_pqcd = Monitored::Scalar<float>(NameH,0.0);
+	    const SG::AuxElement::ConstAccessor<float> pqcd_accessor("GN2XTrig_pqcd"); // DG 03-03-2025
+	    GN2XTrig_pqcd = pqcd_accessor(*jet);  // DG 03-03-2025
+	    ATH_MSG_DEBUG("       GN2XTrig_pqcd: " << GN2XTrig_pqcd);
+	    fill("TrigBjetMonitor",GN2XTrig_pqcd);        
+	    
+	    NameH = "GN2XTrig_ptop_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2XTrig_ptop = Monitored::Scalar<float>(NameH,0.0);
+	    const SG::AuxElement::ConstAccessor<float> ptop_accessor("GN2XTrig_ptop"); // DG 03-03-2025
+	    GN2XTrig_ptop = ptop_accessor(*jet);  // DG 03-03-2025
+	    ATH_MSG_DEBUG("       GN2XTrig_ptop: " << GN2XTrig_ptop);
+	    fill("TrigBjetMonitor",GN2XTrig_ptop);        
+	    
+	    NameH = "GN2XTrig_phbb_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2XTrig_phbb = Monitored::Scalar<float>(NameH,0.0);
+	    const SG::AuxElement::ConstAccessor<float> phbb_accessor("GN2XTrig_phbb"); // DG 03-03-2025
+	    GN2XTrig_phbb = phbb_accessor(*jet);  // DG 03-03-2025
+	    ATH_MSG_DEBUG("       GN2XTrig_phbb: " << GN2XTrig_phbb);
+	    fill("TrigBjetMonitor",GN2XTrig_phbb);        
+	    
+	    NameH = "GN2XTrig_mv_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2XTrig_mv = Monitored::Scalar<float>(NameH,0.0);
+	    ATH_MSG_DEBUG("  GN2XTrig_pqcd: " << GN2XTrig_pqcd << "  GN2XTrig_ptop: " << GN2XTrig_ptop << "  GN2XTrig_phbb: " << GN2XTrig_phbb );
+	    theLLRW = LLRW (GN2XTrig_pqcd, GN2XTrig_ptop, GN2XTrig_phbb, GN2XTrig_mv);
+	    ATH_MSG_DEBUG("        GN2XTrig_mv: " << GN2XTrig_mv << " LLRW: " << theLLRW); 
+	    if ( theLLRW ) fill("TrigBjetMonitor",GN2XTrig_mv);
+	    
+	    
+	    // jetPt
+	    NameH = "LargeR_jetPt_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto LargeR_jetPt = Monitored::Scalar<float>(NameH,0.0);
+	    LargeR_jetPt = (jet->pt())*1.e-3;
+	    ATH_MSG_DEBUG("        LargeR_jetPt: " << LargeR_jetPt);
+	    fill("TrigBjetMonitor",LargeR_jetPt);
+	    
+	    // jetEta
+	    NameH = "LargeR_jetEta_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto LargeR_jetEta = Monitored::Scalar<float>(NameH,0.0);
+	    LargeR_jetEta = jet->eta();
+	    
+	    // jetPhi
+	    NameH = "LargeR_jetPhi_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto LargeR_jetPhi = Monitored::Scalar<float>(NameH,0.0);
+	    LargeR_jetPhi = jet->phi();
+	    ATH_MSG_DEBUG("        LargeR_jetEta: " << LargeR_jetEta << " LargeR_jetPhi : " << LargeR_jetPhi);
+	    fill("TrigBjetMonitor",LargeR_jetEta,LargeR_jetPhi);
+	    
+	    // jetMass
+	    NameH = "LargeR_jetMass_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto LargeR_jetMass = Monitored::Scalar<float>(NameH,0.0);
+	    LargeR_jetMass = (jet->m())*1.e-3;
+	    ATH_MSG_DEBUG("        LargeR_jetMass: " << LargeR_jetMass);
+	    fill("TrigBjetMonitor",LargeR_jetMass);
+	    
+	    // GN2Xv01
+	    
+	    NameH = "GN2Xv01_pqcd_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2Xv01_pqcd = Monitored::Scalar<float>(NameH,0.0);
+	    const SG::AuxElement::ConstAccessor<float> pqcd_accessor0("GN2Xv01_pqcd"); // DG 03-03-2025
+	    GN2Xv01_pqcd = pqcd_accessor0(*jet);  // DG 03-03-2025
+	    ATH_MSG_DEBUG("       GN2Xv01_pqcd: " << GN2Xv01_pqcd);
+	    fill("TrigBjetMonitor",GN2Xv01_pqcd);        
+	    
+	    NameH = "GN2Xv01_ptop_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2Xv01_ptop = Monitored::Scalar<float>(NameH,0.0);
+	    const SG::AuxElement::ConstAccessor<float> ptop_accessor0("GN2Xv01_ptop"); // DG 03-03-2025
+	    GN2Xv01_ptop = ptop_accessor0(*jet);  // DG 03-03-2025
+	    ATH_MSG_DEBUG("       GN2Xv01_ptop: " << GN2Xv01_ptop);
+	    fill("TrigBjetMonitor",GN2Xv01_ptop);        
+	    
+	    NameH = "GN2Xv01_phbb_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2Xv01_phbb = Monitored::Scalar<float>(NameH,0.0);
+	    const SG::AuxElement::ConstAccessor<float> phbb_accessor0("GN2Xv01_phbb"); // DG 03-03-2025
+	    GN2Xv01_phbb = phbb_accessor0(*jet);  // DG 03-03-2025
+	    ATH_MSG_DEBUG("       GN2Xv01_phbb: " << GN2Xv01_phbb);
+	    fill("TrigBjetMonitor",GN2Xv01_phbb);        
+	    
+	    NameH = "GN2Xv01_mv_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2Xv01_mv = Monitored::Scalar<float>(NameH,0.0);
+	    ATH_MSG_DEBUG("  GN2Xv01_pqcd: " << GN2Xv01_pqcd << "  GN2Xv01_ptop: " << GN2Xv01_ptop << "  GN2Xv01_phbb: " << GN2Xv01_phbb );
+	    theLLRW = LLRW (GN2Xv01_pqcd, GN2Xv01_ptop, GN2Xv01_phbb, GN2Xv01_mv);
+	    ATH_MSG_DEBUG("        GN2Xv01_mv: " << GN2Xv01_mv << " LLRW: " << theLLRW); 
+	    if ( theLLRW ) fill("TrigBjetMonitor",GN2Xv01_mv);
+	    
 	      
-	      NameH = "GN2Xv01_ptop_tr_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto GN2Xv01_ptop = Monitored::Scalar<float>(NameH,0.0);
-	      const SG::AuxElement::ConstAccessor<float> ptop_accessor("GN2Xv01_ptop"); // DG 03-03-2025
-	      GN2Xv01_ptop = ptop_accessor(*jet);  // DG 03-03-2025
-	      ATH_MSG_DEBUG("       GN2Xv01_ptop: " << GN2Xv01_ptop);
-	      fill("TrigBjetMonitor",GN2Xv01_ptop);        
-	      
-	      NameH = "GN2Xv01_phbb_tr_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto GN2Xv01_phbb = Monitored::Scalar<float>(NameH,0.0);
-	      const SG::AuxElement::ConstAccessor<float> phbb_accessor("GN2Xv01_phbb"); // DG 03-03-2025
-	      GN2Xv01_phbb = phbb_accessor(*jet);  // DG 03-03-2025
-	      ATH_MSG_DEBUG("       GN2Xv01_phbb: " << GN2Xv01_phbb);
-	      fill("TrigBjetMonitor",GN2Xv01_phbb);        
-	      
-	      NameH = "GN2Xv01_mv_tr_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto GN2Xv01_mv = Monitored::Scalar<float>(NameH,0.0);
-	      ATH_MSG_DEBUG("  GN2Xv01_pqcd: " << GN2Xv01_pqcd << "  GN2Xv01_ptop: " << GN2Xv01_ptop << "  GN2Xv01_phbb: " << GN2Xv01_phbb );
-	      theLLRW = LLRW (GN2Xv01_pqcd, GN2Xv01_ptop, GN2Xv01_phbb, GN2Xv01_mv);
-	      ATH_MSG_DEBUG("        GN2Xv01_mv: " << GN2Xv01_mv << " LLRW: " << theLLRW); 
-	      if ( theLLRW ) fill("TrigBjetMonitor",GN2Xv01_mv);
-	      
-	      // jetPt
-	      NameH = "LargeR_jetPt_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto LargeR_jetPt = Monitored::Scalar<float>(NameH,0.0);
-	      LargeR_jetPt = (jet->pt())*1.e-3;
-	      ATH_MSG_DEBUG("        LargeR_jetPt: " << LargeR_jetPt);
-	      fill("TrigBjetMonitor",LargeR_jetPt);
-
-	      // jetEta
-	      NameH = "LargeR_jetEta_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto LargeR_jetEta = Monitored::Scalar<float>(NameH,0.0);
-	      LargeR_jetEta = jet->eta();
-
-	      // jetPhi
-	      NameH = "LargeR_jetPhi_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto LargeR_jetPhi = Monitored::Scalar<float>(NameH,0.0);
-	      LargeR_jetPhi = jet->phi();
-	      ATH_MSG_DEBUG("        LargeR_jetEta: " << LargeR_jetEta << " LargeR_jetPhi : " << LargeR_jetPhi);
-	      fill("TrigBjetMonitor",LargeR_jetEta,LargeR_jetPhi);
-	      
-	      // jetMass
-	      NameH = "LargeR_jetMass_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto LargeR_jetMass = Monitored::Scalar<float>(NameH,0.0);
-	      LargeR_jetMass = (jet->m())*1.e-3;
-	      ATH_MSG_DEBUG("        LargeR_jetMass: " << LargeR_jetMass);
-	      fill("TrigBjetMonitor",LargeR_jetMass);
-
-	    } // if (nJet > 0)
-	  } // for jetLinkInfo
+	    
+	  } // for jetLinkInfo 
+	  
         } // if (L2bjetChain)
 
 	
