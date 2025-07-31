@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaBlockAllocatorBase_test.cxx
@@ -68,7 +68,7 @@ Payload& payload (SG::ArenaBlock* bl, size_t i=0)
     bl = bl->link();
   }
   assert (bl != nullptr);
-  return *(Payload*)bl->index (i, sizeof(Payload));
+  return *reinterpret_cast<Payload*>(bl->index (i, sizeof(Payload)));
 }
 
 

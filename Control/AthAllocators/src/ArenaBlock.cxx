@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/src/ArenaBlock.cxx
@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <cassert>
+#include <new>
 #include <sys/mman.h>
 
 
@@ -49,6 +50,7 @@ ArenaBlock::newBlock (size_t n, size_t elt_size, func_t* ctor)
   assert (n_rounded >= n);
   ArenaBlock* p = reinterpret_cast<ArenaBlock*>
     (std::aligned_alloc (pageSize, tot_size_rounded));
+  if (!p) throw std::bad_alloc();
   ++s_nactive;
   p->m_link = nullptr;
   p->m_elt_size = elt_size;

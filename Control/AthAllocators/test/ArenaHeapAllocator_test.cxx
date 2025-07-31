@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaHeapAllocator_test.cxx
@@ -101,7 +101,7 @@ void test1()
   assert (aha.stats().blocks.total == nblocks);
 
   for (size_t i = 0; i < ptrs.size(); i += 2)
-    aha.free ((char*)ptrs[i]);
+    aha.free (reinterpret_cast<char*>(ptrs[i]));
   assert (aha.stats().elts.inuse == 493);
   assert (aha.stats().elts.total == nelt);
   assert (aha.stats().elts.free == nelt - 493);
@@ -201,7 +201,7 @@ void test2()
     p->y = 2*p->x;
   }
   for (size_t i = 0; i < ptrs.size(); i+=2) {
-    aha.free ((char*)ptrs[i]);
+    aha.free (reinterpret_cast<char*>(ptrs[i]));
     assert (ptrs[i]->y == 0);
     ptrs[i]->y = 1;
   }
