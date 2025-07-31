@@ -68,13 +68,10 @@ namespace InDetDD {
       /// convenience method to test whether the given value can be converted into an attribute
       template<typename T>
       bool validAttributeType(T val) {
-         if constexpr( std::is_signed_v<T>) {
-            return val>= std::numeric_limits<InDetDD::PixelDiodeTree::AttributeType>::min()
-               && val < std::numeric_limits<InDetDD::PixelDiodeTree::AttributeType>::max();
-         }
-         else {
-            return val < std::numeric_limits<InDetDD::PixelDiodeTree::AttributeType>::max();
-         }
+         static_assert( sizeof(T) <= sizeof(InDetDD::PixelDiodeTree::AttributeType));
+         auto storage_type = static_cast<InDetDD::PixelDiodeTree::AttributeType>(val);
+         T user_type = static_cast<T>(storage_type);
+         return val==user_type;
       }
 
       /// convenience method to convert the given value into an attribute

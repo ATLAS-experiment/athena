@@ -4,7 +4,6 @@
 #include "ReadoutGeometryBase/PixelDiodeTreeBuilder.h"
 #include <stdexcept>
 #include <iomanip>
-#include <iostream>
 #include <unordered_map>
 
 namespace InDetDD {
@@ -103,8 +102,6 @@ namespace {
                       << " | " << new_dim[1][1] << " | " << (*edgeName)[matrix_data.m_edgeType[ 1 + 2*1]]
                       << std::endl;
       }
-      assert(diode_tree.m_idxSplit.size() == diode_tree.m_posSplit.size());
-      assert(diode_tree.m_idxSplit.size() == diode_tree.m_subMatrixIndex.size());
 
       unsigned int sub_matrix_idx = std::numeric_limits<unsigned int>::max();
       std::array<unsigned int,2> axis_split_i;
@@ -196,6 +193,34 @@ namespace {
 
 }
 
+namespace {
+   // helper class to store diode index and for debug build also the attribute
+   // the attribute is used to verify that computed diode attributes agree
+   // for all "diodes" which are mapped to the same diode parameter set.
+   // The functional which is used to compute the diode attributes has to
+   // ensure this.
+   struct DiodeInfo {
+      DiodeInfo(unsigned int idx, [[maybe_unused]] const PixelDiodeTree::AttributeType &attribute)
+         : m_idx(idx)
+#ifndef NDEBUG
+          ,m_attribute(attribute)
+#endif
+      {}
+      void setIndex(unsigned int idx) { m_idx=idx; }
+      unsigned int diodeIndex() const { return m_idx; }
+#ifndef NDEBUG
+      bool attributeAgrees(const PixelDiodeTree::AttributeType &attribute) {
+         return attribute == m_attribute;
+      }
+#endif
+   private:
+      unsigned int m_idx;
+#ifndef NDEBUG
+      PixelDiodeTree::AttributeType m_attribute;
+#endif
+   };
+}
+
 PixelDiodeTree createPixelDiodeTree(const std::array<unsigned int,2> &chip_dim,
                                     const std::array<unsigned int,2> &chip_matrix_dim,
                                     const PixelDiodeTree::Vector2D &pitch,
@@ -231,7 +256,7 @@ PixelDiodeTree createPixelDiodeTree(const std::array<unsigned int,2> &chip_dim,
                        + edge_dim[kOuter][axis_i]*edge_pitch[kOuter][axis_i]*n_outer_edges);
    }
    PixelDiodeTree diode_tree(width);
-   std::unordered_map<unsigned int, unsigned int> diode_idx;
+   std::unordered_map<unsigned int, DiodeInfo > diode_idx;
 
    std::array<std::string,SubMatrixData::kDeadZoneInner+1> edgeName {
       std::string("Outer"),
@@ -517,21 +542,20 @@ PixelDiodeTree createPixelDiodeTree(const std::array<unsigned int,2> &chip_dim,
                                      current_sub_matrix_attribute,
                                      full_diode_type);
 
-         std::pair< std::unordered_map<unsigned int, unsigned int>::iterator, bool>
-            ret = diode_idx.insert( std::make_pair(full_diode_type, std::numeric_limits<unsigned int>::max()));
+         std::pair< std::unordered_map<unsigned int, DiodeInfo >::iterator, bool>
+            ret = diode_idx.insert( std::make_pair(full_diode_type, DiodeInfo(std::numeric_limits<unsigned int>::max(),new_diode_attribute)));
          if (ret.second) {
             unsigned int diode_idx = diode_tree.addDiode(diode_width,
                                                          new_diode_attribute);
             assert( diode_idx < std::numeric_limits<PixelDiodeTree::IndexType>::max());
-            ret.first->second = diode_idx;
+            ret.first->second.setIndex( diode_idx );
          }
-         assert( ret.second || (   ret.first->second < diode_tree.m_diodeParam.m_attribute
-                                && new_diode_attribute==diode_tree.m_diodeParam.m_attribute[ret.first->second]));
-            diode_tree.setAttribute(current_submatrix.m_subMatrixIdx, new_sub_matrix_attribute);
+         assert( ret.second || ret.first->second.attributeAgrees(new_diode_attribute) );
+         diode_tree.setAttribute(current_submatrix.m_subMatrixIdx, new_sub_matrix_attribute);
          assert(   current_sub_matrix_attribute==SubMatrixData::s_defaultMatrixAttribute
                 || current_sub_matrix_attribute==new_sub_matrix_attribute);
 
-         diode_tree.setDiodeForSubMatrix(current_submatrix.m_subMatrixIdx, current_submatrix.m_splitIdx,ret.first->second);
+         diode_tree.setDiodeForSubMatrix(current_submatrix.m_subMatrixIdx, current_submatrix.m_splitIdx,ret.first->second.diodeIndex());
          if (debug_out) {
             (*debug_out) << "Created Diode "
                          << current_submatrix.m_idx[0] << ", " << current_submatrix.m_idx[1] << " "
@@ -540,14 +564,13 @@ PixelDiodeTree createPixelDiodeTree(const std::array<unsigned int,2> &chip_dim,
                          << " : diode_pitch " << diode_width[0] << ", " << diode_width[1]
                          << " sub-matrix index " << current_submatrix.m_subMatrixIdx
                          << " split index " << current_submatrix.m_splitIdx
-                         << " -> " << -static_cast<PixelDiodeTree::IndexType>(ret.first->second)
+                         << " -> " << -static_cast<PixelDiodeTree::IndexType>(ret.first->second.diodeIndex())
                          << " attribute " << full_diode_type << " -> " << new_diode_attribute
                          << std::endl;
          }
       }
    }
    if (diode_tree.cloneSingleSplitsToUnusedHalf()>0) {
-      std::cout << diode_tree.debugStringRepr() << std::endl;
       throw std::logic_error("Some splits have invalid indices. That should not happen.");
    }
    // set the positions of the upper and lower corner of the matrix

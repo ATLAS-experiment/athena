@@ -259,11 +259,6 @@ void PixelGmxInterface::makePixelModule(const std::string &typeName,
 
         unsigned int n_large_dimensions = (  (std::abs(diode_width[0]-pitchPhi)>pitchPhi*.25)
                                             +(std::abs(diode_width[1]-pitchEta)>pitchEta*.25));
-        std::cout << "DEBUG compute diode-type for " << split_idx[0] << " " << split_idx[1] << " | " << split_i
-                  << " width " << diode_width[0] << " " << diode_width[1]  << " normal pitch " << pitchPhi << " " << pitchEta
-                  << " large dim " << n_large_dimensions
-                  << std::endl;
-
         switch (n_large_dimensions) {
         case 1:
            current_diode_attribute=InDetDD::detail::makeAttributeType(InDetDD::PixelDiodeType::LONG);
