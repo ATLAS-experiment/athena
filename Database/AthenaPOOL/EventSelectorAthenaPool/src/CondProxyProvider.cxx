@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CondProxyProvider.cxx
@@ -11,7 +11,6 @@
 #include "PoolCollectionConverter.h"
 #include "registerKeys.h"
 
-#include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PoolSvc/IPoolSvc.h"
@@ -31,7 +30,6 @@
 //________________________________________________________________________________
 CondProxyProvider::CondProxyProvider(const std::string& name, ISvcLocator* pSvcLocator) :
     base_class(name, pSvcLocator),
-	m_athenaPoolCnvSvc("AthenaPoolCnvSvc", name),
 	m_poolCollectionConverter(0),
 	m_contextId(IPoolSvc::kInputStream)
 	{

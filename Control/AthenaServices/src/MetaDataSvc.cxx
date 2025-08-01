@@ -10,7 +10,6 @@
 #include "MetaDataSvc.h"
 
 #include "Gaudi/Interfaces/IOptionsSvc.h"
-#include "GaudiKernel/IAddressCreator.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IIncidentSvc.h"
@@ -56,7 +55,6 @@ MetaDataSvc::MetaDataSvc( const std::string& name, ISvcLocator* pSvcLocator )
     : base_class( name, pSvcLocator )
     , m_inputDataStore( "StoreGateSvc/InputMetaDataStore", name )
     , m_outputDataStore( "StoreGateSvc/MetaDataStore", name )
-    , m_addrCrtr( "AthenaPoolCnvSvc", name )
     , m_fileMgr( "FileMgr", name )
     , m_incSvc( "IncidentSvc", name )
     , m_outSeqSvc( "OutputStreamSequencerSvc", name )

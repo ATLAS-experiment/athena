@@ -8,6 +8,7 @@
 #include "GaudiKernel/IEventProcessor.h"
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "AthenaKernel/IDataShare.h"
 #include "AthenaMPTools/IAthenaMPTool.h"
 #include "AthenaInterprocess/FdsRegistry.h"
 #include "AthenaInterprocess/IMPRunStop.h"
@@ -43,6 +44,7 @@ class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr : public extends<AthService,
  private:
   ServiceHandle<IEventProcessor> m_evtProcessor{this,"EventLoopManager","AthenaEventLoopMgr"};
   SmartIF<IService>              m_evtSelector{nullptr};
+  SmartIF<IDataShare>            m_dataShare;
 
   Gaudi::Property<int> m_nWorkers{this, "NWorkers", 0,
       "Number of AthenaMP worker processes"};

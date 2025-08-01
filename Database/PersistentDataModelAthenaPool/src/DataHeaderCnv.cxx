@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv.cxx
@@ -51,7 +51,8 @@ StatusCode DataHeaderCnv::initialize()
    // Read properties from the ConversionSvc
    m_inDHFMapMaxsize = 100;   // default DHForm cache size
    bool doFilterDHAliases = true;
-   SmartIF<IProperty> cnvSvc{service("AthenaPoolCnvSvc")};
+   const std::string svcName = (serviceLocator()->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc");
+   SmartIF<IProperty> cnvSvc{service(svcName, false)};
    if( cnvSvc ) {
       IntegerProperty sizeProp("maxDHFormCacheSize", m_inDHFMapMaxsize);
       if( cnvSvc->getProperty(&sizeProp).isSuccess() ) {

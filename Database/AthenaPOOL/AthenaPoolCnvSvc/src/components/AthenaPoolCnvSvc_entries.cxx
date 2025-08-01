@@ -1,13 +1,13 @@
-#include "../AthenaPoolBaseCnvSvc.h"
 #include "../AthenaPoolCnvSvc.h"
+#include "../AthenaPoolSharedIOCnvSvc.h"
 #include "../AthenaRootSerializeSvc.h"
 #include "../AthenaRootSharedWriterSvc.h"
 #include "../AthenaAttributeListCnv.h"
 #include "../CondAttrListCollCnv.h"
 #include "../CondAttrListVecCnv.h"
 
-DECLARE_COMPONENT( AthenaPoolBaseCnvSvc )
 DECLARE_COMPONENT( AthenaPoolCnvSvc )
+DECLARE_COMPONENT( AthenaPoolSharedIOCnvSvc )
 DECLARE_COMPONENT( AthenaRootSerializeSvc )
 DECLARE_COMPONENT( AthenaRootSharedWriterSvc )
 DECLARE_CONVERTER( AthenaAttributeListCnv )

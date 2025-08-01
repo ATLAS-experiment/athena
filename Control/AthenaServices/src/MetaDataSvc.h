@@ -19,6 +19,7 @@
 #include "AthenaKernel/IAthMetaDataSvc.h"
 #include "AthenaKernel/IMetaDataTool.h"
 #include "Gaudi/Property.h"  // no forward decl: typedef
+#include "GaudiKernel/IAddressCreator.h"
 #include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/IFileMgr.h"  // for FILEMGR_CALLBACK_ARGS
 #include "GaudiKernel/IIncidentListener.h"
@@ -28,7 +29,6 @@
 #include "GaudiKernel/FileIncident.h"
 
 // Forward declarations
-class IAddressCreator;
 class StoreGateSvc;
 class IAlgTool;
 class OutputStreamSequencerSvc;
@@ -297,7 +297,7 @@ class MetaDataSvc : public extends<::AthService,
  private:  // data
   ServiceHandle<StoreGateSvc> m_inputDataStore;
   ServiceHandle<StoreGateSvc> m_outputDataStore;
-  ServiceHandle<IAddressCreator> m_addrCrtr;
+  ServiceHandle<IAddressCreator> m_addrCrtr{ this, "ConversionService", "AthenaPoolCnvSvc" };
   ServiceHandle<IFileMgr> m_fileMgr;
   ServiceHandle<IIncidentSvc> m_incSvc;
   ServiceHandle<OutputStreamSequencerSvc> m_outSeqSvc;
