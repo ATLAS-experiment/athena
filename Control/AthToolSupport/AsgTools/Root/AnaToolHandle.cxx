@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -113,7 +113,7 @@ namespace asg
         ANA_CHECK (init());
       ANA_CHECK (config.makeTool (th, cleanup, true));
       ANA_MSG_DEBUG ("made shared tool with " << extraInit.size() << " inits for TH: " << th);
-      res_result.reset (new AnaToolShare (th, cleanup, std::move (extraInit)));
+      res_result.reset (new AnaToolShare (th, std::move(cleanup), std::move (extraInit)));
 #ifndef XAOD_STANDALONE
       if (!th.empty())
       {
@@ -122,7 +122,7 @@ namespace asg
 #endif
       assert (share.lock() == nullptr);
       share = res_result;
-      result = res_result;
+      result = std::move(res_result);
       return StatusCode::SUCCESS;
     }
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -79,7 +79,12 @@ namespace asg {
       if(FSMState() == Gaudi::StateMachine::INITIALIZED) {
 	ServiceHandle< IIncidentSvc > incSvc( "IncidentSvc", name() );
         if( incSvc.retrieve().isSuccess() ) {
-	  incSvc->removeListener( this ); //removes entirely
+          try {
+            incSvc->removeListener( this ); //removes entirely
+          }
+          catch (const GaudiException&) {
+            std::abort();
+          }
 	}
       }
 #endif // XAOD_STANDALONE
