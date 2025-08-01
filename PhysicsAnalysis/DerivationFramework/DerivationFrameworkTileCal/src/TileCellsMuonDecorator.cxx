@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCellsMuonDecorator.cxx
@@ -16,7 +16,9 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "CaloGeoHelpers/proxim.h"
+#include "xAODMuon/MuonContainer.h"
 
+#include <string>
 #include <vector>
 #include <algorithm>
 
@@ -30,6 +32,7 @@ namespace DerivationFramework {
 
     ATH_CHECK( m_muonContainerKey.initialize() );
     ATH_CHECK( m_cellContainerKey.initialize(SG::AllowEmpty) );
+    ATH_CHECK( m_clusterContainerKey.initialize(SG::AllowEmpty) );
 
     const std::string baseName = m_muonContainerKey.key() + ".";
 
@@ -75,6 +78,17 @@ namespace DerivationFramework {
     m_cellsMuonDeDxKey = baseName + m_prefix + m_cellsMuonDeDxKey.key();
     ATH_CHECK( m_cellsMuonDeDxKey.initialize() );
 
+    if (!m_clusterContainerKey.empty()) {
+      for (double dr : m_drCones) {
+        m_larEnergyInConeKeyArray.emplace_back(baseName + m_prefix + "elarcone" + std::to_string(int(dr * 100)));
+      }
+    }
+    ATH_CHECK( m_larEnergyInConeKeyArray.initialize(SG::AllowEmpty) );
+
+    for (unsigned int layer : m_energyInLayers) {
+      m_energyInSamplings.emplace(static_cast<xAOD::CaloCluster::CaloSample>(layer));
+    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -92,6 +106,13 @@ namespace DerivationFramework {
       cellContainer = caloCells.cptr();
     }
 
+    const xAOD::CaloClusterContainer* clusterContainer = nullptr;
+    if (!m_clusterContainerKey.empty()) {
+      SG::ReadHandle<xAOD::CaloClusterContainer> caloClusters(m_clusterContainerKey, ctx);
+      ATH_CHECK( caloClusters.isValid() );
+      clusterContainer = caloClusters.cptr();
+    }
+
     SG::WriteDecorHandle<xAOD::MuonContainer, int> selected_mu(m_selectedMuKey, ctx);
     SG::WriteDecorHandle<xAOD::MuonContainer, float> econe_mu(m_econeMuKey, ctx);
     SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonX(m_cellsMuonXKey, ctx);
@@ -106,6 +127,10 @@ namespace DerivationFramework {
     SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDphi(m_cellsToMuonDphiKey, ctx);
     SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonDx(m_cellsMuonDxKey, ctx);
     SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonDeDx(m_cellsMuonDeDxKey, ctx);
+    std::vector<SG::WriteDecorHandle<xAOD::MuonContainer, float>> larEnergyInCones;
+    for (const SG::WriteDecorHandleKey<xAOD::MuonContainer>& key : m_larEnergyInConeKeyArray) {
+      larEnergyInCones.emplace_back(key, ctx);
+    }
 
     std::map<const xAOD::IParticle*, std::vector<const CaloCell*>> muonCellsMap;
 
@@ -127,7 +152,7 @@ namespace DerivationFramework {
 
       std::vector< float > cells_mu_dx;
       std::vector< float > cells_mu_dedx;
-
+      std::vector< float > lar_energy_in_cones;
 
       if (m_selectMuons &&
           (mu->muonType() != xAOD::Muon::Combined
@@ -232,6 +257,10 @@ namespace DerivationFramework {
 
         muonCellsMap[mu] = cells;
 
+        if (clusterContainer) {
+          lar_energy_in_cones = m_trackInCalo->getEnergyInCones(mu_track, clusterContainer, m_energyInSamplings, m_drCones, ctx);
+        }
+
       } else {
         selected_mu(*mu) = 0;
       }
@@ -248,6 +277,10 @@ namespace DerivationFramework {
       cellsToMuonDphi(*mu) = std::move(cells_to_mu_dphi);
       cellsMuonDx(*mu) = std::move(cells_mu_dx);
       cellsMuonDeDx(*mu) = std::move(cells_mu_dedx);
+
+      for (unsigned int icone = 0; icone < larEnergyInCones.size(); ++icone) {
+        larEnergyInCones[icone](*mu) = std::move(lar_energy_in_cones[icone]);
+      }
 
     }
 

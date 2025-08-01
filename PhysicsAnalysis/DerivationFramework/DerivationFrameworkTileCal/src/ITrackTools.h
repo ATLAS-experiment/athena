@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -14,11 +14,13 @@
 #ifndef ITrackTools_H
 #define ITrackTools_H
 //C++
+
 #include <vector>
 #include <math.h>
 
 //Base algorithm
 #include "GaudiKernel/IAlgTool.h"
+#include <GaudiKernel/EventContext.h>
 #include "AthContainers/ConstDataVector.h"
 
 /// CALORIMETER INCLUDES
@@ -91,6 +93,11 @@ class ITrackTools: virtual public IAlgTool{
         virtual std::vector< std::vector<double> > getXYZEtaPhiPerLayer(const TRACK* track) const = 0;
         virtual std::vector< std::vector<double> > getXYZEtaPhiPerSampling(const TRACK* track) const = 0;
         virtual int retrieveIndex(int sampling, float eta) const = 0;
+        virtual std::vector<float> getEnergyInCones(const xAOD::TrackParticle* track,
+                                                    const xAOD::CaloClusterContainer* clusters,
+                                                    const std::set<xAOD::CaloCluster::CaloSample>& samplings,
+                                                    const std::vector<double>& drCones,
+                                                    const EventContext& ctx) const = 0;
 
 };
 
