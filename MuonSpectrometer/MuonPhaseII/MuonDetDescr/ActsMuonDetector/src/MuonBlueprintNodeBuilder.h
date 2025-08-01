@@ -107,8 +107,8 @@ private:
    * @param boundsFactory The factory for volume bounds
    */
   std::shared_ptr<Acts::Experimental::StaticBlueprintNode> buildMuonNode(const Acts::GeometryContext& gctx,
-    const std::vector<StIdx>& stations,
-    const EndcapSide& side,
+    const MuonChamberSet& chambers,
+    const std::string& name,
     const Acts::GeometryIdentifier& id,
     Acts::VolumeBoundFactory& boundsFactory) const;
 };
