@@ -312,10 +312,10 @@ namespace Egamma{
       const double e2 =  egamma.caloCluster()->energyBE(2);
       const double e3 =  egamma.caloCluster()->energyBE(3);
       
-      E0->Fill(e0, weight);
-      E1->Fill(e1, weight);
-      E2->Fill(e2, weight);
-      E3->Fill(e3, weight);
+      E0->Fill(e0 / GeV, weight);
+      E1->Fill(e1 / GeV, weight);
+      E2->Fill(e2 / GeV, weight);
+      E3->Fill(e3 / GeV, weight);
     }
   }
 
