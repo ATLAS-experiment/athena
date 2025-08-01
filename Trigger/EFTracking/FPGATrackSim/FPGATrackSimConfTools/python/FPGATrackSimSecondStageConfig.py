@@ -22,6 +22,27 @@ def getNSubregions(filePath):
         n = fields.split()[1]
         return int(n)
 
+def getChi2Cut_2nd(region):
+    chi2cut_l = [9, 9, 6, 10, 10, 10, 10, 10, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 20] #from most recent run on this branch with new maps/banks
+    binSize = 0.2
+    side = (region >> 5) & 0x1
+    etaBin = (region >> 6) & 0x1F
+    etaRange = [round(binSize * etaBin, 1), round(binSize * (etaBin + 1), 1)] if side else [round(-binSize * (etaBin + 1), 1), round(-binSize * etaBin, 1)]
+
+    abs_etaRange = tuple(round(abs(val), 1) for val in etaRange)
+
+    eta_to_chi2 = {
+        (0.0, 0.2): chi2cut_l[0], (0.2, 0.4): chi2cut_l[1], (0.4, 0.6): chi2cut_l[2],
+        (0.6, 0.8): chi2cut_l[3], (0.8, 1.0): chi2cut_l[4], (1.0, 1.2): chi2cut_l[5],
+        (1.2, 1.4): chi2cut_l[6], (1.4, 1.6): chi2cut_l[7], (1.6, 1.8): chi2cut_l[8],
+        (1.8, 2.0): chi2cut_l[9], (2.0, 2.2): chi2cut_l[10], (2.2, 2.4): chi2cut_l[11],
+        (2.4, 2.6): chi2cut_l[12], (2.6, 2.8): chi2cut_l[13], (2.8, 3.0): chi2cut_l[14],
+        (3.0, 3.2): chi2cut_l[15], (3.2, 3.4): chi2cut_l[16], (3.4, 3.6): chi2cut_l[17],
+        (3.6, 3.8): chi2cut_l[18], (3.8, 4.0): chi2cut_l[19]
+    }
+
+    return eta_to_chi2.get(abs_etaRange, 20)
+
 def getChi2CutNN2ndStage(region):
     chi2cut_l = [1.0,1.0,1.0, ### 0.0-0.6
                  1.0,1.0,1.0, ### 0.6-1.2
@@ -605,6 +626,8 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
     OR.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         OR.MinChi2 = getChi2CutNN2ndStage(flags.Trigger.FPGATrackSim.region)
+    elif flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
+        OR.MinChi2 = getChi2Cut_2nd(flags.Trigger.FPGATrackSim.region)
     else:
         OR.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.secondChi2Cut
 
@@ -640,6 +663,8 @@ def FPGATrackSimSecondStageAlgCfg(inputFlags,name="FPGATrackSimSecondStageAlg",s
     theFPGATrackSimSecondStageAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         theFPGATrackSimSecondStageAlg.TrackScoreCut = getChi2CutNN2ndStage(flags.Trigger.FPGATrackSim.region)
+    elif flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
+        theFPGATrackSimSecondStageAlg.TrackScoreCut = getChi2Cut_2nd(flags.Trigger.FPGATrackSim.region)
     else:
         theFPGATrackSimSecondStageAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.secondChi2Cut
 
