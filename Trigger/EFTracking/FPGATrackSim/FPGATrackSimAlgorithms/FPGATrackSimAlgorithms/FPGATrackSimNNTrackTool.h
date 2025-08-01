@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimNNTRACKTOOL_H
 #define FPGATrackSimNNTRACKTOOL_H
@@ -49,7 +49,7 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	StatusCode getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
 	StatusCode getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
 	StatusCode getTracks_GNN(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
-        StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max);
+        StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, const FPGATrackSimTrackPars& min, const FPGATrackSimTrackPars& max);
 
 	static float getXScale() { return 1015.;};
 	static float getYScale() { return 1015.;};
