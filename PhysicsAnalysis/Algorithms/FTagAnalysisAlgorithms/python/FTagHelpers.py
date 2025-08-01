@@ -19,7 +19,7 @@ def getRecommendedBTagCalib(geometry):
     else:
         raise ValueError(f"LHCPeriod {geometry} does not have a recommended FTag calibration file!")
 
-def getReadFromBTaggingObject(config, jetCollection, defaultReadFromBTaggingObject):
+def getReadFromBTaggingObject(flags, jetCollection, defaultReadFromBTaggingObject):
     
     if defaultReadFromBTaggingObject is not None: 
         # In that case the user has provided a value through the readFromBTaggingObject flag 
@@ -36,18 +36,15 @@ def getReadFromBTaggingObject(config, jetCollection, defaultReadFromBTaggingObje
     # to determine the strategy to adopt
     defaultReadFromBTaggingObject = True
     
-    # Retrieve the auto configuration flags 
-    autoCfgFlags = config.autoconfigFlags()
-    
     # No auto configuration flag thus using default value 
-    if autoCfgFlags is None: 
+    if flags is None: 
         return defaultReadFromBTaggingObject
     
     # Otherwise autoconfiguration flags exist 
     # Let's use directly information from meta data 
     # The list contains container names 
     # NB: Only for AnalysisBase the list also contains branch names
-    listContainersInputFiles = autoCfgFlags.Input.Collections
+    listContainersInputFiles = flags.Input.Collections
     
     # Make sure list is not empty 
     # otherwise use default value
