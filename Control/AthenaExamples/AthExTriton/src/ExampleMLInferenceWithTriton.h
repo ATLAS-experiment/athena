@@ -4,7 +4,7 @@
 
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthTritonInterfaces/ITritonTool.h"
+#include "AthOnnxInterfaces/IAthInferenceTool.h"
 
 // System include(s).
 #include <string>
@@ -46,7 +46,7 @@ namespace AthInfer {
       Gaudi::Property<int> m_batchSize {this, "BatchSize", 1, "No. of elements/example in a batch"};
 
       /// Tool handle for the Triton client
-      ToolHandle< AthInfer::ITritonTool >  m_tritonTool{
+      ToolHandle< AthInfer::IAthInferenceTool >  m_tritonTool{
          this, "InferenceTool", "AthInfer::TritonTool", "Triton client tool"
       };
 

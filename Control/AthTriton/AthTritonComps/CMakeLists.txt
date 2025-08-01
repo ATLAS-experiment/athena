@@ -6,19 +6,19 @@ atlas_subdir( AthTritonComps )
 # External dependencies.
 find_package(gRPC CONFIG REQUIRED)
 find_package(TritonCommon CONFIG REQUIRED)
-find_package(TritonClient CONFIG REQUIRED COMPONENTS TritonClient::triton-client AthTritonInterfaces)
+find_package(TritonClient CONFIG REQUIRED COMPONENTS TritonClient::triton-client)
 
 atlas_add_library( AthTritonCompsLib
    src/*.cxx
    PUBLIC_HEADERS AthTritonComps
    LINK_LIBRARIES ${PROTOBUF_LIBRARIES} TritonClient::grpcclient_static gRPC::grpc++
-   AthenaBaseComps AthTritonInterfaces
+   AthenaBaseComps AthOnnxInterfaces
 )
 
 atlas_add_dictionary( AthTritonCompsDict
     AthTritonComps/AthTritonCompsDict.h
     AthTritonComps/selection.xml
-    LINK_LIBRARIES AthTritonCompsLib 
+    LINK_LIBRARIES AthTritonCompsLib
 )
 
 if (NOT XAOD_STANDALONE)

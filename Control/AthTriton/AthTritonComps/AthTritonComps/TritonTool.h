@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "AthTritonInterfaces/ITritonTool.h"
+#include "AthOnnxInterfaces/IAthInferenceTool.h"
 #include "grpc_client.h"
 #include "grpc_service.pb.h"
 
@@ -27,7 +27,7 @@ namespace AthInfer {
     }                                                              \
 }
 
-class TritonTool: public extends<AthAlgTool, ITritonTool>
+class TritonTool: public extends<AthAlgTool, IAthInferenceTool>
 {
 
   public:
@@ -36,6 +36,8 @@ class TritonTool: public extends<AthAlgTool, ITritonTool>
     StatusCode initialize() override final;
 
     virtual StatusCode inference(InputDataMap& inputData, OutputDataMap& outputData) const override final;
+
+    void print() const override final {} // nothing to print, but required by the interface.
 
   protected:
     TritonTool() = delete;

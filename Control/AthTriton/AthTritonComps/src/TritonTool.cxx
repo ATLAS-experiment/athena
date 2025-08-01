@@ -9,7 +9,7 @@ AthInfer::TritonTool::TritonTool( const std::string& type,
                                  const IInterface* parent)
     : base_class(type, name, parent)
 {
-    declareInterface<ITritonTool>(this);
+    declareInterface<AthInfer::IAthInferenceTool>(this);
 }
 
 StatusCode AthInfer::TritonTool::initialize() {
