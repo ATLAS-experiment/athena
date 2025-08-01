@@ -56,3 +56,9 @@ else:
 from MCJobOptionUtils.JOsupport import check_reset_proc_number
 check_reset_proc_number(opts)
 
+## Revert the recoil strategy to the old default of 1, ie. 'recoil to color'
+#In 8.314, the default option was changed to 0, 'recoil to top' and we revert it back unless 'recoil to top' 
+#is explicitly needed for the samples 
+genSeq.Pythia8.Commands += ["TimeShower:recoilStrategyRF=1"]
+
+

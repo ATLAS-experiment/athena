@@ -60,7 +60,7 @@ The beam specifications are set on the command line by `Generate_tf.py` and do n
 To use a development version not already in a release, you will need to check
 out and build the relevant packages from the ATLAS Git repository. Before doing
 this, follow the ATLAS Git workflow instructions at
-https://atlassoftwaredocs.web.cern.ch/gittutorial/workflow-quick/ to get a
+https://atlas-software.docs.cern.ch/athena/git/ to get a
 personal fork of the ATLAS codebase. Then make a sparse checkout of the
 `Pythia8_i` package with your preferred Git branch or tag:
 
