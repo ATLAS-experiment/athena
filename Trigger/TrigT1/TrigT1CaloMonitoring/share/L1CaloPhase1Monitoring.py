@@ -15,7 +15,7 @@ log = logging.getLogger('L1CaloPhase1Monitoring.py')
 log.setLevel(logging.INFO)
 
 from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
-L1CaloMonitorCfgHelper.embargoed = ["Expert/Efficiency/gFEX/MuonReferenceTrigger/SRpt_L1_gJ400p0ETA25","Expert/Sim/L1TopoAlgoMismatchRateVsLB","Expert/Sim/L1TopoMultiplicityMismatchRateVsLumi"]
+L1CaloMonitorCfgHelper.embargoed = ["Expert/Efficiency/gFEX/MuonReferenceTrigger/SRpt_L1_gJ400p0ETA25"]#,"Expert/Sim/L1TopoAlgoMismatchRateVsLB","Expert/Sim/L1TopoMultiplicityMismatchRateVsLumi"]
 
 
 
@@ -104,8 +104,11 @@ parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify 
 parser.add_argument('--stream',default="*",help="stream to lookup files in")
 parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
 parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath> or <folder>:<tag>[=<dbPath>] to override a tag, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
-parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
-args = flags.fillFromArgs(parser=parser)
+parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config. Can also specify in the flags section if start with 'cfg.'")
+args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True)
+args.postConfig += [x[4:] for x in unknown_args if x.startswith("cfg.")]
+if any([not x.startswith("cfg.") for x in unknown_args]):
+  raise KeyError("Unknown flags: " + " ".join([x for x in unknown_args if not x.startswith("cfg.")]))
 if not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
   log.info("No steering flags specified, turning on phase 1 sim+monitoring (trex,efex,jfex,gfex,topo)")
   flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
@@ -561,6 +564,7 @@ for conf in args.postConfig:
     if comp.getName()==compName or comp.getType()==compName or comp.toStringProperty()==compName:
       applied = True
       try:
+        log.info("Setting "+compName+" property: "+propNameAndVal)
         exec(f"comp.{propNameAndVal}")
       except AttributeError as e:
         log.fatal("Unknown property of " + compName +" : " + propNameAndVal)

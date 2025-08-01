@@ -20,6 +20,8 @@ atlas_install_data( share/hanConfig_header.txt )
 atlas_install_scripts( scripts/cmd-l1calo-dq-*.py scripts/l1calo-ath-mon )
 atlas_add_alias( l1calo-dq-report "cmd-l1calo-dq-report.py" )
 atlas_add_alias( l1calo-dq-web "cmd-l1calo-dq-web.py" )
+atlas_add_alias( l1calo-dq-file "cmd-l1calo-dq-file.py" )
+atlas_add_alias( l1calo-dq-test "cmd-l1calo-dq-test.py" )
 
 atlas_add_test( L1CaloPhase1_Data
         SCRIPT athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_Main.daq.RAW._lb0247._SFO-11._0006.data_150evt --evtMax 10
