@@ -45,14 +45,32 @@ namespace ActsTrk {
 
 std::shared_ptr<Acts::Experimental::BlueprintNode> MuonBlueprintNodeBuilder::buildBlueprintNode(const Acts::GeometryContext& gctx, std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
 
+const MuonChamberSet allChambers = m_detMgr->getAllChambers();
+
+//Divide the chambers for every blueprint node of the muon system
+MuonChamberSet barrelStations;
+MuonChamberSet endcapAStations;
+MuonChamberSet endcapCStations;
+
+for(const MuonGMR4::Chamber* chamber: allChambers){
+
+  if(isChamberInTheStation(*chamber, {StIdx::BI, StIdx::BM, StIdx::BO, StIdx::EE, StIdx::EI}, EndcapSide::Both)) {
+    barrelStations.insert(chamber);
+  } else if(isChamberInTheStation(*chamber, {StIdx::EM, StIdx::EO}, EndcapSide::A)) {
+    endcapAStations.insert(chamber);
+  } else if(isChamberInTheStation(*chamber, {StIdx::EM, StIdx::EO}, EndcapSide::C)) {
+    endcapCStations.insert(chamber);
+  }
+}
+
   // Top level node for the Muon system
 auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("MuonNode", Acts::AxisDirection::AxisZ);
 
 Acts::VolumeBoundFactory boundsFactory{};
 
-auto barrelNode = buildMuonNode(gctx, {StIdx::BI, StIdx::BM, StIdx::BO, StIdx::EE, StIdx::EI}, EndcapSide::Both, Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory);
-auto endcapANode = buildMuonNode(gctx, {StIdx::EM, StIdx::EO}, EndcapSide::A, Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
-auto endcapCNode = buildMuonNode(gctx, {StIdx::EM, StIdx::EO}, EndcapSide::C, Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory);
+auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI",Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory);
+auto endcapANode = buildMuonNode(gctx, endcapAStations, "EM_EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
+auto endcapCNode = buildMuonNode(gctx, endcapCStations, "EM_EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory);
 
 // Add to the muon barrel child node (e.g calo or Itk) - if existed
 if(childNode){
@@ -70,19 +88,14 @@ return muonNode;
 std::shared_ptr<Acts::Experimental::StaticBlueprintNode>
 MuonBlueprintNodeBuilder::buildMuonNode(
     const Acts::GeometryContext& gctx,
-    const std::vector<StIdx>& stations,
-    const EndcapSide& side,
+    const MuonChamberSet& chambers,
+    const std::string& name,
     const Acts::GeometryIdentifier& id,
     Acts::VolumeBoundFactory& boundsFactory) const {
 
-    const MuonChamberSet chambers = m_detMgr->getAllChambers();
     const ActsGeometryContext* context = gctx.get<const ActsGeometryContext* >();
     std::vector<std::string> stationNames;
-    stationNames.reserve(stations.size());
-    // Convert station indices to names
-    std::transform(stations.begin(), stations.end(), std::back_inserter(stationNames),
-                   [](const StIdx& st) { return Muon::MuonStationIndex::stName(st); });
-
+  
     std::vector<std::shared_ptr<Acts::Experimental::StaticBlueprintNode>> nodes;
   
     double innerRadius = 0.0;
@@ -94,9 +107,6 @@ MuonBlueprintNodeBuilder::buildMuonNode(
     int chamberId = 1;
     ATH_MSG_DEBUG("Chambers= "<<chambers.size());
     for(const MuonGMR4::Chamber* chamber: chambers){
-      if(!isChamberInTheStation(*chamber, stations, side)) {
-        continue;
-      }
       const Amg::Transform3D& transform = chamber->localToGlobalTrans(*context);
       auto vol = std::make_unique<Acts::TrackingVolume>(
                                             transform,
@@ -157,8 +167,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(
     Amg::Transform3D trf = Amg::getTranslateZ3D(halfLengthZ + minZ);
 
     auto bounds = boundsFactory.makeBounds<Acts::CylinderVolumeBounds>(innerRadius, outerRadius, halfLengthZ);
-    auto sideStr = (side == EndcapSide::A) ? "A" : (side == EndcapSide::C) ? "C" : "Both";
-    auto volume = std::make_unique<Acts::TrackingVolume>(trf, bounds, std::accumulate(stationNames.begin(), stationNames.end(), std::string("MuonChamber")) + "Volume" + sideStr);
+    auto volume = std::make_unique<Acts::TrackingVolume>(trf, bounds, name);
     volume->assignGeometryId(id);
     auto muonNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(volume));
 
