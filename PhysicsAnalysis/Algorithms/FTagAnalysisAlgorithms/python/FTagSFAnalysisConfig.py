@@ -180,7 +180,7 @@ class FTagJetSFBlock(ConfigBlock):
         jetCollection = config.originalName(jetContainer)
         # Potentially modify the readFromBTaggingObject as here determining 
         # if input files has jet tagging probabilities attached to the jet (or still only to the BTagging object)
-        self.readFromBTaggingObject = getReadFromBTaggingObject(config, jetCollection, self.readFromBTaggingObject)
+        self.readFromBTaggingObject = getReadFromBTaggingObject(config.autoconfigFlags(), jetCollection, self.readFromBTaggingObject)
 
         # b-jet trigger-aware SF
         if self.triggerChainsPerYear:
