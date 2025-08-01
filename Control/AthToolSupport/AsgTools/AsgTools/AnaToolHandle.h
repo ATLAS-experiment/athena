@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -462,7 +462,7 @@ namespace asg
     /// \par Guarantee
     ///   no-fail
   public:
-    bool isUserConfigured () const noexcept;
+    bool isUserConfigured () const;
 
 
     /// \brief the \ref detail::AnaToolHandleMode for this handle
@@ -629,7 +629,7 @@ namespace asg
     /// This is protected by \ref m_isInitialized and should not be
     /// accessed until \ref m_isInitialized is true.
   private:
-    T *m_toolPtr = nullptr;
+    std::atomic<T*> m_toolPtr = nullptr;
 
     /// \brief the value of \ref getMode cached when we initialize the
     /// tool
