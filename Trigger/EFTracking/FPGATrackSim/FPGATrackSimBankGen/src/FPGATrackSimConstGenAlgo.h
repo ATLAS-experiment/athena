@@ -162,8 +162,8 @@ class FPGATrackSimConstGenAlgo : public AthAlgorithm
         void fillConstTree(std::vector<module_t> & modules, FPGATrackSimMatrixAccumulator & acc, geo_constants & geo);
         bool isNAN(double value, const char* name);
         bool failedConstants(geo_constants const & geo, std::vector<bool> const & usable);
-        void DumpConstants(std::vector<geo_constants> &geo_consts, std::string & filename);
-        void writeSectors();
+        StatusCode DumpConstants(std::vector<geo_constants> &geo_consts, std::string & filename);
+        StatusCode writeSectors();
         bool GetConstants(FPGATrackSimMatrixAccumulator const &acc_norm, geo_constants &geo, int entryNumber); // use values in acc_norm
         bool GetConstants(FPGATrackSimMatrixAccumulator const &acc_norm, geo_constants &geo, int entryNumber, std::vector<bool> const &coordsToUse, unsigned int nusable); // full method with different number of usable coordinates
         void createMissingHitsConstants(FPGATrackSimMatrixAccumulator const & acc_norm, size_t entry);
