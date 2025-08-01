@@ -210,7 +210,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                       SlotSCID = itr->second.second;
                   }
                   Decision = "MissingLAr";
-                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
                   if(!reportedErrors.count(Decision)) {
                       ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
                       reportedErrors.insert(Decision);
@@ -218,7 +218,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               } else {
                   Decision = "MissingTile";
                   SlotSCID="";
-                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  fill("errors", Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
                   if(!reportedErrors.count(Decision)) {
                       ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
                       reportedErrors.insert(Decision);
@@ -271,7 +271,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                       ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
                       fill("errors", Decision, ErrorAndLocation, timeSince, timeUntil, evtNumber, lbn, lbnString,
                            TowerId, Towereta, Towerphi, Toweremstatus, Towerhadstatus, TowerSlot, TowerCount,
-                           TowerRefCount, SlotSCID);
+                           TowerRefCount, SlotSCID,IsMonReady);
                       if (!reportedErrors.count(Decision)) {
                           ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb "
                                                                 << std::string(lbnString));

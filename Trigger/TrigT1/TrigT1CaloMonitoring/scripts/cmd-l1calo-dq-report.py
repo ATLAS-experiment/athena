@@ -17,14 +17,17 @@ def getFiles(runNumbers=[],since=None,until=None,stream="express_express",projec
     else:
         # user specified runNumbers, so no need to filter on project or dates
         project = "*"
-        since = None
-        until = None
 
     for run in runNumbers:
-        for f in glob.glob(f"/eos/atlas/atlastier0/rucio/{project}/{stream}/*{run}/*merge.HIST.x*/*"):
+        files = glob.glob(f"/eos/atlas/atlastier0/rucio/{project}/{stream}/*{run}/*merge.HIST.{'f' if stream!='express_express' else 'x'}*/*")
+        if run != "*" and len(files)==0:
+            input(f"No HIST file for run {run} and stream {stream}. {'Please report this' if stream=='express_express' else 'Perhaps bulk processing not ready yet, please try again later'}. Press any key to continue ...")
+        for f in files:
             runNum = f.split("/")[7].lstrip("0")
-            if (since and os.path.getmtime(f)<since.timestamp()) or (until and os.path.getmtime(f)>until.timestamp()): continue
-            if runNum in out: print("Warning, multiple HIST files for run",runNum)
+            if (stream=="express_express") and ((since and os.path.getmtime(f)<since.timestamp()) or (until and os.path.getmtime(f)>until.timestamp())):
+                x = input(f"Run {runNum} is outside of your reporting dates ({since} to {until}), you do not need to review it. Do you still want to include it? [n]/y:")
+                if x=="" or x=="n": continue
+            if runNum in out: print("Warning: multiple HIST files for run",runNum," (using latter):",out[runNum],f)
             out[runNum] = f
     return out
 
@@ -34,20 +37,39 @@ def getMetadata(file):
     out = {}
     out["release"] = f.Get(f"{runNumber}/GLOBAL/DQTDataFlow/m_release_stage_lowStat").GetXaxis().GetBinLabel(1).split("-")[-1]
     # lumi is in fb^-1
-    out["lumi"] = f.Get(f"{runNumber}/GLOBAL/Luminosity/AnyTrigger/lumiWeight_vs_LB").Integral()*1e-9 # includes LB without Stable beams
+    lumiPlot = f.Get(f"{runNumber}/GLOBAL/Luminosity/AnyTrigger/lumiWeight_vs_LB") # missing in cosmic runs
+    out["lumi"] = lumiPlot.Integral()*1e-9 if lumiPlot else 0 # includes LB without Stable beams
     return out
 
-def runDQ(runNumbers,fromDate,toDate,output,commentFile):
+def runDQ(args):
+
+    runNumbers=args.runNumbers
+    fromDate=args.since
+    toDate=args.until
+    output=args.output
+    commentFile=args.commentFile
+    doWeb=args.web
+
+    runsFromFiles = {}
 
     if runNumbers==[]:
-        # no runs given and no "*" specified, so get list of run numbers
-        print("Available runs from",fromDate,"to",toDate,":")
-        for projName,projPattern in [("pp","data2*eV"),("cosmic","data2*_cos"),("hi","data2*_hi")]:
-            print(f" {projName}:")
-            for runNum,file in getFiles(project=projPattern,runNumbers=runNumbers,since=datetime.datetime.combine(fromDate, datetime.datetime.min.time()),until=datetime.datetime.combine(toDate, datetime.datetime.min.time())).items():
-                print("  ",runNum)
+        if len(args.filesInput)>0:
+            # open the files and determine run numbers
+            for f in args.filesInput:
+                rf = ROOT.TFile.Open(f)
+                for k in rf.GetListOfKeys():
+                    if k.GetName().startswith("run_"):
+                        runsFromFiles[k.GetName()[4:]] = f
+                rf.Close()
+        else:
+            # no runs given and no "*" specified, so get list of run numbers
+            print("Available runs from",fromDate,"to",toDate,":")
+            for projName,projPattern in [("pp","data2*eV"),("cosmic","data2*_cos"),("hi","data2*_hi")]:
+                print(f" {projName}:")
+                for runNum,file in getFiles(project=projPattern,runNumbers=runNumbers,since=datetime.datetime.combine(fromDate, datetime.datetime.min.time()),until=datetime.datetime.combine(toDate, datetime.datetime.min.time())).items():
+                    print("  ",runNum)
 
-        exit(0)
+            exit(0)
 
     if not os.path.exists(commentFile):
         print("ERROR: Comment file",commentFile,"does not exist")
@@ -55,6 +77,22 @@ def runDQ(runNumbers,fromDate,toDate,output,commentFile):
 
     hcfg = os.path.expandvars("$BuildArea/$CMTCONFIG/data/DataQualityConfigurations/collisions_run.hcfg")
     if not os.path.exists("./hanResults"): os.mkdir("./hanResults")
+
+    if "previous" in runNumbers:
+        # replace with list of previously generated han results for this stream
+
+        previousRuns = []
+        for f in glob.glob(f"./hanResults/{args.stream}*.root"):
+            if os.path.getmtime(f)>=datetime.datetime.combine(args.since, datetime.datetime.min.time()).timestamp():
+                previousRuns += [f.split("/")[-1].split(".")[1].split("_")[1]]
+        print("Including previous runs from this week:",previousRuns)
+        newRunList = []
+        for r in runNumbers:
+            if r=="previous":
+                newRunList+=previousRuns
+            else:
+                newRunList+=[r]
+        runNumbers = newRunList
 
     histResults = {}
     allRuns = []
@@ -66,24 +104,55 @@ def runDQ(runNumbers,fromDate,toDate,output,commentFile):
 
     ROOT.gROOT.SetBatch(True)
 
-    # get the date of the most recent monday that isn't today
+    tmpFileName = "/tmp/plt.png"
+    i=0
+    while os.path.exists(tmpFileName):
+        tmpFileName = f"/tmp/plt{i}.png"
+        i+=1
 
-    # ["496922","496934","496908","497294","497370","497389","497457"]
-    for runNum,file in (pbar := tqdm.tqdm(getFiles(runNumbers=runNumbers,since=datetime.datetime.combine(fromDate, datetime.datetime.min.time()),until=datetime.datetime.combine(toDate, datetime.datetime.min.time())).items(),desc="Collating DQ results",unit='run')):
+    # get the date of the most recent monday that isn't today
+    firstDraw = True
+    for runNum,file in (pbar := tqdm.tqdm(runsFromFiles.items() if len(runsFromFiles)>0 else getFiles(runNumbers=runNumbers,since=datetime.datetime.combine(fromDate, datetime.datetime.min.time()),until=datetime.datetime.combine(toDate, datetime.datetime.min.time()),stream=args.stream).items(),desc="Collating DQ results",unit='run')):
         if len(runNumbers) and runNum not in runNumbers and "*" not in runNumbers: continue
         allRuns += [runNum]
         allMeta[runNum] = getMetadata(file)
-        if not os.path.exists(f"./hanResults/run_{runNum}_han.root"):
-            ROOT.dqutils.MonitoringFile(file).getHanResults("./hanResults",file,hcfg,"","")
-        f = ROOT.TFile(f"./hanResults/run_{runNum}_han.root")
+        allMeta[runNum]["project"] = file.split("/")[5]
+        hanFiles = glob.glob(f"./hanResults/{args.stream}.run_{runNum}_han*.root")
+        if len(hanFiles)==0:
+            # will run the DQ monitoring, but also will run web display if doWeb
+            # if doWeb, can just copy the result from the webdisplay run to our local dir, avoiding a need to rerun
+            if doWeb:
+                import random
+                r = random.randrange(100000,999999)
+                cmdStr = f"DQWebDisplay.py {file} TestDisplay \"{r}\""
+                import subprocess
+                print("Executing:",cmdStr, "... Please be patient ...")
+                process = subprocess.Popen(cmdStr, shell=True)
+                process.wait()
+                if process.returncode==0:
+                    # copy the results file into the hanResults dir ...
+                    import shutil
+                    #os.rename(f"./hanResults/run_{runNum}_han.root",f"./hanResults/run_{runNum}_han_{r}.root")
+                    shutil.copy(f"/afs/cern.ch/user/a/atlasdqm/dqmdisk/han_results/test/{r}/{args.stream}/run_{runNum}/run_{runNum}_han.root",f"./hanResults/{args.stream}.run_{runNum}_han.{r}.root")
+                    hanFiles = [f"./hanResults/{args.stream}.run_{runNum}_han.{r}.root"]
+                else:
+                    print("WARNING: Failed to run DQWebDisplay ... please report this!")
+                    input("Press Enter to continue (will run DQ algorithms locally)...")
+            if len(hanFiles)==0:
+                ROOT.dqutils.MonitoringFile(file).getHanResults("./hanResults",file,hcfg,"","")
+                os.rename(f"./hanResults/run_{runNum}_han.root",f"./hanResults/{args.stream}.run_{runNum}_han.root")
+                hanFiles = [f"./hanResults/{args.stream}.run_{runNum}_han.root"]
+            print("Saved results of DQ algorithms to:",hanFiles[0])
+        allMeta[runNum]["hanFile"] = hanFiles[0].split("/")[-1]
+        f = ROOT.TFile(hanFiles[0])
         ROOT.gStyle.SetOptStat(False) # no stats boxes
         ROOT.gStyle.SetPadRightMargin(0.15)
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
-        def findHists(d):
+        def findHists(d,firstDraw):
             for k in d.GetListOfKeys():
                 if k.IsFolder():
                     if k.GetName().endswith("_"): continue # don't navigate into folders of results of hists
-                    findHists(k.ReadObj())
+                    findHists(k.ReadObj(),firstDraw)
                 elif k.ReadObj().InheritsFrom("TH1") or k.ReadObj().InheritsFrom("TEfficiency"):
                     #print(d.GetPath()+k.GetName())
                     #d.ls()
@@ -149,7 +218,8 @@ def runDQ(runNumbers,fromDate,toDate,output,commentFile):
                                         for j in range(h.GetNbinsY()+1):
                                             if isProf and h.GetBinContent(i,j)>h.GetMaximum(): extraHist.SetBinEntries(h.GetBin(i,j),1)
                                             extraHist.SetBinContent(i,j,h.GetMaximum() if h.GetBinContent(i,j)>h.GetMaximum() else 0)
-                        pbar.set_description("Drawing " + h.GetName())
+                        pbar.set_description("Drawing " + h.GetName() + ("(Please be patient, the first draw is the slowest)" if firstDraw else ""))
+                        firstDraw=False
                         h.Draw(dString)
                         for o in dispOpt:
                             if o.startswith("SetPalette("): ROOT.gStyle.SetPalette(int(re.findall(r'\d+', o)[0]))
@@ -184,16 +254,17 @@ def runDQ(runNumbers,fromDate,toDate,output,commentFile):
                             extraHist.SetLineWidth(0)
                             extraHist.Draw("BOX same")
                             # ROOT.gPad.SetFillColor(ROOT.kGray)
-                        ROOT.gPad.SaveAs("/tmp/plt.png")
+                        ROOT.gPad.SaveAs(tmpFileName)
                         ROOT.gPad.SetFillColor(ROOT.kWhite)
                         ROOT.gStyle.SetPalette(ROOT.kBird)
                         ROOT.gPad.SetLogx(False);ROOT.gPad.SetLogy(False);ROOT.gPad.SetLogz(False)
                         ROOT.gPad.SetGridx(False);ROOT.gPad.SetGridy(False)
 
-                        pltCode = base64.b64encode(open('/tmp/plt.png', 'rb').read()).decode('utf-8').replace('\n','')
+                        pltCode = base64.b64encode(open(tmpFileName, 'rb').read()).decode('utf-8').replace('\n','')
+                        os.remove(tmpFileName)
                         histResults[histPath][runNum]["imageCode"] = pltCode
 
-        findHists(f)
+        findHists(f,firstDraw)
 
     allRuns.sort()
 
@@ -236,11 +307,16 @@ thead {
 }
 </style></head><body>
     """)
-        outFile.write(f"<h1>L1Calo DQ Report - {fromDate} to {toDate} - Author: {os.getlogin()}</h1>\n")
+        if args.stream!="express_express":
+            outFile.write(f"<h1>L1Calo Validation DQ Report - {fromDate} to {toDate} - {args.stream} - Author: {os.getlogin()}</h1>\n")
+        else:
+            outFile.write(f"<h1>L1Calo DQ Report - {fromDate} to {toDate} - Author: {os.getlogin()}</h1>\n")
         outFile.write("<table cellspacing=0><thead><tr><td rowspan=\"5\" valign=top><a href=\"#ByteSreamDecoders\">ByteSreamDecoders</a><br><a href=\"#Efficiency\">Efficiency</a><br><a href=\"#Inputs\">Inputs</a><br><a href=\"#Outputs\">Outputs</a><br><a href=\"#PpmTrex\">PpmTrex</a><br><a href=\"#Sim\">Sim</a></td><td align=right>RunNumber:</td>\n")
         for r in allRuns: outFile.write(f"<td align=center><a href='https://atlas-runquery.cern.ch/query.py?q=find+run+{r}+%2F+show+all' target='_blank'>{r}</a></td>\n")
         outFile.write("</td><tr><td align=right>Athena Release:</td>")
         for r in allRuns: outFile.write(f"<td align=center>{allMeta[r]['release']}</td>\n")
+        outFile.write("</td><tr><td align=right>Project:</td>")
+        for r in allRuns: outFile.write(f"<td align=center>{allMeta[r]['project']}</td>\n")
         outFile.write("</td><tr><td align=right>Approx Lumi (incl. unstable)/fb<sup>-1</sup>:</td>")
         for r in allRuns: outFile.write(f"<td align=center>{allMeta[r]['lumi']:.3f}</td>\n")
         outFile.write("</tr><tr><td align=right>Defects:</td>\n")
@@ -293,7 +369,11 @@ thead {
                     if "algorithm" in v[r]: altText += f"Algorithm:{v[r]['algorithm']}&#010;&#010;" # display algname first
                     for kk,vv in v[r].items():
                         if kk not in ["imageCode","Status","name","comment","algorithm"]: altText += f"{kk}:{vv}&#010;"
-                    outFile.write(f"<td valign=top align=center width=150><img title=\"{altText}\" src=\"data:image/png;base64,{v[r]['imageCode']}\" width=150 style='border:2px solid {col}' onclick=\"window.open('https://atlasdqm.cern.ch/webdisplay/tier0/1/express_express/run_{r}/run{k}','_blank');\" ondblclick=\"window.open(this.src, '_blank');\"/><br><font size='1'>{v[r].get('comment','')}</font></td>")
+                    linkUrl = f"https://atlasdqm.cern.ch/webdisplay/tier0/1/{allMeta[r]['hanFile'].split('.')[0]}/run_{r}"
+                    if len(allMeta[r]["hanFile"].split("."))==4: # True if WebDisplay was also run in the report generation
+                        webDisplayNum = allMeta[r]["hanFile"].split(".")[-2]
+                        linkUrl = f"https://atlasdqm.cern.ch/webdisplay/test/{webDisplayNum}/{allMeta[r]['hanFile'].split('.')[0]}/run_{r}"
+                    outFile.write(f"<td valign=top align=center width=150><img title=\"{altText}\" src=\"data:image/png;base64,{v[r]['imageCode']}\" width=150 style='border:2px solid {col}' onclick=\"window.open('{linkUrl}/run{k}','_blank');\" ondblclick=\"window.open(this.src, '_blank');\"/><br><font size='1'>{v[r].get('comment','')}</font></td>")
 
             outFile.write("</tr>\n")
         outFile.write("</tbody></table>\n")
@@ -303,25 +383,21 @@ thead {
             if "Expert/" not in k: continue
             outFile.write(k+"<br>")
             v.Draw("COL1Z")
-            ROOT.gPad.SaveAs("/tmp/plt.png")
-            pltCode = base64.b64encode(open('/tmp/plt.png', 'rb').read()).decode('utf-8').replace('\n','')
+            ROOT.gPad.SaveAs(tmpFileName)
+            pltCode = base64.b64encode(open(tmpFileName, 'rb').read()).decode('utf-8').replace('\n','')
+            os.remove(tmpFileName)
             outFile.write(f"<img src=\"data:image/png;base64,{pltCode}\" width=400><br>")
 
         outFile.write("</body></html>\n")
 
-    # histsByStatus = {"Yellow":[],"Red":[]}
-    #
-    # for k,v in histResults.items():
-    #
-    #     if v["Status"]=="Green" or v["Status"]=="Undefined": continue
-    #     histsByStatus[v["Status"]] += [k]
-    #
-    # print(histsByStatus["Yellow"])
+    print("DQ Report Created @",output)
+
 
     return histResults
 
 if __name__=="__main__":
 
+    # defaults to last monday!
     today = datetime.date.today()
     fromDate = today + datetime.timedelta(days=-(today.weekday() if today.weekday()>0 else 7), weeks=0)
 
@@ -329,14 +405,20 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(prog="l1calo-dq-report",description="Generate an L1Calo DQ Report. Run without specifying any runs to list available runs",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--since",type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d').date(),default=fromDate,help="from")
     parser.add_argument("--until",type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d').date(),default=None,help="If unspecified, will make 1 week long")
+    parser.add_argument("--stream",default="express_express",help="Which stream to process. Using something other than express_express for validation reports")
+    parser.add_argument("--web",default=True,action="store_true",help="If given, will generate WebDisplay page and set links to them from report")
+    parser.add_argument("--filesInput",nargs="*",default=[],help="Use this option to list the HIST files to process, instead of run numbers")
     parser.add_argument("--commentFile",type=lambda s: os.path.expanduser(s),default="dqComments.txt",help="path to your comments file")
     parser.add_argument("-o","--output",default="dqReport.html" if not os.path.exists(os.path.expanduser("~/www/")) else (os.path.expanduser("~/www/")+"dqReport.html"),help="Where to create the report")
-    parser.add_argument("runNumbers",nargs="*",help="runs to include in the report, use a '*' to indicate all runs between time ranges specified in --since and --until. If None given, will list available runs")
+    parser.add_argument("runNumbers",nargs="*",help="runs to include in the report, use a '*' to indicate all runs between time ranges specified in --since and --until. Use word 'previous' to include previously generated runs from this week in the same stream. If None given, will list available runs")
 
     args = parser.parse_args()
 
+    # defaults to a week later
+    if args.until is None: args.until = args.since + datetime.timedelta(weeks=1)
 
-    if args.until is None:
-        args.until = args.since + datetime.timedelta(weeks=1)
+    # include stream in dqReport name if doing a validation check
+    if args.stream != "express_express":
+        args.output = args.output.replace(".html","."+args.stream+".html")
 
-    runDQ(runNumbers=args.runNumbers,fromDate=args.since,toDate=args.until,output=args.output,commentFile=args.commentFile)
+    runDQ(args)

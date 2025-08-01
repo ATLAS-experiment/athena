@@ -71,10 +71,11 @@ def EfexSimMonitoringConfig(flags):
                                opt=['kAddBinsDynamically'])
         helper.defineHistogram("LBN,locIdx;h_"+sig+"_mismatchesEmulated_posLbnMap", title = "Mismatched " + sig + " [EmulatedTower evts];LB;Position (Module:Proc:Eta:Phi);TOBs",
                                fillGroup = sig + "_mismatches", cutmask='IsEmulatedTowers',
+                               path = "Expert/Sim",
                                hanConfig={
                                    "algorithm":"Histogram_Empty",
                                    "display":"SetPalette(87)",
-                                   "description":"Location of mismatched " + sig + " TOBs in events with EmulatedTower simput. Use this plot to identify any localized eFEX issues. N.B. this plot is only created if there are mismatches."},
+                                   "description":"Location of mismatched " + sig + " TOBs in events with EmulatedTower simput. Discuss mismatches with expert, they may be caused by LATOME readout issues if there are LAr Mismatches in Input/eFEX folder. N.B. this plot is only created if there are mismatches."},
                                type="TH2I",
                                xbins=1,xmin=0,xmax=1,
                                ybins=1,ymin=0,ymax=1,
