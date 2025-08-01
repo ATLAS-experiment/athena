@@ -100,7 +100,7 @@ bool PathResolver::PR_find( const std::string& logical_file_name, const std::str
   const std::string searchPath = std::format("./{}{}", path_separator, search_list);
 
   // iterate through search list
-  for (const auto& r : searchPath | std::views::split(path_separator)) {
+  for (const auto r : searchPath | std::views::split(path_separator)) {
     std::string_view path(r.begin(), r.end());
     const bool is_http = path.starts_with("http//");
     if( (is_http || path.starts_with("https//")) &&
