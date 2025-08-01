@@ -174,7 +174,7 @@ private: // data
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
    mutable std::map<SG::SourceID, int> m_activeEventsPerSource ATLAS_THREAD_SAFE;
 
-   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "AthenaPoolCnvSvc", "AthenaPoolCnvSvc", ""};
+   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc", ""};
    ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc", ""};
 
 private: // properties

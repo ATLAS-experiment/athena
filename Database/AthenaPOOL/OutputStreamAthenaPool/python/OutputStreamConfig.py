@@ -43,6 +43,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       DataHeaderKey=outputStreamName(streamName),
       MetaDataPoolContainerPrefix=f"{flags.Output.StorageTechnology.MetaData}:MetaData",
       MetaDataOutputCollection=f"{flags.Output.StorageTechnology.MetaData}:MetaDataHdr",
+      ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc",
    )
 
    # If we're running in augmentation mode, configure the writing tool accordingly
