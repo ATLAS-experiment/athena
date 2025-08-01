@@ -489,10 +489,14 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
         // Get info on layers with missing hits
         int nMissing = 0;
         layer_bitmask_t missing_mask = iroad->getNWCLayers();
+	layer_bitmask_t hit_mask = 0x0;
 	for (unsigned ilayer = 0; ilayer < 13; ilayer++) {
 	  if ((missing_mask >> ilayer) & 0x1) {
 	    nMissing++;
 	    if (planeMap->isPixel(ilayer)) nMissing++; /// should be 2 missing coords for pixel
+	  }
+	  else {
+	    hit_mask |= (0x1 << ilayer);
 	  }
 	}
 		
@@ -504,7 +508,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
         temp.setBankID(-1);
         temp.setPatternID(iroad->getPID());
         temp.setFirstSectorID(iroad->getSector());
-        temp.setHitMap(missing_mask);
+        temp.setHitMap(hit_mask);
         temp.setNMissing(nMissing);
         temp.setQOverPt(y);
 
@@ -722,15 +726,25 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
 
     // Loop over roads
     for (auto const &iroad : roads) {
+        // Just used to get number of layers considered
+        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(iroad->getSubRegion());
 
         double y = iroad->getY();
 
         // Get info on layers with missing hits
         int nMissing = 0;
         layer_bitmask_t missing_mask = 0;
+	layer_bitmask_t hit_mask = 0x0;
+	for (unsigned ilayer = 0; ilayer < 13; ilayer++) {
+	  if ((missing_mask >> ilayer) & 0x1) {
+	    nMissing++;
+	    if (planeMap->isPixel(ilayer)) nMissing++; /// should be 2 missing coords for pixel
+	  }
+	  else {
+	    hit_mask |= (0x1 << ilayer);
+	  }
+	}
 
-        // Just used to get number of layers considered
-        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(iroad->getSubRegion());
 
         // Create a template track with common parameters filled already for
         // initializing below
@@ -740,7 +754,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
         temp.setBankID(-1);
         temp.setPatternID(iroad->getPID());
         temp.setFirstSectorID(iroad->getSector());
-        temp.setHitMap(missing_mask);
+        temp.setHitMap(hit_mask);
         temp.setNMissing(nMissing);
         temp.setQOverPt(y);
 
@@ -959,23 +973,19 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
 void FPGATrackSimNNTrackTool::compute_truth(FPGATrackSimTrack &t) const {
     std::vector<FPGATrackSimMultiTruth> mtv;
 
-    const FPGATrackSimPlaneMap* planeMap = nullptr;
-    if (!m_do2ndStage) planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
-    else planeMap = m_FPGATrackSimMapping->PlaneMap_2nd(0);
-
     unsigned nl = (m_do2ndStage ? 13 : 5);
     for (unsigned layer = 0; layer < nl; layer++) {
-        if (t.getHitMap() & (1 << planeMap->getCoordOffset(layer)))
-            continue;  // no hit in this plane
-        // Sanity check that we have enough hits.
-        if (layer < t.getFPGATrackSimHits().size())
-            mtv.push_back(t.getFPGATrackSimHits().at(layer).getTruth());
-
-        // adjust weight for hits without (and also with) a truth match, so that
-        // each is counted with the same weight.
-        mtv.back().assign_equal_normalization();
+      if (!(t.getHitMap() & (1 << layer))) continue;
+      
+      // Sanity check that we have enough hits.
+      if (layer < t.getFPGATrackSimHits().size())
+	mtv.push_back(t.getFPGATrackSimHits().at(layer).getTruth());
+      
+      // adjust weight for hits without (and also with) a truth match, so that
+      // each is counted with the same weight.
+      mtv.back().assign_equal_normalization();
     }
-
+    
     FPGATrackSimMultiTruth mt(std::accumulate(mtv.begin(), mtv.end(), FPGATrackSimMultiTruth(),
                 FPGATrackSimMultiTruth::AddAccumulator()));
     // frac is then the fraction of the total number of hits on the track
