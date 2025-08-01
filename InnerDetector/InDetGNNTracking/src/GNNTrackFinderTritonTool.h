@@ -9,7 +9,7 @@
 #include <list>
 #include <memory>
 
-#include "AthTritonInterfaces/ITritonTool.h"
+#include "AthOnnxInterfaces/IAthInferenceTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ISpacepointFeatureTool.h"
 #include "InDetRecToolInterfaces/IGNNTrackFinder.h"
@@ -51,7 +51,7 @@ class GNNTrackFinderTritonTool : public extends<AthAlgTool, IGNNTrackFinder> {
 
 
  private:
-  ToolHandle<AthInfer::ITritonTool> m_gnnTrackingTritonTool{
+  ToolHandle<AthInfer::IAthInferenceTool> m_gnnTrackingTritonTool{
       this, "TritonTool", "AthInfer::TritonTool"};
   ToolHandle<ISpacepointFeatureTool> m_spacepointFeatureTool{
       this, "SpacepointFeatureTool", "InDet::SpacepointFeatureTool"};

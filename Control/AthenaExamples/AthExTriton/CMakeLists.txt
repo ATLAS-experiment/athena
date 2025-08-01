@@ -6,7 +6,7 @@ atlas_subdir( AthExTriton )
 # Component(s) in the package.
 atlas_add_component( AthExTriton
    src/*.h src/*.cxx src/components/*.cxx
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel PathResolver AthTritonInterfaces
+   LINK_LIBRARIES AthenaBaseComps GaudiKernel PathResolver AthOnnxInterfaces
 )
 
 # Install files from the package:
