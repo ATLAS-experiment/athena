@@ -46,6 +46,7 @@ class L1CaloMonitorCfgHelper(object):
                 db.create_obj("DQAlgorithm",conf["name"])
                 dqAlgo = db.get_dal("DQAlgorithm",conf["name"])
                 dqAlgo.LibraryName = conf["libname"]
+                print("Created dqAlgo",conf["name"])
             # ensure all parameters appear in ParametersNames, and thresholds in ThresholdsNames
             for par,val in conf.items():
                 if par=="thresholds" and val in L1CaloMonitorCfgHelper.hanThresholdConfigs:
@@ -53,9 +54,11 @@ class L1CaloMonitorCfgHelper(object):
                         if thresh not in dqAlgo.ThresholdsNames:
                             updated=True
                             dqAlgo.ThresholdsNames += [thresh]
+                            print("Added",thresh,"to",conf["name"],"ThresholdNames")
                 elif par not in ["name","libname","thresholds"]+dqAlgo.ParametersNames:
                     updated=True
                     dqAlgo.ParametersNames += [par]
+                    print("Added",par,"to",conf["name"],"ParameterNames")
             if updated:
                 db.update_dal(dqAlgo)
 
@@ -279,6 +282,7 @@ thresholds th_AnyBinIsError {
 
         if paths != []:
             for path in paths:
+                if self.dqEnv=='online' and any([x.startswith("Shifter/") for x in paths]) and not path.startswith("Shifter/"): continue # only fill Shifter folder copies online
                 # create a copy of the histogram in each of the extra locations
                 self.defineHistogram(*args,fillGroup=fillGroup,hanConfig=hanConfig,paths=[],path=path,**kwargs)
             return None

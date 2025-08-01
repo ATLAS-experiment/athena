@@ -9,16 +9,18 @@ if __name__=="__main__":
     parser.add_argument("runNumber",help="run number to create website for")
     parser.add_argument("stream",default="express_express",nargs="?",help="stream to create for")
     parser.add_argument("--bulk",action='store_true',help="Use bulk processing")
+    parser.add_argument("--tag",default="*",help="Optional, specify a HIST file tag")
 
     args = parser.parse_args()
 
     import glob
-    files = glob.glob(f"/eos/atlas/atlastier0/rucio/*/{args.stream}/*{args.runNumber}/*merge.HIST.{'f' if args.bulk else 'x'}*/*")
+    files = glob.glob(f"/eos/atlas/atlastier0/rucio/*/{args.stream}/*{args.runNumber}/*merge.HIST.{'f' if args.bulk else 'x'}*{args.tag}/*")
     if len(files)==0:
         print("ERROR: No HIST file found for run")
         exit(1)
     elif len(files)!=1:
         print("ERROR: Multiple HIST files found:",*files)
+        print("Try specifying a particular file via the --tag option")
         exit(1)
 
     import random

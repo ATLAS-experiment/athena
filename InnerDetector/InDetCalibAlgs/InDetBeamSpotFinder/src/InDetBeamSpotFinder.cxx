@@ -263,6 +263,10 @@ StatusCode InDet::InDetBeamSpotFinder::performFits(){
 
   for( auto & eventList: m_sortedEventList){
     verticesToFit.clear();
+    if(eventList.size() > 0) {
+      BeamSpot::Event ev = *eventList.begin();
+      ATH_MSG_INFO( "Event list size/LB/bcid: " << eventList.size() << " " << ev.lumiBlock << " " << ev.bcid);
+    }
     for( const auto & thisEvent: eventList){
       for( const auto & thisVertex: thisEvent.vertices){
         if( thisVertex.passed ) { 
