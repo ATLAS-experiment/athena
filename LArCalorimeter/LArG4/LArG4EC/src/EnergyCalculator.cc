@@ -652,7 +652,11 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   G4AffineTransform transf;
 
   int profundis=pre_step_point->GetTouchable()->GetHistoryDepth();
+#if G4VERSION_NUMBER < 1100
   if (preStepVolume->GetName().contains("Slice"))
+#else
+  if (G4StrUtil::contains(preStepVolume->GetName(),"Slice"))
+#endif
         transf=pre_step_point->GetTouchable()->GetHistory()->GetTransform(profundis-1);
   else
         transf=pre_step_point->GetTouchable()->GetHistory()->GetTopTransform();
