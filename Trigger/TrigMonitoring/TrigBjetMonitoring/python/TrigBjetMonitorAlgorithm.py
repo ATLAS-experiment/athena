@@ -175,6 +175,38 @@ def TrigBjetMonConfig(inputFlags):
                 BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2Xv01_mv LLR;GN2Xv01_mv;Events',
                                              path='Shifter/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
 
+            HistName = 'GN2XTrig_phbb_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2XTrig_phbb probability;GN2XTrig_phbb;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2XTrig_phbb probability;GN2XTrig_phbb;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+
+            HistName = 'GN2XTrig_ptop_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2XTrig_ptop probability;GN2XTrig_ptop;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2XTrig_ptop probability;GN2XTrig_ptop;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+
+            HistName = 'GN2XTrig_pqcd_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2XTrig_pqcd probability;GN2XTrig_pqcd;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2XTrig_pqcd probability;GN2XTrig_pqcd;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+
+            HistName = 'GN2XTrig_mv_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2XTrig_mv LLR;GN2XTrig_mv;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2XTrig_mv LLR;GN2XTrig_mv;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
+
             HistName = 'LargeR_jetPt_' + chain[2:]
             if chain[0:1] == "E" :
                 BjetMonGroup.defineHistogram(HistName, title='Distribution of LargeR jet Pt;Pt_jet;Events',
