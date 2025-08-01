@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/tools/DVLDataBucket.icc
@@ -105,7 +105,7 @@ DVLDataBucket<T>::DVLDataBucket (std::unique_ptr<U> data)
  */
 template <typename T>
 DVLDataBucket<T>::DVLDataBucket (const DVLDataBucket& other)
-  : SG::DataBucket<T> (new T (*(T*)(other.cptr()))),
+  : SG::DataBucket<T> (new T (*other.cptr())),
     m_copies (other.m_copies),
     m_ti (other.m_ti),
     m_clid (other.m_clid)
