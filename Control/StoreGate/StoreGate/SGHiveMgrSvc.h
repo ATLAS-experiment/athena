@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_HIVEMGRSVC_H
@@ -119,7 +119,7 @@ private:
   ServiceHandle<StoreGateSvc> m_hiveStore;
   size_t m_nSlots; //property settable also by setNumberOfStores
   std::vector<SG::HiveEventSlot> m_slots;
-  std::mutex m_mutex; //< protects m_slots access
+  mutable std::mutex m_mutex; //< protects m_slots access
   std::atomic<size_t> m_freeSlots {0};
 
 };
