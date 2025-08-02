@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGCOMPS_ADDRESSREMAPPINGSVC_H
@@ -123,7 +123,7 @@ private: // Data
 
 
 private:
-   CLID getClid(std::string type) const;
+   CLID getClid(const std::string& type) const;
 
    StatusCode preLoadAddressesConst(StoreID::type storeID, IAddressProvider::tadList& tads) const;
 
