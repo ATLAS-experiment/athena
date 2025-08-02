@@ -281,16 +281,16 @@ SGAudSvc::SGAudit(const std::string& key, const CLID& id,
   if (typ == 0) {
     itr = m_read.find(m_currAlg);
     if (itr != m_read.end()) {
-      itr->second.insert(kk);
+      itr->second.insert(std::move(kk));
     } else {
-      m_read[m_currAlg] = std::set<std::string> ( {kk} );
+      m_read[m_currAlg] = std::set<std::string> ( {std::move(kk)} );
     }
   } else {
     itr = m_write.find(m_currAlg);
     if (itr != m_write.end()) {
-      itr->second.insert(kk);
+      itr->second.insert(std::move(kk));
     } else {
-      m_write[m_currAlg] = std::set<std::string> ( {kk} );
+      m_write[m_currAlg] = std::set<std::string> ( {std::move(kk)} );
     }
   }
 }
@@ -324,7 +324,7 @@ SGAudSvc::SGGetCurrentAlg(){
     }
     m_vAlg.push_back(name);
     m_nCurrAlg=index;
-    m_currAlg=name;
+    m_currAlg=std::move(name);
     return true;
   }
   return true;
