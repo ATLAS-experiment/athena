@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file TrackD3PDMaker/src/VertexKineFillerTool.cxx
  * @author maarten boonekamp <maarten.boonekamp@cea.fr>
@@ -75,9 +73,9 @@ StatusCode VertexKineFillerTool::fill (const Trk::VxCandidate& p)
 
     const Trk::Perigee* perigee = 0;
     if ( tv->perigeeAtVertex() )
-      perigee = (const Trk::Perigee*) tv->perigeeAtVertex();
+      perigee = static_cast<const Trk::Perigee*> (tv->perigeeAtVertex());
     else
-      perigee = (const Trk::Perigee*) tv->initialPerigee();
+      perigee = static_cast<const Trk::Perigee*> (tv->initialPerigee());
 
     *m_px    += perigee->momentum().x();
     *m_py    += perigee->momentum().y();
