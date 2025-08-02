@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  SGTools/StringPool.cxx
@@ -138,9 +138,11 @@ void StringPoolImpl::dump() const
   std::sort (keys.begin(), keys.end());
   for (StringPool::sgkey_t k : keys) {
     keymap_t::const_iterator it = m_keymap.find (k);
-    std::cout << std::hex << std::setw(18) << k << " "
-              << std::dec << std::setw(9) << it->second.first << " "
-              << it->second.second << "\n";
+    if (it != m_keymap.end()) {
+      std::cout << std::hex << std::setw(18) << k << " "
+                << std::dec << std::setw(9) << it->second.first << " "
+                << it->second.second << "\n";
+    }
   }
 }
 

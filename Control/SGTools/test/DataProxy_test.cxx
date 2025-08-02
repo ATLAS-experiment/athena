@@ -518,7 +518,9 @@ int main (int argc, char** argv)
     if (argc >= 3) {
       n = atoi (argv[2]);
     }
-    perftest(n);
+    if (n > 0) {
+      perftest(n);
+    }
     return 0;
   }
 

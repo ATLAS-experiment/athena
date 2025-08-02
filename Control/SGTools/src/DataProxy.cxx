@@ -13,6 +13,7 @@
 #include "GaudiKernel/GenericAddress.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/GaudiException.h"
 
 #include "SGTools/TransientAddress.h"
 #include "SGTools/T2pMap.h"
@@ -440,11 +441,19 @@ std::unique_ptr<DataObject> DataProxy::readData (objLock_t&, ErrNo* errNo)
 {
   if (errNo) {
     if (*errNo == RECURSIVEREAD) {
-      MsgStream gLog(m_ims, "DataProxy");
-      gLog << MSG::ERROR
-           << "readData: ERROR recursive read for object" 
-           <<m_tAddress.clID() << '/' << m_tAddress.name() << '\n'
-           <<" Returning NULL DataObject pointer  " << endmsg;
+      // This can end up being called from noexcept functions.
+      // Creating a MsgStream can throw an exception --- don't let
+      // it escape.
+      try {
+        MsgStream gLog(m_ims, "DataProxy");
+        gLog << MSG::ERROR
+             << "readData: ERROR recursive read for object" 
+             <<m_tAddress.clID() << '/' << m_tAddress.name() << '\n'
+             <<" Returning NULL DataObject pointer  " << endmsg;
+      }
+      catch (const GaudiException&) {
+        std::cerr << "DataProxy::readData: Problem creating MsgStream\n";
+      }
       return nullptr;
     }
     *errNo = RECURSIVEREAD;
