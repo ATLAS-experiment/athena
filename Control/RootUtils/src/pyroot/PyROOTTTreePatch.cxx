@@ -292,11 +292,13 @@ PyObject* branchSetAddress (PyObject*, PyObject* args)
   // Convert the buffer argument to an address.
   void* buf = 0;
   if ( TPython::CPPInstance_Check( address ) ) {
-    if ( ((CPPInstance*)address)->fFlags & CPPInstance::kIsReference )
-      buf = (void*)((CPPInstance*)address)->fObject;
+    auto* inst = reinterpret_cast<CPPInstance*>(address);
+    if ( inst->fFlags & CPPInstance::kIsReference )
+      buf = inst->fObject;
     else
-      buf = (void*)&((CPPInstance*)address)->fObject;
-  } else
+      buf = &inst->fObject;
+  }
+  else
     RootUtils::GetBuffer( address, '*', 1, buf, kFALSE );
 
   // Make the call and return.
