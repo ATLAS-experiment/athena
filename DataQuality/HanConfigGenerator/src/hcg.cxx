@@ -126,7 +126,7 @@ std::ostream& operator<<( std::ostream& s, const std::vector<T*>& v ) {
 template<class T>
 T* get( TKey* tobj ) { 
   TObject* a = tobj->ReadObj()->Clone();
-  (static_cast<TH1*>(a))->SetDirectory(0);
+  static_cast<TH1*>(a)->SetDirectory(0);
   return static_cast<T*>(a);
 }
 
