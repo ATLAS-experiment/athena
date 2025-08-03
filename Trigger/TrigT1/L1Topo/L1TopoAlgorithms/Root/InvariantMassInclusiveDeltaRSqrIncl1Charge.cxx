@@ -27,6 +27,7 @@
 #include "L1TopoSimulationUtils/Trigo.h"
 #include "L1TopoSimulationUtils/Hyperbolic.h"
 #include "L1TopoSimulationUtils/Kinematics.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 
 //
 
@@ -192,6 +193,11 @@ TCS::InvariantMassInclusiveDeltaRSqrIncl1Charge::processBitCorrect( const std::v
                    TRG_MSG_DEBUG("Decision " << i << ": " << (accept?"pass":"fail") << " invmass2 = " << invmass2 << " deltaR2 = " << deltaR2 );
                }
             }
+         }
+         for (unsigned int i=0; i < numberOutputBits(); ++i) {
+            bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1[i])
+                                    || TSU::isAmbiguousTruncation(input[0], p_NumberLeading2, p_MinET2[i]);
+            output[i]->setAmbiguityFlag(hasAmbiguousInputs);
          }
    } else {
 
