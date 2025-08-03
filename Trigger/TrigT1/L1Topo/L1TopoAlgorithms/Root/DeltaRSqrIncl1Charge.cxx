@@ -19,6 +19,7 @@
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
 #include "L1TopoSimulationUtils/Kinematics.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 
 REGISTER_ALG_TCS(DeltaRSqrIncl1Charge)
 
@@ -143,6 +144,11 @@ TCS::DeltaRSqrIncl1Charge::processBitCorrect( const std::vector<TCS::TOBArray co
                   }
               }
           }
+        bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1)
+                                || TSU::isAmbiguousTruncation(input[0], p_NumberLeading2, p_MinET2);
+        for (unsigned int i=0; i < numberOutputBits(); ++i) {
+            output[i]->setAmbiguityFlag(hasAmbiguousInputs);
+        }
    } else {
       TCS_EXCEPTION("DeltaRSqrIncl1Charge alg must have either 1 input, but got " << input.size());
    }

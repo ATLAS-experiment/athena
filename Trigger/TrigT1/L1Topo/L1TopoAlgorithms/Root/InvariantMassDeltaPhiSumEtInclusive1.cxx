@@ -14,6 +14,7 @@
 #include "L1TopoAlgorithms/InvariantMassDeltaPhiSumEtInclusive1.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 
 #include <cmath>
 
@@ -202,6 +203,11 @@ TCS::InvariantMassDeltaPhiSumEtInclusive1::processBitCorrect( const std::vector<
                    TRG_MSG_DEBUG("Decision " << i << ": " << (accept?"pass":"fail") << " invmass2 = " << invmass2);
                }
             }
+         }
+         for (unsigned int i=0; i < numberOutputBits(); ++i) {
+            bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading, p_MinET1[i])
+                                    || TSU::isAmbiguousTruncation(input[0], p_NumberLeading, p_MinET2[i]);
+            output[i]->setAmbiguityFlag(hasAmbiguousInputs);
          }
    } else {
 
