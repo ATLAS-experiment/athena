@@ -15,6 +15,7 @@ namespace CP
     const IInterface* parent)
     : asg::AsgTool(std::string(asg::ptrToString(parent))+"#"+type+"/"+myname)
   {
+    // cppcheck-suppress missingReturn; false positive
   }
   template <typename T>
   AsgNumDecorationSelectionTool<T>::~AsgNumDecorationSelectionTool()
