@@ -51,7 +51,7 @@ public:
 
   QSet<const QWidget*> handledWidgets;
   QSet<const QWidget*> ignoredWidgets;
-  void handle(QWidget*w) {
+  void handle(const QWidget*w) {
     if (!w) {
       if(VP1Msg::debug()){
     	 theclass->messageDebug("VP1Serialize::handle() - Returning...");
@@ -64,7 +64,6 @@ public:
 			+", name="+w->objectName());
     handledWidgets.insert(w);
   }
-  void handle(const QWidget*w) { handle(const_cast<QWidget*>(w)); }
   bool expectsPersistification(const QWidget*w);
 
   static unsigned numberOfInstantiations;
