@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -1164,7 +1164,7 @@ namespace DerivationFramework {
       if ( vtx.nRefTrks() == (int)vtx.vtx()->nTrackParticles() ) {
 	for (int i=0; i<vtx.nRefTrks(); ++i) {
 	  const xAOD::TrackParticle* otp =
-	    (const xAOD::TrackParticle*)vtx.refTrkOrigin(i);
+	    static_cast<const xAOD::TrackParticle*>(vtx.refTrkOrigin(i));
 	  if ( otp != NULL ) {
 	    if ( std::find(muonIdTracks.begin(), muonIdTracks.end(), otp)
 		 != muonIdTracks.end() ) {
