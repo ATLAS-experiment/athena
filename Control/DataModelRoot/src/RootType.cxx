@@ -234,7 +234,8 @@ Bool_t TMemberAdapter::IsConstant() const
 Bool_t TMemberAdapter::IsConstructor() const
 {
 // test if the adapted member is a const method
-   return ((TFunction*)fMember) ? (((TFunction*)fMember)->ExtraProperty() & kIsConstructor) : kFALSE;
+   auto func = static_cast<const TFunction*>(fMember);
+   return func ? (func->ExtraProperty() & kIsConstructor) : kFALSE;
 }
 
 //____________________________________________________________________________
@@ -271,7 +272,7 @@ Bool_t TMemberAdapter::IsTransient() const
 size_t TMemberAdapter::FunctionParameterSize( Bool_t required ) const
 {
 // get the total number of parameters that the adapted function/method takes
-   TFunction* func = (TFunction*)fMember;
+   auto func = static_cast<const TFunction*>(fMember);
    if ( ! func )
       return 0;
 
@@ -285,15 +286,17 @@ size_t TMemberAdapter::FunctionParameterSize( Bool_t required ) const
 TMemberAdapter TMemberAdapter::FunctionParameterAt( size_t nth )
 {
 // get the type info of the function parameter at position nth
-   return (TMethodArg*)((TFunction*)fMember)->GetListOfMethodArgs()->At( nth );
+   auto func = static_cast<TFunction*>(fMember);
+   return static_cast<TMethodArg*>(func->GetListOfMethodArgs()->At( nth ));
 }
 
 //____________________________________________________________________________
 std::string TMemberAdapter::FunctionParameterNameAt( size_t nth )
 {
 // get the formal name, if available, of the function parameter at position nth
-   const char* name =
-      ((TMethodArg*)((TFunction*)fMember)->GetListOfMethodArgs()->At( nth ))->GetName();
+   auto func = static_cast<TFunction*>(fMember);
+   auto meth = static_cast<TMethodArg*>(func->GetListOfMethodArgs()->At( nth ));
+   const char* name = meth->GetName();
 
    if ( name )
       return name;
@@ -304,7 +307,8 @@ std::string TMemberAdapter::FunctionParameterNameAt( size_t nth )
 std::string TMemberAdapter::FunctionParameterDefaultAt( size_t nth )
 {
 // get the default value, if available, of the function parameter at position nth
-   TMethodArg* arg = (TMethodArg*)((TFunction*)fMember)->GetListOfMethodArgs()->At( nth );
+   auto func = static_cast<TFunction*>(fMember);
+   TMethodArg* arg = static_cast<TMethodArg*>(func->GetListOfMethodArgs()->At( nth ));
    const char* def = arg->GetDefault();
 
    if ( ! def )
@@ -325,7 +329,8 @@ std::string TMemberAdapter::FunctionParameterDefaultAt( size_t nth )
 TReturnTypeAdapter TMemberAdapter::ReturnType() const
 {
 // get the return type of the wrapped function/method
-   return TReturnTypeAdapter( ((TFunction*)fMember)->GetReturnTypeNormalizedName() );
+   auto func = static_cast<const TFunction*>(fMember);
+   return TReturnTypeAdapter( func->GetReturnTypeNormalizedName() );
 }
 
 //____________________________________________________________________________
