@@ -94,9 +94,10 @@ def EfexSimMonitoringConfig(flags):
                            xbins=1,xmin=0,xmax=1,
                            ybins=1,ymin=0,ymax=1,
                            opt=['kCanRebin','kAlwaysCreate','kAddBinsDynamically'],merge='merge')
-    helper.defineTree('LBN,Signature,LBNString,EventNumber,EventType,timeSince,timeUntil,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
+    helper.defineTree('LBN,SignatureEvtType,LBNString,EventNumber,EventType,timeSince,timeUntil,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
                       "lbn/l:Signature/string:lbnString/string:eventNumber/l:EventType/string:timeSince/I:timeUntil/I:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
-                      title="mismatched;LBN;Signature",fillGroup="mismatches")
+                      title="mismatched (including events with LATOME readout and OTF masking issues);LBN;Signature",
+                      fillGroup="mismatches")
 
 
     result.merge(helper.result())

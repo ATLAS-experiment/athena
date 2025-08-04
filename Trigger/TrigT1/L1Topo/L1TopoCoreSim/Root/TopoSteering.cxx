@@ -310,7 +310,7 @@ TopoSteering::executeDecisionConnector(TCS::DecisionConnector *conn) {
    TRG_MSG_DEBUG("  ... executing decision connector '" << conn->name() << "' -> attaching output data:");
    for(TOBArray const * outarr : output) {
       TRG_MSG_DEBUG("           data '" << outarr->name() << "' of size " << outarr->size());
-      conn->toggleAmbiguity(outarr->ambiguityFlag());
+      conn->toggleAmbiguity(conn->hasAmbiguity() || outarr->ambiguityFlag());
    }
 
    conn->attachOutputData(output);

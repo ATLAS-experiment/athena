@@ -1,0 +1,21 @@
+checlout out TrigInDetValidation, TrigInDetAnalysisUser
+
+
+modify the main driver file ...
+
+       Trigger/TrigValidation/TrigInDetValidation/utils/comparitor.txt
+then run
+
+   TrigInDetValidation/utils/chains.sh
+
+which generates 
+
+ Trigger/TrigAnalysis/TrigInDetAnalysisUser/share/TIDAdata-chains-run3.dat
+ Trigger/TrigValidation/TrigInDetValidation/python/Chains.py
+ Trigger/TrigValidation/TrigInDetValidation/share/comparitor.json
+
+such that everything should be consistent
+
+
+
+

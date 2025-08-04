@@ -99,6 +99,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
     constexpr int INVALID_VALUE = -99999; // use this value to indicate invalid
     constexpr int MASKED_VALUE = std::numeric_limits<int>::max(); // use this value to indicate masked
     constexpr int SATURATED_VALUE = std::numeric_limits<int>::max()-1; // use this value to indicate saturation
+    constexpr int MISSING_VALUE = -99998; // use this value to indicate missing supercell
 
     for (auto digi: *scells) {
         const auto itr = m_scMap.find(digi->ID().get_compact());
@@ -118,7 +119,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
 
         auto towerItr = towers.emplace(itr->second.first,std::array<int,11>{}); // returns pair<itr,bool> with bool indicating if emplaced
         if(towerItr.second) { // did an emplace
-            towerItr.first->second.fill(INVALID_VALUE); // ensure all slots initialize with invalid value
+            towerItr.first->second.fill(MISSING_VALUE); // ensure all slots initialize with missing value
         }
         auto& tower = (towerItr.first->second);
         if (itr->second.second.second<11) {
@@ -130,15 +131,15 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
                     tower.at(itr->second.second.second) = SATURATED_VALUE;
                 }
                 if(tower.at(itr->second.second.first)!=(SATURATED_VALUE)) { // don't override saturation
-                    // if the other contribution was masked or invalid, revert to 0 before adding this contribution
-                    if (tower.at(itr->second.second.first)==MASKED_VALUE || tower.at(itr->second.second.first)==INVALID_VALUE) {
+                    // if the other contribution was masked or invalid or missing, revert to 0 before adding this contribution
+                    if (tower.at(itr->second.second.first)==MASKED_VALUE || tower.at(itr->second.second.first)==INVALID_VALUE  || tower.at(itr->second.second.first)==MISSING_VALUE) {
                         tower.at(itr->second.second.first)=0;
                     }
                     tower.at(itr->second.second.first) += val >> 1;
                 }
                 if(tower.at(itr->second.second.second)!=(SATURATED_VALUE)) { // don't override saturation
-                    // if the other contribution was masked or invalid, revert to 0 before adding this contribution
-                    if (tower.at(itr->second.second.second)==MASKED_VALUE || tower.at(itr->second.second.second)==INVALID_VALUE) {
+                    // if the other contribution was masked or invalid or missing, revert to 0 before adding this contribution
+                    if (tower.at(itr->second.second.second)==MASKED_VALUE || tower.at(itr->second.second.second)==INVALID_VALUE || tower.at(itr->second.second.second)==MISSING_VALUE) {
                         tower.at(itr->second.second.second)=0;
                     }
                     tower.at(itr->second.second.second) += (val - (val >> 1)); // HW seems fixed now!
@@ -151,11 +152,11 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
             auto& v = tower.at(itr->second.second.first);
             if (isMasked) {
                 // dont mark it masked if it already has a contribution
-                if(v==INVALID_VALUE) v = MASKED_VALUE;
+                if(v==MISSING_VALUE) v = MASKED_VALUE;
             } else if(isSaturated) {
                 v = val;
             } else {
-                if(v==INVALID_VALUE) v = 0;
+                if(v==INVALID_VALUE || v==MISSING_VALUE) v = 0;
                 v += val;
             }
         }
@@ -171,7 +172,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         double phi = tTower->phi(); if(phi > M_PI) phi -= 2.*M_PI;
         auto towerItr = towers.emplace(std::pair(etaIndex(tTower->eta()),phiIndex(phi)),std::array<int,11>{}); // returns pair<itr,bool> with bool indicating if emplaced
         if(towerItr.second) { // did an emplace
-            towerItr.first->second.fill(INVALID_VALUE); // ensure all slots initialize with invalid value
+            towerItr.first->second.fill(MISSING_VALUE); // ensure all slots initialize with missing value
         }
         (towerItr.first->second).at(10) = tTower->cpET();
     }
@@ -184,6 +185,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         if(calEt == MASKED_VALUE) return 0; // indicates masked channel
         if(calEt == SATURATED_VALUE) return 1023; // saturated channel
         if( calEt == INVALID_VALUE ) return 1022; // invalid channel value
+        if( calEt == MISSING_VALUE ) return 1025; // missing channel value
         if(calEt<448) return std::max((calEt&~1)/2+32,1); // 25 MeV per eFexTower count
         if(calEt<1472) return (calEt-448)/4+256;          // 50 MeV per eFexTower count
         if(calEt<3520) return (calEt-1472)/8+512;         // 100 MeV ...

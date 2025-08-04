@@ -24,6 +24,7 @@ StatusCode EfexSimMonitorAlgorithm::initialize() {
   ATH_CHECK( m_eFexEmSimContainerKey.initialize() );
   ATH_CHECK( m_eFexTauContainerKey.initialize() );
   ATH_CHECK( m_eFexTauSimContainerKey.initialize() );
+    ATH_CHECK( m_scellKey.initialize() );
     ATH_CHECK( m_eFexEmxContainerKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_eFexEmxSimContainerKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_eFexTauxContainerKey.initialize(SG::AllowEmpty) );
@@ -82,6 +83,15 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
             EventType+="+JustBeforeOTF";
             IsEmulatedTowers=false; // wont fill emulated tower plots with mismatches from these types of events
         }
+
+        // also check if any supercells are missing ... mismatches will get an entry in the TTree (and entries)
+        // but not feature in the EmulatedTowers mismatches plots
+        SG::ReadHandle<CaloCellContainer> scells(m_scellKey,ctx); // n.b. 34048 is a full complement of scells
+        if(!scells.isValid() || scells->size()!=34048){
+            IsEmulatedTowers=false;
+            EventType+="+MissingSCells";
+        }
+
     }
 
     SG::ReadHandle<T> tobs1{key1, ctx};
@@ -181,7 +191,8 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
             for(auto w : sword0s) s << w << " ";
             ATH_MSG_DEBUG(s.str());
         }
-        fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
+        auto signatureEvtType = Monitored::Scalar<std::string>("SignatureEvtType",signa+":"+evtType);
+        fill("mismatches",signatureEvtType,simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
     } else {
         tobMismatched=0;
         fill("mismatches",tobMismatched,lbn,signature,simReady,evtType);
