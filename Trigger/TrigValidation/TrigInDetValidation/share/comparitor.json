@@ -90,10 +90,10 @@
        "chains" : " HLT_mb_sptrk_L1RD0_FILLED:key=HLT_IDTrack_MinBias_IDTrig " 
    },
    "L2minbiaspix": {
-       "chains" : " HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig " 
+       "chains" : " HLT_mb_pixsptrk_nototpix20_q2_L1VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig " 
    },
    "EFminbiaspix": {
-       "chains" : " HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig " 
+       "chains" : " HLT_mb_pixsptrk_nototpix20_q2_L1VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig " 
    },
    "L2bphys": {
        "chains" : " HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:key=HLT_IDTrack_Bmumux_FTF  HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:key=HLT_IDTrack_Bmumux_FTF " 
