@@ -10,8 +10,6 @@
 // ----------------------------------------------------------------------------
 // ****************************************************************************
 #include "ReVertex.h"
-#include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthVertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
@@ -54,7 +52,6 @@ ReVertex::ReVertex(const std::string& t,
    
     declareProperty("V0Tools"               , m_v0Tools);
     declareProperty("PVRefitter"            , m_pvRefitter);
-    declareProperty("DefaultPVContainerName", m_defaultPVContainerName = "PrimaryVertices");
     declareProperty("PVContainerName"       , m_pvContainerName        = "PrimaryVertices");
     declareProperty("RefPVContainerName"    , m_refPVContainerName     = "RefittedPrimaryVertices");
 
@@ -99,7 +96,6 @@ StatusCode ReVertex::initialize() {
     ATH_CHECK(m_OutputContainerName.initialize());
     ATH_CHECK(m_inputContainerName.initialize());
     ATH_CHECK(m_trackContainer.initialize());
-    ATH_CHECK(m_defaultPVContainerName.initialize());
     ATH_CHECK(m_pvContainerName.initialize());
     ATH_CHECK(m_refPVContainerName.initialize());
     ATH_CHECK(m_eventInfo_key.initialize());
@@ -123,85 +119,75 @@ StatusCode ReVertex::addBranches() const {
     //----------------------------------------------------
     // retrieve primary vertices
     //----------------------------------------------------
-    SG::ReadHandle<xAOD::VertexContainer> defaultPVContainer(m_defaultPVContainerName);
-    ATH_CHECK(defaultPVContainer.isValid());
-
     SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_pvContainerName);
     ATH_CHECK(pvContainer.isValid());
 
     std::vector<const xAOD::TrackParticle*> fitpair(Ntracks + m_useAdditionalTrack);
-    for(const xAOD::Vertex* v : *InVtxContainer) {
+    for(const xAOD::Vertex* v : *InVtxContainer)
+    {
+
       bool passed = false;
       for(size_t i=0;i<m_hypoNames.size();i++) {
-	xAOD::BPhysHypoHelper onia(m_hypoNames.at(i), v);
-	passed |= onia.pass();
+	 xAOD::BPhysHypoHelper onia(m_hypoNames.at(i), v);
+	 passed |= onia.pass();
       }
       if (!passed && m_hypoNames.size()) continue;
        
-      for(size_t i =0; i<Ntracks; i++) {
-	size_t trackN = m_TrackIndices[i];
-	if(trackN >= v->nTrackParticles()) {
-	  ATH_MSG_FATAL("Indices exceeds limit in particle");
-	  return StatusCode::FAILURE;
-	}
-	fitpair[i] = v->trackParticle(trackN);
-      }
+        for(size_t i =0; i<Ntracks; i++)
+        {
+            size_t trackN = m_TrackIndices[i];
+            if(trackN >= v->nTrackParticles())
+            {
+                ATH_MSG_FATAL("Indices exceeds limit in particle");
+                return StatusCode::FAILURE;
+            }
+            fitpair[i] = v->trackParticle(trackN);
+        }
 
-      TLorentzVector tmp; TLorentzVector inVtxP;
-      for(size_t i=0; i<Ntracks; i++) {
-	const xAOD::TrackParticle* tp = v->trackParticle(i);
-	tmp.SetPtEtaPhiM(tp->pt(), tp->eta(), tp->phi(), m_trkMasses[i]);
-	inVtxP += tmp;
-      }
+       if (m_useAdditionalTrack) 
+       {
+	  // Loop over ID tracks, call vertexing
+	  for (auto trkItr=importedTrackCollection->cbegin(); trkItr!=importedTrackCollection->cend(); ++trkItr) {
+	     const xAOD::TrackParticle* tp (*trkItr);
+	     fitpair.back() = nullptr;
+	     if (Analysis::JpsiUpsilonCommon::isContainedIn(tp,fitpair)) continue; // remove tracks which were used to build J/psi+2Tracks
+	     fitpair.back() = tp;
 
-      if (m_useAdditionalTrack) {
-	// Loop over ID tracks, call vertexing
-	for (auto trkItr=importedTrackCollection->cbegin(); trkItr!=importedTrackCollection->cend(); ++trkItr) {
-	  const xAOD::TrackParticle* tp (*trkItr);
-	  fitpair.back() = nullptr;
-	  if (Analysis::JpsiUpsilonCommon::isContainedIn(tp,fitpair)) continue; // remove tracks which were used to build J/psi+2Tracks
-	  fitpair.back() = tp;
-
-	  // Daniel Scheirich: remove track too far from the Jpsi+2Tracks vertex (DeltaZ cut)
-	  if(m_trkDeltaZ>0 &&
-	     std::abs((tp)->z0() + (tp)->vz() - v->z()) > m_trkDeltaZ )
-	    continue;
+	      // Daniel Scheirich: remove track too far from the Jpsi+2Tracks vertex (DeltaZ cut)
+	      if(m_trkDeltaZ>0 &&
+		 std::abs((tp)->z0() + (tp)->vz() - v->z()) > m_trkDeltaZ )
+	       continue;
 	     
+	     fitAndStore(vtxContainer.ptr(),v,InVtxContainer.cptr(),fitpair,importedTrackCollection.cptr(),pvContainer.cptr());
+	  }
+       }
+       else 
+       {
 	  fitAndStore(vtxContainer.ptr(),v,InVtxContainer.cptr(),fitpair,importedTrackCollection.cptr(),pvContainer.cptr());
-	}
-      }
-      else {
-	fitAndStore(vtxContainer.ptr(),v,InVtxContainer.cptr(),fitpair,importedTrackCollection.cptr(),pvContainer.cptr());
-      }
+       }
     }
 
     if(m_AddPVData){
-      // Give the helper class the ptr to v0tools and beamSpotsSvc to use
-      SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
-      if(not evt.isValid()) ATH_MSG_ERROR("Cannot Retrieve " << evt.key() );
-      BPhysPVTools helper(&(*m_v0Tools), evt.cptr());
-      helper.SetMinNTracksInPV(m_PV_minNTracks);
-      helper.SetSave3d(m_do3d);
+     // Give the helper class the ptr to v0tools and beamSpotsSvc to use
+     SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+     if(not evt.isValid()) ATH_MSG_ERROR("Cannot Retrieve " << evt.key() );
+     BPhysPVTools helper(&(*m_v0Tools), evt.cptr());
+     helper.SetMinNTracksInPV(m_PV_minNTracks);
+     helper.SetSave3d(m_do3d);
 
-      if(m_refitPV) {
+    if(m_refitPV) {
         //----------------------------------------------------
         // Try to retrieve refitted primary vertices
         //----------------------------------------------------
         SG::WriteHandle<xAOD::VertexContainer> refPvContainer(m_refPVContainerName);
         ATH_CHECK(refPvContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
-	
+
         if(vtxContainer->size() >0){
           ATH_CHECK(helper.FillCandwithRefittedVertices(vtxContainer.ptr(), pvContainer.cptr(), refPvContainer.ptr(), &(*m_pvRefitter) ,  m_PV_max, m_DoVertexType));
         }
-      }
-      else{
-	if(pvContainer->size()==0) {
-	  if(vtxContainer->size() >0) ATH_CHECK(helper.FillCandExistingVertices(vtxContainer.ptr(), defaultPVContainer.cptr(), m_DoVertexType));
-	}
-	else {
-	  if(vtxContainer->size() >0) ATH_CHECK(helper.FillCandExistingVertices(vtxContainer.ptr(), pvContainer.cptr(), m_DoVertexType));
-	}
-      }
+     }else{
+         if(vtxContainer->size() >0) ATH_CHECK(helper.FillCandExistingVertices(vtxContainer.ptr(), pvContainer.cptr(), m_DoVertexType));
+     }
     }
 
     using Analysis::JpsiUpsilonCommon;
@@ -221,7 +207,6 @@ StatusCode ReVertex::addBranches() const {
           }
        }
     }
-
     return StatusCode::SUCCESS;
 }
 
@@ -233,26 +218,19 @@ void ReVertex::fitAndStore(xAOD::VertexContainer* vtxContainer,
 				    const xAOD::VertexContainer* pvContainer) const
 {
    std::unique_ptr<xAOD::Vertex> ptr(fit(inputTracks, importedTrackCollection, nullptr));
-   if(!ptr) {
-     return;
-   }
+   if(!ptr)return;
 
    double chi2DOF = ptr->chiSquared()/ptr->numberDoF();
    ATH_MSG_DEBUG("Candidate chi2/DOF is " << chi2DOF);
    bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
-   if(!chi2CutPassed) {
-     ATH_MSG_DEBUG("Chi Cut failed!");   
-     return;
-   }
+   if(!chi2CutPassed) { ATH_MSG_DEBUG("Chi Cut failed!");  return; }
    xAOD::BPhysHelper bHelper(ptr.get());//"get" does not "release" still automatically deleted
    bHelper.setRefTrks();
    if (m_trkMasses.size()==inputTracks.size()) {
       TLorentzVector bMomentum = bHelper.totalP(m_trkMasses);
       double bMass = bMomentum.M();
       bool passesCuts = (m_BMassUpper > bMass && bMass > m_BMassLower);
-      if(!passesCuts) {
-	return;
-      }
+      if(!passesCuts)return;
    }
 	  
    DerivationFramework::BPhysPVTools::PrepareVertexLinks( ptr.get(), importedTrackCollection );

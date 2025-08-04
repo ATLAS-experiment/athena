@@ -67,7 +67,7 @@ private:
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainer;
     SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName;
     SG::ReadHandleKey<xAOD::VertexContainer> m_pvContainerName;
-    SG::ReadHandleKey<xAOD::VertexContainer> m_defaultPVContainerName;
+
 
     std::vector<double> m_trkMasses;
     std::vector<int> m_indices;
