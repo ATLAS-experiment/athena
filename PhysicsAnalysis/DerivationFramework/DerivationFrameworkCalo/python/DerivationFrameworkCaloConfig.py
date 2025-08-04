@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -144,11 +144,8 @@ def getGainDecorations(
         collections = [flags.Egamma.Keys.Output.Electrons, flags.Egamma.Keys.Output.Photons]
 
     GainDecoratorTool = None
-    for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
-        toolStr = f"{toolStr}"
-        splitStr = toolStr.split("/")
-        tool = acc.getPublicTool(splitStr[1])
-        if splitStr[0] == "DerivationFramework::GainDecorator":
+    for tool in acc.getEventAlgo(kernel).AugmentationTools:
+        if tool.getType() == "DerivationFramework::GainDecorator":
             GainDecoratorTool = tool
 
     if GainDecoratorTool:
@@ -167,11 +164,8 @@ def getClusterEnergyPerLayerDecorations(acc, kernel):
     object (e.g. Photons.E7x11_Lr0, ...)"""
     properties = "SGKey_photons", "SGKey_electrons"
     ClusterEnergyPerLayerDecorators = []
-    for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
-        toolStr = f"{toolStr}"
-        splitStr = toolStr.split("/")
-        tool = acc.getPublicTool(splitStr[1])
-        if splitStr[0] == "DerivationFramework::ClusterEnergyPerLayerDecorator":
+    for tool in acc.getEventAlgo(kernel).AugmentationTools:
+        if tool.getType() == "DerivationFramework::ClusterEnergyPerLayerDecorator":
             ClusterEnergyPerLayerDecorators.append(tool)
 
     decorations = []
