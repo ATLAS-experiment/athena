@@ -216,16 +216,12 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
   
    // now classify the tower signals by looking at their FADC counts, if it exceeds 70
-  int badCounter = 0; // category 2 really bad
-  int bad2Counter = 0; // category 4 bad peak 2 
-  int bad3Counter = 0; // category 6 bad peak 3 
-  int good3Counter = 0; // category 5 good peak 3 
-  int good2Counter = 0; // category 5 good peak 3 
+  int good3Counter = 0; // category 5 good peak 3
+  int good2Counter = 0; // category 5 good peak 2
   int eFexintimeCounter = 0; // in-time TOBs
   int eFexoutoftimeCounter = 0; // out-of-time TOBs
   int jFexCounter = 0; // in-time TOBs
   int gFexCounter = 0; // in-time TOBs
-  int emActivityCounter = 0; //count number of TT in EM layer with ADC > 70 
 
   double dEta = 0., dPhi = 0., dPhi1 = 0., dR = 0.; 
   double etaIn = 0., phiIn = 0., etIn = 0.;
@@ -280,11 +276,9 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     }
     else if(maxADCval == 1023) {
       ttPulseCategory = 1;
-      if(! (tt)->layer()) emActivityCounter++;
     }
     else{
       bool goodQual = pulseQuality(readoutCorrectedADC, adcPeakPositon);
-      if(! (tt)->layer()) emActivityCounter++;
       //look at any of the five FADC values
       if(adcPeakPositon == 2){ // can be class 3 or 4 now
         if(goodQual){
@@ -294,7 +288,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         }
         else{
           //badly peaking TT in BCID0
-          bad2Counter++;
           ttPulseCategory = 4;
         }
       }
@@ -306,13 +299,11 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         }
         else{
           //badly peaking TT in BCID+1
-          bad3Counter++;
           ttPulseCategory = 6;
         }
       }
       else{
           //TT peaking in BCID-1,-2 or +2
-          badCounter++;
           ttPulseCategory = 2;
       }
 
@@ -999,7 +990,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     auto gFexEt      = Monitored::Scalar<int>  ("gFexEt",0);
     auto gFexEta     = Monitored::Scalar<float>("gFexEta",0.0);
     auto gFexPhi     = Monitored::Scalar<float>("gFexPhi",0.0);
-    int key_index = 0; 
 
     TOBeT_max = 0; 
     // Small-R and large-R jets container loop
@@ -1031,7 +1021,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
           }
         }
       }
-      key_index++;  
     }
     if (trigger == "gFex") {
       fill("Gfex_maxTOB", TOBeT_max);  

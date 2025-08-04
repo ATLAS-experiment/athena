@@ -19,6 +19,7 @@
 #include "L1TopoAlgorithms/AnomalyDetectionBDT.h"
 #include "L1TopoInterfaces/Decision.h"
 #include "L1TopoCommon/Exception.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 #ifndef TRIGCONF_STANDALONE
 #include <PathResolver/PathResolver.h>
 #endif
@@ -198,11 +199,9 @@ TCS::AnomalyDetectionBDT::processBitCorrect(const std::vector<TCS::TOBArray cons
       m_totalScore = 0;
       return StatusCode::SUCCESS;
    }
-
-   if (input.size() != 1){
-      TCS_EXCEPTION("ADBDT algorithm expects only one TOBArray input (muons), but got " << input.size());
-   }
-
+   
+   bool hasAmbiguousInputs = TSU::isAmbiguousAnywhere(muons, p_MaxTob, std::min(p_minEt1, p_minEt2));
+   
    int64_t maxScore = 0;
    
    size_t nMuons = p_MaxTob > 0 ? std::min(muons->size(), p_MaxTob) : muons->size();
@@ -263,6 +262,9 @@ TCS::AnomalyDetectionBDT::processBitCorrect(const std::vector<TCS::TOBArray cons
             output[i]->push_back((*muons)[k]);
          }
       }
+      
+      output[i]->setAmbiguityFlag(hasAmbiguousInputs);
+      
       if(fillHistos()) {
          const bool fillAccept = fillHistosBasedOnHardware() ? getDecisionHardwareBit(i) : accept;
          if (fillAccept) {

@@ -20,6 +20,7 @@
 #include "L1TopoAlgorithms/AnomDetVAE.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 #include <VAENetwork.h>
 
 REGISTER_ALG_TCS(ADVAE_2A)
@@ -100,7 +101,6 @@ TCS::ADVAE_2A::initialize() {
 }
 
 
-
 TCS::StatusCode
 TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & input,
                                   const std::vector<TCS::TOBArray *> & output,
@@ -118,6 +118,12 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
       TRG_MSG_DEBUG("Number of taus are " << (*taus).size());
       TRG_MSG_DEBUG("Number of mus are " << (*mus).size());
       TRG_MSG_DEBUG("Number of met are " << (*met).size());
+      
+      //check for ambiguous sorting and set corresponding flag if an ambiguity is found
+      bool hasAmbiguousInputs =  TSU::isAmbiguousAnywhere(jets, p_NumberLeading1, p_minEt1)
+                              || TSU::isAmbiguousAnywhere(taus, p_NumberLeading2, p_minEt2)
+                              || TSU::isAmbiguousAnywhere(mus,  p_NumberLeading3, p_minEt3)
+                              || TSU::isAmbiguousAnywhere(met,  p_NumberLeading4, p_minEt4);
 
       std::vector<u_int> jet_pt(6,0), tau_pt(4,0), mu_pt(4,0), met_pt(1,0);
       std::vector<int>   jet_eta(6,0), tau_eta(4,0), mu_eta(4,0); //no met_eta
@@ -201,7 +207,8 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
             for ( u_int j = 0; j<4 && j<(*mus).size() ; ++j ) output[i]->push_back((*mus) [j]);
             output[i]->push_back((*met)[0]);
          }
-
+         output[i]->setAmbiguityFlag(hasAmbiguousInputs);
+         
          if(fillHistos() and accept) {
             fillHist1D(m_histAccept[i],anomScoreInt64);
          } else if(fillHistos() && !accept) {
@@ -279,7 +286,7 @@ TCS::ADVAE_2A::process( const std::vector<TCS::TOBArray const *> & input,
                               mu_pt [3], mu_eta [3], mu_phi [3],
                               met_pt[0], met_phi[0] );
       std::vector<int64_t> anomScoreInt64Vec = AD_Network.getAnomalyScoreInt64Vec();
-
+      
       for(u_int i=0; i<numberOutputBits(); ++i) {
          bool accept = false;
          // Retrieve threshold

@@ -111,7 +111,8 @@ class Chains:
 #minbiaspixChains
             ],
             "signature": ["MinBias"],
-            "menu": 'PhysicsP1_HI_run3_v1'
+            "menu": 'Dev_HI_run3_v1'
+#           "menu": 'PhysicsP1_HI_run3_v1'
         }
 
         d["cosmic"] = {
