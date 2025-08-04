@@ -698,7 +698,7 @@ class AthConfigFlags(object):
         if parser is None:
             parser = self.parser()
         self._parser = parser # set our parser to given one
-        argList = listOfArgs or sys.argv[1:]
+        argList = listOfArgs if listOfArgs is not None else sys.argv[1:]
         do_help = False
         # We will now do a pre-parse of the command line arguments to propagate these to the flags
         # the reason for this is so that we can use the help messaging to display the values of all
