@@ -23,6 +23,9 @@
  * Implementation of KLGaussianMixtureReduction
  */
 namespace KLReductionFMV {
+#ifdef __clang__  // trapping-math is incompatible with multiversioning with clang 20.1.5
+#pragma float_control(except, off)
+#endif
 //clang FMV needs a namespace :/
 #if HAVE_FUNCTION_MULTIVERSIONING
 [[gnu::target("avx2")]]
