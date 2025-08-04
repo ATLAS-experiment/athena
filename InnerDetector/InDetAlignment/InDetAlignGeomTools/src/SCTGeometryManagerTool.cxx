@@ -372,12 +372,9 @@ namespace InDet {
       ATH_MSG_DEBUG(" DetectorElement id: "<<id);
 
       // get the element via hash
-      const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
-      if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
-
+      const SiDetectorElement * element = m_detManager->getDetectorElement(id);
+      if (element) {
         // add element to respective AlignModule
-
         // add to the sct barrel structure
         if(msgLvl(MSG::DEBUG)) {
           if (m_idHelper->is_barrel(id))
@@ -452,9 +449,7 @@ namespace InDet {
             continue;
 
           for (int is = 0; is < 2; is++) { // module side
-
-            const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const SiDetectorElement* element = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
 
             if (element) {
               // get element location for debugging
@@ -527,8 +522,7 @@ namespace InDet {
             ATH_MSG_DEBUG("iPhi "<<iPhi);
             for(int is=0; is<2; is++) { // module side
 
-              const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
-              const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+              const SiDetectorElement * element = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
               if (element) {
                 // get element location for debugging
                 // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -608,9 +602,7 @@ namespace InDet {
             continue;
           for (int is = 0; is < 2; is++) { // module side
 
-            const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
-
+            const SiDetectorElement * element = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
             if (element) {
               // get element location for debugging
               // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -691,9 +683,7 @@ namespace InDet {
             continue;
           for (int is = 0; is < 2; is++) { // module side
 
-            const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
-
+            const SiDetectorElement * element = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
             if (element) {
               // get element location for debugging
               // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -708,8 +698,8 @@ namespace InDet {
 
             // for the stave alignment frame rotation we use the one of the iEta=1
             // non-stereo side (which is the module local frame)
-            if(iEta==1 && !element2->isStereo())
-              rotation = element2->moduleTransform().rotation();
+            if(iEta==1 && !element->isStereo())
+              rotation = element->moduleTransform().rotation();
           }
         }
 
@@ -784,8 +774,7 @@ namespace InDet {
             ATH_MSG_DEBUG("iPhi "<<iPhi);
             for(int is=0; is<2; is++) { // module side
 
-              const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
-              const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+              const SiDetectorElement * element = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
               if (element) {
                 // get element location for debugging
                 // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -868,8 +857,7 @@ namespace InDet {
             ATH_MSG_DEBUG("iPhi "<<iPhi);
             for(int is=0; is<2; is++) { // module side
 
-              const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
-              const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+              const SiDetectorElement * element = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
               if (element) {
                 // get element location for debugging
                 // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -941,8 +929,7 @@ namespace InDet {
         for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForDiskRing(iWheel,iEta); iPhi++) {
           ATH_MSG_DEBUG("iPhi "<<iPhi);
           for(int is=0; is<2; is++) { // module side
-            const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const SiDetectorElement * element = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
             if (element) {
               // get element location for debugging
               // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -998,9 +985,7 @@ namespace InDet {
             continue;
           for (int is = 0; is < 2; is++) { // module side
 
-            const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
-
+            const SiDetectorElement * element = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
             if (element) {
               // get element location for debugging
               // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -1047,8 +1032,7 @@ namespace InDet {
         for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForDiskRing(iWheel,iEta); iPhi++) {
           ATH_MSG_DEBUG("iPhi "<<iPhi);
           for(int is=0; is<2; is++) { // module side
-            const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const SiDetectorElement * element = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
             if (element) {
               // get element location for debugging
               // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -1124,8 +1108,7 @@ namespace InDet {
 
           for(int is=0;is<2;is++) { // module side
 
-            const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const SiDetectorElement * element = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta, is);
 
             if (element) {
               // get element location for debugging
@@ -1149,8 +1132,8 @@ namespace InDet {
               // in any case the correct frame can be obtained using moduleTransform() call
               // regardless of the side, but we only need it once so we retrieve it
               // for the non-stereo side
-              if(!element2->isStereo())
-                mod->setGlobalFrameToAlignFrameTransform(element2->moduleTransform().inverse());
+              if(!element->isStereo())
+                mod->setGlobalFrameToAlignFrameTransform(element->moduleTransform().inverse());
             }
           }
 
@@ -1211,8 +1194,7 @@ namespace InDet {
 
             for(int is=0; is<2; is++) { // module side
 
-              const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
-              const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+              const SiDetectorElement * element = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta, is);
               if (element) {
                 // get element location for debugging
                 // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -1235,8 +1217,8 @@ namespace InDet {
                 // in any case the correct frame can be obtained using moduleTransform() call
                 // regardless of the side, but we only need it once so we retrieve it
                 // for the non-stereo side
-                if(!element2->isStereo())
-                  mod->setGlobalFrameToAlignFrameTransform(element2->moduleTransform().inverse());
+                if(!element->isStereo())
+                  mod->setGlobalFrameToAlignFrameTransform(element->moduleTransform().inverse());
               }
             }
 
@@ -1246,8 +1228,7 @@ namespace InDet {
       }
     }
 
-    return;
-  }
+     }
 
   //________________________________________________________________________
   void SCTGeometryManagerTool::addModuleParameters(Trk::AlignModule * module, DataVector< DataVector<Trk::AlignPar> > * allFullModPars, DataVector< DataVector<Trk::AlignPar> > * allActiveModPars)

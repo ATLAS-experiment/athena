@@ -291,8 +291,7 @@ namespace InDet {
       }
     }
 
-    return;
-  }
+     }
 
   //_______________________________________________________________________
   void SiGeometryManagerTool::buildL0()
@@ -617,7 +616,12 @@ namespace InDet {
 	  return;
 	}
   const Identifier element_id = element->identify();
-	int det,bec,layer,ring,sector,side;
+	int det;
+	int bec;
+	int layer;
+	int ring;
+	int sector;
+	int side;
 	// in the future, the InDetAlignDBTool::idToDetSet should be directly used !
 	bool resok=false;
 	if (m_pixHelper->is_pixel(element_id)) {
@@ -753,7 +757,7 @@ namespace InDet {
   {
     ATH_MSG_DEBUG("in isOneDetOnly for detector type "<<dettype);
     const Trk::AlignModule::DetElementCollection * coll = mod->detElementCollection(dettype);
-    if(!coll || coll->size() == 0)
+    if(!coll || coll->empty())
       return false;
 
     int nelem(0);
