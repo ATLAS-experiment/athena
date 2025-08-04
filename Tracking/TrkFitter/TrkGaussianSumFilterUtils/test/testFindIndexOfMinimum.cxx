@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkGaussianSumFilterUtils/GsfFindIndexOfMinimum.h"
@@ -8,6 +8,10 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+
+#ifdef __clang__  // trapping-math is incompatible with multiversioning with clang 20.1.5
+#pragma float_control(except, off)
+#endif
 
 //Multiversion for the test
 // For float
