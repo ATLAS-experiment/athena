@@ -414,7 +414,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       ATH_MSG_DEBUG("After merging: " << mergedLayers.size() << " layers");
 
       // Create layers from merged proto layers
-      for (const auto& [key, pl] : Acts::enumerate(mergedLayers)) {
+      for (const auto [key, pl] : Acts::enumerate(mergedLayers)) {
         ATH_MSG_DEBUG("- Layer " << key << " has " << pl.surfaces.size()
                                  << " surfaces");
 
