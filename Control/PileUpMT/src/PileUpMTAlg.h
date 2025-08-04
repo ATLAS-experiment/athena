@@ -38,17 +38,21 @@ class atomic_output {
 
  public:
   atomic_output() = default;
-  void init(const std::string& filename) {
+  bool init(const std::string& filename) {
     using namespace std::chrono;
     std::lock_guard lck{m_mtx};
     if (m_file != nullptr) {
-      return;
+      return true;
     }
     m_file = std::fopen(filename.c_str(), "a");
+    if (m_file == nullptr) {
+      return false;
+    }
     auto time = system_clock::now();
     auto header = std::format("FILE CREATED ON {:%Y-%m-%d} at {:%H:%M:%S %Z}\n",
                               time, time);
     std::fputs(header.c_str(), m_file);
+    return true;
   }
   ~atomic_output() {
     std::lock_guard lck{m_mtx};
