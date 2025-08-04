@@ -192,11 +192,8 @@ void PLRGmxInterface::makePLRModule(const std::string &typeName,
   constexpr InDetDD::PixelReadoutTechnology readoutTechnology = InDetDD::PixelReadoutTechnology::RD53;
 
   // helper function to associate attributes to sub-matrices and diodes.
-  auto computeAttribute = [readoutTechnology,
-                           pitchPhi,
+  auto computeAttribute = [pitchPhi,
                            pitchEta,
-                           circuitsPerPhi,
-                           circuitsPerEta,
                            rowsPerCircuit,
                            columnsPerCircuit
                            ](const std::array<PixelDiodeTree::IndexType,2> &split_idx,

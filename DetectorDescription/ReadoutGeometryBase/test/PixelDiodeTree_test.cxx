@@ -12,7 +12,6 @@
 
 namespace Units {
    constexpr double um=1e-3;
-   constexpr double mm=1.;
 };
 using namespace InDetDD;
 bool test_pixelDiodeTree(const PixelDiodeTree &diode_tree,
