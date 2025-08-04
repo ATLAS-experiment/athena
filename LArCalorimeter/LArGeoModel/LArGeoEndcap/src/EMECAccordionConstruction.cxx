@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2024-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2024-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EMECAccordionConstruction
@@ -196,7 +196,7 @@ void LArGeo::EMECAccordionConstruction::setInnerWheel(GeoFullPhysVol* innerWheel
     if (shape->type() != "Pcon") {
       throw std::runtime_error( "LArGeo::EMECAccordionConstruction::setInnerWheel: unexpected shape type '"+ shape->type() + "', expected 'Pcon'!");
   }
-  const GeoPcon* pcon = (GeoPcon *)shape;
+  const GeoPcon* pcon = static_cast<const GeoPcon*>(shape);
   auto nplanes = pcon->getNPlanes();
   if (nplanes != 2) {
     throw std::runtime_error("LArGeo::EMECAccordionConstruction::setInnerWheel: wrong number of Z planes '" + std::to_string(nplanes) + "', expected '2'!");
@@ -223,7 +223,7 @@ void LArGeo::EMECAccordionConstruction::setOuterWheel(GeoFullPhysVol* outerWheel
     throw std::runtime_error( "LArGeo::EMECAccordionConstruction::setOuterWheel: unexpected shape type '"+ shape->type() + "', expected 'Pcon'!");
    
   }
-  const GeoPcon* pcon = (GeoPcon *)shape;
+  const GeoPcon* pcon = static_cast<const GeoPcon*>(shape);
   auto nplanes = pcon->getNPlanes();
   if (nplanes != 3) {
 	  throw std::runtime_error("LArGeo::EMECAccordionConstruction::setOuterWheel: wrong number of Z planes" + std::to_string(nplanes) + "', expected '3'!" );

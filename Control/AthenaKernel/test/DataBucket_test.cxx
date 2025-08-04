@@ -186,7 +186,7 @@ void test2()
   DataObject* xbucket = SG::asStorable(x1);
 
   const X3* x3 = SG::Storable_cast<X3>(xbucket, false, &trt);
-  assert ((char*)x3 != (char*)x1);
+  assert (reinterpret_cast<const char*>(x3) != reinterpret_cast<char*>(x1));
   assert (x3->a == 10);
 
   assert (trt.m_xtrans.size() == 1);

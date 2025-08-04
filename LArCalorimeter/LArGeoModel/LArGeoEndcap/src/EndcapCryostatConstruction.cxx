@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EndcapCryostatConstruction
@@ -741,7 +741,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
       throw std::runtime_error("Cannot recognize FCAL container shape");
     }
 
-    const GeoTubs * tubs = (const GeoTubs *) envShape;
+    const GeoTubs * tubs = static_cast<const GeoTubs*>(envShape);
 
     // Place the FCAL modules.
     cryoMotherPhysical->add(fcalXF);
