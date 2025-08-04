@@ -20,6 +20,7 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
     result.merge(LArOnOffIdMappingSCCfg(flags))
     result.addEventAlgo(CompFactory.LArHVCorrToSCHVCorr(ContainerKey="NewLArHVScaleCorr",OutputKey="NewSCLArHVScaleCorr",
                                                         OutputFolder="/LAR/ElecCalibFlatSC/HVScaleCorrNew",
+                                                        IsHeavyIons=False,  PatchInHeavyIons=1.0,
                                                         PhysicsWeights="TrigT1CaloCalibUtils/HVcorrPhysicsWeights.txt"))
 
     #The LArHVCorrMaker creates a flat blob in a CondAttrListCollection
