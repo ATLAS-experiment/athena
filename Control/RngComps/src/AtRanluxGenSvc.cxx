@@ -436,7 +436,7 @@ AtRanluxGenSvc::setOnDefinedSeeds(uint32_t theSeed,
   //so let's make sure that our seed is presented to Ranlux64 as a 32 bit
   //signed int
   eng->setSeed( (int32_t)theSeed, eng->getLuxury() );
-  return (CLHEP::HepRandomEngine*)eng;
+  return eng;
 }
 
 
