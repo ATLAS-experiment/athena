@@ -41,7 +41,6 @@ EFmuonLRTLowpt:	HLT_mu6_LRT_idperf_L1MU5VF:key=HLT_IDTrack_MuonLRT_IDTrig:roi=HL
 EFmuonLRTLowpt:	HLT_mu6_idperf_L1MU5VF:key=HLT_IDTrack_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon
     
     
-
     
 L2electron:	HLT_e26_idperf_loose_L1eEM26M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron
 L2electron:	HLT_e28_idperf_loose_L1eEM28M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron
@@ -146,9 +145,10 @@ L2fst0vtx:	HLT_j20_roiftf_preselj20_L1RD0_FILLED:key=HLT_IDTrack_JetSuper_FTF:ro
 
 L2minbias:	HLT_mb_sptrk_L1RD0_FILLED:key=HLT_IDTrack_MinBias_IDTrig
 EFminbias:	HLT_mb_sptrk_L1RD0_FILLED:key=HLT_IDTrack_MinBias_IDTrig
-    
-L2minbiaspix:	HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig
-EFminbiaspix:	HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig
+
+
+L2minbiaspix:	HLT_mb_pixsptrk_nototpix20_q2_L1VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig
+EFminbiaspix:	HLT_mb_pixsptrk_nototpix20_q2_L1VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig
     
     
 
