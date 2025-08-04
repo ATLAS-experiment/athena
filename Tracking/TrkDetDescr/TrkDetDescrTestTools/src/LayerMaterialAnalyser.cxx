@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -195,7 +195,7 @@ StatusCode Trk::LayerMaterialAnalyser::analyseLayerMaterial(const Trk::Layer& la
 StatusCode Trk::LayerMaterialAnalyser::analyseLayerMaterial(const Trk::Layer& layer, const Trk::LayerMaterialRecord& lmRecord) const
 {
     ATH_MSG_DEBUG( "Recieved LayerMaterialRecord  - analyzing it." );
-    return analyse(layer, lmRecord.associatedLayerMaterial(), (const std::vector< std::vector< unsigned int > >*)&lmRecord.binCounts());
+    return analyse(layer, lmRecord.associatedLayerMaterial(), &lmRecord.binCounts());
 }
 
 StatusCode Trk::LayerMaterialAnalyser::analyse(const Trk::Layer& layer,

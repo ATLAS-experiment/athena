@@ -389,7 +389,7 @@ CLHEP::HepRandomEngine* AtDSFMTGenSvc::setOnDefinedSeeds(uint32_t theSeed,
   ATH_MSG_DEBUG("Reseeding stream " << streamName << " with " << theSeed);
   CLHEP::HepRandomEngine* eng = (*iter).second;
   eng->setSeed( theSeed, 0 );
-  return (CLHEP::HepRandomEngine*)eng;
+  return eng;
 }
 
 bool
