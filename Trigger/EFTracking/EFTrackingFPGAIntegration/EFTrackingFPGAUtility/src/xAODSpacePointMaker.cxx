@@ -244,8 +244,6 @@ StatusCode xAODSpacePointMaker::makeStripSpacePointContainer(
         elementIds.push_back(sspAux.elementIdList.at(i * 2));
         elementIds.push_back(sspAux.elementIdList.at(i * 2 + 1));
         
-        // Create empty measurements vector
-        std::vector<const xAOD::UncalibratedMeasurement*> strip_meas;
         
         // Get strip-specific properties
         float topHalfStripLength = 0.0f;
@@ -294,11 +292,11 @@ StatusCode xAODSpacePointMaker::makeStripSpacePointContainer(
         
         // Create the spacepoint with all required parameters
         ssp->setSpacePoint(
-            elementIds,
+            std::move(elementIds),
             globalPosition, 
             sspAux.varianceR.at(i), 
             sspAux.varianceZ.at(i),
-            strip_meas,  // Empty vector
+            std::vector<const xAOD::UncalibratedMeasurement*>(),  // Empty vector of strip measurements
             topHalfStripLength,
             bottomHalfStripLength,
             topStripDirection,

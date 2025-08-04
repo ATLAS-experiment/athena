@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -272,15 +272,13 @@ namespace ActsTrk {
         auto& toAdd = input.at(i);
 
         // make link to Clusters
-        std::vector< const xAOD::UncalibratedMeasurement* > els(
-                      {inputClusters->at(toAdd.measurementIndexes[0]),
-                      inputClusters->at(toAdd.measurementIndexes[1])}
-                      );
-        cont->at(indexBase+i)->setSpacePoint(toAdd.idHashes, 
+        cont->at(indexBase+i)->setSpacePoint(std::move(toAdd.idHashes),
             toAdd.globPos,
             toAdd.cov_r,
             toAdd.cov_z,
-            els,
+            std::vector< const xAOD::UncalibratedMeasurement* >(
+                    {inputClusters->at(toAdd.measurementIndexes[0]),
+                     inputClusters->at(toAdd.measurementIndexes[1])}),
             toAdd.topHalfStripLength,
             toAdd.bottomHalfStripLength,
             toAdd.topStripDirection,
