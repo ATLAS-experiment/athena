@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripSpacePointFormationTool.h"
@@ -497,7 +497,6 @@ namespace ActsTrk {
 
         Eigen::Matrix<double, 3, 1> stripCenterDistance = firstInfo.stripCenter() - secondInfo.stripCenter();
 
-	std::vector<std::size_t> measIndexes({firstInfo.clusterIndex(), secondInfo.clusterIndex()});
 
 
 	StripSP toAdd;
@@ -505,7 +504,7 @@ namespace ActsTrk {
 	toAdd.globPos = globalPosition.cast<float>();
 	toAdd.cov_r = variance(0,0);
 	toAdd.cov_z = variance(1,0);
-	toAdd.measurementIndexes = measIndexes;
+	toAdd.measurementIndexes = std::array<std::size_t,2> ({firstInfo.clusterIndex(), secondInfo.clusterIndex()});
 	toAdd.topHalfStripLength = topHalfStripLength;
 	toAdd.bottomHalfStripLength = bottomHalfStripLength;
 	toAdd.topStripDirection = topStripDirection.cast<float>();
