@@ -9,14 +9,14 @@
 
 namespace InDetDD {
 namespace detail {
-PixelDiodeTree PixelDiodeTreeMakerBase::make(InDetDD::PixelReadoutTechnology readoutTechnology,
+PixelDiodeTree PixelDiodeTreeMakerBase::make(InDetDD::PixelReadoutTechnology /* readoutTechnology */,
                                              const std::array<int,kNDirections> &circuits,
                                              const std::array<int,kNDirections> &dimPerCircuit,
                                              const std::array<std::array<double,kNDirections>,kNPixelLocations> &pitch) {
 
   // helper function to associate correct diode type and front-end number to sub-matrices and diodes
   // in the diode tree as attributes.
-  auto computeAttribute = [readoutTechnology,
+  auto computeAttribute = [
                            &pitch=pitch[InDetDD::detail::kCentral],
                            &circuits,
                            &dimPerCircuit

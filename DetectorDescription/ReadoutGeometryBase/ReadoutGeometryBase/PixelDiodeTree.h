@@ -128,7 +128,7 @@ public:
          sub_matrix_idx=m_subMatrixIndex[sub_matrix_idx][submatrix_i];
       }
       assert( sub_matrix_idx != s_invalid);
-      assert( std::abs(sub_matrix_idx) < m_diodeParam.m_width.size() );
+      assert( static_cast<size_t>(std::abs(sub_matrix_idx)) < m_diodeParam.m_width.size() );
       return std::make_tuple(last_sub_matrix_idx, std::abs(sub_matrix_idx), submatrix_i);
    }
 
