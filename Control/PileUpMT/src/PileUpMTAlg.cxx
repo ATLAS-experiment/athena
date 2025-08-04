@@ -120,10 +120,13 @@ StatusCode PileUpMTAlg::initialize() {
   using namespace std::chrono;
   ATH_MSG_DEBUG("Initializing " << name() << "...");
   if (m_writeTrace) {
-    m_pileupTrace.init(
-        std::format("pileup_trace_skipping-{}_{:%Y-%m-%dT%H%M}.txt",
-                    m_skippedHSEvents.value(),
-                    system_clock::now()));
+    std::string filename = std::format("pileup_trace_skipping-{}_{:%Y-%m-%dT%H%M}.txt",
+                                       m_skippedHSEvents.value(),
+                                       system_clock::now());
+    if (!m_pileupTrace.init(filename)) {
+      ATH_MSG_ERROR("Cannot append to file " << filename);
+      return StatusCode::FAILURE;
+    }
   }
   ATH_CHECK(m_skipEventIdxSvc.retrieve());
   ATH_CHECK(m_rngSvc.retrieve());
