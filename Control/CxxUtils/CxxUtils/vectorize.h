@@ -10,7 +10,7 @@
  *
  * Athena is usually built with -O2.
  * From gcc 12 and onwards this results to
- * (-O2  -Q --help=optimizers)
+ * (gcc -O2  -Q --help=optimizers)
  * -ftree-loop-vectorize       		[enabled]
  * -ftree-slp-vectorize        		[enabled]
  * -ftree-vectorize            		[disabled]
@@ -20,14 +20,14 @@
  * There are cases where we prefer to use the gcc cheap model
  * rather than the very cheap.
  * This can be achieved by enabling tree-vectorize
- * (-O2  -ftree-vectorize -Q   --help=optimizers)
+ * (gcc -O2  -ftree-vectorize -Q --help=optimizers)
  * -ftree-loop-vectorize       		[enabled]
  * -ftree-slp-vectorize        		[enabled]
  * -ftree-vectorize            		[enabled]
  * -fvect-cost-model=[unlimited|dynamic|cheap|very-cheap]  cheap
  *
  * Add
- * ATH_ENABLE_VECTORIZATION;
+ * ATH_ENABLE_TREE_VECTORIZATION;
  * at the start of a compilation unit
  * to enable it for this file.
  *
@@ -45,11 +45,11 @@
 #ifndef CXXUTILS_VECTORIZE_H
 #define CXXUTILS_VECTORIZE_H
 
-#if HAVE_GCC_CLANG_EXTENSIONS && !defined(__clang__) && (__GNUC__ < 14)
-# define ATH_ENABLE_VECTORIZATION                     \
-  _Pragma("GCC optimize (\"tree-vectorize\")") class ATH_ENABLE_VECTORIZATION_SWALLOW_SEMICOLON
+#if HAVE_GCC_CLANG_EXTENSIONS && !defined(__clang__)
+# define ATH_ENABLE_TREE_VECTORIZATION                     \
+  _Pragma("GCC optimize (\"tree-vectorize\")") class ATH_ENABLE_TREE_VECTORIZATION_SWALLOW_SEMICOLON
 #else
-# define ATH_ENABLE_VECTORIZATION class ATH_ENABLE_VECTORIZATION_SWALLOW_SEMICOLON
+# define ATH_ENABLE_TREE_VECTORIZATION class ATH_ENABLE_TREE_VECTORIZATION_SWALLOW_SEMICOLON
 #endif
 
 #endif  // not CXXUTILS_VECTORIZE_H
