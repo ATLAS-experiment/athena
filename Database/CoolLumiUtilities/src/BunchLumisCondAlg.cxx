@@ -20,7 +20,7 @@
 #include <stdint.h>
 
 
-ATH_ENABLE_VECTORIZATION;
+ATH_ENABLE_TREE_VECTORIZATION;
 
 
 
@@ -66,21 +66,21 @@ BunchLumisCondAlg::unpackLumis (const coral::Blob& blob,
 
   const uint8_t* ATH_RESTRICT pchar = static_cast<const uint8_t*>(blob.startingAddress()); // First byte holds storage size and mode
   unsigned int bss = ((*pchar) % 100) / 10;  // Byte storage size
-  unsigned int smod = ((*pchar) % 10);       // Storage mode 
+  unsigned int smod = ((*pchar) % 10);       // Storage mode
 
   ATH_MSG_DEBUG( "BunchRawInstLumi blob found with storage mode " << smod << " and byte storage size " << bss );
 
-  // Check blob length and point pchar to start of raw lumi data 
+  // Check blob length and point pchar to start of raw lumi data
   unsigned int bloblength = 0;
   unsigned int nbcids = 0;
 
   ++pchar;
   const uint8_t* ATH_RESTRICT pbcids = nullptr;
 
-  // Treat different storage modes independently  
+  // Treat different storage modes independently
   switch (smod) {
   case 0:
-    // Packed according to luminousBunches        
+    // Packed according to luminousBunches
     // Make sure tool is configured
     if (luminousBunches.empty()) {
       ATH_MSG_ERROR("Can't unpack using luminousBunches!");
@@ -101,7 +101,7 @@ BunchLumisCondAlg::unpackLumis (const coral::Blob& blob,
     // Self describing length, with 2-byte length followed by 2-byte BCID vector, then data
     nbcids = CxxUtils::get_unaligned16 (pchar);
     pbcids = pchar;
-    bloblength = (2+bss)*nbcids + 3;  // 2-bytes for vector plus bss plus 2 bytes for vector length, plus one byte for packing          
+    bloblength = (2+bss)*nbcids + 3;  // 2-bytes for vector plus bss plus 2 bytes for vector length, plus one byte for packing
     pchar += 2*nbcids; // Advance pchar past bicd vector list to raw data
     // ATH_MSG_DEBUG( "Found mode 2 with " << nbcids << " BCIDs" );
     break;
@@ -110,8 +110,8 @@ BunchLumisCondAlg::unpackLumis (const coral::Blob& blob,
     ATH_MSG_ERROR( "BunchRawInstLumi blob found with unknown storage mode " << smod << "!" );
     return StatusCode::FAILURE;
   }
-  
-  // Check blob size against needed length.  Give up if these don't match 
+
+  // Check blob size against needed length.  Give up if these don't match
   if (static_cast<cool::UInt32>(blob.size()) != bloblength) {
     ATH_MSG_ERROR( "BunchRawInstLumi blob found with length " << blob.size() <<
                    " in storage mode " << smod <<  " with size " << bss <<
@@ -167,7 +167,7 @@ BunchLumisCondAlg::unpackLumis (const coral::Blob& blob,
   // Now figure which BCIDs these values belong to and fill into vector indexed by BCID
 
   rawLumiOut.clear();
-  // Remember, nbcids was set before and the blob size was checked 
+  // Remember, nbcids was set before and the blob size was checked
   switch (smod) {
   case 0:
     // Packed according to luminous bunches, fill accordingly
@@ -178,12 +178,12 @@ BunchLumisCondAlg::unpackLumis (const coral::Blob& blob,
     break;
 
   case 1:
-    // Packed according to full turn, just copy   
+    // Packed according to full turn, just copy
     rawLumiOut = std::move (rawLumi);
     break;
 
   case 2:
-    // Packed according to private list, must read here.  pbcids points to start of this data    
+    // Packed according to private list, must read here.  pbcids points to start of this data
     rawLumiOut.resize (TOTAL_LHC_BCIDS, 0);
     for (unsigned int i=0; i<nbcids; i++) {
       rawLumiOut[CxxUtils::get_unaligned16(pbcids)] = rawLumi[i];
@@ -191,7 +191,7 @@ BunchLumisCondAlg::unpackLumis (const coral::Blob& blob,
     }
     break;
 
-    // This error condition was dealt with before   
+    // This error condition was dealt with before
     //default:
   }
 
@@ -239,7 +239,7 @@ BunchLumisCondAlg::execute (const EventContext& ctx) const
       continue;
     }
 
-    // Make sure the scale factor exists (needed below to unpack integer blob schemes)                        
+    // Make sure the scale factor exists (needed below to unpack integer blob schemes)
     if (attrList["AverageRawInstLum"].isNull()) {
       ATH_MSG_ERROR( "AverageRawInstLum value not found for channel " << channel << "!" );
       return StatusCode::FAILURE;
@@ -250,7 +250,7 @@ BunchLumisCondAlg::execute (const EventContext& ctx) const
     ATH_CHECK( unpackLumis (blob, luminousBunches, avgRawLumi, rawLumis) );
     lumis->addChannel (channel, std::move (rawLumis));
   }
-  
+
   SG::WriteCondHandle<BunchLumisCondData> bunchLumisData
     (m_bunchLumisOutputKey, ctx);
   ATH_CHECK( bunchLumisData.record (range, std::move (lumis)) );
