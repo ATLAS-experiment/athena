@@ -66,8 +66,6 @@ using namespace TauAnalysisTools;
   absolute tau eta. All this is done in:
     - void CommonEfficiencyTool::ReadInputs(TFile* fFile)
 
-  Other tools for scale factors may build up on this tool and overwrite or add
-  praticular functionality (one example is the TauEfficiencyTriggerTool).
 */
 
 //______________________________________________________________________________
@@ -185,7 +183,12 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
      sMode = ConvertProngToString(xTau.nTracks());
   }
 
-  std::string sHistName = m_sSFHistName + sMode;
+  std::string sHistName;
+  if(m_doTauTrig){
+     sHistName = "sf_all_"+m_sWP+sMode;
+  } else {
+     sHistName = m_sSFHistName + sMode;
+  }
 
   // get standard scale factor
   CP::CorrectionCode tmpCorrectionCode = getValue(sHistName,
@@ -217,8 +220,12 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
     sHistName = it->second;
     if (dDirection>0.)  sHistName+="_up";
     else                sHistName+="_down";
+
+    if(m_doTauTrig){ sHistName+="_all"; }
+
     if (!m_sWP.empty()) sHistName+="_"+m_sWP;
     sHistName += sMode;
+
 
     // filter unwanted combinations
     if( (sHistName.find("3P") != std::string::npos && sHistName.find("1p") != std::string::npos) ||
