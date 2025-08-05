@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStationIntersectCond/MuonIntersectGeoData.h"
@@ -17,7 +17,7 @@ namespace Muon {
     MuonIntersectGeoData::MuonIntersectGeoData() = default;
     MuonIntersectGeoData::MuonIntersectGeoData(MsgStream& log, const MuonGM::MuonDetectorManager* detMgr,
                                                const IMuonIdHelperSvc* idHelperSvc, const MdtCondDbData* dbData) :
-        m_idHelperSvc{idHelperSvc}, m_detMgr{detMgr}, m_dbData{dbData} {
+        m_idHelperSvc{idHelperSvc}, m_dbData{dbData} {
        
         for (unsigned int n = 0; n < m_geometry.size(); ++n) {
             IdentifierHash id_hash{n};
@@ -50,13 +50,14 @@ namespace Muon {
          return hash < m_geometry.size() ? m_geometry[hash] : nullptr;
     }
 
-    Muon::MuonStationIntersect MuonIntersectGeoData::tubesCrossedByTrack(const Identifier& id, const Amg::Vector3D& pos,
+    Muon::MuonStationIntersect MuonIntersectGeoData::tubesCrossedByTrack(const MuonGM::MuonDetectorManager* detMgr,
+                                                                         const Identifier& id, const Amg::Vector3D& pos,
                                                                          const Amg::Vector3D& dir) const {
         std::vector<std::shared_ptr<const Muon::MdtIntersectGeometry>> stations = getStationGeometry(id);
 
         Muon::MuonStationIntersect::TubeIntersects tubeIntersects;
         for (std::shared_ptr<const Muon::MdtIntersectGeometry>& it : stations) {
-            Muon::MuonStationIntersect intersect = it->intersection(pos, dir);
+            Muon::MuonStationIntersect intersect = it->intersection(detMgr, pos, dir);
             tubeIntersects.insert(tubeIntersects.end(), intersect.tubeIntersects().begin(), intersect.tubeIntersects().end());
         }
 
