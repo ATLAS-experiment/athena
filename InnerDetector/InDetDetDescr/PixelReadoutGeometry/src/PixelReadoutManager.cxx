@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelReadoutManager.h"
@@ -147,6 +147,8 @@ Identifier PixelReadoutManager::getPixelId(Identifier offlineId,
     return {};
   }
 
+  // Identify the module type
+  PixelModuleType moduleType = getModuleType(offlineId);
   unsigned int columnsPerFE     = p_design->columnsPerCircuit();
   unsigned int FEsPerHalfModule = p_design->numberOfCircuits();
   unsigned int rowsPerFE = 0;
@@ -154,6 +156,11 @@ Identifier PixelReadoutManager::getPixelId(Identifier offlineId,
   if (p_design->getReadoutTechnology() == PixelReadoutTechnology::FEI4) {
     rowsPerFE    = p_design->rowsPerCircuit();
     column_row_offset = -1;
+    if (moduleType == PixelModuleType::DBM) {
+       // DBM_Module defines rowsPerCircuit as number of hardware columns, and columnsPerFE as number of hardware rows.
+       // swap them to match hardware row, column in comparisons and computations
+       std::swap (columnsPerFE,rowsPerFE);
+    }
   }
   else if (p_design->getReadoutTechnology() == PixelReadoutTechnology::FEI3) {
     rowsPerFE    = p_design->rowsPerCircuit()/2+4;  // normal + ganged
@@ -162,8 +169,6 @@ Identifier PixelReadoutManager::getPixelId(Identifier offlineId,
   // ---------------------
   // Check input sanity
   // ---------------------
-  // Identify the module type
-  PixelModuleType moduleType = getModuleType(offlineId);
 
   // Correct row, column
   row = row + column_row_offset;
