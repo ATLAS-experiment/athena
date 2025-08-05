@@ -1,11 +1,19 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/BeamHaloParticleBuffer.h"
 #include "BeamHaloGenerator/BeamHaloParticle.h"
 #include "CLHEP/Random/RandFlat.h"
 #include <iostream>
+
+namespace{
+  char *
+  charAddress(auto &val){
+    return reinterpret_cast<char *> (&val);
+  }
+
+}
 
 //------------------------------------------------------------------------------
 
@@ -126,16 +134,16 @@ int BeamHaloParticleBuffer::writeParticle(BeamHaloParticle *particle) {
   t = particle->positionAtScoringPlane().t();
   weight = particle->weight();
 
-  m_ofstream.write((char*)(&pdgId), sizeof(long)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&px), sizeof(double)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&py), sizeof(double)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&pz), sizeof(double)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&e), sizeof(double)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&x), sizeof(double)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&y), sizeof(double)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&z), sizeof(double)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&t), sizeof(double)); if(m_ifstream.bad()) return 0;
-  m_ofstream.write((char*)(&weight), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(pdgId), sizeof(long)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(px), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(py), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(pz), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(e), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(x), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(y), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(z), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(t), sizeof(double)); if(m_ifstream.bad()) return 0;
+  m_ofstream.write(charAddress(weight), sizeof(double)); if(m_ifstream.bad()) return 0;
 
   m_numberOfParticles++;
 
@@ -270,16 +278,16 @@ BeamHaloParticle* BeamHaloParticleBuffer::readParticle(void) {
   long pdgId = 0;
   double px = 0., py = 0., pz = 0., e = 0., x = 0., y = 0., z = 0., t = 0., weight = 0.;
   
-  m_ifstream.read((char*)(&pdgId), sizeof(pdgId)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&px), sizeof(px)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&py), sizeof(py)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&pz), sizeof(pz)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&e), sizeof(e)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&x), sizeof(x)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&y), sizeof(y)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&z), sizeof(z)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&t), sizeof(t)); if(m_ifstream.bad()) return 0;
-  m_ifstream.read((char*)(&weight), sizeof(weight)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(pdgId), sizeof(pdgId)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(px), sizeof(px)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(py), sizeof(py)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(pz), sizeof(pz)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(e), sizeof(e)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(x), sizeof(x)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(y), sizeof(y)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(z), sizeof(z)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(t), sizeof(t)); if(m_ifstream.bad()) return 0;
+  m_ifstream.read(charAddress(weight), sizeof(weight)); if(m_ifstream.bad()) return 0;
 
   HepMC::FourVector fourVector(px,py,pz,e);
   HepMC::FourVector positionAtScoringPlane(x,y,z,t);
