@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/Derclc1.h"
@@ -26,7 +26,7 @@ void  calcMassConstraint( VKMassConstraint * cnst )
     int it,itc;
     double ptot[4]={0.,0.,0.,0.};
     double cth, invR, pp2, pt;
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = static_cast<VKConstraintBase*> (cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     const std::vector<int> &usedParticles=cnst->getUsedParticles();
     int usedNTRK = usedParticles.size();

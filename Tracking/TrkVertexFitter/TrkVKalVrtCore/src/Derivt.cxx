@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -49,7 +49,7 @@ std::ostream& operator<<(std::ostream& out, const VKMassConstraint& cnst) {
     out << vk->TrackList[cnst.m_usedParticles[i]]->getMass() << ", ";
   }
   out << std::endl;
-  out << (VKConstraintBase&)cnst << '\n';
+  out << dynamic_cast<const VKConstraintBase&>(cnst) << '\n';
   out.precision(6);  // restore default
   return out;
 }
@@ -60,7 +60,7 @@ std::ostream& operator<<(std::ostream& out, const VKPhiConstraint& cnst) {
   out << std::defaultfloat;
   out << " Phi constraint  (total NTRK=" << vk->TrackList.size() << ")"
       << std::endl;
-  out << (VKConstraintBase&)cnst << '\n';
+  out << dynamic_cast<const VKConstraintBase&>(cnst) << '\n';
   out.precision(6);  // restore default
   return out;
 }
@@ -72,7 +72,7 @@ std::ostream& operator<<(std::ostream& out, const VKThetaConstraint& cnst) {
   out << std::defaultfloat;
   out << " Theta constraint  (total NTRK=" << vk->TrackList.size() << ")"
       << std::endl;
-  out << (VKConstraintBase&)cnst << '\n';
+  out << dynamic_cast<const VKConstraintBase&>(cnst) << '\n';
   out.precision(6);  // restore default
   return out;
 }
@@ -92,7 +92,7 @@ std::ostream& operator<<(std::ostream& out, const VKPointConstraint& cnst) {
   out << " target vertex=" << cnst.getTargetVertex()[0] << ", "
       << cnst.getTargetVertex()[1] << ", " << cnst.getTargetVertex()[2]
       << std::endl;
-  out << (VKConstraintBase&)cnst << '\n';
+  out << dynamic_cast<const VKConstraintBase&>(cnst)  << '\n';
   out.precision(6);  // restore default
   return out;
 }
@@ -106,7 +106,7 @@ std::ostream& operator<<(std::ostream& out, const VKPlaneConstraint& cnst) {
       << ")" << std::endl;
   out << " Plane(A,B,C,D):" << cnst.getA() << ", " << cnst.getB() << ", "
       << cnst.getC() << ", " << cnst.getD() << std::endl;
-  out << (VKConstraintBase&)cnst << '\n';
+  out << dynamic_cast<const VKConstraintBase&>(cnst)  << '\n';
   out.precision(6);  // restore default
   return out;
 }

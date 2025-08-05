@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/CommonPars.h"
@@ -19,7 +19,7 @@ namespace Trk {
 //-----------------------------------------------
 void  calcPointConstraint( VKPointConstraint * cnst )
 {
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = static_cast<VKConstraintBase*>( cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     //  Magnetic field in fitted vertex position
     double cnstPos[3];

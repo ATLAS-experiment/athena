@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //
 // The VKalExtPropagator object is created if ATHENA propagator exists
@@ -21,7 +21,7 @@
 #include "TrkSurfaces/StraightLineSurface.h"
 #include "AthContainers/ConstAccessor.h"
 //-------------------------------------------------
-#include<iostream>
+#include <iostream>
 
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -111,7 +111,7 @@ namespace Trk {
       //--- This creates Perigee in GLOBAL frame from input in realtive coordinates
       const Perigee* inpPer =
           m_vkalFitSvc->CreatePerigee( RefStart[0], RefStart[1], RefStart[2], PerigeeIni, CovPerigeeIni, state).release();
-      const TrackParameters * inpPar= (const TrackParameters*) inpPer;
+      const TrackParameters * inpPar= static_cast<const TrackParameters*>( inpPer);
 //
 // ----- Magnetic field is taken at target point (GLOBAL calculated from relative frame input)
 //
