@@ -3,35 +3,46 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
-from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
+from IOVDbSvc.IOVDbSvcConfig import addFolders,addFoldersSplitOnline
 
 LArBadFebCondAlg = CompFactory.LArBadFebCondAlg
 
 
-def LArKnownBadFebCfg(configFlags, tag=None):
+def LArKnownBadFebCfg(configFlags, tag=None, dbname=None):
     result=ComponentAccumulator()
 
     if configFlags.GeoModel.Run is LHCPeriod.Run1:
         rekey=""
     else:
         rekey="/LAR/BadChannels/KnownBADFEBs"
-        result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/KnownBADFEBs",
+        if dbname is None:
+           result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/KnownBADFEBs",
                                            f"/LAR/BadChannelsOfl/KnownBADFEBs<key>{rekey}</key>",tag=tag,
                                            className="AthenaAttributeList"))
+        else:   
+           result.merge(addFolders(configFlags,"/LAR/BadChannelsOfl/KnownBADFEBs","LAR_OFL",
+                                           modifiers=f"<key>{rekey}</key>",tag=tag,
+                                           className="AthenaAttributeList"))  
 
     result.addCondAlgo(LArBadFebCondAlg("LArKnownBadFebAlg",ReadKey=rekey,WriteKey="LArKnownBadFEBs"))
     return result
 
-def LArKnownMNBFebCfg(configFlags, tag=None):
+def LArKnownMNBFebCfg(configFlags, tag=None, dbname=None):
     result=ComponentAccumulator()
 
     if configFlags.GeoModel.Run is LHCPeriod.Run1:
         rekey=""
     else:
         rekey="/LAR/BadChannels/KnownMNBFEBs"
-        result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/KnownMNBFEBs",
+        if dbname is None:
+           result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/KnownMNBFEBs",
                                            f"/LAR/BadChannelsOfl/KnownMNBFEBs<key>{rekey}</key>",tag=tag,
                                            className="AthenaAttributeList"))
+        else:   
+           result.merge(addFolders(configFlags,"/LAR/BadChannelsOfl/KnownMNBFEBs","LAR_OFL",
+                                           modifiers=f"<key>{rekey}</key>",tag=tag,
+                                           className="AthenaAttributeList"))  
+        pass      
 
     result.addCondAlgo(LArBadFebCondAlg("LArKnownMNBFebAlg",ReadKey=rekey,WriteKey="LArKnownMNBFEBs"))
     return result

@@ -5,8 +5,11 @@
 
 if __name__=='__main__':
   import sys
-  from argparse import ArgumentParser
-  parser = ArgumentParser()
+
+  # Initialise Athena config flags to get and customise the argument parser
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+  parser = flags.getArgumentParser()
   #
   parser.add_argument('--disableHistograms', action='store_false', help='Turn off histograming')
   parser.add_argument('--disableGlobalGroups', action='store_false', help='Turn off global groups')
@@ -28,20 +31,11 @@ if __name__=='__main__':
   parser.add_argument('--doRatesVsPositionInTrain', action='store_true', help='Study rates vs BCID position in bunch train')
   parser.add_argument('--vetoStartOfTrain', default=0, type=int, help='Number of BCIDs at the start of the train to veto, implies doRatesVsPositionInTrain')
   #
-  parser.add_argument('--maxEvents', type=int, help='Maximum number of events to process')
-  parser.add_argument('--loglevel', type=int, default=3, help='Verbosity level')
-  parser.add_argument('flags', nargs='*', help='Config flag overrides')
   args = parser.parse_args()
 
-  # Set the Athena configuration flags
-  from AthenaConfiguration.AllConfigFlags import initConfigFlags
-
-  # Set the Athena configuration flags
-  flags = initConfigFlags()
-  flags.Input.Files = ["root://eosatlas.cern.ch//eos/atlas/atlasdatadisk/rucio/data16_13TeV/8d/de/AOD.10654269._000566.pool.root.1"]
-  flags.Exec.OutputLevel = args.loglevel
   flags.Exec.EventPrintoutInterval = 1000
-  flags.fillFromArgs(args.flags)
+  args = flags.fillFromArgs(parser=parser)
+  flags.lock()
   useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
 
   flags.lock()
@@ -105,7 +99,6 @@ if __name__=='__main__':
   rates.VetoStartOfTrain = args.vetoStartOfTrain
   rates.EnableLumiExtrapolation = args.disableLumiExtrapolation
   rates.EnhancedBiasRatesTool = ebw
-  rates.OutputLevel = args.loglevel
   rates.TrigDecisionTool = tdt
   rates.TrigConfigSvc = cfgsvc
 
@@ -120,5 +113,5 @@ if __name__=='__main__':
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
   cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-  sc = cfg.run(args.maxEvents)
+  sc = cfg.run(flags.Exec.MaxEvents)
   sys.exit(0 if sc.isSuccess() else 1)
