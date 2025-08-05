@@ -9,6 +9,7 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "ActsEvent/TrackContainer.h"
+#include "xAODMeasurementBase/MeasurementDefs.h"
 
 namespace ActsTrk {
 

@@ -324,6 +324,13 @@ def ActsTrackFindingCfg(flags,
 
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
+        trackColl = kwargs['ACTSTracksLocation']
+        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
+                                                 name = f'{trackColl}ToXAODConverterAlg',
+                                                 InputActsTracksLocation = trackColl,
+                                                 OutputActsTracksLocation = trackColl))
+        
         toAOD = []
         prefix = f"{flags.Tracking.ActiveConfig.extension}"
         toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
@@ -365,11 +372,7 @@ def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
             ActsAmbiguityResolutionMonitoringToolCfg(flags)))
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
     acc.addEventAlgo(
         CompFactory.ActsTrk.ScoreBasedAmbiguityResolutionAlg(name, **kwargs))
     return acc
@@ -390,11 +393,7 @@ def ActsMainAmbiguityResolutionAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
             ActsAmbiguityResolutionMonitoringToolCfg(flags)))
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
     acc.addEventAlgo(
         CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
     return acc
@@ -424,6 +423,13 @@ def ActsAmbiguityResolutionCfg(flags,
 
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
+        trackColl = kwargs['ResolvedTracksLocation']
+        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
+                                                 name = f'{trackColl}ToXAODConverterAlg',
+                                                 InputActsTracksLocation = trackColl,
+                                                 OutputActsTracksLocation = trackColl))
+        
         toAOD = []
         prefix = f"{flags.Tracking.ActiveConfig.extension}Resolved"
         toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
@@ -480,4 +486,17 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
 
     return acc
 
+def ActsToXAODTrackConverterAlgCfg(flags,
+                                   name: str = "ActsToXAODTrackConverterAlg",
+                                   **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
 
+    kwargs.setdefault('InputActsTracksLocation', '')
+    kwargs.setdefault('OutputActsTracksLocation', '')
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    
+    acc.addEventAlgo(CompFactory.ActsTrk.ActsToXAODTrackConverterAlg(name, **kwargs))    
+    return acc

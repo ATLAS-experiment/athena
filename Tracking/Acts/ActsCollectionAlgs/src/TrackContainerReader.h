@@ -1,6 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef ACTSCOLLECTIONALGS_TRACKCONTAINERREADER_H
 #define ACTSCOLLECTIONALGS_TRACKCONTAINERREADER_H
 
@@ -10,6 +11,7 @@
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/TrackContainer.h"
 
 // STL includes
 #include <string>

@@ -122,9 +122,9 @@ MutableTrackContainerHandlesHelper::moveToConst(
   return cmtj;
 }
 
-std::unique_ptr<ActsTrk::TrackContainer>
+std::unique_ptr<ActsTrk::PersistentTrackContainer>
 MutableTrackContainerHandlesHelper::moveToConst(
-    ActsTrk::MutableTrackContainer&& tc, const Acts::GeometryContext& geoContext, const EventContext& evtContext) const {
+    ActsTrk::MutablePersistentTrackContainer&& tc, const Acts::GeometryContext& geoContext, const EventContext& evtContext) const {
 
 
   std::unique_ptr<ActsTrk::MultiTrajectory> constMtj =
@@ -162,7 +162,7 @@ MutableTrackContainerHandlesHelper::moveToConst(
         "MutableTrackContainerHandlesHelper::moveToConst, can't record "
         "TrackSummary");
   }
-  auto constTrack = std::make_unique<ActsTrk::TrackContainer>(
+  auto constTrack = std::make_unique<ActsTrk::PersistentTrackContainer>(
       DataLink<ActsTrk::TrackSummaryContainer>(m_trackSummaryKey.key(),
                                                evtContext),
       DataLink<ActsTrk::MultiTrajectory>(m_mtjKey.key(), evtContext));
@@ -248,7 +248,7 @@ ConstTrackContainerHandlesHelper::buildMtj(const Acts::TrackingGeometry* geo,
   return cmtj;
 }
 
-std::unique_ptr<ActsTrk::TrackContainer>
+std::unique_ptr<ActsTrk::PersistentTrackContainer>
 ConstTrackContainerHandlesHelper::build(const Acts::TrackingGeometry* geo,
                                         const Acts::GeometryContext& /*geoContext*/,
                                         const EventContext& evtContext) const {
@@ -282,7 +282,7 @@ ConstTrackContainerHandlesHelper::build(const Acts::TrackingGeometry* geo,
         "TrackSummary");
   }
 
-  auto constTrack = std::make_unique<ActsTrk::TrackContainer>(
+  auto constTrack = std::make_unique<ActsTrk::PersistentTrackContainer>(
       DataLink<ActsTrk::TrackSummaryContainer>(m_trackSummaryKey.key(),
                                                evtContext),
       DataLink<ActsTrk::MultiTrajectory>(m_mtjKey.key(), evtContext));

@@ -7,6 +7,7 @@
 #include "TrackContainerReader.h"
 
 namespace ActsTrk{
+  
 StatusCode TrackContainerReader::initialize()
 {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -16,15 +17,40 @@ StatusCode TrackContainerReader::initialize()
 
   return StatusCode::SUCCESS;
 }
+
 StatusCode TrackContainerReader::execute(const EventContext& context) const
 {
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   Acts::GeometryContext geoContext = m_trackingGeometryTool->getGeometryContext(context).context();  
 
-  std::unique_ptr<ActsTrk::TrackContainer> trackContainer = m_tracksBackendHandlesHelper.build(trackingGeometry.get(), geoContext, context);
-  ATH_MSG_DEBUG("track container size " << trackContainer->size());
+  // Create persistent (i.e. xAOD backended) track collection
+  std::unique_ptr<ActsTrk::PersistentTrackContainer> trackContainer = m_tracksBackendHandlesHelper.build(trackingGeometry.get(), geoContext, context);
+  ATH_MSG_DEBUG("read track container size " << trackContainer->size());
+
+  // We convert to non-xAOD backend for StoreGate
+  // Transient declination
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::MutableTrackContainer tc( std::move(trackBackend),
+                                     std::move(trackStateBackend) );
+
+  // copy
+  for ( auto track : *trackContainer ) {
+    auto destProxy = tc.makeTrack();
+    destProxy.copyFrom(track);
+  }
+  
+  // Constant declination
+  Acts::ConstVectorTrackContainer ctrackBackend( std::move(tc.container()) );
+  Acts::ConstVectorMultiTrajectory ctrackStateBackend( std::move(tc.trackStateContainer()) );
+  std::unique_ptr<ActsTrk::TrackContainer> ctc = std::make_unique<ActsTrk::TrackContainer>( std::move(ctrackBackend),
+                                                                                            std::move(ctrackStateBackend) );
+  ATH_MSG_DEBUG("store track container size " << ctc->size());
+  
+  // Store
   auto handle = SG::makeHandle(m_tracksKey, context);
-  ATH_CHECK(handle.record(std::move(trackContainer)));
+  ATH_CHECK(handle.record(std::move(ctc)));
   return StatusCode::SUCCESS;
 }
+  
 }

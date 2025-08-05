@@ -50,7 +50,10 @@ StatusCode ActsEMBremCollectionBuilder::execute(const EventContext &ctx) const {
       m_selectedTrackParticleContainerKey, ctx);
   ATH_CHECK(selectedTrackParticles.isValid());
 
-  ActsTrk::MutableTrackContainer trackContainer;
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::MutableTrackContainer trackContainer( std::move(trackBackend),
+                                                 std::move(trackStateBackend) );
 
   std::vector<const xAOD::TrackParticle *> siliconTrackParticles;
   siliconTrackParticles.reserve(16);
@@ -67,13 +70,13 @@ StatusCode ActsEMBremCollectionBuilder::execute(const EventContext &ctx) const {
 
   ATH_CHECK(refitActsTracks(ctx, siliconTrackParticles, trackContainer));
 
-  std::unique_ptr<ActsTrk::TrackContainer> outputTracks =
-      m_refittedTracksBackendHandles.moveToConst(
-          std::move(trackContainer),
-          m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);
+  // make const
+  Acts::ConstVectorTrackContainer ctrackBackend( std::move(trackContainer.container()) );
+  Acts::ConstVectorMultiTrajectory ctrackStateBackend( std::move(trackContainer.trackStateContainer()) );
+  std::unique_ptr<ActsTrk::TrackContainer> outputTracks = std::make_unique<ActsTrk::TrackContainer>( std::move(ctrackBackend),
+                                                                                                     std::move(ctrackStateBackend) );
 
-  SG::WriteHandle<ActsTrk::TrackContainer> refittedTrackHandle(
-      m_refittedTracksKey, ctx);
+  SG::WriteHandle<ActsTrk::TrackContainer> refittedTrackHandle = SG::makeHandle(m_refittedTracksKey, ctx);
 
   if (refittedTrackHandle.record(std::move(outputTracks)).isFailure()) {
     ATH_MSG_ERROR("Failed to record refitted ACTS tracks with key "

@@ -19,6 +19,7 @@
 #include "Acts/Utilities/TrackHelpers.hpp"
 
 #include "ActsEvent/TrackContainer.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace HGTD {
 

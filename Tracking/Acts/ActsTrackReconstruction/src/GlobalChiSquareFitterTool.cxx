@@ -190,7 +190,11 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext, 
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
-  MutableTrackContainer tracks;
+
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParamsWithHypothesis, gx2fOptions, tracks);
 
@@ -235,7 +239,10 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
 
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext);
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
@@ -280,7 +287,11 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(const EventContext& c
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 pSurface.get(), detail::SourceLinkType::TrkPrepRawData);
 
-  MutableTrackContainer tracks;
+
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
 
@@ -320,7 +331,11 @@ std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 targetSurface, detail::SourceLinkType::xAODUnCalibMeas);
 
-  auto tracks = std::make_unique<MutableTrackContainer>(); 
+
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  auto tracks = std::make_unique<MutableTrackContainer>( std::move(trackContainerBackEnd),
+                                                         std::move(multiTrajBackEnd) ); 
   // Perform the fit
   auto result = fit(sourceLinks, initialParams, gx2fOptions, *tracks);
   if (not result.ok()) {
@@ -379,7 +394,10 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), 
                                                                                       tgContext);
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
@@ -458,7 +476,10 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
       initialParams.parameters(), initialParams.covariance(), 
       ParticleHypothesis::convert(matEffects));
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);

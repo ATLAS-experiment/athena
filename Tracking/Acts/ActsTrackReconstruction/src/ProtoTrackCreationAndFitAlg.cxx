@@ -6,6 +6,7 @@
 
 #include "ActsCalibBase/CalibrationContext.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "src/detail/Definitions.h"
 #include <stdlib.h>
 
 
@@ -66,8 +67,10 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
   
   /// ----------------------------------------------------------
-  /// and we are back to EF tracking! 
-  ActsTrk::MutableTrackContainer trackContainer;
+  /// and we are back to EF tracking!
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::detail::RecoTrackContainer trackContainer( trackBackend, trackStateBackend );
 
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
@@ -96,8 +99,11 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     }
 
   }
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), 
-    m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);  
+
+  ActsTrk::TrackBackend constTrackBackend( std::move(trackBackend) );
+  ActsTrk::TrackStateBackend constTrackStateBackend( std::move(trackStateBackend) );
+  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = std::make_unique<ActsTrk::TrackContainer>( std::move(constTrackBackend),
+                                                                                                             std::move(constTrackStateBackend) );
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
   if (not m_protoTrackCollectionKey.empty()) {
