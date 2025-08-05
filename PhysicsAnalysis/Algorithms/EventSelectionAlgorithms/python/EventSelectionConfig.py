@@ -784,7 +784,7 @@ class EventSelectionConfig(ConfigBlock):
 
     def add_OS_selector(self, text, config):
         items = text.split()
-        if len(items) != 1 or len(items) > 4:
+        if not items or len(items) > 4:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons and not self.taus:
             self.raise_missinginput("electrons or muons or taus")
@@ -812,7 +812,7 @@ class EventSelectionConfig(ConfigBlock):
 
     def add_SS_selector(self, text, config):
         items = text.split()
-        if len(items) != 1 or len(items) > 4:
+        if not items or len(items) > 4:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons and not self.taus:
             self.raise_missinginput("electrons or muons or taus")
