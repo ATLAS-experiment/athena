@@ -372,36 +372,34 @@ namespace Rec{
                 if( h.m_curTup->nNVrt < DevTuple::maxNVrt-1 )h.m_curTup->nNVrt++;
             }
           }
-//-------------------BDT based rejection
+//--------Final selection of the remaining 2-track vertices 
+//    Should be tighter than initila 2-track vertex selection for compatibility graph construction
+//
           if(nth==2){
-             float curVrtPt=std::min(curVrt.vertexMom.Pt(), (double)m_vrt2TrPtLimit);
-             float rhit0=xAODwrk->listSelTracks[curVrt.selTrk[0]]->radiusOfFirstHit();
-             float rhit1=xAODwrk->listSelTracks[curVrt.selTrk[1]]->radiusOfFirstHit();
-             std::vector<float> VARS(10);
-             VARS[0]=vProb;
-             VARS[1]=log(curVrtPt);
-             VARS[2]=log(std::max(minPtT,m_cutPt.value()));
-             VARS[3]=log(vrtR<20. ? SVPV.Perp() : vrtR);
-             VARS[4]=log(std::max(minSig3DT,m_trkSigCut.value()));
-             VARS[5]=log(maxSig3DT);
-             VARS[6]=curVrt.vertexMom.M();
-             VARS[7]=sqrt(std::abs(1.-cosSVPVM*cosSVPVM));
-             VARS[8]=SVPV.Eta();
-             VARS[9]=std::max(rhit0,rhit1);
-             float wgtSelect=m_SV2T_BDT->GetGradBoostMVA(VARS);
+             float wgtSelect=-1.1;
+             xAOD::Vertex testV;
+             testV.makePrivateStore();
+             testV.setPosition(curVrt.vertex);
+             std::vector<float> testVcov(curVrt.vertexCov.begin(),curVrt.vertexCov.end());
+             testV.setCovariance(testVcov);
+             testV.setFitQuality(curVrt.chi2,1.);
+             bool acceptV=m_fin_v2trselector->isgood(std::make_pair(xAODwrk->listSelTracks[curVrt.selTrk[0]],
+                                                                    xAODwrk->listSelTracks[curVrt.selTrk[1]]),
+                                                                    testV, 
+                      std::make_pair(momAtVrt(curVrt.trkAtVrt[0]),momAtVrt(curVrt.trkAtVrt[1])), primVrt, wgtSelect);
              curVrt.BDT=wgtSelect;
              if(m_fillHist){
                Hists& h = getHists();
                h.m_hb_fakeSVBDT->Fill(wgtSelect,1.);
                h.m_curTup->NVrtBDT[h.m_curTup->nNVrt-1] = wgtSelect;
              }
-             if(wgtSelect<m_v2tFinBDTCut) {
+             if(!acceptV){
                curVrt.Good = false;             // Disable 2-track vertex with bad BDT score
                if(m_multiWithOneTrkVrt){        // Check if linked 1-track vertex exists and disable it
                  for(auto it : curVrt.selTrk){
                    for(auto &vtmp : (*wrkVrtSet)){
                      if(vtmp.selTrk.size()!=1 || (!vtmp.Good)) continue;
-		     if(it==vtmp.detachedTrack)vtmp.Good=false;
+		                 if(it==vtmp.detachedTrack)vtmp.Good=false;
                } } }
              }
           }

@@ -13,7 +13,11 @@ Changes with respect to original version:
 5) One-track vertices are allowed (e.g. 3 track system, where one track crosses 2 others in different places, 
      so that 3-track vertex has inacceptable Chi2, will be resolved as 2-track + 1-track vertices).
      This allows to get 2 vertices in case of e.g. cascade B->D decay with 3 reconstracted tracks in total.
-6) Algorithm is converted to Tool for convenience of usage in other Algorithms.
+6) ATHENA Algorithm is converted to ATHENA Tool for convenience of usage in other Algorithms.
+7) 2-track vertex selection for the compatibility graph construction and the final cleaning 
+   of the remaining 2-track vertices after obtaining complete solution is done by independent tools 
+   via  ITwoTrackVertexSelector interface.
+
 
 Pre-configured instances (finders) in the tool:
 1) SoftBFinderTool       - looks for all low-pt (>1GeV) B-hadron vertices in event. No jet presence is assumed
@@ -24,19 +28,10 @@ Pre-configured instances (finders) in the tool:
 5) DVFinderTool          - looks for heavy displaced vertices in ID volume.
    
 -------------------------------------------------------------------------------------------------------------------
-Tool configuration options (in brackets - default settings optimised for B-hadron search)
+Some NVSI Tool configuration options (in brackets - default settings optimised for B-hadron search)
 
 FastZSVCut(15mm) - dZ between 2 tracks at the point of closest track-track distance in XY plane. Reject track pairs
                     which can't form 2-track vertex a priory, therefore save processing CPU.
-v2tIniBDTCut(-0.7) - Cut on 2-track vertex classification BDT(B-hadron vs fakes) weight. This cut is applied 
-                     at the stage of 2-track vertex finding
-v2tFinBDTCut(0.0)  - Cut on 2-track vertex classification BDT(B-hadron vs fakes) weight. This cut is applied
-                     AFTER final multi-track vertex  finding on remaining 2-track vertices in the final set.
-cosSVPVCut(0.0)    - Cut on angle between SV-PV and summary momentum vectors of the 2-track vertex 
-                     applied at the 2-track vertex search  stage
-MaxSVRadiusCut(140mm)    - Evident. 
-Vrt2trMassLimit(4000mev) - Reject at 2-track vertex reconstruction stage vertices with invariant mass above limit 
-                           (e.g. for charm search).
 VrtMassLimit       - Final multi-track vertex mass limit. Vertices with bigger mass will be stripped until 
                      its mass become smaller than the limit.
 AntiPileupSigRCut(2.0) - Tracks having d0 impact significance wrt beamline smaller than the cut are removed. This rejects pileup.
@@ -51,4 +46,13 @@ CutTRTHits(10)     -  TRT hits per track in TRT acceptance |eta|<1.9
 VertexMergeCut(2.) -  3D vertex-vertex distance significance, below which these vertices are checked for merging.
 MultiWithOneTrkVrt(True) -  Allow saving of 1-track vertices appearing in case of close cascade vertices e.g. B->C
 
+---------------------------------------------------------------------------------------------------------------------
+Some TwoTrackVrtBDTSelector implementation of the 2-track vertex selector options:
 
+v2tBDTCut(-0.5) - Cut on 2-track vertex classification BDT(B-hadron vs fakes) weight.  
+                  Typical values of this cut are -0.7 for the compatibility graph construction
+                  and -0.2 for final cleaning of the remaining 2-track vertices.
+cosSVPVCut(0.0) - Cut on angle between SV-PV and summary momentum vectors of the 2-track vertex 
+                  applied at the 2-track vertex selection stage
+MaxSVRadiusCut(140mm)    - Evident.
+Vrt2trMassLimit(4000mev) - Reject at 2-track vertices with invariant mass above limit (e.g. for charm search).                  
