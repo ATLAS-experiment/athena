@@ -6,6 +6,7 @@
 #include "ActsInterop/TableUtils.h"
 #include "TruthUtils/MagicNumbers.h"
 #include <unordered_map>
+#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace ActsTrk {
 

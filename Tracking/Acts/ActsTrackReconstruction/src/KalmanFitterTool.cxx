@@ -204,7 +204,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
                                                        scaledCov,
                                                        Acts::ParticleHypothesis::pion());
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
   
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
@@ -249,7 +252,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
 
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
@@ -290,7 +296,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
     const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
-    MutableTrackContainer tracks;
+    ActsTrk::MutableTrackBackend trackContainerBackEnd;
+    ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+    ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                           std::move(multiTrajBackEnd));
+  
     // Perform the fit
     auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                                 initialParams, kfOptions, tracks);
@@ -333,8 +343,11 @@ KalmanFitterTool::fit(const std::vector< ATLASUncalibSourceLink> & clusterList,
   
   Acts::KalmanFitterOptions kfOptions = configureFit(tgContext, mfContext, calContext, targetSurface,
                                                      detail::SourceLinkType::xAODUnCalibMeas);
-                                                     
-  std::unique_ptr< MutableTrackContainer > tracks = std::make_unique< MutableTrackContainer >();
+
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  std::unique_ptr< MutableTrackContainer > tracks = std::make_unique< MutableTrackContainer >( std::move(trackContainerBackEnd),
+                                                                                               std::move(multiTrajBackEnd) );
  
   
   auto result = m_directFitter->fit(sourceLinks.begin(),
@@ -405,7 +418,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
   }
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
+  
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               initialParams, kfOptions, tracks);
@@ -494,7 +511,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
                                                        scaledCov, Acts::ParticleHypothesis::pion());
 
 
-  MutableTrackContainer tracks{};
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
+  
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               scaledInitialParams, kfOptions, tracks);

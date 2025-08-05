@@ -9,7 +9,7 @@
 
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "ActsEvent/MultiTrajectory.h"
-#include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/PersistentTrackContainer.h"
 #include "ActsEvent/TrackSummaryContainer.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "GaudiKernel/StatusCode.h"
@@ -55,8 +55,8 @@ class MutableTrackContainerHandlesHelper {
    * @arg - geoContext - geometry context, needed in surfaces conversion
    * @arg evtContext - event context (needed for SG operations)
    */
-  std::unique_ptr<ActsTrk::TrackContainer> moveToConst(
-      ActsTrk::MutableTrackContainer&& tc,
+  std::unique_ptr<ActsTrk::PersistentTrackContainer> moveToConst(
+      ActsTrk::MutablePersistentTrackContainer&& tc,
       const Acts::GeometryContext& geoContext,
       const EventContext& evtContext) const;
 
@@ -99,7 +99,7 @@ class ConstTrackContainerHandlesHelper {
  template <class PropOwner> 
       ConstTrackContainerHandlesHelper(PropOwner* owner);
 
-  std::unique_ptr<ActsTrk::TrackContainer> build(
+  std::unique_ptr<ActsTrk::PersistentTrackContainer> build(
       const Acts::TrackingGeometry* geo,
       const Acts::GeometryContext& geoContext,
       const EventContext& context) const;

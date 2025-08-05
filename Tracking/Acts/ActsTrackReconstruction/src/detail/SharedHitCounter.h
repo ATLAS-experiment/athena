@@ -12,9 +12,6 @@
 #include <utility>
 #include <vector>
 
-namespace ActsTrk {
- struct MutableTrackContainer;
-}
 
 namespace ActsTrk::detail {
 

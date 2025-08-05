@@ -76,7 +76,7 @@ namespace ActsTrk {
     for (std::size_t i(0ul); i<tracks->size(); ++i) {
       tracks->trackStateContainer().visitBackwards(tracks->getTrack(i).tipIndex(),
 						   [&prdMap, &nMeasurements, &status, this]
-						   (const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy state) -> bool
+						   (const auto state) -> bool
 						   {
 						     // only consider measurements
 						     if (not state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) return true;

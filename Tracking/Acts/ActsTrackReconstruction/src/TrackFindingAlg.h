@@ -86,6 +86,10 @@ namespace ActsTrk
                         std::size_t iseed,
                         std::size_t category_i,
                         const char *seedType) const;
+
+    StatusCode storeTrackCollectionToStoreGate(const EventContext& ctx,
+                                               Acts::VectorTrackContainer&& originalTrackBackend,
+                                               Acts::VectorMultiTrajectory&& originalTrackStateBackend) const;
     
   private:
     // Handle Keys

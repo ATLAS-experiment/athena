@@ -36,7 +36,11 @@ GaussianSumFitterTool::performDirectFit(const EventContext& ctx,
     return nullptr;
   }
 
-  ActsTrk::MutableTrackContainer tracks;
+
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
   auto result = m_directFitter->fit(trackSourceLinks.begin(),
 			      trackSourceLinks.end(),
 			      initialParams,

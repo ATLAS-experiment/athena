@@ -11,10 +11,12 @@ Reco_tf.py \
   	     flags.Acts.doITkConversion=True; \
 	     flags.Acts.doLargeRadius=True; \
 	     flags.Acts.doLowPt=True; \
+	     flags.Detector.GeometryHGTD=True; \
+             flags.HGTD.doActs=True; \
+	     flags.Reco.EnableHGTDExtension=True; \
 	     flags.Detector.EnableCalo=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
-  --outputESDFile ESD.pool.root \
   --maxEvents ${n_events} \
   --multithreaded

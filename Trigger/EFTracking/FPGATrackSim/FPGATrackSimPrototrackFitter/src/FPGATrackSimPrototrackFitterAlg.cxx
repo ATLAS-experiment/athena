@@ -52,7 +52,11 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
 
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 
-  ActsTrk::MutableTrackContainer trackContainer;
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::MutableTrackContainer trackContainer( std::move(trackBackend),
+                                                 std::move(trackStateBackend) );
+  
   if constexpr (enableBenchmark) m_chrono->chronoStart("FPGATrackSimPrototrackFitterAlg: ACTS KF");
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
@@ -72,8 +76,13 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
     destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
   }
   if constexpr (enableBenchmark) m_chrono->chronoStop("FPGATrackSimPrototrackFitterAlg: ACTS KF");
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), 
-    m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);  
+
+  // convert to const
+  Acts::ConstVectorTrackContainer ctrackBackend( std::move(trackContainer.container()) );
+  Acts::ConstVectorMultiTrajectory ctrackStateBackend( std::move(trackContainer.trackStateContainer()) );
+  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = std::make_unique<ActsTrk::TrackContainer>( std::move(ctrackBackend),
+                                                                                                             std::move(ctrackStateBackend) );
+
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
   return StatusCode::SUCCESS;

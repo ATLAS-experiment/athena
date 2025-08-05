@@ -17,6 +17,7 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternHelpers/MatrixUtils.h"
 
+#include "ActsEvent/MultiTrajectory.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
@@ -247,7 +248,7 @@ namespace MuonR4{
     void SpacePointCalibrator::calibrateSourceLink(const Acts::GeometryContext& geoctx,
                                                    const Acts::CalibrationContext& cctx,
                                                    const Acts::SourceLink& link,
-                                                   ActsTrk::MutableTrackStateBackend::TrackStateProxy trackState) const {
+                                                   ActsTrk::MutableTrackContainer::TrackStateProxy trackState) const {
         
         /** Construct bound track parameters to fetch the global track position */
         const Acts::BoundTrackParameters trackPars{trackState.referenceSurface().getSharedPtr(), 
@@ -286,7 +287,7 @@ namespace MuonR4{
                         pos[Acts::eBoundLoc0] = driftSign*calibOutput.driftRadius();
                         cov(Acts::eBoundLoc0, Acts::eBoundLoc0) = std::pow(calibOutput.driftRadiusUncert(), 2);
                     }
-                    setState<1, ActsTrk::MutableMultiTrajectory>(ProjectorType::e1DimNoTime, pos, cov, link, trackState);
+                    setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, pos, cov, link, trackState);
                 } 
                 /** Twin tube case */
                 else {
@@ -311,7 +312,7 @@ namespace MuonR4{
                         locPos[Acts::eBoundLoc0] = driftSign*calibOutput.primaryDriftR();
                         locPos[Acts::eBoundLoc1] = calibOutput.locZ();
                     }
-                    setState<2, ActsTrk::MutableMultiTrajectory>(ProjectorType::e2DimNoTime, locPos, locCov, link, trackState);
+                    setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, locPos, locCov, link, trackState);
                 }
                 break;
             } case RpcStripType: {
@@ -319,41 +320,41 @@ namespace MuonR4{
                 /** Legacy BM / BO chambers */
                 if (ATH_LIKELY(rpcClust->numDimensions() == 1)) {
                     if (!m_useRpcTime) {
-                        setState<1, ActsTrk::MutableMultiTrajectory>(ProjectorType::e1DimNoTime, 
-                                                                     rpcClust->localPosition<1>(), 
-                                                                     rpcClust->localCovariance<1>(), link, trackState);
+                        setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
+                                                                       rpcClust->localPosition<1>(), 
+                                                                       rpcClust->localCovariance<1>(), link, trackState);
                     } else {
                         AmgVector(2) measPars{AmgVector(2)::Zero()};
                         AmgSymMatrix(2) measCov{AmgSymMatrix(2)::Identity()};
                         measPars[0] = rpcClust->localPosition<1>()[0];
                         measCov(0,0) = rpcClust->localCovariance<1>()(0, 0);
                         measCov(1,1) = std::pow(m_rpcTimeResolution, 2);
-                        setState<2, ActsTrk::MutableMultiTrajectory>(ProjectorType::e1DimWithTime, 
-                                                                     measPars, measCov, link, trackState);
+                        setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimWithTime, 
+                                                                       measPars, measCov, link, trackState);
                     }
                 } 
                 /** BI clusters */
                 else {
                     if (!m_useRpcTime) {
-                        setState<2, ActsTrk::MutableMultiTrajectory>(ProjectorType::e1DimNoTime, 
-                                                                     rpcClust->localPosition<2>(), 
-                                                                     rpcClust->localCovariance<2>(), link, trackState);
+                        setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
+                                                                       rpcClust->localPosition<2>(), 
+                                                                       rpcClust->localCovariance<2>(), link, trackState);
                     } else {
                         AmgVector(3) measPars{AmgVector(3)::Zero()};
                         AmgSymMatrix(3) measCov{AmgSymMatrix(3)::Identity()};
                         measPars.block<2,1>(0,0) = xAOD::toEigen(rpcClust->localPosition<2>());
                         measCov.block<2,2>(0,0) = xAOD::toEigen(rpcClust->localCovariance<2>());
                         measCov(2,2) = std::pow(m_rpcTimeResolution, 2);
-                        setState<3, ActsTrk::MutableMultiTrajectory>(ProjectorType::e2DimWithTime, 
-                                                                     measPars, measCov, link, trackState);
+                        setState<3, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimWithTime, 
+                                                                       measPars, measCov, link, trackState);
                     }
                 }
                 break;
             } case TgcStripType: {
                 if (!m_useTgcTime) {                   
-                    setState<1, ActsTrk::MutableMultiTrajectory>(ProjectorType::e1DimNoTime, 
-                                                                 muonMeas->localPosition<1>(), 
-                                                                 muonMeas->localCovariance<1>(), link, trackState);
+                    setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
+                                                                   muonMeas->localPosition<1>(), 
+                                                                   muonMeas->localCovariance<1>(), link, trackState);
                     } else {
                     }
                 break;

@@ -33,6 +33,7 @@
 // Handle Keys
 #include "src/detail/Definitions.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "ActsEvent/TrackContainer.h"
 
 namespace ActsTrk {
   namespace detail {
@@ -51,7 +52,7 @@ namespace ActsTrk {
 
   protected:
     using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
-
+    
     struct MeasurementSelectorConfig {
        std::vector<std::pair<float, float>> m_chi2CutOffOutlier;
        std::vector<float>                   m_etaBins;

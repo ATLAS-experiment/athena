@@ -17,6 +17,7 @@
 #include <AthenaKernel/RNGWrapper.h>
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
+#include "xAODTracking/TrackStateAuxContainer.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 

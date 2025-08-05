@@ -247,7 +247,6 @@ namespace ActsTrk
     // ================================================== //
     // ===================== COMPUTATION ================ //
     // ================================================== //
-    ActsTrk::MutableTrackContainer tracksContainer;
     Acts::VectorTrackContainer actsTrackBackend;
     Acts::VectorMultiTrajectory actsTrackStateBackend;
     actsTrackBackend.reserve(10000);
@@ -260,7 +259,6 @@ namespace ActsTrk
     }
 
     detail::ExpectedLayerPatternHelper::add(actsTracksContainer); 
-    detail::ExpectedLayerPatternHelper::add(tracksContainer); 
         
     EventStats event_stat;
     event_stat.resize(m_stat.size());
@@ -294,67 +292,91 @@ namespace ActsTrk
     
     mon_nTracks = actsTracksContainer.size();
     copyStats(event_stat);
+
     
-    if (m_ambi) {
-      Acts::GreedyAmbiguityResolution::State state;
-      m_ambi->computeInitialState(actsTracksContainer, state, &sourceLinkHash,
-                                  &sourceLinkEquality);
-      
-      m_ambi->resolve(state);
-      
-      // Copy the resolved tracks into the output container
-      // We need a different sharedHits counter here because it saves the track index
-      // and since I ran the resolving the track indices changed.
-      detail::SharedHitCounter sharedHits_forFinalAmbi;
-      
-      for (auto iTrack : state.selectedTracks) {
-        
-        auto destProxy = tracksContainer.makeTrack();
-        destProxy.copyFrom(actsTracksContainer.getTrack(state.trackTips.at(iTrack)));
-        if (m_countSharedHits) {
-          
-          auto [nShared, nBadTrackMeasurements] = sharedHits_forFinalAmbi.computeSharedHits(destProxy, tracksContainer, measurementIndex);
-          if (nBadTrackMeasurements > 0)
-            ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
-        }
-      }
-    }
-    else { // The ambi has already been done in the track finding, or will be done later in a separate algorithm. Just convert this to pass it to downstream algos
-      
-      for (auto track : actsTracksContainer) {
-        
-        auto destProxy = tracksContainer.makeTrack();
-        destProxy.copyFrom(track);
-      }
-    }
-    
-    ATH_MSG_DEBUG("    \\__ Created " << tracksContainer.size() << " resolved tracks");
-    
-    std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), 
-                                                                                                             m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);
     // ================================================== //
     // ===================== OUTPUTS ==================== //
     // ================================================== //
-    auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
-    ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_trackContainerKey.key() << "` created ...");
-    
-    ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
-    if (!trackContainerHandle.isValid())
-      {
-        ATH_MSG_FATAL("Failed to write TrackContainer with key " << m_trackContainerKey.key());
-        return StatusCode::FAILURE;
-      }
     
     // Save the seed destinies
-    if (m_storeDestinies) {
+    if (m_storeDestinies) { 
       for (std::size_t i(0); i<destinies.size(); ++i) {
         const SG::WriteHandleKey< std::vector<int> >& writeKey = m_seedDestiny.at(i);
         // make the handle and record
         SG::WriteHandle< std::vector<int> > destinyHandle = SG::makeHandle( writeKey, ctx );
         ATH_CHECK( destinyHandle.record( std::move(  destinies.at(i) )  ) );
-      }
+      }    
     }
     
+    // handle the ambiguity    
+    // we potentially need to short list the track candidates and make some copies
+    if (not m_ambi) {
+      // no need to shortlist anything. just use the actsTracksContainer
+      ATH_MSG_DEBUG("    \\__ Created " << actsTracksContainer.size() << " resolved tracks");
+      ATH_CHECK( storeTrackCollectionToStoreGate( ctx,
+                                                  std::move(actsTrackBackend),
+                                                  std::move(actsTrackStateBackend) ) );
+      return StatusCode::SUCCESS;
+    }
+
+    // we have asked for the ambi
+    // we start by shortlisting the container
+    Acts::VectorTrackContainer resolvedTrackBackend;
+    Acts::VectorMultiTrajectory resolvedTrackStateBackend;
+    resolvedTrackBackend.reserve( actsTrackBackend.size() );
+    resolvedTrackStateBackend.reserve( actsTrackStateBackend.size() );
+    detail::RecoTrackContainer resolvedTracksContainer(resolvedTrackBackend, resolvedTrackStateBackend);
+    detail::ExpectedLayerPatternHelper::add(resolvedTracksContainer);
+    
+    if (m_addPixelStripCounts) {
+      addPixelStripCounts(resolvedTracksContainer);
+    }
+    
+    // Start ambiguity resolution
+    Acts::GreedyAmbiguityResolution::State state;
+    m_ambi->computeInitialState(actsTracksContainer, state, &sourceLinkHash,
+                                &sourceLinkEquality);
+    m_ambi->resolve(state);
+
+    // Copy the resolved tracks into the output container
+    // We need a different sharedHits counter here because it saves the track index
+    // and since I ran the resolving the track indices changed.
+    detail::SharedHitCounter sharedHits_forFinalAmbi;    
+
+    // shotlist
+    for (auto iTrack : state.selectedTracks) {      
+      auto destProxy = resolvedTracksContainer.makeTrack();
+      destProxy.copyFrom(actsTracksContainer.getTrack(state.trackTips.at(iTrack)));
+
+      if (m_countSharedHits) {        
+        auto [nShared, nBadTrackMeasurements] = sharedHits_forFinalAmbi.computeSharedHits(destProxy, resolvedTracksContainer, measurementIndex);
+        if (nBadTrackMeasurements > 0)
+          ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
+      }
+    } // loop on tracks
+
+    ATH_MSG_DEBUG("    \\__ Created " << resolvedTracksContainer.size() << " resolved tracks");
+
+    ATH_CHECK( storeTrackCollectionToStoreGate( ctx,
+                                                std::move(resolvedTrackBackend),
+                                                std::move(resolvedTrackStateBackend)) );
+
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode TrackFindingAlg::storeTrackCollectionToStoreGate(const EventContext& ctx,
+                                                              Acts::VectorTrackContainer&& originalTrackBackend,
+                                                              Acts::VectorMultiTrajectory&& originalTrackStateBackend) const
+  {
+    // convert to const
+    Acts::ConstVectorTrackContainer constTrackBackend( std::move(originalTrackBackend) );
+    Acts::ConstVectorMultiTrajectory constTrackStateBackend( std::move(originalTrackStateBackend) );
+    std::unique_ptr< ActsTrk::TrackContainer> constTracksContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(constTrackBackend),
+                                                                                                                  std::move(constTrackStateBackend) );
+    
+    SG::WriteHandle<ActsTrk::TrackContainer> trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
+    ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_trackContainerKey.key() << "` created ...");
+    ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
     return StatusCode::SUCCESS;
   }
   

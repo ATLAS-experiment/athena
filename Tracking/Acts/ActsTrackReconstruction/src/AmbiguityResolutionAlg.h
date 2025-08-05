@@ -47,11 +47,9 @@ namespace ActsTrk
 
   private:
     ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksKey
        {this, "TracksLocation", "", "Input track collection"};
-    ActsTrk::MutableTrackContainerHandlesHelper m_resolvedTracksBackendHandles{this};
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_resolvedTracksKey
        {this, "ResolvedTracksLocation", "", "Ambiguity resolved output track collection"};
 
@@ -63,7 +61,7 @@ namespace ActsTrk
        {this, "NMeasurementsMin", 7u, "Minimum number of measurements per track."};
     Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
 
-    std::unique_ptr<Acts::GreedyAmbiguityResolution> m_ambi;
+    std::unique_ptr<Acts::GreedyAmbiguityResolution> m_ambi {nullptr};
 
   public:
     enum EStat {

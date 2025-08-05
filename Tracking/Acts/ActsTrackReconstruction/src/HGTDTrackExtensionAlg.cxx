@@ -297,8 +297,12 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
     
     ATH_MSG_DEBUG("TrackParticle " << trackParticle->index() << " has ACTS track with eta: " << trackEta << ", phi = " << trackPhi << "  pT: " << trackpT << " and nMeasurements: " << trackNmeasurements);
 
-    // Parameters at last measurement state                            
-    const auto lastMeasurementState = findLastMeasurementState(track);
+    // Parameters at last measurement state
+    const auto lastMeasurementState = Acts::findLastMeasurementState(track);
+    if (not lastMeasurementState.ok()) {
+      ATH_MSG_ERROR("Problem finding last measurement state for acts track");
+      return StatusCode::FAILURE;
+    }
     const Acts::BoundTrackParameters lastMeasurementStateParameters = track.createParametersFromState(*lastMeasurementState);
     
     // Parameters at reference state of track - not necessarily a measurement state!!!                        

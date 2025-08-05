@@ -7,6 +7,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace ActsTrk {
 
