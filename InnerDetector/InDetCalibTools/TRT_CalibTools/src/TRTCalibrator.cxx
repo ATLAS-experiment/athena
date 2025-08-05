@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -516,11 +516,14 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
     while(true){
 
       //read a binary histogram
-      myFile.read ((char*)&npop,sizeof(int)); //number of populated bins
+      //dangerous cast reproduces pre-existing c style cast
+      myFile.read (reinterpret_cast<char*>(&npop),sizeof(int)); //number of populated bins
       if (myFile.eof()) break;
       int* chist=new int[2*npop+2]; //the histogram
-      if (npop>0) myFile.read ((char*)(chist+2), sizeof(int)*2*npop);
-      myFile.read ((char*)&isid,sizeof(int)); //the straw id 
+      //dangerous cast reproduces pre-existing c style cast
+      if (npop>0) myFile.read (reinterpret_cast<char*>(chist+2), sizeof(int)*2*npop);
+      //dangerous cast reproduces pre-existing c style cast
+      myFile.read (reinterpret_cast<char*>(&isid),sizeof(int)); //the straw id 
       sid = (float)isid;
       if(sid<0) continue;
 
@@ -615,12 +618,12 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
 
       strawelement = m_trtmanager->getElement(ident);
       if(hitdata.det==1 || hitdata.det==-1) {
-	barrelelement=(InDetDD::TRT_BarrelElement*)strawelement;
+	barrelelement=static_cast<const InDetDD::TRT_BarrelElement*>(strawelement);
         hitdata.x=(barrelelement->center(ident)).x();
         hitdata.y=(barrelelement->center(ident)).y();
         hitdata.z=(barrelelement->center(ident)).z();
       }else{
-	endcapelement=(InDetDD::TRT_EndcapElement*)strawelement;
+	endcapelement=static_cast<const InDetDD::TRT_EndcapElement*>(strawelement);
          hitdata.x=(endcapelement->center(ident)).x();
          hitdata.y=(endcapelement->center(ident)).y();
          hitdata.z=(endcapelement->center(ident)).z();
