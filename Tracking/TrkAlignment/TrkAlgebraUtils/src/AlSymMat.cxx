@@ -34,6 +34,12 @@ extern "C" {
               double*, double*, const int*, double*, int* );
 }
 
+namespace{
+  char *
+  charAddress(auto & v){
+    return reinterpret_cast<char *>(&v);
+  }
+}
 namespace Trk {
 
 //______________________________________________________________________________
@@ -597,8 +603,8 @@ StatusCode AlSymMat::Write(const std::string &filename, bool binary,
       return StatusCode::FAILURE;
     // if triangular, change size sign to distinguish
     // from square format
-    outmat.write((char*)&msizz, sizeof (msizz));
-    outmat.write((char*)&version, sizeof (version));
+    outmat.write(charAddress(msizz), sizeof (msizz));
+    outmat.write(charAddress(version), sizeof (version));
   }
   else {
     outmat.open((m_pathtxt+filename).c_str());
@@ -618,7 +624,7 @@ StatusCode AlSymMat::Write(const std::string &filename, bool binary,
       for( int j=0; j<=i; j++) {
         melem = *(m_ptr_data+(i+1)*i/2+j);
         if(binary)
-          outmat.write((char*)&(melem), sizeof (melem));
+          outmat.write(charAddress((melem)), sizeof (melem));
         else
           outmat << std::setw(14) << melem;
       }
@@ -632,7 +638,7 @@ StatusCode AlSymMat::Write(const std::string &filename, bool binary,
         if(i>=j) melem =  *(m_ptr_data+(i+1)*i/2+j);
         else     melem =  *(m_ptr_data+(j+1)*j/2+i);
         if(binary)
-          outmat.write((char*)&(melem), sizeof (melem));
+          outmat.write(charAddress((melem)), sizeof (melem));
         else
           outmat << std::setw(14) << melem;
       }
@@ -652,10 +658,10 @@ StatusCode AlSymMat::CheckMatVersion(const std::string& filename, bool &StdUnits
     return StatusCode::FAILURE;
 
   int32_t msiz=0;
-  inmat.read((char*)&msiz, sizeof (msiz));
+  inmat.read(charAddress(msiz), sizeof (msiz));
 
   float version=0.0;
-  inmat.read((char*)&version, sizeof (version));
+  inmat.read(charAddress(version), sizeof (version));
 
   StdUnits = version>=2.0;
 
@@ -681,12 +687,12 @@ StatusCode AlSymMat::Read(const std::string &filename, int &dofs,
     return StatusCode::FAILURE;
 
   int32_t msiz=0;
-  inmat.read((char*)&msiz, sizeof (msiz));
+  inmat.read(charAddress(msiz), sizeof (msiz));
   dofs = abs(msiz);
   m_size = abs(msiz);
 
   if (stdUnits)
-    inmat.read((char*)&version, sizeof (version));
+    inmat.read(charAddress(version), sizeof (version));
 
   double melem=0;
 
@@ -694,7 +700,7 @@ StatusCode AlSymMat::Read(const std::string &filename, int &dofs,
     triang=false;
     for(int i=0; i<msiz; i++) {
       for(int j=0; j<msiz; j++) {
-        inmat.read((char*)&melem, sizeof (melem));
+        inmat.read(charAddress(melem), sizeof (melem));
         if( i>=j )
           *(m_ptr_data+(i+1)*i/2+j) = melem;
       }
@@ -706,7 +712,7 @@ StatusCode AlSymMat::Read(const std::string &filename, int &dofs,
     // std::cout << "msiz="  << msiz << std::endl;
     for( int i=0; i<msiz; i++) {
       for( int j=0; j<=i; j++) {
-        inmat.read((char*)&melem, sizeof (melem));
+        inmat.read(charAddress(melem), sizeof (melem));
         *(m_ptr_data+(i+1)*i/2+j) = melem;
       }
     }
@@ -725,11 +731,11 @@ StatusCode AlSymMat::ReadProjected(const std::string &filename, int &dofs,
     return StatusCode::FAILURE;
 
   int32_t msiz=0;
-  inmat.read((char*)&msiz, sizeof (msiz));
+  inmat.read(charAddress(msiz), sizeof (msiz));
   dofs = abs(msiz);
   m_size = abs(msiz);
 
-  inmat.read((char*)&version, sizeof (version));
+  inmat.read(charAddress(version), sizeof (version));
 
   double melem=0;
 
@@ -737,7 +743,7 @@ StatusCode AlSymMat::ReadProjected(const std::string &filename, int &dofs,
     triang=false;
     for(int i=0; i<msiz; i++) {
       for(int j=0; j<msiz; j++) {
-        inmat.read((char*)&melem, sizeof (melem));
+        inmat.read(charAddress(melem), sizeof (melem));
         if( i>=j )
           *(m_ptr_data+(i+1)*i/2+j) = melem;
       }
@@ -749,7 +755,7 @@ StatusCode AlSymMat::ReadProjected(const std::string &filename, int &dofs,
     // std::cout << "msiz="  << msiz << std::endl;
     for( int i=0; i<msiz; i++) {
       for( int j=0; j<=i; j++) {
-        inmat.read((char*)&melem, sizeof (melem));
+        inmat.read(charAddress(melem), sizeof (melem));
         *(m_ptr_data+(i+1)*i/2+j) = melem;
       }
     }
