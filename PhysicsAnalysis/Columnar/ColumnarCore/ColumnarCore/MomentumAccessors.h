@@ -10,6 +10,7 @@
 
 #include <ColumnarCore/ColumnAccessor.h>
 #include <TruthUtils/ParticleConstants.h>
+#include <xAODBase/ObjectType.h>
 #include <Math/Vector4D.h>
 
 namespace columnar
@@ -364,6 +365,31 @@ namespace columnar
   template<ContainerId CI, typename CM>
   void resetTau (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiReadM (accessors, columnarTool); }
+
+  template<ContainerId CI, typename CM>
+  void resetObjectType (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool, xAODType::ObjectType type)
+  {
+    switch (type)
+    {
+      case xAODType::ObjectType::Electron:
+        resetElectron (accessors, columnarTool);
+        break;
+      case xAODType::ObjectType::Photon:
+        resetPhoton (accessors, columnarTool);
+        break;
+      case xAODType::ObjectType::Muon:
+        resetMuon (accessors, columnarTool);
+        break;
+      case xAODType::ObjectType::Tau:
+        resetTau (accessors, columnarTool);
+        break;
+      case xAODType::ObjectType::Jet:
+        resetJet (accessors, columnarTool);
+        break;
+      default:
+        throw std::runtime_error ("Unknown object type for momentum accessors: " + std::to_string(static_cast<unsigned>(type)));
+    }
+  }
 }
 
 #endif

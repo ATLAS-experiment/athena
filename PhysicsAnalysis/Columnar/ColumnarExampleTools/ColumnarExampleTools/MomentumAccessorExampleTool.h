@@ -14,6 +14,7 @@
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarCore/MomentumAccessors.h>
 #include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/ObjectTypeAccessor.h>
 #include <ColumnarCore/ParticleDef.h>
 
 namespace columnar
@@ -58,6 +59,14 @@ namespace columnar
     /// momentum variables and can be reconfigured at configuration time
     /// to different momentum accessors.
     MomentumAccessors<ContainerId::particle> momAcc;
+
+    /// @brief the object type accessor for the particle container
+    ///
+    /// This is a bit of a hybrid between a property accessor and a
+    /// column accessor, as it needs to be able to access the property
+    /// type at configuration time (to set the correct momentum
+    /// accessor).
+    ObjectTypeAccessor<ContainerId::particle> objectTypeAcc {*this, "ObjectType", "the object type of the particles"};
 
     // If you want to use a statically configured momentum accessor,
     // this would be the basic way to do it. For now (24 Jul 25) I don't
