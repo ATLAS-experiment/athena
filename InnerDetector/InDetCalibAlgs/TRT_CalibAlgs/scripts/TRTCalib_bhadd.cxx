@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <fstream>
 #include <sstream>
@@ -200,7 +200,8 @@ int CompBHist::Print()
 
 void CompBHist::Write(ofstream *file)
 {
-    file->write((char *)hist, (npop * 2 + 2) * sizeof(int));
+    //dangerous cast, reproduces previous c-style cast
+    file->write(reinterpret_cast<char*>(hist), (npop * 2 + 2) * sizeof(int));
 }
 
 int CompBHist::GetStat(int val)
@@ -1790,13 +1791,17 @@ int main(int argc, char *argv[])
             {
 
                 // reading histogram
-                ifile->read((char *)&npop, sizeof(int));
+                //dangerous cast, reproduces previous c-style cast
+                ifile->read(reinterpret_cast<char *>(&npop), sizeof(int));
                 if (ifile->eof())
                     break;
                 int *chist = new int[(2 * npop)];
-                if (npop > 0)
-                    ifile->read((char *)chist, sizeof(int) * 2 * npop);
-                ifile->read((char *)&sid, sizeof(int));
+                if (npop > 0){
+                    //dangerous cast, reproduces previous c-style cast
+                    ifile->read(reinterpret_cast<char *>(chist), sizeof(int) * 2 * npop);
+                }
+                //dangerous cast, reproduces previous c-style cast
+                ifile->read(reinterpret_cast<char *>(&sid), sizeof(int));
 
                 if (histmap.find(sid) == histmap.end())
                 { // create histogram if seen for the first time
@@ -1807,7 +1812,7 @@ int main(int argc, char *argv[])
 
                 for (int ipop = 0; ipop < 2 * npop; ipop = ipop + 2)
                 {
-                    histmap[sid]->IncreaseBin((short)chist[ipop], (unsigned short)chist[ipop + 1]); // increase the bins
+                    histmap[sid]->IncreaseBin(static_cast<short>(chist[ipop]), static_cast<unsigned short>(chist[ipop + 1])); // increase the bins
                     if (chist[ipop] < 100)
                     {
                         ntres += chist[ipop + 1];
