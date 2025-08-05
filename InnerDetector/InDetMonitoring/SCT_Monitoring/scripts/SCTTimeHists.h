@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ Long64_t SCTTimeHists::LoadTree(Long64_t entry)
    Long64_t centry = fChain->LoadTree(entry);
    if (centry < 0) return centry;
    if (!fChain->InheritsFrom(TChain::Class()))  return centry;
-   TChain *chain = (TChain*)fChain;
+   TChain *chain = static_cast<TChain*(fChain);
    if (chain->GetTreeNumber() != fCurrent) {
       fCurrent = chain->GetTreeNumber();
       Notify();
