@@ -199,7 +199,12 @@ namespace MuonValR4 {
         std::vector<const SpacePoint*> spacePointsInAcc{};
         for (const std::size_t bin : accumulator.getNonEmptyBins()) {
             const auto [xBin, yBin] = accumulator.axisBins(bin);
-            const SpacePointSet& hitsInBin{accumulator.hitIds(xBin, yBin)};
+            /// TODO: After next ACTS update, the following three lines can become
+            /// const SpacePointSet& hitsInBin{accumulator.uniqueHitIds(xBin, yBin)};
+            SpacePointSet hitsInBin;
+            auto hitIds = accumulator.hitIds(xBin, yBin); 
+            hitsInBin.insert(std::make_move_iterator(hitIds.begin()),std::make_move_iterator(hitIds.end()));
+    
             spacePointsInAcc.insert(spacePointsInAcc.end(),hitsInBin.begin(), hitsInBin.end());
             accHisto->SetBinContent(xBin+1, yBin+1, accumulator.nHits(bin));
         }
