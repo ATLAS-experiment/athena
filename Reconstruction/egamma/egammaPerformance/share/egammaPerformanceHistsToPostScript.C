@@ -1,4 +1,6 @@
-//********************************
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 //Produce ps files for EM cluster validation
 // from work of 
 //author: A. Kaczmarska
@@ -157,7 +159,7 @@ void displayHists(TCanvas* c1, TObjArray* newHists, TObjArray* refHists){
     }else{
       if(nhist){
 	//cout<<"drawing 2d"<<endl;
-	d1 = (TH2F*)nhist;
+	d1 = static_cast<TH2F*>(nhist);
         d1->SetMarkerStyle(29);
         d1->SetMarkerSize(.5);
         d1->SetMarkerColor(1);        
@@ -166,7 +168,7 @@ void displayHists(TCanvas* c1, TObjArray* newHists, TObjArray* refHists){
       
       if(rhist){
         //cout<<"drawing 2d - ref "<<endl;
-	d2 = (TH2F*)rhist;
+	d2 = static_cast<TH2F*>(rhist);
 	//d2->Scale(0.9);
         d2->SetMarkerStyle(25);
         d2->SetMarkerSize(.5);        
