@@ -29,6 +29,13 @@
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/SparseCholesky>
 
+namespace{
+  char *
+  charAddress(auto & v){
+    return reinterpret_cast<char *>(&v);
+  }
+}
+
 
 namespace Trk {
 
@@ -665,9 +672,9 @@ StatusCode AlSpaMat::Write(const std::string &filename, bool binary,
       return StatusCode::FAILURE;
     // add 10^6 to the size to distinguish
     // from dense format
-    outmat.write((char*)&msizz, sizeof (msizz));
-    outmat.write((char*)&version, sizeof (version));
-    outmat.write((char*)&nelem, sizeof (nelem));
+    outmat.write(charAddress(msizz), sizeof (msizz));
+    outmat.write(charAddress(version), sizeof (version));
+    outmat.write(charAddress(nelem), sizeof (nelem));
   }
   else {
     outmat.open((m_pathtxt+filename).c_str());
@@ -689,9 +696,9 @@ StatusCode AlSpaMat::Write(const std::string &filename, bool binary,
     melem = p.second;
     elem(p.first, ii, jj);   i=ii;  j=jj;     // just a type conversion
     if(binary) {
-      outmat.write((char*)&(i), sizeof (i));
-      outmat.write((char*)&(j), sizeof (j));
-      outmat.write((char*)&(melem), sizeof (melem));
+      outmat.write(charAddress((i)), sizeof (i));
+      outmat.write(charAddress((j)), sizeof (j));
+      outmat.write(charAddress((melem)), sizeof (melem));
     }
     else
       outmat << std::setw(6) << i  << std::setw(6) << j << std::setw(18) << melem << std::endl;
@@ -711,10 +718,10 @@ StatusCode AlSpaMat::CheckMatVersion(const std::string& filename, bool &StdUnits
   m_ptr_map.clear();
 
   int32_t msiz=0;
-  inmat.read((char*)&msiz, sizeof (msiz));
+  inmat.read(charAddress(msiz), sizeof (msiz));
 
   float version=0.0;
-  inmat.read((char*)&version, sizeof (version));
+  inmat.read(charAddress(version), sizeof (version));
 
   StdUnits = version>=2.0;
 
@@ -738,7 +745,7 @@ StatusCode AlSpaMat::Read(const std::string &filename, int &dofs, bool &triang, 
 
   int32_t msiz=0;
   int32_t nelem;
-  inmat.read((char*)&msiz, sizeof (msiz));
+  inmat.read(charAddress(msiz), sizeof (msiz));
   if( msiz>999999 )
     dofs = msiz-1000000;
   else
@@ -746,19 +753,19 @@ StatusCode AlSpaMat::Read(const std::string &filename, int &dofs, bool &triang, 
   m_size = dofs;
 
   if (stdUnits)
-    inmat.read((char*)&version, sizeof (version));
+    inmat.read(charAddress(version), sizeof (version));
 
   double melem=0;
   int32_t i, j;
 
   if(msiz>999999) { // sparse format
     triang=false;
-    inmat.read((char*)&nelem, sizeof (nelem));
+    inmat.read(charAddress(nelem), sizeof (nelem));
     m_nele=nelem;
     for(int k=0; k<nelem; k++) {
-      inmat.read((char*)&i, sizeof (i));
-      inmat.read((char*)&j, sizeof (j));
-      inmat.read((char*)&melem, sizeof (melem));
+      inmat.read(charAddress(i), sizeof (i));
+      inmat.read(charAddress(j), sizeof (j));
+      inmat.read(charAddress(melem), sizeof (melem));
       m_ptr_map.insert(std::make_pair(std::make_pair(i,j), melem));
     }
   }
@@ -766,7 +773,7 @@ StatusCode AlSpaMat::Read(const std::string &filename, int &dofs, bool &triang, 
     triang=false;
     for(int32_t i=0; i<msiz; i++) {
       for(int32_t j=0; j<msiz; j++) {
-        inmat.read((char*)&melem, sizeof (melem));
+        inmat.read(charAddress(melem), sizeof (melem));
         if( i>=j && melem!=0. )
           m_ptr_map.insert(std::make_pair(std::make_pair(i,j), melem));
       }
@@ -777,7 +784,7 @@ StatusCode AlSpaMat::Read(const std::string &filename, int &dofs, bool &triang, 
     msiz = (-1)*msiz;
     for( int32_t i=0; i<msiz; i++) {
       for( int32_t j=0; j<=i; j++) {
-        inmat.read((char*)&melem, sizeof (melem));
+        inmat.read(charAddress(melem), sizeof (melem));
         if( melem!=0. )
           m_ptr_map.insert(std::make_pair(std::make_pair(i,j), melem));
       }
@@ -801,26 +808,26 @@ StatusCode AlSpaMat::ReadProjected(const std::string &filename, int &dofs,
 
   int32_t msiz=0;
   int32_t nelem;
-  inmat.read((char*)&msiz, sizeof (msiz));
+  inmat.read(charAddress(msiz), sizeof (msiz));
   if( msiz>999999 )
     dofs = msiz-1000000;
   else
-    dofs = abs(msiz);
+    dofs = std::abs(msiz);
   m_size = dofs;
 
-  inmat.read((char*)&version, sizeof (version));
+  inmat.read(charAddress(version), sizeof (version));
 
   double melem=0;
   int32_t i, j;
 
   if(msiz>999999) { // sparse format
     triang=false;
-    inmat.read((char*)&nelem, sizeof (nelem));
+    inmat.read(charAddress(nelem), sizeof (nelem));
     m_nele=nelem;
     for(int k=0; k<nelem; k++) {
-      inmat.read((char*)&i, sizeof (i));
-      inmat.read((char*)&j, sizeof (j));
-      inmat.read((char*)&melem, sizeof (melem));
+      inmat.read(charAddress(i), sizeof (i));
+      inmat.read(charAddress(j), sizeof (j));
+      inmat.read(charAddress(melem), sizeof (melem));
       m_ptr_map.insert(std::make_pair(std::make_pair(i,j), melem));
     }
   }
@@ -828,7 +835,7 @@ StatusCode AlSpaMat::ReadProjected(const std::string &filename, int &dofs,
     triang=false;
     for(int32_t i=0; i<msiz; i++) {
       for(int32_t j=0; j<msiz; j++) {
-        inmat.read((char*)&melem, sizeof (melem));
+        inmat.read(charAddress(melem), sizeof (melem));
         if( i>=j && melem!=0. )
           m_ptr_map.insert(std::make_pair(std::make_pair(i,j), melem));
       }
@@ -839,7 +846,7 @@ StatusCode AlSpaMat::ReadProjected(const std::string &filename, int &dofs,
     msiz = (-1)*msiz;
     for( int32_t i=0; i<msiz; i++) {
       for( int32_t j=0; j<=i; j++) {
-        inmat.read((char*)&melem, sizeof (melem));
+        inmat.read(charAddress(melem), sizeof (melem));
         if( melem!=0. )
           m_ptr_map.insert(std::make_pair(std::make_pair(i,j), melem));
       }
