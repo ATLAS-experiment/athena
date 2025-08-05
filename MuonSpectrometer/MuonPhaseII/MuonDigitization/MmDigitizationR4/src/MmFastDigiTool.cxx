@@ -114,7 +114,7 @@ namespace MuonR4 {
                 /// Pipe some dummy values to the digit to ensure that the pdo / tdo calibration 
                 /// does not reject any hit downstream. Or in other words how much do you want... All charge
                 constexpr int dummyResponseTime = 100;
-                constexpr float dummyDepositedCharge = 66666;
+                constexpr float dummyDepositedCharge = 666666;
 
                 const double newLocalX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPos.x(), uncert);
                 const int newChannel = design.stripNumber(newLocalX * Amg::Vector2D::UnitX());
