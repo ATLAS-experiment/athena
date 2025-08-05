@@ -5,8 +5,12 @@
 
 if __name__=='__main__':
   import sys
-  from argparse import ArgumentParser
-  parser = ArgumentParser()
+
+  # Initialise Athena config flags to get and customise the argument parser
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+  parser = flags.getArgumentParser()
+  #
   parser.add_argument('--disableHistograms', action='store_false', help='Turn off histograming')
   parser.add_argument('--disableGlobalGroups', action='store_false', help='Turn off global groups')
   parser.add_argument('--disableTriggerGroups', action='store_false', help='Turn off per-trigger groups')
@@ -29,21 +33,12 @@ if __name__=='__main__':
   parser.add_argument('--MCFilterEfficiency', default=1.0, type=float, help='For MC input: Filter efficiency of any MC filter (0.0 - 1.0)')
   parser.add_argument('--MCKFactor', default=1.0, type=float, help='For MC input: Additional multiplicitive fudge-factor to the supplied cross section.')
   parser.add_argument('--MCIgnoreGeneratorWeights', action='store_true', help='For MC input: Flag to disregard any generator weights.')
-  #
-  parser.add_argument('--maxEvents', type=int, help='Maximum number of events to process')
-  parser.add_argument('--loglevel', type=int, default=3, help='Verbosity level')
-  parser.add_argument('flags', nargs='*', help='Config flag overrides')
   args = parser.parse_args()
 
-  # Set the Athena configuration flags
-  from AthenaConfiguration.AllConfigFlags import initConfigFlags
-  flags = initConfigFlags()
-  flags.Exec.OutputLevel = args.loglevel
   flags.Exec.EventPrintoutInterval = 1000
-  flags.fillFromArgs(args.flags)
-  useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
-
+  args = flags.fillFromArgs(parser=parser)
   flags.lock()
+  useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
 
   # Initialize configuration object, add accumulator, merge, and run.
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
@@ -158,5 +153,5 @@ if __name__=='__main__':
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
   cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-  sc = cfg.run(args.maxEvents)
+  sc = cfg.run(flags.Exec.MaxEvents)
   sys.exit(0 if sc.isSuccess() else 1)

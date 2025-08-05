@@ -40,7 +40,7 @@ def LArBadChannelCfg(configFlags, tag=None, isSC=False):
     return result
 
 
-def LArBadFebCfg(configFlags, tag=None):
+def LArBadFebCfg(configFlags, tag=None, dbname=None):
     result=ComponentAccumulator()
     rekey="/LAR/BadChannels/MissingFEBs"
 
@@ -48,9 +48,15 @@ def LArBadFebCfg(configFlags, tag=None):
         result.merge(addFolders(configFlags,"/LAR/BadChannels/MissingFEBs","LAR_OFL",tag=tag,
                                 className="AthenaAttributeList"))
     else:
-        result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/MissingFEBs",
+        if dbname is None:
+           result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/MissingFEBs",
                                            f"/LAR/BadChannelsOfl/MissingFEBs<key>{rekey}</key>",tag=tag,
                                            className="AthenaAttributeList"))  
+        else:   
+           result.merge(addFolders(configFlags,"/LAR/BadChannelsOfl/MissingFEBs","LAR_OFL",
+                                           modifiers=f"<key>{rekey}</key>",tag=tag,
+                                           className="AthenaAttributeList"))  
+        pass      
     result.addCondAlgo(CompFactory.LArBadFebCondAlg(ReadKey=rekey))
     return result
 
