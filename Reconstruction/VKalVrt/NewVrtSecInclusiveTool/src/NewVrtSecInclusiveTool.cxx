@@ -31,7 +31,6 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
                                            const std::string& name,
                                            const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_SV2T_BDT(nullptr),
     m_instanceName(name),
     m_is_selected("is_selected"),
     m_is_svtrk_final("is_svtrk_final"),
@@ -68,9 +67,10 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
      ATH_MSG_DEBUG( "Initialising NewVrtSecInclusiveTool" );
      ATH_CHECK( m_extrapolator.retrieve() );
      ATH_CHECK( m_trackToVertexTool.retrieve() );
-     ATH_CHECK(m_beamSpotKey.initialize());
+     ATH_CHECK( m_beamSpotKey.initialize() );
      ATH_CHECK( m_fitSvc.retrieve() );
-     ATH_MSG_DEBUG("NewVrtSecInclusiveTool TrkVKalVrtFitter found");
+     ATH_CHECK( m_ini_v2trselector.retrieve() );
+     ATH_CHECK( m_fin_v2trselector.retrieve() );
 
      m_is_selected = SG::AuxElement::Decorator<char>("is_selected"+m_augString);
      m_is_svtrk_final = SG::AuxElement::Decorator<char>("is_svtrk_final"+m_augString);
@@ -104,18 +104,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
        m_w_1 = 1.;
      }
 
-//--------------------------------------------------------
-     //std::string fileName="NewVrtSecInclusiveTool/Fake2TrVertexReject.MVA.v01.root";   ///For local calibration file
-     //std::string rootFilePath = PathResolver::find_file(fileName, "DATAPATH");         ///
-     std::string rootFilePath = PathResolver::find_calib_file("NewVrtSecInclusiveTool/"+m_calibFileName);
-     TFile* rootFile = TFile::Open(rootFilePath.c_str(), "READ");    
-     if (!rootFile) {
-        ATH_MSG_FATAL("Could not retrieve root file: " << m_calibFileName);
-        return StatusCode::FAILURE;
-     }
-     TTree * training = (TTree*)rootFile->Get("BDT");
-     m_SV2T_BDT = std::make_unique<MVAUtils::BDT>(training);
-//--------------------------------------------------------
+
      return StatusCode::SUCCESS;
 
    }

@@ -43,7 +43,10 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 #include "NewVrtSecInclusiveTool/IVrtInclusive.h"
+#include "NewVrtSecInclusiveTool/ITwoTrackVertexSelector.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+
+#include "Math/LorentzVector.h"
 
 class TH1D;
 class TH2D;
@@ -139,62 +142,53 @@ namespace Rec {
         TH1F* m_hb_fakeSVBDT{};
       };
       std::unique_ptr<Hists> m_h;
-//--
-      Gaudi::Property<long int> m_cutSctHits{this, "CutSctHits",    4 ,  "Remove track if it has less SCT hits" };
-      Gaudi::Property<long int> m_cutPixelHits{this, "CutPixelHits",  2, "Remove track if it has less Pixel hits"};
-      Gaudi::Property<long int> m_cutTRTHits{this, "CutTRTHits",    10,   "Remove track if it has less TRT hits"};
-      Gaudi::Property<long int> m_cutSiHits{this, "CutSiHits",     8,    "Remove track if it has less Pixel+SCT hits"  };
-      Gaudi::Property<long int> m_cutBLayHits{this, "CutBLayHits",   0,  "Remove track if it has less B-layer hits"   };
-      Gaudi::Property<long int> m_cutSharedHits{this, "CutSharedHits", 1,"Reject final 2tr vertices if tracks have shared hits" };
-
-      Gaudi::Property<double> m_cutPt{this, "CutPt",         500.,     "Track Pt selection cut"  };
-      Gaudi::Property<double> m_cutD0Min{this, "CutD0Min",      0.,  "Track minimal D0 selection cut"  };
-      Gaudi::Property<double> m_cutD0Max{this, "CutD0Max",      10.,  "Track maximal D0 selection cut"  };
-      Gaudi::Property<double> m_maxZVrt{this, "MaxZVrt",       15.,   "Track Z impact selection max"};
-      Gaudi::Property<double> m_minZVrt{this, "MinZVrt",       0.,   "Track Z impact selection min"};
-      Gaudi::Property<double> m_cutChi2{this, "CutChi2",       5.,   "Track Chi2 selection cut" };
-      Gaudi::Property<double> m_trkSigCut{this, "TrkSigCut",     2.0, "Track 3D impact significance w/r primary vertex. Should be >=AntiPileupSigRCut" };
-
-      Gaudi::Property<float> m_vrtMassLimit{this, "VrtMassLimit",   5500.,   "Maximal allowed mass for found vertices" };
-      Gaudi::Property<float> m_vrt2TrMassLimit{this, "Vrt2TrMassLimit",4000.,"Maximal allowed mass for 2-track vertices" };
-      Gaudi::Property<float> m_vrt2TrPtLimit{this, "Vrt2TrPtLimit",  5.e5,  "Maximal allowed Pt for 2-track vertices. Calibration limit" };
-
-      Gaudi::Property<double> m_sel2VrtProbCut{this, "Sel2VrtProbCut",    0.02, "Cut on probability of 2-track vertex for initial selection"  };
-      Gaudi::Property<double> m_globVrtProbCut{this, "GlobVrtProbCut",    0.005, "Cut on probability of any vertex for final selection"  };
-      Gaudi::Property<double> m_maxSVRadiusCut{this, "MaxSVRadiusCut",    140., "Cut on maximal radius of SV (def = Pixel detector size)"  };
-      Gaudi::Property<double> m_selVrtSigCut{this, "SelVrtSigCut",      3.0,  "Cut on significance of 3D distance between vertex and PV"  };
+      Gaudi::Property<bool> m_fillHist{this, "FillHist",   false, "Fill debugging and development histograms+ntuple"  };
+      //
+      //--  Baseline track selection control
+      Gaudi::Property<int> m_cutSctHits{this,   "CutSctHits",   4, "Remove track if it has less SCT hits" };
+      Gaudi::Property<int> m_cutPixelHits{this, "CutPixelHits", 2, "Remove track if it has less Pixel hits"};
+      Gaudi::Property<int> m_cutTRTHits{this,   "CutTRTHits",  10, "Remove track if it has less TRT hits"};
+      Gaudi::Property<int> m_cutSiHits{this,    "CutSiHits",    8, "Remove track if it has less Pixel+SCT hits"  };
+      Gaudi::Property<int> m_cutBLayHits{this,  "CutBLayHits",  0, "Remove track if it has less B-layer hits"   };
+      Gaudi::Property<int> m_cutSharedHits{this,"CutSharedHits",1, "Reject final 2tr vertices if tracks have shared hits" };
+      Gaudi::Property<float> m_cutPt{this,      "CutPt",     500.,  "Track Pt selection cut"  };
+      Gaudi::Property<float> m_cutD0Min{this,   "CutD0Min",    0.,  "Track minimal D0 selection cut"  };
+      Gaudi::Property<float> m_cutD0Max{this,   "CutD0Max",   10.,  "Track maximal D0 selection cut"  };
+      Gaudi::Property<float> m_maxZVrt{this,    "MaxZVrt",    15.,  "Track Z impact selection max"};
+      Gaudi::Property<float> m_minZVrt{this,    "MinZVrt",     0.,  "Track Z impact selection min"};
+      Gaudi::Property<float> m_cutChi2{this,    "CutChi2",     5.,  "Track Chi2 selection cut" };
       Gaudi::Property<float> m_antiPileupSigRCut{this, "AntiPileupSigRCut", 2.0,  "Upper cut on significance of 2D distance between beam and perigee"  };
-      Gaudi::Property<float> m_dRdZRatioCut{this, "dRdZRatioCut",      0.25,  "Cut on dR/dZ ratio to remove pileup tracks"  };
-      Gaudi::Property<float> m_v2tIniBDTCut{this, "v2tIniBDTCut",      -0.6,  "Initial BDT cut for 2track vertices selection "  };
-      Gaudi::Property<float> m_v2tFinBDTCut{this, "v2tFinBDTCut",      0.,  "Final BDT cut for 2track vertices selection "  };
-      Gaudi::Property<float> m_fastZSVCut{this, "FastZSVCut",        15.,  "Cut to remove SV candidates based on fast SV estimation. To save full fit CPU."  };
-      Gaudi::Property<float> m_cosSVPVCut{this, "cosSVPVCut",        0.,  "Cut on cos of angle between SV-PV and full vertex momentum"  };
-
-      Gaudi::Property<bool> m_fillHist{this, "FillHist",   false, "Fill technical histograms"  };
-
-      Gaudi::Property<bool> m_do2TrkIBLChecks {this, "do2TrkIBLChecks", true, "IBL and B-layer hit requrirements based on the position of 2-track DV." };
-
-      Gaudi::Property<bool> m_useVertexCleaning{this, "useVertexCleaning",  true,    "Clean vertices by requiring pixel hit presence according to vertex position" };
-
-      Gaudi::Property<float> m_twoTrkVtxFormingD0Cut{this, "TwoTrkVtxFormingD0Cut", 0.0,  "Minimum two-track forming vertex d0 cut."};
-
-      Gaudi::Property<bool> m_multiWithOneTrkVrt{this, "MultiWithOneTrkVrt", true,"Allow one-track-vertex addition to already found secondary vertices"};
-
-      Gaudi::Property<float> m_vertexMergeCut{this, "VertexMergeCut",	  4., "To allow vertex merging for MultiVertex Finder" };
-
-      Gaudi::Property<float> m_beampipeR{this, "BeampipeR",	  24.3, "Radius of the beampipe material for aggressive material rejection" };
-      Gaudi::Property<float> m_firstPixelLayerR{this, "FirstPixelLayerR",	  32.0, "Radius of the first Pixel layer" };
+      //
+      //---- Additional track selection at 2-track vertexing stage
+      Gaudi::Property<float> m_trkSigCut{this,    "TrkSigCut",     2.0, "Track 3D impact significance w/r primary vertex. Should be >=AntiPileupSigRCut" };
+      Gaudi::Property<float> m_dRdZRatioCut{this, "dRdZRatioCut", 0.25, "Cut on dR/dZ ratio to remove pileup tracks"  };
+      //
+      //---- Very general 2-track vertex selection cuts. Main selection is done in the TwoTrackVertexSelector tool.
+      Gaudi::Property<float> m_fastZSVCut{this, "FastZSVCut",        10.,  "Cut to remove SV candidates based on fast SV estimation. To save full fit CPU."  };
+      //
+      //---- Experimental material interaction removal 
       Gaudi::Property<float> m_removeTrkMatSignif{this, "removeTrkMatSignif", 0., "Significance of Vertex-TrackingMaterial distance for removal. No removal if <=0." };
+      Gaudi::Property<float> m_beampipeR{this, "BeampipeR",	  24.3, "Radius of the beampipe material for aggressive material rejection" };
+      //
+      //---- Final inclusive vertex reconstruction control
+      Gaudi::Property<float> m_vrtMassLimit{this,    "VrtMassLimit",  5500., "Maximal allowed mass for found vertices" };
+      Gaudi::Property<float> m_globVrtProbCut{this, "GlobVrtProbCut", 0.005, "Cut on probability of any vertex for final selection"  };
+      Gaudi::Property<float> m_maxSVRadiusCut{this, "MaxSVRadiusCut",  140., "Cut on maximal radius of SV (def = Pixel detector size)"  };
+      Gaudi::Property<float> m_selVrtSigCut{this,   "SelVrtSigCut",     3.0, "Cut on significance of 3D distance between vertex and PV"  };
+      Gaudi::Property<float> m_vertexMergeCut{this,  "VertexMergeCut",   4., "To allow vertex merging for MultiVertex Finder" };
+      Gaudi::Property<bool> m_multiWithOneTrkVrt{this, "MultiWithOneTrkVrt", true, "Allow one-track-vertex addition to already found secondary vertices"};
 
-      Gaudi::Property<std::string> m_calibFileName{this, "CalibFileName", "Fake2TrVertexReject.MVA.v02.root", " MVA calibration file for 2-track fake vertices removal" };
-
-      std::unique_ptr<MVAUtils::BDT> m_SV2T_BDT;
 
       SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
       ToolHandle<Trk::IExtrapolator>  m_extrapolator{this,"ExtrapolatorName","Trk::Extrapolator/Extrapolator", "Name of the extrapolator tool"};
       ToolHandle<Trk::TrkVKalVrtFitter>  m_fitSvc{this, "VertexFitterTool", "Trk::TrkVKalVrtFitter/VertexFitterTool", "Name of the Vertex Fitter tool"};
-      ToolHandle< Reco::ITrackToVertex >  m_trackToVertexTool{this, "TrackToVertexTool", "Reco::TrackToVertex/TrackToVertex", "Name of the TrackToVertex tool"};
+      ToolHandle<Reco::ITrackToVertex>  m_trackToVertexTool{this, "TrackToVertexTool", "Reco::TrackToVertex/TrackToVertex", "Name of the TrackToVertex tool"};
+
+      ToolHandle<Rec::ITwoTrackVertexSelector>  m_ini_v2trselector{this, "TwoTrkVtxSelectorIni", "Rec::TwoTrackVrtBDTSelector/V2TrBDTSelectorIni",
+                                                                         "Name of the initial 2-track vertex selector"};
+      ToolHandle<Rec::ITwoTrackVertexSelector>  m_fin_v2trselector{this, "TwoTrkVtxSelectorFinal", "Rec::TwoTrackVrtBDTSelector/V2TrBDTSelectorFin",
+                                                                         "Name of the final 2-track vertex selector"};
 
       Gaudi::Property<std::string> m_augString {this, "AugmentingVersionString", "_NVSI", "Augmentation version string"};
 
@@ -346,7 +340,8 @@ namespace Rec {
       static double massV0(const std::vector< std::vector<double> >& TrkAtVrt, double massP, double massPi ) ;
 
 
-      TLorentzVector momAtVrt(const std::vector<double>& inpTrk) const; 
+      ROOT::Math::PxPyPzEVector momAtVrt(const std::vector<double>& inpTrk) const;
+
       static double  vrtRadiusError(const Amg::Vector3D & secVrt, const std::vector<double>  & vrtErr) ;
 
       static int   nTrkCommon( std::vector<WrkVrt> *WrkVrtSet, int indexV1, int indexV2) ;
