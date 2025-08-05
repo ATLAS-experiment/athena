@@ -141,6 +141,7 @@ protected:
   Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDNONE)};
   Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(ELEIDNONE)};
   Gaudi::Property<bool> m_bUseTauSubstructure{this, "UseTauSubstructure", false};
+  Gaudi::Property<bool> m_doTauTrig{this, "DoTauTrig", false};
 
   std::string m_sInputFileName;
   std::string m_sSFHistName;

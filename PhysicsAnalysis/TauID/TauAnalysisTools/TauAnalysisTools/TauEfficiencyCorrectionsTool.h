@@ -21,7 +21,6 @@
 // Local include(s):
 #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/CommonEfficiencyTool.h"
-#include "TauAnalysisTools/TauEfficiencyTriggerTool.h"
 
 // Tool include(s)
 #include "AsgAnalysisInterfaces/IPileupReweightingTool.h"
