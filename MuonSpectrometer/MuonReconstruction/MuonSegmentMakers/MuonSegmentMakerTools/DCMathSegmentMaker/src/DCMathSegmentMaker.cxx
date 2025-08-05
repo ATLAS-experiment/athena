@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DCMathSegmentMaker.h"
@@ -1738,8 +1738,10 @@ namespace Muon {
             ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
             return {};
         }
-        const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(chid, gpos, gdir);
-        const MuonGM::MuonDetectorManager* MuonDetMgr = InterSectSvc->detMgr();
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_DetectorManagerKey,ctx};
+        const MuonGM::MuonDetectorManager* MuonDetMgr = detMgr.cptr();
+
+        const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(MuonDetMgr, chid, gpos, gdir);
 
         // set to identify the hit on the segment
         std::set<Identifier> hitsOnSegment, chambersOnSegment;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStationIntersectCond/MdtIntersectGeometry.h"
@@ -21,13 +21,14 @@ namespace Muon {
 
     MdtIntersectGeometry::MdtIntersectGeometry(MsgStream& msg, const Identifier& chid, const IMuonIdHelperSvc* idHelperSvc,
                                                const MuonGM::MuonDetectorManager* detMgr, const MdtCondDbData* dbData) :
-        m_chid(chid), m_detMgr(detMgr), m_dbData(dbData), m_idHelperSvc(idHelperSvc) {
-        init(msg);
+        m_chid(chid), m_dbData(dbData), m_idHelperSvc(idHelperSvc) {
+        init(detMgr, msg);
     }
 
     MdtIntersectGeometry::~MdtIntersectGeometry() = default;
 
-    MuonStationIntersect MdtIntersectGeometry::intersection(const Amg::Vector3D& pos, const Amg::Vector3D& dir) const {
+    MuonStationIntersect MdtIntersectGeometry::intersection(const MuonGM::MuonDetectorManager* detMgr,
+                                                            const Amg::Vector3D& pos, const Amg::Vector3D& dir ) const {
         MuonStationIntersect intersect;
         if (!m_mdtGeometry) {
             MsgStream log(Athena::getMessageSvc(), "MdtIntersectGeometry");
@@ -48,6 +49,9 @@ namespace Muon {
 
         MuonStationIntersect::TubeIntersects intersects;
 
+        const MuonGM::MdtReadoutElement* detElMl0 = m_hashMl0.is_valid() ? detMgr->getMdtReadoutElement (m_hashMl0) : nullptr;
+        const MuonGM::MdtReadoutElement* detElMl1 = m_hashMl1.is_valid() ? detMgr->getMdtReadoutElement (m_hashMl1) : nullptr;
+
         TrkDriftCircleMath::DCCit dit = dcs.begin();
         TrkDriftCircleMath::DCCit dit_end = dcs.end();
         for (; dit != dit_end; ++dit) {
@@ -58,7 +62,8 @@ namespace Muon {
             if (m_deadTubesML.find(m_idHelperSvc->mdtIdHelper().multilayerID(tubeid)) != m_deadTubesML.end()) {
                 if (std::find(m_deadTubes.begin(), m_deadTubes.end(), tubeid) != m_deadTubes.end()) continue;
             }
-            double distWall = std::abs(xint) - 0.5 * tubeLength(mdtId.ml(), mdtId.lay(), mdtId.tube());
+            double distWall = std::abs(xint) - 0.5 * tubeLength(detElMl0, detElMl1,
+                                                                mdtId.ml(), mdtId.lay(), mdtId.tube());
             intersects.emplace_back(tubeid, dit->dr(), distWall);
         }
         intersect.setTubeIntersects(std::move(intersects));
@@ -66,7 +71,9 @@ namespace Muon {
         return intersect;
     }
 
-    double MdtIntersectGeometry::tubeLength(const int ml, const int layer, const int tube) const {
+    double MdtIntersectGeometry::tubeLength(const MuonGM::MdtReadoutElement* detElMl0,
+                                            const MuonGM::MdtReadoutElement* detElMl1,
+                                            const int ml, const int layer, const int tube) const {
 #ifndef NDEBUG
         if (ml < 0 || ml > 1){
             std::stringstream sstr{};
@@ -88,14 +95,14 @@ namespace Muon {
         int theTube = tube + 1;
         int theLayer = layer + 1;
         // handle case where first ml is dead
-        if (ml == 1 && !m_detElMl1) return m_detElMl0->getActiveTubeLength(theLayer, theTube);
+        if (ml == 1 && !detElMl1) return detElMl0->getActiveTubeLength(theLayer, theTube);
         if (ml == 0)
-            return m_detElMl0->getActiveTubeLength(theLayer, theTube);
+            return detElMl0->getActiveTubeLength(theLayer, theTube);
         else
-            return m_detElMl1->getActiveTubeLength(theLayer, theTube);
+            return detElMl1->getActiveTubeLength(theLayer, theTube);
     }
 
-    void MdtIntersectGeometry::init(MsgStream& msg) {
+    void MdtIntersectGeometry::init(const MuonGM::MuonDetectorManager* detMgr, MsgStream& msg) {
         /* calculate chamber geometry
            it takes as input:
              distance between the first and second tube in the chamber within a layer along the tube layer (tube distance)
@@ -116,21 +123,21 @@ namespace Muon {
         Identifier firstIdml0 = m_idHelperSvc->mdtIdHelper().channelID(name, eta, phi, 1, 1, 1);
         Identifier firstIdml1;
 
-        m_detElMl0 = m_detMgr->getMdtReadoutElement(firstIdml0);
-        m_detElMl1 = nullptr;
+        const MuonGM::MdtReadoutElement* detElMl0 = detMgr->getMdtReadoutElement(firstIdml0);
+        const MuonGM::MdtReadoutElement* detElMl1 = nullptr;
 
-        if (!m_detElMl0) {
+        if (!detElMl0) {
             msg << MSG::WARNING << "MdtIntersectGeometry::init() - failed to get readout element for ML0" << endmsg;
             return;
         }
 
         // number of multilayers in chamber
-        int nml = m_detElMl0->nMDTinStation();
+        int nml = detElMl0->nMDTinStation();
 
         // treament of chambers with two ml
         if (nml == 2) {
             firstIdml1 = m_idHelperSvc->mdtIdHelper().channelID(name, eta, phi, 2, 1, 1);
-            m_detElMl1 = m_detMgr->getMdtReadoutElement(firstIdml1);
+            detElMl1 = detMgr->getMdtReadoutElement(firstIdml1);
         }
 
         // if one of the two ml is dead treat the chamber as a single ML station
@@ -140,7 +147,7 @@ namespace Muon {
         bool goodMl0{false}, goodMl1{false};
         if (m_dbData) {
             goodMl0 = m_dbData->isGoodMultilayer(firstIdml0);
-            goodMl1 = m_detElMl1 ? m_dbData->isGoodMultilayer(firstIdml1) : false;
+            goodMl1 = detElMl1 ? m_dbData->isGoodMultilayer(firstIdml1) : false;
         } else {
             goodMl0 = true;
             goodMl1 = true;
@@ -148,52 +155,55 @@ namespace Muon {
         int firstMlIndex = 1;
         if (goodMl0 && !goodMl1) {
             nml = 1;
-            m_detElMl1 = nullptr;
+            detElMl1 = nullptr;
         } else if (!goodMl0 && goodMl1) {
             nml = 1;
             // swap detEl1 and detEl0
-            m_detElMl0 = m_detElMl1;
-            m_detElMl1 = nullptr;
+            detElMl0 = detElMl1;
+            detElMl1 = nullptr;
             firstIdml0 = firstIdml1;
             firstMlIndex = 2;
         } else if (!goodMl0 && !goodMl1) {
             msg << MSG::WARNING << "MdtIntersectGeometry::init() - neither multilayer is good" << endmsg;
             return;
         }
-        m_transform = m_detElMl0->GlobalToAmdbLRSTransform();
+        m_transform = detElMl0->GlobalToAmdbLRSTransform();
 
         // number of layers and tubes
-        int nlay = m_detElMl0->getNLayers();
-        int ntube0 = m_detElMl0->getNtubesperlayer();
-        int ntube1 = m_detElMl1 ? m_detElMl1->getNtubesperlayer() : 0;
+        int nlay = detElMl0->getNLayers();
+        int ntube0 = detElMl0->getNtubesperlayer();
+        int ntube1 = detElMl1 ? detElMl1->getNtubesperlayer() : 0;
 
         // position first tube in ml 0 and 1
-        Amg::Vector3D firstTubeMl0 = transform() * (m_detElMl0->tubePos(firstIdml0));
-        Amg::Vector3D firstTubeMl1 = m_detElMl1 ? transform() * (m_detElMl1->tubePos(firstIdml1)) : Amg::Vector3D{0., 0., 0.};
+        Amg::Vector3D firstTubeMl0 = transform() * (detElMl0->tubePos(firstIdml0));
+        Amg::Vector3D firstTubeMl1 = detElMl1 ? transform() * (detElMl1->tubePos(firstIdml1)) : Amg::Vector3D{0., 0., 0.};
 
         TrkDriftCircleMath::LocVec2D firstTube0(firstTubeMl0.y(), firstTubeMl0.z());
         TrkDriftCircleMath::LocVec2D firstTube1(firstTubeMl1.y(), firstTubeMl1.z());
 
         // position second tube in ml 0
         Identifier secondIdml0 = m_idHelperSvc->mdtIdHelper().channelID(name, eta, phi, firstMlIndex, 1, 2);
-        Amg::Vector3D secondTubeMl0 = transform() * (m_detElMl0->tubePos(secondIdml0));
+        Amg::Vector3D secondTubeMl0 = transform() * (detElMl0->tubePos(secondIdml0));
 
-                        fillDeadTubes(m_detElMl0, msg);
-        if (m_detElMl1) fillDeadTubes(m_detElMl1, msg);
+                      fillDeadTubes(detElMl0, msg);
+        if (detElMl1) fillDeadTubes(detElMl1, msg);
 
         // position first tube in second layer ml 0
         Identifier firstIdml0lay1 = m_idHelperSvc->mdtIdHelper().channelID(name, eta, phi, firstMlIndex, 2, 1);
-        Amg::Vector3D firstTubeMl0lay1 = transform() * (m_detElMl0->tubePos(firstIdml0lay1));
+        Amg::Vector3D firstTubeMl0lay1 = transform() * (detElMl0->tubePos(firstIdml0lay1));
 
         double tubeDist = (secondTubeMl0 - firstTubeMl0).y();      // distance between tube in a given layer
         double tubeStage = (firstTubeMl0lay1 - firstTubeMl0).y();  // tube stagering distance
         double layDist = (firstTubeMl0lay1 - firstTubeMl0).z();    // distance between layers
 
         m_mdtGeometry = std::make_unique<TrkDriftCircleMath::MdtChamberGeometry>(
-            m_chid, m_idHelperSvc, nml, nlay, ntube0, ntube1, firstTube0, firstTube1, tubeDist, tubeStage, layDist, m_detElMl0->center().theta());
+            m_chid, m_idHelperSvc, nml, nlay, ntube0, ntube1, firstTube0, firstTube1, tubeDist, tubeStage, layDist, detElMl0->center().theta());
 
         // finally if the first ml is dead, configure the MdtChamberGeometry accordingly
         if (!goodMl0 && goodMl1) m_mdtGeometry->isSecondMultiLayer(true);
+
+                      m_hashMl0 = detElMl0->detectorElementHash();
+        if (detElMl1) m_hashMl1 = detElMl1->detectorElementHash();
     }
     std::shared_ptr<const TrkDriftCircleMath::MdtChamberGeometry> MdtIntersectGeometry::mdtChamberGeometry() const { return m_mdtGeometry; }
     void MdtIntersectGeometry::fillDeadTubes(const MuonGM::MdtReadoutElement* mydetEl, MsgStream& msg) {
