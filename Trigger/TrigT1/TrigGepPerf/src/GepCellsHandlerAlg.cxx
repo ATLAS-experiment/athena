@@ -56,10 +56,10 @@ StatusCode GepCellsHandlerAlg::initialize() {
 	m_stepsPerRange = std::pow(2,m_nEnergyBits-2);
 
 	m_readoutRanges[0] = 0;
-	m_readoutRanges[1] = (m_stepsPerRange-1)*m_valLeastSigBit;
-	m_readoutRanges[2] = ((m_valG*(m_stepsPerRange-1))+m_stepsPerRange)*m_valLeastSigBit;
-	m_readoutRanges[3] = (m_stepsPerRange+(m_stepsPerRange*m_valG)+((m_stepsPerRange-1)*m_valG*m_valG))*m_valLeastSigBit;
-	m_readoutRanges[4] = (m_stepsPerRange+(m_stepsPerRange*m_valG)+(m_stepsPerRange*m_valG*m_valG)+((m_stepsPerRange-1)*m_valG*m_valG*m_valG))*m_valLeastSigBit;
+	m_readoutRanges[1] = m_stepsPerRange*m_valLeastSigBit;
+	m_readoutRanges[2] = ((m_valG*m_stepsPerRange)+m_stepsPerRange)*m_valLeastSigBit;
+	m_readoutRanges[3] = (m_stepsPerRange+(m_stepsPerRange*m_valG)+(m_stepsPerRange*m_valG*m_valG))*m_valLeastSigBit;
+	m_readoutRanges[4] = (m_stepsPerRange+(m_stepsPerRange*m_valG)+(m_stepsPerRange*m_valG*m_valG)+(m_stepsPerRange*m_valG*m_valG*m_valG))*m_valLeastSigBit;
 
 	ATH_MSG_DEBUG("Readout scheme with " << m_nEnergyBits << "-bits provides the following four energy thresholds (with " << m_stepsPerRange << " discrete steps on each threshold)");
 	ATH_MSG_DEBUG("GEP cell energy range 0: min = " << m_readoutRanges[0] << " MeV -> max = " << m_readoutRanges[1] << " MeV");
@@ -290,18 +290,19 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
 int GepCellsHandlerAlg::getGepEnergy(float offline_et) const {
 
   // If cell saturates readout range, largest possible value is send
-  if (offline_et > m_readoutRanges[4]) return m_readoutRanges[4];
+  if (offline_et > m_readoutRanges[4]) 
+      return m_stepsPerRange+(m_stepsPerRange*m_valG)+(m_stepsPerRange*m_valG*m_valG)+((m_stepsPerRange-1)*m_valG*m_valG*m_valG)*m_valLeastSigBit;
 
   int readoutRange = 0;
   for (int i = 1; i <= 3; ++i) {
         if (offline_et > m_readoutRanges[i]) readoutRange = i;
   }
 
-  float step = ((float) m_readoutRanges[readoutRange+1] - (float) m_readoutRanges[readoutRange]) / (m_stepsPerRange-1);
+  float step = (static_cast<float>(m_readoutRanges[readoutRange+1]) - static_cast<float>(m_readoutRanges[readoutRange])) / m_stepsPerRange;
   int gep_energy = -1;
   for (int i = 0; i < m_stepsPerRange; ++i) {
-        if (offline_et < (m_readoutRanges[readoutRange]+(step*i))) break;
         gep_energy = m_readoutRanges[readoutRange]+(step*i);
+        if (offline_et < (m_readoutRanges[readoutRange]+(step*(i+1)))) break;
   }
 
   return gep_energy;
