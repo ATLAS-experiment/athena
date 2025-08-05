@@ -41,6 +41,7 @@ StatusCode JfexSimMonitorAlgorithm::initialize() {
     ATH_CHECK( m_simu_key_jTE.initialize()  );
     
     ATH_CHECK( m_jFexTowerKey.initialize()  );
+    ATH_CHECK( m_scellKey.initialize()      );
 
     ATH_CHECK( m_bcContKey.initialize() );
     
@@ -75,6 +76,12 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         if (timeUntil>=0 && timeUntil<=1) {
             EventType += "+JustBeforeOTF";
         }
+    }
+
+    // check if any supercells are missing, there should be 34048
+    SG::ReadHandle<CaloCellContainer> scells(m_scellKey,ctx);
+    if (!scells.isValid() || scells->size() != 34048) {
+        EventType += "+MissingSCells";
     }
 
 
