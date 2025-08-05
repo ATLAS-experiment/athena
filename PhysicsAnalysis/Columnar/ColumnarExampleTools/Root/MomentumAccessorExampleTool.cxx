@@ -26,10 +26,10 @@ namespace columnar
   StatusCode MomentumAccessorExampleTool ::
   initialize ()
   {
-    // normally one would set this based on a property and pick the
-    // right momentum accessor for our particle type. however, this is
-    // an example and I don't feel like demonstrating that aspect.
-    resetPtEtaPhiReadM (momAcc, *this);
+    if (auto type = objectTypeAcc.staticType())
+      resetObjectType (momAcc, *this, *type);
+    else
+      ANA_MSG_INFO ("ObjectTypeAccessor: no object type set, using default");
 
     // give the base class a chance to initialize the column accessor
     // backends

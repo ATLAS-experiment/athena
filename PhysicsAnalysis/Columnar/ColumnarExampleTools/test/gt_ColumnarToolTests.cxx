@@ -252,6 +252,7 @@ TEST_F (ColumnarMemoryTest, MomentumAccessorExampleTool)
 
   // set up the tool
   auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Jet)));
   ASSERT_SUCCESS (tool->initialize ());
 
   // this is a wrapper around the tool for this test
@@ -332,6 +333,7 @@ TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool)
     return;
 
   auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Jet)));
   ASSERT_SUCCESS (tool->initialize ());
 
   // this will call the tool in either mode, and also performs some
@@ -351,6 +353,7 @@ TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool_photons)
     return;
 
   auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Photon)));
   ASSERT_SUCCESS (tool->initialize ());
 
   // this will call the tool in either mode, and also performs some
