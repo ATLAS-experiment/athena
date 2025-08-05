@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTDIGCONDBASE_H
@@ -7,20 +7,22 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "CxxUtils/checker_macros.h"
-#include "Identifier/Identifier.h"
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" // added by Sasha for Argon
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "CLHEP/Random/RandomEngine.h"
 
 #include <atomic>
 #include <map>
 #include <mutex>
-#include <set>
 
 class TRT_ID;
+class Identifier;
+
+namespace CLHEP{
+  class HepRandomEngine;
+}
 
 namespace InDetDD {
   class TRT_DetectorManager;
@@ -134,16 +136,16 @@ protected:
                                  CLHEP::HepRandomEngine *rndmEngine) = 0;
 
 protected:
-  const TRTDigSettings* m_settings;
-  const InDetDD::TRT_DetectorManager* m_detmgr;
-  const TRT_ID* m_id_helper;
+  const TRTDigSettings* m_settings{};
+  const InDetDD::TRT_DetectorManager* m_detmgr{};
+  const TRT_ID* m_id_helper{};
 
 private:
   /** Straw state */
   struct StrawState {
-    float noiselevel;     /**< Noise level                         */
-    float noiseamplitude; /**< Noise amplitude                     */
-    float lowthreshold;   /**< Low threshold discriminator setting */
+    float noiselevel{};     /**< Noise level                         */
+    float noiseamplitude{}; /**< Noise amplitude                     */
+    float lowthreshold{};   /**< Low threshold discriminator setting */
   };
 
   //--- Data maps:
@@ -160,25 +162,25 @@ private:
   //--- iterators:
 
   /** Iterator over straw state map */
-  std::map<int,StrawState>::const_iterator m_it_hitid_to_StrawState;
+  std::map<int,StrawState>::const_iterator m_it_hitid_to_StrawState{};
   /** Iterator pointing to last straw in straw state map */
-  std::map<int,StrawState>::const_iterator m_it_hitid_to_StrawState_End;
+  std::map<int,StrawState>::const_iterator m_it_hitid_to_StrawState_End{};
   /** Iterator used for caching (ought to be called _Previous) */
-  mutable std::map<int,StrawState>::const_iterator m_it_hitid_to_StrawState_Last ATLAS_THREAD_SAFE; // Guarded by m_mutex
+  mutable std::map<int,StrawState>::const_iterator m_it_hitid_to_StrawState_Last ATLAS_THREAD_SAFE {}; // Guarded by m_mutex
   mutable std::mutex m_mutex;
 
-  mutable std::atomic<float> m_averageNoiseLevel; /**< Average noise level */
-  double m_crosstalk_noiselevel;
-  double m_crosstalk_noiselevel_other_end;
+  mutable std::atomic<float> m_averageNoiseLevel{}; /**< Average noise level */
+  double m_crosstalk_noiselevel{};
+  double m_crosstalk_noiselevel_other_end{};
 
   //---  For iterating through all of the straw hitids:
   /** Iterator over straw state map */
-  std::map<int,StrawState>::iterator m_all_it_hitid_to_StrawState;
+  std::map<int,StrawState>::iterator m_all_it_hitid_to_StrawState{};
   /** Iterator used for caching */
-  std::map<int,StrawState>::iterator m_all_it_hitid_to_StrawState_previous;
+  std::map<int,StrawState>::iterator m_all_it_hitid_to_StrawState_previous{};
 
 protected:
-  int m_UseGasMix;
+  int m_UseGasMix{};
   ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool; // added by Sasha for Argon
 
 };
