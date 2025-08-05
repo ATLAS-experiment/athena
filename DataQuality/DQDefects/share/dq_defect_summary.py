@@ -144,7 +144,7 @@ def main():
             since, until = min(good_runs), max(good_runs)+1
         else:
             good_runs = set()
-            for period, period_runs in project_dict[args.project].iteritems():
+            for period, period_runs in project_dict[args.project].items():
                 good_runs.update(period_runs)
             since, until = min(good_runs), max(good_runs)+1
 
@@ -195,7 +195,7 @@ def main():
 
     # Build the defect objects
     all_defects = {}
-    for name, description in sorted(descriptions.iteritems()):
+    for name, description in sorted(descriptions.items()):
         virtual, intolerable = name in virtuals, name in intolerables
         depends = []
         logic = logics.get(name, None)
