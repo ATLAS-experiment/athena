@@ -161,7 +161,7 @@ StatusCode GeoModelSvc::geoInit()
       ATH_MSG_FATAL("Failed to open SQLite database " << sqliteDbPath << " for reading in persistent GeoModel tree");
       return StatusCode::FAILURE;
     }
-    m_sqliteReader = std::make_unique<GeoModelIO::ReadGeoModel>(m_sqliteDbManager.get());
+    m_sqliteReader = std::make_unique<GeoModelIO::ReadGeoModel>(m_sqliteDbManager);
     PVConstLink vWorldPhys{m_sqliteReader->buildGeoModel()};
     worldPhys = const_pointer_cast(vWorldPhys);
     if(!worldPhys) {
