@@ -298,7 +298,8 @@ int main () {
   pRes = 0;
   //  static const bool QUIET(true);
   static const bool VERBOSE(false);
-  assert(0 != (pRes = SG::Storable_cast<MyDataObj>(pBucket, VERBOSE)));
+  pRes = SG::Storable_cast<MyDataObj>(pBucket, VERBOSE);
+  assert (0 != pRes);
   
   std::cerr << "Now we expect to see an error message:" << std::endl 
 	    << "----Error Message Starts--->>" << std::endl; 
@@ -321,9 +322,11 @@ int main () {
   assert(pGRes->val()==2);
 
   DataObject* pDO(0);
-  assert (0 != (pDO = asStorable(new GaudiDataObj(3))));
+  pDO = asStorable(new GaudiDataObj(3));
+  assert (0 != pDO);
   pGRes = 0;
-  assert(0 != (pGRes = SG::Storable_cast<GaudiDataObj>(pDO, VERBOSE)));
+  pGRes = SG::Storable_cast<GaudiDataObj>(pDO, VERBOSE);
+  assert(0 != pGRes);
 
   delete pDO;
   delete DBGDO;
