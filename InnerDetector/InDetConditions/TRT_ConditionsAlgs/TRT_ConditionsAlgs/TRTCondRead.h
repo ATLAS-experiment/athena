@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTCONDITIONSALGS_TRTCONDREAD_H
@@ -26,42 +26,36 @@
 
 /** @class TRTCondRead
    read TRT calibration constants from db and write text file
-**/ 
+**/
 
-class TRTCondRead:public AthAlgorithm {
+class TRTCondRead : public AthAlgorithm
+{
 public:
-  typedef TRTCond::RtRelationMultChanContainer RtRelationContainer ;
-  typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
+    typedef TRTCond::RtRelationMultChanContainer RtRelationContainer;
+    typedef TRTCond::StrawT0MultChanContainer StrawT0Container;
 
+    /** constructor **/
+    TRTCondRead(const std::string &name, ISvcLocator *pSvcLocator);
 
-  /** constructor **/
-  TRTCondRead(const std::string& name, ISvcLocator* pSvcLocator);
-  /** destructor **/
-  ~TRTCondRead(void);
+    virtual ~TRTCondRead() override = default;
 
-  virtual StatusCode  initialize(void) override;    
-  virtual StatusCode  execute(void) override;
-  virtual StatusCode  finalize(void) override;
+    virtual StatusCode initialize(void) override;
+    virtual StatusCode execute(void) override;
+    virtual StatusCode finalize(void) override;
 
-  /// create an TRTCond::ExpandedIdentifier from a TRTID identifier
-  virtual TRTCond::ExpandedIdentifier trtcondid( const Identifier& id, int level = TRTCond::ExpandedIdentifier::STRAW) const;
+    /// create an TRTCond::ExpandedIdentifier from a TRTID identifier
+    virtual TRTCond::ExpandedIdentifier trtcondid(const Identifier &id, int level = TRTCond::ExpandedIdentifier::STRAW) const;
 
-  // methods for persistency
-  
-  /// write calibration constants or errors to flat text file 
-  virtual StatusCode writeCalibTextFile(std::ostream&) const;
-  virtual StatusCode writeErrorTextFile(std::ostream&) const;
+    // methods for persistency
 
+    /// write calibration constants or errors to flat text file
+    virtual StatusCode writeCalibTextFile(std::ostream &) const;
+    virtual StatusCode writeErrorTextFile(std::ostream &) const;
 
- private:
-
-  ToolHandle<ITRT_CalDbTool> m_TRTCalDbTool;
-  bool m_setup;                            //!< true at first event
-  std::string m_par_caloutputfile;         //set this to either "caliboutput,txt" or "erroroutput.txt"
-  const TRT_ID* m_trtid;                   //!< trt id helper
-  ServiceHandle<StoreGateSvc> m_detstore;
-
+private:
+    ToolHandle<ITRT_CalDbTool> m_TRTCalDbTool{this, "TRTCalDbTool", "CalDbTool", "Access to the folder of the calibration constants"};
+    Gaudi::Property<std::string> m_par_caloutputfile{this, "CalibOutputFile", "caliboutput.txt", ""};
+    const TRT_ID *m_trtid; //!< trt id helper
 };
- 
-#endif // TRTCONDITIONSALGS_TRTCONDREAD_H
 
+#endif // TRTCONDITIONSALGS_TRTCONDREAD_H

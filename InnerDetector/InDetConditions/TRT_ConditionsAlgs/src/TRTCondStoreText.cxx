@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -19,73 +19,36 @@
  *
  * @author Peter Hansen <phansen@nbi.dk>
 **/
-TRTCondStoreText::TRTCondStoreText(const std::string& name, ISvcLocator* pSvcLocator)
-  :AthAlgorithm   (name, pSvcLocator),
-   m_par_rtcontainerkey("/TRT/Calib/RT"),
-   m_par_errcontainerkey("/TRT/Calib/errors2d"),
-   m_par_slopecontainerkey("/TRT/Calib/slopes"),
-   m_par_t0containerkey("/TRT/Calib/T0"),
-   m_par_caltextfile(""),
-   m_trtid(0),
-   m_streamer("AthenaOutputStreamTool/CondStream1"),
-   m_detstore("DetectorStore",name)
+TRTCondStoreText::TRTCondStoreText(const std::string& name, ISvcLocator* pSvcLocator):AthAlgorithm   (name, pSvcLocator){}
 
+StatusCode TRTCondStoreText::initialize()
 {
-  // declare algorithm parameters
-  declareProperty("StreamTool",m_streamer);
-  declareProperty("CalibInputFile",m_par_caltextfile);
-  declareProperty("DetectorStore",m_detstore);
-  declareProperty("RtFolderName",m_par_rtcontainerkey);
-  declareProperty("T0FolderName",m_par_t0containerkey);
-  declareProperty("ErrorSlopeFolderName",m_par_slopecontainerkey);
-  declareProperty("ErrorFolderName",m_par_errcontainerkey);
-}
 
-TRTCondStoreText::~TRTCondStoreText(void)
-{}
+    // Get TRT ID helper
+    ATH_CHECK(detStore()->retrieve(m_trtid, "TRT_ID"));
 
-StatusCode TRTCondStoreText::initialize() {
-
-
-  // Get StoreGate access to DetectorStore
-  if (StatusCode::SUCCESS!=m_detstore.retrieve()) {
-    ATH_MSG_FATAL( "Unable to retrieve " << m_detstore.name());
-    return StatusCode::FAILURE;
-  }
- 
-
-  //
-  // Get ID helper
-  StatusCode sc = detStore()->retrieve(m_trtid,"TRT_ID");
-  if ( sc.isFailure() ) {
-    ATH_MSG_FATAL( "Could not retrieve TRT ID helper." );
-    return sc;
-  }
-
-
-  // Format of input text file
-
-  int format =0;
-  if( m_par_caltextfile != "" ) {
-    ATH_MSG_INFO( " input text file supplied " << m_par_caltextfile);
-    if(StatusCode::SUCCESS!=checkTextFile(m_par_caltextfile, format)) {
-      ATH_MSG_FATAL( "Could not read format of text file" << m_par_caltextfile);
-      return StatusCode::FAILURE ;
+    // Format of input text file
+    int format = 0;
+    if (m_par_caltextfile != ""){
+        ATH_MSG_INFO(" input text file supplied " << m_par_caltextfile);
+        if (StatusCode::SUCCESS != checkTextFile(m_par_caltextfile, format)){
+            ATH_MSG_FATAL("Could not read format of text file" << m_par_caltextfile);
+            return StatusCode::FAILURE;
+        }
+        ATH_MSG_INFO(" Found format " << format << " in text file " << m_par_caltextfile);
     }
-    ATH_MSG_INFO( " Found format " << format << " in text file " << m_par_caltextfile);
-  } else {
-    ATH_MSG_FATAL( " No input text file supplied. Nothing can be done. ");
-    return StatusCode::FAILURE;
-  }
+    else{
+        ATH_MSG_FATAL(" No input text file supplied. Nothing can be done. ");
+        return StatusCode::FAILURE;
+    }
 
-  ATH_MSG_INFO( " Read calibration constants from text file " << m_par_caltextfile);
-  if(StatusCode::SUCCESS!=readTextFile(m_par_caltextfile, format)) {
-       ATH_MSG_FATAL( "Could not read calibration objects from text file " << m_par_caltextfile);
-       return StatusCode::FAILURE ;
-  }
+    ATH_MSG_INFO(" Read calibration constants from text file " << m_par_caltextfile);
+    if (StatusCode::SUCCESS != readTextFile(m_par_caltextfile, format)){
+        ATH_MSG_FATAL("Could not read calibration objects from text file " << m_par_caltextfile);
+        return StatusCode::FAILURE;
+    }
 
-  
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 StatusCode TRTCondStoreText::execute(){
@@ -241,11 +204,11 @@ StatusCode TRTCondStoreText::readTextFile_Format1(std::istream& infile)
 
   if(t0Container->initialize().isFailure()) ATH_MSG_WARNING("Could not initialize T0 Container for key " << m_par_t0containerkey);
   ATH_MSG_INFO(" Recording T0 container ");
-  if( (m_detstore->record(t0Container,m_par_t0containerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(t0Container,m_par_t0containerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record T0 container for key " << m_par_t0containerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(t0Container,m_par_t0containerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(t0Container,m_par_t0containerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for StrawT0Container " );
       return StatusCode::FAILURE ;
     } else { 
@@ -255,11 +218,11 @@ StatusCode TRTCondStoreText::readTextFile_Format1(std::istream& infile)
 
 
   ATH_MSG_INFO(" Recording RT container ");
-  if( (m_detstore->record(rtContainer,m_par_rtcontainerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(rtContainer,m_par_rtcontainerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record RT container for key " << m_par_rtcontainerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(rtContainer,m_par_rtcontainerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(rtContainer,m_par_rtcontainerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for RtRelationContainer " );
       return StatusCode::FAILURE ;
     } else { 
@@ -347,11 +310,11 @@ StatusCode TRTCondStoreText::readTextFile_Format2(std::istream& infile)
   //Record the containers the old way for the OutputConditionsAlg
   if(t0Container->initialize().isFailure()) ATH_MSG_WARNING("Could not initialize T0 Container for key " << m_par_t0containerkey);
   ATH_MSG_INFO(" Recording T0 container ");
-  if( (m_detstore->record(t0Container,m_par_t0containerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(t0Container,m_par_t0containerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record T0 container for key " << m_par_t0containerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(t0Container,m_par_t0containerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(t0Container,m_par_t0containerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for StrawT0Container " );
       return StatusCode::FAILURE ;
     } else { 
@@ -361,11 +324,11 @@ StatusCode TRTCondStoreText::readTextFile_Format2(std::istream& infile)
 
 
   ATH_MSG_INFO(" Recording RT container ");
-  if( (m_detstore->record(rtContainer,m_par_rtcontainerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(rtContainer,m_par_rtcontainerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record RT container for key " << m_par_rtcontainerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(rtContainer,m_par_rtcontainerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(rtContainer,m_par_rtcontainerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for RtRelationContainer " );
       return StatusCode::FAILURE ;
     } else { 
@@ -374,11 +337,11 @@ StatusCode TRTCondStoreText::readTextFile_Format2(std::istream& infile)
   }
 
   ATH_MSG_INFO(" Recording Error container ");
-  if( (m_detstore->record(errContainer,m_par_errcontainerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(errContainer,m_par_errcontainerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record Error container for key " << m_par_errcontainerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(errContainer,m_par_errcontainerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(errContainer,m_par_errcontainerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for RtRelationContainer " );
       return StatusCode::FAILURE ;
     } else { 
@@ -478,11 +441,11 @@ StatusCode TRTCondStoreText::readTextFile_Format3(std::istream& infile)
   //Record the containers the old way for the OutputConditionsAlg
   if(t0Container->initialize().isFailure()) ATH_MSG_WARNING("Could not initialize T0 Container for key " << m_par_t0containerkey);
   ATH_MSG_INFO(" Recording T0 container ");
-  if( (m_detstore->record(t0Container,m_par_t0containerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(t0Container,m_par_t0containerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record T0 container for key " << m_par_t0containerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(t0Container,m_par_t0containerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(t0Container,m_par_t0containerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for StrawT0Container " );
       return StatusCode::FAILURE ;
     } else { 
@@ -492,11 +455,11 @@ StatusCode TRTCondStoreText::readTextFile_Format3(std::istream& infile)
 
 
   ATH_MSG_INFO(" Recording RT container ");
-  if( (m_detstore->record(rtContainer,m_par_rtcontainerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(rtContainer,m_par_rtcontainerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record RT container for key " << m_par_rtcontainerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(rtContainer,m_par_rtcontainerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(rtContainer,m_par_rtcontainerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for RtRelationContainer " );
       return StatusCode::FAILURE ;
     } else { 
@@ -505,11 +468,11 @@ StatusCode TRTCondStoreText::readTextFile_Format3(std::istream& infile)
   }
 
   ATH_MSG_INFO(" Recording Error container ");
-  if( (m_detstore->record(errContainer,m_par_errcontainerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(errContainer,m_par_errcontainerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record Error container for key " << m_par_errcontainerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(errContainer,m_par_errcontainerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(errContainer,m_par_errcontainerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for RtRelationContainer " );
       return StatusCode::FAILURE ;
     } else { 
@@ -518,11 +481,11 @@ StatusCode TRTCondStoreText::readTextFile_Format3(std::istream& infile)
   }
 
   ATH_MSG_INFO(" Recording Slope container ");
-  if( (m_detstore->record(slopeContainer,m_par_slopecontainerkey))!=StatusCode::SUCCESS ) {
+  if( (detStore()->record(slopeContainer,m_par_slopecontainerkey))!=StatusCode::SUCCESS ) {
      ATH_MSG_ERROR("Could not record Slope container for key " << m_par_slopecontainerkey << " with DetStore ");
      return StatusCode::FAILURE;
   } else {
-    if(StatusCode::SUCCESS!=m_detstore->retrieve(slopeContainer,m_par_slopecontainerkey)) {
+    if(StatusCode::SUCCESS!=detStore()->retrieve(slopeContainer,m_par_slopecontainerkey)) {
       ATH_MSG_FATAL(  "Could not retrieve data handle for RtRelationContainer " );
       return StatusCode::FAILURE ;
     } else { 
