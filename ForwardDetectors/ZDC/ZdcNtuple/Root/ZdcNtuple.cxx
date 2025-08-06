@@ -160,6 +160,8 @@ StatusCode ZdcNtuple :: initialize ()
 	m_outputTree->Branch("zdc_ZdcAmpErr", &t_ZdcAmpErr, "zdc_ZdcAmpErr[2]/F");
 	m_outputTree->Branch("zdc_ZdcEnergy", &t_ZdcEnergy, "zdc_ZdcEnergy[2]/F");
 	m_outputTree->Branch("zdc_ZdcEnergyErr", &t_ZdcEnergyErr, "zdc_ZdcEnergyErr[2]/F");
+	m_outputTree->Branch("zdc_ZdcNLEnergy", &t_ZdcNLEnergy, "zdc_ZdcNLEnergy[2]/F");
+	m_outputTree->Branch("zdc_ZdcNLEnergyErr", &t_ZdcNLEnergyErr, "zdc_ZdcNLEnergyErr[2]/F");
 	m_outputTree->Branch("zdc_ZdcTime", &t_ZdcTime, "zdc_ZdcTime[2]/F");
 	m_outputTree->Branch("zdc_ZdcStatus", &t_ZdcStatus, "zdc_ZdcStatus[2]/S");
 	m_outputTree->Branch("zdc_ZdcTrigEff", &t_ZdcTrigEff, "zdc_ZdcTrigEff[2]/F");
@@ -661,7 +663,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
   
   for (size_t iside = 0; iside < 2; iside++)
     {
-      t_ZdcAmp[iside] = 0; t_ZdcEnergy[iside] = 0; t_ZdcTime[iside] = 0; t_ZdcStatus[iside] = 0;
+      t_ZdcAmp[iside] = 0; t_ZdcEnergy[iside] = 0; t_ZdcEnergyErr[iside] = 0;t_ZdcTime[iside] = 0; t_ZdcStatus[iside] = 0;
+      t_ZdcNLEnergy[iside] = 0;t_ZdcNLEnergyErr[iside] = 0;
       t_ZdcTrigEff[iside] = 0;t_ZdcLucrodTriggerSideAmp[iside] = 0; t_ZdcLucrodTriggerSideAmpLG[iside] = 0; t_ZdcTruthTotal[iside] = 0;
       t_ZdcTruthInvis[iside] = 0; t_ZdcTruthEM[iside] = 0; t_ZdcTruthNonEM[iside] = 0;
       t_ZdcTruthEscaped[iside] = 0;
@@ -760,6 +763,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
   static const SG::ConstAccessor<float> cosDeltaReactionPlaneAngleAcc("cosDeltaReactionPlaneAngle" + auxSuffix);
   static const SG::ConstAccessor<float> CalibEnergyAcc("CalibEnergy"+auxSuffix);
   static const SG::ConstAccessor<float> CalibEnergyErrAcc("CalibEnergyErr"+auxSuffix);
+  static const SG::ConstAccessor<float> NLCalibEnergyAcc("NLCalibEnergy"+auxSuffix);
+  static const SG::ConstAccessor<float> NLCalibEnergyErrAcc("NLCalibEnergyErr"+auxSuffix);
   static const SG::ConstAccessor<float> UncalibSumAcc("UncalibSum"+auxSuffix);
   static const SG::ConstAccessor<float> UncalibSumErrAcc("UncalibSumErr"+auxSuffix);
   static const SG::ConstAccessor<float> AverageTimeAcc("AverageTime"+auxSuffix);
@@ -877,6 +882,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    {
 	      t_ZdcEnergy[iside] = CalibEnergyAcc(*zdcSum);
 	      t_ZdcEnergyErr[iside] = CalibEnergyErrAcc(*zdcSum);
+	      t_ZdcNLEnergy[iside] = NLCalibEnergyAcc(*zdcSum);
+	      t_ZdcNLEnergyErr[iside] = NLCalibEnergyErrAcc(*zdcSum);
 	      
 	      t_ZdcAmp[iside] = UncalibSumAcc(*zdcSum);
 	      t_ZdcAmpErr[iside] = UncalibSumErrAcc(*zdcSum);

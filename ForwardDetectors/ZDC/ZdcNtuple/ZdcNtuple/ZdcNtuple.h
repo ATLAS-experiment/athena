@@ -191,6 +191,8 @@ public:
   float t_ZdcAmpErr[2];
   float t_ZdcEnergy[2];
   float t_ZdcEnergyErr[2];
+  float t_ZdcNLEnergy[2];
+  float t_ZdcNLEnergyErr[2];
   float t_ZdcTime[2];
   short t_ZdcStatus[2];
   unsigned int t_ZdcModuleMask;

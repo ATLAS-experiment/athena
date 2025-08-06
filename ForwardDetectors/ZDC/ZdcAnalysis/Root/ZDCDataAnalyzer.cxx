@@ -29,6 +29,9 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   m_moduleSumPreSample({{0, 0}}),
   m_calibModuleSum({{0, 0}}),
   m_calibModuleSumErrSq({{0, 0}}),
+  m_haveNLcalib(false),
+  m_NLcalibModuleSum({{0, 0}}),
+  m_NLcalibModuleSumErrSq({{0, 0}}),
   m_averageTime({{0, 0}}),
   m_fail({{false, false}})
 {
@@ -65,6 +68,10 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   m_currentT0OffsetsHG = {{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}};
   m_currentT0OffsetsLG = {{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}};
 
+  m_NLcalibFactors = {{
+      {{ {{0,0,0,0,0,0}},{{0,0,0,0,0,0}},{{0,0,0,0,0,0}} }},
+      {{ {{0,0,0,0,0,0}},{{0,0,0,0,0,0}},{{0,0,0,0,0,0}} }}  }};
+  
   // Construct the per-module pulse analyzers
   //
   for (size_t side : {0, 1}) {
@@ -325,6 +332,21 @@ void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, float refScale,
   }
 }
 
+void ZDCDataAnalyzer::SetNLcalibParams(std::array< std::array< std::array<float,6>, 3>, 2>& nlcalibParams)
+{
+  for (size_t side: {0,1})
+    {
+      for (size_t module: {0,1,2})
+	{
+	  for (size_t val: {0,1,2,3,4,5})
+	    {
+	      m_NLcalibFactors[side][module][val] = nlcalibParams[side][module][val];
+	    }
+	}
+    }
+  m_haveNLcalib = true;
+}
+
 void ZDCDataAnalyzer::enableFADCCorrections(bool correctPerSample,
 					    std::array<std::array<std::unique_ptr<const TH1>, 4>, 2>& corrHistHG,
 					    std::array<std::array<std::unique_ptr<const TH1>, 4>, 2>& corrHistLG)
@@ -435,7 +457,12 @@ void ZDCDataAnalyzer::StartEvent(int lumiBlock)
 
     m_calibModuleSum[side] = 0;
     m_calibModuleSumErrSq[side] = 0;
-    m_calibModSumBkgdFrac[side] = 0; 
+    m_calibModSumBkgdFrac[side] = 0;
+
+    m_NLcalibModuleSum[side] = 0;
+    m_NLcalibModuleSumErrSq[side] = 0;
+    m_NLcalibModSumBkgdFrac[side] = 0;
+    
     m_averageTime[side] = 0;
     m_fail[side] = false;
   }
@@ -586,6 +613,7 @@ bool ZDCDataAnalyzer::FinishEvent()
       // subtract the fraction of LGOverflow events if we have fraction available (<0 means unavailable)
       if (pulseAna_p->LGOverflow() && m_moduleAmpFractionLG[side][module] > 0) {tempFraction -= m_moduleAmpFractionLG[side][module];}
     }
+
     
     if (m_moduleSum[side] > 0) m_moduleSumBkgdFrac[side] = sumAmpTimesBkgdFrac/m_moduleSum[side];
     else m_moduleSumBkgdFrac[side] = 0;
@@ -601,7 +629,57 @@ bool ZDCDataAnalyzer::FinishEvent()
     
     if (tempFraction < 1.0) {m_moduleSum[side] /= tempFraction;}
   }
-
+  
+  DoNLcalibModuleSum();
+  
   m_eventCount++;
   return true;
+}
+
+void ZDCDataAnalyzer::DoNLcalibModuleSum()
+{
+  if (!m_haveNLcalib) return;
+  
+  for (int iside:{0,1})
+    {
+      if (m_calibModuleSum[iside]>0.)
+	{
+	  float fEM = m_calibAmplitude[iside][0] / m_calibModuleSum[iside];
+	  float fHad1 = m_calibAmplitude[iside][1] / m_calibModuleSum[iside];
+	  float fHad2 = m_calibAmplitude[iside][2] / m_calibModuleSum[iside];
+	  
+	  float EMCorrFact = 0;
+	  
+	  for (size_t i=0;i<m_NLcalibFactors[iside][0].size()-1;i++)
+	    {	  
+	      EMCorrFact += std::pow(fEM - m_NLcalibFactors[iside][0][0],i)*m_NLcalibFactors[iside][0][i+1];
+	    }
+	  
+	  float Had1CorrFact = 0;
+	  for (size_t i=0;i<m_NLcalibFactors[iside][1].size()-1;i++)
+	    {
+	      Had1CorrFact += std::pow(fHad1 - m_NLcalibFactors[iside][1][0],i)*m_NLcalibFactors[iside][1][i+1];
+	    }
+	  
+	  float Had2CorrFact = 0;
+	  for (size_t i=0;i<m_NLcalibFactors[iside][2].size()-1;i++)
+	    {
+	      Had2CorrFact += std::pow(fHad2 - m_NLcalibFactors[iside][2][0],i)*m_NLcalibFactors[iside][2][i+1];
+	    }
+	  
+	  float ECorrEM = m_calibModuleSum[iside]/EMCorrFact;
+	  float ECorrEMHad1 = ECorrEM/Had1CorrFact;
+	  float ECorrEMHad1Had2 = ECorrEMHad1/Had2CorrFact;
+	  
+	  
+	  m_NLcalibModuleSum[iside] = ECorrEMHad1Had2;
+	  m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
+	}
+      else
+	{
+	  m_NLcalibModuleSum[iside] = 0.;
+	  m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
+	}
+    }
+
 }
