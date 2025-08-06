@@ -392,6 +392,10 @@ atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
    SCRIPT ActsBenchmarkWithSpot.sh 8 100
    PROPERTIES PROCESSOR 8 )
 
+atlas_add_citest( ACTS_ActsBenchmarkWithSpotGbts
+   SCRIPT ActsBenchmarkWithSpotGbts.sh 8 100
+   PROPERTIES PROCESSOR 8 )
+
  atlas_add_citest( ACTS_ActsBenchmarkWithSpotHeavyIons
    SCRIPT ActsBenchmarkWithSpotHeavyIons.sh  8 50
    PROPERTIES PROCESSOR 8 )
