@@ -114,7 +114,7 @@ namespace ActsTrk
             auto ends = this->getStripEnds(hit, element, stripIndex);
             auto vertex = Amg::Vector3D::Zero();
             StripInformationHelper stripInfo(id,ends.first, ends.second, vertex, ActsTrk::localXFromSourceLink(hit), cluster_index, stripIndex);
-            assert( idx < measIndices.size() && idx < stripIndex.size());
+            assert( idx < measIndices.size() && idx < stripInfos.size());
             measIndices[idx] = cluster_index;
             stripInfos[idx] = std::move(stripInfo);
             ++idx;
