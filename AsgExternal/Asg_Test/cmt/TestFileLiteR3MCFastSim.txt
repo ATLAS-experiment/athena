@@ -1,1 +1,1 @@
-/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYSLITE/p6491/mc23_13p6TeV.522036.aMCPy8EG_NNPDF30NLO_A14N23LO_ttZqq_run3.deriv.DAOD_PHYSLITE.e8558_e8528_a911_s4114_r15224_r15225_p6491/DAOD_PHYSLITE.41633196._000004.pool.root.1
+/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYSLITE/p6697/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYSLITE.e8514_e8528_a911_s4114_r15530_r15514_p6697/DAOD_PHYSLITE.43700727._000897.pool.root.1
