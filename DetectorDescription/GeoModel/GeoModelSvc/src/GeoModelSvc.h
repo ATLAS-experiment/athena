@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_GEOMODELSVC_H
@@ -82,7 +82,7 @@ private:
 
 
     std::unique_ptr<GeoModelIO::ReadGeoModel> m_sqliteReader{};
-    std::unique_ptr<GMDBManager>              m_sqliteDbManager{};
+    std::shared_ptr<GMDBManager>              m_sqliteDbManager{};
 
     virtual const std::string & atlasVersion()                     const override {return m_atlasVersion;}
     virtual const std::string & inDetVersionOverride()             const override {return m_inDetVersionOverride;}
