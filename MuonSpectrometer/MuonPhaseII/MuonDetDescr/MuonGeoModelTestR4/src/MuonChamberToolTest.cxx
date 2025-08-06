@@ -241,14 +241,13 @@ namespace MuonGMR4 {
                                                    const TgcReadoutElement& tgc,
                                                    const EnevelopeType& chamber,
                                                    const Acts::Volume& detVol) const {        
-      
-        const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
         for (unsigned int gasGap = 1; gasGap <= tgc.nGasGaps(); ++gasGap){
             for (bool isStrip : {false}) {
-                unsigned int nChannel = isStrip ? tgc.numStrips(gasGap) : tgc.numWireGangs(gasGap);
+                const IdentifierHash layHash = tgc.constructHash(0, gasGap, isStrip);
+                const unsigned int nChannel = tgc.numChannels(layHash);
                 for (unsigned int channel = 1; channel <= nChannel ; ++channel) {
-                    const Identifier stripId = idHelper.channelID(tgc.identify(), gasGap, isStrip, channel);
-                    ATH_CHECK(pointInside(chamber, detVol, tgc.channelPosition(gctx, stripId), "center", stripId));
+                    const IdentifierHash measHash = tgc.constructHash(channel, gasGap, isStrip);
+                    ATH_CHECK(pointInside(chamber, detVol, tgc.channelPosition(gctx, measHash), "center", tgc.measurementId(measHash)));
                 }
             }
         }

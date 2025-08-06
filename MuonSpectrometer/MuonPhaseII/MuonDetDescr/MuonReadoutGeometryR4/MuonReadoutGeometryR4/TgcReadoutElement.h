@@ -32,7 +32,7 @@ class TgcReadoutElement : public MuonReadoutElement {
         /// Half length of the chamber long edge (Top)
         double halfWidthLong{0.};
         // The number of gasgaps in a channel
-        unsigned int nGasGaps{0};
+        unsigned nGasGaps{0};
         /// We have maximum 3 gasgaps times eta / phi measurement
         std::array<StripLayerPtr, 6> sensorLayouts{};
 #ifndef SIMULATIONBASE
@@ -66,7 +66,7 @@ class TgcReadoutElement : public MuonReadoutElement {
     Identifier measurementId(const IdentifierHash& measHash) const override final;
 
     /// Returns the number of gasgaps described by this ReadOutElement (usally 2 or 3)
-    unsigned int nGasGaps() const;
+    unsigned nGasGaps() const;
     /// Returns the length of the bottom edge of the chamber (short width)
     double moduleWidthS() const;
     /// Returns the length of the top edge of the chamber (top width)
@@ -77,11 +77,11 @@ class TgcReadoutElement : public MuonReadoutElement {
     double moduleThickness() const;
     
     /// Returns the number of readout channels
-    unsigned int numChannels(const IdentifierHash& measHash) const;
+    unsigned numChannels(const IdentifierHash& measHash) const;
     /// Returns the number of strips for a given gasGap [1-3]
-    unsigned int numStrips(unsigned int gasGap) const;
+    unsigned numStrips(const IdentifierHash& layHash) const;
     /// Returns the number of wire gangs for a given gasGap [1-3]
-    unsigned int numWireGangs(unsigned int gasGap) const;
+    unsigned numWireGangs(const IdentifierHash& layHash) const;
     /// Returns the thickness of the gasGap
     double gasGapPitch() const;
 
@@ -95,14 +95,12 @@ class TgcReadoutElement : public MuonReadoutElement {
     const StripLayerPtr& sensorLayout(const IdentifierHash& hash) const;
     /// Returns access to the wire group design of the given gasGap [1-3]
     /// If the gap does not have a wires an exception is thrown
-    const WireGroupDesign& wireGangLayout(unsigned int gasGap) const;
+    const WireGroupDesign& wireGangLayout(const IdentifierHash& layHash) const;
+
     /// Returns access to the strip design of the given gasGap [1-3]
     /// If the gap does not have strips an exception is thrown
-    const RadialStripDesign& stripLayout(unsigned int gasGap)  const;
-
+    const RadialStripDesign& stripLayout(const IdentifierHash& layHash) const;
     friend class ActsTrk::TransformCacheDetEle<TgcReadoutElement>;
-
-
    private:
         parameterBook m_pars{};
         const TgcIdHelper& m_idHelper{idHelperSvc()->tgcIdHelper()};
@@ -116,12 +114,19 @@ class TgcReadoutElement : public MuonReadoutElement {
     public:
         /// Constructs the Hash out of the Identifier fields 
         /// (channel, gasGap, isStrip)
-        static IdentifierHash constructHash(unsigned int measCh,
-                                            unsigned int gasGap,
+        static IdentifierHash constructHash(unsigned measCh,
+                                            unsigned gasGap,
                                             const bool isStrip);
-        
-        static unsigned int channelNumber(const IdentifierHash& measHash);
-        static unsigned int gasGapNumber(const IdentifierHash& measHash);
+        /** @brief Flips the isStrip bit from a parsed measurment hash
+         *  @param meashHash: Measurement hash encoding channel, gasGap, isStrip
+         *  @param isStrip: Flag what's the new isStrip from the measruement hash */        
+        static IdentifierHash flipIsStrip(const IdentifierHash& meashHash,
+                                          const bool isStrip);
+        /** @brief Unpacks the channel number from the measurement hash */
+        static unsigned channelNumber(const IdentifierHash& measHash);
+        /** @brief Unpacks the gas gap number from the measurement hash */
+        static unsigned gasGapNumber(const IdentifierHash& measHash);
+        /** @brief Unpacks whether the measurement hash is a strip */
         static bool isStrip(const IdentifierHash& measHash);
  };
 std::ostream& operator<<(std::ostream& ostr, const TgcReadoutElement::parameterBook& pars);

@@ -11,6 +11,9 @@ namespace MuonGMR4{
         ostr<<"Hash: "<<static_cast<unsigned int>(lay.hash());        
         return ostr;
     }
+    void StripLayer::flipPhiRotation() {
+        m_phiRot = -m_phiRot;
+    }
     StripLayer::StripLayer(TransformPtr layerTransform,
                            StripDesignPtr design,
                            const IdentifierHash hash):

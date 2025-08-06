@@ -50,22 +50,24 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     float TruthSegmentMaker::hitUncertainty(const EventContext& ctx, const xAOD::MuonSimHit& hit) const {
-        switch (const auto techIdx = m_idHelperSvc->technologyIndex(hit.identify())) {
+        const Identifier hitId{hit.identify()};
+        switch (const auto techIdx = m_idHelperSvc->technologyIndex(hitId)) {
             using enum Muon::MuonStationIndex::TechnologyIndex;
             case MDT:  {
                 const MuonCalib::MdtCalibDataContainer* calibCont{nullptr};
                 if (!SG::get(calibCont, m_mdtCalibKey, ctx).isSuccess()) {
                     THROW_EXCEPTION("Failed to retrieve Mdt calib constants");
                 }
-                const auto& rtCalib{calibCont->getCalibData(hit.identify(), msgStream())->rtRelation};
+                const auto& rtCalib{calibCont->getCalibData(hitId, msgStream())->rtRelation};
                 const double driftTime = rtCalib->tr()->driftTime(hit.localPosition().perp()).value_or(rtCalib->tr()->maxRadius());
                 return rtCalib->rtRes()->resolution(driftTime);
             } case RPC: {
-                const auto* re = m_detMgr->getRpcReadoutElement(hit.identify());
+                const auto* re = m_detMgr->getRpcReadoutElement(hitId);
                 return re->stripEtaPitch() / std::sqrt(12.);
             } case TGC: {
-                const auto* re = m_detMgr->getTgcReadoutElement(hit.identify());
-                const auto& design = re->wireGangLayout(m_idHelperSvc->gasGap(hit.identify()));
+                const auto* re = m_detMgr->getTgcReadoutElement(hitId);
+                const IdentifierHash measHash = re->measurementHash(hitId);
+                const auto& design = re->wireGangLayout(measHash);
                 return design.stripPitch()  / std::sqrt(12.);
             } case STGC:
               case MM: {
@@ -74,7 +76,7 @@ namespace MuonR4{
                     THROW_EXCEPTION("Failed to retrieve the STGC calibration constants");
                 }
                 NswErrorCalibData::Input errorCalibInput{};
-                errorCalibInput.stripId= hit.identify();
+                errorCalibInput.stripId= hitId;
                 errorCalibInput.locTheta = M_PI - hit.localDirection().theta();
                 if (techIdx == STGC) {
                     errorCalibInput.clusterAuthor = 3; // centroid
@@ -213,10 +215,14 @@ namespace MuonR4{
                     break;
                 } case ActsTrk::DetectorType::Tgc: {
                     auto castRE{static_cast<const MuonGMR4::TgcReadoutElement*>(assocRE)};
-                    const int gasGap = m_idHelperSvc->gasGap(assocMe->identify());
-                    if (castRE->numStrips(gasGap)) ++nTgcPhi;
-                    if (castRE->numWireGangs(gasGap)) ++nTgcEta;
-                        break;
+                    const IdentifierHash gapHash = assocRE->measurementHash(assocMe->identify());
+                    if (castRE->numStrips(gapHash)){
+                        ++nTgcPhi;
+                    } 
+                    if (castRE->numWireGangs(gapHash)) {
+                        ++nTgcEta;
+                    }
+                    break;
                 } case ActsTrk::DetectorType::sTgc:{
                     ++nStgcEta;
                     ++nStgcPhi;

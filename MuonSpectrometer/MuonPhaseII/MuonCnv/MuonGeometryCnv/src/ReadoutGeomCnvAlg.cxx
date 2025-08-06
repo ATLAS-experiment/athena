@@ -402,10 +402,12 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
             double wirePitch{0.};
 
             for (unsigned int gasGap =1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
-                nWireGangs[gasGap -1] = copyMe->numWireGangs(gasGap);
-                nStrips[gasGap -1] = copyMe->numStrips(gasGap);
+                const IdentifierHash gangHash = copyMe->constructHash(0, gasGap, false);
+                const IdentifierHash stripHash = copyMe->constructHash(0, gasGap, true);
+                nWireGangs[gasGap -1] = copyMe->numWireGangs(gangHash);
+                nStrips[gasGap -1] = copyMe->numStrips(stripHash);
                 if (nWireGangs[gasGap -1]) {
-                    const MuonGMR4::WireGroupDesign& design{copyMe->wireGangLayout(gasGap)};
+                    const MuonGMR4::WireGroupDesign& design{copyMe->wireGangLayout(gangHash)};
                     wirePitch = design.stripPitch();
                     WiregangArray& fillMe{wires[gasGap-1]};
                     for (int gang = 1; gang <= design.numStrips(); ++gang) {
@@ -413,7 +415,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
                     }
                 }
                 if (nStrips[gasGap -1] && !stripSet) {
-                    const MuonGMR4::RadialStripDesign& design {copyMe->stripLayout(gasGap)};
+                    const MuonGMR4::RadialStripDesign& design{copyMe->stripLayout(stripHash)};
                     const int nCh = nStrips[gasGap -1];
                     for (int strip = 1; strip <= nCh; ++strip) {
                         botMountings[strip-1] = - design.stripLeftBottom(strip).x();
@@ -440,7 +442,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
         
         /// Define the local gasGap positions
         for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
-            const IdentifierHash layHash{ copyMe->constructHash(0, gasGap, false)};
+            const IdentifierHash layHash{copyMe->constructHash(0, gasGap, false)};
             /// In the sector frame, the gasGap is oriented along the x-axis
             const Amg::Vector3D translation{copyMe->globalToLocalTrans(gctx) * copyMe->center(gctx, layHash)};            
             newRE->setPlaneZ(translation.x(), gasGap);
@@ -959,8 +961,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                            <<" z-size: "<<testEle.getZsize()<<"/"<<testEle.getLongZsize());
  
     for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++gasGap) {
-        for (bool isStrip : {false, true}) {
+         for (bool isStrip : {false, true}) {
             const IdentifierHash layHash = refEle.constructHash(0, gasGap, isStrip);
+
             const Identifier layId = idHelper.channelID(refEle.identify(), gasGap, isStrip, 1);
             ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<" "<<refEle.numChannels(layHash)<<" "<<layHash);
             if (!refEle.numChannels(layHash)) continue;

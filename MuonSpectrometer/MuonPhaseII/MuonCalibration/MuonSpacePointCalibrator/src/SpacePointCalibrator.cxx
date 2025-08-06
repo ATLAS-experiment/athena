@@ -9,6 +9,7 @@
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/MdtTwinDriftCircle.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
+#include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonSpacePoint/UtilFunctions.h"
 #include "GaudiKernel/PhysicalConstants.h"
@@ -351,11 +352,12 @@ namespace MuonR4{
                 }
                 break;
             } case TgcStripType: {
-                if (!m_useTgcTime) {                   
-                    setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
+                if (!m_useTgcTime) {
+                    setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimRotNoTime, 
                                                                    muonMeas->localPosition<1>(), 
                                                                    muonMeas->localCovariance<1>(), link, trackState);
                     } else {
+                        ATH_MSG_WARNING("Tgc time calibration to be implemented...");
                     }
                 break;
             } 
