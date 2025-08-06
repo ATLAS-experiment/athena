@@ -58,10 +58,6 @@ namespace PanTau {
         
         double  m_Config_TauConstituents_Types_DeltaRCore = 0.0;
         double  m_Config_TauConstituents_PreselectionMinEnergy = 0.0;
-        
-        std::vector<double>  m_Config_CellBased_BinEdges_Eta;
-        std::vector<double>  m_Config_CellBased_EtaBinned_Pi0MVACut_1prong;
-        std::vector<double>  m_Config_CellBased_EtaBinned_Pi0MVACut_3prong;
        
 	bool m_init=false;
   public:

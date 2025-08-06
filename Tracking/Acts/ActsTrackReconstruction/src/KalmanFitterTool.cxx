@@ -204,7 +204,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
                                                        scaledCov,
                                                        Acts::ParticleHypothesis::pion());
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
   
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
@@ -249,7 +252,10 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
 
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
@@ -290,7 +296,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
     const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
-    MutableTrackContainer tracks;
+    ActsTrk::MutableTrackBackend trackContainerBackEnd;
+    ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+    ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                           std::move(multiTrajBackEnd));
+  
     // Perform the fit
     auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                                 initialParams, kfOptions, tracks);
@@ -333,8 +343,11 @@ KalmanFitterTool::fit(const std::vector< ATLASUncalibSourceLink> & clusterList,
   
   Acts::KalmanFitterOptions kfOptions = configureFit(tgContext, mfContext, calContext, targetSurface,
                                                      detail::SourceLinkType::xAODUnCalibMeas);
-                                                     
-  std::unique_ptr< MutableTrackContainer > tracks = std::make_unique< MutableTrackContainer >();
+
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  std::unique_ptr< MutableTrackContainer > tracks = std::make_unique< MutableTrackContainer >( std::move(trackContainerBackEnd),
+                                                                                               std::move(multiTrajBackEnd) );
  
   
   auto result = m_directFitter->fit(sourceLinks.begin(),
@@ -405,7 +418,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
   }
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
+  
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               initialParams, kfOptions, tracks);
@@ -494,7 +511,11 @@ KalmanFitterTool::fit(const EventContext& ctx,
                                                        scaledCov, Acts::ParticleHypothesis::pion());
 
 
-  MutableTrackContainer tracks{};
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
+  
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               scaledInitialParams, kfOptions, tracks);
@@ -508,28 +529,27 @@ KalmanFitterTool::fit(const Seed &seed,
                       const Acts::BoundTrackParameters& initialParams,
                       const Acts::GeometryContext& tgContext,
                       const Acts::MagneticFieldContext& mfContext,
-                      const Acts::CalibrationContext& calContext) const {
+                      const Acts::CalibrationContext& calContext,
+		      const Acts::Surface& targetSurface) const {
   
   std::vector<ATLASUncalibSourceLink> sourceLinks;
   sourceLinks.reserve(6);
 
-  std::vector<const Acts::Surface*> surfaces;
-  surfaces.reserve(6);
-  
   const auto& sps = seed.sp();
   for (const xAOD::SpacePoint* sp : sps) {
     const auto& measurements = sp->measurements();
     for (const xAOD::UncalibratedMeasurement *umeas : measurements) {     
       sourceLinks.emplace_back(umeas);
-      surfaces.push_back(m_unalibMeasSurfAcc.get(umeas));
     }
   }
-  return fit(sourceLinks, initialParams, tgContext, mfContext, calContext, surfaces.front());
+  return fit(sourceLinks, initialParams, tgContext, mfContext, calContext, &targetSurface);
 }
+  
   StatusCode
   KalmanFitterTool::fit(const EventContext& /*ctx*/,
       const TrackContainer::ConstTrackProxy& /*track*/,          
-      MutableTrackContainer& /*trackContainer*/) const
+      MutableTrackContainer& /*trackContainer*/,
+      const Acts::PerigeeSurface& /*pSurface*/) const
   {
     ATH_MSG_ERROR("Track refit method not implemented in KalmanFitterTool yet");
     return StatusCode::FAILURE;

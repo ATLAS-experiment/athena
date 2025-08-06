@@ -37,6 +37,7 @@ set(FTISource
   Root/TracksLoader.cxx
   Root/HitsLoader.cxx
   Root/SaltModelGraphConfig.cxx
+  Root/GNNDataLoader.cxx
 )
 
 if (NOT XAOD_STANDALONE)

@@ -60,11 +60,11 @@ namespace FlavorTagDiscriminants {
   void DL2HighLevel::decorate(const xAOD::BTagging& btag) const {
     m_dl2->decorate(btag);
   }
-  void DL2HighLevel::decorate(const xAOD::Jet& jet) const {
-    m_dl2->decorate(jet);
+  void DL2HighLevel::decorate(const xAOD::IParticle& i_jet) const {
+    m_dl2->decorate(i_jet);
   }
-  void DL2HighLevel::decorateWithDefaults(const SG::AuxElement& jet) const {
-    m_dl2->decorateWithDefaults(jet);
+  void DL2HighLevel::decorateWithDefaults(const xAOD::IParticle& i_jet) const {
+    m_dl2->decorateWithDefaults(i_jet);
   }
 
   FTagDataDependencyNames DL2HighLevel::getDataDependencyNames() const

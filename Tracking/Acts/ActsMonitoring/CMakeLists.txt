@@ -36,6 +36,7 @@ atlas_add_component( ActsMonitoring
                 xAODEventInfo
                 xAODInDetMeasurement
                 xAODMeasurementBase
+		ActsTruthLib
                 InDetMeasurementUtilitiesLib
                 HGTD_ReadoutGeometry )
 

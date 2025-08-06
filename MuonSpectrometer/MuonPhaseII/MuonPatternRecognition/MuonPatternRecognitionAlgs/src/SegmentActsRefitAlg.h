@@ -18,6 +18,7 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "AthenaKernel/IAthRNGSvc.h"
+#include "ActsEvent/AuxiliaryMeasurementHandler.h"
 
 
 namespace CLHEP{
@@ -50,7 +51,9 @@ namespace MuonR4{
             SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_linkKey{this, "LinkKey", m_writeKey, "prefitSegmentLink"};
             /** @brief  Decorate directly the local segment parameters on to the object. */
             SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_localParsKey{this, "LocalParsKey", m_writeKey, "localSegPars"};
-
+            /** @brief Decorate the seed parameters entering the fit */
+            SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_seedParsKey{this, "SeedParsKey", m_writeKey, "seedSegPars"};
+            
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Track fitting tool */
@@ -65,6 +68,11 @@ namespace MuonR4{
             ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
             /** @brief Smear interval in terms of standard deviations */
             Gaudi::Property<double> m_smearRange{this, "SmearRange", 3.};
+            /** @brief Key to setup a surface container for the external constraints */
+            SG::WriteHandleKey<xAOD::TrackSurfaceContainer> m_surfKey{this, "SurfaceKey", "RefitSegmentSurf"};
+              
+            ActsTrk::AuxiliaryMeasurementHandler m_auxMeasProv{this};
+
 
     };
 }

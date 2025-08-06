@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkSurfaces/Surface.h"
@@ -48,12 +48,11 @@ namespace ActsTrk {
         cov_r = std::min(cov_r, m_maxVarianceR.value());
       }
 
-	std::vector< const xAOD::UncalibratedMeasurement* > measLinks({&cluster});
 	sp.setSpacePoint(cluster.identifierHash(),
 			 cluster.globalPosition(),
 			 cov_r, 
 			 cov_z,
-			 measLinks);
+			 std::vector< const xAOD::UncalibratedMeasurement* >({&cluster}));
 	
         return StatusCode::SUCCESS;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/DerclcAng.h"
@@ -21,7 +21,7 @@ namespace Trk {
 
 void calcPhiConstraint( VKPhiConstraint * cnst)
 {
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = static_cast<VKConstraintBase*>( cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     int NTRK = vk->TrackList.size();
     int i,j;
@@ -60,7 +60,7 @@ void calcPhiConstraint( VKPhiConstraint * cnst)
 
 void calcThetaConstraint( VKThetaConstraint * cnst)
 {
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = static_cast<VKConstraintBase*>( cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     int NTRK = vk->TrackList.size();
     int i,j;
@@ -98,7 +98,7 @@ void calcThetaConstraint( VKThetaConstraint * cnst)
 
 void calcPlaneConstraint( VKPlaneConstraint * cnst)
 {
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = static_cast<VKConstraintBase*>( cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     int NTRK = vk->TrackList.size();
     double curV[3] = {vk->refIterV[0]+vk->cnstV[0], vk->refIterV[1]+vk->cnstV[1],vk->refIterV[2]+vk->cnstV[2]};

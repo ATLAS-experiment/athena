@@ -5,7 +5,7 @@
 /**
 * @file ITkStripCablingData/src/ITkStripCablingData.cxx
 * @author Edson Carquin
-* @date September 2024
+* @author Daniel Torres
 * @brief based on ITkPixelCabling package
 **/
 
@@ -58,6 +58,7 @@ operator>>(std::istream & is, ITkStripCablingData & cabling){
     const ITkStripOnlineId onlineId(onlineInt);
     cabling.m_offline2OnlineMap[offlineId] = onlineId;
     cabling.m_hash2OnlineIdArray[indx] = onlineId;
+    cabling.m_rodIdSet.insert(onlineId.rod());
     words.clear();
     indx++;
     

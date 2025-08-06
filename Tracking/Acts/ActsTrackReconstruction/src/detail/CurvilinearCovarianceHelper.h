@@ -65,20 +65,26 @@ namespace ActsTrk::detail {
    {
       if (param.covariance().has_value()) {
          Acts::FreeVector freeParams = Acts::transformBoundToFreeParameters(
-			 param.referenceSurface(), tgContext, param.parameters());
+            param.referenceSurface(), tgContext, param.parameters());
          Acts::Vector3 position = freeParams.segment<3>(Acts::eFreePos0);
          Acts::Vector3 direction = freeParams.segment<3>(Acts::eFreeDir0);
-         Acts::BoundMatrix b2c;
-         Acts::detail::boundToCurvilinearTransportJacobian(direction, // magnFieldVect.normalized(),
-                                                           param.referenceSurface().boundToFreeJacobian(tgContext, position, direction),
-                                                           Acts::FreeMatrix::Identity(),
-                                                           computeFreeToPathDerivatives(direction,
-                                                                                        param.parameters()[Acts::eBoundQOverP],
-                                                                                        magnFieldVect,
-                                                                                        particle_hypothesis),
-                                                           b2c);
 
-         return b2c * param.covariance().value() * b2c.transpose();
+         Acts::BoundToFreeMatrix boundToFreeJacobian = param.referenceSurface().boundToFreeJacobian(tgContext, position, direction);
+         Acts::FreeMatrix freeTransportJacobian = Acts::FreeMatrix::Identity();
+         Acts::FreeToBoundMatrix freeToBoundJacobian;
+         Acts::FreeVector freeToPathDerivatives = computeFreeToPathDerivatives(direction,
+                                                                               param.parameters()[Acts::eBoundQOverP],
+                                                                               magnFieldVect,
+                                                                               particle_hypothesis);
+         Acts::BoundMatrix fullTransportJacobian;
+         Acts::detail::boundToCurvilinearTransportJacobian(direction,
+                                                           boundToFreeJacobian,
+                                                           freeTransportJacobian,
+                                                           freeToBoundJacobian,
+                                                           freeToPathDerivatives,
+                                                           fullTransportJacobian);
+
+         return fullTransportJacobian * param.covariance().value() * fullTransportJacobian.transpose();
       }
       else {
          return {};

@@ -3,7 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AnalysisAlgorithmsConfig.ConfigSequence import filter_dsids
+from AnalysisAlgorithmsConfig.ConfigBlock import filter_dsids
 from AthenaCommon.Logging import logging
 import copy, re
 
@@ -80,6 +80,12 @@ class OutputAnalysisConfig (ConfigBlock):
             "The default is True.")
         # helper to protect for second pass
         self.validated = False
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None and self.postfix != '':
+            return self.postfix
+        return self.treeName
 
     @staticmethod
     def branchSortOrder (rule):
@@ -251,30 +257,25 @@ class OutputAnalysisConfig (ConfigBlock):
                     outputName += '_%SYS%'
                 myVars.add(f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}")
 
-        if self.postfix:
-            postfix = self.postfix
-        else:
-            postfix = self.treeName
-
         # Add an ntuple dumper algorithm:
-        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', f'TreeMaker{postfix}' )
+        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
         treeMaker.TreeName = self.treeName
         treeMaker.RootStreamName = self.streamName
         # the auto-flush setting still needs to be figured out
         #treeMaker.TreeAutoFlush = 0
 
         if self.vars or autoVars:
-            ntupleMaker = self.createOutputAlgs(config, f'NTupleMaker{postfix}', self.vars | autoVars)
+            ntupleMaker = self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
 
         if self.metVars or autoMetVars:
-            ntupleMaker = self.createOutputAlgs(config, f'MetNTupleMaker{postfix}', self.metVars | autoMetVars, isMet=True)
+            ntupleMaker = self.createOutputAlgs(config, 'MetNTupleMaker', self.metVars | autoMetVars, isMet=True)
             ntupleMaker.termName = self.metTermName
 
         if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
-            ntupleMaker = self.createOutputAlgs(config, f'TruthMetNTupleMaker{postfix}', self.truthMetVars | autoTruthMetVars, isMet=True)
+            ntupleMaker = self.createOutputAlgs(config, 'TruthMetNTupleMaker', self.truthMetVars | autoTruthMetVars, isMet=True)
             ntupleMaker.termName = self.truthMetTermName
 
-        treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
+        treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
         treeFiller.TreeName = self.treeName
         treeFiller.RootStreamName = self.streamName
 

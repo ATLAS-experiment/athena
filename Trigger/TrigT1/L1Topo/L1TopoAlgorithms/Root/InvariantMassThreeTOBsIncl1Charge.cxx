@@ -25,7 +25,7 @@
 #include "L1TopoAlgorithms/InvariantMassThreeTOBsIncl1Charge.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
-
+#include "L1TopoSimulationUtils/Helpers.h"
 
 REGISTER_ALG_TCS(InvariantMassThreeTOBsIncl1Charge)
 
@@ -189,6 +189,10 @@ TCS::InvariantMassThreeTOBsIncl1Charge::processBitCorrect( const std::vector<TCS
 	      }
             }
           }
+        for (unsigned int i=0; i < numberOutputBits(); ++i) {
+          bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1[i]);
+          output[i]->setAmbiguityFlag(hasAmbiguousInputs);
+        }
    } else {
 
       TCS_EXCEPTION("InvariantMassThreeTOBsIncl1Charge alg must have 1 input list, but got " << input.size());

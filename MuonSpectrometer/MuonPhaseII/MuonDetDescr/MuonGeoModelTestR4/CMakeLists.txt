@@ -40,7 +40,7 @@ atlas_add_test( testR3Geometry_MTech
 #### Standard geometry dumping test R3 (data)
 atlas_add_test( testR3GeometryData
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel  --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
@@ -49,7 +49,7 @@ atlas_add_test( testR3GeometryData
 #### Standard geometry dumping test R4 (MC)
 atlas_add_test( testR4Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --defaultGeoFile RUN4
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
@@ -63,7 +63,7 @@ atlas_add_test( checkStripDesign
 ##### Simulation test R3
 atlas_add_test( testR3SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 

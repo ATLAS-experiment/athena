@@ -2,17 +2,17 @@
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
+#include "eFEXFPGATowerIdProvider.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <string>
+
 #include "PathResolver/PathResolver.h"
 
 LVL1::eFEXFPGATowerIdProvider::eFEXFPGATowerIdProvider(const std::string &type, const std::string &name, const IInterface *parent):
   AthAlgTool(type, name, parent)
 {
-  declareInterface<IeFEXFPGATowerIdProvider>(this);
+  declareInterface<eFEXFPGATowerIdProvider>(this);
 }
 
 StatusCode LVL1::eFEXFPGATowerIdProvider::initialize()
@@ -58,6 +58,7 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::setAddress(const std::string& inputadd
 
 StatusCode LVL1::eFEXFPGATowerIdProvider::getRankedTowerIDinFPGA(int eFEXID, int FPGAID, int(&towerlist)[10][6]) const {
   int FPGAindex{ getFPGAIndex(eFEXID, FPGAID) };
+  if (FPGAindex<0) return StatusCode::FAILURE;
   if (m_towerrankingcache[FPGAindex]) {
     // obtain the tower order from cache
     int vectorindex{ 0 };
@@ -85,6 +86,12 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::getRankedTowerIDineFEX(int eFEXID, int
   int FPGA1index{ getFPGAIndex(eFEXID, 1) };
   int FPGA2index{ getFPGAIndex(eFEXID, 2) };
   int FPGA3index{ getFPGAIndex(eFEXID, 3) };
+  //
+  auto is_negative = [](int val){return val<0;};
+  if (std::ranges::any_of(std::initializer_list{FPGA0index, FPGA1index, FPGA2index, FPGA3index}, is_negative)){
+    return StatusCode::FAILURE;
+  }
+  
 
   if (!m_towerrankingcache[FPGA0index] || !m_towerrankingcache[FPGA1index] ||
       !m_towerrankingcache[FPGA2index] || !m_towerrankingcache[FPGA3index]) {
@@ -143,7 +150,7 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::rankTowerinFPGA(int FPGAindex)
   // This function determines the order of towers in an FPGA.
   // Towers are sorted using eta and phi, and 
   // then store the result in m_towerrankingcache object for future use.
-
+  if (FPGAindex < 0) return StatusCode::FAILURE;
   // If the tower order of an FPGA has not been determined yet, start sorting.
   if (!m_towerrankingcache[FPGAindex]) {
     std::vector<std::pair<int, int>> rankingmap;

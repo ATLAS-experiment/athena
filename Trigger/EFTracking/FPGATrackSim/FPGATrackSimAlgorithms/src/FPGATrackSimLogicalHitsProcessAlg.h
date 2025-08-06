@@ -98,6 +98,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
         // Flags
+        Gaudi::Property<int> m_SetTruthParametersForTracks {this, "SetTruthParametersForTracks", -1, "flag to override track parameters and set them to the truth values"};
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
         Gaudi::Property<bool> m_doOverlapRemoval {this, "doOverlapRemoval", true , "flag to enable the overlap removal"}; // defaul true to not change functionality

@@ -1,5 +1,3 @@
-// -*- C++ -*-
-
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
@@ -13,7 +11,6 @@
  * @author Shaun Roe
  * @author Edson Carquin
  * @author Daniel Torres
- * @date 06 March, 2025
  **/
 
 #include "ITkStripCabling/IITkStripCablingTool.h"
@@ -51,6 +48,8 @@ class ITkStripCablingTool: public extends<AthAlgTool, IITkStripCablingTool> {
   //@name ITkStripCablingTool methods implemented, these are visible to clients
   //@{
   
+  virtual IdentifierHash getHashFromOnlineId(const ITkStripOnlineId& onlineId, const EventContext& ctx, const bool withWarnings = true) const override;
+
   /// return the online Id, given a hash (used by simulation encoders)
   virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash, const EventContext& ctx) const override;
   virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash) const override;    

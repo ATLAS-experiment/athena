@@ -27,11 +27,11 @@ int getCellColumn(const StripClusteringTool::Cell& cell)
 }
 
 // Required by ACTS clusterization
-static
-int& getCellLabel(StripClusteringTool::Cell& cell)
+static inline void clusterReserve(StripClusteringTool::Cluster& cl,
+				  std::size_t n)
 {
-    return cell.label;
-}
+  cl.ids.reserve(n);
+} 
 
 // Required by ACTS clusterization
 static

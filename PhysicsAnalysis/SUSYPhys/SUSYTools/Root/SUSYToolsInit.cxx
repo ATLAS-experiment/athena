@@ -1683,22 +1683,17 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         {"HLT_tau160L1TAU100_medium1_tracktwo", "HLT_tau160_medium1_tracktwo_L1TAU100"},
         // whole 2018 data taking period
         {"HLT_tau25_medium1_tracktwoEF", "HLT_tau25_medium1_tracktwoEF"},
-        {"HLT_tau35L1TAU12IM_medium1_tracktwoEF", "HLT_tau35_medium1_tracktwoEF_L1TAU12IM"},
         {"HLT_tau35_medium1_tracktwoEF", "HLT_tau35_medium1_tracktwoEF"},
         {"HLT_tau60_medium1_tracktwoEF", "HLT_tau60_medium1_tracktwoEF"},
         {"HLT_tau80L1TAU60_medium1_tracktwoEF", "HLT_tau80_medium1_tracktwoEF_L1TAU60"},
         {"HLT_tau160L1TAU100_medium1_tracktwoEF", "HLT_tau160_medium1_tracktwoEF_L1TAU100"},
-        // 2018 data after TS1, run >= 355261
-        {"HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau25_medium1_tracktwoEF,HLT_tau25_mediumRNN_tracktwoMVA"},
-        {"HLT_tau35L1TAU12IM_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau35_medium1_tracktwoEF_L1TAU12IM,HLT_tau35_mediumRNN_tracktwoMVA_L1TAU12IM"},
-        {"HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau35_medium1_tracktwoEF,HLT_tau35_mediumRNN_tracktwoMVA"},
-        {"HLT_tau60_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau60_medium1_tracktwoEF,HLT_tau60_mediumRNN_tracktwoMVA"},
-        {"HLT_tau80L1TAU60_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau80_medium1_tracktwoEF_L1TAU60,HLT_tau80_mediumRNN_tracktwoMVA_L1TAU60"},
-        {"HLT_tau160L1TAU100_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau160_medium1_tracktwoEF_L1TAU100,HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100"}
       };
 
       if (m_isRun3){
           m_tau_trig_support = {
+            // 2022, 2023
+            {"HLT_tau25_mediumRNN_tracktwoMVA", "HLT_tau25_mediumRNN_tracktwoMVA"},
+            {"HLT_tau35_mediumRNN_tracktwoMVA", "HLT_tau35_mediumRNN_tracktwoMVA"},
             // 2022, 2023 75-1800 bunches
             {"HLT_tau160_mediumRNN_tracktwoMVA", "HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100"},
             // 2023 from 400 bunches
@@ -1714,12 +1709,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( tau_trigSF->setProperty("JetIDLevel", iTauID) );
         ATH_CHECK( tau_trigSF->setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( tau_trigSF->setProperty("useFastSim", isAtlfast()) );
-        if (m_isRun3){
-            ATH_CHECK( tau_trigSF->setProperty("RecommendationTag", m_tauEffToolRecommendationTag) );
-        } else if (m_tauEffToolRecommendationTag=="2025-prerec"){
-            ATH_MSG_WARNING("mc20 tau triggers not supported in 2025-prerec, failling back to 2022-prerec");
-            ATH_CHECK( tau_trigSF->setProperty("RecommendationTag", "2022-prerec") );
-        }
+        ATH_CHECK( tau_trigSF->setProperty("RecommendationTag", m_tauEffToolRecommendationTag) );
         if (m_isRun3){ ATH_CHECK( tau_trigSF->setProperty("Campaign", m_mcCampaign) );}
         else         { ATH_CHECK( tau_trigSF->setProperty("Campaign", "mc20") );}
         ATH_CHECK( tau_trigSF->initialize() );

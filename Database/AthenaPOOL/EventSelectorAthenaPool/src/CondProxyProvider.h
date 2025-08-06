@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CONDPROXYPROVIDER_H
@@ -14,6 +14,7 @@
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaBaseComps/AthService.h"
+#include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
 
 // Forward declarations
 namespace pool {
@@ -22,7 +23,6 @@ namespace pool {
 class ISvcLocator;
 class PoolCollectionConverter;
 class StoreGateSvc;
-class IAthenaPoolCnvSvc;
 
 /** @class CondProxyProvider
  *  @brief This class is the AddressProvider for conditions data.
@@ -54,7 +54,7 @@ public: // Constructor and Destructor
                                     const EventContext& ctx) override;
 
 private: // data
-   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc;
+   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc"};
 
    mutable PoolCollectionConverter* m_poolCollectionConverter ATLAS_THREAD_SAFE;
    unsigned int m_contextId;

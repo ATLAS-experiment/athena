@@ -17,6 +17,10 @@ class BootstrapGeneratorConfig(ConfigBlock):
             "bootstrapped weights. The default is bootstrapWeights.")
         self.setOptionValue('skipOnMC', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # no instance name needed for singleton block
+
     def makeAlgs(self, config):
 
         alg = config.createAlgorithm( 'CP::BootstrapGeneratorAlg', 'BootstrapGenerator')

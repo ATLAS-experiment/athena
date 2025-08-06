@@ -57,9 +57,14 @@ def IOVDbSvcCfg(flags, **kwargs):
     result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)
 
     # Set up POOLSvc with appropriate catalogs
-    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg, AthenaPoolCnvSvcCfg
+    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg
     result.merge(PoolSvcCfg(flags, withCatalogs=True))
-    result.merge(AthenaPoolCnvSvcCfg(flags))
+    if flags.MP.UseSharedReader or flags.MP.UseSharedWriter:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+        result.merge(AthenaPoolSharedIOCnvSvcCfg(flags))
+    else:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        result.merge(AthenaPoolCnvSvcCfg(flags))
     result.addService(CompFactory.CondSvc())
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 

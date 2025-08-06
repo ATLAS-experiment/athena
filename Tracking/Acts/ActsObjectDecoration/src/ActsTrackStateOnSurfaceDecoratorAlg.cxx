@@ -6,6 +6,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace ActsTrk {
 

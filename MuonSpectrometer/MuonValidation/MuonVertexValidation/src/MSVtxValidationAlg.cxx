@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "TrigDecisionTool/ChainGroup.h"
 
 #include "MSVtxValidationAlg.h"
 #include "Utils.h"
@@ -9,6 +11,7 @@
 using namespace MSVtxValidationAlgUtils;    
 
 namespace{
+    constexpr int    default_d = -99999;
     constexpr float  default_f = -99999.;
 }
 
@@ -24,9 +27,21 @@ StatusCode MSVtxValidationAlg::initialize() {
     ATH_CHECK(m_TrackletKey.initialize());
     ATH_CHECK(m_MSVtxKey.initialize());
 
+    ATH_CHECK(m_trigDec.retrieve());
+    ATH_CHECK(m_matchingTool.retrieve());
+
     // attach branches to the tree
     m_tree.addBranch(std::make_unique<MuonVal::EventInfoBranch>(m_tree, 0));
 
+    // truth TrackParticles
+    m_truthParticle = std::make_shared<MuonVal::IParticleFourMomBranch>(m_tree, "truthParticle");
+    m_truthParticle->addVariableGeV<float>(default_f, "m");
+    m_truthParticle->addVariable<int>(default_d, "pdgId");
+    m_truthParticle->addVariable<float>(default_f, "pX");
+    m_truthParticle->addVariable<float>(default_f, "pY");
+    m_truthParticle->addVariable<float>(default_f, "pZ");
+    m_tree.addBranch(m_truthParticle);
+    
     // portal
     m_portal = std::make_shared<MuonVal::IParticleFourMomBranch>(m_tree, "portal");
     m_portal->addVariableGeV<float>(default_f, "m");
@@ -37,24 +52,11 @@ StatusCode MSVtxValidationAlg::initialize() {
     m_llp->addVariableGeV<float>(default_f, "m");
     m_tree.addBranch(m_llp);
 
-    // truth displaced vertex
-    m_llpVtx = std::make_shared<MuonVal::ThreeVectorBranch>(m_tree, "llpVtx_");
-    m_tree.addBranch(m_llpVtx);
-
-    // reconstructed MS vertex
-    m_msVtx = std::make_shared<MuonVal::ThreeVectorBranch>(m_tree, "msVtx_");
-    m_tree.addBranch(m_msVtx);
     if (!m_computeIso){
         m_tree.disableBranch("msVtx_isoTracks_mindR");
         m_tree.disableBranch("msVtx_isoTracks_pTsum");
         m_tree.disableBranch("msVtx_isoJets_mindR");
     }
-
-    // tracklets
-    m_trklet_pos = std::make_shared<MuonVal::ThreeVectorBranch>(m_tree, "trklet_pos");
-    m_trklet_mom = std::make_shared<MuonVal::ThreeVectorBranch>(m_tree, "trklet_mom");
-    m_tree.addBranch(m_trklet_pos);
-    m_tree.addBranch(m_trklet_mom);
 
     // muon segments: dumps the entire muon segment container without needing an explicit fill call
     m_muonSeg = std::make_shared<MuonPRDTest::SegmentVariables>(m_tree, m_MuonSegKey, "muonSeg", msgLevel());
@@ -132,13 +134,18 @@ StatusCode MSVtxValidationAlg::initialize() {
 
 StatusCode MSVtxValidationAlg::fillTruth(const EventContext& ctx){
     // Fill truth particle branches and histograms
-    SG::ReadHandle<xAOD::TruthParticleContainer> truth_particles{m_TruthParticleKey, ctx};
-    ATH_CHECK(truth_particles.isPresent());
+    const xAOD::TruthParticleContainer* truth_particles{nullptr};
+    ATH_CHECK(SG::get(truth_particles, m_TruthParticleKey, ctx));
 
-    // collect portal, LLPs
+    // dump the TruthParticle information and collect portal, LLPs
     std::vector<const xAOD::TruthParticle*> portals{}, llps{};
     for(const xAOD::TruthParticle* tp : *truth_particles){
         if (!tp) continue;
+        m_truthParticle->push_back(tp);
+        // set default link index to vertex to -1
+        m_truthParticle_llpVtx_link_tmp->push_back(-1); // adjust in LLP children loop
+        m_truthParticle_jetVtx_link_tmp->push_back(-1); // adjust in fillJet
+
         // fill vector of portal particles, skipping the particle if it is a self-decay
         if(std::abs(tp->pdgId()) == m_pdgId_portal){
           bool selfdecay = false;
@@ -166,7 +173,7 @@ StatusCode MSVtxValidationAlg::fillTruth(const EventContext& ctx){
 
         if(llp->hasDecayVtx()){
             const xAOD::TruthVertex* decVtx = llp->decayVtx();
-            m_llpVtx->push_back(decVtx->v4().Vect());
+            m_llpVtx_pos.push_back(decVtx->v4().Vect());
             m_llpVtx_Lxy.push_back(decVtx->perp());
             m_llpVtx_ctau.push_back(getCTau(decVtx));
             ++num_vtx;
@@ -202,16 +209,18 @@ StatusCode MSVtxValidationAlg::fillTruth(const EventContext& ctx){
 
         // LLP children
         if (llp->hasDecayVtx() && llp->nChildren()>0 && !llp->isGenStable()){
-            std::vector<const xAOD::TruthParticle*> genStableChildren = getGenStableChildren(llp);
-            m_llp_Nkids.push_back((int)genStableChildren.size());
-            for (const xAOD::TruthParticle *kid : genStableChildren){
-                m_llpKid_pdgid.push_back(kid->pdgId());
-                m_llpKid_llpLink.push_back(llp_idx);
-            }
+            std::vector<const xAOD::TruthParticle*> stableChildren = getStableChildren(llp, m_llp_genStableChildren);
+            m_llp_Nchildren.push_back((int)stableChildren.size());
+            // update links between LLP and its stable children
+            for (const xAOD::TruthParticle *child : stableChildren) m_truthParticle_llpVtx_link_tmp->at(child->index()) = llp_idx;
         }
         ++llp_idx;
     }
     m_llpVtx_N = num_vtx;
+    // copy linking data from temp vector and clear the temp vector for the next event
+    for (int link : *m_truthParticle_llpVtx_link_tmp) m_truthParticle_llpVtx_link.push_back(link);
+    m_truthParticle_llpVtx_link_tmp->clear();
+
 
     return StatusCode::SUCCESS;
 }
@@ -220,11 +229,70 @@ StatusCode MSVtxValidationAlg::fillTruth(const EventContext& ctx){
 StatusCode MSVtxValidationAlg::fillJet(const EventContext& ctx){
     if (!m_readJets) return StatusCode::SUCCESS;
 
-    SG::ReadHandle Jets{m_JetKey, ctx};
-    ATH_CHECK(Jets.isPresent());
+    const xAOD::JetContainer* jets{nullptr};
+    ATH_CHECK(SG::get(jets, m_JetKey, ctx));
 
-    m_jet_N = Jets->size();
-    for (const xAOD::Jet* jet : *Jets) m_jet->push_back(jet);
+    const Trig::ChainGroup* chain = m_trigDec->getChainGroup(m_triggerString);
+    const std::vector<std::string> triggerNames = chain->getListOfTriggers();
+    // get the trigger decision for this event
+    std::vector<bool> triggerPassed{};
+    for (const std::string& triggerName : triggerNames) {
+        if (m_trigDec->isPassed(triggerName)) triggerPassed.push_back(true);
+        else triggerPassed.push_back(false);
+    }
+
+    m_jet_N = jets->size();
+    bool jetFiredTrigger = false;
+    for (const xAOD::Jet* jet : *jets) {
+        m_jet->push_back(jet);
+        // fill trigger decisions for each jet 
+        for (size_t i = 0; i < triggerNames.size(); ++i) {
+            if (!triggerPassed[i]) continue; // skip if trigger not passed
+            if (m_matchingTool->match(*jet, triggerNames[i], m_jetTriggerMatchingDR, false)) {
+                jetFiredTrigger = true;
+                m_jet_triggers.push_back(1);
+                break; // this jet has fired one for the triggers in the chain so do not need to check the other triggers
+            }
+        }
+        if (!jetFiredTrigger) m_jet_triggers.push_back(0);
+        jetFiredTrigger = false; // reset for the next jet
+
+        if (m_computeJetVtx) ATH_CHECK(fillJetVtx(ctx, jet));
+    }
+
+    // copy linking data from temp vector and clear the temp vector for the next event
+    for (int link : *m_truthParticle_jetVtx_link_tmp) m_truthParticle_jetVtx_link.push_back(link);
+    m_truthParticle_jetVtx_link_tmp->clear();
+
+    return StatusCode::SUCCESS;
+}
+
+
+StatusCode MSVtxValidationAlg::fillJetVtx(const EventContext& ctx, const xAOD::Jet* jet){
+    // fill jet branches with an approximation with displaced vertex approx
+    const xAOD::TruthParticleContainer* truth_particles{nullptr};
+    ATH_CHECK(SG::get(truth_particles, m_TruthParticleKey, ctx));
+
+    JetVtxApprox jetVtx = getJetVtxApprox(jet, *truth_particles);
+
+    if (!jetVtx.vtx) {
+        m_jet_jetVtx_link.push_back(-1); // no suitable truth particles are close to the jet such that no vertex can be identified
+        return StatusCode::SUCCESS;
+    }
+    size_t currNjetVtx = m_jetVtx_NChildren.size(); // the current number of jet vertices
+    m_jetVtx_pos.push_back(jetVtx.vtx->v4().Vect());
+    m_jetVtx_jet_dEta.push_back(jet->eta() - jetVtx.vtx->v4().Eta());
+    m_jetVtx_jet_dPhi.push_back(jet->p4().DeltaPhi(jetVtx.vtx->v4()));
+    m_jetVtx_NChildren.push_back(jetVtx.nChildren);
+    m_jetVtx_chainDepth.push_back(jetVtx.decayDepth);
+    
+    // link between jet and jet vertex
+    m_jet_jetVtx_link.push_back(currNjetVtx);
+    // update the linking between TruthParticles and the jet vertex 
+    for (auto tpLink : jetVtx.vtx->outgoingParticleLinks()) {
+        if (!tpLink) continue;
+        m_truthParticle_jetVtx_link_tmp->at(tpLink.index()) = currNjetVtx; // each TP daughter of the jet vertex is labeled by the jet vertex index
+    }
 
     return StatusCode::SUCCESS;
 }
@@ -233,8 +301,8 @@ StatusCode MSVtxValidationAlg::fillJet(const EventContext& ctx){
 StatusCode MSVtxValidationAlg::fillMet(const EventContext& ctx){
     if (!m_readMET) return StatusCode::SUCCESS;
 
-    SG::ReadHandle MET{m_MetKey, ctx};
-    ATH_CHECK(MET.isPresent());
+    const xAOD::MissingETContainer* MET{nullptr};
+    ATH_CHECK(SG::get(MET, m_MetKey, ctx));
 
     m_met = (*MET)["Final"]->met()/Gaudi::Units::GeV;
     m_met_x = (*MET)["Final"]->mpx()/Gaudi::Units::GeV;
@@ -248,11 +316,11 @@ StatusCode MSVtxValidationAlg::fillMet(const EventContext& ctx){
 
 StatusCode MSVtxValidationAlg::fillTracklets(const EventContext& ctx){
     
-    SG::ReadHandle MSOnlyTracklets{m_TrackletKey , ctx};
-    ATH_CHECK(MSOnlyTracklets.isPresent());
+    const xAOD::TrackParticleContainer* msOnlyTracklets{nullptr};
+    ATH_CHECK(SG::get(msOnlyTracklets, m_TrackletKey, ctx));
 
-    m_trklet_N = MSOnlyTracklets->size();
-    for(const xAOD::TrackParticle* mstrklet : *MSOnlyTracklets){
+    m_trklet_N = msOnlyTracklets->size();
+    for(const xAOD::TrackParticle* mstrklet : *msOnlyTracklets){
         // perigee parameters
         m_trklet_d0.push_back(mstrklet->d0());
         m_trklet_z0.push_back(mstrklet->z0());
@@ -265,8 +333,8 @@ StatusCode MSVtxValidationAlg::fillTracklets(const EventContext& ctx){
         const Trk::Perigee &tkl_perigee = mstrklet->perigeeParameters();
         const Amg::Vector3D &trklet_pos = tkl_perigee.position();
         const Amg::Vector3D &trklet_mom = tkl_perigee.momentum()/Gaudi::Units::GeV;
-        m_trklet_pos->push_back(trklet_pos);
-        m_trklet_mom->push_back(trklet_mom);
+        m_trklet_pos.push_back(trklet_pos);
+        m_trklet_mom.push_back(trklet_mom);
         // set default link index to vertex to -1 and adjust when in fillMSVtx
         m_trklet_vtxLink.push_back(-1);
     }
@@ -286,13 +354,14 @@ void MSVtxValidationAlg::fillHits(const xAOD::Vertex* vtx, const std::string& de
 
 StatusCode MSVtxValidationAlg::fillMSVtx(const EventContext& ctx){
     // Fill MS vertex branches
-    SG::ReadHandle MSVertices{m_MSVtxKey, ctx};
-    ATH_CHECK(MSVertices.isPresent());
+    const xAOD::VertexContainer* msVertices{nullptr};
+    ATH_CHECK(SG::get(msVertices, m_MSVtxKey, ctx));
+
 
     // fill MSVtx branches and histograms when the read handle is present
-    m_msVtx_N = MSVertices->size();
-    for(const xAOD::Vertex* msVtx : *MSVertices){
-        m_msVtx->push_back(msVtx->position());
+    m_msVtx_N = msVertices->size();
+    for(const xAOD::Vertex* msVtx : *msVertices){
+        m_msVtx_pos.push_back(msVtx->position());
         m_msVtx_chi2.push_back(msVtx->chiSquared());
         m_msVtx_nDoF.push_back(msVtx->numberDoF());
 
@@ -336,16 +405,16 @@ StatusCode MSVtxValidationAlg::fillMSVtx(const EventContext& ctx){
 StatusCode MSVtxValidationAlg::fillMSVtxIso(const EventContext& ctx){
     // Fill the isolation variables for the MS vertices
     if (!m_computeIso) return StatusCode::SUCCESS;
+    
+    const xAOD::VertexContainer* msVertices{nullptr};
+    ATH_CHECK(SG::get(msVertices, m_MSVtxKey, ctx));
+    const xAOD::TrackParticleContainer* tracks{nullptr};
+    ATH_CHECK(SG::get(tracks, m_TrackParticleKey, ctx));
+    const xAOD::JetContainer* jets{nullptr};
+    ATH_CHECK(SG::get(jets, m_JetKey, ctx));
 
-    SG::ReadHandle MSVertices{m_MSVtxKey, ctx};
-    ATH_CHECK(MSVertices.isPresent());
-    SG::ReadHandle Tracks{m_TrackParticleKey, ctx};
-    ATH_CHECK(Tracks.isPresent());
-    SG::ReadHandle Jets{m_JetKey, ctx};
-    ATH_CHECK(Jets.isPresent());
-
-    for(const xAOD::Vertex* msVtx : *MSVertices){
-        VtxIso iso = getIso(msVtx, *Tracks, *Jets, m_trackIso_pT, m_softTrackIso_R, m_jetIso_pT, m_jetIso_LogRatio);
+    for(const xAOD::Vertex* msVtx : *msVertices){
+        VtxIso iso = getIso(msVtx, *tracks, *jets, m_trackIso_pT, m_softTrackIso_R, m_jetIso_pT, m_jetIso_LogRatio);
         m_msVtx_isoTracks_mindR.push_back(iso.track_mindR);
         m_msVtx_isoTracks_pTsum.push_back(iso.track_pTsum);
         m_msVtx_isoJets_mindR.push_back(iso.jet_mindR);
@@ -361,8 +430,9 @@ StatusCode MSVtxValidationAlg::execute() {
     const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // event variables
-    SG::ReadHandle eventInfo{m_evtKey, ctx};
-    ATH_CHECK(eventInfo.isPresent());
+    const xAOD::EventInfo* eventInfo{nullptr};
+    ATH_CHECK(SG::get(eventInfo, m_evtKey, ctx));
+
     ATH_MSG_DEBUG("Start to run over event "<<eventInfo->eventNumber()<<" in run" <<eventInfo->runNumber());
 
     ATH_CHECK(fillTruth(ctx));

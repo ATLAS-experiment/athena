@@ -242,14 +242,16 @@ namespace Athena_test
                       "UnLockedDelete", !LOCKED, DELETE).isSuccess());
     assert(foo12.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
-    assert(rSG.record(cpFoo=new Foo(13), "Const").isSuccess());
+    cpFoo = new Foo(13);
+    assert(rSG.record(cpFoo, "Const").isSuccess());
 
     std::unique_ptr<const Foo> foo13a (new Foo(130));
     assert(rSG.record(std::move(foo13a), "Const2").isSuccess());
     assert(foo13a.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
     //FIXME!!! assert(rSG.record(cpFoo=new Foo(14), "ConstUnLocked", !LOCKED).isSuccess());
-    SGASSERTERROR(rSG.record(cpFoo=new Foo(15), "Const").isSuccess());
+    cpFoo = new Foo(15);
+    SGASSERTERROR(rSG.record(cpFoo, "Const").isSuccess());
 
 
     /// Test overwriting.
@@ -733,11 +735,10 @@ namespace Athena_test {
 
   void testClear(::StoreGateSvc& rSG) {
 
-    Foo* pFoo;    
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     Bar* pBar = new Bar();
     Base* bDum(0);
     assert(rSG.record(pBar, "aBar", LOCKED, DELETE).isSuccess());
@@ -785,8 +786,8 @@ namespace Athena_test {
     //try to put a VersionedKey on top
     VersionedKey myKey("aVersObj", 77);
     assert(rSG.record(new Foo(77), (std::string)myKey).isSuccess());
-    const Foo* pFoo77(0);
-    assert(0 != (pFoo77 = rSG.retrieve<Foo>(myKey)));
+    const Foo* pFoo77 = rSG.retrieve<Foo>(myKey);
+    assert(0 != pFoo77);
     assert(pFoo77->i() == 77);
     //test that we can retrieve the same object with an unversioned key
     assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
@@ -831,11 +832,11 @@ namespace Athena_test {
     cout << "\n*** StoreGateSvcClient_test Keys BEGINS ***" << endl;
     rSG.clearStore().ignore();
 
-    Foo* pFoo;    
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    Foo* pFoo = new Foo;
+    assert(rSG.record(pFoo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     assert (rSG.setAlias(pFoo, "fooAlias").isSuccess());
 
     std::vector<std::string> keys;
@@ -862,10 +863,10 @@ namespace Athena_test {
     //get rid of the two RESET dobjs
     rSG.clearStore(/*force=*/true).ignore();
 
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     rSG.clearStore().ignore();
     rSG.keys<Foo>(keys);
     //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
@@ -916,12 +917,14 @@ namespace Athena_test {
 
     assert(rSG.retrieve(pVec,"BVec").isSuccess());    
     //second retrieve does not trigger retrieve of AuxStore
-    assert( 0 != (pVec=rSG.retrieve<TestVector<BX> >("BVec")) );
+    pVec = rSG.retrieve<TestVector<BX> >("BVec");
+    assert( 0 != pVec );
 
     const TestVector<BX>* cpVec(0);
     assert(rSG.retrieve(cpVec, "CVec").isSuccess());    
     // a regular retrieve ignores a missing aux store
-    assert( 0 != (cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec")) );
+    cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec");
+    assert( 0 != cpVec );
     
     //deprecated but we need to test it nonetheless...
 #ifdef TEST_DEPRECATED

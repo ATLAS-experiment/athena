@@ -23,8 +23,9 @@ def PhysValDiTauCfg(flags, **kwargs):
     kwargs.setdefault("DetailLevel", 10)
     kwargs.setdefault("isMC", flags.Input.isMC)
 
-    from DiTauDQA.DiTauDQATools import DiTauDQANominalDiTauSelectionToolCfg
+    from DiTauDQA.DiTauDQATools import DiTauDQANominalDiTauSelectionToolCfg,DiTauDQATauTruthMatchingToolCfg
     kwargs.setdefault("NominalDiTauSelectionTool", DiTauDQANominalDiTauSelectionToolCfg(flags))
+    kwargs.setdefault("DiTauTruthMatchingTool", DiTauDQATauTruthMatchingToolCfg(flags))
 
     tool = CompFactory.PhysValDiTau(name=kwargs["DiTauContainerName"], **kwargs)
     acc.setPrivateTools(tool)

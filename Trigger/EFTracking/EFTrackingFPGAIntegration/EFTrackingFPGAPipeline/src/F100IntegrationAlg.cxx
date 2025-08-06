@@ -254,6 +254,9 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Event> wait_for_reads = { evt_pixel_cluster_output, evt_strip_cluster_output };
         cl::Event::waitForEvents(wait_for_reads);
 
+        if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
+        if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
+
         // calculate the time for the kernel execution
         // get the time of writing pixel input buffer
         cl_ulong pixel_input_time = evt_write_pixel_input.getProfilingInfo<CL_PROFILING_COMMAND_END>() - evt_write_pixel_input.getProfilingInfo<CL_PROFILING_COMMAND_START>();

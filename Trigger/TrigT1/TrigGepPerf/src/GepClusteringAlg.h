@@ -11,7 +11,7 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 
-#include "GepCellMap.h"
+#include "TrigGepPerf/GepCellMap.h"
 
 //typedef std::map<unsigned int,Gep::GepCaloCell> GepCellMap;
 

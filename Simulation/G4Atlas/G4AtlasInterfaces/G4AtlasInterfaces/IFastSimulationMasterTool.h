@@ -26,6 +26,9 @@ class IFastSimulationMasterTool : virtual public IAlgTool {
    need to happen once per thread in a multi-threaded environment. */
   virtual StatusCode initializeFastSims() = 0;
 
+  /** Method to check if we have any fast simulation models */
+  virtual bool HasFastSimulationModels() const = 0;
+
   /** Begin of athena event method. Gets called once at the beginning of every Athena event */
   virtual StatusCode BeginOfAthenaEvent() = 0;
 

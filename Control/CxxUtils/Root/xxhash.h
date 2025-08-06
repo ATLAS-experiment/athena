@@ -1,7 +1,7 @@
 /*
  * xxHash - Extremely Fast Hash algorithm
  * Header File
- * Copyright (C) 2012-2023 Yann Collet
+ * Copyright (C) 2012-2025 Yann Collet
  *
  * BSD 2-Clause License (https://www.opensource.org/licenses/bsd-license.php)
  *
@@ -2556,13 +2556,13 @@ XXH32_update(XXH32_state_t* state, const void* input, size_t len)
         state->large_len |= (XXH32_hash_t)((len>=16) | (state->total_len_32>=16));
 
         if (state->memsize + len < 16)  {   /* fill in tmp buffer */
-            XXH_memcpy((xxh_u8*)(state->mem32) + state->memsize, input, len);
+            XXH_memcpy(reinterpret_cast<xxh_u8*>(state->mem32) + state->memsize, input, len);
             state->memsize += (XXH32_hash_t)len;
             return XXH_OK;
         }
 
         if (state->memsize) {   /* some data left from previous update */
-            XXH_memcpy((xxh_u8*)(state->mem32) + state->memsize, input, 16-state->memsize);
+            XXH_memcpy(reinterpret_cast<xxh_u8*>(state->mem32) + state->memsize, input, 16-state->memsize);
             {   const xxh_u32* p32 = state->mem32;
                 state->v[0] = XXH32_round(state->v[0], XXH_readLE32(p32)); p32++;
                 state->v[1] = XXH32_round(state->v[1], XXH_readLE32(p32)); p32++;
@@ -2611,7 +2611,7 @@ XXH_PUBLIC_API XXH32_hash_t XXH32_digest(const XXH32_state_t* state)
 
     h32 += state->total_len_32;
 
-    return XXH32_finalize(h32, (const xxh_u8*)state->mem32, state->memsize, XXH_aligned);
+    return XXH32_finalize(h32, reinterpret_cast<const xxh_u8*>(state->mem32), state->memsize, XXH_aligned);
 }
 #endif /* !XXH_NO_STREAM */
 
@@ -2996,13 +2996,13 @@ XXH64_update (XXH_NOESCAPE XXH64_state_t* state, XXH_NOESCAPE const void* input,
         state->total_len += len;
 
         if (state->memsize + len < 32) {  /* fill in tmp buffer */
-            XXH_memcpy(((xxh_u8*)state->mem64) + state->memsize, input, len);
+            XXH_memcpy((reinterpret_cast<xxh_u8*>(state->mem64)) + state->memsize, input, len);
             state->memsize += (xxh_u32)len;
             return XXH_OK;
         }
 
         if (state->memsize) {   /* tmp buffer is full */
-            XXH_memcpy(((xxh_u8*)state->mem64) + state->memsize, input, 32-state->memsize);
+            XXH_memcpy((reinterpret_cast<xxh_u8*>(state->mem64)) + state->memsize, input, 32-state->memsize);
             state->v[0] = XXH64_round(state->v[0], XXH_readLE64(state->mem64+0));
             state->v[1] = XXH64_round(state->v[1], XXH_readLE64(state->mem64+1));
             state->v[2] = XXH64_round(state->v[2], XXH_readLE64(state->mem64+2));
@@ -3050,7 +3050,7 @@ XXH_PUBLIC_API XXH64_hash_t XXH64_digest(XXH_NOESCAPE const XXH64_state_t* state
 
     h64 += (xxh_u64) state->total_len;
 
-    return XXH64_finalize(h64, (const xxh_u8*)state->mem64, (size_t)state->total_len, XXH_aligned);
+    return XXH64_finalize(h64, reinterpret_cast<const xxh_u8*>(state->mem64), (size_t)state->total_len, XXH_aligned);
 }
 #endif /* !XXH_NO_STREAM */
 
@@ -5502,7 +5502,7 @@ XXH3_reset_internal(XXH3_state_t* statePtr,
     XXH_ASSERT(offsetof(XXH3_state_t, nbStripesPerBlock) > initStart);
     XXH_ASSERT(statePtr != NULL);
     /* set members from bufferedSize to nbStripesPerBlock (excluded) to 0 */
-    memset((char*)statePtr + initStart, 0, initLength);
+    memset(reinterpret_cast<char*>(statePtr) + initStart, 0, initLength);
     statePtr->acc[0] = XXH_PRIME32_3;
     statePtr->acc[1] = XXH_PRIME64_1;
     statePtr->acc[2] = XXH_PRIME64_2;
@@ -6312,7 +6312,7 @@ XXH128_canonicalFromHash(XXH_NOESCAPE XXH128_canonical_t* dst, XXH128_hash_t has
         hash.low64  = XXH_swap64(hash.low64);
     }
     XXH_memcpy(dst, &hash.high64, sizeof(hash.high64));
-    XXH_memcpy((char*)dst + sizeof(hash.high64), &hash.low64, sizeof(hash.low64));
+    XXH_memcpy(reinterpret_cast<char*>(dst) + sizeof(hash.high64), &hash.low64, sizeof(hash.low64));
 }
 
 /*! @ingroup XXH3_family */

@@ -23,6 +23,21 @@ StatusCode tauMonitorAlgorithm::initialize() {
 
   ATH_CHECK(m_TauContainerKey.initialize());
 
+  m_offlineGNTauScoreDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauScoreDecorKey.key();
+  ATH_CHECK(m_offlineGNTauScoreDecorKey.initialize());
+ 
+  m_offlineGNTauTransScoreDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauTransScoreDecorKey.key();
+  ATH_CHECK(m_offlineGNTauTransScoreDecorKey.initialize());
+
+  m_offlineGNTauLooseWPDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauLooseWPDecorKey.key();
+  ATH_CHECK(m_offlineGNTauLooseWPDecorKey.initialize());
+
+  m_offlineGNTauMediumWPDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauMediumWPDecorKey.key();
+  ATH_CHECK(m_offlineGNTauMediumWPDecorKey.initialize());  
+
+  m_offlineGNTauTightWPDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauTightWPDecorKey.key();
+  ATH_CHECK(m_offlineGNTauTightWPDecorKey.initialize());
+
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -48,53 +63,61 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
   auto tauPhi = Monitored::Scalar<float>("tauPhi", 0.0);
   auto tauEt = Monitored::Scalar<float>("tauEt", 0.0);
-  auto tauEtEt15RNNLoose = Monitored::Scalar<float>("tauEtEt15RNNLoose", 0.0);
-  auto panModeEt15RNNLoose =
-      Monitored::Scalar<float>("panModeEt15RNNLoose", 0.0);
+
+  std::string tauid = "";
+  if(m_TauContainerKey.key().find("TMTauJets") != std::string::npos)
+  {
+    tauid = "GNTau";
+  } else {
+    tauid = "RNN";
+  }
+
+  auto tauEtEt15Loose = Monitored::Scalar<float>("tauEtEt15"+tauid+"Loose", 0.0);
+  auto panModeEt15Loose =
+      Monitored::Scalar<float>("panModeEt15"+tauid+"Loose", 0.0);
   auto panModeSubstructure =
       Monitored::Scalar<float>("panModeSubstructure", 0.0);
 
   auto tauPhiEt15 = Monitored::Scalar<float>("tauPhiEt15", 0.0);
   auto tauEtaEt15 = Monitored::Scalar<float>("tauEtaEt15", 0.0);
 
-  auto tauPhiEt15RNNLoose = Monitored::Scalar<float>("tauPhiEt15RNNLoose", 0.0);
-  auto tauEtaEt15RNNLoose = Monitored::Scalar<float>("tauEtaEt15RNNLoose", 0.0);
+  auto tauPhiEt15Loose = Monitored::Scalar<float>("tauPhiEt15"+tauid+"Loose", 0.0);
+  auto tauEtaEt15Loose = Monitored::Scalar<float>("tauEtaEt15"+tauid+"Loose", 0.0);
 
   auto tauCharge = Monitored::Scalar<int>("tauCharge", 0.0);
-  auto RNNJetScore = Monitored::Scalar<float>("RNNJetScore", 0.0);
-  auto RNNJetScoreSigTrans =
-      Monitored::Scalar<float>("RNNJetScoreSigTrans", 0.0);
+  auto JetScore = Monitored::Scalar<float>(tauid+"JetScore", 0.0);
+  auto JetScoreSigTrans =
+      Monitored::Scalar<float>(tauid+"JetScoreSigTrans", 0.0);
 
   auto RNNEleScore = Monitored::Scalar<float>("RNNEleScore", 0.0);
   auto RNNEleScoreSigTrans =
       Monitored::Scalar<float>("RNNEleScoreSigTrans", 0.0);
 
   auto NumTracks = Monitored::Scalar<int>("NumTracks", 0.0);
-  auto NumTracksEt15RNNLoose =
-      Monitored::Scalar<int>("NumTracksEt15RNNLoose", 0.0);
+  auto NumTracksEt15Loose =
+      Monitored::Scalar<int>("NumTracksEt15"+tauid+"Loose", 0.0);
 
   auto nTauCandidates = Monitored::Scalar<int>("nTauCandidates", 0.0);
   auto nHighPtTauCandidates =
       Monitored::Scalar<int>("nHighPtTauCandidates", 0.0);
   auto nClusters = Monitored::Scalar<int>("nClusters", 0.0);
-  auto nClustersEt15RNNLoose =
-      Monitored::Scalar<int>("nClustersEt15RNNLoose", 0.0);
+  auto nClustersEt15Loose =
+      Monitored::Scalar<int>("nClustersEt15"+tauid+"Loose", 0.0);
 
-  auto tauEtRNNLoose = Monitored::Scalar<float>("tauEtRNNLoose", 0.0);
-  auto tauEtaRNNLoose = Monitored::Scalar<float>("tauEtaRNNLoose", 0.0);
-  auto tauPhiRNNLoose = Monitored::Scalar<float>("tauPhiRNNLoose", 0.0);
-  auto NumTracksRNNLoose = Monitored::Scalar<float>("NumTracksRNNLoose", 0.0);
+  auto tauEtLoose = Monitored::Scalar<float>("tauEt"+tauid+"Loose", 0.0);
+  auto tauEtaLoose = Monitored::Scalar<float>("tauEta"+tauid+"Loose", 0.0);
+  auto tauPhiLoose = Monitored::Scalar<float>("tauPhi"+tauid+"Loose", 0.0);
+  auto NumTracksLoose = Monitored::Scalar<float>("NumTracks"+tauid+"Loose", 0.0);
 
-  auto tauEtRNNMedium = Monitored::Scalar<float>("tauEtRNNMedium", 0.0);
-  auto tauEtaRNNMedium = Monitored::Scalar<float>("tauEtaRNNMedium", 0.0);
-  auto tauPhiRNNMedium = Monitored::Scalar<float>("tauPhiRNNMedium", 0.0);
-  auto NumTracksRNNMedium = Monitored::Scalar<float>("NumTracksRNNMedium", 0.0);
+  auto tauEtMedium = Monitored::Scalar<float>("tauEt"+tauid+"Medium", 0.0);
+  auto tauEtaMedium = Monitored::Scalar<float>("tauEta"+tauid+"Medium", 0.0);
+  auto tauPhiMedium = Monitored::Scalar<float>("tauPhi"+tauid+"Medium", 0.0);
+  auto NumTracksMedium = Monitored::Scalar<float>("NumTracks"+tauid+"Medium", 0.0);
 
-  auto tauEtRNNTight = Monitored::Scalar<float>("tauEtRNNTight", 0.0);
-  auto tauEtaRNNTight = Monitored::Scalar<float>("tauEtaRNNTight", 0.0);
-  auto tauPhiRNNTight = Monitored::Scalar<float>("tauPhiRNNTight", 0.0);
-  auto NumTracksRNNTight = Monitored::Scalar<float>("NumTracksRNNTight", 0.0);
-
+  auto tauEtTight = Monitored::Scalar<float>("tauEt"+tauid+"Tight", 0.0);
+  auto tauEtaTight = Monitored::Scalar<float>("tauEta"+tauid+"Tight", 0.0);
+  auto tauPhiTight = Monitored::Scalar<float>("tauPhi"+tauid+"Tight", 0.0);
+  auto NumTracksTight = Monitored::Scalar<float>("NumTracks"+tauid+"Tight", 0.0);
 
   auto LB = Monitored::Scalar<int>("LB", 0.0);
 
@@ -113,9 +136,9 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
   auto muonVeto = Monitored::Scalar<float>("muonVeto", 0.0);
 
-  auto tauRNNLoose = Monitored::Scalar<float>("tauRNNLoose", 0.0);
-  auto tauRNNMedium = Monitored::Scalar<float>("tauRNNMedium", 0.0);
-  auto tauRNNTight = Monitored::Scalar<float>("tauRNNTight", 0.0);
+  auto tauLoose = Monitored::Scalar<float>("tau"+tauid+"Loose", 0.0);
+  auto tauMedium = Monitored::Scalar<float>("tau"+tauid+"Medium", 0.0);
+  auto tauTight = Monitored::Scalar<float>("tau"+tauid+"Tight", 0.0);
 
   auto PSSFrac = Monitored::Scalar<float>("PSSFrac", 0.0);
   auto EMFrac = Monitored::Scalar<float>("EMFrac", 0.0);
@@ -255,19 +278,41 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     jetSeedPhi = tau->phiJetSeed();
     jetSeedPt = tau->ptJetSeed() / GeV;
 
-    // identification
-    RNNJetScore = tau->discriminant(xAOD::TauJetParameters::TauID::RNNJetScore);
-    RNNJetScoreSigTrans =
-        tau->discriminant(xAOD::TauJetParameters::TauID::RNNJetScoreSigTrans);
-
     RNNEleScore = tau->discriminant(xAOD::TauJetParameters::TauID::RNNEleScore);
     RNNEleScoreSigTrans =
         tau->discriminant(xAOD::TauJetParameters::TauID::RNNEleScoreSigTrans);
 
     muonVeto = tau->isTau(xAOD::TauJetParameters::MuonVeto);
-    tauRNNLoose = tau->isTau(xAOD::TauJetParameters::JetRNNSigLoose);
-    tauRNNMedium = tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium);
-    tauRNNTight = tau->isTau(xAOD::TauJetParameters::JetRNNSigTight);
+
+    // check to understand which TauID we can use
+    SG::ReadDecorHandle<xAOD::TauJetContainer, float> trans_score{m_offlineGNTauTransScoreDecorKey, ctx};
+    if( trans_score.isAvailable()) { 
+      
+      // we are using a special container decorated with GNTau
+      SG::ReadDecorHandle<xAOD::TauJetContainer, float> score{m_offlineGNTauScoreDecorKey, ctx};
+      JetScore = score.isAvailable() ? score(*tau) : -1234; 
+
+      JetScoreSigTrans = trans_score(*tau);
+
+      SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_loose{m_offlineGNTauLooseWPDecorKey, ctx};
+      tauLoose = tauid_loose.isAvailable() ? tauid_loose(*tau) : -1234;
+
+      SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauMediumWPDecorKey, ctx};
+      tauMedium = tauid_medium.isAvailable() ? tauid_medium(*tau) : -1234;
+
+      SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_tight{m_offlineGNTauTightWPDecorKey, ctx};
+      tauTight = tauid_tight.isAvailable() ? tauid_tight(*tau) : -1234;
+
+    } else{
+      // GNTau is not present -> use RNN based TauID
+      JetScore = tau->discriminant(xAOD::TauJetParameters::TauID::RNNJetScore);
+      JetScoreSigTrans =
+        tau->discriminant(xAOD::TauJetParameters::TauID::RNNJetScoreSigTrans);
+
+      tauLoose = tau->isTau(xAOD::TauJetParameters::JetRNNSigLoose);
+      tauMedium = tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium);
+      tauTight = tau->isTau(xAOD::TauJetParameters::JetRNNSigTight);
+    }
 
     dRmax = tau->detail<float>(xAOD::TauJetParameters::dRmax);
     ptRatioEflowApprox =
@@ -310,50 +355,51 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
       }
 
       if (m_kinGroupName != "tauMonKinGroupGlobal" &&
-          tauEt > lowerEtThreshold && tauRNNLoose) {
-        tauPhiEt15RNNLoose = tau->phi();
-        tauEtaEt15RNNLoose = tau->eta();
-        tauEtEt15RNNLoose = tau->pt() / GeV;
-        nClustersEt15RNNLoose =
+          tauEt > lowerEtThreshold && tauLoose) {
+
+        tauPhiEt15Loose = tau->phi();
+        tauEtaEt15Loose = tau->eta();
+        tauEtEt15Loose = tau->pt() / GeV;
+        nClustersEt15Loose =
             tau->detail<int>(xAOD::TauJetParameters::numTopoClusters);
-        NumTracksEt15RNNLoose = tau->nTracks();
+        NumTracksEt15Loose = tau->nTracks();
 
         tau->panTauDetail(xAOD::TauJetParameters::PanTau_DecayMode,
                           panModeDummy);
-        panModeEt15RNNLoose = panModeDummy;
-        fill(tool, tauPhiEt15RNNLoose, tauEtaEt15RNNLoose,
-             nClustersEt15RNNLoose, NumTracksEt15RNNLoose, tauEtEt15RNNLoose,
-             panModeEt15RNNLoose);
+        panModeEt15Loose = panModeDummy;
+        fill(tool, tauPhiEt15Loose, tauEtaEt15Loose,
+             nClustersEt15Loose, NumTracksEt15Loose, tauEtEt15Loose,
+             panModeEt15Loose);
       }
 
-      if (m_kinGroupName != "tauMonKinGroupGlobal" && tauRNNLoose) {
-        tauPhiRNNLoose = tau->phi();
-        tauEtaRNNLoose = tau->eta();
-        tauEtRNNLoose = tau->pt() / GeV;
-        NumTracksRNNLoose = tau->nTracks();
+      if (m_kinGroupName != "tauMonKinGroupGlobal" && tauLoose) {
+        tauPhiLoose = tau->phi();
+        tauEtaLoose = tau->eta();
+        tauEtLoose = tau->pt() / GeV;
+        NumTracksLoose = tau->nTracks();
 
-        fill(tool, tauPhiRNNLoose, tauEtaRNNLoose, NumTracksRNNLoose,
-             tauEtRNNLoose);
+        fill(tool, tauPhiLoose, tauEtaLoose, NumTracksLoose,
+             tauEtLoose);
       }
 
-      if (m_kinGroupName != "tauMonKinGroupGlobal" && tauRNNMedium) {
-        tauPhiRNNMedium = tau->phi();
-        tauEtaRNNMedium = tau->eta();
-        tauEtRNNMedium = tau->pt() / GeV;
-        NumTracksRNNMedium = tau->nTracks();
+      if (m_kinGroupName != "tauMonKinGroupGlobal" && tauMedium) {
+        tauPhiMedium = tau->phi();
+        tauEtaMedium = tau->eta();
+        tauEtMedium = tau->pt() / GeV;
+        NumTracksMedium = tau->nTracks();
 
-        fill(tool, tauPhiRNNMedium, tauEtaRNNMedium, NumTracksRNNMedium,
-             tauEtRNNMedium);
+        fill(tool, tauPhiMedium, tauEtaMedium, NumTracksMedium,
+             tauEtMedium);
       }
 
-      if (m_kinGroupName != "tauMonKinGroupGlobal" && tauRNNTight) {
-        tauPhiRNNTight = tau->phi();
-        tauEtaRNNTight = tau->eta();
-        tauEtRNNTight = tau->pt() / GeV;
-        NumTracksRNNTight = tau->nTracks();
+      if (m_kinGroupName != "tauMonKinGroupGlobal" && tauTight) {
+        tauPhiTight = tau->phi();
+        tauEtaTight = tau->eta();
+        tauEtTight = tau->pt() / GeV;
+        NumTracksTight = tau->nTracks();
 
-        fill(tool, tauPhiRNNTight, tauEtaRNNTight, NumTracksRNNTight,
-             tauEtRNNTight);
+        fill(tool, tauPhiTight, tauEtaTight, NumTracksTight,
+             tauEtTight);
       }
 
 
@@ -690,8 +736,8 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
       fill(tool, tauPhi, tauEta, LB, tauEt, centFrac, isolFrac, EMRadius,
            hadRadius, stripWidth2, nStrip, etEMAtEMScale, etHadAtEMScale,
-           tauCharge, RNNJetScore, RNNJetScoreSigTrans, RNNEleScore, RNNEleScoreSigTrans,
-	   muonVeto, tauRNNLoose, tauRNNMedium, tauRNNTight, PSSFrac, EMFrac, EMFracTrk,
+           tauCharge, JetScore, JetScoreSigTrans, RNNEleScore, RNNEleScoreSigTrans,
+	   muonVeto, tauLoose, tauMedium, tauTight, PSSFrac, EMFrac, EMFracTrk,
            EfracL2EffCluster, EisoEffCluster, InvMassEffClusters, nNeutPFO,
            nShot, NumTracks, nClusters, jetSeedEta, jetSeedPhi, jetSeedPt,
            dRmax, ptRatioEflowApprox, trkAvgDist);

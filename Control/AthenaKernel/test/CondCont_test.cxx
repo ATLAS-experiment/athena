@@ -350,7 +350,8 @@ void test1 (TestRCUSvc& rcusvc)
   assert (cc_ts.maxSize() == 1);
 
   const EventIDRange r4 (timestamp (800), timestamp (899));
-  assert( cc_ts.typelessInsert (r4, new B(4)).isSuccess() );
+  StatusCode sc = cc_ts.typelessInsert (r4, new B(4));
+  assert (sc.isSuccess());
   assert (cc_ts.entries() == 2);
 
   std::vector<CondCont<B>::key_type> keys1 =
@@ -385,7 +386,6 @@ void test1 (TestRCUSvc& rcusvc)
   assert (cc_ts.insert (EventIDRange (runlbn (10, 20), runlbn (10, 30)),
                         std::make_unique<B> (20)).isFailure());
 
-  StatusCode sc;
   sc = cc_rl.insert (EventIDRange (runlbn (10, 20), runlbn (10, 40)),
                      std::make_unique<B> (30));
   assert (sc.isSuccess()); 

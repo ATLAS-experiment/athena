@@ -44,6 +44,10 @@ class CommonServicesConfig (ConfigBlock) :
             "systematics will be printed. The default is None (don't write out "
             "the histogram).")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # no instance name, this is a singleton
+
     def makeAlgs (self, config) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
@@ -92,6 +96,10 @@ class IOStatsBlock(ConfigBlock):
         self.addOption("printOption", "Summary", type=str,
                        info='option to pass the standard ROOT printing function. Can be "Summary", "ByEntries" or "ByBytes".')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return ''  # no instance name, this is a singleton
+
     def makeAlgs(self, config):
         alg = config.createAlgorithm('CP::IOStatsAlg', 'IOStatsAlg')
         alg.printOption = self.printOption
@@ -130,6 +138,9 @@ class PileupReweightingBlock (ConfigBlock):
         self.addOption ('writeColumnarToolVariables', False, type=bool,
             info="whether to add EventInfo variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL)")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.postfix
 
     def makeAlgs (self, config) :
 
@@ -255,13 +266,13 @@ class PileupReweightingBlock (ConfigBlock):
         # Set up the only algorithm of the sequence:
         if config.geometry() is LHCPeriod.Run4:
             log.warning ('Pileup reweighting is not yet supported for Run 4 geometry')
-            alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg'+self.postfix )
+            alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg' )
             alg.uint32Decorations = { 'RandomRunNumber' :
                                       config.autoconfigFlags().Input.RunNumbers[0] }
 
         else:
             alg = config.createAlgorithm( 'CP::PileupReweightingAlg',
-                                        'PileupReweightingAlg'+self.postfix )
+                                        'PileupReweightingAlg' )
             config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
             alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
             if not toolConfigFiles and config.dataType() is not DataType.Data:
@@ -308,6 +319,10 @@ class GeneratorAnalysisBlock (ConfigBlock):
             info="save the necessary information to run the LHAPDF tool offline. "
                  "The default is False.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.streamName
+
     def makeAlgs (self, config) :
 
         if config.dataType() is DataType.Data:
@@ -322,25 +337,25 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
-            alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg' + self.streamName)
+            alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
             alg.RootStreamName = self.streamName
             alg.runNumber = self.runNumber
-            if self.cutBookkeepersSystematics:
-                alg.enableSystematics = self.cutBookkeepersSystematics
-            else:
+            if self.cutBookkeepersSystematics is None:
                 alg.enableSystematics = not config.noSystematics()
+            else:
+                alg.enableSystematics = self.cutBookkeepersSystematics
             if self.histPattern:
                 alg.histPattern = self.histPattern
             config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
 
         # Set up the weights algorithm:
-        alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' + self.streamName )
+        alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
         config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'weight_mc')
 
         if self.detailedPDFinfo:
-            alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg' + self.streamName, reentrant=True )
+            alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg', reentrant=True )
             for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
 
@@ -381,10 +396,13 @@ class PtEtaSelectionBlock (ConfigBlock):
             info="whether to use the dressed kinematic properties "
             "(for truth particles only). The default is False.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + "_" + self.selectionName
 
     def makeAlgs (self, config) :
 
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PtEtaSelectionAlg' + self.containerName + self.selectionName )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PtEtaSelectionAlg' )
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         if self.minPt is not None :
             alg.selectionTool.minPt = self.minPt
@@ -428,9 +446,13 @@ class ObjectCutFlowBlock (ConfigBlock):
             info="whether to force the cut sequence and not accept objects "
             "if previous cuts failed. The default is False.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.selectionName
+
     def makeAlgs (self, config) :
 
-        alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName )
+        alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg' )
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + '_%SYS%'
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
@@ -459,13 +481,17 @@ class EventCutFlowBlock (ConfigBlock):
             info="a postfix to apply in the naming of cutflow histograms. Set "
             "it when defining multiple cutflows.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.selectionName + self.postfix
+
     def makeAlgs (self, config) :
 
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        alg = config.createAlgorithm( 'CP::EventCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName + postfix )
+        alg = config.createAlgorithm( 'CP::EventCutFlowHistAlg', 'CutFlowDumperAlg' )
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
         # find out which selection decorations to use
         if isinstance(self.customSelections, str):
@@ -513,6 +539,10 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('noUniformSelection', False, type=bool,
             info="")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.selectionName + self.postfix
+
     def makeAlgs (self, config) :
 
         postfix = self.postfix
@@ -526,14 +556,14 @@ class OutputThinningBlock (ConfigBlock):
             selection = selection + '&&' + self.selection
 
         if selection != '' and not self.noUniformSelection :
-            alg = config.createAlgorithm( 'CP::AsgUnionSelectionAlg', 'UnionSelectionAlg' + self.containerName + postfix)
+            alg = config.createAlgorithm( 'CP::AsgUnionSelectionAlg', 'UnionSelectionAlg')
             alg.preselection = selection
             alg.particles = config.readName (self.containerName)
             alg.selectionDecoration = 'outputSelect' + postfix
             config.addSelection (self.containerName, alg.selectionDecoration, selection)
             selection = 'outputSelect' + postfix
 
-        alg = config.createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'DeepCopyAlg' + self.containerName + postfix )
+        alg = config.createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'DeepCopyAlg' )
         alg.input = config.readName (self.containerName)
         if self.outputName is not None :
             alg.output = self.outputName + '_%SYS%'
@@ -567,10 +597,14 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs (self, config) :
         particles = config.readName(self.containerName)
 
-        alg = config.createAlgorithm( 'CP::AsgClassificationDecorationAlg', 'IFFClassifierAlg' + self.containerName )
+        alg = config.createAlgorithm( 'CP::AsgClassificationDecorationAlg', 'IFFClassifierAlg' )
         # the IFF classification tool
         config.addPrivateTool( 'tool', 'TruthClassificationTool')
         # label charge-flipped electrons as such
@@ -597,10 +631,14 @@ class MCTCLeptonDecorationBlock (ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs (self, config) :
         particles, selection = config.readNameAndSelection(self.containerName)
 
-        alg = config.createAlgorithm ("CP::MCTCDecorationAlg", f"MCTCDecorationAlg{self.containerName}")
+        alg = config.createAlgorithm ("CP::MCTCDecorationAlg", "MCTCDecorationAlg")
         alg.particles = particles
         alg.preselection = selection
         alg.affectingSystematicsFilter = '.*'
@@ -615,8 +653,7 @@ class PerEventSFBlock (ConfigBlock):
 
     def __init__ (self):
         super(PerEventSFBlock, self).__init__()
-        self.addOption('algoName', '', type=str,
-            noneAction='error',
+        self.addOption('algoName', None, type=str,
             info="unique name given to the underlying algorithm computing the "
             "per-event scale factors")
         self.addOption('particles', '', type=str,
@@ -627,11 +664,15 @@ class PerEventSFBlock (ConfigBlock):
         self.addOption('eventSF', '', type=str,
             info="the name of the per-event SF decoration.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.particles + '_' + self.objectSF + '_' + self.eventSF
+
     def makeAlgs(self, config):
         if config.dataType() is DataType.Data:
             return
         particles, selection = config.readNameAndSelection(self.particles)
-        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algoName)
+        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algoName if self.algoName else 'AsgEventScaleFactorAlg')
         alg.particles = particles
         alg.preselection = selection
         alg.scaleFactorInputDecoration = self.objectSF
@@ -651,6 +692,10 @@ class SelectionDecorationBlock (ConfigBlock):
             noneAction='error',
             info="")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.selectionName
+
     def makeAlgs(self, config):
         for container in self.containers:
             originContainerName = config.getOutputContainerOrigin(container)
@@ -661,7 +706,7 @@ class SelectionDecorationBlock (ConfigBlock):
                     continue
                 alg = config.createAlgorithm(
                     'CP::AsgSelectionAlg',
-                    f'SelectionDecoration_{originContainerName}_{selectionName}')
+                    f'SelectionDecoration_{originContainerName}')
                 selectionDecoration = f'baselineSelection_{selectionName}_%SYS%'
                 alg.selectionDecoration =  f'{selectionDecoration},as_char'
                 alg.particles = config.readName (originContainerName)

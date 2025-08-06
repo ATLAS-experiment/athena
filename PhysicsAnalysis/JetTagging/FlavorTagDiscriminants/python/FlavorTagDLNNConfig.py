@@ -78,8 +78,10 @@ def FlavorTagDLNNCfg(
         BTaggingCollection,
         TrackCollection,
         NNFile,
+        JetCollection=None,
         FlipConfig="STANDARD",
-        variableRemapping={}):
+        variableRemapping={},
+    ):
 
     alg = CompFactory.FlavorTagInference.BTagDecoratorAlg
 

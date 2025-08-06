@@ -87,6 +87,7 @@ RecyclableDataQueue<DOBJ>::~RecyclableDataQueue()
   DOBJ* obj = nullptr;
   while (m_queue->try_pop (obj)) {
     delete obj;
+    obj = nullptr;
   }
 }
 

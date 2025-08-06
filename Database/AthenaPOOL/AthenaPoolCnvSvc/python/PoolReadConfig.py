@@ -10,7 +10,8 @@ def EventSelectorAthenaPoolCfg(flags):
     result = ComponentAccumulator()
     evSel = CompFactory.EventSelectorAthenaPool("EventSelector",
                                                 InputCollections=flags.Input.Files,
-                                                SkipEvents=flags.Exec.SkipEvents)
+                                                SkipEvents=flags.Exec.SkipEvents,
+                                                ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
     if flags.Input.OverrideRunNumber:
         if not flags.Input.RunAndLumiOverrideList:
             DataRunNumber = -1
@@ -75,8 +76,13 @@ def PoolReadCfg(flags):
 
     result = ComponentAccumulator()
 
-    from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg, AthenaPoolAddressProviderSvcCfg
-    result.merge(AthenaPoolCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
+    from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolAddressProviderSvcCfg
+    if flags.MP.UseSharedReader or flags.MP.UseSharedWriter:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+        result.merge(AthenaPoolSharedIOCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
+    else:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        result.merge(AthenaPoolCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
 
     # Suppress ROOT warnings about old I/O classes.
     from AthenaServices.ROOTMessageFilterSvcConfig import ROOTMessageFilterSvcCfg

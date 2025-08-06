@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ArenaHeapAllocator.icc 470529 2011-11-24 23:54:22Z ssnyder $
@@ -47,7 +47,8 @@ ArenaHeapAllocator::initParams<T, clear, no_ctor, no_dtor>::params() const
   };
   p.eltSize = sizeof (Dummy);
   Dummy* dummy = (Dummy*)0x1234;
-  p.linkOffset = (char*)&dummy->y - (char*)dummy;
+  // nb. offsetof gives warnings here because the struct is not standard-layout.
+  p.linkOffset = reinterpret_cast<char*>(&dummy->y) - reinterpret_cast<char*>(dummy);
 
   // Need to allow at least enough space for a pointer.
   p.minSize = sizeof (pointer);

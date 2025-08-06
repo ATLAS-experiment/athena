@@ -19,7 +19,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 
 
-#include "L1CaloFEXToolInterfaces/IeFEXTOBEtTool.h"
+#include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "xAODTrigger/eFexEMRoIContainer.h"
 #include "xAODTrigger/eFexTauRoIContainer.h"
 
@@ -55,7 +55,7 @@ namespace LVL1 {
     SG::WriteDecorHandleKey<xAOD::eFexTauRoIContainer> m_REMCoreDec { this, "REMCoreDecorKey" , m_eFEXtauEDMContainerKey,"REMCoreDec" , "Recalculated Tau REMCore" };
     SG::WriteDecorHandleKey<xAOD::eFexTauRoIContainer> m_REMHadDec  { this, "REMHadDecorKey"  , m_eFEXtauEDMContainerKey,"REMHadDec"  , "Recalculated Tau REMHad" };
 
-    ToolHandle<IeFEXTOBEtTool> m_eFEXTOBEtTool {this, "eFEXTOBEtTool", "LVL1::eFEXTOBEtTool", "Tool for reconstructing TOB ET sums"};
+    ToolHandle<eFEXTOBEtTool> m_eFEXTOBEtTool {this, "eFEXTOBEtTool", "LVL1::eFEXTOBEtTool", "Tool for reconstructing TOB ET sums"};
   };
 }
 #endif

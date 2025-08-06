@@ -41,6 +41,8 @@
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/ElectronContainer.h"
 //
+#include "egammaCaloUtils/egammaClusterCookieCut.h"
+//
 #include "egammaInterfaces/IEMTrackMatchBuilder.h"
 #include "egammaInterfaces/IegammaBaseTool.h"
 #include "egammaInterfaces/IegammaOQFlagsBuilder.h"
@@ -79,12 +81,6 @@ private:
     const std::array<double, 4> &match_values
   ) const;
 
-  /** @brief Remove cells that are too far from the center of mass. */
-  std::unique_ptr<xAOD::CaloCluster> cookieCut(
-    const xAOD::CaloCluster& cluster,
-    const CaloDetDescrManager& mgr,
-    const DataLink<CaloCellContainer>& cellCont
-  ) const;
 
   /** @brief Tool to perform object quality. */
   ToolHandle<IegammaOQFlagsBuilder> m_objectQualityTool{
@@ -180,9 +176,7 @@ private:
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
   mutable Gaudi::Accumulators::Counter<> m_MatchedClusters {};
 
-  float m_maxDelEta {};
-  float m_maxDelPhi {};
-  float m_maxDelR2 {};
+  egammaClusterCookieCut::CookieCutPars m_CookieCutPars{};
 
 protected:
   /** Handle to the selectors. */

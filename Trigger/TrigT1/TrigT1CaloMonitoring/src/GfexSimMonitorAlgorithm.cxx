@@ -85,8 +85,8 @@ StatusCode GfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 	compareJetRoI("gLJ",m_data_gFexJet,m_simu_gFexJet,ctx,true);
 	compareJetRoI("gJ",m_data_gFexBlock,m_simu_gFexBlock,ctx,true);
 	compareJetRoI("gLJRho",m_data_gFexRho,m_simu_gFexRho,ctx);
-	compareGlobalRoI("gTEJWOJSum",m_data_gScalarEJwoj,m_simu_gScalarEJwoj,ctx,0xff000fff); // wont compare MET value in scalarE tob
-	compareGlobalRoI("gXEJWOJMET",m_data_gMETComponentsJwoj,m_simu_gMETComponentsJwoj,ctx);
+	compareGlobalRoI("gTEJWOJ",m_data_gScalarEJwoj,m_simu_gScalarEJwoj,ctx,0xff000fff); // wont compare MET value in scalarE tob
+	compareGlobalRoI("gXEJWOJ",m_data_gMETComponentsJwoj,m_simu_gMETComponentsJwoj,ctx);
 	compareGlobalRoI("gXEJWOJMHT",m_data_gMHTComponentsJwoj,m_simu_gMHTComponentsJwoj,ctx);
 	compareGlobalRoI("gXEJWOJMST",m_data_gMSTComponentsJwoj,m_simu_gMSTComponentsJwoj,ctx);
 	compareGlobalRoI("gXENC",m_data_gMETComponentsNoiseCut,m_simu_gMETComponentsNoiseCut,ctx);

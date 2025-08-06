@@ -17,6 +17,7 @@
 
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 
 #include <cmath>
 
@@ -193,6 +194,11 @@ TCS::InvariantMassInclusiveDeltaRSqrIncl2Charge::processBitCorrect( const std::v
                    TRG_MSG_DEBUG("Decision " << i << ": " << (accept?"pass":"fail") << " invmass2 = " << invmass2 << " deltaR2 = " << deltaR2 );
                }
             }
+         }
+         for (unsigned int i=0; i < numberOutputBits(); ++i) {
+            bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], m_NumberLeading1, m_MinET1[i])
+                                    || TSU::isAmbiguousTruncation(input[1], m_NumberLeading2, m_MinET2[i]);
+            output[i]->setAmbiguityFlag(hasAmbiguousInputs);
          }
    } else {
 

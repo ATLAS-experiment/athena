@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // updated by Leigh Schaefer <leigh.schaefer@cern.ch> April 2017
@@ -380,6 +380,7 @@ void reportResults(const std::string & filename, int run)
     assert(f);
     int count(0), nevents(0), tmp[9];
     FILE *fout = fopen("TRT_StrawStatusReport.txt", "w");
+    assert(fout);
     fprintf(fout, "%d %d %d %d %d %lf %lf %lf %2d\n", 0, 0, 0, 0, run, 0., 0., 0., 0);
     //what do these numbers mean, what are valid ranges for them?
     while (fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8) == 9)

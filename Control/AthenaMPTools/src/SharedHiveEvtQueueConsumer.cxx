@@ -68,11 +68,10 @@ StatusCode SharedHiveEvtQueueConsumer::initialize()
 
   ATH_CHECK(m_chronoStatSvc.retrieve());
 
-  SmartIF<IConversionSvc> cnvSvc(serviceLocator()->service("AthenaPoolCnvSvc"));
   if(m_useSharedWriter) {
-    m_dataShare = SmartIF<IDataShare>(cnvSvc);
+    m_dataShare = SmartIF<IDataShare>(serviceLocator()->service("AthenaPoolSharedIOCnvSvc"));
     if(!m_dataShare) {
-      ATH_MSG_ERROR("Error retrieving AthenaPoolCnvSvc " << cnvSvc);
+      ATH_MSG_ERROR("Error retrieving AthenaPoolSharedIOCnvSvc");
       return StatusCode::FAILURE;
     }
   }
@@ -313,7 +312,7 @@ SharedHiveEvtQueueConsumer::bootstrap_func()
   if(m_useSharedWriter && m_dataShare) {
     SmartIF<IProperty> propertyServer(m_dataShare);
     if (!propertyServer || propertyServer->setProperty("MakeStreamingToolClient", m_rankId + 1).isFailure()) {
-      ATH_MSG_ERROR("Could not change AthenaPoolCnvSvc MakeClient Property");
+      ATH_MSG_ERROR("Could not change AthenaPoolSharedIOCnvSvc MakeClient Property");
       return outwork;
     } else {
       ATH_MSG_DEBUG("Successfully made the conversion service a share client");

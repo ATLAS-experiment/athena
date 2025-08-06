@@ -90,8 +90,7 @@ StatusCode PileUpEventLoopMgr::initialize()
   SmartIF<IEvtSelector> evtSelector;
   if (prpMgr.isValid()) {
     // Get event selector name. Retrieve EventSelector
-    std::string evtSelName = prpMgr->getProperty("EvtSel").toString();
-    evtSelector = serviceLocator()->service(evtSelName);
+    evtSelector = serviceLocator()->service(prpMgr->getProperty("EvtSel").toString());
     CHECK(evtSelector.isValid());
   }
   else {
@@ -250,9 +249,10 @@ StatusCode PileUpEventLoopMgr::nextEvent(int maxevt)
     // Setup overlaid event in the event store
     //-----------------------------------------------------------------------
 
-    xAOD::EventInfo *pOverEvent = new xAOD::EventInfo();
-    xAOD::EventAuxInfo *pOverEventAux = new xAOD::EventAuxInfo();
-    pOverEvent->setStore( pOverEventAux );
+    auto upOverEvent = std::make_unique<xAOD::EventInfo>();
+    auto upOverEventAux = std::make_unique<xAOD::EventAuxInfo>();
+    upOverEvent->setStore( upOverEventAux.get() );
+    xAOD::EventInfo* pOverEvent = upOverEvent.get();
     ATH_MSG_DEBUG(" #subevents in the signal event =" << inputEventInfo->subEvents().size());
 
     // Copy the eventInfo data from origStream event
@@ -293,9 +293,9 @@ StatusCode PileUpEventLoopMgr::nextEvent(int maxevt)
     }
 
     // Record the xAOD object(s):
-    CHECK( m_evtStore->record( pOverEventAux, m_evinfName + "Aux." ) );
-    CHECK( m_evtStore->record( pOverEvent, m_evinfName ) );
-    pOverEvent->setEvtStore( &*m_evtStore );
+    CHECK( m_evtStore->record( std::move(upOverEventAux), m_evinfName + "Aux." ) );
+    CHECK( m_evtStore->record( std::move(upOverEvent), m_evinfName ) );
+    pOverEvent->setEvtStore( m_evtStore.get() );
     // Create an EventInfoContainer for the pileup events:
     xAOD::EventInfoContainer *puei(new xAOD::EventInfoContainer());
     xAOD::EventInfoAuxContainer *puaux(new xAOD::EventInfoAuxContainer());

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CondInputLoader.cxx 
@@ -103,7 +103,7 @@ CondInputLoader::initialize()
   IIOVDbSvc::KeyInfo info;
   DataObjIDColl handles_to_load;
 
-  for (auto key : keys) {
+  for (const std::string& key : keys) {
     if( m_IOVDbSvc->getKeyInfo(key, info) ) {
       m_keyFolderMap[key] = info.folderName;
     } else {

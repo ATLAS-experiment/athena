@@ -11,24 +11,29 @@ logCPGridRun = logging.getLogger('CPGridRun')
 class CPGridRun:
     def __init__(self):
         self.gridParser = self._parseGridArguments()
+        self.prunArgsDict = self._createPrunArgsDict()
+        self._runscript = None
         if self.args.help:
-            self._runscript = self._initRunscript()
+            self._initRunscript()
             self.printHelp()
             sys.exit(0)
         self._tarfile = 'cpgrid.tar.gz'
         self._isFirstRun = True
         self._tarballRecreated = False
         self._inputList = None 
+        self._errorCollector = {} # Delay the error collection until the end of the script for better user experience
         self.cmd = {} # sample name -> command
 
     def _initRunscript(self):
-        if isAthena:
+        if self._runscript is not None:
+            return self._runscript
+        elif isAthena:
             from AnalysisAlgorithmsConfig.AthenaCPRunScript import AthenaCPRunScript
-            runscript = AthenaCPRunScript()
+            self._runscript = AthenaCPRunScript()
         else:
             from AnalysisAlgorithmsConfig.EventLoopCPRunScript import EventLoopCPRunScript
-            runscript = EventLoopCPRunScript()
-        return runscript
+            self._runscript = EventLoopCPRunScript()
+        return self._runscript
 
     def _parseGridArguments(self):
         parser = argparse.ArgumentParser(description='CPGrid runscript to submit CPRun.py jobs to the grid. '
@@ -62,13 +67,28 @@ class CPGridRun:
                                     )
 
         submissionGroup = parser.add_argument_group('Submission configuration')
+        submissionGroup.add_argument('-y', '--agreeAll', dest='agreeAll', action='store_true', help='Agree to all the submission details without asking for confirmation. Use with caution!')
         submissionGroup.add_argument('--noSubmit', dest='noSubmit', action='store_true', help='Do not submit the job to the grid (PanDA). Useful to inspect the prun command')
         submissionGroup.add_argument('--testRun', dest='testRun', action='store_true', help='Will submit job to the grid but greatly limit the number of files per job (10) and number of events (300)')
+        submissionGroup.add_argument('--checkInputDS', dest='checkInputDS', action='store_true', help='Check if the input datasets are available on the AMI.')
         submissionGroup.add_argument('--recreateTar', dest='recreateTar', action='store_true', help='Re-compress the source code. Source code are compressed by default in submission, this is useful when the source code is updated')
-        submissionGroup.add_argument('-y', '--agreeAll', dest='agreeAll', action='store_true', help='Agree to all the submission details without asking for confirmation. Use with caution!')
-        self.args = parser.parse_args()
+        self.args, self.unknown_args = parser.parse_known_args()
         self.outputFilesParsing()
         return parser
+        
+    def _createPrunArgsDict(self) -> dict:
+        '''
+        converting unknown args to a dictionary
+        '''
+        unknownArgsDict = self._unknownArgsDict()
+        if unknownArgsDict and self.hasPrun():
+            self._checkPrunArgs(unknownArgsDict)
+            logCPGridRun.info(f"Adding prun exclusive arguments: {unknownArgsDict.keys()}")
+        elif unknownArgsDict:
+            logCPGridRun.warning(f"Unknown arguments detected: {unknownArgsDict}. Cannot check the availablility in Prun because Prun is not available / noSubmit is on.")
+        else:
+            pass
+        return unknownArgsDict
 
     @property
     def inputList(self):
@@ -147,7 +167,7 @@ class CPGridRun:
         if self.args.testRun:
             config['nEventsPerFile'] = 300
             config['nFiles'] = 10
-
+        config.update(self.prunArgsDict)
         cmd = 'prun \\\n'
         for k, v in config.items():
             if isinstance(v, bool) and v:
@@ -155,7 +175,43 @@ class CPGridRun:
             elif v is not None and v != '':
                 cmd += f'--{k} {v} \\\n'
         return cmd.rstrip(' \\\n')
-
+    
+    def _unknownArgsDict(self)->dict:
+        '''
+        Cleans the unknown args by removing leading dashes and ensuring they are in key-value pairs
+        '''
+        unknown_args_dict = {}
+        idx = 0
+        while idx < len(self.unknown_args):
+            if self.unknown_args[idx].startswith('-'):
+                if idx + 1 < len(self.unknown_args) and not self.unknown_args[idx + 1].startswith('-'):
+                    unknown_args_dict[self.unknown_args[idx].lstrip('-')] = self.unknown_args[idx + 1]
+                    idx += 2
+                else:
+                    unknown_args_dict[self.unknown_args[idx].lstrip('-')] = True
+                    idx += 1
+        return unknown_args_dict
+    
+    def _checkPrunArgs(self,argDict):
+        '''
+        check the arguments against the prun script to ensure they are valid
+        See https://github.com/PanDAWMS/panda-client/blob/master/pandaclient/PrunScript.py
+        '''
+        import pandaclient.PrunScript
+        # We need to temporarily clear the sys.argv to avoid the parser from PrunScript to fail
+        original_argv = sys.argv
+        sys.argv = ['prun']  # Reset sys.argv to only contain the script name
+        prunArgsDict = {}
+        prunArgsDict = pandaclient.PrunScript.main(get_options=True)
+        sys.argv = original_argv  # Restore the original sys.argv
+        nonPrunOrCPGridArgs = []
+        for arg in argDict:
+            if arg not in prunArgsDict:
+                nonPrunOrCPGridArgs.append(arg)
+        if nonPrunOrCPGridArgs:
+            logCPGridRun.error(f"Unknown arguments detected: {nonPrunOrCPGridArgs}. They do not belong to CPGridRun or Panda.")
+            raise ValueError(f"Unknown arguments detected: {nonPrunOrCPGridArgs}. They do not belong to CPGridRun or Panda.")
+        
     def printInputDetails(self):
         for key, cmd in self.cmd.items():
             parsed_name = CPGridRun.atlasProductionNameParser(key)
@@ -165,7 +221,90 @@ class CPGridRun:
             logCPGridRun.info(f"Command: \n{cmd}")
             print("-" * 70)
         # Add your submission logic here
-
+    
+    def hasPyami(self):
+        try:
+            global pyAMI
+            import pyAMI.client
+            import pyAMI.atlas.api
+        except ModuleNotFoundError:
+            self._errorCollector['no AMI'] = (
+                "Cannot import pyAMI, please run the following commands:\n\n"
+                "```\n"
+                "lsetup pyami\n"
+                "voms-proxy-init -voms atlas\n"
+                "```\n"
+                "and make sure you have a valid certificate.")
+            return False
+        return True
+        
+    def checkInputInPyami(self) -> bool:
+        if not self.hasPyami():
+            return False
+    
+        client = pyAMI.client.Client('atlas')
+        pyAMI.atlas.api.init()
+    
+        queries, datasetPtag = self._prepareAmiQueryFromInputList()
+        try:
+            results = pyAMI.atlas.api.list_datasets(client, patterns=queries)
+        except pyAMI.exception.Error:
+            self._errorCollector['no valid certificate'] = (
+                "Cannot query AMI, please run 'voms-proxy-init -voms atlas' and ensure your certificate is valid.")
+            return False
+    
+        return self._analyzeAmiResults(results, datasetPtag)
+    
+    def _prepareAmiQueryFromInputList(self):
+        '''
+        Helper function to prepare a list of queries for the AMI based on the input list.
+        It will replace the _p### with _p% to match the latest ptag.
+        '''
+        import re
+        regex = re.compile("_p[0-9]+")
+        queries = []
+        datasetPtag = {}
+        for datasetName in self.cmd:
+            parsed = CPGridRun.atlasProductionNameParser(datasetName)
+            datasetPtag[datasetName] = parsed.get('ptag')
+            queries.append(regex.sub("_p%", datasetName))
+        return queries, datasetPtag
+    
+    def _analyzeAmiResults(self, results, datasetPtag) -> bool:
+        import re
+        regex = re.compile("_p[0-9]+")
+        results = [r['ldn'] for r in results]
+        notFound = []
+        latestPtag = {}
+    
+        for datasetName in self.cmd:
+            if datasetName not in results:
+                notFound.append(datasetName)
+    
+            base = regex.sub("_p%", datasetName)
+            matching = [r for r in results if r.startswith(base.replace("_p%", ""))]
+            for m in matching:
+                mParsed = CPGridRun.atlasProductionNameParser(m)
+                try:
+                    mPtagInt = int(mParsed.get('ptag', 'p0')[1:])
+                    currentPtagInt = int(datasetPtag.get(datasetName, 'p0')[1:])
+                    if mPtagInt > currentPtagInt:
+                        latestPtag[datasetName] = f"p{mPtagInt}"
+                except (ValueError, TypeError):
+                    continue
+    
+        if latestPtag:
+            logCPGridRun.info("Newer version of datasets found in AMI:")
+            for name, ptag in latestPtag.items():
+                logCPGridRun.info(f"{name} -> ptag: {ptag}")
+    
+        if notFound:
+            logCPGridRun.error("Some input datasets are not available in AMI, missing datasets are likely to fail on the grid:")
+            logCPGridRun.error(", ".join(notFound))
+            return False
+    
+        return True
+        
     def outputDSFormatter(self, name):
         if CPGridRun.isAtlasProductionFormat(name):
             return self._outputDSFormatter(name)
@@ -272,7 +411,7 @@ class CPGridRun:
             return f'"{self.args.exec}"'
         
         # Parse the exec string using the parser to validate and extract known arguments
-        self._runscript = self._initRunscript()
+        self._initRunscript()
         runscriptArgs, unknownArgs = self._runscript.parser.parse_known_args(self.args.exec.split(' '))
         
         # Throw error if unknownArgs contains any --args
@@ -301,18 +440,27 @@ class CPGridRun:
         )
         return f'"CPRun.py {arg_string}"'
 
-
     def outputsFormatter(self):
         outputs = [f'{output.split(".")[0]}:{output}' for output in self.args.output_files]
         return ','.join(outputs)
 
-    def submit(self):
-        import subprocess
+    def hasPrun(self) -> bool:
         import shutil
         prun_path = shutil.which("prun")
         if prun_path is None:
-            logCPGridRun.error("The 'prun' command is not found. If you use are on lxplus, please run `setupATLAS` and `lsetup panda`")
-            return
+            self._errorCollector['no prun'] = (
+                "The 'prun' command is not found. If you are on lxplus, please run the following commands:\n\n"
+                "```\n"
+                "lsetup panda\n"
+                "voms-proxy-init -voms atlas\n"
+                "```\n"
+                "Make sure you have a valid certificate."
+            )
+            return False
+        return True
+        
+    def submit(self):
+        import subprocess
         for key, cmd in self.cmd.items():
             process = subprocess.Popen(cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr)
             process.communicate()
@@ -437,21 +585,41 @@ class CPGridRun:
             files = [file.strip() for file in files]
         return files
 
-    def _askSubmission(self):
+    def printDelayedErrorCollection(self):
+        if self._errorCollector:
+            logCPGridRun.error("Errors were collected during the script execution:")
+            
+            for key, value in self._errorCollector.items():
+                logCPGridRun.error(f"{key}: {value}")
+            logCPGridRun.error("Please fix the errors and try again.")
+            sys.exit(1)
+        
+    def checkExternalTools(self):
+        if self.args.noSubmit:
+            return
+        self.hasPrun()
+        if self.args.checkInputDS:
+            self.checkInputInPyami()
+        
+    def askSubmission(self):
+        if self.args.noSubmit:
+            return
         if self.args.agreeAll:
-            logCPGridRun.info("You have agreed to all the submission details, jobs will be submitted without confirmation.")
+            logCPGridRun.info("You have agreed to all the submission details. Jobs will be submitted without confirmation.")
             self.submit()
             return
-        answer = input("Please confirm ALL the submission details are correct to submit [y/n]: ")
+        answer = input("Please confirm ALL the submission details are correct before submitting [y/n]: ")
         if answer.lower() == 'y':
             self.submit()
         elif answer.lower() == 'n':
-            logCPGridRun.info("Feel free to report any unexpected behavior to CPAlgorithms team!")
+            logCPGridRun.info("Feel free to report any unexpected behavior to the CPAlgorithms team!")
         else:
-            logCPGridRun.error("Invalid input. Please enter 'y' or 'n'. Jobs are not submitted")
+            logCPGridRun.error("Invalid input. Please enter 'y' or 'n'. Jobs are not submitted.")
 
 if __name__ == '__main__':
     cpgrid = CPGridRun()
     cpgrid.configureSumbission()
     cpgrid.printInputDetails()
-    cpgrid._askSubmission()
+    cpgrid.checkExternalTools()
+    cpgrid.printDelayedErrorCollection()
+    cpgrid.askSubmission()

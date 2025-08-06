@@ -360,7 +360,7 @@ def InDetLargeD0PhysValMonitoringToolCfg(flags, **kwargs):
     kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
         InDetRttTruthSelectionToolCfg(flags)))
     kwargs.setdefault("TrackParticleContainerName",
-                      'InDetLargeD0TrackParticles'
+                      flags.PhysVal.IDPVM.largeD0TrackCollection
                       if flags.Tracking.storeSeparateLargeD0Container else
                       'InDetTrackParticles')
     kwargs.setdefault("useTrackSelection", True)

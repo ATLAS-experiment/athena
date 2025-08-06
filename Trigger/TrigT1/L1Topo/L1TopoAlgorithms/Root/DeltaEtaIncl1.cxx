@@ -20,6 +20,7 @@
 #include "L1TopoAlgorithms/DeltaEtaIncl1.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 
 REGISTER_ALG_TCS(DeltaEtaIncl1)
 
@@ -108,7 +109,6 @@ TCS::DeltaEtaIncl1::processBitCorrect( const std::vector<TCS::TOBArray const *> 
    if(input.size() == 1) {
        unsigned int nLeading = p_NumberLeading1;
        unsigned int nLeading2 = p_NumberLeading2;
-       if (nLeading < input[0]->size() && nLeading2 < input[0]->size()) { output[0]->setAmbiguityFlag(false); }
        for( TOBArray::const_iterator tob1 = input[0]->begin();
             tob1 != input[0]->end() && distance( input[0]->begin(), tob1) < nLeading;
             ++tob1)
@@ -118,12 +118,6 @@ TCS::DeltaEtaIncl1::processBitCorrect( const std::vector<TCS::TOBArray const *> 
                     tob2 != input[0]->end() && distance( input[0]->begin(), tob2) < nLeading2;
                     ++tob2) {
                    for(unsigned int i=0; i < numberOutputBits(); ++i) {
-                   if (input[0]->size() >= nLeading2+1) {
-                        TCS::TOBArray::const_iterator tob3 = tob2; ++tob3;
-                        if ((*tob2)->Et() == (*tob3)->Et() && distance(input[0]->begin(), tob2) == nLeading2 - 1) { 
-                            output[0]->setAmbiguityFlag(true); 
-                        }
-                   }
                    bool accept = false;
                    if( parType_t((*tob1)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
                    if( parType_t((*tob2)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
@@ -154,6 +148,11 @@ TCS::DeltaEtaIncl1::processBitCorrect( const std::vector<TCS::TOBArray const *> 
                    }
                }
            }
+         for (unsigned int i=0; i < numberOutputBits(); ++i) {
+          bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1[i])
+                                  || TSU::isAmbiguousTruncation(input[0], p_NumberLeading2, p_MinET2[i]);
+          output[i]->setAmbiguityFlag(hasAmbiguousInputs);
+        }
    } else {
        TCS_EXCEPTION("DeltaEtaIncl1 alg must have 1 input, but got " << input.size());
    }
@@ -179,42 +178,47 @@ TCS::DeltaEtaIncl1::process( const std::vector<TCS::TOBArray const *> & input,
                     tob2 != input[0]->end() && distance( input[0]->begin(), tob2) < nLeading2;
                     ++tob2) {
                    for(unsigned int i=0; i < numberOutputBits(); ++i) {
-                   if (input[0]->size() >= nLeading2+1) {
-                        TCS::TOBArray::const_iterator tob3 = tob2; ++tob3;
-                        if ((*tob2)->Et() == (*tob3)->Et() && distance(input[0]->begin(), tob2) == nLeading2 - 1) { 
-                            output[0]->setAmbiguityFlag(true); 
-                        }
-                   }
-                   bool accept = false;
-                   if( parType_t((*tob1)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
-                   if( parType_t((*tob2)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
-                   if( (parType_t((*tob1)->Et()) <= std::max(p_MinET1[i],p_MinET2[i])) && (parType_t((*tob2)->Et()) <= std::max(p_MinET1[i],p_MinET2[i]))) continue;
-                   // DeltaEta cuts
-                   unsigned int deltaEta = calcDeltaEta( *tob1, *tob2 );
-                   std::stringstream msgss;
-                   msgss << "Combination : " << distance( input[0]->begin(), tob1)
-                         << " x " << distance( input[0]->begin(), tob2)
-                         << " eta=" << (*tob1)->eta()
-                         << " , eta=" << (*tob2)->eta()
-                         << ", DeltaEta = " << deltaEta << " -> ";
-                   accept = deltaEta >= p_DeltaEtaMin[i] && deltaEta <= p_DeltaEtaMax[i];
-                   const bool fillAccept = fillHistos() and (fillHistosBasedOnHardware() ? getDecisionHardwareBit(i) : accept);
-                   const bool fillReject = fillHistos() and not fillAccept;
-                   const bool alreadyFilled = decision.bit(i);
-                   if( accept ) {
-                       decision.setBit(i, true);
-                       output[i]->push_back( TCS::CompositeTOB(*tob1, *tob2) );
-                   }
-                   if(fillAccept and not alreadyFilled) {
-                       fillHist1D(m_histAccept[i],(float)deltaEta);
-                   } else if(fillReject) {
-                       fillHist1D(m_histReject[i],(float)deltaEta);
-                   }
-                   msgss << (accept?"pass":"fail") << "|";
-                   TRG_MSG_DEBUG(msgss.str());
+                     if (input[0]->size() >= nLeading2+1) {
+                          TCS::TOBArray::const_iterator tob3 = tob2; ++tob3;
+                          if ((*tob2)->Et() == (*tob3)->Et() && distance(input[0]->begin(), tob2) == nLeading2 - 1) { 
+                              output[0]->setAmbiguityFlag(true); 
+                          }
+                     }
+                     bool accept = false;
+                     if( parType_t((*tob1)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
+                     if( parType_t((*tob2)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
+                     if( (parType_t((*tob1)->Et()) <= std::max(p_MinET1[i],p_MinET2[i])) && (parType_t((*tob2)->Et()) <= std::max(p_MinET1[i],p_MinET2[i]))) continue;
+                     // DeltaEta cuts
+                     unsigned int deltaEta = calcDeltaEta( *tob1, *tob2 );
+                     std::stringstream msgss;
+                     msgss << "Combination : " << distance( input[0]->begin(), tob1)
+                           << " x " << distance( input[0]->begin(), tob2)
+                           << " eta=" << (*tob1)->eta()
+                           << " , eta=" << (*tob2)->eta()
+                           << ", DeltaEta = " << deltaEta << " -> ";
+                     accept = deltaEta >= p_DeltaEtaMin[i] && deltaEta <= p_DeltaEtaMax[i];
+                     const bool fillAccept = fillHistos() and (fillHistosBasedOnHardware() ? getDecisionHardwareBit(i) : accept);
+                     const bool fillReject = fillHistos() and not fillAccept;
+                     const bool alreadyFilled = decision.bit(i);
+                     if( accept ) {
+                         decision.setBit(i, true);
+                         output[i]->push_back( TCS::CompositeTOB(*tob1, *tob2) );
+                     }
+                     if(fillAccept and not alreadyFilled) {
+                         fillHist1D(m_histAccept[i],(float)deltaEta);
+                     } else if(fillReject) {
+                         fillHist1D(m_histReject[i],(float)deltaEta);
+                     }
+                     msgss << (accept?"pass":"fail") << "|";
+                     TRG_MSG_DEBUG(msgss.str());
                    }
                }
            }
+       for (unsigned int i=0; i < numberOutputBits(); ++i) {
+          bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1[i])
+                                  || TSU::isAmbiguousTruncation(input[0], p_NumberLeading2, p_MinET2[i]);
+          output[i]->setAmbiguityFlag(hasAmbiguousInputs);
+       }
    } else {
        TCS_EXCEPTION("DeltaEtaIncl1 alg must have 1 input, but got " << input.size());
    }

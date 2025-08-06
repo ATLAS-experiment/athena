@@ -9,7 +9,6 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgServices/ServiceHandle.h"
 #include "FlavorTagInference/INNSharingSvc.h"
-#include "FlavorTagInference/IBTagConditionalDecorator.h"
 #include "FlavorTagInference/IJetTagConditionalDecorator.h"
 
 #include "FlavorTagInference/GNNToolifiers.h"
@@ -34,13 +33,11 @@ namespace FlavorTagInference {
   // Tool to to flavor tag jet/btagging object
   // using GNN based taggers
   class MultifoldGNNTool : public asg::AsgTool,
-                           virtual public IBTagConditionalDecorator,
                            virtual public IJetTagConditionalDecorator
   {
 
-    ASG_TOOL_CLASS2(
+    ASG_TOOL_CLASS(
       MultifoldGNNTool,
-      IBTagConditionalDecorator,
       IJetTagConditionalDecorator)
     public:
       MultifoldGNNTool(const std::string& name);
@@ -48,10 +45,8 @@ namespace FlavorTagInference {
 
       StatusCode initialize() override;
 
-      virtual void decorate(const xAOD::BTagging& btag) const override;
-      virtual void decorate(const xAOD::Jet& jet) const override;
-      virtual void decorateWithDefaults(const SG::AuxElement& jet) const override;
-      virtual void decorateWithDefaults(const xAOD::BTagging& btag) const override;
+      virtual void decorate(const xAOD::IParticle& i_jet) const override;
+      virtual void decorateWithDefaults(const xAOD::IParticle& i_jet) const override;
 
       virtual std::set<std::string> getDecoratorKeys() const override;
       virtual std::set<std::string> getAuxInputKeys() const override;

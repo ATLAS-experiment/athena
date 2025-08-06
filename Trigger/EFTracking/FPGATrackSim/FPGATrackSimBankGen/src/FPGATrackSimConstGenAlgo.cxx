@@ -434,28 +434,28 @@ bool FPGATrackSimConstGenAlgo::failedConstants(geo_constants const & geo, std::v
 {
   geo_constants gco = calculate_gcorth(geo, m_nCoords, usable);
 
-    if (CHECK_NAN(gco.pars.qOverPt)) return true;
+    //if (CHECK_NAN(gco.pars.qOverPt)) return true; commenting out all gco's to gret more sectors. we do not use this anyways... for the meanwhile
     if (CHECK_NAN(geo.pars.qOverPt)) return true;
-    if (CHECK_NAN(gco.pars.d0)) return true;
+    //if (CHECK_NAN(gco.pars.d0)) return true;
     if (CHECK_NAN(geo.pars.d0)) return true;
-    if (CHECK_NAN(gco.pars.phi)) return true;
+    //if (CHECK_NAN(gco.pars.phi)) return true;
     if (CHECK_NAN(geo.pars.phi)) return true;
-    if (CHECK_NAN(gco.pars.z0)) return true;
+    //if (CHECK_NAN(gco.pars.z0)) return true;
     if (CHECK_NAN(geo.pars.z0)) return true;
-    if (CHECK_NAN(gco.pars.eta)) return true;
+    //if (CHECK_NAN(gco.pars.eta)) return true;
     if (CHECK_NAN(geo.pars.eta)) return true;
 
     for (int i = 0; i < m_nCoords; i++)
     {
-        if (CHECK_NAN(gco.Vcurvature[i])) return true;
+        //if (CHECK_NAN(gco.Vcurvature[i])) return true;
         if (CHECK_NAN(geo.Vcurvature[i])) return true;
-        if (CHECK_NAN(gco.Vd0[i])) return true;
+        //if (CHECK_NAN(gco.Vd0[i])) return true;
         if (CHECK_NAN(geo.Vd0[i])) return true;
-        if (CHECK_NAN(gco.Vphi[i])) return true;
+        //if (CHECK_NAN(gco.Vphi[i])) return true;
         if (CHECK_NAN(geo.Vphi[i])) return true;
-        if (CHECK_NAN(gco.Vz0[i])) return true;
+        //if (CHECK_NAN(gco.Vz0[i])) return true;
         if (CHECK_NAN(geo.Vz0[i])) return true;
-        if (CHECK_NAN(gco.Veta[i])) return true;
+        //if (CHECK_NAN(gco.Veta[i])) return true;
         if (CHECK_NAN(geo.Veta[i])) return true;
     }
 

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGInputLoader.cxx 
@@ -147,7 +147,7 @@ SGInputLoader::execute()
                         << *obj);
       }
     }
-    m_load = toLoad;
+    m_load = std::move(toLoad);
     
     m_first = false;
   }
@@ -182,7 +182,7 @@ SGInputLoader::loader(Gaudi::Details::PropertyBase& p ) {
     toLoad.emplace(obj);
     if(!outputDataObjs().count(obj)) { addDependency(obj,Gaudi::DataHandle::Writer); }
   }
-  m_load = toLoad;
+  m_load = std::move(toLoad);
 
 }
 

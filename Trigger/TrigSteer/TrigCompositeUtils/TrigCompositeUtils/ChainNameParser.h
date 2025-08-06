@@ -102,6 +102,9 @@ namespace ChainNameParser {
     /// A list of all signature names
     const std::vector<std::string> &allSignatures();
 
+    /// A list of all postfixe qualifiers which may come immidiately after the "XSigY" pattern, e.g. the noL1 in "2mu10noL1"
+    const std::vector<std::string> &allSignaturePostfixQualifiers();
+
     /*
      * @brief The regex pattern to match the part at the start of each leg
      *

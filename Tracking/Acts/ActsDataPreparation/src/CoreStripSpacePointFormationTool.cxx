@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CoreStripSpacePointFormationTool.h"
@@ -99,7 +99,7 @@ namespace ActsTrk
                                                               std::optional<double> /*varT*/,
                                                               const boost::container::static_vector<Acts::SourceLink, 2> &slinks)
       -> StripSP {
-      std::vector<std::size_t> measIndices;
+      std::array<std::size_t,2> measIndices{ std::numeric_limits<std::size_t>::max(), std::numeric_limits<std::size_t>::max()};
       std::array<StripInformationHelper, 2> stripInfos; 
       size_t idx = 0;
       for (const auto& slink : slinks){
@@ -114,8 +114,10 @@ namespace ActsTrk
             auto ends = this->getStripEnds(hit, element, stripIndex);
             auto vertex = Amg::Vector3D::Zero();
             StripInformationHelper stripInfo(id,ends.first, ends.second, vertex, ActsTrk::localXFromSourceLink(hit), cluster_index, stripIndex);
-            measIndices.push_back(cluster_index);
-            stripInfos[idx++] = std::move(stripInfo);
+            assert( idx < measIndices.size() && idx < stripInfos.size());
+            measIndices[idx] = cluster_index;
+            stripInfos[idx] = std::move(stripInfo);
+            ++idx;
           }
       }
       const auto& [firstInfo, secondInfo] = stripInfos;

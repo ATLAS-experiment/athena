@@ -78,6 +78,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('decorateSamplingPattern', False, type=bool,
             info="add samplingPattern decorations to clusters as part of PHYSLITE")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
         """Create the calibration and smearing algorithm
@@ -87,7 +90,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         log = logging.getLogger('ElectronCalibrationConfig')
 
         # Set up the calibration and smearing algorithm:
-        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
+        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name )
         config.addPrivateTool( 'calibrationAndSmearingTool',
                             'CP::EgammaCalibrationAndSmearingTool' )
         # Set default ESModel per period
@@ -132,22 +135,22 @@ class ElectronCalibrationConfig (ConfigBlock) :
         # Decorate calo cluster eta if required
         if self.decorateCaloClusterEta:
             alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg',
-                                          'ElectronEgammaCaloClusterEtaAlg' + self.postfix,
+                                          'ElectronEgammaCaloClusterEtaAlg',
                                            reentrant=True )
             alg.particles = config.readName(self.containerName)
             config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
 
         if self.decorateSamplingPattern:
-            config.createAlgorithm( 'CP::EgammaSamplingPatternDecoratorAlg', 'EgammaSamplingPatternDecoratorAlg' + self.postfix )
+            config.createAlgorithm( 'CP::EgammaSamplingPatternDecoratorAlg', 'EgammaSamplingPatternDecoratorAlg' )
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
-            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
 
         # Set up the eta-cut on all electrons prior to everything else
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' )
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         alg.selectionTool.maxEta = self.maxEta
@@ -160,7 +163,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Select electrons only with good object quality.
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' )
         alg.selectionDecoration = 'goodOQ' + self.postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::EgammaIsGoodOQSelectionTool' )
         alg.selectionTool.Mask = xAOD.EgammaParameters.BADCLUSELECTRON
@@ -217,7 +220,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         if self.minPt > 0 :
             # Set up the the pt selection
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' )
             alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
             alg.selectionTool.minPt = self.minPt
@@ -229,7 +232,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         # Set up the isolation correction algorithm:
         if self.isolationCorrection:
             alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
-                                          'ElectronIsolationCorrectionAlg' + self.postfix )
+                                          'ElectronIsolationCorrectionAlg' )
             config.addPrivateTool( 'isolationCorrectionTool',
                                    'CP::IsolationCorrectionTool' )
             alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
@@ -245,11 +248,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
-                                          'LeptonTrackDecorator' + self.containerName + self.postfix,
+                                          'LeptonTrackDecorator',
                                            reentrant=True )
             alg.particles = config.readName (self.containerName)
 
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName(self.containerName)
 
         config.addOutputVar (self.containerName, 'pt', 'pt')
@@ -358,6 +361,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption('addChargeMisIDSF', False, type=bool,
             info="Adds scale factors for charge-misID.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None :
+            return self.containerName + '_' + self.selectionName + self.postfix
+        return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
 
@@ -384,7 +392,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the track selection algorithm:
         if self.trackSelection :
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                                          'ElectronTrackSelectionAlg' + postfix,
+                                          'ElectronTrackSelectionAlg',
                                           reentrant=True )
             alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
             alg.maxD0Significance = self.maxD0Significance
@@ -398,7 +406,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if 'LH' in self.identificationWP:
             # Set up the likelihood ID selection algorithm
             # It is safe to do this before calibration, as the cluster E is used
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' )
             alg.selectionDecoration = 'selectLikelihood' + selectionPostfix + ',as_char'
             if self.recomputeID:
                 # Rerun the likelihood ID
@@ -418,7 +426,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 alg.selectionTool.selectionFlags = [dfFlag]
         elif 'SiHit' in self.identificationWP:
             # Only want SiHit electrons, so veto loose LH electrons
-            algVeto = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlgVeto' + postfix + 'Veto')
+            algVeto = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlgVeto')
             algVeto.selectionDecoration = 'selectLikelihoodVeto' + postfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
             algVeto.selectionTool.selectionFlags = ["DFCommonElectronsLHLoose"]
@@ -430,7 +438,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
             # Select SiHit electrons using IsEM bits
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' )
             alg.selectionDecoration = 'selectSiHit' + selectionPostfix + ',as_char'
             # Select from Derivation Framework IsEM bits
             config.addPrivateTool( 'selectionTool', 'CP::AsgMaskSelectionTool' )
@@ -444,7 +452,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  '`chargeIDSelectionRun2` option as there are '
                                  'DNN WPs containing charge flip rejection.')
             # Set up the DNN ID selection algorithm
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' )
             alg.selectionDecoration = 'selectDNN' + selectionPostfix + ',as_char'
             if self.recomputeID:
                 # Rerun the DNN ID
@@ -468,7 +476,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # maintain order of selections
         if 'SiHit' in self.identificationWP:
             # Set up the ElectronSiHitDecAlg algorithm to decorate SiHit electrons with a minimal amount of information:
-            algDec = config.createAlgorithm( 'CP::ElectronSiHitDecAlg', 'ElectronSiHitDecAlg' + postfix )
+            algDec = config.createAlgorithm( 'CP::ElectronSiHitDecAlg', 'ElectronSiHitDecAlg' )
             selDec = 'siHitEvtHasLeptonPair' + selectionPostfix + ',as_char'
             algDec.selectionName     = selDec.split(",")[0]
             algDec.ElectronContainer = config.readName (self.containerName)
@@ -490,7 +498,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  f"convSelection option must be one of {allowedValues}.")
 
             # ambiguityType == 0
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronAmbiguityTypeAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronAmbiguityTypeAlg' )
             alg.selectionDecoration = 'selectAmbiguityType' + selectionPostfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::AsgNumDecorationSelectionToolUInt8' )
             alg.selectionTool.decorationName = "ambiguityType"
@@ -502,7 +510,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
             # DFCommonAddAmbiguity selection
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDFCommonAddAmbiguityAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDFCommonAddAmbiguityAlg' )
             alg.selectionDecoration = 'selectDFCommonAddAmbiguity' + selectionPostfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::AsgNumDecorationSelectionToolInt' )
             alg.selectionTool.decorationName = "DFCommonAddAmbiguity"
@@ -524,7 +532,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if self.doFSRSelection :
             # save the flag set for the WP
             wpFlag = alg.selectionDecoration.split(",")[0]
-            alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' )
             alg.selectionDecoration = wpFlag
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
             # For SiHit electrons, set flag to remove FSR electrons.
@@ -536,7 +544,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
             alg = config.createAlgorithm( 'CP::EgammaIsolationSelectionAlg',
-                                          'ElectronIsolationSelectionAlg' + postfix )
+                                          'ElectronIsolationSelectionAlg' )
             alg.selectionDecoration = 'isolated' + selectionPostfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.ElectronWP = self.isolationWP
@@ -553,7 +561,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Select electrons only if they don't appear to have flipped their charge.
         if self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3:
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
-                                          'ElectronChargeIDSelectionAlg' + postfix )
+                                          'ElectronChargeIDSelectionAlg' )
             alg.selectionDecoration = 'chargeID' + selectionPostfix + ',as_char'
             if self.recomputeChargeID:
                 # Rerun the ECIDS BDT
@@ -585,7 +593,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  'please disable it by setting `noEffSF` to True.')
 
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlgReco' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgReco' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_reco_effSF' + selectionPostfix + '_%SYS%'
@@ -619,7 +627,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the ID electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlgID' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgID' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
@@ -648,7 +656,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the ISO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and self.isolationWP != 'NonIso' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlgIsol' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgIsol' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
@@ -681,7 +689,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if (self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3 and 
             config.dataType() is not DataType.Data and not self.noEffSF):
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlgEcids' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgEcids' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_ecids_effSF' + selectionPostfix + '_%SYS%'
@@ -721,7 +729,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  'please disable it by setting `noEffSF` to False.')
 
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlgMisid' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgMisid' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'CP::ElectronChargeEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_charge_misid_effSF' + selectionPostfix + '_%SYS%'
@@ -757,7 +765,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
         if config.dataType() is not DataType.Data and not self.noEffSF and self.saveCombinedSF:
             alg = config.createAlgorithm( 'CP::AsgObjectScaleFactorAlg',
-                                          'ElectronCombinedEfficiencyScaleFactorAlg' + postfix )
+                                          'ElectronCombinedEfficiencyScaleFactorAlg' )
             alg.particles = config.readName (self.containerName)
             alg.inScaleFactors = sfList
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
@@ -798,6 +806,10 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('containerName', '', type=str,
                         info="the input electron container, with a possible selection, in "
                         "the format container or container.selection.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
 
     def makeAlgs (self, config) :
 
@@ -945,13 +957,16 @@ class ElectronLRTMergedConfig (ConfigBlock) :
             info="the name of the output container after LRT merging."
         )
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
 
     def makeAlgs (self, config) :
 
         if config.isPhyslite() :
             raise(RuntimeError("Electron LRT merging is not available in Physlite mode"))
 
-        alg = config.createAlgorithm( "CP::ElectronLRTMergingAlg", "ElectronLRTMergingAlg" + self.containerName )
+        alg = config.createAlgorithm( "CP::ElectronLRTMergingAlg", "ElectronLRTMergingAlg" )
         alg.PromptElectronLocation = self.inputElectrons
         alg.LRTElectronLocation = self.inputLRTElectrons
         alg.OutputCollectionName = self.containerName

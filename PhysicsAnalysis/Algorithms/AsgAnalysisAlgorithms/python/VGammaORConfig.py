@@ -19,6 +19,10 @@ class VGammaORBlock(ConfigBlock):
         self.addOption('removeInOverlap', [700320, 700321, 700322, 700467, 700468, 700469, 700323, 700324, 700325, 700470, 700471, 700472, 700326, 700327, 700328, 700329, 700330, 700331, 700332, 700333, 700334, 700473, 700474, 700475, 700476, 700477, 700478, 700479, 700480, 700481, 700341, 700342, 700343, 700338, 700339, 700340, 700344, 700345, 700346, 700347, 700348, 700349, 700598, 700599, 700439, 700440, 700441], type=list,
                        info='list of DSIDs (integers) for which events are to be remoevd if found to be in the overlap region. For instance, V samples in V+jets vs Vy+jets overlap removal. The default list was taken from the PmgWeakBosonProcesses twiki but is not actively maintained!')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # not sure if this is a singleton block, but I don't know what name to use if not
+
     def makeAlgs(self, config):
 
         log = logging.getLogger('VGammaORBlock')

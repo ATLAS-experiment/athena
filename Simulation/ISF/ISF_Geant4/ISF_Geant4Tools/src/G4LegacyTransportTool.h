@@ -18,7 +18,8 @@
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "G4AtlasInterfaces/IUserActionSvc.h"
-#include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
+#include "G4AtlasInterfaces/IDetectorConstructionTool.h"
+#include "G4AtlasInterfaces/IPhysicsInitialization.h"
 #include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
 #include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
@@ -171,9 +172,7 @@ class ATLAS_NOT_THREAD_SAFE G4LegacyTransportTool
   /// user action service
   ServiceHandle<G4UA::IUserActionSvc> m_userActionSvc{this, "UserActionSvc", "",
                                                       ""};
-  /// Detector Geometry Service (builds G4 Geometry)
-  ServiceHandle<IDetectorGeometrySvc> m_detGeoSvc{this, "DetGeoSvc",
-                                                  "DetectorGeometrySvc", ""};
+  PublicToolHandle<IDetectorConstructionTool> m_detConstruction{this, "DetectorConstruction", "", "Tool handle of the DetectorConstruction"};
   /// Service to convert ISF_Particles into a G4Event
   ServiceHandle<ISF::IInputConverter> m_inputConverter{
       this, "InputConverter", "ISF_InputConverter", ""};
@@ -186,6 +185,7 @@ class ATLAS_NOT_THREAD_SAFE G4LegacyTransportTool
   /// Fast Simulation Master Tool
   PublicToolHandle<IFastSimulationMasterTool> m_fastSimTool{
       this, "FastSimMasterTool", "FastSimulationMasterTool", ""};
+  PublicToolHandleArray<IPhysicsInitializationTool> m_physicsInitializationTools{this, "PhysicsInitializationTools", {}, "Physics initialization happening after Geant4 initialization"};
   /// @}
 };
 }

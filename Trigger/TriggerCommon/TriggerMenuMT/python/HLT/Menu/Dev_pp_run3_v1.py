@@ -437,6 +437,19 @@ def getDevSignatures():
         ChainProp(name='HLT_j260_35smcINF_90bgntwoxt_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175_35smcINF_90bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
 
+        ChainProp(name='HLT_j175C_35smcINF_90bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_90bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j175C_35smcINF_90bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_90bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j175C_35smcINF_90bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_90bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
+        # Monitoring
+        ChainProp(name='HLT_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED'], monGroups=['jetMon:online', 'bJetMon:t0']),
+        ChainProp(name='HLT_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED'], monGroups=['jetMon:online', 'bJetMon:t0']),
+        ChainProp(name='HLT_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED'], monGroups=['jetMon:online', 'bJetMon:t0']),
+
+
         # 95% WP
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_95bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_95bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
@@ -759,6 +772,18 @@ def getDevSignatures():
         ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni07Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
         ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni08Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
         ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni09Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+
+        # ATR-31631 - test chains for boosted ditauOmni0Trk4 chains with elevated pT
+        ChainProp(name='HLT_j260_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j270_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j280_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j290_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j300_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j310_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j320_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j330_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j340_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
+        ChainProp(name='HLT_j350_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
     ]
 
     chains['Bphysics'] = [

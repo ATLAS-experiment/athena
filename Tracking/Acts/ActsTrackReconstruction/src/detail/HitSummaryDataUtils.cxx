@@ -7,6 +7,7 @@
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
+#include "xAODTracking/TrackingPrimitives.h"
 #include "src/detail/HitSummaryDataUtils.h"
 
 namespace ActsTrk::detail {

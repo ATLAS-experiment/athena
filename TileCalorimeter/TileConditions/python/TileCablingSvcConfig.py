@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile cabling service"""
 
@@ -28,7 +28,10 @@ def TileCablingSvcCfg(flags):
 
     geometry = flags.GeoModel.AtlasVersion
 
-    if not flags.Common.isOnline:
+    if geometry.startswith('ATLAS-CTB'):
+        tileCablingSvc.CablingType = -1
+        msg.info("Forcing TestBeam cabling for geometry %s", geometry)
+    elif not flags.Common.isOnline:
       runNumber = flags.Input.RunNumbers[0]
       if flags.Input.OverrideRunNumber > 0:
           from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers

@@ -331,7 +331,8 @@ def HION5AllVariables():
     variables += ["ZdcSums"]
     variables += ["ZdcTriggerTowers"]
     variables += ["PeripheralCaloCalTopoClusters"]
-    
+    variables += ["MET_Track1000", "MET_Track2000", "MET_Track3000", "MET_Track4000", "MET_Track5000"]
+
     return variables
 
 def HION5AllTruthVariables():
@@ -343,7 +344,8 @@ def HION5AllTruthVariables():
     variables += ["MuonTruthParticles"]
     variables += ["AntiKt2TruthJets"]
     variables += ["AntiKt4TruthJets"]
-
+    variables += ["TruthElectrons"]
+    variables += ["TruthMuons"]
     return variables
 
 def HION5SmartCollections():
@@ -374,7 +376,6 @@ def HION7SmartCollections():
     variables += ["Electrons"]
     variables += ["Photons"]
     variables += ["Muons"]
-    variables += ["PrimaryVertices"]
     variables += ["InDetTrackParticles"]
 
     return variables
@@ -385,6 +386,8 @@ def HION7AllVarContent():
     variables += ["AntiKt4HIJets"]
     variables += ["CaloSums"]
     variables += ["ZdcModules"]
+    variables += ["PrimaryVertices"]
+    variables += ["EventInfo"]
 
     return variables
 
@@ -397,6 +400,7 @@ def HION7AllVarTruthContent():
     variables += ["TruthVertices"]
 
     return variables
+
 
 #################################################################################
 #HION12

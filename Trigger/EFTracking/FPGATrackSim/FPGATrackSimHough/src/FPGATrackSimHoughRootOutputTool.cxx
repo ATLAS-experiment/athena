@@ -46,6 +46,13 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_tree->Branch("layerID",&m_layerID);
   m_tree->Branch("etaID",&m_etaID);
 
+  m_tree->Branch("associated_truth_d0",&m_associated_truth_d0);
+  m_tree->Branch("associated_truth_z0",&m_associated_truth_z0);
+  m_tree->Branch("associated_truth_pt",&m_associated_truth_pt);
+  m_tree->Branch("associated_truth_q",&m_associated_truth_q);
+  m_tree->Branch("associated_truth_eta",&m_associated_truth_eta);
+  m_tree->Branch("associated_truth_phi",&m_associated_truth_phi);
+
   m_tree->Branch("gphi",&m_gphi);
   m_tree->Branch("zIdeal",&m_zIdeal);
   m_tree->Branch("gphiIdeal",&m_gphiIdeal);
@@ -495,6 +502,20 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       m_candidate_barcodefrac = 0;
       m_fakelabel = 2;
     }
+
+    for (const auto & track : truthTracks) {
+      if (!m_EvtSel->passCuts(track)) continue;
+      if (track.getStatus() != 1) continue;
+
+      m_associated_truth_d0 = track.getD0();
+      m_associated_truth_z0 = track.getZ0();
+      m_associated_truth_pt = track.getPt();
+      m_associated_truth_q = track.getQ();
+      m_associated_truth_eta = track.getEta();
+      m_associated_truth_phi = track.getPhi();
+      break;
+    }
+
     m_tree->Fill();
 
     mtv.clear();

@@ -299,7 +299,8 @@ class EgammaCalibrationAndSmearingTool
   {
     EtaCaloPredicate(double eta_min, double eta_max) : m_eta_min(eta_min), m_eta_max(eta_max) {}
     bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId p) {
-      const double eta = tool.etaCaloAcc(tool.caloClusterAcc(p)[0].value(),tool.authorAcc (p));
+      const Accessors& acc = *tool.m_accessors;
+      const double eta = acc.etaCaloAcc(acc.caloClusterAcc(p)[0].value(),acc.authorAcc (p));
       return (eta >= m_eta_min and eta < m_eta_max);
     }
     private:
@@ -317,8 +318,9 @@ class EgammaCalibrationAndSmearingTool
     AbsEtaCaloPredicate(double eta_min, double eta_max)
         : m_eta_min(eta_min), m_eta_max(eta_max) {}
     bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId p) {
+      const Accessors& acc = *tool.m_accessors;
       const double aeta =
-          std::abs(tool.etaCaloAcc(tool.caloClusterAcc(p)[0].value(),tool.authorAcc (p)));
+          std::abs(acc.etaCaloAcc(acc.caloClusterAcc(p)[0].value(),acc.authorAcc (p)));
       return (aeta >= m_eta_min and aeta < m_eta_max);
     }
 
@@ -370,8 +372,9 @@ class EgammaCalibrationAndSmearingTool
           m_eta2_max(eta2_max) {}
 
     bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId p) {
+      const Accessors& acc = *tool.m_accessors;
       const double aeta =
-          std::abs(tool.etaCaloAcc(tool.caloClusterAcc(p)[0].value(),tool.authorAcc (p)));
+          std::abs(acc.etaCaloAcc(acc.caloClusterAcc(p)[0].value(),acc.authorAcc (p)));
       return ((aeta >= m_eta1_min and aeta < m_eta1_max) or
               (aeta >= m_eta2_min and aeta < m_eta2_max));
     }
@@ -438,34 +441,40 @@ class EgammaCalibrationAndSmearingTool
 public:
   Gaudi::Property<bool> m_onlyElectrons {this, "onlyElectrons", false, "the tool will only be applied to electrons"};
   Gaudi::Property<bool> m_onlyPhotons {this, "onlyPhotons", false, "the tool will only be applied to photons"};
-  columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
-  columnar::EgammaHelpers::EnergyAccessor<> eAcc {*this};
-  columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
-  columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
-  columnar::EgammaDecorator<float> decEmva;
-  columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
-  columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
-  columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> mAcc {*this, "m"};
-  columnar::EgammaAccessor<uint16_t> authorAcc {*this, "author"};
-  columnar::EgammaAccessor<std::vector<columnar::OptTrackId>> electronTrackAcc;
-  columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;
-  columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterHandle {*this, "egammaClusters"};
-  columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
-  columnar::ClusterAccessor<double> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};
-  columnar::ClusterAccessor<double> Es1Acc {*this, "correctedcl_Es1", {.isOptional = true}};
-  columnar::ClusterAccessor<double> Es2Acc {*this, "correctedcl_Es2", {.isOptional = true}};
-  columnar::ClusterAccessor<double> Es3Acc {*this, "correctedcl_Es3", {.isOptional = true}};
-  columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterEtaAcc {*this, "calEta"};
-  columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterPhiAcc {*this, "calPhi"};
-  columnar::ClusterHelpers::EnergyBEAccessor<> energyBEAcc {*this};
-  columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
-  columnar::ClusterHelpers::EtaCaloAccessor<> etaCaloAcc {*this};
-  columnar::ClusterHelpers::PhiCaloAccessor<> phiCaloAcc {*this};
-  columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo"};
-  columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
-  columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
-  columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
-  columnar::EventInfoAccessor<unsigned int> randomrunnumber_getter {*this, "RandomRunNumber"};
+  struct Accessors : public columnar::ColumnarTool<>
+  {
+    Accessors(columnar::ColumnarTool<>& tool) : columnar::ColumnarTool<>(&tool) {}
+
+    columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
+    columnar::EgammaHelpers::EnergyAccessor<> eAcc {*this};
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
+    columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
+    columnar::EgammaDecorator<float> decEmva;
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> mAcc {*this, "m"};
+    columnar::EgammaAccessor<uint16_t> authorAcc {*this, "author"};
+    columnar::EgammaAccessor<std::vector<columnar::OptTrackId>> electronTrackAcc;
+    columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;
+    columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterHandle {*this, "egammaClusters"};
+    columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ClusterAccessor<double> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};
+    columnar::ClusterAccessor<double> Es1Acc {*this, "correctedcl_Es1", {.isOptional = true}};
+    columnar::ClusterAccessor<double> Es2Acc {*this, "correctedcl_Es2", {.isOptional = true}};
+    columnar::ClusterAccessor<double> Es3Acc {*this, "correctedcl_Es3", {.isOptional = true}};
+    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterEtaAcc {*this, "calEta"};
+    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterPhiAcc {*this, "calPhi"};
+    columnar::ClusterHelpers::EnergyBEAccessor<> energyBEAcc {*this};
+    columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
+    columnar::ClusterHelpers::EtaCaloAccessor<> etaCaloAcc {*this};
+    columnar::ClusterHelpers::PhiCaloAccessor<> phiCaloAcc {*this};
+    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo"};
+    columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
+    columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
+    columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
+    columnar::EventInfoAccessor<unsigned int> randomrunnumber_getter {*this, "RandomRunNumber"};
+  };
+  std::unique_ptr<Accessors> m_accessors;
 
   void callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId event) const;
   void callEvents (columnar::EventContextRange events) const override;

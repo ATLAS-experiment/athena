@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //  ***************************************************************************
 //  *   Author: John Morris (john.morris@cern.ch)                             *
 //  *           Queen Mary University of London                               *
 //  *                                                                         *
 
-// Like it says above, please chop up this code until it does what you want !
+
 
 #include "TrigT1CaloCalibTools/L1CaloOfflineTriggerTowerTools.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -306,8 +306,8 @@ namespace LVL1 {
         }
       } else if (rx.size() == 1) v1.push_back((*i).size());
     }
-    v.push_back(v1);
-    if (rx.size() == 2) v.push_back(v2);
+    v.push_back(std::move(v1));
+    if (rx.size() == 2) v.push_back(std::move(v2));
     return v;
   }
 
@@ -334,8 +334,8 @@ namespace LVL1 {
         }
       } else if (rx.size() == 1) v1.push_back(m_cells2tt->layerNames((*i)[0]));
     }
-    v.push_back(v1);
-    if (rx.size() == 2) v.push_back(v2);
+    v.push_back(std::move(v1));
+    if (rx.size() == 2) v.push_back(std::move(v2));
     return v;
   }
 
@@ -432,8 +432,8 @@ namespace LVL1 {
       }
     }
 
-    output.push_back(emec);
-    output.push_back(emb);
+    output.push_back(std::move(emec));
+    output.push_back(std::move(emb));
     return output;
   }
 
@@ -490,8 +490,8 @@ namespace LVL1 {
         }
       } else if (rx.size() == 1) v1.push_back((*i).size());
     }
-    v.push_back(v1);
-    if (rx.size() == 2) v.push_back(v2);
+    v.push_back(std::move(v1));
+    if (rx.size() == 2) v.push_back(std::move(v2));
     return v;
   }
 
@@ -518,8 +518,8 @@ namespace LVL1 {
         }
       } else if (rx.size() == 1) v1.push_back(m_cells2tt->layerNames((*i)[0]));
     }
-    v.push_back(v1);
-    if (rx.size() == 2) v.push_back(v2);
+    v.push_back(std::move(v1));
+    if (rx.size() == 2) v.push_back(std::move(v2));
     return v;
   }
 
@@ -669,12 +669,12 @@ namespace LVL1 {
 
     // Always have lowEta first
     if(size2A > 0 && size2B > 0 && size3A == 0 && size3B == 0){ // FCAL 2
-      output.push_back(fcal2A);
-      output.push_back(fcal2B);
+      output.push_back(std::move(fcal2A));
+      output.push_back(std::move(fcal2B));
     }
     if(size2A == 0 && size2B == 0 && size3A > 0 && size3B > 0){ // FCAL 3
-      output.push_back(fcal3A);
-      output.push_back(fcal3B);
+      output.push_back(std::move(fcal3A));
+      output.push_back(std::move(fcal3B));
     }
 
     return output;
@@ -699,8 +699,8 @@ namespace LVL1 {
       if(someRxId == rxidA){cellsA.push_back(*i);}
       if(someRxId == rxidB){cellsB.push_back(*i);}
     }
-    output.push_back(cellsA);
-    output.push_back(cellsB);
+    output.push_back(std::move(cellsA));
+    output.push_back(std::move(cellsB));
     return output;
   }
 
@@ -920,8 +920,8 @@ namespace LVL1 {
         }
       } else if (rx.size() == 1) v1.push_back(this->LArNonNominalHV((*i)));
     }
-    nNonNomHV.push_back(v1);
-    if (rx.size() == 2) nNonNomHV.push_back(v2);
+    nNonNomHV.push_back(std::move(v1));
+    if (rx.size() == 2) nNonNomHV.push_back(std::move(v2));
     return nNonNomHV;
   }
 
@@ -985,8 +985,8 @@ namespace LVL1 {
         }
       } else if (rx.size() == 1) v1.push_back(this->LArHVScale((*i)));
     }
-    output.push_back(v1);
-    if (rx.size() == 2) output.push_back(v2);
+    output.push_back(std::move(v1));
+    if (rx.size() == 2) output.push_back(std::move(v2));
     return output;
   }
     
@@ -1067,8 +1067,8 @@ namespace LVL1 {
       } else if (rx.size() == 1) v1.push_back( (isTile == false) ? this->LArNonNominalHV((*i))
                                                                  : this->TileNonNominal((*i)));
     }
-    nNonNomHV.push_back(v1);
-    if (rx.size() == 2) nNonNomHV.push_back(v2);
+    nNonNomHV.push_back(std::move(v1));
+    if (rx.size() == 2) nNonNomHV.push_back(std::move(v2));
     return nNonNomHV;
   }
 
@@ -1146,8 +1146,8 @@ namespace LVL1 {
         }
       } else if (rx.size() == 1) v1.push_back(this->LArHVScale((*i)));
     }
-    output.push_back(v1);
-    if (rx.size() == 2) output.push_back(v2);
+    output.push_back(std::move(v1));
+    if (rx.size() == 2) output.push_back(std::move(v2));
     return output;
   }
   

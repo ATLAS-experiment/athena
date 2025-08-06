@@ -47,17 +47,11 @@ namespace FlavorTagInference {
     return StatusCode::SUCCESS;
   }
 
-  void MultifoldGNNTool::decorate(const xAOD::BTagging& btag) const {
-    m_gnn->decorate(btag);
+  void MultifoldGNNTool::decorate(const xAOD::IParticle& i_jet) const {
+    m_gnn->decorate(i_jet);
   }
-  void MultifoldGNNTool::decorate(const xAOD::Jet& jet) const {
-    m_gnn->decorate(jet);
-  }
-  void MultifoldGNNTool::decorateWithDefaults(const SG::AuxElement& jet) const {
-    m_gnn->decorateWithDefaults(jet);
-  }
-  void MultifoldGNNTool::decorateWithDefaults(const xAOD::BTagging& btag) const {
-    m_gnn->decorateWithDefaults(btag);
+  void MultifoldGNNTool::decorateWithDefaults(const xAOD::IParticle& i_jet) const {
+    m_gnn->decorateWithDefaults(i_jet);
   }
 
   // Dependencies

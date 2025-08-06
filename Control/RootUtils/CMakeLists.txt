@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RootUtils )
@@ -7,7 +7,7 @@ atlas_subdir( RootUtils )
 find_package( Boost COMPONENTS thread )
 find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS RIO Hist Tree Core MathCore ROOTTPython
-   cppyy${Python_VERSION_MAJOR}_${Python_VERSION_MINOR} cppyy )
+   cppyy${Python_VERSION_MAJOR}_${Python_VERSION_MINOR} cppyy CPyCppyy )
 
 set( ROOT_LIBRARIES_PYROOT ${ROOT_LIBRARIES} )
 unset( ROOT_FOUND )

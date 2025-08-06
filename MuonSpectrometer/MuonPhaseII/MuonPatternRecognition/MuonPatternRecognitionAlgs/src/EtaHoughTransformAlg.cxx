@@ -416,7 +416,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         // add phi measurements - will be filtered for compatibility in separate algorithm
         extendWithPhiHits(hitList, bucket);
         // sort hits by layer 
-        SpacePointPerLayerSorter sorter{m_idHelperSvc.get()};
+        const SpacePointPerLayerSorter sorter{};
         std::ranges::stable_sort(hitList, sorter);
         // create hough maximum instance and add it to the event data for later writing! 
         const HoughMaximum& houghMax{data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket)};
@@ -441,6 +441,8 @@ void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughH
 
     using namespace std::placeholders; 
     double w = 1.0; 
+    // convert Gaudi::property to double to avoid deep copy in std::bind expression
+    double resolutionTarget = m_targetResoIntercept; 
     // downweight RPC measurements in the barrel relative to MDT  
     if (SP->primaryMeasurement()->type() == xAOD::UncalibMeasType::RpcStripType){
         w = 0.5; 
@@ -454,13 +456,13 @@ void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughH
         // dummy index for precision layer counting within the hough plane 
         const unsigned precisionLayerIndex = (dc->readoutElement()->multilayer() * 10 + dc->tubeLayer());
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtLeft,
-                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  m_targetResoIntercept), SP, precisionLayerIndex, w);
+                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  resolutionTarget), SP, precisionLayerIndex, w);
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtRight,
-                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  m_targetResoIntercept), SP, precisionLayerIndex, w);
+                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  resolutionTarget), SP, precisionLayerIndex, w);
     } else {
         if (SP->measuresEta()) {
             data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamStrip,
-                                                std::bind(HoughHelpers::Eta::houghWidthStrip, _1, _2, m_targetResoIntercept), SP, 0, w * (
+                                                std::bind(HoughHelpers::Eta::houghWidthStrip, _1, _2, resolutionTarget), SP, 0, w * (
                                                 m_downWeightMultiplePrd ? 1.0 / SP->nEtaInstanceCounts() : 1.));
         }
     }

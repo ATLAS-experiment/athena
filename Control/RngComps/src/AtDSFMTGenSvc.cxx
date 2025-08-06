@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ISvcLocator.h"
@@ -212,6 +212,10 @@ void AtDSFMTGenSvc::handle(const Incident &inc) {
   else if (inc.type() == "ReseedIncident") {
     typedef ContextIncident<std::pair<unsigned,unsigned> > Ctxt;
     const Ctxt* incident = dynamic_cast<const Ctxt*>(&inc);
+    if (!incident) {
+      throw GaudiException(string("can not cast to ContextIncident "),
+                           name(), StatusCode::FAILURE);
+    }
     const std::pair<unsigned,unsigned>& data = incident->tag();
     //clear static RandGauss cache (generates two numbers per call to shoot()
     CLHEP::RandGauss::setFlag(false);
@@ -385,7 +389,7 @@ CLHEP::HepRandomEngine* AtDSFMTGenSvc::setOnDefinedSeeds(uint32_t theSeed,
   ATH_MSG_DEBUG("Reseeding stream " << streamName << " with " << theSeed);
   CLHEP::HepRandomEngine* eng = (*iter).second;
   eng->setSeed( theSeed, 0 );
-  return (CLHEP::HepRandomEngine*)eng;
+  return eng;
 }
 
 bool

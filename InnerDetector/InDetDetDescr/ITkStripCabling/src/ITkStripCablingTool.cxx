@@ -9,7 +9,6 @@
  * @author Shaun Roe
  * @author Edson Carquin
  * @author Daniel Torres
- * @date 06 March, 2025
  **/
  
 //this package
@@ -40,6 +39,12 @@ ITkStripCablingTool::initialize() {
   ATH_CHECK(detStore()->retrieve(m_idHelper, "SCT_ID"));
   ATH_CHECK(m_data.initialize());
   return StatusCode::SUCCESS;
+}
+
+//
+IdentifierHash 
+ITkStripCablingTool::getHashFromOnlineId(const ITkStripOnlineId& /*onlineId*/, const EventContext& /*ctx*/, const bool /*withWarnings*/) const {
+  return 0;
 }
 
 ITkStripOnlineId 
@@ -79,6 +84,12 @@ ITkStripCablingTool::getAllRods(std::vector<std::uint32_t>& usersVector, const E
   }
 
   data->getRods(usersVector);
+  if (msgLvl(MSG::DEBUG)){
+      ATH_MSG_DEBUG("RODs found: " << usersVector.size());
+      for (const auto& rodId : usersVector) {
+         ATH_MSG_DEBUG("ROD ID: 0x" << std::hex << rodId << std::dec);
+      }
+  }    
 }
 
 void
@@ -93,4 +104,3 @@ ITkStripCablingTool::getData(const EventContext& ctx) const {
   ATH_MSG_DEBUG("After getting ITkStripCablindData");
   return condData.retrieve();
 }
-

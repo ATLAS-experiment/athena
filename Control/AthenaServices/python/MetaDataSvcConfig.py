@@ -9,7 +9,9 @@ def MetaDataSvcCfg(flags, toolNames=[], tools=[]):
     result.addService(CompFactory.StoreGateSvc("MetaDataStore"))
     result.addService(CompFactory.StoreGateSvc("InputMetaDataStore"))
 
-    service = CompFactory.MetaDataSvc("MetaDataSvc", MetaDataContainer="MetaDataHdr")
+    service = CompFactory.MetaDataSvc("MetaDataSvc",
+                                      MetaDataContainer="MetaDataHdr",
+                                      ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
     result.addService(service)
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=["MetaDataSvc"]))
 

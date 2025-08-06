@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJetReaderAlg.cxx 632174 2014-11-29 15:23:36Z krasznaa $
@@ -15,9 +15,6 @@ namespace xAODMaker {
    TauJetReaderAlg::TauJetReaderAlg( const std::string& name,
                                      ISvcLocator* svcLoc )
       : ::AthAlgorithm( name, svcLoc ) {
-
-      declareProperty( "SGKey", m_sgKey = "TauRecContainer",
-                       "StoreGate key of the container to test" );
    }
 
    StatusCode TauJetReaderAlg::initialize() {

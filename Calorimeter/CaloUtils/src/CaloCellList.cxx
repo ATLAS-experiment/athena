@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Given an input eta,phi, deta,dphi - this class will return you
@@ -27,6 +27,17 @@ square(double x)
 }
 
 CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container)
+  : m_cellcont(*cell_container)
+  , m_mgr(*mgr)
+  , m_energy(0)
+  , m_et(0)
+{
+  m_caloNums.clear();
+  // NSUBCALO indicate take them all
+  m_caloNums.push_back(CaloCell_ID::NSUBCALO);
+}
+
+CaloCellList::CaloCellList(const CaloDetDescrManager& mgr, const CaloCellContainer& cell_container)
   : m_cellcont(cell_container)
   , m_mgr(mgr)
   , m_energy(0)
@@ -39,8 +50,8 @@ CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContain
 
 // specify one calo number
 CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container, const CaloCell_ID::SUBCALO caloNum)
-  : m_cellcont(cell_container)
-  , m_mgr(mgr)  
+  : m_cellcont(*cell_container)
+  , m_mgr(*mgr)
   , m_energy(0)
   , m_et(0)
 {
@@ -52,8 +63,8 @@ CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContain
 // (if all calo it is more efficient to not specify anything)
 CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container,
                            const std::vector<CaloCell_ID::SUBCALO>& caloNums)
-  : m_cellcont(cell_container)
-  , m_mgr(mgr)  
+  : m_cellcont(*cell_container)
+  , m_mgr(*mgr)
   , m_energy(0)
   , m_et(0)
 
@@ -101,7 +112,7 @@ CaloCellList::doSelect(double eta,
   m_et = 0;
   m_nBadT0 = 0;
   m_nBadT12 = 0;
-  if (m_cellcont->empty()){
+  if (m_cellcont.empty()){
     return;
   }
   std::vector<IdentifierHash> calo_mgr_vect;
@@ -113,19 +124,19 @@ CaloCellList::doSelect(double eta,
   for (; itrCaloNum != itrEndCaloNum; ++itrCaloNum) {
     CaloCell_ID::SUBCALO caloNum = *itrCaloNum;
     if (sam != CaloCell_ID::Unknown) {
-      m_mgr->cellsInZone(eta - deta, eta + deta, phi - dphi, phi + dphi, sam, calo_mgr_vect);
+      m_mgr.cellsInZone(eta - deta, eta + deta, phi - dphi, phi + dphi, sam, calo_mgr_vect);
       itrCaloNum = itrEndCaloNum - 1;
     } else if (caloNum == CaloCell_ID::NSUBCALO) {
-      m_mgr->cellsInZone(eta - deta, eta + deta, phi - dphi, phi + dphi, calo_mgr_vect);
+      m_mgr.cellsInZone(eta - deta, eta + deta, phi - dphi, phi + dphi, calo_mgr_vect);
     } else if (caloNum != CaloCell_ID::NOT_VALID) {
-      m_mgr->cellsInZone(eta - deta, eta + deta, phi - dphi, phi + dphi, caloNum, calo_mgr_vect);
+      m_mgr.cellsInZone(eta - deta, eta + deta, phi - dphi, phi + dphi, caloNum, calo_mgr_vect);
     } else {
       continue;
     }
     m_theCellVector.reserve(m_theCellVector.size() + calo_mgr_vect.size());
 
     for (unsigned int i = 0; i < calo_mgr_vect.size(); i++) {
-      const CaloCell* cell = m_cellcont->findCell(calo_mgr_vect[i]);
+      const CaloCell* cell = m_cellcont.findCell(calo_mgr_vect[i]);
       if (cell) {
         double pphi = proxim(cell->phi(), phi);
         if ( (dR > 0 && square(eta - cell->eta()) + square(pphi - phi) < dR2) ||

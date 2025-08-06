@@ -19,7 +19,7 @@ selStr["zeroET"] = "for unmasked SCs with ET == 0 GeV"
 
 selStr["passSCNom"] = "for unmasked SCs with non-zero ET < 10 GeV"
 #selStr["passSCNom0_0p325"] = "for unmasked SCs which pass #tau selection with non-zero ET < 0.2 GeV"
-selStr["passSCNomInvalid"] = "for unmasked SCs with raw E -99999" # notMasked && NotSaturated && notOFCbOF
+selStr["passSCNomInvalid"] = "for unmasked SCs with raw E = -99999" # notMasked && NotSaturated && notOFCbOF
 selStr["passSCNom0_0p325"] = "for unmasked SCs with 0 GeV < ET < 0.325 GeV"
 #selStr["passSCNom0p325_1"] = "for unmasked SCs which pass #tau selection with 0.2 GeV < ET < 1 GeV"
 selStr["passSCNom0p325_1"] = "for unmasked SCs with 0.325 GeV < ET < 1 GeV"
@@ -387,6 +387,15 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            path=thisTopPath,
                                            xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
                                            ybins=500, ymin=0, ymax=5000,
+                                           pattern=[(part)])
+
+            partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_BCID_'+thisSel, 
+                                           title='ADC - Pedestal (all samples) vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
+                                           type='TProfile',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=3564,xmin=-0.5,xmax=3563.5,
+                                           ybins=500, ymin=-5, ymax=5,
                                            pattern=[(part)])
 
         #### Plots from SC ET loop 

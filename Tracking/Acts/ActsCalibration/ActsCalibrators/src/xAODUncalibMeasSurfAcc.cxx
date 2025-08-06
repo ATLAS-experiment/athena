@@ -5,6 +5,7 @@
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
+#include "xAODAuxiliaryMeasurement/AuxiliaryMeasurement.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 
 namespace ActsTrk::detail{
@@ -36,8 +37,14 @@ namespace ActsTrk::detail{
             case RpcStripType:
             case TgcStripType:
             case sTgcStripType:
-            case MMClusterType:
+            case MMClusterType:{
                 return &xAOD::muonSurface(meas);
+                break;
+            }case Other: {
+                const auto* pMeas = static_cast<const xAOD::AuxiliaryMeasurement*>(meas);
+                return pMeas->surface().get();
+            }
+
             default:
                 break;
               

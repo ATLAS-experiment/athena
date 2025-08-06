@@ -159,7 +159,7 @@ __global__ static void graphEdgeMakingKernel_ITk(const uint4* d_bin_pair_views, 
 
 			float curv = dphi/dr;
 			float d0_for_max_curv = r1*r2*(fabsf(curv) - max_kappa);
-			if(tau < 4.0f) {
+			if(ftau < 4.0f) {
 				if(d0_for_max_curv > 0.2f) continue;
 			}
 			else if(d0_for_max_curv > 1.0f) continue;
@@ -181,10 +181,9 @@ __global__ static void graphEdgeLinkingKernel_ITk(const int2* d_edge_nodes, int*
 	int edge_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
 	if(edge_idx >= nEdges) return;
-	
 	int n2Idx = d_edge_nodes[edge_idx].y;//global index of n2
-	
-	int pos = atomicSub(&d_num_outgoing_edges[n2Idx], 1); //this converts num_outgoing_edges to the start postion for each node in d_edge_links
+
+	unsigned int pos = atomicSub(&d_num_outgoing_edges[n2Idx], 1); //this converts num_outgoing_edges to the start postion for each node in d_edge_links
 	
 	d_edge_links[pos-1] = edge_idx; //this edge starts from n2, matching will check edge's n1 and then loop over edges outgoing from that node
 }
@@ -305,7 +304,6 @@ __global__ static void graphCompressionKernel_ITk(float4* d_sp_params, const int
 
 		unsigned char nNei = d_num_neighbours[idx];
 		d_output_graph[pos + TrigAccel::ITk::nNei] = nNei;
-
 		int nei_pos = TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS*idx;
 		for(int k=0;k<nNei;k++) {
 			d_output_graph[pos + TrigAccel::ITk::nei_idx_start + k] = d_reIndexer[d_neighbours[nei_pos + k]];

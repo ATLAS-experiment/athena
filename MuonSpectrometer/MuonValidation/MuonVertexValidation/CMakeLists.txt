@@ -13,8 +13,9 @@ atlas_add_component ( MuonVertexValidation src/*.cxx src/components/*.cxx
                       NO_PUBLIC_HEADERS
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                       LINK_LIBRARIES ${ROOT_LIBRARIES} 
-                                     AthAnalysisBaseCompsLib StoreGateLib MuonTesterTreeLib MuonPRDTestLib
-                                     FourMomUtils CxxUtils
+                                     AthAnalysisBaseCompsLib AthLinks StoreGateLib MuonTesterTreeLib MuonPRDTestLib
+                                     FourMomUtils CxxUtils TruthUtils 
+                                     TrigDecisionToolLib TriggerMatchingToolLib
                                      xAODEventInfo xAODTruth xAODTracking xAODMuon xAODJet xAODMissingET)
 
 # Declare the validation macros as a library, excluding the cxx files that will be compiled to executables 

@@ -69,21 +69,23 @@ public:
 
 private:
   xAOD::TrackParticle* CKFTrackExtension(const Acts::BoundTrackParameters* parameters);
-
+  /// Private access to the logger
+  const Acts::Logger &logger() const { return *m_logger; }
+  
   // Properties
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerName{this, "TrackParticleContainerName", "", "Name of the TrackParticle container"};
   SG::ReadHandleKey<xAOD::HGTDClusterContainer> m_HGTDClusterContainerName{this, "HGTDClusterContainerName", "", "the HGTD clusters"};
 
   // WriteDecorHandleKeys for decorating tracks
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_timeDecorationKey { this, "TimeDecoration", m_trackParticleContainerName, "time", "Decoration for track time" };
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerHasExtensionKey { this, "LayerHasExtension", m_trackParticleContainerName, "layerHasExtension", "Decoration for layer extension" };
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerExtensionChi2Key { this, "LayerExtensionChi2", m_trackParticleContainerName, "layerExtensionChi2", "Decoration for chi2 of extension" };
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterRawTimeKey { this, "LayerClusterRawTime", m_trackParticleContainerName, "layerClusterRawTime", "Decoration for raw time of cluster" };
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTimeKey { this, "LayerClusterTime", m_trackParticleContainerName, "layerClusterTime", "Decoration for cluster time" };
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapXKey { this, "ExtrapX", m_trackParticleContainerName, "extrapX", "Decoration for extrapolated X coordinate" };
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapYKey { this, "ExtrapY", m_trackParticleContainerName, "extrapY", "Decoration for extrapolated Y coordinate" };
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapZKey { this, "ExtrapZ", m_trackParticleContainerName, "extrapZ", "Decoration for extrapolated Z coordinate" };
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_numHGTDHitsKey{this, "numHGTDHits", m_trackParticleContainerName, "numHGTDHits", "Number of HGTD hits on the track extension"};
+  
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerHasExtensionKey { this, "HGTD_has_extension", m_trackParticleContainerName, "HGTD_has_extension", "Decoration for layer extension" };
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerExtensionChi2Key { this, "HGTD_extension_chi2", m_trackParticleContainerName, "HGTD_extension_chi2", "Decoration for chi2 of extension" };
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterRawTimeKey { this, "HGTD_cluster_raw_time", m_trackParticleContainerName, "HGTD_cluster_raw_time", "Decoration for raw time of cluster" };
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTimeKey { this, "HGTD_cluster_time", m_trackParticleContainerName, "HGTD_cluster_time", "Decoration for cluster time" };
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapXKey { this, "HGTD_extrap_x", m_trackParticleContainerName, "HGTD_extrap_x", "Decoration for extrapolated X coordinate" };
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapYKey { this, "HGTD_extrap_y", m_trackParticleContainerName, "HGTD_extrap_y", "Decoration for extrapolated Y coordinate" };
+
 
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_actsTrackLinkKey {this, "ActsTrackLink", m_trackParticleContainerName, "actsTrack", "Link to Acts track"};
 

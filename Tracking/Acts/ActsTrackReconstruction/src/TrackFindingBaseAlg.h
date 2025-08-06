@@ -17,6 +17,7 @@
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 // ACTS
 #include "Acts/EventData/ProxyAccessor.hpp"
@@ -32,6 +33,7 @@
 // Handle Keys
 #include "src/detail/Definitions.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "ActsEvent/TrackContainer.h"
 
 namespace ActsTrk {
   namespace detail {
@@ -50,7 +52,7 @@ namespace ActsTrk {
 
   protected:
     using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
-
+    
     struct MeasurementSelectorConfig {
        std::vector<std::pair<float, float>> m_chi2CutOffOutlier;
        std::vector<float>                   m_etaBins;
@@ -78,6 +80,9 @@ namespace ActsTrk {
 
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
+    detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc {};
+
+    
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
@@ -254,13 +259,11 @@ namespace ActsTrk {
      *
      * @return Number of found tracks
      */
-    std::size_t doTwoWayTrackFinding(
-        std::function<void(detail::RecoTrackContainerProxy &)> addTrack,
-        TrkProxy &trackProxy,
-        detail::RecoTrackContainer &tracksContainerTemp,
-        const TrackFinderOptions &options,
-        Acts::GeometryContext &tgContext,
-        const bool reverseSearch) const;
+    std::vector<typename detail::RecoTrackContainer::TrackProxy>
+    doTwoWayTrackFinding(const detail::RecoTrackStateContainerProxy& firstMeasurement,
+			 const TrkProxy &trackProxy,
+			 detail::RecoTrackContainer &tracksContainerTemp,
+			 const TrackFinderOptions &options) const;
 
     static xAOD::UncalibMeasType measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState);
 

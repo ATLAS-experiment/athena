@@ -276,8 +276,8 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
     ATH_CHECK(sg->recordAddress(addr));
     ATH_CHECK(sg->loadEventProxies());
     // Read data now if desired
-    for (const auto* proxy_ptr : sg->proxies()) {
-      if (!m_onDemandMB) {
+    if (!m_onDemandMB) {
+      for (const auto* proxy_ptr : sg->proxies()) {
         // Sort of a const_cast, then ->accessData()
         sg->proxy_exact(proxy_ptr->sgkey())->accessData();
       }

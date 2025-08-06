@@ -11,7 +11,7 @@ from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
 from ..Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA, InViewRecoCA
-
+from TriggerMenuMT.HLT.CommonSequences.RejectSequences import RejectSequence
 
 def allTE_trkfastSequenceGenCfg( flags, signature="FS" ):
 
@@ -69,19 +69,12 @@ def getBeamspotVtxSequenceGenCfg(flags):
         beamspotSequence.addRecoAlgo(vertexAlg)
         beamspotViewsSequence = SelectionCA('beamspotJetViewsSequence'+signature)
         beamspotViewsSequence.mergeReco(beamspotSequence)
+        
+        #-- now use universal rejectsequence
+        HypoName = "BeamspotHypoAlg_"+signature
+        msca = RejectSequence(flags, HypoName, beamspotViewsSequence)
 
-        #-- HypoAlg and Tool
-        beamspotHypoAlg = CompFactory.TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
-
-        beamspotViewsSequence.addHypoAlgo(beamspotHypoAlg)
-
-        # Reject every event
-        def getRejectingHypoTool(flags, chainDict): 
-                return CompFactory.TrigStreamerHypoTool(chainDict['chainName'],Pass=False)
-
-        return  MenuSequence( flags,
-                                beamspotViewsSequence,
-                                HypoToolGen = getRejectingHypoTool )
+        return  msca
 
 
 #----------------------------------------------------------------

@@ -62,7 +62,7 @@ namespace MuonR4{
             void calibrateSourceLink(const Acts::GeometryContext& geoctx,
                                      const Acts::CalibrationContext& cctx,
                                      const Acts::SourceLink& link,
-                                     ActsTrk::MutableTrackStateBackend::TrackStateProxy state) const override final;
+                                     ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
         private:
             /// access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 

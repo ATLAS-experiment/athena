@@ -39,6 +39,8 @@ nEvents="100"
 skipCheck=0
 storeClusters=False
 runF110=False
+skipEvents=0
+
 ## parsing flags
 while [ $# -ge 1 ];do
     case "$1" in
@@ -47,6 +49,7 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
+        -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    storeClusters=True ;;
@@ -58,25 +61,37 @@ while [ $# -ge 1 ];do
     done
 
 ## checking valid inputs
-if [ -z $inputRDO ]; then usage ; fi
-if [ -z $outputAOD ]; then usage ; fi
+if [ -z "$inputRDO" ]; then usage ; fi
+if [ -z "$outputAOD" ]; then usage ; fi
 
-if [ ! -f $inputRDO ]; then
-    echo "runReco_C100_FS.sh result: 1 ${inputRDO} not found"
-    exit 1
+if [[ "$inputRDO" == *"*"* ]]; then
+    # Just pass the pattern as is to Reco_tf.py in case of regex-like input
+    inputRDO_arg="$inputRDO"
+else
+    # Check existence for comma-separated files
+    IFS=',' read -ra FILES <<< "$inputRDO"
+    for file in "${FILES[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            echo "Error: File not found: $file"
+            exit 1
+        fi
+    done
+    inputRDO_arg="$inputRDO"
 fi
 export ATHENA_CORE_NUMBER=1
 ## running reconstruction
 
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
+    --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
     --preExec "flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
+                flags.Tracking.doPixelDigitalClustering=True;\
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
                 flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
-    --inputRDOFile ${inputRDO} \
+    --inputRDOFile ${inputRDO_arg} \
     --outputAODFile ${outputAOD}
 
 

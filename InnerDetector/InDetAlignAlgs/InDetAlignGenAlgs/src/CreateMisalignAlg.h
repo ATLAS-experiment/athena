@@ -80,7 +80,10 @@ private:
     int                                    m_MisalignmentMode;   //!< Flag which Misalignment mode is to be generated
     long int                               m_nEvents;
     bool                                   m_translation;        ///< Flag which turns on misalignment with translation 
-    bool                                   m_rotation;           ///< Flag which turns on misalignment with rotation  
+    bool                                   m_rotation;           ///< Flag which turns on misalignment with rotation 
+    std::vector<double>                    m_local_translation;        ///< Specify misalignment with translation
+    std::vector<double>                    m_local_rotation;           ///< Specify misalignment with rotation
+    std::string                            m_index;              ///< Generate misalignment according to module indices
     Gaudi::Property<double> m_Misalign_x {this,"MisalignmentX",0.0,"Fixed X shift (mode 1 and 2)"};
     Gaudi::Property<double> m_Misalign_y {this,"MisalignmentY",0.0,"Fixed Y shif (model 1 and 2)"};       
     Gaudi::Property<double> m_Misalign_z {this,"MisalignmentZ",0.0,"Fixed Z shift (mode 1 and 2)"};

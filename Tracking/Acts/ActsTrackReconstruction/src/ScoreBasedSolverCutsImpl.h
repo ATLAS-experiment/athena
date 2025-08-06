@@ -5,29 +5,22 @@
 #ifndef ACTSTRKFINDING_SCOREBASEDSOLVERCUTSIMPL_H
 #define ACTSTRKFINDING_SCOREBASEDSOLVERCUTSIMPL_H 1
 
-#include "Acts/AmbiguityResolution/ScoreBasedAmbiguityResolution.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "ActsEvent/TrackContainer.h"
 
-// Athena
-#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "AthenaMonitoringKernel/Monitored.h"
-#include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
-
-// Gaudi includes
-#include "Gaudi/Property.h"
-#include "GaudiKernel/SystemOfUnits.h"
-#include "GaudiKernel/ToolHandle.h"
-
 namespace ActsTrk {
 namespace ScoreBasedSolverCutsImpl {
 
-using trackProxy_t = ActsTrk::MutableTrackContainer::ConstTrackProxy;
-/** Adds summary information to the track container */
-ActsTrk::MutableTrackContainer addSummaryInformation(
-    ActsTrk::TrackContainer trackContainer);
+using trackContainer_t = Acts::TrackContainer<Acts::VectorTrackContainer,
+  Acts::VectorMultiTrajectory,
+  Acts::detail::ValueHolder>;
+using trackProxy_t = typename trackContainer_t::ConstTrackProxy;
 
+/** Adds summary information to the track container */
+trackContainer_t
+  addSummaryInformation(const ActsTrk::TrackContainer& trackContainer);
+  
 /** Filter for tracks based on double holes */
 void doubleHolesScore(const trackProxy_t &track, double &score);
 

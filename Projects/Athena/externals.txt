@@ -6,4 +6,4 @@
 # forbidden.
 
 # The version of atlas/atlasexternals to use:
-AthenaExternalsVersion = 2.1.55
+AthenaExternalsVersion = 2.1.58

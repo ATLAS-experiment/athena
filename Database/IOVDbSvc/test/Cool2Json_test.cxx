@@ -122,9 +122,9 @@ BOOST_FIXTURE_TEST_SUITE(Cool2JsonTestSetup , GaudiKernelFixture)
       cool::ChannelSelection selection(0,10);
       const std::string folderTag{};
       Cool2Json testObject(folderPtr, (10ull<<32) + 10, (10ull<<32) + 20, selection, folderTag);
-      std::string referenceDescription=R"delim("node_description" : "<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\"71\" clid=\"1238547719\" /></addrHeader><typeName>CondAttrListCollection</typeName>")delim";
+      std::string referenceDescription=R"delim("node_description" : "<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type="71" clid="1238547719" /></addrHeader><typeName>CondAttrListCollection</typeName>")delim";
       BOOST_CHECK(testObject.description() == referenceDescription);
-      std::string referenceSpec=R"delim("folder_payloadspec": "int: Int32")delim";
+      std::string referenceSpec=R"delim("folder_payloadspec": "[{"int":"Int32"}]")delim";
       BOOST_CHECK(testObject.payloadSpec() == referenceSpec);
       //careful about editing, the following is a multi-line raw string literal:
       std::string referencePayload = R"delim("data_array" : [{"0" : [ 1]}])delim";

@@ -50,6 +50,9 @@ namespace TCS {
       unsigned int m_firstBit {0};
       unsigned int m_nBits {1};
       bool         m_overflow;
+      // note: in principle the ambiguity flag should be per output bit
+      //       in practice the truncation of sorted lists before/in a decision algo 
+      //       is the same for every output bit produced by the same algo instance
       bool         m_ambiguity = false;
 
    };

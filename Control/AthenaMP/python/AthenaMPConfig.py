@@ -113,8 +113,8 @@ def AthenaMPCfg(flags):
 
                 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
                 result.merge(PoolReadCfg(flags))
-                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-                result.merge(AthenaPoolCnvSvcCfg(flags, InputStreamingTool=inputStreamingTool))
+                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+                result.merge(AthenaPoolSharedIOCnvSvcCfg(flags, InputStreamingTool=inputStreamingTool))
 
             evSel.SharedMemoryTool = AthenaSharedMemoryTool("EventStreamingTool",
                                                             SharedMemoryName=f"EventStream{unique_id}")
@@ -129,8 +129,8 @@ def AthenaMPCfg(flags):
                 outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool",
                                                              SharedMemoryName=f"OutputStream{unique_id}")
 
-                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-                result.merge(AthenaPoolCnvSvcCfg(flags, OutputStreamingTool=outputStreamingTool))
+                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+                result.merge(AthenaPoolSharedIOCnvSvcCfg(flags, OutputStreamingTool=outputStreamingTool))
 
         if myStrategy == 'SharedQueue':
             queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,

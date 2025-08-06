@@ -37,9 +37,9 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('taus', "", type=str,
             info="the input tau-jet container, with a possible selection, in "
             "the format `container` or `container.selection`")
-        self.addOption ('invisible', "", type=str,
-            info="any input container to be treated as invisible particles, "
-            "with a possible selection, in the format `container` or `container.selection`")
+        self.addOption ('invisible', [], type=None,
+            info="any input containers to be treated as invisible particles, "
+            "as a single string or a list of strings in the format `container` or `container.selection`")
         self.addOption ('metWP', "Tight", type=str,
             info="the MET working point to use: Loose, Tight, Tighter, "
             "Tenacious")
@@ -50,10 +50,18 @@ class MetAnalysisConfig (ConfigBlock):
             "of this OR scheme, it should not be used in a regular analysis")
         self.addOption ('saveSignificance', True, type=bool,
             info="whether to save the MET significance (default=True)")
+        self.addOption ('addExtraSignificanceVars', False, type=bool,
+            info="whether to save some additional (event-based) MET significance variables (default=False)")
         self.addOption ('useLRT', False, type=bool,
             info="whether to use LRT MET Core and association map")
         self.addOption ('useCaloSoftTerm', False, type=bool,
             info="(expert) use calo- instead of track-based soft term")
+        self.addOption ('softTermResolution', -1.0, type=float,
+            info="(expert) override the default soft term resolution in METSignificance")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
 
     def makeAlgs (self, config) :
 
@@ -71,7 +79,7 @@ class MetAnalysisConfig (ConfigBlock):
             metSuffix = metSuffix[:btIndex]
 
         # Set up the met maker algorithm:
-        alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' + self.containerName )
+        alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' )
         config.addPrivateTool( 'makerTool', 'met::METMaker' )
         alg.makerTool.skipSystematicJetSelection = self.skipSystematicJetSelection
 
@@ -101,20 +109,22 @@ class MetAnalysisConfig (ConfigBlock):
             alg.photons, alg.photonsSelection = config.readNameAndSelection (self.photons, excludeFrom={'or'})
         if self.taus != "" :
             alg.taus, alg.tausSelection = config.readNameAndSelection (self.taus, excludeFrom={'or'})
-        if self.invisible != "" :
-            alg.invisible, alg.invisibleSelection = config.readNameAndSelection (self.invisible, excludeFrom={'or'})
+        if self.invisible:
+            if isinstance(self.invisible, str):
+                self.invisible = [self.invisible]
+            alg.invisible, alg.invisibleSelection = [config.readNameAndSelection (container, excludeFrom={'or'}) for container in self.invisible]
         alg.met = config.writeName (self.containerName, isMet = True)
 
 
         # Set up the met builder algorithm:
-        alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' + self.containerName )
+        alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' )
         alg.softTerm = "PVSoftTrk" if not self.useCaloSoftTerm else "SoftClus"
         alg.met = config.readName (self.containerName)
 
 
         # Set up the met significance algorithm:
         if self.saveSignificance:
-            alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' + self.containerName )
+            alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' )
             config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
             if self.muons != "" :
                 config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
@@ -123,10 +133,19 @@ class MetAnalysisConfig (ConfigBlock):
                     config.getContainerMeta(self.muons.split(".")[0], 'calibMode', failOnMiss=True))
 
             alg.significanceTool.SoftTermParam = 0
+            if self.softTermResolution > 0:
+                alg.significanceTool.SoftTermReso = self.softTermResolution
             alg.significanceTool.TreatPUJets = self.treatPUJets
             alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim
             alg.met = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, 'significance', 'significance')
+            config.addOutputVar (self.containerName, 'significance_%SYS%', 'significance')
+            if self.addExtraSignificanceVars:
+                alg.sigDirectionalDecoration = "sigDirectional_%SYS%"
+                alg.METOverSqrtSumETDecoration = "METOverSqrtSumET_%SYS%"
+                alg.METOverSqrtHTDecoration = "METOverSqrtHT_%SYS%"
+                config.addOutputVar (self.containerName, 'sigDirectional_%SYS%', 'sigDirectional')
+                config.addOutputVar (self.containerName, 'METOverSqrtSumET_%SYS%', 'METOverSqrtSumET')
+                config.addOutputVar (self.containerName, 'METOverSqrtHT_%SYS%', 'METOverSqrtHT')
 
         config.addOutputVar (self.containerName, 'met', 'met')
         config.addOutputVar (self.containerName, 'phi', 'phi')

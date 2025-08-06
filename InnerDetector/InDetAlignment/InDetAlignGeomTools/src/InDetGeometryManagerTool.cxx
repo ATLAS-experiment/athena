@@ -306,8 +306,7 @@ namespace InDet {
       }
     }
 
-    return;
-  }
+     }
 
   //_______________________________________________________________________
   void InDetGeometryManagerTool::buildL0()
@@ -620,7 +619,7 @@ namespace InDet {
   {
     ATH_MSG_DEBUG("in isOneDetOnly for detector type "<<dettype);
     const Trk::AlignModule::DetElementCollection * coll = mod->detElementCollection(dettype);
-    if(!coll || coll->size() == 0)
+    if(!coll || coll->empty())
       return false;
 
     int nelem(0);
@@ -645,7 +644,7 @@ namespace InDet {
     ATH_MSG_DEBUG("in isSiOnly");
     const Trk::AlignModule::DetElementCollection * collPix = mod->detElementCollection(Trk::AlignModule::Pixel);
     const Trk::AlignModule::DetElementCollection * collSCT = mod->detElementCollection(Trk::AlignModule::SCT);
-    if((!collPix || collPix->size()==0) && (!collSCT || collSCT->size()==0))
+    if((!collPix || collPix->empty()) && (!collSCT || collSCT->empty()))
       return false;
 
     int nelem(0);

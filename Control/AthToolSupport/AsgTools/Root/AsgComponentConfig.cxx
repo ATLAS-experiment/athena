@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -174,7 +174,7 @@ namespace asg
     if (split == std::string::npos)
     {
       toolConfig.setName (name);
-      m_privateTools[name] = {toolConfig, ""};
+      m_privateTools[name] = {std::move(toolConfig), ""};
       return StatusCode::SUCCESS;
     } else
     {
@@ -197,7 +197,7 @@ namespace asg
       auto& arrayData = m_toolArrays[name];
       auto myname = makeArrayName (name, arrayData.size());
       toolConfig.setName (myname);
-      m_privateTools[myname] = {toolConfig, name};
+      m_privateTools[myname] = {std::move(toolConfig), name};
       arrayData.push_back (myname);
       return myname;
     } else

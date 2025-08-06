@@ -685,10 +685,16 @@ xAOD::Vertex * TrkVKalVrtFitter::makeXAODVertex( int Neutrals,
     std::vector<float> floatErrMtx;
     if( m_makeExtendedVertex && covarExist ) {
        floatErrMtx.resize(CovFull.size());
-       for(int i=0; i<(int)CovFull.size(); i++) floatErrMtx[i]=CovFull[i];
+       for(int i=0; i<(int)CovFull.size(); i++) {
+         floatErrMtx[i]=static_cast<float>(CovFull[i]);
+         if(std::isinf(floatErrMtx[i]))floatErrMtx[i]=std::numeric_limits<float>::max();
+       }
     }else{
        floatErrMtx.resize(fitErrorMatrix.size());
-       for(int i=0; i<(int)fitErrorMatrix.size(); i++) floatErrMtx[i]=fitErrorMatrix[i];
+       for(int i=0; i<(int)fitErrorMatrix.size(); i++) {
+         floatErrMtx[i]=static_cast<float>(fitErrorMatrix[i]);
+         if(std::isinf(floatErrMtx[i]))floatErrMtx[i]=std::numeric_limits<float>::max();
+       }
     }
     tmpVertex->setCovariance(floatErrMtx);
 

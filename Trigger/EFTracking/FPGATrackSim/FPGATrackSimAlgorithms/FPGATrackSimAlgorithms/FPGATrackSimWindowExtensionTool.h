@@ -64,8 +64,13 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
 
         // We'll definitely need properties, but I don't know which ones.
         Gaudi::Property<int> m_maxMiss  { this, "threshold", 2, "Maximum number of missing hits allowed on a road"};
-        Gaudi::Property<std::vector<float>> m_windows {this, "phiWindow", {}, "Default window settings for phi, must be size nlayers."};
+        Gaudi::Property<std::vector<float>> m_phiwindows {this, "phiWindow", {}, "Default window settings for phi, must be size nlayers."};
         Gaudi::Property<std::vector<float>> m_zwindows {this, "zWindow", {}, "Default window settings for z, must be size nlayers."};
+        Gaudi::Property<std::vector<float>> m_phiwindows_barrel {this, "phiWindow_barrel", {}, "Default window settings for phi in the barrel, must be size nlayers."};
+        Gaudi::Property<std::vector<float>> m_zwindows_barrel {this, "zWindow_barrel", {}, "Default window settings for z in the barrel, must be size nlayers."};
+        Gaudi::Property<std::vector<float>> m_phiwindows_endcap {this, "phiWindow_endcap", {}, "Default window settings for phi in the endcap, must be size nlayers."};
+        Gaudi::Property<std::vector<float>> m_zwindows_endcap {this, "zWindow_endcap", {}, "Default window settings for z in the endcap, must be size nlayers."};
+        Gaudi::Property<bool> m_detectorZoneWindows {this, "detectorZoneWindows", false, "If set to true we separate windows will be used for endcap and barrel hits."};	
         Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};
         Gaudi::Property<bool> m_idealGeoRoads {this, "IdealGeoRoads", true, "Do sector assignment of second stage roads"};
         Gaudi::Property<bool> m_doBinning {this, "doBinning", false, "Use second stage binning to sort hits, not the plane map"};

@@ -54,7 +54,7 @@ def ITkActsPrepDataToxAODCfg(flags,
 
     # need to decorate truth particles and clusters with same unique identified
     # which is the origin truth particle index
-    if not flags.Input.isMC:
+    if not flags.Tracking.doTruth:
         return acc
 
     acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )

@@ -80,8 +80,9 @@ namespace FlavorTagDiscriminants {
     const xAOD::Jet& jet = **jetLink;
     decorate(jet, btag);
   }
-  void DL2::decorate(const xAOD::Jet& jet) const {
-    decorate(jet, jet);
+  void DL2::decorate(const xAOD::IParticle& i_jet) const {
+    auto jet = dynamic_cast<const xAOD::Jet*>(&i_jet);
+    decorate(*jet, *jet);
   }
   void DL2::decorateWithDefaults(const SG::AuxElement& jet) const {
     // save out things

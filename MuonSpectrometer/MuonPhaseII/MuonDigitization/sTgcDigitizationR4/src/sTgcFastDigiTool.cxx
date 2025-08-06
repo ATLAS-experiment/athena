@@ -54,6 +54,19 @@ namespace MuonR4 {
                 if (m_digitizeMuonOnly && !MC::isMuon(simHit)){
                     continue;
                 }
+
+                if (simHit->energyDeposit() < m_energyDepositThreshold){
+                ATH_MSG_VERBOSE("Hit with Energy Deposit of " << simHit->energyDeposit()
+                << " less than " << m_energyDepositThreshold << ". Skip this hit." );
+                continue;
+                }
+
+                const double hitKineticEnergy = simHit->kineticEnergy();
+                if (hitKineticEnergy < m_limitElectronKineticEnergy && MC::isElectron(simHit)) {
+                  ATH_MSG_DEBUG("Skip electron hit with kinetic energy " << hitKineticEnergy
+                              << ", which is less than the lower limit of " << m_limitElectronKineticEnergy);
+                  continue;
+                }
                 sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);
                 const bool digitizedStrip = digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
                 const bool digitizedWire = digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);

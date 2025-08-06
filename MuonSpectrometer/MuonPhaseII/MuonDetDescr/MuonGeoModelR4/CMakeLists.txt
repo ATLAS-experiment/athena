@@ -8,7 +8,7 @@
 atlas_subdir( MuonGeoModelR4 )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead GeoModelHelpers )
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead GeoModelHelpers GeoModelValidation)
 
 set( extra_libs )
 if( NOT SIMULATIONBASE )

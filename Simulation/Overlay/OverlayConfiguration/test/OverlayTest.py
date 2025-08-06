@@ -61,9 +61,6 @@ if args.dump:
     # TODO: will replace with something else in the future
     pass
 acc.merge(DigitizationMessageSvcCfg(flags))
-if flags.Overlay.DataOverlay:
-    from OverlayConfiguration.DataOverlayConditions import DataOverlay2023Cfg
-    acc.merge(DataOverlay2023Cfg(flags))
 
 # Count algorithm misses
 if flags.Concurrency.NumThreads > 0:

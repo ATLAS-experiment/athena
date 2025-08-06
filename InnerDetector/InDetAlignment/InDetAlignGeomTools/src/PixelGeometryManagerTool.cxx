@@ -2078,10 +2078,7 @@ namespace InDet {
         msg(MSG::ERROR)<<"Layer 0 has only 22 phi modules: range 0-21, requested "<<phi<<endmsg;
         return false;
       }
-      if (phi>0 && phi<11)
-        return true;
-      else
-        return false;
+      return phi>0 && phi<11;
     }
     else if (layer==1) {
       if(phi>37) {

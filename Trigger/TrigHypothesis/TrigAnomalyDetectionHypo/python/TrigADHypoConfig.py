@@ -25,15 +25,15 @@ config_dict = {
     },
     "L":{
         "object_cuts": "default",
-        "adScoreThres": 8.768, # 20 Hz est. w/ v2
+        "adScoreThres": 6.174, # 20 Hz est. w/ v2
     },
     "M":{
         "object_cuts": "default",
-        "adScoreThres": 10.574, # 10 Hz est. w/ v2
+        "adScoreThres": 6.929, # 10 Hz est. w/ v2
     },
     "T":{
         "object_cuts": "default",
-        "adScoreThres": 15.0277, # 5 Hz est. w/ v2
+        "adScoreThres": 8.358, # 5 Hz est. w/ v2
     }
 
 }

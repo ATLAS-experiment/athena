@@ -6,6 +6,7 @@
 #include "G4AtlasAlg.h"
 #include "G4AtlasFluxRecorder.h"
 #include "G4AtlasAlg/G4AtlasActionInitialization.h"
+#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CxxUtils/checker_macros.h"
@@ -89,7 +90,6 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   if (m_recordFlux) G4ScoringManager::GetScoringManager();
 
   ATH_CHECK( m_userActionSvc.retrieve() );
-  
   // One-time initialization
   try {
     std::call_once(initializeOnceFlag, &G4AtlasAlg::initializeOnce, this);
@@ -146,26 +146,29 @@ void G4AtlasAlg::initializeOnce()
     }
   }
 
+  ATH_MSG_INFO( "retrieving the Detector Construction tool" );
+  if(m_detConstruction.retrieve().isFailure()) {
+    throw std::runtime_error("Could not initialize ATLAS DetectorConstruction!");
+  }
+
   // Create the (master) run manager
   if(m_useMT) {
 #ifdef G4MULTITHREADED
     auto* runMgr ATLAS_THREAD_SAFE = // protected by std::call_once above
       G4AtlasMTRunManager::GetG4AtlasMTRunManager();
     m_physListSvc->SetPhysicsList();
-    runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
-    runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
+    runMgr->SetDetConstructionTool( m_detConstruction.get() );
     runMgr->SetPhysListSvc( m_physListSvc.typeAndName() );
     runMgr->SetQuietMode( m_quietMode );
     // Worker Thread initialization used to create worker run manager on demand.
     std::unique_ptr<G4AtlasUserWorkerThreadInitialization> workerInit =
       std::make_unique<G4AtlasUserWorkerThreadInitialization>();
-    workerInit->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
-    workerInit->SetFastSimMasterTool( m_fastSimTool.typeAndName() );
     workerInit->SetQuietMode( m_quietMode );
     runMgr->SetUserInitialization( workerInit.release() );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
+    runMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
 #else
     throw std::runtime_error("Trying to use multi-threading in non-MT build!");
 #endif
@@ -177,13 +180,13 @@ void G4AtlasAlg::initializeOnce()
     m_physListSvc->SetPhysicsList();
     runMgr->SetRecordFlux( m_recordFlux, std::make_unique<G4AtlasFluxRecorder>() );
     runMgr->SetLogLevel( int(msg().level()) ); // Synch log levels
-    runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
-    runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
+    runMgr->SetDetConstructionTool( m_detConstruction.get() );
     runMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
     runMgr->SetQuietMode( m_quietMode );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
+    runMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
   }
 
   // G4 user interface commands
@@ -228,9 +231,11 @@ void G4AtlasAlg::initializeOnce()
     rm->RunInitialization();
   }
 
-  ATH_MSG_INFO( "retireving the Detector Geometry Service" );
-  if(m_detGeoSvc.retrieve().isFailure()) {
-    throw std::runtime_error("Could not initialize ATLAS DetectorGeometrySvc!");
+  ATH_MSG_INFO("Initializing " << m_physicsInitializationTools.size() << " physics initialization tools");
+  for(auto& physicsTool : m_physicsInitializationTools) {
+    if (physicsTool->initializePhysics().isFailure()) {
+      throw std::runtime_error("Failed to initialize physics with tool " + physicsTool.name());
+    }
   }
 
   if(m_userLimitsSvc.retrieve().isFailure()) {
@@ -243,7 +248,7 @@ void G4AtlasAlg::initializeOnce()
       throw std::runtime_error("Failed dynamic_cast!! this is not a G4VModularPhysicsList!");
     }
 #if G4VERSION_NUMBER >= 1010
-    std::vector<std::string>& parallelWorldNames=m_detGeoSvc->GetParallelWorldNames();
+    std::vector<std::string>& parallelWorldNames=m_detConstruction->GetParallelWorldNames();
     for (auto& it: parallelWorldNames) {
       thePhysicsList->RegisterPhysics(new G4ParallelWorldPhysics(it,true));
     }

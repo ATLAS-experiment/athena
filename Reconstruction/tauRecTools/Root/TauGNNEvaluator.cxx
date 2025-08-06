@@ -69,7 +69,12 @@ StatusCode TauGNNEvaluator::initialize() {
   if(m_output_discriminant < Discriminant::NegLogPJet || m_output_discriminant > Discriminant::PTau) {
     ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
   }
-  
+
+  if (!m_tauContainerName.empty()){
+    m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
+    ATH_CHECK(m_scoreHandleKey.initialize());    
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -162,13 +167,6 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
 
     out_ptau(tau) = out_f.at(m_outnode_tau);
     out_pjet(tau) = out_f.at(m_outnode_jet);
-
-    if(m_decorateTracks) {
-      for(size_t i = 0; i < tracks.size(); i++) {
-        if(i < out_vc.at("track_class").size()) out_trkclass(*tracks.at(i)) = out_vc.at("track_class").at(i);
-        else out_trkclass(*tracks.at(i)) = '9'; //Dummy value for tracks outside range of out_vc
-      }
-    }
   }
 
   return StatusCode::SUCCESS;

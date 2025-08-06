@@ -5,7 +5,7 @@
  * @file CxxUtils/test/vectorize_test.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date May, 2019
- * @brief Regression test for ATH_ENABLE_VECTORIZATION.  (Parse test only.)
+ * @brief Regression test for ATH_ENABLE_TREE_VECTORIZATION.  (Parse test only.)
  */
 
 #undef NDEBUG
@@ -13,7 +13,7 @@
 #include <iostream>
 
 
-ATH_ENABLE_VECTORIZATION;
+ATH_ENABLE_TREE_VECTORIZATION;
 
 
 int main()

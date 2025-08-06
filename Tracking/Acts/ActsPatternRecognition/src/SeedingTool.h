@@ -44,6 +44,8 @@ namespace Acts {
 #include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/EventData/Seed.hpp"
 
+#include "InDetIdentifier/PixelID.h"
+
 #include <numbers>
 
 namespace ActsTrk {
@@ -99,6 +101,9 @@ namespace ActsTrk {
     // *********************************************************************
 
   protected:
+
+    const PixelID* m_pixelId{ nullptr };
+
     Acts::SeedFinder< value_type, Acts::CylindricalSpacePointGrid<value_type> > m_finder;
     Acts::SeedFinderConfig< value_type > m_finderCfg;
     Acts::CylindricalSpacePointGridConfig m_gridCfg;
@@ -298,29 +303,60 @@ namespace ActsTrk {
     // A conservative guess of the size of the vectors needed for seeding
     
     Gaudi::Property<float> m_ExpCutrMin {this, "SpSelectionExpCutrMin", 45. * Acts::UnitConstants::mm};
-
+    
     inline bool spacePointSelectionFunction(const value_type& sp) const {
-      // At small r we remove points beyond |z| > 200.
+
       float r = sp.radius();
       float zabs = std::abs(sp.z());
-
-      // We perform a triangular cut and remove the space points
-      // that have |z| < 200 and radius < m_ExpCutrMin
-      // But we do that only if the eta of the space point wrt origin is < 3.6
-      // eta 3.6 corresponds to 18.2855
-      if (zabs > 200. and
-	  zabs < 18.2855 * r and
-	  r < m_ExpCutrMin) {
-	return false;
+      float absCotTheta = zabs / r;
+      
+      // checking configuration to remove pixel space points
+      Identifier identifier = m_pixelId->wafer_id(sp.externalSpacePoint().elementIdList().at(0));
+      if (m_pixelId->is_barrel(identifier)) {
+	if (zabs > 200 and
+	    r < 40)
+	  return false;
+	
+      	return true;
       }
-            
-      /// Remove space points beyond eta=4 if their z is
-      /// larger than the max seed z0 (150.)
-      float cotTheta = 27.2899;  // corresponds to eta=4
-      if ((zabs - 150.) > cotTheta * r) {
-	return false;
-      }
+      
+      // Inner layers
+      // Below 1.20 - accept all
+      static constexpr float cotThetaEta120 = 1.5095;
+      if (absCotTheta < cotThetaEta120)
+      	return true;
+      
+      // Below 3.40 - remove if too close to beamline
+      static constexpr float cotThetaEta340 = 14.9654;
+      if (absCotTheta < cotThetaEta340 and
+	  r < m_ExpCutrMin)
+	return false;	
 
+      
+      // Outer layers
+      // Above 2.20
+      static constexpr float cotThetaEta220 = 4.4571;
+      if (absCotTheta > cotThetaEta220 and
+	  r > 260.)
+	return false;
+      
+      // Above 2.60
+      static constexpr float cotThetaEta260 = 6.6947;
+      if (absCotTheta > cotThetaEta260 and
+          r > 200.)
+	return false;
+
+      // Above 3.20
+      static constexpr float cotThetaEta320 = 12.2459;
+      if (absCotTheta > cotThetaEta320 and
+          r > 140.)
+	return false;
+
+      // Above 4.00
+      static constexpr float cotThetaEta400 = 27.2899;
+      if (absCotTheta > cotThetaEta400)
+	return false;
+      
       return true;
     }
 
@@ -329,19 +365,14 @@ namespace ActsTrk {
       // too small (i.e. < fastTrackingRMin)
 
       // This operation is done only within a specific eta window
-      // Instead of eta we use the doublet cottheta
-      // We require:
-      //     fastTrackingCotThetaWindowMin < cottheta doublet < fastTrackingCotThetaWindowMax
-      // with stranslates to an eta window.
-      // cottheta of 1.5 is about eta 1.2
-      // cottheta of 18.2855 is about eta of 3.6
-      float fastTrackingCotThetaWindowMin = 1.5;
-      float fastTrackingCotThetaWindowMax = 18.2855;
-
+      // Instead of eta we use the doublet cottheta      
+      static constexpr float cotThetaEta120 = 1.5095;
+      static constexpr float cotThetaEta360 = 18.2855;
+      
       float absCotTheta = std::abs(cotTheta);
       if (bottomRadius < m_ExpCutrMin and
-	  absCotTheta > fastTrackingCotThetaWindowMin and
-	  absCotTheta < fastTrackingCotThetaWindowMax) {
+	  absCotTheta > cotThetaEta120 and
+	  absCotTheta < cotThetaEta360) {
 	return false;
       }
 
@@ -349,8 +380,6 @@ namespace ActsTrk {
     }
   };
 
-  
-  
 } // namespace
 
 #endif

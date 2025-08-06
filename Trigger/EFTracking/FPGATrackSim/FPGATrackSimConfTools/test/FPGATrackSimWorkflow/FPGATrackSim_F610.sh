@@ -19,11 +19,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
-
-run_F610(){
+run_F610(){    
     python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
-        --evtMax=${RDO_EVT_ANALYSIS}\
-        --filesInput=${RDO_ANALYSIS} \
+           --evtMax=${RDO_EVT_ANALYSIS}\
+	   --filesInput=${RDO_ANALYSIS} \
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \

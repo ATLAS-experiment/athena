@@ -11,7 +11,7 @@
 #include <cmath>
 #include <vector>
 
-#include "L1CaloFEXSim/gFEXJwoJAlgo.h"
+#include "gFEXJwoJAlgo.h"
 #include "L1CaloFEXSim/gFEXJwoJTOB.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/gTower.h"

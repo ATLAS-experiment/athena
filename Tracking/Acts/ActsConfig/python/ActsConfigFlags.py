@@ -14,6 +14,15 @@ class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
     ScoreBased = "ScoreBasedAmbiguitySolver"
 
+# Define the Ambiguity resolution strategy modes
+# OUTSIDE_TF : run the ambiguity resolution in a separate algorithm
+# END_OF_TF  : run the ambiguity resolution at the end of the track finding, on the track candidate container
+# DURING_TF  : remove the tracks that share too many hits during track finding, when deciding good candidates
+class AmbiguitySolverMode(FlagEnum):
+    OUTSIDE_TF = 0
+    END_OF_TF = 1
+    DURING_TF = 2
+
 
 # This is temporary during the integration of ACTS.
 class SpacePointStrategy(FlagEnum):
@@ -36,6 +45,7 @@ class PixelCalibrationStrategy(FlagEnum):
     AnalogueClustering = "AnalogueClustering"
     AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
 
+    
 def createActsConfigFlags():
     actscf = AthConfigFlags()
     
@@ -93,7 +103,7 @@ def createActsConfigFlags():
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, type=SeedingStrategy)  # Define Seeding Strategy
-
+    
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClusteringAfterSelection, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.doRotCorrection', True)
@@ -106,11 +116,11 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
         
-    # Ambiguity resolution
-
+    # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', True)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
-
+    actscf.addFlag('Acts.AmbiguitySolverMode', lambda pcf: AmbiguitySolverMode.OUTSIDE_TF if pcf.Acts.doAmbiguityResolution else AmbiguitySolverMode.END_OF_TF, type=AmbiguitySolverMode)
+    
     # Calibrations
     actscf.addFlag('Acts.OnTrackCalibration.performCovarianceCalibration', True) # perform calibration of covariance during on track analogue cluster calibration
     

@@ -509,7 +509,12 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
     OR_1st.doFastOR = flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
     OR_1st.NumOfHitPerGrouping = 3
     OR_1st.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
-    OR_1st.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
+    if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
+        OR_1st.MinChi2 = getChi2Cut(flags.Trigger.FPGATrackSim.region)
+    elif flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
+        OR_1st.MinChi2 = getChi2CutNN(flags.Trigger.FPGATrackSim.region)
+    else:
+        OR_1st.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
     if flags.Trigger.FPGATrackSim.ActiveConfig.hough or flags.Trigger.FPGATrackSim.ActiveConfig.hough1D:
         OR_1st.nBins_x = flags.Trigger.FPGATrackSim.ActiveConfig.xBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.xBufferBins
         OR_1st.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins
@@ -560,13 +565,19 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg(**kwargs)
     theFPGATrackSimLogicalHitsProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
     theFPGATrackSimLogicalHitsProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
+    theFPGATrackSimLogicalHitsProcessAlg.SetTruthParametersForTracks = flags.Trigger.FPGATrackSim.SetTruthParametersForTracks
     theFPGATrackSimLogicalHitsProcessAlg.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemoval
     theFPGATrackSimLogicalHitsProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
     theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput1st = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput1st
     theFPGATrackSimLogicalHitsProcessAlg.NumOfHitPerGrouping = flags.Trigger.FPGATrackSim.ActiveConfig.NumOfHitPerGrouping
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack_1st = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
-    theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
+    if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
+        theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
+    elif flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
+        theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2CutNN(flags.Trigger.FPGATrackSim.region)
+    else:
+        theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
     theFPGATrackSimLogicalHitsProcessAlg.passLowestChi2TrackOnly = flags.Trigger.FPGATrackSim.ActiveConfig.passLowestChi2TrackOnly
     theFPGATrackSimLogicalHitsProcessAlg.secondStageStrips = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
@@ -637,7 +648,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     return result
 
 def getChi2Cut(region):
-    chi2cut_l = [12, 16, 16, 17, 17, 19, 15, 17, 16, 16, 19, 15, 18, 15, 18, 15, 14, 14, 12, 16]
+    chi2cut_l = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 20] #from most recent run on this branch with new maps/banks, all chi2's are under 1
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F
@@ -658,13 +669,13 @@ def getChi2Cut(region):
     return eta_to_chi2.get(abs_etaRange, 20)
 
 def getChi2CutNN(region):
-    chi2cut_l = [0.9,0.9,0.9, ### 0.0-0.6
-                 0.9,0.9,0.9, ### 0.6-1.2,
-                 0.9,0.9,0.6, ### 1.2-1.8
-                 0.6,0.6,0.6, ### 1.8-2.4
-                 0.6,0.6,0.6, ### 2.4-3.0
-                 0.6,0.6,0.6, ### 3.0-3.6,
-                 0.6,0.6] ### 3.6-4.0
+    chi2cut_l = [0.97,0.97,0.99, ### 0.0-0.6
+                 0.7,0.86,0.99, ### 0.6-1.2,
+                 0.98,0.92,0.98, ### 1.2-1.8
+                 0.95,0.93,0.4, ### 1.8-2.4
+                 0.4,0.4,0.7, ### 2.4-3.0
+                 0.6,0.5,0.4, ### 3.0-3.6
+                 0.4,0.4] ### 3.6-4.0
     binSize = 0.2
     side = (region >> 5) & 0x1
     etaBin = (region >> 6) & 0x1F
@@ -728,7 +739,6 @@ if __name__ == "__main__":
 
     if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis:
         flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
-
     assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-5'),"ERROR You are trying to run an F-5* pipeline! This is not yet supported!"
 
     if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')):
@@ -879,6 +889,7 @@ if __name__ == "__main__":
         if flags.Trigger.FPGATrackSim.msgLimit!=-1:
             acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
             acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit
+            acc.getService("MessageSvc").verboseLimit = flags.Trigger.FPGATrackSim.msgLimit
 
         statusCode = acc.run(flags.Exec.MaxEvents)
         assert statusCode.isSuccess() is True, "Application execution did not succeed"

@@ -260,7 +260,7 @@ void FPGATrackSimFitConstantBank::prepareInvFitConstants()
 	    counteri++;
 	  }
 	}
-
+        /* commenting this out for now because it screws up the new 'non-safeguarded' maps
         // Invert the matrix
 	Eigen::MatrixXf inverted = tempMatrix.inverse();
 
@@ -290,7 +290,7 @@ void FPGATrackSimFitConstantBank::prepareInvFitConstants()
 	  }
 	}
         m_invfit_consts[isec]= fullInverted;
-
+        */
     }
 }
 

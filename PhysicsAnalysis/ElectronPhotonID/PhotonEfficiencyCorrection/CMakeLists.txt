@@ -35,7 +35,7 @@ atlas_add_executable( PrintPhotonSF
    LINK_LIBRARIES ${ROOT_LIBRARIES} ElectronEfficiencyCorrectionLib PATCoreAcceptLib
    PhotonEfficiencyCorrectionLib )
 
-if( XAOD_STANDALONE )
+if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
    atlas_add_executable( TestxAODPhotonAlg
       util/TestxAODPhotonAlg.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}

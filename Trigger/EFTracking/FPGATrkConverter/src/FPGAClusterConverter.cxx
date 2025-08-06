@@ -672,15 +672,12 @@ StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixel
     const float & cov_r = p_cl->localCovariance<2>()(0,0);
     const float & cov_z = p_cl->localCovariance<2>()(1,0);
 
-    // measurement list
-    std::vector< const xAOD::UncalibratedMeasurement* > measurementLinks({ p_cl });
-
     pixelSPs.back()->setSpacePoint(
       p_cl->identifierHash(),
       globalPos,
       cov_r,
       cov_z,
-      measurementLinks
+      std::vector< const xAOD::UncalibratedMeasurement* >({ p_cl }) // measurement list
     );
   }
 
@@ -752,11 +749,11 @@ StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::S
 
   // Fill xAOD::SpacePoint
   sp.setSpacePoint(
-    idHashList, 
+    std::move(idHashList),
     globalPos, 
     cov_r, 
     cov_z, 
-    measurements,
+    std::move(measurements),
     topHalfStripLength,
     bottomHalfStripLength,
     topStripDirection.cast<float>(),

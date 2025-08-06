@@ -21,6 +21,7 @@
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
+#include <vector>
 namespace ActsTrk {
 
   class SeedsToTrackParamsAlg final : public AthReentrantAlgorithm {
@@ -40,6 +41,12 @@ namespace ActsTrk {
 
     SG::ReadHandleKey<ActsTrk::SeedContainer> m_inputSeedContainerKey{this, "InputSeedContainerKey", "", "Name of the input seed container"};
     SG::WriteHandleKey<ActsTrk::BoundTrackParametersContainer> m_outputTrackParamsCollectionKey{this, "OutputTrackParamsCollectionKey","", "Name of the output track parameters collection"};
+
+    Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), automatically determined by the param estimation tool"};
+    Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/Z boundary for using the top space point in the track parameter estimation"};
+
+    bool shouldReverseSearch(const ActsTrk::Seed& seed) const;
+
   };
 
 }

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelNoiseFunctions.h"
@@ -18,6 +18,7 @@
 #include "PixelConditionsData/PixelModuleData.h"  
 #include "PixelConditionsData/PixelChargeCalibCondData.h"  
 #include "PixelConditionsData/ITkPixSimulationParameters.h" 
+#include "InDetIdentifier/PixelID.h"
 
 #include <limits>
 

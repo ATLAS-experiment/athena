@@ -26,7 +26,7 @@ namespace FlavorTagDiscriminants {
         const std::vector<ConstituentsInputConfig>& = {},
         const FTagOptions& = FTagOptions());
     void decorate(const xAOD::BTagging& btag) const;
-    void decorate(const xAOD::Jet& jet) const;
+    void decorate(const xAOD::IParticle& i_jet) const;
     void decorateWithDefaults(const SG::AuxElement&) const;
     void decorate(const xAOD::Jet& jet, const SG::AuxElement& decorated) const;
 

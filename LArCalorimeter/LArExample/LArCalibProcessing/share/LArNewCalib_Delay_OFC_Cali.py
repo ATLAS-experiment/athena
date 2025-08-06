@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -241,21 +241,15 @@ if __name__=='__main__':
       else:   
          fwversion=runinfo.FWversion()   
       if args.fw6 or fwversion==6:
-         #FIXME: for some reason addOverride is not working, CA merger is then complaining
-         #from IOVDbSvc.IOVDbSvcConfig import addOverride
-         #cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
-         fldrs=cfg.getService("IOVDbSvc").Folders
-         for i in range(0, len(fldrs)):
-             if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-fw6</tag>'
-
+         from IOVDbSvc.IOVDbSvcConfig import addOverride
+         cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
 
    if args.emf:
       # additions for EMF
-      #from IOVDbSvc.IOVDbSvcConfig import addOverride
-      #cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-EMF"))   
+      from IOVDbSvc.IOVDbSvcConfig import addOverride
+      cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-EMF"))   
       fldrs=cfg.getService("IOVDbSvc").Folders
       for i in range(0, len(fldrs)):
-          if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-EMF</tag>'
           if 'Align' in fldrs[i]: fldrs[i] += '<forceRunNumber>9999999</forceRunNumber>'
 
    # ignore some channels ?

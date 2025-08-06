@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # standard b-tagging
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-from BTagging.BTagConfig import BTagAlgsCfg
+from BTagging.BTagLegacyConfig import BTagAlgsCfg
 
 # fast btagging
 from FlavorTagInference.FlavorTagNNConfig import getStaticTrackVars

@@ -33,7 +33,6 @@ namespace GlobalSim {
     SG::ReadHandleKey<CaloCellContainer> m_caloCellsKey {
       this, "caloCells", "SeedLessFS", "key to read in a CaloCell container"};
 
-   
     Gaudi::Property<bool> m_makeCaloCellContainerChecks {
       this,
       "makeCaloCellContainerChecks",

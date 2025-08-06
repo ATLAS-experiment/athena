@@ -37,6 +37,7 @@ namespace Muon{
      *              - StationPhi       - doubletPhi
      *          while the internal representation of the data is compressed into a single 64-bit integer. **/
     struct RpcCablingOfflineID {
+         // cppcheck-suppress operatorEqVarError; stationIndex, etc intentionally not copied.
         CABLING_OPERATORS(RpcCablingOfflineID)
         
         int8_t& stationIndex{m_cache.cache[0]};  /// Station of the chamber (i.e, BIL,BIS,etc.)
@@ -75,6 +76,7 @@ namespace Muon{
      *         needed to navigate to a particular RPC gasGap from the readout-side. The particular fields are 
      *         exhibited to the user while the internal storeage is compressed into a single 64 bit integer. */
     struct RpcCablingOnlineID {
+         // cppcheck-suppress operatorEqVarError; subDetector, etc intentionally not copied.
         CABLING_OPERATORS(RpcCablingOnlineID)
         /** @brief  Identifier of the subdetector region in the readout BA / BC etc. */
         int16_t& subDetector{m_cache.cache[0]};

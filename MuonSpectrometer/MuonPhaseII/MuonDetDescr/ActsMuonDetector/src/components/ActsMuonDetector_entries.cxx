@@ -3,6 +3,8 @@
 */
 #include "../MuonDetectorBuilderTool.h"
 #include "../MSTrackingVolumeBuilder.h"
+#include "../MuonBlueprintNodeBuilder.h"
 
 DECLARE_COMPONENT(ActsTrk::MuonDetectorBuilderTool)
 DECLARE_COMPONENT(ActsTrk::MSTrackingVolumeBuilder)
+DECLARE_COMPONENT(ActsTrk::MuonBlueprintNodeBuilder)

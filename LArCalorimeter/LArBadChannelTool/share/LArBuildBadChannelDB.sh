@@ -270,6 +270,8 @@ do
   echo "Running athena to read current database content...with run number " $runnumber
 
   python -m LArBadChannelTool.LArBadChannel2Ascii -r $runnumber -o $oldTextFile -d ${database} -t ${t} $SCParam > oracle2ascii_$t.log 2>&1 
+  # in case reading status from some online sqlite file: 
+  #python -m LArBadChannelTool.LArBadChannel2Ascii -r $runnumber -o $oldTextFile -d "old/BadChannelsOnl.db" -f /LAR/BadChannels/BadChannelsSC -t "LARBadChannelsBadChannelsSC-RUN3-UPD1-00" $SCParam > oracle2ascii_$t.log 2>&1 
 
   if [ $? -ne 0 ];  then
       echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii_$t.log!"

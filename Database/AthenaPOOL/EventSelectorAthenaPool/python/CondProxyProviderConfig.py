@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: EventSelectorAthenaPool/python/CondProxyProviderConfig.py
 # Created: Jun 2020, sss
@@ -19,7 +19,8 @@ def CondProxyProviderCfg (flags, poolFiles):
     result.addService (pps)
     
     CondProxyProvider = CompFactory.CondProxyProvider # EventSelectorAthenaPool
-    cpp = CondProxyProvider (InputCollections = poolFiles)
+    cpp = CondProxyProvider (InputCollections = poolFiles,
+                             ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
     result.addService (cpp)
 
     return result

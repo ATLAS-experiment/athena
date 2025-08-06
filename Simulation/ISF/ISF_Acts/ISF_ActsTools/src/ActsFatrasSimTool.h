@@ -41,6 +41,7 @@
 #include "ActsFatras/Kernel/SimulationResult.hpp"
 #include "ActsFatras/Physics/Decay/NoDecay.hpp"
 #include "ActsFatras/Physics/StandardInteractions.hpp"
+#include "ActsFatras/Physics/ElectroMagnetic/PhotonConversion.hpp"
 #include "ActsFatras/Selectors/SurfaceSelectors.hpp"
 // Tracking
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
@@ -190,7 +191,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
           ActsFatras::NoDecay>;
   // Neutral
   using NeutralSelector = ActsFatras::NeutralSelector;
-  using NeutralInteractions = ActsFatras::InteractionList<>;
+  using NeutralInteractions = ActsFatras::InteractionList<ActsFatras::PhotonConversion>;
   using NeutralSimulation = SingleParticleSimulation<
           NeutralPropagator, NeutralInteractions, ActsFatras::NoSurface,
           ActsFatras::NoDecay>;

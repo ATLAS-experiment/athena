@@ -1,6 +1,8 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "src/FPGATrackSimActsTrackInspectionTool.h"
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include <format>

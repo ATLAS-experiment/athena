@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Hephaestus/Hephaestus.h"
@@ -42,7 +42,13 @@ static struct hhh_Cell *hhh_Cell_new() {
    pthread_mutex_lock( &gPoolLock );
 
    if ( gPool == NULL ) {
-      const long nobj = sysconf( _SC_PAGESIZE ) / sizeof( struct hhh_Cell );
+      long pagesize = sysconf( _SC_PAGESIZE );
+      if (pagesize < 1 || pagesize >= 1024*1024*1024) {
+         fprintf( stderr, "Hephaestus ERROR: bad page size\n" );
+         pthread_mutex_unlock( &gPoolLock );
+         return NULL;
+      }
+      const long nobj = pagesize / sizeof( struct hhh_Cell );
       gPool = (struct hhh_Cell*)malloc( nobj * sizeof( struct hhh_Cell ) );
 
       if ( gPool == NULL ) {

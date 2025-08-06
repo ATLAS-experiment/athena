@@ -205,6 +205,11 @@ namespace ActsTrk {
     m_navigation[1ul] = m_finderCfg.zBinsCustomLooping;
     m_navigation[2ul] = m_rBinsCustomLooping.value();
 
+    if (detStore()->retrieve(m_pixelId, "PixelID").isFailure()) {
+        ATH_MSG_ERROR("Could not get PixelID helper !");
+        return StatusCode::FAILURE;
+    }
+
     return StatusCode::SUCCESS;
   }
 

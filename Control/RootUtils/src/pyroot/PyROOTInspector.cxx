@@ -327,36 +327,39 @@ recurse_pyinspect(PyObject *pyobj,
     //    then with python 3, pyroot will try to convert its contents
     //    to a unicode string object, which will likely fail.
     Py_ssize_t nelems = PySequence_Size(pyobj);
-    if (clsname == "TileCellVec" ||
-        clsname == "vector<char>")
-    {
-      for (Py_ssize_t i = 0; i < nelems; ++i) {
-        PyObject *pyidx = PyLong_FromLong(i);
-        PyObject *itr = PySequence_GetItem(pyobj, i);
-        PyObject *itr_name = ::new_pylist(pyobj_name, pyidx);
-        recurse_pyinspect(itr, itr_name, pystack, persistentOnly, retvecs);
-        Py_XDECREF(itr_name);
-        Py_XDECREF(pyidx);
-        Py_XDECREF(itr);
-      }
-    }
-    else {
-      PyObject* iter = PyObject_GetIter(pyobj);
-      size_t i = 0;
-      if (iter) {
-        PyObject* item = nullptr;
-        // Sometimes iterator comparison doesn't work correctly in pyroot.
-        // So protect against overrunning by also counting
-        // the number of elements.
-        while (nelems-- && (item = PyIter_Next(iter))) {
-          PyObject *pyidx = PyLong_FromLong(i++);
+    if( nelems > 0 ) {
+      // only try iterating if there are elements
+      if (clsname == "TileCellVec" ||
+          clsname == "vector<char>")
+      {
+        for (Py_ssize_t i = 0; i < nelems; ++i) {
+          PyObject *pyidx = PyLong_FromLong(i);
+          PyObject *itr = PySequence_GetItem(pyobj, i);
           PyObject *itr_name = ::new_pylist(pyobj_name, pyidx);
-          recurse_pyinspect(item, itr_name, pystack, persistentOnly, retvecs);
+          recurse_pyinspect(itr, itr_name, pystack, persistentOnly, retvecs);
           Py_XDECREF(itr_name);
           Py_XDECREF(pyidx);
-          Py_DECREF(item);
+          Py_XDECREF(itr);
         }
-        Py_DECREF(iter);
+      }
+      else {
+        PyObject* iter = PyObject_GetIter(pyobj);
+        size_t i = 0;
+        if (iter) {
+          PyObject* item = nullptr;
+          // Sometimes iterator comparison doesn't work correctly in pyroot.
+          // So protect against overrunning by also counting
+          // the number of elements.
+          while (nelems-- && (item = PyIter_Next(iter))) {
+            PyObject *pyidx = PyLong_FromLong(i++);
+            PyObject *itr_name = ::new_pylist(pyobj_name, pyidx);
+            recurse_pyinspect(item, itr_name, pystack, persistentOnly, retvecs);
+            Py_XDECREF(itr_name);
+            Py_XDECREF(pyidx);
+            Py_DECREF(item);
+          }
+          Py_DECREF(iter);
+        }
       }
     }
 

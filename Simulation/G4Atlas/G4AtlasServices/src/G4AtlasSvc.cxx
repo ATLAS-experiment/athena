@@ -32,7 +32,7 @@ StatusCode G4AtlasSvc::initialize(){
     rm->RunInitialization();
   }
 
-  ATH_CHECK(m_detGeoSvc.retrieve());
+  ATH_CHECK(m_detConstruction.retrieve());
 
   ATH_CHECK(m_physicsListSvc.retrieve());
   ATH_CHECK(m_userLimitsSvc.retrieve());
@@ -44,7 +44,7 @@ StatusCode G4AtlasSvc::initialize(){
       return StatusCode::FAILURE;
     }
 #if G4VERSION_NUMBER >= 1010
-      std::vector<std::string>& parallelWorldNames=m_detGeoSvc->GetParallelWorldNames();
+      std::vector<std::string>& parallelWorldNames=m_detConstruction->GetParallelWorldNames();
       for (auto& it: parallelWorldNames) {
         thePhysicsList->RegisterPhysics(new G4ParallelWorldPhysics(it,true));
       }

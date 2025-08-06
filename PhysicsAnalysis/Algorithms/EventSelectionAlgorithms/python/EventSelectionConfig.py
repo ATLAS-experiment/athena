@@ -18,6 +18,10 @@ class EventSelectionMergerConfig(ConfigBlock):
             info="do not apply an event filter. The default is False, i.e. "
             "remove events not passing the full list of selection cuts.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # I think there is only one instance of this block, not sure what the name ought to be
+
     def makeAlgs(self, config):
         if not ( isinstance(self.selections, list) and self.selections and all(isinstance(item, str) for item in self.selections) ):
             print('EventSelectionMerger: selections = ', self.selections)
@@ -91,6 +95,10 @@ class EventSelectionConfig(ConfigBlock):
         self.step = 0
         self.currentDecoration = ''
         self.cutflow = []
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.name
 
     def makeAlgs(self, config):
         # need to re-initialize here to deal with multiple passes
@@ -265,6 +273,12 @@ class EventSelectionConfig(ConfigBlock):
         decoration = [sub + ',as_char' if ',as_char' not in sub else sub for sub in decoration]
         return '&&'.join(decoration)
 
+    def extendObjectSelection(self, config, container, oldSelection, newSelection):
+        if oldSelection:
+            return oldSelection + "&&" + config.getFullSelection(container, newSelection)
+        else:
+            return config.getFullSelection(container, newSelection)
+
     def add_IMPORT(self, text, config):
         # this is used to import a previous selection
         items = text.split()
@@ -302,10 +316,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.count = self.check_int(items[3])
         elif len(items) == 5:
             extraSel  = self.check_string(items[1])
-            if alg.objectSelection:
-                alg.objectSelection += "&&" + config.getFullSelection(self.electrons.split(".")[0], extraSel)
-            else:
-                alg.objectSelection = config.getFullSelection(self.electrons.split(".")[0], extraSel)
+            alg.objectSelection = self.extendObjectSelection(config, self.electrons.split(".")[0], alg.objectSelection, extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -332,10 +343,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.count = self.check_int(items[3])
         elif len(items) == 5:
             extraSel  = self.check_string(items[1])
-            if alg.objectSelection:
-                alg.objectSelection += "&&" + config.getFullSelection(self.muons.split(".")[0], extraSel)
-            else:
-                alg.objectSelection = config.getFullSelection(self.muons.split(".")[0], extraSel)
+            alg.objectSelection = self.extendObjectSelection(config, self.muons.split(".")[0], alg.objectSelection, extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -346,7 +354,7 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if items[0] != "SUM_EL_N_MU_N":
             self.raise_misconfig(text, "SUM_EL_N_MU_N")
-        if len(items) != 4 and len(items) != 5:
+        if len(items) != 4 and len(items) != 5 and len(items) != 7:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
@@ -367,6 +375,15 @@ class EventSelectionConfig(ConfigBlock):
             alg.minPtMu = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
+        elif len(items) == 7:
+            extraSelEl = self.check_string(items[1])
+            extraSelMu = self.check_string(items[2])
+            alg.electronSelection = self.extendObjectSelection(config, self.electrons.split(".")[0], alg.electronSelection, extraSelEl)
+            alg.muonSelection = self.extendObjectSelection(config, self.muons.split(".")[0], alg.muonSelection, extraSelMu)
+            alg.minPtEl = self.check_float(items[3])
+            alg.minPtMu = self.check_float(items[4])
+            alg.sign  = self.check_sign(items[5])
+            alg.count = self.check_int(items[6])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
     
@@ -374,7 +391,7 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if items[0] != "SUM_EL_N_MU_N_TAU_N":
             self.raise_misconfig(text, "SUM_EL_N_MU_N_TAU_N")
-        if len(items) != 4 and len(items) != 6:
+        if len(items) != 4 and len(items) != 6 and len(items) != 9:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons and not self.taus:
             self.raise_missinginput("electrons, muons or taus")
@@ -398,6 +415,18 @@ class EventSelectionConfig(ConfigBlock):
             alg.minPtTau = self.check_float(items[3])
             alg.sign  = self.check_sign(items[4])
             alg.count = self.check_int(items[5])
+        elif len(items) == 9:
+            extraSelEl = self.check_string(items[1])
+            extraSelMu = self.check_string(items[2])
+            extraSelTau = self.check_string(items[3])
+            alg.electronSelection = self.extendObjectSelection(config, self.electrons.split(".")[0], alg.electronSelection, extraSelEl)
+            alg.muonSelection = self.extendObjectSelection(config, self.muons.split(".")[0], alg.muonSelection, extraSelMu)
+            alg.tauSelection = self.extendObjectSelection(config, self.taus.split(".")[0], alg.tauSelection, extraSelTau)
+            alg.minPtEl = self.check_float(items[4])
+            alg.minPtMu = self.check_float(items[5])
+            alg.minPtTau = self.check_float(items[6])
+            alg.sign  = self.check_sign(items[7])
+            alg.count = self.check_int(items[8])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -419,10 +448,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.count = self.check_int(items[3])
         elif len(items) == 5:
             extraSel  = self.check_string(items[1])
-            if alg.objectSelection:
-                alg.objectSelection += "&&" + config.getFullSelection(self.jets.split(".")[0], extraSel)
-            else:
-                alg.objectSelection = config.getFullSelection(self.jets.split(".")[0], extraSel)
+            alg.objectSelection = self.extendObjectSelection(config, self.jets.split(".")[0], alg.objectSelection, extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -453,7 +479,7 @@ class EventSelectionConfig(ConfigBlock):
                 alg.objectSelection = f'{selection}&&{customBtag},as_char' if selection else f'{customBtag},as_char'
             else:
                 extraSel = self.check_string(items[1])
-                alg.objectSelection += "&&" + config.getFullSelection(self.jets.split(".")[0], extraSel)
+                alg.objectSelection = self.extendObjectSelection(config, self.jets.split(".")[0], alg.objectSelection, extraSel)
             alg.sign  = self.check_sign(items[2])
             alg.count = self.check_int(items[3])
         elif len(items) == 5:
@@ -461,7 +487,7 @@ class EventSelectionConfig(ConfigBlock):
             btagger, btagWP = self.check_btagging(items[2])
             customBtag = f'ftag_select_{btagger}_{btagWP}'
             alg.objectSelection = f'{selection}&&{customBtag},as_char' if selection else f'{customBtag},as_char'
-            alg.objectSelection+= "&&" + config.getFullSelection(self.jets.split(".")[0], extraSel)
+            alg.objectSelection = self.extendObjectSelection(config, self.jets.split(".")[0], alg.objectSelection, extraSel)
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
@@ -485,10 +511,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.count = self.check_int(items[3])
         elif len(items) == 5:
             extraSel  = self.check_string(items[1])
-            if alg.objectSelection:
-                alg.objectSelection += "&&" + config.getFullSelection(self.photons.split(".")[0], extraSel)
-            else:
-                alg.objectSelection = config.getFullSelection(self.photons.split(".")[0], extraSel)
+            alg.objectSelection = self.extendObjectSelection(config, self.photons.split(".")[0], alg.objectSelection, extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -513,10 +536,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.count = self.check_int(items[3])
         elif len(items) == 5:
             extraSel  = self.check_string(items[1])
-            if alg.objectSelection:
-                alg.objectSelection += "&&" + config.getFullSelection(self.taus.split(".")[0], extraSel)
-            else:
-                alg.objectSelection = config.getFullSelection(self.taus.split(".")[0], extraSel)
+            alg.objectSelection = self.extendObjectSelection(config, self.taus.split(".")[0], alg.objectSelection, extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -539,10 +559,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.count = self.check_int(items[3])
         elif len(items) == 5:
             extraSel  = self.check_string(items[1])
-            if alg.objectSelection:
-                alg.objectSelection += "&&" + config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
-            else:
-                alg.objectSelection = config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            alg.objectSelection = self.extendObjectSelection(config, self.largeRjets.split(".")[0], alg.objectSelection, extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -565,10 +582,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.count   = self.check_int(items[3])
         elif len(items) == 5:
             extraSel  = self.check_string(items[1])
-            if alg.objectSelection:
-                alg.objectSelection += "&&" + config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
-            else:
-                alg.objectSelection = config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            alg.objectSelection = self.extendObjectSelection(config, self.largeRjets.split(".")[0], alg.objectSelection, extraSel)
             alg.minMass = self.check_float(items[2])
             alg.sign    = self.check_sign(items[3])
             alg.count   = self.check_int(items[4])
@@ -593,10 +607,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.vetoMode = vetoMode
         elif (len(items) == 6 and not vetoMode) or len(items) == 7:
             extraSel = self.check_string(items[1])
-            if alg.ljetSelection:
-                alg.ljetSelection += "&&" + config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
-            else:
-                alg.ljetSelection = config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            alg.ljetSelection = self.extendObjectSelection(config, self.largeRjets.split(".")[0], alg.ljetSelection, extraSel)
             alg.lowMass  = self.check_float(items[2])
             alg.highMass = self.check_float(items[3])
             alg.sign     = self.check_sign(items[4])
@@ -781,23 +792,23 @@ class EventSelectionConfig(ConfigBlock):
 
     def add_OS_selector(self, text, config):
         items = text.split()
-        if len(items) != 1:
+        if not items or len(items) > 4:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons and not self.taus:
             self.raise_missinginput("electrons or muons or taus")
         thisalg = f'{self.name}_OS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
-        if self.electrons:
+        if self.electrons and (len(items) == 1 or "el" in items):
             if "Particle" in self.electrons or "Truth" in self.electrons:
                 alg.truthElectrons, alg.truthElectronSelection = config.readNameAndSelection(self.electrons)
             else:
                 alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        if self.muons:
+        if self.muons and (len(items) == 1 or "mu" in items):
             if "Particle" in self.muons or "Truth" in self.muons:
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
-        if self.taus:
+        if self.taus and (len(items) == 1 or "tau" in items):
             if "Particle" in self.taus or "Truth" in self.taus:
                 alg.truthTaus, alg.truthTauSelection = config.readNameAndSelection(self.taus)
             else:
@@ -809,22 +820,27 @@ class EventSelectionConfig(ConfigBlock):
 
     def add_SS_selector(self, text, config):
         items = text.split()
-        if len(items) != 1:
+        if not items or len(items) > 4:
             self.raise_misconfig(text, "number of arguments")
-        if not self.electrons and not self.muons:
-            self.raise_missinginput("electrons or muons")
+        if not self.electrons and not self.muons and not self.taus:
+            self.raise_missinginput("electrons or muons or taus")
         thisalg = f'{self.name}_SS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
-        if self.electrons:
+        if self.electrons and (len(items) == 1 or "el" in items):
             if "Particle" in self.electrons or "Truth" in self.electrons:
                 alg.truthElectrons, alg.truthElectronSelection = config.readNameAndSelection(self.electrons)
             else:
                 alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        if self.muons:
+        if self.muons and (len(items) == 1 or "mu" in items):
             if "Particle" in self.muons or "Truth" in self.muons:
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if self.taus and (len(items) == 1 or "tau" in items):
+            if "Particle" in self.taus or "Truth" in self.taus:
+                alg.truthTaus, alg.truthTauSelection = config.readNameAndSelection(self.taus)
+            else:
+                alg.taus, alg.tauSelection = config.readNameAndSelection(self.taus)
         alg.OS = False
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')

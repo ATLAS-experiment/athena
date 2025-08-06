@@ -24,6 +24,9 @@ class DiTauCalibrationConfig (ConfigBlock):
             info="whether to rerun truth matching (sets up an instance of "
             "CP::DiTauTruthMatchingAlg). The default is True.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
 
     def makeAlgs (self, config) :
 
@@ -39,14 +42,14 @@ class DiTauCalibrationConfig (ConfigBlock):
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::DiTauTruthMatchingAlg',
-                                   'DiTauTruthMatchingAlg' + postfix )
+                                   'DiTauTruthMatchingAlg' )
             config.addPrivateTool( 'matchingTool',
                             'TauAnalysisTools::DiTauTruthMatchingTool' )
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the tau 4-momentum smearing algorithm:
-        alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::DiTauSmearingTool' )
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
@@ -77,6 +80,12 @@ class DiTauWorkingPointConfig (ConfigBlock) :
             info="whether to retain only ditau-jets satisfying the working point "
             "requirements. The default is True.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None:
+            return self.containerName + '_' + self.selectionName + self.postfix
+        else:
+            return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
 
@@ -107,7 +116,7 @@ class DiTauWorkingPointConfig (ConfigBlock) :
             inputfile = 'TauAnalysisAlgorithms/ditau_selection_lowpt.conf' 
 
         # Set up the algorithm selecting taus:
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'DiTauSelectionAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'DiTauSelectionAlg' )
         config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::DiTauSelectionTool' )
         alg.selectionTool.ConfigPath = inputfile
         alg.selectionDecoration = 'selected_ditau' + selectionPostfix + ',as_char'
@@ -121,7 +130,7 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         # taus:
         if config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::DiTauEfficiencyCorrectionsAlg',
-                                   'DiTauEfficiencyCorrectionsAlg' + postfix )
+                                   'DiTauEfficiencyCorrectionsAlg' )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::DiTauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.JetIDLevel = IDLevel

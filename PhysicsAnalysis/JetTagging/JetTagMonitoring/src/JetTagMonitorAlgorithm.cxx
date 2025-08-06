@@ -64,24 +64,16 @@ StatusCode JetTagMonitorAlgorithm::initialize() {
   ATH_CHECK(m_VertContainerKey.initialize());
   ATH_CHECK(m_TrackContainerKey.initialize());
 
-  if (m_btagLinkKey.empty()) {
-    m_btagLinkKey = m_JetContainerKey.key() + ".btaggingLink";
-  }
-  ATH_CHECK(m_btagLinkKey.initialize());
-
-  if (m_btagResultKey.empty()) {
-    std::string rawJetContainerName = m_JetContainerKey.key();
-    const size_t jetStringItr = rawJetContainerName.find("Jets");
-    if (jetStringItr != std::string::npos)
-      rawJetContainerName = rawJetContainerName.replace(jetStringItr, std::string::npos, "");
-    m_btagResultKey = "BTagging_" + rawJetContainerName + "." + m_TaggerName + "_pb";
-  }
-  ATH_CHECK(m_btagResultKey.initialize(SG::AllowEmpty));
-  
   ATH_CHECK(m_MuonEtIsoDecorKey.initialize());
   ATH_CHECK(m_MuonPtIsoDecorKey.initialize());
   ATH_CHECK(m_EleEtIsoDecorKey.initialize());
   ATH_CHECK(m_ElePtIsoDecorKey.initialize());
+  m_JetTagDecorKey_pb = m_JetContainerKey.objKey() + "." + m_TaggerName + "_pb";
+  ATH_CHECK(m_JetTagDecorKey_pb.initialize());
+  m_JetTagDecorKey_pc = m_JetContainerKey.objKey() + "." + m_TaggerName + "_pc";
+  ATH_CHECK(m_JetTagDecorKey_pc.initialize());
+  m_JetTagDecorKey_pu = m_JetContainerKey.objKey() + "." + m_TaggerName + "_pu";
+  ATH_CHECK(m_JetTagDecorKey_pu.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -694,19 +686,18 @@ bool JetTagMonitorAlgorithm::passJVTCut(const xAOD::Jet *jet) const {
 double JetTagMonitorAlgorithm::getTaggerWeight(const xAOD::Jet *jet) const {
 
   ATH_MSG_DEBUG("retrieving GN2* weight");
-
-  const xAOD::BTagging *bTaggingObject = xAOD::BTaggingUtilities::getBTagging( *jet );
-  if ( !bTaggingObject ) {
-    ATH_MSG_DEBUG( "Could not retrieve b-tagging object from selected jet." );
-    return 0;
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pb (m_JetTagDecorKey_pb);
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pc (m_JetTagDecorKey_pc);
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pu (m_JetTagDecorKey_pu);
+  if (!acc_pb.isAvailable()) {
+    ATH_MSG_DEBUG("GN2* tagger weight not available for jet, skipping");
+    return 0.0; 
   }
-
-  double mv = 0, mv_pu = 0, mv_pb = 0, mv_pc = 0, mv_ptau = 0;
-
-  bTaggingObject->pu(m_TaggerName,mv_pu);
-  bTaggingObject->pc(m_TaggerName,mv_pc);
-  bTaggingObject->pb(m_TaggerName,mv_pb);
-  mv_ptau = 1 - mv_pu - mv_pc - mv_pb;
+  double mv_pb = acc_pb(*jet);
+  double mv_pc = acc_pc(*jet);
+  double mv_pu = acc_pu(*jet);
+  double mv_ptau = 1 - mv_pu - mv_pc - mv_pb;
+  double mv = 0;
   //GN2v01 formula: https://ftag.docs.cern.ch/recommendations/algs/r22-preliminary/#recommendation-as-of-07032024
   if ( mv_pb != 0 && (mv_pu != 0 || mv_pc != 0 || mv_ptau != 0) ) {
     mv = log( mv_pb / ( mv_pc * m_cFraction + mv_ptau * m_tauFraction + mv_pu * (1 - m_cFraction - m_tauFraction) ) );
@@ -1117,10 +1108,11 @@ void JetTagMonitorAlgorithm::fillSuspectJetHistos(const xAOD::Jet *jet) const {
 }
 
 void JetTagMonitorAlgorithm::fillExtraTaggerHistos(const xAOD::Jet *jet) const {
-
-  const xAOD::BTagging *bTaggingObject = xAOD::BTaggingUtilities::getBTagging( *jet );
-  if ( !bTaggingObject ) {
-    ATH_MSG_DEBUG( "Could not retrieve b-tagging object from selected jet." );
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pb (m_JetTagDecorKey_pb);
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pc (m_JetTagDecorKey_pc);
+  SG::ReadDecorHandle<xAOD::JetContainer,float> acc_pu (m_JetTagDecorKey_pu);
+  if (!acc_pb.isAvailable()) {
+    ATH_MSG_DEBUG("GN2* weight not available, skipping...");
     return;
   }
 
@@ -1130,11 +1122,10 @@ void JetTagMonitorAlgorithm::fillExtraTaggerHistos(const xAOD::Jet *jet) const {
   auto jet_MV_pc_good = Monitored::Scalar<float>("jet_MV_pc_good",0);
   auto jet_MV_pb_good = Monitored::Scalar<float>("jet_MV_pb_good",0);
 
-  double mv_pu = 0, mv_pb = 0, mv_pc = 0;  
+  double mv_pu = acc_pu(*jet);
+  double mv_pc = acc_pc(*jet);
+  double mv_pb = acc_pb(*jet);
 
-  bTaggingObject->pu(m_TaggerName,mv_pu);
-  bTaggingObject->pc(m_TaggerName,mv_pc);
-  bTaggingObject->pb(m_TaggerName,mv_pb);
   jet_MV_pu_good = mv_pu;
   jet_MV_pc_good = mv_pc;
   jet_MV_pb_good = mv_pb;
@@ -1147,12 +1138,12 @@ void JetTagMonitorAlgorithm::fillExtraTaggerHistos(const xAOD::Jet *jet) const {
 
 JetTagMonitorAlgorithm::Jet_t JetTagMonitorAlgorithm::getQualityLabel(const xAOD::Jet *jet, float PV_Z) const {
 
-  const xAOD::BTagging *bTaggingObject = xAOD::BTaggingUtilities::getBTagging( *jet );
-  if ( !bTaggingObject ) {
-    ATH_MSG_DEBUG( "Could not retrieve b-tagging object from selected jet." );
-    return badJet;
-  }
-
+    static const SG::AuxElement::ConstAccessor< std::vector< ElementLink<xAOD::IParticleContainer > > > 
+      acc_TracksForBTagging("TracksForBTagging");
+    if (!acc_TracksForBTagging.isAvailable(*jet)) {
+      ATH_MSG_DEBUG("TracksForBTagging not available, skipping quality label");
+      return badJet;
+    }
   auto tool = getGroup("JetTagMonitor");
 
   float jetTrack_pT = 0;
@@ -1221,16 +1212,14 @@ JetTagMonitorAlgorithm::Jet_t JetTagMonitorAlgorithm::getQualityLabel(const xAOD
   TLorentzVector jet_TLV;
   jet_TLV.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->e());
 
-  static const SG::AuxElement::ConstAccessor< std::vector< ElementLink<xAOD::TrackParticleContainer > > >
-    BTagTrackToJetAssociatorAcc("BTagTrackToJetAssociator");
-  std::vector<ElementLink<xAOD::TrackParticleContainer>> assocTracks =
-    BTagTrackToJetAssociatorAcc(*bTaggingObject);
+  std::vector<ElementLink<xAOD::IParticleContainer>> assocTracks =
+    acc_TracksForBTagging(*jet);
 
   nTracks = assocTracks.size();
 
-  for ( const ElementLink< xAOD::TrackParticleContainer >& jetTracks : assocTracks ) {
+  for ( const ElementLink< xAOD::IParticleContainer >& jetTracks : assocTracks ) {
     if ( not jetTracks.isValid() ) continue;
-    const xAOD::TrackParticle* jetTrackItr = *jetTracks;
+    auto jetTrackItr = dynamic_cast<const xAOD::TrackParticle*>(*jetTracks);
 
     jetTrack_pT = jetTrackItr->pt() / Gaudi::Units::GeV;
     jetTrack_eta = jetTrackItr->eta();

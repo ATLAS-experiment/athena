@@ -111,6 +111,13 @@ class FTagJetSFBlock(ConfigBlock):
             "b-tagging related variables are attached to jet container. This only serves"
             "as a compatibility option for analysis that use old derivations.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        selectionName = self.selectionName
+        if selectionName is None or selectionName == '':
+            selectionName = self.btagger + '_' + self.btagWP
+        return self.containerName.replace('.', '_') + '_' + selectionName
+
     def configureEfficiencyTool(self, config, btagger, btagWP, jetContainer,
                                 bTagCalibFile, DSID, tool,
                                 selectionCDI="", selectionTagger=""):
@@ -180,7 +187,7 @@ class FTagJetSFBlock(ConfigBlock):
         jetCollection = config.originalName(jetContainer)
         # Potentially modify the readFromBTaggingObject as here determining 
         # if input files has jet tagging probabilities attached to the jet (or still only to the BTagging object)
-        self.readFromBTaggingObject = getReadFromBTaggingObject(config, jetCollection, self.readFromBTaggingObject)
+        self.readFromBTaggingObject = getReadFromBTaggingObject(config.autoconfigFlags(), jetCollection, self.readFromBTaggingObject)
 
         # b-jet trigger-aware SF
         if self.triggerChainsPerYear:
@@ -190,7 +197,17 @@ class FTagJetSFBlock(ConfigBlock):
             triggers = trigger_set(config, self.triggerChainsPerYear,
                                    self.includeAllYearsPerRun, log)
             decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
+            
+            ChainDict = [
+                    "HLT_j80c_020jvt_j55c_020jvt_j28c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
+                    "HLT_j80c_020jvt_j55c_020jvt_j28c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
+                    "HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
+                    "HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25"]
+            
             for chain in triggers:
+                if  chain not in ChainDict: 
+                    raise ValueError(f"Trigger '{chain}' not supported — no known navigation issues") 
+                
                 chain_noHLT = chain.replace("HLT_", "")
                 chain_out = chain_noHLT if self.removeHLTPrefix else chain
 
@@ -210,7 +227,7 @@ class FTagJetSFBlock(ConfigBlock):
                 bTagConditionalWP = self.btagWP
 
                 alg = config.createAlgorithm( 'CP::BTaggingTriggerEfficiencyAlg',
-                                              'FTagEfficiencyTriggerScaleFactorAlg' + postfix + '_' + chain )
+                                              'FTagEfficiencyTriggerScaleFactorAlg' + chain )
                 config.addPrivateTool( 'offlineEfficiencyTool',
                                        'BTaggingEfficiencyTool' )
                 self.configureEfficiencyTool(
@@ -249,7 +266,7 @@ class FTagJetSFBlock(ConfigBlock):
         # Set up the efficiency calculation algorithm:
         # Always compute regular FTAG SF
         alg = config.createAlgorithm( 'CP::BTaggingEfficiencyAlg',
-                                      'FTagEfficiencyScaleFactorAlg' + postfix )
+                                      'FTagEfficiencyScaleFactorAlg' )
         config.addPrivateTool( 'efficiencyTool', 'BTaggingEfficiencyTool' )
         self.configureEfficiencyTool(
             config, self.btagger, self.btagWP, jetContainer,
@@ -294,6 +311,13 @@ class FTagEventSFBlock(ConfigBlock):
         self.addOption ('removeHLTPrefix', True, type=bool,
             info="remove the HLT prefix from trigger chain names, "
             "The default is True.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        selectionName = self.selectionName
+        if selectionName is None or selectionName == '':
+            selectionName = self.btagger + '_' + self.btagWP
+        return self.containerName.replace('.', '_') + '_' + selectionName
 
     def makeAlgs(self, config):
 

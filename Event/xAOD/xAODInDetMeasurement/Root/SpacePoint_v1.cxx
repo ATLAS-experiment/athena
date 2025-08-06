@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -7,8 +7,18 @@
 // Local include(s):
 #include "xAODInDetMeasurement/versions/SpacePoint_v1.h"
 
-AUXSTORE_OBJECT_SETTER_AND_GETTER( xAOD::SpacePoint_v1, std::vector< xAOD::DetectorIDHashType >,
-				   elementIdList, setElementIdList )
+// replace by handwritten version to avoid vector copy
+// AUXSTORE_OBJECT_SETTER_AND_GETTER( xAOD::SpacePoint_v1, std::vector< xAOD::DetectorIDHashType >,
+//  				      elementIdList, setElementIdList )
+
+const std::vector< xAOD::DetectorIDHashType > & xAOD::SpacePoint_v1::elementIdList() const {
+   static const Accessor< std::vector< xAOD::DetectorIDHashType >  > acc( "elementIdList" );
+   return acc( *this );
+}
+void xAOD::SpacePoint_v1::setElementIdList(std::vector< xAOD::DetectorIDHashType > && value ) {
+   static const Accessor< std::vector< xAOD::DetectorIDHashType >  > acc( "elementIdList" );
+   acc( *this ) = std::move(value);
+}
 
 static const SG::AuxElement::Accessor< std::array< float, 3 > > globalPosAcc("globalPosition");
 
@@ -46,8 +56,18 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 				      varianceZ, setVarianceZ )
 
-AUXSTORE_OBJECT_SETTER_AND_GETTER( xAOD::SpacePoint_v1, std::vector< const xAOD::UncalibratedMeasurement* >,
-				   measurements, setMeasurements )
+// replace by handwritten version to avoid vector copy
+// AUXSTORE_OBJECT_SETTER_AND_GETTER( xAOD::SpacePoint_v1, std::vector< const xAOD::UncalibratedMeasurement* >,
+//				   measurements, setMeasurements )
+
+const std::vector< const xAOD::UncalibratedMeasurement* > & xAOD::SpacePoint_v1::measurements() const {
+   static const Accessor< std::vector< const xAOD::UncalibratedMeasurement* >  > acc( "measurements" );
+   return acc( *this );
+}
+void xAOD::SpacePoint_v1::setMeasurements(std::vector< const xAOD::UncalibratedMeasurement* > && value ) {
+   static const Accessor< std::vector< const xAOD::UncalibratedMeasurement* >  > acc( "measurements" );
+   acc( *this ) = std::move(value);
+}
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 				      topHalfStripLength, setTopHalfStripLength )
@@ -103,20 +123,20 @@ xAOD::SpacePoint_v1::VectorMap xAOD::SpacePoint_v1::topStripCenter() {
 void xAOD::SpacePoint_v1::setSpacePoint(DetectorIDHashType idHash,
 					const Eigen::Matrix<float,3,1>& globPos,
 					float cov_r, float cov_z,
-					const std::vector< const xAOD::UncalibratedMeasurement* >& measurements)
+					std::vector< const xAOD::UncalibratedMeasurement* >&& measurements)
 {
   this->setElementIdList({idHash});
   this->globalPosition() = globPos;
   this->setRadius( std::sqrt( globPos(0,0) * globPos(0,0) + globPos(1,0) * globPos(1,0) ) );
   this->setVarianceR(cov_r);
   this->setVarianceZ(cov_z);
-  this->setMeasurements(measurements);
+  this->setMeasurements(std::move(measurements));
 }
 
-void xAOD::SpacePoint_v1::setSpacePoint(const std::vector<DetectorIDHashType>& idHashes,
+void xAOD::SpacePoint_v1::setSpacePoint(std::vector<DetectorIDHashType>&& idHashes,
 					const Eigen::Matrix<float,3,1>& globPos,
 					float cov_r, float cov_z,
-					const std::vector< const xAOD::UncalibratedMeasurement* >& measurements,
+					std::vector< const xAOD::UncalibratedMeasurement* >&& measurements,
 					float topHalfStripLength, 
 					float bottomHalfStripLength,
 					const Eigen::Matrix<float,3,1>& topStripDirection,
@@ -124,12 +144,12 @@ void xAOD::SpacePoint_v1::setSpacePoint(const std::vector<DetectorIDHashType>& i
 					const Eigen::Matrix<float,3,1>& stripCenterDistance,
 					const Eigen::Matrix<float,3,1>& topStripCenter)
 {
-  this->setElementIdList(idHashes);
+  this->setElementIdList(std::move(idHashes));
   this->globalPosition() = globPos;
   this->setRadius( std::sqrt( globPos(0,0) * globPos(0,0) + globPos(1,0) * globPos(1,0) ) );
   this->setVarianceR(cov_r);
   this->setVarianceZ(cov_z);
-  this->setMeasurements(measurements);
+  this->setMeasurements(std::move(measurements));
 
   this->setTopHalfStripLength(topHalfStripLength);
   this->setBottomHalfStripLength(bottomHalfStripLength);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionBase/CollectionDescription.h"
@@ -104,7 +104,7 @@ pool::CollectionDescription::clearAll()
 pool::CollectionDescription&
 pool::CollectionDescription::operator=( const pool::ICollectionDescription& rhs )
 {
-   if( (ICollectionDescription*)this != &rhs )
+   if( this != &rhs )
       copyFrom( rhs );
    return *this;
 }

@@ -49,6 +49,7 @@ namespace Muon {
     StatusCode MuonSegmentRegionRecoveryTool::initialize() {
         ATH_CHECK(m_edmHelperSvc.retrieve());
         ATH_CHECK(m_chamberGeoKey.initialize());
+        ATH_CHECK(m_DetectorManagerKey.initialize());
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_seededSegmentFinder.retrieve());
 
@@ -409,7 +410,9 @@ namespace Muon {
             ATH_MSG_ERROR("Failed to retrieve chamber intersection service");
             return nullptr;
         }
-        const MuonGM::MuonDetectorManager* MuonDetMgr = InterSectSvc->detMgr();
+
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_DetectorManagerKey,ctx};
+        const MuonGM::MuonDetectorManager* MuonDetMgr = detMgr.cptr();
 
         std::vector<std::unique_ptr<const Trk::TrackStateOnSurface>> states;
         unsigned int nholes = 0;
@@ -442,7 +445,7 @@ namespace Muon {
             ATH_MSG_DEBUG("Reached " << m_idHelperSvc->toStringChamber(chId) << " hash " << ith);
 
             // calculate crossed tubes
-            const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(chId, exPars->position(), exPars->momentum().unit());
+            const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(MuonDetMgr, chId, exPars->position(), exPars->momentum().unit());
 
             // clear hole vector
             for (unsigned int ii = 0; ii < intersect.tubeIntersects().size(); ++ii) {

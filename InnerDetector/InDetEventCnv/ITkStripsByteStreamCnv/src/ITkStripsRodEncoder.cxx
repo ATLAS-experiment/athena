@@ -40,16 +40,7 @@ namespace { // Anonymous namespace
 
 } // End of anonymous namespace
 
-// Constructor
-
-ITkStripsRodEncoder::ITkStripsRodEncoder(const std::string& type, const std::string& name,
-                               const IInterface* parent) :
-  base_class(type, name, parent){
-  //nop
-}
-
 // Initialize
-
 StatusCode
 ITkStripsRodEncoder::initialize() {
   ATH_MSG_DEBUG("ITkStripsRodEncoder::initialize()");
@@ -71,9 +62,6 @@ ITkStripsRodEncoder::initialize() {
 }
 
 
-StatusCode ITkStripsRodEncoder::finalize() {
-  return StatusCode::SUCCESS;
-}
 
 void
 ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /*robID*/,

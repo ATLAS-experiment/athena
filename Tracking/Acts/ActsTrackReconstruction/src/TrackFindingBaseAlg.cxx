@@ -160,6 +160,8 @@ namespace ActsTrk {
 
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
 
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometryTool.get()};
+    
     initStatTables();
 
     return StatusCode::SUCCESS;
@@ -228,94 +230,49 @@ namespace ActsTrk {
            : (std::abs(eta) < trackSelectorCfg.absEtaEdges.front()) ? trackSelectorCfg.cutSets.front()
                                                                     : trackSelectorCfg.getCuts(eta);
   };
-
-  std::size_t TrackFindingBaseAlg::doTwoWayTrackFinding(
-      std::function<void(detail::RecoTrackContainerProxy &)> addTrack,
-      TrkProxy &trackProxy,
-      detail::RecoTrackContainer &tracksContainerTemp,
-      const TrackFinderOptions &options,
-      Acts::GeometryContext &tgContext,
-      const bool reverseSearch) const {
-    std::size_t count = 0;
-
-    std::optional<detail::RecoTrackStateContainerProxy> firstMeasurement;
-    for (auto st : trackProxy.trackStatesReversed()) {
-      bool isMeasurement = st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag);
-      bool isOutlier = st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag);
-      // We are excluding non measurement states and outlier here. Those can
-      // decrease resolution because only the smoothing corrected the very
-      // first prediction as filtering is not possible.
-      if (isMeasurement && !isOutlier) {
-        firstMeasurement = st;
-      }
-    }
-
-    if (!firstMeasurement.has_value()) {
-      return 0;
-    }
-
-    Acts::BoundTrackParameters secondInitialParameters = trackProxy.createParametersFromState(detail::RecoConstTrackStateContainerProxy{*firstMeasurement});
-
+  
+  std::vector<typename detail::RecoTrackContainer::TrackProxy> 
+  TrackFindingBaseAlg::doTwoWayTrackFinding(const detail::RecoTrackStateContainerProxy& firstMeasurement,
+                                            const TrkProxy &trackProxy,
+                                            detail::RecoTrackContainer &tracksContainerTemp,
+                                            const TrackFinderOptions &options) const {
+    if (not m_doTwoWay) return {};
+    
+    // Create initial parameters for the propagation
+    Acts::BoundTrackParameters secondInitialParameters = trackProxy.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
     if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
-      return 0;
+      return {};
     }
-
+    
     auto rootBranch = tracksContainerTemp.makeTrack();
     rootBranch.copyFrom(trackProxy, false);  // #3534
     if (m_addPixelStripCounts) {
       copyPixelStripCounts(rootBranch, trackProxy);
     }
-    auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, options, tracksContainerTemp, rootBranch);
-
+    
+    // perform track finding
+    auto secondResult = 
+      trackFinder().ckf.findTracks(secondInitialParameters, options, tracksContainerTemp, rootBranch);
     if (not secondResult.ok()) {
-      return 0;
+      return {};
     }
-
-    // store the original previous state to restore it later
-    auto originalFirstMeasurementPrevious = firstMeasurement->previous();
-
-    auto &secondTracksForSeed = secondResult.value();
-    for (auto &secondTrack : secondTracksForSeed) {
-      secondTrack.reverseTrackStates(true);
-
-      firstMeasurement->previous() = secondTrack.outermostTrackState().index();
-      secondTrack.tipIndex() = trackProxy.tipIndex();
-
-      if (reverseSearch) {
-        // smooth the full track
-        auto secondSmoothingResult = Acts::smoothTrack(tgContext, secondTrack, logger());
-        if (!secondSmoothingResult.ok()) {
-          continue;
-        }
-
-        secondTrack.reverseTrackStates(true);
-      }
-
-      addTrack(secondTrack);
-
-      ++count;
-    }
-
-    // restore the original previous state for the first track
-    firstMeasurement->previous() = originalFirstMeasurementPrevious;
-
-    return count;
-  };
-
+    return secondResult.value();
+  }
+  
   xAOD::UncalibMeasType TrackFindingBaseAlg::measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState) {
     if (trackState.hasReferenceSurface()) {
       if (const auto *actsDetElem = dynamic_cast<const IDetectorElementBase *>(trackState.referenceSurface().associatedDetectorElement())) {
         switch (actsDetElem->detectorType()) {
-          case DetectorType::Pixel:
-            return xAOD::UncalibMeasType::PixelClusterType;
-          case DetectorType::Sct:
-            return xAOD::UncalibMeasType::StripClusterType;
-          default:
-            break;
+        case DetectorType::Pixel:
+          return xAOD::UncalibMeasType::PixelClusterType;
+        case DetectorType::Sct:
+          return xAOD::UncalibMeasType::StripClusterType;
+        default:
+          break;
         }
       }
     }
-
+    
     return xAOD::UncalibMeasType::Other;
   }
 

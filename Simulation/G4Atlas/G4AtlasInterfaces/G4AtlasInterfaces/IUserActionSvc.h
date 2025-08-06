@@ -27,6 +27,9 @@ namespace G4UA
 
   public:
 
+    /// @brief Initialize run actions on the main Geant4 thread
+    virtual StatusCode initializeActionsMaster() = 0;
+
     /// @brief Initialize all the user actions for the current thread.
     virtual StatusCode initializeActions() = 0;
 

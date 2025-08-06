@@ -8,7 +8,6 @@
 #include "AthenaInterprocess/Utilities.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
-#include "AthenaKernel/IDataShare.h"
 #include "GaudiKernel/Incident.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIoComponentMgr.h"
@@ -217,13 +216,13 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
   // we have to make sure that mother process is a conversion service
   // client so that events before forking workers are captured...
 
-  SmartIF<IDataShare> dataShare{serviceLocator()->service("AthenaPoolCnvSvc")};
-  ATH_CHECK(dataShare.isValid());
-
   auto sharedWriterTool = m_tools["SharedWriterTool"];
   const bool sharedWriterWithFAFE = (m_nEventsBeforeFork!=0 && sharedWriterTool);
 
   if(sharedWriterWithFAFE) {
+    m_dataShare = SmartIF<IDataShare>(serviceLocator()->service("AthenaPoolSharedIOCnvSvc"));
+    ATH_CHECK(m_dataShare.isValid());
+
     (*sharedWriterTool)->useFdsRegistry(registry);
     (*sharedWriterTool)->setRandString(randStream.str());
 
@@ -244,7 +243,7 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
     }
 
     // Make the mother process a client
-    if(!dataShare->makeClient(m_nWorkers+1).isSuccess()) {
+    if(!m_dataShare->makeClient(m_nWorkers+1).isSuccess()) {
       ATH_MSG_FATAL("Cannot make mother process a client for Conversion Service");
       return StatusCode::FAILURE;
     }
@@ -279,7 +278,7 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
   fflush(NULL);
 
   // Make the mother process not client
-  if(sharedWriterWithFAFE && !dataShare->makeClient(0).isSuccess()) {
+  if(sharedWriterWithFAFE && !m_dataShare->makeClient(0).isSuccess()) {
     ATH_MSG_FATAL("Cannot make mother process not client for Conversion Service");
     return StatusCode::FAILURE;
   }

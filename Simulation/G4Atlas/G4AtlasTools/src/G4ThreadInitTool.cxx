@@ -96,6 +96,11 @@ void G4ThreadInitTool::initThread()
   ATH_MSG_INFO("Initializing worker RM");
   wrm->Initialize();
 
+  // Start user worker run
+  if(masterRM->GetUserWorkerInitialization()) {
+    masterRM->GetUserWorkerInitialization()->WorkerRunStart();
+  }
+
   // Copy the UI commands to the worker
   std::vector<G4String> cmds = masterRM->GetCommandStack();
   ATH_MSG_INFO (cmds.size() << " commands in UI stack");

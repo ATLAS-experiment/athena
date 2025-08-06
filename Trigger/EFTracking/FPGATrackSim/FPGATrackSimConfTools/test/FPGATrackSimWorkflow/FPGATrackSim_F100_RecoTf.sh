@@ -26,6 +26,7 @@ outputAOD="AOD.root"
 nEvents="1"
 skipCheck=0
 doClusters="0"
+skipEvents=0
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -34,6 +35,7 @@ while [ $# -ge 1 ];do
         -i  | --inputRDO )      if [ $# -lt 2 ] ; then usage ; fi ; inputRDO="$2"  ; shift ;;
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
+        -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; doClusters="1" ;;
         -h  | --help )          usage 0 ;;
@@ -43,13 +45,24 @@ while [ $# -ge 1 ];do
 done
 
 ## checking valid inputs
-if [ -z $inputRDO ]; then usage ; fi
-if [ -z $outputAOD ]; then usage ; fi
+if [ -z "$inputRDO" ]; then usage ; fi
+if [ -z "$outputAOD" ]; then usage ; fi
 
-if [ ! -f $inputRDO ]; then
-    echo "runReco_C100_FS.sh result: 1 ${inputRDO} not found"
-    exit 1
+if [[ "$inputRDO" == *"*"* ]]; then
+    # Just pass the pattern as is to Reco_tf.py in case of regex-like input
+    inputRDO_arg="$inputRDO"
+else
+    # Check existence for comma-separated files
+    IFS=',' read -ra FILES <<< "$inputRDO"
+    for file in "${FILES[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            echo "Error: File not found: $file"
+            exit 1
+        fi
+    done
+    inputRDO_arg="$inputRDO"
 fi
+
 export ATHENA_CORE_NUMBER=1
 source FPGATrackSim_CommonEnv.sh
 ## running reconstruction
@@ -60,16 +73,18 @@ if [ "$doClusters" == "1" ]; then
     --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
               flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --steering 'doRAWtoALL' \
-    --inputRDOFile ${inputRDO} \
+    --inputRDOFile "${inputRDO_arg}" \
     --outputAODFile ${outputAOD}
 else
   Reco_tf.py --CA \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,\
-                  FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
-    --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
+    --skipEvents ${skipEvents} \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
+    --preExec "flags.Tracking.doPixelDigitalClustering=True;\
+               flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
+    --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
-    --inputRDOFile ${inputRDO} \
+    --inputRDOFile "${inputRDO_arg}" \
     --outputAODFile ${outputAOD}
 fi
 

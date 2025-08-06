@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "AthTritonInterfaces/ITritonTool.h"
+#include "AthOnnxInterfaces/IAthInferenceTool.h"
 #include "grpc_client.h"
 #include "grpc_service.pb.h"
 
@@ -27,7 +27,7 @@ namespace AthInfer {
     }                                                              \
 }
 
-class TritonTool: public extends<AthAlgTool, ITritonTool>
+class TritonTool: public extends<AthAlgTool, IAthInferenceTool>
 {
 
   public:
@@ -37,16 +37,22 @@ class TritonTool: public extends<AthAlgTool, ITritonTool>
 
     virtual StatusCode inference(InputDataMap& inputData, OutputDataMap& outputData) const override final;
 
+    void print() const override final {} // nothing to print, but required by the interface.
+
   protected:
     TritonTool() = delete;
     TritonTool(const TritonTool&) =delete;
     TritonTool &operator=(const TritonTool&) = delete;
 
     StringProperty m_modelName{this, "ModelName", "", "Model name"};
+    IntegerProperty m_port{this, "Port", 8001, "Port ID for Triton server"};
+    StringProperty m_modelVersion{this, "ModelVersion", "", "Model version, empty for latest"};
+    FloatProperty m_clientTimeout{this, "ClientTimeout", 0, "Client timeout in milliseconds, 0 for no timeout"};
     StringProperty m_url{this, "URL", "", "Triton URL"};
-    
+    BooleanProperty m_useSSL{this, "UseSSL", false, "Use SSL for Triton server connection"};
+
   private:
-    tc::InferenceServerGrpcClient* getClient() const;    
+    tc::InferenceServerGrpcClient* getClient() const;
     std::unique_ptr<tc::InferOptions> m_options;
 
     template <typename T>

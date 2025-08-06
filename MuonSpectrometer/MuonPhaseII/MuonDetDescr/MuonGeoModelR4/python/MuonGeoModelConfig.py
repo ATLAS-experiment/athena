@@ -69,7 +69,9 @@ def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
     from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep is not ProductionStep.Simulation:
         sub_detTools.append(result.popToolsAndMerge(ChamberAssebmbleToolCfg(flags)))
+        print("MuonDetectorToolCfg: Adding ChamberAssebmbleTool to MuonDetectorTool")
     kwargs.setdefault("ReadoutEleBuilders", sub_detTools)
+    print(sub_detTools)
     the_tool = CompFactory.MuonGMR4.MuonDetectorTool(name = name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -79,6 +81,7 @@ def MuonGeoModelCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     geoModelSvc = result.getPrimaryAndMerge(GeoModelCfg(flags))
     geoModelSvc.DetectorTools+=[result.popToolsAndMerge(MuonDetectorToolCfg(flags))]
+    print("MuonGeoModelCfg: Adding MuonDetectorTool to GeoModelSvc")
     return result
 
 def MuonAlignStoreCfg(flags):

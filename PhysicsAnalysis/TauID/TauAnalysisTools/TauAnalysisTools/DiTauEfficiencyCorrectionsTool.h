@@ -50,24 +50,19 @@ public:
    * 
    * @param xDiTau : reco DiTauJet
    * @param eff : reference to output variable where efficiency is returned
-   * @param iRunNumber : run number
-   * @param iMu : number of interactions
    * @return CP::CorrectionCode 
    */
   virtual CP::CorrectionCode getEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau,
-      double& eff, unsigned int iRunNumber = 0, unsigned int iMu = 0);
+      double& eff);
 
 
   /**
    * @brief decorate the ditau jet with eff scale factor
    * 
    * @param xDiTau : reco DiTauJet
-   * @param iRunNumber : run number
-   * @param iMu : number of interactions
    * @return CP::CorrectionCode 
    */
-  virtual CP::CorrectionCode applyEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau,
-      unsigned int iRunNumber = 0, unsigned int iMu = 0);
+  virtual CP::CorrectionCode applyEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau);
 
 
   /**

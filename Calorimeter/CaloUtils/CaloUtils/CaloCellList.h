@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CaloCellList_H
@@ -44,6 +44,7 @@ public:
   typedef vector_type::const_iterator list_iterator;
   CaloCellList() = delete;
   CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container);
+  CaloCellList(const CaloDetDescrManager& mgr, const CaloCellContainer& cell_container);
   CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container, const CaloCell_ID::SUBCALO caloNum);
   CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container, const std::vector<CaloCell_ID::SUBCALO>& caloNums);
 
@@ -74,8 +75,8 @@ private:
                 double dR,
                 CaloCell_ID::CaloSample sam = CaloCell_ID::Unknown);
 
-  const CaloCellContainer* m_cellcont;
-  const CaloDetDescrManager* m_mgr;
+  const CaloCellContainer& m_cellcont;
+  const CaloDetDescrManager& m_mgr;
   std::vector<CaloCell_ID::SUBCALO> m_caloNums;
   vector_type m_theCellVector;
   double m_energy;

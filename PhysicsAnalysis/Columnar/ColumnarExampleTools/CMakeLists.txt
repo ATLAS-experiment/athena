@@ -15,5 +15,5 @@ atlas_add_library (ColumnarExampleToolsLib
 atlas_add_test( gt_ColumnarToolTests
   SOURCES test/gt_ColumnarToolTests.cxx
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib ColumnarExampleToolsLib ColumnarJetLib
+  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib ColumnarExampleToolsLib ColumnarJetLib xAODEgamma
   POST_EXEC_SCRIPT nopost.sh )

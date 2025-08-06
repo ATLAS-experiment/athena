@@ -19,27 +19,45 @@ def SoftBFinderToolCfg(flags, name="SoftBFinderTool", **myargs):
     mlog.info("entering SoftBFinderTool configuration")
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
+    
+    #-- 2-track vertex initial selector
+    iniV2Targs = {}
+    iniV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    iniV2Targs.setdefault("useVertexCleaning"  ,  True)
+    iniV2Targs.setdefault("cosSVPVCut"  ,  0.4)
+    iniV2Targs.setdefault("v2tBDTCut"   , -0.7)
+    iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
+    #-- 2-track vertex final selector
+    finV2Targs = {}
+    finV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    finV2Targs.setdefault("useVertexCleaning"  ,  True)
+    finV2Targs.setdefault("cosSVPVCut"  ,  0.4)
+    finV2Targs.setdefault("v2tBDTCut"   ,  0.)
+    finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)
 
-    myargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    myargs.setdefault("ExtrapolatorName", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
+    #-- NVSI track selection cuts
     myargs.setdefault("CutPt" , 500.)
     myargs.setdefault("CutBLayHits" , 1 )
     myargs.setdefault("CutPixelHits" , 3 )
     myargs.setdefault("CutSiHits" ,  8 )
     myargs.setdefault("CutTRTHits" , 10 )
-    myargs.setdefault("useVertexCleaning"  ,  True)
-    myargs.setdefault("MultiWithOneTrkVrt" ,  True)
-    myargs.setdefault("removeTrkMatSignif" , -1.)     # No additional material rejection
     myargs.setdefault("AntiPileupSigRCut" ,  2.0)
     myargs.setdefault("TrkSigCut"      ,  2.0)
-    myargs.setdefault("SelVrtSigCut"   ,  3.0)
-    myargs.setdefault("v2tIniBDTCut"   , -0.7)
-    myargs.setdefault("v2tFinBDTCut"   ,  0.0)
-    myargs.setdefault("cosSVPVCut"     ,  0.4)
-    myargs.setdefault("FastZSVCut"     ,  5.)
+    #-- NVSI inclusive vertex selection
+    myargs.setdefault("FastZSVCut"     ,  5.)        # Fast universal preselection of 2-track vertices 
+    myargs.setdefault("MultiWithOneTrkVrt" ,  True)
+    myargs.setdefault("removeTrkMatSignif" , -1.)    # No additional material rejection
+    myargs.setdefault("SelVrtSigCut"   ,  2.5)
+
     myargs.setdefault("VertexMergeCut" , 4.)
     myargs.setdefault("MaxSVRadiusCut" , 50.)
+    #-- Tools
+    myargs.setdefault("TwoTrkVtxSelectorIni",iniV2TSelector)
+    myargs.setdefault("TwoTrkVtxSelectorFinal",finV2TSelector)
+    myargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    myargs.setdefault("ExtrapolatorName", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
+
     SoftBFinder = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
     acc.setPrivateTools(SoftBFinder)
     mlog.info("SoftBFinderTool created")
@@ -55,24 +73,41 @@ def InclusiveBFinderToolCfg(flags, name="InclusiveBFinderTool", **myargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
 
-    myargs.setdefault("VertexFitterTool" ,  acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    myargs.setdefault("ExtrapolatorName" ,  acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
-    myargs.setdefault("CutPt"        , 500.)
-    myargs.setdefault("CutBLayHits"  , 0)
-    myargs.setdefault("CutPixelHits" , 2)
-    myargs.setdefault("CutSiHits"    , 8)
-    myargs.setdefault("CutTRTHits"   , 10)
-    myargs.setdefault("useVertexCleaning"  , True)
-    myargs.setdefault("MultiWithOneTrkVrt" , True)
+    #-- 2-track vertex initial selector
+    iniV2Targs = {}
+    iniV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    iniV2Targs.setdefault("cosSVPVCut"  ,  0.5)
+    iniV2Targs.setdefault("v2tBDTCut"   , -0.7)
+    iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
+    #-- 2-track vertex final selector
+    finV2Targs = {}
+    finV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    finV2Targs.setdefault("cosSVPVCut"  ,  0.5)
+    finV2Targs.setdefault("v2tBDTCut"   , -0.2)
+    finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)
+
+    #-- NVSI track selection cuts
+    myargs.setdefault("CutPt"       , 500.)
+    myargs.setdefault("CutBLayHits" , 0 )
+    myargs.setdefault("CutPixelHits", 2 )
+    myargs.setdefault("CutSiHits"   , 8 )
+    myargs.setdefault("CutTRTHits"  , 10 )
+    myargs.setdefault("AntiPileupSigRCut" ,  2.0)
+    myargs.setdefault("TrkSigCut"      ,  2.0)
+    #-- NVSI inclusive vertex selection
+    myargs.setdefault("FastZSVCut"     ,  8.0)        # Fast universal preselection of 2-track vertices 
+    myargs.setdefault("MultiWithOneTrkVrt" ,  True)
     myargs.setdefault("removeTrkMatSignif" , -1.)     # No additional material rejection
-    myargs.setdefault("AntiPileupSigRCut"  , 2.0)
-    myargs.setdefault("TrkSigCut"          , 2.0)
     myargs.setdefault("SelVrtSigCut"   ,  3.0)
-    myargs.setdefault("v2tIniBDTCut"   , -0.7)
-    myargs.setdefault("v2tFinBDTCut"   , -0.2)
-    myargs.setdefault("cosSVPVCut"     ,  0.5)
-    myargs.setdefault("FastZSVCut"     ,  8.)
+
+
+    #-- Tools
+    myargs.setdefault("TwoTrkVtxSelectorIni",  iniV2TSelector)
+    myargs.setdefault("TwoTrkVtxSelectorFinal",finV2TSelector)
+    myargs.setdefault("VertexFitterTool",  acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    myargs.setdefault("ExtrapolatorName",  acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
+
 
     InclusiveBFinder = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
     acc.setPrivateTools(InclusiveBFinder)
@@ -90,24 +125,39 @@ def HighPtBFinderToolCfg(flags, name="HighPtBFinderTool", **myargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
 
-    myargs.setdefault("VertexFitterTool" , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    myargs.setdefault("ExtrapolatorName" , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
-    myargs.setdefault("CutPt"        , 1000.)
-    myargs.setdefault("CutBLayHits"  , 0)
-    myargs.setdefault("CutPixelHits" , 2)
-    myargs.setdefault("CutSiHits"    , 8)
-    myargs.setdefault("CutTRTHits"   , 10)
-    myargs.setdefault("useVertexCleaning"  , True)
-    myargs.setdefault("MultiWithOneTrkVrt" , True)
+    #-- 2-track vertex initial selector
+    iniV2Targs = {}
+    iniV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    iniV2Targs.setdefault("cosSVPVCut"  ,  0.7)
+    iniV2Targs.setdefault("v2tBDTCut"   , -0.6)
+    iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
+    #-- 2-track vertex final selector
+    finV2Targs = {}
+    finV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    finV2Targs.setdefault("cosSVPVCut"  ,  0.7)
+    finV2Targs.setdefault("v2tBDTCut"   , -0.2)
+    finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)
+
+    #-- NVSI track selection cuts
+    myargs.setdefault("CutPt"       , 1000.)
+    myargs.setdefault("CutBLayHits" , 0 )
+    myargs.setdefault("CutPixelHits", 2 )
+    myargs.setdefault("CutSiHits"   , 8 )
+    myargs.setdefault("CutTRTHits"  , 10 )
+    myargs.setdefault("AntiPileupSigRCut", 2.0)
+    myargs.setdefault("TrkSigCut"      ,   2.0)
+    #-- NVSI inclusive vertex selection
+    myargs.setdefault("FastZSVCut"     ,  8.0)        # Fast universal preselection of 2-track vertices 
+    myargs.setdefault("MultiWithOneTrkVrt" ,  True)
     myargs.setdefault("removeTrkMatSignif" , -1.)     # No additional material rejection
-    myargs.setdefault("AntiPileupSigRCut"  , 2.0)
-    myargs.setdefault("TrkSigCut"      , 2.0)
-    myargs.setdefault("SelVrtSigCut"   , 3.0)
-    myargs.setdefault("v2tIniBDTCut"   ,-0.6)
-    myargs.setdefault("v2tFinBDTCut"   , 0.2)
-    myargs.setdefault("cosSVPVCut"     , 0.7)
-    myargs.setdefault("FastZSVCut"     , 8.)
+    myargs.setdefault("SelVrtSigCut"   ,  3.0)
+
+    #-- Tools
+    myargs.setdefault("TwoTrkVtxSelectorIni",  iniV2TSelector)
+    myargs.setdefault("TwoTrkVtxSelectorFinal",finV2TSelector)
+    myargs.setdefault("VertexFitterTool",  acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    myargs.setdefault("ExtrapolatorName",  acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
 
     HighPtBFinder = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
     acc.setPrivateTools(HighPtBFinder)
@@ -125,26 +175,44 @@ def MaterialSVFinderToolCfg(flags, name="MaterialSVFinderTool", **myargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
 
-    myargs.setdefault("VertexFitterTool" , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    myargs.setdefault("ExtrapolatorName" , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
+    #-- 2-track vertex initial selector
+    iniV2Targs = {}
+    iniV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    iniV2Targs.setdefault("cosSVPVCut"  ,  0.)
+    iniV2Targs.setdefault("useVertexCleaning", False)
+    iniV2Targs.setdefault("v2tBDTCut"   , -1.01)       #Remove BDT selection
+    iniV2Targs.setdefault("Vrt2TrMassLimit", 8000.)
+    iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
+    #-- 2-track vertex final selector
+    finV2Targs = {}
+    finV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    finV2Targs.setdefault("cosSVPVCut"  ,  0.)
+    finV2Targs.setdefault("useVertexCleaning", False)
+    finV2Targs.setdefault("v2tBDTCut"   , -1.01)       #Remove BDT selection
+    finV2Targs.setdefault("Vrt2TrMassLimit", 8000.)
+    finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)
+
+    #-- NVSI track selection cuts
     myargs.setdefault("CutPt"        , 500.)
-    myargs.setdefault("CutBLayHits"  , 0)
-    myargs.setdefault("CutPixelHits" , 1)
-    myargs.setdefault("CutSiHits"    , 8)
-    myargs.setdefault("CutTRTHits"   , 10)
-    myargs.setdefault("useVertexCleaning"  , False)
-    myargs.setdefault("MultiWithOneTrkVrt" , False)
-    myargs.setdefault("removeTrkMatSignif" , -1.)    # No additional material rejection
-    myargs.setdefault("AntiPileupSigRCut"  , 5.0)
-    myargs.setdefault("TrkSigCut"      , 5.0)
-    myargs.setdefault("SelVrtSigCut"   , 10.0)
-    myargs.setdefault("v2tIniBDTCut"   ,-1.01)       #Remove BDT selection
-    myargs.setdefault("v2tFinBDTCut"   ,-1.01)       #Remove BDT selection
-    myargs.setdefault("cosSVPVCut"     , 0.)
-    myargs.setdefault("FastZSVCut"     , 10.)
-    myargs.setdefault("VrtMassLimit"   , 8000.)
-    myargs.setdefault("Vrt2TrMassLimit", 8000.)
+    myargs.setdefault("CutBLayHits"  , 0 )
+    myargs.setdefault("CutPixelHits" , 1 )
+    myargs.setdefault("CutSiHits"    , 8 )
+    myargs.setdefault("CutTRTHits"   , 10 )
+    myargs.setdefault("AntiPileupSigRCut", 5.0)
+    myargs.setdefault("TrkSigCut"      ,   2.0)
+    #-- NVSI inclusive vertex selection
+    myargs.setdefault("FastZSVCut"     ,  10.0)        # Fast universal preselection of 2-track vertices 
+    myargs.setdefault("MultiWithOneTrkVrt" ,  False)
+    myargs.setdefault("removeTrkMatSignif" , -1.)     # No additional material rejection
+    myargs.setdefault("SelVrtSigCut"   ,  10.0)
+    myargs.setdefault("VrtMassLimit", 8000.)
+
+    #-- Tools
+    myargs.setdefault("TwoTrkVtxSelectorIni",  iniV2TSelector)
+    myargs.setdefault("TwoTrkVtxSelectorFinal",finV2TSelector)
+    myargs.setdefault("VertexFitterTool",  acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    myargs.setdefault("ExtrapolatorName",  acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
 
     MaterialSVFinder = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
     acc.setPrivateTools(MaterialSVFinder)
@@ -161,34 +229,50 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
 
-    myargs.setdefault("VertexFitterTool" , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    myargs.setdefault("ExtrapolatorName" , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
-    myargs.setdefault("CutPt"        , 1000.)
-    myargs.setdefault("CutBLayHits"  , 0)
-    myargs.setdefault("CutPixelHits" , 0)
-    myargs.setdefault("CutSiHits"    , 7)
-    myargs.setdefault("CutTRTHits"   , 0)
-    myargs.setdefault("useVertexCleaning"  , False)
-    myargs.setdefault("MultiWithOneTrkVrt" , False)
-    myargs.setdefault("removeTrkMatSignif" , -1.)    # No additional material rejection
-    myargs.setdefault("AntiPileupSigRCut"  , 6.0)
-    myargs.setdefault("TrkSigCut"      , 10.0)
-    myargs.setdefault("SelVrtSigCut"   , 8.0)
-    myargs.setdefault("v2tIniBDTCut"   ,-1.01)       # BDT selection is disabled
-    myargs.setdefault("v2tFinBDTCut"   ,-1.01)       # BDT selection is disabled
-    myargs.setdefault("cosSVPVCut"     , 0.)
-    myargs.setdefault("FastZSVCut"     , 30.)
-    myargs.setdefault("VrtMassLimit"   , 1000000.)
-    myargs.setdefault("Vrt2TrMassLimit", 1000000.)
-    myargs.setdefault("VertexMergeCut" , 10.)
-    myargs.setdefault("MaxSVRadiusCut" , 350.)
+    #-- 2-track vertex initial selector
+    iniV2Targs = {}
+    iniV2Targs.setdefault("Vrt2TrPtMin" , 2000.)
+    iniV2Targs.setdefault("cosSVPVCut"  ,  0.)
+    iniV2Targs.setdefault("v2tBDTCut"   , -1.01)
+    iniV2Targs.setdefault("Vrt2TrMassLimit", 1000000.)
+    iniV2Targs.setdefault("useVertexCleaning"  , False)
+    iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
+    #-- 2-track vertex final selector
+    finV2Targs = {}
+    finV2Targs.setdefault("Vrt2TrPtMin" , 2000.)
+    finV2Targs.setdefault("cosSVPVCut"  ,  0.)
+    finV2Targs.setdefault("v2tBDTCut"   , -1.01)
+    finV2Targs.setdefault("Vrt2TrMassLimit", 1000000.)
+    finV2Targs.setdefault("useVertexCleaning"  , False)
+    finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)
+
+    #-- NVSI track selection cuts
+    myargs.setdefault("CutPt"       , 1000.)
+    myargs.setdefault("CutBLayHits" , 0 )
+    myargs.setdefault("CutPixelHits", 0 )
+    myargs.setdefault("CutSiHits"   , 7 )
+    myargs.setdefault("CutTRTHits"  , 0 )
+    myargs.setdefault("AntiPileupSigRCut", 6.0)
+    myargs.setdefault("TrkSigCut"      ,  10.0)
     myargs.setdefault("CutD0Max"       , 1000.)   # Maximal track impact parameter
     myargs.setdefault("CutD0Min"       , 0.)      # Minimal track impact parameter
     myargs.setdefault("MaxZVrt"        , 100.)
     myargs.setdefault("MinZVrt"        , 0.)
-    myargs.setdefault("TwoTrkVtxFormingD0Cut", 1.0) # 2-track forming cut
-    myargs.setdefault("do2TrkIBLChecks", False)   # Do not explicitly require IBL/BL hits
+    #-- NVSI inclusive vertex selection
+    myargs.setdefault("FastZSVCut"     ,  30.0)        # Fast universal preselection of 2-track vertices 
+    myargs.setdefault("MultiWithOneTrkVrt" ,  False)
+    myargs.setdefault("removeTrkMatSignif" , -1.)     # No additional material rejection
+    myargs.setdefault("SelVrtSigCut"   , 8.0)
+    myargs.setdefault("VertexMergeCut" , 10.)
+    myargs.setdefault("VrtMassLimit"   , 1000000.)
+    myargs.setdefault("MaxSVRadiusCut" , 350.)
+
+    #-- Tools
+    myargs.setdefault("TwoTrkVtxSelectorIni"  ,iniV2TSelector)
+    myargs.setdefault("TwoTrkVtxSelectorFinal",finV2TSelector)
+    myargs.setdefault("VertexFitterTool",  acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    myargs.setdefault("ExtrapolatorName",  acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
 
     DVFinder = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
     acc.setPrivateTools(DVFinder)
@@ -206,32 +290,51 @@ def V2TCalibrationToolCfg(flags, name="V2TCalibrationTool", **myargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
 
-    myargs.setdefault("VertexFitterTool" , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    myargs.setdefault("ExtrapolatorName" , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
-    myargs.setdefault("FillHist"     , True)
-    myargs.setdefault("CutPt"        , 400.)
-    myargs.setdefault("CutBLayHits"  , 0)
-    myargs.setdefault("CutPixelHits" , 1)
-    myargs.setdefault("CutSiHits"    , 8)
-    myargs.setdefault("CutTRTHits"   , 10)
-    myargs.setdefault("useVertexCleaning"  , False)
-    myargs.setdefault("MultiWithOneTrkVrt" , False)
-    myargs.setdefault("removeTrkMatSignif" , -1.)    # No additional material rejection
-    myargs.setdefault("AntiPileupSigRCut"  , 2.0)
-    myargs.setdefault("TrkSigCut"      ,  2.0)
-    myargs.setdefault("SelVrtSigCut"   ,  2.0)
-    myargs.setdefault("v2tIniBDTCut"   , -1.01)       #Remove BDT selection
-    myargs.setdefault("v2tFinBDTCut"   , -1.01)       #Remove BDT selection
-    myargs.setdefault("cosSVPVCut"     ,  0.)
-    myargs.setdefault("FastZSVCut"     ,  15.)
-    myargs.setdefault("VrtMassLimit"   ,  5500.)
-    myargs.setdefault("Vrt2TrMassLimit",  4000.)
-    myargs.setdefault("MaxSVRadiusCut" ,  140.)
-    myargs.setdefault("CutD0Max"       ,  100.)   # Maximal track impact parameter
-    myargs.setdefault("CutD0Min"       ,  0.)     # Minimal track impact parameter
-    myargs.setdefault("MaxZVrt"        ,  100.)
+    #-- 2-track vertex initial selector
+    iniV2Targs = {}
+    iniV2Targs.setdefault("Vrt2TrPtMin" , 2000.)
+    iniV2Targs.setdefault("cosSVPVCut"  ,  0.)
+    iniV2Targs.setdefault("v2tBDTCut"   , -1.01)
+    iniV2Targs.setdefault("Vrt2TrMassLimit", 4000.)
+    iniV2Targs.setdefault("useVertexCleaning"  , False)
+    iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
+    #-- 2-track vertex final selector
+    finV2Targs = {}
+    finV2Targs.setdefault("Vrt2TrPtMin" , 2000.)
+    finV2Targs.setdefault("cosSVPVCut"  ,  0.)
+    finV2Targs.setdefault("v2tBDTCut"   , -1.01)
+    finV2Targs.setdefault("Vrt2TrMassLimit", 4000.)
+    finV2Targs.setdefault("useVertexCleaning"  , False)
+    finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)
 
+    myargs.setdefault("FillHist"     , True)
+    #-- NVSI track selection cuts
+    myargs.setdefault("CutPt"       , 400.)
+    myargs.setdefault("CutBLayHits" , 0 )
+    myargs.setdefault("CutPixelHits", 1 )
+    myargs.setdefault("CutSiHits"   , 8 )
+    myargs.setdefault("CutTRTHits"  , 10 )
+    myargs.setdefault("AntiPileupSigRCut", 2.0)  # Should be less than TrkSigCut 
+    myargs.setdefault("TrkSigCut"      ,   2.0) 
+    myargs.setdefault("CutD0Max"       , 100.)   # Maximal track impact parameter
+    myargs.setdefault("CutD0Min"       , 0.)      # Minimal track impact parameter
+    myargs.setdefault("MaxZVrt"        , 100.)
+    myargs.setdefault("MinZVrt"        , 0.)
+    #-- NVSI inclusive vertex selection
+    myargs.setdefault("FastZSVCut"     ,  15.0)        # Fast universal preselection of 2-track vertices 
+    myargs.setdefault("MultiWithOneTrkVrt" ,  False)
+    myargs.setdefault("removeTrkMatSignif" , -1.)     # No additional material rejection
+    myargs.setdefault("SelVrtSigCut"   , 2.0)
+    myargs.setdefault("VertexMergeCut" , 10.)
+    myargs.setdefault("VrtMassLimit"   , 5500.)
+    myargs.setdefault("MaxSVRadiusCut" , 140.)
+
+    #-- Tools
+    myargs.setdefault("TwoTrkVtxSelectorIni"  ,iniV2TSelector)
+    myargs.setdefault("TwoTrkVtxSelectorFinal",finV2TSelector)
+    myargs.setdefault("VertexFitterTool",  acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    myargs.setdefault("ExtrapolatorName",  acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
 
     V2TCalibration = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
     acc.setPrivateTools(V2TCalibration)

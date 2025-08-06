@@ -29,11 +29,11 @@ private:
 
     // HLT TauID score monitoring
     Gaudi::Property<std::map<std::string, std::map<std::string, std::pair<std::string, std::string>>>> m_monitoredHLTIdScores {this, "HLTTauIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each HLT TauID algorithm to be monitored, for each reconstruction sequence (type, e.g. tracktwoMVA, tracktwoLLP, etc...)"};
-    std::map<std::string, std::map<std::string, std::pair<SG::ConstAccessor<float>, SG::ConstAccessor<float>>>> m_monitoredHLTIdAccessors;
+    std::map<std::string, std::map<std::string, std::pair<SG::ReadDecorHandleKey<xAOD::TauJetContainer>, SG::ReadDecorHandleKey<xAOD::TauJetContainer>>>> m_monitoredHLTIdDecorHandleKeys;
 
     // Offline TauID score monitoring
     Gaudi::Property<std::map<std::string, std::pair<std::string, std::string>>> m_monitoredOfflineIdScores {this, "OfflineTauIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each Offline TauID algorithm to be monitored"};
-    std::map<std::string, std::pair<SG::ConstAccessor<float>, SG::ConstAccessor<float>>> m_monitoredOfflineIdAccessors;
+    std::map<std::string, std::pair<SG::ReadDecorHandleKey<xAOD::TauJetContainer>, SG::ReadDecorHandleKey<xAOD::TauJetContainer>>> m_monitoredOfflineIdDecorHandleKeys;
 
     virtual StatusCode processEvent(const EventContext& ctx) const override;
 
@@ -42,7 +42,7 @@ private:
     void fillIDTrack(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, bool online) const;
     void fillIDCluster(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, bool online) const;
     void fillBasicVars(const EventContext& ctx, const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, const std::string& nProng, bool online) const;
-    void fillIDScores(const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, const std::string& nProng, bool online) const;
+    void fillIDScores(const EventContext& ctx, const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, const std::string& nProng, bool online) const;
 
     std::vector<TLorentzVector> getRoIsVector(const EventContext& ctx, const std::string& trigger) const;
 };

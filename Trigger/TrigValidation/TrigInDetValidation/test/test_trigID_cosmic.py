@@ -5,8 +5,8 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
-# art-input: group.trig-hlt.mc23_13p6TeV.310772.CosmicRays_CollisionSetup.recon.RDO.s4261_s4260_r15236_tid36836491_00
-# art-input-nfiles: 1
+# art-input: valid1.310772.CosmicRays_CollisionSetup.recon.RDO.s4559_s4560_r16709_tid45807425_00
+# art-input-nfiles: 2
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -31,13 +31,12 @@
 
 
 Slices  = ['cosmic']
-# currently only 1k events available, bump up to 4k once staging from tape to disk is complete
 Events  = 4000
 Threads = 8 
 Slots   = 8
 Release = "current"
-preexec_reco = ["from AthenaConfiguration.Enums import BeamType", "flags.Beam.Type=BeamType.Cosmics",
-                "flags.Tracking.doTRTStandalone=False",
+preexec_all = ["from AthenaConfiguration.Enums import BeamType;flags.Beam.Type=BeamType.Cosmics"]
+preexec_reco = ["flags.Tracking.doTRTStandalone=False",
                 "flags.Tracking.doForwardTracks=False",
                 "flags.Tracking.doLargeD0=False"]
 Input   = 'mc_cosmics'    # defined in TrigValTools/share/TrigValInputs.json  

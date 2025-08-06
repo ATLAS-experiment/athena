@@ -42,7 +42,7 @@ namespace Rec{
       for(int kk=0; kk<(int)(*WrkVrtSet)[iv].selTrk.size(); kk++) {
                 msg(MSG::INFO)<<", "<<(*WrkVrtSet)[iv].selTrk[kk];}
       for(int kk=0; kk<(int)(*WrkVrtSet)[iv].selTrk.size(); kk++) {
-                msg(MSG::INFO)<<", "<<momAtVrt((*WrkVrtSet)[iv].trkAtVrt[kk]).Perp();}
+                msg(MSG::INFO)<<", "<<momAtVrt((*WrkVrtSet)[iv].trkAtVrt[kk]).Pt();}
       msg(MSG::INFO)<<endmsg;
       if((*WrkVrtSet)[iv].Good)nGoodV++;
     }
@@ -198,8 +198,7 @@ namespace Rec{
 
 
 
-  TLorentzVector NewVrtSecInclusiveTool::momAtVrt(const std::vector< double >& inpTrk) 
-  const
+  ROOT::Math::PxPyPzEVector NewVrtSecInclusiveTool::momAtVrt(const std::vector< double >& inpTrk) const
   {
      double api=1./std::abs(inpTrk[2]);
      CxxUtils::sincos   phi(inpTrk[0]);
@@ -210,7 +209,6 @@ namespace Rec{
      double ee = std::sqrt( px*px + py*py + pz*pz + m_massPi*m_massPi);
      return {px,py,pz,ee}; 
    }
-
 
 /*************************************************************************************************************/
   int   NewVrtSecInclusiveTool::getIBLHit(const xAOD::TrackParticle* Part) 

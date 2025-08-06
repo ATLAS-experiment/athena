@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONTRACKTOSEGMENTTOOL_H
@@ -17,6 +17,7 @@
 #include "TrkExInterfaces/IPropagator.h"
 #include "TrkParameters/TrackParameters.h"
 #include "MuonStationIntersectCond/MuonIntersectGeoData.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 namespace Trk {
     class Track;
@@ -70,6 +71,8 @@ namespace Muon {
       
         SG::ReadCondHandleKey<Muon::MuonIntersectGeoData> m_chamberGeoKey{this, "ChamberGeoKey", "MuonStationIntersects", "Pointer to hole search service"};
    
+        SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
+          "Key of input MuonDetectorManager condition data"};
     };
 
 }  // namespace Muon

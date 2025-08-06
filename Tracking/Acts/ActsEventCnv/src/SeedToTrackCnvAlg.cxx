@@ -42,7 +42,10 @@ StatusCode SeedToTrackCnvAlg::initialize()
 
 
 StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
-  ActsTrk::MutableTrackContainer tracksContainer;
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::MutableTrackContainer tracksContainer( std::move(trackBackend),
+                                                  std::move(trackStateBackend) );
 
   Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(context).context();
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();
@@ -65,7 +68,7 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
       }
       
       auto actsTrack =  tracksContainer.makeTrack();
-      ActsTrk::MutableMultiTrajectory& trackStateContainer = tracksContainer.trackStateContainer();
+      auto& trackStateContainer = tracksContainer.trackStateContainer();
       
       actsTrack.parameters() = paramsPointer->parameters();
       actsTrack.covariance() = (*paramsPointer->covariance());
@@ -86,14 +89,16 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
     } 
 
   }
-  
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), 
-  m_trackingGeometryTool->getGeometryContext(context).context(), context);
 
+  Acts::ConstVectorTrackContainer ctrackBackend( std::move(tracksContainer.container()) );
+  Acts::ConstVectorMultiTrajectory ctrackStateBackend( std::move(tracksContainer.trackStateContainer()) );
+  std::unique_ptr< ActsTrk::TrackContainer > ctracksContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(ctrackBackend),
+                                                                                                             std::move(ctrackStateBackend) );
+  
   SG::WriteHandle<ActsTrk::TrackContainer> trackContainerHandle = SG::makeHandle(m_trackContainerKey, context);
   ATH_MSG_DEBUG("Tracks Container `" << m_trackContainerKey.key() << "` created ...");
-  ATH_MSG_DEBUG("Created container with size: " << constTracksContainer->size());
-  ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
+  ATH_MSG_DEBUG("Created container with size: " << ctracksContainer->size());
+  ATH_CHECK(trackContainerHandle.record(std::move(ctracksContainer)));
   if (!trackContainerHandle.isValid())
     {
       ATH_MSG_FATAL("Failed to write TrackContainer with key " << m_trackContainerKey.key());

@@ -628,6 +628,7 @@ def HION7PCCCTriggers2024():
 
 def HION7JetTriggersPP():
     triggers  = {}
+    triggers.update({'HLT_j30a_L1jTE20' : 30})
     triggers.update({'HLT_j40_L1jJ40' : 40})
     triggers.update({'HLT_j50_L1jJ40' : 50})
     triggers.update({'HLT_j60_L1jJ50' : 60})
@@ -691,8 +692,8 @@ def HION7MinBiasTriggerspO():
 
 def HION7JetTriggersOO():
     triggers  = {}
-    triggers.update({'HLT_j50_L1jJ30' : 50})
-    triggers.update({'HLT_j50_pf_ftf_L1jJ30' : 50})
+    triggers.update({'HLT_j20_ionp_L1jJ10' : 20})
+    triggers.update({'HLT_j40_ionp_L1jJ20' : 40})
     triggers.update({'HLT_j50_ionp_L1jJ30' : 50})
 
     return triggers

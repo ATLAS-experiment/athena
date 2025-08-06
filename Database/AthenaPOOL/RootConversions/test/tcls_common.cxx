@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: tcls_common.cxx,v 1.5 2009-01-21 04:34:40 ssnyder Exp $
 /**
  * @file tcls_common.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -22,19 +20,19 @@ std::ostream& operator<< (std::ostream& s, const C& c)
 
 std::ostream& operator<< (std::ostream& s, const E& c)
 {
-  s << (const T3&)c << " " << c.h;
+  s << static_cast<const T3&>(c) << " " << c.h;
   return s;
 }
 
 std::ostream& operator<< (std::ostream& s, const FX& c)
 {
-  s << (const D&)c << " " << (const T1&)c << " " << c.j;
+  s << static_cast<const D&>(c) << " " << static_cast<const T1&>(c) << " " << c.j;
   return s;
 }
 
 std::ostream& operator<< (std::ostream& s, const G& c)
 {
-  s << (const T1&)c << " " << c.k << " " << c.t;
+  s << static_cast<const T1&>(c) << " " << c.k << " " << c.t;
   return s;
 }
 
@@ -64,31 +62,31 @@ std::ostream& operator<< (std::ostream& s, const L& c)
 
 std::ostream& operator<< (std::ostream& s, const M& c)
 {
-  s << c.im << " " << (const E&)c;
+  s << c.im << " " << static_cast<const E&>(c);
   return s;
 }
 
 std::ostream& operator<< (std::ostream& s, const N& c)
 {
-  s << c.in << " " << (const B&)c;
+  s << c.in << " " << static_cast<const B&>(c);
   return s;
 }
 
 std::ostream& operator<< (std::ostream& s, const O& c)
 {
-  s << c.io << " " << (const N&)c;
+  s << c.io << " " << static_cast<const N&>(c);
   return s;
 }
 
 std::ostream& operator<< (std::ostream& s, const P& c)
 {
-  s << c.ip << " " << (const T6&)c;
+  s << c.ip << " " << static_cast<const T6&>(c);
   return s;
 }
 
 std::ostream& operator<< (std::ostream& s, const R& c)
 {
-  s << (const A&)c;
+  s << static_cast<const A&>(c);
   return s;
 }
 
@@ -286,7 +284,7 @@ std::ostream& operator<< (std::ostream& s, const NN& c)
 
 std::ostream& operator<< (std::ostream& s, const OO& c)
 {
-  s << c.ioo << " " << (const V&)c;
+  s << c.ioo << " " << static_cast<const V&>(c);
   return s;
 }
 
@@ -308,7 +306,7 @@ std::ostream& operator<< (std::ostream& s, const PP& c)
 
 std::ostream& operator<< (std::ostream& s, const QQ& c)
 {
-  s << c.iqq << " " << (const T2&)c << " " << c.t3;
+  s << c.iqq << " " << static_cast<const T2&>(c) << " " << c.t3;
   for (unsigned i = 0; i < c.size(); i++)
     s << " " << c[i];
   return s;

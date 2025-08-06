@@ -100,6 +100,9 @@ namespace met {
     SG::ReadHandleKey<xAOD::FlowElementContainer>  m_fecollKey{this,"FlowElementCollection","","FlowElement Collection (overrides PFO if not empty)"};
     SG::ReadHandleKey<xAOD::IParticleContainer>  m_hybridContKey{this,"HybridKey","","Hybrid Collection"};
 
+    //for HR implementation migrated from release 21.2
+    Gaudi::Property<bool> m_recoil{this, "HRecoil", false, ""};
+
     bool m_pflow;
     bool m_useTracks;
     bool m_useRapidity;
@@ -131,10 +134,30 @@ namespace met {
                                   std::vector<const xAOD::IParticle*>& pfolist,
                                   const met::METAssociator::ConstitHolder& constits,
                                   std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const = 0;
+
+    //Get UE correction for HR implementation using METMaker
+    StatusCode GetUEcorr(const met::METAssociator::ConstitHolder& constits,
+                         std::vector<TLorentzVector>& v_clus,
+                         TLorentzVector& clus,
+                         TLorentzVector& HR,
+                         const float Drcone,
+                         const float MinDistCone,
+                         float& UEcorr) const;
+
     virtual StatusCode extractFE(const xAOD::IParticle* obj,
                                  std::vector<const xAOD::IParticle*>& felist,
                                  const met::METAssociator::ConstitHolder& constits,
                                  std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const = 0;
+
+    //HR implementation dealing with FEs instead of PFOs
+    virtual StatusCode extractFEHR(const xAOD::IParticle* /*obj*/,
+                                    std::vector<const xAOD::IParticle*> /*hardObjs*/,
+                                    std::vector<const xAOD::IParticle*>& /*pfolist*/,
+                                    const met::METAssociator::ConstitHolder& /*constits*/,
+                                    std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &/*momenta*/,
+                                    float& /*UEcorr*/) const
+    {return StatusCode::FAILURE;}
+
     virtual StatusCode extractTracks(const xAOD::IParticle* obj,
                                      std::vector<const xAOD::IParticle*>& constlist,
                                      const met::METAssociator::ConstitHolder& constits) const = 0;

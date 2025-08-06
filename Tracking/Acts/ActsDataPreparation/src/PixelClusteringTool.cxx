@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "PixelClusteringTool.h"
 
 #include <Acts/Clusterization/Clusterization.hpp>
@@ -25,8 +24,12 @@ using CLHEP::micrometer;
 namespace ActsTrk {
   static inline int getCellRow(const typename PixelClusteringTool::Cell& cell) { return cell.ROW; }
   static inline int getCellColumn(const typename PixelClusteringTool::Cell& cell) { return cell.COL; }
-  static inline int& getCellLabel(typename PixelClusteringTool::Cell& cell) { return cell.NCL; }
-
+  static inline void clusterReserve(PixelClusteringTool::Cluster& cl,
+				    std::size_t n)
+  {
+    cl.ids.reserve(n);
+    cl.tots.reserve(n);
+  }  
   static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
 				    const PixelClusteringTool::Cell& cell)
   {
@@ -71,24 +74,20 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   std::vector<float> chargeList;
   if (calibData) chargeList.reserve(cluster.ids.size());
   
-  int colmax = std::numeric_limits<int>::min();
-  int rowmax = std::numeric_limits<int>::min();
-  int colmin = std::numeric_limits<int>::max();
-  int rowmin = std::numeric_limits<int>::max();
-  InDetDD::PixelDiodeParametersProxy colmin_diode{};
-  InDetDD::PixelDiodeParametersProxy colmax_diode{};
-  InDetDD::PixelDiodeParametersProxy rowmin_diode{};
-  InDetDD::PixelDiodeParametersProxy rowmax_diode{};
+  InDetDD::PixelDiodeTree::CellIndexType rowmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
+  InDetDD::PixelDiodeTree::CellIndexType colmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
+  InDetDD::PixelDiodeTree::CellIndexType rowmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  InDetDD::PixelDiodeTree::CellIndexType colmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmin_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmax_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition rowmin_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition rowmax_diode{};
 
   // We temporary comment this since it is not used
   // bool hasGanged = false;
 
-  Identifier moduleID = element->identify();
   IdentifierHash moduleHash = element->identifyHash();
 
-  // This could be moved outside the cluster loop
-  bool multiChip = design.numberOfCircuits() > 1;
-    
   for (size_t i = 0; i < cluster.ids.size(); i++) {
 
     //Construct the identifier class
@@ -103,19 +102,26 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 
     int tot = cluster.tots.at(i);
     float charge = tot;
-        
+
+    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(id),
+                                                m_pixelID->eta_index(id));
+    InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
+
     if (calibData) {
 
       if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
 	ATH_MSG_ERROR("Chip type is not recognized!");
 	return StatusCode::FAILURE;
       }
-      
-      // The calibration strategy is updated for each element 
+
+      // The calibration strategy is updated for each element
       // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
       // Single FE modules could have an optimized getCharge function where the calib constants are cached
-      std::uint32_t feValue = multiChip ? m_pixelReadout->getFE(id, moduleID, element) : 0;
-      charge = calibData->getCharge(m_pixelReadout->getDiodeType(id,element),
+      std::uint32_t feValue = design.getFE(si_param);
+      auto diode_type = design.getDiodeType(si_param);
+
+      charge = calibData->getCharge(diode_type,
 				    calibStrategy,
 				    moduleHash,
 				    feValue,
@@ -123,10 +129,8 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
       chargeList.push_back(charge);
     }
     
-    InDetDD::SiCellId si_cell = element->cellIdFromIdentifier(id);
-    const int row = si_cell.phiIndex();
-    const int col = si_cell.etaIndex();
-    InDetDD::PixelDiodeParametersProxy si_param = design.parametersProxy(si_cell);
+    const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];
+    const InDetDD::PixelDiodeTree::CellIndexType &col = diode_idx[1];
     if (row>rowmax) {
        rowmax=row;
        rowmax_diode = si_param;
@@ -291,18 +295,23 @@ PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
 				const InDet::SiDetectorElementStatus& pixelDetElStatus,
 				const InDetDD::SiDetectorElement& element) const
 {
+  // Get the element design
+  const InDetDD::PixelModuleDesign& design =
+    static_cast<const InDetDD::PixelModuleDesign&>(element.design());
   CellCollection cells;
   cells.reserve(300);
 
   const IdentifierHash& idHash = RDOs.identifyHash();
-  
   for (const auto *const rdo : RDOs) {
     const Identifier& rdoID = rdo->identify();
+    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(rdoID),
+                                                m_pixelID->eta_index(rdoID));
+    InDetDD::PixelDiodeTree::DiodeProxy si_param ( design.diodeProxyFromIdx(diode_idx));
+    std::uint32_t fe = design.getFE(si_param);
 
     // check if good RDO
     // the pixel RDO tool here says always good if m_useModuleMap is false
-    const Identifier& waferId = element.identify();
-    const std::uint32_t fe = m_pixelReadout->getFE(rdoID, waferId, &element);
     if (not pixelDetElStatus.isChipGood(idHash, fe)) {
       continue;
     }

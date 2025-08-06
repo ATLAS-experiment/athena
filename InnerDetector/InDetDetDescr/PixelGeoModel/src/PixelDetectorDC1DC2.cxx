@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file is basically a concatenation of all the *.cxx files.
@@ -10,7 +10,6 @@
 
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
-#include "ReadoutGeometryBase/PixelDiodeMatrix.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "ReadoutGeometryBase/SiCommonItems.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -36,10 +35,13 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 
+#include "ReadoutGeometryBase/PixelDiodeTree.h"
+#include "ReadoutGeometryBase/PixelDiodeTreeBuilder.h"
 
 #include <memory>
 #include <vector>
 
+#include "PixelGeoUtils.h"
 
 using namespace PixelGeoDC2;
 
@@ -1178,47 +1180,59 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
   //SiDetectorDesign::Axis phiAxis   = SiDetectorDesign::yAxis;
   //SiDetectorDesign::Axis depthAxis = SiDetectorDesign::xAxis;
   double thickness = m_gmt_mgr->PixelBoardThickness();
-  int CircPerCol = m_gmt_mgr->DesignCircuitsPerColumn();
-  int CircPerRow = m_gmt_mgr->DesignCircuitsPerRow();
+  int circuitsPerEta = m_gmt_mgr->DesignCircuitsPerColumn();
+  int circuitsPerPhi = m_gmt_mgr->DesignCircuitsPerRow();
   int CellRowPerCirc = m_gmt_mgr->DesignCellRowsPerCircuit(isBLayer);
   int CellColPerCirc = m_gmt_mgr->DesignCellColumnsPerCircuit(isBLayer);
-  int DiodeRowPerCirc = m_gmt_mgr->DesignDiodeRowsPerCircuit(isBLayer);
-  int DiodeColPerCirc = m_gmt_mgr->DesignDiodeColumnsPerCircuit(isBLayer);
+  int rowsPerCircuit = m_gmt_mgr->DesignDiodeRowsPerCircuit(isBLayer);
+  int columnsPerCircuit = m_gmt_mgr->DesignDiodeColumnsPerCircuit(isBLayer);
 
   // Add the matrix in the same way as from AGDD... 
   //
   //double startRP = -m_gmt_mgr->DesignRPActiveArea()/2.;
   //double startZ =  -m_gmt_mgr->DesignZActiveArea()/2.;
   //double ColSize = m_gmt_mgr->DesignZActiveArea()/m_gmt_mgr->DesignCircuitsPerRow();
-  double bigEtaPitch =  m_gmt_mgr->DesignPitchZ(isBLayer) + m_gmt_mgr->DesignGapZ()/2;
-  double phiPitch = m_gmt_mgr->DesignPitchRP(isBLayer);
-  double etaPitch = m_gmt_mgr->DesignPitchZ(isBLayer);
+  double pitchEtaBig =  m_gmt_mgr->DesignPitchZ(isBLayer) + m_gmt_mgr->DesignGapZ()/2;
+  double pitchPhi = m_gmt_mgr->DesignPitchRP(isBLayer);
+  double pitchEta = m_gmt_mgr->DesignPitchZ(isBLayer);
 
- 
-  std::shared_ptr<const PixelDiodeMatrix> normalCell = PixelDiodeMatrix::construct(phiPitch, etaPitch); 
-  std::shared_ptr<const PixelDiodeMatrix> bigCell = PixelDiodeMatrix::construct(phiPitch, bigEtaPitch); 
+  // assumed layout
+  // circuit :
+  /// local-x/phi/row ^   big (1) .... normal pitch (columnsPerCircuit-2) ... big
+  //                  |   .
+  //                  |   .
+  //                  |   .
+  //                  +---> local-y / eta/ column
+  //
+  //  full matrix : matrix of n-circuits    n | ...  | N/2
+  //                with 2 rows             ----------------
+  //                                        0 | ...  | N/2-1  
 
-  std::shared_ptr<const PixelDiodeMatrix> singleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-							  bigCell, 
-							  std::move(normalCell),
-							  DiodeColPerCirc-2,
-							  bigCell);
-
-  std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-						      nullptr, std::move(singleChipRow), CircPerRow, nullptr);
-
-  std::shared_ptr<const PixelDiodeMatrix> fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-						       nullptr, std::move(singleRow), DiodeRowPerCirc, nullptr);
+  constexpr auto readoutTechnology = InDetDD::PixelReadoutTechnology::FEI3;
+  constexpr auto kNDirections = InDetDD::detail::kNDirections;
+  constexpr auto kNPixelLocations = InDetDD::detail::kNPixelLocations;
+  PixelDiodeTree diode_tree = InDetDD::detail::makePixelDiodeTree(m_gmt_mgr,
+                                                    readoutTechnology,
+                                                    std::array<int,kNDirections>{circuitsPerPhi,circuitsPerEta},    // [0]=phi/row, [1]=eta/column
+                                                    std::array<int,kNDirections>{rowsPerCircuit,columnsPerCircuit}, // [0]=phi/row, [1]=eta/column
+                                                    std::array<std::array<double,kNDirections>,kNPixelLocations>{   // regular/central,longEnd/outer,long/inner
+                                                       std::array<double,kNDirections>{pitchPhi,pitchEta},
+                                                       std::array<double,kNDirections>{0.,pitchEtaBig},
+                                                       std::array<double,kNDirections>{0.,pitchEtaBig}});
 
   std::unique_ptr<PixelModuleDesign> p_barrelDesign2 = std::make_unique<PixelModuleDesign>(thickness,
-							     CircPerCol,
-							     CircPerRow,
+							     circuitsPerEta,
+							     circuitsPerPhi,
 							     CellColPerCirc,
 							     CellRowPerCirc,
-							     DiodeColPerCirc,
-							     DiodeRowPerCirc,
-							     fullMatrix,
-							     InDetDD::electrons);
+							     columnsPerCircuit,
+							     rowsPerCircuit,
+							     std::move(diode_tree),
+							     InDetDD::electrons,
+							     -1,                 /* readout side */
+							     false,              /* 3D */
+							     InDetDD::Undefined, /* detector type */
+							     readoutTechnology);
 
   // Multiple connections (ganged pixels)
   if (m_gmt_mgr->NumberOfEmptyRows() > 0) {

@@ -6,13 +6,14 @@
 #define TAURECTOOLS_TAUGNNEVALUATOR_H
 
 #include "tauRecTools/TauRecToolBase.h"
-
 #include "tauRecTools/TauGNN.h"
 
 #include "xAODTau/TauJet.h"
+#include "xAODTau/TauJetContainer.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 
 #include "AsgTools/PropertyWrapper.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 
 #include <memory>
 
@@ -56,6 +57,9 @@ public:
 
 private:
 
+    Gaudi::Property<std::string> m_tauContainerName{this, "TauContainerName", "", "Name of TauJetContainer, must be set when using "};
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_scoreHandleKey{this, "ScoreHandleKey","","Output Score"};
+   
     // properties
     Gaudi::Property<std::string> m_weightfile_inclusive{this, "NetworkFileInclusive", ""};
     Gaudi::Property<std::string> m_weightfile_0p{this, "NetworkFile0P", ""};
@@ -71,7 +75,6 @@ private:
     Gaudi::Property<int> m_max_clusters{this, "MaxClusters", 20};
     Gaudi::Property<float> m_max_cluster_dr{this, "MaxClusterDR", 1.0f};
     Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
-    Gaudi::Property<bool> m_decorateTracks{this, "DecorateTracks", false};
     Gaudi::Property<bool> m_doTrackClassification{this, "TrackClassification", true};
     Gaudi::Property<float> m_minTauPt{this, "MinTauPt", 0.};
     Gaudi::Property<bool> m_applyTrackSel{this, "ApplyTrackSel", false};

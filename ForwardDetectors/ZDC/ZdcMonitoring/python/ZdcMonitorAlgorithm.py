@@ -105,7 +105,6 @@ def ZdcMonitoringConfig(inputFlags):
     zdcMonAlg.IspOMode = 'pO' in config
     zdcMonAlg.IsOOMode = 'OO' in config
     zdcMonAlg.EnableOOpOTriggers = (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and inputFlags.DQ.useTrigger and ('physics_' in inputFlags.Input.TriggerStream or inputFlags.Input.TriggerStream == 'calibration_ZDCCalib')
-    zdcMonAlg.TrkInfoOn = (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and (inputFlags.Input.TriggerStream == 'physics_MinBias' or inputFlags.Input.TriggerStream == 'physics_Standby')
 
     phys_stream_trig_map = {
         "physics_MinBias": ['HLT_mb_sptrk_L1TRT_FILLED', 'HLT_mb_sptrk_L1jTE10', 'HLT_mb_sptrk_L1ZDC_OR', 'HLT_mb_sptrk_L1ZDC_LOR', 'HLT_noalg_L1ZDC_OR_EMPTY', 'HLT_noalg_L1ZDC_OR_UNPAIRED_NONISO', 'HLT_noalg_L1ZDC_LOR_EMPTY', 'HLT_noalg_L1ZDC_LOR_UNPAIRED_NONISO'],
@@ -157,7 +156,6 @@ def ZdcMonitoringConfig(inputFlags):
     print ("ZdcMonitorAlgorithm.py: IspOMode? ",zdcMonAlg.IspOMode)
     print ("ZdcMonitorAlgorithm.py: IsOOMode? ",zdcMonAlg.IsOOMode)
     print ("ZdcMonitorAlgorithm.py: EnableOOpOTriggers? ",zdcMonAlg.EnableOOpOTriggers)
-    print ("ZdcMonitorAlgorithm.py: TrkInfoOn? ",zdcMonAlg.TrkInfoOn)
 
 # --------------------------------------------------------------------------------------------------
     # Configure histograms
@@ -225,10 +223,6 @@ def ZdcMonitoringConfig(inputFlags):
     total_Et_sum_min = -0.5
     total_Et_sum_max = 5.5
     total_Et_sum_nbins = 240
-
-    ntrack_min = 0
-    ntrack_max = 5000
-    ntrack_nbins = 250
 
     uncalib_sum_zoomin_nbins = 100
     energy_sum_zoomin_nbins = 200
@@ -304,9 +298,9 @@ def ZdcMonitoringConfig(inputFlags):
         module_calib_amp_1Nmonitor_xmax = 5000 #about 5N / 4 * 2.7TeV
     elif zdcMonAlg.IsOOMode:  ########### overwrite for OO mode ###########
         print ("looking at OO data")
-        energy_sum_xmax = 53600. # 20N
-        energy_sum_two_sides_xmax_TeV = 120. #22.4N per side
-        energy_sum_single_side_xmax_TeV = 60.0
+        energy_sum_xmax = 10000.
+        energy_sum_two_sides_xmax_TeV = 40.
+        energy_sum_single_side_xmax_TeV = 20.0
         energy_sum_zoomin_xmax = 13000.0 #4.85N (tail of 4N)
         uncalib_amp_sum_zoomin_xmax = 7200.0 #tail of 4N
         time_in_data_buffer = 75. #75 ns (3 BCID's) in buffer
@@ -323,18 +317,15 @@ def ZdcMonitoringConfig(inputFlags):
         module_calib_amp_xmax = 13400.0 #20N / 4 * 2680.
         module_amp_1Nmonitor_xmax = 1250.0 #about 5N / 4 * 2.7TeV
         module_calib_amp_1Nmonitor_xmax = 3400.0 #about 5N / 4 * 2.7TeV
-        fCal_single_side_min = -0.05 # overwrite FCal binning
-        fCal_single_side_max = 0.75
-        fCal_sum_min = -0.1
-        fCal_sum_max = 1.5
-        fCal_single_side_nbins = 160
-        fCal_sum_nbins = 160
+        fCal_single_side_min = -0.02 # overwrite FCal binning
+        fCal_single_side_max = 0.43
+        fCal_sum_min = -0.03
+        fCal_sum_max = 0.72
+        fCal_single_side_nbins = 90
+        fCal_sum_nbins = 150
         total_Et_sum_min = -0.1 # overwrite total ET binning 
         total_Et_sum_max = 1.5
         total_Et_sum_nbins = 160
-        ntrack_min = 0 # overwrite NTrk binning 
-        ntrack_max = 1200
-        ntrack_nbins = 120
 
     elif zdcMonAlg.IspOMode:  ########### overwrite for OO mode ###########
         print ("looking at pO data")
@@ -366,9 +357,6 @@ def ZdcMonitoringConfig(inputFlags):
         total_Et_sum_min = -0.1 # overwrite total ET binning 
         total_Et_sum_max = 0.5
         total_Et_sum_nbins = 120
-        ntrack_min = 0 # overwrite NTrk binning 
-        ntrack_max = 1200
-        ntrack_nbins = 120
     else:
         import sys
         print("ZdcMonitorAlgorithm      ERROR: Invalid configuration! Config tag is", config)
@@ -572,26 +560,6 @@ def ZdcMonitoringConfig(inputFlags):
                                     opt='kAlwaysCreate',
                                     xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                     ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-
-        if (zdcMonAlg.TrkInfoOn):
-            genZdcMonTool.defineHistogram('nTracksPV, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_nTracksPV', type='TH2F', 
-                                    title=';#Tracks from PV;ZDC Energy Sum [TeV]',
-                                    path='/EXPERT/Global/TrackCount',
-                                    xbins=ntrack_nbins, xmin=ntrack_min, xmax=ntrack_max,
-                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
-            
-            genZdcMonTool.defineHistogram('lumiBlock, avgTracksPerVertex;avgTracksPerVertex_vs_lb', type='TProfile', 
-                                    title=';LumiBlock;Average Tracks per Vertex',
-                                    path='/EXPERT/Global/TrackCount',
-                                    xbins=lumi_block_max, xmin=0, xmax=lumi_block_max)
-            if (zdcMonAlg.EnableOOpOTriggers):
-                for oo_po_trig in OOpOTriggerChains:
-                    genZdcMonTool.defineHistogram('nTracksPV, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_nTracksPV_pass'+oo_po_trig, type='TH2F', 
-                                            title=';#Tracks from PV;ZDC Energy Sum [TeV]',
-                                            path='/EXPERT/Global/TrackCount',
-                                            cutmask='pass'+oo_po_trig,
-                                            xbins=ntrack_nbins, xmin=ntrack_min, xmax=ntrack_max,
-                                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
 
 # --------------------------------------------------------------------------------------------------
     sides = ["C","A"]
@@ -1135,7 +1103,6 @@ def ZdcMonitoringConfig(inputFlags):
                                 ybins=n_module_amp_coarse_bins, ymin=0.0, ymax=module_calib_amp_1Nmonitor_xmax)
 
     # ---------------------------- ZDC-module times ---------------------------- 
-
     if (not zdcMonAlg.IsOnline): #offline - fine binnings
         zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
@@ -1147,6 +1114,16 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                                 ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
         zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                cutmask='zdcModuleHG',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleCalibTime;zdcModuleCalibTime_LG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                cutmask='zdcModuleLG',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleCalibTime;zdcModuleCalibTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
                                 cutmask='zdcModuleHG',
                                 xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,

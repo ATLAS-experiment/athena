@@ -59,8 +59,8 @@ def getMultiplicityLabels(flags,topoModule):
         bit_id = topo_trigline['startbit']
         topo_trigline_labels[bit_id] = topo_trigline_name
         if ( topo_trigline_labels[bit_id].find("SPARE") >= 0):
-                topo_trigline_labels[bit_id] = "-- Unassigned Item --"
-    
+            topo_trigline_labels[bit_id] = "-- Unassigned Item --"
+
     return topo_trigline_labels
 
 def Phase1TopoMonitoringCfg(flags):
@@ -88,19 +88,24 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
 def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None, toolName="L1TopoMonitoringTool"):
     from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
     helper = L1CaloMonitorCfgHelper(flags,CompFactory.L1TopoOnlineMonitor,toolName,
-                                          doHwMon = doHwMon,
-                                          doHwErrorMon = False,
-                                          doSimMon = doSimMon,
-                                          doHwMonCTP = doHwMonCtp,
-                                          doComp = doComp,
-                                          doMultComp = doMultComp,
-                                          MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
-                                          AlgorithmVetoList   =["jXE40delay"],
-                                          forceCTPasHdw=forceCtp)
+                                    doHwMon = doHwMon,
+                                    doHwErrorMon = False,
+                                    doSimMon = doSimMon,
+                                    doHwMonCTP = doHwMonCtp,
+                                    doComp = doComp,
+                                    doMultComp = doMultComp,
+                                    MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
+                                    AlgorithmVetoList   =["jXE40delay"],
+                                    forceCTPasHdw=forceCtp)
 
     #Define the Monitoring plots for L1Calo DQ
-    helper.defineDQAlgorithm("L1TopoMismatchRate",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.001","PublishBins":"1"}, # counts bins with value>0.001
+    helper.defineDQAlgorithm("L1TopoAlgMismatchRate",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.002","PublishBins":"1","IgnoreBins":"\"*:125,*:123,*:96,*:94,*:92,*:90,*:37,*:20,*:18\""}, # counts bins with value>0.001. IgnoreBins: Masking MuonAD and VAEAD and TEaTime mismatches. Also ZEE-eEM24sm2
+                             thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
+                             )
+
+    helper.defineDQAlgorithm("L1TopoMultMismatchRate",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.002","PublishBins":"1","IgnoreBins":"\"*:120,*:119,*:115\""}, # counts bins with value>0.001. IgnoreBins: Masking gTE500, gTE200 and gXEJWOJ500 mismatches
                              thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
                              )
 
@@ -121,10 +126,10 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
 
     helper.defineHistogram(name,
                            fillGroup="L1TopoDQ_mismatches",
-                           paths=['Expert/Sim'],
-                           hanConfig={"algorithm":"L1TopoMismatchRate","description":"Agreements and Mismatches between L1Topo Simulation and Hdw perLumi-Block","display":"SetPalette(87),Draw=COLZTEXT"},
+                           paths=['Expert/Sim','Shifter/Sim'],
+                           hanConfig={"algorithm":"L1TopoMultMismatchRate","description":"Drag the y-axis to make the text bigger","display":"SetPalette(87),Draw=COLZ"},
                            type='TProfile2D',
-                           title="L1Topo Multiplicities Sim/Hdw mismatch rate", xbins=32, ybins=len(AllLabels),
+                           title="L1Topo Multiplicities Sim/Hdw mismatch rate;LB", xbins=32, ybins=len(AllLabels),
                            xmin=0, xmax=32,
                            ymin=0, ymax=len(AllLabels),
                            ylabels = AllLabels,
@@ -140,15 +145,15 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
         xlabels = [x for x in labels if x]
 
         helper.defineHistogram(name,
-                           fillGroup="L1TopoDQ_mismatches",
-                           paths=['Expert/Sim/detail/L1Topo/Multiplicities'],
-                           hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hdw per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
-                           type='TH2D',
-                           title=title, xbins=len(xlabels), ybins=3,
-                           xlabels=xlabels,ylabels=ylabels,
-                           xmin=0, xmax=len(xlabels),
-                           ymin=0, ymax=len(ylabels),
-                           opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
+                               fillGroup="L1TopoDQ_mismatches",
+                               paths=['Developer/Sim/detail/L1Topo/Multiplicities'],
+                               hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hdw per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
+                               type='TH2D',
+                               title=title, xbins=len(xlabels), ybins=3,
+                               xlabels=xlabels,ylabels=ylabels,
+                               xmin=0, xmax=len(xlabels),
+                               ymin=0, ymax=len(ylabels),
+                               opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
 
     label_topo_all = []
     for cable in range(2):
@@ -165,10 +170,10 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
 
     helper.defineHistogram(nameLB,
                            fillGroup="L1TopoDQ_mismatches",
-                           paths=['Expert/Sim'],
-                           hanConfig={"algorithm":"L1TopoMismatchRate","description":"Mismatch Rate between L1Topo Simulation and Hardware vs Lumi-Block (x-axis)","display":"SetPalette(87),Draw=COLZTEXT"},
+                           paths=['Expert/Sim','Shifter/Sim'],
+                           hanConfig={"algorithm":"L1TopoAlgMismatchRate","description":"Drag the y-axis to make the text bigger","display":"SetPalette(87),Draw=COLZ"},
                            type='TProfile2D',
-                           title="L1Topo Algorithms Sim/Hdw mismatch rate",xbins=32,ybins=128,
+                           title="L1Topo Algorithms Sim/Hdw mismatch rate;LB",xbins=32,ybins=128,
                            #weight=f'Phase1TopoWeight_{topo[0]}',
                            ylabels=label_topo_all,
                            xmin=0, xmax=32,
@@ -180,7 +185,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
         title = f'L1Topo_Algo_{topo[1]} Miss/Matches Summary'
         helper.defineHistogram(name,
                                fillGroup="L1TopoDQ_mismatches",
-                               paths=['Expert/Sim/detail/L1Topo/Algos'],
+                               paths=['Developer/Sim/detail/L1Topo/Algos'],
                                hanConfig={"algorithm":"L1TopoMismatchCountVerticalRange","description":"Agreements and Mismatches between L1Topo Simulation and Hardware per L1Topo Item (x-axis). The upper row should be filled (Sim and Hdw agrees), while the lower two rows shouldn't have any entry","display":"SetPalette(55)"},
                                type='TH2F',
                                title=title,xbins=32,ybins=3,
@@ -282,14 +287,14 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
                                         ymin=0, ymax=10)
 
     alg.MonTool.defineHistogram('TopoSim', path='EXPERT', type='TH1I',
-                                    title='Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
-                                    xmin=0, xmax=128)
+                                title='Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
+                                xmin=0, xmax=128)
     alg.MonTool.defineHistogram('TopoSim_overflows', path='EXPERT', type='TH1I',
-                                    title='Overflow Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
-                                    xmin=0, xmax=128)
+                                title='Overflow Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
+                                xmin=0, xmax=128)
     alg.MonTool.defineHistogram('TopoSim_ambiguity', path='EXPERT', type='TH1I',
-                                    title='Ambiguity Results for L1Topo', xbins=128, xlabels=label_topo_all,
-                                    xmin=0, xmax=128)
+                                title='Ambiguity Results for L1Topo', xbins=128, xlabels=label_topo_all,
+                                xmin=0, xmax=128)
 
     if doHwMonCtp:
         alg.MonTool.defineHistogram('TopoCTP', path='EXPERT', type='TH1I',
@@ -314,7 +319,7 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
                                     xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
 
-    if doMultComp:                             
+    if doMultComp:
         ylabels = ['#frac{HdwNotSim}{Hdw}','#frac{SimNotHdw}{Sim}','#frac{HdwAndSim}{HdwOrSim}','#frac{Hdw}{Sim}']
         for topo in [(0,'2a'),(1,'2b'),(2,'3a'),(3,'3b')]:
             name = f'Phase1TopoTrigger_{topo[0]},Phase1TopoMissMatch_{topo[0]};Ph1Topo{topo[1]}'
@@ -346,18 +351,18 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
                                     title='Overflow Results for L1Topo', xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
         rod_errors_labels = ["CT", "pc", "hc", "pe", "lm", "hm", "pt"]
-        alg.MonTool.defineHistogram('ROD_Errors', path='EXPERT', type='TH1I', 
-                                    title='Counts of ROD errors', xbins=len(rod_errors_labels), xlabels=rod_errors_labels, 
+        alg.MonTool.defineHistogram('ROD_Errors', path='EXPERT', type='TH1I',
+                                    title='Counts of ROD errors', xbins=len(rod_errors_labels), xlabels=rod_errors_labels,
                                     xmin=0, xmax=len(rod_errors_labels))
         fpga_errors_labels = ["CT", "sm", "pe", "lm", "hm", "pt"]
         fpga_indexes = ["topo1fpga1", "topo1fpga0", "topo2fpga1", "topo2fpga0", "topo3fpga1", "topo3fpga0"]
         alg.MonTool.defineHistogram('FPGA_Errors, FPGA_Labels; FPGA_Errors', path='EXPERT', type='TH2I',
-                                        title='Counts of FPGA errors',xbins=len(fpga_errors_labels),ybins=len(fpga_indexes),
-                                        xlabels=fpga_errors_labels,
-                                        ylabels=fpga_indexes,
-                                        xmin=0, xmax=len(fpga_errors_labels),
-                                        ymin=0, ymax=len(fpga_indexes))
-        
+                                    title='Counts of FPGA errors',xbins=len(fpga_errors_labels),ybins=len(fpga_indexes),
+                                    xlabels=fpga_errors_labels,
+                                    ylabels=fpga_indexes,
+                                    xmin=0, xmax=len(fpga_errors_labels),
+                                    ymin=0, ymax=len(fpga_indexes))
+
 
     mon_failure_labels = ['doHwMon', 'doSimMon', 'doHwMonCTP', 'doComp', 'doMultComp']
     alg.MonTool.defineHistogram('MonitoringFailures', path='EXPERT', type='TH1F',

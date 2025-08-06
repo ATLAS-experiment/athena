@@ -13,9 +13,13 @@ class SystObjectLinkBlock (ConfigBlock):
             noneAction='error',
             info="the name of the input container.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs (self, config) :
 
-        alg = config.createAlgorithm('CP::SystObjectLinkerAlg', f'SystObjLinker_{self.containerName}', reentrant=True)
+        alg = config.createAlgorithm('CP::SystObjectLinkerAlg', 'SystObjLinker', reentrant=True)
         alg.input = config.readName (self.containerName)
 
 

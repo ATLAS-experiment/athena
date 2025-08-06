@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2023
 # Python 3 migration by Miaoran Lu (University of Iowa)- 2022
 #
@@ -15,7 +15,6 @@ from re import match
 from time import strftime,localtime
 
 from ROOT import TFile
-from ROOT import TH1F
 from ROOT import TCanvas
 from ROOT import kTeal
 from ROOT import gStyle,gROOT,gPad
@@ -32,7 +31,6 @@ debug = False
 ########################################################################
 ########################################################################
 # Main script
-import os,sys  
 
 from argparse import RawTextHelpFormatter,ArgumentParser
 
@@ -259,9 +257,9 @@ for iYT in yearTagList:
         tmpLines.sort()
         for iline in tmpLines: # Loop on all lines of the loss-[defect/veto].dat files
           if defVetoType[iDefVeto] == "Intolerable defect":
-            read = match("(\d+) \((\d+) ub-1.*\) -> (\d+.\d+) pb-1 \D+(\d+.\d+)\D+",iline)
+            read = match(r"(\d+) \((\d+) ub-1.*\) -> (\d+.\d+) pb-1 \D+(\d+.\d+)\D+",iline)
           else:# Veto loss is never recoverable (not tolerable defects)
-            read = match("(\d+) \((\d+) ub-1.*\) -> (\d+.\d+) pb-1",iline)
+            read = match(r"(\d+) \((\d+) ub-1.*\) -> (\d+.\d+) pb-1",iline)
           # retrieve the run number
           runnumber = int(read.group(1))
           # If the runs filter is activated (i.e. runsFilter != 0), check if the runs must be filtered

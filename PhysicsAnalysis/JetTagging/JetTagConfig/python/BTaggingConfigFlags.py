@@ -94,10 +94,7 @@ def getNNs(flags):
         "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
         "BTagging/20250213/GN3MuonsV00/antikt4empflow/network.onnx", # Tracks+Muons
         "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
-    ] if isRun3Derivation(flags) else [   
-        "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
-        "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
-     ]
+    ] if isRun3Derivation(flags) else []
     gn3v01_paths = [
         "BTagging/20250527/GN3PflowMuonsChargeV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow+Charge
         "BTagging/20250527/GN3PflowMuonsElectronsHybridV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow+Electrons+Hybrid

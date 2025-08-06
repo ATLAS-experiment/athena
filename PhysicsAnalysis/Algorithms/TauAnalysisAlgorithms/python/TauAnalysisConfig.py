@@ -30,6 +30,9 @@ class TauCalibrationConfig (ConfigBlock):
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
 
     def makeAlgs (self, config) :
 
@@ -45,7 +48,7 @@ class TauCalibrationConfig (ConfigBlock):
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::TauTruthMatchingAlg',
-                                          'TauTruthMatchingAlg' + postfix )
+                                          'TauTruthMatchingAlg' )
             config.addPrivateTool( 'matchingTool',
                                    'TauAnalysisTools::TauTruthMatchingTool' )
             alg.matchingTool.TruthJetContainerName = 'AntiKt4TruthDressedWZJets'
@@ -55,7 +58,7 @@ class TauCalibrationConfig (ConfigBlock):
         # decorate truth tau information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::TauTruthDecorationsAlg',
-                                          'TauTruthDecorationsAlg' + postfix,
+                                          'TauTruthDecorationsAlg',
                                            reentrant=True )
             alg.taus = config.readName (self.containerName)
             alg.doubleDecorations = ['pt_vis', 'pt_invis', 'eta_vis', 'eta_invis', 'phi_vis', 'phi_invis', 'm_vis', 'm_invis']
@@ -76,12 +79,12 @@ class TauCalibrationConfig (ConfigBlock):
 
         # Decorate extra variables
         alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg',
-                                      'TauExtraVariables' + self.containerName + self.postfix,
+                                      'TauExtraVariablesAlg',
                                       reentrant=True )
         alg.taus = config.readName (self.containerName)
 
         # Set up the tau 4-momentum smearing algorithm:
-        alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
         alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
         alg.smearingTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
@@ -90,7 +93,7 @@ class TauCalibrationConfig (ConfigBlock):
         alg.preselection = config.getPreselection (self.containerName, '')
 
         # Additional decorations
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName (self.containerName)
 
         config.addOutputVar (self.containerName, 'pt', 'pt')
@@ -99,6 +102,7 @@ class TauCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
+        config.addOutputVar (self.containerName, 'passTATTauMuonOLR', 'passTATTauMuonOLR', noSys=True)
         config.addOutputVar (self.containerName, 'nTracks', 'nTracks', noSys=True)
         config.addOutputVar (self.containerName, 'TESCompatibility', 'TESCompatibility')  
 
@@ -174,6 +178,13 @@ class TauWorkingPointConfig (ConfigBlock) :
             info="whether to retain only tau-jets satisfying the working point "
             "requirements. The default is True.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None:
+            return self.containerName + '_' + self.selectionName + self.postfix
+        else:
+            return self.containerName + '_' + self.selectionName
+
     def makeAlgs (self, config) :
 
         selectionPostfix = self.selectionName
@@ -210,7 +221,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                               "VeryLoose, Baseline, BaselineForFakes")
 
         # Set up the algorithm selecting taus:
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' )
         config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
         if self.useSelectionConfigFile:
             inputfile = nameFormat.format(self.quality.lower())
@@ -307,7 +318,7 @@ class TauWorkingPointConfig (ConfigBlock) :
 
             # TauEfficiencyCorrectionTool for Reco, this should be always enabled
             alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                   'TauEfficiencyCorrectionsAlgReco' + postfix )
+                                   'TauEfficiencyCorrectionsAlgReco' )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [0]
@@ -328,7 +339,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                 if not self.useGNTau: # current recommendations are for RNN ID, so don't use in case of GNTau
 
                     alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                   'TauEfficiencyCorrectionsAlgID' + postfix )
+                                   'TauEfficiencyCorrectionsAlgID' )
                     config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
@@ -359,7 +370,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                 if not self.useGNTau: # eVeto correction for fake tau are for RNN ID, so don't use them for GNTau
                     # correction for fake tau
                     alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                       'TauEfficiencyCorrectionsAlgEvetoFakeTau' + postfix )
+                                       'TauEfficiencyCorrectionsAlgEvetoFakeTau' )
                     config.addPrivateTool( 'efficiencyCorrectionsTool',
                                     'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
@@ -388,7 +399,7 @@ class TauWorkingPointConfig (ConfigBlock) :
 
                 # correction for true tau
                 alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                   'TauEfficiencyCorrectionsAlgEvetoTrueTau' + postfix )
+                                   'TauEfficiencyCorrectionsAlgEvetoTrueTau' )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [8]
@@ -406,7 +417,7 @@ class TauWorkingPointConfig (ConfigBlock) :
 
             if self.saveCombinedSF:
                 alg = config.createAlgorithm( 'CP::AsgObjectScaleFactorAlg',
-                                              'TauCombinedEfficiencyScaleFactorAlg' + postfix )
+                                              'TauCombinedEfficiencyScaleFactorAlg' )
                 alg.particles = config.readName (self.containerName)
                 alg.inScaleFactors = sfList
                 alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
@@ -433,12 +444,16 @@ class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
             info="the name of the output tau container."
         )
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.outputTaus
+
     def makeAlgs (self, config) :
 
         if config.isPhyslite() :
             raise(RuntimeError("Muon removal taus is not available in Physlite mode"))
 
-        alg = config.createAlgorithm( 'CP::TauCombineMuonRMTausAlg', 'TauCombineMuonRMTausAlg' + self.outputTaus )
+        alg = config.createAlgorithm( 'CP::TauCombineMuonRMTausAlg', 'TauCombineMuonRMTausAlg' )
         alg.taus = self.inputTaus
         alg.muonrm_taus = self.inputTausMuRM
         alg.combined_taus = self.outputTaus
@@ -465,6 +480,10 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('containerName', '', type=str,
                         info="the input tau container, with a possible selection, in "
                         "the format container or container.selection.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.prefixSF + '_' + self.tauID
 
     def get_year_data(self, dictionary: dict, year: int | str) -> list:
         return dictionary.get(int(year), dictionary.get(str(year), []))
@@ -500,7 +519,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 chain_noHLT = chain.replace("HLT_", "")
                 chain_out = chain_noHLT if self.removeHLTPrefix else chain
                 alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                              'TauTrigEfficiencyCorrectionsAlg_' + self.tauID + '_' + chain )
+                                              'TauTrigEfficiencyCorrectionsAlg_' + chain )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
                                        'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                 # SFTriggerHadTau correction type from

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODELXML_PIXELGMXINTERFACE_H
@@ -21,7 +21,7 @@ namespace GeoModelIO{
 namespace InDetDD {
 
 class PixelDetectorManager;
-class PixelDiodeMatrix;
+class PixelDiodeTree;
 class SiCommonItems;
 class SiDetectorDesign;
 
@@ -46,14 +46,6 @@ public:
                             std::map<std::string, int> &index,
                             GeoVFullPhysVol *fpv,
                             GeoAlignableTransform *transform) override final;
-
-  std::shared_ptr<const PixelDiodeMatrix> buildMatrix(double phiPitch, double etaPitch,
-						      double phiPitchLong, double phiPitchEnd,
-						      double etaPitchLong, double etaPitchEnd,
-						      int nPhiLong, int nPhiEnd,
-						      int nEtaLong, int nEtaEnd,
-						      int circuitsPhi, int circuitsEta,
-						      int diodeColPerCirc, int diodeRowPerCirc) const;
 
    void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 

@@ -12,7 +12,7 @@
 #include <math.h>
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "L1CaloFEXSim/jFEXPileupAndNoise.h"
+#include "jFEXPileupAndNoise.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 namespace LVL1{

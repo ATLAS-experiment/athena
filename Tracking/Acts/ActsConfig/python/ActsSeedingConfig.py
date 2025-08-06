@@ -69,27 +69,56 @@ def ActsFastPixelSeedingToolCfg(flags,
                                 **kwargs) -> ComponentAccumulator:
     ## Additional cuts for fast seed configuration
     kwargs.setdefault("minPt", 900 * UnitConstants.MeV)
+    kwargs.setdefault("sigmaScattering", 2.)
+    kwargs.setdefault("maxPtScattering", float("inf"))
     kwargs.setdefault("maxSeedsPerSpM", 3)
     kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
     kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
     kwargs.setdefault("maxPhiBins", 200)
     kwargs.setdefault("gridRMax", 250 * UnitConstants.mm)
     kwargs.setdefault("deltaRMax", 200 * UnitConstants.mm)
-    kwargs.setdefault("zBinsCustomLooping" , [3, 11, 4, 10, 7, 5, 9, 6, 8])
+    kwargs.setdefault("zBinsCustomLooping" , [2, 10, 3, 9, 6, 4, 8, 5, 7])
     kwargs.setdefault("rRangeMiddleSP", [
-             [40.0, 80.0],
-             [40.0, 80.0],
-             [40.0, 200.0],
-             [70.0, 200.0],
-             [70.0, 200.0],
-             [70.0, 250.0],
-             [70.0, 250.0],
-             [70.0, 250.0],
-             [70.0, 200.0],
-             [70.0, 200.0],
-             [40.0, 200.0],        
-             [40.0, 80.0],
-             [40.0, 80.0]])
+             [0.0, 0.0],
+             [60.0, 165.0],
+             [60.0, 200.0],
+             [60.0, 200.0],
+             [60.0, 260.0],
+             [60.0, 260.0],
+             [60.0, 260.0],
+             [60.0, 200.0],
+             [60.0, 200.0],
+             [60.0, 165.0],
+             [0.0, 0.0]])
+
+    kwargs.setdefault("zBinNeighborsTop", [
+      [0, 0], # -3000, -2000  
+      [-1, 0], # -2000, -1400  
+      [-1, 0], # -1400, -910
+      [-1, 0], # -910, -500 
+      [-1, 0], # -500, -250 
+      [-1, 1], # -250, 250
+      [0, 1], # 250, 500 
+      [0, 1], # 500, 910
+      [0, 1], # 910, 1400
+      [0, 1], # 1400, 2000
+      [0, 0] # 2000, 3000
+    ])
+    kwargs.setdefault("zBinNeighborsBottom", [
+      [0, 0], # -3000, -2000
+      [1, 1], # -2000, -1400      
+      [0, 1], # -1400, -910
+      [0, 1], # -910, -500
+      [0, 1], # -500, -250
+      [0, 0], # -250, 250
+      [-1, 0], # 250, 500
+      [-1, 0], # 500, 910
+      [-1, 0], # 910, 1400
+      [-1, -1], # 1400, 2000
+      [0, 0] # 2000, 3000
+    ])
+    
+    kwargs.setdefault("zBinEdges", [-3000., -2000, -1400., -910., -500., -250.,  250., 500., 910., 1400., 2000, 3000.])
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
     kwargs.setdefault("rMax", 320 * UnitConstants.mm)

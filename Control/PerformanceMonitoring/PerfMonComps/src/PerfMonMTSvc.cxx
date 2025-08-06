@@ -907,7 +907,7 @@ std::string PerfMonMTSvc::get_info_from_file(const std::string& fileName,
       if (val.empty()) continue;
       if (line.size() >= fieldName.size() &&
           line.compare(0, fieldName.size(), fieldName) == 0) {
-        result = val;
+        result = std::move(val);
       }
     }
   }

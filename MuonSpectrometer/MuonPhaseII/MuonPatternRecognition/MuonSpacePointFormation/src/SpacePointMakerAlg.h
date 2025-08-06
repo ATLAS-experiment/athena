@@ -39,6 +39,7 @@ namespace MuonR4{
              * @param gctx: Geometry context to calculate the relative alignment between chamber & measurement
              * @param meas: Uncalibrated muon measurement */
             template<class MeasType> Amg::Transform3D toChamberTransform(const ActsGeometryContext& gctx, 
+                                                                         const Amg::Transform3D& sectorTrans,
                                                                          const MeasType* meas) const;
             /** @brief Returns the position of the uncalibrated muon measurement in the sector frame
              * @param meas: Uncalibrated muon measurement
@@ -200,7 +201,7 @@ namespace MuonR4{
             bool splitBucket(const SpacePoint& spacePoint,
                              const double firstSpPos,
                              const SpacePointBucketVec& sortedPoints) const;
-            /** @brief Closest the current processed bucket and creates a new one. Space points of the previous bucket
+            /** @brief Closes the current processed bucket and creates a new one. Space points of the previous bucket
              *         within the overlap region to the first space point of the new bucket are copied over
              * @param refSp: First new space point which will be added to the new bucket.
              * @param sortedPoints: List of all processed buckets in the chamber. The list is augmented by 1 element */
@@ -248,7 +249,7 @@ namespace MuonR4{
                                                         "Hits that are within <spacePointOverlap> of the bucket margin. "
                                                         "Are copied to the next bucket"};
     
-            Gaudi::Property<bool> m_doStat{this, "doStats", true, 
+            Gaudi::Property<bool> m_doStat{this, "doStats", false, 
                                            "If enabled the algorithm keeps track how many hits have been made" };
             
             Gaudi::Property<unsigned int> m_capacityBucket{this,"CapacityBucket" , 50};

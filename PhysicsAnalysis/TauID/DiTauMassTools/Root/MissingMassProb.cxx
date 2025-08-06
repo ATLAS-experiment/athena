@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the probability calculation of the MissingMassCalculator
@@ -9,6 +9,12 @@
 #include "DiTauMassTools/MissingMassProb.h"
 #include "PathResolver/PathResolver.h"
 #include <cmath>
+
+#include "TruthUtils/ParticleConstants.h"
+
+namespace {
+  constexpr double GEV = 1000.0;
+}
 
 using namespace DiTauMassTools;
 using ROOT::Math::PtEtaPhiMVector;
@@ -616,7 +622,7 @@ double MissingMassProb::TauProbabilityLFV(MissingMassInput& preparedInput, const
   double prob=1.0;
   if(m_fUseTauProbability==0) return prob; // don't apply TauProbability
   double prob1=1.0;
-  const double mtau=1.777;
+  const double mtau=ParticleConstants::tauMassInMeV / GEV;
   const double R1=nu1.E()/vis1.E();
   //--- dealing with 1st tau
   double m1=nu1.M();
@@ -655,7 +661,7 @@ double MissingMassProb::TauProbability(MissingMassInput& preparedInput, const in
   if(m_fUseTauProbability==0) return prob; // don't apply TauProbability
   double prob1=1.0;
   double prob2=1.0;
-  const double mtau=1.777;
+  const double mtau=ParticleConstants::tauMassInMeV / GEV;
   const double R1=nu1.E()/vis1.E();
   const double R2=nu2.E()/vis2.E();
   //--- dealing with 1st tau

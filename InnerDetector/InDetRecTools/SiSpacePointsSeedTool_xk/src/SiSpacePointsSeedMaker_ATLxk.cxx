@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
      
@@ -1543,7 +1543,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::production3Sp(EventData& data) const
   /// prevent another pass from being run when we run out of Seeds
   data.endlist = true;
 
-  /// Loop thorugh all azimuthal regions
+  /// Loop through all azimuthal regions
   for (int phiBin=data.fNmin; phiBin<=m_maxPhiBin; ++phiBin) {
     
     /// For each azimuthal region loop through all Z regions
@@ -1628,7 +1628,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::production3Sp
  const int numberBottomCells, const int numberTopCells, int& nseed, const int zbin) const
 {
   /** 
-   * This methid implements the seed search for a single phi-Z region of the detector. 
+   * This method implements the seed search for a single phi-Z region of the detector. 
    * The central SP is taken from the region, while the top and bottom SP are allowed 
    * to come from either the same or a range of neighbouring cells. 
    **/ 

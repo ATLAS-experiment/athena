@@ -26,10 +26,10 @@ namespace ActsTrk {
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerName {this, "TrackParticleContainerName", "", "Name of the TrackParticle container"};
     
     // Truth decorations
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTruthClassKey { this, "LayerClusterTruthClass", m_trackParticleContainerName, "layerClusterTruthClass", "Decoration for cluster truth classification" };
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterShadowedKey { this, "LayerClusterShadowed", m_trackParticleContainerName, "layerClusterShadowed", "Decoration for shadowed cluster" };
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterMergedKey { this, "LayerClusterMerged", m_trackParticleContainerName, "layerClusterMerged", "Decoration for merged cluster" };
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey { this, "LayerPrimaryExpected", m_trackParticleContainerName, "layerPrimaryExpected", "Decoration for primary expected cluster" };  
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTruthClassKey { this, "HGTD_cluster_truth_class", m_trackParticleContainerName, "HGTD_cluster_truth_class", "Decoration for cluster truth classification" };
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterShadowedKey { this, "HGTD_cluster_shadowed", m_trackParticleContainerName, "HGTD_cluster_shadowed", "Decoration for shadowed cluster" };
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterMergedKey { this, "HGTD_cluster_merged", m_trackParticleContainerName, "HGTD_cluster_merged", "Decoration for merged cluster" };
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey { this, "HGTD_primary_expected", m_trackParticleContainerName, "HGTD_primary_expected", "Decoration for primary expected cluster" };  
     
     /// @brief Data structure to hold HGTD track extension results
     /// Contains information about hits, timing, and extrapolation for each HGTD layer

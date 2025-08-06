@@ -21,10 +21,21 @@ G4AtlasActionInitialization::~G4AtlasActionInitialization()
 
 void G4AtlasActionInitialization::BuildForMaster() const
 {
+
+  // Here, can only add run actions
+  if (!m_userActionSvc) {
+    G4ExceptionDescription description;
+    description << "BuildForMaster: UserActionSvc is NULL.";
+    G4Exception("G4AtlasActionInitialization", "NoUserActionSvc", FatalException, description);
+    abort(); // to keep Coverity happy
+  }
+  if (m_userActionSvc->initializeActionsMaster().isFailure()) { //Consider renaming to buildActions()?
+    G4ExceptionDescription description;
+    description << "BuildForMaster: Failed to create UserActions on main thread.";
+    G4Exception("G4AtlasActionInitialization", "CouldNotBuildActions", FatalException, description);
+    abort(); // to keep Coverity happy
+  }
   G4VUserActionInitialization::BuildForMaster();
-  // TODO Ideally separate "master" versions of the G4RunActions would
-  // be created, but this will require a larger redesign. See
-  // https://gitlab.cern.ch/geant4/geant4/-/blob/master/examples/basic/B4/B4a/src/B4aActionInitialization.cc#L52
 }
 
 

@@ -198,10 +198,19 @@ TFile* AthAnalysisAlgorithm::currentFile(const char* evtSelName) {
                 }
                 TObjArray* tokens = t.Tokenize("/");
                 TObjString* lastToken = dynamic_cast<TObjString*>(tokens->Last());
+                if (!lastToken) {
+                  ATH_MSG_ERROR("Cannot cast token string to TObjString");
+                  return nullptr;
+                }
                 TString tToCompare = "";
                 bool shortComparison2(false);
                 if(tokens->GetEntries()>1) {
-                  TString beforeSlash((dynamic_cast<TObjString*>(tokens->At(tokens->GetEntries()-2)))->GetString());
+                  TObjString* beforeSlashStr = dynamic_cast<TObjString*>(tokens->At(tokens->GetEntries()-2));
+                  if (!beforeSlashStr) {
+                    ATH_MSG_ERROR("Cannot cast token string to TObjString");
+                    return nullptr;
+                  }
+                  TString beforeSlash(beforeSlashStr->GetString());
                   if(beforeSlash.Length()>0) tToCompare += beforeSlash;
                   tToCompare += "/";
                 } else {

@@ -46,6 +46,9 @@ StatusCode G4AtlasDetectorConstructionTool::initialize( )
   ATH_MSG_DEBUG( "Initializing sensitive detectors in " << name() );
   ATH_CHECK( m_senDetTool.retrieve() );
 
+  ATH_MSG_DEBUG( "Initializing fastsim in " << name() );
+  ATH_CHECK( m_fastSimTool.retrieve() );
+
   ATH_MSG_DEBUG( "Setting up G4 physics regions" );
   for (auto& it: m_regionCreators)
   {
@@ -134,6 +137,11 @@ void G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
   ATH_MSG_DEBUG( "Setting up sensitive detectors" );
   if (m_detConstructionTool->m_senDetTool->initializeSDs().isFailure()) {
     ATH_MSG_FATAL("Failed to initialize SDs for worker thread");
+  }
+
+  if(!m_detConstructionTool->m_fastSimTool->initializeFastSims().isSuccess()) {
+    ATH_MSG_FATAL("Failed to initialize Fast Simulation Tool for worker thread");
+    return;
   }
 
   ATH_MSG_DEBUG( "Setting up field managers" );

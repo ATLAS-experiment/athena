@@ -22,15 +22,16 @@
 
 #include "src/detail/MeasurementIndex.h"
 #include "src/detail/SharedHitCounter.h"
+#include "src/detail/Definitions.h"
 
 namespace {
-   std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
+   static std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
       const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
       const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
       return uncalibMeas.identifier();
    }
 
-   bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
+   static bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
       const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
       const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
 
@@ -59,10 +60,8 @@ namespace ActsTrk
      }
 
      ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
-     ATH_CHECK(m_trackingGeometryTool.retrieve());
      ATH_CHECK(m_tracksKey.initialize());
      ATH_CHECK(m_resolvedTracksKey.initialize());
-     ATH_CHECK(m_resolvedTracksBackendHandles.initialize(ActsTrk::prefixFromTrackContainerName(m_resolvedTracksKey.key()))); //TODO choose prefix related to the output tracks name
      return StatusCode::SUCCESS;
   }
 
@@ -83,49 +82,60 @@ namespace ActsTrk
 
     SG::ReadHandle<ActsTrk::TrackContainer> trackHandle = SG::makeHandle(m_tracksKey, ctx);
     ATH_CHECK(trackHandle.isValid());
-    m_stat[kNInputTracks] += trackHandle->size();
+    const ActsTrk::TrackContainer* trackContainer = trackHandle.cptr();
+    m_stat[kNInputTracks] += trackContainer->size();
 
     Acts::GreedyAmbiguityResolution::State state;
-    m_ambi->computeInitialState(*trackHandle, state, &sourceLinkHash,
+    m_ambi->computeInitialState(*trackContainer, state, &sourceLinkHash,
                                 &sourceLinkEquality);
 
     m_ambi->resolve(state);
 
     ATH_MSG_DEBUG("Resolved to " << state.selectedTracks.size() << " tracks from "
-                  << trackHandle->size());
+                  << trackContainer->size());
     m_stat[kNResolvedTracks] += state.selectedTracks.size();
 
-    ActsTrk::MutableTrackContainer solvedTracks;
-    solvedTracks.ensureDynamicColumns(*trackHandle);
 
+    // we start shortlisting the container
+    Acts::VectorTrackContainer resolvedTrackBackend;
+    Acts::VectorMultiTrajectory resolvedTrackStateBackend;
+    detail::RecoTrackContainer resolvedTracksContainer(resolvedTrackBackend, resolvedTrackStateBackend);
+
+    // need centralized function here
+    resolvedTracksContainer.ensureDynamicColumns(*trackContainer);
+        
     detail::MeasurementIndex measurementIndex;
     detail::SharedHitCounter sharedHits;
 
     std::size_t totalShared = 0;
     for (auto iTrack : state.selectedTracks) {
-       auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
-       destProxy.copyFrom(trackHandle->getTrack(state.trackTips.at(iTrack)));
-       if (m_countSharedHits) {
-        auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, solvedTracks, measurementIndex);
+      auto destProxy = resolvedTracksContainer.getTrack(resolvedTracksContainer.addTrack());
+      destProxy.copyFrom(trackHandle->getTrack(state.trackTips.at(iTrack)));
+      
+      if (m_countSharedHits) {
+        auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, resolvedTracksContainer, measurementIndex);
         if (nBadTrackMeasurements > 0)
           ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
         totalShared += nShared;
       }
     }
+    
     if (m_countSharedHits) {
       ATH_MSG_DEBUG("total number of shared hits = " << totalShared);
       m_stat[kNSharedHits] += totalShared;
     }
 
-    std::unique_ptr<ActsTrk::TrackContainer> outputTracks = m_resolvedTracksBackendHandles.moveToConst(std::move(solvedTracks), 
-       m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);
-    SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle(m_resolvedTracksKey, ctx);
-
-    if (resolvedTrackHandle.record( std::move(outputTracks)).isFailure()) {
-       ATH_MSG_ERROR("Failed to record resolved ACTS tracks with key " << m_resolvedTracksKey.key() );
-       return StatusCode::FAILURE;
+    // make const collection
+    Acts::ConstVectorTrackContainer storableTrackBackend( std::move(resolvedTrackBackend) );
+    Acts::ConstVectorMultiTrajectory storableTrackStateBackend( std::move(resolvedTrackStateBackend) );
+    std::unique_ptr< ActsTrk::TrackContainer > storableTracksContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(storableTrackBackend),
+                                                                                                                      std::move(storableTrackStateBackend) );
+    SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle = SG::makeHandle( m_resolvedTracksKey, ctx );
+    if (resolvedTrackHandle.record( std::move(storableTracksContainer)).isFailure()) {
+      ATH_MSG_ERROR("Failed to record resolved ACTS tracks with key " << m_resolvedTracksKey.key() );
+      return StatusCode::FAILURE;
     }
-
+    
     return StatusCode::SUCCESS;
   }
 

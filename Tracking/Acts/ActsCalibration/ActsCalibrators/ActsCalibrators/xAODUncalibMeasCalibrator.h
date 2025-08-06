@@ -64,7 +64,18 @@ namespace ActsTrk::detail{
             void invalidCalibrator(const Acts::GeometryContext& gctx,
                                    const Acts::CalibrationContext& cctx,
                                    const Acts::SourceLink& sl,
-                                   const MutableTrackStateBackend::TrackStateProxy trackState) const;
+                                   MutableTrackStateBackend::TrackStateProxy trackState) const;
+            /** @brief Delegate method for the Auxiliary measurements. 
+             *  @param gctx: Geometry context passed to access the global alignment
+             *  @param cctx: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
+             *               extra information from store gate
+             *  @param sl: Reference to the source link having the calibrated measurement packed
+             *  @param trackState: Proxy to the track state into which the calibrated measurement parameters
+             *                     are copied. */
+            void auxillaryCalibrator(const Acts::GeometryContext& gctx,
+                                     const Acts::CalibrationContext& cctx,
+                                     const Acts::SourceLink& sl,
+                                     MutableTrackStateBackend::TrackStateProxy trackState) const;
             /** @brief Abrivation for the calibrator delegate. The signature of all delegates should
              *         be shared accross all fitters implemented in Acts */
             using CalibDelegate = Acts::Experimental::Gx2FitterExtensions<MutableTrackStateBackend>::Calibrator; 

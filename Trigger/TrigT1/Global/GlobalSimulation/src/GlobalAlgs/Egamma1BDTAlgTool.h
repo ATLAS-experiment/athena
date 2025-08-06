@@ -14,6 +14,7 @@
 
 #include "ap_int.h"
 #include "ap_fixed.h"
+#include "Digitizer.h"
 
 #include "Egamma1BDT/BDT.h"
 
@@ -56,7 +57,6 @@ namespace GlobalSim {
       "key to read inLArNeighborhoodReadKeys"};
 
     std::vector<double> combine_phi(const LArStripNeighborhood*) const;
-    std::vector<ap_int<10>> digitize(const std::vector<double>&) const;
 
     // a neighborhood has 3 vectors of strip energies (phi_low, phi_center.
     // phi_high). Provide the length thes vectors must have for the BDT to be

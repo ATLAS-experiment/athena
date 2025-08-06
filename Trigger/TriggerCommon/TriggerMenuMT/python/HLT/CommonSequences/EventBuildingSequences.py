@@ -11,6 +11,7 @@ from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
 from AthenaConfiguration.ComponentFactory import CompFactory
 from .LATOMESourceIDs import LATOMESourceIDs
+from .FEXSourceIDs import FEXSourceIDs
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
@@ -110,7 +111,7 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
     elif 'LATOMEPEB' == eventBuildType:
         acc = StaticPEBInfoWriterToolCfg(
             flags, name,
-            ROBs = LATOMESourceIDs, # add full-scan LATOME data
+            ROBs = LATOMESourceIDs + FEXSourceIDs, # add full-scan LATOME and FEX data
             subDets = [SubDetector.TDAQ_CTP] )
 
     elif 'SCTPEB' == eventBuildType:

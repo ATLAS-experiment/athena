@@ -370,22 +370,82 @@ StatusCode GridTripletSeedingTool::createSeeds2(
   Acts::Experimental::CylindricalSpacePointGrid2 grid(
       gridCfg, logger().cloneWithSuffix("Grid"));
 
-  for (const auto& sp : spacePoints) {
+  for (auto sp : spacePoints) {
     if (m_useExperimentCuts && !itkFastTrackingSpCut(sp)) {
       continue;
     }
-    grid.insert(sp);
+
+    grid.insert(sp.index(), sp.phi(), sp.z(), sp.r());
   }
-  grid.sort(spacePoints);
 
-  const Acts::Range1D<float> rRange = grid.computeRadiusRange(spacePoints);
+  for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
+    std::ranges::sort(grid.at(i),
+                      [&](const Acts::Experimental::SpacePointIndex2& a,
+                          const Acts::Experimental::SpacePointIndex2& b) {
+                        return spacePoints[a].r() < spacePoints[b].r();
+                      });
+  }
 
-  auto tripletCuts = m_tripletCuts.derive(bFieldInZ);
+  // TODO a second copy of the container should not be necessary, but
+  //      the current `createSeeds2` interface requires it
+  Acts::Experimental::SpacePointContainer2 selectedSpacePoints;
+  selectedSpacePoints.createColumns(
+      Acts::Experimental::SpacePointColumns::SourceLinks |
+      Acts::Experimental::SpacePointColumns::X |
+      Acts::Experimental::SpacePointColumns::Y |
+      Acts::Experimental::SpacePointColumns::Z |
+      Acts::Experimental::SpacePointColumns::R |
+      Acts::Experimental::SpacePointColumns::VarianceR |
+      Acts::Experimental::SpacePointColumns::VarianceZ |
+      Acts::Experimental::SpacePointColumns::Strip);
+  selectedSpacePoints.reserve(grid.numberOfSpacePoints());
+  std::vector<Acts::Experimental::SpacePointIndexRange2> gridSpacePointRanges;
+  gridSpacePointRanges.reserve(grid.numberOfBins());
+  for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
+    std::uint32_t begin = selectedSpacePoints.size();
+    for (const Acts::Experimental::SpacePointIndex2 spIndex : grid.at(i)) {
+      const auto sp = spacePoints[spIndex];
+
+      auto newSp = selectedSpacePoints.createSpacePoint();
+      newSp.assignSourceLinks(sp.sourceLinks());
+      newSp.x() = sp.x();
+      newSp.y() = sp.y();
+      newSp.z() = sp.z();
+      newSp.r() = sp.r();
+      newSp.varianceR() = sp.varianceR();
+      newSp.varianceZ() = sp.varianceZ();
+    }
+    std::uint32_t end = selectedSpacePoints.size();
+    gridSpacePointRanges.emplace_back(begin, end);
+  }
+
+  // Compute radius range. We rely on the fact the grid is storing the proxies
+  // with a sorting in the radius
+  const Acts::Range1D<float> rRange = [&]() -> Acts::Range1D<float> {
+    float minRange = std::numeric_limits<float>::max();
+    float maxRange = std::numeric_limits<float>::lowest();
+    for (const Acts::Experimental::SpacePointIndexRange2& range :
+         gridSpacePointRanges) {
+      if (range.first == range.second) {
+        continue;
+      }
+      auto first = selectedSpacePoints[range.first];
+      auto last = selectedSpacePoints[range.second - 1];
+      minRange = std::min(first.r(), minRange);
+      maxRange = std::max(last.r(), maxRange);
+    }
+    return {minRange, maxRange};
+  }();
+
+  Acts::Experimental::BroadTripletSeedFinder::DerivedTripletCuts tripletCuts(
+      m_tripletCuts, bFieldInZ);
 
   Acts::Experimental::DoubletSeedFinder bottomDoubletFinder(
-      m_bottomDoubletFinderCfg.derive(bFieldInZ));
+      Acts::Experimental::DoubletSeedFinder::DerivedConfig(
+          m_bottomDoubletFinderCfg, bFieldInZ));
   Acts::Experimental::DoubletSeedFinder topDoubletFinder(
-      m_topDoubletFinderCfg.derive(bFieldInZ));
+      Acts::Experimental::DoubletSeedFinder::DerivedConfig(
+          m_topDoubletFinderCfg, bFieldInZ));
 
   // variable middle SP radial region of interest
   const Acts::Range1D<float> rMiddleSpRange(
@@ -397,31 +457,40 @@ StatusCode GridTripletSeedingTool::createSeeds2(
   Acts::Experimental::BroadTripletSeedFinder::State state;
   Acts::Experimental::BroadTripletSeedFinder::Cache cache;
 
-  std::vector<std::span<const Acts::SpacePointIndex2>> bottomSpGroups;
-  std::span<const Acts::SpacePointIndex2> middleSps;
-  std::vector<std::span<const Acts::SpacePointIndex2>> topSpGroups;
+  std::vector<Acts::Experimental::SpacePointContainer2::ConstRange>
+      bottomSpRanges;
+  std::optional<Acts::Experimental::SpacePointContainer2::ConstRange>
+      middleSpRange;
+  std::vector<Acts::Experimental::SpacePointContainer2::ConstRange> topSpRanges;
 
   for (const auto [bottom, middle, top] : grid.binnedGroup()) {
     ACTS_VERBOSE("Process middle bin " << middle);
-
-    bottomSpGroups.clear();
-    topSpGroups.clear();
+    if (middle >= gridSpacePointRanges.size()) {
+      ATH_MSG_ERROR("Grid Binned Group returned an unreasonable middle bin");
+      return StatusCode::FAILURE;
+    }
+    
+    bottomSpRanges.clear();
+    topSpRanges.clear();
 
     std::ranges::transform(
-        bottom, std::back_inserter(bottomSpGroups),
-        [&](std::size_t b) -> std::span<const Acts::SpacePointIndex2> {
-          return grid.at(b);
+        bottom, std::back_inserter(bottomSpRanges),
+        [&](std::size_t b)
+            -> Acts::Experimental::SpacePointContainer2::ConstRange {
+          return selectedSpacePoints.range(gridSpacePointRanges[b]).asConst();
         });
-    middleSps = grid.at(middle);
+    middleSpRange =
+        selectedSpacePoints.range(gridSpacePointRanges[middle]).asConst();
     std::ranges::transform(
-        top, std::back_inserter(topSpGroups),
-        [&](std::size_t t) -> std::span<const Acts::SpacePointIndex2> {
-          return grid.at(t);
+        top, std::back_inserter(topSpRanges),
+        [&](std::size_t t)
+            -> Acts::Experimental::SpacePointContainer2::ConstRange {
+          return selectedSpacePoints.range(gridSpacePointRanges[t]).asConst();
         });
 
     // we compute this here since all middle space point candidates belong to
     // the same z-bin
-    auto firstMiddleSp = spacePoints.at(middleSps.front());
+    auto firstMiddleSp = middleSpRange->front();
     auto radiusRangeForMiddle =
         retrieveRadiusRangeForMiddle(firstMiddleSp, rMiddleSpRange);
 
@@ -431,8 +500,8 @@ StatusCode GridTripletSeedingTool::createSeeds2(
 
     m_finder->createSeedsFromSortedGroups(
         finderOpts, state, cache, bottomDoubletFinder, topDoubletFinder,
-        tripletCuts, *m_filter, spacePoints, bottomSpGroups, middleSps,
-        topSpGroups, radiusRangeForMiddle, seedContainer);
+        tripletCuts, *m_filter, spacePoints, bottomSpRanges, *middleSpRange,
+        topSpRanges, radiusRangeForMiddle, seedContainer);
   }
 
   if (m_seedQualitySelection) {

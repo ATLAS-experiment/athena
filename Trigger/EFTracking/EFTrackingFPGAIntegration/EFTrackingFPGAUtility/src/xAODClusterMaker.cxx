@@ -35,68 +35,191 @@ StatusCode xAODClusterMaker::initialize() {
 }
 
 StatusCode xAODClusterMaker::makeStripClusterContainer(
-      const uint64_t* stripClusters,
+    const uint64_t* stripClusters,
     const EFTrackingTransient::Metadata *metadata,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Making xAOD::StripClusterContainer");
 
   SG::WriteHandle<xAOD::StripClusterContainer> stripClustersHandle{m_stripClustersKey, ctx};
 
-  ATH_CHECK(stripClustersHandle.record(std::make_unique<xAOD::StripClusterContainer>(), std::make_unique<xAOD::StripClusterAuxContainer>()));
+  if (!m_doBulkCopy) {
+    ATH_CHECK(stripClustersHandle.record(std::make_unique<xAOD::StripClusterContainer>(), std::make_unique<xAOD::StripClusterAuxContainer>()));
 
 
-  for (unsigned int i = 0; i < metadata->numOfStripClusters; i++)
-  {
-    // Push back numClusters of StripCluster
-    auto stripCl = stripClustersHandle->push_back(std::make_unique<xAOD::StripCluster>());
+    for (unsigned int i = 0; i < metadata->numOfStripClusters; i++)
+    {
+      // Push back numClusters of StripCluster
+      auto stripCl = stripClustersHandle->push_back(std::make_unique<xAOD::StripCluster>());
 
-      // Build Matrix
-      Eigen::Matrix<float, 1, 1> localPosition;
-      Eigen::Matrix<float, 1, 1> localCovariance;
+        // Build Matrix
+        Eigen::Matrix<float, 1, 1> localPosition;
+        Eigen::Matrix<float, 1, 1> localCovariance;
 
-      int row = 0; // idhash
-      long unsigned int idHash = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      row = 1; // id
-      unsigned long long id = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      
-      std::vector<Identifier> RDOs;
-      row = 2; // rdo w1
-      unsigned long long rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      if (rdo) RDOs.push_back(Identifier(rdo));
-  
-      row = 3; // rdo w2
-      rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      if (rdo) RDOs.push_back(Identifier(rdo));
-      
-      row = 4; // rdo w3
-      rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      if (rdo) RDOs.push_back(Identifier(rdo));
+        int row = 0; // idhash
+        long unsigned int idHash = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        row = 1; // id
+        unsigned long long id = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        
+        std::vector<Identifier> RDOs;
+        row = 2; // rdo w1
+        unsigned long long rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        if (rdo) RDOs.push_back(Identifier(rdo));
     
-      row = 5; // rdo w4
-      rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      if (rdo) RDOs.push_back(Identifier(rdo));
-      row = 6; // local x
-      localPosition(0, 0) = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-      row = 8; // local covariance xx
-      localCovariance(0, 0) = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-      row = 9; // global x
-      double globalX = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-      row = 10; // global y
-      double globalY = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-      row = 11; // global z
-      double globalZ = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-      row = 12; // channels in phi
-      auto channelsinPhi = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        row = 3; // rdo w2
+        rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        if (rdo) RDOs.push_back(Identifier(rdo));
+        
+        row = 4; // rdo w3
+        rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        if (rdo) RDOs.push_back(Identifier(rdo));
+      
+        row = 5; // rdo w4
+        rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        if (rdo) RDOs.push_back(Identifier(rdo));
+        row = 6; // local x
+        localPosition(0, 0) = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+        row = 8; // local covariance xx
+        localCovariance(0, 0) = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+        row = 9; // global x
+        double globalX = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+        row = 10; // global y
+        double globalY = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+        row = 11; // global z
+        double globalZ = std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+        row = 12; // channels in phi
+        auto channelsinPhi = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
 
 
-      Eigen::Matrix<float, 3, 1> globalPosition(globalX, globalY, globalZ);
-      stripCl->setMeasurement<1>(idHash, localPosition, localCovariance);
+        Eigen::Matrix<float, 3, 1> globalPosition(globalX, globalY, globalZ);
+        stripCl->setMeasurement<1>(idHash, localPosition, localCovariance);
 
-      stripCl->setIdentifier(id);
-      stripCl->setRDOlist(RDOs);
-      stripCl->globalPosition() = globalPosition;
-      stripCl->setChannelsInPhi(channelsinPhi);
+        stripCl->setIdentifier(id);
+        stripCl->setRDOlist(RDOs);
+        stripCl->globalPosition() = globalPosition;
+        stripCl->setChannelsInPhi(channelsinPhi);
+    }
+
+    return StatusCode::SUCCESS;
   }
+
+  ATH_MSG_DEBUG("Doing bulk copy");
+  // Doing bulk copy
+  // --------------------------
+  // Create the container and aux. container
+  // --------------------------
+  auto stripCl = std::make_unique<xAOD::StripClusterContainer>();
+  auto stripClAux = std::make_unique<xAOD::StripClusterAuxContainer>();
+  stripCl->setStore(stripClAux.get());
+
+  // Pre-allocate memory for all clusters in the AuxContainer
+  // and reserve the same space in the container.
+  const size_t nClusters = metadata->numOfStripClusters;
+  stripClAux->resize(nClusters);
+  stripCl->reserve(nClusters);
+
+  // Now, push back the objects
+  // and create them all at once.
+  // Note, that no data is set yet,
+  // we will do that in the next step.
+  for (size_t i = 0; i < nClusters; ++i) {
+    stripCl->push_back(std::make_unique<xAOD::StripCluster>());
+  }
+
+  // --------------------------
+  // Prepare local buffers for each of the
+  // fixed-size attributes.
+  // --------------------------
+  const size_t N = EFTrackingTransient::MAX_NUM_CLUSTERS;
+  const size_t offset = 8;
+
+  // Allocate output buffers
+  std::vector<unsigned int> idHashBuffer(nClusters);
+  std::vector<long unsigned int> identifierBuffer(nClusters);
+  std::vector<std::array<float, 1>> localPosX(nClusters);
+  std::vector<std::array<float, 1>> localCovXX(nClusters);
+  std::vector<std::array<float, 3>> gpBuffer(nClusters);
+  std::vector<int> channelsInPhiBuffer(nClusters);
+
+  // RDO accessor
+  static const SG::Accessor<std::vector<unsigned long long>> rdoListAcc("rdoList");
+  auto rdoSpan = rdoListAcc.getDataSpan(*stripCl);
+
+  // Raw pointer to cluster data
+  const auto* base = stripClusters;
+
+  // Row pointers
+  const auto* idHashPtr       = base + 0 * N + offset;
+  const auto* identifierPtr   = base + 1 * N + offset;
+  const uint64_t* rdoPtrs[4]  = {
+      base + 2 * N + offset,
+      base + 3 * N + offset,
+      base + 4 * N + offset,
+      base + 5 * N + offset
+  };
+  const auto* localPosXPtr    = base + 6 * N + offset;
+  const auto* localCovXXPtr   = base + 8 * N + offset;
+  const auto* gpXPtr          = base + 9 * N + offset;
+  const auto* gpYPtr          = base + 10 * N + offset;
+  const auto* gpZPtr          = base + 11 * N + offset;
+  const auto* channelsPhiPtr  = base + 12 * N + offset;
+
+  // Loop over clusters
+  for (size_t i = 0; i < nClusters; ++i) {
+      idHashBuffer[i] = static_cast<unsigned int>(idHashPtr[i]);
+      identifierBuffer[i] = static_cast<unsigned long>(identifierPtr[i]);
+
+      // RDOs: push non-zero entries into the cluster's list
+      std::vector<unsigned long long>& rdoList = rdoSpan[i];
+      for (int r = 0; r < 4; ++r) {
+        if (!rdoPtrs[r][i]) continue;
+        unsigned long long rdo = static_cast<unsigned long long>(rdoPtrs[r][i]);
+        rdoList.push_back(rdo);
+      }
+
+      localPosX[i][0] = static_cast<float>(std::bit_cast<double>(localPosXPtr[i]));
+      localCovXX[i][0] = static_cast<float>(std::bit_cast<double>(localCovXXPtr[i]));
+
+      gpBuffer[i][0] = static_cast<float>(std::bit_cast<double>(gpXPtr[i]));
+      gpBuffer[i][1] = static_cast<float>(std::bit_cast<double>(gpYPtr[i]));
+      gpBuffer[i][2] = static_cast<float>(std::bit_cast<double>(gpZPtr[i]));
+
+      channelsInPhiBuffer[i] = static_cast<int>(channelsPhiPtr[i]);
+  }
+
+
+  // --------------------------
+  // Now, use SG::Accessors to do a bulk copy into
+  // the container memory.
+  // --------------------------
+
+  // FIXED-SIZE ATTRIBUTES
+  static const SG::Accessor<long unsigned int> idAcc("identifier");
+  static const SG::Accessor<unsigned int> idHashAcc("identifierHash");
+  static const SG::Accessor<std::array<float, 1>> localPosXAcc("localPositionDim1");
+  static const SG::Accessor<std::array<float, 1>> localCovXXAcc("localCovarianceDim1");
+  static const SG::Accessor<int> channelsInPhiAcc("channelsInPhi");
+
+  // VARIABLE-LENGTH ATTRIBUTES
+  static const SG::Accessor<std::array<float, 3>> globalPosAcc("globalPosition");
+
+  // Get spans into the container
+  auto idSpan = idAcc.getDataSpan(*stripCl);
+  auto idHashSpan = idHashAcc.getDataSpan(*stripCl);
+  auto locPosXSpan = localPosXAcc.getDataSpan(*stripCl);
+  auto locCovXXSpan = localCovXXAcc.getDataSpan(*stripCl);
+  auto channelsInPhiSpan = channelsInPhiAcc.getDataSpan(*stripCl);
+  auto gpSpan = globalPosAcc.getDataSpan(*stripCl);
+
+  // Bulk copy the fixed-size attributes
+  CxxUtils::copy_bounded(identifierBuffer, idSpan);
+  CxxUtils::copy_bounded(idHashBuffer, idHashSpan);
+  CxxUtils::copy_bounded(localPosX, locPosXSpan);
+  CxxUtils::copy_bounded(localCovXX, locCovXXSpan);
+  CxxUtils::copy_bounded(gpBuffer, gpSpan);
+  CxxUtils::copy_bounded(channelsInPhiBuffer, channelsInPhiSpan);
+
+
+  ATH_CHECK(stripClustersHandle.record(std::move(stripCl), std::move(stripClAux)));
 
   return StatusCode::SUCCESS;
 }
@@ -163,91 +286,235 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
 
   SG::WriteHandle<xAOD::PixelClusterContainer> pixelClustersHandle{m_pixelClustersKey, ctx};
 
-
-  // --------------------------------------------------------------------
-  // proceed with the element-wise method
-  // --------------------------------------------------------------------
-    ATH_MSG_DEBUG("You are running the element-wise container creation method.");
+  if (!m_doBulkCopy) {
+    // --------------------------------------------------------------------
+    // proceed with the element-wise method
+    // --------------------------------------------------------------------
     Athena::Chrono chrono("ElementWiseMethod", m_chronoSvc.get());
 
     ATH_CHECK(pixelClustersHandle.record(std::make_unique<xAOD::PixelClusterContainer>(),std::make_unique<xAOD::PixelClusterAuxContainer>()));
 
     ATH_CHECK(pixelClustersHandle.isValid());
 
-  for (unsigned int i = 0; i < metadata->numOfPixelClusters; i++)
-  {
-      // Push back numClusters of StripCluster
-      auto pixelCl = pixelClustersHandle->push_back(std::make_unique<xAOD::PixelCluster>());
+    for (unsigned int i = 0; i < metadata->numOfPixelClusters; i++)
+    {
+        // Push back numClusters of StripCluster
+        auto pixelCl = pixelClustersHandle->push_back(std::make_unique<xAOD::PixelCluster>());
 
-      int row = 0; // idhash
-      long unsigned int idHash = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      row = 1; // id
-      unsigned long long id = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      
-      std::vector<Identifier> RDOs;
-      row = 2; // rdo w1
-      unsigned long long rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      if (rdo) RDOs.push_back(Identifier(rdo));
-  
-      row = 3; // rdo w2
-      rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      if (rdo) RDOs.push_back(Identifier(rdo));
-      
-      row = 4; // rdo w3
-      rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      if (rdo) RDOs.push_back(Identifier(rdo));
+        int row = 0; // idhash
+        long unsigned int idHash = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        row = 1; // id
+        unsigned long long id = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        
+        std::vector<Identifier> RDOs;
+        row = 2; // rdo w1
+        unsigned long long rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        if (rdo) RDOs.push_back(Identifier(rdo));
     
-      row = 5; // rdo w4
-      rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-      if (rdo) RDOs.push_back(Identifier(rdo));
-
-      Eigen::Matrix<float, 2, 1> localPosition;
-      Eigen::Matrix<float, 2, 2> localCovariance;
-      localCovariance.setZero();
-      row = 6; // local x
-      localPosition(0 , 0) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-      row = 7; // local y
-      localPosition(1 , 1) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-      row = 8; // local covariance xx
-      localCovariance(0, 0) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-      row = 9; // local covariance yy
-      localCovariance(1, 1) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-      row = 10; // global x
-      float globalX = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-      row = 11; // global y
-      float globalY = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-      row = 12; // global 
-      float globalZ = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-      row = 13; // channels in phi
-      int channelsInPhi = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-
-      row = 14; // channels in eta
-      int channelsInEta = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-
-      row = 15; // width in eta
-      double widthInEta = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-      row = 18; // total ToT
-      int totalToT = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        row = 3; // rdo w2
+        rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        if (rdo) RDOs.push_back(Identifier(rdo));
+        
+        row = 4; // rdo w3
+        rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        if (rdo) RDOs.push_back(Identifier(rdo));
       
-      Eigen::Matrix<float, 3, 1> globalPosition(globalX, globalY, globalZ);
+        row = 5; // rdo w4
+        rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        if (rdo) RDOs.push_back(Identifier(rdo));
 
-      pixelCl->setMeasurement<2>(idHash, localPosition,localCovariance);
-      pixelCl->setIdentifier(id);
-      pixelCl->setRDOlist(RDOs);
-      pixelCl->globalPosition() = globalPosition;
-      pixelCl->setTotalToT(totalToT);
-      pixelCl->setChannelsInPhiEta(channelsInPhi, channelsInEta);
-      pixelCl->setWidthInEta(widthInEta);
-  }
+        Eigen::Matrix<float, 2, 1> localPosition;
+        Eigen::Matrix<float, 2, 2> localCovariance;
+        localCovariance.setZero();
+        row = 6; // local x
+        localPosition(0 , 0) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+        row = 7; // local y
+        localPosition(1 , 1) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+        row = 8; // local covariance xx
+        localCovariance(0, 0) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+        row = 9; // local covariance yy
+        localCovariance(1, 1) = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+        row = 10; // global x
+        float globalX = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+        row = 11; // global y
+        float globalY = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+        row = 12; // global 
+        float globalZ = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+        row = 13; // channels in phi
+        int channelsInPhi = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+
+        row = 14; // channels in eta
+        int channelsInEta = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+
+        row = 15; // width in eta
+        double widthInEta = std::bit_cast<double>(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+
+        row = 18; // total ToT
+        int totalToT = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
+        
+        Eigen::Matrix<float, 3, 1> globalPosition(globalX, globalY, globalZ);
+
+        pixelCl->setMeasurement<2>(idHash, localPosition,localCovariance);
+        pixelCl->setIdentifier(id);
+        pixelCl->setRDOlist(RDOs);
+        pixelCl->globalPosition() = globalPosition;
+        pixelCl->setTotalToT(totalToT);
+        pixelCl->setChannelsInPhiEta(channelsInPhi, channelsInEta);
+        pixelCl->setWidthInEta(widthInEta);
+    }
     return StatusCode::SUCCESS;
+  }
+
+  ATH_MSG_DEBUG("Doing bulk copy");
+  // Doing bulk copy
+  // --------------------------
+  // Create the container and aux. container
+  // --------------------------
+  auto pixelCl = std::make_unique<xAOD::PixelClusterContainer>();
+  auto pixelClAux = std::make_unique<xAOD::PixelClusterAuxContainer>();
+  pixelCl->setStore(pixelClAux.get());
+
+  // Pre-allocate memory for all clusters in the AuxContainer
+  // and reserve the same space in the container.
+  const size_t nClusters = metadata->numOfPixelClusters;
+  pixelClAux->resize(nClusters);
+  pixelCl->reserve(nClusters);
+
+  // Now, push back the PixelCluster objects
+  // and create them all at once.
+  // Note, that no data is set yet,
+  // we will do that in the next step.
+  for (size_t i = 0; i < nClusters; ++i) {
+    pixelCl->push_back(std::make_unique<xAOD::PixelCluster>());
+  }
+
+  // --------------------------
+  // Prepare local buffers for each of the
+  // fixed-size attributes.
+  // --------------------------
+  const size_t N = EFTrackingTransient::MAX_NUM_CLUSTERS;
+  const size_t offset = 8;
+
+  // RDO accessor
+  static const SG::Accessor<std::vector<unsigned long long>> rdoListAcc("rdoList");
+  auto rdoSpan = rdoListAcc.getDataSpan(*pixelCl);
+
+  const auto* base = pixelClusters;
+
+  // Row pointers (only once)
+  const auto* idHashPtr       = base + 0 * N + offset;
+  const auto* identifierPtr   = base + 1 * N + offset;
+  const uint64_t* rdoPtrs[4]  = {
+      base + 2 * N + offset,
+      base + 3 * N + offset,
+      base + 4 * N + offset,
+      base + 5 * N + offset
+  };
+  const auto* localXPtr       = base + 6 * N + offset;
+  const auto* localYPtr       = base + 7 * N + offset;
+  const auto* covXXPtr        = base + 8 * N + offset;
+  const auto* covYYPtr        = base + 9 * N + offset;
+  const auto* gpXPtr          = base + 10 * N + offset;
+  const auto* gpYPtr          = base + 11 * N + offset;
+  const auto* gpZPtr          = base + 12 * N + offset;
+  const auto* channelsPhiPtr  = base + 13 * N + offset;
+  const auto* channelsEtaPtr  = base + 14 * N + offset;
+  const auto* widthEtaPtr     = base + 15 * N + offset;
+  const auto* totalToTPtr     = base + 18 * N + offset;
+
+
+  std::vector<long unsigned int> identifierBuffer(nClusters);
+  std::vector<unsigned int> idHashBuffer(nClusters);
+  std::vector<std::array<float, 3>> gpBuffer(nClusters);
+  std::vector<std::array<float, 2>> localPositionBuffer(nClusters);
+  std::vector<std::array<float, 4>> localCovarianceBuffer(nClusters);
+  std::vector<int> totalToTBuffer(nClusters);
+  std::vector<float> widthInEtaBuffer(nClusters);
+  std::vector<int> channelsInPhiBuffer(nClusters);
+  std::vector<int> channelsInEtaBuffer(nClusters);
+
+  for (unsigned int i = 0; i < metadata->numOfPixelClusters; ++i) {
+
+      // Basic IDs
+      idHashBuffer[i] = static_cast<unsigned int>(idHashPtr[i]);
+      identifierBuffer[i] = static_cast<unsigned long>(identifierPtr[i]);
+
+      // RDOs: push non-zero entries into the cluster's list
+      std::vector<unsigned long long>& rdoList = rdoSpan[i];
+      for (int r = 0; r < 4; ++r) {
+        if (!rdoPtrs[r][i]) continue;
+        unsigned long long rdo = static_cast<unsigned long long>(rdoPtrs[r][i]);
+        rdoList.push_back(rdo);
+      }
+
+      localPositionBuffer[i][0] = static_cast<float>(std::bit_cast<double>(localXPtr[i]));
+      localCovarianceBuffer[i][0] = static_cast<float>(std::bit_cast<double>(covXXPtr[i]));
+
+      localPositionBuffer[i][1] = static_cast<float>(std::bit_cast<double>(localYPtr[i]));
+      localCovarianceBuffer[i][3] = static_cast<float>(std::bit_cast<double>(covYYPtr[i]));
+
+      gpBuffer[i][0] = static_cast<float>(std::bit_cast<double>(gpXPtr[i]));
+      gpBuffer[i][1] = static_cast<float>(std::bit_cast<double>(gpYPtr[i]));
+      gpBuffer[i][2] = static_cast<float>(std::bit_cast<double>(gpZPtr[i]));
+
+      // Additional attributes
+      channelsInPhiBuffer[i] = static_cast<int>(channelsPhiPtr[i]);
+      channelsInEtaBuffer[i] = static_cast<int>(channelsEtaPtr[i]);
+      widthInEtaBuffer[i] = static_cast<float>(std::bit_cast<double>(widthEtaPtr[i]));
+      totalToTBuffer[i] = static_cast<int>(totalToTPtr[i]);
+
+  }
+
+
+  // --------------------------
+  // Now, use SG::Accessors to do a bulk copy into
+  // the container memory.
+  // --------------------------
+
+  // FIXED-SIZE ATTRIBUTES
+  static const SG::Accessor<long unsigned int> idAcc("identifier");
+  static const SG::Accessor<unsigned int> idHashAcc("identifierHash");
+  static const SG::Accessor<std::array<float, 3>> globalPosAcc("globalPosition");
+  static const SG::Accessor<std::array<float, 2>> localPosAcc("localPositionDim2");
+  static const SG::Accessor<std::array<float, 4>> localCovAcc("localCovarianceDim2");
+  static const SG::Accessor<int> totalToTAcc("totalToT");
+  static const SG::Accessor<int> channelsInPhiAcc("channelsInPhi");
+  static const SG::Accessor<int> channelsInEtaAcc("channelsInEta");
+  static const SG::Accessor<float> widthInEtaAcc("widthInEta");
+
+  // Get spans into the container
+  auto idSpan = idAcc.getDataSpan(*pixelCl);
+  auto idHashSpan = idHashAcc.getDataSpan(*pixelCl);
+  auto gpSpan = globalPosAcc.getDataSpan(*pixelCl);
+  auto locPosSpan = localPosAcc.getDataSpan(*pixelCl);
+  auto locCovSpan = localCovAcc.getDataSpan(*pixelCl);
+  auto totalToTSpan = totalToTAcc.getDataSpan(*pixelCl);
+  auto channelsInPhiSpan = channelsInPhiAcc.getDataSpan(*pixelCl);
+  auto channelsInEtaSpan = channelsInEtaAcc.getDataSpan(*pixelCl);
+  auto widthInEtaSpan = widthInEtaAcc.getDataSpan(*pixelCl);
+
+  // Bulk copy the fixed-size attributes
+  CxxUtils::copy_bounded(identifierBuffer, idSpan);
+  CxxUtils::copy_bounded(idHashBuffer, idHashSpan);
+  CxxUtils::copy_bounded(localPositionBuffer, locPosSpan);
+  CxxUtils::copy_bounded(localCovarianceBuffer, locCovSpan);
+  CxxUtils::copy_bounded(gpBuffer, gpSpan);
+  CxxUtils::copy_bounded(totalToTBuffer, totalToTSpan);
+  CxxUtils::copy_bounded(channelsInPhiBuffer, channelsInPhiSpan);
+  CxxUtils::copy_bounded(channelsInEtaBuffer, channelsInEtaSpan);
+  CxxUtils::copy_bounded(widthInEtaBuffer, widthInEtaSpan);
+
+  ATH_CHECK(pixelClustersHandle.record(std::move(pixelCl), std::move(pixelClAux)));
+
+
+  return StatusCode::SUCCESS;
 }
 
 

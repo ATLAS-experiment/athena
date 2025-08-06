@@ -324,9 +324,24 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
       ATH_MSG_DEBUG("No tracking. Just running dummy road2track algorith");
       roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0));
     }
-    //Loop over tracks and set the region for all of them
+
+    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
+    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
+    //Loop over tracks and set the region for all of them, also optionally set track parameters to truth
     for (FPGATrackSimTrack& track : tracks_1st) {
         track.setRegion(m_region);
+	if (m_SetTruthParametersForTracks >= 0 && truthtracks.size() > 0) {
+	  if (m_SetTruthParametersForTracks != 0)
+	    track.setQOverPt(truthtracks.front().getQOverPt());
+	  else if	(m_SetTruthParametersForTracks != 1)
+	    track.setD0(truthtracks.front().getD0());
+	  else if (m_SetTruthParametersForTracks != 2)
+	    track.setPhi(truthtracks.front().getPhi());
+	  else if (m_SetTruthParametersForTracks != 3)
+	    track.setZ0(truthtracks.front().getZ0());
+	  else if (m_SetTruthParametersForTracks != 4)
+	    track.setEta(truthtracks.front().getEta());
+	}
     }
     // Loop over roads and store them in SG (after track finding to also copy the sector information)
     for (auto const& road : roads_1st) {
@@ -349,11 +364,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Overlap removal
     if (m_doOverlapRemoval)  ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
 
-    // If running NN Track tool, now we get the track parameters (it's slow so we only do it for tracks passing OLR)
-    if (m_doTracking && m_doNNTrack) {
-      ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks_1st,true,m_evtSel->getMin(), m_evtSel->getMax()));
-    }
-    
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks_1st) {
       if (track.getChi2ndof() < m_trackScoreCut.value()) {
@@ -377,8 +387,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_nTracksTot += tracks_1st.size();
 
     // Do some simple monitoring of efficiencies. okay, we need truth tracks here.
-    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
-    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
     if (truthtracks.size() > 0) {
         m_evt_truth++;
         auto passroad = Monitored::Scalar<bool>("eff_road",(roads_1st.size() > 0));
