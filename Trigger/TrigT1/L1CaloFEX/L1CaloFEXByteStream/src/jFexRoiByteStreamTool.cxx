@@ -459,11 +459,13 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                 tobIndex -= n_xjTau;
 
                 //saving xjLJ into the EDM container
+                /* Aug 2025 - commented out so that we no longer fill jLJ collections. May be resurrected for run4
+                 * so am leaving this code commented
                 for(unsigned int i=tobIndex; i>tobIndex-n_xjLJ; i--) {
                     const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jLJ xTOB");
                     jLJContainer->push_back( std::make_unique<xAOD::jFexLRJetRoI>() );
                     jLJContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),0, m_jLJRes, eta, phi);
-                }
+                } */
                 //removing xjLJ counter from TOBs
                 tobIndex -= n_xjLJ;
 
