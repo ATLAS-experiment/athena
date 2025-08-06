@@ -45,6 +45,8 @@ namespace ActsTrk {
 			      const Acts::Surface& surface,
 			      const Acts::Vector3& bField) const override;
 
+    SpacePointIndicesFun_t spacePointIndicesFun() const override;
+
     // *********************************************************************
 
   private:
@@ -86,6 +88,8 @@ namespace ActsTrk {
 
     /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger;
+
+    SpacePointIndicesFun_t m_spacePointIndicesFun{};
   };
   
 } // namespace

@@ -6,6 +6,7 @@
 
 #include "src/detail/MeasurementIndex.h"
 #include <stdexcept>
+#include <array>
 
 namespace ActsTrk::detail {
 
@@ -25,6 +26,16 @@ namespace ActsTrk::detail {
   void DuplicateSeedDetector::addSeeds(std::size_t typeIndex,
                                        const ActsTrk::SeedContainer &seeds,
                                        const MeasurementIndex& measurementIndex) {
+    addSeeds(typeIndex, seeds, measurementIndex,
+             [](std::size_t) -> std::array<std::size_t, 3> { return {0, 1, 2}; },
+             [](const ActsTrk::Seed&) -> bool { return false; });
+  }
+
+  void DuplicateSeedDetector::addSeeds(std::size_t typeIndex,
+                                       const ActsTrk::SeedContainer &seeds,
+                                       const MeasurementIndex& measurementIndex,
+                                       SpacePointIndicesFun_t spacePointIndicesFun,
+                                       UseTopSpFun_t useTopSpFun) {
     if (m_disabled)
       return;
     if (!(typeIndex < m_seedOffset.size()))
@@ -37,7 +48,10 @@ namespace ActsTrk::detail {
         continue;
 
       std::size_t nSP = 0;
-      for (const xAOD::SpacePoint *sp : seed->sp()) {
+      bool useTopSp = useTopSpFun(*seed);
+      const auto& sps = seed->sp();
+      for (std::size_t isp : spacePointIndicesFun(sps.size())) {
+        const xAOD::SpacePoint *sp = sps.at(useTopSp ? sps.size() - isp - 1 : isp);
         const std::vector<const xAOD::UncalibratedMeasurement *> &els = sp->measurements();
         for (const xAOD::UncalibratedMeasurement *meas : els) {
           std::size_t hitIndex = measurementIndex.index(*meas);

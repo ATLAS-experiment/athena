@@ -220,7 +220,14 @@ namespace ActsTrk
                                                         m_skipDuplicateSeeds);
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
       {
-        duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex);
+        duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex,
+                                       m_paramEstimationTool->spacePointIndicesFun(),
+                                       [this,icontainer](const ActsTrk::Seed& seed) -> bool {
+                                         const bool reverseSearch = m_autoReverseSearch && shouldReverseSearch(seed);
+                                         const bool refitSeeds = icontainer < m_refitSeeds.size() && m_refitSeeds[icontainer];
+                                         const bool useTopSp = reverseSearch && !refitSeeds;
+                                         return useTopSp;
+                                       });
       }
     
     // Get Beam pos and make pSurface
