@@ -184,15 +184,28 @@ def _pythonize_tfile():
 def _getLeaf (l):
     tname = l.GetTypeName()
     ndat = l.GetNdata()
-    if tname in ['UInt_t', 'Int_t', 'ULong64_t', 'Long64_t']:
-        return [l.GetValueLong64(i) for i in range(ndat)]
-    if tname in ['Float_t', 'Double_t']:
-        return [l.GetValue(i) for i in range(ndat)]
-    if tname in ['Char_t']:
-        try:
-            return l.GetValueString() # TLeafC for variable size string
-        except Exception:
-            return [l.GetValue(i) for i in range(ndat)] # TLeafB for 8-bit integers
+    if (l.GetLeafCount()  # a varying length array
+        or ndat > 1):     # a fixed size array
+        if tname in ['UInt_t', 'Int_t', 'ULong_t', 'Long_t', 'ULong64_t', 'Long64_t', 'UShort_t', 'Short_t', 'Bool_t']:
+            return tuple(l.GetValueLong64(i) for i in range(ndat))
+        elif tname in ['Float_t', 'Double_t', 'Float16_t', 'Double32_t']:
+            return tuple(l.GetValue(i) for i in range(ndat))
+        elif tname in ['UChar_t', 'Char_t']:
+            try:
+                return l.GetValueString() # TLeafC for variable size string
+            except Exception:
+                return tuple(l.GetValueLong64(i) for i in range(ndat)) # TLeafB for 8-bit integers
+    elif ndat == 1:  # a single value
+        if tname in ['UInt_t', 'Int_t', 'ULong_t', 'Long_t', 'ULong64_t', 'Long64_t', 'UShort_t', 'Short_t', 'Bool_t']:
+            return l.GetValueLong64()
+        elif tname in ['Float_t', 'Double_t', 'Float16_t', 'Double32_t']:
+            return l.GetValue()
+        elif tname in ['UChar_t', 'Char_t']:
+            try:
+                return l.GetValueString()  # TLeafC for variable size string
+            except Exception:
+                return l.GetValueLong64()  # TLeafB for 8-bit integers
+
     return None
 
 class RootFileDumper(object):
@@ -201,7 +214,7 @@ class RootFileDumper(object):
     any TTree.
     """
     
-    def __init__(self, fname, tree_name="CollectionTree"):
+    def __init__(self, fname, tree_name=None):
         object.__init__(self)
 
         ROOT = import_root()
@@ -231,9 +244,27 @@ class RootFileDumper(object):
     def __init_obj(self, obj_name):
 
         ROOT = import_root()
-        obj = self.root_file.Get(obj_name)
-        if obj is None or not isinstance(obj, ROOT.TTree) and not isinstance(obj, ROOT.RNTuple):
-            raise AttributeError('no TTree or RNTuple %r in file %r' % (obj_name, self.root_file.GetName()))
+        from PyUtils.PoolFile import PoolOpts
+        TTreeNames = PoolOpts.TTreeNames
+        RNTupleNames = PoolOpts.RNTupleNames
+
+        if obj_name is None:
+            for id in ((TTreeNames.EventData, ROOT.TTree), (RNTupleNames.EventData, ROOT.RNTuple)):
+                name, klass = id
+                if (obj := self.root_file.Get(name)) and isinstance(obj, klass):
+                    self.obj_name = name
+                    break
+            else:
+                raise AttributeError('No TTree named %r or RNTuple named %r in file %r' %
+                                     (TTreeNames.EventData, RNTupleNames.EventData,
+                                      self.root_file.GetName()))
+        else:
+            if (not (obj := self.root_file.Get(obj_name)) or
+                not isinstance(obj, ROOT.TTree) and not isinstance(obj, ROOT.RNTuple)):
+                raise AttributeError('No TTree or RNTuple named %r in file %r' %
+                                     (obj_name, self.root_file.GetName()))
+            self.obj_name = obj_name
+
         if isinstance(obj, ROOT.RNTuple):
             try:
                 self.obj = ROOT.RNTupleReader.Open(obj)
@@ -243,7 +274,6 @@ class RootFileDumper(object):
             self.obj = obj
             # in case it is used somewhere
             self.tree = self.obj
-        self.obj_name = obj_name
 
     def _dump(self, obj, itr_entries, leaves=None, retvecs=False, sortleaves=True):
         ROOT = import_root()
@@ -260,8 +290,9 @@ class RootFileDumper(object):
                                       (obj.__class__.__name__,))
 
     def dump(self, tree_name, itr_entries, leaves=None, retvecs=False, sortleaves=True):
-        if getattr(self, "obj_name", None) != tree_name:
-            self.__init_obj(tree_name)
+        if (tree_name is None and getattr(self, "obj_name", None) is None or
+            tree_name is not None and getattr(self, "obj_name", None) != tree_name):
+                self.__init_obj(tree_name)
         yield from self._dump(self.obj, itr_entries, leaves, retvecs, sortleaves)
 
     def _tree_dump(self, tree, itr_entries, leaves=None, retvecs=False, sortleaves=True):
@@ -333,7 +364,7 @@ class RootFileDumper(object):
                 hdr = "::  branch [%s]..." % (br_name,)
                 #print (hdr)
                 #tree.GetBranch(br_name).GetEntry(ientry)
-                py_name = [br_name]
+                _vals = list()
 
                 br = tree.GetBranch (br_name)
                 if br.GetClassName() != '':
@@ -344,15 +375,17 @@ class RootFileDumper(object):
                     # See ATEAM-1000.
                     getattr (ROOT, br.GetClassName())
                     val = getattr(tree, br_name)
+                    _vals += [ ([br_name], val) ]
                 else:
-                    vals = [_getLeaf (l) for l in br.GetListOfLeaves()]
-                    if len(vals) == 0:
-                        val = None
-                    elif len(vals) == 1:
-                        val = vals
-                    else:
-                        val = tuple(vals)
-                if not (val is None):
+                    for l in br.GetListOfLeaves():
+                        if (br.GetNleaves() == 1 and (br_name == l.GetName() or
+                                                      br_name.endswith('.' + l.GetName()))):
+                            _vals += [ ([br_name], _getLeaf (l)) ]
+                        else:
+                            _vals += [ ([br_name, l.GetName()], _getLeaf (l)) ]
+                for _val in _vals:
+                    py_name, val = _val
+                    if val is None: continue
                     try:
                         vals = _pythonize(val, py_name, True, retvecs)
                     except Exception as err:

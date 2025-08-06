@@ -75,8 +75,8 @@ def _vecdiff (v1, v2, nan_equal):
 @acmdlib.argument('new',
                   help='path to the ROOT file to compare to the reference')
 @acmdlib.argument('-t', '--tree-name',
-                  default='CollectionTree',
-                  help='name of the TTree to compare')
+                  default=None,
+                  help='name of the TTree or RNTuple to compare')
 @acmdlib.argument('--branches-of-interest',
                   nargs='+',
                   default=set(),
@@ -418,17 +418,19 @@ def main(args):
             """
             for pattern in skip_leaves:
                 try:
-                    m = re.match(pattern, name_from_dump)
-                except TypeError:
+                    if re.match(pattern, name_from_dump):
+                        return True
+                except re.error as e:
+                    from traceback import format_exception
+                    msg.error("Exception '%s', pattern %r, line %s, column %s\n%s",
+                              e, e.pattern, e.lineno, e.colno, "".join(format_exception(e)))
                     continue
-                if m:
-                    return True
             else:
                 return False
 
         @cache
         def skip_leaf_entry(entry2, skip_leaves):
-            leafname = '.'.join([s for s in entry2 if not s.isdigit()])
+            leafname = '.'.join(s for s in entry2 if not s.isdigit())
             return skip_leaf (leafname, skip_leaves)
 
         def filter_branches(leaves):
@@ -574,7 +576,7 @@ def main(args):
             if entry is None:
                 return None
             else:
-                return '.'.join([s for s in entry[2] if not s.isdigit()])
+                return '.'.join(s for s in entry[2] if not s.isdigit())
 
         def elindices_fromdump(entry):
             if entry is None:
@@ -640,8 +642,33 @@ def main(args):
 
             if d_old:    
                 tree_name, ientry, iname, iold = d_old
+            else:
+                msg.debug("try to delete 'ientry', 'iname', 'iold'")
+                try: del ientry, iname, iold
+                except NameError: pass
             if d_new:
                 tree_name, jentry, jname, inew = d_new
+            else:
+                msg.debug("try to delete 'jentry', 'jname', 'inew'")
+                try: del jentry, jname, inew
+                except NameError: pass
+
+            if not d_old:
+                # FIXME: that's a plain (temporary?) hack
+                if jname[-1] in args.known_hacks:
+                    continue
+                fold.allgood = False
+                summary[leafname_fromdump(d_new)] += 1
+                n_bad += 1
+                continue
+            elif not d_new:
+                # FIXME: that's a plain (temporary?) hack
+                if iname[-1] in args.known_hacks:
+                    continue
+                fnew.allgood = False
+                summary[leafname_fromdump(d_old)] += 1
+                n_bad += 1
+                continue
 
             idiff = _vecdiff (iold, inew, args.nan_equal)
             if idiff is None:
@@ -650,8 +677,8 @@ def main(args):
             elif idiff >= 0:
                 iold = iold[idiff]
                 inew = inew[idiff]
-                iname = iname[:-1] + [idiff] + iname[-1:]
-                jname = jname[:-1] + [idiff] + jname[-1:]
+                iname.insert(-1, str(idiff))
+                jname.insert(-1, str(idiff))
 
             # for regression testing we should have NAN == NAN
             if args.nan_equal:
@@ -680,11 +707,11 @@ def main(args):
             if not in_synch:
                 if _is_detailed(args):
                     if d_old:
-                        msg.info('::sync-old %s','.'.join(["%03i"%ientry]+list(map(str, d_old[2]))))
+                        msg.info('::sync-old %s','.'.join(["%03i"%ientry]+d_old[2]))
                     else:
                         msg.info('::sync-old ABSENT')
                     if d_new:
-                        msg.info('::sync-new %s','.'.join(["%03i"%jentry]+list(map(str, d_new[2]))))
+                        msg.info('::sync-new %s','.'.join(["%03i"%jentry]+d_new[2]))
                     else:
                         msg.info('::sync-new ABSENT')
                     pass
@@ -749,9 +776,9 @@ def main(args):
                 continue
 
             if not args.order_trees:
-                n = '.'.join(list(map(str, ["%03i"%ientry]+iname)))
+                n = '.'.join(["%03i"%ientry]+iname)
             else:
-                n = '.'.join(list(map(str, ["%03i"%ientry]+iname+["%03i"%jentry]+jname)))
+                n = '.'.join(["%03i"%ientry]+iname+["%03i"%jentry]+jname)
             diff_value = 'N/A'
             try:
                 diff_value = 50.*(iold-inew)/(iold+inew)
