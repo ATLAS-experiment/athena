@@ -138,8 +138,6 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
           MC::isStable(truthParticle) && HepMC::generations(truthParticle) < 1) {
         m_oElectronValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                          *eventInfo);
-        m_oElectronValidationPlots.m_oTruthPromptElecPlots.fill(*truthParticle,
-                                                           *eventInfo);
       } //-- end electrons
 
       //--photons
@@ -150,8 +148,6 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
         //-- filling conversions
         const xAOD::TruthParticle* tmp =
           xAOD::TruthHelpers::getTruthParticle(*truthParticle); // 20.7.0.1
-        //      const xAOD::TruthParticle* tmp =
-        //      xAOD::EgammaHelpers::getTruthParticle( truthParticle );
         bool isTrueConv = false;
         float trueR = -999;
         float truthEta = -999;
@@ -220,76 +216,6 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
         }   //--  end recoPhoton
       }     //-- end Photons
     }       // -- end fill histos iso particles
-    // filling all truth particles from TruthParticles container (possibly will
-    // be deleted, also possibly to fill only prompt particles)
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthallParticles(
-      m_truthParticleContainerKey, ctx);
-    ATH_CHECK(truthallParticles.isValid());
-
-    MCTruthPartClassifier::Info info;
-    bool elecPrompt = false;
-    bool photonPrompt = false;
-
-    for (const auto* const truthallParticle :
-         *truthallParticles) { // Electrons and photons from standard
-                               // TruthParticle container
-
-      //--electrons
-      if (std::abs(truthallParticle->pdgId()) == 11 &&
-          MC::isStable(truthallParticle) &&
-          HepMC::generations(truthallParticle) == 0) {
-
-        auto type = m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
-        if (type.first == IsoElectron)
-          elecPrompt = true;
-
-        m_oElectronValidationPlots.m_oTruthAllPlots.fill(*truthallParticle,
-                                                         *eventInfo);
-          if (elecPrompt) {
-              m_oElectronValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle,
-                                                                  *eventInfo);
-              m_oElectronValidationPlots.m_oTruthAllPromptPlots.fill(*truthallParticle,
-                                                                  *eventInfo);
-          }
-      } //-- end electrons
-
-      //--photons
-      if (std::abs(truthallParticle->pdgId()) == 22 &&
-          MC::isStable(truthallParticle) &&
-          HepMC::generations(truthallParticle) == 0) {
-
-        auto type = m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
-        if (type.first == IsoPhoton)
-          photonPrompt = true;
-
-
-        m_oPhotonValidationPlots.m_oTruthAllPlots.fill(*truthallParticle,
-                                                       *eventInfo);
-
-        if (!photonPrompt)
-          continue;
-        if (truthallParticle->pt() / GeV > 20. &&
-            fabs(truthallParticle->eta()) < 2.47) {
-          m_oPhotonValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle, *eventInfo);
-          m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
-          ParticleOutCome photOutCome = info.particleOutCome;
-
-          float convTruthR = 9999.;
-          if (truthallParticle->decayVtx())
-            convTruthR = truthallParticle->decayVtx()->perp();
-          // std::cout<<"Truth Conversion R "<<convTruthR<<std::endl;
-          // m_oPhotonValidationPlots.convTruthR->Fill(convTruthR);
-
-          // fill only iso photon for conv and not converted
-          if (photOutCome == Converted && convTruthR < 800.)
-            m_oPhotonValidationPlots.m_oTruthAllIsoConvPlots.fill(
-              *truthallParticle, *eventInfo);
-          else
-            m_oPhotonValidationPlots.m_oTruthAllIsoUncPlots.fill(
-              *truthallParticle, *eventInfo);
-        } // end cuts on truth
-      }   // -- end photons
-    }
 
     //---------Electrons----------------------
     if (!fillRecoElecHistograms(truthParticles.ptr(), eventInfo.ptr())) {
