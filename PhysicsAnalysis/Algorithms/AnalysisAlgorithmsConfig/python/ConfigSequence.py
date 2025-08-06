@@ -5,6 +5,7 @@ logCPAlgCfgSeq = logging.getLogger('CPAlgCfgSeq')
 
 from functools import wraps
 from random import randrange
+import re
 
 def groupBlocks(func):
     """
@@ -126,6 +127,10 @@ class ConfigSequence:
         contain all the blocks that will be configured, as it will
         perform all configuration steps at once.
         """
+        for block in self._blocks:
+            if re.compile ('^[_a-zA-Z0-9]*$').match (block.instanceName()) is None :
+                raise ValueError (f'invalid block instance name: {block.instanceName()} for {block.factoryName()}')
+
         self.reorderAlgs()
         self.makeAlgs (config)
         config.nextPass ()
@@ -247,6 +252,20 @@ class ConfigSequence:
         for block in self._blocks:
             block.setOptionValue('groupName', groupName)
 
+
+    def setFactoryName(self, factoryName):
+        """
+        Set the factory name for all blocks in the sequence.
+
+        This is used to set a common factory name for all blocks, which
+        can be useful for debugging or logging purposes.
+        """
+        if len(self._blocks) == 1:
+            self._blocks[0].setFactoryName(factoryName)
+        else:
+            # append [index] to factoryName for each block
+            for index, block in enumerate(self._blocks):
+                block.setFactoryName(f"{factoryName}[{index}:{block.__class__.__name__}]")
 
     def __iadd__( self, sequence, index = None ):
         """Add another sequence to this one

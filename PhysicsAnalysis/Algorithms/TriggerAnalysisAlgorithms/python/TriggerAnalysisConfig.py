@@ -74,6 +74,10 @@ class TriggerAnalysisBlock (ConfigBlock):
         self.addOption ('noL1', False, type=bool,
             info="")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # no instance name, as this is a singleton block
+
     @staticmethod
     def makeTriggerDecisionTool(config):
         # Might have already been added

@@ -25,11 +25,15 @@ class LeptonSFCalculatorBlock(ConfigBlock):
         self.addOption('lepton_postfix', None, type=str,
                        info='the name of the common lepton SF, e.g. `tight`.')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.lepton_postfix
+
     def makeAlgs(self, config):
         if config.dataType() is DataType.Data: return
 
         alg = config.createAlgorithm('CP::LeptonSFCalculatorAlg',
-                                     f'leptonSFCalculator_{self.lepton_postfix}')
+                                     'leptonSFCalculator')
 
         if self.electrons:
             electrons, electronSelection = config.readNameAndSelection(self.electrons)

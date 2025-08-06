@@ -32,9 +32,13 @@ class FakeBkgBlock(ConfigBlock):
         self.addOption('definition', '', type=str,
                        info='this argument allows the user to specify the definition of the region of interest, in terms of how many (tight) leptons are selected, and how extra leptons are treated (vetoed or not). This must describe the way events are selected in the main analysis. More details [here](https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/AnalysisCommon/FakeBkgTools/doc/arg_selection.md).')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.setupName
+
     def makeAlgs(self, config):
 
-        alg = config.createAlgorithm('CP::FakeBkgCalculatorAlg', 'FakeBkgCalculatorAlg_' + self.setupName)
+        alg = config.createAlgorithm('CP::FakeBkgCalculatorAlg', 'FakeBkgCalculatorAlg')
 
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.electronSelectionTarget = config.getFullSelection(self.electrons.split(".")[0], self.electronsTarget)

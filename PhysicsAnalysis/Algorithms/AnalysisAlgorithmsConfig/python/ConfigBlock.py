@@ -117,6 +117,7 @@ class ConfigBlock:
 
     def __init__ (self) :
         self._blockName = ''
+        self._factoryName = None
         self._dependencies = []
         self._options = {}
         # used with block configuration to set arbitrary option
@@ -172,6 +173,33 @@ class ConfigBlock:
     def getBlockName(self):
         """Get blockName"""
         return self._blockName
+
+    def factoryName(self):
+        """get the factory name for this block
+        
+        This is mostly to give a reliable means of identifying the type
+        of block we have in error messages. This is meant to be
+        automatically set by the factory based on the requested block
+        name, but there are a number of fallbacks. It is best not to
+        assume a specific format, this is mostly meant to be used as an
+        identifier in output messages.
+        """
+        if self._factoryName is not None and self._factoryName != '':
+            return self._factoryName
+        # If no factory name is set and the block has a name, use that
+        if self._blockName is not None and self._blockName != '':
+            return self._blockName
+        # Use the class name as a fallback
+        return self.__class__.__name__
+
+    def setFactoryName(self, name):
+        """set the factory name for this block
+        
+        This is meant to be called automatically by the factory based on
+        the requested block name. If you are creating a block without a factory,
+        you can call this method to set the factory name manually.
+        """
+        self._factoryName = name
 
     def instanceName(self):
         """Get the name of the instance

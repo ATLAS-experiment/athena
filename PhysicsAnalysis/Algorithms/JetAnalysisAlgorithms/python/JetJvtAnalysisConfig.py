@@ -22,6 +22,9 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         self.addOption ('enableFJvt', False, type=bool,
             info="whether to enable forward JVT calculations. The default is False.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
 
     def makeAlgs (self, config) :
 
@@ -32,7 +35,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         # Set up the per-event jet efficiency scale factor calculation algorithm
-        alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'JvtEventScaleFactorAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'JvtEventScaleFactorAlg' )
         preselection = config.getFullSelection (self.containerName, '')
         alg.preselection = preselection + '&&no_jvt' if preselection else 'no_jvt'
         alg.scaleFactorInputDecoration = 'jvt_effSF_%SYS%'

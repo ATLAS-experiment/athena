@@ -22,6 +22,10 @@ class PrintToolConfigAlgBlock(ConfigBlock):
                        info="Directory where the output file will be written. If 'None',"
                        " the current directory of the job.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # no instance name needed for singleton block
+
     def get_output_path(self) -> Path:
         """Get the complete output file path.
 

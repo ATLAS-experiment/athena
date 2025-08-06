@@ -38,6 +38,10 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         self.addOption ('outputTrackSummaryInfo', False, type=bool,
             info="decorate track summary information on the reconstructed object")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
+
     def makeAlgs (self, config) :
         inputContainer = "InDetTrackParticles"
         if self.inputContainer:
@@ -46,12 +50,12 @@ class InDetTrackCalibrationConfig (ConfigBlock):
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
-            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'InDetTrackShallowCopyAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'InDetTrackShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
 
         # Set up the eta-cut on all tracks prior to everything else
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackEtaCutAlg' + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackEtaCutAlg' )
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         alg.selectionTool.maxEta = self.maxEta
@@ -60,7 +64,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         if self.minPt > 0 : # Set up the the pt selection
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackPtCutAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackPtCutAlg' )
             alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
             alg.selectionTool.minPt = self.minPt
@@ -71,7 +75,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
 
         # Set up the smearing algorithm:
         if config.dataType() is not DataType.Data:
-            alg = config.createAlgorithm( 'CP::InDetTrackSmearingAlg', 'InDetTrackSmearingAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::InDetTrackSmearingAlg', 'InDetTrackSmearingAlg' )
             config.addPrivateTool( 'smearingTool', 'InDet::InDetTrackSmearingTool' )
             if self.smearingToolSeed:
                 alg.smearingTool.Seed = self.smearingToolSeed
@@ -159,6 +163,13 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             info="whether to retain only tracks satisfying the cutLevel "
             "requirements. The default is True.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None:
+            return self.containerName + self.selectionName + self.postfix
+        else:
+            return self.containerName + self.selectionName
+
     def makeAlgs (self, config) :
         log = logging.getLogger('InDetTrackWorkingPointConfig')
 
@@ -175,7 +186,7 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
         cutLevels = ["NoCut", "Loose", "LoosePrimary", "TightPrimary", "LooseMuon",
                      "LooseElectron", "LooseTau", "MinBias", "HILoose", "HITight",
                      "HILooseOptimized", "HITightOptimized"]
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackSelectionAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackSelectionAlg' )
         alg.selectionDecoration = 'selectTrack' + postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'InDet::InDetTrackSelectionTool')
         if self.cutLevel is None:

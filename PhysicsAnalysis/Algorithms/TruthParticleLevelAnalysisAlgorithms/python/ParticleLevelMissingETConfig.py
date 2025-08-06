@@ -15,10 +15,14 @@ class ParticleLevelMissingETBlock(ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs(self, config):
         # decorate the energy and phi so we can save them later
         alg = config.createAlgorithm( 'CP::ParticleLevelMissingETAlg',
-                                      'ParticleLevelMissingET' + self.containerName,
+                                      'ParticleLevelMissingET',
                                       reentrant=True )
         alg.met = self.containerName
 

@@ -248,6 +248,9 @@ class ConfigAccumulator :
         Blocks should not call this directly, but rather implement the
         instanceName method, which will be used to generate the postfix
         automatically."""
+        # make sure the postfix matches the expected format ([_a-zA-Z0-9]*)
+        if re.compile ('^[_a-zA-Z0-9]*$').match (postfix) is None :
+            raise ValueError ('invalid algorithm postfix: ' + postfix)
         if postfix == '' :
             self._algPostfix = ''
         elif postfix[0] != '_' :
