@@ -1001,7 +1001,7 @@ void TConvertingBranchElement::ReadLeavesCollectionConverting(TBuffer& b)
    }
    fNdata = n;
 
-   R__PushCache onfileObject(((TBufferFile&)b),fOnfileObject,n);   
+   R__PushCache onfileObject((static_cast<TBufferFile&>(b)),fOnfileObject,n);
 
    if (!fObject) {
       return;
@@ -1082,7 +1082,7 @@ void TConvertingBranchElement::ReadLeavesMemberBranchCountConverting(TBuffer& b)
       return;
    }
 
-   R__PushCache onfileObject(((TBufferFile&)b),fOnfileObject,1);
+   R__PushCache onfileObject((static_cast<TBufferFile&>(b)),fOnfileObject,1);
    // If not a TClonesArray or STL container master branch
    // or sub-branch and branch inherits from tobject,
    // then register with the buffer so that pointers are
