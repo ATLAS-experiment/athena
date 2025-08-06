@@ -233,6 +233,8 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         data.b_PadL1A_bcid_rel.push_back(link->getBcidRels());
         data.b_PadL1A_bcid_status.push_back(link->getBcidStatuses());
         data.b_PadL1A_bcid_multzero.push_back(link->getBcidMultZeros());
+        data.b_PadL1A_CRC.push_back(link->getCRC());
+        data.b_PadL1A_CRC_ok.push_back(link->isCRCValid());
       }
     }
     if (robType == "MML1A") {

@@ -25,6 +25,7 @@ namespace Muon
       // general
       constexpr bool     DEBUG             = false;
       constexpr uint32_t N_BYTES_IN_WORD32 = 4;
+      constexpr uint32_t N_BITS_IN_WORD32  = 32;
       constexpr uint32_t N_BITS_IN_BYTE    = 8;
       constexpr uint32_t N_BITS_IN_WORD16  = 16;
       constexpr uint32_t MASK_BYTE         = 0xff;
@@ -183,6 +184,11 @@ namespace Muon
       uint32_t getL1id()   const { return m_decoded.l1id; };
 
       /*
+        Public interface: NSW trailer
+      */
+      uint16_t getCRC() const { return m_decoded.crc; };
+
+      /*
         Public interface: payload
       */
       uint32_t getOrbitid() const { return m_decoded.orbitid; };
@@ -324,6 +330,18 @@ namespace Muon
         return std::distance(chans.begin(), std::find(chans.begin(), chans.end(), tdschan));
       }
 
+      /*
+        CRC utils: returns the recalculated CRC for the given data and if it matches the CRC in the data
+      */
+      bool isCRCValid() {
+        return getCRC() == computeCRC();
+      }
+
+      /*
+        Public interface: retrieve the computed CRC from the data
+      */
+      uint16_t computeCRC() const { return m_computedCRC; }
+
     private:
 
       // Struct for 1 BC of decompressed data
@@ -365,7 +383,11 @@ namespace Muon
         uint32_t orbit1{0};
         uint32_t status{0};
         std::vector<OneBCOfData> data{};
+        uint16_t crc{0};
       };
+
+      // computed CRC
+      uint16_t m_computedCRC{0};
 
       /*
         Struct for holding the decoded data
@@ -422,6 +444,11 @@ namespace Muon
       uint32_t getOrbit(const std::vector<uint32_t>& words) const;
       uint32_t getBcid(const std::vector<uint32_t>& words) const;
       uint32_t getL1id(const std::vector<uint32_t>& words) const;
+
+      /*
+        Computes the CRC for the given data
+      */
+      uint16_t computeCRC(const uint32_t* bs, const uint32_t remaining);
 
       /*
         Returns the orbit ID

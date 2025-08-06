@@ -189,6 +189,8 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_PadL1A_bcid_rel = {} ;
   std::vector<std::vector<uint32_t>> b_PadL1A_bcid_status = {} ;
   std::vector<std::vector<uint32_t>> b_PadL1A_bcid_multzero = {} ;
+  std::vector<uint16_t> b_PadL1A_CRC = {} ;
+  std::vector<bool> b_PadL1A_CRC_ok = {} ;
   //STGL1A - comtemplating multiple elinks
   //so the vector is on elinks for all the sectors
   std::vector<uint32_t> b_STGL1A_ROB_sourceID = {} ;
@@ -425,6 +427,8 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
     outtree.Branch( "PadL1A_bcid_rel", &data.b_PadL1A_bcid_rel);
     outtree.Branch( "PadL1A_bcid_status", &data.b_PadL1A_bcid_status);
     outtree.Branch( "PadL1A_bcid_multzero", &data.b_PadL1A_bcid_multzero);
+    outtree.Branch( "PadL1A_CRC", &data.b_PadL1A_CRC);
+    outtree.Branch( "PadL1A_CRC_ok", &data.b_PadL1A_CRC_ok);
   }
   if ( std::find(params.elink_types.begin(), params.elink_types.end(), "STGL1A") != params.elink_types.end() ) {
     outtree.Branch( "STGL1A_ROB_sourceID", &data.b_STGL1A_ROB_sourceID);
