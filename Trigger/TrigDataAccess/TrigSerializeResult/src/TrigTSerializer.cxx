@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///
@@ -64,6 +64,12 @@
 
 #include "TSchemaRuleSet.h"
 #include "TExMap.h"
+
+namespace{
+  //note: cannot be constexpr
+  //cppcheck-suppress intToPointerCast
+  static const TClass* invalidPtr = reinterpret_cast<TClass*>(std::intptr_t(-1));
+}
 namespace ROOT8367Workaround {
 const Int_t  kMapOffset         = 2;   // first 2 map entries are taken by null obj and self obj
 
@@ -98,7 +104,7 @@ void* TBufferFileWorkaround::ReadObjectAnyNV(const TClass *clCast)
    TClass *clRef = ReadClass(clCast, &tag);
    TClass *clOnfile = 0;
    Int_t baseOffset = 0;
-   if (clRef && (clRef!=(TClass*)(-1)) && clCast) {
+   if (clRef && (clRef!=invalidPtr) && clCast) {
       //baseOffset will be -1 if clRef does not inherit from clCast.
       baseOffset = clRef->GetBaseClassOffset(clCast);
       if (baseOffset == -1) {
@@ -143,7 +149,7 @@ void* TBufferFileWorkaround::ReadObjectAnyNV(const TClass *clCast)
    }
 
    // unknown class, skip to next object and return 0 obj
-   if (clRef == (TClass*) -1) {
+   if (clRef == invalidPtr) {
       if (fBufCur >= fBufMax) return 0;
       if (fVersion > 0)
          MapObject((TObject*) -1, startpos+kMapOffset);
@@ -169,7 +175,7 @@ void* TBufferFileWorkaround::ReadObjectAnyNV(const TClass *clCast)
       obj = (char *) (Long_t)fMap->GetValue(tag);
       clRef = (TClass*) (Long_t)fClassMap->GetValue(tag);
 
-      if (clRef && (clRef!=(TClass*)(-1)) && clCast) {
+      if (clRef && (clRef!=invalidPtr) && clCast) {
          //baseOffset will be -1 if clRef does not inherit from clCast.
          baseOffset = clRef->GetBaseClassOffset(clCast);
          if (baseOffset == -1) {
@@ -428,7 +434,7 @@ void TrigTSerializer::serialize(const std::string &nameOfClass, const void* inst
 
     //inefficient - to be compatible with Serializer for the moment can be avoided later
     uint32_t pbytes;
-    char *pp = (char *)&pbytes;
+    char *pp = reinterpret_cast<char *>(&pbytes);
 
     for (size_t i=0; i<bufsiz/4; i++){
       pbytes = 0;
@@ -531,7 +537,7 @@ void* TrigTSerializer::deserialize(const std::string &nameOfClass, const std::ve
     const size_t nints = bufsiz/4;
     for (size_t i=pBuffOffset; i<nints+pBuffOffset; i++){
       uint32_t pbytes = v.at(i);
-      char *pch = (char *)&pbytes;
+      char *pch = reinterpret_cast<char *>(&pbytes);
       for (size_t c=0; c<4; c++){
 	pbuf[bufpos] = *(char *)(pch+3-c);
 	bufpos++;
