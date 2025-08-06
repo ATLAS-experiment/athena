@@ -16848,6 +16848,14 @@ HLT_j250_a10sd_cssk_ditauOmni0Trk3_pf_jes_ftf_preselj200_L1jJ160:
   stepFeatures:
     0: 2
     1: 2
+HLT_j250_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1gLJ140p0ETA25:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 2
+    1: 2
 HLT_j250_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160:
   eventCount: 0
   stepCounts:
