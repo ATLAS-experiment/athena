@@ -380,7 +380,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2024()
   
   m_deltaTSample = 3.125;
   m_numSample = 24;
-  m_lowGainMode = ZDCPulseAnalyzer::LGModeRefitLG;
+  m_lowGainMode = ZDCPulseAnalyzer::LGModeForceLG;
 
   ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{12, 12, 12, 12}, {12, 12, 12, 12}}};
 
@@ -439,7 +439,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2024()
   zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
   zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
 
-  zdcDataAnalyzer->SetGainFactorsHGLG(1, 10); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
+  zdcDataAnalyzer->SetGainFactorsHGLG(1, 1); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
 
   ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{0.5, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{2, 2, 2, 2}, {2, 2, 2, 2}}};
