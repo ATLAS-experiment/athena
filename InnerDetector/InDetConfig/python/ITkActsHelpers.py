@@ -42,7 +42,16 @@ def extractTrackingPasses(flags) -> list:
     else:
         if flags.Tracking.doITkFastTracking:
             raise ValueError(f"Main pass is NOT set to Fast Tracking but Tracking.doITkFastTracking is set to {flags.Tracking.doITkFastTracking}")
-        
+
+    # Check the ambiguity resolution strategy
+    if flags.Acts.doAmbiguityResolution:
+        from ActsConfig.ActsConfigFlags import AmbiguitySolverMode
+        # If ambiguity resolution is requested, it means we want to schedule the ambiguity resolution algorithm
+        # this means that we must have AmbiguitySolverMode.OUTSIDE_TF
+        if flags.Acts.AmbiguitySolverMode is not AmbiguitySolverMode.OUTSIDE_TF:
+            raise ValueError(f"Conflicting reco configuration: Acts.doAmbiguityResolution has been requested and this will schedule the ACTS ambiguity solver algorithm, yet the ambiguity mode (set to {flags.Acts.AmbiguitySolverMode}) is not compatible with this.")
+
+
     # Primary pass
     trackingPasses += [flags.cloneAndReplace(
         "Tracking.ActiveConfig",
