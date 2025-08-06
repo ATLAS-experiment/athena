@@ -201,8 +201,7 @@ class ConfigBlock:
             return False
         if self.skipOnMC and config.dataType() is DataType.MC:
             return False
-        if self.onlyForDSIDs and not config.isInDSIDs(self.onlyForDSIDs):
-            return False
+
         if self.skipOnData and config.dataType() is DataType.Data:
             return False
         if self.skipOnMC and config.dataType() is not DataType.Data:
