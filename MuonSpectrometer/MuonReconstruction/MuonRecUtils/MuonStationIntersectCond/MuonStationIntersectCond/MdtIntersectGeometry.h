@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSTATIONINTESECTCOND_MDTINTERSECTGEOMETRY_H
@@ -30,7 +30,8 @@ namespace Muon {
 
         virtual ~MdtIntersectGeometry();
 
-        MuonStationIntersect intersection(const Amg::Vector3D& pos, const Amg::Vector3D& dir) const override;
+        MuonStationIntersect intersection(const MuonGM::MuonDetectorManager* detMgr,
+                                          const Amg::Vector3D& pos, const Amg::Vector3D& dir) const override;
 
         const Amg::Transform3D& transform() const { return m_transform; }
 
@@ -38,16 +39,17 @@ namespace Muon {
         const Identifier& chamberId() const { return m_chid; }
 
     private:
-        double tubeLength(const int ml, const int layer, const int tube) const;
-        void init(MsgStream& msg);
+        double tubeLength(const MuonGM::MdtReadoutElement* detElMl0,
+                          const MuonGM::MdtReadoutElement* detElMl1,
+                          const int ml, const int layer, const int tube) const;
+        void init(const MuonGM::MuonDetectorManager* detMgr, MsgStream& msg);
         void fillDeadTubes(const MuonGM::MdtReadoutElement* mydetEl, MsgStream& msg);
 
         Identifier m_chid{};
         Amg::Transform3D m_transform;
         std::shared_ptr<TrkDriftCircleMath::MdtChamberGeometry> m_mdtGeometry{};
-        const MuonGM::MdtReadoutElement* m_detElMl0{nullptr};
-        const MuonGM::MdtReadoutElement* m_detElMl1{nullptr};
-        const MuonGM::MuonDetectorManager* m_detMgr{nullptr};  // cannot use ReadCondHandleKey since no athena component
+        IdentifierHash m_hashMl0;
+        IdentifierHash m_hashMl1;
         const MdtCondDbData* m_dbData{nullptr};
         const IMuonIdHelperSvc* m_idHelperSvc{nullptr};
         std::set<Identifier> m_deadTubesML{};
