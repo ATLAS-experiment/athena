@@ -1,13 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_STRIPLAYER_H
 #define MUONREADOUTGEOMETRYR4_STRIPLAYER_H
 
+#include <GeoPrimitives/GeoPrimitives.h>
 #include <MuonReadoutGeometryR4/StripDesign.h>
 #include <GeoModelUtilities/TransientConstSharedPtr.h>
 
 #include <GeoModelKernel/GeoTransform.h>
+#include <GaudiKernel/SystemOfUnits.h>
+
 namespace MuonGMR4{
     /** @brief The StripLayer interfaces the 2D description of the strip plane layout with
      *         the 3D description of the strips within the read out elements volume. 
@@ -76,7 +79,13 @@ namespace MuonGMR4{
             * @param vec: Vector to be turned into a 3D vector
             * @param phiView: Switched whether the strips should be rotated */
           Amg::Vector3D to3D(CheckVector2D&& vec, const bool phiView) const;
- 
+          /** @brief Transforms a 3D vector from the strip design into a 2D vector.
+           *         If phi view is switched on, the vector is rotated by -90 degrees
+           * @param vec: Vector to be turned into a 3D vector
+           * @param phiView: Switched whether the strips should be rotated */
+          Amg::Vector2D to2D(const Amg::Vector3D& vec, const bool phiView) const;
+          /** @brief Flips the phi rotation from 90 -> -90 degrees */
+          void flipPhiRotation();
         private:
            /** @brief Pointer to the GeoModelTransform  */
            TransformPtr m_transform{};
@@ -86,6 +95,7 @@ namespace MuonGMR4{
            StripDesignPtr m_phiDesign{};
            /** @brief Hash of the strip layer */
            IdentifierHash m_hash{};
+           double m_phiRot{90.*Gaudi::Units::deg};
     };
     using StripLayerPtr = GeoModel::TransientConstSharedPtr<StripLayer>;
     /// Helper struct to share strip layer instances across the readout elements

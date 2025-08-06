@@ -46,9 +46,9 @@ namespace MuonR4 {
         const Identifier hitId = timedHit->identify();
         const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
         const MuonGMR4::TgcReadoutElement* readOutEle = m_detMgr->getTgcReadoutElement(hitId);
-        const unsigned int gasGap = idHelper.gasGap(hitId);
+        const IdentifierHash measHash = readOutEle->measurementHash(hitId);
 
-        if (!readOutEle->numWireGangs(gasGap)) {
+        if (!readOutEle->numWireGangs(measHash)) {
             ATH_MSG_VERBOSE("There're no wires in "<<m_idHelperSvc->toString(hitId)<<" nothing to do");
             return false;
         }
@@ -61,7 +61,7 @@ namespace MuonR4 {
         
         const Amg::Vector2D locSimHitPos{xAOD::toEigen(timedHit->localPosition()).block<2,1>(0,0)}; 
         
-        const MuonGMR4::WireGroupDesign& design{readOutEle->wireGangLayout(gasGap)};
+        const MuonGMR4::WireGroupDesign& design{readOutEle->wireGangLayout(measHash)};
         if (!design.insideTrapezoid(locSimHitPos)) {
             ATH_MSG_DEBUG("The hit "<<Amg::toString(locSimHitPos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
                         <<" is outside of the trapezoid "<<design);
@@ -90,7 +90,7 @@ namespace MuonR4 {
             return false;
         }
         bool isValid{false};
-        const Identifier digitId{idHelper.channelID(hitId, gasGap, false, prdWireNum, isValid)};
+        const Identifier digitId{idHelper.channelID(hitId, readOutEle->gasGapNumber(measHash), false, prdWireNum, isValid)};
         if (!isValid) {
             ATH_MSG_WARNING("Invalid channel "<< m_idHelperSvc->toStringGasGap(hitId)<<", channel: "<<prdWireNum);
             return false;
@@ -118,9 +118,9 @@ namespace MuonR4 {
         const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
         const MuonGMR4::TgcReadoutElement* readOutEle = m_detMgr->getTgcReadoutElement(hitId);
         
-        const unsigned int gasGap = idHelper.gasGap(hitId);
-        if (!readOutEle->numStrips(gasGap)) {
-            ATH_MSG_VERBOSE("There're no strips in "<<m_idHelperSvc->toString(hitId)<<" nothing to do");
+        const IdentifierHash measHash = readOutEle->measurementHash(hitId);
+        if (!readOutEle->numStrips(measHash)) {
+            ATH_MSG_DEBUG("There're no strips in "<<m_idHelperSvc->toString(hitId)<<" nothing to do");
             return false;
         }
         ++(m_allHits[true]);
@@ -134,15 +134,15 @@ namespace MuonR4 {
     
         const ActsGeometryContext& gctx{getGeoCtx(ctx)};
 
-        const IdentifierHash stripHash{MuonGMR4::TgcReadoutElement::constructHash(0, gasGap, true)};
-        const IdentifierHash wireHash{MuonGMR4::TgcReadoutElement::constructHash(0, gasGap, false)};
+        const IdentifierHash stripHash{readOutEle->constructHash(0,readOutEle->gasGapNumber(measHash), true)};
+        const IdentifierHash wireHash{readOutEle->constructHash(0, readOutEle->gasGapNumber(measHash), false)};
 
         const Amg::Transform3D toPhiRot{readOutEle->globalToLocalTrans(gctx, stripHash) *
                                         readOutEle->localToGlobalTrans(gctx, wireHash)};
         const Amg::Vector2D locSimHitPos{(toPhiRot*xAOD::toEigen(timedHit->localPosition())).block<2,1>(0,0)};
 
 
-        const MuonGMR4::RadialStripDesign& design{readOutEle->stripLayout(gasGap)};
+        const MuonGMR4::RadialStripDesign& design{readOutEle->stripLayout(measHash)};
         if (!design.insideTrapezoid(locSimHitPos)) {
             ATH_MSG_DEBUG("The eta hit "<<Amg::toString(locSimHitPos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
                         <<" is outside of the trapezoid "<<std::endl<<design);
@@ -180,7 +180,7 @@ namespace MuonR4 {
         }
         
         bool isValid{false};
-        const Identifier digitId{idHelper.channelID(hitId, gasGap, true, digitStripNum, isValid)};
+        const Identifier digitId{idHelper.channelID(hitId, readOutEle->gasGapNumber(measHash), true, digitStripNum, isValid)};
         if (!isValid) {
             ATH_MSG_WARNING("Invalid channel "<< m_idHelperSvc->toStringGasGap(hitId)<<", channel: "<<digitStripNum);
             return false;

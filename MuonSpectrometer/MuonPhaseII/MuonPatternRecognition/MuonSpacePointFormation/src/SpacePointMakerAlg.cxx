@@ -49,11 +49,13 @@ Amg::Vector3D SpacePointMakerAlg::positionInChamber(const MeasType* meas,
                                                     const Amg::Transform3D& toChamberTrans) const{
     if constexpr (std::is_same_v<MeasType, xAOD::MdtDriftCircle>){
         return toChamberTrans * meas->localCirclePosition();
-    }
-    else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement>){
+    } else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement>){
         return toChamberTrans * meas->localMeasurementPos();
-    }
-    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip> or std::is_same_v<MeasType, xAOD::MMCluster>){
+    } else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){
+        const auto& stripLay = meas->readoutElement()->sensorLayout(meas->layerHash());
+        return toChamberTrans * stripLay->to3D(meas->template localPosition<1>()[0]*Amg::Vector2D::UnitX(),
+                                               meas->measuresPhi());
+    } else if constexpr (std::is_same_v<MeasType, xAOD::MMCluster>){
         return toChamberTrans * (meas->template localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
     }
     else if constexpr (std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
@@ -80,12 +82,13 @@ Amg::Vector3D SpacePointMakerAlg::channelDirInChamber(const MeasType* meas,
                        std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
         return toChamberTrans.linear() * Amg::Vector3D::UnitY();
     }
-    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){           
-        Amg::Vector3D dir{Amg::Vector3D::UnitY()};
+    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>) {           
+        const auto& stripLay = meas->readoutElement()->sensorLayout(meas->layerHash());
         if (meas->measuresPhi()) {
-            dir.block<2,1>(0,0) = meas->readoutElement()->stripLayout(meas->gasGap()).stripDir(meas->channelNumber());
-        } 
-        return toChamberTrans.linear() * dir;
+            const auto& sDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay->design(true));
+            return toChamberTrans.linear() * stripLay->to3D(sDesign.stripDir(meas->channelNumber()), true);
+        }
+        return toChamberTrans.linear() * stripLay->to3D(stripLay->design().stripDir(), false);
     }
     else static_assert(std::false_type::value, "Unsupported measurement type.");
     return Amg::Vector3D::Zero();      
@@ -102,12 +105,13 @@ Amg::Vector3D SpacePointMakerAlg::channelNormalInChamber(const MeasType* meas,
                        std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
         return toChamberTrans.linear() * Amg::Vector3D::UnitX();
     }
-    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){                     
-        Amg::Vector3D dir{Amg::Vector3D::UnitX()};
+    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>) {                     
+        const auto& stripLay = meas->readoutElement()->sensorLayout(meas->layerHash());
         if (meas->measuresPhi()) {
-            dir.block<2,1>(0,0) = meas->readoutElement()->stripLayout(meas->gasGap()).stripNormal(meas->channelNumber());
-        } 
-        return toChamberTrans.linear() * dir;
+            const auto& sDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay->design(true));
+            return toChamberTrans.linear() * stripLay->to3D(sDesign.stripNormal(meas->channelNumber()), true);
+        }
+        return toChamberTrans.linear() * stripLay->to3D(stripLay->design().stripNormal(), false);
     }
     else static_assert(std::false_type::value, "Unsupported measurement type.");
     return Amg::Vector3D::Zero();     
@@ -133,9 +137,9 @@ AmgSymMatrix(2) SpacePointMakerAlg::computeCov(const MeasType* primaryMeas,
         }
         else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){
             if (primaryMeas->measuresPhi()) {
-                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->stripLayout(primaryMeas->gasGap()).stripLength(primaryMeas->channelNumber());
+                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->stripLayout(primaryMeas->layerHash()).stripLength(primaryMeas->channelNumber());
             } else {
-                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->wireGangLayout(primaryMeas->gasGap()).stripLength(primaryMeas->channelNumber());
+                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->wireGangLayout(primaryMeas->layerHash()).stripLength(primaryMeas->channelNumber());
             }
         }
         else if constexpr (std::is_same_v<MeasType, xAOD::MMCluster>){
@@ -178,21 +182,20 @@ AmgSymMatrix(2) SpacePointMakerAlg::computeCov(const xAOD::UncalibratedMeasureme
                                                const Amg::Vector3D& nor2) const {
     AmgSymMatrix(2) Jac{AmgSymMatrix(2)::Identity()}, uvcov {AmgSymMatrix(2)::Identity()};
 
-    if (primaryMeas->numDimensions() != 1) THROW_EXCEPTION("Unexpected numDimension");
-
+    if (primaryMeas->numDimensions() != 1) {
+        THROW_EXCEPTION("Unexpected numDimension");
+    }
     uvcov(0,0) = primaryMeas->localCovariance<1>()[0];
     uvcov(1,1) = secondaryMeas->localCovariance<1>()[0]; 
-
     Jac.col(0)  = nor1.block<2,1>(0,0).unit();
     Jac.col(1)  = nor2.block<2,1>(0,0).unit();
-
     return Jac * uvcov * Jac.inverse();
 }
 
 template<class MeasType>
 void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
-                                        const MeasType* primaryMeas,
-                                        const Amg::Transform3D& toChamberTrans) const {
+                                         const MeasType* primaryMeas,
+                                         const Amg::Transform3D& toChamberTrans) const {
     pointColl.emplace_back(primaryMeas);
     SpacePoint& sp {pointColl.back()};
 
@@ -200,14 +203,16 @@ void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
     sp.setNormal(channelNormalInChamber(primaryMeas, toChamberTrans));
     sp.setPosition(positionInChamber(primaryMeas, toChamberTrans));
     sp.setCovariance(computeCov(primaryMeas,sp.directionInChamber(),sp.normalInChamber()));
+    ATH_MSG_VERBOSE("Space point 1D: "<<m_idHelperSvc->toString(primaryMeas->identify())<<", "<<Amg::toString(sp.positionInChamber())
+        <<", "<<Amg::toString(sp.directionInChamber())<<", "<<Amg::toString(sp.normalInChamber()));
 }
 
 template<class MeasType>
-void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
-                                        const MeasType* primaryMeas,
-                                        const MeasType* secondaryMeas,
-                                        const Amg::Transform3D& toChamberTrans_eta, 
-                                        const Amg::Transform3D& toChamberTrans_phi) const{
+void SpacePointMakerAlg::fillSpacePoint(std::vector<SpacePoint>& pointColl,
+                                       const MeasType* primaryMeas,
+                                       const MeasType* secondaryMeas,
+                                       const Amg::Transform3D& toChamberTrans_eta, 
+                                       const Amg::Transform3D& toChamberTrans_phi) const{
     pointColl.emplace_back(primaryMeas, secondaryMeas);
     SpacePoint& sp {pointColl.back()};
 
@@ -218,7 +223,8 @@ void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
     Amg::Vector3D dir2 {channelDirInChamber(secondaryMeas, toChamberTrans_phi)};
     Amg::Vector3D pos2 {positionInChamber(secondaryMeas, toChamberTrans_phi)};
     sp.setPosition(pos1 + Amg::intersect<3>(pos2,dir2, pos1, sp.directionInChamber()).value_or(0) * sp.directionInChamber());
-
+    ATH_MSG_VERBOSE("Space point: "<<m_idHelperSvc->toString(primaryMeas->identify())<<", "<<Amg::toString(pos1)
+        <<", "<<Amg::toString(sp.directionInChamber())<<", "<<Amg::toString(dir2));
     sp.setCovariance(computeCov(primaryMeas,
                                     secondaryMeas,
                                     sp.normalInChamber(),

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
@@ -123,7 +123,7 @@ namespace MuonGMR4 {
     inline double StripDesign::stripLength(int stripNumber) const {
         const int stripCh = (stripNumber - firstStripNumber());
         if (stripCh < 0 ||  stripCh > numStrips()) {
-            ATH_MSG_WARNING("center() -- Invalid strip number given "<<stripNumber<<" allowed range ["
+            ATH_MSG_WARNING("stripLength() -- Invalid strip number given "<<stripNumber<<" allowed range ["
                          <<firstStripNumber()<<";"<<numStrips()<<"]");
             return 0.;
         }
