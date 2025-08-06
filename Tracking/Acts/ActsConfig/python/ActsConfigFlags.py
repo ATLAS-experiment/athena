@@ -119,7 +119,7 @@ def createActsConfigFlags():
     # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', True)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
-    actscf.addFlag('Acts.AmbiguitySolverMode', lambda pcf: AmbiguitySolverMode.OUTSIDE_TF if pcf.Acts.doAmbiguityResolution else AmbiguitySolverMode.END_OF_TF, type=AmbiguitySolverMode)
+    actscf.addFlag('Acts.AmbiguitySolverMode', lambda pcf: AmbiguitySolverMode.OUTSIDE_TF if pcf.Acts.doAmbiguityResolution else AmbiguitySolverMode.DURING_TF, type=AmbiguitySolverMode)
     
     # Calibrations
     actscf.addFlag('Acts.OnTrackCalibration.performCovarianceCalibration', True) # perform calibration of covariance during on track analogue cluster calibration
