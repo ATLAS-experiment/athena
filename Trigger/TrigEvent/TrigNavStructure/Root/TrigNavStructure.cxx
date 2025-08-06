@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -333,7 +333,7 @@ void TrigNavStructure::getAllRoIThresholdTEs( std::vector< TriggerElement* >& ou
   for ( std::vector<TriggerElement*>::const_iterator roi_te = rois.begin();
         roi_te != rois.end(); ++roi_te) {
     // get threshold-like TEs:
-    const std::vector<TriggerElement*>& tes = getDirectSuccessors( (const TriggerElement*)(*roi_te) );
+    const std::vector<TriggerElement*>& tes = getDirectSuccessors( static_cast<const TriggerElement*>(*roi_te) );
     std::vector<TriggerElement*>::const_iterator te = tes.begin();
     for ( ; te != tes.end(); ++te) {
       output.push_back( *te );

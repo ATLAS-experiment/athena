@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstring>
@@ -49,7 +49,7 @@ namespace StringSerializer {
   
     char * carray = new char [sizeToReserve];
     strncpy(carray, ostream.str().c_str(), sizeToReserve);
-    const uint32_t * uarray = (const uint32_t*) carray;
+    const uint32_t * uarray = reinterpret_cast<const uint32_t*> (carray);
 
     storage.push_back(strings.size()); // put number of strings first
     storage.insert(storage.end(), &uarray[0], &uarray[sizeToReserve/sizeof(uint32_t)]);
@@ -78,7 +78,7 @@ namespace StringSerializer {
     advance(itBegin, 1);
     copy(itBegin, last, &uarray[0]);
   
-    const char * carray = (const char*)uarray;
+    const char * carray = reinterpret_cast<const char*>(uarray);
     std::string whole(carray, (storageSize-1)*sizeof(uint32_t));
     std::istringstream istream;
 
