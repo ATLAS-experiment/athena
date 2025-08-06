@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLSERVICES_TATHENAROOTCONVERTER_H
@@ -76,7 +76,7 @@ public:
   /// To be implemented by the user in the derived class
   /// Default implementation simply does a cast 
   virtual void CopyOldToNew( const OLD &old_obj, NEW &new_obj ) {
-     new_obj = *(NEW*)&old_obj;
+     new_obj = *reinterpret_cast<const NEW*>(&old_obj);
   }
 
   /// General (typeless) invocation of the convertion function
