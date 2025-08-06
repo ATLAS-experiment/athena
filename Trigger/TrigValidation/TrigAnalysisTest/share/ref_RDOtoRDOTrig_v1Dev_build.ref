@@ -1343,10 +1343,6 @@ HLT_2j45_2j45_3timeSig_L14jJ40:
   eventCount: 0
 HLT_2j45_2j55_3timeSig15_L14jJ40:
   eventCount: 0
-HLT_2j45_2j55_3timeSig_L14jJ40:
-  eventCount: 0
-HLT_2j45_2j75_3timeSig_L14jJ40:
-  eventCount: 0
 HLT_2j50_0eta290_020jvt_bgn160_2j50_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25:
   eventCount: 0
   stepCounts:
@@ -1461,16 +1457,6 @@ HLT_2j55_0eta290_020jvt_bgn160_2j55_pf_ftf_presel2j25XX2j25b85_L14jJ40p0ETA25:
     1: 6
     2: 8
     3: 1
-HLT_2j55_2j45_3timeSig_L14jJ40:
-  eventCount: 0
-HLT_2j55_2j55_3timeSig_L14jJ40:
-  eventCount: 0
-HLT_2j75_2j45_3timeSig_L14jJ40:
-  eventCount: 0
-HLT_2j75_2j75_3timeSig_L14jJ40:
-  eventCount: 0
-HLT_2j90_2j90_3timeSig_L14jJ40:
-  eventCount: 0
 HLT_2mu10_bJpsimumu_L12MU8F:
   eventCount: 0
   stepCounts:
@@ -15982,17 +15968,9 @@ HLT_j200_0eta290_nnJvtv1_boffperf_pf_ftf_preselj140_L1jJ160:
     0: 5
     1: 3
     2: 3
-HLT_j200_2timing15_L1HT190-jJ40s5pETA21:
-  eventCount: 0
-HLT_j200_2timing15_L1eTAU140:
-  eventCount: 0
 HLT_j200_2timing15_L1jJ160:
   eventCount: 0
 HLT_j200_2timing_L1jJ160:
-  eventCount: 0
-HLT_j200_3timeSig15_L1HT190-jJ40s5pETA21:
-  eventCount: 0
-HLT_j200_3timeSig15_L1eTAU140:
   eventCount: 0
 HLT_j200_3timeSig15_L1jJ160:
   eventCount: 0
