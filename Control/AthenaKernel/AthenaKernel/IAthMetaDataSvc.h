@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IATHMETADATASVC_H
@@ -129,11 +129,9 @@ StatusCode IAthMetaDataSvc::record(T* pObject, const TKEY& key)
 template <typename T, typename TKEY> 
 StatusCode IAthMetaDataSvc::record(std::unique_ptr<T> pUnique, const TKEY& key)
 {
-   if( this->record( pUnique.get(), key ).isSuccess() ) {
-      (void)pUnique.release();
+   if( this->record( pUnique.release(), key ).isSuccess() ) {
       return StatusCode::SUCCESS;
    }
-   pUnique.reset();
    return StatusCode::FAILURE;
 }
 
