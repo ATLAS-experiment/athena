@@ -28,10 +28,6 @@ class PhotonValidationPlots:public PlotBase {
       Egamma::PhotonPlots             m_oPhotPlots;
       Egamma::PhotonAmbPlots          m_oAmbPhotPlots;
       Egamma::PhotonCnvPlots          m_oConvPhotPlots;
-      Egamma::KinematicsPlots         m_oTruthAllPlots;
-      Egamma::KinematicsPlots         m_oTruthAllIsoPlots;
-      Egamma::KinematicsPlots         m_oTruthAllIsoConvPlots;
-      Egamma::KinematicsPlots         m_oTruthAllIsoUncPlots;
       Egamma::KinematicsPlots         m_oTruthRecoPlots;
       Egamma::KinematicsPlots         m_oTruthRecoConvPlots;
       Egamma::KinematicsPlots         m_oTruthRecoUncPlots;
