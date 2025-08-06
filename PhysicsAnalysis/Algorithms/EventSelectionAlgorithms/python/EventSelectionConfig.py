@@ -18,6 +18,10 @@ class EventSelectionMergerConfig(ConfigBlock):
             info="do not apply an event filter. The default is False, i.e. "
             "remove events not passing the full list of selection cuts.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # I think there is only one instance of this block, not sure what the name ought to be
+
     def makeAlgs(self, config):
         if not ( isinstance(self.selections, list) and self.selections and all(isinstance(item, str) for item in self.selections) ):
             print('EventSelectionMerger: selections = ', self.selections)
@@ -91,6 +95,10 @@ class EventSelectionConfig(ConfigBlock):
         self.step = 0
         self.currentDecoration = ''
         self.cutflow = []
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.name
 
     def makeAlgs(self, config):
         # need to re-initialize here to deal with multiple passes

@@ -43,7 +43,14 @@ class FTagConfig (ConfigBlock):
         self.addOption ('saveCustomVariables', [], type=list,
             info="[Expert mode] additional variables to save from the b-tagging object associated "
             "to each jet. E.g. ['pb','pc','pu', 'ptau'] to replicate 'saveScores=All'.")
-    
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        selectionName = self.selectionName
+        if selectionName is None or selectionName == '' :
+            selectionName = self.btagger + '_' + self.btagWP
+        return self.containerName + '_' + selectionName
+
     def makeAlgs (self, config) :
         # print(config.autoconfigFlags())
     
@@ -69,9 +76,9 @@ class FTagConfig (ConfigBlock):
         
         # Set up the ftag selection algorithm(s):
         if 'Continuous' in self.btagWP:
-            alg = config.createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' )
         else:
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' )
 
         config.addPrivateTool( 'selectionTool', 'BTaggingSelectionTool' )
         alg.selectionTool.TaggerName = self.btagger
@@ -96,7 +103,7 @@ class FTagConfig (ConfigBlock):
         # Save the b-tagging score
         if self.saveScores in ['True', 'All']:
             # Save the b-tagger weight
-            alg = config.createAlgorithm('CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg_' + self.btagger)
+            alg = config.createAlgorithm('CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg')
             alg.jets = config.readName (self.containerName)
             alg.taggerWeightDecoration = f'{self.btagger}'
             alg.affectingSystematicsFilter = '.*' # only run it on nominal!
@@ -118,7 +125,7 @@ class FTagConfig (ConfigBlock):
 
             if self.readFromBTaggingObject:
                 alg = config.createAlgorithm('CP::BTaggingScoresAlg',
-                                             'BTagScoringAlg_' + self.btagger,
+                                             'BTagScoringAlg',
                                              reentrant=True)
                 alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
                 alg.taggerName = self.btagger

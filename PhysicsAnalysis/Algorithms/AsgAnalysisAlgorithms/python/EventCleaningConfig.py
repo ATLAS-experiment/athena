@@ -39,6 +39,10 @@ class EventCleaningBlock (ConfigBlock):
         if self.runGRL and self.userGRLFiles:
             raise ValueError("No userGRLFiles should be specified if runGRL=False")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # no instance name needed for singleton block
+
     def getDefaultGRLs (self, data_year) :
         """ returns a reasonable set of GRLs that should be suited for most analyses """
         from GoodRunsLists.GoodRunsListsDictionary import getGoodRunsLists

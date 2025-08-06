@@ -111,6 +111,13 @@ class FTagJetSFBlock(ConfigBlock):
             "b-tagging related variables are attached to jet container. This only serves"
             "as a compatibility option for analysis that use old derivations.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        selectionName = self.selectionName
+        if selectionName is None or selectionName == '':
+            selectionName = self.btagger + '_' + self.btagWP
+        return self.containerName.replace('.', '_') + '_' + selectionName
+
     def configureEfficiencyTool(self, config, btagger, btagWP, jetContainer,
                                 bTagCalibFile, DSID, tool,
                                 selectionCDI="", selectionTagger=""):
@@ -220,7 +227,7 @@ class FTagJetSFBlock(ConfigBlock):
                 bTagConditionalWP = self.btagWP
 
                 alg = config.createAlgorithm( 'CP::BTaggingTriggerEfficiencyAlg',
-                                              'FTagEfficiencyTriggerScaleFactorAlg' + postfix + '_' + chain )
+                                              'FTagEfficiencyTriggerScaleFactorAlg' + chain )
                 config.addPrivateTool( 'offlineEfficiencyTool',
                                        'BTaggingEfficiencyTool' )
                 self.configureEfficiencyTool(
@@ -259,7 +266,7 @@ class FTagJetSFBlock(ConfigBlock):
         # Set up the efficiency calculation algorithm:
         # Always compute regular FTAG SF
         alg = config.createAlgorithm( 'CP::BTaggingEfficiencyAlg',
-                                      'FTagEfficiencyScaleFactorAlg' + postfix )
+                                      'FTagEfficiencyScaleFactorAlg' )
         config.addPrivateTool( 'efficiencyTool', 'BTaggingEfficiencyTool' )
         self.configureEfficiencyTool(
             config, self.btagger, self.btagWP, jetContainer,
@@ -304,6 +311,13 @@ class FTagEventSFBlock(ConfigBlock):
         self.addOption ('removeHLTPrefix', True, type=bool,
             info="remove the HLT prefix from trigger chain names, "
             "The default is True.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        selectionName = self.selectionName
+        if selectionName is None or selectionName == '':
+            selectionName = self.btagger + '_' + self.btagWP
+        return self.containerName.replace('.', '_') + '_' + selectionName
 
     def makeAlgs(self, config):
 

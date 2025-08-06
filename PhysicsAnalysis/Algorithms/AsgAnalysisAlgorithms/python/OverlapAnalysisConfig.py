@@ -97,6 +97,12 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('favourPhotonOverLepton', False, type=bool,
             info="whether to give priority to photons in OR. The default is False.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.selectionName is not None:
+            return self.selectionName
+        return self.outputLabel
+
     def makeUnionPreselectionAlg(self, config, inputCollection):
         """
         Create a new selection for the inputCollection ('container.selection')
@@ -137,7 +143,6 @@ class OverlapAnalysisConfig (ConfigBlock):
             outputLabel = self.outputLabel + '_' + selectionName
             inputLabel = self.inputLabel + '_' + selectionName
             select_or_decoration = 'select_or_' + self.selectionName
-            postfix = '_' + self.selectionName
         else:
             if self.addToAllSelections:
                 selectionName = ""
@@ -147,7 +152,6 @@ class OverlapAnalysisConfig (ConfigBlock):
                 select_or_decoration = 'select_' + self.outputLabel
             outputLabel = self.outputLabel
             inputLabel = self.inputLabel
-            postfix = self.outputLabel
 
         # here the logic is:
         # - either the user has provided a specific selection name for the object, and we use that one
@@ -211,7 +215,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         if self.electrons != "" :
             if self.nominalOnlyUnifiedSelection:
                 self.makeUnionPreselectionAlg(config, self.electrons)
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORElectronsSelectAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORElectronsSelectAlg' )
             electrons, alg.preselection = config.readNameAndSelection (self.electrons)
             alg.particles = electrons
             alg.selectionDecoration = inputLabel + ',as_char'
@@ -228,7 +232,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         if self.photons != "" :
             if self.nominalOnlyUnifiedSelection:
                 self.makeUnionPreselectionAlg(config, self.photons)
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORPhotonsSelectAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORPhotonsSelectAlg' )
             photons, alg.preselection = config.readNameAndSelection (self.photons)
             alg.particles = photons
             alg.selectionDecoration = inputLabel + ',as_char'
@@ -244,7 +248,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         if self.muons != "" :
             if self.nominalOnlyUnifiedSelection:
                 self.makeUnionPreselectionAlg(config, self.muons)
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORMuonsSelectAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORMuonsSelectAlg' )
             muons, alg.preselection = config.readNameAndSelection (self.muons)
             alg.particles = muons
             alg.selectionDecoration = inputLabel + ',as_char'
@@ -260,7 +264,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         if self.taus != "" :
             if self.nominalOnlyUnifiedSelection:
                 self.makeUnionPreselectionAlg(config, self.taus)
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORTausSelectAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORTausSelectAlg' )
             taus, alg.preselection = config.readNameAndSelection (self.taus)
             alg.particles = taus
             alg.selectionDecoration = inputLabel + ',as_char'
@@ -276,7 +280,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         if self.jets != "" :
             if self.nominalOnlyUnifiedSelection:
                 self.makeUnionPreselectionAlg(config, self.jets)
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORJetsSelectAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORJetsSelectAlg' )
             jets, alg.preselection = config.readNameAndSelection (self.jets)
             alg.particles = jets
             alg.selectionDecoration = inputLabel + ',as_char'
@@ -292,7 +296,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         if self.fatJets != "" :
             if self.nominalOnlyUnifiedSelection:
                 self.makeUnionPreselectionAlg(config, self.fatJets)
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORFatJetsSelectAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORFatJetsSelectAlg' )
             fatJets, alg.preselection = config.readNameAndSelection (self.fatJets)
             alg.particles = fatJets
             alg.selectionDecoration = inputLabel + ',as_char'
@@ -306,7 +310,7 @@ class OverlapAnalysisConfig (ConfigBlock):
 
 
         # Create the overlap removal algorithm:
-        alg = config.createAlgorithm( 'CP::OverlapRemovalAlg', 'OverlapRemovalAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::OverlapRemovalAlg', 'OverlapRemovalAlg' )
         alg.OutputLabel = outputLabel
         if self.nominalOnly or self.nominalOnlyUnifiedSelection :
             alg.affectingSystematicsFilter = '.*'
@@ -486,27 +490,27 @@ class OverlapAnalysisConfig (ConfigBlock):
 
         if self.nominalOnly or self.nominalOnlyUnifiedSelection :
             if electrons :
-                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORElectronsCopyAlg' + postfix)
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORElectronsCopyAlg')
                 alg.particles = electrons
                 alg.selectionDecoration = outputLabel + '_%SYS%,as_char'
             if muons :
-                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORMuonsCopyAlg' + postfix)
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORMuonsCopyAlg')
                 alg.particles = muons
                 alg.selectionDecoration = outputLabel + '_%SYS%,as_char'
             if taus :
-                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORTausCopyAlg' + postfix)
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORTausCopyAlg')
                 alg.particles = taus
                 alg.selectionDecoration = outputLabel + '_%SYS%,as_char'
             if jets :
-                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORJetsCopyAlg' + postfix)
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORJetsCopyAlg')
                 alg.particles = jets
                 alg.selectionDecoration = outputLabel + '_%SYS%,as_char'
             if photons :
-                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORPhotonsCopyAlg' + postfix)
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORPhotonsCopyAlg')
                 alg.particles = photons
                 alg.selectionDecoration = outputLabel + '_%SYS%,as_char'
             if fatJets :
-                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORFatJetsCopyAlg' + postfix)
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORFatJetsCopyAlg')
                 alg.particles = fatJets
                 alg.selectionDecoration = outputLabel + '_%SYS%,as_char'
 
@@ -518,42 +522,42 @@ class OverlapAnalysisConfig (ConfigBlock):
                 preselectLabel = outputLabel
 
             if electrons :
-                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORElectronsPreselectionAlg' + postfix )
+                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORElectronsPreselectionAlg')
                 alg.particles = electrons
                 alg.preselection = '&&'.join (config.getPreselection (self.electrons.split('.')[0], electronsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
                 config.addSelection (self.electrons.split('.')[0], electronsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
             if muons :
-                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORMuonsPreselectionAlg' + postfix )
+                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORMuonsPreselectionAlg')
                 alg.particles = muons
                 alg.preselection = '&&'.join (config.getPreselection (self.muons.split('.')[0], muonsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
                 config.addSelection (self.muons.split('.')[0], muonsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
             if taus :
-                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORTausPreselectionAlg' + postfix )
+                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORTausPreselectionAlg')
                 alg.particles = taus
                 alg.preselection = '&&'.join (config.getPreselection (self.taus.split('.')[0], tausSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
                 config.addSelection (self.taus.split('.')[0], tausSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
             if jets :
-                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORJetsPreselectionAlg' + postfix )
+                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORJetsPreselectionAlg')
                 alg.particles = jets
                 alg.preselection = '&&'.join (config.getPreselection (self.jets.split('.')[0], jetsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
                 config.addSelection (self.jets.split('.')[0], jetsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
             if photons :
-                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORPhotonsPreselectionAlg' + postfix )
+                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORPhotonsPreselectionAlg')
                 alg.particles = photons
                 alg.preselection = '&&'.join (config.getPreselection (self.photons.split('.')[0], photonsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
                 config.addSelection (self.photons.split('.')[0], photonsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
             if fatJets :
-                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORFatJetsPreselectionAlg' + postfix )
+                alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORFatJetsPreselectionAlg')
                 alg.particles = fatJets
                 alg.preselection = '&&'.join (config.getPreselection (self.fatJets.split('.')[0], fatJetsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])

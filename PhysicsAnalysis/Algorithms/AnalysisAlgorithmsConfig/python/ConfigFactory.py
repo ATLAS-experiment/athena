@@ -46,8 +46,9 @@ def getFuncArgs(func):
 class FactoryBlock():
     """
     """
-    def __init__(self, alg, algName, options, defaults, subAlgs=None):
+    def __init__(self, alg, factoryName, algName, options, defaults, subAlgs=None):
         self.alg = alg
+        self.factoryName = factoryName
         self.algName = algName
         self.options = options
         self.defaults = defaults
@@ -102,6 +103,7 @@ class FactoryBlock():
                 configSeq.append(func(**args))
             else:
                 func(**args)
+            configSeq.setFactoryName(self.factoryName)
             return configSeq, args.keys()
 
 
@@ -144,9 +146,15 @@ class ConfigFactory():
             if alg in algs:
                 raise ValueError(f"{algName} has already been added.")
 
+            if block != self.ROOTNAME:
+                factoryName = f"{block}.{algName}"
+            else :
+                factoryName = algName
+
             # create FactoryBlock with alg information
             algs[algName] = FactoryBlock(
                 alg=alg,
+                factoryName=factoryName,
                 algName=algName,
                 options=opts,
                 defaults=defaults,

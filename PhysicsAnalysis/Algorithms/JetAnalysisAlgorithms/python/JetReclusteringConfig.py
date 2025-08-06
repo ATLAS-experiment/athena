@@ -27,9 +27,13 @@ class JetReclusteringBlock(ConfigBlock):
         self.addOption ('maxEta', 2.5, type=float,
                         info='maximum eta requirement on the reclustered jets, creating the selection `passed_sel`. The default is 2.5.')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs(self, config):
 
-        alg = config.createAlgorithm('CP::JetReclusteringAlg', 'JetReclusteringAlg' + self.containerName)
+        alg = config.createAlgorithm('CP::JetReclusteringAlg', 'JetReclusteringAlg')
 
         alg.jets, alg.jetSelection = config.readNameAndSelection(self.jets)
         alg.reclusteredJets = config.writeName(self.containerName)
@@ -40,7 +44,7 @@ class JetReclusteringBlock(ConfigBlock):
 
         # prepare selection algorithm
         if self.minPt > 0 or self.maxEta > 0 :
-            selAlg = config.createAlgorithm('CP::AsgSelectionAlg', 'RCJetsMinPtAlg' + self.containerName)
+            selAlg = config.createAlgorithm('CP::AsgSelectionAlg', 'RCJetsMinPtAlg')
             selAlg.selectionDecoration = 'passed_sel,as_bits'
             config.addPrivateTool('selectionTool', 'CP::AsgPtEtaSelectionTool')
             selAlg.selectionTool.minPt = self.minPt

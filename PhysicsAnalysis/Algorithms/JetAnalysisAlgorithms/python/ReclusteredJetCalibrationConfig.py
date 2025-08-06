@@ -16,6 +16,10 @@ class ReclusteredJetCalibrationBlock(ConfigBlock):
         self.addOption ('jetInput', jetInput, type=str,
             info='the input calibrated small-R jet collection to use')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs(self, config):
 
         config.setSourceName (self.containerName, self.jetCollection, originalName = self.jetCollection)
@@ -26,7 +30,7 @@ class ReclusteredJetCalibrationBlock(ConfigBlock):
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
 
-        alg = config.createAlgorithm('CP::ReclusteredJetCalibrationAlg', 'ReclusteredJetCalibrationAlg' + self.containerName)
+        alg = config.createAlgorithm('CP::ReclusteredJetCalibrationAlg', 'ReclusteredJetCalibrationAlg')
 
         alg.reclusteredJets = config.readName(self.containerName)
         alg.reclusteredJetsOut = config.copyName(self.containerName)

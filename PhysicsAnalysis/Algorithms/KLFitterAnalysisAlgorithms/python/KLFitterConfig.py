@@ -99,6 +99,10 @@ class KLFitterBlock(ConfigBlock):
         # list of dictionaries for the per-region config options
         self.perRegionConfiguration = list()
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def parseSelectionRegionsConfig(self):
         regions = self.selectionRegionsConfig.split(";")
         if len(regions) == 0:
@@ -128,7 +132,7 @@ class KLFitterBlock(ConfigBlock):
             selectionName = perRegionConfig["selectionName"]
             alg = config.createAlgorithm(
                 "EventReco::RunKLFitterAlg",
-                f"RunKLFitterAlg_{self.containerName}_{selectionName}",
+                f"RunKLFitterAlg_{selectionName}",
             )
             # input objects and their object selections
             alg.electrons, alg.electronSelection = config.readNameAndSelection(
@@ -178,7 +182,7 @@ class KLFitterBlock(ConfigBlock):
 
         finalizeAlg = config.createAlgorithm(
             "EventReco::KLFitterFinalizeOutputAlg",
-            "KLFitterFinalizeOutputAlg_" + self.containerName,
+            "KLFitterFinalizeOutputAlg",
         )
         finalizeAlg.resultContainerToCheck = self.containerName + "_%SYS%"
         finalizeAlg.resultContainerToWrite = self.containerName + "_%SYS%"

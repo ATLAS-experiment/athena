@@ -37,6 +37,9 @@ class PreJetAnalysisConfig (ConfigBlock) :
             info="whether to set up the jet truth tagging algorithm "
             "CP::JetTruthTagAlg. The default is True.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
 
     def makeAlgs (self, config) :
 
@@ -51,7 +54,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
         # Relink original jets in case of b-tagging calibration
         if self.runOriginalObjectLink :
             alg = config.createAlgorithm( 'CP::AsgOriginalObjectLinkAlg',
-                                          'JetOriginalObjectLinkAlg'+self.containerName,
+                                          'JetOriginalObjectLinkAlg',
                                            reentrant=True )
             alg.baseContainerName = self.jetCollection
             alg.particles = config.readName (self.containerName)
@@ -63,7 +66,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
         if (self.runGhostMuonAssociation is None and not config.isPhyslite()) or \
            (self.runGhostMuonAssociation is True):
             alg = config.createAlgorithm( 'CP::JetGhostMuonAssociationAlg',
-                                          'JetGhostMuonAssociationAlg'+self.containerName )
+                                          'JetGhostMuonAssociationAlg' )
             alg.jets = config.readName (self.containerName)
             if config.isPhyslite():
                 alg.muons = "AnalysisMuons"
@@ -77,7 +80,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
             and config.dataType() is not DataType.Data
         ):
             # Decorate jets with isHS labels (required to retrieve Jvt SFs)
-            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupLabelingTool' )
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
@@ -86,7 +89,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
 
         # Set up shallow copy if needed and not yet done
         if config.wantCopy (self.containerName) :
-            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' + self.containerName )
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
 
@@ -171,6 +174,9 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             "'AF3' or 'MC16'). Expert option to override JetETmiss "
             "recommendations. The default is None.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
 
     def getUncertaintyToolSettings(self, config):
 
@@ -303,7 +309,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Prepare the jet calibration algorithm
-            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
             # Get the correct string to use in the config file name
@@ -353,7 +359,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
 
         # Jet uncertainties
-        alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
+        alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg' )
         self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
         alg.jets = config.readName (self.containerName)
         alg.jetsOut = config.copyName (self.containerName)
@@ -361,7 +367,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         # Set up the JVT update algorithm:
         if self.runJvtUpdate :
-            alg = config.createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg' )
             config.addPrivateTool( 'jvtTool', 'JetVertexTaggerTool' )
             alg.jvtTool.JetContainer = self.jetCollection
             alg.jvtTool.SuppressInputDependence=True
@@ -371,7 +377,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         if self.runNNJvtUpdate:
             assert self.jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
-            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupTag::JetVertexNNTagger' )
             # Set this actually to the *output* collection
             alg.jets = config.readName (self.containerName)
@@ -384,7 +390,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
         if self.runJvtSelection :
             assert self.jetInput=="EMPFlow", "NNJvt WPs and SFs only valid for PFlow jets"
-            alg = config.createAlgorithm('CP::AsgSelectionAlg', f'JvtSelectionAlg{self.containerName}')
+            alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
             alg.selectionTool.WorkingPoint = self.jvtWP
@@ -393,7 +399,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.particles = config.readName(self.containerName)
 
             if self.runJvtEfficiency and config.dataType() is not DataType.Data:
-                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+self.containerName )
+                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg' )
                 config.addPrivateTool( 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
                 alg.efficiencyTool.MaxPtForJvt = 60*GeV
@@ -414,7 +420,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         if self.runFJvtSelection :
             assert self.jetInput=="EMPFlow", "fJvt WPs and SFs only valid for PFlow jets"
-            alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg{self.containerName}')
+            alg = config.createAlgorithm('CP::AsgSelectionAlg', 'FJvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
             alg.selectionTool.WorkingPoint = self.fJvtWP
@@ -422,7 +428,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.particles = config.readName(self.containerName)
 
             if self.runFJvtEfficiency and config.dataType() is not DataType.Data:
-                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+self.containerName )
+                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg' )
                 config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
                 alg.efficiencyTool.WorkingPoint = self.fJvtWP
@@ -441,7 +447,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             config.addSelection (self.containerName, 'baselineFJvt', 'fjvt_selection,as_char', preselection=False)
 
         # Additional decorations
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName )
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'AsgEnergyDecoratorAlg' )
         alg.particles = config.readName (self.containerName)
 
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
@@ -471,6 +477,9 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
             "derivations. The default is True.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
 
     def makeAlgs (self, config) :
 
@@ -487,7 +496,7 @@ class RScanJetAnalysisConfig (ConfigBlock) :
                 raise ValueError(
                     "Unsupported input type '{0}' for R-scan jets!".format(self.jetInput) )
             # Prepare the jet calibration algorithm
-            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
             alg.calibrationTool.ConfigFile = \
@@ -596,6 +605,10 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('maxMass', 600.*GeV, type=float,
             info="the maximum mass cut to apply to calibrated large-R jets. "
             "The default is 600 GeV.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
 
     def getUncertaintyToolSettings(self, config):
         # Retrieve appropriate JES/JER recommendations for the JetUncertaintiesTool.
@@ -765,7 +778,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Prepare the jet calibration algorithm
-            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
 
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
@@ -786,7 +799,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         # Jet uncertainties
         if self.jetInput == "UFO" and config.dataType() in [DataType.FullSim, DataType.FastSim]:
-            alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg' )
             self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
 
             alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
@@ -800,7 +813,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
 
         if self.jetInput != "UFO":
-            alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg' )
 
             # R=1.0 jets have a validity range
             alg.outOfValidity = 2 # SILENT
@@ -820,7 +833,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         if self.jetInput == "UFO" and config.dataType() is not DataType.Data:
             # set up the FF smearing algorithm
-            alg = config.createAlgorithm( 'CP::JetFFSmearingAlg', 'JetFFSmearingAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::JetFFSmearingAlg', 'JetFFSmearingAlg' )
             self.createFFSmearingTool(alg, config)
             alg.outOfValidity = 2 # SILENT
             alg.outOfValidityDeco = 'outOfValidityJMR'
@@ -830,7 +843,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         if self.minPt > 0 or self.maxPt > 0 or self.maxEta > 0:
             # Set up the the pt-eta selection
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetPtEtaCutAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetPtEtaCutAlg' )
             alg.selectionDecoration = 'selectPtEta,as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
             alg.selectionTool.minPt = self.minPt
@@ -843,7 +856,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             
         if self.minMass > 0 or self.maxMass > 0:
             # Set up the the mass selection
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetMassCutAlg'+self.containerName )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetMassCutAlg' )
             alg.selectionDecoration = 'selectMass,as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::AsgMassSelectionTool' )
             alg.selectionTool.minM = self.minMass

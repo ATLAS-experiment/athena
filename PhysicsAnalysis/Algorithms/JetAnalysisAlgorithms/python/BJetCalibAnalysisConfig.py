@@ -27,13 +27,17 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
         self.addOption ('doPtCorr', True, type=bool,
             info="whether to run the b-jet pT correction on top of the muon-in-jet one")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs(self, config):
 
         # Set up kinematic selection for which ftag selection should be used downstream
         jetPreselection = config.getFullSelection(self.containerName, self.jetPreselection)
         if jetPreselection:
             alg = config.createAlgorithm('CP::AsgSelectionAlg',
-                                         'FtagPTEtaCutAlg' + self.containerName)
+                                         'FtagPTEtaCutAlg')
             alg.selectionDecoration = 'selectPtEtaFtag'
             config.addPrivateTool('selectionTool', 'CP::AsgPtEtaSelectionTool')
             alg.selectionTool.maxEta = 2.5
@@ -43,7 +47,7 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
             jetPreselection = "selectPtEtaFtag&&"+jetPreselection
 
         alg = config.createAlgorithm('CP::BJetCalibrationAlg',
-                                     'BJetCalibAlg_' + self.containerName)
+                                     'BJetCalibAlg')
         alg.muons = config.readName(self.muonContainerName)
         alg.muonPreselection = config.getPreselection(self.muonContainerName,
                                                       self.muonPreselection)
@@ -60,5 +64,5 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
             config.addPrivateTool('bJetTool', 'BJetCorrectionTool')
 
         # (re-)decorate jets with the updated energy
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecoratorBJetCalib' + self.containerName )
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecoratorBJetCalib' )
         alg.particles = config.readName (self.containerName)

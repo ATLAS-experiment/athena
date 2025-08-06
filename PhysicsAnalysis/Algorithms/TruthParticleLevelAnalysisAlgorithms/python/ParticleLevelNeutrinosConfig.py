@@ -21,18 +21,22 @@ class ParticleLevelNeutrinosBlock(ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.selectionName
+
     def makeAlgs(self, config):
         config.setSourceName (self.containerName, self.containerName)
 
         # decorate the missing elements of the 4-vector so we can save it later
         alg = config.createAlgorithm('CP::ParticleLevelPtEtaPhiDecoratorAlg',
-                                     'ParticleLevelPtEtaPhiEDecoratorNeutrinos' + self.selectionName,
+                                     'ParticleLevelPtEtaPhiEDecoratorNeutrinos',
                                      reentrant=True)
         alg.particles    = self.containerName
 
         # check for prompt isolation and possible origin from tau decays
         alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg',
-                                     'ParticleLevelIsolationNeutrinos' + self.selectionName,
+                                     'ParticleLevelIsolationNeutrinos',
                                      reentrant=True)
         alg.particles    = self.containerName
         alg.isolation    = 'isIsolated' + self.selectionName if self.isolated else 'isIsolatedButNotRequired' + self.selectionName

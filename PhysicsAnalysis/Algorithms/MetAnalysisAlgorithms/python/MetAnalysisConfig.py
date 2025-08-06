@@ -59,6 +59,10 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('softTermResolution', -1.0, type=float,
             info="(expert) override the default soft term resolution in METSignificance")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs (self, config) :
 
         if config.isPhyslite() :
@@ -75,7 +79,7 @@ class MetAnalysisConfig (ConfigBlock):
             metSuffix = metSuffix[:btIndex]
 
         # Set up the met maker algorithm:
-        alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' + self.containerName )
+        alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' )
         config.addPrivateTool( 'makerTool', 'met::METMaker' )
         alg.makerTool.skipSystematicJetSelection = self.skipSystematicJetSelection
 
@@ -113,14 +117,14 @@ class MetAnalysisConfig (ConfigBlock):
 
 
         # Set up the met builder algorithm:
-        alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' + self.containerName )
+        alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' )
         alg.softTerm = "PVSoftTrk" if not self.useCaloSoftTerm else "SoftClus"
         alg.met = config.readName (self.containerName)
 
 
         # Set up the met significance algorithm:
         if self.saveSignificance:
-            alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' + self.containerName )
+            alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' )
             config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
             if self.muons != "" :
                 config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
