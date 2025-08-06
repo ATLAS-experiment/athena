@@ -180,9 +180,7 @@ void TrigTauCluster::setClusterDetails(const ElementLink<TrigTauClusterDetailsCo
 
 bool operator== (const TrigTauCluster& clus1, const TrigTauCluster& clus2 )
 {
-	//if(clus1.clusterDetails() != 0 && clus2.clusterDetails() == 0 ) return false;
-	//if(clus1.clusterDetails() == 0 && clus2.clusterDetails() != 0 ) return false;
-	if((const TrigCaloCluster&)clus1 != (const TrigCaloCluster&)clus2)
+	if(static_cast<const TrigCaloCluster&>(clus1) != static_cast<const TrigCaloCluster&>(clus2))
 	{
 		return false;
 	}
@@ -214,7 +212,7 @@ bool operator== (const TrigTauCluster& clus1, const TrigTauCluster& clus2 )
 std::string str(const TrigTauCluster& tau)
 {
 	std::stringstream stream;
-	stream << str((const TrigCaloCluster&) tau)
+	stream << str(static_cast<const TrigCaloCluster&>(tau))
            << "; EMenergy:" << tau.EMenergy()
            << "; HADenergy:" << tau.HADenergy()
            << "; eCalib:" << tau.eCalib()
@@ -246,7 +244,7 @@ MsgStream& operator<< (MsgStream& m, const TrigTauCluster& tau)
 void diff(const TrigTauCluster& clus1, const TrigTauCluster& clus2, std::map< std::string, double >& varChange)
 {
 	const double epsilon = 0.001;
-	diff((const TrigCaloCluster&)clus1, (const TrigCaloCluster&)clus2, varChange);
+	diff(static_cast<const TrigCaloCluster&>(clus1), static_cast<const TrigCaloCluster&>(clus2), varChange);
 
 	if(std::fabs(clus1.EMenergy() - clus2.EMenergy()) > epsilon)
 	{

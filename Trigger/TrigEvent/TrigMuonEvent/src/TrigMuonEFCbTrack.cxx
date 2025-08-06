@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -122,7 +122,7 @@ void TrigMuonEFCbTrack::setIDTrackElementLink(const ElementLink<Rec::TrackPartic
  */
 std::string str( const TrigMuonEFCbTrack& d ) {
    std::stringstream ss;
-   ss << str( ( TrigMuonEFTrack& ) d )
+   ss << str( static_cast<const TrigMuonEFTrack&>(d))
       << "; chi2 match: " << d.matchChi2();
 
    return ss.str();
@@ -139,7 +139,7 @@ MsgStream& operator<< ( MsgStream& m, const TrigMuonEFCbTrack& d ) {
  */
 bool operator== ( const TrigMuonEFCbTrack& a, const TrigMuonEFCbTrack& b ) {
 
-   if( ( TrigMuonEFTrack& ) a != ( TrigMuonEFTrack& ) b )
+   if( static_cast<const TrigMuonEFTrack&>(a) != static_cast<const TrigMuonEFTrack&>(b) )
       return false;
    if( std::abs( a.matchChi2() - b.matchChi2() ) > DELTA )
       return false;
@@ -160,7 +160,7 @@ void diff( const TrigMuonEFCbTrack& a, const TrigMuonEFCbTrack& b,
            std::map< std::string, double >& variableChange ) {
 
    // Call the function operating on the base class:
-   diff( ( TrigMuonEFTrack& ) a, ( TrigMuonEFTrack& ) b, variableChange );
+   diff( static_cast<const TrigMuonEFTrack&>(a), static_cast<const TrigMuonEFTrack&>(b), variableChange );
 
    if( std::abs( a.matchChi2() - b.matchChi2() ) > DELTA ) {
       variableChange[ "MatchChi2" ] = a.matchChi2() - b.matchChi2();
