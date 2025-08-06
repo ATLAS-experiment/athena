@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackToSegmentTool.h"
@@ -30,6 +30,7 @@ namespace Muon {
         ATH_CHECK(m_edmHelperSvc.retrieve());
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_chamberGeoKey.initialize());
+        ATH_CHECK(m_DetectorManagerKey.initialize());
         return StatusCode::SUCCESS;
     }
 
@@ -215,8 +216,10 @@ namespace Muon {
             ATH_MSG_ERROR("Failed to retrieve chamber intersection service");                            
         }
 
-        const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(chid, pars.position(), pars.momentum().unit());
-        const MuonGM::MuonDetectorManager* MuonDetMgr = InterSectSvc->detMgr();
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_DetectorManagerKey,ctx};
+        const MuonGM::MuonDetectorManager* MuonDetMgr = detMgr.cptr();
+
+        const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(MuonDetMgr, chid, pars.position(), pars.momentum().unit());
 
         // set to identify the hit on the segment
         std::set<Identifier> hitsOnSegment;
