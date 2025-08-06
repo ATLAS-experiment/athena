@@ -60,6 +60,7 @@
 #include "G4Step.hh"
 #include "G4Navigator.hh"
 #include "G4TransportationManager.hh"
+#include "G4Version.hh"
 #include "globals.hh"
 
 #include "LArG4Code/LArG4BirksLaw.h"
