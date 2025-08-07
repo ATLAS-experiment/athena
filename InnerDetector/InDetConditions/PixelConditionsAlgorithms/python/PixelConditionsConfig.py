@@ -236,7 +236,7 @@ def PixelClusterdEdxCondAlgCfg(flags, name="PixelClusterdEdxCondAlg", **kwargs):
     kwargs.setdefault("ReadKey", "/PIXEL/test")
     acc.merge(addFolders(flags, "/PIXEL/test",  className="CondAttrListCollection"))
     kwargs.setdefault("WriteKey","PixelClusterdEdxCondData")
-    kwargs.setdefault("ConfigStatus", flags.InDet.PixelConfig.clusterdEdxCalib) #Default is true
+    kwargs.setdefault("ConfigFlag", flags.InDet.PixelConfig.clusterdEdxCalib) #Default is true
     acc.addCondAlgo(CompFactory.PixelClusterdEdxCondAlg(name, **kwargs))
     return acc
 

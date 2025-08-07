@@ -9,10 +9,7 @@
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 
 //Rebecca - includes
-#include <TFile.h>
-#include <TTree.h>
-#include <map>
-#include "StoreGate/StoreGateSvc.h"
+// #include "StoreGate/StoreGateSvc.h"
 //Rebecca - end includes
 
 // Tracking:
@@ -51,7 +48,6 @@ InDet::PixelToTPIDTool::PixelToTPIDTool(const std::string& t, const std::string&
 
   //conversion Factor
   //{.025,.023,.020}; //{Old Planars,IBL_3Ds,IBL_Planars} the sensors thickness will be take into account in dEdx calculation
-  //std::map<std::tuple<int, int, int>, float> m_scaleFactorMap; //Rebecca edits
   m_conversionfactor=energyPair/sidensity;
 }
 

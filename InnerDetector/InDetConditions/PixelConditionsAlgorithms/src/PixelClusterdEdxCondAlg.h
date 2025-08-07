@@ -25,13 +25,13 @@ class PixelClusterdEdxCondAlg : public AthReentrantAlgorithm {
 
   private:
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKey
-      {this, "ReadKey", "/PIXEL/test", "Rebecca Test read key"}; //XXXChange for testing!  /PIXEL/test
+      {this, "ReadKey", "/PIXEL/test", "Rebecca Test read key"};
   
-    SG::WriteCondHandleKey<PixelClusterdEdxCondData> m_writeKey //Just for testing... trying to create some kind of objec to read in PixelPID
+    SG::WriteCondHandleKey<PixelClusterdEdxCondData> m_writeKey 
       {this, "WriteKey", "PixelClusterdEdxCondData", "Making a PixelClusterdEdxCondData object for testing --Rebecca"};  
    
-    Gaudi::Property<int> m_configStatus 
-      {this, "ConfigStatus", true,"Switching Pixel dEdx Calib on and off --Rebecca" };
+    Gaudi::Property<int> m_configFlag 
+      {this, "ConfigFlag", true,"Switching Pixel dEdx Calib on and off --Rebecca" };
  
 };  
 #endif

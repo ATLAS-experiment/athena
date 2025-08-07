@@ -71,7 +71,7 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.PixelConfig.UserInputFileName", '')
     icf.addFlag("InDet.doPixelFEcheckExpHits", True)
     icf.addFlag("InDet.PixelConfig.clusterdEdxCalib", True) #Rebecca
-
+    
     # Save SiHitCollections to RDO
     icf.addFlag("InDet.savePixelSiHits", lambda prevFlags:
                 prevFlags.BTagging.Trackless or

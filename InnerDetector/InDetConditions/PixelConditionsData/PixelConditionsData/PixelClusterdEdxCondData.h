@@ -21,10 +21,10 @@ class PixelClusterdEdxCondData {
     virtual ~PixelClusterdEdxCondData();
     float getVar(const std::tuple<int,int,int>& module_coordinates) const;
     void setVar(const std::vector<std::tuple<std::tuple<int,int,int>,float>>& value);
-    void setConfig(const int& value); 
+    void setConfig(const bool& value); 
   private:
-    std::vector<std::tuple<std::tuple<int,int,int>,float>> m_var; //Default for testing
-    int m_configStatus = 1;
+    std::vector<std::tuple<std::tuple<int,int,int>,float>> m_var; 
+    bool m_configFlag;
 };
 
 CLASS_DEF( PixelClusterdEdxCondData , 112527067 , 1 );
