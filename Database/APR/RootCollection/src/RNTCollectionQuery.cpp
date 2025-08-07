@@ -13,8 +13,6 @@
 #include "CollectionBase/CollectionBaseNames.h"
 #include "CollectionBase/boost_tokenizer_headers.h"
 
-#include "POOLCore/Exception.h"
-
 #include "CoralBase/AttributeList.h"
 
 #include <ROOT/RNTuple.hxx>
@@ -134,14 +132,7 @@ void RNTCollectionQuery::addToTokenOutputList( const std::string& columnName )
 {
    // Add to select list, if not already present
    if( m_selectedColumnNames.find( columnName ) == m_selectedColumnNames.end() ) {
-      try {
-         m_description.tokenColumn( columnName ); 
-      } catch( pool::Exception& /* e */ ) {
-         std::string errorMsg( "Token column with name `" + columnName + "' does not exist." );
-         throw pool::Exception( errorMsg,
-                             "RNTCollectionQuery::addToTokenOutputList",
-                             "RootCollection" );
-      }
+      m_description.tokenColumn( columnName ); 
       m_outputTokenList.extend( columnName );
       m_selectedColumnNames.insert( columnName );
    }
@@ -152,14 +143,7 @@ void RNTCollectionQuery::addToAttributeOutputList( const std::string& columnName
 {  
    // Add to select list, if not already present
    if( m_selectedColumnNames.find( columnName ) == m_selectedColumnNames.end() ) {
-      try {
-         m_outputAttributeList.extend( columnName, m_description.attributeColumn( columnName ).type() );
-      } catch( pool::Exception& /* e */) {
-         std::string errorMsg( "Attribute column with name `" + columnName + "' does not exist." );
-         throw pool::Exception( errorMsg,
-                             "RNTCollectionQuery::addToAttributeOutputList",
-                             "RootCollection" );
-      }         
+      m_outputAttributeList.extend( columnName, m_description.attributeColumn( columnName ).type() );
       m_selectedColumnNames.insert( columnName );
    }
 }

@@ -13,8 +13,6 @@
 #include "CollectionBase/CollectionBaseNames.h"
 #include "CollectionBase/boost_tokenizer_headers.h"
 
-#include "POOLCore/Exception.h"
-
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
 #include "CoralBase/MessageStream.h"
@@ -157,9 +155,7 @@ pool::RootCollection::RootCollectionQuery::execute()
      APRTreeFormula formula(m_whereClause, m_tree);
      if( !formula.GetNdim() )  {
         std::string errorMsg = "Could not construct TTreeFormula object, probably because of incorrect ROOT predicate syntax in expression `" + m_whereClause + "'";
-        throw pool::Exception( errorMsg,
-                               "RootCollectionQuery::execute", 
-                               "RootCollection");
+        throw std::runtime_error( errorMsg + " (APR: \" RootCollectionQuery::execute \" from \" RootCollection \")");
      }
      int entries = (int)m_tree->GetEntries();
      for( int i = 0; i < entries; ++i ) {
@@ -189,11 +185,9 @@ pool::RootCollection::RootCollectionQuery::addToTokenOutputList( const std::stri
    if( m_selectedColumnNames.find( columnName ) == m_selectedColumnNames.end() ) {
       try {
          m_description.tokenColumn( columnName ); 
-      } catch( pool::Exception& /* e */ ) {
+      } catch( std::runtime_error& /* e */ ) {
          std::string errorMsg( "Token column with name `" + columnName + "' does not exist." );
-         throw pool::Exception( errorMsg,
-                             "RootCollectionQuery::addToTokenOutputList",
-                             "RootCollection" );
+         throw std::runtime_error( errorMsg + " (APR: \" RootCollectionQuery::addToTokenOutputList \" from \" RootCollection \")");
       }
       m_outputTokenList.extend( columnName );
       m_selectedColumnNames.insert( columnName );
@@ -209,11 +203,9 @@ pool::RootCollection::RootCollectionQuery::addToAttributeOutputList( const std::
    if( m_selectedColumnNames.find( columnName ) == m_selectedColumnNames.end() ) {
       try {
          m_outputAttributeList.extend( columnName, m_description.attributeColumn( columnName ).type() );
-      } catch( pool::Exception& /* e */) {
+      } catch( std::runtime_error& /* e */ ) {
          std::string errorMsg( "Attribute column with name `" + columnName + "' does not exist." );
-         throw pool::Exception( errorMsg,
-                             "RootCollectionQuery::addToAttributeOutputList",
-                             "RootCollection" );
+         throw std::runtime_error( errorMsg + " (APR: \" RootCollectionQuery::addToAttributeOutputList \" from \" RootCollection \")");
       }         
       m_selectedColumnNames.insert( columnName );
    }

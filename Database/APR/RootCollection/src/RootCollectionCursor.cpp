@@ -5,10 +5,8 @@
 #include "RootCollectionCursor.h"
 
 #include "CoralBase/Attribute.h"
-#include "POOLCore/Exception.h"
 
-
-#include <iostream>
+#include <exception>
 
 pool::RootCollection::RootCollectionCursor::
 RootCollectionCursor(
@@ -32,7 +30,7 @@ RootCollectionCursor(
       TBranch* branch = tree->GetBranch( branchName.c_str() );
       if( !branch ) {
          std::string errorMsg = "Failed to retrieve TBranch " + branchName + " from the CollectionTree";
-         throw pool::Exception( errorMsg, "RootCollectionCursor()", "RootCollection");
+         throw std::runtime_error( errorMsg + " (APR: \" RootCollectionCursor() \" from \" RootCollection \")");
       }
       if( attrI->specification().type() == typeid(std::string) ) {
          branch->SetAddress( m_charBuffer );
@@ -55,7 +53,7 @@ RootCollectionCursor(
       TBranch* branch = tree->GetBranch( tokenI.tokenName().c_str() );
       if( !branch ) {
          std::string errorMsg = "Failed to retrieve TBranch " + tokenI.tokenName() + " from the CollectionTree";
-         throw pool::Exception( errorMsg, "RootCollectionCursor()", "RootCollection");
+         throw std::runtime_error( errorMsg + " (APR: \" RootCollectionCursor() \" from \" RootCollection \")");
       }
       branch->SetAddress( m_charBuffer );
       m_tokenBranches.push_back( std::make_pair(branch, &*tokenI) );
@@ -101,19 +99,7 @@ pool::RootCollection::RootCollectionCursor::next()
 
   
    // Get iterator over current row.
-//  coral::AttributeList::const_iterator iData = m_cursor.currentRow().begin();
 
-/* 
-  cout << " * Cursor next(), values: " << endl;
-  for( ; iData != m_cursor.currentRow().end(); ++iData ) {
-      std::cout << "[";
-      iData->toOutputStream( std::cout );
-      std::cout << "] ";
-  }
-  cout << endl;  
-  iData = m_cursor.currentRow().begin();
-*/
-  
   return true;
 }
 

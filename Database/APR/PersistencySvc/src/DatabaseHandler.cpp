@@ -5,7 +5,6 @@
 #include "DatabaseHandler.h"
 #include "Container.h"
 #include "PersistentDataModel/Token.h"
-#include "PersistencySvc/PersistencySvcException.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/IStorageExplorer.h"
 #include "StorageSvc/Transaction.h"
@@ -14,6 +13,7 @@
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 
+#include <exception>
 #include <memory>
 
 pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
@@ -33,8 +33,7 @@ pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& stora
   if ( ! m_storageSvc.connect( m_session,
                                m_accessMode,
                                m_fileDescriptor ).isSuccess() ) {
-    throw pool::PersistencySvcException( "Could not connect to the database",
-                                         "PersistencySvc::DatabaseHandler::DatabaseHandler" );
+    throw std::runtime_error( "Could not connect to the database (APR: \" DatabaseHandler::DatabaseHandler \" from \" PersistencySvc \")" );
   }
 }
 

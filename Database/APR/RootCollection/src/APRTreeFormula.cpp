@@ -5,7 +5,6 @@
 #  include "TTreeFormulaManager.h"
 
 #include "APRTreeFormula.h"
-#include "POOLCore/Exception.h"
 
 #include "TBranchElement.h"
 #include "TTree.h"
@@ -23,7 +22,8 @@
 #include <cmath>
 #include <sstream>
 #include <cassert>
-//#include <iostream>
+#include <exception>
+
 using namespace std;
 
 APRTreeFormula::~APRTreeFormula() {
@@ -417,9 +417,7 @@ Double_t APRTreeFormula::EvalInstance(Int_t instance, const char *stringStackArg
               // Using gRandom is not thread-safe.
               // ATLAS doesn't use this code, so just give an error
               // rather than trying to fix it.
-              throw pool::Exception ("Rndm() not supported",
-                                     "APRTreeFormula::EvalInstance",
-                                     "APRTreeFormula");
+              throw std::runtime_error("Rndm() not supported (APR: \" APRTreeFormula::EvalInstance \" from \" APRTreeFormula \")");
 
             case kAnd  : pos--; if (tab[pos-1]!=0 && tab[pos]!=0) tab[pos-1]=1;
                                 else tab[pos-1]=0;

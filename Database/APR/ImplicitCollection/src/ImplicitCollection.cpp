@@ -8,9 +8,7 @@
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
-#include "PersistencySvc/PersistencySvcException.h"
 
-#include "POOLCore/Exception.h"
 #include "CoralBase/MessageStream.h"
 
 #include "StorageSvc/DbType.h"
@@ -55,9 +53,7 @@ namespace pool {
 
       if ( mode != ICollection::READ ) {
          log << coral::Error << "An implicit collection can be opened only in READ mode" << coral::MessageStream::endmsg;
-         throw Exception( "An implicit collection can be opened only in READ mode",
-                          "ImplicitCollection::ImplicitCollection",
-                          "ImplicitCollection" );
+         throw std::runtime_error( "An implicit collection can be opened only in READ mode (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
 
       DatabaseSpecification::NameType dbNameType = DatabaseSpecification::UNDEFINED;
@@ -67,9 +63,7 @@ namespace pool {
       std::string::size_type pos = connection.find( ":" );
       if ( pos == std::string::npos ) {
          log << coral::Error << "Badly formed connection string : \"" << connection << "\"" << coral::MessageStream::endmsg;
-         throw Exception( "Badly formed connection string",
-                          "ImplicitCollection::ImplicitCollection",
-                          "ImplicitCollection" );
+         throw std::runtime_error( "Badly formed connection string (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
 
       const std::string dbType = connection.substr( 0, pos );
@@ -79,9 +73,7 @@ namespace pool {
       else if ( dbType == "FID" ) dbNameType = DatabaseSpecification::FID;
       else {
          log << coral::Error << "Unrecognizable database name type : \"" << dbType << "\"" << coral::MessageStream::endmsg;
-         throw Exception( "Unrecognizable database name type : " + dbType,
-                          "ImplicitCollection::ImplicitCollection",
-                          "ImplicitCollection" );
+         throw std::runtime_error( "Unrecognizable database name type : " + dbType + " (APR: \"ImplicitCollection::ImplicitCollection (APR: \" ImplicitCollection \")" );
       }
 
       std::string dbName = "";
@@ -91,22 +83,16 @@ namespace pool {
 
       if ( dbName.empty() ) {
          log << coral::Error << "Invalid database name " << coral::MessageStream::endmsg;
-         throw Exception( "Invalid database name",
-                          "ImplicitCollection::ImplicitCollection",
-                          "ImplicitCollection" );
+         throw std::runtime_error( "Invalid database name (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
   
       if( !session ) {
-         throw Exception( "session object not set",
-                          "ImplicitCollection::ImplicitCollection",
-                          "ImplicitCollection" );
+         throw std::runtime_error( "session object not set (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
   
       auto database = session->databaseHandle( dbName, dbNameType );
       if( !database ) {
-         throw Exception( "Could not retrieve a database handle",
-                          "ImplicitCollection::ImplicitCollection",
-                          "ImplicitCollection" );
+         throw std::runtime_error( "Could not retrieve a database handle (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
 
       if ( database->openMode() == IDatabase::CLOSED ) {
@@ -116,7 +102,7 @@ namespace pool {
          try {
             database->connectForRead();
          }
-         catch ( PersistencySvcException& /* exception */ ) {
+         catch ( std::runtime_error& /* exception */ ) {
 	    // use provided tech name or assume ROOT
             DbType theDbType = (technologyName != "") ? DbType::getType( technologyName ) : ROOT_StorageType;
 	    // setting tech will make connectForRead work without a catalog
@@ -136,9 +122,7 @@ namespace pool {
       }
 
       if( !m_container ) {
-         throw Exception( "Could not open the container " + name,
-                          "ImplicitCollection::ImplicitCollection",
-                          "ImplicitCollection" );
+         throw std::runtime_error( "Could not open the container " + name + " (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
       log << coral::Info << "Opened the implicit collection with connection string \""
           << connection << "\"" << coral::MessageStream::endmsg
@@ -180,7 +164,7 @@ namespace pool {
    void
    ImplicitCollection::insertRow(const pool::CollectionRowBuffer& /*inputRowBuffer*/)
    {
-      throw pool::Exception( "Cannot modify the data of a implicit collection.", "ImplicitCollection::insertRow", "ImplicitCollection" );
+      throw std::runtime_error( "Cannot modify the data of a implicit collection. (APR: \" ImplicitCollection::insertRow \" from \" ImplicitCollection \")" );
    }
 
 
