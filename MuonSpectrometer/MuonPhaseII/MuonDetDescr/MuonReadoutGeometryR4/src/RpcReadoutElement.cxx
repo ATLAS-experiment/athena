@@ -119,7 +119,7 @@ double RpcReadoutElement::distanceToEdge(const IdentifierHash& layerHash,
                                          const EdgeSide side) const {
     const StripDesign& design{measuresPhi(layerHash) ? *m_pars.phiDesign : *m_pars.etaDesign};
     /// For the moment define the readOut to be at negative y while the highVolt is at positive
-    const double refPoint{design.longHalfHeight() * (side == EdgeSide::readOut ? -1. : 1.)};
+    const double refPoint{design.longHalfHeight() * (side == EdgeSide::readOut ? -1. : 1.) * m_pars.readoutSide};
     return std::abs(refPoint - posInStripPlane.y());                                    
 }
 

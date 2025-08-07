@@ -15,6 +15,8 @@
 
 #include <GeoModelHelpers/GeoDeDuplicator.h>
 
+class GeoBox;
+
 namespace MuonGMR4 {
 /** @brief Implementation to construct Rpc readout element from the list of published
  *         full physical volumes and the WRPC meta data table. */
@@ -71,7 +73,17 @@ class RpcReadoutGeomTool : public extends<AthAlgTool,IMuonReadoutGeomTool> {
     /// Retrieves the auxillary tables from the database
     StatusCode readParameterBook(FactoryCache& cache);
     /// Loads the chamber dimensions from GeoModel
-    StatusCode loadDimensions(RpcReadoutElement::defineArgs& args, FactoryCache& factory );
+    StatusCode loadDimensions(RpcReadoutElement::defineArgs& args, FactoryCache& factory);
+    /** @brief Constructs a new Strip design from the parameter book to describe either
+     *         the phi plane or the eta strip-plane 
+     *  @param planeBox: Pointer to the shape describing the strip-readout volume,
+     *                   needed to fetch the design's dimensions
+     *  @param paramBook: Parameter book to read off the strip design paramters in terms of
+     *                    pitch, n-strips etc
+     *  @param phiPlane: Switch toggling whether the eta / phi design should be created */
+    std::unique_ptr<StripDesign> constructDesign(const GeoBox* planeBox,
+                                                 const wRPCTable& paramBook,
+                                                 bool phiPlane) const;
 
 };
 
