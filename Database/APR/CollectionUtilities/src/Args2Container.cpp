@@ -533,7 +533,7 @@ void Args2Container::writeXMLContent(std::vector<std::string>& argv)
       DOMImplementation* impl(DOMImplementationRegistry::getDOMImplementation (ls_id));
 
 #if XERCES_VERSION_MAJOR < 3
-      DOMWriter         *theSerializer = ((DOMImplementationLS*)impl)->createDOMWriter();
+      DOMWriter         *theSerializer = static_cast<DOMImplementationLS*>(impl)->createDOMWriter();
 
       if (theSerializer->canSetFeature(XMLUni::fgDOMWRTDiscardDefaultContent, true))
           theSerializer->setFeature(XMLUni::fgDOMWRTDiscardDefaultContent, true);
