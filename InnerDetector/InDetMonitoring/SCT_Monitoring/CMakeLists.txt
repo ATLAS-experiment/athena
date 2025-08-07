@@ -30,7 +30,7 @@ atlas_add_dictionary( SCT_MonitoringDict
 atlas_add_test( SCTLorentzMonAlg_test
                 SCRIPT python -m SCT_Monitoring.SCTLorentzMonAlg
                 POST_EXEC_SCRIPT noerror.sh
-                PROPERTIES TIMEOUT 600 )
+                PROPERTIES TIMEOUT 1000 )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

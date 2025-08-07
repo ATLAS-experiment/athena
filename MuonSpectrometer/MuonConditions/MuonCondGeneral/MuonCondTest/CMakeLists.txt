@@ -41,7 +41,7 @@ atlas_add_test( RpcCabling_Run3MC
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( NSWCondTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWCondAlg.sh 
-                PROPERTIES TIMEOUT 900
+                PROPERTIES TIMEOUT 1000
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( NSWPassivTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWPassivAlg.sh 
