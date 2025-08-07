@@ -406,7 +406,6 @@ StatusCode MdtCalibDbAlg::parseT0Payload(TTree& t0Tree,
     SET_BRANCHADDRESS(t0Tree, tube);
     
     using SingleTubeCalib = MdtTubeCalibContainer::SingleTubeCalib;
-    using SingleTubeCalibPtr = MdtTubeCalibContainer::SingleTubeCalibPtr;
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
 
     for (Long64_t e = 0 ; e <t0Tree.GetEntries(); ++e) {
@@ -446,7 +445,6 @@ StatusCode MdtCalibDbAlg::parseT0Payload(const nlohmann::json& t0Blob,
                                          MdtCalibDataContainer& outContainer) const {
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     using SingleTubeCalib = MdtTubeCalibContainer::SingleTubeCalib;
-    using SingleTubeCalibPtr = MdtTubeCalibContainer::SingleTubeCalibPtr;
     
     /** Loop over the R-T blob payload */
     for (auto& dbEntry : t0Blob.items()) {
