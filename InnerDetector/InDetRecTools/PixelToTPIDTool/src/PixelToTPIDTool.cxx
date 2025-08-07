@@ -143,9 +143,9 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           // Get SF for cluster 
           float scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getVar(std::make_tuple(bec,layer,eta_module)); //XXXRebecca
           ATH_MSG_INFO("Rebecca - Did I read from PixelChargeCalibCondData?");
-          ATH_MSG_INFO("bec: " << bec << " layer: " << layer << " etaM: " << eta_module);
+          //ATH_MSG_INFO("bec: " << bec << " layer: " << layer << " etaM: " << eta_module);
           ATH_MSG_INFO(scaleFactor);
-          float charge=pixclus->prepRawData()->totalCharge()*cosalpha*scaleFactor;
+          float charge=pixclus->prepRawData()->totalCharge()*cosalpha; //*scaleFactor;
 
           //keep track if this is an ibl cluster with overflow
           int iblOverflow=0;
