@@ -122,11 +122,6 @@ MuonBlueprintNodeBuilder::buildMuonNode(
 
       std::pair<std::vector<volumePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*context, *chamber, chId, boundsFactory);
 
-      //get the readout elements as volumes and surfaces and add them to the node
-      for(auto& readoutVol : innerStructure.first){
-        vol->addVolume(std::move(readoutVol));
-      }
-
       for(auto& surface: innerStructure.second){
         vol->addSurface(surface);
       }
@@ -153,8 +148,14 @@ MuonBlueprintNodeBuilder::buildMuonNode(
         helper.write(chamber->identString() + ".obj");
         helper.clear();
       }
+
+      auto node = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
+      for(auto& readoutVol : innerStructure.first){
+         node->addStaticVolume(std::move(readoutVol));
+       }
+
       
-      nodes.emplace_back(std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol)));
+      nodes.emplace_back(std::move(node));
     }
 
     double halfLengthZ = 0.5 * std::abs(maxZ - minZ);
