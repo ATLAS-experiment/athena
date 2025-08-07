@@ -374,19 +374,19 @@ const DbTypeInfo* DbTypeInfo::fromString(const std::string& string_rep)
 
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::create(const std::string& cl_name)  {
+const DbTypeInfo* DbTypeInfo::create(const std::string& cl_name)  {
   Columns cols;
   return create(cl_name, cols);
 }
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::create(const Guid& guid)  {
+const DbTypeInfo* DbTypeInfo::create(const Guid& guid)  {
   Columns cols;
   return create(guid, cols);
 }
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::createEx(const Guid& guid)  {
+const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid)  {
   Columns cols;
   return createEx(guid, cols);
 }
@@ -402,12 +402,12 @@ DbTypeInfo* DbTypeInfo::regShape(const Guid& guid, const TypeH& type, Columns& c
 
 
 /// Create type information using name
-DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols)   {
+const DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols)   {
   TypeH type = DbReflex::forTypeName(cl_name);
   if ( type )    {
     Guid guid(DbReflex::guid(type));
-    DbTypeInfo* typ_info = 0;
-    if (DbTransform::getShape(guid, (const DbTypeInfo*&)typ_info) == DbStatus::Success) {
+    const DbTypeInfo* typ_info = 0;
+    if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
        clearColumns(cols);
        return typ_info;
     }
@@ -420,9 +420,9 @@ DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols)   {
 
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
-  DbTypeInfo* typ_info = 0;
-  if (DbTransform::getShape(guid, (const DbTypeInfo*&)typ_info) == DbStatus::Success) {
+const DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
+  const DbTypeInfo* typ_info = 0;
+  if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
     clearColumns(cols);
     return typ_info;
   }
@@ -435,9 +435,9 @@ DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
 }
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::createEx(const Guid& guid, Columns& cols)   {
-  DbTypeInfo* typ_info = 0;
-  if (DbTransform::getShape(guid, (const DbTypeInfo*&)typ_info) == DbStatus::Success) {
+const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid, Columns& cols)   {
+  const DbTypeInfo* typ_info = 0;
+  if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
     clearColumns(cols);
     return typ_info;
   }
