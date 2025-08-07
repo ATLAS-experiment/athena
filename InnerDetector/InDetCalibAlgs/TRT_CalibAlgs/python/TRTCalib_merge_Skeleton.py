@@ -13,13 +13,13 @@ def tryError(command, error):
     try:
         print(" Running: %s\n" % (command))
         stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        print("OUTPUT: \n%s" % (stdout.decode('ascii')))
-        print("ERRORS: %s" % ("NONE" if stderr.decode('ascii')=='' else "\n"+stderr.decode('ascii')))
-        if stderr:
-            exit(1)        
-    except OSError as e:
+        print("STD::OUTPUT: \n%s" % (stdout.decode('ascii')))
+        print("STD::ERRORS: %s" % ("NONE" if stderr.decode('ascii')=='' else "\n"+stderr.decode('ascii')))
+        if "error" in stderr.decode('ascii').lower():
+            raise RuntimeError(f"Error from subprocess:\n{stderr.decode('ascii')}")
+    except RuntimeError as e:
         print(error,e)
-        sys.exit(e.errno)
+        sys.exit(1)
 
 def fromRunArgs(runArgs):
     

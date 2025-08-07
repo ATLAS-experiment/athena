@@ -1683,6 +1683,12 @@ def setupMenu():
         ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk3_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
 
+        # Support chains (NTrack <= 4/5)
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni0Trk5_pf_jes_ftf_preselj200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni0Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+DiTauGroup, monGroups=['tauMon:t0']),
+
 
         # HH->2b2tau: di-tau support chains (ATR-28890)
         ChainProp(name='HLT_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB_L14jJ30p0ETA24_0DETA24-eTAU30eTAU12', l1SeedThresholds=['eTAU20', 'eTAU12'], groups=SupportPhIGroup+MultiTauGroup+Topo3Group),

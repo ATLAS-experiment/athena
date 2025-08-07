@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "EfexSimMonitorAlgorithm.h"
 #include "eFEXTOBSimDataCompare.h"
@@ -191,7 +191,7 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
             for(auto w : sword0s) s << w << " ";
             ATH_MSG_DEBUG(s.str());
         }
-        auto signatureEvtType = Monitored::Scalar<std::string>("SignatureEvtType",signa+":"+evtType);
+        auto signatureEvtType = Monitored::Scalar<std::string>("SignatureEvtType",signa+":"+static_cast<std::string>(evtType));
         fill("mismatches",signatureEvtType,simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
     } else {
         tobMismatched=0;

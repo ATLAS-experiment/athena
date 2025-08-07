@@ -117,8 +117,8 @@ def main():
         if args.period:
             runs = set(period_dict[args.period])
         else:
-            #runs = set([ run for run in runs for (period, runs) in period_dict.iteritems() ])
-            for period, period_runs in period_dict.iteritems():
+            #runs = set([ run for run in runs for (period, runs) in period_dict.items() ])
+            for period, period_runs in period_dict.items():
                 runs.update(period_runs)
 
         since, until = (min(runs), 0), (max(runs)+1, 0)

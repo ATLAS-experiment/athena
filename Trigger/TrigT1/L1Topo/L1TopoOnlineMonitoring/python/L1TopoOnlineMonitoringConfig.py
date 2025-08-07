@@ -95,7 +95,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
                                     doComp = doComp,
                                     doMultComp = doMultComp,
                                     MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
-                                    AlgorithmVetoList   =["jXE40delay"],
+                                    AlgorithmVetoList   =["jXE40delay","TeATIME"],
                                     forceCTPasHdw=forceCtp)
 
     #Define the Monitoring plots for L1Calo DQ
