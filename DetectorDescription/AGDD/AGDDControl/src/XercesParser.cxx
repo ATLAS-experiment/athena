@@ -105,7 +105,7 @@ bool XercesParser::ParseFileAndNavigate(AGDDController& c,
 bool XercesParser::ParseString(const std::string& s)
 {
 	const char* str=s.c_str();
-	MemBufInputSource memBuf ((const XMLByte*)str,strlen(str),"prodInfo",false);
+	MemBufInputSource memBuf (reinterpret_cast<const XMLByte*>(str),strlen(str),"prodInfo",false);
     m_parser = new XercesDOMParser;
     bool errorsOccured = false;
 	if (!m_initialized) Initialize();
@@ -158,12 +158,12 @@ bool XercesParser::WriteToFile(const std::string& s)
 	XMLCh tempStr[100];
 	XMLString::transcode("LS 3.0 Core 2.0", tempStr, 99);
 	DOMImplementation* implementation = DOMImplementationRegistry::getDOMImplementation(tempStr);
-	DOMLSSerializer*   serializer     = ((DOMImplementationLS*)implementation)->createLSSerializer();
+	DOMLSSerializer*   serializer     = static_cast<DOMImplementationLS*>(implementation)->createLSSerializer();
 	// if one wants a nicely indented file -- not in this case as it goes to the DB and be compressed
 	// DOMConfiguration*  domconfig     = serializer->getDomConfig();
 	// domconfig->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true);
 	XMLFormatTarget* target    = new LocalFileFormatTarget(s.c_str());
-	DOMLSOutput*     domoutput = ((DOMImplementationLS*)implementation)->createLSOutput();
+	DOMLSOutput*     domoutput = static_cast<DOMImplementationLS*>(implementation)->createLSOutput();
 	// remove all comments
 	if( m_doc->getDOMConfig()->canSetParameter(XMLUni::fgDOMComments, true) ) m_doc->getDOMConfig()->setParameter(XMLUni::fgDOMComments, false);
 	m_doc->normalizeDocument();

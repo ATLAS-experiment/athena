@@ -480,7 +480,7 @@ std::string EvtRangeScatterer::getNewRangeRequest(yampl::ISocket* socket2Process
   if(processorRequestSize==sizeof(pid_t)+sizeof(AthenaMPToolBase::ESRange_Status)) {
     ATH_MSG_INFO("Processor reported event range processing error");
     pid_t pid = *((pid_t*)processor_request);
-    AthenaMPToolBase::ESRange_Status status = *((AthenaMPToolBase::ESRange_Status*)((pid_t*)processor_request+1));
+    AthenaMPToolBase::ESRange_Status status = *reinterpret_cast<AthenaMPToolBase::ESRange_Status*>((pid_t*)processor_request+1);
     std::string errorStr("ERR_ATHENAMP_PROCESS "+ m_pid2RangeID[pid] + ": ");
     switch(status) {
     case AthenaMPToolBase::ESRANGE_NOTFOUND:
