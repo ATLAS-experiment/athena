@@ -38,6 +38,9 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   m_calibModuleSum({{0, 0}}),
   m_calibModuleSumErrSq({{0, 0}}),
   m_haveNLcalib(false),
+  m_NLcalibFactors({{
+      {{ {{0,0,0,0,0,0}},{{0,0,0,0,0,0}},{{0,0,0,0,0,0}} }},
+      {{ {{0,0,0,0,0,0}},{{0,0,0,0,0,0}},{{0,0,0,0,0,0}} }}  }}),
   m_NLcalibModuleSum({{0, 0}}),
   m_NLcalibModuleSumErrSq({{0, 0}}),
   m_averageTime({{0, 0}}),
@@ -68,11 +71,6 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
 
   m_pedestals[0] = {{100, 100, 100, 100}};
   m_pedestals[1] = {{100, 100, 100, 100}};
-
-
-  m_NLcalibFactors = {{
-      {{ {{0,0,0,0,0,0}},{{0,0,0,0,0,0}},{{0,0,0,0,0,0}} }},
-      {{ {{0,0,0,0,0,0}},{{0,0,0,0,0,0}},{{0,0,0,0,0,0}} }}  }};
   
   // Construct the per-module pulse analyzers
   //

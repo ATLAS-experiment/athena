@@ -76,7 +76,7 @@ private:
   std::array<float, 2> m_calibModSumBkgdFrac{};
 
   bool m_haveNLcalib{};
-  std::array< std::array< std::array<float,6>, 3>, 2> m_NLcalibFactors; // 3 POL5s for each side
+  std::array< std::array< std::array<float,6>, 3>, 2> m_NLcalibFactors{}; // 3 POL5s for each side
   
   std::array<float, 2> m_NLcalibModuleSum{};
   std::array<float, 2> m_NLcalibModuleSumErrSq{};
