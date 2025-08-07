@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/SpacerBeam.h"
@@ -39,7 +39,7 @@ namespace MuonGM {
 
         m_cy = s->posy;
         if (componentType == "CRO" || componentType == "CMI" || componentType == "CHV") {
-            CbmComponent *ccbm = (CbmComponent *)s;
+            CbmComponent *ccbm = static_cast<CbmComponent *>(s);
             m_hole_pos1 = ccbm->hole_pos1 - length / 2. - m_cy - tol / 2.;
             m_hole_pos2 = ccbm->hole_pos2 - length / 2. - m_cy - tol / 2.;
             m_lb_height = ccbm->lb_height;
