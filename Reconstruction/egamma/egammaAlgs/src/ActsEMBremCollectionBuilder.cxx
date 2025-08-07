@@ -31,8 +31,15 @@ StatusCode ActsEMBremCollectionBuilder::initialize() {
   ATH_CHECK(m_refittedTracksKey.initialize());
   ATH_CHECK(m_actsFitter.retrieve());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_refittedTracksBackendHandles.initialize(
-      ActsTrk::prefixFromTrackContainerName(m_refittedTracksKey.key())));
+
+  std::string backendname{};
+  try {
+    backendname = ActsTrk::prefixFromTrackContainerName(m_refittedTracksKey.key());
+  }
+  catch (const std::runtime_error &ee){
+    backendname = m_refittedTracksKey.key() + "_int";
+  }
+  ATH_CHECK(m_refittedTracksBackendHandles.initialize(backendname));
 
   return StatusCode::SUCCESS;
 }
