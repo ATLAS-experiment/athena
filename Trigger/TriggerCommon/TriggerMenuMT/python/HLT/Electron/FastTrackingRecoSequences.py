@@ -10,7 +10,7 @@ def fastTracking(inflags, RoIs, variant=''):
     from TrigInDetConfig.utils import getFlagsForActiveConfig
     from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
     log = logging.getLogger("trigElectron"+variant+"InDetFastTrackingCfg")
-    signatureName = 'electronLRT' if variant  else 'electron'
+    signatureName = 'electronLRT' if 'LRT' in variant  else 'electron'
     flags = getFlagsForActiveConfig(inflags, signatureName, log)
 
     seq = InnerTrackingTrigSequence.create(flags, 

@@ -4,7 +4,6 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-#logging
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
@@ -22,6 +21,10 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys(flags, variant, ion=ion)
 
+    signatureName = 'electronLRT' if 'LRT' in variant else 'electron'
+    from TrigInDetConfig.utils import getFlagsForActiveConfig
+    trkflags = getFlagsForActiveConfig(flags, signatureName, log)
+
     precisionGsfVDV = CompFactory.AthViews.ViewDataVerifier("PrecisionTrackViewDataVerifier_forGSFRefit"+tag+'VDV')
 
     # precision Tracking related data dependencies
@@ -31,12 +34,17 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
         ambimap = flags.Trigger.ITkTracking.ClusterAmbiguitiesMap
 
     dataObjects = [( 'xAOD::TrackParticleContainer','StoreGateSvc+%s' % trackParticles),
-                   # verifier object needed by GSF
                    ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
                    ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+%s' % ambimap ),
                    ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.AveIntPerXDecor' ),
                    ]
 
+    if flags.Trigger.useActsTracking and flags.Acts.GsfRefitActs:
+        dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+                        ( 'xAOD::TrackParticleContainer','StoreGateSvc+%s.actsTrack' % trackParticles)]
+ 
+
+    
     if flags.Detector.GeometryTRT:
         dataObjects +=  [( 'InDet::TRT_DriftCircleContainer' , 'StoreGateSvc+%s' % "TRT_TrigDriftCircles" )]
         if flags.Input.isMC:
@@ -58,16 +66,23 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
 
     acc.addEventAlgo(precisionGsfVDV)
 
-    from TriggerMenuMT.HLT.Electron.TrigEMBremCollectionBuilder import TrigEMBremCollectionBuilderCfg
+    ## EMBremCollectionBuilder ##
+    if flags.Acts.GsfRefitActs:
+        from egammaAlgs.ActsEMBremCollectionBuilderConfig import (
+            TrigActsEMBremCollectionBuilderCfg)
+        acc.merge(TrigActsEMBremCollectionBuilderCfg(trkflags, name='TrigActsEMBremCollectionBuilder'+variant,
+                                                     RefittedTracksLocation = TrigEgammaKeys.precisionElectronTrkCollectionGSF,
+                                                     SelectedTrackParticleContainerName = trackParticles,
+                                                     TrackParticlesOutKey = TrigEgammaKeys.precisionElectronTrackParticleContainerGSF))
 
+    else:
 
-    ## TrigEMBremCollectionBuilder ##
-
-    acc.merge(TrigEMBremCollectionBuilderCfg(flags,
-                                             name = "TrigEMBremCollectionBuilderCfg"+variant,
-                                             TrackParticleContainerName=TrigEgammaKeys.precisionTrackingContainer,
-                                             SelectedTrackParticleContainerName=TrigEgammaKeys.precisionTrackingContainer,
-                                             OutputTrkPartContainerName=TrigEgammaKeys.precisionElectronTrackParticleContainerGSF,
-                                             OutputTrackContainerName=TrigEgammaKeys.precisionElectronTrkCollectionGSF))
+        from TriggerMenuMT.HLT.Electron.TrigEMBremCollectionBuilder import TrigEMBremCollectionBuilderCfg
+        acc.merge(TrigEMBremCollectionBuilderCfg(trkflags,
+                                                 name = "TrigEMBremCollectionBuilderCfg"+variant,
+                                                 TrackParticleContainerName=TrigEgammaKeys.precisionTrackingContainer,
+                                                 SelectedTrackParticleContainerName=TrigEgammaKeys.precisionTrackingContainer,
+                                                 OutputTrkPartContainerName=TrigEgammaKeys.precisionElectronTrackParticleContainerGSF,
+                                                 OutputTrackContainerName=TrigEgammaKeys.precisionElectronTrkCollectionGSF))
 
     return acc
