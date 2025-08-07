@@ -17,7 +17,11 @@
 
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "EventInfo/EventInfo.h"
+#include <tuple>
 
+#include "AthenaKernel/RNGWrapper.h"
+#include "CLHEP/Random/RandPoisson.h"
+#include "CLHEP/Random/RandomEngine.h"
 #include "PileUpTools/PileUpHashHelper.h"
 #include "PileUpTools/PileUpMisc.h"
 #include "xAODEventInfo/EventAuxInfo.h"
@@ -51,15 +55,9 @@ StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg,
   if (ei != nullptr) {
     *newEi = *ei;
   } else {
-    SG::ReadHandle<::EventInfo> ei2_h(key, sg.name());
-    const ::EventInfo* ei2 = ei2_h.get();
-    if (ei2 == nullptr) {
-      // Just in case
-      ATH_MSG_ERROR("Got null ::EventInfo from " << sg.name());
-      ATH_MSG_ERROR(sg.dump());
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK(m_xAODEICnvTool->convert(ei2, newEi, true));
+    ATH_MSG_ERROR("Couldn't find xAOD::EventInfo. " << sg.name());
+    ATH_MSG_ERROR(sg.dump());
+    return StatusCode::FAILURE;
   }
   // Use attribute list if EventInfo doesn't have event numbers set
   if (newEi->eventNumber() == 0) {
@@ -147,7 +145,6 @@ StatusCode PileUpMTAlg::initialize() {
   }
   ATH_CHECK(m_beamInt.retrieve());
   ATH_CHECK(m_beamLumi.retrieve());
-  ATH_CHECK(m_xAODEICnvTool.retrieve());
   ATH_CHECK(m_puTools.retrieve());
 
   m_evtInfoContKey = "PileUpEventInfo";
