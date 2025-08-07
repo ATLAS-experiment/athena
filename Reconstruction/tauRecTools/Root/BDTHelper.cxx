@@ -135,17 +135,4 @@ float BDTHelper::getResponse(const std::map<TString, float*>& availableVariables
   }
 }
 
-
-float BDTHelper::getClassification(const std::map<TString, float*>& availableVariables) const {
-  std::vector<float> values = getInputVariables(availableVariables);
-
-  if (values.size() < m_inputVariableNames.size()) {
-    ATH_MSG_ERROR("There are missing variables when calculating the BDT score, will return -999");
-    return -999;
-  }
-  else {
-    return  m_BDT->GetClassification(values);
-  }
-}
-
 } // end of namespace tauRecTools

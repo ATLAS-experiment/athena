@@ -24,8 +24,6 @@ namespace tauRecTools {
 
       float getResponse(const std::map<TString, float*>& availableVariables) const; 
 
-      float getClassification(const std::map<TString, float*>& availableVariables) const;
-
       MVAUtils::BDT* getBDT() const { return m_BDT.get(); }
 
     private:
