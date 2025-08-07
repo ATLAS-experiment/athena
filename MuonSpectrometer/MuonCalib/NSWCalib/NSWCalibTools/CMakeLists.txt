@@ -10,7 +10,7 @@ atlas_add_library( NSWCalibToolsLib
                    src/*.cxx
                    PUBLIC_HEADERS NSWCalibTools
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES GaudiKernel MuonPrepRawData MagFieldElements MagFieldConditions MuonRDO PathResolver MuonCondData
+                   LINK_LIBRARIES GaudiKernel MuonPrepRawData MagFieldElements MagFieldConditions MuonRDO PathResolver MuonCondData xAODMuonPrepData ActsGeometryInterfacesLib MuonReadoutGeometryR4 
                    PRIVATE_LINK_LIBRARIES AthenaBaseComps MuonIdHelpersLib )
  
 
