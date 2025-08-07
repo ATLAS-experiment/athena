@@ -41,7 +41,7 @@ FastChain_tf.py \
    --sharedWriter True \
    --parallelCompression False \
    --formats PHYS PHYSVAL \
-   --athenaopts "EVNTtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
+   --athenaopts "EVNTtoRDO:--threads=${NTHREADS} --nprocs=0" "RDOtoRDOTrigger:--threads=${NTHREADS} --nprocs=0" "RAWtoALL:--threads=${NTHREADS} --nprocs=0" \
    --imf False > __log.txt 2>&1;
 
 echo $? > __exitcode;
