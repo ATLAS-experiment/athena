@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2022, 2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2022, 2023, 2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPMT_PILEUPMTALG_H
@@ -14,7 +14,6 @@
 #include "PileUpTools/IPileUpTool.h"
 #include "StoreGate/ActiveStoreSvc.h"
 #include "src/ISkipEventIdxSvc.h"
-#include "xAODCnvInterfaces/IEventInfoCnvTool.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "xAODEventInfo/EventInfoContainer.h"
@@ -111,9 +110,6 @@ class PileUpMTAlg : public AthAlgorithm {
       this, "BeamLumiSvc", "LumiProfileSvc", "Beam luminosity service"};
   ServiceHandle<IAthRNGSvc> m_rngSvc{this, "RNGSvc", "AthRNGSvc/PileupRNG",
                                      "RNG service for pile-up digitization"};
-  ToolHandle<xAODMaker::IEventInfoCnvTool> m_xAODEICnvTool{
-      this, "xAODCnvTool", "xAODMaker::EventInfoCnvTool/EventInfoCnvTool",
-      "xAOD EventInfo conversion tool"};
   ToolHandleArray<IPileUpTool> m_puTools{
       this, "PileUpTools", {}, "Pileup tools"};
   Gaudi::Property<bool> m_writeTrace{this, "WriteTrace", false, "Write trace of pileup events used"};
