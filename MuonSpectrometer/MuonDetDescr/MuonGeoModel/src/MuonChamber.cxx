@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -400,7 +400,7 @@ namespace MuonGM {
             StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
             std::string_view cname = std::string_view(c->name).substr(0, 3);
             if (cname == "CRO" || cname == "CMI" || cname == "CHV") {
-                CbmComponent *ccbm = (CbmComponent *)c;
+                CbmComponent *ccbm = static_cast<CbmComponent *>(c);
                 ccbm->lb_height = LBheight;
                 ccbm->lb_width = LBwidth;
                 ccbm->hole_pos1 = LBpos[0];
@@ -423,7 +423,7 @@ namespace MuonGM {
             StandardComponent *d = (StandardComponent *)m_station->GetComponent(j);
             std::string_view cn = std::string_view(d->name).substr(0, 2);
             if (cn == "LB") {
-                LbiComponent *lbic = (LbiComponent *)d;
+                LbiComponent *lbic = static_cast<LbiComponent *>(d);
                 if (lbic) {
                     lbic->associated_CMIsubtype = CMIcomponentNumber;
                 } else
@@ -578,7 +578,7 @@ namespace MuonGM {
                         cutRpcType->dx = cutRpcType->dx - c->posx;
 
                         if (type == "RPC") {
-                            RpcComponent *rp = (RpcComponent *)c;
+                            RpcComponent *rp = static_cast<RpcComponent *>(c);
                             if (rp->iswap == -1) {
                                 cutRpcType->dy = c->dy - (cutRpcType->dy + cutRpcType->lengthY);
                             }
@@ -667,7 +667,7 @@ namespace MuonGM {
                     }
                     m_FPVMAP->StoreDetector(lvm, key);                  
                 } else {
-                    GeoFullPhysVol *rfpv = (GeoFullPhysVol *)fpv;
+                    GeoFullPhysVol *rfpv = static_cast<GeoFullPhysVol *>(fpv);
                     ATH_MSG_VERBOSE( " This MDT for station " << key << " component name is " << c->name << " already exists; clone it " );
                     lvm = rfpv->clone();
                 }
@@ -780,7 +780,7 @@ namespace MuonGM {
 
             } else if (type == "RPC") {
                 // position stuff needed for cutout, used to be below:
-                RpcComponent *rp = (RpcComponent *)c;
+                RpcComponent *rp = static_cast<RpcComponent *>(c);
                 int ndivy = rp->ndivy;
                 int ndivz = rp->ndivz;
 
@@ -935,7 +935,7 @@ namespace MuonGM {
                     }
                     m_FPVMAP->StoreDetector(lvt, key);
                 } else {
-                    GeoFullPhysVol *rfpv = (GeoFullPhysVol *)fpv;
+                    GeoFullPhysVol *rfpv = static_cast<GeoFullPhysVol *>(fpv);
                     lvt = rfpv->clone();
                 }
 
@@ -963,7 +963,7 @@ namespace MuonGM {
 
                     m_FPVMAP->StoreDetector(lvc, key);
                 } else {
-                    GeoFullPhysVol *rfpv = (GeoFullPhysVol *)fpv;
+                    GeoFullPhysVol *rfpv = static_cast<GeoFullPhysVol *>(fpv);
                     lvc = rfpv->clone();
                 }
 
@@ -996,7 +996,7 @@ namespace MuonGM {
                 const MdtIdHelper *mdt_id = manager->mdtIdHelper();
                 std::unique_ptr<MdtReadoutElement> det = std::make_unique<MdtReadoutElement>(lvm, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
-                setMdtReadoutGeom(mysql, det.get(), (MdtComponent *)c, ip);
+                setMdtReadoutGeom(mysql, det.get(), static_cast<MdtComponent *>(c), ip);
                 det->setHasCutouts(ncutouts > 0);
                 det->setNMdtInStation(nMdt);
                 Identifier id = mdt_id->channelID(stationType, stationEta, stationPhi, ml, tubel, tube);
@@ -1116,7 +1116,7 @@ namespace MuonGM {
             }
 
             if (lvr && RPCON && manager->rpcIdHelper()) {
-                RpcComponent *rp = (RpcComponent *)c;
+                RpcComponent *rp = static_cast<RpcComponent *>(c);
                 int ndivy = rp->ndivy;
                 int ndivz = rp->ndivz;
 
