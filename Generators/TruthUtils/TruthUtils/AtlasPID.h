@@ -847,6 +847,7 @@ template<> inline bool isBSM(const DecodedPID& p){
   if (isExcited(p)) return true;
   if (isKK(p)) return true;
   if (isHiddenValley(p)) return true;
+  if (isMonopole(p)) return true;
   return false;
 }
 template<> inline bool isBSM(const int& p){
