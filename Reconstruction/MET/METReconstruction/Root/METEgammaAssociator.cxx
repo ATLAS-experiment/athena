@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // METEgammaAssociator.cxx 
@@ -486,7 +486,7 @@ namespace met {
     const xAOD::Egamma *eg = static_cast<const xAOD::Egamma*>(obj);
 
     // Preselect charged and neutral FEs, based on proximity: dR < m_Drcone
-    for(const auto& fe : *constits.feCont) {
+    for(const auto fe : *constits.feCont) {
       if(eg && P4Helpers::isInDeltaR(*fe, *eg, m_Drcone, m_useRapidity)) {
         if( ( !fe->isCharged() && fe->e() > FLT_MIN ) ||
             ( fe->isCharged() && PVMatchedAcc(*fe)  && ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) ) {
@@ -499,7 +499,7 @@ namespace met {
     if(eg){
       // Vectoral sum of all FEs
       TLorentzVector HR;  // uncorrected HR (initialized with 0,0,0,0 automatically)
-      for(const auto& fe_itr : *constits.feCont) {
+      for(const auto fe_itr : *constits.feCont) {
         if( fe_itr->pt() < 0 || fe_itr->e() < 0 ) { // sanity check
           continue;
         }
@@ -519,7 +519,7 @@ namespace met {
       }
 
       // Subtruct FEs which are in the cone around egamma (gives uncorrected HR)
-      for(const auto& fe_i : *constits.feCont) {  // charged and neutral FEs
+      for(const auto fe_i : *constits.feCont) {  // charged and neutral FEs
         if( fe_i->pt() < 0 || fe_i->e() < 0 ) { // sanity check
           continue;
         }

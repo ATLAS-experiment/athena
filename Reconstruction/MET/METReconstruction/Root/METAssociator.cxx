@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // METAssociator.cxx
@@ -502,7 +502,7 @@ namespace met {
       // Calculate delta phi -> always the same angle so its sufficient to calculate it only once
       float dphi_angle=P4Helpers::deltaPhi(clus.Phi(),eta_rndphi.second);
 
-      for(const auto& fe_itr : *constits.feCont){ // loop over PFOs
+      for(const auto fe_itr : *constits.feCont){ // loop over PFOs
         if(fe_itr->pt() < 0 || fe_itr->e() < 0){ //sanity check
           continue;
         }

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMuonAssociator.cxx 
@@ -338,7 +338,7 @@ namespace met {
     const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(obj);
 
     // Get PFOs associated to muons
-    for(const auto& fe : *constits.feCont) {
+    for(const auto fe : *constits.feCont) {
       if( fe->isCharged()) { // Fill list with charged PFOs (using muon tracks)
         if( mu && P4Helpers::isInDeltaR(*fe, *mu, m_Drcone, m_useRapidity) && PVMatchedAcc(*fe) &&
           ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ){
@@ -356,7 +356,7 @@ namespace met {
     if(mu){
       // Vectoral sum of all FE
       TLorentzVector HR;  // uncorrected HR (initialized with 0,0,0,0 automatically)
-      for(const auto& fe_itr : *constits.feCont) {
+      for(const auto fe_itr : *constits.feCont) {
         if( fe_itr->pt() < 0 || fe_itr->e() < 0 ) { // sanity check
           continue;
         }
@@ -380,7 +380,7 @@ namespace met {
 
 
       // Subtracting PFOs matched to muons from HR
-      for(const auto& fe_i : *constits.feCont) { // charged and neutral PFOs
+      for(const auto fe_i : *constits.feCont) { // charged and neutral PFOs
         if( fe_i->pt() < 0 || fe_i->e() < 0 ) { // sanity check
           continue;
         }
