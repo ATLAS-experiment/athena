@@ -187,13 +187,17 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         }
         gapVol.transform = gapVol.transform * Amg::getRotateY3D( (isAside ? -90. :  90.)* Gaudi::Units::degree);
 
-        insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform), 
-                                                      etaDesign,
-                                                      RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)));
-        insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform*
-                                                                                              Amg::getRotateZ3D(90. * Gaudi::Units::deg)), 
-                                                      phiDesign,
-                                                      RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, true)));      
+        if (etaDesign) {
+            insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform), 
+                                                          etaDesign,
+                                                          RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)));
+        }
+        if (phiDesign) {
+            insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform*
+                                                                                                  Amg::getRotateZ3D(90. * Gaudi::Units::deg)), 
+                                                          phiDesign,
+                                                          RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, true))); 
+        }     
     }
     return StatusCode::SUCCESS;
 }
