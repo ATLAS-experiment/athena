@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -308,7 +308,7 @@ int pool::RootKeyIOHandler::read(const char* knam, void** obj) const    {
 
 int pool::RootKeyIOHandler::read NO_SANITIZE_UNDEFINED (TKey* key, void** obj) const   {
   if ( key )  { 
-    Key* mkey = (Key*)key;// Extremely ugly, but it works, because
+    Key* mkey = reinterpret_cast<Key*>(key);// Extremely ugly, but it works, because
     // of single inheritance and no virtuality.
     // But we then need to disable ubsan for this function.
     int nbytes = mkey->readObject(obj);
