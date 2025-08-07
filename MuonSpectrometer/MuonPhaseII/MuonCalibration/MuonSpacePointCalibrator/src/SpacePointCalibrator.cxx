@@ -18,6 +18,8 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternHelpers/MatrixUtils.h"
 
+#include "MuonPrepRawData/NswClusteringUtils.h"
+
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 namespace {
@@ -34,6 +36,7 @@ namespace MuonR4{
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_mdtCalibrationTool.retrieve(EnableTool{m_idHelperSvc->hasMDT()}));
+        ATH_CHECK(m_nswCalibTool.retrieve(EnableTool{m_idHelperSvc->hasMM() || m_idHelperSvc->hasSTGC()}));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         return StatusCode::SUCCESS;
     }
@@ -206,6 +209,41 @@ namespace MuonR4{
                 /// Reminder to myself, we should modify the covariance if the space point is 1D? Probably... dunno
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir));
                 calibSP->setCovariance<2>(spacePoint->covariance());
+                break;
+           }
+           case xAOD::UncalibMeasType::MMClusterType: {
+                const xAOD::MMCluster* cluster = static_cast<const xAOD::MMCluster*>(spacePoint->primaryMeasurement());
+
+                std::vector<NSWCalib::CalibratedStrip> calibClus;
+                StatusCode sc =  m_nswCalibTool->calibrateClus(ctx, *gctx, cluster, locToGlob * posInChamb, calibClus);
+                if(sc.isFailure()) {
+                    ATH_MSG_WARNING("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster->identify()));
+                    return nullptr;
+                }
+
+                Amg::Vector2D locPos{cluster->localPosition<1>()[0] * Amg::Vector2D::UnitX()};
+                Amg::MatrixX loce = spacePoint->covariance();
+
+                Amg::Vector3D globalTrackDir{locToGlob.linear() * dirInChamb};
+                Amg::Vector3D locDir = Muon::NswClustering::toLocal(cluster->readoutElement()->globalToLocalTrans(*gctx, cluster->layerHash()), globalTrackDir);
+
+                Muon::IMMClusterBuilderTool::RIO_Author rotAuthor = m_clusterBuilderToolMM->getCalibratedClusterPosition(ctx, calibClus, locDir ,locPos, loce);
+                if(rotAuthor == Muon::IMMClusterBuilderTool::RIO_Author::unKnownAuthor){
+                    ATH_MSG_ERROR("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster->identify()));
+                    return nullptr;
+                }
+
+                Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTrans(*gctx, cluster->layerHash())};
+
+                Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
+                calibSpPosInLayer.x() = locPos.x();
+
+                calibSpPos = toChamberTrans * calibSpPosInLayer;
+
+                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir));
+                calibSP->setCovariance<2>(spacePoint->covariance());
+                ATH_MSG_DEBUG("calibrated MM cluster "<<m_idHelperSvc->toString(cluster->identify()) << " loc x old " << cluster->localPosition<1>()[0] << " new loc x " << locPos.x());
+                                
                 break;
            }
            default:

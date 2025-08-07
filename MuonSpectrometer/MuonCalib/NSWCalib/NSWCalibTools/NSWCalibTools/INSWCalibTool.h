@@ -8,6 +8,10 @@
 #include "GaudiKernel/EventContext.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "Identifier/Identifier.h"
+#include "xAODMuonPrepData/MMCluster.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+
+
 
 #include <cmath>
 #include <vector>
@@ -68,7 +72,14 @@ namespace Muon {
   public:  // interface methods
  
     virtual StatusCode calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepRawData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const = 0;
-    virtual StatusCode calibrateStrip(const EventContext& ctx, const Identifier& id,  const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip&calibStrip) const = 0;
+    
+    virtual StatusCode calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster* prepRawData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const = 0;
+
+    virtual StatusCode calibrateStrip(const EventContext& ctx ,const Identifier& id,  const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip&calibStrip) const = 0;
+
+
+
+    
     virtual StatusCode calibrateStrip(const EventContext& ctx, const Muon::MM_RawData* mmRawData, NSWCalib::CalibratedStrip& calibStrip) const = 0;
     virtual StatusCode calibrateStrip(const EventContext& ctx, const Muon::STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const = 0;
 
