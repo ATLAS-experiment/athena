@@ -274,6 +274,14 @@ def ActsMainSpacePointFormationCfg(flags,
 
     return acc
 
+# Config to be called outside of loops over tracking passes in main reco
+# Will configure subtools based on MainPass
+def ActsMainSpacePointFormationStandaloneCfg(flags) -> ComponentAccumulator:
+    primaryFlags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")
+    return ActsMainSpacePointFormationCfg(primaryFlags)
+
 def ActsSpacePointFormationCfg(flags,
                                *,
                                previousActsExtension = None) -> ComponentAccumulator:
