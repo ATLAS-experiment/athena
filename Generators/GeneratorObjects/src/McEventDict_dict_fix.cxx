@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,7 +13,7 @@
  * $Id: McEventDict_dict_fix.cxx,v 1.1 2005-08-12 12:52:38 schaffer Exp $
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
+
 
 // Generated at Fri Aug 12 09:48:24 2005. Do not modify it
 
@@ -32,6 +32,12 @@
 #include "ReflectionBuilder/CollectionProxy.h"
 #include <typeinfo>
 using namespace seal::reflect;
+namespace{
+  //cppcheck-suppress intToPointerCast
+  static const pVtx64 = reinterpret_cast<HepMC::GenVertex*>(64);
+  //cppcheck-suppress intToPointerCast
+  static const pParticle64 = reinterpret_cast<HepMC::GenParticle*>(64);
+}
 
 
 //------Dictionary for class GenVertex -------------------------------
@@ -75,13 +81,13 @@ class HepMC__GenVertex_dict {
 };
 HepMC__GenVertex_dict::HepMC__GenVertex_dict() {
   ClassBuilder _c_("HepMC::GenVertex", "", typeid(HepMC::GenVertex), sizeof(HepMC::GenVertex),std::vector<const std::type_info*>(), false, NOCONTAINER, 0, PUBLIC | VIRTUAL);
-  _c_.addField("m_position", "HepLorentzVector", "", (size_t)(&((HepMC::GenVertex*)64)->m_position)-64, PRIVATE );
-  _c_.addField("m_particles_in", "std::set<HepMC::GenParticle*>", "", (size_t)(&((HepMC::GenVertex*)64)->m_particles_in)-64, PRIVATE );
-  _c_.addField("m_particles_out", "std::set<HepMC::GenParticle*>", "", (size_t)(&((HepMC::GenVertex*)64)->m_particles_out)-64, PRIVATE );
-  _c_.addField("m_id", "int", "", (size_t)(&((HepMC::GenVertex*)64)->m_id)-64, PRIVATE );
-  _c_.addField("m_weights", "HepMC::WeightContainer", "", (size_t)(&((HepMC::GenVertex*)64)->m_weights)-64, PRIVATE );
-  _c_.addField("m_event", "HepMC::GenEvent*", "", (size_t)(&((HepMC::GenVertex*)64)->m_event)-64, PRIVATE );
-  _c_.addField("m_barcode", "int", "", (size_t)(&((HepMC::GenVertex*)64)->m_barcode)-64, PRIVATE );
+  _c_.addField("m_position", "HepLorentzVector", "", (size_t)(&(pVtx64)->m_position)-64, PRIVATE );
+  _c_.addField("m_particles_in", "std::set<HepMC::GenParticle*>", "", (size_t)(&(pVtx64)->m_particles_in)-64, PRIVATE );
+  _c_.addField("m_particles_out", "std::set<HepMC::GenParticle*>", "", (size_t)(&(pVtx64)->m_particles_out)-64, PRIVATE );
+  _c_.addField("m_id", "int", "", (size_t)(&(pVtx64)->m_id)-64, PRIVATE );
+  _c_.addField("m_weights", "HepMC::WeightContainer", "", (size_t)(&(pVtx64)->m_weights)-64, PRIVATE );
+  _c_.addField("m_event", "HepMC::GenEvent*", "", (size_t)(&(pVtx64)->m_event)-64, PRIVATE );
+  _c_.addField("m_barcode", "int", "", (size_t)(&(pVtx64)->m_barcode)-64, PRIVATE );
   _c_.addMethod("GenVertex", "", "HepMC::GenVertex", "CLHEP::HepLorentzVector&=; int=; HepMC::WeightContainer&=", constructor_6443, PUBLIC);
   _c_.addMethod("GenVertex", "", "HepMC::GenVertex", "HepMC::GenVertex&", constructor_6444, PUBLIC);
   _c_.addMethod("~GenVertex", "", destructor, PUBLIC | VIRTUAL);
@@ -369,14 +375,14 @@ class HepMC__GenParticle_dict {
 };
 HepMC__GenParticle_dict::HepMC__GenParticle_dict() {
   ClassBuilder _c_("HepMC::GenParticle", "", typeid(HepMC::GenParticle), sizeof(HepMC::GenParticle),std::vector<const std::type_info*>(), false, NOCONTAINER, 0, PUBLIC | VIRTUAL);
-  _c_.addField("m_momentum", "HepLorentzVector", "", (size_t)(&((HepMC::GenParticle*)64)->m_momentum)-64, PRIVATE );
-  _c_.addField("m_pdg_id", "int", "", (size_t)(&((HepMC::GenParticle*)64)->m_pdg_id)-64, PRIVATE );
-  _c_.addField("m_status", "int", "", (size_t)(&((HepMC::GenParticle*)64)->m_status)-64, PRIVATE );
-  _c_.addField("m_flow", "HepMC::Flow", "", (size_t)(&((HepMC::GenParticle*)64)->m_flow)-64, PRIVATE );
-  _c_.addField("m_polarization", "HepMC::Polarization", "", (size_t)(&((HepMC::GenParticle*)64)->m_polarization)-64, PRIVATE );
-  _c_.addField("m_production_vertex", "HepMC::GenVertex*", "", (size_t)(&((HepMC::GenParticle*)64)->m_production_vertex)-64, PRIVATE );
-  _c_.addField("m_end_vertex", "HepMC::GenVertex*", "", (size_t)(&((HepMC::GenParticle*)64)->m_end_vertex)-64, PRIVATE );
-  _c_.addField("m_barcode", "int", "", (size_t)(&((HepMC::GenParticle*)64)->m_barcode)-64, PRIVATE );
+  _c_.addField("m_momentum", "HepLorentzVector", "", (size_t)(&(pParticle64)->m_momentum)-64, PRIVATE );
+  _c_.addField("m_pdg_id", "int", "", (size_t)(&(pParticle64)->m_pdg_id)-64, PRIVATE );
+  _c_.addField("m_status", "int", "", (size_t)(&(pParticle64)->m_status)-64, PRIVATE );
+  _c_.addField("m_flow", "HepMC::Flow", "", (size_t)(&(pParticle64)->m_flow)-64, PRIVATE );
+  _c_.addField("m_polarization", "HepMC::Polarization", "", (size_t)(&(pParticle64)->m_polarization)-64, PRIVATE );
+  _c_.addField("m_production_vertex", "HepMC::GenVertex*", "", (size_t)(&(pParticle64)->m_production_vertex)-64, PRIVATE );
+  _c_.addField("m_end_vertex", "HepMC::GenVertex*", "", (size_t)(&(pParticle64)->m_end_vertex)-64, PRIVATE );
+  _c_.addField("m_barcode", "int", "", (size_t)(&(pParticle64)->m_barcode)-64, PRIVATE );
   _c_.addMethod("GenParticle", "", "HepMC::GenParticle", constructor_6550, PUBLIC);
   _c_.addMethod("GenParticle", "", "HepMC::GenParticle", "CLHEP::HepLorentzVector&; int; int=; HepMC::Flow&=; HepMC::Polarization&=", constructor_6551, PUBLIC);
   _c_.addMethod("GenParticle", "", "HepMC::GenParticle", "HepMC::GenParticle&", constructor_6552, PUBLIC);
