@@ -450,9 +450,11 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
                                        int16_t scalar/* = -1*/) const {
     
     ATH_MSG_DEBUG("fillGlobal with type " << type);
-
-    int16_t sum_x = 0;
-    int16_t sum_y = 0;
+    
+    // 32 bit integers to avoid interim overflows when summing 16b (signed) 
+    // quantities from each pFPGA. Proper clamping and bit masking follows afterwards
+    int32_t sum_x = 0;
+    int32_t sum_y = 0;
 
     // Extract the x and y components and sum them for the three FPGAs
     for (size_t fpga = 0; fpga < 3; fpga++) {

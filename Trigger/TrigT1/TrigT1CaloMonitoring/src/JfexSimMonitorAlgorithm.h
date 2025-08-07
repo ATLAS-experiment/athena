@@ -16,6 +16,7 @@
 #include "xAODTrigger/jFexSumETRoIContainer.h"
 
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
+#include "CaloEvent/CaloCellContainer.h"
 
 #include "LArRecConditions/LArBadChannelCont.h"
 
@@ -30,6 +31,7 @@ class JfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
         
         // container keys for jfex input data
         SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexTowerKey{this, "jFexTowerContainer","L1_jFexDataTowers","SG key of the input jFex Tower container"};
+        SG::ReadHandleKey<CaloCellContainer> m_scellKey{this, "CaloCellContainerReadKey","SCell","Read handle key for the supercells"};
 
         // container keys for Data tobs
         SG::ReadHandleKey< xAOD::jFexSRJetRoIContainer > m_data_key_jJ   {this,"jFexSRJetRoIContainer","L1_jFexSRJetRoI","SG key of the jFex SR Jet Roi container"};

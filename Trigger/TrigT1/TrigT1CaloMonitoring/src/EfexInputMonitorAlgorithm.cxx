@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EfexInputMonitorAlgorithm.h"
@@ -170,7 +170,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     Towerhadstatus=eTower->had_status();
     if(eTower->em_status()) {
         Decision="BadEMStatus";
-        ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
+        ErrorAndLocation = "#splitline{" + static_cast<std::string>(Decision) + "}{" + std::to_string(TowerId) + "}";
         fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
         if(!reportedErrors.count(Decision)) {
             ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
@@ -179,7 +179,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     }
       if(eTower->had_status()) {
           Decision="BadHadStatus";
-          ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
+          ErrorAndLocation = "#splitline{" + static_cast<std::string>(Decision) + "}{" + std::to_string(TowerId) + "}";
           fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
           if(!reportedErrors.count(Decision)) {
             ATH_MSG_WARNING(std::string(Decision) << " in event " << evtNumber << " in lb " << std::string(lbnString));
@@ -268,7 +268,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                       }
                   }
                   if(!(isLAr && timeUntil>=0 && timeUntil<=1)) { // lar errors within 1s of an otf masking update are not treated as errors
-                      ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
+                      ErrorAndLocation = "#splitline{" + static_cast<std::string>(Decision) + "}{" + std::to_string(TowerId) + "}";
                       fill("errors", Decision, ErrorAndLocation, timeSince, timeUntil, evtNumber, lbn, lbnString,
                            TowerId, Towereta, Towerphi, Toweremstatus, Towerhadstatus, TowerSlot, TowerCount,
                            TowerRefCount, SlotSCID,IsMonReady);

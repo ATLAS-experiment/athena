@@ -381,7 +381,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2024()
   
   m_deltaTSample = 3.125;
   m_numSample = 24;
-  m_lowGainMode = ZDCPulseAnalyzer::LGModeRefitLG;
+  m_lowGainMode = ZDCPulseAnalyzer::LGModeForceLG;
 
   ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{12, 12, 12, 12}, {12, 12, 12, 12}}};
 
@@ -440,7 +440,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2024()
   zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
   zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
 
-  zdcDataAnalyzer->SetGainFactorsHGLG(1, 10); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
+  zdcDataAnalyzer->SetGainFactorsHGLG(1, 1); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
 
   ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{0.5, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{2, 2, 2, 2}, {2, 2, 2, 2}}};
@@ -787,9 +787,15 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2024()
 
   // Commenting out the timing correlation for PbPb2024: re-calibraton needed
   // zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
+
+  std::array< std::array< std::array<float,6>, 3>, 2> nlCalib = {{
+      {{ {{0.3, 1, -0.00753349, 0.882218, 0.019739, 1.0803}},{{0.3, 1, 0.0181165, 0.620646, -0.171213, 2.2143}},{{0.25, 1, -0.108547, 0.106, -1.3594, 4.1509}} }},
+      {{ {{0.3, 1, -0.00753349, 0.882218, 0.019739, 1.0803}},{{0.3, 1, 0.0181165, 0.620646, -0.171213, 2.2143}},{{0.25, 1, -0.108547, 0.106, -1.3594, 4.1509}} }}
+    }};
   
-  // Set the amplitude fit range limits                                                                       
-  //                                                                                                          
+  zdcDataAnalyzer->SetNLcalibParams(nlCalib);
+
+  // Set the amplitude fit range limits                                 
   zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
 
   return zdcDataAnalyzer;
@@ -956,6 +962,21 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeOONeNe2025()
   // Set the amplitude fit range limits                                                                       
   //                                                                                                          
   zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
+
+  
+  /*
+{{
+      {{{{0.3, 1, -0.00753349, 0.882218, 0.019739, 1.0803}},{{0.3, 1, 0.0181165, 0.620646, -0.171213, 2.2143}},{{0.25, 1, -0.108547, 0.106, -1.3594, 4.1509}}}},
+	{{{{0.3, 1, -0.00753349, 0.882218, 0.019739, 1.0803}},{{0.3, 1, 0.0181165, 0.620646, -0.171213, 2.2143}},{{0.25, 1, -0.108547, 0.106, -1.3594, 4.1509}}}}
+    }};
+  */
+  
+  std::array< std::array< std::array<float,6>, 3>, 2> nlCalib = {{
+      {{ {{0.3, 1, -0.00753349, 0.882218, 0.019739, 1.0803}},{{0.3, 1, 0.0181165, 0.620646, -0.171213, 2.2143}},{{0.25, 1, -0.108547, 0.106, -1.3594, 4.1509}} }},
+      {{ {{0.3, 1, -0.00753349, 0.882218, 0.019739, 1.0803}},{{0.3, 1, 0.0181165, 0.620646, -0.171213, 2.2143}},{{0.25, 1, -0.108547, 0.106, -1.3594, 4.1509}} }}
+    }};
+
+  zdcDataAnalyzer->SetNLcalibParams(nlCalib);
 
   return zdcDataAnalyzer;
 }
@@ -2539,12 +2560,16 @@ StatusCode ZdcAnalysisTool::initialize()
     //
     m_zdcSumUncalibSum = m_zdcSumContainerName+".UncalibSum"+m_auxSuffix;
     ATH_CHECK( m_zdcSumUncalibSum.initialize());
+    m_zdcSumUncalibSumErr = m_zdcSumContainerName+".UncalibSumErr"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumUncalibSumErr.initialize());
     m_zdcSumCalibEnergy = m_zdcSumContainerName+".CalibEnergy"+m_auxSuffix;
     ATH_CHECK( m_zdcSumCalibEnergy.initialize());
     m_zdcSumCalibEnergyErr = m_zdcSumContainerName+".CalibEnergyErr"+m_auxSuffix;
     ATH_CHECK( m_zdcSumCalibEnergyErr.initialize());
-    m_zdcSumUncalibSumErr = m_zdcSumContainerName+".UncalibSumErr"+m_auxSuffix;
-    ATH_CHECK( m_zdcSumUncalibSumErr.initialize());
+    m_zdcSumNLCalibEnergy = m_zdcSumContainerName+".NLCalibEnergy"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumNLCalibEnergy.initialize());
+    m_zdcSumNLCalibEnergyErr = m_zdcSumContainerName+".NLCalibEnergyErr"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumNLCalibEnergyErr.initialize());
     m_zdcSumFinalEnergy = m_zdcSumContainerName+".FinalEnergy"+m_auxSuffix;
     ATH_CHECK( m_zdcSumFinalEnergy.initialize());
     m_zdcSumAverageTime = m_zdcSumContainerName+".AverageTime"+m_auxSuffix;
@@ -2863,6 +2888,8 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumUncalibSumErr(m_zdcSumUncalibSumErr);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumCalibEnergy(m_zdcSumCalibEnergy);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumCalibEnergyErr(m_zdcSumCalibEnergyErr);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumNLCalibEnergy(m_zdcSumNLCalibEnergy);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumNLCalibEnergyErr(m_zdcSumNLCalibEnergyErr);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumFinalEnergy(m_zdcSumFinalEnergy);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumAverageTime(m_zdcSumAverageTime);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcSumStatus(m_zdcSumStatus);
@@ -2885,6 +2912,11 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	zdcSumCalibEnergy(*zdc_sum) = calibEnergy;
 	float calibEnergyErr = getCalibModuleSumErr(iside);
 	zdcSumCalibEnergyErr(*zdc_sum) = calibEnergyErr;
+	
+	float nlcalibEnergy = getNLCalibModuleSum(iside);
+	zdcSumNLCalibEnergy(*zdc_sum) = nlcalibEnergy;
+	float nlcalibEnergyErr = getNLCalibModuleSumErr(iside);
+	zdcSumNLCalibEnergyErr(*zdc_sum) = nlcalibEnergyErr;
 
 	float finalEnergy = calibEnergy;
 	zdcSumFinalEnergy(*zdc_sum) = finalEnergy;
@@ -3210,6 +3242,18 @@ float ZdcAnalysisTool::getCalibModuleSumErr(int side)
 {
     if (!m_zdcDataAnalyzer) return 0;
     return m_zdcDataAnalyzer->GetCalibModuleSumErr(side);
+}
+
+float ZdcAnalysisTool::getNLCalibModuleSum(int side)
+{
+    if (!m_zdcDataAnalyzer) return 0;
+    return m_zdcDataAnalyzer->GetNLcalibModuleSum(side);
+}
+
+float ZdcAnalysisTool::getNLCalibModuleSumErr(int side)
+{
+    if (!m_zdcDataAnalyzer) return 0;
+    return m_zdcDataAnalyzer->GetNLcalibModuleSumErr(side);
 }
 
 float ZdcAnalysisTool::getUncalibModuleSum(int side)
