@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StorageSvc/DbTypeInfo.h"
@@ -39,9 +39,9 @@ void worker(int thread_id) {
       DbTypeInfo::fromString(strstr.str());
    }
    {
-      DbTypeInfo* typ_info = 0;
+      const DbTypeInfo* typ_info = 0;
       const string guidstr("00000000-0000-0001-0000-000000000000");
-      DbTransform::getShape(Guid(guidstr), (const DbTypeInfo*&)typ_info);
+      DbTransform::getShape(Guid(guidstr), typ_info);
       cout << "get for " << guidstr << " = " << typ_info << "  " << (typ_info? typ_info->toString() : "") << endl;
    }
 }

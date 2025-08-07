@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //  ====================================================================
@@ -175,10 +175,12 @@ DbStatus DbStorageSvc::createShape( const FileDescriptor&  /*fDesc   */,
                                     const Guid&              shapeID,
                                     ShapeH&                  shapeH)
 {
-  DbStatus sc = DbTransform::getShape(shapeID, (const DbTypeInfo*&)shapeH);
+  const DbTypeInfo* typ_info;
+  DbStatus sc = DbTransform::getShape(shapeID, typ_info);
+  shapeH = typ_info;
   if ( !sc.isSuccess() )    {
     DbPrint log(name());
-    DbTypeInfo* typ = DbTypeInfo::create(shapeID);
+    const DbTypeInfo* typ = DbTypeInfo::create(shapeID);
     if ( 0 != typ )   {
       log << DbPrintLvl::Info 
           << "Building shape according to reflection information using "

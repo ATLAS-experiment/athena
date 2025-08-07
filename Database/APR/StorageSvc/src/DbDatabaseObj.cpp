@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -94,7 +94,7 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
   }
   DbString s;
   DbTypeInfo::Columns c;
-  c.push_back(new DbColumn("db_string",DbColumn::STRING,size_t((std::string*)&s)-size_t(&s),0,1,0));
+  c.push_back(new DbColumn("db_string",DbColumn::STRING,size_t(static_cast<std::string*>(&s))-size_t(&s),0,1,0));
   m_string_t = DbTypeInfo::create(std::string("pool::DbString"), c);
   if ( m_string_t ) m_string_t->addRef();
 }
@@ -662,7 +662,7 @@ DbStatus DbDatabaseObj::getLink(const Token::OID_t& oid, Token* pTok)
       pTok->oid() = oid;
       if( !(pTok->type() & DbToken::TOKEN_FULL_KEY) )  {
          if( typeid(*pTok) == typeid(DbToken) )  {
-	    DbToken* pdbTok = (DbToken*)pTok;
+            DbToken* pdbTok = static_cast<DbToken*>(pTok);
 	    pdbTok->setKey(DbToken::TOKEN_FULL_KEY);
          }
       }
