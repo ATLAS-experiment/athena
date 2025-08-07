@@ -63,7 +63,7 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
       //const std::tuple<std::tuple<int,int,int>,float> & sf_placeholder = std::make_tuple(std::make_tuple(0,0,0), -1.0);
       //const std::vector<std::tuple<std::tuple<int,int,int>,float>> & params_placeholder = {sf_placeholder};
       //writeCdo->setVar(params_placeholder);
-      //ATH_MSG_INFO("Rebecca - recorded new CDO " << writeHandle.key() << " with range " << rangeW << " into Conditions Store");
+      ATH_MSG_INFO("Rebecca - recorded new CDO " << writeHandle.key() << " with range " << rangeW << " into Conditions Store");
     }
     else {
         writeCdo->setConfig(m_configFlag);
