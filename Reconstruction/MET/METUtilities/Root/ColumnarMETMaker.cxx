@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ColumnarMETMaker.cxx
@@ -749,7 +749,7 @@ namespace met {
       ATH_MSG_DEBUG("Jet " << jet << " is " << ( caloverlap ? "" : "non-") << "overlapping");
 
       if(m_veryGreedyPhotons && caloverlap) {
-        for(const auto& object : m_assocAcc.objects(*assoc)) {
+        for(const auto object : m_assocAcc.objects(*assoc)) {
           // Correctly handle this jet if we're using very greedy photons
           if (object && object.getXAODObject()->type() == xAOD::Type::Photon) hardJet = true;
         }
@@ -800,7 +800,7 @@ namespace met {
           muons_in_jet.push_back(*static_cast<const xAOD::Muon*>(*el));
         }
       }
-      for(const auto& obj : m_assocAcc.objects(*assoc)) {
+      for(const auto obj : m_assocAcc.objects(*assoc)) {
         if(!obj) continue;
         if(!m_useGhostMuons && obj.isContainer<columnar::ContainerId::muon>()) {
           auto mu_test = obj.tryGetObject<columnar::ContainerId::muon>().value();
@@ -1108,7 +1108,7 @@ namespace met {
       double opx = calvec.cpx();
       double opy = calvec.cpy();
       double osumpt = calvec.sumpt();
-      for(const auto& objId : m_assocAcc.objects(*assoc)) {
+      for(const auto objId : m_assocAcc.objects(*assoc)) {
         auto *obj = objId.getXAODObject();
         if (!obj || obj->type() != xAOD::Type::Muon) continue;
         const xAOD::Muon* mu_test(static_cast<const xAOD::Muon*>(obj));
