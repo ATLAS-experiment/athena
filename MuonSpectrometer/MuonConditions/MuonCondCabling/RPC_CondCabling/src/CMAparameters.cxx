@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_CondCabling/CMAparameters.h"
@@ -374,7 +374,7 @@ void CMAparameters::showMt(char display[][90], int ln, TrigType type, int layer)
     int shift = 6 * pivot_loop;
 
     for (int i = 0; i < shift; ++i) *disp[0] << " ";
-    for (int i = 0; i < confirm_channels; ++i) (std::ostream&)*disp[0] << (char)up;
+    for (int i = 0; i < confirm_channels; ++i) static_cast<std::ostream&>(*disp[0]) << (char)up;
 
     for (int i = 1; i <= pivot_channels; ++i) {
         // Display the cabling for the pivot plane
@@ -388,7 +388,7 @@ void CMAparameters::showMt(char display[][90], int ln, TrigType type, int layer)
         }
 
         // Display the trigger window for all tresholds
-        (std::ostream&)*disp[i] << (char)left;
+        static_cast<std::ostream&>(*disp[i]) << (char)left;
         for (int j = 0; j < confirm_channels; ++j) {
             unsigned int no_coincidence = ':';
             if (program) {
@@ -404,12 +404,12 @@ void CMAparameters::showMt(char display[][90], int ln, TrigType type, int layer)
                 else if (registers[first])
                     *disp[i] << "1";
                 else
-                    (std::ostream&)*disp[i] << (char)no_coincidence;
+                    static_cast<std::ostream&>(*disp[i]) << (char)no_coincidence;
 
             } else
                 *disp[i] << " ";
         }
-        (std::ostream&)*disp[i] << (char)right;
+        static_cast<std::ostream&>(*disp[i]) << (char)right;
     }
 
     // Display the cabling for the confirm plane
@@ -418,21 +418,21 @@ void CMAparameters::showMt(char display[][90], int ln, TrigType type, int layer)
     for (int i = start_confirm + 1; i < start_confirm + conf_loop * 6; ++i)
         for (int j = 0; j < shift; ++j) *disp[i] << " ";
 
-    for (int i = 0; i < confirm_channels; ++i) (std::ostream&)*disp[start_confirm] << (char)down;
+    for (int i = 0; i < confirm_channels; ++i) static_cast<std::ostream&>(*disp[start_confirm]) << (char)down;
 
     for (int i = 0; i < conf_loop; ++i) {
         int start = (i) ? start_confirm + i * 6 : start_confirm + 1;
         if (i) {
-            for (int ch = 1; ch <= confirm_channels; ++ch) (std::ostream&)*disp[start] << (char)middle;
+            for (int ch = 1; ch <= confirm_channels; ++ch) static_cast<std::ostream&>(*disp[start]) << (char)middle;
             ++start;
         }
 
         for (int j = 0; j < 5; ++j)
             for (int ch = 0; ch < confirm_channels; ++ch) {
                 if (conf[i][layer][ch] >= 0) {
-                    (std::ostream&)*disp[start + j] << (conf[i][layer][ch] / static_cast<int>(pow(10., j))) % 10;
+                    static_cast<std::ostream&>(*disp[start + j]) << (conf[i][layer][ch] / static_cast<int>(pow(10., j))) % 10;
                 } else
-                    (std::ostream&)*disp[start + j] << "*";
+                    static_cast<std::ostream&>(*disp[start + j]) << "*";
             }
     }
 
