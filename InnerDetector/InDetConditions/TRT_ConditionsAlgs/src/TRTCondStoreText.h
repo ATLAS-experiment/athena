@@ -62,7 +62,7 @@ public:
     Gaudi::Property<std::string> m_par_caltextfile       {this,"CalibInputFile"      ,"dbconst.txt",""};
     Gaudi::Property<std::string> m_streamer              {this,"StreamTool"          ,"AthenaOutputStreamTool/CondStream1",""};
 
-    const TRT_ID* m_trtid;                   //!< trt id helper
+    const TRT_ID* m_trtid{};                   //!< trt id helper
  
 };
  

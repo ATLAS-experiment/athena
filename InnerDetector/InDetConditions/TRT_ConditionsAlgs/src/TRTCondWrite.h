@@ -56,7 +56,7 @@ public:
     virtual EventIDRange IOVInfRange() const;
 
 private:
-    const TRT_ID *m_trtid; //!< trt id helper
+    const TRT_ID *m_trtid{}; //!< trt id helper
     ServiceHandle<ICondSvc> m_condSvc{this, "CondSvc", "CondSvc"};
     Gaudi::Property<std::string> m_par_caltextfile{this, "CalibInputFile", "dummy_TRTCondWrite.txt", ""};
 

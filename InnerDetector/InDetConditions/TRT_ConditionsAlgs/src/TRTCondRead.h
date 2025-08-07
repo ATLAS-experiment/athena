@@ -55,7 +55,7 @@ public:
 private:
     ToolHandle<ITRT_CalDbTool> m_TRTCalDbTool{this, "TRTCalDbTool", "CalDbTool", "Access to the folder of the calibration constants"};
     Gaudi::Property<std::string> m_par_caloutputfile{this, "CalibOutputFile", "caliboutput.txt", ""};
-    const TRT_ID *m_trtid; //!< trt id helper
+    const TRT_ID *m_trtid{}; //!< trt id helper
 };
 
 #endif // TRTCONDITIONSALGS_TRTCONDREAD_H
