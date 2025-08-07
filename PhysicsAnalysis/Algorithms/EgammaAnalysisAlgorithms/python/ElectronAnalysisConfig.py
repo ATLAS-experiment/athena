@@ -415,7 +415,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
                 # which differ from the one used for scale factors
                 if config.geometry() >= LHCPeriod.Run3:
-                    alg.selectionTool.WorkingPoint = self.identificationWP.replace("BLayer","BL") + 'Electron'
+                    if 'HI' not in self.identificationWP:
+                        alg.selectionTool.WorkingPoint = self.identificationWP.replace("BLayer","BL") + 'Electron'
+                    else:
+                        alg.selectionTool.WorkingPoint = self.identificationWP.replace('_HI', 'Electron_HI')
                 elif config.geometry() is LHCPeriod.Run2:
                     alg.selectionTool.WorkingPoint = self.identificationWP.replace("BLayer","BL") + 'Electron_Run2'
             else:
