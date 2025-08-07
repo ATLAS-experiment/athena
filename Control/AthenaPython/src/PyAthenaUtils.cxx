@@ -302,7 +302,7 @@ StatusCode PyAthena::queryInterface ATLAS_NOT_THREAD_SAFE
       continue;
     }
 
-    const std::string cppName = ((MyObjProxy*)self)->m_class->GetName();
+    const std::string cppName = reinterpret_cast<MyObjProxy*>(self)->m_class->GetName();
 
     std::cout << "::: would like to do: *ppvInterface = static_cast<"
 	      << cppBaseName << "*>( " 
