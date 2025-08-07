@@ -6,13 +6,13 @@
 #include "CollectionBase/CollectionColumn.h"
 #include "CollectionBase/CollectionBaseNames.h"
 
-#include "POOLCore/Exception.h"
-
 #include "CoralBase/AttributeSpecification.h"
 
+#include <exception>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+
 using namespace std;
 
 pool::CollectionDescription::CollectionDescription( const std::string& name,
@@ -124,9 +124,7 @@ bool
 pool::CollectionDescription::isSubsetOf( const ICollectionDescription& Irhs ) const
 {
    const CollectionDescription *rhs = dynamic_cast<const CollectionDescription*>(&Irhs);
-   if( !rhs ) throw pool::Exception( "Dynamic cast from ICollectionDescription failed",
-                                     "CollectionDescription::equals",
-                                     "CollectionBase" );
+   if( !rhs ) throw std::runtime_error( "Dynamic cast from ICollectionDescription failed (APR: \" CollectionDescription::equals \" from \" CollectionBase" );
    if( this == rhs ) return true;
    // printOut();  rhs->printOut();
 
@@ -443,9 +441,7 @@ pool::CollectionDescription::changeColumnType( const std::string& columnName,
   // Check that type change is not requested on event reference Token column.
    if( columnName == eventReferenceColumnName() )  {
       std::string errorMsg = "Cannot change the type of the event reference Token column.";
-      throw pool::Exception( errorMsg,
-			    "CollectionDescription::" + methodName,
-			    "CollectionBase" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::" + methodName + " \" from \" CollectionBase" );
    }
 
    // Check if description for column already exists and whether it is of type Token or Attribute.
@@ -572,7 +568,7 @@ pool::CollectionDescription::column( const std::string& name, const std::string&
       iColumn = m_tokenColumnForColumnName.find( name );
       if( iColumn == m_tokenColumnForColumnName.end() )  {
          std::string errorMsg = "Column with name `" + name + "' does NOT exist.";
-         throw pool::Exception(errorMsg, "CollectionDescription::" + method, "CollectionBase");
+         throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::" + method + " \" from \" CollectionBase" );
       }
    }
    return iColumn->second;
@@ -589,7 +585,7 @@ pool::CollectionDescription::column( const std::string& name, const std::string&
       iColumn = m_tokenColumnForColumnName.find( name );
       if( iColumn == m_tokenColumnForColumnName.end() )  {
          std::string errorMsg = "Column with name `" + name + "' does NOT exist.";
-         throw pool::Exception(errorMsg, "CollectionDescription::" + method, "CollectionBase");
+         throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::" + method + " \" from \" CollectionBase" );
       }
    }
    return iColumn->second;
@@ -613,9 +609,7 @@ pool::CollectionDescription::tokenColumn( const std::string& columnName ) const
   if ( iColumn == m_tokenColumnForColumnName.end() )
   {
     std::string errorMsg = "Token column with name `" + columnName + "' does not exist.";
-    throw pool::Exception( errorMsg,
-                           "CollectionDescription::tokenColumn",
-                           "CollectionBase" );
+    throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::tokenColumn \" from \" CollectionBase" );
   }
  
   return *( iColumn->second );
@@ -632,9 +626,7 @@ pool::CollectionDescription::tokenColumn( int columnId ) const
 	 std::ostringstream strm;
 	 strm << columnId;
 	 std::string errorMsg = "Token column with ID " + strm.str() + " does not exist.";
-	 throw pool::Exception( errorMsg,
-				"CollectionDescription::tokenColumn",
-				"CollectionBase" );
+         throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::tokenColumn \" from \" CollectionBase" );
    }
 }
 
@@ -655,9 +647,7 @@ pool::CollectionDescription::attributeColumn( const std::string& columnName ) co
   if ( iColumn == m_attributeColumnForColumnName.end() )
   {
     std::string errorMsg = "Attribute column with name `" + columnName + "' does not exist.";
-    throw pool::Exception( errorMsg,
-                           "CollectionDescription::attributeColumn",
-                           "CollectionBase" );
+    throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::attributeColumn\" from \" CollectionBase" );
   }
  
   return *( iColumn->second );
@@ -675,9 +665,7 @@ pool::CollectionDescription::attributeColumn( int columnId ) const
       std::ostringstream strm;
       strm << columnId;
       std::string errorMsg = "Attribute column with ID " + strm.str() + " does not exist.";
-      throw pool::Exception( errorMsg,
-                             "CollectionDescription::attributeColumn",
-                             "CollectionBase" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::attributeColumn\" from \" CollectionBase" );
    }
 }
 
@@ -689,9 +677,7 @@ pool::CollectionDescription::checkNewColumnName( const std::string& name, const 
        ||  m_tokenColumnForColumnName.find( name ) != m_tokenColumnForColumnName.end() )
    {
       std::string errorMsg = "Column with name `" + name + "' already exists.";
-      throw pool::Exception( errorMsg,
-			     "CollectionDescription::" + method,
-			     "CollectionBase" );       
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::" + method + " \" from \" CollectionBase" );
    }
 }
 

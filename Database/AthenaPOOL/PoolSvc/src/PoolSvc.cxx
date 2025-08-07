@@ -48,6 +48,7 @@
 #include <algorithm>  // for STL find()
 #include <cstdio>     // for fopen
 #include <ctype.h>    // for isdigit
+#include <exception>  // for runtime_error
 
 bool isNumber(const std::string& s) {
    return !s.empty() and ( isdigit(s[0]) or s[0]=='+' or s[0]=='-' );
@@ -537,9 +538,8 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
          }
          rntuple_error = e.what();
       }
-      if( !collPtr ) throw pool::Exception( "Failed to open APR Collection as RootCollection or RNTCollection: "
-                                            + tree_error + " | " + rntuple_error,
-                                            "PoolSvc::createCollection", "PoolSvc" );
+      if( !collPtr ) throw std::runtime_error( "Failed to open APR Collection as RootCollection or RNTCollection: "
+                                            + tree_error + " | " + rntuple_error + "PoolSvc::createCollection" );
    }
    if (insertFile && m_attemptCatalogPatch.value()) {
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);

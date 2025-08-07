@@ -15,9 +15,7 @@ atlas_add_library( CollectionUtilities
   src/Args2Container.cpp
   src/CatalogInfo.cpp
   src/Progress.cpp
-  src/UtilityFuncs.cpp
   src/MaxEventsInfo.cpp
-  src/QueryInfo.cpp
   PUBLIC_HEADERS CollectionUtilities
   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
   PRIVATE_INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
@@ -35,10 +33,6 @@ endmacro( collection_utility )
 
 # Declare the utilities of the package:
 collection_utility( coll_insertGuidToCatalog )
-collection_utility( CollListAttrib )
-collection_utility( CollListPFN )
-collection_utility( CollListToken )
-collection_utility( CollQuery )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

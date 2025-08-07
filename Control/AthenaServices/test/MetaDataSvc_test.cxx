@@ -21,7 +21,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "src/MetaDataSvc.h"
 #include "MetaDataToolStub.h"
-#include "PersistencySvc/PersistencySvcException.h"
 
 
 /// Test fixture (run before each test)
@@ -81,8 +80,8 @@ BOOST_AUTO_TEST_CASE(newMetadataSource_method){
   FileIncident failingInputIncident("test2", "BeginInputFile", "dummy.txt", "badGuid");
   BOOST_TEST(pMetaData->newMetadataSource(failingInputIncident).isFailure());
   //The following tests use a service with  MetaDataContainer defined
-  //File must exist, otherwise it throws pool::PersistencySvcException
-  BOOST_CHECK_THROW(pMDWithContainer->newMetadataSource(beginInputIncident).isSuccess(), pool::PersistencySvcException);
+  //File must exist, otherwise it throws std::runtime_error
+  BOOST_CHECK_THROW(pMDWithContainer->newMetadataSource(beginInputIncident).isSuccess(), std::runtime_error);
   //
   // Tests will throw unless the file is in the FileCatalog with the right info
 }

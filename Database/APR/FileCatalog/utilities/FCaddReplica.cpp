@@ -10,8 +10,9 @@
 #include "FileCatalog/CommandLine.h"
 #include "FileCatalog/IFileCatalog.h"
 #include "FileCatalog/URIParser.h"
-#include "POOLCore/Exception.h"
 #include "POOLCore/SystemTools.h"
+
+#include <exception>
 #include <memory>
 
 using namespace pool;
@@ -85,7 +86,7 @@ int main(int argc, char** argv)
       mycatalog->commit();  
       mycatalog->disconnect();
     }
-  }catch (const pool::Exception& er){
+  }catch (const std::runtime_error& er){
     std::cerr<<er.what()<<std::endl;
     return 1;
   }catch (const std::exception& er){

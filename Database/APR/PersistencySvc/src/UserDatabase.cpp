@@ -7,7 +7,6 @@
 #include "TechnologyDispatcher.h"
 #include "MicroSessionManager.h"
 #include "DatabaseRegistry.h"
-#include "PersistencySvc/PersistencySvcException.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/ITransaction.h"
 #include "StorageSvc/DbType.h"
@@ -15,6 +14,7 @@
 #include "FileCatalog/IFileCatalog.h"
 #include "POOLCore/DbPrint.h"
 
+#include <exception>
 
 static const std::string& emptyString = "";
 
@@ -72,8 +72,7 @@ pool::PersistencySvc::UserDatabase::connectForRead( const pool::DatabaseConnecti
       switch( m_nameType ) {
       case pool::DatabaseSpecification::PFN:
         if ( this->fid().empty() ) {
-          throw pool::PersistencySvcException( "PFN \"" + m_name + "\" is not existing",
-                                               "PersistencySvc::UserDatabase::connectForRead" );
+          throw std::runtime_error( "PFN \"" + m_name + "\" is not existing (APR: \" UserDatabase::connectForRead \" from \" PersistencySvc \")" );
         }
         if( m_nameType == DatabaseSpecification::LFN ) {
            // fid() found the PFN and FID but no tech
@@ -86,16 +85,14 @@ pool::PersistencySvc::UserDatabase::connectForRead( const pool::DatabaseConnecti
 
       case pool::DatabaseSpecification::FID:
         if ( this->pfn().empty() ) {
-          throw pool::PersistencySvcException( "FID \"" + m_name + "\" is not existing in the catalog",
-                                               "PersistencySvc::UserDatabase::connectForRead" );
+          throw std::runtime_error( "FID \"" + m_name + "\" is not existing in the catalog (APR: \" UserDatabase::connectForRead \" from \" PersistencySvc \")" );
         }
         break;
       case pool::DatabaseSpecification::LFN:
         {
           std::string lfn = m_name;
           if ( this->fid().empty() ) {
-            throw pool::PersistencySvcException( "LFN \"" + m_name + "\" is not existing in the catalog",
-                                                 "PersistencySvc::UserDatabase::connectForRead" );
+            throw std::runtime_error( "LFN \"" + m_name + "\" is not existing in the catalog (APR: \" UserDatabase::connectForRead \" from \" PersistencySvc \")" );
           }
           this->connectForRead( policy );
           m_registry.registerDatabaseHandler( m_databaseHandler, lfn );
@@ -103,8 +100,7 @@ pool::PersistencySvc::UserDatabase::connectForRead( const pool::DatabaseConnecti
       return;
       break;
       default:
-        throw pool::PersistencySvcException( "Unknown database name type",
-                                             "PersistencySvc::UserDatabase::connectForRead" );
+        throw std::runtime_error( "Unknown database name type (APR: \" UserDatabase::connectForRead \" from \" PersistencySvc \")" );
       };
 
       // Now we have all the usefull information to open the file.
@@ -124,8 +120,7 @@ pool::PersistencySvc::UserDatabase::connectForRead( const pool::DatabaseConnecti
         m_openMode = ( ( accessMode == pool::READ ) ? pool::IDatabase::READ : pool::IDatabase::UPDATE );
       }
       else {
-        throw pool::PersistencySvcException( "Could not connect to the file",
-                                             "PersistencySvc::UserDatabase::connectForRead" );
+        throw std::runtime_error( "Could not connect to the file (APR: \" UserDatabase::connectForRead \" from \" PersistencySvc \")" );
       }
     }
   }
@@ -144,8 +139,7 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
   if ( ( ! m_databaseHandler ) &&
        m_transaction.isActive() ) {
     if ( m_transaction.type() != pool::ITransaction::UPDATE ) {
-      throw pool::PersistencySvcException( "Could not open a database for write outside an update transaction.",
-                                           "PersistencySvc::UserDatabase::connectForWrite" );
+      throw std::runtime_error( "Could not open a database for write outside an update transaction. (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
     }
 
     if ( this->checkInRegistry() ) {
@@ -162,13 +156,11 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
         m_the_pfn = m_name;
         if ( this->fid().empty() ) {
           if( policy.writeModeForNonExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-            throw pool::PersistencySvcException( "Could not find the PFN \"" + m_name + "\" in the file catalog",
-                                                 "PersistencySvc::UserDatabase::connectForWrite" );
+            throw std::runtime_error( "Could not find the PFN \"" + m_name + "\" in the file catalog (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
           }
 	  // Check if the technology is already set
 	  if( ! m_technologySet ) {
-	     throw pool::PersistencySvcException( "The back end technology has not been specified",
-						  "PersistencySvc::UserDatabase::connectForWrite" );
+	     throw std::runtime_error( "The back end technology has not been specified (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
 	  }
 	  // register in the catalog 
 	  pool::DbType dbType( m_technology );
@@ -183,8 +175,7 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
         }
         else {
 	   if( policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-	      throw pool::PersistencySvcException( "The PFN \"" + m_name + "\" already exists",
-						   "PersistencySvc::UserDatabase::connectForWrite" );
+	      throw std::runtime_error( "The PFN \"" + m_name + "\" already exists (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
 	   }
 	}
 	// MN: change - set overwrite mode even if it the databas was not registered in a catalog
@@ -195,12 +186,10 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
       case pool::DatabaseSpecification::FID:
         m_the_fid = m_name;
         if ( this->pfn().empty() ) {
-          throw pool::PersistencySvcException( "Could not find the FID \"" + m_name + "\" in the file catalog",
-                                               "PersistencySvc::UserDatabase::connectForWrite" );
+          throw std::runtime_error( "Could not find the FID \"" + m_name + "\" in the file catalog (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
         }
         if ( policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-          throw pool::PersistencySvcException( "The FID \"" + m_name + "\" already exists",
-                                               "PersistencySvc::UserDatabase::connectForWrite" );
+          throw std::runtime_error( "The FID \"" + m_name + "\" already exists (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
         }
         else if ( policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::OVERWRITE ) {
           accessMode = pool::RECREATE;
@@ -210,12 +199,10 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
         {
           std::string lfn = m_name;
           if ( this->fid().empty() ) {
-            throw pool::PersistencySvcException( "Could not find the LFN \"" + m_name  + "\" in the file catalog",
-                                                 "PersistencySvc::UserDatabase::connectForWrite" );
+            throw std::runtime_error( "Could not find the LFN \"" + m_name  + "\" in the file catalog (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
           }
           if ( policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-            throw pool::PersistencySvcException( "The LFN \"" + m_name + "\" already exists",
-                                                 "PersistencySvc::UserDatabase::connectForWrite" );
+            throw std::runtime_error( "The LFN \"" + m_name + "\" already exists (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
           }
           this->connectForWrite( policy );
           m_registry.registerDatabaseHandler( m_databaseHandler, lfn );
@@ -223,8 +210,7 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
       return;
       break;
       default:
-        throw pool::PersistencySvcException( "Unknown database name type",
-                                             "PersistencySvc::UserDatabase::connectForWrite" );
+        throw std::runtime_error( "Unknown database name type (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
       };
 
       if( accessMode == pool::UPDATE
@@ -237,8 +223,7 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
 	    // creation failed, remove entry from the in-memory catalog
 	    m_catalog.deleteFID( m_the_fid );
 	 }
-	 throw pool::PersistencySvcException( "Could not connect to the file",
-					      "PersistencySvc::UserDatabase::connectForWrite" );
+	 throw std::runtime_error( "Could not connect to the file (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
       }
       m_openMode = pool::IDatabase::UPDATE;
       
@@ -413,8 +398,7 @@ pool::PersistencySvc::UserDatabase::checkInRegistry()
     m_databaseHandler = m_registry.lookupByLFN( m_name );
     break;
   default:
-    throw pool::PersistencySvcException( "Only PFN, LFN and FID database types are currently supported",
-                                         "PersistencySvc::UserDatabase::checkInRegistry" );
+    throw std::runtime_error( "Only PFN, LFN and FID database types are currently supported (APR: \" UserDatabase::checkInRegistry \" from \" PersistencySvc \")" );
   };
   if ( m_databaseHandler ) {
     m_alreadyConnected = true;

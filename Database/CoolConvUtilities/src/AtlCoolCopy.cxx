@@ -35,7 +35,6 @@
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/PersistencySvcException.h"
 #include "PersistencySvc/SimpleUtilityBase.h"
 #include "RelationalAccess/ConnectionService.h"
 #include "RelationalAccess/IConnectionServiceConfiguration.h"
