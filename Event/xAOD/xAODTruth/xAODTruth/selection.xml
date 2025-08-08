@@ -1,4 +1,4 @@
-<!-- $Id: selection.xml 670153 2015-05-27 11:42:29Z tbisanz $ -->
+<!-- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
   <!-- The TruthParticle_v1 class(es): -->
@@ -48,8 +48,12 @@
 
   <class name="xAOD::TruthParticleAuxContainer_v1"
          id="BA8FA08F-8DD6-420D-97D5-8B54EABECD65" />
+  <class name="xAOD::TruthParticleAuxContainer_v2"
+         id="95326A79-5433-4F65-9590-8E72D67FE0D5" />
   <class name="xAOD::TruthVertexAuxContainer_v1"
          id="B6BD3B02-C411-4EB9-903F-5B099D3B1A3E" />
+  <class name="xAOD::TruthVertexAuxContainer_v2"
+         id="95326A79-5433-4F65-9590-8E72D67FE0D5" />
   <class name="xAOD::TruthEventAuxContainer_v1"
          id="1B945EFD-4F7D-4BDD-9FB1-6FB975315961" />
   <class name="xAOD::TruthPileupEventAuxContainer_v1"
