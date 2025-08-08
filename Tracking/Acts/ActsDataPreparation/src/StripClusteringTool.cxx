@@ -92,7 +92,9 @@ StripClusteringTool::clusterize(const EventContext& ctx,
 				std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const
 {
     IdentifierHash idHash = RDOs.identifyHash();
-
+    // At least an empty cluster collection needs to be always added because the
+    // assumption is that there is one element per element RawDataCollection.
+    collection.emplace_back();
     bool goodModule = true;
     if (m_checkBadModules.value()) {
       goodModule = stripDetElStatus.isGood(idHash);
@@ -133,7 +135,7 @@ StripClusteringTool::clusterize(const EventContext& ctx,
     
     ClusterCollection clusters =
 	Acts::Ccl::createClusters<CellCollection, typename IStripClusteringTool::ClusterCollection, 1>(cells);
-    collection.push_back( std::move(clusters) );
+    collection.back() = std::move(clusters);
 
     return StatusCode::SUCCESS;
 }
