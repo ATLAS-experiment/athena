@@ -135,6 +135,25 @@ def getJetDeltaRFlavorLabelTool(name='jetdrlabeler', jet_pt_min=5000, collection
         )
 
 
+def getJetQuarkChargeLabelTool(name='jetquarkcharge',
+                               output_label = "QuarkChargeTruthLabelID",
+                               hadron_label = "HadronGhostInitialTruthLabelPdgId",
+                               parton_label = "PartonExtendedTruthLabelID"):
+    """Get the flavor tagging labeling tool to store the quark charge of a jet
+    It is necessary to have saved before an hadron label and a parton label, otherwise the code will break
+    """
+
+    import ParticleJetTools.quarkChargeMap as qcMap
+    charge_map = qcMap.hadrons_dict
+    
+    return CompFactory.JetQuarkChargeLabelingTool(
+        name,
+        HadronDecorationName = hadron_label,
+        PartonDecorationName = parton_label,
+        HadronChargeMap = charge_map,
+        OutputName = output_label,
+        )
+
 def getJetDeltaRLabelTool(jetdef, modspec):
     """returns a ParticleJetDeltaRLabelTool
     Cone matching for B, C and tau truth for all but track jets.
@@ -145,6 +164,21 @@ def getJetDeltaRLabelTool(jetdef, modspec):
     jetptmin = float(modspec)
     name = "jetdrlabeler_jetpt{0}GeV".format(int(jetptmin/1000))
     return getJetDeltaRFlavorLabelTool(name, jetptmin)
+
+
+def getJetQuarkChargeTool(jetdef, modspec):
+    """returns a JetQuarkChargeLabelingTool
+
+    This function is meant to be used as callback from JetRecConfig where
+    it is called as func(jetdef, modspec). Hence the jetdef argument even if not used.
+    """
+    if modspec == "":
+        return getJetQuarkChargeLabelTool()
+
+    outputLabel,hadronLabel,partonLabel = modspec.split(",")
+    
+    name = f"jetquarkcharge_{outputLabel}_{hadronLabel}_{partonLabel}"
+    return getJetQuarkChargeLabelTool(name,output_label = outputLabel, hadron_label = hadronLabel, parton_label = partonLabel)
 
 def getJetDeltaRInitialLabelTool(jetdef, modspec):
     """returns a ParticleJetDeltaRLabelTool

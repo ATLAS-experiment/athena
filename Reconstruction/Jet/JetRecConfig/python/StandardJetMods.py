@@ -219,7 +219,8 @@ from ParticleJetTools import ParticleJetToolsConfig
 stdJetModifiers.update(
     # Easy cases, no special config or prereqs, just default tool config
     PartonTruthLabel = JetModifier("Analysis::JetPartonTruthLabel","partontruthlabel",
-                                    prereqs=["ghost:Partons"]),
+                                    prereqs=["ghost:Partons"]
+                                   ),
 
     # More complex cases here
     JetDeltaRLabel =   JetModifier("ParticleJetDeltaRLabelTool","jetdrlabeler_jetptmin",
@@ -253,18 +254,23 @@ stdJetModifiers.update(
                                                    "ghost:TausFinal"]
                                    ),
 
+    JetQuarkChargeLabel =    JetModifier("JetQuarkChargeLabelingTool","jetquarkchargetool",
+                                         createfn=ParticleJetToolsConfig.getJetQuarkChargeTool,
+                                         prereqs=["mod:JetGhostInitialLabel","mod:JetGhostLabel","mod:PartonTruthLabel"]
+                                         ),
+
 
     JetTaggingTruthLabel = JetModifier("JetTaggingTruthLabel", "truthlabeler_{mods}",
                                        filterfn=isMC,
                                        createfn=ParticleJetToolsConfig.getJetTruthLabelTool,
-                                       prereqs=lambda modspec,jetdef: ParticleJetToolsConfig.getJetTruthLabelToolPrereqs(jetdef, modspec),
+                                       prereqs=lambda modspec,jetdef: ParticleJetToolsConfig.getJetTruthLabelToolPrereqs(jetdef, modspec)
                                       ),
 
     JetPileupLabel = JetModifier("JetPileupLabel", "pileuplabeler_{mods}",
                                  filterfn=isMC,
                                  createfn=ParticleJetToolsConfig.getJetPileupLabelTool,
                                  prereqs=["input:AntiKt4TruthDressedWZJets"]
-                                 ),
+                                 )
 )
 
 
