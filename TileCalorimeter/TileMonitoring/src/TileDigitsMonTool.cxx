@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -1873,7 +1873,7 @@ void TileDigitsMonTool::statTestHistos(int ros, int drawer, int gain)
   TH1S *obj = 0;
 
   for (int i = 0; i < entr; i++) {
-    obj = (TH1S*) refbld.at(i);
+    obj = static_cast<TH1S*> (refbld.at(i));
     float kol = obj->KolmogorovTest(ref);
     //std::cout<<"The value of the Kolmogorov test for "<< ros << drawer << gain << " pmt:" << i << " is "<< kol << std::endl;
     if (kol > 0.5) {
@@ -1884,7 +1884,7 @@ void TileDigitsMonTool::statTestHistos(int ros, int drawer, int gain)
   int ent = newrefbld.size();
   const double inv_ent = (ent > 0 ? 1. / static_cast<double>(ent) : 1);
   for (int i = 0; i < ent; i++) {
-    obj = (TH1S*) newrefbld.at(i);
+    obj = static_cast<TH1S*>(newrefbld.at(i));
     ref1->Add(obj, inv_ent);
   }
 
