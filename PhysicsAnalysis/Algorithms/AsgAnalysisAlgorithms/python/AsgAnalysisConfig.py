@@ -382,6 +382,8 @@ class PtEtaSelectionBlock (ConfigBlock):
             info="minimum |eta| value to cut on. No default value.")
         self.addOption ('maxEta', None, type=float,
             info="maximum |eta| value to cut on. No default value.")
+        self.addOption ('maxRapidity', None, type=float,
+            info="maximum rapidity value to cut on. No default value.")
         self.addOption ('etaGapLow', None, type=float,
             info="low end of the |eta| gap. No default value.")
         self.addOption ('etaGapHigh', None, type=float,
@@ -412,6 +414,8 @@ class PtEtaSelectionBlock (ConfigBlock):
             alg.selectionTool.minEta = self.minEta
         if self.maxEta is not None :
             alg.selectionTool.maxEta = self.maxEta
+        if self.maxRapidity is not None :
+            alg.selectionTool.maxRapidity = self.maxRapidity
         if self.etaGapLow is not None:
             alg.selectionTool.etaGapLow = self.etaGapLow
         if self.etaGapHigh is not None:

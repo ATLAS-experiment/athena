@@ -196,7 +196,7 @@ def CPAlgorithmsCfg(flags):
     # Disable kinematic selections on large-R jets
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.maxPt', 0.)
-    subConfig.setOptionValue ('.maxEta', 0.)
+    subConfig.setOptionValue ('.maxRapidity', 0.)
     subConfig.setOptionValue ('.minMass', 0.)
     subConfig.setOptionValue ('.maxMass', 0.)
     configSeq += subConfig
