@@ -17,6 +17,7 @@
 #include <ColumnarToolWrapper/ColumnarToolWrapper.h>
 #include <PATInterfaces/ISystematicsTool.h>
 #include <PATInterfaces/SystematicsUtil.h>
+#include <iomanip>
 #include <span>
 #include <iomanip>
 
