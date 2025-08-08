@@ -10,6 +10,6 @@ find_package( ROOT COMPONENTS Core MathCore Minuit2 )
 atlas_add_component( MdtSegmentT0Fitter
    MdtSegmentT0Fitter/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel MdtCalibSvcLib
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel MdtCalibInterfacesLib
    TrkDriftCircleMath MdtCalibData MuonReadoutGeometry MuonPrepRawData
    MuonRIO_OnTrack MuonSegmentMakerInterfacesLib )

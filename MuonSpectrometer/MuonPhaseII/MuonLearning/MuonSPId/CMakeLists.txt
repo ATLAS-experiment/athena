@@ -10,7 +10,7 @@ atlas_add_component( MuonSPId
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
-                                     MuonSimEvent xAODMuonSimHit StoreGateLib MdtCalibSvcLib
+                                     MuonSimEvent xAODMuonSimHit StoreGateLib MdtCalibInterfacesLib
                                      xAODMuonPrepData MuonSpacePoint xAODMuon MuonTesterTreeLib
                                      MuonPatternEvent MuonPatternHelpers MuonPatternHelpers 
                                      MuonInferenceInterfaces
