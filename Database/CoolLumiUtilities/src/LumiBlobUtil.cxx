@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CoolLumiUtilities/LumiBlobUtil.h"
-//#Include "CoolKernel/IObject.h"                                                                         
 #include "CoralBase/Blob.h"
 #include "CoralBase/Attribute.h"
 #include <sstream>
@@ -161,7 +160,7 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
 	//	std::cout << AB1 << std::endl;
       } //This ends y=1   
       if (y==2) {
-	const uint16_t* k1 = (const uint16_t*) k;
+	const uint16_t* k1 = reinterpret_cast<const uint16_t*> (k);
 	len = *k1;
 	k1++;
 	const uint8_t* y12 = (const uint8_t*) (k+2*(len+1));
@@ -192,7 +191,7 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
       if (y==0) {
         for (unsigned int i =0; i<PV.size(); i++) {
           BCID = PV[i];
-          const uint16_t* y20 = (const uint16_t*) k;
+          const uint16_t* y20 = reinterpret_cast<const uint16_t*> (k);
           for (unsigned int j = BCIDold; j <= BCID; j++, y20++) {
             if (j==BCID) {
               tmk = *y20;
@@ -213,7 +212,7 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
 	//	std::cout << AB1 << std::endl;
       }// This ends y=0  
       if (y==1) {
-        const uint16_t* y21 = (const uint16_t*) k;
+        const uint16_t* y21 = reinterpret_cast<const uint16_t*> (k);
         for (unsigned int i = 0; i < ((blobBC.size()-1)/x); i++, y21++) {
           tmk=*y21;
           BV = ARI*tmk/fact;
@@ -224,10 +223,10 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
 	//	std::cout << AB1 << std::endl;
       }      //This ends y=1
       if (y==2) {
-        const uint16_t* k2 = (const uint16_t*) k;
+        const uint16_t* k2 = reinterpret_cast<const uint16_t*> (k);
         unsigned int len = *k2;
         k2++;
-        const uint16_t* y22 = (const uint16_t*) (k+2*(len+1));
+        const uint16_t* y22 = reinterpret_cast<const uint16_t*> (k+2*(len+1));
         for (unsigned int i = 0; i<len; i++, k2++) {
           BCID = *k2;
           for (unsigned int j=BCIDold; j<=(BCID); j++, y22++) {
@@ -284,7 +283,7 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
           unsigned int i;
           float f;
         } cnv;
-        const unsigned int * y41 = (const unsigned int*) k;
+        const unsigned int * y41 = reinterpret_cast<const unsigned int*> (k);
         for (unsigned int i = 0; i < ((blobBC.size()-1)/x); i++, y41++) {
           cnv.i = *y41;
           BV = cnv.f;
@@ -295,14 +294,14 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
 	//	std::cout << AB1 << std::endl;
       } //This ends y=1      
       if (y==2) {
-        const uint16_t* k4 = (const uint16_t*) k;
+        const uint16_t* k4 = reinterpret_cast<const uint16_t*> (k);
         unsigned int len = *k4;
         k4++;
         union {
           unsigned int i;
           float f;
         } cnv;
-        const unsigned int* y42 = (const unsigned int*) (k+2*(1+len));
+        const unsigned int* y42 = reinterpret_cast<const unsigned int*> (k+2*(1+len));
         for (unsigned int i = 0; i<len; i++, k4++) {
           BCID = *k4;
 
