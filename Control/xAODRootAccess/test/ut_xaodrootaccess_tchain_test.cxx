@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ROOT include(s):
@@ -57,15 +57,15 @@ int main() {
 
    const char* ref = getenv( "ATLAS_REFERENCE_DATA" );
    const std::string FPATH =
-      ref ? ref : "/afs/cern.ch/atlas/project/PAT";
-   const std::string FNAME1 = FPATH + "/xAODs/r5591/"
-      "mc14_8TeV.117050.PowhegPythia_P2011C_ttbar.recon."
-      "AOD.e1727_s1933_s1911_r5591/AOD.01494881._105458.pool.root.1";
-   const std::string FNAME2 = FPATH + "/xAODs/r5591/"
-      "mc14_8TeV.117050.PowhegPythia_P2011C_ttbar.recon."
-      "AOD.e1727_s1933_s1911_r5591/AOD.01494881._107292.pool.root.1";
+      ref ? ref : "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art";
+   const std::string FNAME1 = FPATH + "/CampaignInputs/mc23/AOD/"
+      "mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon."
+      "AOD.e8514_s4159_r14799/1000events.AOD.34124794._001345.pool.root.1";
+   const std::string FNAME2 = FPATH + "/CampaignInputs/mc23/AOD/"
+      "mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon."
+      "AOD.e8514_s4162_r14622/1000events.AOD.33799166._000073.pool.root.1";
 
-   // Set up a TChain with some mc14_8TeV input files:
+   // Set up a TChain with some mc23_13p6TeV input files:
    ::TChain chain1( "CollectionTree" );
    chain1.Add( FNAME1.c_str() );
    chain1.Add( FNAME2.c_str() );
@@ -74,27 +74,7 @@ int main() {
    ANA_CHECK( event.readFrom( &chain1 ) );
 
    // Run the processing:
-   ::Info( APP_NAME, "Processing mc14_8TeV chain..." );
-   ANA_CHECK( process( event, store ) );
-
-   // Set up a TChain with some mc14_8TeV input files:
-   ::TChain chain2( "CollectionTree" );
-   const std::string FNAME3 = FPATH + "/xAODs/r5787/"
-      "mc14_13TeV.110401.PowhegPythia_P2012_ttbar_nonallhad.merge."
-      "AOD.e2928_s1982_s2008_r5787_r5853_tid01597980_00/"
-      "AOD.01597980._000098.pool.root.1";
-   const std::string FNAME4 = FPATH + "/xAODs/r5787/"
-      "mc14_13TeV.110401.PowhegPythia_P2012_ttbar_nonallhad.merge."
-      "AOD.e2928_s1982_s2008_r5787_r5853_tid01597980_00/"
-      "AOD.01597980._000420.pool.root.1";
-   chain2.Add( FNAME3.c_str() );
-   chain2.Add( FNAME4.c_str() );
-
-   // Connect the TEvent object to it:
-   ANA_CHECK( event.readFrom( &chain2 ) );
-
-   // Run the processing:
-   ::Info( APP_NAME, "Processing mc14_13TeV chain..." );
+   ::Info( APP_NAME, "Processing mc23_13p6TeV chain..." );
    ANA_CHECK( process( event, store ) );
 
    // Return gracefully:
@@ -124,10 +104,10 @@ StatusCode process( xAOD::TEvent& event, xAOD::TStore& store ) {
 
       // Try to retrieve some objects:
       const xAOD::AuxContainerBase* c = 0;
-      RETURN_CHECK( "process", event.retrieve( c, "ElectronCollectionAux." ) );
+      RETURN_CHECK( "process", event.retrieve( c, "ElectronsAux." ) );
       RETURN_CHECK( "process", event.retrieve( c, "MuonsAux." ) );
       const SG::AuxVectorBase* b = 0;
-      RETURN_CHECK( "process", event.retrieve( b, "ElectronCollection" ) );
+      RETURN_CHECK( "process", event.retrieve( b, "Electrons" ) );
       RETURN_CHECK( "process", event.retrieve( b, "Muons" ) );
 
       // Record some objects into TStore:
