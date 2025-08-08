@@ -14,6 +14,7 @@ class SystematicsCategories(Enum):
     PHOTONS = ['EG_', 'PH_']
     TAUS = ['TAUS_']
     MET = ['MET_']
+    TRACKS = ['TRK_']
     EVENT = ['GEN_', 'PRW_']
     FTAG = ['FT_']
 
@@ -37,7 +38,7 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('onlySystematicsCategories', None, type=list,
             info="a list of strings defining categories of systematics to enable "
             "(only recommended for studies / partial ntuple productions). Choose amongst: "
-            "jets, electrons, muons, photons, taus, met, ftag, event. This option is overridden "
+            "jets, electrons, muons, photons, taus, met, tracks, ftag, event. This option is overridden "
             "by 'filterSystematics'.")
         self.addOption ('systematicsHistogram', None , type=str,
             info="the name (string) of the histogram to which a list of executed "
