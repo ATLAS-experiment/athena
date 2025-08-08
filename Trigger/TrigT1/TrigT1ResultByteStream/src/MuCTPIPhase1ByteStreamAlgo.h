@@ -39,6 +39,7 @@ public:
 
   virtual StatusCode initialize() override;  
   virtual StatusCode execute(const EventContext& eventContext) const override;
+  virtual StatusCode finalize() override;
 
   /// Convert ROBFragment to MuCTPI_RDO
   StatusCode convert( const IROBDataProviderSvc::ROBF* rob, SG::WriteHandle<MuCTPI_Phase1_RDO>& outputHandle ) const;
