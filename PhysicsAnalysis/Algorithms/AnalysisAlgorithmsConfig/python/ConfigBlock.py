@@ -2,6 +2,7 @@
 
 import textwrap
 import inspect
+from functools import wraps
 
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgBlock = logging.getLogger('CPAlgCfgBlock')
@@ -26,6 +27,30 @@ def filter_dsids (filterList, config) :
                 return True
     return False
 
+def alphanumeric_block_name(func):
+    """this wrapper ensures that the 'instanceName' of the various """
+    """config blocks is cleaned up of any non-alphanumeric characters """
+    """that may arise from using 'selectionName' in the naming."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Get the string returned by the 'instanceName()' method of a config block
+        orig_name = func(*args, **kwargs)
+
+        # Allowed replacements - anything else is likely a mistake on the user-side
+        result = orig_name.replace("||", "OR").replace("&&", "AND").replace("(","LB").replace(")","RB").replace(" ","")
+
+        return result
+    return wrapper
+
+class BlockNameProcessorMeta(type):
+    """this meta class enforces the application of 'alphanumeric_block_names()' """
+    """to 'instanceName()' and will be used in the main ConfigBlock class in order """
+    """to propagate this rule also to all derived classes (the individual config blocks."""
+    def __new__(cls, name, bases, dct):
+        # Automatically apply alphanumeric-only decorator to 'instanceName()' method
+        if 'instanceName' in dct and callable(dct['instanceName']):
+            dct['instanceName'] = alphanumeric_block_name(dct['instanceName'])
+        return super().__new__(cls, name, bases, dct)
 
 class ConfigBlockOption:
     """the information for a single option on a configuration block"""
@@ -60,7 +85,7 @@ class ConfigBlockDependency():
         return f'ConfigBlockDependency(blockName="{self.blockName}", required={self.required})'
 
 
-class ConfigBlock:
+class ConfigBlock(metaclass=BlockNameProcessorMeta):
     """the base class for classes implementing individual blocks of
     configuration
 
