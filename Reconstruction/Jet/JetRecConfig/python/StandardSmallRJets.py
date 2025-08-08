@@ -83,7 +83,7 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 

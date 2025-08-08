@@ -17,7 +17,7 @@ else()
    atlas_add_library( ParticleJetToolsLib
       ParticleJetTools/*.h Root/*.cxx src/*.cxx
       PUBLIC_HEADERS ParticleJetTools
-      LINK_LIBRARIES AsgDataHandlesLib AsgTools AthContainers AthenaBaseComps EventPrimitives
+      LINK_LIBRARIES AsgDataHandlesLib AsgTools AthContainers AthenaBaseComps EventPrimitives 
       GaudiKernel JetInterface JetRecLib MCTruthClassifierLib
       xAODBase xAODEventInfo xAODJet xAODTruth
       PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AthAnalysisBaseCompsLib CxxUtils TruthUtils xAODTracking )
