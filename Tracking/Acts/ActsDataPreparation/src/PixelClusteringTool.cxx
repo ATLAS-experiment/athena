@@ -232,6 +232,9 @@ PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
   IdentifierHash idHash = RDOs.identifyHash();
   if ( not pixelDetElStatus.isGood(idHash) ) {
     // the module being flagged as bad is not a failure
+    // An empty cluster collection needs to be added because the assumption
+    // is that there is one element per element RawDataCollection.
+    collection.emplace_back();
     return StatusCode::SUCCESS;
   }
 
