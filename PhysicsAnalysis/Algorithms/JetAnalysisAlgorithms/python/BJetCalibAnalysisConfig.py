@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -8,16 +8,16 @@ import AthenaCommon.SystemOfUnits as Units
 class BJetCalibAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the b-jet calibration sequence"""
 
-    def __init__ (self, containerName='', muonContainerName='') :
+    def __init__ (self) :
         super (BJetCalibAnalysisConfig, self).__init__ ()
         self.setBlockName('BJetCalib')
         self.addDependency('FTag', required=False)
         self.addDependency('Muons', required=True)
         self.addDependency('MuonsWorkingPoint', required=False)
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input jet container.")
-        self.addOption ('muonContainerName', muonContainerName, type=str,
+        self.addOption ('muonContainerName', '', type=str,
             noneAction='error',
             info="the name of the input muon container.")
         self.addOption ('jetPreselection', "", type=str,
