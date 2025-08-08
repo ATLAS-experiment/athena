@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileJetMonitorAlgorithm.h"
@@ -171,7 +171,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
           cellIndex++;
           if (cell->caloDDE()->getSubCalo() == CaloCell_ID::TILE) { // a Tile Cell
             ATH_MSG_DEBUG("Cell " << cellIndex << " IS TILECAL !!");
-            const TileCell *tilecell = (TileCell*) cell;
+            const TileCell *tilecell = static_cast<const TileCell*> (cell);
             Identifier id = tilecell->ID();
             if (usedCells.find(id) == usedCells.end()) {
               usedCells.insert(id);
