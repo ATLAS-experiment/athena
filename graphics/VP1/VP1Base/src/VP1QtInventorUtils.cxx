@@ -49,6 +49,12 @@
 #include <QtCoreVersion>
 
 #include <iostream>
+namespace{
+  unsigned char *
+  ucharAddress(auto * pv){
+    return reinterpret_cast<unsigned char *>(pv);
+  }
+}
 
 //____________________________________________________________________
 class VP1QtInventorUtils::Imp {
@@ -173,10 +179,10 @@ public:
 
         
         const unsigned int colourBuffSize=image->xsize*256u;
-		    image->tmp = (unsigned char *)malloc(colourBuffSize);
-		    image->tmpR = (unsigned char *)malloc(colourBuffSize);
-		    image->tmpG = (unsigned char *)malloc(colourBuffSize);
-		    image->tmpB = (unsigned char *)malloc(colourBuffSize);
+		    image->tmp = ucharAddress(malloc(colourBuffSize));
+		    image->tmpR = ucharAddress(malloc(colourBuffSize));
+		    image->tmpG = ucharAddress(malloc(colourBuffSize));
+		    image->tmpB = ucharAddress(malloc(colourBuffSize));
 		    if (image->tmp == NULL || image->tmpR == NULL || image->tmpG == NULL ||
 			    	image->tmpB == NULL) {
 			    fprintf(stderr, "Out of memory!\n");
@@ -295,11 +301,11 @@ public:
 		const unsigned int imageHeight = image->ysize;
 		const unsigned int uintSize(sizeof(unsigned)), ucharSize(sizeof(unsigned char));
 		const unsigned int colourBufSize=imageWidth*ucharSize;
-		base = (unsigned *)malloc(imageWidth*imageHeight*uintSize);
-		rbuf = (unsigned char *)malloc(colourBufSize);
-		gbuf = (unsigned char *)malloc(colourBufSize);
-		bbuf = (unsigned char *)malloc(colourBufSize);
-		abuf = (unsigned char *)malloc(colourBufSize);
+		base = reinterpret_cast<unsigned *>(malloc(imageWidth*imageHeight*uintSize));
+		rbuf = ucharAddress(malloc(colourBufSize));
+		gbuf = ucharAddress(malloc(colourBufSize));
+		bbuf = ucharAddress(malloc(colourBufSize));
+		abuf = ucharAddress(malloc(colourBufSize));
 		if(!base || !rbuf || !gbuf || !bbuf) {
 			ImageClose(image);
 			if (base) free(base);
@@ -316,22 +322,22 @@ public:
 				ImageGetRow(image,gbuf,y,1);
 				ImageGetRow(image,bbuf,y,2);
 				ImageGetRow(image,abuf,y,3);
-				rgbatorgba(rbuf,gbuf,bbuf,abuf,(unsigned char *)lptr,image->xsize);
+				rgbatorgba(rbuf,gbuf,bbuf,abuf,ucharAddress(lptr),image->xsize);
 				lptr += image->xsize;
 			} else if(image->zsize==3) {
 				ImageGetRow(image,rbuf,y,0);
 				ImageGetRow(image,gbuf,y,1);
 				ImageGetRow(image,bbuf,y,2);
-				rgbtorgba(rbuf,gbuf,bbuf,(unsigned char *)lptr,image->xsize);
+				rgbtorgba(rbuf,gbuf,bbuf,ucharAddress(lptr),image->xsize);
 				lptr += image->xsize;
 			} else if(image->zsize==2) {
 				ImageGetRow(image,rbuf,y,0);
 				ImageGetRow(image,abuf,y,1);
-				latorgba(rbuf,abuf,(unsigned char *)lptr,image->xsize);
+				latorgba(rbuf,abuf,ucharAddress(lptr),image->xsize);
 				lptr += image->xsize;
 			} else {
 				ImageGetRow(image,rbuf,y,0);
-				bwtorgba(rbuf,(unsigned char *)lptr,image->xsize);
+				bwtorgba(rbuf,ucharAddress(lptr),image->xsize);
 				lptr += image->xsize;
 			}
 		}
