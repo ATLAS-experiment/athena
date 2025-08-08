@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSignatureMoni.h"
@@ -216,10 +216,12 @@ StatusCode TrigSignatureMoni::stop() {
 StatusCode TrigSignatureMoni::fillHistogram(const TrigCompositeUtils::DecisionIDContainer& dc, int row, LockedHandle<TH2>& histogram) const {
   for (TrigCompositeUtils::DecisionID id : dc)  {
     auto id2bin = m_chainIDToBinMap.find( id );
-     if ( id2bin == m_chainIDToBinMap.end() && HLT::Identifier(id).name().find("leg") != 0 ) {
-      ATH_MSG_WARNING( "HLT chain " << HLT::Identifier(id) << " not configured to be monitored" );
+    if ( id2bin == m_chainIDToBinMap.end() ) {
+      if ( !HLT::Identifier(id).name().starts_with("leg") ) {
+        ATH_MSG_WARNING( "HLT chain " << HLT::Identifier(id) << " not configured to be monitored" );
+      }
     } else {
-      histogram->Fill( id2bin->second, double(row) );
+      histogram->Fill( id2bin->second, static_cast<double>(row) );
     }
   }
   return StatusCode::SUCCESS;
