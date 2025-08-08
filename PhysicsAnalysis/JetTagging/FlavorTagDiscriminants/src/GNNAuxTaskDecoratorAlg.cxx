@@ -27,7 +27,7 @@ namespace FlavorTagDiscriminants {
 
     m_trackAuxTasksDecorKeys.reserve(m_trackAuxTasks.size());
     m_readDecorKeys.reserve(m_trackAuxTasks.size());
-    for (const auto& [jetDecor, trackDecor] : m_trackAuxTasks) {      
+    for (const auto& [jetDecor, trackDecor] : m_trackAuxTasks) {
       m_trackAuxTasksDecorKeys.emplace_back(m_trackContainerKey, trackDecor);
       m_readDecorKeys.emplace_back(m_jetContainerKey, jetDecor);
     }
