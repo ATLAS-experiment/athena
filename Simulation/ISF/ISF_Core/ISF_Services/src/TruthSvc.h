@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_SERVICES_TRUTHSVC_H
@@ -81,9 +81,6 @@ namespace ISF {
     /** Record and end vertex to the MC Truth for the parent particle */
     HepMC::GenVertexPtr  createGenVertexFromTruthIncident( ITruthIncident& truthincident,
                                                            bool replaceExistingGenVertex=false) const;
-
-    /** Set shared barcode for child particles */
-    void setSharedChildParticleBarcode( ITruthIncident& truthincident) const;
 
     /** Delete child vertex */
     void deleteChildVertex(HepMC::GenVertexPtr  vertex) const;

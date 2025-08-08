@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -415,12 +415,8 @@ namespace ISFTesting {
     anEvent->set_beam_particles(inParticle1,inParticle2);
 
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
-    EXPECT_CALL(ti, physicsProcessCode())
-      .Times(1)
-      .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(2)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(1)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
 
     registerTruthIncident(ti);
@@ -464,12 +460,10 @@ namespace ISFTesting {
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
     HepMC::FourVector vtxPosition(0.0, 40.0, 0.0, 40.0);
     EXPECT_CALL(ti, physicsProcessCode())
-      .Times(2)
-      .WillOnce(::testing::Return(21))
+      .Times(1)
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(3)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(2)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
@@ -541,12 +535,10 @@ namespace ISFTesting {
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
     HepMC::FourVector vtxPosition(0.0, 40.0, 0.0, 40.0);
     EXPECT_CALL(ti, physicsProcessCode())
-      .Times(2)
-      .WillOnce(::testing::Return(21))
+      .Times(1)
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(3)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(2)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
