@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for building the common truth collections
@@ -247,7 +247,7 @@ def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "dressedPhoton"
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.1,
                                 particleIDsToDress    = [11],
-                                decorationName        = decorationName)
+                                decorationName        = decorationName+"_e")
 
 def DFCommonTruthMuonDressingToolCfg(flags, decorationName = "dressedPhoton"):
     """Configure the muon truth dressing tool"""
@@ -257,7 +257,7 @@ def DFCommonTruthMuonDressingToolCfg(flags, decorationName = "dressedPhoton"):
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.1,
                                 particleIDsToDress    = [13],
-                                decorationName        = decorationName)
+                                decorationName        = decorationName+"_mu")
 
 def DFCommonTruthTauDressingToolCfg(flags):
     """Configure the tau truth dressing tool"""

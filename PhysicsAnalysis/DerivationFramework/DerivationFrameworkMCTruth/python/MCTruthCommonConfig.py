@@ -184,11 +184,10 @@ def AddStandardTruthContentsCfg(flags,
     acc.merge(AddTruthJetsCfg(flags))
     acc.merge(AddTruthMETCfg(flags))
     # Tools that must come after jets
-    acc.merge(PostJetMCTruthAugmentationsCfg(flags, decorationDressing = decorationDressing))
+    acc.merge(PostJetMCTruthAugmentationsCfg(flags))
     # Should photons that are dressed onto taus also be removed from truth jets?
     if includeTausInDressingPhotonRemoval:
-        acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
-    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations(name ="AddStandardTruthContentsLockDecoration", Decorations = ['TruthParticles.' + decorationDressing]))
+        acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing+"_tau"
 
     # Add back the navigation contect for the collections we want
     acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))

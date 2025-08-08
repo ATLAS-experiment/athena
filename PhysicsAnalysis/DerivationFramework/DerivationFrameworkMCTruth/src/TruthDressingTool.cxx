@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -101,19 +101,12 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_phi_vis(m_decorator_phi_visKey, ctx);
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_m_vis(m_decorator_m_visKey, ctx);
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,int > decorator_nphoton(m_decorator_nphotonKey, ctx);
-    // One for the photons as well
-    // Can't use a handle here, as this decoration gets touched by
-    // multiple algorithms.  Need to explicitly schedule a LockDecorations
-    // algorithm to lock it after all modifications.
-    // FIXME: This is not MT-safe.
-    SG::Decorator< char > dressDec (SG::decorKeyFromKey (m_decorationKey.key()));
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,char > dressDec(m_decorationKey, ctx);
     // If we want to decorate, then we need to decorate everything with false to begin with
     if (!m_decorationName.empty()){
-      if (!dressDec.isAvailable(*truthParticles)) {
-        for (const auto * particle : *truthParticles){
-          dressDec(*particle);
-        }
-      } // Loop over particles
+      for (const auto * particle : *truthParticles){
+        dressDec(*particle) = 0;
+      }
     } // We are using the decoration
 
     //get struct of helper functions
