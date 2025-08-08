@@ -43,6 +43,11 @@ class CommonServicesConfig (ConfigBlock) :
             info="the name (string) of the histogram to which a list of executed "
             "systematics will be printed. The default is None (don't write out "
             "the histogram).")
+        self.addOption ('separateWeightSystematics', False, type=bool,
+            info="if 'systematicsHistogram' is enabled, whether to create a separate "
+            "histogram holding only the names of weight-based systematics. This is useful "
+            "to help make histogramming frameworks more efficient by knowing in advance which "
+            "systematics need to recompute the observable and which don't.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -84,8 +89,16 @@ class CommonServicesConfig (ConfigBlock) :
         config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
 
         if self.systematicsHistogram is not None:
-            sysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
-            sysDumper.histogramName = self.systematicsHistogram
+            # print out all systematics
+            allSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
+            allSysDumper.histogramName = self.systematicsHistogram
+
+            if self.separateWeightSystematics:
+                # print out only the weight systematics (for more efficient histogramming down the line)
+                weightSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'OnlyWeightSystematicsPrinter' )
+                weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
+                weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|extrapolation_pt_|JET_.*JvtEfficiency_|PRW_).*"
+
 
 
 class IOStatsBlock(ConfigBlock):
