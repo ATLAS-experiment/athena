@@ -11,13 +11,12 @@ from Campaigns.Utils import Campaign
 class TauCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the tau four-momentum correction"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (TauCalibrationConfig, self).__init__ ()
         self.setBlockName('Taus')
-        self.containerName = containerName
         self.addOption ('inputContainer', '', type=str,
             info="select tau input container, by default set to TauJets")
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('postfix', '', type=str,
@@ -111,12 +110,12 @@ class TauWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (16 Mar 22)."""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (TauWorkingPointConfig, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the tau-jet selection to define (e.g. tight or "
             "loose).")
@@ -460,7 +459,7 @@ class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
 
 class TauTriggerAnalysisSFBlock (ConfigBlock):
 
-    def __init__ (self, configName='') :
+    def __init__ (self) :
         super (TauTriggerAnalysisSFBlock, self).__init__ ()
 
         self.addOption ('triggerChainsPerYear', {}, type=None,
