@@ -9,7 +9,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, HIMode
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
 from TrackHitAssignement.TrackHitAssignementAlgCfg import TrackHitAssignementAlg
@@ -141,8 +140,6 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMPFlowJets']):
     # Can only configure b-tagging for collisions; not cosmics, etc.
     if inputFlags.Beam.Type is not BeamType.Collisions:
         return result
-
-    result.merge(JetTagCalibCfg(inputFlags))
 
     #Track Augmenter
     result.merge(BTagTrackAugmenterAlgCfg(inputFlags))
