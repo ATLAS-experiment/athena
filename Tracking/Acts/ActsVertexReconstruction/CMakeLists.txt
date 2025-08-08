@@ -11,7 +11,7 @@ atlas_add_component( ActsVertexReconstruction
                      src/*.h src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES 
-                       ActsCore
+		       Acts::Core
 		       ActsGeometryLib
 		       ActsGeometryInterfacesLib
 		       AthenaBaseComps

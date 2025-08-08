@@ -7,7 +7,7 @@ atlas_subdir( ActsGeometryInterfaces )
 set( extra_libs )
 if( NOT SIMULATIONBASE )
     find_package( Acts COMPONENTS Core )
-    set( extra_libs ActsCore TrkGeometry ActsInteropLib)
+    set( extra_libs Acts::Core TrkGeometry ActsInteropLib)
 endif()
 
 # Component(s) in the package:

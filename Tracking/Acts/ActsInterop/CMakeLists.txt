@@ -10,11 +10,11 @@ find_package( Acts COMPONENTS Core )
 atlas_add_library( ActsInteropLib
    ActsInterop/*.h src/*.cxx
    PUBLIC_HEADERS ActsInterop
-   LINK_LIBRARIES ActsCore GaudiKernel
+   LINK_LIBRARIES Acts::Core GaudiKernel
    PRIVATE_LINK_LIBRARIES InDetIdentifier InDetReadoutGeometry )
 
 # Unpack header from Acts target to use without linking
-get_target_property(Acts_INCLUDE_DIR ActsCore INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(Acts_INCLUDE_DIR Acts::Core INTERFACE_INCLUDE_DIRECTORIES)
 
 # Set up dictionary with special header
 atlas_add_dictionary( ActsUnitDict

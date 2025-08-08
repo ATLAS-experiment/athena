@@ -15,7 +15,7 @@ set( extra_libs )
 
 if( NOT SIMULATIONBASE )
     find_package(Acts COMPONENTS Core)
-    set( extra_libs xAODTracking ActsCore)
+    set( extra_libs xAODTracking Acts::Core)
 endif()
 
 

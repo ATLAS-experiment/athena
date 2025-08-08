@@ -12,7 +12,7 @@ atlas_add_component( ActsTrackReconstruction
                      src/components/*.cxx
              INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
             LINK_LIBRARIES ${Boost_LIBRARIES}
-               ActsCore
+               Acts::Core
                ActsEventLib
                ActsGeometryLib
                ActsGeometryInterfacesLib

@@ -10,7 +10,7 @@ atlas_add_component( ActsPatternRecognition
                      src/*.h src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES
-               ActsCore
+               Acts::Core
                ActsEventLib
                ActsGeometryInterfacesLib
                ActsInteropLib

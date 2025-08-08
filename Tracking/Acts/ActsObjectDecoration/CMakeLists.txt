@@ -10,7 +10,7 @@ atlas_add_component( ActsObjectDecoration
    src/*.h src/*.cxx src/detail/*.h src/detail/*.cxx
    src/components/*.cxx
    LINK_LIBRARIES
-   ActsCore
+   Acts::Core
    ActsEventLib
    ActsGeometryLib
    xAODInDetMeasurement

@@ -13,7 +13,7 @@ find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead 
 set( extra_libs )
 if( NOT SIMULATIONBASE )
     find_package(Acts CONFIG COMPONENTS Core)
-    set( extra_libs ActsCore )
+    set( extra_libs Acts::Core )
 endif()
 
 # Component(s) in the package:

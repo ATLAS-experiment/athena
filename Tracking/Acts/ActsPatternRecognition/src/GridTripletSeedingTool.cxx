@@ -34,7 +34,10 @@ static inline bool itkFastTrackingSpCut(
   return true;
 }
 
-static inline bool itkFastDoubletCut(float bottomRadius, float cotTheta) {
+static inline bool itkFastDoubletCut(
+    const Acts::Experimental::ConstSpacePointProxy2& /*middle*/,
+    const Acts::Experimental::ConstSpacePointProxy2& other, float cotTheta,
+    bool isBottomCandidate) {
   // We remove here some seeds, in case the bottom space point radius is
   // too small (i.e. < fastTrackingRMin)
 
@@ -50,8 +53,8 @@ static inline bool itkFastDoubletCut(float bottomRadius, float cotTheta) {
   constexpr float fastTrackingCotThetaWindowMax = 18.2855;
 
   float absCotTheta = std::abs(cotTheta);
-  if (bottomRadius < expCutRMin and
-      absCotTheta > fastTrackingCotThetaWindowMin and
+  if (isBottomCandidate && other.r() < expCutRMin &&
+      absCotTheta > fastTrackingCotThetaWindowMin &&
       absCotTheta < fastTrackingCotThetaWindowMax) {
     return false;
   }
@@ -469,7 +472,7 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       ATH_MSG_ERROR("Grid Binned Group returned an unreasonable middle bin");
       return StatusCode::FAILURE;
     }
-    
+
     bottomSpRanges.clear();
     topSpRanges.clear();
 
@@ -498,7 +501,7 @@ StatusCode GridTripletSeedingTool::createSeeds2(
                  << radiusRangeForMiddle.first << ", "
                  << radiusRangeForMiddle.second << "]");
 
-    m_finder->createSeedsFromSortedGroups(
+    m_finder->createSeedsFromGroups(
         finderOpts, state, cache, bottomDoubletFinder, topDoubletFinder,
         tripletCuts, *m_filter, spacePoints, bottomSpRanges, *middleSpRange,
         topSpRanges, radiusRangeForMiddle, seedContainer);
@@ -530,7 +533,8 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       if (!selectionFunction(seed)) {
         continue;
       }
-      auto newSeed = newSeedContainer.createSeed(seed.spacePointIndices());
+      auto newSeed = newSeedContainer.createSeed();
+      newSeed.assignSpacePointIndices(seed.spacePointIndices());
       newSeed.vertexZ() = seed.vertexZ();
       newSeed.quality() = seed.quality();
     }

@@ -9,19 +9,18 @@ find_package( Acts COMPONENTS Core PluginJson )
 atlas_add_library( ActsCalibratorsLib
                    src/*.cxx
                    PUBLIC_HEADERS ActsCalibrators
-                   LINK_LIBRARIES ActsCore ActsCalibBase ActsGeometryLib TrkEventPrimitives TrkMeasurementBase
+                   LINK_LIBRARIES Acts::Core ActsCalibBase ActsGeometryLib TrkEventPrimitives TrkMeasurementBase
                                   TrkSurfaces ActsToolInterfacesLib TrkToolInterfaces GeoPrimitives
                                   TrkRIO_OnTrack InDetMeasurementUtilitiesLib InDetRIO_OnTrack
                     PRIVATE_LINK_LIBRARIES xAODMuonPrepData xAODAuxiliaryMeasurement)
 
 atlas_add_test ( MeasurementCalibratorBaseTest
                  SOURCES test/MeasurementCalibratorBaseTest.cxx
-                LINK_LIBRARIES ActsCore ActsEventLib ActsCalibratorsLib ActsGeometryInterfacesLib
+                LINK_LIBRARIES Acts::Core ActsEventLib ActsCalibratorsLib ActsGeometryInterfacesLib
                 POST_EXEC_SCRIPT nopost.sh )
-                                
+
 atlas_add_test ( TrkMeasurementCalibratorTest
                 SOURCES test/TrkMeasurementCalibratorTest.cxx
-                LINK_LIBRARIES ActsCore ActsCalibratorsLib TestTools AthenaBaseComps
+                LINK_LIBRARIES Acts::Core ActsCalibratorsLib TestTools AthenaBaseComps
                 DEPENDS MeasurementCalibratorBaseTest
                 POST_EXEC_SCRIPT nopost.sh )
-              
