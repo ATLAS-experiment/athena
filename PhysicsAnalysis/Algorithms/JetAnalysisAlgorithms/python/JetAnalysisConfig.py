@@ -596,9 +596,12 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('maxPt', 3000.*GeV, type=float,
             info="the maximum pt cut to apply to calibrated large-R jets. "
             "The default is 3000 GeV.")
-        self.addOption ('maxEta', 2., type=float,
+        self.addOption ('maxEta', 0., type=float,
             info="the maximum |eta| cut to apply to calibrated large-R jets. "
-            "The default is 2.")
+            "The default is 0.")
+        self.addOption ('maxRapidity', 2., type=float,
+            info="the maximum rapidity cut to apply to calibrated large-R jets. "
+            "The default is 2.")        
         self.addOption ('minMass', 40.*GeV, type=float,
             info="the minimum mass cut to apply to calibrated large-R jets. "
             "The default is 40 GeV.")
@@ -841,7 +844,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
-        if self.minPt > 0 or self.maxPt > 0 or self.maxEta > 0:
+        if self.minPt > 0 or self.maxPt > 0 or self.maxEta > 0 or self.maxRapidity > 0:
             # Set up the the pt-eta selection
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetPtEtaCutAlg' )
             alg.selectionDecoration = 'selectPtEta,as_bits'
@@ -849,6 +852,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.selectionTool.minPt = self.minPt
             alg.selectionTool.maxPt = self.maxPt
             alg.selectionTool.maxEta = self.maxEta
+            alg.selectionTool.maxRapidity = self.maxRapidity            
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
