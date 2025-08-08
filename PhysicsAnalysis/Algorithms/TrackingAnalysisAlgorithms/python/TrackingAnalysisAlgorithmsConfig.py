@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -39,16 +39,11 @@ def SecVertexTruthMatchAlgCfg(flags, name="SecVertexTruthMatchAlg", useLRTTracks
     kwargs.setdefault("SecondaryVertexContainer", "VrtSecInclusive_SecondaryVertices")
     kwargs.setdefault("TargetPDGIDs", [511,521])
     kwargs.setdefault("doSMOrigin", False)
-
-    # extract doSMOrigin property from kwargs to pass to the tool as well
-    do_sm_origin = kwargs.get("doSMOrigin", False)
-    tool_kwargs = {"doSMOrigin": do_sm_origin}
     
-    kwargs.setdefault("MatchTool", acc.popToolsAndMerge(InDetSecVtxTruthMatchToolCfg(flags, **tool_kwargs)))
+    kwargs.setdefault("MatchTool", acc.popToolsAndMerge(InDetSecVtxTruthMatchToolCfg(
+        flags, doSMOrigin=kwargs["doSMOrigin"])))
 
-    truthMatchAlg = CompFactory.CP.SecVertexTruthMatchAlg(name, **kwargs)
-
-    acc.addEventAlgo(truthMatchAlg)
+    acc.addEventAlgo(CompFactory.CP.SecVertexTruthMatchAlg(name, **kwargs))
     acc.addService(CompFactory.THistSvc(Output = [f"ANALYSIS DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'"]))
     acc.setAppProperty("HistogramPersistency","ROOT")
     return acc
@@ -64,15 +59,10 @@ def SecVertexTruthMatchMuSaAlgCfg(flags, name="SecVertexTruthMatchMuSaAlg", **kw
     kwargs.setdefault("doMuSA", True)
     kwargs.setdefault("doSMOrigin", False)
 
-    # extract doSMOrigin property from kwargs to pass to the tool as well
-    do_sm_origin = kwargs.get("doSMOrigin", False)
-    tool_kwargs = {"doSMOrigin": do_sm_origin}
+    kwargs.setdefault("MatchTool", acc.popToolsAndMerge(InDetSecVtxTruthMatchToolMuSaCfg(
+        flags, doSMOrigin=kwargs["doSMOrigin"])))
 
-    kwargs.setdefault("MatchTool", acc.popToolsAndMerge(InDetSecVtxTruthMatchToolMuSaCfg(flags, **tool_kwargs)))
-    
-    truthMatchAlg = CompFactory.CP.SecVertexTruthMatchAlg(name, **kwargs)
-
-    acc.addEventAlgo(truthMatchAlg)
+    acc.addEventAlgo(CompFactory.CP.SecVertexTruthMatchAlg(name, **kwargs))
     acc.addService(CompFactory.THistSvc(Output = [f"ANALYSIS DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'"]))
     acc.setAppProperty("HistogramPersistency","ROOT")
     return acc
