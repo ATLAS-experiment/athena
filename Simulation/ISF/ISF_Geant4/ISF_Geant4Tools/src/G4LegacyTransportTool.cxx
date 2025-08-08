@@ -8,8 +8,8 @@
 //package includes
 #include "AthenaKernel/RNGWrapper.h"
 #include "CxxUtils/checker_macros.h"
-#include "G4AtlasAlg/G4AtlasActionInitialization.h"
 #include "G4AtlasAlg/G4AtlasRunManager.h"
+#include "G4AtlasTools/G4AtlasActionInitialization.h"
 #include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 #include "ISFFluxRecorder.h"
 

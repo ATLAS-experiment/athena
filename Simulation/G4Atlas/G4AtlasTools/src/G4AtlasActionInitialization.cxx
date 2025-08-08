@@ -2,7 +2,7 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "G4AtlasAlg/G4AtlasActionInitialization.h"
+#include "G4AtlasTools/G4AtlasActionInitialization.h"
 #if G4VERSION_NUMBER >= 1070
 #include "G4Exception.hh"
 #else
