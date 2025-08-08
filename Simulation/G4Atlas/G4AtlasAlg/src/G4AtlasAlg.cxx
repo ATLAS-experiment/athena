@@ -5,7 +5,7 @@
 // Local includes
 #include "G4AtlasAlg.h"
 #include "G4AtlasFluxRecorder.h"
-#include "G4AtlasAlg/G4AtlasActionInitialization.h"
+#include "G4AtlasTools/G4AtlasActionInitialization.h"
 #include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 
 #include "AthenaKernel/RNGWrapper.h"
