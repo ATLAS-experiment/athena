@@ -16,12 +16,12 @@ import re
 class PreJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the common preprocessing of jet sequences"""
 
-    def __init__ (self, containerName='', jetCollection='') :
+    def __init__ (self) :
         super (PreJetAnalysisConfig, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
-        self.addOption ('jetCollection', jetCollection, type=str,
+        self.addOption ('jetCollection', '', type=str,
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
@@ -107,17 +107,17 @@ class PreJetAnalysisConfig (ConfigBlock) :
 class SmallRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the small-r jet sequence"""
 
-    def __init__ (self, containerName='', jetCollection='', jetInput='') :
+    def __init__ (self) :
         super (SmallRJetAnalysisConfig, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
-        self.addOption ('jetCollection', jetCollection, type=str,
+        self.addOption ('jetCollection', '', type=str,
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
         # TODO: add info string
-        self.addOption ('jetInput', jetInput, type=str,
+        self.addOption ('jetInput', '', type=str,
             noneAction='error',
             info="")
         self.addOption ('runJvtUpdate', False, type=bool,
@@ -456,21 +456,21 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 class RScanJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the r-scan jet sequence"""
 
-    def __init__ (self, containerName='', jetCollection='', jetInput='', radius=None) :
+    def __init__ (self) :
         super (RScanJetAnalysisConfig, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
-        self.addOption ('jetCollection', jetCollection, type=str,
+        self.addOption ('jetCollection', '', type=str,
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
         # TODO: add info string
-        self.addOption ('jetInput', jetInput, type=str,
+        self.addOption ('jetInput', '', type=str,
             noneAction='error',
             info="")
         # TODO: add info string
-        self.addOption (radius, radius, type=int,
+        self.addOption ('radius', None, type=int,
             noneAction='error',
             info="")
         self.addOption ('recalibratePhyslite', True, type=bool,
@@ -534,17 +534,17 @@ def _largeLCTopoConfigFile(config, self):
 class LargeRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the large-r jet sequence"""
 
-    def __init__ (self, containerName='', jetCollection='', jetInput='') :
+    def __init__ (self) :
         super (LargeRJetAnalysisConfig, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
-        self.addOption ('jetCollection', jetCollection, type=str,
+        self.addOption ('jetCollection', '', type=str,
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
         # TODO: add info string
-        self.addOption ('jetInput', jetInput, type=str,
+        self.addOption ('jetInput', '', type=str,
             noneAction='error',
             info="")
         # TODO: add info string
@@ -921,13 +921,17 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection,
 
     if jetCollectionName == 'AntiKtVR30Rmax4Rmin02PV0TrackJets' :
         # don't to anything on track jets
-        config = PreJetAnalysisConfig (containerName, jetCollection)
+        config = PreJetAnalysisConfig()
+        config.setOptionValue ('containerName', containerName)
+        config.setOptionValue ('jetCollection', jetCollection)
         config.setOptionValue ('runOriginalObjectLink', False)
         config.setOptionValue ('runGhostMuonAssociation', False)
         seq.append (config)
         return
 
-    config = PreJetAnalysisConfig (containerName, jetCollection)
+    config = PreJetAnalysisConfig()
+    config.setOptionValue ('containerName', containerName)
+    config.setOptionValue ('jetCollection', jetCollection)
     config.runOriginalObjectLink = (btIndex != -1)
     config.setOptionValue ('runGhostMuonAssociation', runGhostMuonAssociation)
     seq.append (config)
@@ -975,7 +979,10 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
         raise ValueError(
             "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
 
-    config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput)
+    config = SmallRJetAnalysisConfig()
+    config.setOptionValue ('containerName', containerName)
+    config.setOptionValue ('jetCollection', jetCollection)
+    config.setOptionValue ('jetInput', jetInput)
     config.setOptionValue ('runJvtUpdate', runJvtUpdate)
     config.setOptionValue ('runNNJvtUpdate', runNNJvtUpdate)
     config.setOptionValue ('runJvtSelection', runJvtSelection)
@@ -1000,7 +1007,11 @@ def makeRScanJetAnalysisConfig( seq, containerName, jetCollection,
         radius -- The radius of the r-scan jets.
     """
 
-    config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput, radius)
+    config = RScanJetAnalysisConfig()
+    config.setOptionValue ('containerName', containerName)
+    config.setOptionValue ('jetCollection', jetCollection)
+    config.setOptionValue ('jetInput', jetInput)
+    config.setOptionValue ('radius', radius)
     seq.append (config)
 
 
@@ -1016,7 +1027,10 @@ def makeLargeRJetAnalysisConfig( seq, containerName, jetCollection,
         jetInput -- The type of input used, read from the collection name.
         largeRMass -- Which large-R mass definition to use. Ignored if not running on large-R jets ("Comb", "Calo", "TA")
     """
-    config = LargeRJetAnalysisConfig (containerName, jetCollection, jetInput)
+    config = LargeRJetAnalysisConfig()
+    config.setOptionValue ('containerName', containerName)
+    config.setOptionValue ('jetCollection', jetCollection)
+    config.setOptionValue ('jetInput', jetInput)
     config.setOptionValue ('largeRMass', largeRMass)
     seq.append (config)
 

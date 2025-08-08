@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 # AnaAlgorithm import(s):
@@ -9,11 +9,11 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 class JetJvtAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the JVT sequence"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (JetJvtAnalysisConfig, self).__init__ ()
         self.setBlockName('JVT')
         self.addDependency('OverlapRemoval', required=False)
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
         self.addOption ('postfix', '', type=str,

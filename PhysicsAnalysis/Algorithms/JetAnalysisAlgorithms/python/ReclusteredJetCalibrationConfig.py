@@ -7,13 +7,13 @@ class ReclusteredJetCalibrationBlock(ConfigBlock):
     bootstrap reclustered Large-R jet calibration by manually
     setting 4-momentum from calibrated constituent small-R jets"""
 
-    def __init__(self, containerName='', jetCollection='', jetInput=''):
+    def __init__(self):
         super(ReclusteredJetCalibrationBlock, self).__init__()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             info='the name of the output container after calibration.')
-        self.addOption ('jetCollection', jetCollection, type=str,
+        self.addOption ('jetCollection', '', type=str,
             info="the reclustered Large-R jet container to run on.")
-        self.addOption ('jetInput', jetInput, type=str,
+        self.addOption ('jetInput', '', type=str,
             info='the input calibrated small-R jet collection to use')
 
     def instanceName (self) :
