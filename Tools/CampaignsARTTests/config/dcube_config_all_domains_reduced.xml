@@ -373,17 +373,6 @@
      <hist1D name="Electron_Frwd_n_weighted" plotopts="" tests="KS" type="TH1F"/>
     </TDirectory>
     <TDirectory name="Truth">
-     <TDirectory name="All">
-      <TDirectory name="Iso">
-       <hist1D name="Electron_Truth_All_Iso_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Electron_Truth_All_Iso_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Electron_Truth_All_Iso_phi" plotopts="" tests="KS" type="TH1F"/>
-      </TDirectory>
-      <hist1D name="Electron_Truth_All_et" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Electron_Truth_All_eta" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Electron_Truth_All_phi" plotopts="" tests="KS" type="TH1F"/>
-      <hist2D name="Electron_Truth_All_etvseta" plotopts="" tests="KS" type="TH2F"/>
-     </TDirectory>
      <TDirectory name="Iso">
       <hist1D name="Electron_Truth_Iso_et" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Electron_Truth_Iso_eta" plotopts="" tests="KS" type="TH1F"/>
