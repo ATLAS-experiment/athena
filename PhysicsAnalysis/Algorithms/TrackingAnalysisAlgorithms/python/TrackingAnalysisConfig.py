@@ -12,12 +12,12 @@ from AthenaCommon.Logging import logging
 class InDetTrackCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the track impact parameter correction"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (InDetTrackCalibrationConfig, self).__init__ ()
         self.setBlockName ('InDetTracks')
         self.addOption ('inputContainer', '', type=str,
             info="select track input container, by default set to InDetTrackParticles")
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('postfix', '', type=str,
@@ -185,7 +185,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
 class InDetTrackWorkingPointConfig (ConfigBlock):
     """the ConfigBlock for the track working point"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (InDetTrackWorkingPointConfig, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
