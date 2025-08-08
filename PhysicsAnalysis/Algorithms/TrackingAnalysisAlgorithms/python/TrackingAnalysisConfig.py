@@ -23,6 +23,26 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here since the calibration is common to all tracks.")
+        self.addOption ('runBiasing', True, type=bool,
+            info="whether to run the InDetTrackBiasingTool. Allows the user to "
+            "disable the tool if no recommendations are available. This should "
+            "not be used in an analysis. The default is True.")
+        self.addOption ('biasD0', None, type=float,
+            info="a manual bias (float) to d0 in mm. Will be applied by the "
+            "InDetTrackBiasingTool. Expert option in addition to the "
+            "recommendations. The default is 0.")
+        self.addOption ('biasZ0', None, type=float,
+            info="a manual bias (float) to z0 in mm. Will be applied by the "
+            "InDetTrackBiasingTool. Expert option in addition to the "
+            "recommendations. The default is 0.")
+        self.addOption ('biasQoverPsagitta', None, type=float,
+            info="a manual bias (float) to QoverP in TeV^-1. Will be applied "
+            "by the InDetTrackBiasingTool. Expert option in addition to the "
+            "recommendations. The default is 0.")
+        self.addOption ('customRunNumber', None, type=int,
+            info="manually sets the runNumber (int) in the InDetTrackBiasingTool. "
+            "Expert option leads to use of different recommendations. Default is "
+            "retrieved from EventInfo")
         self.addOption ('calibFile', None, type=str,
             info="name (str) of the calibration file to use for the CTIDE "
             "calibration. Expert option to override the recommendations "
@@ -43,6 +63,8 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         return self.containerName + self.postfix
 
     def makeAlgs (self, config) :
+        log = logging.getLogger('InDetTrackCalibrationConfig')
+
         inputContainer = "InDetTrackParticles"
         if self.inputContainer:
             inputContainer = self.inputContainer
@@ -63,15 +85,31 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration)
 
-        if self.minPt > 0 : # Set up the the pt selection
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackPtCutAlg' )
-            alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
-            config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-            alg.selectionTool.minPt = self.minPt
-            alg.particles = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, '', alg.selectionDecoration,
-                                 preselection=True)
+        # Set up the biasing algorithm. The recommendations is to bias MC instead of unbiasing Data:
+        if config.dataType() is not DataType.Data:
+            if not self.runBiasing:
+                log.warning('Disabling the biasing tool for now. This should not '
+                            'be used in an analysis.')
+            else:
+                if config.geometry() is LHCPeriod.Run3:
+                    raise ValueError ('Recommendations are not yet available in Run 3.')
+                elif config.geometry() is not LHCPeriod.Run2:
+                    raise ValueError ('No recommendations found for geometry \"'
+                                      + config.geometry().value + '\". Please check '
+                                      'the configuration.')
+                alg = config.createAlgorithm( 'CP::InDetTrackBiasingAlg', 'InDetTrackBiasingAlg' )
+                config.addPrivateTool( 'biasingTool', 'InDet::InDetTrackBiasingTool' )
+                if self.biasD0:
+                    alg.biasingTool.biasD0 = self.biasD0
+                if self.biasZ0:
+                    alg.biasingTool.biasZ0 = self.biasZ0
+                if self.biasQoverPsagitta:
+                    alg.biasingTool.biasQoverPsagitta = self.biasQoverPsagitta
+                if self.customRunNumber:
+                    alg.biasingTool.runNumber = self.customRunNumber
+                alg.inDetTracks = config.readName (self.containerName)
+                alg.inDetTracksOut = config.copyName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the smearing algorithm:
         if config.dataType() is not DataType.Data:
@@ -107,12 +145,24 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             alg.inDetTracksOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+        if self.minPt > 0 : # Set up the the pt selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackPtCutAlg' )
+            alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+            alg.selectionTool.minPt = self.minPt
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                 preselection=True)
 
-        config.addOutputVar (self.containerName, 'pt', 'pt', noSys=True)
+        alg = config.createAlgorithm( 'CP::InDetTrackMomentumDecoratorAlg', 'MomentumDecorator' )
+        alg.inDetTracks = config.readName(self.containerName)
+
+        config.addOutputVar (self.containerName, 'pt_%SYS%', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
-        config.addOutputVar (self.containerName, 'qOverP', 'qOverP', noSys=True)
+        config.addOutputVar (self.containerName, 'qOverP', 'qOverP')
         config.addOutputVar (self.containerName, 'd0', 'd0')
         config.addOutputVar (self.containerName, 'z0', 'z0')
         config.addOutputVar (self.containerName, 'vz', 'vz', noSys=True)
@@ -159,6 +209,28 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             "expert studies of track selection. Passed as pairs of `cutName: value`. "
             "For an overview of available cuts, see twiki.cern.ch/twiki/bin/viewauth/"
             "AtlasProtected/InDetTrackSelectionTool#List_of_possible_cuts.")
+        self.addOption ('runTruthFilter', True, type=bool,
+            info="whether to run the TruthFilterTool. This tool is only compatible "
+            "with the cut levels 'Loose' and 'TightPrimary'.")
+        self.addOption ('calibFile', None, type=str,
+            info="name (str) of the calibration file to use for efficiencies "
+            "in the TruthFilter tool. Expert option to override the "
+            "recommendations based on the campaign. The default is None.")
+        self.addOption ('filterToolSeed', None, type=int,
+            info="random seed (int) to be used by the InDetTrackTruthFilterTool. "
+            "Expert option. The default is 0.")
+        self.addOption ('fFakeLoose', None, type=float,
+            info="the fraction of fake tracks (float) in the Loose working point. "
+            "Will be used by the InDetTrackTruthFilterTool. Expert option to "
+            "override the recommendations.")
+        self.addOption ('fFakeTight', None, type=float,
+            info="the fraction of fake tracks (float) in the TightPrimary working "
+            "point. Will be used by the InDetTrackTruthFilterTool. Expert option "
+            "to override the recommendations.")
+        self.addOption ('trkEffSystScale', None, type=float,
+            info="the track efficiency systematic scale (float). Will be used "
+            "by the InDetTrackTruthFilterTool. Expert option to override the "
+            "recommendations. Default is 1.0")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only tracks satisfying the cutLevel "
             "requirements. The default is True.")
@@ -186,8 +258,8 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
         cutLevels = ["NoCut", "Loose", "LoosePrimary", "TightPrimary", "LooseMuon",
                      "LooseElectron", "LooseTau", "MinBias", "HILoose", "HITight",
                      "HILooseOptimized", "HITightOptimized"]
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'InDetTrackSelectionAlg' )
-        alg.selectionDecoration = 'selectTrack' + postfix + ',as_bits'
+        alg = config.createAlgorithm( 'CP::InDetTrackSelectionAlg', 'InDetTrackSelectionAlg' )
+        alg.selectionDecoration = 'selectTrack' + postfix + '_%SYS%,as_bits'
         config.addPrivateTool( 'selectionTool', 'InDet::InDetTrackSelectionTool')
         if self.cutLevel is None:
             log.warning("No selection WP chosen, not setting up InDetTrackSelectionTool.")
@@ -203,7 +275,58 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
         if self.additionalCuts:
             for cutName, value in self.additionalCuts.items():
                 setattr(alg.selectionTool, cutName, value)
-        alg.particles = config.readName (self.containerName)
+        # Set up the truth filtering algorithm:
+        if config.dataType() is not DataType.Data:
+            if not self.runTruthFilter:
+                log.warning('Disabling the TruthFilterTool.')
+            else:
+                config.addPrivateTool( 'filterTool', 'InDet::InDetTrackTruthFilterTool' )
+                config.addPrivateTool( 'filterTool.trackOriginTool', 'InDet::InDetTrackTruthOriginTool' )
+                # Set working point based on cut level
+                if self.cutLevel == "Loose":
+                    alg.filterWP = "LOOSE"
+                elif self.cutLevel == "TightPrimary":
+                    alg.filterWP = "TIGHT"
+                else:
+                    raise ValueError ('Attempting to set TruthFilter WP based on cut level: \"'
+                                      + self.efficiencyWP + '\" that is not supported.')
+                # Set calibFile and fake rates based on campaign
+                if config.geometry() is LHCPeriod.Run2:
+                    # Run 2 recommendations (MC20)
+                    alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
+                    alg.filterTool.fFakeLoose = 0.10
+                    alg.filterTool.fFakeTight = 1.00
+                elif config.geometry() is LHCPeriod.Run3:
+                    if config.campaign() is Campaign.MC23a:
+                        # 2022 recommendations (MC23a)
+                        alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
+                        alg.filterTool.fFakeLoose = 0.40
+                        alg.filterTool.fFakeTight = 1.00
+                    elif config.campaign() is Campaign.MC23d:
+                        # 2023 recommendations (MC23d)
+                        alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
+                        alg.filterTool.fFakeLoose = 0.40
+                        alg.filterTool.fFakeTight = 1.00
+                    elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):
+                        raise ValueError ('No efficiency recommendations found for capaign \"'
+                                          + config.campaign().value + '\" in Run 3. '
+                                          'Please check that the recommendations exist.')
+                elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):
+                    raise ValueError ('No efficiency recommendations found for geometry \"'
+                                      + config.geometry().value + '\". Please check '
+                                      'the configuration.')
+                # Set custom calibFile, fake rates, or random seed
+                if self.calibFile:
+                    alg.filterTool.calibFileNomEff = self.calibFile
+                if self.fFakeLoose:
+                    alg.filterTool.fFakeLoose = self.fFakeLoose
+                if self.fFakeTight:
+                    alg.filterTool.fFakeTight = self.fFakeTight
+                if self.filterToolSeed:
+                    alg.filterTool.Seed = self.filterToolSeed
+                if self.trkEffSystScale:
+                    alg.filterTool.trkEffSystScale = self.trkEffSystScale
+        alg.inDetTracks = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                              preselection=self.addSelectionToPreselection)
