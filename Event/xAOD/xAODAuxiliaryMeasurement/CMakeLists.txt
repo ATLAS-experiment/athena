@@ -16,7 +16,7 @@ if( NOT XAOD_ANALYSIS AND NOT GENERATIONBASE )
        PUBLIC_HEADERS xAODAuxiliaryMeasurement
        INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
        LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks xAODBase xAODCore 
-                     xAODTracking xAODMeasurementBase ActsCore ActsCalibBase ActsGeoUtils)
+                     xAODTracking xAODMeasurementBase Acts::Core ActsCalibBase ActsGeoUtils)
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODAuxiliaryMeasurement/selection.xml

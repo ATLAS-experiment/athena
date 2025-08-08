@@ -25,12 +25,12 @@ atlas_add_library( ActsGeometryLib
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES}
-                   ActsCore
+                   Acts::Core
                    ActsGeometryInterfacesLib
                    ActsGeoUtils
                    ActsInteropLib
-                   ActsPluginJson
-                   ActsPluginGeoModel
+                   Acts::PluginJson
+                   Acts::PluginGeoModel
                    AthenaBaseComps
                    AthenaKernel
                    CaloDetDescrLib
@@ -90,7 +90,7 @@ atlas_add_component( ActsGeometry
                      TrkGeometry
                      TrkParameters
                      TrkSurfaces
-                     ActsPluginGeoModel
+                     Acts::PluginGeoModel
                       )
 
 # Install files from the package:

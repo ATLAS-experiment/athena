@@ -360,7 +360,10 @@ namespace ActsTrk {
       return true;
     }
 
-    inline bool doubletSelectionFunction(float bottomRadius, float cotTheta) const {
+    inline bool doubletSelectionFunction(
+      const value_type& /*middle*/,
+      const value_type& other,
+      float cotTheta, bool isBottomCandidate) const {
       // We remove here some seeds, in case the bottom space point radius is
       // too small (i.e. < fastTrackingRMin)
 
@@ -370,7 +373,7 @@ namespace ActsTrk {
       static constexpr float cotThetaEta360 = 18.2855;
       
       float absCotTheta = std::abs(cotTheta);
-      if (bottomRadius < m_ExpCutrMin and
+      if (isBottomCandidate and other.radius() < m_ExpCutrMin and
 	  absCotTheta > cotThetaEta120 and
 	  absCotTheta < cotThetaEta360) {
 	return false;

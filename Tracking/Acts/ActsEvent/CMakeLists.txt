@@ -14,7 +14,7 @@ atlas_add_library( ActsEventLib
    ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES
    ${Boost_LIBRARIES}
-   ActsCore
+   Acts::Core
    ActsGeometryLib
    ActsGeometryInterfacesLib
    AthContainers

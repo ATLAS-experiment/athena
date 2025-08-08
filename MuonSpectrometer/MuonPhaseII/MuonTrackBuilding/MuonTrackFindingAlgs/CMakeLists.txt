@@ -13,7 +13,7 @@ find_package( ROOT COMPONENTS Gpad Graf Core Hist )
 
 atlas_add_component( MuonTrackFindingAlgs
                      src/components/*.cxx src/*.cxx
-                     LINK_LIBRARIES AthenaKernel StoreGateLib AthenaBaseComps GaudiKernel MuonReadoutGeometryR4 ActsCore
+                     LINK_LIBRARIES AthenaKernel StoreGateLib AthenaBaseComps GaudiKernel MuonReadoutGeometryR4 Acts::Core
                                      xAODTracking CxxUtils MuonSpacePoint ActsGeometryInterfacesLib MuonDetDescrUtils
                                      MuonPatternEvent ActsGeometryLib MagFieldConditions MuonRecToolInterfacesR4
                                      MuonPatternHelpers MuonTrackEvent MuonTrackFindingToolsLib
