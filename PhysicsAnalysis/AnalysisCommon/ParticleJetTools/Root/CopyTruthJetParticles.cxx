@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/CopyTruthJetParticles.h"
@@ -15,6 +15,7 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/WriteHandle.h"
 #include "AsgMessaging/Check.h"
+#include "AsgTools/CurrentContext.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <mutex>          // std::call_once, std::once_flag
@@ -38,6 +39,7 @@ StatusCode CopyTruthJetParticles::initialize() {
 
   ATH_CHECK(m_truthEventKey.initialize());
   ATH_CHECK(m_outTruthPartKey.initialize());
+  ATH_CHECK(m_dressingNames.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -48,6 +50,9 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
                                              std::vector<const xAOD::TruthParticle*>& promptLeptons,
                                              std::map<const xAOD::TruthParticle*,unsigned int>& tc_results) const {
 
+  // Needed for the dressed photon decorations
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  
   // Check if this thing is a candidate to be in a truth jet
   //  First block is largely copied from isGenStable, which works on HepMC only
   if (HepMC::is_simulation_particle(tp)) return false; // Particle is from G4
@@ -105,10 +110,14 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   }
 
   // If we want to remove photons via the dressing decoration
-  if (!m_dressingName.empty()){
+  if (!m_dressingNames.empty()){
     // Accessor for the dressing decoration above
-    const static SG::AuxElement::Accessor<char> dressAcc(m_dressingName);
-    if (MC::isPhoton(pdgid) && dressAcc(*tp)) return false;
+    bool foundDressDec{false};
+    for(const auto &decName : m_dressingNames){
+      SG::ReadDecorHandle<xAOD::TruthParticleContainer, char> dressAcc(decName, ctx);
+      if (MC::isPhoton(pdgid) && dressAcc(*tp)) foundDressDec = true;
+    }
+    if (foundDressDec) return false;
   } // End of removal via dressing decoration
 
   // Pseudo-rapidity cut
