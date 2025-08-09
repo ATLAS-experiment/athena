@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloPedestalContainer.h"
@@ -54,7 +54,7 @@ DataObject* L1CaloPedestalContainer::makePersistent() const {
 		// add AttributeList corresponding to channel iChanNumber to the CondAttrListCollection
 		attrListCollection->add(iChanNumber, attrList);
 	}
-	return (DataObject*) attrListCollection;
+	return attrListCollection;
 }
 
 void L1CaloPedestalContainer::makeTransient(const CondAttrListCollection*& attrListCollection) {
