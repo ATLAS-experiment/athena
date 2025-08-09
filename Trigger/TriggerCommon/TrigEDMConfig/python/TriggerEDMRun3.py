@@ -156,10 +156,12 @@ BTagOutput_highLevelTaggers = [
     *[f'{t}_p{x}' for x in ['b','bb'] for t in b_vs_bb_taggers],
 ]
 
+# !The BTag object will be decommissioned in Run 4, these variables are kept for backward compatibility
 BTagOutput += BTagOutput_IP2D + BTagOutput_IP3D + BTagOutput_SV1 + BTagOutput_JetFitter + BTagOutput_rnnip + BTagOutput_highLevelTaggers
 BTagVars = '.'.join(BTagOutput)
 
-BTagJetOutput = ['btaggingLink', 'Jvt', 'JVFCorr', 'SumPtTrkPt500','NNJvtTrkAugV1','NNJvtTrkAugV1Pass']
+# !The BTag object will be decommissioned in Run 4, the explicitly listed variables in [] is kept for backward compatibility
+BTagJetOutput = ['btaggingLink', 'Jvt', 'JVFCorr', 'SumPtTrkPt500','NNJvtTrkAugV1','NNJvtTrkAugV1Pass'] + BTagOutput_rnnip + BTagOutput_highLevelTaggers
 BTagJetVars  ='.'.join(BTagJetOutput)
 
 hitDVToKeepBase = ['seed_eta','seed_phi','seed_type','n_track_qual','ly0_sp_frac','ly1_sp_frac','ly2_sp_frac','ly3_sp_frac',
@@ -1069,10 +1071,10 @@ TriggerHLTListRun3 = [
     # bjet jets
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_bJets',                        'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars, 'BS ESD AODFULL', 'Bjet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars,     'BS ESD AODFULL', 'Bjet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets',                        'BS ESD AODFULL AODSLIM', 'Bjet', [InViews(BTagViewsEMPFlow)]),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars, 'BS ESD AODFULL AODSLIM', 'Bjet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets',                       'BS ESD AODFULL AODSLIM', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars,    'BS ESD AODFULL AODSLIM', 'Bjet'),
 
     # secvertex for b-jets
     ('xAOD::VertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtx',                          '', 'Bjet'),
