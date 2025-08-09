@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBBLOBOBJS_TILEBCHSTATUS_H
@@ -44,11 +44,17 @@ class TileBchStatus
   static void defineBadTiming(const TileBchStatus& status);
   static void defineTimingDmuBcOffset(const TileBchStatus& status);
   static void defineWrongBCID(const TileBchStatus& status);
+  // cppcheck-suppress returnByReference; not actually returning member
   static TileBchStatus getDefinitionBad();
+  // cppcheck-suppress returnByReference; not actually returning member
   static TileBchStatus getDefinitionNoisy();
+  // cppcheck-suppress returnByReference; not actually returning member
   static TileBchStatus getDefinitionNoGainL1();
+  // cppcheck-suppress returnByReference; not actually returning member
   static TileBchStatus getDefinitionBadTiming();
+  // cppcheck-suppress returnByReference; not actually returning member
   static TileBchStatus getDefinitionTimingDmuBcOffset();
+  // cppcheck-suppress returnByReference; not actually returning member
   static TileBchStatus getDefinitionWrongBCID();
 
   bool isGood() const;
