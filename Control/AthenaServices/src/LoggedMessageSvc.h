@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_LOGGEDMESSAGESVC_H
@@ -96,6 +96,7 @@ public:
 
   // Implementation of IMessageSvc::defaultStream()
   virtual std::ostream* defaultStream ATLAS_NOT_CONST_THREAD_SAFE () const override {
+    std::lock_guard<std::mutex> lock(m_reportMutex);
     return m_defaultStream;
   }
 
@@ -130,9 +131,9 @@ public:
   virtual void incrInactiveCount( MSG::Level level,
                                   std::string_view src ) override;
 
-  virtual const std::vector< std::pair<std::string, std::string> >& getMessages( MSG::Level level) const override;
+  virtual std::vector< std::pair<std::string, std::string> > getMessages( MSG::Level level) const override;
 
-  virtual const std::vector< LoggedMessage >& getKeyMessages() const override { return m_msgKeyLog; }
+  virtual std::vector< LoggedMessage > getKeyMessages() const override;
 
 private:
   std::ostream* m_defaultStream;      ///< Pointer to the output stream.

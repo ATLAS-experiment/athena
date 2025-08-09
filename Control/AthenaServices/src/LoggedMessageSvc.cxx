@@ -364,6 +364,7 @@ StatusCode LoggedMessageSvc::finalize() {
 
   bool found(false);
 
+  std::lock_guard<std::mutex> lock(m_reportMutex);
   std::map<std::string,MsgAry>::const_iterator itr;
   for (itr=m_sourceMap.begin(); itr!=m_sourceMap.end(); ++itr) {
     for (unsigned int ic = 0; ic < MSG::NUM_LEVELS; ++ic) {
@@ -952,10 +953,18 @@ void LoggedMessageSvc::tee( const std::string& sourceName,
 // Purpose: get all messages of a certain MSG::Level
 // ---------------------------------------------------------------------------
 
-const std::vector< std::pair<std::string, std::string> >& 
-LoggedMessageSvc::getMessages( MSG::Level level) const {
-
+std::vector< std::pair<std::string, std::string> >
+LoggedMessageSvc::getMessages( MSG::Level level) const
+{
+  std::lock_guard<std::mutex> lock(m_reportMutex);
   return m_msgLog[ level ];
+}
 
+
+auto LoggedMessageSvc::getKeyMessages() const
+  -> std::vector< LoggedMessage >
+{
+  std::lock_guard<std::mutex> lock(m_reportMutex);
+  return m_msgKeyLog;
 }
 
