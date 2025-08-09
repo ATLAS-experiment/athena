@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/GridTripletSeedingAlg.h"
@@ -185,7 +185,7 @@ StatusCode GridTripletSeedingAlg::execute(const EventContext& ctx) const {
   }
   time_seedCreation.stop();
 
-  for (const auto& seed : seedContainer) {
+  for (const auto seed : seedContainer) {
     const auto* bottom = selectedSpacePoints.at(seed.spacePointIndices()[0])
                              .sourceLinks()[0]
                              .get<const xAOD::SpacePoint*>();
