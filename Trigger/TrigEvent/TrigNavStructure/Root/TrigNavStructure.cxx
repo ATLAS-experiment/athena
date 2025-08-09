@@ -330,13 +330,11 @@ void TrigNavStructure::getAllRoIThresholdTEs( std::vector< TriggerElement* >& ou
   const TriggerElement* initNode = getInitialNode();
   // get first layer of TEs representing the RoIs themselves (not the thresholds!)
   const std::vector<TriggerElement*>& rois = getDirectSuccessors(initNode);
-  for ( std::vector<TriggerElement*>::const_iterator roi_te = rois.begin();
-        roi_te != rois.end(); ++roi_te) {
+  for ( const TriggerElement* roi_te : rois ) {
     // get threshold-like TEs:
-    const std::vector<TriggerElement*>& tes = getDirectSuccessors( static_cast<const TriggerElement*>(*roi_te) );
-    std::vector<TriggerElement*>::const_iterator te = tes.begin();
-    for ( ; te != tes.end(); ++te) {
-      output.push_back( *te );
+    const std::vector<TriggerElement*>& tes = getDirectSuccessors( roi_te );
+    for (TriggerElement* te : tes) {
+      output.push_back( te );
     }
   }
 }
