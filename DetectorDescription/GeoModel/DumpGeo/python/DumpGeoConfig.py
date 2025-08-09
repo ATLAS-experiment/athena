@@ -250,6 +250,8 @@ if __name__=="__main__":
                         help="Show the content of the Treetops --- (by default, only the list of Treetops is shown)", action = 'store_true')
     parser.add_argument("--debugCA", help="Debug the CA configuration: print flags, tools, ... --- mainly, for DumpGeo developers. '1' prints a subset of the CA flags, '2' prints all of them.")
 
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    parser.set_defaults(filesInput=f"{defaultTestFiles.EVNT[0]}")
     args = flags.fillFromArgs(parser=parser)
 
     if args.help:
@@ -275,8 +277,8 @@ if __name__=="__main__":
     dumpgeo_empty_input = False  
     # This covers the use case where we launch DumpGeo
     # without input files; e.g., to check the detector description
-    if (flags.Input.Files == [] or 
-        flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']):
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    if ( len(flags.Input.Files) ==  0 or GetFileMD(flags.Input.Files).get("GeoAtlas", None) is None):
         from Campaigns.Utils import Campaign
         from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
 
