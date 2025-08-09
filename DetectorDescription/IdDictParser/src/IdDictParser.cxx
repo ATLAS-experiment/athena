@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -143,14 +143,14 @@ IdDictParser::parse (const std::string& file_name, const std::string& tag)  {
   
 void 
 IdDictBaseFactory::do_start (XMLCoreParser& parser,   
-				  const XMLCoreNode& node)  {  
+                             const XMLCoreNode& node)  {
   parser.up (); 
-  idd_start ((IdDictParser&) parser, node);  
+  idd_start (static_cast<IdDictParser&>(parser), node);
 }  
   
 void 
 IdDictBaseFactory::do_end (XMLCoreParser& parser, const XMLCoreNode& node)  {  
-  idd_end ((IdDictParser&) parser, node);  
+  idd_end (static_cast<IdDictParser&>(parser), node);
   parser.down (); 
 }  
   
