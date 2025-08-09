@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  interpolate.cxx
@@ -85,7 +85,9 @@ float interpolate (const CaloRec::Array<2>& a,
   // Check arguments.
   if (n_points < 0)
     n_points = static_cast<int> (a.size());
-  assert (n_points >= 2 && degree >= 1);
+  if (n_points < 2 || degree < 1) {
+    std::abort();
+  }
   degree = std::min (degree, static_cast<unsigned int> (n_points) - 1);
 
   // Find subscripts of the input value in the input arrays.
