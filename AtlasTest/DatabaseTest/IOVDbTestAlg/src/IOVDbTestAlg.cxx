@@ -639,20 +639,13 @@ IOVDbTestAlg::streamOutCondObjects(){
     ATH_MSG_DEBUG( "entering streamOutCondObjects " );
     ATH_CHECK( m_streamer->connectOutput() );
 
-    int npairs = 3;
-    int index = 0;
-    IAthenaOutputStreamTool::TypeKeyPairs  typeKeys(npairs);
+    IAthenaOutputStreamTool::TypeKeyPairs  typeKeys;
     if (!m_writeOnlyCool) {
-	IAthenaOutputStreamTool::TypeKeyPair   mdtPair("IOVDbTestMDTEleMap", "");
-	typeKeys[index] = mdtPair;
-	++index;
-	IAthenaOutputStreamTool::TypeKeyPair   amdbCorr("IOVDbTestAmdbCorrection", "");
-	typeKeys[index] = amdbCorr;
-	++index;
-	IAthenaOutputStreamTool::TypeKeyPair   mdtCollPair("IOVDbTestMDTEleMapColl", "");
-	typeKeys[index] = mdtCollPair;
-	++index;
+        typeKeys.emplace_back("IOVDbTestMDTEleMap", "");
+        typeKeys.emplace_back("IOVDbTestAmdbCorrection", "");
+        typeKeys.emplace_back("IOVDbTestMDTEleMapColl", "");
     }
+    typeKeys.resize(3);
 
     ATH_MSG_DEBUG( "Stream out for pairs:" );
     for (unsigned int i = 0; i < typeKeys.size(); ++i) {
