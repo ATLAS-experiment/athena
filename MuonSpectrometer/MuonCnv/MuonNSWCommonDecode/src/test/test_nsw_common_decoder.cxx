@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL include files
@@ -487,7 +487,7 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
           break;
         }
 
-        eformat::read::FullEventFragment f ((unsigned int *) buf);
+        eformat::read::FullEventFragment f (reinterpret_cast<unsigned int *>(buf));
         f.check ();
 
         if ((errcode = test_nsw_common_decoder_event (f, params, statistics)) != ERR_NOERR)
