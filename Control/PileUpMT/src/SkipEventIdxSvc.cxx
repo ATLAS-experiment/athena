@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2023, 2025 CERN for the benefit of the ATLAS collaboration.
  */
 #include "SkipEventIdxSvc.h"
 
@@ -70,7 +70,7 @@ StatusCode SkipEventIdxSvc::initialize() {
   }
   auto sg = serviceLocator()->service<StoreGateSvc>("StoreGateSvc/StoreGateSvc",
                                                     false);
-  auto evtSel = serviceLocator()->service<IEvtSelector>(evt_sel_name, false);
+  auto evtSel = serviceLocator()->service<IEvtSelector>(std::move(evt_sel_name), false);
   if (!sg.isValid() || !evtSel.isValid()) {
     ATH_MSG_WARNING("Event selector or storegate is invalid");
     return StatusCode::FAILURE;
@@ -133,7 +133,12 @@ StatusCode SkipEventIdxSvc::initialize() {
   ATH_CHECK(evtSel->createContext(ctx));
 
   std::uint64_t idx = 0;
-  ATH_CHECK(dynamic_cast<Service*>(evtSel.get())->start());
+  Service* evtSelSvc = dynamic_cast<Service*>(evtSel.get());
+  if (!evtSelSvc) {
+    ATH_MSG_FATAL("Cannot cast to Service");
+    return StatusCode::FAILURE;
+  }
+  ATH_CHECK(evtSelSvc->start());
   while (evtSel->next(*ctx).isSuccess()) {
     EvtId evt_id{};
     // Load event

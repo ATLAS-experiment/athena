@@ -47,9 +47,9 @@ StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg,
                                std::unique_ptr<xAOD::EventAuxInfo>& ei_aux_,
                                bool pileup) const {
   std::string key = pileup ? "EventInfo" : "HSEventInfo";
-  xAOD::EventInfo* newEi = new xAOD::EventInfo();
-  xAOD::EventAuxInfo* eiAux = new xAOD::EventAuxInfo();
-  newEi->setStore(eiAux);
+  auto newEi = std::make_unique<xAOD::EventInfo>();
+  auto eiAux = std::make_unique<xAOD::EventAuxInfo>();
+  newEi->setStore(eiAux.get());
   SG::ReadHandle<xAOD::EventInfo> ei_h(key, sg.name());
   const xAOD::EventInfo* ei = ei_h.get();
   if (ei != nullptr) {
@@ -81,8 +81,8 @@ StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg,
     }
   }
   newEi->setEvtStore(&sg);
-  ei_.reset(newEi);
-  ei_aux_.reset(eiAux);
+  ei_ = std::move(newEi);
+  ei_aux_ = std::move(eiAux);
   return StatusCode::SUCCESS;
 }
 

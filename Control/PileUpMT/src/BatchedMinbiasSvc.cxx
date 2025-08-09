@@ -315,10 +315,12 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
     }
     // See if there are any free caches
     // Using try_lock here to avoid reading same batch twice
-    if (m_empty_caches_mtx.try_lock()) {
+    std::unique_lock<std::mutex> empty_caches_lock (m_empty_caches_mtx,
+                                                    std::try_to_lock);
+    if (empty_caches_lock.owns_lock()) {
       if (m_empty_caches.empty()) {
         // Unlock mutex if we got the lock but there were no free caches
-        m_empty_caches_mtx.unlock();
+        empty_caches_lock.unlock();
         if (first_wait) {
           ATH_MSG_INFO("Waiting for a free cache");
           first_wait = false;
@@ -385,7 +387,6 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
             "Reading {} events took {:%OMm %OSs}", m_cache[batch]->size(),
             std::chrono::system_clock::now() - start_time));
       }
-      m_empty_caches_mtx.unlock();
       m_last_loaded_batch.exchange(batch);
       return StatusCode::SUCCESS;
     }
