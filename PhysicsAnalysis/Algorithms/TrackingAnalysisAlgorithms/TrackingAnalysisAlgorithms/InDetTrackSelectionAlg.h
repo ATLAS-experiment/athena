@@ -42,10 +42,6 @@ namespace CP
   private:
     ToolHandle<InDet::IInDetTrackTruthFilterTool> m_filterTool {this, "filterTool", "", "the truth filter tool we apply"};
 
-    /// \brief the filter tool cast to an ISystematicsTool
-  private:
-    ISystematicsTool *m_sysFilterTool {nullptr};
-
     /// \brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
