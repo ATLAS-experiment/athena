@@ -27,7 +27,7 @@ namespace MuonGM {
 
     SpacerBeam::SpacerBeam(const MYSQL& mysql,
                            Component *ss) : DetectorElement(ss->name) {
-        StandardComponent *s = (StandardComponent *)ss;
+        StandardComponent *s = static_cast<StandardComponent *>(ss);
         std::string_view componentType = std::string_view(s->name).substr(0, 3);
 
         double tol = 1.e-4;

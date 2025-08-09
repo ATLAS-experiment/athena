@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -1033,7 +1033,7 @@ namespace MuonGM {
             c->dead3 = almn[icomp].dead3 * Gaudi::Units::cm;
 
             if (cartec == "CSC") {
-                CscComponent *derc = (CscComponent *)c;
+                CscComponent *derc = static_cast<CscComponent *>(c);
                 if (derc == NULL) {
                     log << MSG::WARNING << " There is a problem" << endmsg;
                 }
@@ -1046,13 +1046,13 @@ namespace MuonGM {
                     derc->maxwdy = c->dy;
                 }
             } else if (cartec == "SPA") {
-                SpaComponent *derc = (SpaComponent *)c;
+                SpaComponent *derc = static_cast<SpaComponent *>(c);
                 derc->maxwdy = derc->dy;
                 if (jtech == 6 && name.compare(0, 3, "CSL") == 0) {
                     derc->dy = 1129.20 * Gaudi::Units::mm; // AMDB-Q and CTB
                 }
             } else if (cartec == "MDT") {
-                MdtComponent *derc = (MdtComponent *)c;
+                MdtComponent *derc = static_cast<MdtComponent *>(c);
                 // relevant only for endcap MDTs
                 derc->tubelenStepSize = derc->dead3;
                 // long width for MDTs is the length of the longest tubes
@@ -1062,7 +1062,7 @@ namespace MuonGM {
                 // length of a trapezoid enclosing the multilayer must be larger by halfpitch
                 derc->dy = derc->dy + halfpitch;
             } else if (cartec == "RPC") {
-                RpcComponent *derc = (RpcComponent *)c;
+                RpcComponent *derc = static_cast<RpcComponent *>(c);
                 derc->ndivy = 1;
                 derc->ndivz = 1;
                 // DHW 4 Feb 09 : no longer needed, read in above:   derc->iswap = 1;
@@ -1071,7 +1071,7 @@ namespace MuonGM {
             } else if (cartec == "SUP" || cartec == "TGC" || cartec == "CHV" || cartec == "CRO" || cartec == "CMI" || cartec.compare(0, 2, "LB") == 0) {
 
                 if (cartec.compare(0, 2, "LB") == 0) {
-                    LbiComponent *derc = (LbiComponent *)c;
+                    LbiComponent *derc = static_cast<LbiComponent *>(c);
                     derc->associated_CMIsubtype = "";
                     if ((name == "BMF1" || name == "BMF2" || name == "BMF3" || name == "BMF4" || name == "BMF5" || name == "BMF6") && derc->name == "LB02") {
 
