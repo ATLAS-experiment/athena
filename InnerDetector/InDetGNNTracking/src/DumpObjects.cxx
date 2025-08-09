@@ -23,9 +23,6 @@
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkTrack/TrackInfo.h"
 
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventInfo.h"
-
 #include "GaudiKernel/ITHistSvc.h"
 #include "TTree.h"
 
