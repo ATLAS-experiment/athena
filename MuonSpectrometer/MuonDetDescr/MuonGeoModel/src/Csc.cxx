@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Csc.h"
@@ -31,7 +31,7 @@ class GeoMaterial;
 namespace MuonGM {
 
     Csc::Csc(const MYSQL& mysql, Component *ss) : DetectorElement(ss->name) {
-        CscComponent *s = (CscComponent *)ss;
+        CscComponent *s = static_cast<CscComponent *>(ss);
         m_component = s;
         width = s->dx1;
         longWidth = s->dx2;

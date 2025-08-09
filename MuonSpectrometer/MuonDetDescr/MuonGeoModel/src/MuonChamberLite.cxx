@@ -161,7 +161,7 @@ namespace MuonGM {
                 // look for FIRST component with cutouts and loop over all of the cutouts:
                 bool foundCutouts = false;
                 for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
-                    StandardComponent *c = (StandardComponent *)m_station->GetComponent(j);
+                    StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(j));
 
                     if (!foundCutouts) {
                         for (int ii = 0; ii < m_station->GetNrOfCutouts(); ii++) {
@@ -212,7 +212,7 @@ namespace MuonGM {
         
 
         for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
-            StandardComponent *d = (StandardComponent *)m_station->GetComponent(j);
+            StandardComponent *d = static_cast<StandardComponent *>(m_station->GetComponent(j));
             std::string_view cn = std::string_view(d->name).substr(0, 3);
             if (cn == "RPC") {
                 nRpc++;
@@ -243,7 +243,7 @@ namespace MuonGM {
         double LBheight{0.}, LBwidth{0.};
         std::array<double, 2> LBpos{-1, -1};
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
-            StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
+            StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(i));
             std::string_view cname = std::string_view(c->name).substr(0, 2);
             if (cname == "LB") {
                 const LBI *lb = dynamic_cast<const LBI *>(mysql.GetTechnology(c->name));
@@ -257,7 +257,7 @@ namespace MuonGM {
         }
 
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
-            StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
+            StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(i));
             std::string_view cname = std::string_view(c->name).substr(0, 3);
             if (cname == "CRO" || cname == "CMI" || cname == "CHV") {
                 CbmComponent *ccbm = static_cast<CbmComponent *>(c);
@@ -271,7 +271,7 @@ namespace MuonGM {
         // Look for the subtype of the CMI in the chamber to let LB know ...
         std::string CMIcomponentNumber = "";
         for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
-            StandardComponent *d = (StandardComponent *)m_station->GetComponent(j);
+            StandardComponent *d = static_cast<StandardComponent *>(m_station->GetComponent(j));
             std::string_view cn = std::string_view(d->name).substr(0, 3);
             if (cn == "CMI") {
                 CMIcomponentNumber = (d->name).substr(3, 2);
@@ -280,7 +280,7 @@ namespace MuonGM {
         }
 
         for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
-            StandardComponent *d = (StandardComponent *)m_station->GetComponent(j);
+            StandardComponent *d = static_cast<StandardComponent *>(m_station->GetComponent(j));
             std::string_view cn = std::string_view(d->name).substr(0, 2);
             if (cn == "LB") {
                 LbiComponent *lbic = static_cast<LbiComponent *>(d);
@@ -309,7 +309,7 @@ namespace MuonGM {
         mstat->setPhysVol(ptrd);
         // here the big loop over the components !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
-            StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
+            StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(i));
  	     ATH_MSG_VERBOSE( " Component index " << c->index << " in loop for " << stName << " " << stationType << " at zi, fi " << zi << " " << fi + 1 << "  cName "
                               << c->name << " thickness " << c->GetThickness(mysql) << " length " << c->dy << " w, lw " << c->dx1 << " " << c->dx2 );
             ATH_MSG_VERBOSE( " Component local (amdb) coords " << c->posx << " " << c->posy << " " << c->posz );
@@ -551,10 +551,10 @@ namespace MuonGM {
                 xfaligncomponent = (*m_mapAXF)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(rp->index)];
                 lvr = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(rp->index)];
             } else if (type == "TGC") {
-                TgcComponent *tg = (TgcComponent *)m_station->GetComponent(i);
-                TgcComponent *tgInner = (TgcComponent *)m_station->GetComponent(0);
+                TgcComponent *tg = static_cast<TgcComponent *>(m_station->GetComponent(i));
+                TgcComponent *tgInner = static_cast<TgcComponent *>(m_station->GetComponent(0));
                 irad = tgInner->posy;
-                TgcComponent *tgOuter = (TgcComponent *)m_station->GetComponent(m_station->GetNrOfComponents() - 1);
+                TgcComponent *tgOuter = static_cast<TgcComponent *>(m_station->GetComponent(m_station->GetNrOfComponents() - 1));
                 double orad = tgOuter->posy + tgOuter->dy;
                 double start = -(orad - irad) / 2. + (tg->posy - irad) + tg->dy / 2;
                 double xstart = -thickness / 2. + tg->GetThickness(mysql) / 2.;
@@ -637,7 +637,7 @@ namespace MuonGM {
             }
 
             if (lvc && manager->cscIdHelper()) {
-                CscComponent *cs = (CscComponent *)m_station->GetComponent(i);
+                CscComponent *cs = static_cast<CscComponent *>(m_station->GetComponent(i));
                 int stationEta = zi;
                 int stationPhi = fi + 1;
                 int chamberLayer = 1;
@@ -672,7 +672,7 @@ namespace MuonGM {
                 ATH_MSG_DEBUG( " Adding a TGC chamber to the tree zi,fi, is_mirrored " << zi << " " << fi + 1 << " " << is_mirrored );
                 
 
-                TgcComponent *tg = (TgcComponent *)m_station->GetComponent(i);
+                TgcComponent *tg = static_cast<TgcComponent *>(m_station->GetComponent(i));
                 
                 ATH_MSG_VERBOSE( "There's a TGC named " << techname << " of thickness " << tg->GetThickness(mysql) );
                 
