@@ -431,9 +431,10 @@ AthenaSummarySvc::createASCII( std::ofstream& ofs ) {
     }
 
     ofs << "Keyword tracked messages: " << endl;
-    vector<ILoggedMessageSvc::LoggedMessage>::const_iterator ilm = p_logMsg->getKeyMessages().begin();
-    for (;ilm != p_logMsg->getKeyMessages().end(); ++ilm) {
-      ofs << "  " << levelNames[ilm->level] << "  " << ilm->source << "  " << ilm->message
+    for (const auto& msg : p_logMsg->getKeyMessages()) {
+      ofs << "  " << levelNames[msg.level]
+	  << "  " << msg.source
+	  << "  " << msg.message
 	  << endl;
     }
     
