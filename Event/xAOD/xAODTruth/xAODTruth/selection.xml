@@ -49,7 +49,7 @@
   <class name="xAOD::TruthParticleAuxContainer_v1"
          id="BA8FA08F-8DD6-420D-97D5-8B54EABECD65" />
   <class name="xAOD::TruthParticleAuxContainer_v2"
-         id="95326A79-5433-4F65-9590-8E72D67FE0D5" />
+         id="3D5B5EBB-D923-4A12-987C-80791C63F3B6" />
   <class name="xAOD::TruthVertexAuxContainer_v1"
          id="B6BD3B02-C411-4EB9-903F-5B099D3B1A3E" />
   <class name="xAOD::TruthVertexAuxContainer_v2"

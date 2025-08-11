@@ -39,7 +39,7 @@ xAODTruthParticleAuxContainerCnv::createTransient() {
 
    // The known ID(s) for this container:
    static const pool::Guid v1_guid( "BA8FA08F-8DD6-420D-97D5-8B54EABECD65" );
-   static const pool::Guid v2_guid( "95326A79-5433-4F65-9590-8E72D67FE0D5" );
+   static const pool::Guid v2_guid( "3D5B5EBB-D923-4A12-987C-80791C63F3B6" );
 
    // Check which version of the container we're reading:
    if( compareClassGuid( v1_guid ) ) {
