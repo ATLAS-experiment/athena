@@ -52,7 +52,7 @@ namespace ActsTrk {
 
   protected:
     using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
-    
+
     struct MeasurementSelectorConfig {
        std::vector<std::pair<float, float>> m_chi2CutOffOutlier;
        std::vector<float>                   m_etaBins;
@@ -82,14 +82,13 @@ namespace ActsTrk {
 
     detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc {};
 
-    
+
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
-    ToolHandle<ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
     ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
@@ -109,12 +108,10 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
     Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};
     Gaudi::Property<bool> m_doTwoWay{this, "doTwoWay", true, "run CKF twice, first with forward propagation with smoothing, then with backward propagation"};
-    Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), automatically determined by the param estimation tool"};
     Gaudi::Property<double> m_branchStopperPtMinFactor{this, "branchStopperPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMaxExtra{this, "branchStopperAbsEtaMaxExtra", 0.0, "increase absEtaMax cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperMeasCutReduce{this, "branchStopperMeasCutReduce", 2, "how much to reduce the minMeas requirement for the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMeasCut{this, "branchStopperAbsEtaMeasCut", 1.2, "the minimum |eta| to apply the reduction to the minMeas requirement for the branch stopper"};
-    Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
@@ -261,9 +258,9 @@ namespace ActsTrk {
      */
     std::vector<typename detail::RecoTrackContainer::TrackProxy>
     doTwoWayTrackFinding(const detail::RecoTrackStateContainerProxy& firstMeasurement,
-			 const TrkProxy &trackProxy,
-			 detail::RecoTrackContainer &tracksContainerTemp,
-			 const TrackFinderOptions &options) const;
+                         const TrkProxy &trackProxy,
+                         detail::RecoTrackContainer &tracksContainerTemp,
+                         const TrackFinderOptions &options) const;
 
     static xAOD::UncalibMeasType measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState);
 
@@ -311,7 +308,7 @@ namespace ActsTrk {
     std::array<bool, 3> selectPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;
 
     bool selectPixelStripCountsFinal(const detail::RecoTrackContainer::TrackProxy &track) const;
-    
+
     /// Private access to the logger
     const Acts::Logger &logger() const
     {

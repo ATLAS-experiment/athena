@@ -42,10 +42,10 @@ namespace {
     const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
     return uncalibMeas.identifier();
   }
-  
+
   static bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
     const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
-    const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());    
+    const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
     return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
   }
 
@@ -58,10 +58,10 @@ namespace {
       if (not st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) continue;
       if (st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag)) continue;
       firstMeasurement = st;
-    }    
+    }
     return firstMeasurement;
   }
-  
+
 }
 
 
@@ -69,16 +69,16 @@ namespace {
 namespace ActsTrk
 {
   struct TrackFindingBaseAlg::CKF_pimpl : public detail::CKF_config {};
-  
+
   TrackFindingAlg::TrackFindingAlg(const std::string &name, ISvcLocator *pSvcLocator)
     : TrackFindingBaseAlg(name, pSvcLocator) {}
-  
+
   // === initialize ==========================================================
-  
+
   StatusCode TrackFindingAlg::initialize()
   {
     ATH_MSG_INFO("Initializing " << name() << " ... ");
-    
+
     ATH_CHECK(TrackFindingBaseAlg::initialize());
     ATH_MSG_DEBUG("   " << m_skipDuplicateSeeds);
     ATH_MSG_DEBUG("   " << m_refitSeeds);
@@ -88,7 +88,10 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_useTopSpRZboundary);
     ATH_MSG_DEBUG("   " << m_seedMeasOffset);
     ATH_MSG_DEBUG("   " << m_ambiStrategy);
-    
+    ATH_MSG_DEBUG("   " << m_autoReverseSearch);
+    ATH_MSG_DEBUG("   " << m_countSharedHits);
+
+    ATH_CHECK(m_paramEstimationTool.retrieve());
     ATH_CHECK(m_seedContainerKeys.initialize());
     ATH_CHECK(m_detEleCollKeys.initialize());
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
@@ -98,70 +101,70 @@ namespace ActsTrk
 
     m_storeDestinies = not m_seedDestiny.empty();
     ATH_CHECK(m_seedDestiny.initialize(m_storeDestinies));
-    
+
     if (m_seedContainerKeys.size() != m_detEleCollKeys.size())
       {
         ATH_MSG_FATAL("There are " << m_detEleCollKeys.size() << " DetectorElementsKeys, but " << m_seedContainerKeys.size() << " SeedContainerKeys");
         return StatusCode::FAILURE;
       }
-    
+
     if (m_detEleCollKeys.size() != m_seedLabels.size())
       {
         ATH_MSG_FATAL("There are " << m_seedLabels.size() << " SeedLabels, but " << m_detEleCollKeys.size() << " DetectorElementsKeys");
         return StatusCode::FAILURE;
       }
-    
+
     if (m_useTopSpRZboundary.size() != 2)
       {
         ATH_MSG_FATAL("useTopSpRZboundary must have 2 elements, but has " << m_useTopSpRZboundary.size());
         return StatusCode::FAILURE;
       }
-    
+
     if (m_ambiStrategy == 1 /* END_OF_TF */) {
       Acts::GreedyAmbiguityResolution::Config cfg;
       cfg.maximumSharedHits = m_maximumSharedHits;
       cfg.maximumIterations = m_maximumIterations;
       cfg.nMeasurementsMin = m_nMeasurementsMin;
-      
+
       m_ambi.emplace(std::move(cfg), makeActsAthenaLogger(this, "Acts"));
     }
 
     if (m_storeDestinies) {
       if (m_seedDestiny.size() != m_seedContainerKeys.size()) {
         ATH_MSG_ERROR("There are " << m_seedDestiny.size() << " seed destiny collections, but " << m_seedContainerKeys.size() << " seed collections");
-        return StatusCode::FAILURE;        
+        return StatusCode::FAILURE;
       }
     }
-    
+
     return StatusCode::SUCCESS;
   }
-  
+
   // === finalize ============================================================
-  
+
   StatusCode TrackFindingAlg::finalize() {
     ATH_CHECK(TrackFindingBaseAlg::finalize());
     return StatusCode::SUCCESS;
   }
-  
+
   // === execute =============================================================
-  
+
   StatusCode TrackFindingAlg::execute(const EventContext &ctx) const
   {
     ATH_MSG_DEBUG("Executing " << name() << " ... ");
-    
+
     auto timer = Monitored::Timer<std::chrono::milliseconds>("TIME_execute");
     auto mon_nTracks = Monitored::Scalar<int>("nTracks");
     auto mon = Monitored::Group(m_monTool, timer, mon_nTracks);
-    
+
     // ================================================== //
     // ===================== INPUTS ===================== //
     // ================================================== //
-    
+
     // SEED TRIPLETS
     std::vector<const ActsTrk::SeedContainer *> seedContainers;
     std::size_t total_seeds = 0;
     ATH_CHECK(getContainersFromKeys(ctx, m_seedContainerKeys, seedContainers, total_seeds));
-    
+
     // DESTINIES
     std::vector< std::unique_ptr< std::vector<int> > > destinies {};
     if (m_storeDestinies) {
@@ -170,12 +173,12 @@ namespace ActsTrk
         destinies.push_back( std::make_unique< std::vector<int> >( seedContainers.at(i)->size(), DestinyType::UNKNOWN) );
       }
     }
-    
+
     // MEASUREMENTS
     std::vector<const xAOD::UncalibratedMeasurementContainer *> uncalibratedMeasurementContainers;
     std::size_t total_measurements = 0;
     ATH_CHECK(getContainersFromKeys(ctx, m_uncalibratedMeasurementContainerKeys, uncalibratedMeasurementContainers, total_measurements));
-    
+
     // map detector element status to volume ids
     SG::ReadCondHandle<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap>
       volumeIdToDetectorElementCollMap(m_volumeIdToDetectorElementCollMapKey,ctx);
@@ -192,12 +195,12 @@ namespace ActsTrk
                                     &det_el_status->getDetectorElements());
       det_el_status_arr.at(det_el_col_iter - det_el_collections.begin()) = det_el_status.cptr();
     }
-    
+
     detail::TrackFindingMeasurements measurements(uncalibratedMeasurementContainers.size() /* number of measurement containers*/);
     std::size_t measurementIndexContainersSize = (m_skipDuplicateSeeds || m_countSharedHits || m_trackStatePrinter.isSet()) ? uncalibratedMeasurementContainers.size() : 0ul;
     detail::MeasurementIndex measurementIndex(measurementIndexContainersSize);
     detail::SharedHitCounter sharedHits;
-    
+
     for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer) {
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
       measurements.addMeasurements(icontainer,
@@ -206,15 +209,15 @@ namespace ActsTrk
       if (measurementIndexContainersSize > 0ul)
         measurementIndex.addMeasurements(*uncalibratedMeasurementContainers[icontainer]);
     }
-    
+
     ATH_MSG_DEBUG("measurement index size = " << measurementIndex.size());
-    
+
     ATH_CHECK( propagateDetectorElementStatusToMeasurements(*(volumeIdToDetectorElementCollMap.cptr()), det_el_status_arr, measurements) );
-    
+
     if (m_trackStatePrinter.isSet()) {
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
     }
-    
+
     detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds,
                                                         m_seedMeasOffset.value(),
                                                         m_skipDuplicateSeeds);
@@ -229,28 +232,28 @@ namespace ActsTrk
                                          return useTopSp;
                                        });
       }
-    
+
     // Get Beam pos and make pSurface
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, ctx );
     ATH_CHECK( beamSpotHandle.isValid() );
     const InDet::BeamSpotData* beamSpotData = beamSpotHandle.cptr();
-    
+
     // Beam Spot Position
     Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
                            beamSpotData->beamPos().y() * Acts::UnitConstants::mm,
                            0 );
-    
+
     // Construct a perigee surface as the target surface
     std::shared_ptr<Acts::PerigeeSurface> pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(beamPos);
-    
+
     // ================================================== //
-    // ===================== CONDS ====================== // 
+    // ===================== CONDS ====================== //
     // ================================================== //
-    
+
     std::vector<const InDetDD::SiDetectorElementCollection*> detElementsCollections;
     std::size_t total_detElems = 0;
     ATH_CHECK(getContainersFromKeys(ctx, m_detEleCollKeys, detElementsCollections, total_detElems));
-    
+
     // ================================================== //
     // ===================== COMPUTATION ================ //
     // ================================================== //
@@ -260,23 +263,23 @@ namespace ActsTrk
     actsTrackStateBackend.reserve(400000);
     detail::RecoTrackContainer actsTracksContainer(actsTrackBackend,
                                                    actsTrackStateBackend);
-    
+
     if (m_addPixelStripCounts) {
       addPixelStripCounts(actsTracksContainer);
     }
 
-    detail::ExpectedLayerPatternHelper::add(actsTracksContainer); 
-        
+    detail::ExpectedLayerPatternHelper::add(actsTracksContainer);
+
     EventStats event_stat;
     event_stat.resize(m_stat.size());
-    
+
     DetectorContextHolder detContext {
       .geometry = m_trackingGeometryTool->getGeometryContext(ctx).context(),
       .magField = m_extrapolationTool->getMagneticFieldContext(ctx),
       // CalibrationContext converter not implemented yet.
       .calib = getCalibrationContext(ctx)
     };
-    
+
     // Perform the track finding for all initial parameters.
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
       {
@@ -294,28 +297,28 @@ namespace ActsTrk
                              m_storeDestinies ? destinies.at(icontainer).get() : nullptr,
                              *pSurface.get()));
       }
-    
+
     ATH_MSG_DEBUG("    \\__ Created " << actsTracksContainer.size() << " tracks");
-    
+
     mon_nTracks = actsTracksContainer.size();
     copyStats(event_stat);
 
-    
+
     // ================================================== //
     // ===================== OUTPUTS ==================== //
     // ================================================== //
-    
+
     // Save the seed destinies
-    if (m_storeDestinies) { 
+    if (m_storeDestinies) {
       for (std::size_t i(0); i<destinies.size(); ++i) {
         const SG::WriteHandleKey< std::vector<int> >& writeKey = m_seedDestiny.at(i);
         // make the handle and record
         SG::WriteHandle< std::vector<int> > destinyHandle = SG::makeHandle( writeKey, ctx );
         ATH_CHECK( destinyHandle.record( std::move(  destinies.at(i) )  ) );
-      }    
+      }
     }
-    
-    // handle the ambiguity    
+
+    // handle the ambiguity
     // we potentially need to short list the track candidates and make some copies
     if (not m_ambi) {
       // no need to shortlist anything. just use the actsTracksContainer
@@ -334,11 +337,11 @@ namespace ActsTrk
     resolvedTrackStateBackend.reserve( actsTrackStateBackend.size() );
     detail::RecoTrackContainer resolvedTracksContainer(resolvedTrackBackend, resolvedTrackStateBackend);
     detail::ExpectedLayerPatternHelper::add(resolvedTracksContainer);
-    
+
     if (m_addPixelStripCounts) {
       addPixelStripCounts(resolvedTracksContainer);
     }
-    
+
     // Start ambiguity resolution
     Acts::GreedyAmbiguityResolution::State state;
     m_ambi->computeInitialState(actsTracksContainer, state, &sourceLinkHash,
@@ -348,14 +351,14 @@ namespace ActsTrk
     // Copy the resolved tracks into the output container
     // We need a different sharedHits counter here because it saves the track index
     // and since I ran the resolving the track indices changed.
-    detail::SharedHitCounter sharedHits_forFinalAmbi;    
+    detail::SharedHitCounter sharedHits_forFinalAmbi;
 
     // shotlist
-    for (auto iTrack : state.selectedTracks) {      
+    for (auto iTrack : state.selectedTracks) {
       auto destProxy = resolvedTracksContainer.makeTrack();
       destProxy.copyFrom(actsTracksContainer.getTrack(state.trackTips.at(iTrack)));
 
-      if (m_countSharedHits) {        
+      if (m_countSharedHits) {
         auto [nShared, nBadTrackMeasurements] = sharedHits_forFinalAmbi.computeSharedHits(destProxy, resolvedTracksContainer, measurementIndex);
         if (nBadTrackMeasurements > 0)
           ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
@@ -380,27 +383,27 @@ namespace ActsTrk
     Acts::ConstVectorMultiTrajectory constTrackStateBackend( std::move(originalTrackStateBackend) );
     std::unique_ptr< ActsTrk::TrackContainer> constTracksContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(constTrackBackend),
                                                                                                                   std::move(constTrackStateBackend) );
-    
+
     SG::WriteHandle<ActsTrk::TrackContainer> trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
     ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_trackContainerKey.key() << "` created ...");
     ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
     return StatusCode::SUCCESS;
   }
-  
+
   bool TrackFindingAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
     const auto& bottom_sp = seed.sp().front();
-    
+
     const double r = bottom_sp->radius();
     const double z = std::abs(bottom_sp->z());
-    
+
     const double rBoundary = m_useTopSpRZboundary.value()[0];
     const double zBoundary = m_useTopSpRZboundary.value()[1];
-    
+
     return r > rBoundary || z > zBoundary;
   }
-  
+
   // === findTracks ==========================================================
-  
+
   StatusCode
   TrackFindingAlg::findTracks(const DetectorContextHolder& detContext,
                               const detail::TrackFindingMeasurements &measurements,
@@ -417,19 +420,19 @@ namespace ActsTrk
                               const Acts::PerigeeSurface& pSurface) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-    
+
     auto [options, secondOptions, measurementSelector] = getDefaultOptions(detContext, measurements, &pSurface);
-    
+
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
     Acts::VectorTrackContainer trackBackend;
     Acts::VectorMultiTrajectory trackStateBackend;
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
-    
+
     if (m_addPixelStripCounts) {
       addPixelStripCounts(tracksContainerTemp);
     }
 
-    detail::ExpectedLayerPatternHelper::add(tracksContainerTemp); 
+    detail::ExpectedLayerPatternHelper::add(tracksContainerTemp);
 
     std::size_t category_i = 0;
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
@@ -438,48 +441,48 @@ namespace ActsTrk
       return stopBranch(track, trackState, trackSelectorCfg, detContext.geometry, measurementIndex, typeIndex, event_stat[category_i]);
     };
     options.extensions.branchStopper.connect(stopBranchProxy);
-    
+
     Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
                             Acts::ActorList<Acts::MaterialInteractor>>
       extrapolationOptions(detContext.geometry, detContext.magField);
-    
+
     Acts::TrackExtrapolationStrategy extrapolationStrategy =
       Acts::TrackExtrapolationStrategy::first;
-    
+
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << seeds.size() << ' ' << seedType << " seeds.");
-    
-    
+
+
     std::size_t nPrinted = 0;
-    
+
     // Function for Estimate Track Parameters
-    auto retrieveSurfaceFunction = 
-      [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& { 
+    auto retrieveSurfaceFunction =
+      [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
         const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
         const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(useTopSp ? sp->elementIdList().back()
                                                                                    : sp->elementIdList().front());
         const Trk::Surface& atlas_surface = element->surface();
         return m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
       };
-    
-    
-    
+
+
+
     // Loop over the track finding results for all initial parameters
     for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
       {
         // Get the seed
         const ActsTrk::Seed& seed = *seeds[iseed];
-        
+
         category_i = typeIndex * (m_statEtaBins.size() + 1);
         tracksContainerTemp.clear();
-        
+
         const bool reverseSearch = m_autoReverseSearch && shouldReverseSearch(seed);
         const bool refitSeeds = typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex];
         const bool useTopSp = reverseSearch && !refitSeeds;
-        
+
         // Check if the seed is a duplicate seed
         const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
-        
+
         if (isDupSeed) {
           ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
           category_i = getSeedCategory(typeIndex, seed, useTopSp);
@@ -488,14 +491,14 @@ namespace ActsTrk
           if (m_storeDestinies) destiny->at(iseed) = DestinyType::DUPLICATE;
           if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
         }
-        
+
         // Set the option accordingly - we change the direction and the target surface accordingly
         options.propagatorPlainOptions.direction = reverseSearch ? Acts::Direction::Backward() : Acts::Direction::Forward();
         secondOptions.propagatorPlainOptions.direction = options.propagatorPlainOptions.direction.invert();
         options.targetSurface = reverseSearch ? &pSurface : nullptr;
         secondOptions.targetSurface = reverseSearch ? nullptr : &pSurface;
         // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
-        
+
         // Get first estimate of parameters from the seed
         std::optional<Acts::BoundTrackParameters> optTrackParams =
           m_paramEstimationTool->estimateTrackParameters(seed,
@@ -503,7 +506,7 @@ namespace ActsTrk
                                                          detContext.geometry,
                                                          detContext.magField,
                                                          retrieveSurfaceFunction);
-        
+
         if (!optTrackParams) {
           ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
           if (!isDupSeed) {
@@ -514,16 +517,16 @@ namespace ActsTrk
           }
           continue;
         }
-        
+
         Acts::BoundTrackParameters *initialParameters = &(*optTrackParams);
         printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType);
         if (isDupSeed) continue;  // skip now if not done before
-        
+
         double etaInitial = -std::log(std::tan(0.5 * initialParameters->theta()));
         category_i = getStatCategory(typeIndex, etaInitial);
         ++event_stat[category_i][kNTotalSeeds];  // also updated for duplicate seeds
         ++event_stat[category_i][kNUsedSeeds];
-        
+
         // Optional refit track parameters to get more refined value
         std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;
         if (refitSeeds) {
@@ -538,11 +541,11 @@ namespace ActsTrk
             printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType, true);
           }
         }
-        
+
         // Get the Acts tracks, given this seed
         // Result here contains a vector of TrackProxy objects
         auto result = trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
-        
+
         // The result for this seed
         if (not result.ok()) {
           ATH_MSG_WARNING("Track finding failed for " << seedType << " seed " << iseed << " with error" << result.error());
@@ -552,9 +555,9 @@ namespace ActsTrk
         auto &tracksForSeed = result.value();
 
 
-        
+
         std::size_t ntracks = 0ul;
-        
+
         // loop on the tracks we have just found from the seed
         std::size_t nfirst = 0;
         for (TrkProxy &firstTrack : tracksForSeed) {
@@ -566,7 +569,7 @@ namespace ActsTrk
                           << " failed with error " << smoothingResult.error());
             continue;
           }
-          
+
           // if no two way, just add the track and move on
           if (not m_doTwoWay) {
             // add the track to the collection
@@ -588,7 +591,7 @@ namespace ActsTrk
             ++nfirst;
             continue;
           }
-          
+
           // TWO WAY STARTS HERE
           // We need the first measurement of the track
           std::optional<detail::RecoTrackStateContainerProxy> firstMeas = getFirstMeasurementFromTrack(firstTrack);
@@ -598,16 +601,14 @@ namespace ActsTrk
             return StatusCode::FAILURE;
           }
           detail::RecoTrackStateContainerProxy& firstMeasurement = firstMeas.value();
-          
+
           // Get the tracks from the second track finding
           std::vector<typename detail::RecoTrackContainer::TrackProxy> secondTracksForSeed =
             doTwoWayTrackFinding(firstMeasurement,
-                                 firstTrack,				 
+                                 firstTrack,
                                  tracksContainerTemp,
                                  secondOptions);
-          
-          
-          
+
           if ( secondTracksForSeed.empty() ) {
             ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
             ++event_stat[category_i][kNoSecond];
@@ -627,17 +628,17 @@ namespace ActsTrk
                                 category_i,
                                 seedType) );
           }
-          
+
           // need to add tracks here
           // do the stiching
           // store the original previous state to restore it later
           auto originalFirstMeasurementPrevious = firstMeasurement.previous();
           for (auto &secondTrack : secondTracksForSeed) {
             secondTrack.reverseTrackStates(true);
-            
+
             firstMeasurement.previous() = secondTrack.outermostTrackState().index();
             secondTrack.tipIndex() = firstTrack.tipIndex();
-            
+
             if (reverseSearch) {
               // smooth the full track
               auto secondSmoothingResult = Acts::smoothTrack(detContext.geometry,
@@ -648,7 +649,7 @@ namespace ActsTrk
               }
               secondTrack.reverseTrackStates(true);
             }
-            
+
             // Add track to collection
             ATH_CHECK( addTrack(detContext,
                                 secondTrack,
@@ -666,11 +667,11 @@ namespace ActsTrk
                                 category_i,
                                 seedType) );
           } // loop on tracks
-          
+
           // finish the stiching
           // restore the original previous state for the first track
-          firstMeasurement.previous() = originalFirstMeasurementPrevious;	  
-          
+          firstMeasurement.previous() = originalFirstMeasurementPrevious;
+
           nfirst++;
         } // loop on tracks from seed
 
@@ -681,32 +682,32 @@ namespace ActsTrk
             destiny->at(iseed) = DestinyType::SUCCEED;
           }
         }
-        
+
         if (ntracks == 0) {
           ATH_MSG_DEBUG("Track finding found no track candidates for " << seedType << " seed " << iseed);
           ++event_stat[category_i][kNoTrack];
         } else if (ntracks >= 2) {
           ++event_stat[category_i][kMultipleBranches];
         }
-        
+
         if (m_trackStatePrinter.isSet())
           std::cout << std::flush;
       } // loop on seeds
-    
+
     ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << computeStatSum(typeIndex, kNOutputTracks, event_stat) << " track candidates.");
-    
+
     return StatusCode::SUCCESS;
   }
-  
-  void 
+
+  void
   TrackFindingAlg::storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
                                  const detail::RecoTrackContainerProxy &track,
                                  detail::DuplicateSeedDetector &duplicateSeedDetector,
                                  const detail::MeasurementIndex &measurementIndex) const {
-    
+
     const auto lastMeasurementIndex = track.tipIndex();
     duplicateSeedDetector.newTrajectory();
-    
+
     tracksContainer.trackStateContainer().visitBackwards(
                                                          lastMeasurementIndex,
                                                          [&duplicateSeedDetector,&measurementIndex](const detail::RecoTrackStateContainer::ConstTrackStateProxy &state) -> void
@@ -714,20 +715,20 @@ namespace ActsTrk
                                                            // Check there is a source link
                                                            if (not state.hasUncalibratedSourceLink())
                                                              return;
-                                                           
+
                                                            // Fill the duplicate selector
                                                            auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
                                                            duplicateSeedDetector.addMeasurement(sl, measurementIndex);
                                                          }); // end visitBackwards
   }
-  
+
   StatusCode TrackFindingAlg::propagateDetectorElementStatusToMeasurements(const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volume_id_to_det_el_coll,
                                                                            const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
                                                                            detail::TrackFindingMeasurements &measurements) const {
     const Acts::TrackingGeometry *
       acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
     ATH_CHECK(acts_tracking_geometry != nullptr);
-    
+
     using Counter = struct { unsigned int n_volumes, n_volumes_with_status, n_missing_detector_elements, n_detector_elements, n_disabled_detector_elements;};
     Counter counter {0u,0u,0u,0u,0u};
     acts_tracking_geometry->visitVolumes([&counter,
@@ -737,7 +738,7 @@ namespace ActsTrk
                                           this](const Acts::TrackingVolume *volume_ptr) {
       ++counter.n_volumes;
       if (!volume_ptr) return;
-      
+
       const InDet::SiDetectorElementStatus*
         det_el_status = det_el_status_arr.at(volume_id_to_det_el_coll.collecionMap().at(volume_ptr->geometryId().volume()));
       if (det_el_status) {
@@ -777,7 +778,7 @@ namespace ActsTrk
                   << counter.n_missing_detector_elements);
     return StatusCode::SUCCESS;
   }
-  
+
   std::size_t TrackFindingAlg::getSeedCategory(std::size_t typeIndex,
                                                const ActsTrk::Seed& seed,
                                                bool useTopSp) const
@@ -787,7 +788,7 @@ namespace ActsTrk
     double etaSeed = std::atanh(pos[2] / pos.norm());
     return getStatCategory(typeIndex, etaSeed);
   }
-  
+
   void TrackFindingAlg::printSeed(unsigned int iseed,
                                   const DetectorContextHolder& detContext,
                                   const ActsTrk::SeedContainer& seeds,
@@ -798,7 +799,7 @@ namespace ActsTrk
                                   bool isKF) const
   {
     if (not m_trackStatePrinter.isSet()) return;
-    
+
     if (nPrinted == 0) {
       ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
     }
@@ -832,10 +833,10 @@ struct Collector {
   };
 };
 }
-  
+
 Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
   const DetectorContextHolder& detContext,
-  detail::RecoTrackContainerProxy &track, 
+  detail::RecoTrackContainerProxy &track,
   const Acts::Surface &referenceSurface,
   const detail::Extrapolator &propagator,
   Acts::TrackExtrapolationStrategy strategy,
@@ -913,7 +914,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                        std::size_t category_i,
                                        const char *seedType) const
   {
-  
+
     std::array<unsigned int, 4> expectedLayerPattern;
 
     // if the the perigeeSurface was not hit (in particular the case for the inside-out pass,
@@ -947,7 +948,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         }
       }
     }
-    
+
     // Trim tracks
     // - trimHoles
     // - trimOutliers
@@ -962,10 +963,10 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
       }
       checkPixelStripCounts(track);
     }
-    
+
     ++ntracks;
     ++event_stat[category_i][kNOutputTracks];
-    
+
     if ( not trackFinder().trackSelector.isValidTrack(track) or
          not selectPixelStripCountsFinal(track)) {
       ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
@@ -974,71 +975,71 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
       }
       return StatusCode::SUCCESS;
     }
-    
+
     // Fill the track infos into the duplicate seed detector
     if (m_skipDuplicateSeeds) {
       storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector, measurementIndex);
     }
-    
+
     auto actsDestProxy   = actsTracksContainer.makeTrack();
     actsDestProxy.copyFrom(track, true);  // make sure we copy track states!
 
     detail::ExpectedLayerPatternHelper::set(actsDestProxy, expectedLayerPattern);
-    
+
     if (not m_countSharedHits) {
       return StatusCode::SUCCESS;
     }
-    
+
     auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHits(actsDestProxy, actsTracksContainer, measurementIndex);
-    
+
     if (nBadTrackMeasurements > 0) {
       ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input for " << seedType << " seed " << iseed << " track");
     }
-    
+
     ATH_MSG_DEBUG("found " << actsDestProxy.nSharedHits() << " shared hits in " << seedType << " seed " << iseed << " track");
-    
+
     event_stat[category_i][kNTotalSharedHits] += nShared;
-    
+
     if (m_ambiStrategy == 2) { // run the ambiguity during track selection
-      
+
       if (actsDestProxy.nSharedHits() <= m_maximumSharedHits) {
         ++event_stat[category_i][kNSelectedTracks];
       }
       else { // track fails the shared hit selection
-        
+
         ATH_MSG_DEBUG("found " << actsDestProxy.nSharedHits() << " shared hits in " << seedType << " seed " << iseed << " track");
         // Reset the original track shared hits by running coumputeSharedHits
         // with removeSharedHits flag to true
         // nSharedRemoved contains the total shared hits that will be removed
         auto [nSharedRemoved, nRemoveBadTrackMeasurements] = sharedHits.computeSharedHits(actsDestProxy, actsTracksContainer, measurementIndex, true);
-        
+
         ATH_MSG_DEBUG("Removed " << nSharedRemoved << " shared hits in " << seedType << " seed " << iseed << " track and the matching track");
-        
+
         if (nRemoveBadTrackMeasurements > 0) {
           ATH_MSG_ERROR("computeSharedHits with remove flag ON: " << nRemoveBadTrackMeasurements <<
                         " track measurements not found in input for " << seedType << " seed " << iseed << " track");
         }
-        
+
         if (actsDestProxy.nSharedHits() != 0) {
           ATH_MSG_ERROR("computeSharedHits with remove flag ON returned " <<
                         actsDestProxy.nSharedHits()<< " while expecting 0 for" <<
                         seedType << " seed " << iseed << " track");
         }
-        
+
         // Remove the track from the container
         actsTracksContainer.removeTrack(actsDestProxy.index());
         ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed shared hit selection");
-      }  
+      }
     }
-    else { // use ambi during selection      
+    else { // use ambi during selection
       ++event_stat[category_i][kNSelectedTracks];
-      
+
       if (m_trackStatePrinter.isSet()) {
         m_trackStatePrinter->printTrack(detContext.geometry, actsTracksContainer, actsDestProxy, measurementIndex);
       }
     }
-    
+
     return StatusCode::SUCCESS;
-  }  
-  
+  }
+
 } // namespace

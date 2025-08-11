@@ -42,15 +42,15 @@ namespace ActsTrk
 {
   using AtlUncalibSourceLinkAccessor = detail::UncalibSourceLinkAccessor;
   using DefaultTrackStateCreator = Acts::TrackStateCreator<ActsTrk::detail::UncalibSourceLinkAccessor::Iterator,detail::RecoTrackContainer>;
-  
+
   class TrackFindingAlg : public TrackFindingBaseAlg
   {
   public:
-    
+
     TrackFindingAlg(const std::string &name,
                     ISvcLocator *pSvcLocator);
     virtual ~TrackFindingAlg() = default;
-    
+
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
@@ -61,7 +61,7 @@ namespace ActsTrk
     std::size_t getSeedCategory(std::size_t typeIndex,
                                 const ActsTrk::Seed& seed,
                                 bool useTopSp) const;
-    
+
     void printSeed(unsigned int iseed,
                    const DetectorContextHolder& detContext,
                    const ActsTrk::SeedContainer& seeds,
@@ -70,7 +70,7 @@ namespace ActsTrk
                    std::size_t& nPrinted,
                    const char *seedType,
                    bool isKF = false) const;
-    
+
     StatusCode addTrack(const DetectorContextHolder& detContext,
                         detail::RecoTrackContainerProxy &track,
                         const Acts::Surface& pSurface,
@@ -90,8 +90,11 @@ namespace ActsTrk
     StatusCode storeTrackCollectionToStoreGate(const EventContext& ctx,
                                                Acts::VectorTrackContainer&& originalTrackBackend,
                                                Acts::VectorMultiTrajectory&& originalTrackStateBackend) const;
-    
+
   private:
+    // Tool Handles
+    ToolHandle<ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
+
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKeys{this, "SeedContainerKeys", {}, "Seed containers"};
@@ -101,21 +104,23 @@ namespace ActsTrk
     SG::ReadCondHandleKey<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap> m_volumeIdToDetectorElementCollMapKey
       {this, "ActsVolumeIdToDetectorElementCollectionMapKey", "ActsVolumeIdToDetectorElementCollectionMap",
        "Map which associates Acts geometry volume IDs to detector element collections."};
-    
+
     SG::ReadHandleKeyArray<InDet::SiDetectorElementStatus> m_detElStatus
       {this, "DetElStatus", {}, "Keys for detector element status conditions data."};
-    
+
     bool m_storeDestinies {false};
-    SG::WriteHandleKeyArray< std::vector<int> > m_seedDestiny {this, "SeedDestiny", {}}; 
+    SG::WriteHandleKeyArray< std::vector<int> > m_seedDestiny {this, "SeedDestiny", {}};
     SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
-    
+
     // Configuration
     Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
     Gaudi::Property<unsigned int> m_seedMeasOffset{this,"seedMeasOffset", 0, "Reduce the requirement on the space points on seed to mark a seed as duplicate, e.g seedMeasOffset=1, only N-1 measurements on seed are sufficient deduplicate the seed"};
     Gaudi::Property<std::vector<bool>> m_refitSeeds{this, "refitSeeds", {}, "Run KalmanFitter on seeds before passing to CKF, specified separately for each seed collection"};
     Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/Z boundary for using the top space point in the track parameter estimation"};
-    
-    
+    Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), automatically determined by the param estimation tool"};
+    Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
+
+
     // Ambiguity resolution
     Gaudi::Property<unsigned int> m_maximumSharedHits
       {this, "MaximumSharedHits", 3u, "Maximum number of shared hits per track."};
@@ -124,20 +129,20 @@ namespace ActsTrk
     Gaudi::Property<unsigned int> m_nMeasurementsMin
       {this, "NMeasurementsMin", 7u, "Minimum number of measurements per track."};
     Gaudi::Property<std::size_t> m_ambiStrategy {this, "ambiStrategy", 0, "0 - Do ambiguity resolution outside track finding; 1 - Do ambiguity in track finding using GreedyAmbiguitySolver tool; 2 - Do shared hit cut during track candidate selection"};
-    
-    
+
+
     StatusCode propagateDetectorElementStatusToMeasurements(const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volume_id_to_det_el_coll,
                                                             const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
                                                             detail::TrackFindingMeasurements &measurements) const;
-    
+
     bool shouldReverseSearch(const ActsTrk::Seed& seed) const;
-    
+
     std::optional<Acts::GreedyAmbiguityResolution> m_ambi;
 
 
     Acts::Result<void> extrapolateTrackToReferenceSurface(
       const DetectorContextHolder& detContext,
-      detail::RecoTrackContainerProxy &track, 
+      detail::RecoTrackContainerProxy &track,
       const Acts::Surface &referenceSurface,
       const detail::Extrapolator &propagator,
       Acts::TrackExtrapolationStrategy strategy,
@@ -172,18 +177,18 @@ namespace ActsTrk
                EventStats &event_stat,
                std::vector<int>* destiny,
                const Acts::PerigeeSurface& pSurface) const;
-    
+
     // Create tracks from one seed's CKF result, appending to tracksContainer
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
                        const detail::RecoTrackContainerProxy &track,
                        detail::DuplicateSeedDetector &duplicateSeedDetector,
                        const detail::MeasurementIndex &measurementIndex) const;
-    
+
     using TrackFindingBaseAlg::CKF_pimpl;
-    
+
     enum DestinyType : int {UNKNOWN=0, SUCCEED, DUPLICATE, FAILURE};
   };
-  
+
 } // namespace
 
 #endif

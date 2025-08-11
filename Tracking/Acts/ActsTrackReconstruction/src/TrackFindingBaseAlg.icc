@@ -45,7 +45,7 @@ namespace ActsTrk {
     }
     const auto fittedSeedCollection = m_fitterTool->fit(measurement, initialParameters,
                                                         detContext.geometry, detContext.magField, detContext.calib,
-							*targetSurface);
+                                                        *targetSurface);
     if (not fittedSeedCollection) {
       ATH_MSG_WARNING("KF Fitted Track is nullptr");
     }
