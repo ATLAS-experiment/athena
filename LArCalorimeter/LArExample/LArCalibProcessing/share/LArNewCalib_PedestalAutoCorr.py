@@ -114,7 +114,7 @@ if __name__=='__main__':
          elif args.side == "A":   
             flags.LArCalib.Preselection.Side = [1]
          else:   
-            log.warning("Bad side argument: ",args.side," using both!!") 
+            log.warning("Bad side argument: %s using both!!", args.side) 
  
       if args.subdet == 'EMB':
          flags.LArCalib.Preselection.BEC = [0]

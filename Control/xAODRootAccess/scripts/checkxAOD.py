@@ -141,12 +141,12 @@ def printFileInfo( fileName, categoryStrings ):
         # "Decode" the name of the branch:
         brName = branch.GetName()
         # Check if this is a static auxiliary branch:
-        m = re.match( "(.*)Aux\..*", branch.GetName() )
+        m = re.match( r"(.*)Aux\..*", branch.GetName() )
         if m:
             brName = m.group( 1 )
             pass
         # Check if this is a dynamic auxiliary branch:
-        m = re.match( "(.*)AuxDyn\..*", branch.GetName() )
+        m = re.match( r"(.*)AuxDyn\..*", branch.GetName() )
         if m:
             brName = m.group( 1 )
             pass
