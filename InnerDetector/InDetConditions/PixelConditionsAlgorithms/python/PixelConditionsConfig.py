@@ -228,18 +228,6 @@ def PixelDeadMapCondAlgCfg(flags, name="PixelDeadMapCondAlg", **kwargs):
     acc.addCondAlgo(CompFactory.PixelDeadMapCondAlg(name, **kwargs))
     return acc
 
-#REBECCA
-def PixelClusterdEdxCondAlgCfg(flags, name="PixelClusterdEdxCondAlg", **kwargs):
-    """Return a ComponentAccumulator with configured PixelClusterdEdxCondAlg"""
-    acc = ComponentAccumulator()
-    acc.merge(PixelConfigCondAlgCfg(flags))
-    kwargs.setdefault("ReadKey", "/PIXEL/test")
-    acc.merge(addFolders(flags, "/PIXEL/test",  className="CondAttrListCollection"))
-    kwargs.setdefault("WriteKey","PixelClusterdEdxCondData")
-    kwargs.setdefault("ConfigFlag", flags.InDet.PixelConfig.clusterdEdxCalib) #Default is true
-    acc.addCondAlgo(CompFactory.PixelClusterdEdxCondAlg(name, **kwargs))
-    return acc
-
 def PixelDetectorElementCondAlgCfg(flags, name="PixelDetectorElementCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelDetectorElementCondAlg"""
     acc = ComponentAccumulator()
@@ -446,6 +434,16 @@ def PostInclude_UsePixelModuleLevelMask(flags, cfg):
         cfg.merge(addOverride(flags, '/PIXEL/PixelModuleFeMask', 'PixelModuleFeMask-SIM-MC16-000-03'))
     return cfg
 
+def PixelClusterdEdxCondAlgCfg(flags, name="PixelClusterdEdxCondAlg", **kwargs):
+    """Return a ComponentAccumulator with configured PixelClusterdEdxCondAlg"""
+    acc = ComponentAccumulator()
+    acc.merge(PixelConfigCondAlgCfg(flags))
+    kwargs.setdefault("ReadKey", "/PIXEL/test")
+    acc.merge(addFolders(flags, "/PIXEL/test",  className="CondAttrListCollection"))
+    kwargs.setdefault("WriteKey","PixelClusterdEdxCondData")
+    kwargs.setdefault("ConfigFlag", flags.InDet.PixelConfig.clusterdEdxCalib) #Default is true
+    acc.addCondAlgo(CompFactory.PixelClusterdEdxCondAlg(name, **kwargs))
+    return acc
 
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

@@ -140,29 +140,19 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                                                                                << phi_module << " " <<
                                                                                 eta_module);
           
-          
- 
-          Identifier idWafer = m_pixelid->wafer_id(bec,layer,phi_module,eta_module);
+          Identifier idWafer = m_pixelid->wafer_id(bec,layer,phi_module,eta_module,true);
           ATH_MSG_INFO("Here is the WAFER ID: " <<  idWafer );
           Identifier idPixel = m_pixelid->pixel_id(bec,layer,phi_module,eta_module,0,0);
-           
-          ATH_MSG_INFO("Here is the PIXEL ID: " <<  idPixel );
-      
-          IdentifierHash idHash = m_pixelid->wafer_hash(idWafer);
-
+          IdentifierHash idHash = m_pixelid->wafer_hash(idWafer); 
           ATH_MSG_INFO("This should be the wafer id HASH: " << idHash);
 
-          //ATH_MSG_INFO("Maybe this one? :" << pixclus->identify() );
-          //IdentifierHash idHash = m_pixelid->wafer_hash(idWafer);
-          //ATH_MSG_INFO("Hash?: " << m_pixelid->get_hash(pixclus->identify()));
-          //ATH_MSG_INFO("Is the hash valid?" << m_pixelid->wafer_id_checks(idHash));
           if (std::abs(cosalpha)<0.16) { continue; }
           //IdentifierHash wafer_hash(Identifier wafer_id) const;
           // Get SF for cluster 
-          float scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getVar(std::make_tuple(bec,layer,eta_module)); //XXXRebecca
+          float scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getScaleFactor(idHash); //XXXRebecca
           ATH_MSG_INFO("Rebecca - Did I read from PixelChargeCalibCondData?");
-          //ATH_MSG_INFO("bec: " << bec << " layer: " << layer << " etaM: " << eta_module);
-          //ATH_MSG_INFO(scaleFactor);
+          ATH_MSG_INFO("bec: " << bec << " layer: " << layer << " etaM: " << eta_module);
+          ATH_MSG_INFO(scaleFactor);
           float charge=pixclus->prepRawData()->totalCharge()*cosalpha*scaleFactor;
 
           //keep track if this is an ibl cluster with overflow

@@ -6,6 +6,8 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
+#include "Identifier/Identifier.h"
+#include "Identifier/IdentifierHash.h"
 #include <vector>
 #include <tuple>
 
@@ -13,17 +15,17 @@
  * @file PixelConditionsData/PixeldEdxData.h
  * @author Rebecca Hicks <rhicks@cern.ch>
  * @class PixelClusterdEdxCondData
- * @brief Store pixel cluster dEdx calibration data */
+ * @brief Store pixel cluster dEdx equalization scale factors */
 
 class PixelClusterdEdxCondData {
   public:
     PixelClusterdEdxCondData();
     virtual ~PixelClusterdEdxCondData();
-    float getVar(const std::tuple<int,int,int>& module_coordinates) const;
-    void setVar(const std::vector<std::tuple<std::tuple<int,int,int>,float>>& value);
-    void setConfig(const bool& value); 
+    float getScaleFactor(const IdentifierHash& wafer_hashID) const;
+    void setScaleFactors(const std::vector<std::tuple<IdentifierHash,float>>& inputScaleFactors);
+    void setConfig(const bool& flagValue); 
   private:
-    std::vector<std::tuple<std::tuple<int,int,int>,float>> m_var; 
+    std::vector<std::tuple<IdentifierHash,float>> m_clusterScaleFactors; 
     bool m_configFlag;
 };
 

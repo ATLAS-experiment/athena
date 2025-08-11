@@ -25,13 +25,13 @@ class PixelClusterdEdxCondAlg : public AthReentrantAlgorithm {
 
   private:
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKey
-      {this, "ReadKey", "/PIXEL/test", "Rebecca Test read key"};
+      {this, "ReadKey", "/PIXEL/test", "Input Pixel cluster dEdx equalization scale factors folder"};
   
     SG::WriteCondHandleKey<PixelClusterdEdxCondData> m_writeKey 
-      {this, "WriteKey", "PixelClusterdEdxCondData", "Making a PixelClusterdEdxCondData object for testing --Rebecca"};  
+      {this, "WriteKey", "PixelClusterdEdxCondData", "Output Pixel cluster dEdx equalization scale factors"};  
    
     Gaudi::Property<int> m_configFlag 
-      {this, "ConfigFlag", true,"Switching Pixel dEdx Calib on and off --Rebecca" };
+      {this, "ConfigFlag", true,"Flag switches Pixel dEdx cluster equalization calibration on or off" };
  
 };  
 #endif
