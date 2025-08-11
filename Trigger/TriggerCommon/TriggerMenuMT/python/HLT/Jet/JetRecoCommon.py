@@ -450,7 +450,7 @@ def defineJetConstit(jetRecoDict,clustersKey=None,pfoPrefix=None):
         elif jetRecoDict["clusterCalib"] == "lcw":
             constitMods = ["LC"] + constitMods
         else:
-            log.error("cluster calib state not recognised : ",jetRecoDict["clusterCalib"])
+            log.error("cluster calib state not recognised : %s",jetRecoDict["clusterCalib"])
         if not clustersKey:
             raise ValueError("cluster key must be provided for topocluster jets.")
             

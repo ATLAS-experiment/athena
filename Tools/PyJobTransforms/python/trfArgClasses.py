@@ -779,12 +779,12 @@ class argFile(argList):
                                 if fileMask != '':
                                     if(patt.search(srmFile)) is not None:
                                     #if fnmatch.fnmatch(srmFile, fileMask):
-                                        msg.debug('match: ',srmFile)
+                                        msg.debug('match: %s',srmFile)
                                         newValue.extend(([srmFile]))
                                 else:
                                     newValue.extend(([srmFile]))
                                 
-                            msg.debug('Selected files: ', newValue)
+                            msg.debug('Selected files: %s', newValue)
                         except (AttributeError, TypeError, OSError):
                             raise trfExceptions.TransformArgException(trfExit.nameToCode('TRF_RUNTIME_ERROR'),
                                                                       'Failed to convert %s to a list' % str(value))

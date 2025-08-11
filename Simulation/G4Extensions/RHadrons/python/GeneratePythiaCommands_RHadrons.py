@@ -13,7 +13,7 @@ def determineLegacyGeneratorJobOptions(mcChannelNumber):
     # Default position: look in cvmfs for job options
     if(mcChannelNumber ==  449497 ):
         mcChannelNumber =  421442
-        rhlog.info('MC channel number changed from 449497 to ', str(mcChannelNumber))
+        rhlog.info('MC channel number changed from 449497 to %d', mcChannelNumber)
 
     cvmfs_mc16 = '/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/'
 
