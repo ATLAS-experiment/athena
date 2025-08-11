@@ -1,68 +1,10 @@
-/*  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
- */
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 
 #include "src/GridTripletSeedingTool.h"
 
-#include <cmath>
-
 namespace ActsTrk {
-
-namespace {
-
-static constexpr float expCutRMin = 45.;
-
-static inline bool itkFastTrackingSpCut(
-    const Acts::Experimental::ConstSpacePointProxy2& sp) {
-  float r = sp.r();
-  float zabs = std::abs(sp.z());
-
-  // We perform a triangular cut and remove the space points
-  // that have |z| < 200 and radius < expCutRMin
-  // But we do that only if the eta of the space point wrt origin is < 3.6
-  // eta 3.6 corresponds to 18.2855
-  if (zabs > 200. and zabs < 18.2855 * r and r < expCutRMin) {
-    return false;
-  }
-
-  // Remove space points beyond eta=4 if their z is larger than the max seed z0
-  // (150.)
-  float cotTheta = 27.2899;  // corresponds to eta=4
-  if ((zabs - 150.) > cotTheta * r) {
-    return false;
-  }
-
-  return true;
-}
-
-static inline bool itkFastDoubletCut(
-    const Acts::Experimental::ConstSpacePointProxy2& /*middle*/,
-    const Acts::Experimental::ConstSpacePointProxy2& other, float cotTheta,
-    bool isBottomCandidate) {
-  // We remove here some seeds, in case the bottom space point radius is
-  // too small (i.e. < fastTrackingRMin)
-
-  // This operation is done only within a specific eta window
-  // Instead of eta we use the doublet cottheta
-  // We require:
-  //     fastTrackingCotThetaWindowMin < cottheta doublet <
-  //     fastTrackingCotThetaWindowMax
-  // with stranslates to an eta window.
-  // cottheta of 1.5 is about eta 1.2
-  // cottheta of 18.2855 is about eta of 3.6
-  constexpr float fastTrackingCotThetaWindowMin = 1.5;
-  constexpr float fastTrackingCotThetaWindowMax = 18.2855;
-
-  float absCotTheta = std::abs(cotTheta);
-  if (isBottomCandidate && other.r() < expCutRMin &&
-      absCotTheta > fastTrackingCotThetaWindowMin &&
-      absCotTheta < fastTrackingCotThetaWindowMax) {
-    return false;
-  }
-
-  return true;
-}
-
-}  // namespace
 
 GridTripletSeedingTool::GridTripletSeedingTool(const std::string& type,
                                                const std::string& name,
@@ -183,7 +125,7 @@ StatusCode GridTripletSeedingTool::initialize() {
   ATH_MSG_DEBUG("   " << m_numSeedIncrement);
   ATH_MSG_DEBUG("   " << m_deltaInvHelixDiameter);
 
-  // Make the logger And Propagate to ACTS routines
+  // Make the logger && Propagate to ACTS routines
   m_logger = makeActsAthenaLogger(this, "Acts");
 
   if (m_zBinEdges.size() - 1 != m_zBinNeighborsTop.size() &&
@@ -234,20 +176,20 @@ StatusCode GridTripletSeedingTool::initialize() {
     }
   }
 
-  m_gridCfg.minPt = m_minPt.value();
+  m_gridCfg.minPt = m_minPt;
   m_gridCfg.rMin = 0;
-  m_gridCfg.rMax = m_gridRMax.value();
-  m_gridCfg.zMin = m_zMin.value();
-  m_gridCfg.zMax = m_zMax.value();
-  m_gridCfg.deltaRMax = m_deltaRMax.value();
-  m_gridCfg.cotThetaMax = m_cotThetaMax.value();
-  m_gridCfg.impactMax = m_impactMax.value();
-  m_gridCfg.phiMin = m_gridPhiMin.value();
-  m_gridCfg.phiMax = m_gridPhiMax.value();
-  m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage.value();
-  m_gridCfg.maxPhiBins = m_maxPhiBins.value();
-  m_gridCfg.zBinEdges = m_zBinEdges.value();
-  m_gridCfg.rBinEdges = m_rBinEdges.value();
+  m_gridCfg.rMax = m_gridRMax;
+  m_gridCfg.zMin = m_zMin;
+  m_gridCfg.zMax = m_zMax;
+  m_gridCfg.deltaRMax = m_deltaRMax;
+  m_gridCfg.cotThetaMax = m_cotThetaMax;
+  m_gridCfg.impactMax = m_impactMax;
+  m_gridCfg.phiMin = m_gridPhiMin;
+  m_gridCfg.phiMax = m_gridPhiMax;
+  m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
+  m_gridCfg.maxPhiBins = m_maxPhiBins;
+  m_gridCfg.zBinEdges = m_zBinEdges;
+  m_gridCfg.rBinEdges = m_rBinEdges;
   m_gridCfg.bFieldInZ = 0;  // will result in max phi bins
   m_gridCfg.bottomBinFinder = Acts::GridBinFinder<3ul>(
       m_numPhiNeighbors.value(), m_zBinNeighborsBottom.value(),
@@ -256,48 +198,51 @@ StatusCode GridTripletSeedingTool::initialize() {
                                                     m_zBinNeighborsTop.value(),
                                                     m_rBinNeighborsTop.value());
   m_gridCfg.navigation[0ul] = {};
-  m_gridCfg.navigation[1ul] = m_zBinsCustomLooping.value();
-  m_gridCfg.navigation[2ul] = m_rBinsCustomLooping.value();
+  m_gridCfg.navigation[1ul] = m_zBinsCustomLooping;
+  m_gridCfg.navigation[2ul] = m_rBinsCustomLooping;
 
   m_bottomDoubletFinderCfg.candidateDirection = Acts::Direction::Backward();
-  m_bottomDoubletFinderCfg.deltaRMin = m_deltaRMinBottomSP.value();
-  m_bottomDoubletFinderCfg.deltaRMax = m_deltaRMaxBottomSP.value();
+  m_bottomDoubletFinderCfg.deltaRMin = m_deltaRMinBottomSP;
+  m_bottomDoubletFinderCfg.deltaRMax = m_deltaRMaxBottomSP;
   m_bottomDoubletFinderCfg.deltaZMin = -std::numeric_limits<float>::infinity();
-  m_bottomDoubletFinderCfg.deltaZMax = m_deltaZMax.value();
-  m_bottomDoubletFinderCfg.impactMax = m_impactMax.value();
-  m_bottomDoubletFinderCfg.interactionPointCut = m_interactionPointCut.value();
-  m_bottomDoubletFinderCfg.collisionRegionMin = m_collisionRegionMin.value();
-  m_bottomDoubletFinderCfg.collisionRegionMax = m_collisionRegionMax.value();
-  m_bottomDoubletFinderCfg.cotThetaMax = m_cotThetaMax.value();
-  m_bottomDoubletFinderCfg.minPt = m_minPt.value();
+  m_bottomDoubletFinderCfg.deltaZMax = m_deltaZMax;
+  m_bottomDoubletFinderCfg.impactMax = m_impactMax;
+  m_bottomDoubletFinderCfg.interactionPointCut = m_interactionPointCut;
+  m_bottomDoubletFinderCfg.collisionRegionMin = m_collisionRegionMin;
+  m_bottomDoubletFinderCfg.collisionRegionMax = m_collisionRegionMax;
+  m_bottomDoubletFinderCfg.cotThetaMax = m_cotThetaMax;
+  m_bottomDoubletFinderCfg.minPt = m_minPt;
   m_bottomDoubletFinderCfg.helixCutTolerance = 1.;
   if (m_useExperimentCuts) {
-    m_bottomDoubletFinderCfg.experimentCuts.connect<itkFastDoubletCut>();
+    m_bottomDoubletFinderCfg.experimentCuts
+        .connect<&ActsTrk::GridTripletSeedingTool::doubletSelectionFunction>(
+            this);
   }
+  m_bottomDoubletFinderCfg.spacePointsSortedByRadius = true;
 
   m_topDoubletFinderCfg = m_bottomDoubletFinderCfg;  // copy the bottom cuts
   m_topDoubletFinderCfg.candidateDirection = Acts::Direction::Forward();
-  m_topDoubletFinderCfg.deltaRMin = m_deltaRMinTopSP.value();
-  m_topDoubletFinderCfg.deltaRMax = m_deltaRMaxTopSP.value();
+  m_topDoubletFinderCfg.deltaRMin = m_deltaRMinTopSP;
+  m_topDoubletFinderCfg.deltaRMax = m_deltaRMaxTopSP;
 
-  m_tripletCuts.minPt = m_minPt.value();
-  m_tripletCuts.sigmaScattering = m_sigmaScattering.value();
-  m_tripletCuts.radLengthPerSeed = m_radLengthPerSeed.value();
-  m_tripletCuts.maxPtScattering = m_maxPtScattering.value();
-  m_tripletCuts.impactMax = m_impactMax.value();
+  m_tripletCuts.minPt = m_minPt;
+  m_tripletCuts.sigmaScattering = m_sigmaScattering;
+  m_tripletCuts.radLengthPerSeed = m_radLengthPerSeed;
+  m_tripletCuts.maxPtScattering = m_maxPtScattering;
+  m_tripletCuts.impactMax = m_impactMax;
   m_tripletCuts.helixCutTolerance = 1.;
-  m_tripletCuts.toleranceParam = m_toleranceParam.value();
+  m_tripletCuts.toleranceParam = m_toleranceParam;
 
-  m_filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter.value();
-  m_filterCfg.deltaRMin = m_deltaRMin.value();
-  m_filterCfg.compatSeedWeight = m_compatSeedWeight.value();
-  m_filterCfg.impactWeightFactor = m_impactWeightFactor.value();
-  m_filterCfg.zOriginWeightFactor = m_zOriginWeightFactor.value();
-  m_filterCfg.maxSeedsPerSpM = m_maxSeedsPerSpM.value();
-  m_filterCfg.compatSeedLimit = m_compatSeedLimit.value();
-  m_filterCfg.seedWeightIncrement = m_seedWeightIncrement.value();
-  m_filterCfg.numSeedIncrement = m_numSeedIncrement.value();
-  m_filterCfg.seedConfirmation = m_seedConfirmationInFilter.value();
+  m_filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
+  m_filterCfg.deltaRMin = m_deltaRMin;
+  m_filterCfg.compatSeedWeight = m_compatSeedWeight;
+  m_filterCfg.impactWeightFactor = m_impactWeightFactor;
+  m_filterCfg.zOriginWeightFactor = m_zOriginWeightFactor;
+  m_filterCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
+  m_filterCfg.compatSeedLimit = m_compatSeedLimit;
+  m_filterCfg.seedWeightIncrement = m_seedWeightIncrement;
+  m_filterCfg.numSeedIncrement = m_numSeedIncrement;
+  m_filterCfg.seedConfirmation = m_seedConfirmationInFilter;
   m_filterCfg.centralSeedConfirmationRange.zMinSeedConf = m_seedConfCentralZMin;
   m_filterCfg.centralSeedConfirmationRange.zMaxSeedConf = m_seedConfCentralZMax;
   m_filterCfg.centralSeedConfirmationRange.rMaxSeedConf = m_seedConfCentralRMax;
@@ -324,19 +269,94 @@ StatusCode GridTripletSeedingTool::initialize() {
       m_seedConfForwardMaxZOrigin;
   m_filterCfg.forwardSeedConfirmationRange.minImpactSeedConf =
       m_seedConfForwardMinImpact;
-  m_filterCfg.maxSeedsPerSpMConf = m_maxSeedsPerSpMConf.value();
-  m_filterCfg.maxQualitySeedsPerSpMConf = m_maxQualitySeedsPerSpMConf.value();
-  m_filterCfg.useDeltaRinsteadOfTopRadius = m_useDeltaRorTopRadius.value();
+  m_filterCfg.maxSeedsPerSpMConf = m_maxSeedsPerSpMConf;
+  m_filterCfg.maxQualitySeedsPerSpMConf = m_maxQualitySeedsPerSpMConf;
+  m_filterCfg.useDeltaRinsteadOfTopRadius = m_useDeltaRorTopRadius;
 
-  m_finderOpts.useStripMeasurementInfo =
-      m_useDetailedDoubleMeasurementInfo.value();
+  m_finderOpts.useStripMeasurementInfo = m_useDetailedDoubleMeasurementInfo;
+  m_finderOpts.spacePointsSortedByRadius = true;
 
   m_finder = Acts::Experimental::BroadTripletSeedFinder(
       logger().cloneWithSuffix("Finder"));
   m_filter = Acts::Experimental::BroadTripletSeedFilter(
       m_filterCfg, logger().cloneWithSuffix("Filter"));
 
+  ATH_CHECK(detStore()->retrieve(m_pixelId, "PixelID"));
+
   return StatusCode::SUCCESS;
+}
+
+bool GridTripletSeedingTool::spacePointSelectionFunction(
+    const Acts::Experimental::ConstSpacePointProxy2& sp) const {
+  float r = sp.r();
+  float zabs = std::abs(sp.z());
+  float absCotTheta = zabs / r;
+
+  // checking configuration to remove pixel space points
+  const xAOD::SpacePoint* inputSp =
+      sp.sourceLinks()[0].get<const xAOD::SpacePoint*>();
+  Identifier identifier = m_pixelId->wafer_id(inputSp->elementIdList().at(0));
+  if (m_pixelId->is_barrel(identifier)) {
+    if (zabs > 200 && r < 40)
+      return false;
+
+    return true;
+  }
+
+  // Inner layers
+  // Below 1.20 - accept all
+  static constexpr float cotThetaEta120 = 1.5095;
+  if (absCotTheta < cotThetaEta120)
+    return true;
+
+  // Below 3.40 - remove if too close to beamline
+  static constexpr float cotThetaEta340 = 14.9654;
+  if (absCotTheta < cotThetaEta340 && r < m_expCutrMin)
+    return false;
+
+  // Outer layers
+  // Above 2.20
+  static constexpr float cotThetaEta220 = 4.4571;
+  if (absCotTheta > cotThetaEta220 && r > 260.)
+    return false;
+
+  // Above 2.60
+  static constexpr float cotThetaEta260 = 6.6947;
+  if (absCotTheta > cotThetaEta260 && r > 200.)
+    return false;
+
+  // Above 3.20
+  static constexpr float cotThetaEta320 = 12.2459;
+  if (absCotTheta > cotThetaEta320 && r > 140.)
+    return false;
+
+  // Above 4.00
+  static constexpr float cotThetaEta400 = 27.2899;
+  if (absCotTheta > cotThetaEta400)
+    return false;
+
+  return true;
+}
+
+bool GridTripletSeedingTool::doubletSelectionFunction(
+    const Acts::Experimental::ConstSpacePointProxy2& /*middle*/,
+    const Acts::Experimental::ConstSpacePointProxy2& other, float cotTheta,
+    bool isBottomCandidate) const {
+  // We remove here some seeds, in case the bottom space point radius is
+  // too small (i.e. < fastTrackingRMin)
+
+  // This operation is done only within a specific eta window
+  // Instead of eta we use the doublet cottheta
+  static constexpr float cotThetaEta120 = 1.5095;
+  static constexpr float cotThetaEta360 = 18.2855;
+
+  float absCotTheta = std::abs(cotTheta);
+  if (isBottomCandidate && other.r() < m_expCutrMin &&
+      absCotTheta > cotThetaEta120 && absCotTheta < cotThetaEta360) {
+    return false;
+  }
+
+  return true;
 }
 
 std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
@@ -374,7 +394,7 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       gridCfg, logger().cloneWithSuffix("Grid"));
 
   for (auto sp : spacePoints) {
-    if (m_useExperimentCuts && !itkFastTrackingSpCut(sp)) {
+    if (m_useExperimentCuts && !spacePointSelectionFunction(sp)) {
       continue;
     }
 
@@ -399,9 +419,14 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       Acts::Experimental::SpacePointColumns::Z |
       Acts::Experimental::SpacePointColumns::R |
       Acts::Experimental::SpacePointColumns::VarianceR |
-      Acts::Experimental::SpacePointColumns::VarianceZ |
-      Acts::Experimental::SpacePointColumns::Strip);
+      Acts::Experimental::SpacePointColumns::VarianceZ);
+  if (m_useDetailedDoubleMeasurementInfo) {
+    selectedSpacePoints.createColumns(
+        Acts::Experimental::SpacePointColumns::Strip);
+  }
   selectedSpacePoints.reserve(grid.numberOfSpacePoints());
+  std::vector<Acts::Experimental::SpacePointIndex2> copyFromIndices;
+  copyFromIndices.reserve(grid.numberOfSpacePoints());
   std::vector<Acts::Experimental::SpacePointIndexRange2> gridSpacePointRanges;
   gridSpacePointRanges.reserve(grid.numberOfBins());
   for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
@@ -417,10 +442,22 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       newSp.r() = sp.r();
       newSp.varianceR() = sp.varianceR();
       newSp.varianceZ() = sp.varianceZ();
+      if (m_useDetailedDoubleMeasurementInfo) {
+        newSp.topStripVector() = sp.topStripVector();
+        newSp.bottomStripVector() = sp.bottomStripVector();
+        newSp.stripCenterDistance() = sp.stripCenterDistance();
+        newSp.topStripCenter() = sp.topStripCenter();
+      }
+
+      copyFromIndices.push_back(spIndex);
     }
     std::uint32_t end = selectedSpacePoints.size();
     gridSpacePointRanges.emplace_back(begin, end);
   }
+
+  ACTS_VERBOSE("Number of space points after selection "
+               << selectedSpacePoints.size() << " out of "
+               << spacePoints.size());
 
   // Compute radius range. We rely on the fact the grid is storing the proxies
   // with a sorting in the radius
@@ -503,45 +540,47 @@ StatusCode GridTripletSeedingTool::createSeeds2(
 
     m_finder->createSeedsFromGroups(
         finderOpts, state, cache, bottomDoubletFinder, topDoubletFinder,
-        tripletCuts, *m_filter, spacePoints, bottomSpRanges, *middleSpRange,
-        topSpRanges, radiusRangeForMiddle, seedContainer);
+        tripletCuts, *m_filter, selectedSpacePoints, bottomSpRanges,
+        *middleSpRange, topSpRanges, radiusRangeForMiddle, seedContainer);
   }
 
-  if (m_seedQualitySelection) {
-    // Selection function - temporary implementation
-    // need change from ACTS for final implementation
-    // To be used only on PPP
-    auto selectionFunction =
-        [&state](const Acts::Experimental::MutableSeedProxy2& seed) -> bool {
-      float seedQuality = seed.quality();
-      float bottomQuality =
-          state.filter.bestSeedQualityMap.at(seed.spacePointIndices()[0]);
-      float middleQuality =
-          state.filter.bestSeedQualityMap.at(seed.spacePointIndices()[1]);
-      float topQuality =
-          state.filter.bestSeedQualityMap.at(seed.spacePointIndices()[2]);
+  // Selection function - temporary implementation
+  // need change from ACTS for final implementation
+  // To be used only on PPP
+  auto selectionFunction =
+      [&state](const Acts::Experimental::MutableSeedProxy2& seed) -> bool {
+    float seedQuality = seed.quality();
+    float bottomQuality =
+        state.filter.bestSeedQualityMap.at(seed.spacePointIndices()[0]);
+    float middleQuality =
+        state.filter.bestSeedQualityMap.at(seed.spacePointIndices()[1]);
+    float topQuality =
+        state.filter.bestSeedQualityMap.at(seed.spacePointIndices()[2]);
 
-      return bottomQuality <= seedQuality || middleQuality <= seedQuality ||
-             topQuality <= seedQuality;
-    };
+    return bottomQuality <= seedQuality || middleQuality <= seedQuality ||
+           topQuality <= seedQuality;
+  };
 
-    Acts::Experimental::SeedContainer2 newSeedContainer;
-    newSeedContainer.reserve(seedContainer.size());
+  Acts::Experimental::SeedContainer2 newSeedContainer;
+  newSeedContainer.reserve(seedContainer.size());
 
-    // Select the seeds
-    for (Acts::Experimental::MutableSeedProxy2 seed : seedContainer) {
-      if (!selectionFunction(seed)) {
-        continue;
-      }
-      auto newSeed = newSeedContainer.createSeed();
-      newSeed.assignSpacePointIndices(seed.spacePointIndices());
-      newSeed.vertexZ() = seed.vertexZ();
-      newSeed.quality() = seed.quality();
+  // Select the seeds
+  for (Acts::Experimental::MutableSeedProxy2 seed : seedContainer) {
+    if (m_seedQualitySelection && !selectionFunction(seed)) {
+      continue;
     }
-
-    // Replace the old seed container with the new one
-    seedContainer = std::move(newSeedContainer);
+    std::array<Acts::Experimental::SpacePointIndex2, 3> spacePointIndices{
+        copyFromIndices[seed.spacePointIndices()[0]],
+        copyFromIndices[seed.spacePointIndices()[1]],
+        copyFromIndices[seed.spacePointIndices()[2]]};
+    auto newSeed = newSeedContainer.createSeed();
+    newSeed.assignSpacePointIndices(spacePointIndices);
+    newSeed.vertexZ() = seed.vertexZ();
+    newSeed.quality() = seed.quality();
   }
+
+  // Replace the old seed container with the new one
+  seedContainer = std::move(newSeedContainer);
 
   return StatusCode::SUCCESS;
 }
