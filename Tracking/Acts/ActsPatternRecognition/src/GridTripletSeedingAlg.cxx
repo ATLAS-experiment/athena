@@ -115,18 +115,22 @@ StatusCode GridTripletSeedingAlg::execute(const EventContext& ctx) const {
       Acts::Experimental::SpacePointColumns::R |
       Acts::Experimental::SpacePointColumns::Phi |
       Acts::Experimental::SpacePointColumns::VarianceR |
-      Acts::Experimental::SpacePointColumns::VarianceZ |
-      Acts::Experimental::SpacePointColumns::Strip);
+      Acts::Experimental::SpacePointColumns::VarianceZ);
+  if (!m_usePixel.value()) {
+    selectedSpacePoints.createColumns(
+        Acts::Experimental::SpacePointColumns::Strip);
+  }
 
   for (const auto* collection : allInputCollections) {
     for (const xAOD::SpacePoint* inputSp : *collection) {
       auto newSp = selectedSpacePoints.createSpacePoint();
-      newSp.assignSourceLinks(std::array<Acts::SourceLink, 1>{Acts::SourceLink(inputSp)});
-      inputSp->x();
-      inputSp->y();
-      inputSp->z();
-      newSp.phi() = std::atan2(inputSp->y(), inputSp->x());
+      newSp.assignSourceLinks(
+          std::array<Acts::SourceLink, 1>{Acts::SourceLink(inputSp)});
+      newSp.x() = inputSp->x();
+      newSp.y() = inputSp->y();
+      newSp.z() = inputSp->z();
       newSp.r() = std::hypot(inputSp->x(), inputSp->y());
+      newSp.phi() = std::atan2(inputSp->y(), inputSp->x());
       newSp.varianceR() = inputSp->varianceR();
       newSp.varianceZ() = inputSp->varianceZ();
       if (!m_usePixel.value()) {

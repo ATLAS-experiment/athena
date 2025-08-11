@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_GRIDTRIPLETSEEDINGTOOL_GRIDTRIPLETSEEDINGTOOL_H
@@ -9,6 +9,7 @@
 #include "ActsInterop/Logger.h"
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "InDetIdentifier/PixelID.h"
 
 // ACTS CORE
 #include "Acts/EventData/SeedContainer2.hpp"
@@ -328,6 +329,9 @@ class GridTripletSeedingTool
       this, "stateVectorReserveSize", 500,
       "Size of the initial Seeding State internal vectors"};
 
+  Gaudi::Property<float> m_expCutrMin{this, "SpSelectionExpCutrMin",
+                                      45. * Acts::UnitConstants::mm};
+
  private:
   Acts::Experimental::CylindricalSpacePointGrid2::Config m_gridCfg;
   Acts::Experimental::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
@@ -344,8 +348,18 @@ class GridTripletSeedingTool
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
 
+  const PixelID* m_pixelId{nullptr};
+
   /// Private access to the logger
   const Acts::Logger& logger() const { return *m_logger; }
+
+  bool spacePointSelectionFunction(
+      const Acts::Experimental::ConstSpacePointProxy2& sp) const;
+
+  bool doubletSelectionFunction(
+      const Acts::Experimental::ConstSpacePointProxy2& middle,
+      const Acts::Experimental::ConstSpacePointProxy2& other, float cotTheta,
+      bool isBottomCandidate) const;
 
   std::pair<float, float> retrieveRadiusRangeForMiddle(
       const Acts::Experimental::ConstSpacePointProxy2& spM,
