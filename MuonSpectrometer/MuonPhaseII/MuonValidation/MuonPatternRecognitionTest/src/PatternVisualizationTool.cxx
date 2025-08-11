@@ -18,6 +18,8 @@
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
 
+#include "Acts/Utilities/Helpers.hpp"
+
 #include <format>
 #include <sstream>
 #include <filesystem>
@@ -35,12 +37,6 @@ namespace {
                     return !std::isalnum(c);
                    }), str.end());
         return str;
-    }
-    std::vector<const MuonR4::SpacePoint*> stripSmartPtr(const MuonR4::SpacePointBucket& bucket) {
-        std::vector<const MuonR4::SpacePoint*> ret{};
-        std::transform(bucket.begin(), bucket.end(), std::back_inserter(ret), 
-                      [](const MuonR4::SpacePointBucket::value_type& sp){ return sp.get();});
-        return ret;
     }
     constexpr int truthColor = kOrange +2;
     constexpr int parLineColor = kRed;
@@ -374,7 +370,7 @@ namespace MuonValR4 {
             return;
         }
         std::array<double, 4> canvasDim{};        
-        LabeledSegmentSet truthSegs{getLabeledSegments(stripSmartPtr(bucket))};
+        LabeledSegmentSet truthSegs{getLabeledSegments(Acts::unpackConstSmartPointers(bucket))};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
