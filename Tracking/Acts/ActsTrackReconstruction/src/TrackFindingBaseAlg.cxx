@@ -35,8 +35,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_doBranchStopper);
     ATH_MSG_DEBUG("   " << m_addPixelStripCounts);
     ATH_MSG_DEBUG("   " << m_doTwoWay);
-    ATH_MSG_DEBUG("   " << m_autoReverseSearch);
-    ATH_MSG_DEBUG("   " << m_countSharedHits);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
     ATH_MSG_DEBUG("   " << m_etaMin);
@@ -45,6 +43,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_absEtaMax);
     ATH_MSG_DEBUG("   " << m_ptMin);
     ATH_MSG_DEBUG("   " << m_ptMax);
+    ATH_MSG_DEBUG("   " << m_d0Min);
+    ATH_MSG_DEBUG("   " << m_d0Max);
     ATH_MSG_DEBUG("   " << m_z0Min);
     ATH_MSG_DEBUG("   " << m_z0Max);
     ATH_MSG_DEBUG("   " << m_minMeasurements);
@@ -62,6 +62,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMaxExtra);
     ATH_MSG_DEBUG("   " << m_branchStopperMeasCutReduce);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMeasCut);
+    ATH_MSG_DEBUG("   " << m_endOfWorldVolumeIds);
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -74,7 +75,6 @@ namespace ActsTrk {
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
     ATH_CHECK(m_ATLASConverterTool.retrieve());
-    ATH_CHECK(m_paramEstimationTool.retrieve());
     ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
@@ -161,7 +161,7 @@ namespace ActsTrk {
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
 
     m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometryTool.get()};
-    
+
     initStatTables();
 
     return StatusCode::SUCCESS;
@@ -210,7 +210,7 @@ namespace ActsTrk {
                                trackFinder().ckfExtensions, plainOptions, pSurface);
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(measurements, options);
-    
+
     Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
     plainSecondOptions.maxSteps = m_maxPropagationStep;
     plainSecondOptions.direction = plainOptions.direction.invert();
@@ -230,35 +230,35 @@ namespace ActsTrk {
            : (std::abs(eta) < trackSelectorCfg.absEtaEdges.front()) ? trackSelectorCfg.cutSets.front()
                                                                     : trackSelectorCfg.getCuts(eta);
   };
-  
-  std::vector<typename detail::RecoTrackContainer::TrackProxy> 
+
+  std::vector<typename detail::RecoTrackContainer::TrackProxy>
   TrackFindingBaseAlg::doTwoWayTrackFinding(const detail::RecoTrackStateContainerProxy& firstMeasurement,
                                             const TrkProxy &trackProxy,
                                             detail::RecoTrackContainer &tracksContainerTemp,
                                             const TrackFinderOptions &options) const {
     if (not m_doTwoWay) return {};
-    
+
     // Create initial parameters for the propagation
     Acts::BoundTrackParameters secondInitialParameters = trackProxy.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
     if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
       return {};
     }
-    
+
     auto rootBranch = tracksContainerTemp.makeTrack();
     rootBranch.copyFrom(trackProxy, false);  // #3534
     if (m_addPixelStripCounts) {
       copyPixelStripCounts(rootBranch, trackProxy);
     }
-    
+
     // perform track finding
-    auto secondResult = 
+    auto secondResult =
       trackFinder().ckf.findTracks(secondInitialParameters, options, tracksContainerTemp, rootBranch);
     if (not secondResult.ok()) {
       return {};
     }
     return secondResult.value();
   }
-  
+
   xAOD::UncalibMeasType TrackFindingBaseAlg::measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState) {
     if (trackState.hasReferenceSurface()) {
       if (const auto *actsDetElem = dynamic_cast<const IDetectorElementBase *>(trackState.referenceSurface().associatedDetectorElement())) {
@@ -272,7 +272,7 @@ namespace ActsTrk {
         }
       }
     }
-    
+
     return xAOD::UncalibMeasType::Other;
   }
 
@@ -328,7 +328,7 @@ namespace ActsTrk {
       return BranchStopperResult::StopAndDrop;
     }
 
-  
+
     // In the pixel endcap regions relax the requirement for minMeasurements before cutting the branch off
     auto minMeasurementsBranchStop = std::abs(eta) > m_branchStopperAbsEtaMeasCut ? cutSet.minMeasurements - m_branchStopperMeasCutReduce : cutSet.minMeasurements;
     bool enoughMeasurements = (track.nMeasurements() >= minMeasurementsBranchStop);
@@ -742,5 +742,5 @@ namespace ActsTrk {
     auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] = selectPixelStripCounts(track, eta);
     return enoughMeasurementsPS && !tooManyHolesPS && !tooManyOutliersPS;
   }
-  
+
 }  // namespace ActsTrk
