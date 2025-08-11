@@ -46,19 +46,6 @@ namespace pool {
 
      // ------------------- Query interface
      
-     /**
-      * Sets the query.
-      * @param whereClause The query.
-      * @param attributeBindData  - unused
-      * @param tokenBindData  - unused
-      */
-     virtual void setCondition( const std::string& whereClause,
-                                coral::AttributeList* attributeBindData = 0,
-                                TokenList* tokenBindData = 0 ) ;
-
-     /// Returns the where clause of the query.
-     virtual const std::string& whereClause() const;
-
      /// Processes the query and returns a cursor over the query result.
      /// this method returns self
      virtual pool::ICollectionCursor& execute();
@@ -99,15 +86,9 @@ namespace pool {
 
      // ------------------- Unimplemented methods
 
-     virtual void addToOutputList( const std::string& ) {}
-     virtual void addToOutputList( const std::vector<std::string>& ) {}
      virtual void selectAllAttributes() {}
      virtual void selectAllTokens() {}
      virtual void selectAll() {}
-     virtual void addToCollectionFragmentList( const std::string& ) {}
-     virtual void addToCollectionFragmentList( const std::vector< std::string >& ) {}
-     virtual void addAllCollectionFragments() {}
-     virtual void setRowCacheSize( int ) {}
 
      virtual void close() {}
 
@@ -118,8 +99,6 @@ namespace pool {
      Token*             m_token;
 
      mutable CollectionRowBuffer        m_rowBuffer;
-
-     std::string                m_whereClause;
    };
 
 }

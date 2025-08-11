@@ -127,7 +127,6 @@ pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
    delete m_collectionQuery; m_collectionQuery = nullptr;
    m_collectionQuery = m_poolCollection->newQuery();
    m_collectionQuery->selectAll();
-   m_collectionQuery->setRowCacheSize(100);   //MN: FIXME - just an arbitrary number
    return(m_collectionQuery->execute());
 }
 //______________________________________________________________________________
