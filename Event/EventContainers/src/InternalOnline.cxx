@@ -60,7 +60,9 @@ void InternalOnline::wait() const {
     for(size_t i =0;i<m_mask.size();i++){
         if(m_mask[i]) m_map.emplace_back(i, m_cacheLink->m_vec[i].load(std::memory_order_relaxed));//acquire sync is done by  m_waitNeeded
     }
-    m_waitNeeded.store(false, std::memory_order_release);
+    //Full sync to release m_map and acquire pointers retrieved
+    //Probably done by the lock descoping but this is easier to read.
+    m_waitNeeded.store(false, std::memory_order_seq_cst);
 }
 
 bool InternalOnline::tryAddFromCache(IdentifierHash hashId, EventContainers::IDC_WriteHandleBase &lock) {
