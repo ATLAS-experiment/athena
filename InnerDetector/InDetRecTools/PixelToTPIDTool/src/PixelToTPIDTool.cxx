@@ -8,10 +8,6 @@
 #include "Identifier/Identifier.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 
-//Rebecca - includes
-// #include "StoreGate/StoreGateSvc.h"
-//Rebecca - end includes
-
 // Tracking:
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
@@ -33,7 +29,6 @@
 
 // Math functions:
 #include <cmath>
-
 #include "PathResolver/PathResolver.h"
 
 InDet::PixelToTPIDTool::PixelToTPIDTool(const std::string& t, const std::string& n, const IInterface*  p )
@@ -133,26 +128,21 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           float dotProd = (*tsosIter)->trackParameters()->momentum().dot((*tsosIter)->trackParameters()->associatedSurface().normal());
           float cosalpha =
             fabs(dotProd / (*tsosIter)->trackParameters()->momentum().mag());
+
           ATH_MSG_INFO("Rebecca - Testing pixel hash structure");
           int phi_module = m_pixelid->phi_module(pixclus->identify());
-          ATH_MSG_INFO("Here are the values? numbers (bec, layer, phi, eta): " << bec << " "
+          ATH_MSG_INFO("Here are the cluster Pixel wafer values (bec, layer, phi, eta): " << bec << " "
                                                                                << layer << " " 
                                                                                << phi_module << " " <<
                                                                                 eta_module);
           
           Identifier idWafer = m_pixelid->wafer_id(bec,layer,phi_module,eta_module,true);
-          ATH_MSG_INFO("Here is the WAFER ID: " <<  idWafer );
-          Identifier idPixel = m_pixelid->pixel_id(bec,layer,phi_module,eta_module,0,0);
           IdentifierHash idHash = m_pixelid->wafer_hash(idWafer); 
-          ATH_MSG_INFO("This should be the wafer id HASH: " << idHash);
+          ATH_MSG_INFO("This should be the wafer ID HASH: " << idHash);
 
           if (std::abs(cosalpha)<0.16) { continue; }
-          //IdentifierHash wafer_hash(Identifier wafer_id) const;
-          // Get SF for cluster 
-          float scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getScaleFactor(idHash); //XXXRebecca
-          ATH_MSG_INFO("Rebecca - Did I read from PixelChargeCalibCondData?");
-          ATH_MSG_INFO("bec: " << bec << " layer: " << layer << " etaM: " << eta_module);
-          ATH_MSG_INFO(scaleFactor);
+          float scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getScaleFactor(idHash);
+          ATH_MSG_INFO("Here is the assosciated scale factor: " << scaleFactor);
           float charge=pixclus->prepRawData()->totalCharge()*cosalpha*scaleFactor;
 
           //keep track if this is an ibl cluster with overflow
