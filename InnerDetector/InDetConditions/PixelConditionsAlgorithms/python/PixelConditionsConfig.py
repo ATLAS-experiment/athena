@@ -438,10 +438,13 @@ def PixelClusterdEdxCondAlgCfg(flags, name="PixelClusterdEdxCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelClusterdEdxCondAlg"""
     acc = ComponentAccumulator()
     acc.merge(PixelConfigCondAlgCfg(flags))
-    kwargs.setdefault("ReadKey", "/PIXEL/test")
-    acc.merge(addFolders(flags, "/PIXEL/test",  className="CondAttrListCollection"))
+    kwargs.setdefault("ConfigFlag", flags.InDet.PixelConfig.clusterdEdxCalib) #Default is false
+    if (flags.InDet.PixelConfig.clusterdEdxCalib):
+        kwargs.setdefault("ReadKey", "/PIXEL/test")
+        acc.merge(addFolders(flags, "/PIXEL/test",  className="CondAttrListCollection"))
+    else:
+        kwargs.setdefault("ReadKey", " ")
     kwargs.setdefault("WriteKey","PixelClusterdEdxCondData")
-    kwargs.setdefault("ConfigFlag", flags.InDet.PixelConfig.clusterdEdxCalib) #Default is true
     acc.addCondAlgo(CompFactory.PixelClusterdEdxCondAlg(name, **kwargs))
     return acc
 

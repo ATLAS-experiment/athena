@@ -32,35 +32,42 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
   
-  SG::ReadCondHandle<CondAttrListCollection> readHandle(m_readKey,ctx);
-  const CondAttrListCollection* readCdo = *readHandle; 
-  if (readCdo==nullptr) {
-    ATH_MSG_FATAL("Null pointer to the read conditions object");
-    return StatusCode::FAILURE;
-  }
-  // Get the validitiy range
-  EventIDRange rangeW;
-  if (not readHandle.range(rangeW)) {
-    ATH_MSG_FATAL("Failed to retrieve validity range for " << readHandle.key());
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG("Size of AthenaAttributeList " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
-  ATH_MSG_DEBUG("Range of input is " << rangeW);
+  const EventIDBase start {EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT,                     0,                       
+                                              0, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
+  const EventIDBase stop {EventIDBase::UNDEFNUM,   EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, 
+                          EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
+
+  EventIDRange rangeW{start, stop};
 
   // Construct the output Cond Object and fill it in
   std::unique_ptr<PixelClusterdEdxCondData> writeCdo(std::make_unique<PixelClusterdEdxCondData>());
-  //If configuration flag is turned off, do nothing
-  if (m_configFlag == false) {
-    ATH_MSG_INFO("Turned off Pixel cluster dEdx equalization, the default behavior is to do nothing");
-    const EventIDBase start {EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT,                     0,                                                                 0, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
-    const EventIDBase stop  {EventIDBase::UNDEFNUM,   EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, 
-                             EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
-    EventIDRange rangeW{start, stop};
+  if (m_configFlag == false) { //If configuration flag is set to false, do nothing
+    ATH_MSG_INFO("Turned off Pixel cluster dEdx equalization, the default behavior is to apply 1.0 as a scale factor");
     writeCdo->setConfig(false);
-    ATH_MSG_INFO("Recorded new CDO " << writeHandle.key() << " with range " << rangeW << " into Conditions Store");
   }
   else {
       writeCdo->setConfig(m_configFlag);
+
+      SG::ReadCondHandle<CondAttrListCollection> readHandle(m_readKey,ctx);
+      const CondAttrListCollection* readCdo = *readHandle; 
+      if (readCdo==nullptr) {
+        ATH_MSG_FATAL("Null pointer to the read conditions object");
+        return StatusCode::FAILURE;
+      }
+      
+      if (not readHandle.range(rangeW)) {
+        ATH_MSG_FATAL("Failed to retrieve validity range for " << readHandle.key());
+        return StatusCode::FAILURE;
+      }
+      ATH_MSG_DEBUG("Size of AthenaAttributeList " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
+      ATH_MSG_DEBUG("Range of input is " << rangeW);
+
+
+      if (rangeW.stop().isValid() and rangeW.start()>rangeW.stop()) {
+        ATH_MSG_FATAL("Invalid intersection rangeW: " << rangeW);
+        return StatusCode::FAILURE;
+      }
+
       CondAttrListCollection::const_iterator itr;
       for (itr = readCdo->begin(); itr != readCdo->end(); ++itr){
         const coral::AttributeList &atr = itr->second;
@@ -82,10 +89,6 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
         }
         writeCdo->setScaleFactors(params); 
       }
-  }
-  if (rangeW.stop().isValid() and rangeW.start()>rangeW.stop()) {
-    ATH_MSG_FATAL("Invalid intersection rangeW: " << rangeW);
-    return StatusCode::FAILURE;
   }
 
   if (writeHandle.record(rangeW, std::move(writeCdo)).isFailure()) {
