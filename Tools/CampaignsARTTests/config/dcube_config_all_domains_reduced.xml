@@ -156,6 +156,23 @@
       <hist1D name="vx_time_diff_pull" plotopts="" tests="KS" type="TH1F"/>
      </TDirectory>
     </TDirectory>
+    <TDirectory name="SecVtx">
+     <TDirectory name="VrtSecInclusive_SecondaryVertices">
+      <hist1D name="x" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="y" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="z" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="r" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="pt" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="eta" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="phi" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="m" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="ntrk" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="chi2" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="charge" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="mind0" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="minz0" plotopts="" tests="KS" type="TH1D"/>
+     </TDirectory>
+    </TDirectory>
    </TDirectory>
    <TDirectory name="MET">
     <TDirectory name="MET_Rebuilt_AntiKt4EMTopo">
