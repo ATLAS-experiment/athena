@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYSVAL.py
 # This defines DAOD_PHYSVAL, an unskimmed DAOD format for
@@ -22,10 +22,10 @@ def PHYSVALKernelCfg(flags, name='PHYSVALKernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # LLP-specific configs
-    if flags.Tracking.doLargeD0:
-        from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
-        acc.merge(PhysValLLPCfg(flags))
+    from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
+    acc.merge(PhysValLLPCfg(flags))
 
+    if flags.Tracking.doLargeD0:
         # LRT Egamma
         from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
         acc.merge(EGammaLRTCfg(flags))
