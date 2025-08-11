@@ -7,17 +7,11 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonSpacePoint/SpacePointPerLayerSorter.h>
 
+#include "Acts/Utilities/Helpers.hpp"
 namespace MuonR4 {
     using HitVec = SpacePointPerLayerSplitter::HitVec;
-    inline HitVec stripSmartPtr(const SpacePointBucket& bucket) {
-        HitVec hits{};
-        hits.reserve(bucket.size());
-        std::transform(bucket.begin(),bucket.end(),std::back_inserter(hits), 
-                      [](const SpacePointBucket::value_type& hit){return hit.get();});
-        return hits;
-    }
     SpacePointPerLayerSplitter::SpacePointPerLayerSplitter(const SpacePointBucket& bucket):
-        SpacePointPerLayerSplitter(stripSmartPtr(bucket)){}
+        SpacePointPerLayerSplitter(Acts::unpackConstSmartPointers(bucket)){}
 
     SpacePointPerLayerSplitter::SpacePointPerLayerSplitter(const HitVec& hits) {
         if (hits.empty()) return;
