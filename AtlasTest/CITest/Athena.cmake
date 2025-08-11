@@ -419,6 +419,9 @@ atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts
   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
 
+atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Gbts
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbts )
+
 #################################################################################
 #                 Muon Phase II CI tests
 #################################################################################
