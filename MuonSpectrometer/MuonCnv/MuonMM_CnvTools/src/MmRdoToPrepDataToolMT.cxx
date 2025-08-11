@@ -22,10 +22,6 @@ namespace {
 }  // namespace
 
 namespace Muon{
-MmRdoToPrepDataToolMT::MmRdoToPrepDataToolMT(const std::string& t,
-                                             const std::string& n,
-                                             const IInterface* p)
-    : base_class(t, n, p) {}
 
 StatusCode MmRdoToPrepDataToolMT::initialize() {
   ATH_MSG_DEBUG(" in initialize()");

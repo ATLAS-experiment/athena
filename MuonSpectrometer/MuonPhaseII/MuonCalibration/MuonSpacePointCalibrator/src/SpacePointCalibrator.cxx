@@ -10,6 +10,7 @@
 #include "xAODMuonPrepData/MdtTwinDriftCircle.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
 #include "xAODMuonPrepData/TgcStrip.h"
+#include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonSpacePoint/UtilFunctions.h"
 #include "GaudiKernel/PhysicalConstants.h"
