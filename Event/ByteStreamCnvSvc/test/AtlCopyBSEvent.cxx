@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -26,19 +26,6 @@
 #include "EventStorage/pickDataReader.h"
 #include "EventStorage/DataWriter.h" 
 
-#include "CoralBase/Attribute.h"
-#include "CoralBase/AttributeList.h"
-
-#include "PersistentDataModel/Token.h"
-
-#include "CollectionBase/TokenList.h"
-#include "CollectionBase/CollectionService.h"
-#include "CollectionBase/ICollectionCursor.h"
-#include "CollectionBase/ICollectionQuery.h"
-#include "CollectionBase/CollectionRowBuffer.h"
-
-#include "FileCatalog/IFileCatalog.h"
-
 #include "CxxUtils/checker_macros.h"
 
 void eventLoop(DataReader*, EventStorage::DataWriter*, unsigned&, const std::vector<uint64_t>*, uint32_t, bool, bool, bool, const std::vector<long long int>* = 0);
@@ -51,22 +38,13 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
     std::cerr << "usage: " << argv[0] 
 	      << " [-d --deflate] -e [--event] <eventNumbers> [-r, --run <runnumber>] [-l, --listevents] [-t --checkevents] -o, --out outputfile inputfiles...." << std::endl;
     std::cerr << "eventNumbers is a comma-separated list of events" << std::endl;
-    std::cerr << "or using TAG collections: " << std::endl;
-    std::cerr << "usage: " << argv[0] 
-	      << " [-d --deflate] -s, --src <input collection name> <input collection type> [-x --srcconnect <input database connection string>] [-q --query <predicate string>] [-c --catalog <file catalogs>] -o, --out outputfile"  << std::endl;
     std::exit(1);
   }
 
   std::string fileNameOut("extractedEvents.data");
   std::vector<std::string> fileNames;
-  std::vector<std::string> catalogFile;
-  std::vector<std::string> collNames, collTypes;
-  std::string collConnect;
-  std::string collQuery;
   std::vector<uint64_t> searchEvents;
-  std::vector<std::string> searchTokens;
   uint32_t searchRun=0; 
-  bool searchEventSet=false;
   bool searchRunSet=false;
   bool listEvents=false;
   bool checkEvents=false;
@@ -94,7 +72,6 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
 	return -1;
       }
       i++;
-      searchEventSet=true;
     } else if (arg1=="-o" || arg1=="--out") {
       std::string arg2;
       if ((i+1) < argc) arg2=argv[i+1];
@@ -116,56 +93,6 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
       }
       i++;
       searchRunSet=true;
-    } else if (arg1=="-s" || arg1=="--src") {
-      std::string arg2, arg3;
-      if ((i+2) < argc) {
-        arg2=argv[i+1];
-        arg3=argv[i+2];
-      }
-      if (arg2.size()>0 && arg3.size()>0) {
-        collNames.push_back(arg2);
-        collTypes.push_back(arg3);
-        i++; i++;
-        while ((i+2) < argc) {
-          arg2=argv[i+1];
-          arg3=argv[i+2];
-          if (arg2.empty() || arg3.empty()) break;
-          if (arg2.at(0) == '-' || arg3.at(0) == '-') break;
-          collNames.push_back(arg2);
-          collTypes.push_back(arg3);
-          i++; i++;
-        }
-      } else {
-	std::cout << "ERROR: no input collection <name>/<type> found after '" << arg1 << "'" << std::endl;
-	return -1;
-      }
-    } else if (arg1=="-x" || arg1=="--srcconnect") {
-      std::string arg2;
-      if ((i+1) < argc) arg2=argv[i+1];
-      if (arg2.size()>0) collConnect=arg2;
-      else {
-	std::cout << "ERROR: Expected input database connection string after '" << arg1 << "'" <<std::endl;
-	return -1;
-      }
-      i++;
-    } else if (arg1=="-q" || arg1=="--query") {
-      std::string arg2;
-      if ((i+1) < argc) arg2=argv[i+1];
-      if (arg2.size()>0) collQuery=arg2;
-      else {
-	std::cout << "ERROR: Expected predicate string after '" << arg1 << "'" <<std::endl;
-	return -1;
-      }
-      i++;
-    } else if (arg1=="-c" || arg1=="--catalog") {
-      std::string arg2;
-      if ((i+1) < argc) arg2=argv[i+1];
-      if (arg2.size()>0) catalogFile.push_back(arg2);
-      else {
-	std::cout << "ERROR: Expected catalog file name after '" << arg1 << "'" <<std::endl;
-	return -1;
-      }
-      i++;
     } else if (arg1=="-t" || arg1=="--checkevents") {
       checkEvents=true;
     } else if (arg1=="-l" || arg1=="--listevents") {
@@ -174,98 +101,6 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
       fileNames.push_back(arg1);
     }
   }// End loop over arguments
-
-  std::map<Guid, std::string> guidPfn;
-  std::map<std::string, std::vector<uint64_t> > searchEventByPFN;
-  std::map<std::string, std::vector<long long int> > offsetEventByPFN;
-  // If no event search set, then we need a POOL collections as input
-  if (!searchEventSet && !collNames.empty()) {
-    std::string refName("StreamRAW_ref");
-    std::string runAtt("RunNumber");
-    std::string eventAtt("EventNumber");
-    pool::CollectionService* collSvc = new pool::CollectionService();
-    pool::IFileCatalog* ctlg = new pool::IFileCatalog();
-    try {
-      if (!catalogFile.empty()) {
-        ctlg->setWriteCatalog(*catalogFile.begin());
-        for (std::vector<std::string>::const_iterator iter = catalogFile.begin(); iter != catalogFile.end(); ++iter) {
-          ctlg->addReadCatalog(*iter);
-        }
-      } else {
-        ctlg->setWriteCatalog("");
-      }
-      ctlg->connect();
-    } catch(std::exception& e) {
-      std::cout << e.what()  << std::endl;
-      return -1;
-    }
-    ctlg->start();
-    for (std::vector<std::string>::const_iterator collIter = collNames.begin(), typeIter = collTypes.begin(), collEnd = collNames.end(); collIter != collEnd; ++collIter, ++typeIter) {
-      try {
-        // Open the collection and execute the query
-        pool::ICollection* srcColl = collSvc->handle(*collIter, *typeIter, collConnect, true);
-        pool::ICollectionQuery* srcQuery = srcColl->newQuery();
-        srcQuery->setCondition(collQuery);
-        srcQuery->addToOutputList(refName+","+runAtt+","+eventAtt);
-        pool::ICollectionCursor& cursor = srcQuery->execute();
-        // iterate over query results
-        while (cursor.next()) { 
-          coral::AttributeList attList = cursor.currentRow().attributeList();
-          const unsigned int* evNum = static_cast<unsigned int*>(attList[eventAtt].addressOfData());
-          searchEvents.push_back(*evNum);
-          const pool::TokenList& tokens = cursor.currentRow().tokenList();
-          // Fill maps with guid, pfn, offset based on what is in StreamRAW token
-          try {
-            const Token* token = &tokens[refName];
-            Guid guid = token->dbID();
-            searchTokens.push_back(token->toString());
-            long long int pos = token->oid().second;
-            if (!token->contID().empty()) { 
-               unsigned long long int cntID; 
-               sscanf(token->contID().c_str(), "%08llX", &cntID); 
-               pos += (long long int)(cntID<<32); 
-            } 
-            if (guidPfn.count(guid) == 0) {   // first instance of this guid
-              std::string pfn;
-              std::string type;
-              ctlg->getFirstPFN(guid.toString(), pfn, type);
-              // fill map of guid to pfn
-              guidPfn.insert(std::pair<Guid, std::string>(guid, pfn));
-              // add pfn to list
-              fileNames.push_back(pfn);
-              std::vector<uint64_t> evts;
-              std::vector<long long int> offs;
-              evts.push_back(*evNum);
-              offs.push_back(pos);
-              // fill map of pfn to event number list
-              searchEventByPFN.insert(std::pair<std::string, std::vector<uint64_t> >(pfn, evts));
-              // fill map of pfn to offset list
-              offsetEventByPFN.insert(std::pair<std::string, std::vector<long long int> >(pfn, offs));
-            } else {   // guid already in map guid to pfn map
-              // get pfn for this guid
-              const std::string pfn = guidPfn[guid];
-              // append to event number list
-              searchEventByPFN[pfn].push_back(*evNum);
-              // append to offset list
-              offsetEventByPFN[pfn].push_back(pos);
-            }
-          } catch (std::exception& e) {
-            std::cout << "Unable to find StreamRAW for event = " << *evNum << std::endl;
-            std::cout << e.what()  << std::endl;
-            return -1;
-          }
-        }
-      } catch (std::exception& e) {
-        std::cout << "Reading collections encountered " << e.what() << std::endl;
-        return -1;
-      }
-    }
-    ctlg->commit();
-  }
-  if ( (!searchEventSet || fileNames.empty()) && collNames.empty()) {
-    std::cout << "ERROR: Insufficient input specified!" << std::endl;
-    return -1;
-  }
 
   std::sort(searchEvents.begin(),searchEvents.end());
   std::cout << "Events to copy: ";
@@ -337,15 +172,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
       std::cerr << "No events in file "<< fName << std::endl;
       continue;
     }
-    // Check if using collection or not
-    if (searchEventByPFN.count(fName) > 0) {
-      // sort events and offsets maps by key/pfn
-      std::sort(searchEventByPFN[fName].begin(),searchEventByPFN[fName].end());
-      std::sort(offsetEventByPFN[fName].begin(),offsetEventByPFN[fName].end());
-      eventLoop(pDR.get(), pDW.get(), nFound, &searchEventByPFN[fName], searchRun, searchRunSet, listEvents, checkEvents, &offsetEventByPFN[fName]);
-    } else {
-      eventLoop(pDR.get(), pDW.get(), nFound, &searchEvents, searchRun, searchRunSet, listEvents, checkEvents);
-    }
+    eventLoop(pDR.get(), pDW.get(), nFound, &searchEvents, searchRun, searchRunSet, listEvents, checkEvents);
     if (nFound >= searchEvents.size() && nFound) break;
   }
   if (!nFound && searchEvents.size() > 0) {
