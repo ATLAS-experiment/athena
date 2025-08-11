@@ -38,8 +38,8 @@ rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200" "RAWtoALL:ActsConfig.ActsCIFlags.actsValidateTracksFlags"'
 rdo2aod.args += ' --conditionsTag f"default:{defaultConditionsTags.RUN4_MC}"'
 rdo2aod.timeout = 5400 # default = 3600 s
-rdo2aod.flags = ['Trigger.enabledSignatures=[\'Muon\',\'Egamma\',\'Jet\',\'Bjet\']',  #need to skip Tau temporarily and disabled does not work
-                 'Trigger.useActsTracking=True',
+rdo2aod.flags = ['Trigger.enabledSignatures=[\'Muon\',\'Egamma\',\'Jet\',\'Bjet\',\'Tau\']',  
+                 'Trigger.useActsTracking=True','Acts.GsfRefitActs=True',
                  'Trigger.doRuntimeNaviVal=True',
                  'ITk.doTruth=False',
                  'Tracking.doTruth=False',
