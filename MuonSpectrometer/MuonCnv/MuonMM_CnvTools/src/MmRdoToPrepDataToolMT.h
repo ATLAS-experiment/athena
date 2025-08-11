@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMmRdoToPrepDataToolMT_H
@@ -17,14 +17,13 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODMuonPrepData/MMClusterContainer.h"
 
+#include <cfloat>
 namespace Muon {
 
 class MmRdoToPrepDataToolMT
     : public extends<AthAlgTool, IMuonRdoToPrepDataTool> {
  public:
-  MmRdoToPrepDataToolMT(const std::string&, const std::string&,
-                        const IInterface*);
-
+  using base_class::base_class;
   /** default destructor */
   virtual ~MmRdoToPrepDataToolMT() = default;
 

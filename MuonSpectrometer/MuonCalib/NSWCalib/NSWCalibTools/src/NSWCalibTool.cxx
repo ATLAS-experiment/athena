@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NSWCalibTool.h"
@@ -8,8 +8,9 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 
+#include "xAODMuonPrepData/MMCluster.h"
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
-
+#include <cfloat>
 namespace {
   constexpr double toRad = M_PI/180;
   constexpr double pitchErr = 0.425 * 0.425 / 12;
@@ -44,12 +45,6 @@ namespace {
                                    {"ArCo2_8020", 16.15 / 5.}, {"ArCo2iC4H10_9352", 16.15 / 5.}};
 
 }
-
-Muon::NSWCalibTool::NSWCalibTool(const std::string& t, const std::string& n, const IInterface* p) :
-  AthAlgTool(t,n,p) {
-  declareInterface<INSWCalibTool>(this);
-}
-
 
 StatusCode Muon::NSWCalibTool::initialize()
 {

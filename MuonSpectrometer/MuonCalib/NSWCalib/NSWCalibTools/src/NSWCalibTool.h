@@ -23,12 +23,11 @@
 
 namespace Muon {
 
-  class NSWCalibTool : virtual public INSWCalibTool, public AthAlgTool {
+  class NSWCalibTool : public extends<AthAlgTool, INSWCalibTool> {
 
   public:
 
-    NSWCalibTool(const std::string&, const std::string&, const IInterface*);
-
+    using base_class::base_class;
     virtual ~NSWCalibTool() = default;
     
     using TimeCalibType = NswCalibDbTimeChargeData::CalibDataType;
