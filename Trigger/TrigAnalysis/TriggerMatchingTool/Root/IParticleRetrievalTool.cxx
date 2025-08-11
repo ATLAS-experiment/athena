@@ -4,7 +4,6 @@
 
 // Package includes
 #include "TriggerMatchingTool/IParticleRetrievalTool.h"
-#include "CxxUtils/starts_with.h"
 #include <ostream>
 
 // Anonymous namespace contains helper functions
@@ -232,9 +231,9 @@ namespace Trig {
     if (teName.find("etcut") != std::string::npos &&
         teName.find("trkcut") == std::string::npos)
       return xAOD::Type::CaloCluster;
-    else if (CxxUtils::starts_with (teName, "EF_e"))
+    else if (teName.starts_with( "EF_e"))
       return xAOD::Type::Electron;
-    else if (CxxUtils::starts_with (teName, "EF_g"))
+    else if (teName.starts_with( "EF_g"))
       return xAOD::Type::Photon;
     else 
       return xAOD::Type::Other;

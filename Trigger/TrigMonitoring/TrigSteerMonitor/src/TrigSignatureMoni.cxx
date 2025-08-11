@@ -9,7 +9,6 @@
 #include "AthenaInterprocess/Incidents.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigSignatureMoni.h"
-#include "CxxUtils/starts_with.h"
 
 TrigSignatureMoni::TrigSignatureMoni(const std::string& name, ISvcLocator* pSvcLocator)
   : base_class(name, pSvcLocator)
@@ -54,7 +53,7 @@ StatusCode TrigSignatureMoni::start() {
   for (const TrigConf::Chain& chain : *hltMenuHandle) {
     for (const std::string& group : chain.groups()) {
       // Save chains per RATE group
-      if (CxxUtils::starts_with (group, "RATE")){
+      if (group.starts_with( "RATE")){
         m_groupToChainMap[group].insert(HLT::Identifier(chain.name()));
       }
     }
@@ -201,12 +200,12 @@ StatusCode TrigSignatureMoni::stop() {
   for (int bin = 1; bin <= (*m_passHistogram)->GetXaxis()->GetNbins(); ++bin) {
     const std::string chainName = m_passHistogram->GetXaxis()->GetBinLabel(bin);
     const std::string chainID = std::to_string( HLT::Identifier(chainName) );
-    if (CxxUtils::starts_with (chainName, "HLT")) { // print only for chains
+    if (chainName.starts_with( "HLT")) { // print only for chains
       ATH_MSG_INFO( chainName + " #" + chainID);
       ATH_MSG_INFO( fixedWidth("-- #" + chainID + " Events", 30)  << collToString( bin, m_passHistogram) );
       ATH_MSG_INFO( fixedWidth("-- #" + chainID + " Features", 30) << collToString( bin, m_countHistogram , 2, 1 ) );
     }
-    if (CxxUtils::starts_with (chainName, "All")){
+    if (chainName.starts_with( "All")){
       ATH_MSG_INFO( fixedWidth(chainName, 30)  << collToString( bin, m_passHistogram) );
     }
   }

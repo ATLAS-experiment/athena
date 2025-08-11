@@ -14,7 +14,6 @@
 
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaMonitoringKernel/HistogramDef.h"
-#include "CxxUtils/starts_with.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "CLHEP/Random/RandomEngine.h"
@@ -628,7 +627,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
       bool opt_cable = false;
       std::bitset<128> cable128 {0};
       uint64_t cable {0};
-      if (CxxUtils::starts_with (connName, "Legacy")) { // legacy topo
+      if (connName.starts_with( "Legacy")) { // legacy topo
          if (m_iKeyLegacyTopo.empty() || !m_doL1CaloLegacy || !m_doL1TopoLegacy )
          {
             continue;
@@ -643,7 +642,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
             cable = ( (uint64_t)topoInput->cableWord2( 1 ) << 32) + topoInput->cableWord2( 0 );
          }
       }
-      else if (CxxUtils::starts_with (connName, "CTPCAL") && m_doZDC) // ZDC simulation
+      else if (connName.starts_with( "CTPCAL") && m_doZDC) // ZDC simulation
       {
          auto zdcInput = SG::makeHandle(m_iKeyZDC, context);
          if (not zdcInput.isValid())
@@ -665,7 +664,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          }
          continue;
       }
-      else if (CxxUtils::starts_with (connName, "NIM2"))
+      else if (connName.starts_with( "NIM2"))
       {
 	 if (m_doTRT) // TRT simulation
 	 {
