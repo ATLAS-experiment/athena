@@ -125,8 +125,8 @@ def tagInfoMetadataCheck(sigdict, pudict):
     sigkeys = sigdict.keys()
     pukeys = pudict.keys()
 
-    logger.debug("Signal /TagInfo ", sigdict)
-    logger.debug("Pileup /TagInfo ", pudict)
+    logger.debug("Signal /TagInfo %s", sigdict)
+    logger.debug("Pileup /TagInfo %s", pudict)
 
     sigOnlyDict = dict()
     sigOnlyKeySet = set(sigkeys).difference(set(pukeys))
@@ -134,7 +134,7 @@ def tagInfoMetadataCheck(sigdict, pudict):
     logger.debug(sigOnlyKeySet)
     for key in sigOnlyKeySet:
         sigOnlyDict[key] = sigdict[key]
-        logger.debug("  key: ", key, "value: ", sigdict[key])
+        logger.debug("  key: %s value: %s", key, sigdict[key])
         pass
     # TODO: extra
     keysToCompareSet = set(sigkeys).intersection(set(pukeys))

@@ -51,7 +51,7 @@ def TrigADComboHypoToolFromDict(flags, chainDict):
     group = chainDict['groups']
 
     log.debug("Inside AD ComboHypoToolFromDict")
-    log.debug("chainDict:", chainDict)
+    log.debug("chainDict: %s", chainDict)
 
     cfg_name = TrigADGetConfigValue(chainDict, "anomdet")
     cfg = config_dict[cfg_name]

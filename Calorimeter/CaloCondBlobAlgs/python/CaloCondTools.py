@@ -507,7 +507,7 @@ class CaloBlobWriter(CaloCondLogger):
         for chanNum in chanList:
             data = self.__chanDictRecord[chanNum]
             strout = "cool channel=%4i" % chanNum
-            self.log().debug("Registering %s %s", (strout, data))
+            self.log().debug("Registering %s %s", strout, data)
             channelId = cool.ChannelId(chanNum)
             self.__folder.storeObject(sinceCool, untilCool, data, channelId, folderTag, userTagOnly)
 

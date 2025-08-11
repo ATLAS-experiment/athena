@@ -139,7 +139,7 @@ def FixRegion(config: ROOT.TDirectory, top_level: dqi.HanConfigGroup, td: ROOT.T
                         ref = config.Get(a.GetAlgRefName())
                         refmapcache[a.GetAlgRefName()] = ref
                     if not ref:
-                        log.error('Unable to find references for', orig)
+                        log.error('Unable to find references for %s', orig)
                     else:
                         if isinstance(ref, ROOT.TMap):
                             algrefnameptr = ref.GetValue(h)
