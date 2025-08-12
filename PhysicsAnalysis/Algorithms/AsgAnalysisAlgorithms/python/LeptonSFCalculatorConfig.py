@@ -13,7 +13,7 @@ class LeptonSFCalculatorBlock(ConfigBlock):
         self.addOption('electrons', None, type=str,
                        info='the input electron container, with a possible selection, in the format `container` or `container.selection`.')
         self.addOption('electronSFs', None, type=list,
-                       info='list of decorated electron SFs to use in the computation. If not set, will use reconstruction x ID x isolation.')
+                       info='list of decorated electron SFs to use in the computation. If not set, will use reconstruction x ID x isolation, also ECIDS (charge ID) if available.')
         self.addOption('muons', None, type=str,
                        info='the input muon container, with a possible selection, in the format `container` or `container.selection`.')
         self.addOption('muonSFs', None, type=list,
@@ -24,6 +24,10 @@ class LeptonSFCalculatorBlock(ConfigBlock):
                        info='list of decorated photon SFs to use in the computation. If not set, will use ID x isolation.')
         self.addOption('lepton_postfix', None, type=str,
                        info='the name of the common lepton SF, e.g. `tight`.')
+        self.addOption('includeElectronChargeMisID', False, type=str,
+                       info='whether to include the electron charge mis-ID SFs in the computation. The user is responsible for determining whether these are available.')
+        self.addOption('includeMuonBadVeto', False, type=str,
+                       info='whether to include the muon bad veto SFs in the computation. The user is responsible for determining whether these are available.')
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -46,6 +50,10 @@ class LeptonSFCalculatorBlock(ConfigBlock):
                                     f'el_id_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.electronSelection:
                     alg.electronSFs += [ f'el_isol_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
+                if 'chargeID' in  alg.electronSelection:
+                    alg.electronSFs += [ f'el_ecids_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
+                if self.includeElectronChargeMisID:
+                    alg.electronSFs += [ f'el_charge_misid_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
 
         if self.muons:
             muons, muonSelection         = config.readNameAndSelection(self.muons)
@@ -59,6 +67,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
                     alg.muonSFs += [ f'muon_TTVA_effSF_{self.muons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.muonSelection:
                     alg.muonSFs += [ f'muon_isol_effSF_{self.muons.split(".")[1]}_%SYS%' ]
+                if self.includeMuonBadVeto:
+                    alg.muonSFs += [ f'muon_BadMuonVeto_effSF_{self.muons.split(".")[1]}_%SYS%' ]
 
         if self.photons:
             photons, photonSelection     = config.readNameAndSelection(self.photons)

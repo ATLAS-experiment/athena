@@ -559,7 +559,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
         if self.chargeIDSelectionRun2 and config.geometry() >= LHCPeriod.Run3:
-            log.warning("ECIDS is only available for Run 2 and will not have effect in run 3.")
+            log.warning("ECIDS is only available for Run 2 and will not have any effect in Run 3.")
 
         # Select electrons only if they don't appear to have flipped their charge.
         if self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3:
@@ -697,7 +697,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_ecids_effSF' + selectionPostfix + '_%SYS%'
             if self.isolationWP != 'Tight_VarRad':
-                raise ValueError('ECIDS are supported only for Tight_VarRad isolation.')
+                raise ValueError('ECIDS SFs are supported only for Tight_VarRad isolation.')
             if self.identificationWP == 'LooseBLayerLH':
                 ecids_lh = 'loose'
             elif self.identificationWP == 'MediumLH':
@@ -705,7 +705,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif self.identificationWP == 'TightLH':
                 ecids_lh = 'tight'
             else:  
-                raise ValueError('ECIDS are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
+                raise ValueError('ECIDS SFs are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
 
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             alg.efficiencyCorrectionTool.CorrectionFileNameList = \
@@ -726,7 +726,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                      'ecids_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
         
-        if self.addChargeMisIDSF and  config.dataType() is not DataType.Data and not self.noEffSF:
+        if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF:
             if config.geometry() >= LHCPeriod.Run3:
                 raise ValueError('Run 3 does not yet have charge mis-ID correction, '
                                  'please disable it by setting `noEffSF` to False.')
@@ -737,7 +737,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                    'CP::ElectronChargeEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_charge_misid_effSF' + selectionPostfix + '_%SYS%'
             if self.isolationWP != 'Tight_VarRad':
-                raise ValueError('ECIDS are supported only for Tight_VarRad isolation.')
+                raise ValueError('Charge mis-ID SFs are supported only for Tight_VarRad isolation.')
             if self.identificationWP == 'LooseBLayerLH':
                 misid_lh = 'LooseAndBLayerLLH'
             elif self.identificationWP == 'MediumLH':
@@ -745,7 +745,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif self.identificationWP == 'TightLH':
                 misid_lh = 'TightLLH'
             else:  
-                raise ValueError('ECIDS are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
+                raise ValueError('Charge mis-ID SFs are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
             misid_suffix = '_ECIDSloose' if self.chargeIDSelectionRun2 else ''
 
             alg.efficiencyCorrectionTool.CorrectionFileName = \
