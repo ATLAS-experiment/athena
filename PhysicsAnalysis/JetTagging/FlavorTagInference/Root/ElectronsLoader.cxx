@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/ElectronsLoader.h"
@@ -58,8 +58,6 @@ namespace FlavorTagInference {
                       el_dpop = 1 - track->qOverP() / (refittedTrack_LMqoverp);
                   }
                   
-                  if (jet_4vec.DeltaR(el_4vec) > 0.4) return false;
-
                   float el_ptrel = el_4vec.Vect().Perp(jet_4vec.Vect());
                   // Get shower shapes
                   float el_rhad1 = el->showerShapeValue(xAOD::EgammaParameters::Rhad1);
