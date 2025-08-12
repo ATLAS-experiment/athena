@@ -69,6 +69,9 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
             "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx"
         ],
+        "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA": [
+            "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx", # fold 0 of the GN2v01 (safe for HLT jets)
+        ]
     }
 
     networks_by_jet_col["AntiKt4HI"] = networks_by_jet_col["AntiKt4EMPFlow"]
