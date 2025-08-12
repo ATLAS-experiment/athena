@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes:
@@ -307,6 +307,8 @@ LVL1CTP::ResultBuilder::constructRoIResult( const EventIDBase & eventID,
    return result;
 }
 
+
+// TODO to be obsolete in favour of the CTPResult - see below
 	
 std::unique_ptr<CTP_RDO>
 LVL1CTP::ResultBuilder::constructRDOResult( const EventIDBase & eventID,
@@ -345,9 +347,46 @@ LVL1CTP::ResultBuilder::constructRDOResult( const EventIDBase & eventID,
 
 	
 
-	
 
-	
+std::pair< std::unique_ptr<xAOD::CTPResult>, std::unique_ptr<xAOD::CTPResultAuxInfo> >
+LVL1CTP::ResultBuilder::constructCTPResult( const EventIDBase & eventID,
+                                            const std::vector<uint32_t> & tbp,
+                                            const std::vector<uint32_t> & tap,
+                                            const std::vector<uint32_t> & tav,
+                                            const std::vector<uint32_t> & tip,
+                                            const std::vector<uint32_t> & extra ) const
+{
+   auto wrongSize = [this](const std::vector<uint32_t> & vec, uint32_t exp, std::string_view name) {
+      if (vec.size() == exp) {return false;}
+      ATH_MSG_ERROR("Wrong " << name << " vector size passed to constructRDOResult, " << vec.size() << " instead of " << exp);
+      return true;
+   };
+   if (wrongSize(tip, m_ctpDataFormat->getTIPwords(), "TIP")
+    || wrongSize(tbp, m_ctpDataFormat->getTBPwords(), "TBP")
+    || wrongSize(tap, m_ctpDataFormat->getTAPwords(), "TAP")
+    || wrongSize(tav, m_ctpDataFormat->getTAVwords(), "TAV")) {
+      return {nullptr, nullptr};
+   }
+
+   std::vector<uint32_t> data(static_cast<size_t>(m_ctpDataFormat->getNumberTimeWords()), uint32_t{0});
+   data.reserve(m_ctpDataFormat->getNumberTimeWords() + m_ctpDataFormat->getDAQwordsPerBunch() + extra.size());
+   data.insert(data.end(),tip.begin(),tip.end());
+   data.insert(data.end(),tbp.begin(),tbp.end());
+   data.insert(data.end(),tap.begin(),tap.end());
+   data.insert(data.end(),tav.begin(),tav.end());
+   data.insert(data.end(),extra.begin(),extra.end());
+     
+   auto result = std::make_unique<xAOD::CTPResult>();
+   auto resultAux = std::make_unique<xAOD::CTPResultAuxInfo>();
+   result->setStore(resultAux.get());
+   CTPResultUtils::initialize(*result, m_ctpVersionNumber, std::move(data), extra.size());
+   CTPResultUtils::setTimeSec(*result, eventID.time_stamp());                // Time stamp: 32-bit UTC seconds
+   CTPResultUtils::setTimeNanoSec(*result, eventID.time_stamp_ns_offset());  // Time stamp: 28-bit nanoseconds
+   ATH_MSG_DEBUG( "Created CTPResult object" );
+   return std::make_pair(std::move(result), std::move(resultAux));
+}
+
+
 std::vector<std::string>
 LVL1CTP::ResultBuilder::firedItems(const std::vector<uint32_t>& triggerWords) const {
    std::vector<std::string> passedItems;    

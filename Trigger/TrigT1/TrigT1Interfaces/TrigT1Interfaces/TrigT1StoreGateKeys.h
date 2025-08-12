@@ -57,10 +57,15 @@ namespace LVL1CTP {
   static const std::string DEFAULT_CTPSLinkLocation = "CTPSLinkLocation";  
   //! default StoreGate location for CTPSLink for simulation rerun on data
   static const std::string DEFAULT_CTPSLinkLocation_Rerun = "CTPSLinkLocation_Rerun";
-  //! location of CTP RDO output in StoreGate
+  // TODO: obsolete usage of CTP RDO (Run2 EDM) in favour of xAOD::CTPResult (Run3 EDM) - currently both existing
+  //! location of CTP RDO output in StoreGate 
   static const std::string DEFAULT_RDOOutputLocation = "CTP_RDO";
   //! location of CTP RDO output in StoreGate for simulation rerun on data
   static const std::string DEFAULT_RDOOutputLocation_Rerun = "CTP_RDO_Rerun";
+  //! location of CTPResult output in StoreGate 
+  static const std::string DEFAULT_CTPResultOutputLocation = "CTPResult";
+  //! location of CTPResult output in StoreGate for simulation rerun on data
+  static const std::string DEFAULT_CTPResultOutputLocation_Rerun = "CTPResult_Rerun";
 
 } // namespace LVL1CTP
 

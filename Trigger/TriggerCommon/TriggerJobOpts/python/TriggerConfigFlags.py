@@ -493,6 +493,11 @@ def createTriggerRecoFlags():
         return createTrigMUCTPIConfigFlags()
     flags.addFlagsCategory('Trigger.MUCTPI', __muctpiFlags )
 
+    def __ctpFlags():
+        from TrigT1CTP.CTPSimulationConfigFlags import createTrigCTPConfigFlags
+        return createTrigCTPConfigFlags()
+    flags.addFlagsCategory('Trigger.CTP', __ctpFlags )
+
     def __fpgatracksimFlags():
         """Additional function delays import"""
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createFPGATrackSimConfigFlags
