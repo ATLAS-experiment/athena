@@ -21,8 +21,7 @@ def is_year_in_current_period(config: ConfigAccumulator, year: int | str) -> boo
 class TriggerAnalysisBlock (ConfigBlock):
     """the ConfigBlock for trigger analysis"""
 
-    # configName is not used
-    def __init__ (self, configName='') :
+    def __init__ (self) :
         super (TriggerAnalysisBlock, self).__init__ ()
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
