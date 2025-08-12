@@ -30,6 +30,7 @@
 #include "LArElecCalib/ILArfSampl.h"
 #include "LArElecCalib/ILArMinBias.h"
 #include "LArElecCalib/ILArAutoCorr.h"
+#include "LArElecCalib/ILArNoise.h"
 
 #include "LArRawConditions/LArADC2MeV.h"
 #include "LArRawConditions/LArOFC.h"
@@ -243,6 +244,9 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
   
     SG::ReadCondHandleKey<ILArPedestal> m_pedestalKey{this,"PedestalKey","LArPedestal","SG Key of LArPedestal object"};
     const ILArPedestal *m_ped=nullptr;
+ 
+    SG::ReadCondHandleKey<ILArNoise> m_noiseKey{this,"NoiseKey","","SG Key of LArNoise object"};
+    const ILArNoise *m_noise=nullptr;
  
     SG::ReadCondHandleKey<ILArAutoCorr> m_acorrKey{this,"AutocorrKey","LArAutoCorrSym","SG Key of LArAutoCorr object"};
     const ILArAutoCorr *m_acorr=nullptr;
