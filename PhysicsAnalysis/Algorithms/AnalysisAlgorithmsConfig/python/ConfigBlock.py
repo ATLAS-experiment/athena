@@ -17,7 +17,7 @@ def filter_dsids (filterList, config) :
         return True
     for dsid_filter in filterList:
         # Check if the pattern is enclosed in regex delimiters (e.g., starts with '^' or contains regex metacharacters)
-        if any(char in dsid_filter for char in "^$*+?.()|[]{}\\"):
+        if any(char in str(dsid_filter) for char in "^$*+?.()|[]{}\\"):
             pattern = re.compile(dsid_filter)
             if pattern.match(str(config.dsid())):
                 return True
