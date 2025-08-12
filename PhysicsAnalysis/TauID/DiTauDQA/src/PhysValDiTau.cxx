@@ -105,7 +105,8 @@ StatusCode PhysValDiTau::fillHistograms()
     if ( (bool)IsTruthMatchedAcc(*ditau) ) {
        m_oDiTauValidationPlots->m_oNewCorePlotsTrue.fill(*ditau, weight);
        if(nominal){
-          m_oDiTauValidationPlots->m_oNewCorePlotsNomTrue.fill(*ditau, weight);   
+          m_oDiTauValidationPlots->m_oNewCorePlotsNomTrue.fill(*ditau, weight);
+          m_oDiTauValidationPlots->m_oNewResolutionPlotsTrue.fill(*ditau, weight);	  
        }  
     } else {
        m_oDiTauValidationPlots->m_oNewCorePlotsFake.fill(*ditau, weight);

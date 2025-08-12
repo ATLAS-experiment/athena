@@ -7,6 +7,7 @@
 
 // PlotBase objects
 #include "CorePlots.h"
+#include "ResolutionPlots.h"
 
 class DiTauValidationPlots:public PlotBase {
     public:
@@ -17,6 +18,7 @@ class DiTauValidationPlots:public PlotBase {
     
       DiTau::CorePlots m_oNewCorePlotsTrue;
       DiTau::CorePlots m_oNewCorePlotsNomTrue;
+      DiTau::ResolutionPlots m_oNewResolutionPlotsTrue;
 
       DiTau::CorePlots m_oNewCorePlotsFake;
       DiTau::CorePlots m_oNewCorePlotsNomFake;
