@@ -44,7 +44,7 @@ def EfexSimMonitoringConfig(flags):
                            type='TH2I', cutmask='SimulationReadyMismatch',
                            title='Mismatched Simulation-Ready Events;LB;Signature;Events',
                            xbins=1,xmin=0,xmax=1,
-                           ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
+                           ylabels=["gJ","gLJ","jJ","jTAU","jEM","jXE","jTE","eTAU","eEM"],
                            opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('LBN,Signature,tobMismatched;h_mismatched_SimReadyRate',
                            fillGroup="mismatches",
@@ -53,7 +53,7 @@ def EfexSimMonitoringConfig(flags):
                            type='TProfile2D', cutmask='SimulationReady',
                            title='Mismatched Rate for Simulation-Ready Signatures;LB;Signature;Event Rate (%)',
                            xbins=1,xmin=0,xmax=1,
-                           ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
+                           ylabels=["gJ","gLJ","jJ","jTAU","jEM","jXE","jTE","eTAU","eEM"],
                            opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
     # when there are mismatches, would be useful to know where they occurred (might be a single module gone bad)
     # so register a location-vs-lbn histogram
