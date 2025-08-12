@@ -8,12 +8,6 @@ find_package( Eigen )
 find_package( ROOT COMPONENTS Core Tree Hist RIO )
 find_package( onnxruntime )
 
-atlas_add_component( DiTauRecTools
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AsgTools AsgMessagingLib xAODBase tauRecToolsLib
-      xAODCaloEvent xAODJet xAODPFlow FourMomUtils DiTauRecToolsLib
-      ${extra_private_libs} )
-
 # Component(s) in the package:
 atlas_add_library( DiTauRecToolsLib
    DiTauRecTools/*.h Root/*.cxx 
@@ -31,3 +25,11 @@ atlas_add_library( DiTauRecToolsLib
 atlas_add_dictionary( DiTauRecToolsDict
    DiTauRecTools/DiTauRecToolsDict.h DiTauRecTools/selection.xml
    LINK_LIBRARIES DiTauRecToolsLib )
+
+if( NOT XAOD_STANDALONE )
+   atlas_add_component( DiTauRecTools
+      src/*.h src/*.cxx src/components/*.cxx
+      LINK_LIBRARIES AsgTools AsgMessagingLib xAODBase tauRecToolsLib
+      xAODCaloEvent xAODJet xAODPFlow FourMomUtils DiTauRecToolsLib
+      ${extra_private_libs} )
+endif()
