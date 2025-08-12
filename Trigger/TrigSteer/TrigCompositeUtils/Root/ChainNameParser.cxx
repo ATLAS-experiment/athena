@@ -190,9 +190,9 @@ namespace ChainNameParser {
     const std::vector<std::string> &allSignatures()
     {
         const static std::vector<std::string> signatures{
-            "e", "g", "j", "dispjet", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb",
+            "e", "g", "j", "dispjet", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb", "hi",
             "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp", "distrk", 
-            "hitdvjet", "isotrk", "dedxtrk"
+            "hitdvjet", "isotrk", "dedxtrk", "l1topoPh1debug", "caloclustermon", "fslrt"
         };
         return signatures;
     }
@@ -200,7 +200,7 @@ namespace ChainNameParser {
     const std::vector<std::string> &allSignaturePostfixQualifiers()
     {
         const static std::vector<std::string> postfixQualifiers{
-            "noL1", "vtx", "c", "f", "a"
+            "noL1", "vtx", "c", "C", "f", "a"
         };
         return postfixQualifiers;
     }
@@ -214,6 +214,9 @@ namespace ChainNameParser {
 
     std::vector<int> multiplicities(const std::string &chain)
     {
+        if (LegInfoIterator(chain)->signature == "noalg")
+            return std::vector<int>{1};
+
         std::vector<int> multiplicities;
         for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
             multiplicities.push_back(itr->multiplicity);
@@ -222,6 +225,9 @@ namespace ChainNameParser {
 
     std::vector<std::string> signatures(const std::string &chain)
     {
+        if (LegInfoIterator(chain)->signature == "noalg")
+            return std::vector<std::string>{"noalg"};
+
         std::vector<std::string> signatures;
         for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
             signatures.push_back(itr->signature);
