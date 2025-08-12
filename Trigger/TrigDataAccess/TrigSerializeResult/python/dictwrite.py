@@ -238,6 +238,7 @@ def main():
     'xAOD::jFexSRJetRoIAuxContainer_v1',
     'xAOD::jFexLRJetRoI_v1',
     'xAOD::jFexLRJetRoIAuxContainer_v1',
+    'ElementLink<TrigRoiDescriptorCollection>',
   ]
   updated_objects = []
   return update_streamerinfos(objects, updated_objects)
