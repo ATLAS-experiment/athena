@@ -314,7 +314,7 @@ def parseGeometry():
         
     msg.info("%d eta rows:",len(eta_vals_for_key_layer))
     msg.info(sorted(eta_vals_for_key_layer))
-    msg.info("Tracks Used = %d", %(tracks_used))
+    msg.info("Tracks Used = %d", tracks_used)
     return eta_vals_for_key_layer
 
 

@@ -56,7 +56,7 @@ def dump_nav(collections):
             xaod_map[strip_name]['aux_cont'] = col
         elif col.is_xAOD_decoration():
             if not col.parent:
-                log.warning('{:s} has no parent', col.name())
+                log.warning('{%s} has no parent', col.name())
             strip_name = col.parent.name_key[0:-4]  # Remove 'Aux.'
             if strip_name not in xaod_map:
                 log.warning('%s not in xaod_map', strip_name)
