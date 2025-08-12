@@ -8,6 +8,7 @@ def CTPSimulationCfg(flags):
     log = logging.getLogger("CTPMCSimulationCfg")
     acc = ComponentAccumulator()
     acc.addEventAlgo(CompFactory.LVL1CTP.CTPSimulation("CTPSimulation",
+                                                        UseEDMxAOD = flags.Trigger.CTP.UseEDMxAOD,
                                                         DoL1Topo       = flags.Trigger.L1.doTopo, 
                                                         DoL1TopoLegacy = False,
                                                         #Using same as Phase1L1Topo for now, but it should be changed in the future

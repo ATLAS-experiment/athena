@@ -71,7 +71,7 @@ def EnhancedBiasHypoToolGen(flags, chainDict):
 
     key = chainDict['chainParts'][0]['algType']
     if key not in l1seeds:
-        log.error("No configuration exist for EB chain: ", key)
+        log.error("No configuration exist for EB chain: %s", key)
     else:
         tool.L1ItemNames = l1seeds[key]
 

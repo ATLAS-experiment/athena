@@ -525,7 +525,7 @@ class TriggerChain:
                 elif 'HT' in legtype:
                     mtype |= TriggerType.ht
                 else:
-                    log.info("Unknown trigger type:",(legtype, mtype, token, self.name))
+                    log.info("Unknown trigger type: %s %s %s %s", legtype, mtype, token, self.name)
         return mtype
 
     def isActive(self, livefraction=1e-99):
@@ -590,17 +590,17 @@ class TriggerChain:
         comp = -1
         debug = False
         #if re.search("HLT_j55_gsc75_bmv2c1040_split_3j55_gsc75_boffperf_split", self.name): debug = True
-        if debug: log.info("DEBUG:",self.name,other.name)
+        if debug: log.info("DEBUG: %s %s",self.name,other.name)
         for selfleg, otherleg in zip(self.legs, other.legs):
             legcomp = selfleg.isLegLowerThan(otherleg, is2015, debug)
-            if debug: log.info("DEBUG LEG return:", legcomp)
+            if debug: log.info("DEBUG LEG return: %s", legcomp)
             if legcomp == -9: return -1
             elif legcomp == -1: continue
             elif legcomp == 0 and comp == 1: return -1
             elif legcomp == 1 and comp == 0: return -1
             elif legcomp == 0 : comp = 0
             elif legcomp == 1 : comp = 1
-        if debug: log.info("DEBUG FINAL:",comp)
+        if debug: log.info("DEBUG FINAL: %s",comp)
         return comp
 
 

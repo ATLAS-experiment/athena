@@ -470,14 +470,12 @@ JetChainParts = {
     # Setup for alternative data stream readout
     # B-tagging information
     'bTag'         : ['boffperf'  ,
-                      'bdl1r60', 'bdl1r70', 'bdl1r77', 'bdl1r85',
-                      'bdl1d60',  'bdl1d65', 'bdl1d70', 'bdl1d72',
-                      'bdl1d75', 'bdl1d77', 'bdl1d80', 'bdl1d82',
-                      'bdl1d85',
+                      # GN1 series
                       'bgn160', 'bgn165', 'bgn170', 'bgn172',
                       'bgn175', 'bgn177', 'bgn180', 'bgn182',
                       'bgn185',
                       'bgn182bb96', 'bgn177bb96', 'bgn175bb90',
+                      # GN2 series
                       'bgn260', 'bgn265', 'bgn270', 'bgn272',
                       'bgn275', 'bgn277', 'bgn280', 'bgn282',
                       'bgn285',                       ],

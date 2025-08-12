@@ -47,7 +47,7 @@ def getReadyForPhysicsInRange(period):
         sincerun, sincelb = getRunLBFromU64(obj.since())
         untilrun, untillb = getRunLBFromU64(obj.until())
         if sincerun != untilrun:
-            log.info("WARNING: ready block crosses run boundaries:", sincerun, untilrun)
+            log.info("WARNING: ready block crosses run boundaries: %d %d", sincerun, untilrun)
         if sincerun not in period: continue
         if sincerun in runsWithReady:
             runsWithReady[sincerun] += [ (sincelb, untillb) ]

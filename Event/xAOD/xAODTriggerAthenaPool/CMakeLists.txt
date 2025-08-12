@@ -32,6 +32,7 @@ atlas_add_poolcnv_library( xAODTriggerAthenaPoolPoolCnv
    xAODTrigger/L1TopoSimResultsContainer.h xAODTrigger/L1TopoSimResultsAuxContainer.h
    xAODTrigger/gFexJetRoIContainer.h xAODTrigger/gFexJetRoIAuxContainer.h
    xAODTrigger/gFexGlobalRoIContainer.h xAODTrigger/gFexGlobalRoIAuxContainer.h
+   xAODTrigger/CTPResult.h xAODTrigger/CTPResultAuxInfo.h
    TYPES_WITH_NAMESPACE xAOD::MuonRoIContainer xAOD::MuonRoIAuxContainer
    xAOD::JetRoIContainer xAOD::JetRoIAuxContainer
    xAOD::EmTauRoIContainer xAOD::EmTauRoIAuxContainer
@@ -58,6 +59,7 @@ atlas_add_poolcnv_library( xAODTriggerAthenaPoolPoolCnv
    xAOD::L1TopoSimResultsContainer xAOD::L1TopoSimResultsAuxContainer
    xAOD::gFexJetRoIContainer xAOD::gFexJetRoIAuxContainer
    xAOD::gFexGlobalRoIContainer xAOD::gFexGlobalRoIAuxContainer
+   xAOD::CTPResult xAOD::CTPResultAuxInfo
 
    CNV_PFX xAOD
    LINK_LIBRARIES AthContainers AthenaKernel AthenaPoolCnvSvcLib

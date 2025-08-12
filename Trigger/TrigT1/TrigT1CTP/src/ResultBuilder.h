@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,7 +26,10 @@
 #include "TrigT1Interfaces/CTPSLink.h"
 
 // Output to the DAQ:
-#include "TrigT1Result/CTP_RDO.h"
+#include "TrigT1Result/CTP_RDO.h" // TODO: obsolete it in favour of xAOD::CTPResult --> see line below
+#include "xAODTrigger/CTPResult.h"
+#include "xAODTrigger/CTPResultAuxInfo.h"
+#include "TrigT1Interfaces/CTPResultUtils.h"
 
 #include "CLHEP/Random/RandomEngine.h"
 
@@ -35,6 +38,14 @@ namespace LVL1CTP {
    /**
     *
     *   @short Class used to create the CTP output (RDO, SLink and TriggerInfo)
+    *
+    *   This class constructs and uses vectors of the following words to form the CTP output:
+    *   - tbp: Trigger before prescale words
+    *   - tap: Trigger after prescale words 
+    *   - tav: Trigger after veto words 
+    *   - tip: Trigger input pattern words
+    *   - extra: Extra data words
+    *
     */
    
    class ResultBuilder : public AthAlgTool {
@@ -69,12 +80,19 @@ namespace LVL1CTP {
                                                     const std::vector<uint32_t> & extra,
                                                     const unsigned char triggerType ) const;
 
-      //! build RDO result (CTP_RDO)
+      //! build RDO result (CTP_RDO) - TODO obsolete it in favor of xAOD::CTPResult
       std::unique_ptr<CTP_RDO> constructRDOResult( const EventIDBase & eventID, 
                                                    const std::vector<uint32_t> & tbp, const std::vector<uint32_t> & tap, 
                                                    const std::vector<uint32_t> & tav, const std::vector<uint32_t> & tip,
                                                    const std::vector<uint32_t> & extra ) const;
 
+     //! build RDO result (CTPResult)
+     std::pair< std::unique_ptr<xAOD::CTPResult>, std::unique_ptr<xAOD::CTPResultAuxInfo> > constructCTPResult( const EventIDBase & eventID, 
+							  const std::vector<uint32_t> & tbp, const std::vector<uint32_t> & tap, 
+							  const std::vector<uint32_t> & tav, const std::vector<uint32_t> & tip,
+							  const std::vector<uint32_t> & extra ) const;
+
+     
    private:
 
       enum WrdType { TBP = 0x01, TAP = 0x02, TAV = 0x04 };

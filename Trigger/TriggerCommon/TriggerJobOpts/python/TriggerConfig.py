@@ -672,6 +672,10 @@ def triggerRunCfg( flags, menu=None ):
         hltSeedingAcc = emulateHLTSeedingCfg(flags)
     else:
         acc.merge( triggerIDCCacheCreatorsCfg( flags, seqName="AthAlgSeq" ), sequenceName="HLTBeginSeq" )
+
+        if flags.Trigger.doRuntimeNaviVal: # Validate we can parse the menu with the standalone chain parser
+            acc.addEventAlgo( CompFactory.TrigChainNameParserChecker(), sequenceName="HLTBeginSeq" )
+
         from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
         hltSeedingAcc = HLTSeedingCfg( flags )
         
