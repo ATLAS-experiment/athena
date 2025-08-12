@@ -213,6 +213,16 @@ class ConfigFactory():
                 block = self._algs[name]
         except KeyError:
             raise ValueError(f"{name} config block not found. Make sure context is correct.")
+        # Optional **kwargs are in the process of being retired. While the process is not fully complete
+        # we still need to allow them to be passed. However, for blocks where they have already been retired
+        # we want to raise an error so users don't experience undesirable behaviour where their extra options
+        # are being ignored, or run into related cryptic crashes.
+        already_fixed_blocks = {
+            'Electrons','Photons','Muons','TauJets','DiTauJets','MissingET','FlavourTagging','FlavourTaggingEventSF','XbbTagging',
+            'InDetTracks','KLFitter','EventSelection','PtEtaSelection','ObjectCutFlow','EventCutFlow','Thinning',
+            'IFFClassification','MCTCClassification','PerEventSF','SelectionDecoration','SystObjectLink'}
+        if kwargs and name.split('.')[-1] in already_fixed_blocks:
+            raise ValueError(f"Config block '{name}' no longer accepts **kwargs. Use config.setOptionValue('option', value) instead!")
         configSeq, _ = block.makeConfig(kwargs)
         return configSeq
 
