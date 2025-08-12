@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODTrigger )
@@ -36,7 +36,7 @@ atlas_add_xaod_smart_pointer_dicts(
 
    OBJECTS "xAOD::EnergySumRoI_v1" "xAOD::EnergySumRoI_v2"
            "xAOD::TrigDecision_v1" "xAOD::TrigNavigation_v1"
-           "xAOD::RoiDescriptorStore_v1" )
+           "xAOD::RoiDescriptorStore_v1" "xAOD::CTPResult_v1" )
 
 atlas_add_dictionary( xAODTriggerDict
    xAODTrigger/xAODTriggerDict.h

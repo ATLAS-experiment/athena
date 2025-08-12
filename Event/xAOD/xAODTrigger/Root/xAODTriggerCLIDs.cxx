@@ -61,3 +61,6 @@
 
 #include "xAODTrigger/L1TopoSimResultsContainer.h"
 #include "xAODTrigger/L1TopoSimResultsAuxContainer.h"
+
+#include "xAODTrigger/CTPResult.h"
+#include "xAODTrigger/CTPResultAuxInfo.h"

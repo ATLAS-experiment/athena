@@ -7,7 +7,9 @@
 #include "./CTPTriggerItem.h"
 #include "./CTPUtil.h"
 
-#include "TrigT1Result/CTP_RDO.h"
+#include "TrigT1Result/CTP_RDO.h" // TODO obsolete it in favour of xAOD::CTPResult - see line below
+#include "xAODTrigger/CTPResult.h"
+#include "xAODTrigger/CTPResultAuxInfo.h"
 #include "TrigT1Interfaces/CTPSLink.h"
 #include "TrigT1Result/RoIBResult.h"
 #include "TrigT1Result/JetEnergyRoI.h"
@@ -56,11 +58,16 @@ LVL1CTP::CTPSimulation::initialize() {
    }
 
    if( m_isData ) {
-      CHECK( m_oKeyRDO.assign(LVL1CTP::DEFAULT_RDOOutputLocation_Rerun) );
+      if(m_useEDMxAOD){
+	CHECK( m_oKeyCTPResult.assign(LVL1CTP::DEFAULT_CTPResultOutputLocation_Rerun) );
+      } else {
+	CHECK( m_oKeyRDO.assign(LVL1CTP::DEFAULT_RDOOutputLocation_Rerun) );
+      }
       CHECK( m_oKeySLink.assign(LVL1CTP::DEFAULT_CTPSLinkLocation_Rerun) );
    }
    ATH_CHECK( m_bgKey.initialize( !m_forceBunchGroupPattern ) );
 
+   
    // data links
    ATH_CHECK( m_iKeyTopo.initialize( !m_iKeyTopo.empty() && m_doL1Topo ) );
    ATH_CHECK( m_iKeyMuctpi.initialize( ! m_iKeyMuctpi.empty() ) );
@@ -80,7 +87,8 @@ LVL1CTP::CTPSimulation::initialize() {
    ATH_CHECK( m_iKeyGFexMETJwoJ.initialize( ! m_iKeyGFexMETJwoJ.empty() ) );
    ATH_CHECK( m_iKeyEFexCluster.initialize( ! m_iKeyEFexCluster.empty() ) );
    ATH_CHECK( m_iKeyEFexTau.initialize( ! m_iKeyEFexTau.empty() ) );
-   ATH_CHECK( m_oKeyRDO.initialize( ! m_oKeyRDO.empty() ) );
+   ATH_CHECK( m_oKeyCTPResult.initialize( m_useEDMxAOD && !m_oKeyCTPResult.empty() ) );
+   ATH_CHECK( m_oKeyRDO.initialize( !m_useEDMxAOD && !m_oKeyRDO.empty() ) );
    ATH_CHECK( m_oKeySLink.initialize( ! m_oKeySLink.empty() ) );
 
    // L1ZDC
@@ -1142,13 +1150,22 @@ LVL1CTP::CTPSimulation::simulateItems(const std::map<std::string, unsigned int> 
    const std::vector<uint32_t> extra(size_t{6}, uint32_t{0});
 
    auto eventID = context.eventID();
-   std::unique_ptr<CTP_RDO> rdo = m_resultBuilder->constructRDOResult( eventID, tbp, tap, tav, tip, extra );
-   std::unique_ptr<CTPSLink> roi = m_resultBuilder->constructRoIResult( eventID, tbp, tap, tav, tip, extra, triggerType );
 
    // create CTP output format and store in the event
-   auto rdoWriteHandle = SG::makeHandle( m_oKeyRDO, context );
+   if (m_useEDMxAOD) {
+     std::pair< std::unique_ptr<xAOD::CTPResult>, std::unique_ptr<xAOD::CTPResultAuxInfo> > ctpResultAuxPair = m_resultBuilder->constructCTPResult( eventID, tbp, tap, tav, tip, extra );
+     std::unique_ptr<xAOD::CTPResult> ctpResult = std::move(ctpResultAuxPair.first);
+     std::unique_ptr<xAOD::CTPResultAuxInfo> ctpResultAux = std::move(ctpResultAuxPair.second);
+     auto ctpResultWriteHandle = SG::makeHandle( m_oKeyCTPResult, context );
+     ATH_CHECK( ctpResultWriteHandle.record( std::move(ctpResult), std::move(ctpResultAux) ));
+   }
+   else   {
+     std::unique_ptr<CTP_RDO> rdo = m_resultBuilder->constructRDOResult( eventID, tbp, tap, tav, tip, extra );
+     auto rdoWriteHandle = SG::makeHandle( m_oKeyRDO, context );
+     ATH_CHECK( rdoWriteHandle.record( std::move(rdo) ));
+   }
+   std::unique_ptr<CTPSLink> roi = m_resultBuilder->constructRoIResult( eventID, tbp, tap, tav, tip, extra, triggerType );
    auto sLinkWriteHandle = SG::makeHandle( m_oKeySLink, context );
-   ATH_CHECK( rdoWriteHandle.record( std::move(rdo) ));
    ATH_CHECK( sLinkWriteHandle.record( std::move(roi)  ));
 
    // fill histograms with item simulation results

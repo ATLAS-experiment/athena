@@ -11,7 +11,7 @@ atlas_add_library( TrigT1Interfaces
                    src/*.cxx
                    PUBLIC_HEADERS TrigT1Interfaces
                    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} AthContainers AthenaBaseComps AthenaKernel GaudiKernel TrigConfData TrigT1MuctpiBits
+                   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} AthContainers AthenaBaseComps AthenaKernel GaudiKernel TrigConfData TrigT1MuctpiBits xAODTrigger
                    PRIVATE_LINK_LIBRARIES TrigConfL1Data)
 
 atlas_add_dictionary( TrigT1InterfacesDict
