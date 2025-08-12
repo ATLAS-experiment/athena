@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import textwrap
 import inspect
@@ -250,11 +250,6 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
         This is used by `ConfigSequence` to determine whether this block
         should be included in the configuration.
         """
-        if self.skipOnData and config.dataType() is DataType.Data:
-            return False
-        if self.skipOnMC and config.dataType() is DataType.MC:
-            return False
-
         if self.skipOnData and config.dataType() is DataType.Data:
             return False
         if self.skipOnMC and config.dataType() is not DataType.Data:
