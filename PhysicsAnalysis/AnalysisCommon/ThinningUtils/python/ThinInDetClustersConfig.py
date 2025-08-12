@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # 
 # Heavily Inspired by ThinInDetForwardTrackParticles.py
 
@@ -105,11 +105,15 @@ def ThinInDetClustersCfg(flags, name="ThinInDetClustersAlg", **kwargs):
         if flags.Tracking.thinPixelClustersOnTrack:
             kwargs["ThinPixelHitsOnTrack"] = True
             kwargs["InDetTrackStatesPixKey"] = flags.Tracking.thinInDetClustersPixelMSOSContainers[idx]
-            kwargs["InDetTrackMeasurementsPixKey"] = "PixelClusters"
+            kwargs["InDetTrackMeasurementsPixKey"] = (
+                "ITkPixelMeasurements" if flags.Detector.GeometryITk
+                else "PixelClusters")
         if flags.Tracking.thinSCTClustersOnTrack:
             kwargs["ThinSCTHitsOnTrack"] = True
             kwargs["InDetTrackStatesSctKey"] = flags.Tracking.thinInDetClustersSCTMSOSContainers[idx]
-            kwargs["InDetTrackMeasurementsSctKey"] = "SCT_Clusters"
+            kwargs["InDetTrackMeasurementsSctKey"] = (
+                "ITkStripMeasurements" if flags.Detector.GeometryITk
+                else "SCT_Clusters")
         if flags.Tracking.thinTRTClustersOnTrack:
             kwargs["ThinTRTHitsOnTrack"] = True
             kwargs["InDetTrackStatesTrtKey"] = flags.Tracking.thinInDetClustersTRTMSOSContainers[idx]
