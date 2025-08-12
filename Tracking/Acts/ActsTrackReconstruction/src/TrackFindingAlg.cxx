@@ -259,8 +259,11 @@ namespace ActsTrk
     // ================================================== //
     Acts::VectorTrackContainer actsTrackBackend;
     Acts::VectorMultiTrajectory actsTrackStateBackend;
-    actsTrackBackend.reserve(10000);
-    actsTrackStateBackend.reserve(400000);
+    {
+      std::lock_guard<std::mutex> lock( m_mutex );      
+      actsTrackBackend.reserve(m_nTrackReserve);
+      actsTrackStateBackend.reserve(m_nTrackStateReserve);
+    }
     detail::RecoTrackContainer actsTracksContainer(actsTrackBackend,
                                                    actsTrackStateBackend);
 
@@ -318,7 +321,18 @@ namespace ActsTrk
       }
     }
 
-    // handle the ambiguity
+    {
+      std::lock_guard<std::mutex> lock( m_mutex );
+      // update the reserve space
+      if (actsTrackBackend.size() > m_nTrackReserve) {
+        m_nTrackReserve = static_cast<std::size_t>( std::ceil(m_memorySafetyMargin * actsTrackBackend.size()) );
+      }
+      if (actsTrackStateBackend.size() > m_nTrackStateReserve) {
+        m_nTrackStateReserve = static_cast<std::size_t>( std::ceil(m_memorySafetyMargin * actsTrackStateBackend.size()) );
+      }
+    }
+    
+    // handle the ambiguity    
     // we potentially need to short list the track candidates and make some copies
     if (not m_ambi) {
       // no need to shortlist anything. just use the actsTracksContainer

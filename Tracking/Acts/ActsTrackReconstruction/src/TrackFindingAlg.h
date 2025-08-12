@@ -187,6 +187,11 @@ namespace ActsTrk
     using TrackFindingBaseAlg::CKF_pimpl;
 
     enum DestinyType : int {UNKNOWN=0, SUCCEED, DUPLICATE, FAILURE};
+
+    Gaudi::Property< float > m_memorySafetyMargin {this, "MemorySafetyMargin", 1.2};
+    mutable std::size_t m_nTrackReserve ATLAS_THREAD_SAFE {0ul};
+    mutable std::size_t m_nTrackStateReserve ATLAS_THREAD_SAFE {0ul};
+    mutable std::mutex m_mutex ATLAS_THREAD_SAFE {};
   };
 
 } // namespace
