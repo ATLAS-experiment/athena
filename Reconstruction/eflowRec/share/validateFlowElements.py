@@ -34,7 +34,9 @@ def ReadMyxAOD(evt):
                             print("Got a link to a muon")
                 else:
                     print("No auxdata retrieved")
-
+        except:
+            print("Problem in accessing charged FE container")
+            
         try:
             neutralFEcont=evt.retrieve("xAOD::FlowElementContainer","JetETMissNeutralParticleFlowObjects")
             print("\n")
@@ -51,7 +53,7 @@ def ReadMyxAOD(evt):
                 else:
                     print("No auxdata retrieved")
         except:
-            print("No charged FE container accessible")
+            print("No neutral FE container accessible")
             nneutralFE=0
         
         outputdict={"nChargedFE":nchargedFE,"nNeutralFE":nneutralFE}
