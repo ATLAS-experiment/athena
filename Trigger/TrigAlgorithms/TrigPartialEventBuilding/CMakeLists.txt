@@ -8,7 +8,7 @@ atlas_add_library( TrigPartialEventBuildingLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigPartialEventBuilding
                    PRIVATE_LINK_LIBRARIES CxxUtils IRegionSelector
-                   LINK_LIBRARIES AthenaBaseComps DecisionHandlingLib TrigCompositeUtilsLib TrigSteeringEvent )
+                   LINK_LIBRARIES AthenaBaseComps DecisionHandlingLib TrigCompositeUtilsLib TrigSteeringEvent xAODTrigMissingET )
 
 atlas_add_component( TrigPartialEventBuilding
                      src/components/*.cxx
