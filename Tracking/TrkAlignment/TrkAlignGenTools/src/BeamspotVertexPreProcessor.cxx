@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenTools/BeamspotVertexPreProcessor.h"
@@ -756,7 +756,7 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
       // this track failed the PV constraint reift
       if (!newTrack)  {
         ++m_nFailedPVRefits;
-        msg(MSG::ERROR)<<"VertexConstraint track refit failed! "<<endmsg;
+        ATH_MSG_DEBUG("VertexConstraint track refit failed! ");
       }
     }
   }
@@ -766,10 +766,10 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
       if(vot){
         newTrack = doConstraintRefit(fitter, track, vot, particleHypothesis);
         type = AlignTrack::BeamspotConstrained;
-        // this track failed the BS constraint reift
+        // this track failed the BS constraint refit
         if (!newTrack)  {
           ++m_nFailedBSRefits;
-          msg(MSG::ERROR)<<"BSConstraint track refit failed! "<<endmsg;
+          ATH_MSG_DEBUG("BSConstraint track refit failed! ");
         }
       }
   }
@@ -786,11 +786,11 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
       if(type == AlignTrack::VertexConstrained)
       {
         ++m_nFailedPVRefits;
-        ATH_MSG_ERROR("VertexConstraint track refit2 failed! ");
+        ATH_MSG_DEBUG("VertexConstraint track refit2 failed! ");
       }else if(type == AlignTrack::BeamspotConstrained)
       {
         ++m_nFailedPVRefits;
-        ATH_MSG_ERROR("BSConstraint track refit2 failed! ");
+        ATH_MSG_DEBUG("BSConstraint track refit2 failed! ");
       }
     }
   }
@@ -798,10 +798,10 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
   if(!newTrack && m_doNormalRefit){
       newTrack = fitter->alignmentFit(alignCache,*track,m_runOutlierRemoval,particleHypothesis);
       type = AlignTrack::NormalRefitted;
-      // this track failed the normal reift
+      // this track failed the normal refit
       if (!newTrack)   {
         ++m_nFailedNormalRefits;
-        msg(MSG::ERROR)<<"Normal track refit failed! "<<endmsg;
+        ATH_MSG_DEBUG("Normal track refit failed! ");
       }
   }
 
