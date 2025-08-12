@@ -214,7 +214,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                                         JetContainer = CustomPFJetContainerName),
 
         BoostedQGTaggingCustomVtx =       JetModifier("BoostedJetTaggerTool", "boostedqgtaggingCustomVtx",
-                                        createfn=lambda jdef,_ :JetMomentToolsConfig.getBoostedJetTaggerTool(jdef,"CustomVtx"),
+                                        createfn=lambda jdef,_ :JetMomentToolsConfig.getBoostedJetTaggerToolQG(jdef,"CustomVtx"),
                                         modspec = "CustomVtx",
                                         prereqs = lambda _,jdef :
                                              ["input:JetTrackVtxAssocCustomVtx","mod:TrackMomentsCustomVtx"] +
