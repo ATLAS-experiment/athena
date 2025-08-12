@@ -20,7 +20,7 @@ namespace DiTauRecTools
   {
 
     /// Declare the interface that the class provides
-    ASG_TOOL_INTERFACE( tauRecTools::IDiTauToolBase )
+    ASG_TOOL_INTERFACE( DiTauRecTools::IDiTauToolBase )
 
     public:
     // calculate ID variables
