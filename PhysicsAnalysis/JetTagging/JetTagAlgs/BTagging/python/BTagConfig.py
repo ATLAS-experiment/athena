@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 Main configuration of flavour tagging algorithms.
 The low and high level tagging algorithms are scheduled here.
@@ -11,13 +11,13 @@ from AthenaConfiguration.Enums import BeamType, LHCPeriod, HIMode
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
-from TrackHitAssignement.TrackHitAssignementAlgCfg import TrackHitAssignementAlg
+from TrackHitAssignement.TrackHitAssignementAlgCfg import TrackHitAssignementAlgCfg
 from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
 
 
-def GetTaggerTrainingMap(inputFlags, jet_col):
+def GetTaggerTrainingMap(flags, jet_col):
     """This function defines the networks used for the different jet collections."""
-    if inputFlags.GeoModel.Run >= LHCPeriod.Run4 and "AntiKt10UFOCSSKSoftDropBeta100Zcut10" not in jet_col:
+    if flags.GeoModel.Run >= LHCPeriod.Run4 and "AntiKt10UFOCSSKSoftDropBeta100Zcut10" not in jet_col:
         return [
             "BTagging/20240918/gn2hl/antikt4emtopo/network.onnx",
         ]
@@ -124,57 +124,57 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
     return acc
 
 
-def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMPFlowJets']):
+def BTagRecoSplitCfg(flags, JetCollection=['AntiKt4EMPFlowJets']):
     """
     Run flavour tagging algorithms during reconstruction (AOD or ESD production).
     """
 
     result = ComponentAccumulator()
  
-    if inputFlags.Reco.EnableHI:   
+    if flags.Reco.EnableHI:   
         JetCollection=['AntiKt4HIJets']     
-        if inputFlags.Reco.HIMode is not HIMode.HI:
+        if flags.Reco.HIMode is not HIMode.HI:
             JetCollection.extend(['AntiKt4EMTopoJets','AntiKt4EMPFlowJets'])
 
 
     # Can only configure b-tagging for collisions; not cosmics, etc.
-    if inputFlags.Beam.Type is not BeamType.Collisions:
+    if flags.Beam.Type is not BeamType.Collisions:
         return result
 
     #Track Augmenter
-    result.merge(BTagTrackAugmenterAlgCfg(inputFlags))
+    result.merge(BTagTrackAugmenterAlgCfg(flags))
     # loop over jet collections and schedule btagging algorithms
     for jc in JetCollection:
         result.merge(
             FlavorTaggingCfg(
-                cfgFlags = inputFlags,
+                cfgFlags = flags,
                 JetCollection = jc,
             )
         )
 
     # Invoking the algorithm saving hits in the vicinity of jets, with proper flags
-    if inputFlags.BTagging.Trackless:
-        result.merge(JetHitAssociationCfg(inputFlags))
-        result.merge(TrackHitAssignementAlg(inputFlags))
+    if flags.BTagging.Trackless:
+        result.merge(JetHitAssociationCfg(flags))
+        result.merge(TrackHitAssignementAlgCfg(flags))
         BTaggingAODList = _track_measurement_list('JetAssociatedPixelClusters')
         BTaggingAODList += _track_measurement_list('JetAssociatedSCTClusters')
-        result.merge(addToAOD(inputFlags, BTaggingAODList))
-    if inputFlags.BTagging.savePixelHits:
-        result.merge(JetHitAssociationCfg(inputFlags))
-        result.merge(TrackHitAssignementAlg(inputFlags))
+        result.merge(addToAOD(flags, BTaggingAODList))
+    if flags.BTagging.savePixelHits:
+        result.merge(JetHitAssociationCfg(flags))
+        result.merge(TrackHitAssignementAlgCfg(flags))
         result.merge(
             addToAOD(
-              inputFlags,
-              _track_measurement_list(("ITk" if inputFlags.Detector.GeometryITk else "") + "PixelClusters")
+              flags,
+              _track_measurement_list("ITkPixelMeasurements" if flags.Detector.GeometryITk else "PixelClusters")
             )
         )
-    if inputFlags.BTagging.saveSCTHits:
-        result.merge(JetHitAssociationCfg(inputFlags))
-        result.merge(TrackHitAssignementAlg(inputFlags))
+    if flags.BTagging.saveSCTHits:
+        result.merge(JetHitAssociationCfg(flags))
+        result.merge(TrackHitAssignementAlgCfg(flags))
         result.merge(
             addToAOD(
-              inputFlags,
-              _track_measurement_list("ITkStripClusters" if inputFlags.Detector.GeometryITk else "SCT_Clusters")
+              flags,
+              _track_measurement_list("ITkStripMeasurements" if flags.Detector.GeometryITk else "SCT_Clusters")
             )
         )
 
