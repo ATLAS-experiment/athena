@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DiTauRecTools )
@@ -25,10 +25,9 @@ atlas_add_library( DiTauRecToolsLib
    CxxUtils AthLinks AsgMessagingLib AsgDataHandlesLib AsgTools xAODCaloEvent
    xAODJet xAODParticleEvent xAODPFlow xAODTracking xAODEventShape
    MVAUtils ${extra_public_libs}
+   tauRecToolsLib
    PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver AthContainers AthOnnxInterfaces )
 
 atlas_add_dictionary( DiTauRecToolsDict
    DiTauRecTools/DiTauRecToolsDict.h DiTauRecTools/selection.xml
    LINK_LIBRARIES DiTauRecToolsLib )
-
-

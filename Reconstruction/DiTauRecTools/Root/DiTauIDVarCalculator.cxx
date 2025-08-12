@@ -42,11 +42,11 @@ StatusCode DiTauIDVarCalculator::initialize()
 //                              Wrapper functions                             //
 ////////////////////////////////////////////////////////////////////////////////
 
-StatusCode DiTauIDVarCalculator::calculateIDVariables(const xAOD::DiTauJet& xDiTau){
+StatusCode DiTauIDVarCalculator::calculateIDVariables(const xAOD::DiTauJet& xDiTau) const{
   return execute(xDiTau);
 }
 
-StatusCode DiTauIDVarCalculator::execute(const xAOD::DiTauJet& xDiTau)
+StatusCode DiTauIDVarCalculator::execute(const xAOD::DiTauJet& xDiTau) const
 {
   
   ATH_MSG_DEBUG("Calculate DiTau ID variables");
