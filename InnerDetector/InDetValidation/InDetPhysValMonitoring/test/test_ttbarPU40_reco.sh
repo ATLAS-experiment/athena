@@ -10,14 +10,11 @@
 # art-output: dcube*
 # art-html: dcube_lrt_last
 
-#RDO is made at rel 22.0.73
-#reference plots are made at rel 22.0.73
-
 # Fix ordering of output in logfile
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r24.0.87"
+relname="r24.0.106"
 
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
