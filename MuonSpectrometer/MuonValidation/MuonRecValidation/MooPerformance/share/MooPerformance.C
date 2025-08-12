@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 //////////////////////////////////////////////////////////////
 // Moore Validation/Performance Plots
 //
@@ -525,12 +528,6 @@ void MooPerformance(char* genTitle)
   // 2x2 plots for a particular pT
   //////////////////////////////////////////////////////////////////////
 
-  //TIter next(gROOT->GetListOfFiles());
-  //TFile* f;
-  //while ((f = (TFile*)next())) {
-
-  //f->cd();
-
   TDirectory* currentDir = gDirectory;
   TIter objIter(gDirectory->GetList());
   TObject* obj;
@@ -538,9 +535,9 @@ void MooPerformance(char* genTitle)
 
     if (obj->InheritsFrom("TDirectory")) {
 
-      ((TDirectory*)obj)->cd();
+      (static_cast<TDirectory*>(obj))->cd();
       char psFileName[256];
-      sprintf(psFileName,"ComparisonPlots_%s.ps",((TDirectory*)obj)->GetTitle());
+      sprintf(psFileName,"ComparisonPlots_%s.ps",(static_cast<TDirectory*>(obj))->GetTitle());
       TPostScript psFile(psFileName,112);
       gStyle->SetOptStat(111110);
       compRecoPage("pTRes");
