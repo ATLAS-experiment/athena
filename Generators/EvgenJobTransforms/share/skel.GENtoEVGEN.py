@@ -774,7 +774,7 @@ if eventsFile or datFile:
                 input0 = os.path.basename(file).split("._")[0]
                 input1 = (os.path.basename(file).split("._")[1]).split(".")[0]
                 inputroot = input0+"._"+input1
-              evgenLog.info("inputroot = ",inputroot)
+              evgenLog.info("inputroot = %s",inputroot)
               realEventsFile = find_unique_file('*%s.*ev*ts' % inputroot)
 #             The only input format where merging is permitted is LHE
               with open(realEventsFile, 'r') as f:
