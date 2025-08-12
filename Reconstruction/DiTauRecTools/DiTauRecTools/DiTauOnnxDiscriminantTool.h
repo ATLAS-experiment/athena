@@ -36,7 +36,7 @@ public:
   virtual StatusCode initialize() override;
 
   // calculate ID variables
-  virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) override;
+  virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) const override;
   
 private:
 

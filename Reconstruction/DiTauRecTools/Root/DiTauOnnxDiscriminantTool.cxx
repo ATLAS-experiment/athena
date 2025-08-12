@@ -61,7 +61,7 @@ StatusCode DiTauOnnxDiscriminantTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DiTauOnnxDiscriminantTool::execute(const xAOD::DiTauJet& xDiTau)
+StatusCode DiTauOnnxDiscriminantTool::execute(const xAOD::DiTauJet& xDiTau) const
 {
     const static SG::Decorator<float> omni_scoreDec("omni_score");
     ATH_MSG_DEBUG("Inferencing omni DiTau ID score...");

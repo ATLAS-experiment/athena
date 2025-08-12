@@ -45,10 +45,10 @@ public:
   virtual StatusCode initialize() override;
 
   // calculate ID variables depricated
-  virtual StatusCode calculateIDVariables(const xAOD::DiTauJet& xDiTau);
+  virtual StatusCode calculateIDVariables(const xAOD::DiTauJet& xDiTau) const;
 
   // calculate ID variables
-  virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) override;
+  virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) const override;
   
 private:
 
