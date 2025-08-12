@@ -53,6 +53,8 @@ public:
 private:
 
   Gaudi::Property<float> m_dDefault{this, "DefaultValue", -1234};
+  Gaudi::Property<float> m_Rsubjet{this, "R_subjet", 0.2};
+  Gaudi::Property<float> m_Rcore{this, "R_core", 0.1};
 
   static float n_subjets(const xAOD::DiTauJet& xDiTau) ;
   float ditau_pt(const xAOD::DiTauJet& xDiTau) const;
@@ -81,7 +83,7 @@ private:
   float d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float f_isotracks(const xAOD::DiTauJet& xDiTau) const;
   
-  static StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau);
+  StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau) const;
 }; // class DiTauIDVarCalculator
 
 }
