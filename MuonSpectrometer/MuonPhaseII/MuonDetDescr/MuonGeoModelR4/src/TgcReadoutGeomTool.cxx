@@ -167,7 +167,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
             } 
             if (!stripReadout && radDesign) {
                 const IdentifierHash layHash = TgcReadoutElement::constructHash(0, gasGap+1, true);
-                ATH_MSG_ALWAYS("Radial hash "<<layHash);
+                ATH_MSG_VERBOSE("Radial hash "<<layHash);
                 const Amg::Transform3D trans{pVolTrans.transform 
                                              * Amg::getRotateZ3D(90.* Gaudi::Units::deg)
                                              * Amg::getRotateX3D(90.*Gaudi::Units::deg)};
