@@ -134,8 +134,11 @@ class DiTauWorkingPointConfig (ConfigBlock) :
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::DiTauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.JetIDLevel = IDLevel
-            alg.scaleFactorDecoration = 'tau_effSF' + postfix
+            alg.scaleFactorDecoration = 'tau_effSF' + postfix + '_%SYS%'
             # alg.outOfValidity = 2 #silent
             # alg.outOfValidityDeco = "bad_eff"
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                 'effSF' + postfix)
+
