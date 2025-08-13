@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -80,10 +80,9 @@ QWidget * VP1MissingEtSystem::buildController()
 {
   //Updated: replaced to predefined controller
   m_d->controller = new missingEtController(this);
-  m_d->collWidget = (VP1MissingEtCollWidget*)m_d->controller->collWidget();
+  m_d->collWidget = static_cast<VP1MissingEtCollWidget*>(m_d->controller->collWidget());
   return m_d->controller;
-  //m_d->collWidget = new VP1MissingEtCollWidget;
-  //return m_d->collWidget;
+ 
 }
 
 //_____________________________________________________________________________________

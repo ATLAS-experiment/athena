@@ -36,10 +36,10 @@ public:
 			     detectorStore(ds),
 			     initattempted(false),
 			     initsucceeded(false) {}
-  MuonChamberProjectionHelper* theclass;
-  StoreGateSvc * detectorStore;
-  bool initattempted;
-  bool initsucceeded;
+  MuonChamberProjectionHelper* theclass{};
+  StoreGateSvc * detectorStore{};
+  bool initattempted{};
+  bool initsucceeded{};
   bool ensureInited();//Returns false if can't init.
   bool init();//Returns false if can't init.
 
@@ -54,7 +54,7 @@ public:
     void ensureInitGlobalToLocal() { if (!globalToLocal) globalToLocal = new Amg::Transform3D(localToGlobal.inverse()); }
     ~MDTChamberInfo() { delete globalToLocal; }
   };
-  std::map<GeoPVConstLink,MDTChamberInfo>::iterator itLastMDTChamberLookedUp;
+  std::map<GeoPVConstLink,MDTChamberInfo>::iterator itLastMDTChamberLookedUp{};
   std::map<GeoPVConstLink,MDTChamberInfo> mdtchambervolinfo;//Map typically has around 1124 entries.
   typedef std::map<GeoPVConstLink,MDTChamberInfo>::iterator ChamberInfoMapItr;
   inline bool nameIsMDTChamber( const std::string& n );

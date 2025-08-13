@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1LegoSystems/VP1CaloLegoSystem.h"
@@ -369,7 +369,7 @@ void VP1CaloLegoSystem::createEtaPhi() {
 
 
 
-	    EMECCellConstLink cellPtr = ((EMECDetectorRegion *) region)->getEMECCell(iEta,iPhi);
+	    EMECCellConstLink cellPtr = (static_cast<const EMECDetectorRegion *> (region))->getEMECCell(iEta,iPhi);
 	    double phiMin = cellPtr->getPhiLocalLower();
 	    double phiMax = cellPtr->getPhiLocalUpper();
 	    double etaMin = cellPtr->getEtaMin();
@@ -416,7 +416,7 @@ void VP1CaloLegoSystem::createEtaPhi() {
 	  for (unsigned int iEta=region->beginEtaIndex();iEta<region->endEtaIndex();iEta++) {
 
 
-	    EMBCellConstLink cellPtr = ((EMBDetectorRegion *) region)->getEMBCell(iEta,iPhi);
+	    EMBCellConstLink cellPtr = (static_cast<const EMBDetectorRegion *> (region))->getEMBCell(iEta,iPhi);
 	    double phiMin = cellPtr->getPhiLocalLower();
 	    double phiMax = cellPtr->getPhiLocalUpper();
 	    double etaMin = cellPtr->getEtaMin();
