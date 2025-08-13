@@ -3,6 +3,16 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def CaloCellDecoratorCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
+    kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
+    acc.setPrivateTools(CompFactory.DerivationFramework.CaloCellDecorator(**kwargs))
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+
+    acc.merge(LArOnOffIdMappingCfg(flags))
+    return acc
+   
 
 def MaxCellDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
@@ -63,6 +73,19 @@ def ClusterEnergyPerLayerDecoratorCfg(flags, **kwargs):
     acc.setPrivateTools(
         CompFactory.DerivationFramework.ClusterEnergyPerLayerDecorator(**kwargs)
     )
+    return acc
+
+
+def CaloCellDecoratorKernelCfg(flags, name="CaloCellDecoratorKernel", **kwargs):
+    acc = ComponentAccumulator()
+
+    augmentationTools = [
+        acc.addPublicTool(acc.popToolsAndMerge(CaloCellDecoratorCfg(flags)))
+    ]
+
+    kwargs.setdefault("AugmentationTools", augmentationTools)
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
     return acc
 
 
