@@ -22,9 +22,6 @@
 #include "MuonCalibEvent/MdtCalibHit.h"
 
 #include "GeoModelKernel/throwExcept.h"
-namespace {
-  static double const twoBySqrt12 = 2/std::sqrt(12);
-}
 
 using SingleTubeCalib = MuonCalib::MdtTubeCalibContainer::SingleTubeCalib;
 using MdtDriftCircleStatus = MdtCalibOutput::MdtDriftCircleStatus;
@@ -226,37 +223,48 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
     r = rtRelation->rt()->radius( t * (1 + tShift) );
   }
   // check whether drift times are within range, if not fix them to the min/max range
-  if ( t < rtRelation->rt()->tLower() ) {
+  if ( t < rtRelation->rt()->tLower()) {
     t_inrange = rtRelation->rt()->tLower();
     double rmin = rtRelation->rt()->radius( t_inrange );
-    double drdt = (rtRelation->rt()->radius( t_inrange + 30. ) - rmin)/30.;
+    double drdt = rtRelation->rt()->driftVelocity( t_inrange);
     /// now check whether we are outside the time window
     if (timeStatus == Muon::MdtStatusBeforeSpectrum) {
       t = rtRelation->rt()->tLower() - m_timeWindowLowerBound;
     }
-    // if we get here we are outside the rt range but inside the window.
-    r = std::max(rmin + drdt*(t-t_inrange), m_unphysicalHitRadiusLowerBound.value());
+    /// Try an analytic continuation of the rt relation
+    r = rmin + drdt*(t-t_inrange);
   } else if( t > rtRelation->rt()->tUpper() ) {
     t_inrange = rtRelation->rt()->tUpper();
     double rmax = rtRelation->rt()->radius( t_inrange );
-    double drdt = (rmax - rtRelation->rt()->radius( t_inrange - 30. ))/30.;
+    double drdt = rtRelation->rt()->driftVelocity(t_inrange);
     // now check whether we are outside the time window
     if ( timeStatus == Muon::MdtStatusAfterSpectrum ) {
       t = rtRelation->rt()->tUpper() + m_timeWindowUpperBound;
     }
-    // if we get here we are outside the rt range but inside the window.
+    /// Linearly expand the r-t relation
     r = rmax + drdt*(t-t_inrange);
   }
-
+ 
   assert(rtRelation->rtRes() != nullptr);
-  if (!resolFromRtrack) {
+ 
+  /// Calibrated radius too low
+  if (r <m_unphysicalHitRadiusLowerBound){
+    ATH_MSG_VERBOSE("Calibrated radius below physical limit "<<r<<" vs. "<<calibIn.innerTubeR());
+    timeStatus = Muon::MdtStatusBeforeSpectrum;
+    r = m_unphysicalHitRadiusLowerBound;
+    reso = std::pow(calibIn.innerTubeR(), 2);
+  } else if (r > calibIn.innerTubeR()) {
+    ATH_MSG_VERBOSE("Calibrated radius outside tube ."<<r<<" vs. "<<calibIn.innerTubeR());  
+    timeStatus = Muon::MdtStatusAfterSpectrum;
+    r = calibIn.innerTubeR();
+    reso = std::pow(calibIn.innerTubeR(), 2);
+  } else if (!resolFromRtrack) {
     reso = rtRelation->rtRes()->resolution( t_inrange );
   } else {
     const std::optional<double> tFromR = rtRelation->tr()->driftTime(std::abs(calibIn.distanceToTrack()));
     reso = rtRelation->rtRes()->resolution(tFromR.value_or(0.));
   }
   
-
   if (m_doPropUncert && !calibIn.trackDirHasPhi()) {
       assert(rtRelation->rt() != nullptr);
       const double driftTimeUp = std::min(rtRelation->rt()->tUpper(),
@@ -275,7 +283,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
       const double radiusUp = rtRelation->rt()->radius(driftTimeUp);
       const double radiusDn = rtRelation->rt()->radius(driftTimeDn);
       ATH_MSG_VERBOSE("Measurement "<<m_idHelperSvc->toString(calibIn.identify())
-          <<" nominal drift time "<<driftTime<<", down: "<<driftTimeDn<<", up: "<<driftTimeUp
+          <<" nominal drift time "<<calibResult.driftTime()<<", down: "<<driftTimeDn<<", up: "<<driftTimeUp
           <<" --> driftRadius: "<<r<<" pm "<<reso<<", prop-up: "<<radiusUp<<", prop-dn: "<<radiusDn
           <<" delta: "<<(radiusUp-radiusDn));
       calibResult.setDriftUncertSigProp(0.5*std::abs(radiusUp - radiusDn));
