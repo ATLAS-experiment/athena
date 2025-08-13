@@ -181,6 +181,11 @@
 #include "xAODTrigger/versions/L1TopoSimResultsContainer_v1.h"
 #include "xAODTrigger/versions/L1TopoSimResultsAuxContainer_v1.h"
 
+#include "xAODTrigger/CTPResult.h"
+#include "xAODTrigger/CTPResultAuxInfo.h"
+#include "xAODTrigger/versions/CTPResult_v1.h"
+#include "xAODTrigger/versions/CTPResultAuxInfo_v1.h"
+
 // EDM include(s).
 #include "xAODCore/tools/DictHelpers.h"
 
@@ -221,6 +226,7 @@ namespace {
       XAOD_INSTANTIATE_NS_OBJECT_TYPES( xAOD, TrigDecision_v1 );
       XAOD_INSTANTIATE_NS_OBJECT_TYPES( xAOD, TrigNavigation_v1 );
       XAOD_INSTANTIATE_NS_OBJECT_TYPES( xAOD, RoiDescriptorStore_v1 );
+      XAOD_INSTANTIATE_NS_OBJECT_TYPES( xAOD, CTPResult_v1 );
    };
 }
 
