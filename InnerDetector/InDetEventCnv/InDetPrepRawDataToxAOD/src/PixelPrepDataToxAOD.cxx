@@ -390,7 +390,7 @@ StatusCode PixelPrepDataToxAOD::execute()
          }
          std::vector<unsigned int> barcodes; // FIXME  barcode-based - requires xAOD::TrackMeasurementValidation to be migrated away from barcodes
          for (auto i = range.first; i != range.second; ++i) {
-           barcodes.push_back( HepMC::barcode(i->second) );
+           barcodes.push_back( HepMC::uniqueID(i->second) );
          }
          // @TODO move vector
          AUXDATA(xprd,std::vector<unsigned int>, truth_barcode) = barcodes;
@@ -481,7 +481,7 @@ std::vector< std::vector< int > > PixelPrepDataToxAOD::addSDOInformation( xAOD::
     std::vector<float> sdoDepEnergy(pos->second.getdeposits().size());
     unsigned int nDepos{0};
     for (auto& deposit: pos->second.getdeposits()) {
-      if (deposit.first) sdoDepBC[nDepos] = HepMC::barcode(deposit.first);
+      if (deposit.first) sdoDepBC[nDepos] = HepMC::uniqueID(deposit.first);
       ATH_MSG_DEBUG(" SDO Energy Deposit " << deposit.second  ) ;
       sdoDepEnergy[nDepos] = deposit.second;
       nDepos++;
@@ -525,7 +525,7 @@ void  PixelPrepDataToxAOD::addSiHitInformation( xAOD::TrackMeasurementValidation
       sihit_energyDeposit[hitNumber] =  sihit.energyLoss() ;
       sihit_meanTime[hitNumber] =  sihit.meanTime() ;
       const HepMcParticleLink& HMPL = sihit.particleLink();
-      sihit_barcode[hitNumber] =  HepMC::barcode(HMPL) ;
+      sihit_barcode[hitNumber] =  HepMC::uniqueID(HMPL) ;
       if(HMPL.isValid()){
         sihit_pdgid[hitNumber]   = HMPL->pdg_id();
       }
@@ -607,7 +607,7 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
     }
     else
     {
-    auto bc = HepMC::barcode(siHit->particleLink());
+    auto bc = HepMC::uniqueID(siHit->particleLink());
     for ( const auto& barcodeSDOColl : trkBCs ) {
         if (std::find(barcodeSDOColl.begin(),barcodeSDOColl.end(),bc) == barcodeSDOColl.end() ) continue;
         multiMatchingHits.push_back(siHit);
@@ -685,7 +685,7 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
                                      highestXPos->localEndPosition(),
                                      energyDep,
                                      time,
-                                     HepMC::barcode((*siHitIter)->particleLink()),
+                                     HepMC::uniqueID((*siHitIter)->particleLink()),
                                      0, // 0 for pixel 1 for Pixel
                                      (*siHitIter)->getBarrelEndcap(),
                                      (*siHitIter)->getLayerDisk(),
@@ -1114,7 +1114,7 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
     phi[hitNumber] = std::atan(std::tan(bowphi)-readoutside*tanlorentz);
     const HepMcParticleLink& HMPL = siHit.particleLink();
     if (HMPL.isValid()){
-      barcode[hitNumber] = HepMC::barcode(HMPL);
+      barcode[hitNumber] = HepMC::uniqueID(HMPL);
       const auto particle = HMPL.cptr();
       pdgid[hitNumber]   = particle->pdg_id();
       HepMC::FourVector mom=particle->momentum();
@@ -1124,13 +1124,13 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
 #ifdef HEPMC3
       if ( vertex && !vertex->particles_in().empty()){
         const auto& mother_of_particle=vertex->particles_in().front();             
-        motherBarcode[hitNumber] =  HepMC::barcode(mother_of_particle);
+        motherBarcode[hitNumber] =  HepMC::uniqueID(mother_of_particle);
         motherPdgid[hitNumber]    = mother_of_particle->pdg_id();
       }
 #else
       if ( vertex ){
         if( vertex->particles_in_const_begin() !=  vertex->particles_in_const_end() ){
-          motherBarcode[hitNumber] =  HepMC::barcode(*vertex->particles_in_const_begin());
+          motherBarcode[hitNumber] =  HepMC::uniqueID(*vertex->particles_in_const_begin());
           motherPdgid[hitNumber]    =  (*vertex->particles_in_const_begin())->pdg_id();
         }
       }

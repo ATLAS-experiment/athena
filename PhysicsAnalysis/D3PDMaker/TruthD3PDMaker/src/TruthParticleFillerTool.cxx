@@ -73,7 +73,7 @@ StatusCode TruthParticleFillerTool::book()
 StatusCode TruthParticleFillerTool::fill (const xAOD::TruthParticle& p)
 {
   *m_status = p.status();
-  *m_barcode = HepMC::barcode(p); // FIXME barcode-based
+  *m_barcode = HepMC::uniqueID(p);
   *m_pdgId = p.pdgId();
 
   const HepPDT::ParticleDataTable* pdt = m_ppsvc->PDT();

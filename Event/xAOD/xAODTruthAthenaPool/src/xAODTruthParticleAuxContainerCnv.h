@@ -12,11 +12,11 @@
 
 // EDM include(s):
 #include "xAODTruth/TruthParticleAuxContainer.h"
-#include "xAODTruthParticleAuxContainerCnv_v2.h"
+#include "xAODTruthParticleAuxContainerCnv_v1.h"
 
 /// Base class for the converter
 typedef T_AthenaPoolAuxContainerCnv< xAOD::TruthParticleAuxContainer,
-                                     xAODTruthParticleAuxContainerCnv_v2 >
+                                     xAODTruthParticleAuxContainerCnv_v1 >
    xAODTruthParticleAuxContainerCnv;
 
 

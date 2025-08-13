@@ -316,7 +316,7 @@ namespace Rec{
 
   int NewVrtSecInclusiveTool::getProdVrtBarcode(const xAOD::TrackParticle * TP, float resolLimit) // FIXME barcode-based
   {
-     int barVrt=0;
+     int barVrt{HepMC::UNDEFINED_ID};
      if(!TP)return barVrt;
      static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> truthParticleLinkAcc( "truthParticleLink");
      if( truthParticleLinkAcc.isAvailable( *TP ) ) {
@@ -325,7 +325,7 @@ namespace Rec{
        if( !tplink.isValid() ) return barVrt;
        const xAOD::TruthParticle *tparticle = (*tplink);         // truth particle for TrackPartile
        if(tparticle->hasProdVtx()){                              // truth particle has production vertex
-          barVrt = HepMC::barcode(tparticle->prodVtx()); // FIXME barcode-based
+          barVrt = HepMC::uniqueID(tparticle->prodVtx());
           if(HepMC::is_simulation_vertex(tparticle->prodVtx()))      return barVrt;          // Geant4 vertex
 	  if(tparticle->prodVtx()->nIncomingParticles()!=1) return barVrt;           // Safety!
 	  const xAOD::TruthParticle *parent = *(tparticle->prodVtx()->incomingParticleLinks())[0];
@@ -336,7 +336,7 @@ namespace Rec{
           if(!parent->hasProdVtx())         return barVrt;    // Parent particle doesn't have production vertex
 	  Amg::Vector3D vpos1(parent->prodVtx()->x(),parent->prodVtx()->y(),parent->prodVtx()->z()); //Truth vertex position
           if( Amg::distance(vpos0,vpos1) > resolLimit) return barVrt;    // Parent vertex is far
-          barVrt = HepMC::barcode(parent->prodVtx());                         // Else use parent vertex as reference // FIXME barcode-based
+          barVrt = HepMC::uniqueID(parent->prodVtx());                         // Else use parent vertex as reference
           if(HepMC::is_simulation_vertex(parent->prodVtx()))   return barVrt;     // Geant4 vertex
 	  if(parent->prodVtx()->nIncomingParticles()!=1)       return barVrt;     // Not a decay vertex
 	  const xAOD::TruthParticle *grandparent = *(parent->prodVtx()->incomingParticleLinks())[0];
@@ -346,7 +346,7 @@ namespace Rec{
           if(!grandparent->hasProdVtx())         return barVrt;    // Parent particle doesn't have production vertex
 	  Amg::Vector3D vpos2(grandparent->prodVtx()->x(),grandparent->prodVtx()->y(),grandparent->prodVtx()->z()); //Truth vertex position
           if( Amg::distance(vpos0,vpos2) > resolLimit) return barVrt;    // Grandparent vertex is far
-          barVrt = HepMC::barcode(grandparent->prodVtx());                    // Use grandparent vertex as reference // FIXME barcode-based
+          barVrt = HepMC::uniqueID(grandparent->prodVtx());                    // Use grandparent vertex as reference
           if(HepMC::is_simulation_vertex(grandparent->prodVtx()))      return barVrt;          // Geant4 vertex
 	  if(grandparent->prodVtx()->nIncomingParticles()!=1) return barVrt;           // Not a decay vertex
 	  const xAOD::TruthParticle *biggrandparent = *(grandparent->prodVtx()->incomingParticleLinks())[0];
@@ -356,7 +356,7 @@ namespace Rec{
           if(!biggrandparent->hasProdVtx())         return barVrt;    // Parent particle doesn't have production vertex
 	  Amg::Vector3D vpos3(biggrandparent->prodVtx()->x(),biggrandparent->prodVtx()->y(),biggrandparent->prodVtx()->z());
           if( Amg::distance(vpos0,vpos3) > resolLimit) return barVrt;    // Grandparent vertex is far
-          barVrt = HepMC::barcode(biggrandparent->prodVtx());               // Use grandparent vertex as reference // FIXME barcode-based
+          barVrt = HepMC::uniqueID(biggrandparent->prodVtx());               // Use grandparent vertex as reference
        }
      }
      return barVrt;

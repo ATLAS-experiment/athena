@@ -34,7 +34,7 @@ private:
     /** ReadHandleKey for Active LAr Calibration Hits */
     SG::ReadHandleKey<CaloCalibrationHitContainer> m_lArActiveCaloCalibrationHitReadHandleKey{this,"lArActiveCaloCalibrationHitsName","LArCalibrationHitActive","ReadHandleKey for Active LAr Calibration Hits"};
 
-    void fillMap(std::map<Identifier,double>& identifierToTruthEnergyMap, int barcode, const CaloCalibrationHit& thisCalibHit) const; // FIXME barcode-based
+  void fillMap(std::map<Identifier,double>& identifierToTruthEnergyMap, int uniqueID, const CaloCalibrationHit& thisCalibHit) const;
 
 };
 

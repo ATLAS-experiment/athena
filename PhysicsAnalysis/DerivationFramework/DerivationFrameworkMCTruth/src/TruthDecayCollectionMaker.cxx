@@ -147,7 +147,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     part_cont->push_back( xTruthParticle );
     // Fill with numerical content
     xTruthParticle->setPdgId(old_part.pdgId());
-    xTruthParticle->setBarcode(HepMC::barcode(&old_part)); // FIXME barcode-based
+    xTruthParticle->setUid(HepMC::uniqueID(&old_part));
     xTruthParticle->setStatus(old_part.status());
     xTruthParticle->setM(old_part.m());
     xTruthParticle->setPx(old_part.px());
@@ -197,8 +197,8 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventC
     int my_index = vert_cont->size()-1;
     ElementLink<xAOD::TruthVertexContainer> eltv(*vert_cont, my_index);
     // Set properties
-    xTruthVertex->setId(HepMC::status(old_vert));
-    xTruthVertex->setBarcode(HepMC::barcode(&old_vert)); // FIXME barcode-based
+    xTruthVertex->setStatus(HepMC::status(old_vert));
+    xTruthVertex->setUid(HepMC::uniqueID(old_vert));
     xTruthVertex->setX(old_vert.x());
     xTruthVertex->setY(old_vert.y());
     xTruthVertex->setZ(old_vert.z());

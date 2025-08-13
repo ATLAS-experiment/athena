@@ -158,7 +158,7 @@ bool TrigTrackSelector::selectTrack( const TrigInDetTrack* track, const TrigInDe
 	if ( truthMap ) { 
 	  const TrigInDetTrackTruth* trackTruth = truthMap->truth(track);
 	  if (trackTruth!=0 && trackTruth->nrMatches() > 0) {
-	    match_barcode = HepMC::barcode(trackTruth->bestSiMatch()); // FIXME barcode-based
+	    match_barcode = HepMC::uniqueID(trackTruth->bestSiMatch());
 	    truth = true;
 	  }
 	}
@@ -645,7 +645,7 @@ bool TrigTrackSelector::selectTrack( const xAOD::TruthParticle* track, double x0
     unsigned bitmap = 0;
 
     int trackAuthor = track->pdgId();
-    int barcode     = HepMC::barcode(track); // FIXME barcode-based
+    int barcode     = HepMC::uniqueID(track);
 
 #if 0
     std::cout << "\t\t\tSUTT TP track" 
@@ -821,7 +821,7 @@ TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned 
 
     /// how about storing barcode/status/pidg info?
     int author  = track->pdgId();   /// this isn't good!! but it will do for testing 
-    int barcode = HepMC::barcode(track); /// probably won't work either // FIXME barode-based
+    int barcode = HepMC::uniqueID(track); /// probably won't work either
 
 
     unsigned long id = (unsigned long)track;

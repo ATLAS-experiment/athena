@@ -313,7 +313,7 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
         STDM6SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
         STDM6SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
-        STDM6SlimmingHelper.ExtraVariables += ["TruthVertices.barcode.z"]
+        STDM6SlimmingHelper.ExtraVariables += ["TruthVertices.uid.z"]
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))

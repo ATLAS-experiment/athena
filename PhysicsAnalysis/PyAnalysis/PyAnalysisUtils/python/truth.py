@@ -19,12 +19,12 @@ from PyParticleTools import PyParticleTools
 import sys
 
 def do_decay (t, n):
-    """Return the barcode number for decay N of truth particle T
+    """Return the unique ID number for decay N of truth particle T
 as a string.  Return an empty string if there's no such decay.
 """
     if t.nDecay() <= n:
         return ''
-    bc = t.child(n).genParticle().barcode()
+    bc = t.child(n).genParticle().id()
     return str(bc)
 
 class _Truthtmp(object):
@@ -32,7 +32,7 @@ class _Truthtmp(object):
 def dump_one_truth (t, f=sys.stdout):
     """Dump truth information for truth particle T to file F."""
     d = _Truthtmp()
-    d.bc = t.genParticle().barcode()
+    d.bc = t.genParticle().id()
     d.name = PDG.pdgid_to_name(t.pdgId())
     d.da1 = do_decay(t, 0)
     d.da2 = do_decay(t, 1)
@@ -45,7 +45,7 @@ def dump_one_truth (t, f=sys.stdout):
     d.py = t.py()/1000
     d.pz = t.pz()/1000
     d.e = t.e()/1000
-    print ("%(bc)3d %(name)-4s %(da1)4s %(da2)4s %(da3)4s %(pt)6.1f %(eta)5.2f %(phi)5.2f %(m)5.1f %(px)6.1f %(py)6.1f %(pz)6.1f %(e)6.1f" % d.__dict__, file=f)
+    print ("%(id)3d %(name)-4s %(da1)4s %(da2)4s %(da3)4s %(pt)6.1f %(eta)5.2f %(phi)5.2f %(m)5.1f %(px)6.1f %(py)6.1f %(pz)6.1f %(e)6.1f" % d.__dict__, file=f)
     if t.nDecay() > 3:
         print ("  (more than 3 decays)", file=f)
 
@@ -55,8 +55,8 @@ def dump_truth(f=sys.stdout, sgkey="SpclMC", maxn=None):
 F is the file to which the dump is sent.
 SGKEY is the StoreGate key which is used to retrieve the truth information.
 
-The first column in the dump is the particle barcode number.
-This is followed by the particle type, and then by the barcode numbers
+The first column in the dump is the particle unique ID number.
+This is followed by the particle type, and then by the unique ID numbers
 of any decay daughters (up to 3).  This is followed by the four-momentum
 in two versions: first as pt, eta, phi, m and then as px, py, pz, e.
 """

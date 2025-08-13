@@ -316,7 +316,7 @@ namespace VKalVrtAthena {
             const xAOD::TruthParticle* aTemp_truth = getTrkGenParticle( trk );
             if( aTemp_truth )
               {
-                barcode = HepMC::barcode(aTemp_truth); // FIXME barcode-based
+                barcode = HepMC::uniqueID(aTemp_truth);
                 static const SG::ConstAccessor<float> truthMatchProbabilityAcc( "truthMatchProbability" ); 
                 matchProb= truthMatchProbabilityAcc( *trk );
               }

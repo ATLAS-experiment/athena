@@ -502,7 +502,7 @@ int InDetSecVtxTruthMatchTool::checkProduction( const xAOD::TruthParticle & trut
     const xAOD::TruthVertex* parentVertex = parent->decayVtx();
     if(std::find(truthVerticesToMatch.begin(), truthVerticesToMatch.end(), parentVertex) != truthVerticesToMatch.end()) {
       ATH_MSG_DEBUG("Found LLP decay.");
-      return HepMC::barcode(parentVertex); // FIXME barcode-based
+      return HepMC::uniqueID(parentVertex);
     }
     // recurse on parent
     return checkProduction(*parent, truthVerticesToMatch);

@@ -230,7 +230,7 @@ def JETM7Cfg(flags):
         JETM7SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles",
                                              "TruthVertices", "TruthEvents"]
-        JETM7SlimmingHelper.ExtraVariables += ["InDetTrackParticles.truthMatchProbability", "TruthVertices.barcode.z"]
+        JETM7SlimmingHelper.ExtraVariables += ["InDetTrackParticles.truthMatchProbability", "TruthVertices.uid.z"]
 
 
     # Trigger content

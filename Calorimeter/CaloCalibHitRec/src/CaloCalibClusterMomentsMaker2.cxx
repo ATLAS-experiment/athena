@@ -37,6 +37,8 @@
 
 #include "StoreGate/ReadHandle.h"
 
+#include "TruthUtils/MagicNumbers.h"
+
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include <CLHEP/Vector/LorentzVector.h>
@@ -377,29 +379,29 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
           int iClus = p.first;
           double weight = p.second;
           if(m_useParticleID){
-            const int uniqueID = HepMC::barcode(hit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
+            const int uniqueID = HepMC::uniqueID(hit);
             if (uniqueID == HepMC::INVALID_PARTICLE_ID) {
-              ATH_MSG_ERROR("Invalid uniqueID (barcode) detected - this sample cannot be properly analysed.");
+              ATH_MSG_ERROR("Invalid uniqueID detected - this sample cannot be properly analysed.");
               break;
             }
-            clusInfoVec[iClus].Add(weight * hit->energyTotal(), nsmp, (unsigned int)(HepMC::barcode(hit)));
+            clusInfoVec[iClus].Add(weight * hit->energyTotal(), nsmp, (unsigned int)(HepMC::uniqueID(hit)));
           }else{
             clusInfoVec[iClus].Add(weight * hit->energyTotal(), nsmp);
           }
         }
       }
-      if( m_useParticleID && HepMC::barcode(hit) == HepMC::UNDEFINED_ID) {
+      if( m_useParticleID && HepMC::uniqueID(hit) == HepMC::UNDEFINED_ID) {
         nHitsWithoutParticleID++;
       }
       nHitsTotal++;
     }
   }
 
-  // if all calibration hits have ParticleID(i.e barcode)==0 when simulation was done without ParticleID
+  // if all calibration hits have ParticleUID(i.e GenParticle::id())==0 when simulation was done without ParticleUID
   bool doCalibFrac = m_doCalibFrac;
   bool useParticleID = m_useParticleID;
   if(m_useParticleID && (nHitsTotal == nHitsWithoutParticleID) ) {
-    ATH_MSG_INFO("Calibration hits do not have ParticleID, barcodes of particle-caused hits are always 0. Continuing without ParticleID machinery.");
+    ATH_MSG_INFO("Calibration hits do not have ParticleUID, ids of particle-caused hits are always 0. Continuing without ParticleID machinery.");
     useParticleID = false;
   }
 
@@ -482,7 +484,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
             const CaloDetDescrElement* myCDDE = 
               calo_dd_man->get_element(myId);
             int uniqueID(HepMC::UNDEFINED_ID);
-            if(useParticleID) uniqueID = HepMC::barcode(hit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
+            if(useParticleID) uniqueID = HepMC::uniqueID(hit);
             if ( myCDDE ) {
               int jeO = (int)floor(m_n_eta_out*(myCDDE->eta()/m_out_eta_max));
               if ( jeO >= -m_n_eta_out && jeO < m_n_eta_out ) {
@@ -506,7 +508,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
                     for(unsigned int i_cls=0; i_cls<(*pClusList)[(jpO+m_n_phi_out)*(2*m_n_eta_out+1)+jeO+m_n_eta_out].size(); i_cls++){
                       int iClus = (*pClusList)[(jpO+m_n_phi_out)*(2*m_n_eta_out+1)+jeO+m_n_eta_out][i_cls];
                       MyClusInfo& clusInfo = clusInfoVec[iClus];
-                      // getting access to calibration energy inside cluster caused by same particleID (barcode)
+                      // getting access to calibration energy inside cluster caused by same particleUID (uniqueID)
                       // as given OOC hit
                       auto pos = clusInfo.engCalibParticle.find(uniqueID);
                       if(pos!=clusInfo.engCalibParticle.end()) {
@@ -557,7 +559,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
           myCDDE = m_caloDmDescrManager->get_element(myId);
           if ( myCDDE ) {
             int uniqueID(HepMC::UNDEFINED_ID);
-            if(useParticleID) uniqueID = HepMC::barcode(hit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
+            if(useParticleID) uniqueID = HepMC::uniqueID(hit);
 
             int jeO = (int)floor(m_n_eta_out*(myCDDE->eta()/m_out_eta_max));
             if ( jeO >= -m_n_eta_out && jeO < m_n_eta_out ) {
@@ -580,7 +582,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
                 xAOD::CaloCluster * theCluster = theClusColl->at(iClus);
                 
                 MyClusInfo& clusInfo = clusInfoVec[iClus];
-                // getting access to calibration energy inside cluster caused by same particleID (barcode)
+                // getting access to calibration energy inside cluster caused by same particleUID (uniqueID)
                 // as given OOC hit
                 auto pos = clusInfo.engCalibParticle.find(uniqueID);
                 if(pos!=clusInfo.engCalibParticle.end()) {
@@ -657,7 +659,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
       continue;
     }
     
-    truthIDToPdgCodeMap[HepMC::barcode(thisTruthParticle)] = thisTruthParticle->pdgId(); // FIXME barcode-based xAOD::TruthParticle does not support uniqueID yet
+    truthIDToPdgCodeMap[HepMC::uniqueID(thisTruthParticle)] = thisTruthParticle->pdgId();
   }//truth particle loop
   
   // assign moments
@@ -701,13 +703,13 @@ Calculation of energy fraction caused by particles of different types
 *****************************************************************************/
       engCalibFrac.assign(kCalibFracMax, 0.0);
       if(clusInfo.engCalibIn.engTot > 0.0) {
-        // each MyClusInfo has a map of particle's barcode and particle calibration deposits in given cluster
+        // each MyClusInfo has a map of particle's uniqueID (GenParticle::id()) and particle calibration deposits in given cluster
         for (const auto& p : clusInfo.engCalibParticle) {
           int pdg_id = 0;
-          if ( auto it = truthIDToPdgCodeMap.find(p.first); it != truthIDToPdgCodeMap.end()) { // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
+          if ( auto it = truthIDToPdgCodeMap.find(p.first); it != truthIDToPdgCodeMap.end()) {
             pdg_id = it->second;
           } else {   
-            ATH_MSG_WARNING("truthIDToPdgCodeMap cannot find an entry with barcode " << p.first);
+            ATH_MSG_WARNING("truthIDToPdgCodeMap cannot find an entry with uniqueID " << p.first);
             continue;
           }
           if( std::abs(pdg_id) == 211) {

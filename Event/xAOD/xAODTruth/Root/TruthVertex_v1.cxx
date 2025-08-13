@@ -24,9 +24,10 @@ namespace xAOD {
    //            Implementation for the "MC specific" functions
    //
 
-   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TruthVertex_v1, int, id, setId )
-   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TruthVertex_v1, int, barcode,
-                                         setBarcode )
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TruthVertex_v1, int, status,
+                                         setStatus )
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TruthVertex_v1, int, uid,
+                                         setUid )
 
    //
    /////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -74,8 +74,8 @@ StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches() const
             xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
             newVertexCollection->push_back( xTruthVertex );
             // Set properties
-            xTruthVertex->setId(HepMC::status(old_vert));
-            xTruthVertex->setBarcode(HepMC::barcode(old_vert)); // FIXME barcode-based
+            xTruthVertex->setStatus(HepMC::status(old_vert));
+            xTruthVertex->setUid(HepMC::uniqueID(old_vert));
             xTruthVertex->setX(old_vert->x());
             xTruthVertex->setY(old_vert->y());
             xTruthVertex->setZ(old_vert->z());

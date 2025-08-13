@@ -243,7 +243,7 @@ namespace Muon {
                 nprecLayers = precLayers.size();
                 ATH_MSG_DEBUG(" total counts: precision " << static_cast<int>(nprecLayers) << " phi layers " << static_cast<int>(nphiLayers)
                               << " eta trig layers " << static_cast<int>(ntrigEtaLayers)
-                              << " associated reco muon " << index << " barcode " << HepMC::barcode(*truthLink) // FIXME barcode-based
+                              << " associated reco muon " << index << " unique ID " << HepMC::uniqueID(*truthLink)
                               << " truthLink " << truthLink);
                 xAOD::MuonSegment* segment =  segmentContainer.push_back(std::make_unique<xAOD::MuonSegment>());
                

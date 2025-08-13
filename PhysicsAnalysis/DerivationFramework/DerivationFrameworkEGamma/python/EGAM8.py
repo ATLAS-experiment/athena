@@ -316,11 +316,11 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         truth_cond_top = "(abs(TruthParticles.pdgId) ==  6)"
         # Photon
         truth_cond_gam = " && ".join(
-            ["(abs(TruthParticles.pdgId) == 22)", "(TruthParticles.pt > 1*GeV)"]
+            ["(TruthParticles.isPhoton)", "(TruthParticles.pt > 1*GeV)"]
         )
         # stable particles
         truth_cond_finalState = " && ".join(
-            ["(TruthParticles.status == 1)", "(TruthParticles.barcode<200000)"]
+            ["(TruthParticles.isGenStable)", "(!TruthParticles.isSimulationParticle)"]
         )
         truth_expression = (
             "( "
