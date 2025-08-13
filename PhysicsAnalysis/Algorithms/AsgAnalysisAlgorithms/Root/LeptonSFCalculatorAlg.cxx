@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -13,15 +13,18 @@ namespace CP {
     ANA_CHECK(m_electronsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_photonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_tausHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK(m_photonSelection.initialize(m_systematicsList, m_photonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_tauSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
 
     ANA_CHECK(m_electronSFs.initialize(m_systematicsList, m_electronsHandle));
     ANA_CHECK(m_muonSFs.initialize(m_systematicsList, m_muonsHandle));
     ANA_CHECK(m_photonSFs.initialize(m_systematicsList, m_photonsHandle));
+    ANA_CHECK(m_tauSFs.initialize(m_systematicsList, m_tausHandle));
 
     ANA_CHECK(m_event_leptonSF.initialize(m_systematicsList, m_eventInfoHandle));
 
@@ -43,6 +46,9 @@ namespace CP {
 
       const xAOD::PhotonContainer *photons {nullptr};
       if (m_photonsHandle) ANA_CHECK(m_photonsHandle.retrieve(photons, syst));
+
+      const xAOD::TauJetContainer *taus {nullptr};
+      if (m_tausHandle) ANA_CHECK(m_tausHandle.retrieve(taus, syst));
 
       double leptonSF {1.};
       if (m_electronsHandle){
@@ -68,6 +74,15 @@ namespace CP {
           if (m_photonSelection.getBool(*ph, syst)) {
             for (size_t i{}; i < m_photonSFs.size(); i++) {
               leptonSF *= m_photonSFs.at(i).get(*ph, syst);
+            }
+          }
+        }
+      }
+      if (m_tausHandle){
+        for (const xAOD::TauJet *tau : *taus) {
+          if (m_tauSelection.getBool(*tau, syst)) {
+            for (size_t i{}; i < m_tauSFs.size(); i++) {
+              leptonSF *= m_tauSFs.at(i).get(*tau, syst);
             }
           }
         }

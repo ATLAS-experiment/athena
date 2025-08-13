@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -17,6 +17,7 @@
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODMuon/MuonContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
+#include <xAODTau/TauJetContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
 namespace CP {
@@ -51,6 +52,13 @@ namespace CP {
       this, "photonSelection", "", "the selection on the input photons"
     };
 
+    CP::SysReadHandle<xAOD::TauJetContainer> m_tausHandle {
+      this, "taus", "", "the tau container to use"
+    };
+    CP::SysReadSelectionHandle m_tauSelection {
+      this, "tauSelection", "", "the selection on the input taus"
+    };
+
     CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
       this, "eventInfo", "EventInfo", "the EventInfo container to decorate selection decisions to"
     };
@@ -65,6 +73,10 @@ namespace CP {
 
     CP::SysReadDecorHandleArray<float> m_photonSFs {
       this, "photonSFs", {}, "Array of decorated per-photon SFs"
+    };
+
+    CP::SysReadDecorHandleArray<float> m_tauSFs {
+      this, "tauSFs", {}, "Array of decorated per-tau SFs"
     };
 
     CP::SysWriteDecorHandle<float> m_event_leptonSF {
