@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODJET_JETCONSTITUENTSVECTOR_H
@@ -145,11 +145,11 @@ namespace xAOD {
 
       void update4Mom();
       
-      ELiterator m_index;
-      ELiterator m_cachedMomIndex;
-      JetConstituent m_4mom;
+      ELiterator m_index{};
+      ELiterator m_cachedMomIndex{};
+      JetConstituent m_4mom{};
 
-      JetConstitScale m_sigState; 
+      JetConstitScale m_sigState{}; 
       
     };
 
