@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PunchThrough headers
@@ -921,16 +921,16 @@ std::vector<std::map<std::string, std::string>> PunchThroughG4Tool::getInfoMap(c
                                 std::map<std::string, std::string>  xml_info_item;
 
                                 if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "name")) != nullptr) {
-                                    xml_info_item.insert({"name", (const char*)xmlBuff});
+                                    xml_info_item.insert({"name", reinterpret_cast<const char*>(xmlBuff)});
                                 }
                                 if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "etaMins")) != nullptr) {
-                                    xml_info_item.insert({"etaMins", (const char*)xmlBuff});
+                                    xml_info_item.insert({"etaMins", reinterpret_cast<const char*>(xmlBuff)});
                                 }
                                 if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "etaMaxs")) != nullptr) {
-                                    xml_info_item.insert({"etaMaxs", (const char*)xmlBuff});
+                                    xml_info_item.insert({"etaMaxs", reinterpret_cast<const char*>(xmlBuff)});
                                 }
                                 if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "pidStr")) != nullptr) {
-                                    xml_info_item.insert({"pidStr", (const char*)xmlBuff});
+                                    xml_info_item.insert({"pidStr", reinterpret_cast<const char*>(xmlBuff)});
                                 }
 
                                 xml_info.push_back(xml_info_item);                                
@@ -987,7 +987,7 @@ StatusCode PunchThroughG4Tool::initializeInversePCA(const std::string & inverseP
                                   for (int i = 0; i <= 4; ++i) {
                                       std::string propName = "comp_" + std::to_string(i); // Dynamically create property name
                                       if ((xmlBuff = xmlGetProp(pcaNode, BAD_CAST propName.c_str())) != nullptr) {
-                                          PCA_matrix_row.push_back(atof((const char*)xmlBuff)); // Convert and push to the row
+                                          PCA_matrix_row.push_back(atof(reinterpret_cast<const char*>(xmlBuff))); // Convert and push to the row
                                       }
                                   }
                                   PCA_matrix.push_back(PCA_matrix_row);          
@@ -997,7 +997,7 @@ StatusCode PunchThroughG4Tool::initializeInversePCA(const std::string & inverseP
                                   for (int i = 0; i <= 4; ++i) {
                                       std::string propName = "mean_" + std::to_string(i); // Dynamically create property name
                                       if ((xmlBuff = xmlGetProp(pcaNode, BAD_CAST propName.c_str())) != nullptr) {
-                                          PCA_means_row.push_back(atof((const char*)xmlBuff)); // Convert and push to the row
+                                          PCA_means_row.push_back(atof(reinterpret_cast<const char*>(xmlBuff))); // Convert and push to the row
                                       }
                                   }
                                   m_PCA_means.push_back(PCA_means_row);  
@@ -1094,10 +1094,10 @@ std::map<double, double> PunchThroughG4Tool::getVariableCDFmappings(xmlNodePtr& 
         //Get min and max values that we normalise values to
         if (xmlStrEqual( node->name, BAD_CAST "CDFmap" )) {
             if ((xmlBuff = xmlGetProp(node, BAD_CAST "ref")) != nullptr) {
-              ref = atof( (const char*) xmlBuff );
+              ref = atof( reinterpret_cast<const char*> (xmlBuff) );
             }
             if ((xmlBuff = xmlGetProp(node, BAD_CAST "quant")) != nullptr) {
-              quant = atof( (const char*) xmlBuff );
+              quant = atof( reinterpret_cast<const char*> (xmlBuff) );
             }
             mappings.insert(std::pair<double, double>(ref, quant) );
         }
