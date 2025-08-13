@@ -149,22 +149,22 @@ namespace ActsTrk {
 	  rdos[i].set_literal( rdoIdentifierList[i] );
 	}
 		
-	auto [word, depositsBarcode, depositsEnergy] = ActsTrk::detail::getSDOInformation(rdos, *sdos); // FIXME barcode-based
-	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(rdos, *element, siHitsWithCurrentHash, depositsBarcode);
+	auto [word, depositsUniqueID, depositsEnergy] = ActsTrk::detail::getSDOInformation(rdos, *sdos);
+	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(rdos, *element, siHitsWithCurrentHash, depositsUniqueID);
 
-	auto [energyDeposit, meanTime, barcode, pdgid,
+	auto [energyDeposit, meanTime, uniqueID, pdgid,
 	      startPosX, startPosY, startPosZ,
-	      endPosX, endPosY, endPosZ] = ActsTrk::detail::getSiHitInformation(*element, compatibleSiHits); // FIXME barcode-based
+	      endPosX, endPosY, endPosZ] = ActsTrk::detail::getSiHitInformation(*element, compatibleSiHits);
 	
 	// attach SDO decorations
 	decor_sdo_words(*measurement) = std::move(word);
-	decor_sdo_depositsBarcode(*measurement) = std::move(depositsBarcode);
+	decor_sdo_depositsBarcode(*measurement) = std::move(depositsUniqueID);
 	decor_sdo_depositsEnergy(*measurement) = std::move(depositsEnergy);
 
 	// attach SiHit decorations
 	decor_sihit_energyDeposit(*measurement) = std::move(energyDeposit);
 	decor_sihit_meanTime(*measurement) = std::move(meanTime);
-	decor_sihit_barcode(*measurement) = std::move(barcode);
+	decor_sihit_barcode(*measurement) = std::move(uniqueID);
 	decor_sihit_pdgid(*measurement) = std::move(pdgid);
 	
 	decor_sihit_startPosX(*measurement) = std::move(startPosX);
@@ -208,9 +208,9 @@ namespace ActsTrk {
 	} // list on rdos
 	
       } else { // not m_useSiHitsGeometryMatching
-	auto siHitBarcode = HepMC::barcode(siHit->particleLink()); // FIXME barcode-based
-	for ( const std::vector<int>& barcodeSDOColl : sdoTracks ) {
-	  if (std::find(barcodeSDOColl.begin(), barcodeSDOColl.end(), siHitBarcode) == barcodeSDOColl.end()) continue; // FIXME barcode-based
+	auto siHitUniqueID = HepMC::uniqueID(siHit->particleLink());
+	for ( const std::vector<int>& uniqueIDSDOColl : sdoTracks ) {
+	  if (std::find(uniqueIDSDOColl.begin(), uniqueIDSDOColl.end(), siHitUniqueID) == uniqueIDSDOColl.end()) continue;
 	  multiMatchingHits.push_back(siHit);	
 	  break;
 	}	
@@ -283,7 +283,7 @@ namespace ActsTrk {
 				  highestXPos->localEndPosition(),
 				  energyDep,
 				  time,
-				  HepMC::barcode((*siHitIter)->particleLink()), // FIXME barcode-based
+				  (*siHitIter)->particleLink(),
 				  0, // 0 for pixel 1 for strip
 				  (*siHitIter)->getBarrelEndcap(),
 				  (*siHitIter)->getLayerDisk(),

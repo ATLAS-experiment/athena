@@ -100,14 +100,14 @@ JetVtxApprox getJetVtxApprox(const xAOD::Jet* jet, const xAOD::TruthParticleCont
 
     for (const xAOD::TruthParticle* tp : truthParticles){
         if (!tp || !tp->isStable() || jet->p4().DeltaR(tp->p4()) > 0.4) continue; // only final state particles close to the jet axis will pass
-        if (tp->barcode() < HepMC::SIM_BARCODE_THRESHOLD ) continue; // only simulated particles will pass. For samples made with athena 24.0 onwards, use tp->status() < HepMC::SIM_STATUS_THRESHOLD instead
+        if (!HepMC::is_simulation_particle(tp)) continue; // only simulated particles will pass.
 
         int decayDepth{0};
         const xAOD::TruthParticle* current = tp;
         while (current) {
             if (decayDepth > 200) break; // safety break 
             // prevent loop from going too deep where the truth record contains information used for generator internal book keeping 
-            // add current->status()<HepMC::SIM_STATUS_THRESHOLD to limit to GEANT4 layer of ancestry
+            // add check on HepMC::is_simulation_particle(current) to limit to GEANT4 layer of ancestry
             if (!MC::isPhysical(current)) break;
             const xAOD::TruthVertex* prodVtx = current->prodVtx();
             if (!prodVtx || seenVertices.count(prodVtx)) break;  // No more ancestry or already visited. 

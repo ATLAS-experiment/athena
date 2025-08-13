@@ -215,7 +215,7 @@ namespace ParticleJetTools {
       decs.positionDPhi(jet) = positionDPhi(labelling_particle, jet, origin);
       decs.positionDEta(jet) = positionDEta(labelling_particle, jet, origin);
       decs.barcode(jet) = labelling_particle ?
-        HepMC::barcode(labelling_particle) : HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
+        HepMC::uniqueID(labelling_particle) : HepMC::INVALID_PARTICLE_BARCODE;
       decs.childLxy(jet) = partLxy(child_particle, origin);
       decs.childPt(jet) = partPt(child_particle);
       decs.childPdgId(jet) = partPdgId(child_particle);

@@ -121,7 +121,7 @@ namespace Muon {
             const ElementTruthLink_t link = truthParticleLinkAcc(indetTrackParticle);
             if (link.isValid()) {
                 pdg = (*link)->pdgId();
-                barcode = HepMC::barcode(*link);
+                barcode = HepMC::uniqueID(*link);
                 beta = (*link)->p4().Beta();
             }
         }

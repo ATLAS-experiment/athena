@@ -235,7 +235,7 @@ namespace ActsTrk {
       std::vector<unsigned int> tp_barcodes;
       for (const auto& tp : tps) {
         tp_indices.push_back(tp->index());
-        tp_barcodes.push_back(HepMC::barcode(tp));
+        tp_barcodes.push_back(HepMC::uniqueID(tp));
       }
       
       // decorate

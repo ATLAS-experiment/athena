@@ -99,13 +99,13 @@ namespace FlavorTagDiscriminants {
         dec_source_label(*truth_particle) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
         tp_truth_vertices.push_back(nullptr);
         dec_vertex_index(*truth_particle) = -1;
-        dec_parent_barcode(*truth_particle) = HepMC::UNDEFINED_ID; // FIXME barcode-based
+        dec_parent_barcode(*truth_particle) = HepMC::UNDEFINED_ID; // FIXME make variable names consistent
         continue;
       }
 
       // get parent hadron and decorate barcode
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
-      dec_parent_barcode(*truth_particle) = truth_parent ? HepMC::barcode(truth_parent) : HepMC::UNDEFINED_ID; // FIXME barcode-based
+      dec_parent_barcode(*truth_particle) = truth_parent ? HepMC::uniqueID(truth_parent) : HepMC::UNDEFINED_ID; // FIXME make variable names consistent
 
       // get truth origin and use it for exclusive origin and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);

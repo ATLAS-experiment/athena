@@ -181,10 +181,10 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 	      float mothermass = 0.;
 	      if (theParticle->hasProdVtx()){
 		const xAOD::TruthParticle * mother_hold = theParticle->prodVtx()->incomingParticle(0);
-		motherBarcode = HepMC::barcode(mother_hold);
+		motherBarcode = HepMC::uniqueID(mother_hold);
 		motherPDGid = mother_hold->pdgId();
 		mothermass = mother_hold->p4().M()/1000.;
-		xTruthParticle->setBarcode(motherBarcode); // FIXME barcode-based
+		xTruthParticle->setUid(motherBarcode);
 		int mcount = 0;
 		//Let's find the first mother of mothers that has a different PDGid
 		while (mother_hold->hasProdVtx() && mother_hold->pdgId()==theParticle->pdgId()){
@@ -193,14 +193,14 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 		    break; //should not come in here, but just in case we have a closed loop from a bug
 		  }
 		  mother_hold = mother_hold->prodVtx()->incomingParticle(0);
-		  motherBarcode = HepMC::barcode(mother_hold); // FIXME barcode-based
+		  motherBarcode = HepMC::uniqueID(mother_hold);
 		  motherPDGid = mother_hold->pdgId();
 		  mothermass = mother_hold->p4().M()/1000.;
 		}
 	      }
 
           *xTruthParticle=*theParticle;
-          xTruthParticle->setBarcode(motherBarcode); // FIXME barcode-based
+          xTruthParticle->setUid(motherBarcode);
           originDecorator(*xTruthParticle) = motherPDGid;
           typeDecorator(*xTruthParticle) = motherBarcode; // FIXME barcode-based
           typeDecoratorMass(*xTruthParticle) = mothermass;

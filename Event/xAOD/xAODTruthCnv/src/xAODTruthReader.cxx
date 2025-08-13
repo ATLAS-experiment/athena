@@ -105,8 +105,8 @@ namespace xAODReader {
     cout << "GenEvent: #" << "NNN" << "\n";
     cout << " Entries this event: " << event->nTruthVertices() << " vertices, " << event->nTruthParticles() << " particles.\n";
     cout << "                                    GenParticle Legend\n";
-    if (do4momPtEtaPhi) cout << "        Barcode   PDG ID      ( pt,      eta,      phi,     E ) Stat  DecayVtx\n";
-    else                cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";    // FIXME barcode-based
+    if (do4momPtEtaPhi) cout << "        UniqueID   PDG ID      ( pt,      eta,      phi,     E ) Stat  DecayVtx\n";
+    else                cout << "        UniqueID   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";
     cout << "--------------------------------------------------------------------------------\n";
     for (unsigned int iv = 0; iv < event->nTruthVertices(); ++iv) {
       printVertex(event->truthVertex(iv), do4momPtEtaPhi);
@@ -123,8 +123,8 @@ namespace xAODReader {
       if (HepMC::uniqueID(vertex) != HepMC::UNDEFINED_ID) {
         if (vertex->x() != 0.0 && vertex->y() != 0.0 && vertex->z() != 0.0) {
           cout.width(9);
-          cout << HepMC::barcode(vertex); // FIXME barcode-based
-          cout << " ID:";
+          cout << HepMC::uniqueID(vertex);
+          cout << " Status:";
           cout.width(5);
           cout << HepMC::status(vertex);
           cout << " (X,cT)=";
@@ -147,21 +147,21 @@ namespace xAODReader {
           cout << endl;
         } else {
           cout.width(9);
-          cout << HepMC::barcode(vertex); // FIXME barcode-based
-          cout << " ID:";
+          cout << HepMC::uniqueID(vertex);
+          cout << " Status:";
           cout.width(5);
           cout << HepMC::status(vertex);
           cout << " (X,cT): 0";
           cout << endl;
         }
       } else {
-        // If the vertex doesn't have a unique barcode assigned, then
+        // If the vertex doesn't have a unique ID assigned, then
         //  we print its memory address instead... so that the
         //  print out gives us a unique tag for the particle.
         if (vertex->x() != 0.0 && vertex->y() != 0.0 && vertex->z() != 0.0) {
           cout.width(9);
           cout << (void*)vertex;
-          cout << " ID:";
+          cout << " Status:";
           cout.width(5);
           cout << HepMC::status(vertex);
           cout << " (X,cT)=";
@@ -185,7 +185,7 @@ namespace xAODReader {
         } else {
           cout.width(9);
           cout << (void*)vertex;
-          cout << " ID:";
+          cout << " Status:";
           cout.width(5);
           cout << HepMC::status(vertex);
           cout << " (X,cT):0";
@@ -220,7 +220,7 @@ namespace xAODReader {
     if (particle) {
       cout << " ";
       cout.width(9);
-      cout << HepMC::barcode(particle); // FIXME barcode-based
+      cout << HepMC::uniqueID(particle);
       cout.width(9);
       cout << particle->pdgId() << " ";
       cout.width(9);
@@ -247,7 +247,7 @@ namespace xAODReader {
           cout.width(3);
           cout << particle->status() << " ";
           cout.width(9);
-          cout << HepMC::barcode(particle->decayVtx()); // FIXME barcode-based
+          cout << HepMC::uniqueID(particle->decayVtx());
         }
       } else {
         cout.width(3);

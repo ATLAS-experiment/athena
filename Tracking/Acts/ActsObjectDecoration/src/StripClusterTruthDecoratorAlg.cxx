@@ -195,7 +195,7 @@ namespace ActsTrk {
 	std::vector<unsigned int> tp_barcodes;
 	for (auto tp : tps) {
 	  tp_indices.push_back(tp->index());
-	  tp_barcodes.push_back(HepMC::barcode(tp));
+	  tp_barcodes.push_back(HepMC::uniqueID(tp));
 	}
 	
 	decor_truth_indices(*measurement) = std::move(tp_indices);

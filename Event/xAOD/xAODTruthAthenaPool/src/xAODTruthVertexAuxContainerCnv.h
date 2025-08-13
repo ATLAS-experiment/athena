@@ -12,11 +12,11 @@
 
 // EDM include(s):
 #include "xAODTruth/TruthVertexAuxContainer.h"
-#include "xAODTruthVertexAuxContainerCnv_v2.h"
+#include "xAODTruthVertexAuxContainerCnv_v1.h"
 
 /// Base class for the converter
 typedef T_AthenaPoolAuxContainerCnv< xAOD::TruthVertexAuxContainer,
-                                     xAODTruthVertexAuxContainerCnv_v2 >
+                                     xAODTruthVertexAuxContainerCnv_v1 >
    xAODTruthVertexAuxContainerCnv;
 
 

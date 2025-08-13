@@ -248,7 +248,7 @@ egammaTruthAssociationAlg::getNewTruthParticle(
 {
   auto *truthParticle = egammaTruthContainer.push_back(std::make_unique<xAOD::TruthParticle>());
   truthParticle->setPdgId(truth->pdgId());
-  truthParticle->setBarcode(HepMC::barcode(truth)); // FIXME barcode-based
+  truthParticle->setUid(HepMC::uniqueID(truth));
   truthParticle->setStatus(truth->status());
   truthParticle->setPx(truth->px());
   truthParticle->setPy(truth->py());

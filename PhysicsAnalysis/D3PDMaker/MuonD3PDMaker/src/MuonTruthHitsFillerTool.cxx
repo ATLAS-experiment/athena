@@ -94,7 +94,7 @@ StatusCode MuonTruthHitsFillerTool::book() {
  */
 StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
 {
-  ATH_CHECK( fillHitCounts (HepMC::barcode(trackRecord)) );  // FIXME barcode-based
+  ATH_CHECK( fillHitCounts (HepMC::uniqueID(trackRecord)) );
   return StatusCode::SUCCESS;
 }
 
@@ -104,7 +104,7 @@ StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
  */
 StatusCode MuonTruthHitsFillerTool::fill (const xAOD::TruthParticle& p)
 {
-  ATH_CHECK( fillHitCounts (HepMC::barcode(p)) );
+  ATH_CHECK( fillHitCounts (HepMC::uniqueID(p)) );
   return StatusCode::SUCCESS;
 }
 

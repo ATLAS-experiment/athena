@@ -194,7 +194,7 @@ namespace VKalVrtAthena {
         const xAOD::TruthParticle *truth = getTrkGenParticle(trk);
         
         if ( truth ) {
-          barcode = truth->barcode(); // FIXME barcode-based
+          barcode = HepMC::uniqueID(truth);
         }
         
       }
@@ -209,7 +209,7 @@ namespace VKalVrtAthena {
       
       m_selectedTracks.emplace_back( trk );
       
-      if( m_jp.FillNtuple ) m_ntupleVars->get< vector<int> >( "SelTrk_barcode" ).emplace_back(barcode); // will need this later // FIXME barcode-based
+      if( m_jp.FillNtuple ) m_ntupleVars->get< vector<int> >( "SelTrk_barcode" ).emplace_back(barcode); // TODO Rename variable name to be consistent?
       
       ATH_MSG_VERBOSE( " > " << __FUNCTION__ << ": Track index " << trk->index() << " has been selected." );
       ATH_MSG_VERBOSE( " > " << __FUNCTION__ << ": Track index " << trk->index()

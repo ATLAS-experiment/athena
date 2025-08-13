@@ -671,7 +671,8 @@ def HION14TruthVariablesGeneral():
 def HION14ContentTruthParticles():
     variables = []
     variables += ["TruthParticles.pdgId"]
-    variables += ["TruthParticles.barcode"] # FIXME barcode-based
+    variables += ["TruthParticles.uid"]
+    variables += ["TruthParticles.status"]
     variables += ["TruthParticles.m"]
     variables += ["TruthParticles.e"]
     variables += ["TruthParticles.py"]

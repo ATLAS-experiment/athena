@@ -265,7 +265,7 @@ namespace MuonCombined {
                 if (truthLink.isValid()) {
                     m_idtrack_has_truth.push_back(1);
                     m_idtrack_truth_pdgid.push_back((*truthLink)->pdgId());
-                    m_idtrack_truth_barcode.push_back(HepMC::barcode(*truthLink)); // FIXME barcode-based
+                    m_idtrack_truth_barcode.push_back(HepMC::uniqueID(*truthLink));
                     const Trk::TrackParameters* perigee = m_truthToTrack->makePerigeeParameters(*truthLink);
                     if (perigee) {
                         m_idtrack_has_truth_par.push_back(1);
@@ -442,7 +442,7 @@ namespace MuonCombined {
                 if (truthLink.isValid()) {
                     m_mstrack_has_truth.push_back(1);
                     m_mstrack_truth_pdgid.push_back((*truthLink)->pdgId());
-                    m_mstrack_truth_barcode.push_back(HepMC::barcode(*truthLink)); // FIXME barcode-based
+                    m_mstrack_truth_barcode.push_back(HepMC::uniqueID(*truthLink));
                     const Trk::TrackParameters* perigee = m_truthToTrack->makePerigeeParameters(*truthLink);
                     if (perigee) {
                         m_mstrack_has_truth_par.push_back(1);

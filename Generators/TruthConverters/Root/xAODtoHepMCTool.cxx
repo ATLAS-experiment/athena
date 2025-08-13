@@ -175,7 +175,6 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 #else
     std::unique_ptr<HepMC::GenParticle> hepmcParticle(createHepMCParticle(xPart));
 #endif
-    int bcpart = HepMC::barcode(xPart);
 
     // Get the production and decay vertices
     if (xPart->hasProdVtx()) {
@@ -193,16 +192,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       // Insert into Event
       if (!prodVtxSeenBefore) {
         genEvt.add_vertex(hepmcProdVtx);
-        if (!HepMC::suggest_barcode(hepmcProdVtx, HepMC::barcode(xAODProdVtx))) {
-          ATH_MSG_WARNING("suggest_barcode failed for vertex " << HepMC::barcode(xAODProdVtx));
-          ++m_badSuggest;
-        }
       }
-      if (!HepMC::suggest_barcode(hepmcParticle, bcpart)) {
-        ATH_MSG_VERBOSE("suggest_barcode failed for particle " << bcpart);
-        ++m_badSuggest;
-      }
-      bcpart = 0;
     }
     else {
       ATH_MSG_VERBOSE("No production vertex found for particle " << HepMC::uniqueID(xPart));
@@ -229,18 +219,6 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       // Insert into Event
       if (!decayVtxSeenBefore) {
         genEvt.add_vertex(hepmcDecayVtx);
-        if (!HepMC::suggest_barcode(hepmcDecayVtx, HepMC::barcode(xAODDecayVtx))) {
-          ATH_MSG_WARNING("suggest_barcode failed for vertex "
-                          << HepMC::barcode(xAODDecayVtx));
-          ++m_badSuggest;
-        }
-      }
-      if (bcpart != 0) {
-        if (!HepMC::suggest_barcode(hepmcParticle, bcpart)) {
-          ATH_MSG_DEBUG("suggest_barcode failed for particle " << bcpart);
-          ++m_badSuggest;
-        }
-        bcpart = 0;
       }
     }
 #ifndef HEPMC3

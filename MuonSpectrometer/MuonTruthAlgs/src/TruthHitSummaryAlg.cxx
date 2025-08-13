@@ -75,8 +75,8 @@ namespace Muon {
         nprecHitsPerChamberLayer.resize(toInt(ChIndex::ChIndexMax));
         nphiHitsPerChamberLayer.resize(toInt(PhiIndex::PhiIndexMax));
         
-        ATH_MSG_DEBUG("addHitCounts: barcode " << HepMC::barcode(truthParticle)); // FIXME barcode-based
-        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, -1); // Returns a list of uniqueIDs (currently for xAOD::TruthParticle these would be barcodes)
+        ATH_MSG_DEBUG("addHitCounts: unique ID " << HepMC::uniqueID(truthParticle));
+        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, -1); // Returns a list of unique IDs
         // loop over detector technologies
         for (SG::ReadHandle<PRD_MultiTruthCollection>& col : m_PRD_TruthNames.makeHandles(ctx)) {
             ATH_CHECK(col.isPresent());
@@ -84,8 +84,8 @@ namespace Muon {
             // loop over trajectories
             for (const std::pair<Identifier, HepMcParticleLink> trajectory : *col) {
                  // check if gen particle same as input
-                if (std::ranges::find(truthParticleHistory, HepMC::barcode(trajectory.second)) == truthParticleHistory.end()) {
-                    continue; // FIXME barcode-based - TrackRecords read in from existing inputs will not have valid id values.
+                if (std::ranges::find(truthParticleHistory, HepMC::uniqueID(trajectory.second)) == truthParticleHistory.end()) {
+                    continue;
                 }
                 const Identifier& id = trajectory.first;
                 bool measPhi = m_idHelperSvc->measuresPhi(id);

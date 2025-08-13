@@ -100,7 +100,7 @@ void InDetPerfNtuple_TruthToReco::fillTruth(const xAOD::TruthParticle& truth) {
     m_truth_selectedByPileupSwitch = (m_acc_selectedByPileupSwitch.isAvailable(truth) ? (int)m_acc_selectedByPileupSwitch(truth) : 0);
 
     m_truth_pdgId   = truth.pdgId(); 
-    m_truth_barcode = HepMC::barcode(truth); // FIXME barcode-based
+    m_truth_barcode = HepMC::uniqueID(truth);
     m_truth_charge  = truth.charge();
     m_truth_eta     = truth.eta();
     m_truth_pt      = truth.pt();

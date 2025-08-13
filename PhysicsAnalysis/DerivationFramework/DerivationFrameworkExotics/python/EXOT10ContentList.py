@@ -46,6 +46,6 @@ EXOT10ExtraVariables = [
         "CombinedMuonTrackParticles.d0.z0.vz.definingParametersCovMatrix.truthOrigin.truthType",
         "ExtrapolatedMuonTrackParticles.d0.z0.vz.definingParametersCovMatrix.truthOrigin.truthType",
         "TauJets.IsTruthMatched.truthOrigin.truthType",
-        "MuonTruthParticles.barcode.decayVtxLink.e.m.pdgId.prodVtxLink.px.py.pz.recoMuonLink.status.truthOrigin.truthType", # FIXME barcode-based
+        "MuonTruthParticles.uid.decayVtxLink.e.m.pdgId.prodVtxLink.px.py.pz.recoMuonLink.status.truthOrigin.truthType",
         #     "AntiKt4LCTopoJets.AverageLArQF"
 ]

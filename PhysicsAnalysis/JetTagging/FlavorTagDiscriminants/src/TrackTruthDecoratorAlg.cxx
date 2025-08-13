@@ -40,26 +40,26 @@ namespace FlavorTagDiscriminants {
     m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
     m_acc_source_label = "TruthParticles." + m_acc_source_label.key();
     m_acc_vertex_index = "TruthParticles." + m_acc_vertex_index.key();
-    m_acc_parent_barcode = "TruthParticles." + m_acc_parent_barcode.key(); // FIXME barcode-based
+    m_acc_parent_barcode = "TruthParticles." + m_acc_parent_barcode.key(); // FIXME make variable names consistent
     ATH_CHECK( m_acc_type_label.initialize() );
     ATH_CHECK( m_acc_source_label.initialize() );
     ATH_CHECK( m_acc_vertex_index.initialize() );
-    ATH_CHECK( m_acc_parent_barcode.initialize() ); // FIXME barcode-based
+    ATH_CHECK( m_acc_parent_barcode.initialize() ); // FIXME make variable names consistent
 
     // Initialize decorators
     m_dec_origin_label = m_TrackContainerKey.key() + "." + m_dec_origin_label.key();
     m_dec_type_label = m_TrackContainerKey.key() + "." + m_dec_type_label.key();
     m_dec_source_label = m_TrackContainerKey.key() + "." + m_dec_source_label.key();
     m_dec_vertex_index = m_TrackContainerKey.key() + "." + m_dec_vertex_index.key();
-    m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key(); // FIXME barcode-based
-    m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key(); // FIXME barcode-based
+    m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key(); // FIXME make variable names consistent
+    m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key(); // FIXME make variable names consistent
     m_dec_muon_origin_label = m_TrackContainerKey.key() + "." + m_dec_muon_origin_label.key();
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_source_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
-    CHECK( m_dec_barcode.initialize() ); // FIXME barcode-based
-    CHECK( m_dec_parent_barcode.initialize() ); // FIXME barcode-based
+    CHECK( m_dec_barcode.initialize() ); // FIXME make variable names consistent
+    CHECK( m_dec_parent_barcode.initialize() ); // FIXME make variable names consistent
     CHECK( m_dec_muon_origin_label.initialize() );
 
     // Retrieve tools
@@ -110,8 +110,8 @@ namespace FlavorTagDiscriminants {
 
       // everything else is already decorated to the associated truth particle
       const auto truth = m_trackTruthOriginTool->getTruth(track);
-      dec_barcode(*track) = truth ? HepMC::barcode(truth) : HepMC::UNDEFINED_ID; // FIXME barcode-based
-      dec_parent_barcode(*track) = truth ? acc_parent_barcode(*truth) : HepMC::UNDEFINED_ID; // FIXME barcode-based
+      dec_barcode(*track) = truth ? HepMC::uniqueID(truth) : HepMC::UNDEFINED_ID; // FIXME make variable names consistent
+      dec_parent_barcode(*track) = truth ? acc_parent_barcode(*truth) : HepMC::UNDEFINED_ID; // FIXME make variable names consistent
       dec_type_label(*track) = truth ? acc_type_label(*truth) : TruthDecoratorHelpers::TruthType::Label::NoTruth;
       dec_source_label(*track) = truth ? acc_source_label(*truth) : TruthDecoratorHelpers::TruthSource::Label::NoTruth;
       dec_vertex_index(*track) = truth ? acc_vertex_index(*truth) : -2;

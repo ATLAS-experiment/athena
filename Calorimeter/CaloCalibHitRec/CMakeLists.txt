@@ -12,7 +12,7 @@ atlas_add_library( CaloCalibHitRecLib
 		           PUBLIC_HEADERS CaloCalibHitRec
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloDmDetDescr CaloGeoHelpers CaloIdentifier CaloSimEvent GaudiKernel Identifier StoreGateLib xAODCaloEvent xAODTruth CaloUtilsLib
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasDetDescr CaloDetDescrLib CaloEvent LArRecEvent TileEvent )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasDetDescr CaloDetDescrLib CaloEvent LArRecEvent TileEvent TruthUtils )
 
 # Component(s) in the package:
 atlas_add_component( CaloCalibHitRec

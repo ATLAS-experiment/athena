@@ -140,7 +140,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
       if (truthLink.isValid()) trackMatchedTruthParticle = *truthLink;
  
       if (trackMatchedTruthParticle){
-        double barcode = trackMatchedTruthParticle->barcode(); // FIXME barcode-based
+        double barcode = HepMC::uniqueID(trackMatchedTruthParticle);
 
         SG::ReadDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterReadDecorHandleNLeadingTruthParticles(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles);
         if (!caloClusterReadDecorHandleNLeadingTruthParticles.isValid()){
