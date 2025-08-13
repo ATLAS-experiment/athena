@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################################
@@ -633,7 +633,7 @@ void CaloCellVecMon::DrawLayers()
       fCanvas->Clear();
       fCanvas->Divide(2, nLayerPerCanvas/2);
     }
-    tEntry = (TGTextLBEntry*)(TGListBox*)fComboLayer->GetListBox()->GetEntry(i);
+    tEntry = static_cast<TGTextLBEntry*>((TGListBox*)fComboLayer->GetListBox()->GetEntry(i));
     TString lay = tEntry->GetText()->GetString();
     //TString histoName1 = m_histoNameBase1  + cut + lay;
     TString histoName1 = m_histoNameBase1  + lay;
@@ -698,7 +698,7 @@ void CaloCellVecMon::DrawRegions()
 	fCanvas->Clear();
 	fCanvas->Divide(2, nEtaSlicePerCanvas/2);
       }
-      tEntry = (TGTextLBEntry*)(TGListBox*)fComboEtaSlice->GetListBox()->GetEntry(i);
+      tEntry = static_cast<TGTextLBEntry*>((TGListBox*)fComboEtaSlice->GetListBox()->GetEntry(i));
       TString cut = tEntry->GetText()->GetString();
       TString histoName1 = m_histoNameBase1  + cut + lay;
       int padIndex = (i%nEtaSlicePerCanvas) + 1;
@@ -741,7 +741,7 @@ void CaloCellVecMon::DrawEcuts()
       fCanvas->Clear();
       fCanvas->Divide(2, nEcutPerCanvas/2);
     }
-    tEntry = (TGTextLBEntry*)(TGListBox*)fComboEcut->GetListBox()->GetEntry(i);
+    tEntry = static_cast<TGTextLBEntry*>((TGListBox*)fComboEcut->GetListBox()->GetEntry(i));
     TString cut = tEntry->GetText()->GetString();
     TString histoName1 = m_histoNameBase1  + cut + lay;
     int padIndex = (i%nEcutPerCanvas) + 1;
