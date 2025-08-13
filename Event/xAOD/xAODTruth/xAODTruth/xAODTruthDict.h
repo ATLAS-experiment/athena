@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: xAODTruthDict.h 670153 2015-05-27 11:42:29Z tbisanz $
 #ifndef XAODTRUTH_XAODTRUTHDICT_H
 #define XAODTRUTH_XAODTRUTHDICT_H
 
@@ -18,8 +17,10 @@
 // Local include(s):
 #include "xAODTruth/versions/TruthParticleContainer_v1.h"
 #include "xAODTruth/versions/TruthParticleAuxContainer_v1.h"
+#include "xAODTruth/versions/TruthParticleAuxContainer_v2.h"
 #include "xAODTruth/versions/TruthVertexContainer_v1.h"
 #include "xAODTruth/versions/TruthVertexAuxContainer_v1.h"
+#include "xAODTruth/versions/TruthVertexAuxContainer_v2.h"
 #include "xAODTruth/versions/TruthEventBaseContainer_v1.h"
 #include "xAODTruth/versions/TruthEventContainer_v1.h"
 #include "xAODTruth/versions/TruthEventAuxContainer_v1.h"
