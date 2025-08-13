@@ -90,7 +90,15 @@ namespace AthONNX {
     Ort::SessionOptions sessionOptions;
     sessionOptions.SetIntraOpNumThreads( 1 );
     sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
+
+    // according to the discussion here https://its.cern.ch/jira/browse/ATLASG-2866
+    // this should reduce memory use while slowing things down slightly
+    sessionOptions.DisableCpuMemArena();
+
+    // declare an allocator
     Ort::AllocatorWithDefaultOptions allocator;
+
+    // create session and load model into memory
     m_env = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_WARNING, "");
     m_session = std::make_unique< Ort::Session >( *m_env,
 						  m_modelFileName.c_str(),
