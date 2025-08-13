@@ -10,6 +10,7 @@
 //====================================================================
 #include "RootKeyIOHandler.h"
 #include "TKey.h"
+#include "TMath.h"
 #include "TFile.h"
 #include "TClass.h"
 #include "TROOT.h"
