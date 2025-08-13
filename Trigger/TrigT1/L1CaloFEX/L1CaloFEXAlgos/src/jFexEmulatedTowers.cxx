@@ -156,7 +156,9 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
 
                 invalid &= isInvalid;
                 masked &= isMasked;
-                jTower_sat |= isSaturated;
+		if (!isMasked) {
+		  jTower_sat |= isSaturated;
+		}
 
                 if( isMasked ) {
                     //if masked then Et = 0

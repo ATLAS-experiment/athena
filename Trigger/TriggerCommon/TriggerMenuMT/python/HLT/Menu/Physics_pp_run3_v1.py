@@ -1641,7 +1641,15 @@ def setupMenu():
         ChainProp(name='HLT_j260C_35smcINF_90bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=PrimaryPhIGroup+MultiBjetGroup+Topo3Group, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175C_35smcINF_90bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=PrimaryPhIGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j260C_35smcINF_90bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=PrimaryPhIGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
+
+        # Monitoring
+        ChainProp(name='HLT_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=SupportPhIGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED'], monGroups=['jetMon:online', 'bJetMon:t0'], stream=[PhysicsStream, 'express']),
+        ChainProp(name='HLT_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=SupportPhIGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED'], monGroups=['jetMon:online', 'bJetMon:t0'], stream=[PhysicsStream, 'express']),
+        ChainProp(name='HLT_j260C_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=SupportPhIGroup+SingleBjetGroup+Topo3Group, l1SeedThresholds=['FSNOSEED'], monGroups=['jetMon:online', 'bJetMon:t0'], stream=[PhysicsStream, 'express']),
     ]
+
+
 
 
     chains['Tau'] += [

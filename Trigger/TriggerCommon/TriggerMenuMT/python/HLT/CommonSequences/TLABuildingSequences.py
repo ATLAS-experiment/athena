@@ -8,6 +8,7 @@ from ..Jet.JetChainConfiguration import JetChainConfiguration
 from ..Photon.PrecisionPhotonTLAMenuSequenceConfig import PhotonTLAMenuSequenceGenCfg
 from ..Jet.JetTLASequenceConfig import JetTLAMenuSequenceGenCfg
 from ..Muon.MuonTLASequenceConfig import MuonTLAMenuSequenceGenCfg
+from ..Config.MenuComponents import EmptyMenuSequence
 log = logging.getLogger(__name__)
 
 
@@ -21,7 +22,6 @@ def addTLAStep(flags, chain, chainDict):
     
 
     for cPart in chainDict['chainParts']:
-        
         log.debug("addTLAStep: processing signature: %s", cPart['signature'] )
         # call the sequence from their respective signatures
         tlaSequencesList.append(functools.partial(getTLASignatureSequenceGenCfg, flags, chainDict=chainDict, chainPart=cPart))
@@ -59,6 +59,8 @@ def getTLASignatureSequenceGenCfg(flags, chainDict, chainPart):
         jetInputCollectionName = jetChainConfig.jetName
         log.debug(f"TLA jet input collection = {jetInputCollectionName}")
         return JetTLAMenuSequenceGenCfg(flags, jetsIn=jetInputCollectionName)
+    elif signature == 'MET':
+        return EmptyMenuSequence("EmptyMETTLA")
 
     else:
         raise ValueError(f"Unsupported TLA signature: No TLA sequence specified for signature {signature}.")

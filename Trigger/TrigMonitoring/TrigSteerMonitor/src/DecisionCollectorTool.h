@@ -1,37 +1,39 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGSTEERMONITOR_DECISIONCOLLECTORTOOL_H
 #define TRIGSTEERMONITOR_DECISIONCOLLECTORTOOL_H
 
-#include "./IDecisionCollector.h"
-
-// Framework includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-// STL includes
 #include <string>
+
 
 /**
  * @class DecisionCollectorTool
  * @brief
  **/
-class DecisionCollectorTool : public extends<AthAlgTool, IDecisionCollector>  {
+class DecisionCollectorTool : public AthAlgTool {
 public:
-  DecisionCollectorTool(const std::string& type, const std::string& name, const IInterface* parent);
-  virtual ~DecisionCollectorTool() override;
-    
-  void getDecisions( std::vector<TrigCompositeUtils::DecisionID>&, const EventContext& ) const override;
-  void getSequencesPerEvent( std::set<std::string>&, const EventContext& ) const;
-  void getSequencesNames( std::set<std::string>& ) const;
-  
+  using AthAlgTool::AthAlgTool;
+
   virtual StatusCode initialize() override;
 
-  SG::ReadHandleKeyArray<TrigCompositeUtils::DecisionContainer> m_decisionsKey{ this, "Decisions", {}, "Containers from which the decisions need to be red" };
-  // in future we will also need a property to filter only the desired decision for combined chains (partial decisions should not be accounted)
-  
-private:
+  /// Get decision IDs for the current event
+  void getDecisions( std::vector<TrigCompositeUtils::DecisionID>&, const EventContext& ) const;
 
+  /// Get decision IDs and sequences for the current event
+  void getDecisions( std::vector<TrigCompositeUtils::DecisionID>&, std::set<std::string>&, const EventContext& ) const;
+
+  /// Get configured sequence names
+  void getSequencesNames( std::set<std::string>& ) const;
+
+private:
+  SG::ReadHandleKeyArray<TrigCompositeUtils::DecisionContainer> m_decisionsKey{
+    this, "Decisions", {}, "Containers from which the decisions need to be read" };
+
+  // in future we will also need a property to filter only the desired decision for combined chains (partial decisions should not be accounted)
 };
 
 #endif // TRIGSTEERMONITOR_DECISIONCOLLECTORTOOL_H
