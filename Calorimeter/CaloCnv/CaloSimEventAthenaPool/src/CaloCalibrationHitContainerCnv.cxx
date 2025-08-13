@@ -13,7 +13,7 @@
 
 CaloCalibrationHitContainer_PERS* CaloCalibrationHitContainerCnv::createPersistent(CaloCalibrationHitContainer* transCont) {
     MsgStream mlog(msgSvc(), "CaloCalibrationHitContainerConverter" );
-    CaloCalibrationHitContainerCnv_p3   converter;
+    CaloCalibrationHitContainerCnv_p4   converter;
     CaloCalibrationHitContainer_PERS *persObj = converter.createPersistent( transCont, mlog );
     return persObj;
 }
