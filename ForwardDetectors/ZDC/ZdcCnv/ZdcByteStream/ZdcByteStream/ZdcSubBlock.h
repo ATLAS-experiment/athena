@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -207,26 +207,26 @@ class ZdcSubBlock {
    static const uint32_t s_glinkDavSet      = 0x400000;
 
    /// Sub-Block Header
-   uint32_t m_header;
+   uint32_t m_header{};
    /// Sub-Block Status Trailer
-   uint32_t m_trailer;
+   uint32_t m_trailer{};
    /// Bunch Crossing number (neutral format only)
-   int m_bunchCrossing;
+   int m_bunchCrossing{};
    /// Unpacking error code
-   int m_unpackError;
+   int m_unpackError{};
    //  Used for bit-packing
-   uint32_t m_bitword;
-   int      m_currentBit;
-   int      m_maxBits;
-   uint32_t m_maxMask;
-   bool     m_unpackerFlag;
-   std::vector<uint32_t>::const_iterator m_dataPos;
-   std::vector<uint32_t>::const_iterator m_dataPosEnd;
+   uint32_t m_bitword{};
+   int      m_currentBit{};
+   int      m_maxBits{};
+   uint32_t m_maxMask{};
+   bool     m_unpackerFlag{};
+   std::vector<uint32_t>::const_iterator m_dataPos{};
+   std::vector<uint32_t>::const_iterator m_dataPosEnd{};
    //  Used for neutral bit packing
    std::vector<int> m_currentPinBit;
    std::vector<int> m_oddParity;
    /// Current number of data words
-   int      m_dataWords;
+   int      m_dataWords{};
    /// Sub-Block data
    std::vector<uint32_t> m_data;
 
