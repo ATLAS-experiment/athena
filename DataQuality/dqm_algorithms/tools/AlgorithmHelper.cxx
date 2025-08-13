@@ -707,7 +707,7 @@ dqm_algorithms::tools::BookHistogramByExample(const TH1* histogram, const std::s
 
     resultXY->SetXTitle(histogram->GetXaxis()->GetTitle());
     resultXY->SetYTitle(histogram->GetYaxis()->GetTitle());
-    return (TH1*) resultXY;
+    return static_cast<TH1*> (resultXY);
 
   case YAxis:
 
@@ -724,7 +724,7 @@ dqm_algorithms::tools::BookHistogramByExample(const TH1* histogram, const std::s
 			 histogram->GetNbinsY(),histogram->GetYaxis()->GetXmin(),histogram->GetYaxis()->GetXmax());
     }
     resultY->SetXTitle(histogram->GetYaxis()->GetTitle());
-    return (TH1*) resultY;
+    return static_cast<TH1*>  (resultY);
    
   case XYZAxes:
 
@@ -767,7 +767,7 @@ dqm_algorithms::tools::BookHistogramByExample(const TH1* histogram, const std::s
     }
     resultXZ->SetXTitle(histogram->GetXaxis()->GetTitle());
     resultXZ->SetYTitle(histogram->GetZaxis()->GetTitle());
-    return (TH1*) resultXZ;
+    return static_cast<TH1*> (resultXZ);
 
   case YZAxes:
 
@@ -787,7 +787,7 @@ dqm_algorithms::tools::BookHistogramByExample(const TH1* histogram, const std::s
     }
     resultYZ->SetXTitle(histogram->GetYaxis()->GetTitle());
     resultYZ->SetYTitle(histogram->GetZaxis()->GetTitle());
-    return (TH1*) resultYZ;
+    return static_cast<TH1*> (resultYZ);
 
   case ZAxis:
 
@@ -804,7 +804,7 @@ dqm_algorithms::tools::BookHistogramByExample(const TH1* histogram, const std::s
 			 histogram->GetNbinsZ(),histogram->GetZaxis()->GetXmin(),histogram->GetZaxis()->GetXmax());
     }
     resultZ->SetXTitle(histogram->GetZaxis()->GetTitle());
-    return (TH1*) resultZ;
+    return static_cast<TH1*> (resultZ);
 
   case XAxis:
   default:
@@ -819,7 +819,7 @@ dqm_algorithms::tools::BookHistogramByExample(const TH1* histogram, const std::s
 			 histogram->GetNbinsX(),histogram->GetXaxis()->GetXmin(),histogram->GetXaxis()->GetXmax());
     }
     resultX->SetXTitle(histogram->GetXaxis()->GetTitle());
-    return (TH1*) resultX ;
+    return static_cast<TH1*> (resultX );
   }
 
 }

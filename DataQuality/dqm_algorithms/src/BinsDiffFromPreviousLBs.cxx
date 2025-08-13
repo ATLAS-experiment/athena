@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinsDiffFromPreviousLBs.cxx evaluates the number of consecutive bins with bin value different from set threshold. Also usable for single bins. 
@@ -139,7 +139,7 @@ dqm_algorithms::BinsDiffFromPreviousLBs::execute(const std::string &  name,
   int count =  LBs.size();
 
   result->tags_["NBins"] = count;
-  result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resulthisto);
+  result->object_ =  (boost::shared_ptr<TObject>)static_cast<TObject*>(resulthisto);
 
   ERS_DEBUG(1,"Number of bins " << nsigmas << " Sigma away from average of "<< bin_threshold << " is " << count);
   ERS_DEBUG(1,"Green threshold: "<< gthreshold << " bin(s);   Red threshold : " << rthreshold << " bin(s) ");
