@@ -38,9 +38,9 @@ void TestDivideReference()
   dqm_core::Result* result = algorithm->execute("test",*hin,*aconfig);
   std::cout<<"Result "<<result->status_<<std::endl;
   TObject* o = result->getObject();
-  std::cout<<o->GetName()<<" "<<((TObjArray*)o)->GetEntries()<<std::endl;
-  TObjArray* results = (TObjArray*)o;
-  TH1* modifiedhisto = (TH1*)results->At(1);
+  std::cout<<o->GetName()<<" "<<(static_cast<TObjArray*>(o))->GetEntries()<<std::endl;
+  TObjArray* results = static_cast<TObjArray*>(o);
+  TH1* modifiedhisto = static_cast<TH1*>(results->At(1));
   modifiedhisto->SetLineColor(kBlue);
   modifiedhisto->Draw("same");
   algorithm->printDescription();
