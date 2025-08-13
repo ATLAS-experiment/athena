@@ -164,7 +164,9 @@ namespace LVL1 {
 
                     invalid &= isInvalid;
                     masked &= isMasked;
-                    gTower_sat |= isSaturated;
+		    if (!isMasked) {
+		      gTower_sat |= isSaturated;
+		    }
 
                     if (isMasked) {
                         val = 0;
