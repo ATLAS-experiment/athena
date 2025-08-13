@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ATHENAKERNEL_IMPICLUSTERSVC_H
 #define ATHENAKERNEL_IMPICLUSTERSVC_H
@@ -12,7 +12,7 @@
 struct ClusterMessage;
 
 namespace boost::mpi3 {
-struct communicator;
+class communicator;
 }
 
 enum class ClusterComm { Default, EventData };
