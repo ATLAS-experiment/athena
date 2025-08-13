@@ -139,7 +139,8 @@ class MdtCalibInput {
       double tubeLength() const;
       /// Returns the sign of the readout position in local coordinates
       double readOutSide() const;
-      /** @brief set whether the  */
+      /// Returns the inner tube radius
+      double innerTubeR() const;
   private:
     /** @brief Local to global transformation of the tube */
     const Amg::Transform3D& localToGlobal() const;

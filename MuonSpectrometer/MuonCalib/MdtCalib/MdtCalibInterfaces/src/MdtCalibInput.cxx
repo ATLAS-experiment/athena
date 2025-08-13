@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCalibInterfaces/MdtCalibInput.h"
 
@@ -165,6 +165,17 @@ double MdtCalibInput::tubeLength() const {
                }
             }, m_RE);
     return tubeLength;
+ }
+ double MdtCalibInput::innerTubeR() const {
+   const double tubeR = std::visit([this](const auto& re) -> double {
+       using REType = std::decay_t<decltype(re)>;
+      if constexpr(std::is_same_v<REType, const MuonGMR4::MdtReadoutElement*>){
+         return re->innerTubeRadius();
+      } else if (std::is_same_v<REType, const MuonGM::MdtReadoutElement*>) {
+         return re->innerTubeRadius();
+      }
+   }, m_RE);
+   return tubeR;
  }
 double MdtCalibInput::readOutSide() const {
    /// By convention the new readout geometry points along the negative z-axis
