@@ -153,13 +153,13 @@ void fReadDavix::setPositionFromEnd(int64_t p)
 fRead * fReadDavix::newReader() const
 {
   fReadDavix * nfr = new fReadDavix();
-  return (fRead *)nfr;
+  return static_cast<fRead *>(nfr);
 }
 
 extern "C" {
   fRead * fReadFactory()
   {
     fReadDavix * nfr = new fReadDavix();
-    return (fRead *)nfr;
+    return static_cast<fRead *>(nfr);
   }
 }
