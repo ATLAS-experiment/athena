@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawConditions/LArConditionsSubset.h"
@@ -34,7 +34,7 @@ LArRampSubsetCnv_p1::persToTrans(const LArRampPersType* persObj,
         bool hasSparseData       = false;
         unsigned int chansSet    = 0;
         unsigned int chansOffset = 0;
-        if (ifebWithData < persObj->m_subset.m_febsWithSparseData.size() &&
+        if (ifebWithData+1 < persObj->m_subset.m_febsWithSparseData.size() &&
             febid == persObj->m_subset.m_febsWithSparseData[ifebWithData]) {
             // Found feb with sparse data
             hasSparseData = true;
