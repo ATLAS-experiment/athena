@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -13,11 +13,13 @@
 #include <iostream>
 
 //______________________________________________________
-ZdcID::ZdcID(void) {
-  m_dict = nullptr;
+ZdcID::ZdcID()
+  : AtlasDetectorID("ZdcID", "ZDC"),
+    m_dict(nullptr)
+{
 } 
 //______________________________________________________
-ZdcID::~ZdcID(void){
+ZdcID::~ZdcID(){
 
 }
 
@@ -127,7 +129,7 @@ ZdcID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
 
 
 int     
-ZdcID::initLevelsFromDict(void)
+ZdcID::initLevelsFromDict()
 {
     MsgStream log(m_msgSvc, "ZdcID");
     if(!m_dict) {
@@ -242,7 +244,7 @@ ZdcID::initLevelsFromDict(void)
 
 
 int
-ZdcID::init_hashes(void)
+ZdcID::init_hashes()
 {
     //
     // create a vector(s) to retrieve the hashes for compact ids.
@@ -335,8 +337,8 @@ ZdcID::init_hashes(void)
     return (0);
 }
 
-void   
-ZdcID::test_packing    (void) const
+void
+ZdcID::test_packing    () const
 {
     MsgStream log(m_msgSvc, "ZDC_ID");
 
@@ -433,22 +435,22 @@ ZdcID::test_packing    (void) const
     }
 }
 
-ZdcID::const_id_iterator   ZdcID::modules_begin (void) const
+ZdcID::const_id_iterator   ZdcID::modules_begin () const
 {
     return (m_module_vec.begin());
 }
 
-ZdcID::const_id_iterator   ZdcID::modules_end   (void) const
+ZdcID::const_id_iterator   ZdcID::modules_end   () const
 {
     return (m_module_vec.end());
 }
 
-ZdcID::const_id_iterator   ZdcID::channels_begin (void) const
+ZdcID::const_id_iterator   ZdcID::channels_begin () const
 {
     return (m_channel_vec.begin());
 }
 
-ZdcID::const_id_iterator   ZdcID::channels_end   (void) const
+ZdcID::const_id_iterator   ZdcID::channels_end   () const
 {
     return (m_channel_vec.end());
 }
