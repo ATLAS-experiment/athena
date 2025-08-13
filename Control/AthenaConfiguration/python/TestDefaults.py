@@ -30,7 +30,7 @@ class defaultTestFiles:
     HITS_DATA_OVERLAY_HI_RUN3_2023 = [f"{d}//OverlayTests/DataOverlaySimulation/24.0/v1/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.pool.root"]
 
     RAW_RUN1 =          [f"{d}/Tier0ChainTests/data12_8TeV.00209109.physics_JetTauEtmiss.merge.RAW._lb0186._SFO-1._0001.1"]
-    RAW_RUN2 =          [f"{d}/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"]
+    RAW_RUN2 =          [f"{d}/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1_50evt"]
     RAW_RUN3 =          [f"{d}/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"]
 
     RAW_RUN1_DATA11 =   [f"{d}/RecJobTransformTests/high_mu-data11_7TeV.00179725.physics_JetTauEtmiss.merge.RAW._lb0021.data"]
