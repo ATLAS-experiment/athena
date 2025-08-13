@@ -433,25 +433,27 @@ void TrigTSerializer::serialize(const std::string &nameOfClass, const void* inst
     serialized.push_back(m_guid[3]);
 
     //inefficient - to be compatible with Serializer for the moment can be avoided later
-    uint32_t pbytes;
-    char *pp = reinterpret_cast<char *>(&pbytes);
+    union {
+      uint32_t uint;
+      char pp[4];
+    } pbytes;
 
     for (size_t i=0; i<bufsiz/4; i++){
-      pbytes = 0;
+      pbytes.uint = 0;
       for (size_t j=0; j<4; j++){
-	*(pp+3-j) = pbuff[4*i+j];
+	pbytes.pp[3-j] = pbuff[4*i+j];
       }
       // ATH_MSG_DEBUG( "packed " << std::hex << pbytes <<  std::dec  );
       
-      serialized.push_back(pbytes);
+      serialized.push_back(pbytes.uint);
     }
 
     //send rest of chars as one int each
     const size_t modb = bufsiz%4;
     for (size_t i=0; i<modb; i++){
-      pbytes = 0;
-      *pp = pbuff[bufsiz-modb+i];
-      serialized.push_back(pbytes);
+      pbytes.uint = 0;
+      pbytes.pp[0] = pbuff[bufsiz-modb+i];
+      serialized.push_back(pbytes.uint);
     }
 
     if (msgLvl(MSG::VERBOSE)){
@@ -531,15 +533,19 @@ void* TrigTSerializer::deserialize(const std::string &nameOfClass, const std::ve
   char *pbuf = NULL;
 
   if (newFormatOK){
+    union {
+      uint32_t uint;
+      char pp[4];
+    } pbytes;
+
     //  const size_t bufsiz = v.size();
     pbuf = new char[bufsiz];
     size_t bufpos=0;
     const size_t nints = bufsiz/4;
     for (size_t i=pBuffOffset; i<nints+pBuffOffset; i++){
-      uint32_t pbytes = v.at(i);
-      char *pch = reinterpret_cast<char *>(&pbytes);
+      pbytes.uint = v.at(i);
       for (size_t c=0; c<4; c++){
-	pbuf[bufpos] = *(char *)(pch+3-c);
+	pbuf[bufpos] = pbytes.pp[3-c];
 	bufpos++;
       }
     }
