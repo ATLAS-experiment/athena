@@ -51,7 +51,7 @@ namespace pool  {
       char*             val_pchar;
     };
     /// Buffer holding option value
-    Value             m_value;
+    Value             m_value{};
     /// Option data type
     DbColumn::Type    m_type;
     /// Option name identifier
