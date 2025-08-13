@@ -63,7 +63,7 @@ private: // properties
    /// InputCollections, vector with names of the input collections.
    StringArrayProperty m_inputCollectionsProp
    { this, "InputCollections", {}, "Files to read", "OrderedSet<std::string>" };
-   mutable std::vector<std::string>::const_iterator m_inputCollectionsIterator ATLAS_THREAD_SAFE;
+   mutable std::vector<std::string>::const_iterator m_inputCollectionsIterator ATLAS_THREAD_SAFE {};
 
 private: // internal helper functions
    /// Return pointer to new PoolCollectionConverter
