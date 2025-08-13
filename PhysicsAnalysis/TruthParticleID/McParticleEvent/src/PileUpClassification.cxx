@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "McParticleEvent/PileUpClassification.h"
@@ -15,15 +15,15 @@ void PileUpClassification::findEventIterators(PileuType_t putype, McEventCollect
 
   switch(putype){
   case SIGNAL:
-    lEvt = fEvt; lEvt++;
+    lEvt = fEvt; ++lEvt;
     break;
   case ALL:
     break;
   case INTIME:
     {
       // Special case : there's no SEPARATOR between SIGNAL and INTIME :
-      fEvt++; lEvt = fEvt; lEvt++;
-      for(; lEvt < maxIterator; lEvt++){
+      ++fEvt; lEvt = fEvt; ++lEvt;
+      for(; lEvt < maxIterator; ++lEvt){
         if(HepMC::signal_process_id(*lEvt) == 0 ) break;
       }
     break;
@@ -38,7 +38,7 @@ void PileUpClassification::findEventIterators(PileuType_t putype, McEventCollect
     intervallN = 3;
     break;
   case ALLMINBIAS:
-    fEvt++;
+    ++fEvt;
     break;
   default:
     break;
@@ -47,11 +47,11 @@ void PileUpClassification::findEventIterators(PileuType_t putype, McEventCollect
 
   // if needed, search the correct interval
   while(intervallN>0){
-    for(; fEvt < maxIterator; fEvt++){
-      if( HepMC::signal_process_id(*fEvt) == 0 ) { fEvt++; break; }
+    for(; fEvt < maxIterator; ++fEvt){
+      if( HepMC::signal_process_id(*fEvt) == 0 ) { ++fEvt; break; }
     }
     lEvt = fEvt;
-    for(; lEvt < maxIterator; lEvt++){
+    for(; lEvt < maxIterator; ++lEvt){
       if( HepMC::signal_process_id(*lEvt) == 0 ) break;
     }
     intervallN--;
