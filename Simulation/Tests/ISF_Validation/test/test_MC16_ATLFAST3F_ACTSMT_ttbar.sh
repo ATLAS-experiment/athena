@@ -20,7 +20,7 @@ Sim_tf.py \
     --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationNoIoV' \
-    --preExec "flags.Acts.TrackingGeometry.MaterialCalibrationFolder='./ACTS'; flags.Acts.TrackingGeometry.MaterialSource='material-maps-ATLAS-R2-2016-00-00-00_v1.json'" \
+    --preExec "flags.Acts.TrackingGeometry.MaterialCalibrationFolder='ACTS/MaterialMaps/ID'; flags.Acts.TrackingGeometry.MaterialSource='material-maps-ATLAS-R2-2016-00-00-00.json'" \
     --DataRunNumber 284500 \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
