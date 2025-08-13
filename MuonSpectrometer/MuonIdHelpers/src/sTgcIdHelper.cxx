@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/sTgcIdHelper.h"
@@ -7,7 +7,7 @@
 
 /*******************************************************************************/
 // Constructor/Destructor
-sTgcIdHelper::sTgcIdHelper() : MuonIdHelper("sTgcIdHelper") {
+sTgcIdHelper::sTgcIdHelper() : MuonIdHelper("sTgcIdHelper", "stgc") {
     m_module_hashes.fill(-1);
     m_detectorElement_hashes.fill(-1);
 }

@@ -7,8 +7,10 @@
 
 const std::string MuonIdHelper::BAD_NAME = "UNKNOWN";
 
-MuonIdHelper::MuonIdHelper(const std::string& logName) :
-    AtlasDetectorID(logName.empty() ? "MuonIdHelper" : logName) {
+MuonIdHelper::MuonIdHelper(const std::string& logName,
+                           const std::string& group) :
+    AtlasDetectorID(logName.empty() ? "MuonIdHelper" : logName, group)
+{
 }
 
 int MuonIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
@@ -345,7 +347,7 @@ int MuonIdHelper::initLevelsFromDict() {
     return 0;
 }
 
-int MuonIdHelper::init_hashes(void) {
+int MuonIdHelper::init_hashes() {
     //
     // create a vector(s) to retrieve the hashes for compact ids. For
     // the moment, we implement a hash for modules
@@ -391,7 +393,7 @@ int MuonIdHelper::init_hashes(void) {
     return 0;
 }
 
-int MuonIdHelper::init_detectorElement_hashes(void) {
+int MuonIdHelper::init_detectorElement_hashes() {
     //
     // create a vector(s) to retrieve the hashes for compact ids. For
     // the moment, we implement a hash for readout channels
@@ -437,7 +439,7 @@ int MuonIdHelper::init_detectorElement_hashes(void) {
     return 0;
 }
 
-int MuonIdHelper::init_channel_hashes(void) {
+int MuonIdHelper::init_channel_hashes() {
     //
     // create a vector(s) to retrieve the hashes for compact ids. For
     // the moment, we implement a hash for readout channels
@@ -517,7 +519,7 @@ int MuonIdHelper::get_next_in_eta(const IdentifierHash& id, IdentifierHash& next
     return 1;
 }
 
-int MuonIdHelper::init_neighbors(void) {
+int MuonIdHelper::init_neighbors() {
     //
     // create a vector(s) to retrieve the hashes for compact ids for
     // module neighbors.
@@ -645,7 +647,7 @@ int MuonIdHelper::init_neighbors(void) {
     return 0;
 }
 
-void MuonIdHelper::test_module_packing(void) const {
+void MuonIdHelper::test_module_packing() const {
     if (m_dict) {
         int nids = 0;
         IdContext context = module_context();
@@ -725,45 +727,45 @@ int MuonIdHelper::stationRegion(const Identifier& id) const {
 /*******************************************************************************/
 Identifier MuonIdHelper::muon() const { return AtlasDetectorID::muon(); }
 /*******************************************************************************/
-IdContext MuonIdHelper::technology_context(void) const {
+IdContext MuonIdHelper::technology_context() const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_TECHNOLOGY_INDEX));
 }
 /*******************************************************************************/
-IdContext MuonIdHelper::module_context(void) const {
+IdContext MuonIdHelper::module_context() const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_MODULE_INDEX));
 }
 /*******************************************************************************/
-IdContext MuonIdHelper::detectorElement_context(void) const {
+IdContext MuonIdHelper::detectorElement_context() const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_DETECTORELEMENT_INDEX));
 }
 /*******************************************************************************/
-IdContext MuonIdHelper::channel_context(void) const {
+IdContext MuonIdHelper::channel_context() const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_CHANNEL_INDEX));
 }
 /*******************************************************************************/
-const MultiRange& MuonIdHelper::multiRange(void) const { return m_full_module_range; }
+const MultiRange& MuonIdHelper::multiRange() const { return m_full_module_range; }
 /*******************************************************************************/
-MuonIdHelper::size_type MuonIdHelper::module_hash_max(void) const { return m_module_hash_max; }
+MuonIdHelper::size_type MuonIdHelper::module_hash_max() const { return m_module_hash_max; }
 /*******************************************************************************/
-MuonIdHelper::size_type MuonIdHelper::channel_hash_max(void) const { return m_channel_hash_max; }
+MuonIdHelper::size_type MuonIdHelper::channel_hash_max() const { return m_channel_hash_max; }
 /*******************************************************************************/
-const std::vector<Identifier>& MuonIdHelper::idVector(void) const { return m_module_vec; }
+const std::vector<Identifier>& MuonIdHelper::idVector() const { return m_module_vec; }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::module_begin(void) const { return (m_module_vec.begin()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::module_begin() const { return (m_module_vec.begin()); }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::module_end(void) const { return (m_module_vec.end()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::module_end() const { return (m_module_vec.end()); }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::detectorElement_begin(void) const { return (m_detectorElement_vec.begin()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::detectorElement_begin() const { return (m_detectorElement_vec.begin()); }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::detectorElement_end(void) const { return (m_detectorElement_vec.end()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::detectorElement_end() const { return (m_detectorElement_vec.end()); }
 
-MuonIdHelper::const_id_iterator MuonIdHelper::channel_begin(void) const { return (m_channel_vec.begin()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::channel_begin() const { return (m_channel_vec.begin()); }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::channel_end(void) const { return (m_channel_vec.end()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::channel_end() const { return (m_channel_vec.end()); }
 /*******************************************************************************/
 // Check common station fields
 bool MuonIdHelper::validStation(int stationName, int technology) const { return validStation(stationName) && validTechnology(technology); }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MmIdHelper.h"
@@ -9,7 +9,7 @@
 
 /*******************************************************************************/
 // Constructor/Destructor
-MmIdHelper::MmIdHelper() : MuonIdHelper("MmIdHelper") {
+MmIdHelper::MmIdHelper() : MuonIdHelper("MmIdHelper", "mm") {
     m_module_hashes.fill(-1);
     m_detectorElement_hashes.fill(-1);
 }
