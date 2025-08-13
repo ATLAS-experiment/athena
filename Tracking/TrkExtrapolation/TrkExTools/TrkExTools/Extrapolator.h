@@ -668,6 +668,7 @@ private:
   BooleanProperty m_useDenseVolumeDescription
     {this, "UseDenseVolumeDescription", true,
      "use dense volume description when available in ID/Calo"};
+  UnsignedIntegerProperty m_maxRecursion{this, "MaxRecursion", 1000};
 
   static const unsigned int m_maxNavigSurf = 1000;
   static const unsigned int m_maxNavigVol = 50;
@@ -709,6 +710,8 @@ private:
   mutable Gaudi::Accumulators::Counter<> m_navigationBreakDistIncrease{}; //!< number of navigation breaks due to distance increase
   mutable Gaudi::Accumulators::Counter<> m_navigationBreakVolumeSignature{}; //!< number of navigation breaks due to distance increase
   mutable Gaudi::Accumulators::Counter<> m_overlapSurfaceHit{}; //!< number of OverlapSurfaces found
+
+  mutable Dbg::PropStat m_propStat ATLAS_THREAD_SAFE;
 };
 
 } // end of namespace
