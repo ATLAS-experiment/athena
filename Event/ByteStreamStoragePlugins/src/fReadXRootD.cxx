@@ -104,13 +104,13 @@ void fReadXRootD::setPositionFromEnd(int64_t p)
 fRead * fReadXRootD::newReader() const
 {
   fReadXRootD * nfr = new fReadXRootD();
-  return (fRead *)nfr;
+  return static_cast<fRead *>(nfr);
 }
 
 extern "C" {
   fRead * fReadFactory()
   {
     fReadXRootD * nfr = new fReadXRootD();
-    return (fRead *)nfr;
+    return static_cast<fRead *>(nfr);
   }
 }
