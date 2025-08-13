@@ -55,6 +55,23 @@
 
 
 namespace {
+   // helper class to increment and decrement the recursion level and keep
+   // track of the maximum.
+   class RecursionCounter {
+   public:
+      RecursionCounter(std::array<unsigned short,Trk::Cache::kNRecursionValues> &the_counter)
+         : m_counter(&the_counter)
+      {
+         ++(*m_counter)[Trk::Cache::kCurrentRecursionCount];
+         (*m_counter)[Trk::Cache::kMaxRecursionCount]=std::max((*m_counter)[Trk::Cache::kMaxRecursionCount],(*m_counter)[Trk::Cache::kCurrentRecursionCount]);
+      }
+      ~RecursionCounter() { --(*m_counter)[Trk::Cache::kCurrentRecursionCount]; }
+   private:
+      std::array<unsigned short,Trk::Cache::kNRecursionValues> *m_counter;
+   };
+}
+
+namespace {
 constexpr double s_distIncreaseTolerance = 100. * Gaudi::Units::millimeter;
 constexpr unsigned int INVALIDPROPAGATORS = Trk::NumberOfSignatures+3;
 
@@ -259,6 +276,15 @@ Trk::Extrapolator::initialize()
 StatusCode
 Trk::Extrapolator::finalize()
 {
+  if (m_propStat.m_maxRecursionCount>0) {
+     ATH_MSG_INFO("ExtrapolatorStat: maximum-recursion-depth = " << m_propStat.m_maxRecursionCount);
+  }
+  if (m_propStat.m_maxPropagations>0) {
+     ATH_MSG_INFO("ExtrapolatorStat: maximum-number-of-propagations = " << m_propStat.m_maxPropagations);
+  }
+  if (m_propStat.m_maxMethodSequence>0) {
+     ATH_MSG_INFO("ExtrapolatorStat: maximum-method-sequence-number = " << m_propStat.m_maxMethodSequence);
+  }
   if (m_navigationStatistics) {
     ATH_MSG_INFO(" Perfomance Statistics  : ");
     ATH_MSG_INFO(" [P] Method Statistics ------- ------------------------------------");
@@ -345,7 +371,7 @@ Trk::Extrapolator::extrapolate(const EventContext& ctx,
                                MaterialUpdateMode matupmode,
                                Trk::ExtrapolationCache* extrapolationCache) const
 {
-  Cache cache{};
+  Cache cache(m_propStat);
   // Material effect updator cache
   Trk::CacheOwnedPtr<Trk::TrackParameters> clonedInput = cache.m_ownedPtrs.push(parm.uniqueClone());
   cache.populateMatEffUpdatorCache(m_subupdaters);
@@ -429,7 +455,7 @@ Trk::Extrapolator::extrapolateBlindly(const EventContext& ctx,
       !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
 
   if (currentPropagator) {
-      Cache cache{};
+      Cache cache(m_propStat);
       Trk::CacheOwnedPtr<Trk::TrackParameters> clonedInput = cache.m_ownedPtrs.push(parm.uniqueClone());
       cache.populateMatEffUpdatorCache(m_subupdaters);
       return extrapolateBlindlyImpl(ctx, cache, (*currentPropagator),
@@ -451,7 +477,7 @@ Trk::Extrapolator::extrapolateM(const EventContext& ctx,
                                 Trk::ExtrapolationCache* extrapolationCache) const
 {
 
-  Cache cache{};
+  Cache cache(m_propStat);
   // Material effect updator cache
   cache.populateMatEffUpdatorCache(m_subupdaters);
   ATH_MSG_DEBUG("C-[" << cache.m_methodSequence << "] extrapolateM()");
@@ -491,7 +517,7 @@ Trk::Extrapolator::collectIntersections(
 {
   // extrapolation method intended for collection of intersections with active layers/volumes
   // extrapolation stops at indicated geoID subdetector exit
-  Cache cache{};
+  Cache cache(m_propStat);
   ++cache.m_methodSequence;
   ATH_MSG_DEBUG("M-[" << cache.m_methodSequence << "] extrapolate(through active volumes), from "
                       << parm.position());
@@ -594,7 +620,7 @@ Trk::Extrapolator::extrapolateStepwiseImpl(const EventContext& ctx,
                                            const Trk::BoundaryCheck& bcheck,
                                            Trk::ParticleHypothesis particle) const{
 
-  Cache cache{};
+  Cache cache(m_propStat);
   // statistics && sequence output ----------------------------------------
   ++m_extrapolateStepwiseCalls;
   ++cache.m_methodSequence;
@@ -633,7 +659,7 @@ Trk::Extrapolator::extrapolateToNextActiveLayerMImpl(
   ParticleHypothesis particle,
   MaterialUpdateMode matupmode) const
 {
-  Cache cache{};
+  Cache cache(m_propStat);
   //This is needed as we need to return a Trk::Layer
   cache.m_cacheLastMatLayer = true;
   ++cache.m_methodSequence;
@@ -708,6 +734,13 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                                                   ParticleHypothesis particle,
                                                   MaterialUpdateMode matupmode) const
 {
+  RecursionCounter counter(cache.m_recursionCount);
+  if (cache.m_recursionCount[Trk::Cache::kCurrentRecursionCount]>m_maxRecursion) {
+     ATH_MSG_WARNING("Too many recursive calls of  extrapolateToNextMaterialLayer: "
+                     << cache.m_recursionCount[Trk::Cache::kCurrentRecursionCount]);
+     cache.m_status=Cache::kRecursionCountExceeded;
+     return {};
+  }
   ++cache.m_methodSequence;
   ATH_MSG_DEBUG("M-[" << cache.m_methodSequence << "] extrapolateToNextMaterialLayer(...) ");
 
@@ -876,6 +909,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                                                                    false,propagVol);
     Trk::CacheOwnedPtr<Trk::TrackParameters> nextPar = cache.m_ownedPtrs.push(std::move(pNextPar));
     if (nextPar) {
+      ++cache.m_nPropagations;
       ATH_MSG_DEBUG("  [+] Position after propagation -   at "
                     << positionOutput(nextPar->position()));
     }
@@ -1166,6 +1200,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
         ctx, *currPar, cache.m_navigSurfs, dir, m_fieldProperties, particle,
         solutions, path, false, false, cache.m_currentDense));
     if (nextPar) {
+      ++cache.m_nPropagations;
       ATH_MSG_DEBUG("  [+] Position after propagation -   at "
                     << positionOutput(nextPar->position()));
     }
@@ -1818,6 +1853,7 @@ Trk::Extrapolator::extrapolateInAlignableTV(const EventContext& ctx,
         cache.m_currentDense, cache.m_extrapolationCache));
 
     if (nextPar) {
+      ++cache.m_nPropagations;
       ATH_MSG_DEBUG("  [+] Position after propagation -   at "
                     << positionOutput(nextPar->position()));
       ATH_MSG_DEBUG("  [+] Number of intersection solutions: " << solutions.size());
@@ -2000,7 +2036,7 @@ Trk::Extrapolator::extrapolateToVolumeImpl(const EventContext& ctx,
   // solution along path
   for (std::pair<const Trk::Surface*, double> const& a_surface : surfaces) {
     if (a_surface.second > 0) {
-      Cache cache{};
+      Cache cache(m_propStat);
       Trk::CacheOwnedPtr<Trk::TrackParameters> cloneInput = cache.m_ownedPtrs.push(parm.uniqueClone());
       // Material effect updator cache
       cache.populateMatEffUpdatorCache(m_subupdaters);
@@ -2022,7 +2058,7 @@ Trk::Extrapolator::extrapolateToVolumeImpl(const EventContext& ctx,
          rsIter != surfaces.rend();
          ++rsIter) {
       if ((*rsIter).second < 0) {
-        Cache cache{};
+        Cache cache(m_propStat);
         Trk::CacheOwnedPtr<Trk::TrackParameters> cloneInput = cache.m_ownedPtrs.push(parm.uniqueClone());
         // Material effect updator cache
         cache.populateMatEffUpdatorCache(m_subupdaters);
@@ -2245,7 +2281,8 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
         // return the result (succesful)
         return resultParameters;
       } if (!cache.m_parametersAtBoundary.nextParameters ||
-                 !cache.m_parametersAtBoundary.nextVolume) {
+            !cache.m_parametersAtBoundary.nextVolume ||
+            cache.m_status != Cache::kContinue) {
         ATH_MSG_DEBUG("  [-] Destination surface could not be hit.");
         return resultParameters;
       }
@@ -2753,7 +2790,8 @@ Trk::Extrapolator::extrapolateWithinDetachedVolumes(const EventContext& ctx,
         nextParameters = onNextLayer;
         break;
       }
-      if (!cache.m_parametersAtBoundary.nextParameters) {
+      if (!cache.m_parametersAtBoundary.nextParameters
+          || cache.m_status != Cache::kContinue) {
         return {};
       }
 
@@ -4397,6 +4435,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         ctx, *currPar, cache.m_navigSurfs, dir, m_fieldProperties, particle,
         solutions, path, true, false, cache.m_currentDense));
     if (nextPar) {
+      ++cache.m_nPropagations;
       ATH_MSG_DEBUG("  [+] Position after propagation -   at "
                     << positionOutput(nextPar->position()));
       ATH_MSG_DEBUG("  [+] Momentum after propagation - " << nextPar->momentum());
