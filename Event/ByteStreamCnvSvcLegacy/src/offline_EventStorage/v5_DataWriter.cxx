@@ -690,7 +690,7 @@ void DataWriter::file_record(const offline_EventStorage_v5::file_name_strings& n
   uint32_t sizeTag =  nst.fileNameCore.size();
 
   m_cFile.write(ccharAddress(offline_EventStorage_v5::file_name_strings_marker),sizeof(uint32_t));
-  m_check =  ::adler32(m_check,(const Bytef*)
+  m_check =  ::adler32(m_check,reinterpret_cast<const Bytef*>
 		     (&offline_EventStorage_v5::file_name_strings_marker),
 		     sizeof(uint32_t));
 
@@ -723,7 +723,7 @@ void DataWriter::file_record(const offline_EventStorage_v5::freeMetaDataStrings&
   ERS_DEBUG(2,"Writing the metadata strings.");
 
   m_cFile.write(ccharAddress(offline_EventStorage_v5::free_strings_marker),sizeof(uint32_t));
-  m_check = ::adler32(m_check, (const Bytef*)
+  m_check = ::adler32(m_check, reinterpret_cast<const Bytef*>
 		    (&offline_EventStorage_v5::free_strings_marker),
 		    sizeof(uint32_t));
 
