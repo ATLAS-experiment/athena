@@ -338,8 +338,7 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
   for ( auto& ctool: m_decisionCollectorTools ) {
     std::vector<TrigCompositeUtils::DecisionID> stepSum;
     std::set<std::string> stepSequences;
-    ctool->getDecisions( stepSum, context );
-    ctool->getSequencesPerEvent( stepSequences, context );
+    ctool->getDecisions( stepSum, stepSequences, context );
     ATH_MSG_DEBUG( " Step " << step << " decisions (for decisions): " << stepSum.size() );
     TrigCompositeUtils::DecisionIDContainer stepUniqueSum( stepSum.begin(), stepSum.end() );
     ATH_CHECK( fillPassEvents( stepUniqueSum, 3+step ) );
