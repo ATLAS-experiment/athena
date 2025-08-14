@@ -338,7 +338,7 @@ void test_set_store()
 
   caught = false;
   try {
-    b.setStore ((SG::IConstAuxStore*)&store);
+    b.setStore (static_cast<SG::IConstAuxStore*>(&store));
   }
   catch (const SG::ExcUntrackedSetStore&) {
     caught = true;
@@ -346,7 +346,7 @@ void test_set_store()
   assert (caught);
 
   b.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
-  b.setStore ((SG::IConstAuxStore*)&store);
+  b.setStore (static_cast<SG::IConstAuxStore*>(&store));
   assert (b.trackIndices());
   assert (b.hasStore());
   assert (!b.hasNonConstStore());

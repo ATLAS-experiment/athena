@@ -233,7 +233,7 @@ void test1()
   ityp1.set (b3, 22);
   assert (ityp1(b3) == 22);
 
-  v.setStore ((SG::IConstAuxStore*)&store);
+  v.setStore (static_cast<SG::IConstAuxStore*>(&store));
   assert (ftyp1(cb) == 1.5);
 }
 
