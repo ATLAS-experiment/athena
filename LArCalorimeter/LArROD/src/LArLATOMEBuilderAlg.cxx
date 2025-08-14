@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArLATOMEBuilderAlg.h"
@@ -44,7 +44,7 @@ StatusCode LArLATOMEBuilderAlg::initialize() {
 
   const LArOnline_SuperCellID* ll;
   ATH_CHECK(detStore()->retrieve(ll,"LArOnline_SuperCellID"));
-  m_onlineId = (const LArOnlineID_Base*)ll;
+  m_onlineId = static_cast<const LArOnlineID_Base*>(ll);
 
   return StatusCode::SUCCESS;
 }
