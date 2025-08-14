@@ -408,7 +408,7 @@ namespace Muon {
                         ATH_MSG_VERBOSE("Prd is already good");
                     } else if (newPrepData->status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
                         (*prevPrd) = std::move(*newPrepData);
-                        prevPrd->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
+                        prevPrd->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size()-1);
                     }
                     continue;
                 }
