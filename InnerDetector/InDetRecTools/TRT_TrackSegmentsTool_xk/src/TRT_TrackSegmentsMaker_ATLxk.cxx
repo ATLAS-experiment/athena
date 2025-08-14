@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -721,7 +721,8 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::findLocaly(const EventContext &ctx,
   for(++s; s!=se; ++s) {
     const Trk::RIO_OnTrack*  rio = dynamic_cast<const Trk::RIO_OnTrack*>(*s);
     if (!rio) continue;
-    const InDet::TRT_DriftCircle* dc = ((const InDet::TRT_DriftCircleOnTrack*)(*s))->prepRawData();
+    const InDet::TRT_DriftCircleOnTrack* trt = static_cast<const InDet::TRT_DriftCircleOnTrack*>(*s);
+    const InDet::TRT_DriftCircle* dc = trt->prepRawData();
     if(dc) event_data.m_clusterSegment.insert(std::make_pair(dc,seg));
   }
 }
@@ -745,9 +746,9 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::segmentsPreparation(TRT_TrackSegmentsM
 
     for(++s; s!=se; ++s) {
       const Trk::RIO_OnTrack*  rio = dynamic_cast<const Trk::RIO_OnTrack*>(*s);
-    if (!rio) continue;
-
-      const InDet::TRT_DriftCircle* dc = ((const InDet::TRT_DriftCircleOnTrack*)(*s))->prepRawData();
+      if (!rio) continue;
+      const InDet::TRT_DriftCircleOnTrack* trt = static_cast<const InDet::TRT_DriftCircleOnTrack*>(*s);
+      const InDet::TRT_DriftCircle* dc = trt->prepRawData();
       if(dc && event_data.m_clusterSegment.erase(dc)) ++nfree;
     }
     if(nfree >= 7) event_data.m_segments.push_back((*qs).second);
