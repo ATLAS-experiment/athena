@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCTRIGGEREFFICIENCY_H
 #define ZDCANALYSIS_ZDCTRIGGEREFFICIENCY_H
 
 #include <TSpline.h>
-#include <iostream>
 #include <vector>
 #include <array>
-#include <algorithm>
+#include <algorithm> //std::max
+#include <utility> //std::pair
+#include <stdexcept> //std::runtime_error
 
 class MsgStream;
 

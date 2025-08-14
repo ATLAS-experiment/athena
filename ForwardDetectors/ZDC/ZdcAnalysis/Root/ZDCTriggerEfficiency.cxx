@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZDCTriggerEfficiency.h"
 #include "AsgTools/MessageCheckAsgTools.h"
-#include <vector>
+#include <cmath>
 
 double ZDCTriggerEfficiency::GetEfficiency(int side, float ADCSum){
   double alpha = m_currentParams[side][0];
