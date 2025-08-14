@@ -875,7 +875,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   std::string strg;
  
   // Save index to a DictionaryRegion for unpacking
-  IdDictRegion* reg = m_dict->find_region("laronline-barrel");
+  const IdDictRegion* reg = m_dict->find_region("laronline-barrel");
   if (reg) 
     {
       m_laronlineRegion_index = reg->index();
@@ -894,7 +894,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
       return (1);
     }
   /* Find LAr field */
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) 
     {
       m_lar_index = field->index();
@@ -1074,12 +1074,12 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   
   /* Set the field implementations */
 
-  IdDictGroup* group = m_dict->find_group(group_name);
+  const IdDictGroup* group = m_dict->find_group(group_name);
   if ( !group ) {
         log << MSG::ERROR << "initLevelsFromDict - cannot find "
                 << group_name << endmsg;
   } else {
-        m_laronlineRegion_index = group->regions()[0]->index();
+        m_laronlineRegion_index = group->region(0).index();
   }
 
   const IdDictRegion& region = m_dict->region(m_laronlineRegion_index);
