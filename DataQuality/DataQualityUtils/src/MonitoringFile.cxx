@@ -265,7 +265,7 @@ namespace dqutils {
 
   template <class HIST>
   void defaultMerge(TObject * a, const TObject* b) {
-    ((HIST*)a)->Add((HIST*)b);
+    (static_cast<HIST*>(a))->Add(static_cast<const HIST*>(b));
     return;
   }
 

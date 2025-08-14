@@ -15,11 +15,13 @@
 
 #include "DataQualityUtils/MonitoringFile.h"
 
-#include <vector>
+
 
 #include "TH1F.h"
 #include "TFile.h"
 #include "TKey.h"
+#include <vector>
+#include <algorithm> //std::max
 
 namespace dqutils
 {
@@ -138,7 +140,7 @@ namespace dqutils
                 minimalBin = workingHistogram->FindFirstBinAbove(0.0, 1);
                 maximalBin = workingHistogram->FindLastBinAbove(0.0, 1);
 
-                workingHistogram->SetAxisRange(TMath::Max(1, (minimalBin - 5)),
+                workingHistogram->SetAxisRange(std::max(1, (minimalBin - 5)),
                                                (maximalBin + 5), "X");
 
                 dir->cd();
