@@ -203,7 +203,7 @@ int AtlasDetectorID::register_dict_tag(const IdDictMgr &dict_mgr,
     // Register version of dictionary dict_name
 
     // Access dictionary by name
-    IdDictDictionary *dict = dict_mgr.find_dictionary(dict_name);
+    const IdDictDictionary *dict = dict_mgr.find_dictionary(dict_name);
     if (!dict) {
         ATH_MSG_ERROR(__func__<<":"<<__LINE__<<" No dictionary found");
         return 1;
@@ -234,7 +234,7 @@ bool AtlasDetectorID::reinitialize(const IdDictMgr &dict_mgr) {
     }
     for (unsigned int i = 0; i < m_dict_names.size(); ++i) {
         // Access dictionary by name
-        IdDictDictionary *dict = dict_mgr.find_dictionary(m_dict_names[i]);
+        const IdDictDictionary *dict = dict_mgr.find_dictionary(m_dict_names[i]);
         if (!dict) {
             ATH_MSG_ERROR("reinitialize: could not find dict -  " << m_dict_names[i]);
             return false;
@@ -376,7 +376,7 @@ AtlasDetectorID::show_to_string(const Identifier id, const IdContext *context, c
         return result;
 
     // Find the dictionary to use:
-    IdDictDictionary *dict{nullptr};
+    const IdDictDictionary *dict{nullptr};
     ExpandedIdentifier expId{};
     ExpandedIdentifier prefix{}; // default is null prefix
     Identifier compact = id;
@@ -434,7 +434,7 @@ std::string AtlasDetectorID::print_to_string(Identifier id,
         unsigned int max_index = (context) ? context->end_index() : 999;
 
         // Find the dictionary to use:
-        IdDictDictionary *dict{nullptr};
+        const IdDictDictionary *dict{nullptr};
         ExpandedIdentifier expId;
         ExpandedIdentifier prefix; // default is null prefix
         Identifier compact = id;
@@ -525,7 +525,7 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         m_do_neighbours = false;
 
     
-    IdDictField *field{nullptr};
+    const IdDictField *field{nullptr};
 
     // Find out from the dictionary the detector and subdetector
     // levels and id values
@@ -557,12 +557,12 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
     m_MM_ID = -1;
 
     // Save generic dict for top levels
-    IdDictDictionary *top_dict {nullptr};
+    const IdDictDictionary *top_dict {nullptr};
 
     auto assignSystemId = [this, &field](const std::string& systemName,
                                    int& idToAssign, 
                                    bool mandatory = true) ->bool {
-        IdDictLabel *label = field->find_label(systemName);
+        const IdDictLabel *label = field->find_label(systemName);
         if (label && label->valued()){
             idToAssign = label->value();
             ATH_MSG_VERBOSE("Assign system "<<systemName<<" to "<<idToAssign<<".");
