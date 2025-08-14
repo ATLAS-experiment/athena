@@ -1,7 +1,11 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "egammaLayerRecalibTool/corr_pileupShift.h"
 #include <iostream>
 #include <string>
 #include <utility>
+#include <cmath>
 
 #include "PathResolver/PathResolver.h"
 
