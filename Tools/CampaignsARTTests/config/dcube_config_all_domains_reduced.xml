@@ -170,7 +170,7 @@
       <hist1D name="chi2" plotopts="" tests="KS" type="TH1D"/>
       <hist1D name="charge" plotopts="" tests="KS" type="TH1D"/>
       <hist1D name="mind0" plotopts="" tests="KS" type="TH1D"/>
-      <hist1D name="minz0" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="maxd0" plotopts="" tests="KS" type="TH1D"/>
      </TDirectory>
     </TDirectory>
    </TDirectory>
