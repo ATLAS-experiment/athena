@@ -302,6 +302,13 @@ namespace Trk {
     }else{              vk_forcft.usePlaneCnst = 1; }
     vk_forcft.Ap = a; vk_forcft.Bp = b; vk_forcft.Cp = c; vk_forcft.Dp = d;
   }
+  void VKalVrtControl::setUseRadiusCnst(double R, double RefP[2])   {
+    if(R == 0.){  vk_forcft.useRadiusCnst = 0;
+    }else{        vk_forcft.useRadiusCnst = 1; }
+    vk_forcft.RC = R;
+    vk_forcft.radiusRefP[0]=RefP[0];
+    vk_forcft.radiusRefP[1]=RefP[1];
+  }
   void VKalVrtControl::setUseThetaCnst() { vk_forcft.useThetaCnst = 1;}
   void VKalVrtControl::setUseAprioriVrt(){ vk_forcft.useAprioriVrt = 1;}
   void VKalVrtControl::setUsePointingCnst(int iType = 1 ) { vk_forcft.usePointingCnst = iType<2 ? 1 : 2 ;}

@@ -110,4 +110,17 @@ std::ostream& operator<<(std::ostream& out, const VKPlaneConstraint& cnst) {
   out.precision(6);  // restore default
   return out;
 }
+
+std::ostream& operator<<(std::ostream& out, const VKRadiusConstraint& cnst) {
+  const VKVertex* vk = cnst.getOriginVertex();
+  out.precision(7);
+  out << std::defaultfloat;
+  out << " Vertex in radius constraint  (total NTRK=" << vk->TrackList.size()
+      << ")" << std::endl;
+  out << " Fixed Radius:" << cnst.getRC() << std::endl;
+  out << (VKConstraintBase&)cnst << '\n';
+  out.precision(6);  // restore default
+  return out;
+}
+
 }  // namespace Trk

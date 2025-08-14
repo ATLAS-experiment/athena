@@ -124,7 +124,7 @@ ForCFT::ForCFT() noexcept{
   nmcnst=0;
   useMassCnst=0; usePhiCnst=0; useThetaCnst=0; usePointingCnst=0; usePlaneCnst=0;
   useAprioriVrt=0; usePassNear=0;
-  Ap=Bp=Dp=Cp=0.;
+  Ap=Bp=Dp=Cp=RC=0.;
   IterationNumber = 50;
   IterationPrecision=1.e-3;
   RobustScale = 1.; irob=0;
