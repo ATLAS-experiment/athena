@@ -6,6 +6,7 @@
 // Framework include(s).
 #include "PathResolver/PathResolver.h"
 #include <arpa/inet.h>
+#include <utility> //std::pair
 #include <fstream>
 
 namespace AthInfer {
@@ -94,13 +95,13 @@ ExampleMLInferenceWithTriton::read_mnist_pixel_notFlat(const std::string &full_p
   int number_of_images=0;
   int n_rows=0;
   int n_cols=0;
-  file.read((char*)&magic_number,sizeof(magic_number));
+  file.read(reinterpret_cast<char*>(&magic_number),sizeof(magic_number));
   magic_number= ntohl(magic_number);
-  file.read((char*)&number_of_images,sizeof(number_of_images));
+  file.read(reinterpret_cast<char*>(&number_of_images),sizeof(number_of_images));
   number_of_images= ntohl(number_of_images);
-  file.read((char*)&n_rows,sizeof(n_rows));
+  file.read(reinterpret_cast<char*>(&n_rows),sizeof(n_rows));
   n_rows= ntohl(n_rows);
-  file.read((char*)&n_cols,sizeof(n_cols));
+  file.read(reinterpret_cast<char*>(&n_cols),sizeof(n_cols));
   n_cols= ntohl(n_cols);
   for(int i=0;i<number_of_images;++i)
   {
@@ -109,7 +110,7 @@ ExampleMLInferenceWithTriton::read_mnist_pixel_notFlat(const std::string &full_p
         for(int c=0;c<n_cols;++c)
         {
           unsigned char temp=0;
-          file.read((char*)&temp,sizeof(temp));
+          file.read(reinterpret_cast<char*>(&temp),sizeof(temp));
           input_tensor_values[i][r][c]= float(temp)/255;
         }
      }
