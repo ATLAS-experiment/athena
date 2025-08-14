@@ -27,10 +27,9 @@ public:
     using ClusterAuxContainer = xAOD::PixelClusterAuxContainer;
 
     struct Cell {
-      Cell(int ncl, int row, int col, int tot, int lvl1, Identifier id):
-	NCL(ncl), ROW(row), COL(col), TOT(tot), LVL1(lvl1), ID(id) {};
+      Cell(int row, int col, int tot, int lvl1, Identifier id):
+        ROW(row), COL(col), TOT(tot), LVL1(lvl1), ID(id) {};
       
-      int           NCL;
       int           ROW;
       int           COL;
       int           TOT;
