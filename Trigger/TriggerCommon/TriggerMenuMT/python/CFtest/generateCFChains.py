@@ -195,7 +195,6 @@ def generateCFChains(flags):
             makeChain(flags, name='HLT_j45_boffperf_ftf_subjesgscIS_preselj20_L1J20', L1Thresholds=["FSNOSEED"], ChainSteps=[step1,step2,step3] ),
             makeChain(flags, name='HLT_j45_bgn270_ftf_subjesgscIS_preselj20_L1J20',  L1Thresholds=["FSNOSEED"], ChainSteps=[step1,step2,step3] ),
             ]
-
    
     ##################################################################
     # tau chains

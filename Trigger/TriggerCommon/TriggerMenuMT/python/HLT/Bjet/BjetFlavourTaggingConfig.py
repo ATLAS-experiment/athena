@@ -12,7 +12,7 @@ from BTagging.BTagLegacyConfig import BTagAlgsCfg
 from FlavorTagInference.FlavorTagNNConfig import getStaticTrackVars
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
+def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks,
                        inputMuons = ""):
 
     # because Cfg functions internally re-append the 'Jets' string
@@ -47,7 +47,6 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
         trackCollection=inputTracks,
         muons=inputMuons,
         primaryVertices=inputVertex,
-        BTagCollection=BTagName,
         AddedJetSuffix='Jets',
         SecVertexers = [],
     ))

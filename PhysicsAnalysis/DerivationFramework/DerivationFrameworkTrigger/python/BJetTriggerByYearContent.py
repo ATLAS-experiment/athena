@@ -61,15 +61,14 @@ def getBJetTriggerContent(flags):
 
         triggerContent += jetCollections[year]
         return triggerContent
-    elif flags.Trigger.EDMVersion >= 3: # NOTE: Currently re-using the Run 3 EDM for Run 4.
+    elif flags.Trigger.EDMVersion == 3:
         triggerContent = [
             "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets",
-            "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.pt.eta.phi.m",
             "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging",
         ]
 
         year = getDataYear(flags)
-        msg.debug(f'Configured b-jet trigger content for {year}')
+        msg.debug(f'Configured Run 3 b-jet trigger content for {year}')
 
         btagstrs = []
         btaggers = {
@@ -77,13 +76,33 @@ def getBJetTriggerContent(flags):
             2023: ['GN120220813'],
             2024: ['GN220240122'],
             2025: ['GN220240122'],
-            2030: [], # Some day we'll have something amazing here
+            2026: ['GN220240122'],
         }[year]
         for btagger in btaggers:
             btagstrs.append('.'.join([f'{btagger}_{p}' for p in ['pb','pc','pu']]))
+        jetstrs = btagstrs + ['pt', 'eta', 'phi', 'm']
         btagvars = '.'.join(btagstrs)
+        jetvars = '.'.join(jetstrs)
         triggerContent.append(f"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingAux.{btagvars}")
+        triggerContent.append(f"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.{jetvars}")
         return triggerContent
+
+    elif flags.Trigger.EDMVersion >= 4:
+        triggerContent = ["HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets"]
+
+        year = getDataYear(flags)
+        msg.debug(f'Configured Run 4 b-jet trigger content for {year}')
+
+        jetstrs = ['pt', 'eta', 'phi', 'm']
+        btaggers = {
+            2030: ['GN220240122'], # Some day we'll have something amazing here
+        }[year]
+        for btagger in btaggers:
+            jetstrs.append('.'.join([f'{btagger}_{p}' for p in ['pb','pc','pu']]))
+        jetvars = '.'.join(jetstrs)
+        triggerContent.append(f"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.{jetvars}")
+        return triggerContent
+
     elif flags.Trigger.EDMVersion == -1:
         # Allow for undefined trigger content -- no RDOtoRDOTrigger run
         msg.debug('Received EDMVersion=-1: no trigger info available. Returning empty b-jet trigger content')

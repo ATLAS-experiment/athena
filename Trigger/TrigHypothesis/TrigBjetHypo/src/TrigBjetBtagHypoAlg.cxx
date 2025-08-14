@@ -20,12 +20,10 @@ StatusCode TrigBjetBtagHypoAlg::initialize() {
   if ( !m_monTool.empty() ) CHECK( m_monTool.retrieve() );
 
   ATH_CHECK( m_bTaggedJetKey.initialize() );
-  ATH_CHECK( m_bTagKey.initialize() );
   ATH_CHECK( m_trackKey.initialize() );
   ATH_CHECK( m_inputPrmVtx.initialize() );
 
   renounce( m_bTaggedJetKey );
-  renounce( m_bTagKey );
   renounce( m_trackKey );
   renounce( m_inputPrmVtx );
 
@@ -114,34 +112,14 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
     toAdd->setObjectLink< xAOD::JetContainer >( TrigCompositeUtils::featureString(),bTaggedJetEL.front() );     
     all_bTaggedJetELs.push_back( bTaggedJetEL.front() );
 
-
-
-    // Retrieve Flavour Tagging object from view
-    ElementLinkVector< xAOD::BTaggingContainer > bTaggingEL;
-    CHECK( retrieveCollectionFromView( context,
-				       bTaggingEL,
-				       m_bTagKey,
-				       prevDecisionContainer->at(index) ) );
-    
-    if ( bTaggingEL.size() != 1 ) {
-      ATH_MSG_ERROR( "Did not find only 1 b-tagging object from View!" );
-      return StatusCode::FAILURE;
-    }
-
-    toAdd->setObjectLink< xAOD::BTaggingContainer >(m_btaggingLinkName,bTaggingEL.front() ); // TM 2021-10-30
-
     // online monitoring for btagging, with a check to ensure the PV is marked
     ElementLink< xAOD::VertexContainer > vertexEL;
     CHECK( retrieveObjectFromNavigation(  m_prmVtxLink.value(), vertexEL, prevDecisionContainer->at(index) ) );
         
     if ( (*vertexEL)->vertexType() == xAOD::VxType::VertexType::PriVtx ) {
       CHECK( monitor_primary_vertex( vertexEL ) );
-      CHECK( monitor_btagging( bTaggingEL ) );
+      CHECK( monitor_btagging( all_bTaggedJetELs ) );
     }
-
-
-
-
     // Add to Decision collection
     newDecisions.push_back( toAdd );
   }
@@ -183,18 +161,10 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
     ElementLink< xAOD::VertexContainer > vertexEL;
     CHECK( retrieveObjectFromNavigation(  m_prmVtxLink.value(), vertexEL, previousDecision ) );
 
-    // Retrieve b-tagging code
-    ElementLinkVector< xAOD::BTaggingContainer > bTaggingELs;
-    CHECK( retrieveCollectionFromView< xAOD::BTaggingContainer >( context,
-								  bTaggingELs,
-								  m_bTagKey,
-								  previousDecision ) );
-    CHECK( bTaggingELs.size() == 1 );
-
     // Put everything in place
     TrigBjetBtagHypoTool::TrigBjetBtagHypoToolInfo infoToAdd;
     infoToAdd.previousDecisionIDs = previousDecisionIDs;
-    infoToAdd.btaggingEL = bTaggingELs.front();
+    infoToAdd.jetEL = all_bTaggedJetELs.front();
     infoToAdd.vertexEL = vertexEL;
     infoToAdd.decision = newDecisions.at( index );
     infoToAdd.beamSpot = beamSpot;
@@ -331,43 +301,43 @@ StatusCode TrigBjetBtagHypoAlg::monitor_tracks( const EventContext& context, con
 }
 
 
-StatusCode TrigBjetBtagHypoAlg::monitor_flavor_probabilities( const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL, const std::string& var_name ) const {
-  auto monitor_pu = Monitored::Collection( "btag_"+var_name+"_pu", bTaggingEL,
-    [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      auto jet = getJetFromBTagLink(**bTagLink);
+StatusCode TrigBjetBtagHypoAlg::monitor_flavor_probabilities( const ElementLinkVector< xAOD::JetContainer >& jetEL, const std::string& var_name ) const {
+  auto monitor_pu = Monitored::Collection( "btag_"+var_name+"_pu", jetEL,
+    [var_name](const ElementLink< xAOD::JetContainer >& jetlink) { 
+      auto jet = *jetlink;
       double pu = -1; 
       SG::ConstAccessor<float> acc(var_name+"_pu");
-      pu = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
+      pu = acc(*jet);
       return pu; 
     } );
 
-  auto monitor_pb = Monitored::Collection( "btag_"+var_name+"_pb", bTaggingEL,
-    [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      auto jet = getJetFromBTagLink(**bTagLink);
+  auto monitor_pb = Monitored::Collection( "btag_"+var_name+"_pb", jetEL,
+    [var_name](const ElementLink< xAOD::JetContainer >& jetlink) { 
+      auto jet = *jetlink;
       double pb = -1; 
       SG::ConstAccessor<float> acc(var_name+"_pb");
-      pb = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
+      pb = acc(*jet);
       return pb;
     } );
 
-  auto monitor_pc = Monitored::Collection( "btag_"+var_name+"_pc", bTaggingEL,
-    [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      auto jet = getJetFromBTagLink(**bTagLink);
+  auto monitor_pc = Monitored::Collection( "btag_"+var_name+"_pc", jetEL,
+    [var_name](const ElementLink< xAOD::JetContainer >& jetlink) { 
+      auto jet = *jetlink;
       double pc = -1; 
       SG::ConstAccessor<float> acc(var_name+"_pc");
-      pc = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
+      pc = acc(*jet);
       return pc;
     } );
 
-  auto monitor_llr = Monitored::Collection( "btag_"+var_name+"_llr", bTaggingEL,
-    [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      auto jet = getJetFromBTagLink(**bTagLink);
+  auto monitor_llr = Monitored::Collection( "btag_"+var_name+"_llr", jetEL,
+    [var_name](const ElementLink< xAOD::JetContainer >& jetlink) { 
+      auto jet = *jetlink;
       SG::ConstAccessor<float> acc_pb(var_name+"_pb");
       double pb = -1.0;
-      pb = (acc_pb.isAvailable(*jet) ? acc_pb(*jet) : acc_pb(**bTagLink));
+      pb = acc_pb(*jet);
       SG::ConstAccessor<float> acc_pu(var_name+"_pu");
       double pu = -1.0;
-      pu = (acc_pu.isAvailable(*jet) ? acc_pu(*jet) : acc_pu(**bTagLink));
+      pu = acc_pu(*jet);
       if( !pb || !pu )  return -1.0f;
       float llr = 0.;
       if(pb<=0.) {
@@ -385,23 +355,23 @@ StatusCode TrigBjetBtagHypoAlg::monitor_flavor_probabilities( const ElementLinkV
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigBjetBtagHypoAlg::monitor_flavor_bb_probabilities( const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL, const std::string& var_name ) const {
+StatusCode TrigBjetBtagHypoAlg::monitor_flavor_bb_probabilities( const ElementLinkVector< xAOD::JetContainer >& jetEL, const std::string& var_name ) const {
 
-  auto monitor_pb = Monitored::Collection( "bbtag_"+var_name+"_pb", bTaggingEL,
-    [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      auto jet = getJetFromBTagLink(**bTagLink);
+  auto monitor_pb = Monitored::Collection( "bbtag_"+var_name+"_pb", jetEL,
+    [var_name](const ElementLink< xAOD::JetContainer >& jetlink) { 
+      auto jet = *jetlink;
       double pb = -1;
       SG::ConstAccessor<float> acc(var_name+"_pb");
-      pb = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
+      pb = acc(*jet);
       return pb; 
     } );
 
-  auto monitor_pbb = Monitored::Collection( "bbtag_"+var_name+"_pbb", bTaggingEL,
-    [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      auto jet = getJetFromBTagLink(**bTagLink);
+  auto monitor_pbb = Monitored::Collection( "bbtag_"+var_name+"_pbb", jetEL,
+    [var_name](const ElementLink< xAOD::JetContainer >& jetlink) { 
+      auto jet = *jetlink;
       double pbb = -1; 
       SG::ConstAccessor<float> acc(var_name+"_pbb");
-      pbb = (acc.isAvailable(*jet) ? acc(*jet) : acc(**bTagLink));
+      pbb = acc(*jet);
       return pbb;
     } );
 
@@ -421,23 +391,23 @@ StatusCode TrigBjetBtagHypoAlg::monitor_primary_vertex( const ElementLink< xAOD:
 }
 
 
-ElementLinkVector<xAOD::BTaggingContainer> TrigBjetBtagHypoAlg::collect_valid_links(
-    const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL, std::string tagger ) const {
+ElementLinkVector<xAOD::JetContainer> TrigBjetBtagHypoAlg::collect_valid_links(
+    const ElementLinkVector< xAOD::JetContainer >& jetEL, std::string tagger ) const {
 
-  ElementLinkVector<xAOD::BTaggingContainer> valid_bTaggingEL;
-  for (const ElementLink< xAOD::BTaggingContainer > bTagLink : bTaggingEL) {
+  ElementLinkVector<xAOD::JetContainer> valid_jetEL;
+  for (const ElementLink< xAOD::JetContainer > jetLink : jetEL) {
     SG::ConstAccessor<char> acc(tagger+"_isDefaults");
-    if ( not acc(**bTagLink) ) { valid_bTaggingEL.push_back( bTagLink ); }
+    if ( not acc(**jetLink) ) { valid_jetEL.push_back( jetLink ); }
   }
-  return valid_bTaggingEL;
+  return valid_jetEL;
 }
 
 
-StatusCode TrigBjetBtagHypoAlg::monitor_btagging( const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL ) const {
+StatusCode TrigBjetBtagHypoAlg::monitor_btagging( const ElementLinkVector< xAOD::JetContainer >& jetEL ) const {
   // Monitor high-level tagger flavor probabilites
-  CHECK( monitor_flavor_probabilities(bTaggingEL, "dips20211116") );
-  CHECK( monitor_flavor_probabilities(bTaggingEL, "GN120220813") );
-  CHECK( monitor_flavor_probabilities(bTaggingEL, "GN220240122") );
+  CHECK( monitor_flavor_probabilities(jetEL, "dips20211116") );
+  CHECK( monitor_flavor_probabilities(jetEL, "GN120220813") );
+  CHECK( monitor_flavor_probabilities(jetEL, "GN220240122") );
 
   return StatusCode::SUCCESS;
 }

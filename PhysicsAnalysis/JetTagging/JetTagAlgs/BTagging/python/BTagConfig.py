@@ -53,8 +53,6 @@ def GetTaggerTrainingMap(flags, jet_col):
             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
         ],
         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA": [
-            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",    # input to DL1dv01
-            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",    # 2023 pre-rec DL1dv01
             "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx", # fold 0 of the GN2v01 (safe for HLT jets)
         ],
         "AntiKt4EMPFlowByVertex": [ # ByVertex added 

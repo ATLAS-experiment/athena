@@ -254,7 +254,7 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
 
     acc.merge(JetParticleAssociationAlgCfg(
         flags,
-            jet,
+        jet,
         trackCollection,
         JetTrackAssociator,
     ))
@@ -273,7 +273,6 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
     jetFitterVF = acc.popToolsAndMerge(JetFitterVariablesFactoryCfg('JFVarFactory'))
 
     VxSecVertexInfoNameList = []
-    BTagCollection = f'BTagging_{jetcol_no_suffix}'
 
     for sv in SecVertexers:
         BTagVxSecVertexInfoName = sv + 'VxSecVertexInfo_' + jetcol_no_suffix
@@ -295,7 +294,6 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
             flags,
             BTagVxSecVertexInfoName = BTagVxSecVertexInfoName,
             SVAlgName = AlgName + '_secvtx',
-            BTaggingCollection = BTagCollection,
             JetCollection = jet,
             TrackCollection = trackCollection,
             PrimaryVertexCollectionName = pv_col,
@@ -322,5 +320,4 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
 
 
     acc.addEventAlgo(CompFactory.Analysis.JetTagVertexDecoratorAlg(**options))
-
     return acc
