@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimDataCollectionCnv.h"
@@ -24,7 +24,7 @@ MuonSimDataCollectionCnv::~MuonSimDataCollectionCnv() = default;
 MuonSimDataCollection_PERS*    MuonSimDataCollectionCnv::createPersistent (MuonSimDataCollection* transCont) {
     MsgStream log(msgSvc(), "MuonSimDataCollectionCnv" );
     ATH_MSG_DEBUG("createPersistent(): main converter");
-    MuonSimDataCollection_PERS *pixdc_p= m_TPConverter_p2.createPersistent( transCont, log );
+    MuonSimDataCollection_PERS *pixdc_p= m_TPConverter_p3.createPersistent( transCont, log );
     return pixdc_p;
 }
 
