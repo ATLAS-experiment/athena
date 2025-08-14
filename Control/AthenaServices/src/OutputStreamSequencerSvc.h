@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef OUTPUTSTREAMSEQUENCERSVC_H
@@ -77,7 +77,7 @@ private: // data
    ServiceHandle<MetaDataSvc> m_metaDataSvc;
 
    /// The event sequence number
-   int m_fileSequenceNumber;
+   int m_fileSequenceNumber{};
 
    /// Current EventRange ID constructed on the last NextRange incident
    std::string  m_currentRangeID;
@@ -108,7 +108,7 @@ private: // properties
        "selected"};
 
    std::map<std::string,std::string> m_fnToRangeId;
-   std::map<std::string,std::string>::iterator m_finishedRange;
+   std::map<std::string,std::string>::iterator m_finishedRange{};
 
    mutable std::mutex         m_mutex;
 };
