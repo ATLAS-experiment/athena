@@ -25,18 +25,10 @@ StatusCode BJetTwoValueCheck::initialize() {
   return StatusCode::SUCCESS;
 }
 
-bool BJetTwoValueCheck::passThreshold(const SG::AuxElement& btag) const
+bool BJetTwoValueCheck::passThreshold(const xAOD::Jet& bjet) const
 {
-  float d = -1.0;
-  float n = -1.0;
-  auto jet = getJetFromBTagLink(btag);
-  if (m_acc->n.isAvailable(*jet)) {
-    n = m_acc->n(*jet);
-    d = m_acc->d(*jet);
-  } else {
-    n = m_acc->n(btag);
-    d = m_acc->d(btag);
-  }
+  float n = m_acc->n(bjet);
+  float d = m_acc->d(bjet);
   float llr = safeLogRatio(n, d);
   Monitored::Group(m_monTool, Monitored::Scalar(m_llrName, llr));
   return llr > m_threshold;
