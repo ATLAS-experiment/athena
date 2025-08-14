@@ -246,7 +246,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
   m_SLAR_INDEX       = 999 ;
 
   // Find a EM region
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_LAR_INDEX = field->index();
   }
@@ -376,13 +376,13 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   // Set the field implementations
 
-  IdDictGroup* group = dict()->find_group(group_name);
+  const IdDictGroup* group = dict()->find_group(group_name);
   if ( !group ){
     log << MSG::ERROR << "initLevelsFromDict - cannot find " << group_name 
         << " group' field " << endmsg;
   }
   else {
-	m_em_region_index = group->regions()[0]->index();
+	m_em_region_index = group->region(0).index();
   }
   const IdDictRegion& region = dict()->region(m_em_region_index);
 
