@@ -30,8 +30,8 @@
 
 CavernInfraDetectorFactory::CavernInfraDetectorFactory(const ServiceHandle<StoreGateSvc>& detStore,
 						       const ServiceHandle<IRDBAccessSvc>& pAccess)
-  : m_detectorStore(std::move(detStore))
-  , m_access(std::move(pAccess))
+  : m_detectorStore(detStore)
+  , m_access(pAccess)
 {
 }
 
