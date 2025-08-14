@@ -33,6 +33,8 @@ class CorePlots: public PlotBase {
     TH1* sublead_subjet_eta{};
     TH1* sublead_subjet_phi{};
     TH1* sublead_subjet_pt{};
+  
+    TH1* omni_score{}; 
 
   private:
     void initializePlots();
