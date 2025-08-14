@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
@@ -477,8 +477,8 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
                   if (chain()[ichain]->InheritsFrom(
                           TFCSLateralShapeParametrizationHitBase::Class())) {
                     TFCSLateralShapeParametrizationHitBase *sim =
-                        (TFCSLateralShapeParametrizationHitBase
-                             *)(chain()[ichain]);
+                        static_cast<TFCSLateralShapeParametrizationHitBase
+                             *>(chain()[ichain]);
                     if (sim->simulate_hit(hit, simulstate, truth, extrapol) !=
                         FCSSuccess) {
                       ATH_MSG_ERROR(
