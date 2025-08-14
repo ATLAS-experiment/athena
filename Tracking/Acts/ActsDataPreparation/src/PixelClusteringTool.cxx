@@ -322,7 +322,7 @@ PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
     const int lvl1 = rdo->getLVL1A();
     const int tot = rdo->getToT();
 
-    cells.emplace_back(-1,
+    cells.emplace_back(
 		       m_pixelID->phi_index(rdoID),
 		       m_pixelID->eta_index(rdoID),
 		       tot,
@@ -332,7 +332,7 @@ PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
     if ( m_checkGanged ) {
       std::optional<Identifier> gangedID = isGanged(rdoID, element);
       if (gangedID.has_value()) {
-	cells.emplace_back(-1,
+	cells.emplace_back(
 			   m_pixelID->phi_index(*gangedID),
 			   m_pixelID->eta_index(*gangedID),
 			   tot,
