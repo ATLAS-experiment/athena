@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -109,11 +109,9 @@ Int_t CaloHadDMCoeffData::GetEntry(Long64_t entry)
     // read only m_MaxEventsPerFile
     if(entry==0) offset = 0;
     Int_t nbytes = fChain->GetEntry(offset++);
-    TTree *loc = ((TChain *)fChain)->GetTree();
-    //std::cout << "entry:" << entry << " offset:" << offset << " loc->GetReadEntry():" << loc->GetReadEntry() << std::endl;
+    TTree *loc = (static_cast<TChain *>(fChain))->GetTree();
     if( loc->GetReadEntry() >= m_MaxEventsPerFile) {
-      offset = ((TChain *)fChain)->GetTreeOffset()[ fChain->GetTreeNumber()] + loc->GetEntries();
-      //std::cout << "changing offset "<< ((TChain *)fChain)->GetTreeOffset()[ fChain->GetTreeNumber()] << " " << loc->GetEntries() << " " << offset << std::endl;
+      offset = (static_cast<TChain *>(fChain))->GetTreeOffset()[ fChain->GetTreeNumber()] + loc->GetEntries();
       nbytes = fChain->GetEntry(offset++);
     }
    return nbytes;

@@ -198,7 +198,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffMinim::process(CaloHadDMCoeffData *myData, Cal
 
     //if(m_data->m_mc_ener < m_engBeamMin) continue;
 
-    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " (" << nGoodEvents << ") '" << ((TChain *)m_data->fChain)->GetFile()->GetName() << "'" << std::endl;
+    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " (" << nGoodEvents << ") '" << (static_cast<TChain *>(m_data->fChain))->GetFile()->GetName() << "'" << std::endl;
 
     double EnergyResolution; // in GeV
     if( abs(m_data->m_mc_pdg) == 211) {
