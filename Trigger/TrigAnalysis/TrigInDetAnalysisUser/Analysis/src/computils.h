@@ -33,6 +33,7 @@
 #include "TGraphAsymmErrors.h"
 
 #include "TLegend.h"
+#include <cmath>
 
 
 extern bool LINEF;
