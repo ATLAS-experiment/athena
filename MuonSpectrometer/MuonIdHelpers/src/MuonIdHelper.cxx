@@ -271,7 +271,7 @@ int MuonIdHelper::initLevelsFromDict() {
     }
 
     // Find a Muon region
-    IdDictField* field = m_dict->find_field("subdet");
+    const IdDictField* field = m_dict->find_field("subdet");
     if (field) {
         m_MUON_INDEX = field->index();
     } else {
