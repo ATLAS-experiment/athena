@@ -167,7 +167,7 @@ double MdtCalibInput::tubeLength() const {
     return tubeLength;
  }
  double MdtCalibInput::innerTubeR() const {
-   const double tubeR = std::visit([this](const auto& re) -> double {
+   const double tubeR = std::visit([](const auto& re) -> double {
        using REType = std::decay_t<decltype(re)>;
       if constexpr(std::is_same_v<REType, const MuonGMR4::MdtReadoutElement*>){
          return re->innerTubeRadius();
