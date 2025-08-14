@@ -66,11 +66,11 @@ namespace Monitored {
           // The histogram exists and needs to be rolled
           if (m_histDef->type=="TEfficiency") {
             // Roll a TEfficiency (same process as the codeblock immediately above)
-            TH1* totalClone = ((TEfficiency*) m_currentHistogram)->GetCopyTotalHisto();
-            TH1* passedClone = ((TEfficiency*) m_currentHistogram)->GetCopyPassedHisto();
+            TH1* totalClone = (static_cast<TEfficiency*> (m_currentHistogram))->GetCopyTotalHisto();
+            TH1* passedClone = (static_cast<TEfficiency*> (m_currentHistogram))->GetCopyPassedHisto();
             m_factory->remove(*m_histDef);
             updateHistDef();
-            TEfficiency* eNew = (TEfficiency*) m_factory->create(*m_histDef);
+            TEfficiency* eNew = static_cast<TEfficiency*> (m_factory->create(*m_histDef));
             TH1* totalNew = eNew->GetCopyTotalHisto();
             TH1* passedNew = eNew->GetCopyPassedHisto();
             copyDataToNewHistogram(totalClone, totalNew);
@@ -84,11 +84,11 @@ namespace Monitored {
             delete passedNew;
 	  } else if (m_histDef->type=="TProfile") {
 	    // Store the data and deregister the old histogram.
-            TProfile* hClone = (TProfile*) m_currentHistogram->Clone();
+            TProfile* hClone = static_cast<TProfile*> (m_currentHistogram->Clone());
             m_factory->remove(*m_histDef);
             // Update the bin ranges and register the new histogram.
             updateHistDef();
-            TProfile* hNew = (TProfile*) m_factory->create(*m_histDef);
+            TProfile* hNew = static_cast<TProfile*> (m_factory->create(*m_histDef));
             // Fill it with the old histogram's data and update pointer.
             copyDataToNewHistogram(hClone, hNew);
             m_currentHistogram = hNew;
