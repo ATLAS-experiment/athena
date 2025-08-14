@@ -31,7 +31,8 @@ ex.input = 'data'
 ex.threads = 8
 ex.concurrent_events = 8
 ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"',
-            'Trigger.doLVL1=True']
+            'Trigger.doLVL1=True',
+            'Trigger.doRuntimeNaviVal=True']
 
 test = Test.Test()
 test.art_type = 'grid'

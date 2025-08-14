@@ -190,7 +190,7 @@ namespace ChainNameParser {
     const std::vector<std::string> &allSignatures()
     {
         const static std::vector<std::string> signatures{
-            "e", "g", "j", "dispjet", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb", "hi",
+            "e", "g", "j", "dispjet", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb", "hi", "eb",
             "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp", "distrk", 
             "hitdvjet", "isotrk", "dedxtrk", "l1topoPh1debug", "caloclustermon", "fslrt",
             "beamspot", "cosmic", "timeburner", "mistimemonj400", "larsupercellmon", "larnoiseburst",
@@ -224,23 +224,23 @@ namespace ChainNameParser {
 
     std::vector<int> multiplicities(const std::string &chain)
     {
-        if (singleLegIdentifiers().count(LegInfoIterator(chain)->signature) == 1)
-            return std::vector<int>{static_cast<int>(LegInfoIterator(chain)->multiplicity)};
-
         std::vector<int> multiplicities;
-        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
+        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr) {
             multiplicities.push_back(itr->multiplicity);
+            if (singleLegIdentifiers().count(itr->signature) == 1)
+                return multiplicities;
+        }
         return multiplicities;
     }
 
     std::vector<std::string> signatures(const std::string &chain)
     {
-        if (singleLegIdentifiers().count(LegInfoIterator(chain)->signature) == 1)
-            return std::vector<std::string>{LegInfoIterator(chain)->signature};
-
         std::vector<std::string> signatures;
-        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
+        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr) {
             signatures.push_back(itr->signature);
+            if (singleLegIdentifiers().count(itr->signature) == 1)
+                return signatures;
+        }
         return signatures;
     }
 
