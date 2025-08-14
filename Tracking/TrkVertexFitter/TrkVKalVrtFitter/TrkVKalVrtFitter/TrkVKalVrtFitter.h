@@ -340,6 +340,8 @@ namespace Trk{
                                        "Name of the Magnetic Field key" };
         Gaudi::Property<bool> m_firstMeasuredPoint{this, "FirstMeasuredPoint", false, "Use FirstMeasuredPoint strategy in fits"};
         Gaudi::Property<bool> m_firstMeasuredPointLimit{this, "FirstMeasuredPointLimit", false, "Use FirstMeasuredPointLimit strategy"};
+	Gaudi::Property<bool> m_firstMeasuredRadiusLimit{this, "FirstMeasuredRadiusLimit", false,
+	                                "Use radius of FirstMeasuredRadiusLimit as maximal vertex radius"};
         Gaudi::Property<bool> m_makeExtendedVertex{this, "MakeExtendedVertex", false, "Return VxCandidate with full covariance matrix"};
         Gaudi::Property<bool> m_useFixedField{this, "useFixedField", false, "Use fixed magnetic field instead of exact Atlas one"};
 
@@ -440,7 +442,11 @@ namespace Trk{
         int m_Robustness = 0;
         double m_RobustScale = 1;
         std::vector<double> m_MassInputParticles;
+        double m_parPlaneCnst[4]{};
+        double m_cnstRadius{};
+        double m_cnstRadiusRef[2]{};
 
+  
         std::unique_ptr<CascadeState> m_cascadeState;
 
         State()
