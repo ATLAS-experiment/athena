@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -501,16 +501,16 @@ Root::TElectronEfficiencyCorrectionTool::buildToyMCTable(
       HistArray tmpArray;
       for (int i = 0; i < stat_entries; ++i) {
         if (!eig.empty() && !uncorr.empty()) {
-          nSys = ((TH1*)eig.at(i))->GetNbinsX() - 1;
-          tmpArray.emplace_back(buildSingleCombToyMC((TH2*)sf.at(i),
-                                                     (TH2*)stat.at(i),
-                                                     (TH2*)uncorr.at(i),
+          nSys = (static_cast<TH1*>(eig.at(i)))->GetNbinsX() - 1;
+          tmpArray.emplace_back(buildSingleCombToyMC(static_cast<TH2*>(sf.at(i)),
+                                                     static_cast<TH2*>(stat.at(i)),
+                                                     static_cast<TH2*>(uncorr.at(i)),
                                                      corr.at(i),
                                                      nSys,
                                                      randomCounter));
         } else {
-          tmpArray.emplace_back(buildSingleCombToyMC((TH2*)sf.at(i),
-                                                     (TH2*)stat.at(i),
+          tmpArray.emplace_back(buildSingleCombToyMC(static_cast<TH2*>(sf.at(i)),
+                                                     static_cast<TH2*>(stat.at(i)),
                                                      nullptr,
                                                      corr.at(i),
                                                      nSys,
@@ -523,9 +523,9 @@ Root::TElectronEfficiencyCorrectionTool::buildToyMCTable(
     std::vector<std::vector<TH2*>> tmpVec2;
     for (int i = 0; i < stat_entries; ++i) {
       nSys = ((TH1*)eig.at(i))->GetNbinsX() - 1;
-      tmpVec2.push_back(buildSingleToyMC((TH2*)sf.at(i),
-                                         (TH2*)stat.at(i),
-                                         (TH2*)uncorr.at(i),
+      tmpVec2.push_back(buildSingleToyMC(static_cast<TH2*>(sf.at(i)),
+                                         static_cast<TH2*>(stat.at(i)),
+                                         static_cast<TH2*>(uncorr.at(i)),
                                          corr.at(i),
                                          randomCounter));
     }
