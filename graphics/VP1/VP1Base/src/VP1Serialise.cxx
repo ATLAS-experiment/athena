@@ -64,7 +64,7 @@ public:
 			+", name="+w->objectName());
     handledWidgets.insert(w);
   }
-  void handle(const QWidget*w) { handle((QWidget*)(w)); }
+  void handle(const QWidget*w) { handle(const_cast<QWidget*>(w)); }
   bool expectsPersistification(const QWidget*w);
 
   static unsigned numberOfInstantiations;

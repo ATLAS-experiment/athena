@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -463,7 +463,7 @@ double GuideSysController::lettersZPos() const
 {
 
   int nmax; double distmax;
-  if (!VP1Floor::calcParsFromExtentAndSpacing( (VP1HelperClassBase*)this, floorExtent(), floorSpacing(), VP1Floor::nMax(), nmax, distmax )) {
+  if (!VP1Floor::calcParsFromExtentAndSpacing( static_cast<const VP1HelperClassBase*>(this), floorExtent(), floorSpacing(), VP1Floor::nMax(), nmax, distmax )) {
     nmax = 10;
     distmax = 10*SYSTEM_OF_UNITS::m;
     message("lettersZPos  ERROR: Problems calculating floor nmax/distmax.");
@@ -488,7 +488,7 @@ double GuideSysController::peopleZPos() const
 {
 
   int nmax; double distmax;
-  if (!VP1Floor::calcParsFromExtentAndSpacing( (VP1HelperClassBase*)this, floorExtent(), floorSpacing(), VP1Floor::nMax(), nmax, distmax )) {
+  if (!VP1Floor::calcParsFromExtentAndSpacing( static_cast<const VP1HelperClassBase*>(this), floorExtent(), floorSpacing(), VP1Floor::nMax(), nmax, distmax )) {
     nmax = 10;
     distmax = 10*SYSTEM_OF_UNITS::m;
     message("lettersZPos  ERROR: Problems calculating floor nmax/distmax.");

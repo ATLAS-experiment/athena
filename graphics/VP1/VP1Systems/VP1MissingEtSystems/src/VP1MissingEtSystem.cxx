@@ -104,7 +104,7 @@ QByteArray VP1MissingEtSystem::saveState()
   ensureBuildController();
   VP1Serialise serialise(1/*version*/, this);
   serialise.save(IVP13DSystemSimple::saveState());
-  serialise.save((VP1CollectionWidget*)m_d->collWidget);
+  serialise.save(static_cast<VP1CollectionWidget*>(m_d->collWidget));
   serialise.save(m_d->controller->saveSettings());
   serialise.warnUnsaved(controllerWidget());
   return serialise.result();
@@ -120,7 +120,7 @@ void VP1MissingEtSystem::restoreFromState(QByteArray ba)
   }
   ensureBuildController();
   IVP13DSystemSimple::restoreFromState(state.restoreByteArray());
-  state.restore((VP1CollectionWidget*)m_d->collWidget);
+  state.restore(static_cast<VP1CollectionWidget*>(m_d->collWidget));
 
   if (state.version() >= 1)
    m_d->controller->restoreSettings(state.restoreByteArray());

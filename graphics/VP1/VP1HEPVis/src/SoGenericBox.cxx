@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -113,9 +113,9 @@ void SoGenericBox::generatePrimitives(SoAction *action) {
     glBegin(GL_QUADS);
     int *iptr = sogenericbox_vindices;
     for (int i=0;i<SOGENERICBOX_NFACES;i++) {
-      glNormal3fv((const GLfloat*)&m_normals[i*3]);
+      glNormal3fv(static_cast<const GLfloat*>(&m_normals[i*3]));
       for (int j = 0; j < 4; j++)
-        glVertex3fv((const GLfloat*)&m_points[(*iptr++)*3]);
+        glVertex3fv(static_cast<const GLfloat*>(&m_points[(*iptr++)*3]));
     }
     glEnd();
 
@@ -127,8 +127,7 @@ void SoGenericBox::generatePrimitives(SoAction *action) {
 
       if (disableLighting) glDisable(GL_LIGHTING);
       if (transparencyOn) glDisable(GL_BLEND);
-
-#define trdV(i) glVertex3fv((const GLfloat*)&m_points[i*3]);
+#define trdV(i) glVertex3fv(static_cast<const GLfloat*>(&m_points[i*3]));
       glBegin(GL_LINE_STRIP);
       trdV(0)trdV(1)trdV(2)trdV(3)trdV(0)trdV(4)trdV(5)trdV(6)trdV(7)trdV(4)
       glEnd();
