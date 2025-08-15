@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -1334,7 +1334,7 @@ namespace CaloRecGPU
           }
         if (std::is_same<Context, MemoryContext::CPU>::value)
           {
-            s.write((char *) m_object, sizeof(T));
+            s.write(reinterpret_cast<char *>( m_object), sizeof(T));
           }
         else
           {
@@ -1349,7 +1349,7 @@ namespace CaloRecGPU
         if (std::is_same<Context, MemoryContext::CPU>::value)
           {
             allocate();
-            s.read((char *) m_object, sizeof(T));
+            s.read(reinterpret_cast<char *> (m_object), sizeof(T));
           }
         else
           {

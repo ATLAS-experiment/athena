@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloRec/src/CaloBCIDCoeffsCondAlg.cxx
@@ -30,12 +30,12 @@ StatusCode CaloBCIDCoeffsCondAlg::initialize()
   if ( m_isSC ) {
 	const LArOnline_SuperCellID* ll = nullptr;
 	ATH_CHECK(detStore()->retrieve(ll,"LArOnline_SuperCellID"));
-	m_laronline_id = (const LArOnlineID_Base*)ll;
+	m_laronline_id = static_cast<const LArOnlineID_Base*>(ll);
   }
   else {
 	const LArOnlineID* ll = nullptr;
 	ATH_CHECK(detStore()->retrieve(ll,"LArOnlineID"));
-	m_laronline_id = (const LArOnlineID_Base*)ll;
+	m_laronline_id = static_cast<const LArOnlineID_Base*>(ll);
   }
 
   return StatusCode::SUCCESS;
@@ -69,7 +69,7 @@ StatusCode CaloBCIDCoeffsCondAlg::execute (const EventContext& ctx) const
   SG::ReadCondHandle<ILArMinBiasAverage> minBiasAvg (m_minBiasAvgKey, ctx);
 
   auto coeffs = std::make_unique<CaloBCIDCoeffs> (hwids,
-                                                  *((const LArOnlineID_Base*)m_laronline_id),
+                                                  *(static_cast<const LArOnlineID_Base*>(m_laronline_id)),
                                                   **ofcs,
                                                   **shapes,
                                                   **minBiasAvg);
