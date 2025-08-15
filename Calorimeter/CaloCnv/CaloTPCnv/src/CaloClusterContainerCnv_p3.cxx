@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTPCnv/CaloClusterContainerCnv_p3.h" 
@@ -162,7 +162,7 @@ void CaloClusterContainerCnv_p3::persToTrans(const CaloClusterContainer_p3::Calo
   //trans->m_endcap=pers->m_samplingPattern & 0xe00ff0; //That's the OR of all endcap-bits
 
   //Convert base class and element links
-  m_P4EEtaPhiMCnv.persToTrans(&pers->m_P4EEtaPhiM,(P4EEtaPhiM*)trans,log);
+  m_P4EEtaPhiMCnv.persToTrans(&pers->m_P4EEtaPhiM,static_cast<P4EEtaPhiM*>(trans),log);
   m_showerElementLinkCnv.persToTrans(showerLinkState, pers->m_dataLink, trans->m_dataLink,log);
   m_cellElementLinkCnv.persToTrans(cellLinkState, pers->m_cellLink, trans->m_cellLink,log);
   trans->setAthenaBarCode (IAthenaBarCode::UNDEFINEDBARCODE);

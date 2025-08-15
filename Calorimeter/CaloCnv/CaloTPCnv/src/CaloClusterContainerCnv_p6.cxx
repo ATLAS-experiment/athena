@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTPCnv/CaloClusterContainerCnv_p6.h" 
@@ -9,7 +9,6 @@
 #include "AthenaPoolCnvSvc/Compressor.h"
 #include "CaloEvent/CaloSamplingData.h"
 #include "CaloConditions/CaloBadChannel.h"
-//#include "CaloEvent/CaloSampling.h"
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "CaloUtils/CaloClusterSignalState.h"
 #include "AthenaKernel/errorcheck.h"
@@ -374,7 +373,7 @@ void CaloClusterContainerCnv_p6::persToTrans(const CaloClusterContainer_p6::Calo
   trans->setClusterSize (pers->m_clusterSize);
 
   //Convert base class and element links
-  m_P4EEtaPhiMCnv.persToTrans(&pers->m_P4EEtaPhiM,(P4EEtaPhiM*)trans,log);
+  m_P4EEtaPhiMCnv.persToTrans(&pers->m_P4EEtaPhiM,static_cast<P4EEtaPhiM*>(trans),log);
   m_showerElementLinkCnv.persToTrans(showerLinkState, pers->m_dataLink, trans->m_dataLink,log);
   m_cellElementLinkCnv.persToTrans(cellLinkState, pers->m_cellLink, trans->m_cellLink,log);
   trans->setAthenaBarCode (IAthenaBarCode::UNDEFINEDBARCODE);
