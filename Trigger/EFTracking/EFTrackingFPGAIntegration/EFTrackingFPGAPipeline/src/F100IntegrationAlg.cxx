@@ -4,7 +4,7 @@
 
 #include "EFTrackingFPGAPipeline/F100IntegrationAlg.h"
 #include "AthenaKernel/Chrono.h"
-
+#include "AthenaKernel/SlotSpecificObj.h"
 namespace EFTrackingFPGAIntegration
 {
     StatusCode F100IntegrationAlg::initialize()
@@ -35,8 +35,14 @@ namespace EFTrackingFPGAIntegration
 
         cl_int err = 0;
 
+        unsigned int nthreads = m_FPGAThreads.value();
+
+        if(m_FPGAThreads.value() < 1){
+            nthreads = SG::getNSlots();
+        }
+
         // create the buffers
-        for(int i = 0; i < m_FPGAThreads.value(); i++)
+        for(unsigned int i = 0; i < nthreads; i++)
         {
             m_acc_queues.emplace_back(m_context, m_accelerator, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
 
@@ -63,7 +69,7 @@ namespace EFTrackingFPGAIntegration
             m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err));
         }
 
-        for (int i = 0; i < m_FPGAThreads.value(); ++i) {
+        for (unsigned int i = 0; i < nthreads; ++i) {
             // Indexing CUs
             size_t pixelCU = (i % m_NpixelCU.value()) + 1;
             size_t stripCU = (i % m_NstripCU.value()) + 1;
@@ -115,8 +121,13 @@ namespace EFTrackingFPGAIntegration
 
     
         // logic
+        unsigned int nthreads = m_FPGAThreads.value();
 
-        size_t bufferIndex = ctx.slot() % m_FPGAThreads.value();
+        if(m_FPGAThreads.value() < 1){
+            nthreads = SG::getNSlots();
+        }
+
+        size_t bufferIndex = ctx.slot() % nthreads;
 
         size_t pixelKernelIndex = ctx.slot() % m_NpixelCU.value() + 1;
         size_t stripKernelIndex = ctx.slot() % m_NstripCU.value() + 1;
@@ -334,23 +345,26 @@ namespace EFTrackingFPGAIntegration
 
         ATH_MSG_INFO("Finalizing F100IntegrationAlg");
         ATH_MSG_INFO("Number of events: " << m_numEvents);
-        ATH_MSG_INFO("Pixel input ave time: " << m_pixelInputTime / m_numEvents / 1e6 << " ms");
-        ATH_MSG_INFO("Strip input ave time: " << m_stripInputTime / m_numEvents / 1e6 << " ms");
-        ATH_MSG_INFO("Pixel clustering ave time: " << m_pixelClusteringTime / m_numEvents / 1e6 << " ms");
-        ATH_MSG_INFO("Strip clustering ave time: " << m_stripClusteringTime / m_numEvents / 1e6 << " ms");
-        if (!m_doF110) {
-            ATH_MSG_INFO("Pixel L2G ave time: " << m_pixelL2GTime / m_numEvents / 1e6 << " ms");
+
+        if(m_numEvents > 0){
+            ATH_MSG_INFO("Pixel input ave time: " << m_pixelInputTime / m_numEvents / 1e6 << " ms");
+            ATH_MSG_INFO("Strip input ave time: " << m_stripInputTime / m_numEvents / 1e6 << " ms");
+            ATH_MSG_INFO("Pixel clustering ave time: " << m_pixelClusteringTime / m_numEvents / 1e6 << " ms");
+            ATH_MSG_INFO("Strip clustering ave time: " << m_stripClusteringTime / m_numEvents / 1e6 << " ms");
+            if (!m_doF110) {
+                ATH_MSG_INFO("Pixel L2G ave time: " << m_pixelL2GTime / m_numEvents / 1e6 << " ms");
+            }
+            ATH_MSG_INFO("Strip L2G ave time: " << m_stripL2GTime / m_numEvents / 1e6 << " ms");
+            if (!m_doF110) {
+                ATH_MSG_INFO("EDMPrep ave time: " << m_edmPrepTime / m_numEvents / 1e6 << " ms");
+            } else {
+                ATH_MSG_INFO("PixelEDMPrep ave time: " << m_pixelEdmPrepTime / m_numEvents / 1e6 << " ms");
+                ATH_MSG_INFO("StripEDMPrep ave time: " << m_stripEdmPrepTime / m_numEvents / 1e6 << " ms");
+            }
+            ATH_MSG_INFO("Kernel execution ave time: " << m_kernelTime / m_numEvents / 1e6 << " ms");
+            ATH_MSG_INFO("Pixel output ave time: " << m_pixelOutputTime / m_numEvents / 1e6 << " ms");
+            ATH_MSG_INFO("Strip output ave time: " << m_stripOutputTime / m_numEvents / 1e6 << " ms");
         }
-        ATH_MSG_INFO("Strip L2G ave time: " << m_stripL2GTime / m_numEvents / 1e6 << " ms");
-        if (!m_doF110) {
-            ATH_MSG_INFO("EDMPrep ave time: " << m_edmPrepTime / m_numEvents / 1e6 << " ms");
-        } else {
-            ATH_MSG_INFO("PixelEDMPrep ave time: " << m_pixelEdmPrepTime / m_numEvents / 1e6 << " ms");
-            ATH_MSG_INFO("StripEDMPrep ave time: " << m_stripEdmPrepTime / m_numEvents / 1e6 << " ms");
-        }
-        ATH_MSG_INFO("Kernel execution ave time: " << m_kernelTime / m_numEvents / 1e6 << " ms");
-        ATH_MSG_INFO("Pixel output ave time: " << m_pixelOutputTime / m_numEvents / 1e6 << " ms");
-        ATH_MSG_INFO("Strip output ave time: " << m_stripOutputTime / m_numEvents / 1e6 << " ms");
 
         return StatusCode::SUCCESS;
     }
