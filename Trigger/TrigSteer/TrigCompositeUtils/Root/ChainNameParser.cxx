@@ -190,9 +190,11 @@ namespace ChainNameParser {
     const std::vector<std::string> &allSignatures()
     {
         const static std::vector<std::string> signatures{
-            "e", "g", "j", "dispjet", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb", "hi",
+            "e", "g", "j", "dispjet", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb", "hi", "eb",
             "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp", "distrk", 
-            "hitdvjet", "isotrk", "dedxtrk", "l1topoPh1debug", "caloclustermon", "fslrt"
+            "hitdvjet", "isotrk", "dedxtrk", "l1topoPh1debug", "caloclustermon", "fslrt",
+            "beamspot", "cosmic", "timeburner", "mistimemonj400", "larsupercellmon", "larnoiseburst",
+            "acceptedevts", "larpsall", "larpsallem", "idcalib", "metcalo", "mettrk", 
         };
         return signatures;
     }
@@ -205,6 +207,14 @@ namespace ChainNameParser {
         return postfixQualifiers;
     }
 
+    const std::set<std::string> &singleLegIdentifiers()
+    {
+        const static std::set<std::string> singleLegIDs{
+            "noalg", "acceptedevts"
+        };
+        return singleLegIDs;
+    }
+
     std::string legHeadPattern()
     {
         // Pattern looks like an expanded version of "(\d*)(e|g|j|mu|tau|xe)(\d*)(noL1|vtx|c|f|a)?";
@@ -214,23 +224,23 @@ namespace ChainNameParser {
 
     std::vector<int> multiplicities(const std::string &chain)
     {
-        if (LegInfoIterator(chain)->signature == "noalg")
-            return std::vector<int>{1};
-
         std::vector<int> multiplicities;
-        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
+        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr) {
             multiplicities.push_back(itr->multiplicity);
+            if (singleLegIdentifiers().count(itr->signature) == 1)
+                return multiplicities;
+        }
         return multiplicities;
     }
 
     std::vector<std::string> signatures(const std::string &chain)
     {
-        if (LegInfoIterator(chain)->signature == "noalg")
-            return std::vector<std::string>{"noalg"};
-
         std::vector<std::string> signatures;
-        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
+        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr) {
             signatures.push_back(itr->signature);
+            if (singleLegIdentifiers().count(itr->signature) == 1)
+                return signatures;
+        }
         return signatures;
     }
 
