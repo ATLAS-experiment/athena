@@ -67,7 +67,7 @@ void IOVDbTestAlg::waitForSecond() const {
     printf("Recieving a message ...\n");
 	
     qbuf.mtype = 123;
-    msgrcv(msgqueue_id, (struct msgbuf *)(&qbuf), 80, 123, 0);
+    msgrcv(msgqueue_id, reinterpret_cast< msgbuf *>(&qbuf), 80, 123, 0);
     
     printf("Type: %ld Text: %s\n", qbuf.mtype, qbuf.mtext);
 	
