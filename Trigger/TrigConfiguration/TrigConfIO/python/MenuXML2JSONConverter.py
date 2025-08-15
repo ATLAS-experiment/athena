@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-from __future__ import print_function
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 import sys
 import os
 
@@ -148,8 +147,7 @@ class XML2JsonConverter(object):
             return [ {element.tag : self.createJsonStruct(element)} for element in node ]
 
         else:
-            from collections import OrderedDict
-            d = OrderedDict()
+            d = {}
             # writing attributs of the element to json structure in alphabetical order
             # turn values into int according to the asInt rule
             for attr in sorted(node.attrib.keys()):
