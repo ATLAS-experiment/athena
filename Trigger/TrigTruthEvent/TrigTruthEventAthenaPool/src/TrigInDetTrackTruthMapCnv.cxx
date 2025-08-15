@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigInDetTrackTruthMapCnv.h"
@@ -21,7 +21,7 @@ TrigInDetTrackTruthMapCnv::~TrigInDetTrackTruthMapCnv() {}
 TrigInDetTrackTruthMap_PERS* TrigInDetTrackTruthMapCnv::createPersistent(TrigInDetTrackTruthMap* transObj) {
     ATH_MSG_DEBUG( "TrigInDetTrackTruthMapCnv::createPersistent"  );
 
-    TrigInDetTrackTruthMap_PERS* persObj = m_trigInDetTrackTruthMapCnv_tlp2.createPersistent( transObj, msg() );
+    TrigInDetTrackTruthMap_PERS* persObj = m_trigInDetTrackTruthMapCnv_tlp4.createPersistent( transObj, msg() );
 
     return persObj;
 }
