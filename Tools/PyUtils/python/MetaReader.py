@@ -208,6 +208,10 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     "DataVector<xAOD::TriggerMenuJson_v1>",
                     "xAOD::TruthMetaDataAuxContainer_v1",
                     "DataVector<xAOD::TruthMetaData_v1>",
+                    "xAOD::CutBookkeeperContainer_v1",
+                    "xAOD::CutBookkeeperAuxContainer_v1",
+                    "xAOD::LumiBlockRangeAuxContainer_v1",
+                    "DataVector<xAOD::LumiBlockRange_v1>",
                 }
 
                 dynamic_fmd_items = {}
@@ -291,6 +295,23 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                             field.GetFieldName()
                             .replace("xAOD__", "xAOD::")
                             .replace("Aux:", "Aux.")
+                        ] = field.GetTypeName()
+                    elif regexXAODCutBookkeeperContainer.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("DataVector_", "DataVector<")
+                            .replace("__CutBookkeeper", ">_CutBookkeeper")
+                        ] = field.GetTypeName()
+                    elif regexXAODCutBookkeeperContainerAux.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("Aux:", "Aux.")
+                        ] = field.GetTypeName()
+                    else:
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName().replace("Aux:", "Aux.")
                         ] = field.GetTypeName()
 
                     if field.GetTypeName() in classes_with_aux:
@@ -446,6 +467,8 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                                 .replace("xAOD__", "xAOD::")
                                 .replace("Aux:", "Aux.")
                             ] = {}
+                    elif pair == ("CutBookkeepersAux:", "CutBookkeepers"):
+                        meta_dict[filename]["CutBookkeepers"] = return_obj
 
                 msg.debug(f"Read metadata from RNTuple: {meta_dict[filename]}")
 
@@ -1834,8 +1857,8 @@ def denormalize_metadata_types(metadata_dict):
         "float": "Float_t",
         "char": "Char_t",
         "std::string": "string",
+        "std::uint32_t": "UInt_t",
         "xAOD::FileMetaData_v1": "FileMetaData",
-        # "xAOD::FileMetaDataAuxInfo_v1": "FileMetaDataAux",
     }
     denormalized = {}
     for k, v in metadata_dict.items():
