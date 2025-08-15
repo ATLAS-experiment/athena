@@ -284,4 +284,43 @@ bool DiTauSelectionCutAbsCharge::accept(const xAOD::DiTauJet& xTau,
 
 }
 
+//___________________________SelectionCutOmniScore_____________________________
+//______________________________________________________________________________
+DiTauSelectionCutOmniScore::DiTauSelectionCutOmniScore(DiTauSelectionTool* tDTST)
+  : DiTauSelectionCut("CutOmniScore", tDTST)
+{
+  m_hHistCutPre = CreateControlPlot("hOmniScore_pre","OmniScore_pre;OmniScore; events",100,0,1);
+  m_hHistCut = CreateControlPlot("hOmniScore_cut","OmniScore_cut;OmniScore; events",100,0,1);
+}
+//______________________________________________________________________________
+void DiTauSelectionCutOmniScore::fillHistogram(const xAOD::DiTauJet& xTau, TH1F& hHist) const
+{
+  static const SG::ConstAccessor<float> acc_OmniScore("omni_score");	
+  hHist.Fill(acc_OmniScore(xTau));
+}
+//______________________________________________________________________________
+void DiTauSelectionCutOmniScore::setAcceptInfo(asg::AcceptInfo& info) const
+{
+  info.addCut( "OmniScore",
+               "Selection of taus according to their OmniScore" );
+}
+//______________________________________________________________________________
+bool DiTauSelectionCutOmniScore::accept(const xAOD::DiTauJet& xTau,
+                                              asg::AcceptData& acceptData)
+{
+  // check OmniScore score, if tau has a OmniScore score in one of the regions requiered then return true; false otherwise
+  static const SG::ConstAccessor<float> acc ("omni_score");
+  float dOmniScore = acc(xTau); 
+  unsigned int iNumOmniScoreRegion = m_tDTST->m_vOmniScoreRegion.size()/2;
+  for( unsigned int iOmniScoreRegion = 0; iOmniScoreRegion < iNumOmniScoreRegion; iOmniScoreRegion++ )
+  {
+    if ( dOmniScore >= m_tDTST->m_vOmniScoreRegion.at(iOmniScoreRegion*2) and dOmniScore <= m_tDTST->m_vOmniScoreRegion.at(iOmniScoreRegion*2+1))
+    {
+      acceptData.setCutResult( "OmniScore", true );
+      return true;
+    }
+  }
+  m_tDTST->msg() << MSG::VERBOSE << "Tau failed OmniScore requirement, tau OmniScore: " << dOmniScore << endmsg;
+  return false;
+}
 

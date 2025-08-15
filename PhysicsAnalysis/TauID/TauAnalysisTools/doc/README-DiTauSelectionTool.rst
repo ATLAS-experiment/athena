@@ -126,6 +126,21 @@ setup:
      - if ``AbsCharge`` is configured, ``AbsCharges`` configuration wont be considered
 
 
+   * - ``CutOmniScore``
+     - ``OmniScoreRegion``
+     - ``std::vector<double>``
+     - accepting ditaus within OmniScore regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
+
+   * -
+     - ``OmniScoreMin``
+     - ``double``
+     - accepting ditaus with a OmniScore above a lower bound
+
+   * -
+     - ``OmniScoreMax``
+     - ``double``
+     - accepting ditaus with a OmniScore below an upper bound
+
 If one wants to use a different setup one has three options:
 
 1. Using an own config file

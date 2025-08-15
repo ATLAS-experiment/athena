@@ -27,10 +27,11 @@ DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
   , m_fOutFile(nullptr)
   , m_aAccept( "DiTauSelection" )
 {
-  declareProperty( "PtRegion",       m_vPtRegion       = {});  // in GeV
-  declareProperty( "AbsEtaRegion",   m_vAbsEtaRegion   = {});
-  declareProperty( "NSubjetsRegion", m_vNSubjetsRegion = {});
-  declareProperty( "AbsCharges",     m_vAbsCharges    = {});
+  declareProperty( "PtRegion",        m_vPtRegion       = {});  // in GeV
+  declareProperty( "AbsEtaRegion",    m_vAbsEtaRegion   = {});
+  declareProperty( "NSubjetsRegion",  m_vNSubjetsRegion = {});
+  declareProperty( "AbsCharges",      m_vAbsCharges    = {});
+  declareProperty( "OmniScoreRegion", m_vOmniScoreRegion = {});
 }
 //______________________________________________________________________________
 DiTauSelectionTool::~DiTauSelectionTool()
@@ -54,6 +55,9 @@ StatusCode DiTauSelectionTool::initialize()
   if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMax.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsCharges.empty())       bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_iAbsCharge.value())) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !m_vOmniScoreRegion.empty())         bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dOmniScoreMin.value())) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dOmniScoreMax.value())) bConfigViaProperties = true;
 
 
   if (bConfigViaConfigFile and bConfigViaProperties)
@@ -164,12 +168,63 @@ StatusCode DiTauSelectionTool::initialize()
         if (std::isnan(m_iAbsCharge.value()))
           m_iAbsCharge = rEnv.GetValue("AbsCharge",NAN);
       }
+      else if (sCut == "OmniScoreRegion")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutOmniScore;
+        if (m_vOmniScoreRegion.empty())
+          TauAnalysisTools::split(rEnv,"OmniScoreRegion", ';', m_vOmniScoreRegion);
+
+	// check if using OmniScore
+        m_useOmniScore = true;
+      }
+      else if (sCut == "OmniScoreMin")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutOmniScore;
+        if (std::isnan(m_dOmniScoreMin.value()))
+          m_dOmniScoreMin = rEnv.GetValue("OmniScoreMin",NAN);
+
+        // check for possible mis-config in DiTau selection
+        for (const std::string& checkCut : vCuts){
+           if (checkCut.find("OmniScoreRegion") != std::string::npos) {
+              ATH_MSG_ERROR("Misconfig due to OmniScoreRegion and OmniScoreMin cuts both present in the config file. Please CHECK carefully config file again and choose of the two");
+              return StatusCode::FAILURE;
+           }
+        }
+
+	// check if using OmniScore
+	m_useOmniScore = true;
+      }
+      else if (sCut == "OmniScoreMax")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutOmniScore;
+        if (std::isnan(m_dOmniScoreMax.value()))
+          m_dOmniScoreMax = rEnv.GetValue("OmniScoreMax",NAN);
+
+        // check for possible mis-config in DiTau selection
+        for (const std::string& checkCut : vCuts){
+           if (checkCut.find("OmniScoreRegion") != std::string::npos) {
+              ATH_MSG_ERROR("Misconfig due to OmniScoreRegion and OmniScoreMax cuts both present in the config file. Please CHECK carefully config file again and choose of the two");
+              return StatusCode::FAILURE;
+           }
+        }
+
+	// check if using OmniScore
+	m_useOmniScore = true;
+      }
       else ATH_MSG_WARNING("Cut " << sCut << " is not available");
     }
 
     if (m_iSelectionCuts == NoDiTauCut)
       m_iSelectionCuts = iSelectionCuts;
   }
+
+  // initialise the ReadDecorHandleKey if OmniScore is applied
+  if (m_useOmniScore) {
+    if(m_OmniScoreDecorKey.empty()) { 	  
+        ATH_CHECK( m_OmniScoreDecorKey.assign("DiTauJets.omni_score"));
+    }     
+  }
+  ATH_CHECK( m_OmniScoreDecorKey.initialize( m_useOmniScore ) );
 
   // specify all available cut descriptions
   using map_type  = std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>>;
@@ -181,6 +236,7 @@ StatusCode DiTauSelectionTool::initialize()
    {DiTauCutAbsEta, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsEta>(this)},
    {DiTauCutNSubjets, std::make_unique<TauAnalysisTools::DiTauSelectionCutNSubjets>(this)},
    {DiTauCutAbsCharge, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsCharge>(this)},
+   {DiTauCutOmniScore, std::make_unique<TauAnalysisTools::DiTauSelectionCutOmniScore>(this)}, 
   };
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
@@ -190,17 +246,20 @@ StatusCode DiTauSelectionTool::initialize()
   FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
   FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin.value(), m_dNSubjetsMax.value());
   FillValueVector(m_vAbsCharges, m_iAbsCharge.value());
+  FillRegionVector(m_vOmniScoreRegion, m_dOmniScoreMin.value(), m_dOmniScoreMax.value() );
 
   PrintConfigRegion ("Pt",          m_vPtRegion);
   PrintConfigRegion ("AbsEta",      m_vAbsEtaRegion);
   PrintConfigRegion ("NSubjets",    m_vNSubjetsRegion);
   PrintConfigValue  ("AbsCharge",   m_vAbsCharges);
+  PrintConfigRegion ("OmniScore",   m_vOmniScoreRegion);
 
   std::string sCuts = "";
   if (m_iSelectionCuts & DiTauCutPt) sCuts += "Pt ";
   if (m_iSelectionCuts & DiTauCutAbsEta) sCuts += "AbsEta ";
   if (m_iSelectionCuts & DiTauCutNSubjets) sCuts += "NSubjets ";
   if (m_iSelectionCuts & DiTauCutAbsCharge) sCuts += "AbsCharge ";
+  if (m_iSelectionCuts & DiTauCutOmniScore) sCuts += "OmniScore ";
 
   ATH_MSG_DEBUG( "cuts: " << sCuts);
 
