@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -360,7 +360,7 @@ namespace InDet {
       // get the element via hash
       const SiDetectorElement * element2 = m_pixelDetManager->getDetectorElement(id);
       if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+        const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*>( element2);
 
         // get element location for debugging
         // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -408,7 +408,7 @@ namespace InDet {
       // get the element via hash
       const SiDetectorElement * element2 = m_sctDetManager->getDetectorElement(id);
       if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+        const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
         // add element to respective AlignModule
 
