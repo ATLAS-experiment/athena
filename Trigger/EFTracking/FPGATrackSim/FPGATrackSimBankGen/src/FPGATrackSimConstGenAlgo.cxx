@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimConstGenAlgo.cxx
@@ -32,6 +32,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <cassert>
+#include <format>
+#include <stdexcept>
 
 #include <TVectorD.h>
 #include <TDecompLU.h>
@@ -781,8 +783,16 @@ void FPGATrackSimConstGenAlgo::writeSectors()
     std::string sector_filename = "sectors_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + ".patt";
     std::string sectorHW_filename = "sectorsHW_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + ".patt";
     FILE *sector_file = fopen(sector_filename.c_str(),"w");
+    if (not sector_file){
+      throw std::runtime_error(std::format("Failed to open file {}", sector_filename));
+    }
+    //
     FILE *sectorHW_file = fopen(sectorHW_filename.c_str(),"w");
-
+    if (not sectorHW_file){
+      fclose(sector_file);
+      throw std::runtime_error(std::format("Failed to open file {}", sectorHW_filename));
+    }
+    
     fprintf(sector_file,"%zu %d\n",m_geo_consts.size(),m_nLayers);
     fprintf(sectorHW_file,"%zu %d\n",m_geo_consts.size(),m_nLayers);
 
@@ -820,6 +830,9 @@ void FPGATrackSimConstGenAlgo::writeSectors()
 void FPGATrackSimConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_consts, std::string & filename)
 {
     FILE *const_file = fopen(filename.c_str(),"w");
+    if (not const_file){
+      throw std::runtime_error(std::format("Failed to open file {}", filename));
+    }
 
     fprintf(const_file,"! ***           RECONSTRUCTION GEOMETRY CONSTANTS               ***\n");
     fprintf(const_file,"\n");
