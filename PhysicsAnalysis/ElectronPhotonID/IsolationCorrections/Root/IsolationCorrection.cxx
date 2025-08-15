@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for the ROOT tool of this package
@@ -139,7 +139,7 @@ namespace CP {
     float conv_ratio = 0.;
 
     if(part_type == IsolationCorrection::PHOTON){
-      const xAOD::Photon* ph_input = ((const xAOD::Photon_v1*) &input);
+      const xAOD::Photon* ph_input = (static_cast<const xAOD::Photon_v1*> (&input));
 
       convFlag_int = xAOD::EgammaHelpers::conversionType(ph_input);
       if(convFlag_int == 3 ) convFlag_int = 2;
@@ -320,7 +320,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
     // corrections only for MC and photon
     if(!m_is_mc || input.type() == xAOD::Type::Electron) return 0;
 
-    const xAOD::Photon* ph_input = ((const xAOD::Photon_v1*) &input);
+    const xAOD::Photon* ph_input = (static_cast<const xAOD::Photon_v1*> (&input));
     int convFlag_int = xAOD::EgammaHelpers::conversionType(ph_input);
 
     bool converted = false;
