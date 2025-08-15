@@ -254,15 +254,12 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
 
         if (belongsToElectron) continue;
 
-        bool belongsToMuon = false;
         double muonCaloEnergy = 0.0;
         if (m_excludeNeutralMuonFE){          
           SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector<double> > chargedFE_energy_match_muonReadHandle(m_chargedFE_energy_match_muonReadHandleKey,ctx);
           std::vector<double> muonCaloEnergies = chargedFE_energy_match_muonReadHandle(*chargedFE);
           muonCaloEnergy = muonCaloEnergies[iCluster];
         }
-
-        if (belongsToMuon) continue;
 
         xAOD::FlowElement* newFE = new xAOD::FlowElement();
         selectedNeutralPFlowObjects->push_back(newFE);
