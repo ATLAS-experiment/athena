@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  *
  * @author Laforge, Bertrand <laforge@lpnhe.in2p3.fr>
  * @author Leopold, Alexander <alexander.leopold@cern.ch>
@@ -122,7 +122,7 @@ enum class ClusterAlgo { Eager, Simultaneous, SimultaneousMean };
 
 template <typename T> class ClusterCollection {
 public:
-  void addCluster(Cluster<T> vx);
+  void addCluster(const Cluster<T> & vx);
   void doClustering(ClusterAlgo algo);
 
 private:
@@ -271,7 +271,7 @@ void ClusterCollection<T>::updateDistanceCut(double cut_value) {
   m_distance_cut = cut_value;
 }
 
-template <typename T> void ClusterCollection<T>::addCluster(Cluster<T> vx) {
+template <typename T> void ClusterCollection<T>::addCluster(const Cluster<T> & vx) {
   m_clusters.push_back(vx);
 }
 
