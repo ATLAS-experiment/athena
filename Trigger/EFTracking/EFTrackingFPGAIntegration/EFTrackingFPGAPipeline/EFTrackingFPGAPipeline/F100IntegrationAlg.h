@@ -81,6 +81,8 @@ namespace EFTrackingFPGAIntegration
         Gaudi::Property<std::string> m_stripL2GKernelName{
             this, "StripL2GKernelName", "", "Name of the strip L2G kernel"}; //!< Name of the strip L2G kernelS
 
+
+
         mutable std::atomic<ulonglong> m_numEvents{0};          //!< Number of events processed
         mutable std::atomic<cl_ulong> m_pixelInputTime{0};      //!< Time for pixel input buffer write
         mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write

@@ -3,9 +3,13 @@
 # @date: Nov. 22, 2024
 # @brief: Customized flags for FPGA data preparation pipeline
 
-def addFPGADataPrepFlags(flags):
 
-    flags.addFlag("FPGADataPrep.xclbin", "/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin")
+
+def addFPGADataPrepFlags():
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+    
+    flags = AthConfigFlags()
+    flags.addFlag("FPGADataPrep.xclbin", "/eos/project-a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw_physicsRelease_v03.xclbin")
     flags.addFlag("FPGADataPrep.bdfID", "0000:c3:00.1")
 
     flags.addFlag("FPGADataPrep.DoActs", True)

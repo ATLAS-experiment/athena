@@ -540,6 +540,13 @@ def initConfigFlags():
         return createOnnxRuntimeFlags()
     _addFlagsCategory(acf, "AthOnnx", __onnxruntime, 'AthOnnxComps')
 
+    #EFTracking fpga data prep (F100)
+    def _eftracking_f100():
+        from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
+        return addFPGADataPrepFlags()
+    
+    _addFlagsCategory(acf, "FPGADataPrep", _eftracking_f100, "EFTrackingFPGAPipeline")
+    
     # For AnalysisBase, pick up things grabbed in Athena by the functions above
     if not isGaudiEnv():
         def EDMVersion(flags):

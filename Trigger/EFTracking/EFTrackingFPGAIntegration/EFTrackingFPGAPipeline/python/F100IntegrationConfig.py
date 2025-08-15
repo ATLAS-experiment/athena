@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
+
 def F100IntegrationCfg(flags, name = 'F100IntegrationAlg', **kwarg):
     acc = ComponentAccumulator()
 
@@ -15,11 +16,15 @@ def F100IntegrationCfg(flags, name = 'F100IntegrationAlg', **kwarg):
     kwarg.setdefault('EDMPrepKernelName', 'EDMPrep')
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
-    kwarg.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     kwarg.setdefault('NpixelCU', flags.FPGADataPrep.NpixelCU)
     kwarg.setdefault('NstripCU', flags.FPGADataPrep.NstripCU)
     kwarg.setdefault('doEmulation', flags.FPGADataPrep.DoEmulation)
     kwarg.setdefault('doF110', flags.FPGADataPrep.doF110)
+
+    if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
+        if 'RegSelTool' not in kwarg:
+            from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+            kwarg.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
 
     # Set up Chrono service
     acc.addService(CompFactory.ChronoStatSvc(
@@ -67,17 +72,16 @@ def F100FlagsCfg(flags):
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False
-    
-    from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
-    addFPGADataPrepFlags(flags)
-    
+
     return flags
 
 
 def FPGADataPreparation(flags): # thsi is used to run the F100 through Reco_tf
+    kwargs = {}
+    kwargs.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     acc = ComponentAccumulator()
     acc.merge(F100DataEncodingCfg(flags))
-    acc.merge(F100IntegrationCfg(flags))
+    acc.merge(F100IntegrationCfg(flags, "F100IntegrationAlg", **kwargs))
     acc.merge(F100EDMConversionCfg(flags))
     acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'ITkPixelClusters',
                                              'sortedxAODStripClusterContainer': 'ITkStripClusters'}))
@@ -112,11 +116,7 @@ def FPGADataPreparation(flags): # thsi is used to run the F100 through Reco_tf
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    
-    # Add FPGA Integration flags
-    from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
-    addFPGADataPrepFlags(flags)
-    
+
     flags.Detector.EnableCalo = False
     flags.FPGADataPrep.DoActs = True
     flags.Acts.doRotCorrection = False
@@ -150,6 +150,8 @@ if __name__ == "__main__":
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
 
     kwarg = {}
+
+    kwarg.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
