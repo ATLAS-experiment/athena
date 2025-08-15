@@ -221,22 +221,14 @@ DbContainerImp::update(DbContainer& /* cntH */, const void* object, ShapeH shape
 
 // Fetch next object address of the selection to set token
 DbStatus DbContainerImp::fetch(DbSelect& sel) {
-   if( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-      Token::OID_t lnk = sel.link();
-      while( (uint64_t)lnk.second < size() ) {
-         if( fetch(lnk, lnk).isSuccess() )  {
-            sel.link() = lnk;
-            return Success;
-         }
-         lnk.second++;
+   Token::OID_t lnk = sel.link();
+   while( (uint64_t)lnk.second < size() ) {
+      if( fetch(lnk, lnk).isSuccess() )  {
+         sel.link() = lnk;
+         return Success;
       }
-      return Error;
+      lnk.second++;
    }
-   DbPrint log( m_name );
-   log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-       << "refine container scans."
-       << "The only valid selection criterium is: \"\" (empty string)"
-       << DbPrint::endmsg;
    return Error;
 } 
 

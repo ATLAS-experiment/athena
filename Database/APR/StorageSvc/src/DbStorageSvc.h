@@ -18,10 +18,7 @@ namespace pool  {
 
   // Forward declarations
   class DbStorageExplorer;
-  class DbClassMap;
-  class DbModule;
   class DbOption;
-  class DbSelect;
 
   /** @class DbStorageSvc DbStorageSvc.h POOLCore/DbStorageSvc.h
     *

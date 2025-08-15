@@ -12,10 +12,9 @@
 
 pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
                                                     const std::string& containerName,
-                                                    IStorageExplorer& storageExplorer,
-                                                    const std::string& selection ):
+                                                    IStorageExplorer& storageExplorer):
   m_storageExplorer( storageExplorer ),
-  m_selection( new pool::DbSelect( selection ) )
+  m_selection( new pool::DbSelect() )
 {
    DbStatus sc = m_storageExplorer.select( fileDescriptor, containerName, *m_selection );
    if( sc.isError() )

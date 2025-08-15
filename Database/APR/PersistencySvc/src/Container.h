@@ -43,7 +43,7 @@ namespace pool {
       /** Starts an iteration over the tokens in the container.
        *  Returns a token iterator whose ownership is passed to the user.
        */
-      virtual ITokenIterator* tokens( const std::string& selection ) override;
+      virtual ITokenIterator* tokens() override;
       
       /// Returns the object holding the technology specific attributes for a given technology domain
       virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const override;

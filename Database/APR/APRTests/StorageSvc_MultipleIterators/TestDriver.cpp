@@ -207,12 +207,12 @@ TestDriver::testReadingParallelSameContainer()
   }
 
   // Fetch the objects in the container (Initialize the iterators)
-  pool::DbSelect selectionObject_SimpleTestClass("");
+  pool::DbSelect selectionObject_SimpleTestClass;
   sc = storageExplorer->select( *fd, containerToken->contID(), selectionObject_SimpleTestClass );
   if ( ! sc.isSuccess() ) {
     throw std::runtime_error( "Could not start an implicit collection iteration" );
   }
-  pool::DbSelect selectionObject_TestClassPrimitives("");
+  pool::DbSelect selectionObject_TestClassPrimitives;
   sc = storageExplorer->select( *fd, containerToken->contID(), selectionObject_TestClassPrimitives );
   if ( ! sc.isSuccess() ) {
     throw std::runtime_error( "Could not start an implicit collection iteration" );

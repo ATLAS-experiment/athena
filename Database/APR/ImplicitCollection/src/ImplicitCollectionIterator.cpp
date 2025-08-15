@@ -34,7 +34,7 @@ pool::ImplicitCollectionIterator::~ImplicitCollectionIterator()
 pool::ICollectionCursor&
 pool::ImplicitCollectionIterator::execute()
 {
-   m_tokenIterator = m_container.tokens( "" );
+   m_tokenIterator = m_container.tokens();
    return *this;
 }
 

@@ -586,7 +586,7 @@ Token* PoolSvc::getToken(const std::string& connection,
    if (contH == nullptr) {
       return(nullptr);
    }
-   pool::ITokenIterator* tokenIter = contH->tokens("");
+   pool::ITokenIterator* tokenIter = contH->tokens();
    Token* thisToken = tokenIter->next();
    for (unsigned long ipos = 0; ipos < ientry; ipos++) {
       delete thisToken; thisToken = tokenIter->next();

@@ -38,7 +38,6 @@
 #include "TLeaf.h"
 #include "TBranch.h"
 #include "RootUtils/TBranchElementClang.h"
-#include "TTreeFormula.h"
 
 #include "RootAuxDynIO/IRootAuxDynIO.h"
 
@@ -137,11 +136,6 @@ RootTreeContainer::RootTreeContainer()
 /// Standard destructor
 RootTreeContainer::~RootTreeContainer()   {
    RootTreeContainer::close();
-}
-
-/// Ask if a given shape is supported
-DbStatus RootTreeContainer::isShapeSupported(const DbTypeInfo* typ) const  {
-  return typ == m_type;
 }
 
 uint64_t RootTreeContainer::size()    {
@@ -290,43 +284,8 @@ DbStatus RootTreeContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt)
 
 // Fetch next object address of the selection to set token
 DbStatus RootTreeContainer::fetch(DbSelect& sel)  {
-  if ( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-    sel.link().second++;
-    return DbContainerImp::fetch(sel.link(), sel.link());
-  }
-  DbSelect::Ptr<TTreeFormula>* stmt =
-    dynamic_cast<DbSelect::Ptr<TTreeFormula>* >(sel.statement());
-  if ( stmt ) {
-    TTreeFormula* selStmt = stmt->m_ptr;
-    if ( selStmt )  {
-      std::lock_guard<std::recursive_mutex>   lock( m_rootDb->ioMutex() );
-      Branches::iterator k;
-      long long cur  = sel.link().second;
-      Long64_t last = m_tree->GetEntries();
-      for(k=m_branches.begin(); k != m_branches.end(); ++k)  {
-        BranchDesc& dsc = (*k);
-        int typ = dsc.column->typeID();
-        switch ( typ )    {
-        case DbColumn::POINTER:
-        case DbColumn::BLOB:
-          dsc.branch->SetAddress(&dsc.buffer);
-        default:
-          break;
-        }
-      }
-      selStmt->SetTree(m_tree);
-      // loop on all selected entries
-      for( ++cur; cur < last; ++cur) {
-        m_tree->LoadTree(cur);
-        selStmt->GetNdata();
-        if ( selStmt->EvalInstance(0) != 0 ) {
-          sel.link().second = cur;
-          return Success;
-        }
-      }
-    }
-  }
-  return Error;
+  sel.link().second++;
+  return DbContainerImp::fetch(sel.link(), sel.link());
 }
 
 
@@ -743,19 +702,11 @@ DbStatus RootTreeContainer::checkAccess(DbDatabase& dbH,
 }
 
 
-// Define selection criteria
+// Define selection
 DbStatus  RootTreeContainer::select(DbSelect& sel)    {
   if ( nullptr != m_tree )  {
-    if( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-      sel.link().second = -1;
-      return Success;
-    }
-    else  {
-      TTreeFormula* stmt = new TTreeFormula("RootSelect", sel.criteria().c_str(), m_tree);
-      sel.setStatement(new DbSelect::Ptr<TTreeFormula>(stmt));
-      sel.link().second = -1;
-      return Success;
-    }
+    sel.link().second = -1;
+    return Success;
   }
   return Error;
 }

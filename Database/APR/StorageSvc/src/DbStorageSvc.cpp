@@ -17,8 +17,6 @@
 #include "DbStorageSvc.h"
 #include "DbStorageExplorer.h"
 #include "POOLCore/DbPrint.h"
-#include "StorageSvc/DbToken.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -28,9 +26,7 @@
 #include "StorageSvc/DbTransform.h"
 #include "StorageSvc/DbConnection.h"
 #include "DbDatabaseObj.h"
-#include "StorageSvc/IOODatabase.h"
 #include "StorageSvc/FileDescriptor.h"
-#include "StorageSvc/DatabaseConnection.h"
 
 #include <vector>
 #include <memory>
