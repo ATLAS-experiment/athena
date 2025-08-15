@@ -59,6 +59,7 @@ namespace TauAnalysisTools
     DiTauCutAbsEta       = 1<<1, // 000000000010
     DiTauCutNSubjets     = 1<<2, // 000000000100
     DiTauCutAbsCharge    = 1<<3, // 000000001000
+    DiTauCutOmniScore       = 1<<4, // 000000010000 
   };
 
   enum EfficiencyCorrectionType
