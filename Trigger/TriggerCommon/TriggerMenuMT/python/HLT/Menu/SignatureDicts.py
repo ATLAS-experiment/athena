@@ -4,7 +4,6 @@ log = logging.getLogger( __name__ )
 log.debug("Importing %s",__name__)
 
 from copy import deepcopy
-from collections import OrderedDict
 import itertools
 
 #==========================================================
@@ -15,7 +14,7 @@ import itertools
 # 'signature': ('substring', 'group')
 # if the substring is '', the signature is not mapped to the chain name
 # if the group is '', the signature is not mapped to any group
-SignatureDict = OrderedDict({
+SignatureDict = {
     'Electron': ('e','AllTag'),
     'Photon'  : ('g','AllTag'),
     'Muon'    : ('mu','AllTag'),
@@ -41,19 +40,19 @@ SignatureDict = OrderedDict({
     'Photonprobe'  : ('', 'AllProbe'),
     'Tauprobe'     : ('', 'AllProbe'),
     'Muonprobe'    : ('', 'AllProbe')
-})
+}
 
 
 def getSignatureDict():
     # removes the grouping from the dict and creates a new one signature : string
-    new_dict = OrderedDict({key: value[0] for key, value in SignatureDict.items() if value[0] != ''})
+    new_dict = {key: value[0] for key, value in SignatureDict.items() if value[0] != ''}
     return new_dict
 
 SliceIDDict = getSignatureDict()
 
 def getSignatureGroupingDict():
     # removes the substring from the dict and creates a new one signature : group
-    new_dict = OrderedDict({key: value[1] for key, value in SignatureDict.items() if value[1] != ''})
+    new_dict = {key: value[1] for key, value in SignatureDict.items() if value[1] != ''}
     return new_dict
 
 def getListOfSignatureStrings():   
@@ -93,18 +92,18 @@ class ChainStore(dict):
 # ---- signature specific dictionaries below    ----
 #==========================================================
 ChainDictTemplate = {
-    'chainName'    : '',
-    'L1item'        : '',
-    'topo'          : '',
-    'signatures'    : [],
+    'chainName'       : '',
+    'L1item'          : '',
+    'topo'            : '',
+    'signatures'      : [],
     'alignmentGroups' : [],
-    'stream'        : '',
-    'groups'        : [],
-    'EBstep'        : '',
-    'chainParts'   : [],
-    'sigDicts' : OrderedDict(),
-    'sigFolder'     : [],
-    'subSigs'        : [],
+    'stream'          : '',
+    'groups'          : [],
+    'EBstep'          : '',
+    'chainParts'      : [],
+    'sigDicts'        : {},
+    'sigFolder'       : [],
+    'subSigs'         : [],
     'extraComboHypos' : []
 }
 
