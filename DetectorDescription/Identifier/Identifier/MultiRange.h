@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_MULTIRANGE_H
@@ -40,13 +40,13 @@ public:
     using id_iterator = id_vec::iterator;
     using id_const_iterator = id_vec::const_iterator;
 
-    ExpandedIdentifier		m_id;
-    ConstRangeIterator	m_id_fac_it; 
-    ConstRangeIterator	m_id_fac_end; 
-    range_vector::const_iterator   	m_range_it; 
-    range_vector::const_iterator   	m_range_end; 
-    id_iterator			m_id_vec_it;
-    id_iterator			m_id_vec_end;
+    ExpandedIdentifier		m_id{};
+    ConstRangeIterator	m_id_fac_it{}; 
+    ConstRangeIterator	m_id_fac_end{}; 
+    range_vector::const_iterator   	m_range_it{}; 
+    range_vector::const_iterator   	m_range_end{}; 
+    id_iterator			m_id_vec_it{};
+    id_iterator			m_id_vec_end{};
   }; 
  
   class const_identifier_factory {
@@ -62,13 +62,13 @@ public:
     using id_iterator = id_vec::iterator;
     using id_const_iterator = id_vec::const_iterator;
 
-    ExpandedIdentifier		m_id;
-    ConstRangeIterator	m_id_fac_it; 
-    ConstRangeIterator	m_id_fac_end; 
-    range_vector::const_iterator   	m_range_it; 
-    range_vector::const_iterator   	m_range_end; 
-    id_iterator			m_id_vec_it;
-    id_iterator			m_id_vec_end;
+    ExpandedIdentifier		m_id{};
+    ConstRangeIterator	m_id_fac_it{}; 
+    ConstRangeIterator	m_id_fac_end{}; 
+    range_vector::const_iterator   	m_range_it{}; 
+    range_vector::const_iterator   	m_range_end{}; 
+    id_iterator			m_id_vec_it{};
+    id_iterator			m_id_vec_end{};
   }; 
  
   MultiRange () = default; 
