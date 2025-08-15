@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -72,10 +72,10 @@ public:
 
 
 private:
-  int m_which;
+  int m_which{};
 
-  std::vector<Obj2>::const_iterator m_it;
-  std::vector<Obj2>::const_iterator m_end;
+  std::vector<Obj2>::const_iterator m_it{};
+  std::vector<Obj2>::const_iterator m_end{};
 
   std::vector<Obj2> m_tmpvec;
 };

@@ -1,18 +1,19 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: RootObjectMetadata.h 530460 2012-12-13 18:27:24Z krasznaa $
 #ifndef D3PDMAKERREADER_ROOTOBJECTMETADATA_H
 #define D3PDMAKERREADER_ROOTOBJECTMETADATA_H
 
-// STL include(s):
-#include <string>
+
 
 // D3PD include(s):
 #include "D3PDMakerUtils/ObjectMetadata.h"
+// STL include(s):
+#include <string>
 
 namespace D3PD {
 
