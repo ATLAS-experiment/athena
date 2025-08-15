@@ -258,15 +258,19 @@ StatusCode TrigSignatureMoni::fillSequences(const std::set<std::string>& sequenc
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigSignatureMoni::fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>& nameToChainsMap, const TrigCompositeUtils::DecisionIDContainer& dc) const {
-  const int countOutputRow {nSteps()-1};
+StatusCode TrigSignatureMoni::fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>& nameToChainsMap, const TrigCompositeUtils::DecisionIDContainer& dc, int row) const {
+
+  // Adjust bin index for those histograms that monitor all steps
+  int rowWithSteps = row;
+  if (row==OUTPUT || row==EXPRESS) rowWithSteps += m_decisionCollectorTools.size();
+
   for (const auto& [name, decisions] : nameToChainsMap) {
     for (TrigCompositeUtils::DecisionID id : dc) {
       if (decisions.contains(id)) {
         const double bin = m_nameToBinMap.at(name);
-        m_countHistogram->Fill(bin, countOutputRow);
-        m_rateHistogram.fill(bin, OUTPUT);
-        m_passHistogram->Fill(bin, countOutputRow);
+        m_rateHistogram.fill(bin, row);
+        m_countHistogram->Fill(bin, rowWithSteps);
+        m_passHistogram->Fill(bin, rowWithSteps);
         break;
       }
     }
@@ -312,6 +316,7 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
     TrigCompositeUtils::DecisionIDContainer ids;    
     TrigCompositeUtils::decisionIDs(l1Decisions->at(index-1), ids);
     ATH_MSG_DEBUG( "L1 " << index-1 << " N positive decisions " << ids.size()  );
+    ATH_CHECK(fillStreamsAndGroups(m_groupToChainMap, ids, index));
     ATH_CHECK(fillPassEvents(ids, index));
     ATH_CHECK(fillRate(ids, index));
     if (!ids.empty()){
@@ -371,14 +376,16 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
 
   // Fill the histograms with output counts/rate
   const int countOutputRow {nSteps()-1};
-  ATH_CHECK( fillStreamsAndGroups(m_streamToChainMap, finalIDs));
-  ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, finalIDs));
+  ATH_CHECK( fillStreamsAndGroups(m_streamToChainMap, finalIDs, OUTPUT));
+  ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, finalIDs, OUTPUT));
   ATH_CHECK( fillPassEvents(finalIDs, countOutputRow));
   ATH_CHECK( fillRate(finalIDs, OUTPUT));
 
   // Fill the histograms with express counts/rate
   const int countExpressRow {nSteps()};
-  ATH_CHECK( fillStreamsAndGroups(m_expressChainMap, expressFinalIDs));
+  // express stream rate is filled into OUTPUT bin on purpose
+  ATH_CHECK( fillStreamsAndGroups(m_expressChainMap, expressFinalIDs, OUTPUT));
+  ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, expressFinalIDs, EXPRESS));
   ATH_CHECK( fillPassEvents(expressFinalIDs, countExpressRow));
   ATH_CHECK( fillRate(expressFinalIDs, EXPRESS));
 
