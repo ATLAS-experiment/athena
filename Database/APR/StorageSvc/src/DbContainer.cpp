@@ -160,16 +160,6 @@ DbContainer::objectShape(const Guid& guid) {
   return isValid() ? m_ptr->objectShape(guid) : 0;
 }
 
-/// Perform DELETE statement
-DbStatus DbContainer::update(DbSelect& sel)  {
-  return isValid() ? m_ptr->update(sel) : Error;
-}
-
-/// Perform DELETE statement
-DbStatus DbContainer::destroy(DbSelect& sel)  {
-  return isValid() ? m_ptr->destroy(sel) : Error;
-}
-
 /// Perform selection
 DbStatus DbContainer::select(DbSelect& sel) {
   return isValid() ? m_ptr->select(sel) : Error;

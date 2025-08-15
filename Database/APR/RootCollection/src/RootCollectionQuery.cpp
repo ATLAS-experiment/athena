@@ -18,12 +18,6 @@
 #include "CoralBase/MessageStream.h"
 
 #include "TEventList.h"
-#include "TFormula.h"
-#include "APRTreeFormula.h"
-
-//#include <iostream>
-//using namespace std;
-
 
 pool::RootCollection::RootCollectionQuery::
 RootCollectionQuery(

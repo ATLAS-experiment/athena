@@ -373,7 +373,7 @@ pool::TestDriver::readCollections()
       throw std::runtime_error( "Could not retrieve the container" );
     }
     std::cout << "Container : " << container->name() << std::endl;
-    pool::ITokenIterator* tokenIterator = container->tokens( "" );
+    pool::ITokenIterator* tokenIterator = container->tokens();
     if ( ! tokenIterator ) {
       throw std::runtime_error( "Could not obtain a token iterator" );
     }
@@ -433,7 +433,7 @@ pool::TestDriver::readBackUpdatedObjects()
     throw std::runtime_error( "Could not retrieve the container" );
   }
 
-  pool::ITokenIterator* tokenIterator = container->tokens( "" );
+  pool::ITokenIterator* tokenIterator = container->tokens();
   if ( ! tokenIterator ) {
     throw std::runtime_error( "Could not obtain a token iterator" );
   }

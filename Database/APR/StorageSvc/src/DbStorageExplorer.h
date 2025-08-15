@@ -302,13 +302,11 @@ namespace pool  {
                                         const DbOption& opt);
 
     /// Initiate a selection on a given container.
-    /** The criteria according to which the selection is supposed
-      * to be executed must be present in the passed criteria.
-      * Empty criteria will select all entries in the container.
+    /** Initiate a selection off all entries on a given container.
       *
       *  @param   refDB       [IN] Reference to Database descriptor 
       *  @param   cntName     [IN] Container name to be scanned.
-      *  @param   sel     [IN/OUT] Selection criteria
+      *  @param   sel     [IN/OUT] Selection
       *  @return                   DbStatus code indicating success or failure.
       */
     virtual DbStatus select(      FileDescriptor&       refDB,

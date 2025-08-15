@@ -56,8 +56,6 @@ namespace pool    {
     virtual uint64_t size() = 0;
     /// Get container name
     virtual std::string name() const = 0;
-    /// Ask if a given shape is supported
-    virtual DbStatus isShapeSupported(const DbTypeInfo* typ) const = 0;
     /// Set options
     virtual DbStatus setOption(const DbOption& refOpt) = 0;
     /// Access options
@@ -90,12 +88,8 @@ namespace pool    {
     /// Check if we can access the container for reading with the given type
     virtual DbStatus checkAccess(DbDatabase&        dbH,
                                  const std::string& nam) const = 0;
-    /// Perform UPDATE select
-    virtual DbStatus update(  DbSelect& sel) = 0;
-    /// Perform DELETE select
-    virtual DbStatus destroy( DbSelect& sel) = 0;
-    /// Define selection criteria
-    virtual DbStatus select(  DbSelect& criteria) = 0;
+    /// Define selection
+    virtual DbStatus select(DbSelect& sel) = 0;
     /// Fetch next object address of the selection to set token
     virtual DbStatus fetch(DbSelect& sel) = 0;
 

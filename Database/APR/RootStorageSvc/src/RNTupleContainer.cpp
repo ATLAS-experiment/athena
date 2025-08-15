@@ -96,11 +96,6 @@ RNTupleContainer::RNTupleContainer()
 /// Standard destructor
 RNTupleContainer::~RNTupleContainer() { close(); }
 
-/// Ask if a given shape is supported
-DbStatus RNTupleContainer::isShapeSupported(const DbTypeInfo* typ) const {
-  return typ == m_type;
-}
-
 uint64_t RNTupleContainer::size() {
   auto s = DbContainerImp::size();
   if( m_ntupleReader ) s += m_ntupleReader->GetNEntries();
@@ -444,28 +439,14 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
 // Initiate reading with a selection
 DbStatus  RNTupleContainer::select(DbSelect& sel)
 {
-   if( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-      sel.link().second = -1;
-      return Success;
-   } else  {
-      DbPrint log(m_name);
-      log << DbPrintLvl::Warning << "RNTuple selection not implemented, reading everything"
-          << DbPrint::endmsg;
-      sel.link().second = -1;
-      return Success;
-   }
-   return pool::Error;
+   sel.link().second = -1;
+   return Success;
 }
 
 
 // Fetch next object address of the selection to set token
 DbStatus RNTupleContainer::fetch(DbSelect& sel)
 {
-   if( sel.criteria().length() > 0 and sel.criteria() != "*" )  {
-      DbPrint log(m_name);
-      log << DbPrintLvl::Warning << "RNTuple selection not implemented, reading everything"
-          << DbPrint::endmsg;
-   }
    sel.link().second++;
    return DbContainerImp::fetch(sel.link(), sel.link());
 }

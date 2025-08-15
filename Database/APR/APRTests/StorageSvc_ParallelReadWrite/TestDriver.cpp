@@ -186,7 +186,7 @@ TestDriver::testParallelReadWrite()
 
 
   // Fetch the objects in the container.
-  pool::DbSelect selectionObject("");
+  pool::DbSelect selectionObject;
   sc = storageExplorer->select( fd1, containerToken->contID(), selectionObject );
   int iObject = 0;
   if ( sc.isSuccess() ) {
@@ -327,7 +327,7 @@ TestDriver::testReading()
   }
 
   // Fetch the objects in the container.
-  pool::DbSelect selectionObject("");
+  pool::DbSelect selectionObject;
   sc = storageExplorer->select( fd, containerToken->contID(), selectionObject );
   int iObject = 0;
   if ( sc.isSuccess() ) {

@@ -144,9 +144,6 @@ class RNTupleContainer : public pool::DbContainerImp
    */
   virtual pool::DbStatus setOption(const pool::DbOption& opt) override final;
 
-  /// Ask if a given shape is supported
-  virtual pool::DbStatus isShapeSupported(const pool::DbTypeInfo* typ) const override final;
-
   /// Number of entries within the container
   virtual uint64_t size() override final;
 
@@ -177,8 +174,8 @@ class RNTupleContainer : public pool::DbContainerImp
 
   virtual void useNextRecordId(uint64_t nextID) override final;
 
-  /// Define selection criteria
-  virtual pool::DbStatus select(pool::DbSelect& criteria) override final;
+  /// Define selection
+  virtual pool::DbStatus select(pool::DbSelect& sel) override final;
 
   /// Equivalent to next()
   using pool::DbContainerImp::fetch;

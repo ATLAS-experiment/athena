@@ -149,10 +149,6 @@ namespace pool    {
     /// In place deletion of raw memory
     virtual DbStatus free(    void* ptr,
                               DbContainer& cntH) override;
-    /// Perform UPDATE statement
-    virtual DbStatus update(DbSelect&  /* sel */) override { return Error;   }
-    /// Perform DELETE statement
-    virtual DbStatus destroy(DbSelect& /* sel */) override { return Error;   }
     /// Fetch next object address of the selection to set token
     virtual DbStatus fetch(DbSelect&      sel) override;
     /// Add the specified object to the delete stack.

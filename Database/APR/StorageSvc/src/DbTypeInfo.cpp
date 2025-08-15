@@ -14,11 +14,12 @@
 //====================================================================
 
 // Framework include files
-#include "StorageSvc/DbToken.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbTransform.h"
+
+#include "PersistentDataModel/Token.h"
 
 #include <cstdio>
 

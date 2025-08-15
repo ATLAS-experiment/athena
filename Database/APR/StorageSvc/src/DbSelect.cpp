@@ -12,8 +12,6 @@
 //  @author      M.Frank
 //====================================================================
 // Framework include files
-#include "PersistentDataModel/Guid.h"
-#include "PersistentDataModel/Token.h"
 #include "POOLCore/DbPrint.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbDatabase.h"
@@ -30,28 +28,25 @@ namespace pool {
   class DbSelectContext   {
   public:
     DbSelectContext() 
-      : dbH(POOL_StorageType), cntH(POOL_StorageType), 
-        stmH(0), shape(Guid::null())
+      : dbH(POOL_StorageType), cntH(POOL_StorageType), shape(Guid::null())
     {
       linkH.first = linkH.second = INVALID;
     }
     DbDatabase            dbH;
     DbContainer           cntH;
-    DbSelect::Pointer*    stmH;
     Token::OID_t          linkH;
     Guid                  shape;
   };
 }
 using namespace pool;
 
-/// Constructor taking selection criteria
-DbSelect::DbSelect(const std::string& crit) : m_context(0), m_criteria(crit)  { 
+/// Constructor
+DbSelect::DbSelect() : m_context(0)  { 
   m_context = new DbSelectContext();
 }
 
 /// Standard destructor
 DbSelect::~DbSelect()   {
-  deletePtr(m_context->stmH);
   deletePtr(m_context);
 }
 
@@ -68,16 +63,6 @@ DbContainer& DbSelect::container() const  {
 /// Access to link handle
 Token::OID_t& DbSelect::link() const  {
   return m_context->linkH;
-}
-
-/// Access to existing selection statement
-DbSelect::Pointer* DbSelect::statement() const  {
-  return m_context->stmH;
-}
-
-/// Set selection statement
-void DbSelect::setStatement(Pointer* p) {
-  m_context->stmH = p;
 }
 
 /// Set database context
@@ -110,7 +95,7 @@ DbStatus DbSelect::start(DbDatabase& dbH, const std::string& cntName)   {
       DbContainer cntH(typ);
       DbStatus sc = cntH.open(dbH, cntName, 0, typ, pool::READ);
       if ( sc.isSuccess() )  {
-        // Now select according to criteria
+        // Now select
         setContainer(cntH);
         if ( cntH.select(*this).isSuccess() )  {
           return Success;          
@@ -118,7 +103,7 @@ DbStatus DbSelect::start(DbDatabase& dbH, const std::string& cntName)   {
         // What to do ?
         DbPrint err0(cntName);
         err0 << DbPrintLvl::Error
-             << "Cannot issue select criteria on container:" << cntName
+             << "Cannot issue select container:" << cntName
              << DbPrint::endmsg;
         return Error;
       }
