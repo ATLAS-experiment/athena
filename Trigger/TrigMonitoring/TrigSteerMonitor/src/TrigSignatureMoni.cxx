@@ -85,7 +85,7 @@ StatusCode TrigSignatureMoni::start() {
   // Initialize SignatureAcceptance and DecisionCount histograms that will monitor 
   //    chains, groups and sequences per each step
   const int x {nBinsX(hltMenuHandle)};
-  const int y {nSteps()};
+  const int y {nSteps() + N_BINS};
   ATH_MSG_DEBUG( "Histogram " << x << " x " << y << " bins");
   std::unique_ptr<TH2> hSA = std::make_unique<TH2I>("SignatureAcceptance", "Raw acceptance of signatures in;chain;step", x, 1, x + 1, y, 1, y + 1);  
   std::unique_ptr<TH2> hDC = std::make_unique<TH2I>("DecisionCount", "Positive decisions count per step;chain;step", x, 1, x + 1, y, 1, y + 1);
@@ -375,14 +375,14 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
   }
 
   // Fill the histograms with output counts/rate
-  const int countOutputRow {nSteps()-1};
+  const int countOutputRow {nSteps() + OUTPUT};
   ATH_CHECK( fillStreamsAndGroups(m_streamToChainMap, finalIDs, OUTPUT));
   ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, finalIDs, OUTPUT));
   ATH_CHECK( fillPassEvents(finalIDs, countOutputRow));
   ATH_CHECK( fillRate(finalIDs, OUTPUT));
 
   // Fill the histograms with express counts/rate
-  const int countExpressRow {nSteps()};
+  const int countExpressRow {nSteps() + EXPRESS};
   // express stream rate is filled into OUTPUT bin on purpose
   ATH_CHECK( fillStreamsAndGroups(m_expressChainMap, expressFinalIDs, OUTPUT));
   ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, expressFinalIDs, EXPRESS));
@@ -415,7 +415,7 @@ int TrigSignatureMoni::nChains(SG::ReadHandle<TrigConf::HLTMenu>& hltMenuHandle)
 }
 
 int TrigSignatureMoni::nSteps() const {
-  return m_decisionCollectorTools.size() + N_BINS;
+  return m_decisionCollectorTools.size();
 }
 
 StatusCode TrigSignatureMoni::initHist(LockedHandle<TH2>& hist, SG::ReadHandle<TrigConf::HLTMenu>& hltMenuHandle, bool steps) {
