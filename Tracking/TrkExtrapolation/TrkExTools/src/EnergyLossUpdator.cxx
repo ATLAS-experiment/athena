@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,13 +23,8 @@ Trk::EnergyLossUpdator::EnergyLossUpdator(const std::string& t,
                                           const std::string& n,
                                           const IInterface* p)
   : AthAlgTool(t, n, p)
-  , m_detailedEloss(true)
-  , m_optimalRadiation(true)
 {
   declareInterface<Trk::IEnergyLossUpdator>(this);
-  // scale for the most probable value
-  declareProperty("DetailedEloss", m_detailedEloss);
-  declareProperty("OptimalRadiation", m_optimalRadiation);
 }
 
 // public interface method
