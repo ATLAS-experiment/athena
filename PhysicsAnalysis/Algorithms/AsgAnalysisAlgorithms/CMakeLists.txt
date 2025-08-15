@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -22,11 +22,9 @@ atlas_add_dictionary( AsgAnalysisAlgorithmsDict
    AsgAnalysisAlgorithms/selection.xml
    LINK_LIBRARIES AsgAnalysisAlgorithmsLib )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( AsgAnalysisAlgorithms
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AsgAnalysisAlgorithmsLib )
-endif()
+atlas_add_component( AsgAnalysisAlgorithms
+   src/components/*.cxx
+   LINK_LIBRARIES AsgAnalysisAlgorithmsLib )
 
 atlas_install_data( data/* )
 atlas_install_python_modules( python/*.py )
@@ -59,5 +57,5 @@ endif()
 atlas_add_test( TestFullTermsOutput
    SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_full_terms_output.yaml -e 150
    POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 400 
+   PROPERTIES TIMEOUT 400
    )

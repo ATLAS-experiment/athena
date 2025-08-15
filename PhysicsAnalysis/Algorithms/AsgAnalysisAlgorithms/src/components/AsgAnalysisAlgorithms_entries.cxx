@@ -4,6 +4,7 @@
 
 /// @author Nils Krumnack
 
+// Local include(s).
 #include <AsgAnalysisAlgorithms/AsgClassificationDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEnergyDecoratorAlg.h>
@@ -48,6 +49,9 @@
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
 #include <AsgAnalysisAlgorithms/VGammaORAlg.h>
+
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT (CP::AsgClassificationDecorationAlg)
 DECLARE_COMPONENT (CP::AsgCutBookkeeperAlg)
