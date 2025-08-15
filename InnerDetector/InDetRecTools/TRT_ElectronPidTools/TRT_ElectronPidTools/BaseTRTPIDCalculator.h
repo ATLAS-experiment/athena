@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,8 +48,8 @@ namespace InDet
     my_name(name),
     BLOB_SIZE(size),
     Blob(new unsigned char[size]),
-    UpperLimit( * ((float*)( Blob + OFF_UpperLim) ) ),
-    LowerLimit( * ((float*)( Blob + OFF_LowerLim) ) ),
+    UpperLimit( * (reinterpret_cast<float*>( Blob + OFF_UpperLim) ) ),
+    LowerLimit( * (reinterpret_cast<float*>( Blob + OFF_LowerLim) ) ),
     HasBeenInitialized(0)
       {
 	CurrentVersion = -1;

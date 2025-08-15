@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_RodDecoder.h"
@@ -1536,7 +1536,7 @@ StatusCode TRT_RodDecoder::update(const EventContext& ctx) const {
     int j = 0;
     for (int i = 0; (i < blob.size()) && (j < Ctable->m_Nsymbols);
          i += sizeof(unsigned int)) {
-      Ctable->m_syms[j++] = *((unsigned int*)(BlobStart + i));
+      Ctable->m_syms[j++] = *(reinterpret_cast<const unsigned int*>(BlobStart + i));
     }
 
     std::istringstream iss((atrlist)["firstcode"].data<cool::String4k>());
