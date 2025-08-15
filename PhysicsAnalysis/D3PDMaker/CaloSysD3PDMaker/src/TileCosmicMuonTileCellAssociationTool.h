@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -50,10 +50,10 @@ public:
     virtual const  CaloCell* next();
     
 private:
-    const TileID* m_tileid;
-    CaloCellContainer::const_iterator m_cEnd,m_itr;
+    const TileID* m_tileid{};
+    CaloCellContainer::const_iterator m_cEnd{},m_itr{};
     std::vector<IdentifierHash> m_tileHash;
-    std::vector<IdentifierHash>::iterator m_tileItr;
+    std::vector<IdentifierHash>::iterator m_tileItr{};
 };
 
 }
