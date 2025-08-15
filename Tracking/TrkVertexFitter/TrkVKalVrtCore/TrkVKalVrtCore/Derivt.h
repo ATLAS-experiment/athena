@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _TrkVKalVrtCore_Derivt_H
@@ -126,7 +126,7 @@ class VKPlaneConstraint final : public VKConstraintBase {
 //
 class VKRadiusConstraint final : public VKConstraintBase {
  public:
-  VKRadiusConstraint(int, double, double[], VKVertex*);
+  VKRadiusConstraint(int, double, double[2], VKVertex*);
   ~VKRadiusConstraint();
   friend std::ostream& operator<<(std::ostream& out, const VKRadiusConstraint&);
   double getRC() const { return m_RC; }
