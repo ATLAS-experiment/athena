@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -394,7 +394,7 @@ void VP1Controller::restoreSettings(const QByteArray& ba)
   //warn unrestored:
   if (m_d->collWidget)
     s.ignoreWidget(m_d->collWidget);
-  s.warnUnrestored((QWidget*)(this));
+  s.warnUnrestored(static_cast<QWidget*>(this));
   for (Imp::DialogInfo* di : m_d->dialogs)
     s.warnUnrestored(di->dialogWidget);
 
@@ -415,7 +415,7 @@ QByteArray VP1Controller::saveSettings() const
   if (m_d->collWidget)
     s.ignoreWidget(m_d->collWidget);
 
-  s.warnUnsaved((QWidget*)(this));
+  s.warnUnsaved(static_cast<const QWidget*>(this));
   for (Imp::DialogInfo* di : m_d->dialogs)
     s.warnUnsaved(di->dialogWidget);
 
