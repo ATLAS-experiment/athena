@@ -14475,6 +14475,18 @@ HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21:
   stepFeatures:
     0: 3
     1: 8
+HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_xe0_nn_DarkJetPEBTLA_L1HT190-jJ40s5pETA21:
+  eventCount: 2
+  stepCounts:
+    0: 3
+    1: 2
+    2: 2
+    3: 2
+  stepFeatures:
+    0: 7
+    1: 11
+    2: 8
+    3: 10
 HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_xe0_nn_L1HT190-jJ40s5pETA21:
   eventCount: 2
   stepCounts:

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <string_view>
+#include "xAODTrigMissingET/TrigMissingETContainer.h"
 
 // =============================================================================
 
@@ -36,8 +37,14 @@ PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const PEBInfo
   ATH_MSG_DEBUG("Processing RoI " << **(input.roiEL));
   // Assert we're not being passed a full-scan RoI which makes no sense for RoI-based PEB
   if ((*input.roiEL)->isFullscan()) {
-    ATH_MSG_ERROR("Full-scan RoI passed as input to RoIPEBInfoWriterTool");
-    return {};
+    auto met_feature_vec = TrigCompositeUtils::findLinks<xAOD::TrigMissingETContainer>(input.decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+    if (not met_feature_vec.empty()) {
+      ATH_MSG_DEBUG("Ignoring MET leg passed to RoIPEBInfoWriterTool");
+      return pebi;
+    } else {
+      ATH_MSG_ERROR("Full-scan RoI passed as input to RoIPEBInfoWriterTool");
+      return {};
+    }
   }
 
   float eta = (*input.roiEL)->eta();

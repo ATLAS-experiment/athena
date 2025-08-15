@@ -24,6 +24,7 @@
 #include "LArElecCalib/ILArAutoCorr.h" //read handle
 #include "LArRawConditions/LArADC2MeV.h" //read handle
 #include "LArRawConditions/LArOFC.h" //read handle
+#include "LArElecCalib/ILArNoise.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 
 class AtlasDetectorID;
@@ -231,6 +232,9 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
   
     SG::ReadCondHandleKey<ILArPedestal> m_pedestalKey{this,"PedestalKey","LArPedestal","SG Key of LArPedestal object"};
     const ILArPedestal *m_ped=nullptr;
+ 
+    SG::ReadCondHandleKey<ILArNoise> m_noiseKey{this,"NoiseKey","","SG Key of LArNoise object"};
+    const ILArNoise *m_noise=nullptr;
  
     SG::ReadCondHandleKey<ILArAutoCorr> m_acorrKey{this,"AutocorrKey","LArAutoCorrSym","SG Key of LArAutoCorr object"};
     const ILArAutoCorr *m_acorr=nullptr;
