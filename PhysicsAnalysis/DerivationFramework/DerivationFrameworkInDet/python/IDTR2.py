@@ -7,7 +7,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
-from Campaigns.Utils import Campaign
 
 streamName = "StreamDAOD_IDTR2"
 
@@ -79,7 +78,7 @@ def IDTR2Cfg(flags):
     skimmingTools = []
     augmentationTools = [IDTR2_Reco_V0Finder]
 
-    if flags.Input.isMC and flags.Input.MCCampaign not in [Campaign.MC23e, Campaign.MC23g]:
+    if flags.Derivation.InDet.doTrackSystematics:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
         acc.merge(TrackSystematicsAlgCfg(
             flags,

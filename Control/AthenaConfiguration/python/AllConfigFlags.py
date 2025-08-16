@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
@@ -521,6 +521,12 @@ def initConfigFlags():
         from DerivationFrameworkConfiguration.DerivationConfigFlags import createDerivationConfigFlags
         return createDerivationConfigFlags()
     _addFlagsCategory(acf, "Derivation", __commonDerivation, 'DerivationFrameworkConfiguration' )
+
+#indet derivation flags
+    def __indetDerivation():
+        from DerivationFrameworkInDet.InDetDFConfigFlags import createInDetDFConfigFlags
+        return createInDetDFConfigFlags()
+    _addFlagsCategory(acf, "Derivation.InDet", __indetDerivation, 'DerivationFrameworkInDet' )
 
 #egamma derivation Flags:
     def __egammaDerivation():
