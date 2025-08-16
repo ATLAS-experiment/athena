@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of the LArRODBlockStructure_3 class
@@ -87,14 +87,14 @@ bool LArRodBlockPhysicsV1::setPointers()
  if (m_FebBlockSize>m_iHeadBlockSize)
    {if (getHeader16(LowEBlkOffset))
       {m_FlagPtr=m_FebBlock+getHeader16(LowEBlkOffset);
-       m_LowEPtr=(const int16_t*)(m_FlagPtr+m_NFlaggingWords);
+       m_LowEPtr=reinterpret_cast<const int16_t*>(m_FlagPtr+m_NFlaggingWords);
       }
     else 
       {//m_FlagPtr=NULL;
        //m_LowEPtr=NULL;
        //Bugfix, 9.8.2004, WL: Set pointer to dummy map to read FEB with only high energy block
 	m_FlagPtr=m_DummyBitMap;
-	m_LowEPtr=(const int16_t*)m_FlagPtr;
+	m_LowEPtr=reinterpret_cast<const int16_t*>(m_FlagPtr);
       }
     if (getHeader16(HighEBlkOffset))
       m_HighEPtr=(const int32_t*)m_FebBlock+getHeader16(HighEBlkOffset);

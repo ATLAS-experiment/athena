@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of a LArRODBlockStructure class
@@ -58,24 +58,24 @@ bool LArRodBlockPhysicsV4::setPointers()
       int off = -8;
       if (getHeader16(ResultsOff1)) {
 	if (getHeader16(ResultsDim1)>=8) 
-	m_GainPointer=(const uint32_t*)(m_FebBlock+getHeader16(ResultsOff1)+off);
+          m_GainPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+getHeader16(ResultsOff1)+off);
 	if (getHeader16(ResultsDim1)>=12) 
 	  m_MaskPointer=(const uint32_t*)(m_FebBlock+getHeader16(ResultsOff1)+8+off);
 	if (getHeader16(ResultsDim1)>=13)
-	  m_HotCellsPointer=(const uint16_t*) (m_FebBlock+getHeader16(ResultsOff1)+12+off);
+	  m_HotCellsPointer=reinterpret_cast<const uint16_t*> (m_FebBlock+getHeader16(ResultsOff1)+12+off);
 	if (getHeader16(ResultsDim1)>13)
-	  m_EnergyPointer=(const uint16_t*) (m_FebBlock+getHeader16(ResultsOff1)+13+off);
+	  m_EnergyPointer=reinterpret_cast<const uint16_t*> (m_FebBlock+getHeader16(ResultsOff1)+13+off);
       }
       if (getHeader16(ResultsOff2)) {
 	if (getHeader16(ResultsOff2)>=4) 
-	m_TowerPointer=(const uint8_t*)(m_FebBlock+getHeader16(ResultsOff2)+off);
+          m_TowerPointer=reinterpret_cast<const uint8_t*>(m_FebBlock+getHeader16(ResultsOff2)+off);
 	if (getHeader16(ResultsOff2)>=7) 
-	  m_SumPointer=(const int32_t*)(m_FebBlock+getHeader16(ResultsOff2)+4+off);
+	  m_SumPointer=reinterpret_cast<const int32_t*>(m_FebBlock+getHeader16(ResultsOff2)+4+off);
 	if (getHeader16(ResultsOff2)>7) 
-	  m_TimeQualityPointer=(const uint16_t*)(m_FebBlock+getHeader16(ResultsOff2)+7+off);
+	  m_TimeQualityPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+getHeader16(ResultsOff2)+7+off);
       }
       if (getHeader16(RawDataBlkOff))
-	m_RawDataPointer=(const uint16_t*)(m_FebBlock+getHeader16(RawDataBlkOff)+off);
+	m_RawDataPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+getHeader16(RawDataBlkOff)+off);
       
 #ifdef  LARBSDBGOUTPUT
       MsgStream logstr(Athena::getMessageSvc(), BlockType());

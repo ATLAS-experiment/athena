@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of the LArRODBlockStructure_3 class
@@ -126,32 +126,32 @@ bool LArRodBlockPhysicsV3::setPointers()
  if (m_FebBlockSize>m_iHeadBlockSize)
    {
      if (LE_getHeader16(SumBlkOffset))
-       m_SumBlkPtr=(const uint32_t*) (m_FebBlock+LE_getHeader16(SumBlkOffset));
-       else m_SumBlkPtr=(const uint32_t*)m_DummyBitMap;
+       m_SumBlkPtr=reinterpret_cast<const uint32_t*> (m_FebBlock+LE_getHeader16(SumBlkOffset));
+     else m_SumBlkPtr=reinterpret_cast<const uint32_t*>(m_DummyBitMap);
 
      if (LE_getHeader16(CounterBlkOffset)) 
-       m_CounterPtr=(const uint16_t*)(m_FebBlock+LE_getHeader16(CounterBlkOffset));
-       else m_CounterPtr=(const uint16_t*)m_DummyBitMap;
+       m_CounterPtr=reinterpret_cast<const uint16_t*>(m_FebBlock+LE_getHeader16(CounterBlkOffset));
+     else m_CounterPtr=reinterpret_cast<const uint16_t*>(m_DummyBitMap);
     
      if (LE_getHeader16(EBlkOffset))
-       m_EnergyPtr=(const uint16_t*)(m_FebBlock+LE_getHeader16(EBlkOffset));
-       else m_EnergyPtr=(const uint16_t*)m_DummyBitMap;
+       m_EnergyPtr=reinterpret_cast<const uint16_t*>(m_FebBlock+LE_getHeader16(EBlkOffset));
+     else m_EnergyPtr=reinterpret_cast<const uint16_t*>(m_DummyBitMap);
 
      if (LE_getHeader16(GainBlkOffset)) 
-       m_GainPtr=(const uint32_t*)(m_FebBlock+LE_getHeader16(GainBlkOffset));
-       else m_GainPtr=(const uint32_t*)m_DummyBitMap;
+       m_GainPtr=reinterpret_cast<const uint32_t*>(m_FebBlock+LE_getHeader16(GainBlkOffset));
+     else m_GainPtr=reinterpret_cast<const uint32_t*>(m_DummyBitMap);
      
      if (LE_getHeader16(TimeQualityBlkOffset)) 
-       m_TimeQualityPtr=(const int16_t*)(m_FebBlock+LE_getHeader16(TimeQualityBlkOffset));
-       else m_TimeQualityPtr=(const int16_t*)m_DummyBitMap;
+       m_TimeQualityPtr=reinterpret_cast<const int16_t*>(m_FebBlock+LE_getHeader16(TimeQualityBlkOffset));
+     else m_TimeQualityPtr=reinterpret_cast<const int16_t*>(m_DummyBitMap);
 
      if (LE_getHeader16(RawDataBlkOffset))
-       m_RawDataPtr=(const int16_t*)(m_FebBlock+LE_getHeader16(RawDataBlkOffset));
-       else m_RawDataPtr=(const int16_t*)m_DummyBitMap;
+       m_RawDataPtr=reinterpret_cast<const int16_t*>(m_FebBlock+LE_getHeader16(RawDataBlkOffset));
+     else m_RawDataPtr=reinterpret_cast<const int16_t*>(m_DummyBitMap);
 
      if (LE_getHeader16(FebInfoBlkOffset))
-       m_FebInfoDataPtr=(const int16_t*)(m_FebBlock+LE_getHeader16(FebInfoBlkOffset));
-       else m_FebInfoDataPtr=(const int16_t*)m_DummyBitMap;
+       m_FebInfoDataPtr=reinterpret_cast<const int16_t*>(m_FebBlock+LE_getHeader16(FebInfoBlkOffset));
+     else m_FebInfoDataPtr=reinterpret_cast<const int16_t*>(m_DummyBitMap);
 
 #ifdef  LARBSDBGOUTPUT
       m_logstr << MYLEVEL  << "***********************************************************************"<< endmsg;
