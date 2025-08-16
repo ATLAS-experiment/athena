@@ -12,6 +12,7 @@
 #define OFFLINE_V5_POOL_GUID_H
 
 #include <string>
+#include <cstring>
 
 /*
  *  POOL namespace (changed for DAQ use)
@@ -67,9 +68,7 @@ namespace offline_poolCopy_v5  {
         if (Data1 != g.Data1 ) return false;
         if (Data2 != g.Data2 ) return false;
         if (Data3 != g.Data3 ) return false;
-        const unsigned int *p = reinterpret_cast<const unsigned int*>(&Data4[0]), 
-                            *q = reinterpret_cast<const unsigned int*>(&g.Data4[0]);
-        return *p++ == *q++ && *p == *q;
+        return memcmp (Data4, g.Data4, sizeof(Data4)) == 0;
       }
       return true;
     }
