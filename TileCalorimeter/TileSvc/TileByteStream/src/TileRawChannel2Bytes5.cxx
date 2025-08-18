@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileByteStream/TileRawChannel2Bytes5.h" 
@@ -675,8 +675,8 @@ void TileRawChannel2Bytes5::unpack(const UINT32* ofw, const UINT32* ptr_frag, Ti
   int size_L2 = _extu(ptr_frag[2], 2, 32 - 3); // frag_info = ..xxx...
   int i, chan, code, size;
   int gain(0), bad, ene(0), time(0), u[7];
-  const UINT32* ptr_reco = (const UINT32*) (ptr_frag + 3); // + Header
-  const unsigned char* ptr_buff = (const unsigned char*) (ptr_frag + 3 + 48 + size_L2); // + Header + Reco + Size_L2
+  const UINT32* ptr_reco = ptr_frag + 3; // + Header
+  const unsigned char* ptr_buff = reinterpret_cast<const unsigned char*> (ptr_frag + 3 + 48 + size_L2); // + Header + Reco + Size_L2
   const UINT32* ptr = ptr_reco;
   UINT16 bad_bits[3];
   UINT16 bad16 = 0;
