@@ -143,7 +143,7 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
   StatusCode fillRate(const TrigCompositeUtils::DecisionIDContainer&, int) const;
   StatusCode fillHistogram(const TrigCompositeUtils::DecisionIDContainer&, int, LockedHandle<TH2>&) const;
   StatusCode fillSequences(const std::set<std::string>&) const;
-  StatusCode fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>&, const TrigCompositeUtils::DecisionIDContainer&) const;
+  StatusCode fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>&, const TrigCompositeUtils::DecisionIDContainer&, int) const;
 };
 
 #endif //> !TRIGSTEERMONITOR_TRIGSIGNATUREMONI_H
