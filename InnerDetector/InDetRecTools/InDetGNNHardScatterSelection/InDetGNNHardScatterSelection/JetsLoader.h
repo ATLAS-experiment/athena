@@ -53,7 +53,7 @@ namespace InDetGNNHardScatterSelection {
         using PartLinks = std::vector<ElementLink<IPC>>;
         using IPV = std::vector<const xAOD::Jet*>;
 
-        JetSortVar iparticleSortVar(ConstituentsSortOrder);
+        static JetSortVar iparticleSortVar(ConstituentsSortOrder);
 
         std::vector<const xAOD::Jet*> getJetsFromVertex(const xAOD::Vertex& vertex) const;
 

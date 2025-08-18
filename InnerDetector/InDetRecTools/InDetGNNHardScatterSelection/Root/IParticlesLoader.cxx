@@ -13,8 +13,8 @@ namespace InDetGNNHardScatterSelection {
     IParticlesLoader::IParticleSortVar IParticlesLoader::iparticleSortVar(
         ConstituentsSortOrder config) 
     {
-      typedef xAOD::IParticle Ip;
-      typedef xAOD::Vertex Vertex;
+      using Ip = xAOD::IParticle;
+      using Vertex = xAOD::Vertex;
       switch(config) {
         case ConstituentsSortOrder::PT_DESCENDING:
           return [](const Ip* tp, const Vertex&) {return tp->pt();};
@@ -52,11 +52,12 @@ namespace InDetGNNHardScatterSelection {
     {
         std::vector<std::pair<double, const xAOD::IParticle*>> particles;
         for (const xAOD::IParticle *tp : m_associator(vertex)) {
-          particles.push_back({m_iparticleSortVar(tp, vertex), tp});
+          particles.emplace_back(m_iparticleSortVar(tp, vertex), tp);
         }
         std::sort(particles.begin(), particles.end(), std::greater<>());
         std::vector<const xAOD::IParticle*> only_particles;
-        for (const auto& particle: particles) {
+        only_particles.reserve(particles.size());
+for (const auto& particle: particles) {
           only_particles.push_back(particle.second);
         }
         return only_particles;

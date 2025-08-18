@@ -89,7 +89,7 @@ for(const auto & h: ownedRetrievedHistos){
       retrievedHistos.push_back(h.get());
     }
 
-    std::unique_ptr<TTrainedNetwork> a_nn(m_networkToHistoTool->fromHistoToTrainedNetwork(retrievedHistos));
+    std::unique_ptr<TTrainedNetwork> a_nn(Trk::NeuralNetworkToHistoTool::fromHistoToTrainedNetwork(retrievedHistos));
     if (!a_nn) {
       ATH_MSG_ERROR( "Failed to create NN from " << retrievedHistos.size() << " histograms read from " << folder);
     }

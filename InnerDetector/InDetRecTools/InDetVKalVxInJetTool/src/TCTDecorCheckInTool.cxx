@@ -121,7 +121,7 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
        //loop over tracks and check if decoration was correctly added (using either decorateTrack)
       for(trackItr = trackTES->begin(); trackItr != trackItrE; ++trackItr){
         const xAOD::TrackParticle* itrk = (*trackItr);
-        std::vector<float> v_tctScoresDeco = trackReadDecorHandleTCTScore(*itrk);
+        const std::vector<float>& v_tctScoresDeco = trackReadDecorHandleTCTScore(*itrk);
         const ElementLink<xAOD::JetContainer>& v_jetLinks = trackReadDecorHandleJetLink(*itrk);
 
           ATH_MSG_DEBUG("TCT score from decoration: " << v_tctScoresDeco.at(0) << ", " << v_tctScoresDeco.at(1) << ", "<< v_tctScoresDeco.at(2));
@@ -148,8 +148,8 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
       //loop over jets and check if decoration was correctly added 
       for(jetItr = jetTES->begin(); jetItr != jetItrE; ++jetItr){
         const xAOD::Jet* ijet = (*jetItr);
-        std::vector<std::vector<float>> v_tctScoresDeco = jetReadDecorHandleTCTScore(*ijet);
-        std::vector<ElementLink<xAOD::TrackParticleContainer>> v_trackLinks = jetReadDecorHandleTrackLink(*ijet);
+        const std::vector<std::vector<float>>& v_tctScoresDeco = jetReadDecorHandleTCTScore(*ijet);
+        const std::vector<ElementLink<xAOD::TrackParticleContainer>>& v_trackLinks = jetReadDecorHandleTrackLink(*ijet);
 
         for(unsigned int i=0; i<v_tctScoresDeco.size(); i++)
         {

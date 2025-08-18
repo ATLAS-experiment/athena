@@ -122,7 +122,7 @@ namespace InDet {
         // flag if cluster contains at least a ganged pixel
 
         hasGanged = hasGanged ||
-	            m_pixelRDOTool->isGanged(rId, element).has_value();
+	            InDet::PixelRDOTool::isGanged(rId, element).has_value();
         DVid.push_back(rId);
         InDetDD::SiLocalPosition siLocalPosition
         (design->positionFromColumnRow(col,row));
