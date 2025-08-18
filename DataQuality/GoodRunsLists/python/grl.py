@@ -6,7 +6,7 @@ import cherrypy
 import threading
 import sys, os
 import multiprocessing
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 import urllib
 import tempfile
 import shutil

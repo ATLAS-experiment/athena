@@ -129,7 +129,7 @@ def ami_dsinfos(dsname):
     """
     import PyUtils.AmiLib as A
     import PyUtils.xmldict as _x
-    import xml.etree.cElementTree as ET
+    import xml.etree.ElementTree as ET
 
     # keep order of tokens !
     for token in ('ami://', '//', '/'):
