@@ -201,6 +201,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   ANA_CHECK(m_tgecTool.setProperty("ListOfLegsPerTool", legsPerTool));
   ANA_CHECK(m_tgecTool.setProperty("TriggerCombination", triggerCombination));
   ANA_CHECK(m_tgecTool.setProperty("TriggerMatchingTool", m_trigMatchingTool));
+  ANA_CHECK(m_tgecTool.setProperty("NumberOfToys", m_numToys));
   ANA_CHECK(m_tgecTool.setProperty("OutputLevel", MSG::ERROR));
   ANA_CHECK(m_tgecTool.initialize());
 

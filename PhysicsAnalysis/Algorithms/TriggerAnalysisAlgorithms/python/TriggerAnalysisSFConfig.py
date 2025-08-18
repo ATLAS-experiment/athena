@@ -106,6 +106,9 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addOption ('taus', '', type=str,
             info="the input tau container, with a possible selection, in "
             "the format container or container.selection.")
+        self.addOption ('numberOfToys', 0, type=int,
+            info="Number of toy experiments to run to estimate the trigger efficiencies, "
+            "instead of using explicit formulas. The default is 0 (not using toys).")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -167,6 +170,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
 
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
+        alg.numberOfToys = self.numberOfToys
         alg.scaleFactorDecoration = 'globalTriggerEffSF' + triggerSuffix + self.postfix + '_%SYS%'
         alg.matchingDecoration = 'globalTriggerMatch' + triggerSuffix + self.postfix + '_%SYS%'
         alg.eventDecisionOutputDecoration = 'globalTriggerMatch' + triggerSuffix + self.postfix + '_dontsave_%SYS%'
