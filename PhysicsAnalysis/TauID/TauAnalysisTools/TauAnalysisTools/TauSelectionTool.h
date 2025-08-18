@@ -153,6 +153,14 @@ private:
   Gaudi::Property<int> m_iEleIDWP{this, "EleIDWP", 0};
   Gaudi::Property<int> m_iEleIDVersion{this, "EleIDVersion", 1};
   Gaudi::Property<bool> m_bMuonOLR{this, "MuonOLR", false};
+ 
+  Gaudi::Property<std::vector<float>> m_vecPtRegion{this, "PtRegion", {}};  
+  Gaudi::Property<std::vector<float>> m_vecAbsEtaRegion{this, "AbsEtaRegion",{}};
+  Gaudi::Property<std::vector<int>> m_vecAbsCharges{this, "AbsCharges", {}};
+  Gaudi::Property<std::vector<unsigned>> m_vecNTracks{this, "NTracks", {}};
+  Gaudi::Property<std::vector<float>> m_vecJetRNNSigTransRegion{this, "JetRNNSigTransRegion", {}};
+  Gaudi::Property<std::vector<float>> m_vecGNTauSigTransRegion{this, "GNTauSigTransRegion", {}};
+  Gaudi::Property<std::vector<float>> m_vecEleRNNRegion{this, "EleRNNRegion", {}};
 
 protected:
   TFile* m_fOutFile;//!

@@ -26,13 +26,8 @@ DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
   : asg::AsgMetadataTool( name )
   , m_fOutFile(nullptr)
   , m_aAccept( "DiTauSelection" )
-{
-  declareProperty( "PtRegion",        m_vPtRegion       = {});  // in GeV
-  declareProperty( "AbsEtaRegion",    m_vAbsEtaRegion   = {});
-  declareProperty( "NSubjetsRegion",  m_vNSubjetsRegion = {});
-  declareProperty( "AbsCharges",      m_vAbsCharges    = {});
-  declareProperty( "OmniScoreRegion", m_vOmniScoreRegion = {});
-}
+{}
+
 //______________________________________________________________________________
 DiTauSelectionTool::~DiTauSelectionTool()
 {
@@ -42,6 +37,13 @@ DiTauSelectionTool::~DiTauSelectionTool()
 //______________________________________________________________________________
 StatusCode DiTauSelectionTool::initialize()
 {
+ 
+  m_vPtRegion = m_vecPtRegion.value();	
+  m_vAbsEtaRegion = m_vecAbsEtaRegion.value();
+  m_vNSubjetsRegion = m_vecNSubjetsRegion.value(); 
+  m_vAbsCharges = m_vecAbsCharges.value();
+  m_vOmniScoreRegion = m_vecOmniScoreRegion.value();
+
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
   if (!bConfigViaProperties and !m_vPtRegion.empty())             bConfigViaProperties = true;
