@@ -118,10 +118,6 @@ protected:
                                         double& dEfficiencyScaleFactor,
                                         double dVars[]
                                         );
-  static CP::CorrectionCode getValueTH3(const TObject* oObject,
-                                        double& dEfficiencyScaleFactor,
-                                        double dVars[]
-                                        );
   static CP::CorrectionCode getValueTF1(const TObject* oObject,
                                         double& dEfficiencyScaleFactor,
                                         double dVars[]

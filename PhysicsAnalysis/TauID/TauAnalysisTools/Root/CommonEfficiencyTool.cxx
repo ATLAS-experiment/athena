@@ -15,7 +15,6 @@
 #include "TF1.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "TH3.h"
 #include "TROOT.h"
 #include "TClass.h"
 #include <utility>
@@ -550,13 +549,7 @@ void CommonEfficiencyTool::addHistogramToSFMap(TKey* kKey, const std::string& sK
     (*m_mSF)[sKeyName] = tTupleObjectFunc(oObject,&getValueTH2);
     ATH_MSG_DEBUG("added histogram with name "<<sKeyName);
   }
-  else if (cClass->InheritsFrom("TH3"))
-  {
-    TH1* oObject = (TH1*)kKey->ReadObj();
-    oObject->SetDirectory(0);
-    (*m_mSF)[sKeyName] = tTupleObjectFunc(oObject,&getValueTH3);
-    ATH_MSG_DEBUG("added histogram with name "<<sKeyName);
-  }else if (cClass->InheritsFrom("TH1"))
+  else if (cClass->InheritsFrom("TH1"))
   {
     TH1* oObject = (TH1*)kKey->ReadObj();
     oObject->SetDirectory(0);
@@ -603,9 +596,6 @@ void CommonEfficiencyTool::generateSystematicSets()
   // set truth type to check for in truth matching
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
   else if (sTruthType=="TRUEELECTRON") m_eCheckTruth = TauAnalysisTools::TruthElectron;
-  else if (sTruthType=="TRUEMUON") m_eCheckTruth = TauAnalysisTools::TruthMuon;
-  else if (sTruthType=="TRUEJET") m_eCheckTruth = TauAnalysisTools::TruthJet;
-  else if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
   // 3p eVeto, still need this to be measurable in T&P
   if (sEfficiencyType=="ELERNN" || sEfficiencyType=="ELEOLR") m_bNoMultiprong = true;
 
@@ -740,41 +730,6 @@ CP::CorrectionCode CommonEfficiencyTool::getValueTH2(const TObject* oObject,
 
   // get bin from TH2 depending on x and y values; finally set the scale factor
   int iBin = hHist->FindFixBin(dPt,dEta);
-  dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
-  return CP::CorrectionCode::Ok;
-}
-
-/*
-  find the particular value in TH3 depending on x, y, z
-  Note: In case values are outside of bin ranges, the closest bin value is used
-*/
-//______________________________________________________________________________
-CP::CorrectionCode CommonEfficiencyTool::getValueTH3(const TObject* oObject,
-    double& dEfficiencyScaleFactor, double dVars[])
-{
-  double dX = dVars[0];
-  double dY = dVars[1];
-  double dZ = dVars[2];
-
-  const TH3* hHist = dynamic_cast<const TH3*>(oObject);
-
-  if (!hHist)
-  {
-    // ATH_MSG_ERROR("Problem with casting TObject of type "<<oObject->ClassName()<<" to TH2D");
-    return CP::CorrectionCode::Error;
-  }
-
-  // protect values from underflow bins
-  dX = std::max(dX,hHist->GetXaxis()->GetXmin());
-  dY = std::max(dY,hHist->GetYaxis()->GetXmin());
-  dZ = std::max(dZ,hHist->GetZaxis()->GetXmin());
-  // protect values from overflow bins (times .999 to keep it inside last bin)
-  dX = std::min(dX,hHist->GetXaxis()->GetXmax() * .999);
-  dY = std::min(dY,hHist->GetYaxis()->GetXmax() * .999);
-  dZ = std::min(dZ,hHist->GetZaxis()->GetXmax() * .999);
-
-  // get bin from TH2 depending on x and y values; finally set the scale factor
-  int iBin = hHist->FindFixBin(dX,dY,dZ);
   dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
   return CP::CorrectionCode::Ok;
 }
