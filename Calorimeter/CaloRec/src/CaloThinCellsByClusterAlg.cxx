@@ -23,7 +23,10 @@ StatusCode CaloThinCellsByClusterAlg::initialize()
   ATH_CHECK( m_cells.initialize (m_streamName) );
   ATH_CHECK( m_clusters.initialize() );
   ATH_CHECK(m_caloMgrKey.initialize());
-
+  if (m_clusterCellLinks.key().empty()) {
+    m_clusterCellLinks = m_clusters.key() + "_links";
+  }
+  ATH_CHECK(m_clusterCellLinks.initialize(m_streamName));
   if (!m_samplingNames.empty()) {
     ATH_CHECK( decodeSamplings() );
   }
@@ -46,6 +49,8 @@ StatusCode CaloThinCellsByClusterAlg::execute (const EventContext& ctx) const
      return StatusCode::SUCCESS;
   }
 
+  SG::ThinningHandle<CaloClusterCellLinkContainer> clusterCellLinks (m_clusterCellLinks, ctx);
+  clusterCellLinks.keepAll();
 
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
@@ -82,7 +87,7 @@ StatusCode CaloThinCellsByClusterAlg::execute (const EventContext& ctx) const
     }
 
     // add additional layer cells
-    if (!m_validSamplings.empty()) {	
+    if (!m_validSamplings.empty()) {
       double eta = clust->eta();
       double phi = clust->phi();
       double deta = clust->getClusterEtaSize() * 0.025;

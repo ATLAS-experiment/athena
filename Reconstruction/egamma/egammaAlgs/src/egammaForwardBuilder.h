@@ -131,7 +131,10 @@ private:
   };
 
   /** @brief Output cluster container cell links: name taken from containter name. */
-  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_outClusterContainerCellLinkKey;
+  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_outClusterContainerCellLinkKey{
+    this,
+    "ClusterContainerLinks", "",
+    "Key of the output cluster container cell links; Taken from associated container"};
 
   /** @brief Private member flag to do the track matching. */
   Gaudi::Property<bool> m_doTrackMatching {
