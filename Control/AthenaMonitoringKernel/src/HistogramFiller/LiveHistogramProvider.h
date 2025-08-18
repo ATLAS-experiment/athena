@@ -66,8 +66,8 @@ namespace Monitored {
           // The histogram exists and needs to be rolled
           if (m_histDef->type=="TEfficiency") {
             // Roll a TEfficiency (same process as the codeblock immediately above)
-            TH1* totalClone = (static_cast<TEfficiency*> (m_currentHistogram))->GetCopyTotalHisto();
-            TH1* passedClone = (static_cast<TEfficiency*> (m_currentHistogram))->GetCopyPassedHisto();
+            TH1* totalClone = static_cast<TEfficiency*>(m_currentHistogram)->GetCopyTotalHisto();
+            TH1* passedClone = static_cast<TEfficiency*>(m_currentHistogram)->GetCopyPassedHisto();
             m_factory->remove(*m_histDef);
             updateHistDef();
             TEfficiency* eNew = static_cast<TEfficiency*> (m_factory->create(*m_histDef));
