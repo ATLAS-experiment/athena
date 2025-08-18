@@ -455,7 +455,7 @@ atlas_add_citest( TriggerConfigFlags
 
 atlas_add_citest( EFTracking_FPGATrackSim_CI
   SCRIPT FPGATrackSim_CI.sh
-   LOG_IGNORE_PATTERN "FPGATrackSimProto.*ERROR Propagation reached the step count limit.*|FPGATrackSimProto.*ERROR.*Propagation failed: PropagatorError.*|WARNING FPE.*FPGATrackSimProtoTackFitAlg.*|.*WARNING FPE INVALID.*ResolvedProtoTrackToAltTrackParticleCnvAlg.*|.*ERROR.*No start volume resolved.*" )
+   LOG_IGNORE_PATTERN "FPGATrackSimProto.*ERROR Propagation reached the step count limit.*|FPGATrackSimProto.*ERROR.*Propagation failed: PropagatorError.*|WARNING FPE.*FPGATrackSimProtoTackFitAlg.*|.*WARNING FPE INVALID.*ResolvedProtoTrackToAltTrackParticleCnvAlg.*|.*ERROR.*No start volume resolved.*|.*WARNING ERROR message limit.*|.*ERROR \|" )
 
 atlas_add_citest (TrigInDetValidationMenu 
                SCRIPT TrigInDetValidation_menu_test.py

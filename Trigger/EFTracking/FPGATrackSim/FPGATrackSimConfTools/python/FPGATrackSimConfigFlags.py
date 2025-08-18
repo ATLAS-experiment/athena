@@ -59,7 +59,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('ParamNNonnxFile1st', 'NN/1stStage/v0.11/Param_5Hits_V004')
     cf.addFlag('ParamNNonnxFile2nd', 'NN/2ndStage/v0.11/Param_13Hits_V007') 
     cf.addFlag('doNNPathFinder', False)
-    cf.addFlag('NNCartesianCoordinates', True)
+    cf.addFlag('NNCartesianCoordinates', False)
     cf.addFlag('windowRScaling', 1.0)
     cf.addFlag('windowPhiScaling', 1.0)
     cf.addFlag('windowZScaling', 1.0)
