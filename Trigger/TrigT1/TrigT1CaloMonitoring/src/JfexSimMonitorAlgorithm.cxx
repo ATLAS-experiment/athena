@@ -73,7 +73,7 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     auto EventType = Monitored::Scalar<std::string>("EventType","DataTowers");
     if(jFexTowerContainer->empty()) {
         EventType = "EmulatedTowers";
-        if (timeUntil>=0 && timeUntil<=1) {
+        if (timeUntil>=0 && timeUntil<=5) {
             EventType += "+JustBeforeOTF";
         }
     }
