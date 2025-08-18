@@ -488,7 +488,7 @@ InDetIterativePriVxFinderTool::findVertex(
               (*tracksIter).initialPerigee();
 
             if (trackPerigee == nullptr) {
-              msg(MSG::ERROR) << " Cast to perigee gives 0 pointer " << endmsg;
+              ATH_MSG_ERROR(" nullptr to perigee");
             }
 
             double chi2_newvtx = compatibility(*trackPerigee, *myxAODVertex);
@@ -667,8 +667,6 @@ InDetIterativePriVxFinderTool::findVertex(
     ATH_MSG_WARNING("Exceeded maximum iterations, have "<<iterations<<" vertices, m_maxVertices = "<<m_maxVertices);
   }
 
-  // unfortunately you have still a problem with the track to links!!!
-
   //---- add dummy vertex at the end
   //------------------------------------------------------//
   //---- if one or more vertices are already there: let dummy have same position
@@ -809,11 +807,6 @@ InDetIterativePriVxFinderTool::printParameterSettings()
                << "VertexFitter " << m_iVertexFitter << '\n');
 }
 
-void
-InDetIterativePriVxFinderTool::SGError(const std::string& errService)
-{
-  msg(MSG::FATAL) << errService << " not found. Exiting !" << endmsg;
-}
 
 double
 InDetIterativePriVxFinderTool::compatibility(
@@ -888,7 +881,7 @@ InDetIterativePriVxFinderTool::removeAllFrom(
 void
 InDetIterativePriVxFinderTool::countTracksAndNdf(xAOD::Vertex* myxAODVertex,
                                                  double& ndf,
-                                                 int& ntracks) 
+                                                 int& ntracks)
 {
   if (myxAODVertex) {
     ndf = myxAODVertex->numberDoF();
@@ -1002,7 +995,7 @@ InDetIterativePriVxFinderTool::removeCompatibleTracks(
     const Trk::TrackParameters* myPerigee = (*perigeesToFitIter);
 
     if (myPerigee == nullptr) {
-      ATH_MSG_ERROR(" Cast to perigee gives null pointer ");
+      ATH_MSG_ERROR(" nullptr to perigee ");
       return;
     }
 
