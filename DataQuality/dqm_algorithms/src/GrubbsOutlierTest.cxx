@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file GrubbsOutlierTest.cxx
@@ -62,7 +62,7 @@ dqm_algorithms::GrubbsOutlierTest::execute(	const std::string & name ,
 
   // check if its a 1d histogram or not
   if ( object.IsA()->InheritsFrom("TH1") ) {
-    histogram = (TH1*)&object;
+    histogram = static_cast<const TH1*>(&object);
   } else {
     throw dqm_core::BadConfig( ERS_HERE ,name , " does not inherit from TH1");
   }
