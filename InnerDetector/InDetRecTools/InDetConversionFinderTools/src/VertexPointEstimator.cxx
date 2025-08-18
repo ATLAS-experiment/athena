@@ -117,10 +117,29 @@ namespace InDet {
       maxPhi= m_maxPhi[flag];
     }
     
-    double d0[2],z0[2],phi[2],cotTheta[2],qOverPt[2],RC[2],XC[2],YC[2],RA[2],AB[2];
-    double XSVI[2],YSVI[2],ZSVI[2],RVI[2],DZSVI[2],SS1[2],SS2[2],ZZ1[2],ZZ2[2];
+    double d0[2];
+    double z0[2];
+    double phi[2];
+    double cotTheta[2];
+    double qOverPt[2];
+    double RC[2];
+    double XC[2];
+    double YC[2];
+    double RA[2];
+    double AB[2];
+    double XSVI[2];
+    double YSVI[2];
+    double ZSVI[2];
+    double RVI[2];
+    double DZSVI[2];
+    double SS1[2];
+    double SS2[2];
+    double ZZ1[2];
+    double ZZ2[2];
     
-    double X=0.,Y=0.,Z=0.;
+    double X=0.;
+    double Y=0.;
+    double Z=0.;
     for (int I=0; I<2; ++I) {
       d0[I]       = -999.;
       z0[I]       = -999.;
@@ -336,7 +355,10 @@ namespace InDet {
   double VertexPointEstimator::areaVar(double xc1, double yc1, double r1, double xc2, double yc2, double r2, double& phi) 
   {
     double ret = -999999;
-    double xi1, yi1, xi2, yi2;
+    double xi1;
+    double yi1;
+    double xi2;
+    double yi2;
     if (circleIntersection( xc1,  yc1,  r1,  xc2,  yc2,  r2, xi1, yi1, xi2, yi2 ))
     {
       double  h = 0.5*(sqrt( pow(xi1-xi2,2) + pow(yi1-yi2,2) ));
@@ -373,7 +395,10 @@ namespace InDet {
   double VertexPointEstimator::areaVar(double xc1, double yc1, double r1, double xc2, double yc2, double r2, double& h, double& hl, double &ddphi) 
   {
     double ret = -999999;
-    double xi1, yi1, xi2, yi2;
+    double xi1;
+    double yi1;
+    double xi2;
+    double yi2;
     h     = 0;
     hl    = 0;
     ddphi = 0.;

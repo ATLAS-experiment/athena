@@ -86,7 +86,7 @@ namespace InDet {
 
 
     /** Compute the four-momentum of a particle according to a mass hypothesis.  */
-    CLHEP::HepLorentzVector fourP(const Trk::TrackParameters&, const Trk::TrackParameters&, double, bool) const;
+    static CLHEP::HepLorentzVector fourP(const Trk::TrackParameters&, const Trk::TrackParameters&, double, bool) ;
   };
 
 }

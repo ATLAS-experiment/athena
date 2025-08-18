@@ -88,7 +88,7 @@ namespace InDet {
     //Getting the track perigee parameters
     const Trk::TrackParameters* perPos = &(trkPpos->perigeeParameters());
     const Trk::TrackParameters* perNeg = &(trkPneg->perigeeParameters());
-    if (!(m_helpertool->momFraction(perPos, perNeg))) pass = false;
+    if (!(InDet::ConversionFinderUtils::momFraction(perPos, perNeg))) pass = false;
 
     //Track summary information
 
@@ -216,7 +216,7 @@ namespace InDet {
     ///Getting the track perigee parameters
     const Trk::Perigee* perPos = trkpos->perigeeParameters();
     const Trk::Perigee* perNeg = trkneg->perigeeParameters();
-    if (!(m_helpertool->momFraction(perPos, perNeg))) pass = false;
+    if (!(InDet::ConversionFinderUtils::momFraction(perPos, perNeg))) pass = false;
 
     ///Position of initial hit of the two tracks
     double init_pos = 0.; double init_neg = 0.;

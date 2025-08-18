@@ -72,24 +72,6 @@ public:
   virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
   findVertex(const EventContext& ctx,
              const xAOD::TrackParticleContainer* trackParticles) const = 0;
-
-  /* 
-   * Non Event context aware methods.
-   * Can be remove when all clients move to EventContext 
-   * aware calls
-   */
-
-  virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
-  findVertex(const TrackCollection* trackTES) const
-  {
-    return findVertex(Gaudi::Hive::currentContext(), trackTES);
-  }
-
-  virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
-  findVertex(const xAOD::TrackParticleContainer* trackParticles) const
-  {
-    return findVertex(Gaudi::Hive::currentContext(), trackParticles);
-  }
 };
 }
 #endif

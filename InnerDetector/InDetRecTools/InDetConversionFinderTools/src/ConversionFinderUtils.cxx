@@ -117,8 +117,8 @@ namespace InDet {
       // when the helix can be approximated as a straight line, when the
       // distance of closest approach can be calculated as distance^2 = [momentum
       // x (ref_point-position)]^2/momentum^2
-      Amg::Vector3D momentum = perigee->momentum();
-      Amg::Vector3D position = perigee->position();
+      const Amg::Vector3D& momentum = perigee->momentum();
+      const Amg::Vector3D& position = perigee->position();
       double p = momentum.mag();
       Amg::Vector3D delta = position - ref_point;
       distance = std::sqrt(std::pow(delta.mag(),2.) - std::pow((delta.adjoint()*momentum)[0]/p,2.));
@@ -142,7 +142,8 @@ namespace InDet {
     auto	 ntsos = std::make_unique<Trk::TrackStates>();
     const Trk::TrackStates* tsos = track->trackStateOnSurfaces();
     if(!tsos) {return nullptr;}
-    Trk::TrackStates::const_iterator its,itse = tsos->end();
+    Trk::TrackStates::const_iterator its;
+    Trk::TrackStates::const_iterator itse = tsos->end();
     for(its=tsos->begin();its!=itse;++its) {
 
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;

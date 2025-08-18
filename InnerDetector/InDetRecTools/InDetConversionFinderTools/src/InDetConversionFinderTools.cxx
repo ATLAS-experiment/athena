@@ -229,7 +229,7 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
                 ATH_MSG_DEBUG(
                   "Decorating vertex with values used in track pair selector");
                 for (const auto& kv :
-                     m_trackPairsSelector->getLastValues(cache)) {
+                     InDet::TrackPairsSelector::getLastValues(cache)) {
                   SG::Accessor<float> acc (kv.first);
                   acc (*myVertex) = kv.second;
                 }
@@ -288,8 +288,8 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
           singleTrackConvList.push_back(negSelectedTracks[in]);
       }
 
-      std::vector<const xAOD::TrackParticle*>::iterator itk,
-        itke = singleTrackConvList.end();
+      std::vector<const xAOD::TrackParticle*>::iterator itk;
+      std::vector<const xAOD::TrackParticle*>::iterator itke = singleTrackConvList.end();
       int numSingle = 0;
       for (itk = singleTrackConvList.begin(); itk != itke; ++itk) {
         if (!m_singleTrkConvTool->selectSingleTrackParticleConversion((*itk)))
@@ -310,21 +310,21 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
             if (m_decorateVertices) {
               ATH_MSG_DEBUG("Decorating single track vertex with dummy values "
                             "used in track pair selector");
-              for (const auto& kv : m_trackPairsSelector->getLastValues(cache)) {
+              for (const auto& kv : InDet::TrackPairsSelector::getLastValues(cache)) {
                 SG::Accessor<float> acc (kv.first);
                 acc (*sConver) = 0.;
               }
 
               ATH_MSG_DEBUG("Decorating single track vertex with dummy values "
                             "used in vertex point estimator");
-              for (const std::string& k : m_vertexEstimator->decorKeys()) {
+              for (const std::string& k : InDet::VertexPointEstimator::decorKeys()) {
                 SG::Accessor<float> acc (k);
                 acc (*sConver) = 0.;
               }
 
               ATH_MSG_DEBUG("Decorating single track vertex with dummy values "
                             "used in post selector");
-              m_postSelector->decorateVertex(*sConver, 0., 0., 0., 0., 0.);
+              InDet::ConversionPostSelector::decorateVertex(*sConver, 0., 0., 0., 0., 0.);
             }
           }
         }

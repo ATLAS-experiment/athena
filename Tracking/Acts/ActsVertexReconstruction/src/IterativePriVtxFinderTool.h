@@ -89,8 +89,6 @@ namespace ActsTrk {
                               const std::string& name,
                               const IInterface* parent);
 
-    using InDet::IVertexFinder::findVertex;
-
     virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
        findVertex(const EventContext& ctx, const TrackCollection* trackTES) const override;
 
@@ -102,7 +100,7 @@ namespace ActsTrk {
      /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger {nullptr};
     const Acts::Logger &logger() const { return *m_logger; }
-    
+
     std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
     findVertex(const EventContext& ctx, const std::vector<std::unique_ptr<Trk::ITrackLink>>& trackVector) const;
 
