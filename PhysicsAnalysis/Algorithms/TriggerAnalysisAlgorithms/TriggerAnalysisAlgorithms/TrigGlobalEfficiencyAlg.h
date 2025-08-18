@@ -137,6 +137,10 @@ namespace CP
     /// \brief muon quality
     Gaudi::Property<std::string> m_muonID {this, "muonID", "", "muon ID/Quality WP"};
 
+    /// \brief number of toy experiments to run to estimate the trigger combination efficiency,
+    /// instead of using an explicit formula
+    Gaudi::Property<int> m_numToys {this, "numberOfToys", 0, "number of toy experiments"};
+
   }; // class TrigGlobalEfficiencyAlg
 } // namespace CP
 
