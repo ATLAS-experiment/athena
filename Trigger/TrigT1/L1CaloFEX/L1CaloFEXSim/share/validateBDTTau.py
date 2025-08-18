@@ -26,12 +26,12 @@ def get_vector(lines, startswith):
 out_log_content = open(test_output_file, "r").read()
 
 # Filter to get only BDT-related lines
-bdt_algo_lines = [l for l in out_log_content.split('\n') if re.findall("eFEXDriver\..+eFEXtauBDTAlgo", l)]
+bdt_algo_lines = [l for l in out_log_content.split('\n') if re.findall(r"eFEXDriver\..+eFEXtauBDTAlgo", l)]
 
 # Get supercells used to compute the variables, as appears in the test output. Check that they're the same as in the bdt config file
-rgx_vartitle = re.compile("DEBUG\s+([0-9]+) is (l[0-4]_d[0-9_pld]*), sum of supercells$")
-rgx_coretitle = re.compile("DEBUG\s+([0-9]+) is CORE, sum of supercells$")
-rgx_etaphilayer = re.compile("DEBUG\s+eta=([0-9]+)\s+phi=([0-9]+)\s+layer=([0-9]+)$")
+rgx_vartitle = re.compile(r"DEBUG\s+([0-9]+) is (l[0-4]_d[0-9_pld]*), sum of supercells$")
+rgx_coretitle = re.compile(r"DEBUG\s+([0-9]+) is CORE, sum of supercells$")
+rgx_etaphilayer = re.compile(r"DEBUG\s+eta=([0-9]+)\s+phi=([0-9]+)\s+layer=([0-9]+)$")
 variables = OrderedDict()
 last_var_line = [i for i,x in enumerate(bdt_algo_lines) if "Will use sum of supercells" in x][0]
 for l in bdt_algo_lines[:last_var_line]:

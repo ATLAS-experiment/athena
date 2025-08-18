@@ -161,7 +161,7 @@ def parse_date_dir(upload_arg):
 	global lowtime
 	global uptime
 	# try to parse a date from dirname and figure out IOV
-	check = re.compile('.*2[0-9][0-9][0-9][0-1][0-9][0-3][0-9]\/*')
+	check = re.compile(r'.*2[0-9][0-9][0-9][0-1][0-9][0-3][0-9]\/*')
 	find = re.compile('2[0-9][0-9][0-9][0-1][0-9][0-3][0-9]')
 	check_date = check.match(upload_arg)
 	if check_date != None and (lowtime == None and uptime == None):
@@ -230,7 +230,7 @@ for opt,arg in opts:
 		syncdb = True
 
 	if opt in ['--synclimit']:
-		if re.match("^\d+$", arg, flags=0):
+		if re.match(r"^\d+$", arg, flags=0):
 			synclimit = int(arg)
 		else:
 			perr("--synclimit must be integer",exit=True)

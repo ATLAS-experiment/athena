@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser.add_option("-b", "--branches-to-copy", type='string',
                       action='callback',
                       callback=foo_callback,
-                      help="comma separated list of branches to copy from the input tree, you can use \*, do not use spaces")
+                      help=r"comma separated list of branches to copy from the input tree, you can use \*, do not use spaces")
 
     (options, args) = parser.parse_args()
 

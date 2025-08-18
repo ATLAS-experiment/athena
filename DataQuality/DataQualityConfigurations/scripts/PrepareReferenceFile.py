@@ -33,7 +33,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('infile')
     parser.add_argument('outfile')
-    parser.add_argument('--excludeRegex', default='^run_\d+/lb_\d+')
+    parser.add_argument('--excludeRegex', default=r'^run_\d+/lb_\d+')
     parser.add_argument('--excludeTrees', default=True)
 
     args = parser.parse_args()

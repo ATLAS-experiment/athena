@@ -19,7 +19,7 @@ if 0:
     EventSelector = svcMgr.EventSelector
     if hasattr(EventSelector,"CollectionType") and  EventSelector.CollectionType == "ExplicitROOT":
         filename = EventSelector.InputCollections[0]
-        if not re.search('\.root$',filename):
+        if not re.search(r'\.root$',filename):
             filename = filename+'.root'
         file = ROOT.TFile(filename)
         rootStream=ROOT.gROOT.FindObject('CollectionTree')
