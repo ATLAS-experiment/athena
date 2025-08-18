@@ -35,7 +35,7 @@ def STDM17SkimmingToolCfg(flags):
 
     trackRequirements = '(InDetTrackParticles.pt > 9.*GeV && '+tracks+' )'
     #b-jet requirement FixedCutBEff_85 of GN2v01
-    jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV && log(BTagging_AntiKt4EMPFlow.GN2v01_pb/(0.2*BTagging_AntiKt4EMPFlow.GN2v01_pc+0.01*BTagging_AntiKt4EMPFlow.GN2v01_ptau+(1.0-0.2-0.01)*BTagging_AntiKt4EMPFlow.DL1dv01_pu)) > -0.378)'
+    jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV && log(AntiKt4EMPFlowJets.GN2v01_pb/(0.2*AntiKt4EMPFlowJets.GN2v01_pc+0.01*AntiKt4EMPFlowJets.GN2v01_ptau+(1.0-0.2-0.01)*AntiKt4EMPFlowJets.GN2v01_pu)) > -0.378)'
 
     muonsRequirements = '(Muons.pt >= 24.*GeV) && (abs(Muons.eta) < 2.6) && (Muons.DFCommonMuonPassPreselection)'
     electronsRequirements = '(Electrons.pt > 24.*GeV) && (abs(Electrons.eta) < 2.6) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))'
@@ -78,13 +78,16 @@ def STDM17AugmentationToolsForSkimmingCfg(flags):
     TrackIsoTool = CompFactory.xAOD.TrackIsolationTool(**toolkwargs)
     acc.addPublicTool(TrackIsoTool)
 
-    from xAODPrimitives.xAODIso import xAODIso as isoPar
-    Pt1000IsoTrackDecorator = CompFactory.DerivationFramework.trackIsolationDecorator(name = "Pt1000IsoTrackDecorator",
-                                                                                      TrackIsolationTool = TrackIsoTool,
-                                                                                      TargetContainer = "InDetTrackParticles",
-                                                                                      ptcones = [isoPar.ptcone40,isoPar.ptcone30,isoPar.ptcone20],
-                                                                                      Prefix = 'TrkIsoPt1000_')
 
+    from xAODPrimitives.xAODIso import xAODIso as isoPar
+    from DerivationFrameworkInDet.InDetToolsConfig import IsolationTrackDecoratorCfg
+    Pt1000IsoTrackDecorator = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                name               = "Pt1000IsoTrackDecorator",
+                                                                                TrackIsolationTool = TrackIsoTool,
+                                                                                TargetContainer    = "InDetTrackParticles",
+                                                                                iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20],
+                                                                                isoSuffix          = ["ptcone40", "ptcone30", "ptcone20"],
+                                                                                Prefix             = "TrkIsoPt1000_"))
     acc.addPublicTool(Pt1000IsoTrackDecorator, primary=True)
 
     return(acc)
@@ -107,15 +110,18 @@ def STDM17AugmentationToolsCfg(flags):
     TrackIsoTool = CompFactory.xAOD.TrackIsolationTool(**toolkwargs)
     acc.addPublicTool(TrackIsoTool)
 
-    from xAODPrimitives.xAODIso import xAODIso as isoPar
-    Pt500IsoTrackDecorator = CompFactory.DerivationFramework.trackIsolationDecorator(name = "Pt500IsoTrackDecorator",
-                                                                                     TrackIsolationTool = TrackIsoTool,
-                                                                                     TargetContainer = "InDetTrackParticles",
-                                                                                     ptcones = [isoPar.ptcone40,isoPar.ptcone30,isoPar.ptcone20],
-                                                                                     Prefix = 'TrkIsoPt500_')
 
+    from xAODPrimitives.xAODIso import xAODIso as isoPar
+    from DerivationFrameworkInDet.InDetToolsConfig import IsolationTrackDecoratorCfg
+    Pt500IsoTrackDecorator = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                               name               = "Pt500IsoTrackDecorator",
+                                                                               TrackIsolationTool = TrackIsoTool,
+                                                                               TargetContainer    = "InDetTrackParticles",
+                                                                               iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20],
+                                                                               isoSuffix          = ["ptcone40", "ptcone30", "ptcone20"],
+                                                                               Prefix             = "TrkIsoPt500_"))
     acc.addPublicTool(Pt500IsoTrackDecorator, primary=True)
-    
+
     return(acc)
 
 # Main algorithm config
