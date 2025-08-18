@@ -33,7 +33,7 @@ namespace InDetGNNHardScatterSelection {
     // Create configuration objects for data preprocessing.
     auto [inputs, constituents_configs] = dataprep::createGetterConfig(graph_config);
     
-    for (auto config : constituents_configs){
+    for (const auto& config : constituents_configs){
       switch (config.type){
       case ConstituentsType::TRACK:
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config));
@@ -81,7 +81,8 @@ namespace InDetGNNHardScatterSelection {
     std::map<std::string, FlavorTagInference::Inputs> gnn_input;
 
     std::vector<float> vertex_feat;
-    for (const auto& getter: m_varsFromVertex) {
+    vertex_feat.reserve(m_varsFromVertex.size());
+for (const auto& getter: m_varsFromVertex) {
       vertex_feat.push_back(getter(vertex).second);
     }
     std::vector<int64_t> vertexfeat_dim = {1, static_cast<int64_t>(vertex_feat.size())};
@@ -89,7 +90,7 @@ namespace InDetGNNHardScatterSelection {
     FlavorTagInference::Inputs vertex_info (vertex_feat, vertexfeat_dim);
     gnn_input.insert({"vertex_features", vertex_info});
 
-    for (auto loader : m_constituentsLoaders){
+    for (const auto& loader : m_constituentsLoaders){
       auto [sequence_name, sequence_data, sequence_constituents] = loader->getData(vertex);
       gnn_input.insert({sequence_name, sequence_data});
     }

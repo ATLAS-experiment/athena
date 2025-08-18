@@ -4,6 +4,7 @@
 #include "InDetGNNHardScatterSelection/CustomGetterUtils.h"
 
 #include <optional>
+#include <utility>
 
 #include "xAODMuon/Muon.h"
 #include "xAODJet/Jet.h"
@@ -51,8 +52,8 @@ namespace {
     private:
       F m_getter;
     public:
-        CJGetter(F getter):
-        m_getter(getter)
+        explicit CJGetter(F getter):
+        m_getter(std::move(getter))
         {}
       std::vector<double> operator()(
         const xAOD::Vertex& vertex,
@@ -75,14 +76,15 @@ namespace {
       SG::AuxElement::ConstAccessor<T> m_getter;
       std::string m_name;
     public:
-      SequenceGetter(const std::string& name):
+      explicit SequenceGetter(const std::string& name):
         m_getter(name),
         m_name(name)
         {
         }
       std::pair<std::string, std::vector<double>> operator()(const xAOD::Vertex&, const std::vector<const U*>& consts) const {
         std::vector<double> seq;
-        for (const U* el: consts) {
+        seq.reserve(consts.size());
+for (const U* el: consts) {
           seq.push_back(m_getter(*el));
         }
         return {m_name, seq};

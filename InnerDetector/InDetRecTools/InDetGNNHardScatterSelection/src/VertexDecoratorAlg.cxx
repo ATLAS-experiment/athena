@@ -306,7 +306,7 @@ namespace InDetGNNHardScatterSelection
 
       std::vector<ElementLink<xAOD::MuonContainer>> muonLinks;
       for(const xAOD::Muon* muon : *muonsIn){
-        auto tp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+        const auto *tp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
         if(!tp) continue;
         try{
           auto muonVertex = m_trkVtxAssociationTool->getUniqueMatchVertexLink(*tp, *vertices);

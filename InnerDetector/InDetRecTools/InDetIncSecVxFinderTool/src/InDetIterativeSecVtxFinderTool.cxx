@@ -1581,7 +1581,7 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetIterativeSecVt
 
   std::vector<Trk::ITrackLink*> selectedTracks;
 
-  typedef DataVector<Trk::Track>::const_iterator TrackDataVecIter;
+  using TrackDataVecIter = DataVector<Trk::Track>::const_iterator;
 
   bool selectionPassed;
   for (TrackDataVecIter itr  = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {
@@ -1616,7 +1616,7 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetIterativeSecVt
   std::vector<Trk::ITrackLink*> selectedTracks;
 
 
-  typedef DataVector<Trk::TrackParticleBase>::const_iterator TrackParticleDataVecIter;
+  using TrackParticleDataVecIter = DataVector<Trk::TrackParticleBase>::const_iterator;
 
   bool selectionPassed;
   for (TrackParticleDataVecIter itr  = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {
