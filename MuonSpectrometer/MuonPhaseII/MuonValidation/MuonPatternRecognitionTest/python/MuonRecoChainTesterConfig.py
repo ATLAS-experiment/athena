@@ -16,12 +16,15 @@ if __name__=="__main__":
                         help="Setup monitoring plots of the pattern recognition")
     parser.add_argument("--runVtune", 
                         help="runs VTune profiler service for the muon hough alg", action='store_true', default = False)
-
+    parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
+                        default=False, action='store_true')
+  
 
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    # flags.PerfMon.doFullMonMT = True
+    flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
     

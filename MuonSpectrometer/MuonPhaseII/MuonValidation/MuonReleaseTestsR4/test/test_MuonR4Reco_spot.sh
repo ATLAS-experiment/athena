@@ -8,10 +8,9 @@ inputFile=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestF
 
 # Run the job
 export TRF_ECHO=1;
-python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig \
+python -m MuonPatternRecognitionTest.MuonRecoChainTesterConfig \
     --nEvents ${NEVENTS} \
     --threads ${NTHREADS} \
-    --noMonitorPlots \
     --inputFile ${inputFile} > log.MuonR4Reco 2>&1;
 
 ecode=$?
