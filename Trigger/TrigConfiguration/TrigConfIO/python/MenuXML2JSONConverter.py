@@ -21,7 +21,7 @@ class XML2JsonConverter(object):
     
     def parseXMLFile(self,filename):
         self.xmlfilename = filename
-        import xml.etree.cElementTree as ET
+        import xml.etree.ElementTree as ET
         self.doc = ET.parse(filename)
         self.root = self.doc.getroot()
         print("Parsed file %s" % filename)
