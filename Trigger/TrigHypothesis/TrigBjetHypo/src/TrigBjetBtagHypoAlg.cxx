@@ -118,7 +118,7 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
         
     if ( (*vertexEL)->vertexType() == xAOD::VxType::VertexType::PriVtx ) {
       CHECK( monitor_primary_vertex( vertexEL ) );
-      CHECK( monitor_btagging( all_bTaggedJetELs ) );
+      CHECK( monitor_btagging( bTaggedJetEL ) );
     }
     // Add to Decision collection
     newDecisions.push_back( toAdd );
@@ -160,11 +160,13 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
     // Retrieve PV from navigation
     ElementLink< xAOD::VertexContainer > vertexEL;
     CHECK( retrieveObjectFromNavigation(  m_prmVtxLink.value(), vertexEL, previousDecision ) );
-
+    ElementLinkVector< xAOD::JetContainer > bTaggedJetEL;
+    CHECK( retrieveCollectionFromView( context, bTaggedJetEL, m_bTaggedJetKey, previousDecision ) );
+    CHECK( bTaggedJetEL.size() == 1 );
     // Put everything in place
     TrigBjetBtagHypoTool::TrigBjetBtagHypoToolInfo infoToAdd;
     infoToAdd.previousDecisionIDs = previousDecisionIDs;
-    infoToAdd.jetEL = all_bTaggedJetELs.front();
+    infoToAdd.jetEL = bTaggedJetEL.front();
     infoToAdd.vertexEL = vertexEL;
     infoToAdd.decision = newDecisions.at( index );
     infoToAdd.beamSpot = beamSpot;
