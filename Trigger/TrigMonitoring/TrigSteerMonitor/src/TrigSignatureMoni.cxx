@@ -85,7 +85,7 @@ StatusCode TrigSignatureMoni::start() {
   // Initialize SignatureAcceptance and DecisionCount histograms that will monitor 
   //    chains, groups and sequences per each step
   const int x {nBinsX(hltMenuHandle)};
-  const int y {nSteps()};
+  const int y {nSteps() + N_BINS};
   ATH_MSG_DEBUG( "Histogram " << x << " x " << y << " bins");
   std::unique_ptr<TH2> hSA = std::make_unique<TH2I>("SignatureAcceptance", "Raw acceptance of signatures in;chain;step", x, 1, x + 1, y, 1, y + 1);  
   std::unique_ptr<TH2> hDC = std::make_unique<TH2I>("DecisionCount", "Positive decisions count per step;chain;step", x, 1, x + 1, y, 1, y + 1);
@@ -258,15 +258,19 @@ StatusCode TrigSignatureMoni::fillSequences(const std::set<std::string>& sequenc
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigSignatureMoni::fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>& nameToChainsMap, const TrigCompositeUtils::DecisionIDContainer& dc) const {
-  const int countOutputRow {nSteps()-1};
+StatusCode TrigSignatureMoni::fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>& nameToChainsMap, const TrigCompositeUtils::DecisionIDContainer& dc, int row) const {
+
+  // Adjust bin index for those histograms that monitor all steps
+  int rowWithSteps = row;
+  if (row==OUTPUT || row==EXPRESS) rowWithSteps += m_decisionCollectorTools.size();
+
   for (const auto& [name, decisions] : nameToChainsMap) {
     for (TrigCompositeUtils::DecisionID id : dc) {
       if (decisions.contains(id)) {
         const double bin = m_nameToBinMap.at(name);
-        m_countHistogram->Fill(bin, countOutputRow);
-        m_rateHistogram.fill(bin, OUTPUT);
-        m_passHistogram->Fill(bin, countOutputRow);
+        m_rateHistogram.fill(bin, row);
+        m_countHistogram->Fill(bin, rowWithSteps);
+        m_passHistogram->Fill(bin, rowWithSteps);
         break;
       }
     }
@@ -312,6 +316,7 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
     TrigCompositeUtils::DecisionIDContainer ids;    
     TrigCompositeUtils::decisionIDs(l1Decisions->at(index-1), ids);
     ATH_MSG_DEBUG( "L1 " << index-1 << " N positive decisions " << ids.size()  );
+    ATH_CHECK(fillStreamsAndGroups(m_groupToChainMap, ids, index));
     ATH_CHECK(fillPassEvents(ids, index));
     ATH_CHECK(fillRate(ids, index));
     if (!ids.empty()){
@@ -370,15 +375,17 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
   }
 
   // Fill the histograms with output counts/rate
-  const int countOutputRow {nSteps()-1};
-  ATH_CHECK( fillStreamsAndGroups(m_streamToChainMap, finalIDs));
-  ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, finalIDs));
+  const int countOutputRow {nSteps() + OUTPUT};
+  ATH_CHECK( fillStreamsAndGroups(m_streamToChainMap, finalIDs, OUTPUT));
+  ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, finalIDs, OUTPUT));
   ATH_CHECK( fillPassEvents(finalIDs, countOutputRow));
   ATH_CHECK( fillRate(finalIDs, OUTPUT));
 
   // Fill the histograms with express counts/rate
-  const int countExpressRow {nSteps()};
-  ATH_CHECK( fillStreamsAndGroups(m_expressChainMap, expressFinalIDs));
+  const int countExpressRow {nSteps() + EXPRESS};
+  // express stream rate is filled into OUTPUT bin on purpose
+  ATH_CHECK( fillStreamsAndGroups(m_expressChainMap, expressFinalIDs, OUTPUT));
+  ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, expressFinalIDs, EXPRESS));
   ATH_CHECK( fillPassEvents(expressFinalIDs, countExpressRow));
   ATH_CHECK( fillRate(expressFinalIDs, EXPRESS));
 
@@ -408,7 +415,7 @@ int TrigSignatureMoni::nChains(SG::ReadHandle<TrigConf::HLTMenu>& hltMenuHandle)
 }
 
 int TrigSignatureMoni::nSteps() const {
-  return m_decisionCollectorTools.size() + N_BINS;
+  return m_decisionCollectorTools.size();
 }
 
 StatusCode TrigSignatureMoni::initHist(LockedHandle<TH2>& hist, SG::ReadHandle<TrigConf::HLTMenu>& hltMenuHandle, bool steps) {

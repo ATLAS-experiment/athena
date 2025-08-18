@@ -7,6 +7,9 @@
 #include "ZdcAnalysis/RpdSubtractCentroidTool.h"
 #include "ZdcAnalysis/RPDDataAnalyzer.h"
 #include "AthContainers/ConstAccessor.h"
+#include <sstream>     // for std::ostringstream
+#include <utility>     // for std::pair (if not already included indirectly)
+
 
 ZdcMonitorAlgorithm::ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator){
@@ -181,7 +184,7 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
         else {
             unsigned int startLB = m_zdcInjPulserAmpMap->getFirstLumiBlock(m_injMapRunToken);
             unsigned int nsteps = m_zdcInjPulserAmpMap->getNumSteps(m_injMapRunToken);
-            ATH_MSG_DEBUG("Successfully obtained injector pulse steps for run " << m_runNumber
+            ATH_MSG_INFO("Successfully obtained injector pulse steps for run " << m_runNumber
                 << ", first LB = " << startLB << ", number of steps = " << nsteps);
         }
     }
@@ -645,9 +648,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         }
           
         injectedPulseInputVoltage = m_zdcInjPulserAmpMap->getPulserAmplitude(m_injMapRunToken, lumiBlock);
-        if (injectedPulseInputVoltage > 0){ // LB > startLB
-            ATH_MSG_DEBUG("Lumi block: " << lumiBlock << "; pulser amplitude: " << injectedPulseInputVoltage);        
-        }
     }
 
     // first loop over zdcModules - read ZDC-module information & fill in ZDC histograms
@@ -735,6 +735,11 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                         
                         if (m_isInjectedPulse){
 
+                            zdcHGInjPulseValid = true;
+                            zdcLGInjPulseValid = true;
+
+                            bool pass_first3s = true;
+
                             // ------------ throw away the first few seconds of each LB ------------
                             // get the start + end time of the event LB from the cool data
                             // copied from Trigger/TrigT1/TrigT1CTMonitoring/src/BSMonitoringAlg.cxx
@@ -771,6 +776,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                                     ATH_MSG_WARNING("Event time is after the end time of the current LB");
                                     ATH_MSG_WARNING("Event time: " << eventTime << "; current LB: " << lumiBlock << "; end time of current LB: " << lb_etime);
                                 }else{ // require event time to be at least X seconds after start time of the current LB
+                                    pass_first3s = (eventTime > lb_stime + m_nSecondsRejectStartofLBInjectorPulse);
                                     zdcHGInjPulseValid &= (eventTime > lb_stime + m_nSecondsRejectStartofLBInjectorPulse);
                                     zdcLGInjPulseValid &= (eventTime > lb_stime + m_nSecondsRejectStartofLBInjectorPulse);                            
                                 }
@@ -780,25 +786,52 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
                             zdcHGInjPulseValid &= zdcModuleHG;
                             zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::ExcludeEarlyLGBit);
-                            zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::preExpTailBit);
                             zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadChisqBit);
                             zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FailBit);
                             zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FitMinAmpBit);
+                            zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadT0Bit);
                             if (m_minVInjToImposeAmpRequirementHGInjectorPulse > 0 && injectedPulseInputVoltage >= m_minVInjToImposeAmpRequirementHGInjectorPulse){
                                 zdcHGInjPulseValid &= (zdcModuleAmp > m_minAmpRequiredHGInjectorPulse);
                             }
-                            zdcHGInjPulseValid &= (zdcModuleFitT0 >= m_timingCutsInjectorPulse[iside][imod][0] && zdcModuleFitT0 <= m_timingCutsInjectorPulse[iside][imod][1]);
 
                             zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::LGOverflowBit);
                             zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::ExcludeEarlyLGBit);
-                            zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::preExpTailBit);
                             zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadChisqBit);
                             zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FailBit);
                             zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FitMinAmpBit);
+                            zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadT0Bit);
                             if (m_minVInjToImposeAmpRequirementLGInjectorPulse > 0 && injectedPulseInputVoltage >= m_minVInjToImposeAmpRequirementLGInjectorPulse){
                                 zdcLGInjPulseValid &= (zdcModuleLGFitAmp > m_minAmpRequiredLGInjectorPulse);
                             }
-                            zdcLGInjPulseValid &= (zdcModuleFitT0 >= m_timingCutsInjectorPulse[iside][imod][0] && zdcModuleFitT0 <= m_timingCutsInjectorPulse[iside][imod][1]);
+
+                            if (injectedPulseInputVoltage > 0){ // LB > startLB
+                                if (injectedPulseInputVoltage > 1 && !zdcLGInjPulseValid &&pass_first3s){ // problematic range && LG not valid && not failing first 3s
+
+                                    std::ostringstream fails;
+                                    std::vector<std::pair<std::string, bool>> checks = {
+                                        {"LGOverflowBit",        !(status & (1 << ZDCPulseAnalyzer::LGOverflowBit))},
+                                        {"ExcludeEarlyLGBit",    !(status & (1 << ZDCPulseAnalyzer::ExcludeEarlyLGBit))},
+                                        {"BadChisqBit",          !(status & (1 << ZDCPulseAnalyzer::BadChisqBit))},
+                                        {"FailBit",              !(status & (1 << ZDCPulseAnalyzer::FailBit))},
+                                        {"FitMinAmpBit",         !(status & (1 << ZDCPulseAnalyzer::FitMinAmpBit))},
+                                        {"BadT0Bit",             !(status & (1 << ZDCPulseAnalyzer::BadT0Bit))}
+                                    };
+
+                                    for (const auto& [name, pass] : checks) {
+                                        if (!pass) fails << "fail " << name << "; ";
+                                    }
+
+                                    ATH_MSG_DEBUG("[LG NOT valid] Lumi block: " << lumiBlock
+                                        << "; input voltage: " << injectedPulseInputVoltage
+                                        << "; LG amp: " << zdcModuleLGFitAmp
+                                        << "; side" << side_str << ", mod" << module_str
+                                        << "; " << fails.str());
+
+                                }
+                            } else if (lumiBlock > m_zdcInjPulserAmpMap->getFirstLumiBlock(m_injMapRunToken)){ // LB > startLB but injectedPulseInputVoltage < 0!
+                                ATH_MSG_WARNING("Lumi block: " << lumiBlock << ", yet input voltage is negative!! input voltage: " << injectedPulseInputVoltage);
+                            }
+
 
                             // ------------ find the voltage index & fill per-voltage HG&LG cut masks ------------
 
