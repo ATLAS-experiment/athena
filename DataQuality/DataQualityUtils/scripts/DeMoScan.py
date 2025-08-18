@@ -259,9 +259,9 @@ for iYT in yearTagList:
         tmpLines.sort()
         for iline in tmpLines: # Loop on all lines of the loss-[defect/veto].dat files
           if defVetoType[iDefVeto] == "Intolerable defect":
-            read = match("(\d+) \((\d+) ub-1.*\) -> (\d+.\d+) pb-1 \D+(\d+.\d+)\D+",iline)
+            read = match(r"(\d+) \((\d+) ub-1.*\) -> (\d+.\d+) pb-1 \D+(\d+.\d+)\D+",iline)
           else:# Veto loss is never recoverable (not tolerable defects)
-            read = match("(\d+) \((\d+) ub-1.*\) -> (\d+.\d+) pb-1",iline)
+            read = match(r"(\d+) \((\d+) ub-1.*\) -> (\d+.\d+) pb-1",iline)
           # retrieve the run number
           runnumber = int(read.group(1))
           # If the runs filter is activated (i.e. runsFilter != 0), check if the runs must be filtered
