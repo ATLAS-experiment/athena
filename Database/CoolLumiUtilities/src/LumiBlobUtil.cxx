@@ -163,7 +163,7 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
 	const uint16_t* k1 = reinterpret_cast<const uint16_t*> (k);
 	len = *k1;
 	k1++;
-	const uint8_t* y12 = (const uint8_t*) (k+2*(len+1));
+	const uint8_t* y12 = k+2*(len+1);
 	for (unsigned int i = 0; i<len; i++, k1++) {
 	  BCID = *k1;
 	  for (unsigned int j=BCIDold; j<=(BCID); j++, y12++) {
