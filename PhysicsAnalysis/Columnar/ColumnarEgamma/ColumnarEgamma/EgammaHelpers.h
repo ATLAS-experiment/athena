@@ -68,7 +68,14 @@ namespace columnar
           resetAccessor (m_objectTypeAcc, columnarTool, "objectType", {.isOptional = true});
       }
 
-      bool operator () (ObjectId<CI,CM> photon, bool excludeTRT) const
+      /// return whether the photon is converted, and a bitmask of
+      /// missing links
+      ///
+      /// It is up to the called to decide whether they want to do
+      /// anything for the missing links. The reason to report it out is
+      /// that the caller will have a message stream, configurable
+      /// properties, etc. which an accessor helper does not have.
+      std::pair<bool,unsigned> operator () (ObjectId<CI,CM> photon, bool excludeTRT) const
       {
         // While the accessor is generally meant to be used with
         // photons, sometimes electrons are passed as photons for
@@ -87,10 +94,15 @@ namespace columnar
             type = m_objectTypeAcc(photon);
         }
         if (type != xAOD::Type::Photon)
-          return false;
+          return std::make_pair (false, 0x0);
 
         const auto vertices = m_vertexLinksAcc(photon);
-        if (vertices.size() == 0) return false;
+        if (vertices.size() == 0) return std::make_pair (false, 0x0);
+        if (!vertices[0].has_value())
+          return std::make_pair (false, 0x1);
+
+        unsigned missingLinks = 0x0;
+
         auto vertex = vertices[0].value();
         bool hasTrk1 = false;
         bool hasTrk2 = false;
@@ -98,20 +110,24 @@ namespace columnar
         std::uint8_t nSiHits2 = 0;
         if (m_trackParticleLinksAcc.isAvailable(vertex)) {
           const auto tracks = m_trackParticleLinksAcc(vertex);
-          if (tracks.size() > 0 && tracks[0].has_value()) {
-            hasTrk1 = true;
-            nSiHits1 += m_numberOfPixelHitsAcc(tracks[0].value());
-            nSiHits1 += m_numberOfSCTHitsAcc(tracks[0].value());
+          if (tracks.size() > 0) {
+            if (tracks[0].has_value()) {
+              hasTrk1 = true;
+              nSiHits1 += m_numberOfPixelHitsAcc(tracks[0].value());
+              nSiHits1 += m_numberOfSCTHitsAcc(tracks[0].value());
+            } else missingLinks |= 0x2;
           }
-          if (tracks.size() > 1 && tracks[1].has_value()) {
-            hasTrk2 = true;
-            nSiHits2 += m_numberOfPixelHitsAcc(tracks[1].value());
-            nSiHits2 += m_numberOfSCTHitsAcc(tracks[1].value());
+          if (tracks.size() > 1) {
+            if (tracks[1].has_value()) {
+              hasTrk2 = true;
+              nSiHits2 += m_numberOfPixelHitsAcc(tracks[1].value());
+              nSiHits2 += m_numberOfSCTHitsAcc(tracks[1].value());
+            } else missingLinks |= 0x4;
           }
         }
 
         auto conversionType = xAOD::EgammaDetails::conversionType(hasTrk1, hasTrk2, nSiHits1, nSiHits2);
-        return xAOD::EgammaDetails::isConvertedPhoton (excludeTRT, photon(m_etaAcc), vertices.size(), conversionType);
+        return std::make_pair (xAOD::EgammaDetails::isConvertedPhoton (excludeTRT, photon(m_etaAcc), vertices.size(), conversionType), missingLinks);
       }
     };
   }

@@ -257,7 +257,25 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( columnar::Egamm
    bool excludeTRT = false;
    if(runnumber >= 410000 && m_removeTRTConversion) excludeTRT = true;
   // check if converted
-  const bool isConv = acc.isConvertedPhotonAcc(egam, excludeTRT);
+  const auto [isConv, missingLinks] = acc.isConvertedPhotonAcc(egam, excludeTRT);
+  if (missingLinks) { // missing vertex or track links
+    if (!m_allowMissingLinks.value()) {
+      ATH_MSG_ERROR("Missing vertex or track links when trying to calculate the conversion type. missingLinks=" << std::hex << missingLinks);
+      return CP::CorrectionCode::Error;
+    }
+    static std::atomic<bool> warned {false};
+    if (warned.exchange(true) == false) {
+      ATH_MSG_WARNING("Missing vertex or track links when trying to calculate the conversion type. missingLinks=" << std::hex << missingLinks);
+      ATH_MSG_WARNING("This may indicate that the DAOD is incorrectly missing some conversion vertices.");
+      ATH_MSG_WARNING("This is your only warning, repeat occurrences will be reported at the DEBUG level.");
+    } else {
+      ATH_MSG_DEBUG("Missing vertex or track links when trying to calculate the conversion type. missingLinks=" << std::hex << missingLinks);
+    }
+    result.SF = 1;
+    result.Total = 1;
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
+
 
   // Call the ROOT tool to get an answer (for photons we need just the total)
   const int status = isConv ? m_rootTool_con->calculate(dataType, runnumber,
