@@ -123,6 +123,11 @@ private:
   Gaudi::Property<float> m_dOmniScoreMin{this, "OmniScoreMin", NAN};
   Gaudi::Property<float> m_dOmniScoreMax{this, "OmniScoreMax", NAN};
 
+  Gaudi::Property<std::vector<float>> m_vecPtRegion{this, "PtRegion", {}};
+  Gaudi::Property<std::vector<float>> m_vecAbsEtaRegion{this, "AbsEtaRegion",{}};
+  Gaudi::Property<std::vector<float>> m_vecNSubjetsRegion{this, "NSubjetsRegion", {}};
+  Gaudi::Property<std::vector<int>> m_vecAbsCharges{this, "AbsCharges", {}};
+  Gaudi::Property<std::vector<float>> m_vecOmniScoreRegion{this, "OmniScoreRegion", {}};
 
 protected:
   TFile* m_fOutFile;//!

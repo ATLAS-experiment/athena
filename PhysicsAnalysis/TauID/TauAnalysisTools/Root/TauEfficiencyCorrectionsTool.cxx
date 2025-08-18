@@ -21,10 +21,7 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   , m_bIsData(false)
   , m_bIsConfigured(false)
   , m_iRunNumber(0)
-{
-  declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );
-}
-
+{}
 
 //______________________________________________________________________________
 TauEfficiencyCorrectionsTool::~TauEfficiencyCorrectionsTool()
@@ -37,6 +34,8 @@ TauEfficiencyCorrectionsTool::~TauEfficiencyCorrectionsTool()
 StatusCode TauEfficiencyCorrectionsTool::initialize()
 {
   ATH_MSG_INFO( "Initializing TauEfficiencyCorrectionsTool" );
+
+  m_vEfficiencyCorrectionTypes = m_vecEfficiencyCorrectionTypes.value();
 
   if (m_bSkipTruthMatchCheck)
     ATH_MSG_WARNING("Truth match check will be skipped. This is ONLY FOR TESTING PURPOSE!");

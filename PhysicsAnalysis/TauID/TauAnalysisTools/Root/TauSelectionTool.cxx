@@ -26,21 +26,7 @@ TauSelectionTool::TauSelectionTool( const std::string& name )
   , m_sEleIDWP("ELEIDNONE")
   , m_fOutFile(nullptr)
   , m_aAccept( "TauSelection" )
-{
-  /*
-    Baseline properties declaration:
-    properties containing 'Region' are a vector of lower and upper bounds
-    other properties named in plural are a list of exact values to cut on
-    other properties are single cuts
-  */
-  declareProperty( "PtRegion",      m_vPtRegion      = {});  // in GeV
-  declareProperty( "AbsEtaRegion",  m_vAbsEtaRegion  = {});
-  declareProperty( "AbsCharges",    m_vAbsCharges    = {});
-  declareProperty( "NTracks",       m_vNTracks       = {});
-  declareProperty( "JetRNNSigTransRegion", m_vJetRNNSigTransRegion = {});
-  declareProperty( "GNTauSigTransRegion", m_vGNTauSigTransRegion = {});
-  declareProperty( "EleRNNRegion",  m_vEleRNNRegion  = {});
-}
+{}
 
 //______________________________________________________________________________
 TauSelectionTool::~TauSelectionTool()
@@ -51,6 +37,15 @@ TauSelectionTool::~TauSelectionTool()
 //______________________________________________________________________________
 StatusCode TauSelectionTool::initialize()
 {
+
+  m_vPtRegion = m_vecPtRegion.value();	
+  m_vAbsEtaRegion = m_vecAbsEtaRegion.value();
+  m_vAbsCharges = m_vecAbsCharges.value(); 
+  m_vNTracks = m_vecNTracks.value();
+  m_vJetRNNSigTransRegion = m_vecJetRNNSigTransRegion.value();
+  m_vGNTauSigTransRegion = m_vecGNTauSigTransRegion.value();
+  m_vEleRNNRegion = m_vecEleRNNRegion.value();
+
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
   if (!bConfigViaProperties and !m_vPtRegion.empty())         bConfigViaProperties = true;
@@ -123,7 +118,7 @@ StatusCode TauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | CutPt;
         if (m_vPtRegion.empty())
-          TauAnalysisTools::split(rEnv,"PtRegion", ';', m_vPtRegion);
+           TauAnalysisTools::split(rEnv,"PtRegion", ';', m_vPtRegion);		
       }
       else if (sCut == "PtMin")
       {
