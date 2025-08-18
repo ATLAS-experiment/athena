@@ -44,10 +44,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
-        self.addOption ('minPt', None, type=float,
+        self.addOption ('minPt', 4.5*GeV, type=float,
             info="the minimum pT cut to apply to calibrated electrons. "
-            "The default is 15 GeV for Run 2 and 4.5 GeV for Run 3, "
-            "based on the current coverage by the scale factors.")
+            "The default is 4.5 GeV.")
         self.addOption ('maxEta', 2.47, type=float,
             info="maximum electron |eta| (float). The default is 2.47.")
         self.addOption ('forceFullSimConfigForP4', False, type=bool,
@@ -207,17 +206,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.calibrationAndSmearingTool.useMVACalibration = False
             alg.calibrationAndSmearingTool.decorateEmva = False
         
-        if self.minPt is None:
-            if config.geometry() is LHCPeriod.Run2:
-                self.minPt = 15*GeV
-            else:
-                self.minPt = 4.5*GeV
-        elif self.minPt < 15*GeV and config.geometry() is LHCPeriod.Run2:
-            log.warning("You are applying pT selection smaller than 15 GeV for Run 2. "
-                        "Be aware that for electrons below 15 GeV, no scale factors "
-                        "are currently available.")
-        
-
         if self.minPt > 0 :
             # Set up the the pt selection
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' )
@@ -585,7 +573,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
-        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v2/map1.txt' \
+        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3/map0.txt' \
                    if config.geometry() is LHCPeriod.Run2 else \
                    'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt'
         sfList = []
