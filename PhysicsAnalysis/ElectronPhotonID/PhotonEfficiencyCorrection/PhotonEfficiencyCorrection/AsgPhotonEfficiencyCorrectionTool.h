@@ -23,6 +23,7 @@
 
 //xAOD includes
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "PATInterfaces/ISystematicsTool.h"
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PATInterfaces/CorrectionCode.h"
@@ -147,6 +148,8 @@ private:
 
   // remove TRT converted photon for Run-3
   bool m_removeTRTConversion;
+
+  Gaudi::Property<bool> m_allowMissingLinks{ this, "AllowMissingLinks", false, "Allow missing links in the input objects. This should only be used by experts running on expert formats." };
 
   // an accessor structure that hides the columnar accessors from the
   // root dictionaries that can't handle them.  these dictionaries are
