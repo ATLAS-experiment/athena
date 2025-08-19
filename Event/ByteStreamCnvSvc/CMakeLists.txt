@@ -27,7 +27,7 @@ atlas_add_executable( AtlFindBSEvent test/AtlFindBSEvent.cxx
 atlas_add_executable( AtlCopyBSEvent test/AtlCopyBSEvent.cxx
    INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}
    LINK_LIBRARIES CxxUtils ${CORAL_LIBRARIES} ${TDAQ-COMMON_LIBRARIES}
-   CollectionBase FileCatalog PersistentDataModel )
+   PersistentDataModel )
 
 atlas_add_executable( AtlListBSEvents test/AtlListBSEvents.cxx
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
