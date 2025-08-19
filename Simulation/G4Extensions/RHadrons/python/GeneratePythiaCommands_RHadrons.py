@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from MadGraphControl.MadGraphUtils import * # noqa: F401 F403
 from MadGraphControl.MadGraph_NNPDF30NLO_Base_Fragment import * # noqa: F401 F403
@@ -339,7 +339,7 @@ def configureAndRunMadGraph(flags):
 
     rhlog.info("Calling SUSY_Generation")
     # Note that for gridpack generation (i.e. MadGraph_writeGridpack=True), the job will exit after this command
-    from MadGraphControl.MadGraphUtils import SUSY_Generation
+    from MadGraphControl.SUSY_Helpers import SUSY_Generation
     ktdurham = SUSY_Generation(**argdict)
 
     addProcessCardsToDATAPATH()
