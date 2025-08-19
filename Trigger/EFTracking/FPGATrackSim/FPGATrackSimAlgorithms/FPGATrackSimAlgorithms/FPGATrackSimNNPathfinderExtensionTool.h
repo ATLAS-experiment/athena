@@ -170,17 +170,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         Gaudi::Property <bool> m_doOutsideIn { this, "doOutsideIn", true, "Setup the tool so it's doing outside in extrap"};
         Gaudi::Property <int> m_predictionWindowLength { this, "predictionWindowLength", 3, "Length of hits needed for prediction"};
         Gaudi::Property <bool> m_useCartesian { this, "useCartesian", true, "If true, NNs use Cartestian coordinates. If false,they use cylindrical coordiantes"};
-  
-        StatusCode bookTree();
-        TTree *m_tree = nullptr; // output tree
-        std::vector<unsigned long> m_NcompletedRoads;
-        std::vector<unsigned int> m_missingHitsOnRoad;
-        std::vector<std::vector<unsigned long>> m_predictedHitsFineID;
-        std::vector<std::vector<unsigned int>> m_foundHitITkLayer;
-        std::vector<std::vector<std::vector<float>>> m_distanceHitsInLayerToPrediction;
-        std::vector<unsigned int> m_nHitsInSearchWindow;
-        std::vector<std::vector<float>> m_distanceOfPredictedHitToFoundHit;
-        std::vector<std::vector<bool>> m_foundHitIsSP;
+
 
         std::vector<FPGATrackSimRoad> m_roads;
         unsigned m_nLayers_1stStage = 0;

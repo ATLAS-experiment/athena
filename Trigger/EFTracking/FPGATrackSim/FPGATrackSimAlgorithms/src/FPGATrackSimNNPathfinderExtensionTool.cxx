@@ -56,23 +56,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
     }
 
     ATH_CHECK(m_tHistSvc.retrieve());
-    ATH_CHECK(bookTree());
-
-    return StatusCode::SUCCESS;
-}
-
-StatusCode FPGATrackSimNNPathfinderExtensionTool::bookTree()
-{
-    m_tree = new TTree("NNPathFinderMonitoring","NNPathFinderMonitoring");
-    m_tree->Branch("NcompletedRoads", &m_NcompletedRoads);
-    m_tree->Branch("predictedHitsFineID", &m_predictedHitsFineID);
-    m_tree->Branch("foundHitITkLayer", &m_foundHitITkLayer);
-    m_tree->Branch("missingHitsOnRoad", &m_missingHitsOnRoad);
-    m_tree->Branch("nHitsInSearchWindow", &m_nHitsInSearchWindow);
-    m_tree->Branch("distanceOfPredictedHitToFoundHit", &m_distanceOfPredictedHitToFoundHit);
-    m_tree->Branch("foundHitIsSP", &m_foundHitIsSP);
-
-    ATH_CHECK(m_tHistSvc->regTree(Form("/FPGATRACKSIMOUTPUTNNPATHFINDER/%s", m_tree->GetName()), m_tree));
 
     return StatusCode::SUCCESS;
 }
@@ -120,32 +103,15 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         roadsToExtrapolate.push_back(road);
 
         std::vector<miniRoad> completedRoads;
-        std::vector<unsigned long> currentRoadHitFineIDs;
-        std::vector<std::vector<unsigned long>> tmp_predictedHitsFineID;
-        std::vector<unsigned int> currentRoadHitITkLayer;
-        std::vector<std::vector<unsigned int>> tmp_foundHitITkLayer;
-        std::vector<float> currentRoadHitDistancePredFound;
-        std::vector<std::vector<float>> tmp_foundHitDistancePredFound;
-
-        for (unsigned int i = 0; i < roadsToExtrapolate.size(); i++){
-            tmp_predictedHitsFineID.push_back(currentRoadHitFineIDs);
-            tmp_foundHitITkLayer.push_back(currentRoadHitITkLayer);
-            tmp_foundHitDistancePredFound.push_back(currentRoadHitDistancePredFound);
-        }
 
         int count = 0;
 	// FIXED: Add maximum iteration limit to prevent infinite loops
         const int MAX_ROADS = 10000;
 	while(roadsToExtrapolate.size() > 0 && count < MAX_ROADS ) {
 	  miniRoad currentRoad = *roadsToExtrapolate.begin();
-            std::vector<unsigned long> tmp_currentRoadHitFineIDs = *tmp_predictedHitsFineID.begin();
-            std::vector<unsigned int> tmp_currentRoadHitITkLayer = *tmp_foundHitITkLayer.begin();
-            std::vector<float> tmp_currentRoadHitDistancePredFound = *tmp_foundHitDistancePredFound.begin();
+
             // Erase this road from the vector
             roadsToExtrapolate.erase(roadsToExtrapolate.begin());
-            tmp_predictedHitsFineID.erase(tmp_predictedHitsFineID.begin());
-            tmp_foundHitITkLayer.erase(tmp_foundHitITkLayer.begin());
-            tmp_foundHitDistancePredFound.erase(tmp_foundHitDistancePredFound.begin());
             count ++;
             if(m_debugEvent) {
                 ATH_MSG_DEBUG("\033[1;31m-------------------------- extraploating road "<< count << "------------------ \033[0m");
@@ -155,9 +121,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             if (currentRoad.getNHits() >= (m_nLayers_1stStage+m_nLayers_2ndStage))
             {
                 completedRoads.push_back(currentRoad);
-                m_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
-                m_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
-                m_distanceOfPredictedHitToFoundHit.push_back(tmp_currentRoadHitDistancePredFound);
                 continue; // this one is done
             }
             // Other try to find the next hit in this road
@@ -180,9 +143,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 		  (!m_useCartesian && abs(predhit[0]) < 25))
 		{
                     completedRoads.push_back(currentRoad);
-                    m_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
-                    m_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
-                    m_distanceOfPredictedHitToFoundHit.push_back(tmp_currentRoadHitDistancePredFound);
                     continue;
                 }
             }
@@ -193,9 +153,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 if ((m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || radius > 1024 || abs(predhit[2]) > 3000)) ||
 		    (!m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[2]) > 3000))) {
                     completedRoads.push_back(currentRoad);
-                    m_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
-                    m_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
-                    m_distanceOfPredictedHitToFoundHit.push_back(tmp_currentRoadHitDistancePredFound);
                     continue;
                 }
             }
@@ -254,7 +211,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 
                         auto fineID_it = std::find(m_windowFineID.begin(), m_windowFineID.end(), fineID);
                         if (fineID_it == m_windowFineID.end()){
-                            ATH_MSG_WARNING("No windows for predicted fineID " << fineID << ", using maximum in provided list instead!");
+                            ATH_MSG_DEBUG("No windows for predicted fineID " << fineID << ", using maximum in provided list instead!");
                             fineID_index = -1;
                         }
                         fineID_index = fineID_it - m_windowFineID.begin();
@@ -394,23 +351,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             }
 
             for (auto& hitsFound: cleanHitsToGrow) {
-                // get the first hit
-                auto hit = hitsFound[0];
-
-                // a hit is in the right fine ID == layer
-                double hitz = hit->getZ();
-                double hitr = hit->getR();
-                double hitphi = hit->getGPhi();		
-		double predr = (m_useCartesian ? sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]) : predhit[0]);
-                double predz = predhit[2];
-		double predphi = predhit[1];
-		double dr = abs(hitr - predr);		
-		double dz = abs(hitz - predz);
-                double dphi = abs(hitphi - predphi);
-		while (dphi > pi) dphi -= pi;
-
-                float distancePredFound = (m_useCartesian ? sqrt(dr*dr + dz*dz) :
-					   sqrt(dphi*dphi/(getPhiScale()*getPhiScale()) + dz*dz/(getZScale()*getZScale()) + dr*dr/(getRScale()*getRScale())));
 
                 // We got a hit, lets make a road
                 miniRoad newRoad;
@@ -420,22 +360,14 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 }
                 roadsToExtrapolate.push_back(newRoad);
                 foundhitForRoad = true;
-                tmp_currentRoadHitFineIDs.push_back(fineID);
-                tmp_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
-                tmp_currentRoadHitITkLayer.push_back(hit->getLayerDisk());
-                tmp_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
-                tmp_currentRoadHitDistancePredFound.push_back(distancePredFound);
-                tmp_foundHitDistancePredFound.push_back(tmp_currentRoadHitDistancePredFound);
                 if(m_debugEvent) {
                     ATH_MSG_DEBUG("------ road grown with hit from layer "<<layer<<" to");
                     printRoad(newRoad);
                 }
             }
-            if (hitsInWindow != 0) m_nHitsInSearchWindow.push_back(hitsInWindow);
             // If the hit wasn't found, push a fake hit
             if (!foundhitForRoad) {
                 // did not find a hit to extrapolate to, check if we need to delete this road. if not, add a guessed hit if still useful
-                m_nHitsInSearchWindow.push_back(0);
                 if (currentRoad.getNWCLayers() >= m_maxMiss) {
                     // we don't want this road, so we continue
                     continue;
@@ -458,19 +390,14 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                         continue;
                     }
                     roadsToExtrapolate.push_back(newroad);
-                    tmp_predictedHitsFineID.push_back(tmp_currentRoadHitFineIDs);
-                    tmp_foundHitITkLayer.push_back(tmp_currentRoadHitITkLayer);
-                    tmp_foundHitDistancePredFound.push_back(tmp_currentRoadHitDistancePredFound);
                 }
             }
         }
-        m_NcompletedRoads.push_back(completedRoads.size());
         // This track has been extrapolated, copy the completed tracks to the full list with full road objects
         for (const auto &miniroad : completedRoads) {
             FPGATrackSimRoad road;
             road.setWCLayers(miniroad.getWCLayers());
             road.setHitLayers(miniroad.getHitLayers());
-            m_missingHitsOnRoad.push_back(miniroad.getNWCLayers());
             road.setRoadID(m_roads.size() - 1);
             // Set the "Hough x" and "Hough y" using the track parameters.
             road.setX(track->getPhi());
@@ -505,12 +432,6 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 
             m_roads.push_back(road);
         }
-        currentRoadHitFineIDs.clear();
-        tmp_predictedHitsFineID.clear();
-        currentRoadHitITkLayer.clear();
-        tmp_foundHitITkLayer.clear();
-        currentRoadHitDistancePredFound.clear();
-        tmp_foundHitDistancePredFound.clear();
     }
     // Copy the roads we found into the output argument and return success.
     roads.reserve(m_roads.size());
@@ -520,14 +441,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
     }
     ATH_MSG_DEBUG("Found " << roads.size() << " new roads in second stage.");
-    m_tree->Fill();
-    m_NcompletedRoads.clear();
-    m_predictedHitsFineID.clear();
-    m_missingHitsOnRoad.clear();
-    m_nHitsInSearchWindow.clear();
-    m_distanceOfPredictedHitToFoundHit.clear();
-    m_foundHitITkLayer.clear();
-    m_foundHitIsSP.clear();
+
     return StatusCode::SUCCESS;
 }
 
