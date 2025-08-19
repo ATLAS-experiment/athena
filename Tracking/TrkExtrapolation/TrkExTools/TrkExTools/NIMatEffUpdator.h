@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,14 +19,13 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExInterfaces/ITimedMatEffUpdator.h"
+#include "TrkExInterfaces/IMaterialEffectsUpdator.h"
 #include "TrkExUtils/MaterialUpdateMode.h"
 #include "TrkParameters/TrackParameters.h"
 
 class TTree;
 
 namespace Trk {
-
-class IMaterialEffectsUpdator;
 
 /** @class NIMatEffUpdator
 
@@ -91,7 +90,8 @@ public:
 
 private:
   /** rely on MaterialEffectsIUpdator */
-  ToolHandle<Trk::IMaterialEffectsUpdator> m_matUpdator;
+  ToolHandle<Trk::IMaterialEffectsUpdator> m_matUpdator
+  {this, "MaterialEffectsUpdator", "Trk::MaterialEffectsUpdator/MaterialEffectsUpdator"};
 };
 }
 

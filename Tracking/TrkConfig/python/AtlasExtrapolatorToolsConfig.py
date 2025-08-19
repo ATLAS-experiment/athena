@@ -169,5 +169,9 @@ def fatrasMultipleScatteringUpdatorCfg(flags,
 
 def NIMatEffUpdatorCfg(flags, name="NIMatEffUpdator", **kwargs):
     result = ComponentAccumulator()
+
+    kwargs.setdefault("MaterialEffectsUpdator", result.popToolsAndMerge(
+        AtlasMaterialEffectsUpdatorCfg(flags)))
+
     result.setPrivateTools(CompFactory.Trk.NIMatEffUpdator(name, **kwargs))
     return result
