@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -43,23 +43,8 @@ constexpr double s_gausMixEpsilon_b2 = -5.729e-3;
 // constructor
 Trk::MultipleScatteringUpdator::MultipleScatteringUpdator(const std::string &t, const std::string &n,
                                                           const IInterface *p) :
-  AthAlgTool(t, n, p),
-  m_useTrkUtils(true),
-  m_log_include(true),
-  m_gaussianMixture(false),
-  m_optGaussianMixtureG4(true),
-  m_rndGenSvc("AthRNGSvc", n),
-  m_rngWrapper(nullptr),
-  m_randomEngineName("TrkExRnd") {
+  AthAlgTool(t, n, p) {
   declareInterface<IMultipleScatteringUpdator>(this);
-  // multiple scattering parameters
-  declareProperty("UseTrkUtils", m_useTrkUtils);
-  declareProperty("MultipleScatteringLogarithmicTermOn", m_log_include);
-  declareProperty("GaussianMixtureModel", m_gaussianMixture);
-  declareProperty("G4OptimisedGaussianMixtureModel", m_optGaussianMixtureG4);
-  // random service for Gaussian mixture model
-  declareProperty("RandomNumberService", m_rndGenSvc, "Name of the random number service");
-  declareProperty("RandomStreamName", m_randomEngineName, "Name of the random number stream");
 }
 
 // destructor
