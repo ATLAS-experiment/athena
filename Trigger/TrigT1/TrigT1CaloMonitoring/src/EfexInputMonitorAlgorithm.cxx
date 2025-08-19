@@ -267,7 +267,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                           SlotSCID = itr->second.second;
                       }
                   }
-                  if(!(isLAr && timeUntil>=0 && timeUntil<=1)) { // lar errors within 1s of an otf masking update are not treated as errors
+                  if(!(isLAr && timeUntil>=0 && timeUntil<=5)) { // lar errors within 5s of an otf masking update are not treated as errors
                       ErrorAndLocation = "#splitline{" + static_cast<std::string>(Decision) + "}{" + std::to_string(TowerId) + "}";
                       fill("errors", Decision, ErrorAndLocation, timeSince, timeUntil, evtNumber, lbn, lbnString,
                            TowerId, Towereta, Towerphi, Toweremstatus, Towerhadstatus, TowerSlot, TowerCount,
