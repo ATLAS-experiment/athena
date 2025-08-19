@@ -522,7 +522,7 @@ Root::TElectronEfficiencyCorrectionTool::buildToyMCTable(
   } else {
     std::vector<std::vector<TH2*>> tmpVec2;
     for (int i = 0; i < stat_entries; ++i) {
-      nSys = ((TH1*)eig.at(i))->GetNbinsX() - 1;
+      nSys = (static_cast<TH1*>(eig.at(i)))->GetNbinsX() - 1;
       tmpVec2.push_back(buildSingleToyMC(static_cast<TH2*>(sf.at(i)),
                                          static_cast<TH2*>(stat.at(i)),
                                          static_cast<TH2*>(uncorr.at(i)),
