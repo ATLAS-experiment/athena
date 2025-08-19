@@ -16,12 +16,12 @@ ReWriteData                                          INFO in initialize()
 ReWriteData                                         DEBUG data dependencies:
   + INPUT   ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
   + OUTPUT  ( 'ExampleTrackContainer' , 'StoreGateSvc+MyTracks' ) 
+StreamStream1                                       DEBUG In initialize
 StreamStream1                                       DEBUG In initialize 
 StreamStream1                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamStream1 with no Algs
 StreamStream1                                       DEBUG End initialize 
-StreamStream1                                       DEBUG In initialize
-StreamStream1                                       DEBUG Found StoreGateSvc store.
+StreamStream1                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream1                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 AthDictLoaderSvc                                     INFO in initialize...
 AthDictLoaderSvc                                     INFO acquired Dso-registry
@@ -44,12 +44,12 @@ MakeInputDH                                          INFO Name of Stream to be m
 MakeInputDH                                         DEBUG data dependencies:
   + INPUT   ( 'DataHeader' , 'StoreGateSvc+StreamStream1' ) 
   + OUTPUT  ( 'DataHeader' , 'StoreGateSvc+StreamStream1_Input' ) 
+StreamStream2                                       DEBUG In initialize
 StreamStream2                                       DEBUG In initialize 
 StreamStream2                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamStream2 with no Algs
 StreamStream2                                       DEBUG End initialize 
-StreamStream2                                       DEBUG In initialize
-StreamStream2                                       DEBUG Found StoreGateSvc store.
+StreamStream2                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream2                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 StreamStream2.StreamStream2Tool                      INFO Initializing StreamStream2.StreamStream2Tool
 StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG Creating new xAOD::FileMetaData object to fill
@@ -116,6 +116,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -127,11 +128,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 1
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 1
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 1
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 1
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -154,27 +150,15 @@ StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
-StorageSvc                                           INFO xAOD::EventAuxInfo_v3 [0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (3 , ffffffffffffffff)
-SimplePoolFile1.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
-SimplePoolFile1.root                                DEBUG --->Adding Shape[0 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
-SimplePoolFile1.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
-SimplePoolFile1.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO EventInfo_p4 [C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(EventInfo_p4/McEventInfo)
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opening
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG    attributes# = 1
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'EventInfo_p4_McEventInfo'
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container CollectionTree(EventInfo_p4/McEventInfo) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/CollectionTree(EventInfo_p4/McEventInfo) [202]  (4 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/CollectionTree(EventInfo_p4/McEventInfo) [202]  (3 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7
-SimplePoolFile1.root                                DEBUG --->Adding Shape[1 , C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[0 , C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:EventInfo_p4
 SimplePoolFile1.root                                DEBUG ---->[0]:EventInfo_p4 Typ:EventInfo_p4 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -184,11 +168,23 @@ CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opening
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG    attributes# = 1
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Branch container 'ExampleHitContainer_p1_MyHits'
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opened container CollectionTree(ExampleHitContainer_p1/MyHits) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/CollectionTree(ExampleHitContainer_p1/MyHits) [202]  (5 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/CollectionTree(ExampleHitContainer_p1/MyHits) [202]  (4 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
-SimplePoolFile1.root                                DEBUG --->Adding Shape[2 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[1 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:ExampleHitContainer_p1
 SimplePoolFile1.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO xAOD::EventAuxInfo_v3 [0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (5 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile1.root                                DEBUG --->Adding Shape[2 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
+SimplePoolFile1.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::EventInfo_v1 [AE8BED6D-1D41-4CAF-994B-42613FC91A0A]
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventInfo_v1/EventInfo)
@@ -246,6 +242,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -257,10 +254,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 1
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 1
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 1
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -282,26 +275,26 @@ SimplePoolFile3.root                                DEBUG ---->ClassID:DA8F479C-
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
 StreamStream2                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile3.root
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
-SimplePoolFile3.root                                DEBUG --->Adding Assoc :A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (3 , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
-SimplePoolFile3.root                                DEBUG --->Adding Shape[0 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
-SimplePoolFile3.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
-SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(EventInfo_p4/McEventInfo)
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opening
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG    attributes# = 1
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'EventInfo_p4_McEventInfo'
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container CollectionTree(EventInfo_p4/McEventInfo) of type ROOT_Tree
-SimplePoolFile3.root                                DEBUG --->Adding Assoc :A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(EventInfo_p4/McEventInfo) [202]  (4 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Adding Assoc :A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(EventInfo_p4/McEventInfo) [202]  (3 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7
-SimplePoolFile3.root                                DEBUG --->Adding Shape[1 , C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]:  [1 Column(s)] 
+SimplePoolFile3.root                                DEBUG --->Adding Shape[0 , C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]:  [1 Column(s)] 
 SimplePoolFile3.root                                DEBUG ---->Class:EventInfo_p4
 SimplePoolFile3.root                                DEBUG ---->[0]:EventInfo_p4 Typ:EventInfo_p4 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
+SimplePoolFile3.root                                DEBUG --->Adding Assoc :A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (4 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile3.root                                DEBUG --->Adding Shape[1 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
+SimplePoolFile3.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventInfo_v1/EventInfo)
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG    attributes# = 1
@@ -383,6 +376,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -394,11 +388,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 2
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 2
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 2
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 2
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -416,6 +405,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -427,10 +417,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 2
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 2
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 2
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -479,6 +465,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -490,11 +477,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 3
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 3
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 3
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 3
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -512,6 +494,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -523,10 +506,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 3
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 3
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 3
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -575,6 +554,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -586,11 +566,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 4
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 4
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 4
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 4
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -608,6 +583,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -619,10 +595,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 4
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 4
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 4
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -671,6 +643,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -682,11 +655,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 5
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 5
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 5
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 5
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -704,6 +672,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -715,10 +684,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 5
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 5
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 5
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -767,6 +732,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -778,11 +744,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 6
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 6
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 6
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 6
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -801,6 +762,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -812,10 +774,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 6
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 6
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 6
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -865,6 +823,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -876,11 +835,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 7
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 7
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 7
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 7
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -898,6 +852,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -909,10 +864,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 7
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 7
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 7
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -961,6 +912,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -972,11 +924,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 8
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 8
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 8
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 8
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -994,6 +941,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1005,10 +953,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 8
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 8
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 8
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1057,6 +1001,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1068,11 +1013,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 9
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 9
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 9
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 9
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1090,6 +1030,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1101,10 +1042,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 9
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 9
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 9
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1153,6 +1090,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1164,11 +1102,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 10
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 10
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 10
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 10
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1186,6 +1119,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1197,10 +1131,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 10
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 10
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 10
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1249,6 +1179,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1260,11 +1191,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 11
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 11
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 11
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 11
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1283,6 +1209,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1294,10 +1221,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 11
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 11
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 11
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1347,6 +1270,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1358,11 +1282,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 12
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 12
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 12
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 12
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1380,6 +1299,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1391,10 +1311,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 12
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 12
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 12
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1443,6 +1359,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1454,11 +1371,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 13
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 13
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 13
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 13
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1476,6 +1388,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1487,10 +1400,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 13
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 13
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 13
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1540,7 +1449,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1551,11 +1462,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 14
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 14
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 14
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 14
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1573,6 +1479,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1584,10 +1491,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 14
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 14
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 14
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1636,7 +1539,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1647,11 +1552,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 15
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 15
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 15
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 15
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1669,6 +1569,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1680,10 +1581,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 15
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 15
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 15
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1732,7 +1629,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1743,11 +1642,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 16
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 16
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 16
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 16
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1766,6 +1660,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1777,10 +1672,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 16
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 16
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 16
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1830,7 +1721,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1841,11 +1734,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 17
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 17
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 17
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 17
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1863,6 +1751,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1874,10 +1763,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 17
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 17
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 17
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -1926,7 +1811,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1937,11 +1824,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 18
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 18
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 18
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 18
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -1959,6 +1841,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1970,10 +1853,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 18
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 18
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 18
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -2022,7 +1901,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -2033,11 +1914,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 19
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 19
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 19
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 19
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -2055,6 +1931,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -2066,10 +1943,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 19
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 19
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 19
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -2118,7 +1991,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
+StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -2129,11 +2004,6 @@ StreamStream1                                       DEBUG            Key:EventIn
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 20
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 20
-StreamStream1                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 20
-StreamStream1                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 20
 StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
 StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
@@ -2151,6 +2021,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -2162,10 +2033,6 @@ StreamStream2                                       DEBUG            Key:EventIn
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream2                                       DEBUG  Added object 45903698,"EventInfo"
-StreamStream2                                       DEBUG  Collected objects:
-StreamStream2                                       DEBUG  Object/count: EventInfo_McEventInfo, 20
-StreamStream2                                       DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 20
-StreamStream2                                       DEBUG  Object/count: xAOD::EventInfo_EventInfo, 20
 StreamStream2.StreamStream2Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile3.root
 StreamStream2.StreamStream2Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream2'
@@ -2175,8 +2042,6 @@ SimplePoolFile3.root                                DEBUG DB Action Commit
 StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
 StreamStre...StreamStream2_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 20 events processed so far  <<<===
-StreamStream1                                       DEBUG AthenaOutputStream StreamStream1 ::stop()
-StreamStream2                                       DEBUG AthenaOutputStream StreamStream2 ::stop()
 StreamStream1                                       DEBUG handle() incident type: MetaDataStop
 StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Could not get mcProcID
 StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG FileMetaData payload replaced in store with content created for this stream
