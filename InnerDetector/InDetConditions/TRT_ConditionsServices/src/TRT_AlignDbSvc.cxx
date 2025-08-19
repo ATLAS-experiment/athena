@@ -124,26 +124,6 @@ StatusCode TRT_AlignDbSvc::initialize()
     }
   }
   
-  /** Keeping Back compatibility with old db scheme
-      This is needed when reading in an textFile with the old endcap Schema
-      and the alignment folder in the db has been blocked.
-  */
-  if(m_alignString != "ALold"){
-    
-    for(unsigned int i=0; i<14; ++i){
-      std::string testA = "A"+intToString(i);
-      //m_alignobjs.push_back("/TRT/Align/"+testA);
-      m_alignobjs.push_back(m_alignDBprefix+testA);
-      m_alignchans.push_back(ichan++);
-      
-      std::string testC = "C"+intToString(i);
-      //     m_alignobjs.push_back("/TRT/Align/"+testC);
-      m_alignobjs.push_back(m_alignDBprefix+testC);
-      m_alignchans.push_back(ichan++);
-    
-    }
-  }
-  
   /** If the folder exists, register a callback, we read from the text file if it exists in the call back
       If the folder does not yet exist, create and record it.
   */
