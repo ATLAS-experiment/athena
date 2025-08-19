@@ -1,6 +1,4 @@
 *** AthenaOutputStream_test starts ***
-AthenaOutputStream_test 8212 compAux.
-AthenaOutputStream_test 8212 seiAux.
 AthenaOutputStream_test 8101 due
 AthenaOutputStream_test 8101 uno
 AthenaOutputStream_test 8107 due
@@ -9,4 +7,6 @@ AthenaOutputStream_test 8108 cinque
 AthenaOutputStream_test 8107 quattro
 AthenaOutputStream_test 8211 comp
 AthenaOutputStream_test 8211 sei
+AthenaOutputStream_test 8212 compAux.
+AthenaOutputStream_test 8212 seiAux.
 *** AthenaOutputStream_test OK ***

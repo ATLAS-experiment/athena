@@ -72,27 +72,15 @@ SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949
 SimplePoolFile5.root                                DEBUG ---->ClassID:DA8F479C-09BC-49D4-94BC-99D025A23A3B
 ##Params                                            DEBUG No objects passing selection criteria... Container has 0 Entries in total.
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
-StorageSvc                                           INFO xAOD::EventAuxInfo_v3 [0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
-CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
-SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (3 , ffffffffffffffff)
-SimplePoolFile5.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
-SimplePoolFile5.root                                DEBUG --->Adding Shape[0 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
-SimplePoolFile5.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
-SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO EventInfo_p4 [C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(EventInfo_p4/McEventInfo)
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opening
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG    attributes# = 1
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'EventInfo_p4_McEventInfo'
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container CollectionTree(EventInfo_p4/McEventInfo) of type ROOT_Tree
-SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(EventInfo_p4/McEventInfo) [202]  (4 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(EventInfo_p4/McEventInfo) [202]  (3 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7
-SimplePoolFile5.root                                DEBUG --->Adding Shape[1 , C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]:  [1 Column(s)] 
+SimplePoolFile5.root                                DEBUG --->Adding Shape[0 , C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]:  [1 Column(s)] 
 SimplePoolFile5.root                                DEBUG ---->Class:EventInfo_p4
 SimplePoolFile5.root                                DEBUG ---->[0]:EventInfo_p4 Typ:EventInfo_p4 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -102,11 +90,23 @@ CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opening
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG    attributes# = 1
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Branch container 'ExampleHitContainer_p1_MyHits'
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opened container CollectionTree(ExampleHitContainer_p1/MyHits) of type ROOT_Tree
-SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(ExampleHitContainer_p1/MyHits) [202]  (5 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(ExampleHitContainer_p1/MyHits) [202]  (4 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
-SimplePoolFile5.root                                DEBUG --->Adding Shape[2 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]:  [1 Column(s)] 
+SimplePoolFile5.root                                DEBUG --->Adding Shape[1 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]:  [1 Column(s)] 
 SimplePoolFile5.root                                DEBUG ---->Class:ExampleHitContainer_p1
 SimplePoolFile5.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO xAOD::EventAuxInfo_v3 [0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
+SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (5 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile5.root                                DEBUG --->Adding Shape[2 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
+SimplePoolFile5.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
+SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::EventInfo_v1 [AE8BED6D-1D41-4CAF-994B-42613FC91A0A]
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventInfo_v1/EventInfo)
@@ -356,6 +356,13 @@ MetaDataSvc                                         DEBUG Transforming MetaCont<
 MetaDataSvc                                         DEBUG Transforming MetaCont<EventStreamInfo> to EventStreamInfo for output
 MetaDataSvc                                         DEBUG Transforming MetaCont<xAOD::FileMetaData> to xAOD::FileMetaData for output
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1316383046
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(ExampleHitContainer_p1/PedestalWriteData)
+MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Opening
+MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG    attributes# = 1
+MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Branch container 'ExampleHitContainer_p1_PedestalWriteData'
+MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Opened container MetaData(ExampleHitContainer_p1/PedestalWriteData) of type ROOT_Tree
+SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(ExampleHitContainer_p1/PedestalWriteData) [202]  (9 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::FileMetaDataAuxInfo_v1 [BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
@@ -363,18 +370,11 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (9 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (a , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
 SimplePoolFile5.root                                DEBUG --->Adding Shape[6 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
 SimplePoolFile5.root                                DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(ExampleHitContainer_p1/PedestalWriteData)
-MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Opening
-MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG    attributes# = 1
-MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Branch container 'ExampleHitContainer_p1_PedestalWriteData'
-MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Opened container MetaData(ExampleHitContainer_p1/PedestalWriteData) of type ROOT_Tree
-SimplePoolFile5.root                                DEBUG --->Adding Assoc :C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(ExampleHitContainer_p1/PedestalWriteData) [202]  (a , ffffffffffffffff)
-SimplePoolFile5.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO EventStreamInfo_p3 [11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(EventStreamInfo_p3/StreamExampleMeta)

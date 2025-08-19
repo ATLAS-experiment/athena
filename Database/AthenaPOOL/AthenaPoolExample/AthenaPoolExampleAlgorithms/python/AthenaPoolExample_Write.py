@@ -127,7 +127,6 @@ acc.merge( AthenaPoolExampleWriteCfg( flags, stream2name, disableEventTag = noTa
 stream2ca = OutputStreamCfg(flags, stream2name, disableEventTag = noTag,
                             ItemList = ['EventInfo#*', 'ExampleHitContainer#MyHits'] )
 stream2 = stream2ca.getEventAlgo( outputStreamName( stream2name ) )
-stream2.ExcludeList += [ "ExampleHitContainer#MyHits" ]
 stream2.WritingTool.AttributeListKey = "RunEventTag"
 acc.merge( stream2ca )
 

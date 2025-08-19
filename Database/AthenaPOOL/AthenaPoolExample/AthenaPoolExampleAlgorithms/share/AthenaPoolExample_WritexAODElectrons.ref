@@ -17,10 +17,10 @@ SimplePoolFile3.root                                DEBUG --> Access   DbContain
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
 ##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
-SimplePoolFile3.root                                DEBUG --->Reading Shape[0 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]: [1 Column(s)]
-SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[1 , FF777FDA-721C-4756-BBF3-4CE28C2A3AF5]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[0 , FF777FDA-721C-4756-BBF3-4CE28C2A3AF5]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:ExampleTrackContainer_p1 Typ:ExampleTrackContainer_p1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[1 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile3.root                                DEBUG --->Reading Shape[2 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile3.root                                DEBUG --->Reading Shape[3 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
@@ -46,10 +46,10 @@ SimplePoolFile3.root                                DEBUG --> Access   DbContain
 ##Links                                             DEBUG Opened container ##Links of type ROOT_Tree
 SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/##Params [200]  (2 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:DA8F479C-09BC-49D4-94BC-99D025A23A3B
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [203]  (3 , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(ExampleTrackContainer_p1/MyTracks) [203]  (4 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(ExampleTrackContainer_p1/MyTracks) [203]  (3 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:FF777FDA-721C-4756-BBF3-4CE28C2A3AF5
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [203]  (4 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
 SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventInfo_v1/EventInfo) [203]  (5 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
 SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLContainer(DataHeader) [203]  (6 , ffffffffffffffff)
@@ -111,12 +111,12 @@ WriteExampleElectron                                DEBUG data dependencies:
   + OUTPUT  ( 'xAOD::ExampleElectronContainer' , 'StoreGateSvc+TestContainer' ) 
   + OUTPUT  ( 'xAOD::ExampleElectronContainer' , 'StoreGateSvc+TestContainer.decor1' ) 
   + OUTPUT  ( 'xAOD::ExampleElectronContainer' , 'StoreGateSvc+TestContainer.decor2' ) 
+StreamWritexAODElectrons                            DEBUG In initialize
 StreamWritexAODElectrons                            DEBUG In initialize 
 StreamWritexAODElectrons                            DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamWritexAODElectrons with no Algs
 StreamWritexAODElectrons                            DEBUG End initialize 
-StreamWritexAODElectrons                            DEBUG In initialize
-StreamWritexAODElectrons                            DEBUG Found StoreGateSvc store.
+StreamWritexAODElectrons                            DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamWritexAODElectrons                            DEBUG Found StoreGateSvc/MetaDataStore store.
 AthDictLoaderSvc                                     INFO in initialize...
 AthDictLoaderSvc                                     INFO acquired Dso-registry
@@ -171,8 +171,8 @@ POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
 POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'DataHeaderForm'
 POOLContainerForm(DataHeaderForm)                   DEBUG Opened container POOLContainerForm(DataHeaderForm) of type ROOT_Tree
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(xAOD::EventInfo_v1/EventInfo)
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
@@ -203,8 +203,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000000]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000000]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000000]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000000]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000000]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000000]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000000]
@@ -254,12 +254,6 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 1
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 1
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 1
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 1
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 1
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -287,17 +281,37 @@ RootDatabase.setOption                              DEBUG Request TREE_AUTO_FLUS
 RootDatabase.setOption                              DEBUG File name SimplePoolFile_xAOD.root
 RootDatabase.setOption                              DEBUG Demand to set AUTO_FLUSH for TTree: POOLContainerForm with value: 10
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
+SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(MyTracks)
+CollectionTree(MyTracks)                            DEBUG Opening
+CollectionTree(MyTracks)                            DEBUG    attributes# = 1
+CollectionTree(MyTracks)                            DEBUG Branch container 'MyTracks'
+CollectionTree(MyTracks)                            DEBUG Opened container CollectionTree(MyTracks) of type ROOT_Tree
+CollectionTree(MyTracks)                            DEBUG Setting AUTO_FLUSH for TTree: CollectionTree to value: 10
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(MyTracks) [203]  (3 , ffffffffffffffff)
+SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:FF777FDA-721C-4756-BBF3-4CE28C2A3AF5
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[0 , FF777FDA-721C-4756-BBF3-4CE28C2A3AF5]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG ---->Class:ExampleTrackContainer_p1
+SimplePoolFile_xAOD.root                            DEBUG ---->[0]:ExampleTrackContainer_p1 Typ:ExampleTrackContainer_p1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(EventInfoAux.)
 CollectionTree(EventInfoAux.)                       DEBUG Opening
 CollectionTree(EventInfoAux.)                       DEBUG    attributes# = 1
 CollectionTree(EventInfoAux.)                       DEBUG Branch container 'EventInfoAux.'
 CollectionTree(EventInfoAux.)                       DEBUG Opened container CollectionTree(EventInfoAux.) of type ROOT_Tree
-CollectionTree(EventInfoAux.)                       DEBUG Setting AUTO_FLUSH for TTree: CollectionTree to value: 10
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(EventInfoAux.) [203]  (3 , ffffffffffffffff)
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(EventInfoAux.) [203]  (4 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[0 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[1 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::EventAuxInfo_v3
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(EventInfo)
+CollectionTree(EventInfo)                           DEBUG Opening
+CollectionTree(EventInfo)                           DEBUG    attributes# = 1
+CollectionTree(EventInfo)                           DEBUG Branch container 'EventInfo'
+CollectionTree(EventInfo)                           DEBUG Opened container CollectionTree(EventInfo) of type ROOT_Tree
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(EventInfo) [203]  (5 , ffffffffffffffff)
+SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[2 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::EventInfo_v1
+SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::ExampleElectronAuxContainer_v1 [A57CD90B-B697-4067-93C7-28252B1FF9D5]
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(TestContainerAux.)
@@ -305,31 +319,11 @@ CollectionTree(TestContainerAux.)                   DEBUG Opening
 CollectionTree(TestContainerAux.)                   DEBUG    attributes# = 1
 CollectionTree(TestContainerAux.)                   DEBUG Branch container 'TestContainerAux.'
 CollectionTree(TestContainerAux.)                   DEBUG Opened container CollectionTree(TestContainerAux.) of type ROOT_Tree
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(TestContainerAux.) [203]  (4 , ffffffffffffffff)
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(TestContainerAux.) [203]  (6 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:A57CD90B-B697-4067-93C7-28252B1FF9D5
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[1 , A57CD90B-B697-4067-93C7-28252B1FF9D5]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[3 , A57CD90B-B697-4067-93C7-28252B1FF9D5]:  [1 Column(s)] 
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::ExampleElectronAuxContainer_v1
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::ExampleElectronAuxContainer_v1 Typ:xAOD::ExampleElectronAuxContainer_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(MyTracks)
-CollectionTree(MyTracks)                            DEBUG Opening
-CollectionTree(MyTracks)                            DEBUG    attributes# = 1
-CollectionTree(MyTracks)                            DEBUG Branch container 'MyTracks'
-CollectionTree(MyTracks)                            DEBUG Opened container CollectionTree(MyTracks) of type ROOT_Tree
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(MyTracks) [203]  (5 , ffffffffffffffff)
-SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:FF777FDA-721C-4756-BBF3-4CE28C2A3AF5
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[2 , FF777FDA-721C-4756-BBF3-4CE28C2A3AF5]:  [1 Column(s)] 
-SimplePoolFile_xAOD.root                            DEBUG ---->Class:ExampleTrackContainer_p1
-SimplePoolFile_xAOD.root                            DEBUG ---->[0]:ExampleTrackContainer_p1 Typ:ExampleTrackContainer_p1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(EventInfo)
-CollectionTree(EventInfo)                           DEBUG Opening
-CollectionTree(EventInfo)                           DEBUG    attributes# = 1
-CollectionTree(EventInfo)                           DEBUG Branch container 'EventInfo'
-CollectionTree(EventInfo)                           DEBUG Opened container CollectionTree(EventInfo) of type ROOT_Tree
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(EventInfo) [203]  (6 , ffffffffffffffff)
-SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[3 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]:  [1 Column(s)] 
-SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::EventInfo_v1
-SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO DataVector<xAOD::ExampleElectron_v1> [4508E3FC-03A7-4770-BF41-050C]
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(TestContainer)
@@ -369,8 +363,8 @@ MetaDataSvc                                         DEBUG MetaDataSvc will handl
 Str...StreamWritexAODElectrons_MakeEventStreamInfo  DEBUG Resetting the EventStreamInfo payload at the first event
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967298, run #1 1 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -382,8 +376,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000001]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000001]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000001]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000001]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000001]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000001]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000001]
@@ -428,18 +422,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 2
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 2
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 2
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 2
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 2
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967298, run #1 2 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967299, run #1 2 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -451,8 +439,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000002]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000002]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000002]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000002]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000002]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000002]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000002]
@@ -497,18 +485,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 3
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 3
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 3
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 3
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 3
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967299, run #1 3 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #, run #1 3 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -520,8 +502,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000003]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000003]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000003]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000003]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000003]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000003]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000003]
@@ -566,18 +548,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 4
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 4
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 4
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 4
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 4
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #, run #1 4 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 4 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -589,8 +565,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000004]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000004]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000004]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000004]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000004]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000004]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000004]
@@ -635,18 +611,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 5
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 5
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 5
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 5
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 5
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 5 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #2, run #1 5 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -658,8 +628,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000005]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000005]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000005]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000005]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000005]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000005]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000005]
@@ -704,18 +674,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 6
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 6
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 6
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 6
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 6
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #2, run #1 6 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #3, run #1 6 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -727,8 +691,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000006]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000006]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000006]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000006]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000006]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000006]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000006]
@@ -773,18 +737,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 7
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 7
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 7
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 7
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 7
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #3, run #1 7 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4, run #1 7 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -796,8 +754,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000007]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000007]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000007]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000007]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000007]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000007]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000007]
@@ -842,18 +800,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 8
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 8
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 8
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 8
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 8
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4, run #1 8 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #5, run #1 8 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -865,8 +817,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000008]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000008]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000008]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000008]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000008]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000008]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000008]
@@ -911,18 +863,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 9
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 9
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 9
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 9
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 9
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #5, run #1 9 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #6, run #1 9 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -934,8 +880,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000009]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000009]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000009]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000009]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000009]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000009]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000009]
@@ -980,12 +926,6 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 10
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 10
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 10
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 10
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 10
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 SimplePoolFile_xAOD.root                            DEBUG TestContainerAux. Initial basket size = 1536 increased to 3072
@@ -993,8 +933,8 @@ SimplePoolFile_xAOD.root                            DEBUG TestContainer Initial 
 SimplePoolFile_xAOD.root                            DEBUG TestContainerAuxDyn.decor1 Initial basket size = 512 increased to 1024
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #6, run #1 10 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #7, run #1 10 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1006,8 +946,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-0000000A]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-0000000A]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-0000000A]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-0000000A]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-0000000A]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-0000000A]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-0000000A]
@@ -1052,18 +992,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 11
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 11
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 11
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 11
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 11
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #7, run #1 11 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #8, run #1 11 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1075,8 +1009,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-0000000B]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-0000000B]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-0000000B]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-0000000B]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-0000000B]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-0000000B]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-0000000B]
@@ -1121,18 +1055,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 12
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 12
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 12
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 12
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 12
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #8, run #1 12 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #9, run #1 12 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1144,8 +1072,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-0000000C]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-0000000C]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-0000000C]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-0000000C]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-0000000C]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-0000000C]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-0000000C]
@@ -1190,18 +1118,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 13
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 13
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 13
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 13
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 13
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #9, run #1 13 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4, run #1 13 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1213,8 +1135,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-0000000D]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-0000000D]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-0000000D]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-0000000D]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-0000000D]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-0000000D]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-0000000D]
@@ -1259,18 +1181,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 14
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 14
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 14
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 14
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 14
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4, run #1 14 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967311, run #1 14 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1282,8 +1198,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-0000000E]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-0000000E]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-0000000E]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-0000000E]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-0000000E]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-0000000E]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-0000000E]
@@ -1328,18 +1244,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 15
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 15
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 15
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 15
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 15
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967311, run #1 15 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967312, run #1 15 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1351,8 +1261,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-0000000F]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-0000000F]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-0000000F]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-0000000F]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-0000000F]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-0000000F]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-0000000F]
@@ -1397,18 +1307,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 16
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 16
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 16
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 16
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 16
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967312, run #1 16 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967313, run #1 16 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1420,8 +1324,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000010]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000010]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000010]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000010]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000010]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000010]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000010]
@@ -1466,18 +1370,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 17
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 17
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 17
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 17
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 17
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967313, run #1 17 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967314, run #1 17 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1489,8 +1387,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000011]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000011]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000011]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000011]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000011]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000011]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000011]
@@ -1535,18 +1433,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 18
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 18
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 18
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 18
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 18
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967314, run #1 18 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967315, run #1 18 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1558,8 +1450,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000012]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000012]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000012]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000012]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000012]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000012]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000012]
@@ -1604,18 +1496,12 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 19
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 19
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 19
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 19
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 19
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967315, run #1 19 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
-AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967316, run #1 19 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -1627,8 +1513,8 @@ ReadData                                             INFO CLID = 45903698, key =
 ReadData                                             INFO CLID = 222376821, key = StreamReWrite
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000003-00000013]
-ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000004-00000013]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(ExampleTrackContainer_p1/MyTracks)][CLID=FF777FDA-721C-4756-BBF3-4CE28C2A3AF5][TECH=00000203][OID=00000003-00000013]
+ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000203][OID=00000004-00000013]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000203][OID=00000005-00000013]
 ReadData                                             INFO DataHeader (Event Content) [DB=A811B014-0297-AD47-AF4C-B75EF418982D][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000006-00000013]
 ReadData                                             INFO DataHeader (Provenance) [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000013]
@@ -1673,12 +1559,6 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
-StreamWritexAODElectrons                            DEBUG  Collected objects:
-StreamWritexAODElectrons                            DEBUG  Object/count: ExampleTrackContainer_MyTracks, 20
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventAuxInfo_EventInfoAux., 20
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::EventInfo_EventInfo, 20
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronAuxContainer_TestContainerAux., 20
-StreamWritexAODElectrons                            DEBUG  Object/count: xAOD::ExampleElectronContainer_TestContainer, 20
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 20 events processed so far  <<<===
@@ -1689,7 +1569,6 @@ StorageSvc                                          DEBUG Disconnect request for
 StorageSvc                                          DEBUG Closing database: FID=A811B014-0297-AD47-AF4C-B75EF418982D
 RootDatabase.close                                  DEBUG Closing DB SimplePoolFile3.root
 AthenaEventLoopMgr                                   INFO No more events in event selection 
-StreamWritexAODElectrons                            DEBUG AthenaOutputStream StreamWritexAODElectrons ::stop()
 MetaDataSvc                                         DEBUG MetaDataSvc::stop()
 StreamWritexAODElectrons                            DEBUG handle() incident type: MetaDataStop
 MetaDataSvc                                         DEBUG  calling metaDataStop for ToolSvc.xAODMaker::FileMetaDataTool
