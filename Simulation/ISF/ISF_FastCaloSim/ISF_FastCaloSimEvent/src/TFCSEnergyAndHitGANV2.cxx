@@ -263,7 +263,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
           if (chain()[ichain]->InheritsFrom(
                   TFCSLateralShapeParametrizationHitBase::Class())) {
             TFCSLateralShapeParametrizationHitBase *sim =
-                (TFCSLateralShapeParametrizationHitBase *)(chain()[ichain]);
+                static_cast<TFCSLateralShapeParametrizationHitBase *>(chain()[ichain]);
             if (sim->simulate_hit(hit, simulstate, truth, extrapol) !=
                 FCSSuccess) {
               ATH_MSG_ERROR("error for "
