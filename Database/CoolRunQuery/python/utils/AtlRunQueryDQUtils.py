@@ -14,7 +14,7 @@ from __future__ import division, print_function
 
 import sys, time
 from functools import reduce
-import xml.etree.cElementTree as et
+import xml.etree.ElementTree as et
 import xmlrpc.client
 from PyCool import cool
 dbSvc = cool.DatabaseSvcFactory.databaseService()

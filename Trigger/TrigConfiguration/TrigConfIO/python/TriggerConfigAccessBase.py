@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os
 import json
@@ -6,7 +6,6 @@ import re
 from typing import Any
 import six
 import xml.etree.ElementTree as ET
-from collections import OrderedDict as odict
 import coral
 
 from AthenaCommon.Logging import logging
@@ -61,7 +60,7 @@ class ConfigFileLoader(ConfigLoader):
         self.filename = filename
     def load(self):
         with open(self.filename, 'r') as fp:
-            config = json.load(fp, object_pairs_hook = odict)
+            config = json.load(fp)
             self.confirmConfigType(config)
         return config
     def setQuery(self, query):
@@ -78,7 +77,7 @@ class ConfigDirectLoader(ConfigLoader):
         super(ConfigDirectLoader,self).__init__(configType) 
         self.jsonString = jsonString
     def load(self):
-        config = json.loads(self.jsonString, object_pairs_hook = odict)
+        config = json.loads(self.jsonString)
         self.confirmConfigType(config)
         return config
     def setQuery(self, query):
@@ -134,7 +133,7 @@ class ConfigDBLoader(ConfigLoader):
             listOfServices = [svc for svc in listOfServices if not svc.startswith("frontier:")]
 
         # now get the account and pw for oracle connections
-        credentials = odict().fromkeys(listOfServices)
+        credentials = dict.fromkeys(listOfServices)
 
         for svc in filter(lambda s : s.startswith("frontier:"), listOfServices):
             credentials[svc] = dict()
@@ -315,7 +314,7 @@ class ConfigDBLoader(ConfigLoader):
             configblob = cursor.currentRow()[0].data()
             if type(configblob) is not str:
                 configblob = configblob.readline()
-            config = json.loads(configblob, object_pairs_hook = odict)
+            config = json.loads(configblob)
             session.transaction().commit()
             
             self.confirmConfigType(config)
@@ -384,7 +383,7 @@ class ConfigCrestLoader(ConfigLoader):
             log.error(f"Error: HTTP GET request '{preq.url}' failed")
             raise RuntimeError(f"Query {hash} to crest failed with status code {resp.status_code}")
         
-        config = json.loads(resp.content, object_pairs_hook = odict)
+        config = json.loads(resp.content)
         self.confirmConfigType(config)
         return config
 
@@ -424,7 +423,7 @@ class ConfigCrestLoader(ConfigLoader):
 
 class TriggerConfigAccess:
     """ 
-    base class to hold the configuration (OrderedDict) 
+    base class to hold the configuration (dict)
     and provides basic functions to access and print
     """
     def __init__(self, configType, mainkey, filename = None, jsonString = None, dbalias = None, dbkey = None, useCrest=False, crestServer=""):

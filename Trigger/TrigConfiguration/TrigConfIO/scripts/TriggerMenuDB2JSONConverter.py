@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+import json
 import sys, os
 from optparse import OptionParser, OptionGroup
+
 
 class Silence():
     def __init__(self, verbose):
@@ -86,7 +88,7 @@ def main():
             from TrigConfigSvc.TrigConfigSvcUtils import queryHLTPrescaleTableRun2
             res = queryHLTPrescaleTableRun2(options.db,options.hltpsk,smk)        
 
-        from collections import defaultdict, OrderedDict
+        from collections import defaultdict
         d = defaultdict(lambda : list())
 
         for e in res:
@@ -95,14 +97,13 @@ def main():
         # building json structure
         prescaleSet = []
         for (chainID, chainName),prescales in sorted(d.items()):
-            entry = OrderedDict()
+            entry = {}
             entry['chainId'] = chainID
             entry['chainName'] =chainName
             entry.update(prescales)
             prescaleSet.append( entry )
 
         # saving to file
-        import json
         filename = "HLTPrescales_smk%i_psk%i.json" % (smk, options.hltpsk)
         FH = open(filename, "w")
         json.dump(prescaleSet, FH, indent=4, separators=(',', ': '))
@@ -114,7 +115,7 @@ def main():
             from TrigConfigSvc.TrigConfigSvcUtils import queryHLTPrescaleTableRun2
             res = queryHLTPrescaleTableRun2(options.db,options.hltpsk,smk)        
 
-        from collections import defaultdict, OrderedDict
+        from collections import defaultdict
         d = defaultdict(lambda : list())
 
         for e in res:
@@ -123,14 +124,13 @@ def main():
         # building json structure
         prescaleSet = []
         for (chainID, chainName),prescales in sorted(d.items()):
-            entry = OrderedDict()
+            entry = {}
             entry['chainId'] = chainID
             entry['chainName'] =chainName
             entry.update(prescales)
             prescaleSet.append( entry )
 
         # saving to file
-        import json
         filename = "HLTPrescales_smk%i_psk%i.json" % (smk, options.hltpsk)
         FH = open(filename, "w")
         json.dump(prescaleSet, FH, indent=4, separators=(',', ': '))

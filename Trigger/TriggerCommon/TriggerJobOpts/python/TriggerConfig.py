@@ -2,7 +2,7 @@
 
 import re
 import GaudiConfig2
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format, MetadataCategory
@@ -52,7 +52,7 @@ def collectHypos( steps ):
                 else:
                     __log.verbose("Not a hypo %s", alg.getName())
 
-    return OrderedDict(hypos)
+    return hypos
 
 def __decisionsFromHypo( hypo ):
     """ return all chains served by this hypo and the keys of produced decision object """
@@ -176,8 +176,7 @@ def triggerSummaryCfg(flags, hypos):
     acc = ComponentAccumulator()
     from TrigOutputHandling.TrigOutputHandlingConfig import DecisionSummaryMakerAlgCfg
     decisionSummaryAlg = DecisionSummaryMakerAlgCfg(flags)
-    chainToLastCollection = OrderedDict() # keys are chain names, values are lists of collections
-
+    chainToLastCollection = {} # keys are chain names, values are lists of collections
 
     # sort steps according to the step number i.e. strings Step1 Step2 ... Step10 Step11 rather than
     # alphabetic order Step10 Step11 Step1 Step2
@@ -190,7 +189,7 @@ def triggerSummaryCfg(flags, hypos):
         # (TODO, review this whn config is symmetrised by addition of ComboHypos always)
         orderedStepHypos = sorted(stepHypos, key=lambda hypo: not __isCombo(hypo))
 
-        chainToCollectionInStep = OrderedDict()
+        chainToCollectionInStep = {}
         for hypo in orderedStepHypos:
             hypoChains, hypoOutputKeys = __decisionsFromHypo( hypo )
             for chain in hypoChains:
@@ -254,8 +253,8 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
             else:
                 stepFeatureDecisionKeys.extend( hypoOutputKeys )
 
-        dcEventTool = DecisionCollectorTool( "EventDecisionCollector" + stepName, Decisions=list(OrderedDict.fromkeys(stepDecisionKeys)))
-        dcFeatureTool = DecisionCollectorTool( "FeatureDecisionCollector" + stepName, Decisions=list(OrderedDict.fromkeys(stepFeatureDecisionKeys)))
+        dcEventTool = DecisionCollectorTool( "EventDecisionCollector" + stepName, Decisions=list(dict.fromkeys(stepDecisionKeys)))
+        dcFeatureTool = DecisionCollectorTool( "FeatureDecisionCollector" + stepName, Decisions=list(dict.fromkeys(stepFeatureDecisionKeys)))
         __log.debug( "The step monitoring decisions in %s %s", dcEventTool.getName(), dcEventTool.Decisions)
         __log.debug( "The step monitoring decisions in %s %s", dcFeatureTool.getName(), dcFeatureTool.Decisions)
         mon.DecisionCollectorTools += [ dcEventTool ]
