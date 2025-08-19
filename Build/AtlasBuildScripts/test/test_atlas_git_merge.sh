@@ -48,4 +48,15 @@ git checkout -f -B target ffda64e6dce47eb01aa3efba01051186dcdf1df2
 echo "a" | ../Build/AtlasBuildScripts/atlas_git_merge.py source target --remote ''
 assert_unmerged 8
 
+# Merge with sweep:ignore and another MR modifying the same file
+# https://gitlab.cern.ch/atlas/athena/-/merge_requests/81866
+git checkout -f -B source 6dad299ae64bf696937081dc5eed6b864e1d45ff
+git checkout -f -B target e465621f4069be6d8b7471f9e49c9824379729f0
+echo "a" | ../Build/AtlasBuildScripts/atlas_git_merge.py source target --remote ''
+status=`git status -s 'Trigger/TrigMonitoring/TrigSteerMonitor/src/TrigSignatureMoni.cxx'`
+if [[ -z "${status}" ]]; then
+    echo "ERROR: sweep:ignore did not work as expected"
+    exit 1
+fi
+
 echo "OK. All tests succeeded."
