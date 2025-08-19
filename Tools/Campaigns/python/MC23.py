@@ -163,8 +163,8 @@ def MC23g(flags):
     flags.Digitization.PU.NumberOfHighPtMinBias = 0.192
     # TODO new bunch structure?
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
-    # TODO: replace with the actual profile
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run470000_MC23e_MultiBeamspot' 
+    # TODO: replace with the actual mc23g profile - this is a validation PileupProfile file
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run495000_MC23g_MultiBeamspot_VALIDATION' 
 
 
 def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
@@ -452,10 +452,17 @@ def BeamspotSplitMC23e():
 def BeamspotSplitMC23g():
     """MC23g beamspot splitting configuration."""
     substeps = 4
-    event_fractions = [0.22, 0.22, 0.22, 0.34]
+    event_fractions = [0.3, 0.41, 0.09, 0.2]
 
     return substeps, event_fractions
 
+
+def BeamspotSplitMC23g_VALIDATION():
+    """MC23g beamspot splitting configuration for Validation purposes. The values are kept the same as BeamspotSplitMC23e"""
+    substeps = 4
+    event_fractions = [0.22, 0.22, 0.22, 0.34]
+
+    return substeps, event_fractions
 
 def MC23SimulationNoIoV(flags):
     """MC23 base flags for simulation without specifying conditions IoVs"""
