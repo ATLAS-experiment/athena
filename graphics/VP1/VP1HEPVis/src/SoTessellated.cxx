@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1HEPVis/nodes/SoTessellated.h"
@@ -130,9 +130,9 @@ void SoTessellated::generatePrimitives(SoAction *action)
     glBegin(GL_TRIANGLES);
     int nFaces = m_normals.size()/3;
     for (int i=0;i<nFaces;i++) {
-      glNormal3fv((const GLfloat*)&m_normals[i*3]);
+      glNormal3fv(static_cast<const GLfloat*>(&m_normals[i*3]));
       for (int j = 0; j < 3; j++)
-	glVertex3fv((const GLfloat*)&m_points[i*9+j*3]);
+	      glVertex3fv(static_cast<const GLfloat*>(&m_points[i*9+j*3]));
     }
     glEnd();
 
@@ -151,10 +151,10 @@ void SoTessellated::generatePrimitives(SoAction *action)
 
       for(size_t i=0;i<m_points.size()-9;i+=9) {
 	glBegin(GL_LINE_STRIP);
-	glVertex3fv((const GLfloat*)&m_points[i]);
-	glVertex3fv((const GLfloat*)&m_points[i+3]);
-	glVertex3fv((const GLfloat*)&m_points[i+6]);
-	glVertex3fv((const GLfloat*)&m_points[i]);
+	glVertex3fv(static_cast<const GLfloat*>(&m_points[i]));
+	glVertex3fv(static_cast<const GLfloat*>(&m_points[i+3]));
+	glVertex3fv(static_cast<const GLfloat*>(&m_points[i+6]));
+	glVertex3fv(static_cast<const GLfloat*>(&m_points[i]));
 	glEnd();
       }
 
