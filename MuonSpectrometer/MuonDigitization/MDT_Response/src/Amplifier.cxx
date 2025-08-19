@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDT_Response/Amplifier.h"
@@ -26,7 +26,6 @@ void  Amplifier::InitAmplifierParameters()
   m_adcFactor = 90.;
   m_adcFraction = 10.;
   m_binsize = 1.;
-  //std::cout << "Amplifier Threshold " << m_triggerElectron << std::endl;
 } 
 
 double Amplifier::ResponseFunction(double time)
@@ -101,7 +100,6 @@ void Amplifier::InitResponse(unsigned int bins, double binsize)
 
   m_response.resize(bins);
   m_signal.resize(bins);
-  //std::cout << "Amplifier Initialize: new response vector with " << m_response.size() << " bins" << std::endl;
 
   cluster_vec_it it = m_response.begin();
   double i(0.);
@@ -109,13 +107,11 @@ void Amplifier::InitResponse(unsigned int bins, double binsize)
   while( it != m_response.end() ){
     resp = m_binsize*ResponseFunction(m_binsize*i);
     if(resp>max) max = resp;
-    //integral+=resp;
     *it = resp;
     ++it;++i;
   }  
   m_responseMax = max;
   m_threshold = m_triggerElectron*max;
-  //std::cout << "max " << max << " integral " << integral << " threshold " << m_threshold <<std::endl;
   Reset();
 }
 
