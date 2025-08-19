@@ -23,7 +23,10 @@ def TRIG9KernelCfg(flags, name='TRIG9Kernel', **kwargs):
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
-    
+   
+    from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
+    acc.merge(AddTauAugmentationCfg(flags, prefix="TRIG9", doGNTauLoose=True))
+
     from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod
 
