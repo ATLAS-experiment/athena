@@ -29,3 +29,5 @@ atlas_add_component( AthXRTServices
    LINK_LIBRARIES
    GaudiKernel AthXRTInterfacesLib
    AthenaBaseComps CxxUtils LibXRT LibXOCL)
+
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
