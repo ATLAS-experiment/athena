@@ -25,9 +25,7 @@ def addFPGADataPrepFlags():
     flags.addFlag("FPGADataPrep.DoEmulation", False)
     flags.addFlag("FPGADataPrep.ForTiming", False)
     flags.addFlag("FPGADataPrep.doF110", False)
-    flags.addFlag("FPGADataPrep.NpixelCU", 1)
-    flags.addFlag("FPGADataPrep.NstripCU", 1)
-
+    flags.addFlag("FPGADataPrep.doCodeType", "F100")
     
     return flags
 

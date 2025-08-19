@@ -34,6 +34,10 @@ namespace EFTrackingFPGAIntegration
         // Get the RDOs from the SG
         auto pixelRDOHandle = SG::makeHandle(m_pixelRDOKey, ctx);
         auto stripRDOHandle = SG::makeHandle(m_stripRDOKey, ctx);
+        ATH_CHECK(pixelRDOHandle.isValid());
+        ATH_CHECK(stripRDOHandle.isValid());
+
+
 
         // Encode RDO into byte stream
         SG::WriteHandle<std::vector<uint64_t>> FPGAPixelRDO(m_FPGAPixelRDO, ctx);

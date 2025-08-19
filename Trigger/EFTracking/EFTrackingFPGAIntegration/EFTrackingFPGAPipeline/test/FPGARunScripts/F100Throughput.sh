@@ -40,8 +40,8 @@ storeClusters=False
 runF110=False
 threads=1
 nproc=0
-nPixelCU=1
-nStripCU=1
+doCodeType="F100"
+
 ## parsing flags
 while [ $# -ge 1 ];do
     case "$1" in
@@ -50,11 +50,10 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
-        -p  | --nPixelCU )      if [ $# -lt 2 ] ; then usage ; fi ; nPixelCU="$2"   ; shift ;;
-        -s  | --nStripCU )      if [ $# -lt 2 ] ; then usage ; fi ; nStripCU="$2"   ; shift ;;
         -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         -t  | --threads )       if [ $# -lt 2 ] ; then usage ; fi ; threads="$2" ; shift ;;
         -r  | --procs )         if [ $# -lt 2 ] ; then usage ; fi ; nproc="$2" ; shift ;;
+        -q  | --doCodeType )    if [ $# -lt 2 ] ; then usage ; fi ; doCodeType="$2" ; shift ;;
         -f  | --runF110 )       runF110=True ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
@@ -63,13 +62,24 @@ while [ $# -ge 1 ];do
     done
 
 ## checking valid inputs
-if [ -z $inputRDO ]; then usage ; fi
-if [ -z $outputAOD ]; then usage ; fi
+if [ -z "$inputRDO" ]; then usage ; fi
+if [ -z "$outputAOD" ]; then usage ; fi
 
-if [ ! -f $inputRDO ]; then
-    echo "runReco_F100_FS.sh result: 1 ${inputRDO} not found"
-    exit 1
+if [[ "$inputRDO" == *"*"* ]]; then
+    # Just pass the pattern as is to Reco_tf.py in case of regex-like input
+    inputRDO_arg="$inputRDO"
+else
+    # Check existence for comma-separated files
+    IFS=',' read -ra FILES <<< "$inputRDO"
+    for file in "${FILES[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            echo "Error: File not found: $file"
+            exit 1
+        fi
+    done
+    inputRDO_arg="$inputRDO"
 fi
+
 ## running reconstruction
 echo "running local"
 
@@ -79,13 +89,12 @@ ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
     --preExec "flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
                 flags.Tracking.doTruth=False; flags.Output.doGEN_AOD2xAOD=False; flags.Reco.PostProcessing.GeantTruthThinning=False; \
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};flags.Tracking.doVertexFinding=False;\
-                flags.Concurrency.NumConcurrentEvents=${threads}; flags.Concurrency.NumThreads=${threads}; flags.Output.AODFileName=\"\"; flags.Output.doWriteAOD=False;\
-                flags.FPGADataPrep.NpixelCU=${nPixelCU}; flags.FPGADataPrep.NstripCU=${nStripCU};  \
-                flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
+                flags.Concurrency.NumProcs=${nproc}; flags.Concurrency.NumConcurrentEvents=${threads}; flags.Concurrency.NumThreads=${threads}; flags.Output.AODFileName=\"\"; flags.Output.doWriteAOD=False;\
+                flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
     --perfmon 'fullmonmt' \
     --autoConfiguration 'everything' \
     --multithreaded 'True' \
     --steering 'doRAWtoALL' \
-    --inputRDOFile ${inputRDO} \
+    --inputRDOFile ${inputRDO_arg} \
     --outputAODFile ${outputAOD}
 
