@@ -1,28 +1,33 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
-
-// Gaudi includes
-#include "GaudiKernel/ConcurrencyFlags.h"
 
 // Local include(s).
 #include "VectorMultXRTExampleAlg.h"
 
 namespace AthExXRT {
 
-StatusCode VectorMultXRTExampleAlg::initialize() {
+StatusCode VectorMultXRTExampleAlg::initialize_global() {
 
-  // Retrieve the necessary component(s).
+  ATH_MSG_INFO("initialize_global()");
+
   ATH_CHECK(m_DeviceMgmtSvc.retrieve());
 
   // Retrieve the list of device(s) providing the kernel.
-  std::vector<std::shared_ptr<xrt::device>> devices =
-      m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(s_krnl_name);
-  if (devices.empty()) {
+  m_devices = m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(s_krnl_name);
+  if (m_devices.empty()) {
     ATH_MSG_ERROR("No XRT device provides kernel '" << s_krnl_name << "'");
     return StatusCode::FAILURE;
   }
+  ATH_MSG_INFO("Retrieved " << m_devices.size()<<" devices running "<< s_krnl_name);
 
+  return StatusCode::SUCCESS;
+
+}
+
+StatusCode VectorMultXRTExampleAlg::initialize_worker() {
+
+  ATH_MSG_INFO("initialize_worker()");
   // Allocate slot specific resources.
   std::size_t slotIdx = 0;
   for (SlotData& slot : m_slots) {
@@ -32,9 +37,9 @@ StatusCode VectorMultXRTExampleAlg::initialize() {
     // number in a round-robin fashion. This is just an example, and more
     // complex logic could be implemented here to take advantage of multiple
     // devices.
-    const std::size_t device_idx = slotIdx % devices.size();
+    const std::size_t device_idx = slotIdx % m_devices.size();
     ATH_MSG_DEBUG("Using device " << device_idx << " for slot " << slotIdx);
-    slot.m_device = devices[device_idx];
+    slot.m_device = m_devices[device_idx];
 
     // Create kernel objects.
     try {
@@ -75,7 +80,6 @@ StatusCode VectorMultXRTExampleAlg::initialize() {
     ++slotIdx;
   }
 
-  // Return gracefully.
   return StatusCode::SUCCESS;
 }
 
@@ -125,7 +129,6 @@ StatusCode VectorMultXRTExampleAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  // Return gracefully.
   return StatusCode::SUCCESS;
 }
 

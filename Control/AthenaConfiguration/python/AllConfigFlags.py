@@ -553,6 +553,11 @@ def initConfigFlags():
     
     _addFlagsCategory(acf, "FPGADataPrep", _eftracking_f100, "EFTrackingFPGAPipeline")
     
+    def __fpga():
+        from AthXRTServices.FPGAConfigFlags import createFPGAMgmtFlags
+        return createFPGAMgmtFlags()
+    _addFlagsCategory(acf, "FPGAMgmt", __fpga, 'AthXRTServices' )
+
     # For AnalysisBase, pick up things grabbed in Athena by the functions above
     if not isGaudiEnv():
         def EDMVersion(flags):

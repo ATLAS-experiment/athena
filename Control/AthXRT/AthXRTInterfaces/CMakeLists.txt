@@ -26,7 +26,8 @@ atlas_add_library( AthXRTInterfacesLib
    INTERFACE
    INCLUDE_DIRS ${OpenCL_INCLUDE_DIRS}
    PUBLIC_HEADERS AthXRTInterfaces
-   LINK_LIBRARIES GaudiKernel XRTLib ${OpenCL_LIBRARIES})
+   LINK_LIBRARIES GaudiKernel AthenaInterprocess XRTLib ${OpenCL_LIBRARIES})
 
 set_target_properties( AthXRTInterfacesLib PROPERTIES
    POSITION_INDEPENDENT_CODE TRUE )
+
