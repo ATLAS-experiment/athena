@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatTrackBuilder.h"
@@ -65,11 +65,7 @@ StatusCode MuPatTrackBuilder::execute(const EventContext& ctx) const {
 
     std::unique_ptr<TrackCollection> newtracks{m_trackMaker->find(ctx, msc)};
     if (!newtracks) newtracks = std::make_unique<TrackCollection>();
-    const TrackCollection* track_raw_ptr = newtracks.get();
     SG::WriteHandle<TrackCollection> spectroTracks(m_spectroTrackKey, ctx);
-    ATH_CHECK(spectroTracks.record(std::move(newtracks)));
-    ATH_MSG_DEBUG("TrackCollection '" << m_spectroTrackKey.key() << "' recorded in storegate, ntracks: " << track_raw_ptr->size());
-
     //---------------------------------------------------------------------------------------------------------------------//
     //------------                Monitoring of muon segments and tracks inside the trigger algs               ------------//
     //------------ Author:  Laurynas Mince                                                                     ------------//
@@ -78,14 +74,14 @@ StatusCode MuPatTrackBuilder::execute(const EventContext& ctx) const {
 
     // Only run monitoring for online algorithms
     if (not m_monTool.name().empty()) {
-        auto mstrks_n = Monitored::Scalar<int>("mstrks_n", track_raw_ptr->size());
-        auto mstrks_pt = Monitored::Collection("mstrks_pt", *track_raw_ptr, [](auto const& mstrk) {
+        auto mstrks_n = Monitored::Scalar<int>("mstrks_n", newtracks->size());
+        auto mstrks_pt = Monitored::Collection("mstrks_pt", *newtracks, [](auto const& mstrk) {
             return mstrk->perigeeParameters()->momentum().perp() / 1000.0;
         });  // pT converted to GeV
-        auto mstrks_eta = Monitored::Collection("mstrks_eta", *track_raw_ptr, [](auto const& mstrk) {
+        auto mstrks_eta = Monitored::Collection("mstrks_eta", *newtracks, [](auto const& mstrk) {
             return -log(tan(mstrk->perigeeParameters()->parameters()[Trk::theta] * 0.5));
         });
-        auto mstrks_phi = Monitored::Collection("mstrks_phi", *track_raw_ptr,
+        auto mstrks_phi = Monitored::Collection("mstrks_phi", *newtracks,
                                                 [](auto const& mstrk) { return mstrk->perigeeParameters()->parameters()[Trk::phi0]; });
         auto mssegs_n = Monitored::Scalar<int>("mssegs_n", msc.size());
         auto mssegs_eta = Monitored::Collection("mssegs_eta", msc, [](auto const& seg) { return seg->globalPosition().eta(); });
@@ -93,6 +89,8 @@ StatusCode MuPatTrackBuilder::execute(const EventContext& ctx) const {
 
         auto monitorIt = Monitored::Group(m_monTool, mstrks_n, mstrks_pt, mstrks_eta, mstrks_phi, mssegs_n, mssegs_eta, mssegs_phi);
     }
-
+    const auto nTracks = newtracks->size();
+    ATH_CHECK(spectroTracks.record(std::move(newtracks)));
+    ATH_MSG_DEBUG("TrackCollection '" << m_spectroTrackKey.key() << "' recorded in storegate, ntracks: " << nTracks);
     return StatusCode::SUCCESS;
 }  // execute
