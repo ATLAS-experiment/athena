@@ -27,6 +27,7 @@ atlas_add_component(TrigBtagEmulationTool
 		      xAODTrigger
 		      TrigDecisionToolLib
 		      FlavorTagDiscriminants
+              TrigCompositeUtilsLib
 		    )
 
 # Install files from the package:

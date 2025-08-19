@@ -47,6 +47,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
   m_jvt.reserve(n_def_size);
   m_tagger.reserve(n_def_size);
   m_is_PFlow.reserve(n_def_size);
+  m_gsc_pt.reserve(n_def_size);
   
   for(size_t chainPart_idx = 1; chainPart_idx < definition.size(); chainPart_idx++) {
     // L1threshold:J20_multiplicity:1_threshold:45_etaRange:0eta290_tagger:bdl1r70_isPFlow:True
@@ -64,6 +65,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     std::string dijetmass = (CHAINPART_VARIABLE(chainPart, "dijetmass")).size() ? CHAINPART_VARIABLE(chainPart, "dijetmass") : "";
     bool is_PFlow = (CHAINPART_VARIABLE(chainPart, "isPFlow") == "True");
     bool is_shared = (CHAINPART_VARIABLE(chainPart, "isShared") == "True");
+    double gsc_pt = static_cast<double>( std::stoi(CHAINPART_VARIABLE(chainPart, "GSCthreshold")) * 1e3 );
     
     double jet_eta_min = static_cast<double>( std::stoi(etaRange) / 100. );
     double jet_eta_max = static_cast<double>( std::stoi(etaRange.substr(etaRange.find("eta") + 3)) / 100. ); // 3 -> strlen("eta")
@@ -92,6 +94,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     ATH_MSG_DEBUG( " -   Jet preselection: " << m_jet_presel);
     ATH_MSG_DEBUG( " -         Dijet Mass: " << dijetmass);
     ATH_MSG_DEBUG( " -           is PFlow: " << (is_PFlow ? "YES":"NO"));
+    ATH_MSG_DEBUG( " -      GSC threshold: " << gsc_pt);
     
     m_chainPartName.push_back(chainPartName);
     m_jet_multiplicity.push_back(jet_multiplicity);
@@ -101,6 +104,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     m_jvt.push_back(jvt);
     m_tagger.push_back(tagger);
     m_is_PFlow.push_back(is_PFlow);
+    m_gsc_pt.push_back(gsc_pt);
     
     if(is_shared) {
       m_shared_idx = chainPart_idx;

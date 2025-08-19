@@ -2,8 +2,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def main():
-    EvtMax = 20
-    inputFiles = ['/global/homes/c/cvarni/Athena/TrigBtagEmulationToolLayout/data/TrigAnalysisTest.2022-05-09T2101.test_trigAna_RDOtoADO_v1Dev_grid.AOD.pool.root']
+    EvtMax = 100
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    inputFiles = defaultTestFiles.AOD_RUN3_MC
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
@@ -52,14 +53,15 @@ def main():
             emulatedChains = [cp for cp in chains_phys_pp_run3_v1[trigger_slice] if '_pf_' in cp.name and '_HT' not in cp.name and 'dl1d85bb' not in cp.name]
 
         # retagging example, DL1d from BTagging/20210519r22/dl1d/antikt4empflow/network.json (needs to be coded in TrigBtagEmulationJet.cxx as well)
-        if trigger_slice[0] == 'B':
-            from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
-            from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import SingleBjetGroup, PrimaryLegGroup
-            emulatedChains += [ChainProp(name='HLT_j45_0eta290_020jvt_pf_ftf_newTagger_L1J20', l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup)]
-
-            from TriggerMenuMT.HLT.Menu.SignatureDicts import JetChainParts
-            JetChainParts['bTag'] += ['newTagger']
-
+        # DL1d retagging is no longer supported, but this example is kept for reference
+        #if trigger_slice[0] == 'B':
+        #    from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+        #    from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import SingleBjetGroup, PrimaryLegGroup
+        #    emulatedChains += [ChainProp(name='HLT_j45_0eta290_020jvt_pf_ftf_newTagger_L1J20', l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup)]
+        #
+        #    from TriggerMenuMT.HLT.Menu.SignatureDicts import JetChainParts
+        #    JetChainParts['bTag'] += ['newTagger']
+    
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
@@ -72,9 +74,12 @@ def main():
                                         InputChain_EMTopo = '',
                                         InputJetContainer_EMTopo = jetcontainer_EMTopo,
                                         InputJetContainer_EMTopoPresel = '',
-                                        InputChain_PFlow = validation_singlechain,
                                         InputJetContainer_PFlow = jetcontainer_PFlow,
-                                        InputJetContainer_PFlowPresel = '' ))
+                                        InputJetContainer_PFlowPresel = '',
+                                        InputJetContainer_a4tcemsubjesJet = '',
+                                        InputJetContainer_SplitJet = '',
+                                        InputJetContainer_GSCJet = '',
+                                        ))
 
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TrigBtagValidationConfig.pkl','wb') )

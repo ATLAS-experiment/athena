@@ -49,9 +49,13 @@ namespace Trig {
     // These are set in the initialize method given JetContainerName
     SG::ReadHandleKey< xAOD::JetContainer > m_jetInputKey {this, "InputJets", "", "Input Jet Collection Key, retrieved from reconstructed jets"};
     SG::ReadHandleKey< xAOD::JetContainer > m_bjetInputKey {this, "InputBJets", "", "Input b-Jet Collection Key, retrieved from reconstructed jets"};
+    SG::ReadHandleKey< xAOD::BTaggingContainer > m_btagInputKey {this, "InputBTag", "HLT_xAOD__BTaggingContainer_HLTBjetFex", "Run2 input b-tag Collection Key"};
 
     Gaudi::Property<std::string> m_btagging_link {this, "BTaggingLink", "btaggingLink"};    
     Gaudi::Property<std::string> m_jetcontainer {this, "JetContainerName", "", "Jet Container"};
+    Gaudi::Property<int> m_LHCPeriod {this, "LHCPeriod", 3, "LHC Period Run2 or Run3"};
+
+    bool matchedSPLITjet(const xAOD::Jet*, const xAOD::Jet*) const;
   };
 
   inline const std::string& JetManagerTool::jetContainerName() const { return m_jetInputKey.key(); }
