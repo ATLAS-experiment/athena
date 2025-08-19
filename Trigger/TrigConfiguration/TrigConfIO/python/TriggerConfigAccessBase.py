@@ -383,7 +383,7 @@ class ConfigCrestLoader(ConfigLoader):
             log.error(f"Error: HTTP GET request '{preq.url}' failed")
             raise RuntimeError(f"Query {hash} to crest failed with status code {resp.status_code}")
         
-        config = json.loads(resp.content, object_pairs_hook = odict)
+        config = json.loads(resp.content)
         self.confirmConfigType(config)
         return config
 
