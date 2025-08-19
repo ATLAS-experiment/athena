@@ -29,6 +29,7 @@ class NswGeoPlottingAlg : public AthHistogramAlgorithm {
 
   StatusCode initMm();
   StatusCode initStgc();
+  StatusCode initTgc();
 
   // MuonDetectorManager from the conditions store
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
@@ -39,9 +40,14 @@ class NswGeoPlottingAlg : public AthHistogramAlgorithm {
   const MuonDetectorManager* m_detMgr{nullptr};
 
   Gaudi::Property<bool> m_testActsSurf{this, "TestActsSurface", true};
+
+  Gaudi::Property<bool> m_plotMm{this, "plotMm", true};
+  Gaudi::Property<bool> m_plotStgc{this, "plotStgc", true};
+  Gaudi::Property<bool> m_plotTgc{this, "plotTgc",false};
   /// Map showing the active areas of the NSW to show the passivation
   std::map<IdentifierHash, TH1*> m_mmActiveAreas{};
   std::map<IdentifierHash, TH1*> m_stgcActiveAreas{};
+  std::map<IdentifierHash, TH1*> m_tgcActiveAreas{};
 
 };
 
