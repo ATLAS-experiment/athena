@@ -11,6 +11,9 @@
 #include "TrackingAnalysisAlgorithms/InDetTrackSelectionAlg.h"
 #include "TrackingAnalysisAlgorithms/InDetTrackSmearingAlg.h"
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 
 // Declare the component(s) of the package:
 DECLARE_COMPONENT( CP::VertexSelectionAlg )

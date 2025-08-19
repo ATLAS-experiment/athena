@@ -11,6 +11,9 @@
 #include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelMissingETAlg.h>
 #include <TruthParticleLevelAnalysisAlgorithms/ParticleLevelOverlapRemovalAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (CP::ParticleLevelJetsAlg)
 DECLARE_COMPONENT (CP::ParticleLevelIsolationAlg)
 DECLARE_COMPONENT (CP::ParticleLevelChargeDecoratorAlg)

@@ -15,17 +15,10 @@ atlas_add_library( JetAnalysisAlgorithmsLib
    JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib ${FASTJET_LIBRARIES}
    PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODMuon )
 
-atlas_add_dictionary( JetAnalysisAlgorithmsDict
-   JetAnalysisAlgorithms/JetAnalysisAlgorithmsDict.h
-   JetAnalysisAlgorithms/selection.xml
-   LINK_LIBRARIES JetAnalysisAlgorithmsLib )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( JetAnalysisAlgorithms
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AnaAlgorithmLib JetAnalysisInterfacesLib JetCPInterfaces JetCalibToolsLib
-      JetInterface SelectionHelpersLib SystematicsHandlesLib xAODJet JetAnalysisAlgorithmsLib )
-endif()
+atlas_add_component( JetAnalysisAlgorithms
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES AnaAlgorithmLib JetAnalysisInterfacesLib JetCPInterfaces JetCalibToolsLib
+   JetInterface SelectionHelpersLib SystematicsHandlesLib xAODJet JetAnalysisAlgorithmsLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )

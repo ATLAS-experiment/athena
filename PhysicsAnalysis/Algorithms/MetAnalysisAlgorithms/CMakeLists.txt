@@ -9,16 +9,9 @@ atlas_add_library( MetAnalysisAlgorithmsLib
    LINK_LIBRARIES AnaAlgorithmLib METInterface SystematicsHandlesLib SelectionHelpersLib xAODBase xAODMissingET
    PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODEventInfo )
 
-atlas_add_dictionary( MetAnalysisAlgorithmsDict
-   MetAnalysisAlgorithms/MetAnalysisAlgorithmsDict.h
-   MetAnalysisAlgorithms/selection.xml
-   LINK_LIBRARIES MetAnalysisAlgorithmsLib )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( MetAnalysisAlgorithms
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AnaAlgorithmLib METInterface SystematicsHandlesLib xAODBase
-      xAODMissingET MetAnalysisAlgorithmsLib )
-endif()
+atlas_add_component( MetAnalysisAlgorithms
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES AnaAlgorithmLib METInterface SystematicsHandlesLib xAODBase
+   xAODMissingET MetAnalysisAlgorithmsLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

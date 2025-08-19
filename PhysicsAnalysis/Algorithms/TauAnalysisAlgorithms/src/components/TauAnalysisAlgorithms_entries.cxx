@@ -9,6 +9,9 @@
 #include <TauAnalysisAlgorithms/DiTauMassCalculatorAlg.h>
 #include <TauAnalysisAlgorithms/TauCombineMuonRMTausAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (CP::DiTauEfficiencyCorrectionsAlg)
 DECLARE_COMPONENT (CP::DiTauSmearingAlg)
 DECLARE_COMPONENT (CP::DiTauTruthMatchingAlg)

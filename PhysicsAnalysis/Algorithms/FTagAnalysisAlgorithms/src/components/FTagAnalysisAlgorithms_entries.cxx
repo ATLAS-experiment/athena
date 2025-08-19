@@ -7,6 +7,9 @@
 #include <FTagAnalysisAlgorithms/XbbInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/XbbEfficiencyAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (CP::BTaggingEfficiencyAlg)
 DECLARE_COMPONENT (CP::BTaggingTriggerEfficiencyAlg)
 DECLARE_COMPONENT (CP::BTaggingInformationDecoratorAlg)

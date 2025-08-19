@@ -15,6 +15,9 @@
 #include <EgammaAnalysisAlgorithms/ElectronSiHitDecAlg.h>
 #include <EgammaAnalysisAlgorithms/PhotonExtraVariablesAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (CP::EgammaCalibrationAndSmearingAlg)
 DECLARE_COMPONENT (CP::EgammaCaloClusterEtaAlg)
 DECLARE_COMPONENT (CP::EgammaIsGoodOQSelectionTool)

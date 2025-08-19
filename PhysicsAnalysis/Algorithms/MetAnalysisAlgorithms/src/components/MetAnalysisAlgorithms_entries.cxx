@@ -4,6 +4,9 @@
 #include <MetAnalysisAlgorithms/MetMakerAlg.h>
 #include <MetAnalysisAlgorithms/MetSignificanceAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (CP::MetBuilderAlg)
 DECLARE_COMPONENT (CP::MetMakerAlg)
 DECLARE_COMPONENT (CP::MetSignificanceAlg)
