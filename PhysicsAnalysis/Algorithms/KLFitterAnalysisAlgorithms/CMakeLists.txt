@@ -25,6 +25,10 @@ if(XAOD_ANALYSIS)
     target_link_libraries(KLFitterAnalysisAlgorithmsLib PUBLIC ${ROOT_LIBRARIES} AthContainers)
   endif()
 
+  atlas_add_component(
+    KLFitterAnalysisAlgorithms src/components/*.cxx
+    LINK_LIBRARIES KLFitterAnalysisAlgorithmsLib
+  )
   if(XAOD_STANDALONE)
     atlas_add_dictionary( KLFitterAnalysisAlgorithmsDict
       KLFitterAnalysisAlgorithms/KLFitterAnalysisAlgorithmsDict.h
@@ -32,10 +36,6 @@ if(XAOD_ANALYSIS)
       LINK_LIBRARIES KLFitterAnalysisAlgorithmsLib
       EXTRA_FILES Root/dict/*.cxx )
   else()
-    atlas_add_component(
-      KLFitterAnalysisAlgorithms src/components/*.cxx
-      LINK_LIBRARIES KLFitterAnalysisAlgorithmsLib
-    )
     atlas_add_dictionary( KLFitterAnalysisAlgorithmsDict
       KLFitterAnalysisAlgorithms/KLFitterAnalysisAlgorithmsDict.h
       KLFitterAnalysisAlgorithms/selection_ath.xml

@@ -8,6 +8,6 @@
 #ifndef SYSTEMATICS_HANDLES__SYSTEMATICS_HANDLES_DICT_H
 #define SYSTEMATICS_HANDLES__SYSTEMATICS_HANDLES_DICT_H
 
-#include <SystematicsHandles/SystematicsSvc.h>
+#include <SystematicsHandles/ISystematicsSvc.h>
 
 #endif

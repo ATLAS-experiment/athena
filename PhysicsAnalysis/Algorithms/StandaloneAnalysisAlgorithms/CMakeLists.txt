@@ -19,8 +19,6 @@ atlas_add_library( StandaloneAnalysisAlgorithmsLib
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers EventLoop )
 
-# Set up a dictionary:
-atlas_add_dictionary( StandaloneAnalysisAlgorithmsDict
-   StandaloneAnalysisAlgorithms/StandaloneAnalysisAlgorithmsDict.h
-   StandaloneAnalysisAlgorithms/selection.xml
+atlas_add_component( StandaloneAnalysisAlgorithms
+   src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES StandaloneAnalysisAlgorithmsLib )

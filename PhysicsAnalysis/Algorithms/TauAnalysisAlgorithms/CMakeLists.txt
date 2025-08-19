@@ -13,15 +13,8 @@ atlas_add_library( TauAnalysisAlgorithmsLib
    SystematicsHandlesLib
    AnaAlgorithmLib TauAnalysisToolsLib )
 
-atlas_add_dictionary( TauAnalysisAlgorithmsDict
-   TauAnalysisAlgorithms/TauAnalysisAlgorithmsDict.h
-   TauAnalysisAlgorithms/selection.xml
+atlas_add_component( TauAnalysisAlgorithms src/components/*.cxx
    LINK_LIBRARIES TauAnalysisAlgorithmsLib )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( TauAnalysisAlgorithms src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel TauAnalysisAlgorithmsLib )
-endif()
 
 atlas_install_python_modules( python/*.py )
 

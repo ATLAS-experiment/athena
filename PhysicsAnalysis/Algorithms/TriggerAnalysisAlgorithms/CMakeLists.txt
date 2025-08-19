@@ -12,15 +12,8 @@ atlas_add_library( TriggerAnalysisAlgorithmsLib
       xAODEgamma xAODMuon TriggerAnalysisInterfaces TrigCompositeUtilsLib TrigGlobalEfficiencyCorrectionLib TriggerMatchingToolLib
    PRIVATE_LINK_LIBRARIES RootCoreUtils )
 
-atlas_add_dictionary( TriggerAnalysisAlgorithmsDict
-   TriggerAnalysisAlgorithms/TriggerAnalysisAlgorithmsDict.h
-   TriggerAnalysisAlgorithms/selection.xml
+atlas_add_component( TriggerAnalysisAlgorithms
+   src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES TriggerAnalysisAlgorithmsLib )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( TriggerAnalysisAlgorithms
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel TriggerAnalysisAlgorithmsLib )
-endif()
 
 atlas_install_python_modules( python/*.py )

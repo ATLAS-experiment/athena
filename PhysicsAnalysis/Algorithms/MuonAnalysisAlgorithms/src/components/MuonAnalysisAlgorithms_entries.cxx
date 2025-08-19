@@ -8,6 +8,9 @@
 #include <MuonAnalysisAlgorithms/MuonLRTMergingAlg.h>
 #include <MuonAnalysisAlgorithms/MuonContainerMergingAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (CP::MuonCalibrationAndSmearingAlg)
 DECLARE_COMPONENT (CP::MuonIsolationAlg)
 DECLARE_COMPONENT (CP::MuonEfficiencyScaleFactorAlg)

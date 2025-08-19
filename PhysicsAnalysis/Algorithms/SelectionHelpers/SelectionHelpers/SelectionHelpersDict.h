@@ -11,6 +11,5 @@
 #include "SelectionHelpers/ISelectionReadAccessor.h"
 #include "SelectionHelpers/ISelectionWriteAccessor.h"
 #include "SelectionHelpers/OutOfValidityHelper.h"
-#include "SelectionHelpers/SelectionNameSvc.h"
 
 #endif

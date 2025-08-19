@@ -1,50 +1,10 @@
 <lcgdict>
 
-   <class name="CP::AsgClassificationDecorationAlg" />
-   <class name="CP::AsgCutBookkeeperAlg" />
-   <class name="CP::AsgEnergyDecoratorAlg" />
-   <class name="CP::AsgEventScaleFactorAlg" />
    <class name="CP::AsgFlagSelectionTool" />
-   <class name="CP::AsgLeptonTrackDecorationAlg" />
-   <class name="CP::AsgLeptonTrackSelectionAlg" />
-   <class name="CP::AsgObjectScaleFactorAlg" />
-   <class name="CP::AsgOriginalObjectLinkAlg" />
-   <class name="CP::AsgPriorityDecorationAlg" />
    <class name="CP::AsgPtEtaSelectionTool" />
    <class name="CP::AsgMassSelectionTool" />
    <class name="CP::AsgNumDecorationSelectionToolInt" />
    <class name="CP::AsgNumDecorationSelectionToolUInt8" />
-   <class name="CP::AsgSelectionAlg" />
-   <class name="CP::AsgShallowCopyAlg" />
-   <class name="CP::AsgUnionPreselectionAlg" />
-   <class name="CP::AsgUnionSelectionAlg" />
-   <class name="CP::AsgViewFromSelectionAlg" />
-   <class name="CP::AsgxAODMetNTupleMakerAlg" />
-   <class name="CP::AsgxAODNTupleMakerAlg" />
    <class name="CP::BootstrapGenerator" />
-   <class name="CP::BootstrapGeneratorAlg" />
-   <class name="CP::CopyNominalSelectionAlg" />
-   <class name="CP::EventCutFlowHistAlg" />
-   <class name="CP::EventDecoratorAlg" />
-   <class name="CP::EventFlagSelectionAlg" />
-   <class name="CP::EventSelectionByObjectFlagAlg" />
-   <class name="CP::EventStatusSelectionAlg" />
-   <class name="CP::FakeBkgCalculatorAlg" />
-   <class name="CP::IOStatsAlg" />
-   <class name="CP::IsolationCloseByCorrectionAlg" />
-   <class name="CP::KinematicHistAlg" />
-   <class name="CP::LeptonSFCalculatorAlg" />
-   <class name="CP::MCTCDecorationAlg" />
-   <class name="CP::ObjectCutFlowHistAlg" />
-   <class name="CP::OverlapRemovalAlg" />
-   <class name="CP::PileupReweightingAlg" />
-   <class name="CP::PDFinfoAlg" />
-   <class name="CP::PMGTruthWeightAlg" />
-   <class name="CP::SysListDumperAlg" />
-   <class name="CP::SystObjectLinkerAlg" />
-   <class name="CP::SystObjectUnioniserAlg" />
-   <class name="CP::TreeFillerAlg" />
-   <class name="CP::TreeMakerAlg" />
-   <class name="CP::VGammaORAlg" />
 
 </lcgdict>
