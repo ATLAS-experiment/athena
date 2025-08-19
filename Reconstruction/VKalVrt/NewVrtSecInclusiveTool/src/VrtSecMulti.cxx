@@ -113,7 +113,7 @@ namespace Rec{
           newvrt.projectedVrt=MomProjDist(newvrt.vertex, primVrt, newvrt.vertexMom); //3D SV-PV distance
           wrkVrtSet->push_back(newvrt);
     } 
-    std::sort(wrkVrtSet->begin(),wrkVrtSet->end(),[](WrkVrt a, WrkVrt b){return a.selTrk.size()>b.selTrk.size();});
+    std::sort(wrkVrtSet->begin(),wrkVrtSet->end(),[](const WrkVrt& a, const WrkVrt& b){return a.selTrk.size()>b.selTrk.size();});
 //==================================================================================
 // boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS>::vertex_iterator vertexIt, vertexEnd;
 // boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS>::adjacency_iterator neighbourIt, neighbourEnd;
