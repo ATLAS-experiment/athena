@@ -22,6 +22,12 @@ def FPGATrackSimReportingCfg(flags, name='FPGATrackSimReportingAlg',**kwargs):
 
     return acc
 
+def FPGADataFormatToolCfg(flags, name='FPGADataFormatTool', **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault('name', name)
+    acc.setPrivateTools(CompFactory.FPGADataFormatTool(**kwargs))
+    return acc
+
 def xAODClusterMakerCfg(flags, name = 'xAODClusterMaker', **kwarg):
     """Configure the xAODClusterMaker tool"""
     

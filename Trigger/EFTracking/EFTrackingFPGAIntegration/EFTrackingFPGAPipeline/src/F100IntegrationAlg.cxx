@@ -5,6 +5,11 @@
 #include "EFTrackingFPGAPipeline/F100IntegrationAlg.h"
 #include "AthenaKernel/Chrono.h"
 #include "AthenaKernel/SlotSpecificObj.h"
+#include <xrt/xrt_bo.h>
+#include <xrt/xrt_device.h>
+#include <xrt/xrt_kernel.h>
+#include <xrt/xrt_uuid.h>
+
 namespace EFTrackingFPGAIntegration
 {
     StatusCode F100IntegrationAlg::initialize()
@@ -33,6 +38,10 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_FPGAStripOutput.initialize());
         ATH_CHECK(m_FPGAPixelOutput.initialize());
 
+        std::vector<std::string> listofCUs;
+
+        getListofCUs(listofCUs);
+
         cl_int err = 0;
 
         unsigned int nthreads = m_FPGAThreads.value();
@@ -59,52 +68,49 @@ namespace EFTrackingFPGAIntegration
             m_stripClusterEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             // L2G
             if (!m_doF110) {
-                m_pixelL2GOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err)); 
+                m_pixelL2GOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
                 m_pixelL2GEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             }
-            m_stripL2GOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err)); 
+            m_stripL2GOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             m_stripL2GEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             // EDMPrep
             m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err));
         }
 
-        for (unsigned int i = 0; i < nthreads; ++i) {
-            // Indexing CUs
-            size_t pixelCU = (i % m_NpixelCU.value()) + 1;
-            size_t stripCU = (i % m_NstripCU.value()) + 1;
-
+        // Create kernels for each one of CUs that is inside device
+        for (const auto& cuName: listofCUs)
+        {
             // Pixel clustering
-            std::string pixelClustName = std::string(m_pixelClusterKernelName.value()) + ":{" + std::string(m_pixelClusterKernelName.value()) + "_" + std::to_string(pixelCU) + "}";
-            m_pixelClusteringKernels.emplace_back(cl::Kernel(m_program, pixelClustName.c_str()));
+            if(cuName.find(m_pixelClusterKernelName.value()) != std::string::npos) m_pixelClusteringKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
 
             // Strip clustering
-            std::string stripClustName = std::string(m_stripClusterKernelName.value()) + ":{" + std::string(m_stripClusterKernelName.value()) + "_" + std::to_string(stripCU) + "}";
-            m_stripClusteringKernels.emplace_back(cl::Kernel(m_program, stripClustName.c_str()));
+            else if(cuName.find(m_stripClusterKernelName.value()) != std::string::npos)  m_stripClusteringKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
 
-            if (!m_doF110) {
-                // Pixel L2G
-                std::string pixelL2GName = std::string(m_pixelL2GKernelName.value()) + ":{" + std::string(m_pixelL2GKernelName.value()) + "_" + std::to_string(pixelCU) + "}";
-                m_pixelL2GKernels.emplace_back(cl::Kernel(m_program, pixelL2GName.c_str()));
-            }
+            // Pixel L2G
+            else if(m_doF110 && cuName.find(m_pixelL2GKernelName.value()) != std::string::npos) m_pixelL2GKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
 
             // Strip L2G
-            std::string stripL2GName = std::string(m_stripL2GKernelName.value()) + ":{" + std::string(m_stripL2GKernelName.value()) + "_" + std::to_string(stripCU) + "}";
-            m_stripL2GKernels.emplace_back(cl::Kernel(m_program, stripL2GName.c_str()));
+            else if(cuName.find(m_stripL2GKernelName.value()) != std::string::npos) m_stripL2GKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
 
             // EDM prep
-            if (m_doF110) {
-                std::string pixelEdmName = std::string(m_pixelEdmKernelName.value()) + ":{" + std::string(m_pixelEdmKernelName.value()) + "_" + std::to_string(pixelCU) + "}";
-                m_pixelEdmPrepKernels.emplace_back(cl::Kernel(m_program, pixelEdmName.c_str()));
+            else if(m_doF110 && cuName.find(m_pixelEdmKernelName.value()) != std::string::npos) m_pixelEdmPrepKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
 
-                std::string stripEdmName = std::string(m_stripEdmKernelName.value()) + ":{" + std::string(m_stripEdmKernelName.value()) + "_" + std::to_string(stripCU) + "}";
-                m_stripEdmPrepKernels.emplace_back(cl::Kernel(m_program, stripEdmName.c_str()));
-            } else {
-                std::string edmPrepName = std::string(m_edmKernelName.value()) + ":{" + std::string(m_edmKernelName.value()) + "_" + std::to_string(stripCU) + "}";
-                m_edmPrepKernels.emplace_back(cl::Kernel(m_program, edmPrepName.c_str()));
+            else if(m_doF110 && cuName.find(m_stripEdmKernelName.value()) != std::string::npos) m_stripEdmPrepKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
+            else if(!m_doF110 && cuName.find(m_edmKernelName.value()) != std::string::npos) m_edmPrepKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
+            else
+            {
+                ATH_MSG_WARNING("Do not recognize kernel name: "<<cuName);
             }
         }
 
+        ATH_MSG_INFO(m_pixelClusterKernelName.value()<<" size: "<<m_pixelClusteringKernels.size());
+        ATH_MSG_INFO(m_stripClusterKernelName.value()<<" size: "<<m_stripClusteringKernels.size());
+        ATH_MSG_INFO(m_pixelL2GKernelName.value()<<" size: "<<m_pixelL2GKernels.size());
+        ATH_MSG_INFO(m_stripL2GKernelName.value()<<" size: "<<m_stripL2GKernels.size());
+        ATH_MSG_INFO(m_pixelEdmKernelName.value()<<" size: "<<m_pixelEdmPrepKernels.size());
+        ATH_MSG_INFO(m_stripEdmKernelName.value()<<" size: "<<m_stripEdmPrepKernels.size());
+        ATH_MSG_INFO(m_edmKernelName.value()<<" size: "<<m_edmPrepKernels.size());
 
 
         return StatusCode::SUCCESS;
@@ -116,8 +122,9 @@ namespace EFTrackingFPGAIntegration
         m_numEvents++;
 
         /// Input handles
-        auto pixelInput = SG::get(m_FPGAPixelRDO, ctx);
-        auto stripInput = SG::get(m_FPGAStripRDO, ctx);
+        const std::vector<uint64_t>* pixelInput{nullptr}, *stripInput{nullptr};
+        ATH_CHECK(SG::get(pixelInput, m_FPGAPixelRDO, ctx));
+        ATH_CHECK(SG::get(stripInput, m_FPGAStripRDO, ctx));  
 
     
         // logic
@@ -129,28 +136,34 @@ namespace EFTrackingFPGAIntegration
 
         size_t bufferIndex = ctx.slot() % nthreads;
 
-        size_t pixelKernelIndex = ctx.slot() % m_NpixelCU.value() + 1;
-        size_t stripKernelIndex = ctx.slot() % m_NstripCU.value() + 1;
-        
+        // Get index for each of the kernels
+        size_t pixelClusterIndex = ctx.slot() % m_pixelClusteringKernels.size();
+        size_t stripClusterIndex = ctx.slot() % m_stripClusteringKernels.size();
+        size_t stripL2GIndex = ctx.slot() % m_stripL2GKernels.size();
+        size_t pixelL2GIndex = m_pixelL2GKernels.size() ? ctx.slot() % m_pixelL2GKernels.size() : 0;
+        size_t edmIndex = m_edmPrepKernels.size() ? ctx.slot() % m_edmPrepKernels.size() : 0;
+        size_t pixelEDMIndex = m_pixelEdmPrepKernels.size() ? ctx.slot() % m_pixelEdmPrepKernels.size() : 0;
+        size_t stripEDMIndex = m_stripEdmPrepKernels.size() ? ctx.slot() % m_stripEdmPrepKernels.size() : 0;
+
         const cl::CommandQueue &acc_queue = m_acc_queues[bufferIndex];
 
+        ATH_MSG_INFO("Thread number "<<ctx.slot()<<" running on buffer "<<bufferIndex<<" pixelClusterIndex: "<< pixelClusterIndex<<" stripClusterIndex: "<< stripClusterIndex<<" stripL2GIndex: "<< stripL2GIndex<<" pixelL2GIndex: "<< pixelL2GIndex<<" edmIndex: "<< edmIndex<<" pixelEDMIndex: "<< pixelEDMIndex<<" stripEDMIndex: "<< stripEDMIndex);
 
-        ATH_MSG_DEBUG("Thread number "<<ctx.slot()<<" running on buffer "<<bufferIndex<<" pixelKernelIndex: "<< pixelKernelIndex<<" stripKernelIndex: "<< stripKernelIndex);
+        cl::Kernel &pixelClusteringKernel = m_pixelClusteringKernels[pixelClusterIndex];
+        cl::Kernel &stripClusteringKernel = m_stripClusteringKernels[stripClusterIndex];
+        cl::Kernel &stripL2GKernel = m_stripL2GKernels[stripL2GIndex];
 
-        cl::Kernel &pixelClusteringKernel = m_pixelClusteringKernels[bufferIndex];
-        cl::Kernel &stripClusteringKernel = m_stripClusteringKernels[bufferIndex];
-        cl::Kernel &stripL2GKernel = m_stripL2GKernels[bufferIndex];
-
-        cl::Kernel *pixelL2GKernel = m_doF110 ? nullptr : &m_pixelL2GKernels[bufferIndex];
+        cl::Kernel *pixelL2GKernel = nullptr;
         cl::Kernel *edmPrepKernel = nullptr;
         cl::Kernel *pixelEdmPrepKernel = nullptr;
         cl::Kernel *stripEdmPrepKernel = nullptr;
 
         if (m_doF110) {
-            pixelEdmPrepKernel = &m_pixelEdmPrepKernels[bufferIndex];
-            stripEdmPrepKernel = &m_stripEdmPrepKernels[bufferIndex];
+            pixelEdmPrepKernel = &m_pixelEdmPrepKernels[pixelEDMIndex];
+            stripEdmPrepKernel = &m_stripEdmPrepKernels[stripEDMIndex];
         } else {
-            edmPrepKernel = &m_edmPrepKernels[bufferIndex];
+            edmPrepKernel = &m_edmPrepKernels[edmIndex];
+            pixelL2GKernel = &m_pixelL2GKernels[pixelL2GIndex];
         }
 
         // Set kernel arguments
@@ -265,8 +278,10 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Event> wait_for_reads = { evt_pixel_cluster_output, evt_strip_cluster_output };
         cl::Event::waitForEvents(wait_for_reads);
 
+
         if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
         if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
+
 
         // calculate the time for the kernel execution
         // get the time of writing pixel input buffer
@@ -368,4 +383,31 @@ namespace EFTrackingFPGAIntegration
 
         return StatusCode::SUCCESS;
     }
+
+    void F100IntegrationAlg::getListofCUs(std::vector<std::string>& cuNames)
+    {
+        xrt::xclbin xrt_xclbin(m_xclbin);
+
+        ATH_MSG_INFO("xsa name: "<<xrt_xclbin.get_xsa_name());
+        ATH_MSG_INFO("fpga name: "<<xrt_xclbin.get_fpga_device_name());
+        ATH_MSG_INFO("uuid: "<<xrt_xclbin.get_uuid().to_string());
+
+        for (const xrt::xclbin::kernel &kernel : xrt_xclbin.get_kernels()) {
+            const std::string& kernelName = kernel.get_name();
+
+            ATH_MSG_INFO("kernelName: "<<kernelName);
+
+
+            for (const xrt::xclbin::ip &computeUnit : kernel.get_cus()) {
+                const std::string& computeUnitName = computeUnit.get_name();
+                const std::string computeUnitIsolatedName = computeUnitName.substr(kernelName.size() + 1);
+
+                const std::string computeUnitUsableName = kernelName + ":{" + computeUnitIsolatedName + "}";
+
+                ATH_MSG_INFO("CU name: "<<computeUnitUsableName);
+                cuNames.push_back(computeUnitUsableName);
+            }
+        }
+    }
+
 } // namespace EFTrackingFPGAIntegration

@@ -9,16 +9,16 @@ def F100IntegrationCfg(flags, name = 'F100IntegrationAlg', **kwarg):
 
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
     kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
-    kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
+    if(flags.FPGADataPrep.doF110):
+        kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
+    else:
+        kwarg.setdefault('PixelClusterKernelName', 'pixclustering_top_v1_0')
     kwarg.setdefault('StripClusterKernelName','processHits')
     kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
     kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
     kwarg.setdefault('EDMPrepKernelName', 'EDMPrep')
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
-    kwarg.setdefault('NpixelCU', flags.FPGADataPrep.NpixelCU)
-    kwarg.setdefault('NstripCU', flags.FPGADataPrep.NstripCU)
-    kwarg.setdefault('doEmulation', flags.FPGADataPrep.DoEmulation)
     kwarg.setdefault('doF110', flags.FPGADataPrep.doF110)
 
     if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
@@ -37,8 +37,42 @@ def F100IntegrationCfg(flags, name = 'F100IntegrationAlg', **kwarg):
 
     return acc
 
+def F110IntegrationCfg(flags, name = 'F110IntegrationAlg', **kwarg):
+    acc = ComponentAccumulator()
+
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
+    kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
+    kwarg.setdefault('StripClusterKernelName','processHits')
+    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
+    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
+
+    if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
+        if 'RegSelTool' not in kwarg:
+            from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+            kwarg.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+
+    # Set up Chrono service
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True
+    ))
+
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F110IntegrationAlg(name, **kwarg))
+
+    return acc
+
+
 def F100DataEncodingCfg(flags, name = 'F100DataEncodingAlg', **kwarg):
     acc = ComponentAccumulator()
+
+    # Set up Cluster maker tool
+    if("FPGADataFormatTool" not in kwarg):
+        from EFTrackingFPGAPipeline.DataPrepConfig import FPGADataFormatToolCfg
+        dataFormatTool = acc.popToolsAndMerge(FPGADataFormatToolCfg(flags))
+        kwarg.setdefault('FPGADataFormatTool', dataFormatTool)
 
     kwarg.setdefault('isRoI_Seeded', False)
     
@@ -81,7 +115,12 @@ def FPGADataPreparation(flags): # thsi is used to run the F100 through Reco_tf
     kwargs.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     acc = ComponentAccumulator()
     acc.merge(F100DataEncodingCfg(flags))
-    acc.merge(F100IntegrationCfg(flags, "F100IntegrationAlg", **kwargs))
+    
+    if(flags.FPGADataPrep.doCodeType == "F100"):
+        acc.merge(F100IntegrationCfg(flags, "F100IntegrationAlg", **kwargs))
+    elif(flags.FPGADataPrep.doCodeType == "F110"):
+        acc.merge(F110IntegrationCfg(flags, "F110IntegrationAlg", **kwargs))
+
     acc.merge(F100EDMConversionCfg(flags))
     acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'ITkPixelClusters',
                                              'sortedxAODStripClusterContainer': 'ITkStripClusters'}))
@@ -121,9 +160,7 @@ if __name__ == "__main__":
     flags.FPGADataPrep.DoActs = True
     flags.Acts.doRotCorrection = False
     
-    flags.Concurrency.NumThreads=1
-    flags.Concurrency.NumConcurrentEvents=1
-    flags.Concurrency.NumProcs=0
+    flags.Concurrency.NumThreads = 1
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"]
     # flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
     flags.Output.AODFileName = "FPGA.Benchmark.AOD.pool.root"
@@ -136,11 +173,11 @@ if __name__ == "__main__":
         # For Spacepoint formation
         if flags.FPGADataPrep.PassThrough.ClusterOnly:
             flags.Acts.useCache = False
+            flags.Tracking.ITkMainPass.doActsSeed = True
         
-        from ActsConfig.ActsCIFlags import actsWorkflowFlags
-        actsWorkflowFlags(flags)
-        flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
-        flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
+        flags.Tracking.ITkMainPass.doAthenaToActsCluster = True
+        flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint = True
+        flags.Tracking.ITkMainPass.doAthenaSpacePoint = True
     else:
         flags.Tracking.doTruth=False
         flags.ITk.doTruth=False
@@ -179,8 +216,7 @@ if __name__ == "__main__":
 
     acc = F100IntegrationCfg(flags, **kwarg)
     cfg.merge(acc)
-    cfg.merge(F100DataEncodingCfg(flags))
-    cfg.merge(F100EDMConversionCfg(flags))
+    
     OutputItemList = []
     # # Connection to ACTS
     if flags.FPGADataPrep.DoActs:
@@ -201,7 +237,11 @@ if __name__ == "__main__":
                                 'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["SortedFPGAPixelClusters","SortedFPGAStripClusters"],
                                 'PixelClusterToTruthAssociationAlg.Measurements' : 'SortedFPGAPixelClusters',
                                 'StripClusterToTruthAssociationAlg.Measurements' : 'SortedFPGAStripClusters'}))
-        if(not flags.FPGADataPrep.ForTiming):                 
+        if(not flags.FPGADataPrep.ForTiming):     
+
+            # Run the ACTS Fast Tracking (C-100) as an additional reference
+            cfg.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))
+            
             OutputItemList += [
                         "xAOD::TrackParticleContainer#FPGATrackParticles",
                         "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
@@ -218,8 +258,8 @@ if __name__ == "__main__":
 
         from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
         cfg.merge(FPGAOutputValidationCfg(flags, **{
-            "pixelKeys": ["SortedFPGAPixelClusters", "ITkPixelClusters"],
-            "stripKeys": ["SortedFPGAStripClusters", "ITkStripClusters"],
+            "pixelKeys": ["FPGAPixelClusters", "ITkPixelClusters"],
+            "stripKeys": ["FPGAStripClusters", "ITkStripClusters"],
             'doDiffHistograms':True,
             'matchByID' : False,
             'allowedRdoMisses': 1000}))

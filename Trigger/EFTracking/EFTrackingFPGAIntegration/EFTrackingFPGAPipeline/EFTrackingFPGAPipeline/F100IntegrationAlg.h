@@ -37,8 +37,6 @@ namespace EFTrackingFPGAIntegration
         virtual StatusCode initialize() override final;
         virtual StatusCode execute(const EventContext &ctx) const override final;
         virtual StatusCode finalize() override final;
-        StatusCode runPassThrough(std::vector<uint64_t> &pixelChainOutput, std::vector<uint64_t> &stripChainOutput, const EventContext &ctx) const;
-        StatusCode runDataPrep(std::vector<uint64_t> &pixelChainOutput, std::vector<uint64_t> &stripChainOutput, const EventContext &ctx) const;
 
     private:
         ServiceHandle<IChronoSvc> m_chronoSvc{"ChronoStatSvc", name()}; //!< Service for timing the algorithm
@@ -49,10 +47,7 @@ namespace EFTrackingFPGAIntegration
         SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
         SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
 
-
         Gaudi::Property<int> m_FPGAThreads{this, "FPGAThreads", 1, "number of FPGA threads to initialize"}; 
-        Gaudi::Property<int> m_NpixelCU{this, "NpixelCU", 1, "number of pixel CU in for pixel"}; 
-        Gaudi::Property<int> m_NstripCU{this, "NstripCU", 1, "number of FPGA threads to initialize"}; 
         
         Gaudi::Property<std::string> m_xclbin{
             this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
@@ -130,6 +125,7 @@ namespace EFTrackingFPGAIntegration
 
         // Command queue
         std::vector<cl::CommandQueue> m_acc_queues;
+        void getListofCUs(std::vector<std::string>& cuNames);
 
 
     };

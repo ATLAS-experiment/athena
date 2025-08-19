@@ -34,12 +34,13 @@ inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 # inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"
 
 outputAOD="AOD.root"
-
+threads=1
 nEvents="100"
 skipCheck=0
 storeClusters=False
 runF110=False
 skipEvents=0
+doCodeType="F100"
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -51,9 +52,11 @@ while [ $# -ge 1 ];do
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
-        -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
-        -c  | --doClusters )    storeClusters=True ;;
+        -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1 ; shift ;;
+        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; storeClusters=True; shift ;;
         -f  | --runF110 )       runF110=True ;;
+        -t  | --threads )       if [ $# -lt 2 ] ; then usage ; fi ; threads=${2} ; shift ;;
+        -q  | --doCodeType )    if [ $# -lt 2 ] ; then usage ; fi ; doCodeType="$2" ; shift ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
         esac
@@ -78,17 +81,17 @@ else
     done
     inputRDO_arg="$inputRDO"
 fi
-export ATHENA_CORE_NUMBER=1
-## running reconstruction
 
-Reco_tf.py --CA \
+
+ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
     --preExec "flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
                 flags.Tracking.doPixelDigitalClustering=True;\
+                flags.Concurrency.NumConcurrentEvents=${threads}; flags.Concurrency.NumThreads=${threads};\
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
-                flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
+                flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO_arg} \
