@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleBaseCnv_p1.cxx 
@@ -160,7 +160,7 @@ void ParticleBaseCnv_p1::transToPers( const ParticleEvent::Base* trans,
   pers->m_dataType  = trans->dataType();
 
   // convert AthenaBarCode
-  s_abcCnv.transToPers((const AthenaBarCodeImpl*)(&(trans->getAthenaBarCodeImpl())), (AthenaBarCode_p1*)(&(pers->m_athenabarcode)),msg);
+  s_abcCnv.transToPers(static_cast<const AthenaBarCodeImpl*>(&(trans->getAthenaBarCodeImpl())), static_cast<AthenaBarCode_p1*>(&(pers->m_athenabarcode)),msg);
 
 //   msg << MSG::DEBUG << "Created persistent state of ParticleBase [OK]"
 //       << endmsg;
