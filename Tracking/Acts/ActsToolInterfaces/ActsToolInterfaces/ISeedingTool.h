@@ -44,11 +44,12 @@ class ISeedingTool : virtual public IAlgTool {
 
   virtual StatusCode createSeeds2(
       const EventContext& ctx,
-      const Acts::Experimental::SpacePointContainer2& spacePoints,
+      const std::vector<const xAOD::SpacePointContainer*>&
+          spacePointCollections,
       const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
-      Acts::Experimental::SeedContainer2& seedContainer) const {
+      ActsTrk::SeedContainer& seedContainer) const {
     (void)ctx;
-    (void)spacePoints;
+    (void)spacePointCollections;
     (void)beamSpotPos;
     (void)bFieldInZ;
     (void)seedContainer;

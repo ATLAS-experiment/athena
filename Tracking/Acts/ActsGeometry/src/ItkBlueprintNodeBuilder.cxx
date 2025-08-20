@@ -138,7 +138,7 @@ void addStripBarrelLayer(
   auto addLayer = [ilayer, &surfaces](auto& node) {
     node.addLayer("Strip_Brl_" + std::to_string(ilayer), [&](auto& layer) {
       layer.setNavigationPolicyFactory(
-          Acts::NavigationPolicyFactory::make()
+          Acts::NavigationPolicyFactory{}
               .add<Acts::SurfaceArrayNavigationPolicy>(
                   Acts::SurfaceArrayNavigationPolicy::Config{
                       .layerType = Cylinder, .bins = {30, 10}})
@@ -182,7 +182,7 @@ void addStripEndcapLayer(
 
     mat.addLayer(name, [&surfaces](auto& layer) {
       layer.setNavigationPolicyFactory(
-          Acts::NavigationPolicyFactory::make()
+          Acts::NavigationPolicyFactory{}
               .add<Acts::SurfaceArrayNavigationPolicy>(
                   Acts::SurfaceArrayNavigationPolicy::Config{.layerType = Disc,
                                                              .bins = {30, 30}})
@@ -334,7 +334,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
             // Set navigation policy for efficient surface lookup
             layer.setNavigationPolicyFactory(
-                Acts::NavigationPolicyFactory::make()
+                Acts::NavigationPolicyFactory{}
                     .add<Acts::SurfaceArrayNavigationPolicy>(
                         Acts::SurfaceArrayNavigationPolicy::Config{
                             .layerType = Cylinder,
@@ -427,7 +427,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
           // Set navigation policy for efficient surface lookup
           layer.setNavigationPolicyFactory(
-              Acts::NavigationPolicyFactory::make()
+              Acts::NavigationPolicyFactory{}
                   .add<Acts::SurfaceArrayNavigationPolicy>(
                       Acts::SurfaceArrayNavigationPolicy::Config{
                           .layerType = Disc,
@@ -510,7 +510,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
             // Set navigation policy for efficient surface lookup
             layer.setNavigationPolicyFactory(
-                Acts::NavigationPolicyFactory::make()
+                Acts::NavigationPolicyFactory{}
                     .add<Acts::SurfaceArrayNavigationPolicy>(
                         Acts::SurfaceArrayNavigationPolicy::Config{
                             .layerType = Cylinder,
@@ -532,7 +532,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                                               const auto& surfaces) {
       parent.addLayer(name, [&surfaces](auto& layer) {
         layer.setNavigationPolicyFactory(
-            Acts::NavigationPolicyFactory::make()
+            Acts::NavigationPolicyFactory{}
                 .add<Acts::SurfaceArrayNavigationPolicy>(
                     Acts::SurfaceArrayNavigationPolicy::Config{
                         .layerType = Disc, .bins = {30, 30}})
