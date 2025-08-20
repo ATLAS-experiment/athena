@@ -84,36 +84,36 @@ InDetPerfPlot_TRTExtension::initializePlots() {
   book(m_chi2ndofTRTExtensions, "chi2ndofTRTExtensions");
   book(m_chi2ndofNoTRTExtensions, "chi2ndofNoTRTExtensions");
 
-  book(m_ptresTRTExtensions_vs_eta, "ptresTRTExtensions_vs_eta");
-  book(m_ptresTRTExtensions_vs_pt, "ptresTRTExtensions_vs_pt");
-  book(m_ptresNoTRTExtensions_vs_eta, "ptresNoTRTExtensions_vs_eta");
-  book(m_ptresNoTRTExtensions_vs_pt, "ptresNoTRTExtensions_vs_pt");
+  book(m_ptresTRTExtensions_vs_eta, "resHelper_eta_pt_TRTExtension");
+  book(m_ptresTRTExtensions_vs_pt, "resHelper_pt_pt_TRTExtension");
+  book(m_ptresNoTRTExtensions_vs_eta, "resHelper_eta_pt_NoTRTExtension");
+  book(m_ptresNoTRTExtensions_vs_pt, "resHelper_pt_pt_NoTRTExtension");
 
-  book(m_reswidthTRTExtensions_vs_eta, "ptresolutionTRTExtensions_vs_eta");
-  book(m_resmeanTRTExtensions_vs_eta, "ptresmeanTRTExtensions_vs_eta");
-  book(m_reswidthTRTExtensions_vs_pt, "ptresolutionTRTExtensions_vs_pt");
-  book(m_resmeanTRTExtensions_vs_pt, "ptresmeanTRTExtensions_vs_pt");
+  book(m_reswidthTRTExtensions_vs_eta, "resolution_vs_eta_pt_TRTExtension");
+  book(m_resmeanTRTExtensions_vs_eta, "resmean_vs_eta_pt_TRTExtension");
+  book(m_reswidthTRTExtensions_vs_pt, "resolution_vs_pt_pt_TRTExtension");
+  book(m_resmeanTRTExtensions_vs_pt, "resmean_vs_pt_pt_TRTExtension");
 
-  book(m_reswidthNoTRTExtensions_vs_eta, "ptresolutionNoTRTExtensions_vs_eta");
-  book(m_resmeanNoTRTExtensions_vs_eta, "ptresmeanNoTRTExtensions_vs_eta");
-  book(m_reswidthNoTRTExtensions_vs_pt, "ptresolutionNoTRTExtensions_vs_pt");
-  book(m_resmeanNoTRTExtensions_vs_pt, "ptresmeanNoTRTExtensions_vs_pt");
+  book(m_reswidthNoTRTExtensions_vs_eta, "resolution_vs_eta_pt_NoTRTExtension");
+  book(m_resmeanNoTRTExtensions_vs_eta, "resmean_vs_eta_pt_NoTRTExtension");
+  book(m_reswidthNoTRTExtensions_vs_pt, "resolution_vs_pt_pt_NoTRTExtension");
+  book(m_resmeanNoTRTExtensions_vs_pt, "resmean_vs_pt_pt_NoTRTExtension");
 
 
-  book(m_ptpullTRTExtensions_vs_eta, "ptpullTRTExtensions_vs_eta");
-  book(m_ptpullTRTExtensions_vs_pt, "ptpullTRTExtensions_vs_pt");
-  book(m_ptpullNoTRTExtensions_vs_eta, "ptpullNoTRTExtensions_vs_eta");
-  book(m_ptpullNoTRTExtensions_vs_pt, "ptpullNoTRTExtensions_vs_pt");
+  book(m_ptpullTRTExtensions_vs_eta, "pullHelper_eta_pt_TRTExtension");
+  book(m_ptpullTRTExtensions_vs_pt, "pullHelper_pt_pt_TRTExtension");
+  book(m_ptpullNoTRTExtensions_vs_eta, "pullHelper_eta_pt_NoTRTExtension");
+  book(m_ptpullNoTRTExtensions_vs_pt, "pullHelper_pt_pt_NoTRTExtension");
 
-  book(m_pullwidthTRTExtensions_vs_eta, "ptpullwidthTRTExtensions_vs_eta");
-  book(m_pullmeanTRTExtensions_vs_eta, "ptpullmeanTRTExtensions_vs_eta");
-  book(m_pullwidthTRTExtensions_vs_pt, "ptpullwidthTRTExtensions_vs_pt");
-  book(m_pullmeanTRTExtensions_vs_pt, "ptpullmeanTRTExtensions_vs_pt");
+  book(m_pullwidthTRTExtensions_vs_eta, "pullwidth_vs_eta_pt_TRTExtension");
+  book(m_pullmeanTRTExtensions_vs_eta, "pullmean_vs_eta_pt_TRTExtension");
+  book(m_pullwidthTRTExtensions_vs_pt, "pullwidth_vs_pt_pt_TRTExtension");
+  book(m_pullmeanTRTExtensions_vs_pt, "pullmean_vs_pt_pt_TRTExtension");
 
-  book(m_pullwidthNoTRTExtensions_vs_eta, "ptpullwidthNoTRTExtensions_vs_eta");
-  book(m_pullmeanNoTRTExtensions_vs_eta, "ptpullmeanNoTRTExtensions_vs_eta");
-  book(m_pullwidthNoTRTExtensions_vs_pt, "ptpullwidthNoTRTExtensions_vs_pt");
-  book(m_pullmeanNoTRTExtensions_vs_pt, "ptpullmeanNoTRTExtensions_vs_pt");
+  book(m_pullwidthNoTRTExtensions_vs_eta, "pullwidth_vs_eta_pt_NoTRTExtension");
+  book(m_pullmeanNoTRTExtensions_vs_eta, "pullmean_vs_eta_pt_NoTRTExtension");
+  book(m_pullwidthNoTRTExtensions_vs_pt, "pullwidth_vs_pt_pt_NoTRTExtension");
+  book(m_pullmeanNoTRTExtensions_vs_pt, "pullmean_vs_pt_pt_NoTRTExtension");
 
 }
 
