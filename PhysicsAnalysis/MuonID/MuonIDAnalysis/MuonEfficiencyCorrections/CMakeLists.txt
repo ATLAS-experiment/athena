@@ -25,6 +25,10 @@ if( NOT XAOD_STANDALONE )
    atlas_add_component( MuonEfficiencyCorrections
       src/*.h src/*.cxx src/components/*.cxx
       LINK_LIBRARIES AsgAnalysisInterfaces AthContainers AthenaBaseComps FourMomUtils GaudiKernel MuonEfficiencyCorrectionsLib StoreGateLib xAODJet )
+else()
+   atlas_add_component( MuonEfficiencyCorrections
+      src/components/*.cxx
+      LINK_LIBRARIES MuonEfficiencyCorrectionsLib )
 endif()
 
 atlas_add_dictionary( MuonEfficiencyCorrectionsDict

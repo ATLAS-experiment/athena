@@ -41,6 +41,10 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
       LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthenaBaseComps AsgTools xAODTau GaudiKernel
       TauAnalysisToolsLib xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib)
+else()
+   atlas_add_component( TauAnalysisTools
+      src/components/*.cxx
+      LINK_LIBRARIES TauAnalysisToolsLib)
 endif()
 
 atlas_add_dictionary( TauAnalysisToolsDict

@@ -20,6 +20,10 @@ if( NOT XAOD_STANDALONE )
       src/*.h src/*.cxx src/components/*.cxx
       LINK_LIBRARIES AthenaBaseComps GaudiKernel xAODCore xAODMuon MuonAnalysisInterfacesLib
       MuonSelectorToolsLib PATCoreLib )
+else()
+   atlas_add_component( MuonSelectorTools
+      src/components/*.cxx
+      LINK_LIBRARIES MuonSelectorToolsLib )
 endif()
 
 atlas_add_dictionary( MuonSelectorToolsDict

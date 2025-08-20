@@ -254,6 +254,21 @@ namespace asg
 #ifdef XAOD_STANDALONE
   namespace
   {
+    /// whether to disable instantiating components via factories
+    ///
+    /// This is mostly meant to allow checking whether there are
+    /// component factories missing. That's more of a developer or
+    /// maintainer option, whereas users probably prefer the fallback of
+    /// having components instantiated via dictionaries if no factory is
+    /// available.
+    ///
+    /// Ideally this should be read from a configuration file, but
+    /// that's tricky, so for now I require people to update and compile
+    /// this package to change it.
+    ///
+    /// IMPORTANT: this should always be set to `false` in the repository
+    constexpr bool noDictionaryFactories = false;
+
     StatusCode createComponent (std::unique_ptr<AsgComponent>& component,
                                 const std::string& type,
                                 const std::string& name,
@@ -272,6 +287,12 @@ namespace asg
           return StatusCode::FAILURE;
         }
         return StatusCode::SUCCESS;
+      }
+
+      if (noDictionaryFactories)
+      {
+        ANA_MSG_ERROR ("no component factory for type " << type << " (dictionary factories disabled)");
+        return StatusCode::FAILURE;
       }
 
       ANA_MSG_DEBUG ("using dictionary as factory for type " << type);

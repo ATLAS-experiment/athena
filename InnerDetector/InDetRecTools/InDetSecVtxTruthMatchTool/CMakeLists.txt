@@ -11,12 +11,9 @@ atlas_add_library( InDetSecVtxTruthMatchToolLib
    PUBLIC_HEADERS InDetSecVtxTruthMatchTool
    LINK_LIBRARIES PATCoreLib AsgAnalysisInterfaces TruthUtils xAODTracking xAODTruth InDetTrackSystematicsToolsLib)
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( InDetSecVtxTruthMatchTool
-      src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel AthenaBaseComps xAODTracking xAODTruth
-      InDetSecVtxTruthMatchToolLib)
-endif()
+atlas_add_component( InDetSecVtxTruthMatchTool
+   src/components/*.cxx
+   LINK_LIBRARIES InDetSecVtxTruthMatchToolLib)
 
 atlas_add_dictionary( InDetSecVtxTruthMatchToolDict
    InDetSecVtxTruthMatchTool/InDetSecVtxTruthMatchToolDict.h

@@ -24,11 +24,9 @@ atlas_add_library( ElectronEfficiencyCorrectionLib
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} xAODEventInfo AsgMessagingLib
    xAODMetaData PathResolver )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( ElectronEfficiencyCorrection
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES ElectronEfficiencyCorrectionLib )
-endif()
+atlas_add_component( ElectronEfficiencyCorrection
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES ElectronEfficiencyCorrectionLib )
 
 atlas_add_dictionary( ElectronEfficiencyCorrectionDict
    ElectronEfficiencyCorrection/ElectronEfficiencyCorrectionDict.h

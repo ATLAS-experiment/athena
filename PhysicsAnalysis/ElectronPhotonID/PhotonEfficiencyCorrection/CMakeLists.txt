@@ -21,6 +21,10 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES AsgTools AthenaBaseComps EgammaAnalysisInterfacesLib
       ElectronEfficiencyCorrectionLib GaudiKernel PATCoreAcceptLib PATInterfaces
       xAODCore xAODEgamma xAODEventInfo PhotonEfficiencyCorrectionLib )
+else()
+   atlas_add_component( PhotonEfficiencyCorrection
+      src/components/*.cxx
+      LINK_LIBRARIES PhotonEfficiencyCorrectionLib )
 endif()
 
 atlas_add_dictionary( PhotonEfficiencyCorrectionDict

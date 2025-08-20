@@ -21,11 +21,9 @@ atlas_add_library( ElectronPhotonSelectorToolsLib
   xAODCaloEvent PathResolver EgammaAnalysisHelpersLib
   ${LWTNN_LIBRARIES} ${EIGEN_LIBRARIES} EventPrimitives )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( ElectronPhotonSelectorTools
-      src/components/*.cxx
-      LINK_LIBRARIES ElectronPhotonSelectorToolsLib )
-endif()
+  atlas_add_component( ElectronPhotonSelectorTools
+    src/components/*.cxx
+    LINK_LIBRARIES ElectronPhotonSelectorToolsLib )
 
 atlas_add_dictionary( ElectronPhotonSelectorToolsDict
   ElectronPhotonSelectorTools/ElectronPhotonSelectorToolsCoreDict.h

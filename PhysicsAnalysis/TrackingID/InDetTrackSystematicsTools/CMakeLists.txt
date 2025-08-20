@@ -21,6 +21,10 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AsgTools xAODCore
       xAODTracking InDetTrackSystematicsToolsLib )
+else()
+   atlas_add_component( InDetTrackSystematicsTools
+      src/components/*.cxx
+      LINK_LIBRARIES InDetTrackSystematicsToolsLib )
 endif()
 
 atlas_add_dictionary( InDetTrackSystematicsToolsDict

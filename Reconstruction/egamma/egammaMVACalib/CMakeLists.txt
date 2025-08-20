@@ -26,12 +26,9 @@ atlas_add_dictionary( egammaMVACalibDict
 	egammaMVACalib/selection.xml
 	LINK_LIBRARIES egammaMVACalibLib )
 
-if( NOT XAOD_STANDALONE )
 atlas_add_component( egammaMVACalib
 	src/*.cxx src/components/*.cxx
-	INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-	LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel egammaMVACalibLib)
-endif()
+	LINK_LIBRARIES egammaMVACalibLib)
 
 if( NOT XAOD_ANALYSIS)
 atlas_add_test(egammaMVASvcConfigTest

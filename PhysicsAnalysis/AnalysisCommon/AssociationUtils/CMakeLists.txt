@@ -26,6 +26,10 @@ if( NOT XAOD_STANDALONE )
    atlas_add_component( AssociationUtils
       src/*.h src/*.cxx src/components/*.cxx
       LINK_LIBRARIES AthenaBaseComps xAODBase xAODBTagging GaudiKernel AssociationUtilsLib )
+else()
+   atlas_add_component( AssociationUtils
+      src/components/*.cxx
+      LINK_LIBRARIES AssociationUtilsLib )
 endif()
 
 # Executables in the package:

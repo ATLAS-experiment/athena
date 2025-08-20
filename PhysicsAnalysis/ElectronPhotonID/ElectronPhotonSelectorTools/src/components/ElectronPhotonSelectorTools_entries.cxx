@@ -8,6 +8,9 @@
 #include "ElectronPhotonSelectorTools/AsgForwardElectronLikelihoodTool.h"
 #include "ElectronPhotonSelectorTools/AsgElectronSelectorTool.h"
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT( AsgElectronIsEMSelector )
 DECLARE_COMPONENT( AsgElectronLikelihoodTool )
 DECLARE_COMPONENT( AsgPhotonIsEMSelector )

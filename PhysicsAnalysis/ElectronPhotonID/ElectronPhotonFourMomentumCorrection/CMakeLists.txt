@@ -33,6 +33,10 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools AthenaBaseComps
       EgammaAnalysisInterfacesLib ElectronPhotonFourMomentumCorrectionLib GaudiKernel
       PATInterfaces xAODBase xAODCaloEvent xAODCore xAODEgamma xAODEventInfo xAODTruth )
+else ()
+   atlas_add_component( ElectronPhotonFourMomentumCorrection
+      src/components/*.cxx
+      LINK_LIBRARIES ElectronPhotonFourMomentumCorrectionLib )
 endif()
 
 atlas_add_dictionary( ElectronPhotonFourMomentumCorrectionDict

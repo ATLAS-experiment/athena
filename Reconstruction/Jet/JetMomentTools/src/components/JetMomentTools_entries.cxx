@@ -1,4 +1,3 @@
-#include "PFlowUtils/IWeightPFOTool.h"
 #include "JetMomentTools/JetCaloEnergies.h"
 #include "JetMomentTools/JetCaloQualityTool.h"
 #include "JetMomentTools/JetCaloQualityToolFE.h"
@@ -12,9 +11,7 @@
 #include "JetMomentTools/JetTrackMomentsTool.h"
 #include "JetMomentTools/JetTrackSumMomentsTool.h"
 #include "JetMomentTools/JetClusterMomentsTool.h"
-#include "JetMomentTools/JetVoronoiMomentsTool.h"
 #include "JetMomentTools/JetPtAssociationTool.h"
-#include "JetMomentTools/JetIsolationTool.h"
 #include "JetMomentTools/JetLArHVTool.h"
 #include "JetMomentTools/JetOriginCorrectionTool.h"
 #include "JetMomentTools/JetECPSFractionTool.h"
@@ -28,8 +25,13 @@
 
 #ifndef XAOD_ANALYSIS
 #include "JetMomentTools/JetBadChanCorrTool.h"
+#include "JetMomentTools/JetIsolationTool.h"
+#include "JetMomentTools/JetVoronoiMomentsTool.h"
 #include "../JetCaloCellQualityTool.h"
 #endif
+
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT( JetCaloEnergies )
 DECLARE_COMPONENT( JetCaloQualityTool )
@@ -44,9 +46,7 @@ DECLARE_COMPONENT(JetBalancePFlowJvtTool)
 DECLARE_COMPONENT( JetTrackMomentsTool )
 DECLARE_COMPONENT( JetTrackSumMomentsTool )
 DECLARE_COMPONENT( JetClusterMomentsTool )
-DECLARE_COMPONENT( JetVoronoiMomentsTool )
 DECLARE_COMPONENT( JetPtAssociationTool )
-DECLARE_COMPONENT( JetIsolationTool )
 DECLARE_COMPONENT( JetLArHVTool )
 DECLARE_COMPONENT( JetOriginCorrectionTool )
 DECLARE_COMPONENT( JetECPSFractionTool )
@@ -60,6 +60,8 @@ DECLARE_COMPONENT( BoostedJetTaggerTool )
 
 #ifndef XAOD_ANALYSIS
 DECLARE_COMPONENT( JetBadChanCorrTool )
+DECLARE_COMPONENT( JetIsolationTool )
+DECLARE_COMPONENT( JetVoronoiMomentsTool )
 DECLARE_COMPONENT( JetCaloCellQualityTool )
 #endif
 
