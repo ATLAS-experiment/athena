@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/JetTrackFilterTool.h"
@@ -25,21 +25,11 @@ namespace InDet {
     };
 
   JetTrackFilterTool::JetTrackFilterTool(const std::string& name) :
-    InDetTrackSystematicsTool(name),
-    m_trackOriginTool("InDet::InDetTrackTruthOriginTool", this)
+    InDetTrackSystematicsTool(name)
   {
-
 #ifndef XAOD_STANDALONE
     declareInterface<IJetTrackFilterTool>(this);
 #endif
-
-    declareProperty("Seed", m_seed, "Seed used to initialize the RNG");
-    declareProperty("DeltaR", m_deltaR, "Delta-R cut in which to apply jet-track efficiency rejection");
-    declareProperty("trkEffSystScale", m_trkEffSystScale, "Option to scale the effect of the systematic (default 1)");
-    declareProperty("FakeUncertainty",  m_fakeUncertTIDE, "Option to set the fake uncertainty");
-    declareProperty("FLostUncertainty",  m_effUncertTIDE, "Option to set the uncertainty on FLost");
-    declareProperty("calibFileNomEff", m_calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root");
-    declareProperty("trackOriginTool", m_trackOriginTool);
   }
 
   StatusCode JetTrackFilterTool::initialize()
@@ -72,6 +62,9 @@ namespace InDet {
       ATH_MSG_DEBUG( "Pointer to jet is null." );
       return true;
     }
+
+    // Uncertainties are only applicable inside high pT jets
+    if (jet->pt() < m_minJetPt) return true;
 
     // if the track is outside of the range of this jet, then it is allowed to pass
     constexpr bool useRapidity = false; // use eta instead of rapidity - the default for this function is true
