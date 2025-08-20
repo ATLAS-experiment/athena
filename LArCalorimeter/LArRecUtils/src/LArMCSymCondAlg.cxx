@@ -1,7 +1,7 @@
 //dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArMCSymCondAlg.h"
@@ -9,6 +9,7 @@
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+#include <cmath> //std::abs
 
 
 StatusCode LArMCSymCondAlg::initialize() {
@@ -46,17 +47,17 @@ StatusCode LArMCSymCondAlg::execute() {
   if(m_isSC){
      const LArOnline_SuperCellID *ll;
      ATH_CHECK(detStore()->retrieve(ll,"LArOnline_SuperCellID"));
-     larOnlineID=(const LArOnlineID_Base*)ll;
+     larOnlineID=static_cast<const LArOnlineID_Base*>(ll);
      const CaloCell_SuperCell_ID *cal;
      ATH_CHECK(detStore()->retrieve(cal,"CaloCell_SuperCell_ID"));
-     caloCellID=(const CaloCell_Base_ID *)cal;
+     caloCellID=static_cast<const CaloCell_Base_ID *>(cal);
   } else {
      const LArOnlineID *ll;
      ATH_CHECK(detStore()->retrieve(ll,"LArOnlineID"));
-     larOnlineID=(const LArOnlineID_Base*)ll;
+     larOnlineID=static_cast<const LArOnlineID_Base*>(ll);
      const CaloCell_ID *cal;
      ATH_CHECK(detStore()->retrieve(cal,"CaloCell_ID"));
-     caloCellID=(const CaloCell_Base_ID *)cal;
+     caloCellID=static_cast<const CaloCell_Base_ID *>(cal);
   }
 
   const LArEM_Base_ID* lar_em_id=caloCellID->em_idHelper();
@@ -81,7 +82,7 @@ StatusCode LArMCSymCondAlg::execute() {
     const Identifier id=lar_em_id->channel_id (idhash);
     const HWIdentifier hwid=cabling->createSignalChannelID(id);
     const IdentifierHash hwid_hash=larOnlineID->channel_Hash(hwid);
-    const int barrel_ec = abs( lar_em_id->barrel_ec(id) ) ;
+    const int barrel_ec = std::abs( lar_em_id->barrel_ec(id) ) ;
     const int sampling  = lar_em_id->sampling(id);
     const int region    = lar_em_id->region(id);
     const Identifier regId = lar_em_id->region_id(barrel_ec, sampling, region );
@@ -102,7 +103,7 @@ StatusCode LArMCSymCondAlg::execute() {
     const HWIdentifier hwid=cabling->createSignalChannelID(id);
     const IdentifierHash hwid_hash=larOnlineID->channel_Hash(hwid);
 
-    const int pos_neg   = abs( lar_hec_id->pos_neg(id) ) ;
+    const int pos_neg   = std::abs( lar_hec_id->pos_neg(id) ) ;
     const int sampling  = lar_hec_id->sampling(id);
     const int region    = lar_hec_id->region(id);
     const Identifier regId = lar_hec_id->region_id(pos_neg, sampling, region );
@@ -126,7 +127,7 @@ StatusCode LArMCSymCondAlg::execute() {
     const IdentifierHash hwid_hash=larOnlineID->channel_Hash(hwid);
 
 
-    const int pos_neg   = abs( lar_fcal_id->pos_neg(id) ) ;
+    const int pos_neg   = std::abs( lar_fcal_id->pos_neg(id) ) ;
     const int module    = lar_fcal_id->module(id);
 
 // symmetry for FCAL: save all y>0 part of the +side module
