@@ -13,6 +13,7 @@ atlas_add_component (GlobalSimulation
    src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx
    src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp 
    src/GlobalAlgs/Hypothesis/UCL/*.h src/GlobalAlgs/Hypothesis/UCL/*.cxx 
+   src/GlobalAlgs/FirstChain/*.h src/GlobalAlgs/FirstChain/*.cxx 
    src/IO/*.h src/IO/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
@@ -26,6 +27,7 @@ atlas_add_component (GlobalSimulation
    AthenaBaseComps
    AthenaMonitoringKernelLib
    xAODTrigger
+   xAODEventInfo
    CaloEvent
    PathResolver)
 
