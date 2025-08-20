@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -38,14 +38,26 @@ bool isResolutionHelper(TObject* entry){
 
 // get the x axis observable and resolution (y axis) from the name of a 2D histo. 
 // Relies on the conventions within IDPVM
-std::pair<std::string, std::string> getObservableAndReso(const TObject* resHelper){
+std::vector<std::string> getObservableAndResoAndSuffix(const TObject* resHelper){
     const std::string name{resHelper->GetName()};
     const std::string keyWord {"Helper_"}; 
     const size_t offset = keyWord.size();
     auto start = name.find(keyWord)+offset;
     auto sep = name.find('_',start);
-    return {name.substr(start, sep-start), name.substr(sep+1)}; 
+    auto sep2 = name.find('_',sep+1);
 
+    std::string first  = name.substr(start, sep - start);
+    std::string second;
+    std::string third;
+    if (sep2 == std::string::npos) {
+        // Only one underscore after Helper_
+        second = name.substr(sep + 1);
+    } else {
+        second = name.substr(sep + 1, sep2 - sep - 1);
+        third  = name.substr(sep2 + 1);
+    }
+
+    return {first, second, third};
 }
 
 // get the resolution type (pull or res) - taken from the prefix of the 2D histo name 
@@ -84,7 +96,7 @@ std::pair<std::string, std::string> getPullAndResoNames(const std::string & type
 
 int postProcessHistos(TObject* resHelper, IDPVM::ResolutionHelper & theHelper){
     // here we have to rely on the naming conventions of IDPVM to identify what we are looking at 
-    auto vars = getObservableAndReso(resHelper); 
+    auto vars = getObservableAndResoAndSuffix(resHelper);
     auto type = getResoType(resHelper); 
     // cast to TH2
     TH2* resHelper2D = dynamic_cast<TH2*>(resHelper); 
@@ -93,9 +105,11 @@ int postProcessHistos(TObject* resHelper, IDPVM::ResolutionHelper & theHelper){
         return 1; 
     }
     const auto & oneDimNames = getPullAndResoNames(type);  
-    // get the corresponding 1D histos by cloning the existing ones in the same folder 
-    TH1* h_width = cloneExisting(oneDimNames.first+"_vs_"+vars.first+"_"+vars.second); 
-    TH1* h_mean = cloneExisting(oneDimNames.second+"_vs_"+vars.first+"_"+vars.second); 
+    // get the corresponding 1D histos by cloning the existing ones in the same folder
+    std::string suffix = "_vs_"+vars[0]+"_"+vars[1];
+    if(!vars[2].empty()) suffix += "_" + vars[2];
+    TH1* h_width = cloneExisting(oneDimNames.first+suffix);
+    TH1* h_mean = cloneExisting(oneDimNames.second+suffix);
     // then call the resolution helper as done in "online" IDPVM
     theHelper.makeResolutions(resHelper2D, h_width, h_mean); 
     // update our 1D histos 
