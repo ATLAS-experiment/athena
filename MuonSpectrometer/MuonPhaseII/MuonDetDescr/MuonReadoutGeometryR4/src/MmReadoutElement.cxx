@@ -61,7 +61,7 @@ StatusCode MmReadoutElement::initElement() {
             m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(design.shortHalfHeight(),
                                                                   design.longHalfHeight(),
                                                                   design.halfWidth(),
-                                                                  90.*Gaudi::Units::deg - design.stereoAngle())));
+                                                                  90.*Gaudi::Units::deg + design.stereoAngle())));
 #endif
     }
 #ifndef SIMULATIONBASE

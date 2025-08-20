@@ -57,11 +57,13 @@ namespace MuonGMR4{
     }
 
     void StripDesign::setStereoAngle(double sAngle) {
-        if (std::abs(sAngle) < std::numeric_limits<float>::epsilon()) return;
+        if (std::abs(sAngle) < std::numeric_limits<float>::epsilon()) {
+            return;
+        }
         m_stereoAngle = sAngle;
         m_hasStereo = true;
-        m_etaToStereo = Eigen::Rotation2D{sAngle};
-        m_stereoToEta = Eigen::Rotation2D{-sAngle};
+        m_etaToStereo = Eigen::Rotation2D{-stereoAngle()};
+        m_stereoToEta = Eigen::Rotation2D{stereoAngle()};
         m_stripDir = m_stereoToEta * m_stripDir;
         m_stripNormal = m_stereoToEta * m_stripNormal;
     }

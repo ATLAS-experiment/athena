@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "NSWGeoPlottingAlg.h"
 
 #include <cmath>
+#include <format>
 
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
@@ -27,13 +28,9 @@ std::string to_string(const Amg::Vector3D& v) {
 }
 
 }  // namespace
-
-NSWGeoPlottingAlg::NSWGeoPlottingAlg(const std::string& name,
-                                     ISvcLocator* pSvcLocator)
-    : AthHistogramAlgorithm(name, pSvcLocator) {}
+namespace MuonGM{
 StatusCode NSWGeoPlottingAlg::finalize() {
-  std::unique_ptr<TFile> out_file =
-      std::make_unique<TFile>(m_outFile.value().c_str(), "RECREATE");
+  auto out_file = std::make_unique<TFile>(m_outFile.value().c_str(), "RECREATE");
   if (!out_file || !out_file->IsOpen() || out_file->IsZombie()) {
 
     ATH_MSG_FATAL("Failed to create the output file " << m_outFile);
@@ -88,13 +85,12 @@ StatusCode NSWGeoPlottingAlg::initialize() {
 StatusCode NSWGeoPlottingAlg::execute() {
   if (m_alg_run)
     return StatusCode::SUCCESS;
+  ATH_MSG_INFO("Executing NSWGeoPlottingAlg for the first time");
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_DetectorManagerKey,
-                                                         ctx};
-  if (!detMgr.isValid()) {
-    ATH_MSG_FATAL("Failed to retrieve the detector manager ");
-    return StatusCode::FAILURE;
-  }
+  
+  const MuonGM::MuonDetectorManager* detMgr{nullptr};
+  
+  ATH_CHECK(SG::get(detMgr, m_DetectorManagerKey, ctx));
 
   for (auto& id_graph : m_nswPads) {
     const Identifier& id = id_graph.first;
@@ -312,18 +308,18 @@ StatusCode NSWGeoPlottingAlg::initMicroMega() {
       for (int phi = id_helper.stationPhiMin();
            phi <= id_helper.stationPhiMax(); ++phi) {
         for (int eta = -2; eta <= 2; ++eta) {
-          if (eta == 0)
+          if (eta == 0) {
             continue;
+          }
+          bool is_valid{false};
+            
+          const Identifier station_id = id_helper.elementID(station, eta, phi, is_valid);
+          if (!is_valid) {
+              continue;
+          }
           for (int ml = id_helper.multilayerMin();
                ml <= id_helper.multilayerMax(); ++ml) {
-            bool is_valid{false};
-            const Identifier station_id =
-                id_helper.elementID(station, eta, phi, is_valid);
-            if (!is_valid)
-              continue;
             const Identifier module_id = id_helper.multilayerID(station_id, ml);
-            if (!detMgr->getMMReadoutElement(module_id))
-              continue;
             for (int i_layer = 1; i_layer <= 4; ++i_layer) {
               const Identifier id =
                   id_helper.channelID(module_id, ml, i_layer, 10);
@@ -410,4 +406,5 @@ StatusCode NSWGeoPlottingAlg::initSTgcs() {
     }
   }
   return StatusCode::SUCCESS;
+}
 }

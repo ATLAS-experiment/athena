@@ -1,19 +1,12 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator   
 
 def NSWGeoPlottingAlgCfg(flags, name = "NSWGeoPlottingAlg", **kwargs):
     result = ComponentAccumulator()
-    event_algo = CompFactory.NSWGeoPlottingAlg(name, **kwargs)
+    event_algo = CompFactory.MuonGM.NSWGeoPlottingAlg(name, **kwargs)
     result.addEventAlgo(event_algo, primary = True)
     return result
-
-def sTgcPadPlottingAlg(flags, name = "sTgcPadPlottingAlg", **kwargs):
-    result = ComponentAccumulator()
-    event_algo = CompFactory.sTgcPadPlottingAlg(name, **kwargs)
-    result.addEventAlgo(event_algo, primary = True)
-    return result
-
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -36,12 +29,10 @@ if __name__ == "__main__":
     from MuonCondTest.MdtCablingTester import setupServicesCfg
     cfg = setupServicesCfg(flags)
     
-    #cfg.merge(NSWGeoPlottingAlgCfg(flags))
-    cfg.merge(sTgcPadPlottingAlg(flags))
+    cfg.merge(NSWGeoPlottingAlgCfg(flags))
 
     msgService = cfg.getService('MessageSvc')
-    msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
-
+  
     cfg.printConfig(withDetails=True, summariseProps=True)
 
     flags.dump()

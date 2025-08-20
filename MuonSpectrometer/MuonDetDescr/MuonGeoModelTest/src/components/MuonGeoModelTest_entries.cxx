@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "../GeoModelCscTest.h"
 #include "../GeoModelMdtTest.h"
@@ -8,11 +8,9 @@
 #include "../GeoModelsTgcTest.h"
 #include "../GeoModelTgcTest.h"
 #include "../NSWGeoPlottingAlg.h"
-#include "../sTgcPadPlottingAlg.h"
 
 
-DECLARE_COMPONENT(NSWGeoPlottingAlg)
-DECLARE_COMPONENT(sTgcPadPlottingAlg)
+DECLARE_COMPONENT(MuonGM::NSWGeoPlottingAlg)
 DECLARE_COMPONENT(MuonGM::GeoModelCscTest)
 DECLARE_COMPONENT(MuonGM::GeoModelMdtTest)
 DECLARE_COMPONENT(MuonGM::GeoModelRpcTest)
