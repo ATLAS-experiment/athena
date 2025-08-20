@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: test muon slide of HLT running with phase2 geometry building (RUN3 layout)
+# art-description: test muon preparation data write with phase2 geometry building (RUN4 layout)
 #
 # art-type: grid
 # art-include: main/Athena
@@ -11,14 +11,15 @@
 
 # specify python test script 
 package="MuonReleaseTestsR4"
-file="testMuonHLTphase2"
+file="testPrepDataWrite"
 
 # run in specified directory
 mkdir $file; cd $file
 
 # run python test script
 log_file="${package}_${file}.log"
-athena.py $package/$file.py --threads=1 --concurrent-events=1 --defaultGeoFile=RUN3 > $log_file 2>&1  
+python -m $package/$file.py --threads=1 \
+        --defaultGeoFile=RUN4 --nEvents 100 > $log_file 2>&1  
 
 # save return code and write to art-results output 
 rc1=${PIPESTATUS[0]}
