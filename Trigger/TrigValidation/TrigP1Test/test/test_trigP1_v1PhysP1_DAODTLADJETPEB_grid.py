@@ -68,9 +68,8 @@ tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)
 test = Test.Test()
 test.art_type = 'grid'
 test.exec_steps = [hlt, filter_bs, tlareco]
-test.check_steps = CheckSteps.default_check_steps(test)
+test.check_steps = CheckSteps.default_check_steps(test, checkfile_input='DAOD_TLADJETPEB.pool.root')
 add_analysis_steps(test, input_file='DAOD_TLADJETPEB.pool.root')
-test.exec_steps = [t for t in test.exec_steps if not t.name == "TrigEDMChecker"] # TrigEDMChecker fails on TLA DAOD output due to missing HLT containers
 
 import sys
 sys.exit(test.run())
