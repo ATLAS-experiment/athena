@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "MuidCaloEnergyTool.h"
 
@@ -34,7 +33,6 @@
 
 namespace Units = Athena::Units;
 
-//<<<<<< CLASS STRUCTURE INITIALIZATION                                 >>>>>>
 
 namespace Rec {
 
@@ -195,8 +193,13 @@ namespace Rec {
         /// which have a real copy and pipe their surface to the ctor.
 
         std::unique_ptr<Trk::TrackParameters> middle_clone = middleParameters.uniqueClone();
-        /// Cache the pointer for the debug message
-        const CaloEnergy* calo_observer = caloEnergy.get();
+        /// Cache the quantities for the debug message before moving the caloEnergy
+        const  CaloEnergy::EnergyLossType eLossType = caloEnergy->energyLossType();
+        const double dE = caloEnergy->deltaE() / Units::GeV;
+        const double sigPlus_dE = caloEnergy->sigmaPlusDeltaE() / Units::GeV;
+        const double sigMinus_dE = caloEnergy->sigmaMinusDeltaE() / Units::GeV;
+        const double sig_dE = caloEnergy->sigmaDeltaE() / Units::GeV;
+        //
         auto materialEffects =
           std::make_unique<Trk::MaterialEffectsOnTrack>(
             0.,
@@ -210,13 +213,13 @@ namespace Rec {
 
         // debugging
         if (msgLvl(MSG::DEBUG)) {
-            std::string eLossType = "  no Calo !!";
-            switch (calo_observer->energyLossType()) {
-                case CaloEnergy::Parametrized: eLossType = "Parametrized"; break;
-                case CaloEnergy::NotIsolated: eLossType = "NotIsolated "; break;
-                case CaloEnergy::MOP: eLossType = "MOP         "; break;
-                case CaloEnergy::Tail: eLossType = "Tail        "; break;
-                case CaloEnergy::FSRcandidate: eLossType = "FSRcandidate"; break;
+            std::string eLossTypeStr = "  no Calo !!";
+            switch (eLossType) {
+                case CaloEnergy::Parametrized: eLossTypeStr = "Parametrized"; break;
+                case CaloEnergy::NotIsolated: eLossTypeStr = "NotIsolated "; break;
+                case CaloEnergy::MOP: eLossTypeStr = "MOP         "; break;
+                case CaloEnergy::Tail: eLossTypeStr = "Tail        "; break;
+                case CaloEnergy::FSRcandidate: eLossTypeStr = "FSRcandidate"; break;
                 default: break;
             };
             ATH_MSG_DEBUG(std::setiosflags(std::ios::fixed)
@@ -224,10 +227,10 @@ namespace Rec {
                           << " momentum =" << std::setw(6) << std::setprecision(1) << middleParameters.momentum().mag() / Units::GeV
                           << "  phi =" << std::setw(6) << std::setprecision(3) << middleParameters.position().phi()
                           << "  eta =" << std::setw(6) << std::setprecision(3) << middleParameters.position().eta()
-                          << ".  CaloEnergy: deltaE = " << std::setw(8) << std::setprecision(3) << calo_observer->deltaE() / Units::GeV
-                          << "  +" << std::setw(5) << std::setprecision(3) << calo_observer->sigmaPlusDeltaE() / Units::GeV << "  -"
-                          << std::setw(5) << std::setprecision(3) << calo_observer->sigmaMinusDeltaE() / Units::GeV << " (" << std::setw(5)
-                          << std::setprecision(3) << calo_observer->sigmaDeltaE() / Units::GeV << ") GeV,  CaloEnergy::Type " << eLossType);
+                          << ".  CaloEnergy: deltaE = " << std::setw(8) << std::setprecision(3) << dE
+                          << "  +" << std::setw(5) << std::setprecision(3) << sigPlus_dE << "  -"
+                          << std::setw(5) << std::setprecision(3) << sigMinus_dE << " (" << std::setw(5)
+                          << std::setprecision(3) << sig_dE << ") GeV,  CaloEnergy::Type " << eLossTypeStr);
         }
         return std::make_unique<Trk::TrackStateOnSurface>(
           nullptr, std::move(middle_clone), std::move(materialEffects), pattern);
