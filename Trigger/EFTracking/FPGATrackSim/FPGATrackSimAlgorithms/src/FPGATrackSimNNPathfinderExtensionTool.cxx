@@ -456,9 +456,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
       if (ihit < m_nLayers_1stStage && !(hits[ihit]->isReal())) continue; // skip guessed hits for the 1st stage
        hitsR.push_back(hits[ihit]);
     }
-    // Sort in increasing R. We will reverise it for inside out after the cleanup
+    // Sort in increasing 3D distance.
     std::sort(hitsR.begin(), hitsR.end(), [](auto& a, auto& b){
-        return a->getR() < b->getR();
+        double dist_a = std::hypot(a->getX(), a->getY(), a->getZ());
+        double dist_b = std::hypot(b->getX(), b->getY(), b->getZ());
+        return dist_a < dist_b;
     });
 
     if(m_debugEvent) ATH_MSG_DEBUG("hitsR");
