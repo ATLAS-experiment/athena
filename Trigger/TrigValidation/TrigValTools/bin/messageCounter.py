@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -8,14 +8,12 @@ Script listing and counting Athena messages between two points in a log file,
 typically between start and end of event loop.
 '''
 
-from __future__ import print_function
 import sys
 import os
 import re
 import logging
 import argparse
 import json
-from collections import OrderedDict
 
 
 default_ignore_patterns = [
@@ -67,7 +65,7 @@ def get_parser():
 
 def extract_messages(lines, start, end, ignore):
     patterns = [re.compile(p) for p in ['FATAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'VERBOSE']]
-    result = OrderedDict()
+    result = {}
     for p in patterns:
         result[p.pattern] = []
     result['other'] = []
@@ -103,7 +101,7 @@ def extract_messages(lines, start, end, ignore):
 
 
 def make_summary(result):
-    summary = OrderedDict()
+    summary = {}
     for p in result.keys():
         summary[p] = len(result[p])
     total = sum(summary.values())
