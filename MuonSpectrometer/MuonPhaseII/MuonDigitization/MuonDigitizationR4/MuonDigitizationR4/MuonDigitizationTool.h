@@ -18,24 +18,15 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
+
+#include "Acts/Utilities/PointerTraits.hpp"
 #include "HitManagement/TimedHitPtr.h"
 
 
-namespace std{
-    template<> class remove_pointer<TimedHitPtr<xAOD::MuonSimHit>>{
-        public:
-          using type = xAOD::MuonSimHit;
-    };
-      template<> class remove_pointer<TimedHitPtr<const xAOD::MuonSimHit>>{
-        public:
-          using type = xAOD::MuonSimHit;
-    };
-}
 
 namespace MuonR4 {
-     /** @brief Barebone implementation of the I/O infrastructure for all MuonDigitizationTools.
-      *         
-     */
+     /** @brief Barebone implementation of the I/O infrastructure for all MuonDigitizationTools. */
+     static_assert(Acts::PointerConcept<TimedHitPtr<xAOD::MuonSimHit>>);
      class MuonDigitizationTool: public PileUpToolBase {
         public:
             using PileUpToolBase::PileUpToolBase;
