@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBJETMONITORING_TRIGBJETMONITORALGORITHM_H
@@ -28,11 +28,11 @@ class TrigBjetMonitorAlgorithm : public AthMonitorAlgorithm {
 
   Gaudi::Property<std::vector<std::string>> m_allChains{this,"AllChains",{}};
 
-  SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey{this,"MuonContainerName","Muons","Muon Container Name"};
-  SG::ReadHandleKey<xAOD::VertexContainer> m_offlineVertexContainerKey {this,"OfflineVertexContainerName","PrimaryVertices","Key of offline primary vertexes"};
-  SG::ReadHandleKey<xAOD::VertexContainer> m_onlineVertexContainerKey {this,"OnlineVertexContainerName","HLT_IDVertex_FS","Key of online bjet primary vertexes"}; // MS 290620
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_onlineTrackContainerKey {this,"OnlineTrackContainerName","HLT_IDTrack_Bjet_IDTrig","Key of online tracks of bjets"};
-
-
+  SG::ReadHandleKey<xAOD::MuonContainer>          m_muonContainerKey              {this, "MuonContainerName",             "Muons",                                           "Muon Container Name"};
+  SG::ReadHandleKey<xAOD::VertexContainer>        m_offlineVertexContainerKey     {this, "OfflineVertexContainerName",    "PrimaryVertices",                                 "Key of offline primary vertexes"};
+  SG::ReadHandleKey<xAOD::VertexContainer>        m_onlineVertexContainerKey      {this, "OnlineVertexContainerName",     "HLT_IDVertex_FS",                                 "Key of online bjet primary vertexes"}; // MS 290620
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_onlineTrackContainerKey       {this, "OnlineTrackContainerName",      "HLT_IDTrack_Bjet_IDTrig",                         "Key of online tracks of bjets"};
+  SG::ReadHandleKey<xAOD::JetContainer>           m_onlineEMPFlowBJetContainerKey {this, "OnlineEMPFlowBJetContainerKey", "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets", "Key of online EMPFlow bjets"};
+  SG::ReadHandleKey<xAOD::JetContainer>           m_onlineEMTopoBJetContainerKey  {this, "OnlineEMTopoBJetContainerKey",  "HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_bJets",  "Key of online EMTopo bjets"};
 };
 #endif
