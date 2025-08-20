@@ -105,51 +105,16 @@ StatusCode GridTripletSeedingAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("    \\__ " << spCont->size() << " elements!");
   }
 
-  // Apply selection on which SPs you want to use from the input container
-  Acts::Experimental::SpacePointContainer2 selectedSpacePoints;
-  selectedSpacePoints.createColumns(
-      Acts::Experimental::SpacePointColumns::SourceLinks |
-      Acts::Experimental::SpacePointColumns::X |
-      Acts::Experimental::SpacePointColumns::Y |
-      Acts::Experimental::SpacePointColumns::Z |
-      Acts::Experimental::SpacePointColumns::R |
-      Acts::Experimental::SpacePointColumns::Phi |
-      Acts::Experimental::SpacePointColumns::VarianceR |
-      Acts::Experimental::SpacePointColumns::VarianceZ);
-  if (!m_usePixel.value()) {
-    selectedSpacePoints.createColumns(
-        Acts::Experimental::SpacePointColumns::Strip);
+  std::size_t totalSpacePoints = 0;
+  for (const xAOD::SpacePointContainer* collection : allInputCollections) {
+    totalSpacePoints += collection->size();
   }
 
-  for (const auto* collection : allInputCollections) {
-    for (const xAOD::SpacePoint* inputSp : *collection) {
-      auto newSp = selectedSpacePoints.createSpacePoint();
-      newSp.assignSourceLinks(
-          std::array<Acts::SourceLink, 1>{Acts::SourceLink(inputSp)});
-      newSp.x() = inputSp->x();
-      newSp.y() = inputSp->y();
-      newSp.z() = inputSp->z();
-      newSp.r() = std::hypot(inputSp->x(), inputSp->y());
-      newSp.phi() = std::atan2(inputSp->y(), inputSp->x());
-      newSp.varianceR() = inputSp->varianceR();
-      newSp.varianceZ() = inputSp->varianceZ();
-      if (!m_usePixel.value()) {
-        newSp.topStripVector() =
-            inputSp->topHalfStripLength() * inputSp->topStripDirection();
-        newSp.bottomStripVector() =
-            inputSp->bottomHalfStripLength() * inputSp->bottomStripDirection();
-        newSp.stripCenterDistance() = inputSp->stripCenterDistance();
-        newSp.topStripCenter() = inputSp->topStripCenter();
-      }
-    }
-  }
-
-  ATH_MSG_DEBUG(
-      "    \\__ Total input space points: " << selectedSpacePoints.size());
-  m_stat[kNSpacepoints] += selectedSpacePoints.size();
+  ATH_MSG_DEBUG("    \\__ Total input space points: " << totalSpacePoints);
+  m_stat[kNSpacepoints] += totalSpacePoints;
 
   // Early Exit in case no space points at this stage
-  if (selectedSpacePoints.empty()) {
+  if (totalSpacePoints == 0) {
     ATH_MSG_DEBUG("No input space points found, we stop seeding");
     return StatusCode::SUCCESS;
   }
@@ -175,36 +140,17 @@ StatusCode GridTripletSeedingAlg::execute(const EventContext& ctx) const {
   // ===================== COMPUTATION ================ //
   // ================================================== //
 
-  Acts::Experimental::SeedContainer2 seedContainer;
-
   ATH_MSG_DEBUG("Running Grid Triplet Seed Finding ...");
   time_seedCreation.start();
   try {
-    ATH_CHECK(m_seedsTool->createSeeds2(ctx, selectedSpacePoints,
+    ATH_CHECK(m_seedsTool->createSeeds2(ctx, allInputCollections,
                                         beamPos.cast<float>(), bField.z(),
-                                        seedContainer));
+                                        *seedPtrs));
   } catch (const std::exception& e) {
     ATH_MSG_ERROR("Exception caught during seed creation: " << e.what());
     return StatusCode::FAILURE;
   }
   time_seedCreation.stop();
-
-  for (const auto seed : seedContainer) {
-    const auto* bottom = selectedSpacePoints.at(seed.spacePointIndices()[0])
-                             .sourceLinks()[0]
-                             .get<const xAOD::SpacePoint*>();
-    const auto* middle = selectedSpacePoints.at(seed.spacePointIndices()[1])
-                             .sourceLinks()[0]
-                             .get<const xAOD::SpacePoint*>();
-    const auto* top = selectedSpacePoints.at(seed.spacePointIndices()[2])
-                          .sourceLinks()[0]
-                          .get<const xAOD::SpacePoint*>();
-
-    auto outputSeed = std::make_unique<ActsTrk::Seed>(*bottom, *middle, *top);
-    outputSeed->setVertexZ(seed.vertexZ());
-    outputSeed->setQuality(seed.quality());
-    seedPtrs->push_back(std::move(outputSeed));
-  }
 
   ATH_MSG_DEBUG("    \\__ Created " << seedPtrs->size() << " seeds");
   m_stat[kNSeeds] += seedPtrs->size();

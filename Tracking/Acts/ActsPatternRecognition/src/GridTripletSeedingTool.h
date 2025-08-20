@@ -14,8 +14,9 @@
 // ACTS CORE
 #include "Acts/EventData/SeedContainer2.hpp"
 #include "Acts/EventData/SpacePointContainer2.hpp"
-#include "Acts/Seeding2/BroadTripletSeedFinder.hpp"
+#include "Acts/Seeding2/BroadTripletSeedFilter.hpp"
 #include "Acts/Seeding2/CylindricalSpacePointGrid2.hpp"
+#include "Acts/Seeding2/TripletSeeder.hpp"
 
 // Other
 #include <memory>
@@ -31,11 +32,11 @@ class GridTripletSeedingTool
 
   virtual StatusCode initialize() override;
 
-  StatusCode createSeeds2(
-      const EventContext& ctx,
-      const Acts::Experimental::SpacePointContainer2& spacePoints,
-      const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
-      Acts::Experimental::SeedContainer2& seedContainer) const override;
+  StatusCode createSeeds2(const EventContext& ctx,
+                          const std::vector<const xAOD::SpacePointContainer*>&
+                              spacePointCollections,
+                          const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
+                          ActsTrk::SeedContainer& seedContainer) const override;
 
  protected:
   Gaudi::Property<bool> m_seedQualitySelection{
@@ -336,17 +337,14 @@ class GridTripletSeedingTool
   Acts::Experimental::CylindricalSpacePointGrid2::Config m_gridCfg;
   Acts::Experimental::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
   Acts::Experimental::DoubletSeedFinder::Config m_topDoubletFinderCfg;
-  Acts::Experimental::BroadTripletSeedFinder::TripletCuts m_tripletCuts;
+  Acts::Experimental::TripletSeedFinder::Config m_tripletFinderCfg;
   Acts::Experimental::BroadTripletSeedFilter::Config m_filterCfg;
-  Acts::Experimental::BroadTripletSeedFinder::Options m_finderOpts;
-  Acts::SeedConfirmationRangeConfig m_centralSeedConfirmationRange;
-  Acts::SeedConfirmationRangeConfig m_forwardSeedConfirmationRange;
 
-  std::optional<Acts::Experimental::BroadTripletSeedFinder> m_finder;
-  std::optional<Acts::Experimental::BroadTripletSeedFilter> m_filter;
+  std::optional<Acts::Experimental::TripletSeeder> m_finder;
 
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
+  std::unique_ptr<const Acts::Logger> m_loggerFilter;
 
   const PixelID* m_pixelId{nullptr};
 
@@ -354,7 +352,7 @@ class GridTripletSeedingTool
   const Acts::Logger& logger() const { return *m_logger; }
 
   bool spacePointSelectionFunction(
-      const Acts::Experimental::ConstSpacePointProxy2& sp) const;
+      const xAOD::SpacePoint* sp, float r) const;
 
   bool doubletSelectionFunction(
       const Acts::Experimental::ConstSpacePointProxy2& middle,
