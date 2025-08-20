@@ -32,7 +32,7 @@ StatusCode LArPhysWaveFromStdNtuple::stop()
   if(m_isSC) {
      const LArOnline_SuperCellID* onltmp;
      ATH_CHECK( detStore()->retrieve(onltmp, "LArOnline_SuperCellID") );
-     onlineHelper = (const LArOnlineID_Base*) onltmp;
+     onlineHelper = static_cast<const LArOnlineID_Base*>( onltmp);
   } else {
      const LArOnlineID* onltmp = nullptr;
      ATH_CHECK( detStore()->retrieve(onltmp, "LArOnlineID") );
