@@ -14,6 +14,12 @@ namespace HepMC {
 constexpr int SIM_BARCODE_THRESHOLD = 200000;
 constexpr int SIM_REGENERATION_INCREMENT = 1000000;
 
+/// @brief Constant defining the barcode threshold for regenerated particles, i.e. particles surviving an interaction
+constexpr int SIM_STATUS_INCREMENT = 100000;
+
+/// @brief Constant definiting the status threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
+constexpr int SIM_STATUS_THRESHOLD = 20000;
+
 constexpr int PARTONPDGMAX = 43;
 constexpr int NPPDGMIN = 1000000;
 constexpr int NPPDGMAX = 8999999;
@@ -31,5 +37,19 @@ template <>  inline bool is_simulation_particle(const int& b){ return (b>SIM_BAR
 template <class T>  inline bool is_simulation_vertex(const T& p){ return (p->barcode()<-SIM_BARCODE_THRESHOLD);}
 template <>  inline bool is_simulation_vertex(const int& b){ return (b<-SIM_BARCODE_THRESHOLD);}
 
+/// @brief Functions for converting between the old and new barcode/status schemes
+inline int new_particle_status_from_old(int oldStatus, int barcode) {
+  int generations_barcode_based = (barcode/SIM_REGENERATION_INCREMENT);
+  bool is_sim_secondary_barcode_based = (barcode%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD);
+  return oldStatus + SIM_STATUS_INCREMENT*generations_barcode_based + (is_sim_secondary_barcode_based? SIM_STATUS_THRESHOLD : 0); }
+inline int old_particle_status_from_new(int newStatus) { return newStatus%SIM_STATUS_THRESHOLD; }
+
+inline int new_vertex_status_from_old(int oldStatus, int barcode) {
+  bool is_simulation_vertex_barcode_based =  (barcode<-SIM_BARCODE_THRESHOLD);
+  return (is_simulation_vertex_barcode_based? SIM_STATUS_THRESHOLD : 0) + oldStatus;
+}
+inline int old_vertex_status_from_new(int newStatus) {
+  bool is_simulation_vertex_status_based = (newStatus>SIM_STATUS_THRESHOLD);
+  return ( is_simulation_vertex_status_based ? -SIM_STATUS_THRESHOLD : 0) + newStatus; }
 }
 #endif
