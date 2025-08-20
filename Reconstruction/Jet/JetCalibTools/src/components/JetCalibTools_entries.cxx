@@ -9,6 +9,9 @@
 #include "JetCalibTools/MuonInJetCorrectionTool.h"
 #include "JetCalibTools/BJetCorrectionTool.h"
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT( JetCalibrationTool )
 DECLARE_COMPONENT( JetCalibTool )
 DECLARE_COMPONENT( PileupAreaCalibStep )

@@ -5,4 +5,7 @@
 //Local includes:
 #include "LRTElectronAnalysisTools/ElectronLRTOverlapRemovalTool.h"
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT(CP::ElectronLRTOverlapRemovalTool)

@@ -19,6 +19,10 @@ if( NOT XAOD_STANDALONE )
       src/*.h src/*.cxx src/components/*.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel StoreGateLib TrigConfData TrigConfHLTData TrigConfInterfaces TrigConfL1Data TrigConfxAODLib xAODTrigger )
+else()
+   atlas_add_component( TrigConfxAOD
+      src/components/*.cxx
+      LINK_LIBRARIES TrigConfxAODLib )
 endif()
 
 atlas_add_dictionary( TrigConfxAODDict

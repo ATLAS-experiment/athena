@@ -47,11 +47,11 @@ else()
          PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES_NOPYTHON} AthenaBaseComps
          TrigSteeringEvent AthenaKernel TrigConfData)
    endif()
-
-   atlas_add_component( TrigDecisionTool
-      src/components/*.cxx
-      LINK_LIBRARIES TrigDecisionToolLib )
 endif()
+
+atlas_add_component( TrigDecisionTool
+   src/components/*.cxx
+   LINK_LIBRARIES TrigDecisionToolLib )
 
 atlas_add_dictionary( TrigDecisionToolDict
    TrigDecisionTool/TrigDecisionToolDict.h

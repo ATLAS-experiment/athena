@@ -5,6 +5,9 @@
 #include "PMGTools/PMGSherpaVjetsSysTool.h"
 #include "PMGTools/PMGTruthWeightTool.h"
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 using namespace PMGTools;
 
 DECLARE_COMPONENT( PMGCrossSectionTool )

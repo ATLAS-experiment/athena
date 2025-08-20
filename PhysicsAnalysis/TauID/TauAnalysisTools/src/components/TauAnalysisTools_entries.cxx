@@ -13,7 +13,13 @@
 #include "TauAnalysisTools/DiTauSmearingTool.h"
 #include "TauAnalysisTools/DiTauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/TauHFVetoTool.h"
+
+#ifndef XAOD_STANDALONE
 #include "../TauAnalysisToolsExampleAthena.h"
+#endif
+
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT( TauAnalysisTools::CommonEfficiencyTool )
 DECLARE_COMPONENT( TauAnalysisTools::CommonSmearingTool )
@@ -30,6 +36,8 @@ DECLARE_COMPONENT( TauAnalysisTools::DiTauSelectionTool )
 DECLARE_COMPONENT( TauAnalysisTools::DiTauSmearingTool )
 DECLARE_COMPONENT( TauAnalysisTools::DiTauEfficiencyCorrectionsTool )
 DECLARE_COMPONENT( TauAnalysisTools::TauHFVetoTool )
-DECLARE_COMPONENT( TauAnalysisTools::TauAnalysisToolsExampleAthena )
 
+#ifndef XAOD_STANDALONE
+DECLARE_COMPONENT( TauAnalysisTools::TauAnalysisToolsExampleAthena )
+#endif
 

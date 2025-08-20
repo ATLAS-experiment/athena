@@ -15,11 +15,9 @@ atlas_add_library( JetUncertaintiesLib
    JetCPInterfaces
    PRIVATE_LINK_LIBRARIES xAODCore xAODTracking PathResolver ParticleJetToolsLib )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( JetUncertainties
-      src/components/*.cxx
-      LINK_LIBRARIES JetUncertaintiesLib )
-endif()
+atlas_add_component( JetUncertainties
+   src/components/*.cxx
+   LINK_LIBRARIES JetUncertaintiesLib )
 
 atlas_add_dictionary( JetUncertaintiesDict
    JetUncertainties/JetUncertaintiesDict.h

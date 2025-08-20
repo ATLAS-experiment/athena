@@ -21,6 +21,10 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel
       AthAnalysisBaseCompsLib TriggerMatchingToolLib )
+else()
+   atlas_add_component( TriggerMatchingTool
+      src/components/*.cxx
+      LINK_LIBRARIES TriggerMatchingToolLib )
 endif()
 
 atlas_add_dictionary( TriggerMatchingToolDict

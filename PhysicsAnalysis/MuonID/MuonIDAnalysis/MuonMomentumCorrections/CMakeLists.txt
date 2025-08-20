@@ -23,6 +23,10 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps xAODMuon xAODCore MuonAnalysisInterfacesLib  FourMomUtils
       xAODBase GaudiKernel MuonSelectorToolsLib MuonMomentumCorrectionsLib StoreGateLib AsgMessagingLib PathResolver TruthUtils)
+else()
+   atlas_add_component( MuonMomentumCorrections
+      src/components/*.cxx
+      LINK_LIBRARIES MuonMomentumCorrectionsLib)
 endif()
 
 atlas_add_dictionary( MuonMomentumCorrectionsDict

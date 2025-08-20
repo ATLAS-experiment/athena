@@ -42,6 +42,10 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES GaudiKernel AthenaBaseComps METInterface xAODEgamma
       xAODMuon xAODTau xAODMissingET xAODJet JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib MuonSelectorToolsLib tauRecToolsLib
       TauAnalysisToolsLib METUtilitiesLib  )
+else()
+   atlas_add_component( METUtilities
+      src/components/*.cxx
+      LINK_LIBRARIES METUtilitiesLib  )
 endif()
 
 atlas_add_dictionary( METUtilitiesDict
