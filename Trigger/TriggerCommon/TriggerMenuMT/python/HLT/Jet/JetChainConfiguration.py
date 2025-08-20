@@ -141,7 +141,7 @@ class JetChainConfiguration(ChainConfigurationBase):
                 preselJetDef, jetPreselStep = self.getJetCaloPreselChainStep(flags)
                 chainSteps.append( jetPreselStep )
 
-                if re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)|.*Z|.*gntau', self.trkpresel):
+                if re.match(r'.*((b|bg|bgtwo)\d\d)|.*Z|.*gntau|.*uht', self.trkpresel):
                     # Preselection with super-RoI tracking for b-tagging, tau-tagging or pileup tagging
                     roitrkPreselStep = self.getJetRoITrackJetTagPreselChainStep(flags, preselJetDef)
                 else:

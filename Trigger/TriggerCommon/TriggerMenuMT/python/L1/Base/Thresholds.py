@@ -1,8 +1,7 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import re
 from copy import deepcopy
-from collections import OrderedDict as odict
 from functools import total_ordering
 
 from AthenaCommon.Logging import logging
@@ -18,8 +17,8 @@ log = logging.getLogger(__name__)
 class MenuThresholdsCollection( object ):
 
     def __init__(self, flags):
-        self.thresholds     = odict() # holds all thresholds
-        self.thresholdNames = set()   # holds all threshold names
+        self.thresholds     = {}     # holds all thresholds
+        self.thresholdNames = set()  # holds all threshold names
         self.flags = flags
 
     def __iter__(self):
@@ -63,11 +62,12 @@ class MenuThresholdsCollection( object ):
         return getTypeWideThresholdConfig(ttype, self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, self.flags.Trigger.L1.Menu.doeFexBDTTau)
 
     def json(self):
-        confObj = odict()
+        confObj = {}
         for ttype in (ThrType.Run3Types() + ThrType.NIMTypes() + [ThrType.TOPO, ThrType.MUTOPO] + [ThrType.LArSat, ThrType.NSWMon] ):
-            confObj[ttype.name] = odict()
-            confObj[ttype.name]["type"] = ttype.name
-            confObj[ttype.name]["thresholds"] = odict()
+            confObj[ttype.name] = {
+                "type": ttype.name,
+                "thresholds": {}
+            }
         for thr in self:
             if thr.isLegacy():
                 continue
@@ -82,11 +82,12 @@ class MenuThresholdsCollection( object ):
 
 
     def jsonLegacy(self):
-        confObj = odict()
+        confObj = {}
         for ttype in (ThrType.LegacyTypes() + [ThrType.R2TOPO]):
-            confObj[ttype.name] = odict()
-            confObj[ttype.name]["type"] = ttype.name
-            confObj[ttype.name]["thresholds"] = odict()
+            confObj[ttype.name] = {
+                "type": ttype.name,
+                "thresholds": {}
+            }
         for thr in self:
             if not thr.isLegacy():
                 continue
@@ -135,14 +136,15 @@ class Threshold( object ):
             return float(self.thresholdValues[0].value)
 
     def json(self):
-        confObj = odict()
-        confObj["todo"] = "implement"
+        confObj = {
+            "todo": "implement"
+        }
         if self.ttype == ThrType.ZB:
-            confObj["seed"] = self.seed
-            confObj["seed_multi"] = self.seed_multi
-            confObj["bc_delay"] = self.mapping
-        
-
+            confObj.update( {
+                "seed": self.seed,
+                "seed_multi": self.seed_multi,
+                "bc_delay": self.mapping
+            } )
         return confObj
 
 
@@ -220,68 +222,69 @@ class LegacyThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
+        confObj = {
+            "mapping": self.mapping
+        }
         if self.ttype == ThrType.EM:
             confObj["thrValues"] = []
             for thrV in self.thresholdValues:
-                confObj["thrValues"].append( odict([
-                    ("value", thrV.value),
-                    ("isobits", thrV.isobits),
-                    ("etamin", thrV.etamin),
-                    ("etamax", thrV.etamax),
-                    ("phimin", thrV.phimin),
-                    ("phimax", thrV.phimax),
-                    ("priority", thrV.priority)
-                ]) )
+                confObj["thrValues"].append({
+                    "value": thrV.value,
+                    "isobits": thrV.isobits,
+                    "etamin": thrV.etamin,
+                    "etamax": thrV.etamax,
+                    "phimin": thrV.phimin,
+                    "phimax": thrV.phimax,
+                    "priority": thrV.priority
+                })
         elif self.ttype == ThrType.TAU:
             confObj["isobits"] = self.thresholdValues[0].isobits
             confObj["thrValues"] = []
             for thrV in self.thresholdValues:
-                confObj["thrValues"].append( odict([
-                    ("value", thrV.value),
-                    ("etamin", thrV.etamin),
-                    ("etamax", thrV.etamax),
-                    ("phimin", thrV.phimin),
-                    ("phimax", thrV.phimax),
-                    ("priority", thrV.priority)
-                ]) )
+                confObj["thrValues"].append({
+                    "value": thrV.value,
+                    "etamin": thrV.etamin,
+                    "etamax": thrV.etamax,
+                    "phimin": thrV.phimin,
+                    "phimax": thrV.phimax,
+                    "priority": thrV.priority
+                })
         elif self.ttype == ThrType.JET:
             confObj["thrValues"] = []
             for thrV in self.thresholdValues:
-                confObj["thrValues"].append( odict([
-                    ("value", thrV.value),
-                    ("etamin", thrV.etamin),
-                    ("etamax", thrV.etamax),
-                    ("phimin", thrV.phimin),
-                    ("phimax", thrV.phimax),
-                    ("window", thrV.window),
-                    ("priority", thrV.priority)
-                ]) )
+                confObj["thrValues"].append({
+                    "value": thrV.value,
+                    "etamin": thrV.etamin,
+                    "etamax": thrV.etamax,
+                    "phimin": thrV.phimin,
+                    "phimax": thrV.phimax,
+                    "window": thrV.window,
+                    "priority": thrV.priority
+                })
         elif self.ttype == ThrType.TE:
             if len(self.thresholdValues)==1:
                 confObj["value"] = self.thresholdValues[0].value
             else:
                 confObj["thrValues"] = []
                 for thrV in self.thresholdValues:
-                    confObj["thrValues"].append( odict([
-                        ("value", thrV.value),
-                        ("etamin", thrV.etamin),
-                        ("etamax", thrV.etamax),
-                        ("priority", thrV.priority)
-                    ]) )
+                    confObj["thrValues"].append({
+                        "value": thrV.value,
+                        "etamin": thrV.etamin,
+                        "etamax": thrV.etamax,
+                        "priority": thrV.priority
+                    })
         elif self.ttype == ThrType.XE:
             if len(self.thresholdValues)==1:
                 confObj["value"] = self.thresholdValues[0].value
             else:
                 confObj["thrValues"] = []
                 for thrV in self.thresholdValues:
-                    confObj["thrValues"].append( odict([
-                        ("value", thrV.value),
-                        ("etamin", thrV.etamin),
-                        ("etamax", thrV.etamax),
-                        ("priority", thrV.priority)
-                    ]) )
+                    confObj["thrValues"].append({
+                        "value": thrV.value,
+                        "etamin": thrV.etamin,
+                        "etamax": thrV.etamax,
+                        "priority": thrV.priority
+                    })
         elif self.ttype == ThrType.XS:
             confObj["value"] = self.thresholdValues[0].value
         else:
@@ -344,18 +347,20 @@ class eEMThreshold (Threshold):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["rhad"] = self.rhad
-        confObj["reta"] = self.reta
-        confObj["wstot"] = self.wstot
+        confObj = {
+            "mapping": self.mapping,
+            "rhad": self.rhad,
+            "reta": self.reta,
+            "wstot": self.wstot
+        }
         confObj["thrValues"] = []
         for thrV in self.thresholdValues:
-            tvco = odict()
-            tvco["value"] = thrV.value
-            tvco["etamin"] = thrV.etamin
-            tvco["etamax"] = thrV.etamax
-            tvco["priority"] = thrV.priority
+            tvco = {
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "priority": thrV.priority
+            }
             confObj["thrValues"].append( tvco )
         return confObj
 
@@ -412,18 +417,20 @@ class eEMVarThreshold (Threshold):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["rhad"] = self.rhad
-        confObj["reta"] = self.reta
-        confObj["wstot"] = self.wstot
-        confObj["thrValues"] = []
+        confObj = {
+            "mapping": self.mapping,
+            "rhad": self.rhad,
+            "reta": self.reta,
+            "wstot": self.wstot,
+            "thrValues": []
+        }
         for thrV in self.thresholdValues:
-            tvco = odict()
-            tvco["value"] = thrV.value
-            tvco["etamin"] = thrV.etamin
-            tvco["etamax"] = thrV.etamax
-            tvco["priority"] = thrV.priority
+            tvco = {
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "priority": thrV.priority
+            }
             confObj["thrValues"].append( tvco )
         return confObj
 
@@ -482,18 +489,20 @@ class jEMThreshold (Threshold):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["iso"] = self.iso
-        confObj["frac"] = self.frac
-        confObj["frac2"] = self.frac2
-        confObj["thrValues"] = []
+        confObj = {
+            "mapping": self.mapping,
+            "iso": self.iso,
+            "frac": self.frac,
+            "frac2": self.frac2,
+            "thrValues": []
+        }
         for thrV in self.thresholdValues:
-            tvco = odict()
-            tvco["value"] = thrV.value
-            tvco["etamin"] = thrV.etamin
-            tvco["etamax"] = thrV.etamax
-            tvco["priority"] = thrV.priority
+            tvco = {
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "priority": thrV.priority
+            }
             confObj["thrValues"].append( tvco )
         return confObj
 
@@ -588,8 +597,9 @@ class MuonThreshold( Threshold ):
 
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
+        confObj = {
+            "mapping": self.mapping
+        }
         if self.isLegacy():
             confObj["thr"] = self.thr
         else:
@@ -613,8 +623,9 @@ class NSWMonThreshold( Threshold ):
         self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
+        confObj = {
+            "mapping": self.mapping
+        }
         return confObj
 
 
@@ -675,20 +686,21 @@ class eTauThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["rCore"] = self.rCore
-        confObj["rHad"] = self.rHad
-        confObj["thrValues"] = []
+        confObj = {
+            "mapping": self.mapping,
+            "rCore": self.rCore,
+            "rHad": self.rHad,
+            "thrValues": []
+        }
         for thrV in self.thresholdValues:
-            confObj["thrValues"].append( odict([
-                ("value", thrV.value),
-                ("etamin", thrV.etamin),
-                ("etamax", thrV.etamax),
-                ("phimin", thrV.phimin),
-                ("phimax", thrV.phimax),
-                ("priority", thrV.priority)
-            ]) )
+            confObj["thrValues"].append({
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "phimin": thrV.phimin,
+                "phimax": thrV.phimax,
+                "priority": thrV.priority
+            })
         return confObj
 
 class jTauThreshold( Threshold ):
@@ -740,19 +752,20 @@ class jTauThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["isolation"] = self.isolation
+        confObj = {
+            "mapping": self.mapping,
+            "isolation": self.isolation
+        }
         confObj["thrValues"] = []
         for thrV in self.thresholdValues:
-            confObj["thrValues"].append( odict([
-                ("value", thrV.value),
-                ("etamin", thrV.etamin),
-                ("etamax", thrV.etamax),
-                ("phimin", thrV.phimin),
-                ("phimax", thrV.phimax),
-                ("priority", thrV.priority)
-            ]) )
+            confObj["thrValues"].append({
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "phimin": thrV.phimin,
+                "phimax": thrV.phimax,
+                "priority": thrV.priority
+            })
         return confObj
 
 class cTauThreshold( Threshold ):
@@ -804,19 +817,20 @@ class cTauThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["isolation"] = self.isolation
-        confObj["thrValues"] = []
+        confObj = {
+            "mapping": self.mapping,
+            "isolation": self.isolation,
+            "thrValues": []
+        }
         for thrV in self.thresholdValues:
-            confObj["thrValues"].append( odict([
-                ("value", thrV.value),
-                ("etamin", thrV.etamin),
-                ("etamax", thrV.etamax),
-                ("phimin", thrV.phimin),
-                ("phimax", thrV.phimax),
-                ("priority", thrV.priority)
-            ]) )
+            confObj["thrValues"].append({
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "phimin": thrV.phimin,
+                "phimax": thrV.phimax,
+                "priority": thrV.priority
+            })
         return confObj
 
 class jJetThreshold( Threshold ):
@@ -841,15 +855,17 @@ class jJetThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["thrValues"] = []
+        confObj = {
+            "mapping": self.mapping,
+            "thrValues": []
+        }
         for thrV in self.thresholdValues:
-            tvco = odict()
-            tvco["value"] = thrV.value
-            tvco["etamin"] = thrV.etamin
-            tvco["etamax"] = thrV.etamax
-            tvco["priority"] = thrV.priority
+            tvco = {
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "priority": thrV.priority
+            }
             confObj["thrValues"].append( tvco )
         return confObj
 
@@ -876,15 +892,17 @@ class gJetThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["thrValues"] = []
+        confObj = {
+            "mapping": self.mapping,
+            "thrValues": []
+        }
         for thrV in self.thresholdValues:
-            tvco = odict()
-            tvco["value"] = thrV.value
-            tvco["etamin"] = thrV.etamin
-            tvco["etamax"] = thrV.etamax
-            tvco["priority"] = thrV.priority
+            tvco = {
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "priority": thrV.priority
+            }
             confObj["thrValues"].append( tvco )
         return confObj
 
@@ -910,15 +928,17 @@ class gLJetThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["thrValues"] = []
+        confObj = {
+            "mapping": self.mapping,
+            "thrValues": []
+        }
         for thrV in self.thresholdValues:
-            tvco = odict()
-            tvco["value"] = thrV.value
-            tvco["etamin"] = thrV.etamin
-            tvco["etamax"] = thrV.etamax
-            tvco["priority"] = thrV.priority
+            tvco = {
+                "value": thrV.value,
+                "etamin": thrV.etamin,
+                "etamax": thrV.etamax,
+                "priority": thrV.priority
+            }
             confObj["thrValues"].append( tvco )
         return confObj
 
@@ -935,9 +955,10 @@ class XEThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["value"] = self.xe
-        confObj["mapping"] = self.mapping
+        confObj = {
+            "value": self.xe,
+            "mapping": self.mapping
+        }
         return confObj
 
 
@@ -948,8 +969,9 @@ class LArSaturationThreshold( Threshold ):
         self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
+        confObj = {
+            "mapping": self.mapping
+        }
         return confObj
 
 class ZeroBiasThresholdTopo( Threshold ):
@@ -976,15 +998,16 @@ class ZeroBiasThresholdTopo( Threshold ):
         
 
     def json(self):
-        confObj = odict()
-        confObj["mapping" ]         = self.mapping
-        confObj["delay"]            = self.bcdelay
-        confObj["mask0"]            = self.mask0
-        confObj["mask1"]            = self.mask1
-        confObj["mask2"]            = self.mask2
-        confObj["mask3"]            = self.mask3
-        confObj["mask4"]            = self.mask4
-        confObj["mask5"]            = self.mask5
+        confObj = {
+            "mapping": self.mapping,
+            "delay": self.bcdelay,
+            "mask0": self.mask0,
+            "mask1": self.mask1,
+            "mask2": self.mask2,
+            "mask3": self.mask3,
+            "mask4": self.mask4,
+            "mask5": self.mask5
+        }
         
         return confObj
 
@@ -1002,9 +1025,10 @@ class TEThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["value"] = self.xe
-        confObj["mapping"] = self.mapping
+        confObj = {
+            "value": self.xe,
+            "mapping": self.mapping
+        }
         return confObj
 
 class NimThreshold( Threshold ):
@@ -1013,8 +1037,9 @@ class NimThreshold( Threshold ):
         super(NimThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3)
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
+        confObj = {
+            "mapping": self.mapping
+        }
         return confObj
 
 
@@ -1028,9 +1053,10 @@ class MBTSSIThreshold( Threshold ):
         self.voltage = voltage
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["voltage"] = self.voltage
+        confObj = {
+            "mapping": self.mapping,
+            "voltage": self.voltage
+        }
         return confObj
 
 
@@ -1044,9 +1070,10 @@ class MBTSThreshold( Threshold ):
         self.sectors += [ mbtsSector.name ]
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
-        confObj["sectors"] = self.sectors
+        confObj = {
+            "mapping": self.mapping,
+            "sectors": self.sectors
+        }
         return confObj
 
 
@@ -1069,11 +1096,12 @@ class ZeroBiasThreshold( Threshold ):
         
 
     def json(self):
-        confObj = odict()
-        confObj["mapping" ]         = self.mapping
-        confObj["seed"]             = self.seed
-        confObj["seedMultiplicity"] = self.seed_multi
-        confObj["seedBcdelay"]      = self.bcdelay
+        confObj = {
+            "mapping": self.mapping,
+            "seed": self.seed,
+            "seedMultiplicity": self.seed_multi,
+            "seedBcdelay": self.bcdelay
+        }
         return confObj
 
 
@@ -1188,6 +1216,7 @@ class TopoThreshold( Threshold ):
         return self.name.replace('.','').replace('-','_') # we can not have '.' or '-' in the variable name
 
     def json(self):
-        confObj = odict()
-        confObj["mapping"] = self.mapping
+        confObj = {
+            "mapping": self.mapping
+        }
         return confObj

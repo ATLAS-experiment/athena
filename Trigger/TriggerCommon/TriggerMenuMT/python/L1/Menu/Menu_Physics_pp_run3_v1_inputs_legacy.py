@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
-
-from collections import OrderedDict as odict
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from ..Base.L1MenuFlags import L1MenuFlags
 from ..Base.MenuConfObj import TopoMenuDef
@@ -8,14 +6,14 @@ from ..Config.LegacyTopoMergerMap import createMergerBoard
 
 def defineLegacyInputsMenu():
 
-    legacyBoards = odict()
-    legacyTopoBoards = odict()
+    legacyBoards = {}
+    legacyTopoBoards = {}
 
     #----------------------------------------
     # SLOT 7 / CON 0-3 (EM1, EM2, TAU1, TAU2)
     # https://twiki.cern.ch/twiki/bin/view/Atlas/LevelOneCentralTriggerSetup#CTPIN_Slot_7
     #----------------------------------------
-    legacyBoards["Ctpin7"] = odict()
+    legacyBoards["Ctpin7"] = {}
     legacyBoards["Ctpin7"]["legacy"] = True
     legacyBoards["Ctpin7"]["connectors"] = []
     legacyBoards["Ctpin7"]["connectors"] += [
@@ -60,7 +58,7 @@ def defineLegacyInputsMenu():
     # SLOT 8 / CON 0 (JET1, JET2, EN1, EN2)
     # https://twiki.cern.ch/twiki/bin/view/Atlas/LevelOneCentralTriggerSetup#CTPIN_Slot_8
     #--------------------------------------
-    legacyBoards["Ctpin8"] = odict()
+    legacyBoards["Ctpin8"] = {}
     legacyBoards["Ctpin8"]["legacy"] = True
     legacyBoards["Ctpin8"]["connectors"] = []
     legacyBoards["Ctpin8"]["connectors"] += [
@@ -120,7 +118,7 @@ def defineLegacyInputsMenu():
     #----------------
     # Legacy L1TOPO 0  
     #----------------
-    legacyTopoBoards["LegacyTopo0"] = odict()
+    legacyTopoBoards["LegacyTopo0"] = {}
     legacyTopoBoards["LegacyTopo0"]["legacy"] = True
     legacyTopoBoards["LegacyTopo0"]["connectors"] = [
         {
@@ -212,7 +210,7 @@ def defineLegacyInputsMenu():
         }
     ]
 
-    legacyTopoBoards["LegacyTopo1"] = odict()
+    legacyTopoBoards["LegacyTopo1"] = {}
     legacyTopoBoards["LegacyTopo1"]["legacy"] = True
     legacyTopoBoards["LegacyTopo1"]["connectors"] = [
         {
