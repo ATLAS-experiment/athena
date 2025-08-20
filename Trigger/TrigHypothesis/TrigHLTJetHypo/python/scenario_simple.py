@@ -5,10 +5,13 @@ from TrigHLTJetHypo.HelperConfigToolParams import HelperConfigToolParams
 from TrigHLTJetHypo.ConditionDefaults import defaults
 from TrigHLTJetHypo.make_treevec import make_treevec
 
+from AthenaCommon.Logging import logging
+log = logging.getLogger(__name__)
+
 
 # make a list of all possible cut items for the simple scenario
 all_elemental_keys = ('etaRange', 'nnJvt', 'jvt', 'smc',
-                      'threshold', 'momCuts', 'bsel', 'tausel',
+                      'threshold', 'momCuts', 'bsel', 'gntau', 'uht1tau',
                       'clrsel','pileuprm', 'timing', 'timeSig')
 
 # Extract moment cuts
@@ -20,12 +23,11 @@ def _cuts_from_momCuts(momCuts):
     return ''
 
 def get_condition_args_from_chainpart(cp):
-
     # determine which cut variable are present in this chain part,
     # and find their chain part values
     elemental_keys = [k for k in all_elemental_keys if k  in cp]
     cp_elemental_args = {k : cp[k] for k in elemental_keys if cp[k]}
-        
+
     # remove place holders
     todelete = []
     for k, v in cp_elemental_args.items():
@@ -34,15 +36,15 @@ def get_condition_args_from_chainpart(cp):
     for k in todelete: del cp_elemental_args[k]
 
     # decode the chain part cut values to find the numerical cut values
-        
+
     condargs = list()
-    
+
     for k, v in cp_elemental_args.items():
         if k == 'threshold':
             key = 'pt'
             vals = defaults(key, lo=v)
             condargs.append((key, vals))
-                
+
         if k == 'etaRange':
             key='eta'
             lo, hi = v.split(key)
@@ -102,6 +104,7 @@ def get_condition_args_from_chainpart(cp):
             lo   = values[0]
             vals = defaults(key, lo=lo)
             condargs.append((key, vals))
+
         if k == 'bsel':
             if 'bgnone' in v:
                 key = 'bgnone'
@@ -121,20 +124,21 @@ def get_condition_args_from_chainpart(cp):
                 }
 
                 assert (values[0] in gn1_WPs.keys()),f"The efficiency of the specified GN1 cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the GN1 WP dictionary."
-                
+
                 lo   = gn1_WPs[values[0]]
-                
+
                 vals = {
                     'min': str(lo),
                     'max': '',
                     'cfrac': '0.018',
-                    'namePb': 'fastGN120230331_pb', 
-                    'namePc': 'fastGN120230331_pc', 
+                    'namePb': 'fastGN120230331_pb',
+                    'namePc': 'fastGN120230331_pc',
                     'namePu': 'fastGN120230331_pu',
                     'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
 
                 condargs.append((k, vals))
+
             # Retrained Xbb tagger
             # Has to go before the rest of "bgntwo*"
             elif 'bgntwoxt' in v:
@@ -173,7 +177,7 @@ def get_condition_args_from_chainpart(cp):
                 key = 'bgntwox'
                 values = v.split(key)
                 assert values[1] == '','bgntwox condition takes only one argument, two were given'
-                
+
                 #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
                 gn2x_WPs = {
                     '':   float('-inf'),
@@ -190,8 +194,8 @@ def get_condition_args_from_chainpart(cp):
                     'min': str(lo),
                     'max': '',
                     'cfrac': '0.25',
-                    'namePb': 'GN2Xv01_phbb', 
-                    'namePc': 'GN2Xv01_ptop', 
+                    'namePb': 'GN2Xv01_phbb',
+                    'namePc': 'GN2Xv01_ptop',
                     'namePu': 'GN2Xv01_pqcd',
                 }
                 condargs.append((k, vals))
@@ -200,7 +204,7 @@ def get_condition_args_from_chainpart(cp):
                 key = 'bgntwo'
                 values = v.split(key)
                 assert values[1] == '', 'bgn2 condition takes only one argument, two were given'
-                
+
                 gn2_WPs = {
                     '': float('-inf'),
                     "95": -2.432,
@@ -214,25 +218,26 @@ def get_condition_args_from_chainpart(cp):
                 }
 
                 assert (values[0] in gn2_WPs.keys()),f"The efficiency of the specified GN2 cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the GN2 WP dictionary."
-                
+
                 lo   = gn2_WPs[values[0]]
-                
+
                 vals = {
                     'min': str(lo),
                     'max': '',
                     'cfrac': '0.018',
-                    'namePb': 'fastGN220240122_pb', 
-                    'namePc': 'fastGN220240122_pc', 
+                    'namePb': 'fastGN220240122_pb',
+                    'namePc': 'fastGN220240122_pc',
                     'namePu': 'fastGN220240122_pu',
                     'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
 
-                condargs.append((k, vals))                
+                condargs.append((k, vals))
+
             elif 'bdips' in v:
                 key = 'bdips'
                 values = v.split(key)
                 assert values[1] == '','bdips condition takes only one argument, two were given' # protection when an upper (not supported) cut is requested
-                
+
                 #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
                 dips_WPs = {
                     '':   float('-inf'),
@@ -253,28 +258,30 @@ def get_condition_args_from_chainpart(cp):
                     'min': str(lo),
                     'max': '',
                     'cfrac': '0.018',
-                    'namePb': 'fastDips_pb', 
-                    'namePc': 'fastDips_pc', 
+                    'namePb': 'fastDips_pb',
+                    'namePc': 'fastDips_pc',
                     'namePu': 'fastDips_pu',
                     'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
                 condargs.append((k, vals))
 
             else:
-                raise ValueError(f'btagger {v.split("b")[1]} not supportted')
+                raise ValueError(f'btagger {v} not supported')
 
-        if k == "tausel":
-            key = 'gntau'
-            values = v.split(key)
+        # for the love of all that is whole could we turn these into functions
+        # instead of copy/paste?!
+        elif k == "gntau":
+            assert k in v
+            values = v.split(k)
             assert values[1] == '' , 'gntau condition takes only one argument, two were given' # protection when an upper (not supported) cut is requested
 
             gntau_WPs = \
-              { '':   float('-inf')
-              , '90': -0.846
-              , '85': 0.048
-              , '80': 0.693
-              , '75': 1.229
-              }
+                { '':   float('-inf')
+                , '90': -0.846
+                , '85': 0.048
+                , '80': 0.693
+                , '75': 1.229
+                }
 
             assert (values[0] in gntau_WPs.keys()),f"The efficiency of the specified gntau cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the gntau WP dictionary."
 
@@ -288,13 +295,43 @@ def get_condition_args_from_chainpart(cp):
             }
             condargs.append((k, vals))
 
+            log.info("Adding HLT preselection: gntau %s", values[0])
 
-        if k == 'momCuts':
+        elif k == "uht1tau":
+            assert k in v
+            values = v.split(k)
+            assert values[1] == '' , 'uht1tau condition takes only one argument, two were given' # protection when an upper (not supported) cut is requested
+
+            uht1tau_WPs = \
+                { '':   float('-inf')
+                , '90': 0.556
+                , '87': 1.379
+                , '85': 1.936
+                , '82': 2.752
+                , '80': 3.259
+                }
+
+            assert (values[0] in uht1tau_WPs.keys()),f"The efficiency of the specified uht1tau cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the gntau WP dictionary."
+
+            lo   = uht1tau_WPs[values[0]]
+            vals = {
+                'min': str(lo),
+                'max': '',
+                'namePtau': 'fastUHT120250605_ptau',
+                'namePu': 'fastUHT120250605_pu',
+                'nameValid': 'TracksForMinimalJetTag_isValid'
+            }
+            condargs.append((k, vals))
+
+            log.info("Adding HLT preselection: uht1tau %s", values[0])
+
+
+        elif k == 'momCuts':
             from TrigHLTJetHypo.FastReductionAlgToolFactory import jetMoments
             if 'XX' in v: # several moment cuts are requested
 
                 # loop over requested moment strings
-                for cutstr in _cuts_from_momCuts(v): 
+                for cutstr in _cuts_from_momCuts(v):
                     for moment in jetMoments: # loop over possible jet moments
                         if moment in cutstr:
                             key='mom{}'.format(moment)
@@ -310,15 +347,17 @@ def get_condition_args_from_chainpart(cp):
                         vals   = defaults(k, lo=lo, hi=hi)
                         vals["moment"] = jetMoments[moment]
                         condargs.append((key, vals))
-        if k =='pileuprm':
+
+        elif k =='pileuprm':
             key    = 'pileuprm'
             values = v.split(key)
             if "n" in values[0]:
                  lo=values[0].replace("n","-",1)
             if "n" in values[1]:
-                 hi=values[1].replace("n","-",1) 
+                 hi=values[1].replace("n","-",1)
             vals =  defaults(key, lo=lo, hi=hi)
             condargs.append((key, vals))
+
     return condargs
 
 
@@ -333,11 +372,11 @@ def scenario_simple(chain_parts):
     repcondargs = []
     filterparams = []
     filterparam_inds = []
-    
+
     ncp = 0
-    
+
     # keep track of identical cond_args, which are given the same
-    # clique number. 
+    # clique number.
     # the C++ code will use the clique number for optimisation of
     # the calculation of the combinations
     #
@@ -353,7 +392,7 @@ def scenario_simple(chain_parts):
 
         multiplicity = int(cp['multiplicity'])
         chainPartInd = cp['chainPartIndex']
- 
+
         # no condition filtering
         filterparam_inds.append(-1) # no Condition filter
 
@@ -383,5 +422,5 @@ def scenario_simple(chain_parts):
                                            repcondargs=repcondargs,
                                            filterparams=filterparams,
                                            filterparam_inds=filterparam_inds)
-    
+
     return [helper_params]  # a list is one entry per FastReduction tree
