@@ -350,7 +350,6 @@ StatusCode TrigFastTrackFinder::initialize() {
   ATH_MSG_DEBUG("	m_dodEdxTrk                : " <<  m_dodEdxTrk         );
   ATH_MSG_DEBUG("	m_ITkMode                  : " <<  m_ITkMode         );
   ATH_MSG_DEBUG("	m_useTracklets             : " <<  m_useTracklets         );
-  ATH_MSG_DEBUG(" m_useGBTSeedingTool        : " << m_useGBTSeedingTool  );
 
   ATH_MSG_DEBUG(" Initialized successfully");
 
@@ -598,28 +597,18 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
       }
       
     } else {
-
-      if (m_useGBTSeedingTool) {
-
-        ATH_MSG_ERROR("Calling GBTS Tool that is not yet implemented");
-        return StatusCode::FAILURE;
-        
+      TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
+      
+      seedGen.loadSpacePoints(convertedSpacePoints);
+      
+      if (m_doZFinder && m_doFastZVseeding) {
+	seedGen.createSeeds(tmpRoi.get(), vZv);
       }
       else {
-
-          TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
-      
-          seedGen.loadSpacePoints(convertedSpacePoints);
-          
-          if (m_doZFinder && m_doFastZVseeding) {
-            seedGen.createSeeds(tmpRoi.get(), vZv);
-          }
-          else {
-            seedGen.createSeeds(tmpRoi.get());
-          }
-          
-          seedGen.getSeeds(triplets);
+	seedGen.createSeeds(tmpRoi.get());
       }
+      
+      seedGen.getSeeds(triplets);
     }
   }
   else {

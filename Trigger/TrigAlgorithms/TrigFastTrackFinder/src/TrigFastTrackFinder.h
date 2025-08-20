@@ -218,7 +218,6 @@ protected:
 
   bool m_useNewLayerNumberScheme;
 
-
   // GPU acceleration
 
   bool m_useGPU;
@@ -282,8 +281,7 @@ protected:
   Gaudi::Property<bool> m_doCloneRemoval{this,  "doCloneRemoval", true, "Remove tracks sharing too many hits"};
   Gaudi::Property<bool> m_doTrackRefit  {this, "doTrackRefit",    true, "Refit tracks after the combinatorial track following"};
   Gaudi::Property<bool> m_useTracklets  {this, "UseTracklets",    false, "Use tracklet seeds from ITk track seeding"};
-  Gaudi::Property<bool> m_useGBTSeedingTool {this, "useGBTSeedingTool", false, "GBT seeding tool for tracker"};
-  
+
 };
 
 
