@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from collections import OrderedDict as odict
 from operator import attrgetter
 from enum import Enum
 
@@ -54,14 +53,14 @@ class MenuTopoAlgorithmsCollection(object):
 
     def __init__(self):
         # all algos that are in menu (new and legacy)
-        self.topoAlgos = odict()
+        self.topoAlgos = {}
         for cat in AlgCategory:
-            self.topoAlgos[cat] = odict()
+            self.topoAlgos[cat] = {}
             if cat in [AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY]:
-                self.topoAlgos[cat][AlgType.DEC] = odict()
-                self.topoAlgos[cat][AlgType.SORT] = odict()
+                self.topoAlgos[cat][AlgType.DEC] = {}
+                self.topoAlgos[cat][AlgType.SORT] = {}
             elif cat in [AlgCategory.MULTI]:
-                self.topoAlgos[cat][AlgType.MULT] = odict()
+                self.topoAlgos[cat][AlgType.MULT] = {}
 
     def addAlgo(self, algo, category):
         if type(category) is not AlgCategory:
@@ -77,7 +76,7 @@ class MenuTopoAlgorithmsCollection(object):
             raise RuntimeError("Trying to add topo algorithm %s of unknown type %s to the menu" % (algo.name, type(algo)))
 
         if algType not in self.topoAlgos[category]:
-            self.topoAlgos[category][algType] = odict()
+            self.topoAlgos[category][algType] = {}
 
         if algo.name in self.topoAlgos[category][algType]:
             raise RuntimeError("Trying to add topo algorithm %s a second time" % algo.name)
@@ -87,11 +86,11 @@ class MenuTopoAlgorithmsCollection(object):
 
     def json(self):
 
-        confObj = odict()
+        confObj = {}
         for cat in self.topoAlgos:
-            confObj[cat.key] = odict()
+            confObj[cat.key] = {}
             for typ in self.topoAlgos[cat]:
-                confObj[cat.key][typ.key] = odict()
+                confObj[cat.key][typ.key] = {}
                 for alg in sorted(self.topoAlgos[cat][typ].values(), key=attrgetter('name')):
                     confObj[cat.key][typ.key][alg.name] = alg.json()
 

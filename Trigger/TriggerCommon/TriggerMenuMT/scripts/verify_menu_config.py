@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 '''
 Script for verifying menu configurations.
@@ -14,7 +14,6 @@ import os
 import sys
 import argparse
 
-from collections import OrderedDict as odict
 from AthenaCommon.Logging import logging
 from TriggerMenuMT.menu_config_tests import TriggerLevel, menu_tests
 
@@ -45,7 +44,7 @@ def load_and_verify(file_path, trigger_level):
         log.error("'{}' is not a JSON file".format(file_path))
     else:
         with open(file_path, "r") as config_file:
-            config = json.load(config_file, object_pairs_hook = odict)
+            config = json.load(config_file)
 
         return verify(config, trigger_level)
 

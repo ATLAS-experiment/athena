@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -24,14 +24,15 @@ def setupFilterMonitoring( flags, filterAlg ):
     filterAlg.MonTool = monTool
 
 
-def TriggerSummaryAlg( flags, name ):
+def TriggerSummaryAlg( flags, name, **kwargs ):
     monTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
     monTool.defineHistogram('TIME_SinceEventStart', path='EXPERT', type='TH1F',
                                    title='Time since beginning of event processing;time [ms]',
                                    xbins=100, xmin=0, xmax=3.5e3   )
 
     alg = CompFactory.TriggerSummaryAlg( name,
-                                         MonTool = monTool )
+                                         MonTool = monTool,
+                                         **kwargs )
     return alg
 
 
