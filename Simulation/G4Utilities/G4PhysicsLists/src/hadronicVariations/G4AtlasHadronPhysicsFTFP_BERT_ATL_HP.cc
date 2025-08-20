@@ -240,7 +240,7 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_HP::ConstructProcess()
 #endif
     pmanager->AddDiscreteProcess(capture);
   }
-  tpdata->xsNeutronCaptureXS = (G4NeutronCaptureXS*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronCaptureXS::Default_Name());
+  tpdata->xsNeutronCaptureXS = static_cast<G4NeutronCaptureXS*>(G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronCaptureXS::Default_Name()));
   capture->AddDataSet(tpdata->xsNeutronCaptureXS);
   capture->AddDataSet( new G4NeutronHPCaptureData );
   G4NeutronRadCapture* theNeutronRadCapture = new G4NeutronRadCapture(); 
