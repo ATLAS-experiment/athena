@@ -2,13 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cassert>
-#include <cmath>      /*ceil,sqrt*/
-#include <stdexcept>  /*runtime_error*/
-#include <string>
 
-#include <functional>
-
+#include "BkgStreamsCache.h"
 #include "StoreGate/StoreGateSvc.h" /*to print name() */
 #include "GaudiKernel/IEvtSelector.h"
 
@@ -22,7 +17,11 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaKernel/errorcheck.h"
 
-#include "BkgStreamsCache.h"
+
+#include <cassert>
+#include <cmath>      /*ceil,sqrt*/
+#include <stdexcept>  /*runtime_error*/
+
 
 BkgStreamsCache::BkgStreamsCache( const std::string& type,
                                   const std::string& name,

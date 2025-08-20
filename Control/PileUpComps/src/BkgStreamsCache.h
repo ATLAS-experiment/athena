@@ -96,7 +96,7 @@ private:
 
   typedef std::vector<PileUpStream> StreamVector;
   bool alreadyInUse(StreamVector::size_type iStream);
-  StreamVector::iterator m_cursor;
+  StreamVector::iterator m_cursor{};
   StreamVector m_streams;
   std::vector<bool> m_usedStreams;
   unsigned int m_nXings{0};
