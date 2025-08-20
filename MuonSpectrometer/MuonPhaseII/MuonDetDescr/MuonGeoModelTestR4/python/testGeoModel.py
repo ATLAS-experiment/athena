@@ -92,7 +92,11 @@ def GeoModelMmTestCfg(flags, name = "GeoModelMmTest", **kwargs):
 
 def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("TestActsSurface", False)
+    kwargs.setdefault("TestActsSurface", True)
+    kwargs.setdefault("plotTgc", flags.Detector.GeometryTGC)
+    kwargs.setdefault("plotStgc", flags.Detector.GeometrysTGC)
+    kwargs.setdefault("plotMm", flags.Detector.GeometryMM)
+    
     the_alg = CompFactory.MuonGMR4.NswGeoPlottingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -285,7 +289,7 @@ if __name__=="__main__":
                                         TestStations = [ch for ch in chambToTest if ch[0] == "M"],
                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"])) 
         else:
-
+            cfg.merge(NswGeoPlottingAlgCfg(flags))
             cfg.merge(GeoModelMmTestCfg(flags, 
                                         TestStations = [ch for ch in chambToTest if ch[0] == "M"],
                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"],

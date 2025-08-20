@@ -44,29 +44,29 @@ StatusCode NswGeoPlottingAlg::execute() {
       ATH_MSG_DEBUG("Skipping plotting of MM readout elements");
       break;
     }
-      ATH_MSG_INFO("plotting active areas for "<< m_idHelperSvc->toString(mm->identify()));
-      for (int gasGap = 1; gasGap <= 4; ++ gasGap) {
-          const IdentifierHash  hash = MmReadoutElement::createHash(gasGap, (mm->stationEta() > 0 ? 1 : 2) +
+    ATH_MSG_INFO("plotting active areas for "<< m_idHelperSvc->toString(mm->identify()));
+    for (int gasGap = 1; gasGap <= 4; ++ gasGap) {
+        const IdentifierHash  hash = MmReadoutElement::createHash(gasGap, (mm->stationEta() > 0 ? 1 : 2) +
                                                                             10 * mm->multilayer());
-          auto histo = m_mmActiveAreas[hash];
-          const StripDesign& design{mm->stripLayer(hash).design()};
-          const Acts::Surface& plane{mm->surface(mm->layerHash(hash))};
-          const double halfY = 2*design.longHalfHeight();
-          const double halfX = 2*design.halfWidth();
-          for (double x = -halfX; x <= halfX; x+= 1.*Gaudi::Units::mm){
-              for (double y = -halfY; y<= halfY; y+=1.*Gaudi::Units::mm) {
-                  const Amg::Vector3D locPos{x,y,0};
-                  if (!m_testActsSurf && !design.insideTrapezoid(locPos.block<2,1>(0,0))) {
-                      continue;
-                  } else if (m_testActsSurf && !plane.insideBounds(locPos.block<2,1>(0,0))) {
-                     continue;                     
-                  }
-                  
-                  const Amg::Vector3D globPos = plane.transform(gctx->context()) * locPos;
-                  histo->Fill(globPos.x(), globPos.y());
-              }
-          }
-      }
+        auto histo = m_mmActiveAreas[hash];
+        const StripDesign& design{mm->stripLayer(hash).design()};
+        const Acts::Surface& plane{mm->surface(mm->layerHash(hash))};
+        const double halfY = 2.*design.longHalfHeight();
+        const double halfX = 2.*design.halfWidth();
+        for (double x = -halfX; x <= halfX; x+= 1.*Gaudi::Units::mm){
+            for (double y = -halfY; y<= halfY; y+=1.*Gaudi::Units::mm) {
+                const Amg::Vector3D locPos{x,y,0};
+                if (!m_testActsSurf && !design.insideTrapezoid(locPos.block<2,1>(0,0))) {
+                    continue;
+                } else if (m_testActsSurf && !plane.insideBounds(locPos.block<2,1>(0,0))) {
+                    continue;                     
+                }
+                
+                const Amg::Vector3D globPos = plane.transform(gctx->context()) * locPos;
+                histo->Fill(globPos.x(), globPos.y());
+            }
+        }
+    }
   }
 
   std::vector<const sTgcReadoutElement*> sTgcs = m_detMgr->getAllsTgcReadoutElements();
