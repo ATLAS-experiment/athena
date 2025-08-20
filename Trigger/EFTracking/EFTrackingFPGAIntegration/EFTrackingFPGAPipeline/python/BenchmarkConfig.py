@@ -53,10 +53,6 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     
-    # Add FPGA Integration flags
-    from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
-    addFPGADataPrepFlags(flags)
-    
     flags.Detector.EnableCalo = False
     flags.FPGADataPrep.DoActs = True
     
