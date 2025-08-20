@@ -82,8 +82,7 @@ private:
     Gaudi::Property<std::string> m_UCCtriggerHELT25{this, "triggerUCCHELT25", "L1_ZDC_HELT25_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 25 TeV"};
     Gaudi::Property<std::string> m_UCCtriggerHELT35{this, "triggerUCCHELT35", "L1_ZDC_HELT35_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 35 TeV"};
     Gaudi::Property<std::string> m_UCCtriggerHELT50{this, "triggerUCCHELT50", "L1_ZDC_HELT50_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 50 TeV"};
-    
-    float m_timingCutsInjectorPulse [2][4][2] = {{{30, 38}, {30, 38}, {28, 38}, {30, 38}}, {{30, 38}, {30, 38}, {30, 38}, {30, 38}}}; // Timing cuts (array of dimension 2 * 4 * 2) for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream
+
     Gaudi::Property<unsigned int> m_nSecondsRejectStartofLBInjectorPulse {this, "NSecondsRejectStartofLBInjectorPulse", 3, "The number of seconds to reject at beginning of each LB in reco-amp-vs-input-voltage histograms in the injector pulse stream"};
     Gaudi::Property<float> m_minAmpRequiredHGInjectorPulse {this, "MinAmpRequiredHGInjectorPulse", 20, "HG Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
     Gaudi::Property<float> m_minAmpRequiredLGInjectorPulse {this, "MinAmpRequiredLGInjectorPulse", 20, "LG Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
