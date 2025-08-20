@@ -69,7 +69,7 @@ StatusCode LArRinj2Ntuple::stop() {
    return StatusCode::FAILURE;
  }
  else {
-   m_onlineId = (const LArOnlineID_Base*)ll;
+   m_onlineId = static_cast<const LArOnlineID_Base*>(ll);
    ATH_MSG_DEBUG(" Found the LAr cell LArOnlineID helper. ");
  }
    
