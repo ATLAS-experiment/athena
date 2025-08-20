@@ -650,7 +650,7 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
 
   if(m_SaveRootFile){
     for (int ii=0;ii<npl;ii++){
-      Cellmaps[ii].reset((TH2F*)m_LarIdTranslator->GetCaloPartitionLayerMap(ii));
+      Cellmaps[ii].reset(static_cast<TH2F*>(m_LarIdTranslator->GetCaloPartitionLayerMap(ii)));
       Cellmaps[ii]->GetXaxis()->SetTitle("#eta"); Cellmaps[ii]->GetYaxis()->SetTitle("#Phi"); 
       hname.Form("%s_PulseShape_%dsigma",m_LarIdTranslator->GetPartitonLayerName(ii),(int)nsigmaHits);
       Pulsemaps[ii].reset((TH2D*)NormPulse.Clone(hname));
@@ -1601,15 +1601,15 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
   TH2F** hmap_energy_cut = new TH2F*[nhists];
   TH2F** hmap_quality_cut = new TH2F*[nhists];
   for(int j=0;j<nhists;j++){
-    hmap_counts_all[j] = (TH2F*)m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_counts_all[j] = static_cast<TH2F*>(m_LarIdTranslator->GetCaloPartitionLayerMap(j));
     sprintf(hname,"counst_all_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_counts_all[j]->SetName(hname);
     //
-    hmap_energy_cut[j] = (TH2F*)m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_energy_cut[j] = static_cast<TH2F*>(m_LarIdTranslator->GetCaloPartitionLayerMap(j));
     sprintf(hname,"energy_cut_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_energy_cut[j]->SetName(hname);
     //
-    hmap_quality_cut[j] = (TH2F*)m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_quality_cut[j] = static_cast<TH2F*>(m_LarIdTranslator->GetCaloPartitionLayerMap(j));
     sprintf(hname,"quality_cut_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_quality_cut[j]->SetName(hname);
   }
