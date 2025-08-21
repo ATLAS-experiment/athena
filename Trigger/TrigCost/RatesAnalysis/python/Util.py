@@ -59,8 +59,8 @@ def toCSV(fileName, metadata, HLTTriggers, readL1=False):
           "%.4f" % trig.rateUnique,"%.4f" % trig.rateUniqueErr, ("%.4f" % trig.rateExpress if not isL1 else "-"), ("%.4f" % trig.rateExpressErr if not isL1 else "-"), \
           trig.prescale, (trig.expressPrescale if not isL1 else "-"), chain_id, "%.0f" % trig.activeRaw,"%.0f" % trig.passRaw,"%.4f" % trig.activeWeighted, \
           "%.4f" % (float(trig.activeWeighted)/float(trig.rateDenominator)),"%.4f" % passFrac_afterPS,"%.4f" % trig.passWeighted])
-      
-    
+
+
 
 def toJson(fileName, metadata, L1Triggers, HLTTriggers):
   import json
@@ -77,7 +77,9 @@ def toJson(fileName, metadata, L1Triggers, HLTTriggers):
 
   jsonDict = {}
   jsonDict['PredictionLumi'] = metadata['targetLumi']
-  jsonDict['n_evts'] = metadata['n_evts']
+  for k,v in metadata.items():
+    if k.startswith("n_evts"):
+      jsonDict[k] = v
   jsonDict['AtlasProject'] = metadata['AtlasProject']
   jsonDict['AtlasVersion'] = metadata['AtlasVersion']
   jsonDict['triggerMenuSetup'] = metadata['masterKey']
@@ -94,7 +96,6 @@ def toJson(fileName, metadata, L1Triggers, HLTTriggers):
     {'PredictionLumi' : metadata['targetLumi']},
     {'TargetMu' : metadata['targetMu']},
     {'RunNumber' : metadata['runNumber']},
-    {'NEvents' : metadata['n_evts']},
     {'Details' : metadata['details']},
     {'JIRA' : metadata['JIRA']},
     {'AMITag' : metadata['amiTag']},
@@ -105,6 +106,9 @@ def toJson(fileName, metadata, L1Triggers, HLTTriggers):
     {'AtlasProject' : metadata['AtlasProject']},
     {'AtlasVersion' : metadata['AtlasVersion']}
   ]
+  for k,v in metadata.items():
+    if k.startswith("n_evts"):
+      metajsonData+={jsonDict[k] : v} 
 
 
   metajsonDict = {}
@@ -113,6 +117,16 @@ def toJson(fileName, metadata, L1Triggers, HLTTriggers):
   
   with open('metadata.json', 'w') as outMetaFile:
     json.dump(obj=metajsonDict, fp=outMetaFile, indent=2, sort_keys=True)
+
+
+def toROOT(fileName, triggers):
+  mydict = {}
+  for trigger in triggers:
+    trigger.export(mydict)
+  from ROOT import TFile
+  with TFile.Open(fileName, 'RECREATE') as fout:
+    for key, scanDict in mydict.items():
+      fout.WriteObject(scanDict['rate'], f"{key}_rate")
 
 
 def getMetadata(inputFile):
@@ -136,6 +150,10 @@ def getMetadata(inputFile):
 
   metadata['AtlasProject'] = str(metatree.AtlasProject)
   metadata['AtlasVersion'] = str(metatree.AtlasVersion)
+
+  metadata['bunchCrossingRate'] = metatree.bunchCrossingRate
+
+  metadata['multiSliceDiJet'] = metatree.multiSliceDiJet
 
   prescales = {}
   lowers = {}
@@ -175,7 +193,7 @@ def getMetadata(inputFile):
   return metadata
 
 
-def populateTriggers(inputFile, metadata, globalGroup, filter):
+def populateTriggers(inputFile, metadata, globalGroupDict, filter):
   # Fix groups' names that are also not GLOBAL
   def getTriggerName(name, filter):
     if "Group" in filter and "GLOBAL" not in name:
@@ -190,15 +208,40 @@ def populateTriggers(inputFile, metadata, globalGroup, filter):
       for subdirKey in key.ReadObj().GetListOfKeys():
         if filter not in subdirKey.GetName(): continue
         for triggerKey in subdirKey.ReadObj().GetListOfKeys():
-            for hist in triggerKey.ReadObj().GetListOfKeys():
-              if hist.GetName() == 'data':
-                try:
-                  triggerList.append(RatesTrigger(getTriggerName(triggerKey.GetName(), filter), metadata, hist.ReadObj(), globalGroup))
-                except ValueError:
-                  log.error("Cannot create a new trigger for {0}".format(triggerKey.GetName()))
-                  return []
+            numeratorDict = slice_dictionary(triggerKey.ReadObj(),"data")
+            for suffix, data in numeratorDict.items():
+              try:
+                triggerList.append(RatesTrigger(getTriggerName(triggerKey.GetName(), filter)+suffix, metadata, data, globalGroupDict[suffix], suffix))
+              except ValueError:
+                log.error("Cannot create a new trigger for {0}".format(triggerKey.GetName()))
+                return []
   return triggerList
 
+
+def slice_dictionary(directory, object_key):
+  slices_dict = {}
+  for hist in directory.GetListOfKeys():
+    if str(hist.GetName()).startswith(object_key):
+      try:
+        slice_index = "_"+str(hist.GetName()).split("_")[1]
+      except IndexError:
+        slice_index = ""
+      slices_dict[slice_index] = hist.ReadObj()
+  return slices_dict
+
+def populateScanTriggers(inputFile, metadata):
+  from .RatesScanTrigger import RatesScanTrigger
+  triggerList = []
+  for key in inputFile.GetListOfKeys():
+    if key.GetName() == 'ScanTriggers':
+      for scanName in key.ReadObj().GetListOfKeys():
+          numerator_dict = slice_dictionary(scanName.ReadObj(), "rateVsThreshold")
+          if len(numerator_dict) == 0:
+            log.error(f"Empty dictionary in populateScanTriggers for scan {scanName}")
+            continue
+          else:
+            triggerList.append(RatesScanTrigger(scanName.GetName(), metadata, numerator_dict))
+  return triggerList
 
 def getGlobalGroup(inputFile, filter):
   for key in inputFile.GetListOfKeys():
@@ -207,9 +250,8 @@ def getGlobalGroup(inputFile, filter):
         if not subdirKey.GetName() == "Rate_Group_HLT" : pass
         for globalsKey in subdirKey.ReadObj().GetListOfKeys():
           if filter in globalsKey.GetName():
-            for hist in globalsKey.ReadObj().GetListOfKeys():
-              if hist.GetName() == 'data':
-                return hist.ReadObj()
+            groupsDict = slice_dictionary(globalsKey.ReadObj(), "data")
+            return groupsDict
 
 
 def readDBFromAMI(amiTag):
