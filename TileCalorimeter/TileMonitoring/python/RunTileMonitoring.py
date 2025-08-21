@@ -63,7 +63,7 @@ def _configFlagsFromPartition(flags, partition, log):
 
 
 if __name__=='__main__':
-    import sys,os
+    import sys, os
 
     def _addBoolArgument(parser, argument, dest=None, help=''):
         group = parser.add_mutually_exclusive_group()
@@ -133,8 +133,8 @@ if __name__=='__main__':
         parser.set_defaults(cells=False, towers=False, clusters=False, muid=False, muonfit=False, mbts=False,
                             rod=False, tmdb=False, tmdbDigits=False, tmdbRawChannels=False)
     elif not any([args.laser, args.cis, args.noise, args.mbts]):
-        mbts = False if (args.stateless and args.useMbtsTrigger) else True
-        parser.set_defaults(cells=True, towers=True, clusters=True, muid=True, muonfit=True, mbts=mbts,
+        mbts = not (args.stateless and args.useMbtsTrigger)
+        parser.set_defaults(cells=True, towers=True, clusters=True, muid=True, muonfit=None, mbts=mbts,
                             rod=True, tmdb=True, tmdbDigits=True, tmdbRawChannels=True)
     elif args.noise:
         parser.set_defaults(digiNoise=True, rawChanNoise=True)
@@ -293,6 +293,9 @@ if __name__=='__main__':
                                      type_names=typeNames) )
 
     if args.stateless:
+        jobs = ['cosmics', 'mbts', 'noise', 'laser', 'cis']
+        bufferSize = 200 if any(job in args.publishName for job in jobs) else 500
+
         bsEmonInputSvc = cfg.getService( "ByteStreamInputSvc" )
         bsEmonInputSvc.Partition = args.partition
         bsEmonInputSvc.Key = args.key
@@ -312,15 +315,15 @@ if __name__=='__main__':
         bsEmonInputSvc.StreamLogic = args.streamLogic
         bsEmonInputSvc.GroupName = args.groupName
         bsEmonInputSvc.ProcessCorruptedEvents = True
-        bsEmonInputSvc.BufferSize = 200
+        bsEmonInputSvc.BufferSize = bufferSize
+
+        if (args.threads):
+            cfg.getEventAlgo('SGInputLoader').ExtraOutputs=[("xAOD::EventInfo","StoreGateSvc+EventInfo"),("xAOD::EventAuxInfo","StoreGateSvc+EventInfoAux.")]
 
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-    cfg.merge( TileRawChannelMakerCfg(flags) )
-    if args.threads and (args.threads > 1):
-        rawChMaker = cfg.getEventAlgo('TileRChMaker')
-        rawChMaker.Cardinality = args.threads
+    cfg.merge( TileRawChannelMakerCfg(flags, Cardinality=args.threads if args.threads else 0) )
 
     l1Triggers = ['bit0_RNDM', 'bit1_ZeroBias', 'bit2_L1Cal', 'bit3_Muon',
                   'bit4_RPC', 'bit5_FTK', 'bit6_CTP', 'bit7_Calib', 'AnyPhysTrig']
@@ -346,7 +349,8 @@ if __name__=='__main__':
         from TileMonitoring.TileTMDBMonitorAlgorithm import TileTMDBMonitoringConfig
         cfg.merge(TileTMDBMonitoringConfig(flags))
 
-    if any([args.cells, args.towers, args.clusters, args.mbts, args.muid, args.muonfit, flags.Output.doJiveXML]):
+    muonfit = flags.Beam.Type is not BeamType.Collisions if args.muonfit is None else args.muonfit
+    if any([args.cells, args.towers, args.clusters, args.mbts, args.muid, muonfit, flags.Output.doJiveXML]):
         from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
         cfg.merge( TileCellMakerCfg(flags) )
 
@@ -374,9 +378,9 @@ if __name__=='__main__':
         from TileMonitoring.TileMuIdMonitorAlgorithm import TileMuIdMonitoringConfig
         cfg.merge(TileMuIdMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers))
 
-    if args.muonfit:
+    if muonfit:
         from TileCosmicAlgs.TileMuonFitterConfig import TileMuonFitterCfg
-        cfg.merge(TileMuonFitterCfg(flags))
+        cfg.merge(TileMuonFitterCfg(flags, Cardinality=args.threads if args.threads else 0))
 
         from TileMonitoring.TileMuonFitMonitorAlgorithm import TileMuonFitMonitoringConfig
         cfg.merge(TileMuonFitMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers))
