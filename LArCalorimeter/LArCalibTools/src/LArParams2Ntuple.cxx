@@ -621,7 +621,8 @@ StatusCode LArParams2Ntuple::scanCalibChannels( const DATA*& data_object ) {
 
     for ( unsigned ichan=0 ; ichan<nchan ; ichan++ ) { // loop through channels in a CB
       if ( !m_isSC ) {
-      HWIdentifier chid =  (static_cast<LArOnlineID*>(m_onlineId))->calib_channel_Id(cb_HWid , ichan) ;
+      const LArOnlineID* onlineId = static_cast<const LArOnlineID*>(m_onlineId);
+      HWIdentifier chid = onlineId->calib_channel_Id(cb_HWid , ichan);
       ATH_MSG_VERBOSE("    ... calib channel " << chid);
       if ( LArParamsProperties::isValid( data_object->get(chid) ) ) {
 	for ( unsigned g=0 ; g<3 ; g++ ) {
