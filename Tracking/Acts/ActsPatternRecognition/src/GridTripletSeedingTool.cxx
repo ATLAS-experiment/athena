@@ -190,7 +190,7 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_gridCfg.maxPhiBins = m_maxPhiBins;
   m_gridCfg.zBinEdges = m_zBinEdges;
   m_gridCfg.rBinEdges = m_rBinEdges;
-  m_gridCfg.bFieldInZ = 0;  // will result in max phi bins
+  m_gridCfg.bFieldInZ = 0;  // will be set later
   m_gridCfg.bottomBinFinder = Acts::GridBinFinder<3ul>(
       m_numPhiNeighbors.value(), m_zBinNeighborsBottom.value(),
       m_rBinNeighborsBottom.value());
@@ -201,10 +201,11 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_gridCfg.navigation[1ul] = m_zBinsCustomLooping;
   m_gridCfg.navigation[2ul] = m_rBinsCustomLooping;
 
+  m_bottomDoubletFinderCfg.spacePointsSortedByRadius = true;
   m_bottomDoubletFinderCfg.candidateDirection = Acts::Direction::Backward();
   m_bottomDoubletFinderCfg.deltaRMin = m_deltaRMinBottomSP;
   m_bottomDoubletFinderCfg.deltaRMax = m_deltaRMaxBottomSP;
-  m_bottomDoubletFinderCfg.deltaZMin = -std::numeric_limits<float>::infinity();
+  m_bottomDoubletFinderCfg.deltaZMin = -m_deltaZMax;
   m_bottomDoubletFinderCfg.deltaZMax = m_deltaZMax;
   m_bottomDoubletFinderCfg.impactMax = m_impactMax;
   m_bottomDoubletFinderCfg.interactionPointCut = m_interactionPointCut;
@@ -218,20 +219,21 @@ StatusCode GridTripletSeedingTool::initialize() {
         .connect<&ActsTrk::GridTripletSeedingTool::doubletSelectionFunction>(
             this);
   }
-  m_bottomDoubletFinderCfg.spacePointsSortedByRadius = true;
 
   m_topDoubletFinderCfg = m_bottomDoubletFinderCfg;  // copy the bottom cuts
   m_topDoubletFinderCfg.candidateDirection = Acts::Direction::Forward();
   m_topDoubletFinderCfg.deltaRMin = m_deltaRMinTopSP;
   m_topDoubletFinderCfg.deltaRMax = m_deltaRMaxTopSP;
 
-  m_tripletFinderCfg.minPt = m_minPt.value();
-  m_tripletFinderCfg.sigmaScattering = m_sigmaScattering.value();
-  m_tripletFinderCfg.radLengthPerSeed = m_radLengthPerSeed.value();
-  m_tripletFinderCfg.maxPtScattering = m_maxPtScattering.value();
-  m_tripletFinderCfg.impactMax = m_impactMax.value();
+  m_tripletFinderCfg.useStripInfo = m_useDetailedDoubleMeasurementInfo;
+  m_tripletFinderCfg.sortedByCotTheta = !m_useDetailedDoubleMeasurementInfo;
+  m_tripletFinderCfg.minPt = m_minPt;
+  m_tripletFinderCfg.sigmaScattering = m_sigmaScattering;
+  m_tripletFinderCfg.radLengthPerSeed = m_radLengthPerSeed;
+  m_tripletFinderCfg.maxPtScattering = m_maxPtScattering;
+  m_tripletFinderCfg.impactMax = m_impactMax;
   m_tripletFinderCfg.helixCutTolerance = 1.;
-  m_tripletFinderCfg.toleranceParam = m_toleranceParam.value();
+  m_tripletFinderCfg.toleranceParam = m_toleranceParam;
 
   m_filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
   m_filterCfg.deltaRMin = m_deltaRMin;
@@ -345,7 +347,7 @@ bool GridTripletSeedingTool::doubletSelectionFunction(
   static constexpr float cotThetaEta360 = 18.2855;
 
   float absCotTheta = std::abs(cotTheta);
-  if (isBottomCandidate && other.r() < m_expCutrMin &&
+  if (isBottomCandidate && other.zr()[1] < m_expCutrMin &&
       absCotTheta > cotThetaEta120 && absCotTheta < cotThetaEta360) {
     return false;
   }
@@ -356,7 +358,7 @@ bool GridTripletSeedingTool::doubletSelectionFunction(
 std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
     const Acts::Experimental::ConstSpacePointProxy2& spM,
     const Acts::Range1D<float>& rMiddleSpRange) const {
-  if (m_useVariableMiddleSPRange.value()) {
+  if (m_useVariableMiddleSPRange) {
     return {rMiddleSpRange.min(), rMiddleSpRange.max()};
   }
   if (m_rRangeMiddleSP.empty()) {
@@ -365,12 +367,12 @@ std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
   }
 
   // get zBin position of the middle SP
-  auto pVal = std::lower_bound(m_zBinEdges.value().begin(),
-                               m_zBinEdges.value().end(), spM.z());
-  int zBin = std::distance(m_zBinEdges.value().begin(), pVal);
+  auto pVal =
+      std::lower_bound(m_zBinEdges.begin(), m_zBinEdges.end(), spM.zr()[0]);
+  int zBin = std::distance(m_zBinEdges.begin(), pVal);
   // protects against zM at the limit of zBinEdges
   zBin == 0 ? zBin : --zBin;
-  return {m_rRangeMiddleSP.value()[zBin][0], m_rRangeMiddleSP.value()[zBin][1]};
+  return {m_rRangeMiddleSP[zBin][0], m_rRangeMiddleSP[zBin][1]};
 }
 
 StatusCode GridTripletSeedingTool::createSeeds2(
@@ -426,12 +428,10 @@ StatusCode GridTripletSeedingTool::createSeeds2(
   Acts::Experimental::SpacePointContainer2 selectedSpacePoints;
   selectedSpacePoints.createColumns(
       Acts::Experimental::SpacePointColumns::SourceLinks |
-      Acts::Experimental::SpacePointColumns::X |
-      Acts::Experimental::SpacePointColumns::Y |
-      Acts::Experimental::SpacePointColumns::Z |
-      Acts::Experimental::SpacePointColumns::R |
-      Acts::Experimental::SpacePointColumns::VarianceR |
-      Acts::Experimental::SpacePointColumns::VarianceZ);
+      Acts::Experimental::SpacePointColumns::XY |
+      Acts::Experimental::SpacePointColumns::ZR |
+      Acts::Experimental::SpacePointColumns::VarianceZ |
+      Acts::Experimental::SpacePointColumns::VarianceR);
   if (m_useDetailedDoubleMeasurementInfo) {
     selectedSpacePoints.createColumns(
         Acts::Experimental::SpacePointColumns::Strip);
@@ -449,12 +449,12 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       auto newSp = selectedSpacePoints.createSpacePoint();
       newSp.assignSourceLinks(
           std::array<Acts::SourceLink, 1>{Acts::SourceLink(sp)});
-      newSp.x() = static_cast<float>(sp->x());
-      newSp.y() = static_cast<float>(sp->y());
-      newSp.z() = static_cast<float>(sp->z());
-      newSp.r() = selectedSpacePointsR[spIndex];
-      newSp.varianceR() = static_cast<float>(sp->varianceR());
+      newSp.xy() = std::array<float, 2>{static_cast<float>(sp->x()),
+                                        static_cast<float>(sp->y())};
+      newSp.zr() = std::array<float, 2>{static_cast<float>(sp->z()),
+                                        selectedSpacePointsR[spIndex]};
       newSp.varianceZ() = static_cast<float>(sp->varianceZ());
+      newSp.varianceR() = static_cast<float>(sp->varianceR());
       if (m_useDetailedDoubleMeasurementInfo) {
         newSp.topStripVector() =
             sp->topHalfStripLength() * sp->topStripDirection();
@@ -475,8 +475,7 @@ StatusCode GridTripletSeedingTool::createSeeds2(
   selectedSpacePointsR = {};
 
   ACTS_VERBOSE("Number of space points after selection "
-               << selectedSpacePoints.size() << " out of "
-               << totalSpacePoints);
+               << selectedSpacePoints.size() << " out of " << totalSpacePoints);
 
   // Compute radius range. We rely on the fact the grid is storing the proxies
   // with a sorting in the radius
@@ -490,8 +489,8 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       }
       auto first = selectedSpacePoints[range.first];
       auto last = selectedSpacePoints[range.second - 1];
-      minRange = std::min(first.r(), minRange);
-      maxRange = std::max(last.r(), maxRange);
+      minRange = std::min(first.zr()[1], minRange);
+      maxRange = std::max(last.zr()[1], maxRange);
     }
     return {minRange, maxRange};
   }();
@@ -508,8 +507,8 @@ StatusCode GridTripletSeedingTool::createSeeds2(
 
   // variable middle SP radial region of interest
   const Acts::Range1D<float> rMiddleSpRange(
-      std::floor(rRange.min() / 2) * 2 + m_deltaRMiddleMinSPRange.value(),
-      std::floor(rRange.max() / 2) * 2 - m_deltaRMiddleMaxSPRange.value());
+      std::floor(rRange.min() / 2) * 2 + m_deltaRMiddleMinSPRange,
+      std::floor(rRange.max() / 2) * 2 - m_deltaRMiddleMaxSPRange);
 
   Acts::Experimental::BroadTripletSeedFilter::State filterState;
   Acts::Experimental::BroadTripletSeedFilter::Cache filterCache;
