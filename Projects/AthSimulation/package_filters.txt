@@ -76,7 +76,6 @@
 + Database/AthenaPOOL/OutputStreamAthenaPool
 + Database/AthenaPOOL/PoolSvc
 + Database/AthenaPOOL/RootConversions
-+ Database/AthenaPOOL/RootFileTools
 + Database/AthenaPOOL/StlAthenaPoolCnv
 + Database/AthenaRoot/AthenaRootComps
 + Database/AthenaRoot/AthenaRootKernel
