@@ -205,7 +205,6 @@
 + Database/AthenaRoot/.*
 + Database/ConnectionManagement/.*
 - Database/AthenaPOOL/AthenaPoolExample.*
-- Database/AthenaPOOL/.*Tools
 + Database/AthenaPOOL/.*
 + Database/DBLock
 + Database/IOVDb.*
