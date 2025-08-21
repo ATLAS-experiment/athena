@@ -11,6 +11,7 @@
 #include "SGTools/TestStore.h"
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect.h"
+#include "TestTools/expect_exception.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
 #include "CxxUtils/checker_macros.h"
@@ -213,6 +214,30 @@ int main ATLAS_NOT_THREAD_SAFE () {
   VALUE ( d5self.index() ) EXPECTED ( d6seed.index() );
   VALUE ( d5self.key()   ) EXPECTED ( d6seed.key()   );
 
+  // Test chain/leg helper methods
+  HLT::Identifier id = createLegName("HLT_mu50_L1MU20", 2);
+  VALUE ( id.name() ) EXPECTED ( "leg002_HLT_mu50_L1MU20" );
+
+  HLT::Identifier legId = getIDFromLeg(id);
+  VALUE ( legId.name() ) EXPECTED ( "HLT_mu50_L1MU20" );
+
+  EXPECT_EXCEPTION( std::runtime_error, getIDFromLeg(HLT::Identifier("foo")) );
+
+  VALUE ( getIndexFromLeg(id) ) EXPECTED ( 2 );
+  VALUE ( getIndexFromLeg("HLT_mu50_L1MU20") ) EXPECTED ( 0 );
+  VALUE ( getIndexFromLeg("foo") ) EXPECTED ( -1 );
+
+  const auto& [name, index] = getNameAndIndexFromLeg("leg002_HLT_mu50_L1MU20");
+  VALUE ( name ) EXPECTED ( "HLT_mu50_L1MU20" );
+  VALUE ( index ) EXPECTED ( 2 );
+
+  EXPECT_EXCEPTION( std::runtime_error, getNameAndIndexFromLeg("foo") );
+
+  VALUE ( isLegId("HLT_mu50_L1MU20") ) EXPECTED ( false );
+  VALUE ( isChainId("HLT_mu50_L1MU20") ) EXPECTED ( true );
+
+  VALUE ( isLegId("leg002_HLT_mu50_L1MU20") ) EXPECTED ( true );
+  VALUE ( isChainId("leg002_HLT_mu50_L1MU20") ) EXPECTED ( false );
+
   return 0;
-  
 }
