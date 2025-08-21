@@ -27,14 +27,14 @@ public:
     using ClusterAuxContainer = xAOD::PixelClusterAuxContainer;
 
     struct Cell {
-      Cell(int row, int col, int tot, int lvl1, Identifier id):
+      Cell(int row, int col, int tot, int lvl1, Identifier::value_type id):
         ROW(row), COL(col), TOT(tot), LVL1(lvl1), ID(id) {};
       
       int           ROW;
       int           COL;
       int           TOT;
       int           LVL1;
-      Identifier    ID ;
+      Identifier::value_type    ID ;
     };
 
     using CellCollection = std::vector<Cell>;
