@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRampBuilder.h"
@@ -28,7 +28,7 @@ StatusCode LArRampBuilder::initialize()
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineHelper = (const LArOnlineID_Base*)ll;
+      m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG("Found the LArOnlineID helper");
     }
     
@@ -40,7 +40,7 @@ StatusCode LArRampBuilder::initialize()
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineHelper = (const LArOnlineID_Base*)ll;
+      m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     }
     

@@ -79,7 +79,7 @@ StatusCode LArOFCAlg::initialize(){
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineID = (const LArOnlineID_Base*)ll;
+      m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG("Found the LArOnlineID helper");
     }
   } else { // m_isSC
@@ -90,7 +90,7 @@ StatusCode LArOFCAlg::initialize(){
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineID = (const LArOnlineID_Base*)ll;
+      m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     }
   }
