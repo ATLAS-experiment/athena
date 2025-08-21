@@ -5,7 +5,6 @@
 Utility module for dataquality specific things
 """
 
-from __future__ import with_statement
 
 from sys import stdout
 

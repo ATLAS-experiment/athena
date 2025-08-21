@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 import eformat
 import libpyevent_storage as EventStorage
 import sys

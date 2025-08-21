@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 HTCondorJobRunner is a JobRunner for running jobs with the HTCondor batch system.

@@ -14,7 +14,6 @@
 # sg-dump aod1.pool aod2.pool -o aods.ascii
 # @endcode
 
-from __future__ import with_statement
 import sys
 import os
 

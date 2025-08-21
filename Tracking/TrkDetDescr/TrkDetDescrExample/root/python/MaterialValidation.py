@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 # encoding: utf-8
-from __future__ import print_function
 
 """
 MaterialValidation.py

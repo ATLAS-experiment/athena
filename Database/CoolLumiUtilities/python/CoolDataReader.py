@@ -24,7 +24,6 @@
 # The CoolDataReader uses the LumiDBHandler internally to cache multiple CoolConnections
 #
 
-from __future__ import print_function
 from PyCool import cool
 
 # Get our global DB handler object

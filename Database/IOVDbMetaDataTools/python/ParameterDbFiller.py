@@ -5,7 +5,6 @@
 #
 #
 
-from __future__ import print_function
 
 __version__ = "$Id: ParameterDbFiller.py,v 1.3 2008-11-13 12:25:23 schaffer Exp $"
 __author__  = "RD Schaffer <R.D.Schaffer@cern.ch>"

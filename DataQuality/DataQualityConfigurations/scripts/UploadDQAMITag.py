@@ -13,7 +13,6 @@
 #            / collisions_*.hcfg
 #            / heavyions_*.hcfg
 
-from __future__ import print_function
 
 import os
 

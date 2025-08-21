@@ -2,7 +2,6 @@
 
 # Copyright (C) 2020-2020 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 Plot beamspot properties vs mu

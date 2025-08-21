@@ -9,7 +9,6 @@
 """
 This module contains tools to write a DQConfiguration in han format
 """
-from __future__ import print_function
 
 import DQHanConfMaker
 from DQConfMakerBase.Helpers import BaseException, toList

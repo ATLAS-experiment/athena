@@ -10,7 +10,6 @@
 # Created: Oct 6, 2009
 # ----------------------------------------------------------------
 #
-from __future__ import print_function
 import sys, time
 from CoolRunQuery.utils.AtlRunQueryUtils  import prettyNumber, durationInSeconds, filesize, importroot
 from CoolRunQuery.utils.AtlRunQueryLookup import DQChannelDict, DQSuperGroupsDict, DQGroupDict, DQChannels

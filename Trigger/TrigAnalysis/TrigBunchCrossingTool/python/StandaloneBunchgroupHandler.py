@@ -10,8 +10,6 @@
 # BunchgroupHandler - utility tool to access bunch-group information from COOL
 #
 
-from __future__ import print_function
-from builtins import range
 from builtins import object
 import sys
 

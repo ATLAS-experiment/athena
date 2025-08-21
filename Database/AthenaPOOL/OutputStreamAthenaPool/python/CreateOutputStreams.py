@@ -5,7 +5,6 @@
 ## @author Peter van Gemmeren <gemmeren@bnl.gov>
 ###############################################################
 
-from __future__ import print_function
 
 from AthenaCommon import CfgMgr
 from AthenaCommon.AppMgr import ServiceMgr as svcMgr

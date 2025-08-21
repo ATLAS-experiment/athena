@@ -9,7 +9,6 @@ Transate arbitrary root file into a han config file
 Adapted for physics validation 14 May 2014
 """
 
-from __future__ import print_function
 
 from DQConfMakerBase.DQElements import DQRegion, DQReference, DQAlgorithm, DQAlgorithmParameter
 from DQConfMakerBase.Helpers import make_thresholds

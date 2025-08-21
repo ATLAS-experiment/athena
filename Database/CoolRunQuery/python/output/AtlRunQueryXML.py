@@ -14,7 +14,6 @@
 # XML making
 # ---------------------------------------------------------------------------------------------------
 
-from __future__ import with_statement
 from CoolRunQuery.utils.AtlRunQueryTimer import timer
 
 import datetime, sys

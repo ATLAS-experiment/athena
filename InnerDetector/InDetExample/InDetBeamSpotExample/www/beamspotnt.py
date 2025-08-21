@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 beamspotnt is a command line utility for beam spot ntuples.

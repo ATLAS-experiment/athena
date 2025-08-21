@@ -6,7 +6,6 @@
 # Purpose: Dump the offsets of fields in a structure.
 #
 
-from __future__ import print_function
 import gdb
 
 class Offsets(gdb.Command):

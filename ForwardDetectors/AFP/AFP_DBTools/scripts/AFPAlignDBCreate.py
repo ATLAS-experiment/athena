@@ -15,7 +15,6 @@
 #        3. check "testAFPDB.py" for more testing
 
 
-from __future__ import print_function
 
 import sys, json, copy
 from CoolConvUtilities import AtlCoolLib

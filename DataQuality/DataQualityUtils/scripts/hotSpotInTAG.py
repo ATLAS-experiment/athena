@@ -18,7 +18,6 @@
 #  -n, --noplot          Do not plot LB map
 # Author : Benjamin Trocme (LPSC Grenoble) / Summer 2012, updated in 2015
 
-from __future__ import print_function
 
 import sys
 from math import fabs

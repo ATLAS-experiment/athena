@@ -8,7 +8,6 @@ Script listing and counting Athena messages between two points in a log file,
 typically between start and end of event loop.
 '''
 
-from __future__ import print_function
 import sys
 import os
 import re

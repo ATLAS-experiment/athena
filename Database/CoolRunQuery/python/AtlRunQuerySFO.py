@@ -100,7 +100,6 @@
 # (inclusive/exclusive, late, ...)
 #  
 
-from __future__ import with_statement, print_function
 from CoolRunQuery.utils.AtlRunQueryCache import Cache
 from CoolRunQuery.AtlRunQueryRun import Run
 

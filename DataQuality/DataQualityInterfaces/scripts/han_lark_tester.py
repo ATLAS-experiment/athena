@@ -3,7 +3,6 @@
 
 # More detailed syntax checking for han files
 
-from __future__ import print_function
 
 import lark, sys
 from AthenaCommon.Utils.unixtools import find_datafile
