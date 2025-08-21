@@ -36,7 +36,7 @@ StatusCode LArPhysWaveFromStdNtuple::stop()
   } else {
      const LArOnlineID* onltmp = nullptr;
      ATH_CHECK( detStore()->retrieve(onltmp, "LArOnlineID") );
-     onlineHelper = (const LArOnlineID_Base*) onltmp;
+     onlineHelper = static_cast<const LArOnlineID_Base*> (onltmp);
   }
 
   TChain* outfit = new TChain(m_ntuple_name.value().c_str());

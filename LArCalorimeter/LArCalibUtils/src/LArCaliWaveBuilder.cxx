@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArCaliWaveBuilder.h"
@@ -96,7 +96,7 @@ StatusCode LArCaliWaveBuilder::initialize()
   } else { // m_isSC
     const LArOnlineID* ll;
     ATH_CHECK( detStore()->retrieve(ll, "LArOnlineID") );
-    m_onlineID = (const LArOnlineID_Base*)ll;
+    m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
   }
 

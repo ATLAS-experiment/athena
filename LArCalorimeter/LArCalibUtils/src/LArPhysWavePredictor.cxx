@@ -127,7 +127,7 @@ StatusCode LArPhysWavePredictor::initialize()
   if ( m_isSC ) {
     const LArOnline_SuperCellID* ll;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnline_SuperCellID"));
-    m_onlineHelper = (const LArOnlineID_Base*)ll;
+    m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG("Found the LArOnlineID helper");
     const CaloCell_SuperCell_ID* scid;
     ATH_CHECK(detStore()->retrieve(scid, "CaloCell_SuperCell_ID" ));
@@ -136,11 +136,11 @@ StatusCode LArPhysWavePredictor::initialize()
   } else { // m_isSC
     const LArOnlineID* ll;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnlineID") );
-    m_onlineHelper = (const LArOnlineID_Base*)ll;
+    m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
      const CaloCell_ID* cid;
     ATH_CHECK(detStore()->retrieve(cid, "CaloCell_ID" ));
-    m_caloCellId= (const CaloCell_Base_ID*)cid;
+    m_caloCellId= static_cast<const CaloCell_Base_ID*>(cid);
   }
 
   ATH_CHECK( m_BCKey.initialize() );
