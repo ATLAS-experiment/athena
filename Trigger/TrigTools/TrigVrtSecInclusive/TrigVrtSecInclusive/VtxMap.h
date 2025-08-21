@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGTOOLS_TRIG_VSI_VTXMAP
 #define TRIGTOOLS_TRIG_VSI_VTXMAP
@@ -15,15 +15,13 @@
 #include "TrigVrtSecInclusive/IWrkVrt.h"
 #include "TrigVrtSecInclusive/Coordinate.h"
 
-#include "TMath.h"
 #include "TVector3.h"
 #include "TH3D.h"
 
-#include <iostream>
-#include <deque>
 #include <unordered_set>
 #include <vector>
-#include <functional>
+#include <memory>
+#include <type_traits>
 
 namespace TrigVSI{
 
@@ -67,10 +65,10 @@ class VtxMap {
             *
             *  ID and point can't be configured after construction.
             */
-            Cell(size_t id, KDPoint<double, 3> p, std::vector<const WrkVrt*>&   v) : VtxPack<WrkVrt>(v), m_id(id), m_pos(p) {};
-            Cell(size_t id, KDPoint<double, 3> p, std::vector<const WrkVrt*>&&  v) : VtxPack<WrkVrt>(v), m_id(id), m_pos(p) {};
-            Cell(size_t id, KDPoint<double, 3> p, const WrkVrt* vtx_ptr)   : VtxPack<WrkVrt>(  std::vector<const WrkVrt*>{vtx_ptr} ), m_id(id), m_pos(p) {};
-            Cell(size_t id, KDPoint<double, 3> p) : m_id(id), m_pos(p) {};
+            Cell(size_t id, const KDPoint<double, 3> & p, std::vector<const WrkVrt*>&   v) : VtxPack<WrkVrt>(v), m_id(id), m_pos(p) {};
+            Cell(size_t id, const KDPoint<double, 3> & p, std::vector<const WrkVrt*>&&  v) : VtxPack<WrkVrt>(v), m_id(id), m_pos(p) {};
+            Cell(size_t id, const KDPoint<double, 3> & p, const WrkVrt* vtx_ptr)   : VtxPack<WrkVrt>(  std::vector<const WrkVrt*>{vtx_ptr} ), m_id(id), m_pos(p) {};
+            Cell(size_t id, const KDPoint<double, 3> & p) : m_id(id), m_pos(p) {};
             Cell(){};
 
             inline int  getId(){ return m_id; };
@@ -136,7 +134,7 @@ class VtxMap {
             inline double x1() const { return m_posAvr.at(0); };
             inline double x2() const { return m_posAvr.at(1); };
             inline double x3() const { return m_posAvr.at(2); };
-            inline KDPoint<double,3> PosCoord() const { return m_posAvr; };
+            inline const KDPoint<double,3> & PosCoord() const { return m_posAvr; };
             /// @}
 
             /// @name Position in cartesian coordinate
