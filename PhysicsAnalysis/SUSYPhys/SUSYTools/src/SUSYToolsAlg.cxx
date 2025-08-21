@@ -81,14 +81,13 @@ SUSYToolsAlg::SUSYToolsAlg(const std::string& name,
   , m_tauTruthMatchingTool("TauAnalysisTools::TauTruthMatchingTool/TauTruthMatchingTool")
   , m_Nevts(0)
   , m_kernel("StreamDAOD")
-  , m_configFile("SUSYTools/SUSYTools_Default.conf")
 {
 
   declareProperty( "DoSyst",      m_doSyst = false );
   declareProperty( "GRLFiles", m_GRLFiles );
   declareProperty( "maxEvts", m_maxEvts = -999 );
   declareProperty( "LumiBlockFilter", m_lbfilter = 90 );
-
+  declareProperty( "ConfigFile", m_configFile = "SUSYTools/SUSYTools_Default.conf" );
 
   // asg Tool Handles must be dealt with differently
   m_tauTruthMatchingTool.declarePropertyFor( this, "TauTruthMatchingTool", "The TTMT" );
@@ -987,7 +986,7 @@ StatusCode SUSYToolsAlg::execute() {
           ATH_CHECK( m_SUSYTools->GetJetsSyst(*jets_nominal, jets_syst, jets_syst_aux, true, m_isPHYSLITE?"AnalysisJets":"") );
           jets = jets_syst;
         }
-        if (m_slices["fjet"]) {
+        if (m_slices["fjet"] and doFatJets) {
           ATH_MSG_DEBUG("Get systematics-varied fatjets");
           xAOD::JetContainer* fatjets_syst(0);
           xAOD::ShallowAuxContainer* fatjets_syst_aux(0);
