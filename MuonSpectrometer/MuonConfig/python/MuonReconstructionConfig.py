@@ -70,15 +70,15 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["Muon::MdtPrepDataContainer#MDT_DriftCircles"]
 
     if flags.Muon.writexAODPRD:
-        esd_items += ["xAOD::MdtDriftCircleContainer#*", "xAOD::MdtDriftCircleAuxContainer#*" ]
-        esd_items += ["xAOD::MdtTwinDriftCircleContainer#*", "xAOD::MdtTwinDriftCircleAuxContainer#*" ]
-        esd_items += ["xAOD::sTgcStripContainer#*", "xAOD::sTgcStripAuxContainer#*" ]
-        esd_items += ["xAOD::sTgcPadContainer#*", "xAOD::sTgcPadAuxContainer#*" ]
-        esd_items += ["xAOD::sTgcWireContainer#*", "xAOD::sTgcWireAuxContainer#*" ]
-        esd_items += ["xAOD::MMClusterContainer#*", "xAOD::MMClusterAuxContainer#*" ]
-        esd_items += ["xAOD::TgcStripContainer#*", "xAOD::TgcStripAuxContainer#*" ]
-        esd_items += ["xAOD::RpcStripContainer#*", "xAOD::RpcStripAuxContainer#*" ]
-        esd_items += ["xAOD::RpcStrip2DContainer#*", "xAOD::RpcStrip2DAuxContainer#*" ]
+        esd_items += ["xAOD::MdtDriftCircleContainer#xMdtDriftCircles", "xAOD::MdtDriftCircleAuxContainer#xMdtDriftCirclesAux." ]
+        esd_items += ["xAOD::MdtTwinDriftCircleContainer#xMdtTwinDriftCircles", "xAOD::MdtTwinDriftCircleAuxContainer#xMdtTwinDriftCirclesAux." ]
+        esd_items += ["xAOD::sTgcStripContainer#xAODsTgcStrips", "xAOD::sTgcStripAuxContainer#xAODsTgcStripsAux." ]
+        esd_items += ["xAOD::sTgcPadContainer#xAODsTgcPads", "xAOD::sTgcPadAuxContainer#xAODsTgcPadsAux." ]
+        esd_items += ["xAOD::sTgcWireContainer#xAODsTgcWires", "xAOD::sTgcWireAuxContainer#xAODsTgcWiresAux." ]
+        esd_items += ["xAOD::MMClusterContainer#xAODMMClusters", "xAOD::MMClusterAuxContainer#xAODMMClustersAux." ]
+        esd_items += ["xAOD::TgcStripContainer#xTgcStrips", "xAOD::TgcStripAuxContainer#xTgcStripsAux." ]
+        esd_items += ["xAOD::RpcStripContainer#xRpcStrips", "xAOD::RpcStripAuxContainer#xRpcStripsAux." ]
+        esd_items += ["xAOD::RpcStrip2DContainer#xRpcBILStrips", "xAOD::RpcStrip2DAuxContainer#xRpcBILStripsAux." ]
 
 
     # trigger related info for offline DQA
