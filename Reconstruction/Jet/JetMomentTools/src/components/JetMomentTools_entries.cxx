@@ -23,10 +23,13 @@
 #include "JetMomentTools/JetGroomMRatio.h"
 #include "JetMomentTools/BoostedJetTaggerTool.h"
 
-#ifndef XAOD_ANALYSIS
-#include "JetMomentTools/JetBadChanCorrTool.h"
+#ifndef XAOD_STANDALONE
 #include "JetMomentTools/JetIsolationTool.h"
 #include "JetMomentTools/JetVoronoiMomentsTool.h"
+#endif
+
+#ifndef XAOD_ANALYSIS
+#include "JetMomentTools/JetBadChanCorrTool.h"
 #include "../JetCaloCellQualityTool.h"
 #endif
 
@@ -58,10 +61,12 @@ DECLARE_COMPONENT( JetConstituentFrac )
 DECLARE_COMPONENT( JetGroomMRatio)
 DECLARE_COMPONENT( BoostedJetTaggerTool )
 
-#ifndef XAOD_ANALYSIS
-DECLARE_COMPONENT( JetBadChanCorrTool )
+#ifndef XAOD_STANDALONE
 DECLARE_COMPONENT( JetIsolationTool )
 DECLARE_COMPONENT( JetVoronoiMomentsTool )
-DECLARE_COMPONENT( JetCaloCellQualityTool )
 #endif
 
+#ifndef XAOD_ANALYSIS
+DECLARE_COMPONENT( JetBadChanCorrTool )
+DECLARE_COMPONENT( JetCaloCellQualityTool )
+#endif
