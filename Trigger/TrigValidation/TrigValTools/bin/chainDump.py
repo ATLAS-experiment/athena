@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''Script to dump trigger counts to a text file'''
@@ -11,7 +11,7 @@ import logging
 import json
 import yaml
 import ROOT
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 
 total_events_key = 'TotalEventsProcessed'
 column_width = 10  # width of the count columns for print out
@@ -183,11 +183,10 @@ def get_2D_counts(hist):
     return counts
 
 def make_counts_json_dict(in_counts, ref_counts):
-    counts = OrderedDict()
-    all_keys = set(in_counts.keys())
-    all_keys.update(ref_counts.keys())
-    keys_sorted = sorted(all_keys)
-    for k in keys_sorted:
+    counts = {}
+    all_keys = set(in_counts)
+    all_keys.update(ref_counts)
+    for k in sorted(all_keys):
         v = in_counts[k] if k in in_counts else 'n/a'
         ref_v = ref_counts[k] if k in ref_counts else 'n/a'
         counts[k] = {
@@ -209,7 +208,7 @@ def parse_name_dict(name_dict_as_list):
 
 
 def get_text_name(hist_name, name_dict):
-    if hist_name in name_dict.keys():
+    if hist_name in name_dict:
         return name_dict[hist_name]
     else:
         return hist_name.replace('/', '_')
@@ -230,7 +229,7 @@ def compare_ref(json_dict, thr_frac, thr_num):
     results = []
     in_total = json_dict[total_events_key]['count']
     ref_total = json_dict[total_events_key]['ref_count']
-    for text_name in sorted(json_dict.keys()):
+    for text_name in sorted(json_dict):
         if text_name == total_events_key:
             continue
         diff_val = []  # different counts in input and reference
@@ -277,7 +276,7 @@ def compare_ref(json_dict, thr_frac, thr_num):
 
 
 def print_counts(json_dict):
-    for text_name in json_dict.keys():
+    for text_name in json_dict:
         if text_name == total_events_key:
             logging.info('%s: %d', text_name, json_dict[text_name]['count'])
             continue
@@ -314,7 +313,7 @@ def format_txt_count(count):
 
 
 def write_txt_output(json_dict, diff_only=False, printHeader=False):
-    for text_name in sorted(json_dict.keys()):
+    for text_name in sorted(json_dict):
         if text_name == total_events_key:
             logging.info('Writing total event count to file %s.txt', text_name)
             with open('{:s}.txt'.format(text_name), 'w') as outfile:
@@ -363,9 +362,9 @@ def make_light_dict(full_dict, includeL1Counts):
             light_dict[chain_name][out_name][int(chain_step)] = c['count']
         
         # Change step dictionary to consecutive list of steps
-        for chain_name in light_dict.keys():
+        for chain_name in light_dict:
             steps = light_dict[chain_name][out_name]
-            light_dict[chain_name][out_name] = {i:steps[k] for i,k in enumerate(sorted(steps.keys()))}
+            light_dict[chain_name][out_name] = {i:steps[k] for i,k in enumerate(sorted(steps))}
 
     extract_steps('HLTStep', 'stepCounts')
     extract_steps('HLTDecision', 'stepFeatures')
@@ -418,7 +417,7 @@ def main():
     if len(in_hists) == 0:
         logging.error('No count histograms could be loaded.')
         return 1
-    logging.info('Loaded count histograms: %s', sorted(in_hists.keys()))
+    logging.info('Loaded count histograms: %s', sorted(in_hists))
 
     in_total_hists = load_histograms(in_file, args.totalHists)
     if len(in_total_hists) == 0:
@@ -434,8 +433,8 @@ def main():
     ref_total = None
     if args.referenceFile:
         ref_hists = load_histograms(ref_file, args.countHists)
-        logging.info('Loaded reference count histograms: %s', sorted(ref_hists.keys()))
-        missing_refs = [k for k in in_hists.keys() if k not in ref_hists.keys()]
+        logging.info('Loaded reference count histograms: %s', sorted(ref_hists))
+        missing_refs = [k for k in in_hists if k not in ref_hists]
         if len(missing_refs) > 0:
             logging.error('Count histogram(s) %s missing in the reference', missing_refs)
             return 1
@@ -451,15 +450,17 @@ def main():
     # Extract counts from histograms
     ##################################################
 
-    json_dict = OrderedDict()
-    json_dict[total_events_key] = OrderedDict()
-    json_dict[total_events_key]['hist_name'] = list(in_total_hists.keys())[0]
-    json_dict[total_events_key]['count'] = int(in_total)
-    json_dict[total_events_key]['ref_count'] = int(ref_total) if ref_total else 'n/a'
+    json_dict = {
+        total_events_key: {
+            'hist_name': list(in_total_hists.keys())[0],
+            'count': int(in_total),
+            'ref_count': int(ref_total) if ref_total else 'n/a'
+        }
+    }
 
     for hist_name, hist in in_hists.items():
         text_name = get_text_name(hist_name, name_dict)
-        if text_name in json_dict.keys():
+        if text_name in json_dict:
             logging.error(
                 'Name "%s" assigned to more than one histogram, ', text_name,
                 'results would be overwritten. Use --countHists and ',
@@ -473,9 +474,10 @@ def main():
             ref_counts = get_2D_counts(ref_hist) if text_name in ['HLTStep', 'HLTDecision'] else get_counts(ref_hist, rowLabel)
         d = make_counts_json_dict(counts, ref_counts)
 
-        json_dict[text_name] = OrderedDict()
-        json_dict[text_name]['hist_name'] = hist_name
-        json_dict[text_name]['counts'] = d
+        json_dict[text_name] = {
+            'hist_name': hist_name,
+            'counts': d
+        }
 
     ##################################################
     # Compare to reference and produce output files

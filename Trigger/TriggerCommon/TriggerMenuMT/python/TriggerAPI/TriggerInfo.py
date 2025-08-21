@@ -332,7 +332,7 @@ class TriggerLeg:
             tag1 = tag1.replace(cut,cut+"-")
             tag2 = tag2.replace(cut,cut+"-")
         #only make a statement on the numerical values, with everything else identical
-        extra_inverseCuts = ("b","emf","bgtwo","gntau") # all only appear in "presel" block
+        extra_inverseCuts = ("b","emf","bgtwo","gntau", "uht1tau") # all only appear in "presel" block
         def findall(tag): # do the findall per tag block, so that can apply special rule to presel block only
             out = []
             for s in tag.split(" "):

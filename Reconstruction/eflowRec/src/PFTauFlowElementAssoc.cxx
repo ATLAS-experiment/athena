@@ -1,12 +1,12 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "eflowRec/PFTauFlowElementAssoc.h"
-#include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauTrack.h"
-#include "xAODPFlow/FlowElementContainer.h"
 #include "xAODPFlow/FlowElement.h"
+#include <map>
+#include <utility>
 
 using TauJetLink_t = ElementLink<xAOD::TauJetContainer>;
 using FELink_t = ElementLink<xAOD::FlowElementContainer>;
@@ -63,25 +63,27 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
   std::vector<std::vector<FELink_t>> tauNeutralFEVec(tauJetReadHandle->size());
   std::vector<std::vector<FELink_t>> tauChargedFEVec(tauJetReadHandle->size());
 
-  static const SG::AuxElement::ConstAccessor<char> acc_passThinning("passThinning");
+  // Prepare <tau,clusters> and <tau,tracks> maps to avoid nested loops
+  std::multimap<size_t, size_t> map_tau_clusters, map_tau_tracks;
+  // Skip taus that won't be written to AOD - first check the variable exists
+  // because older ESD and any AOD used as input do not have this variable.
+  static const SG::ConstAccessor<char> acc_passThinning("passThinning");
+  for (const xAOD::TauJet* tau : *tauJetReadHandle) {
+    if(acc_passThinning.isAvailable(*tau) && !acc_passThinning(*tau)) continue;
 
-  ////////////////////////////////////////////
-  // Loop over the neutral flow elements
-  ////////////////////////////////////////////
-  for (const xAOD::FlowElement* FE : *neutralFETauWriteDecorHandle) {
-    // Check that the flow element cluster exists and is not null
-    if (FE->otherObjects().empty()) continue;
-    if (FE->otherObjects().at(0) == nullptr) continue;
-    // Get the index of the flow element cluster
-    size_t FEClusterIndex = FE->otherObjects().at(0)->index();
-
-    std::vector<TauJetLink_t> FETauJetLinks;
-
-    // Loop over the taus
-    for (const xAOD::TauJet* tau : *tauNeutralFEWriteDecorHandle) {
-      // Skip taus that won't be written to AOD - first check the variable exists
-      // because older ESD and any AOD used as input do not have this variable.
-      if(acc_passThinning.isAvailable(*tau) && !acc_passThinning(*tau)) continue;
+    // Vertexed clusters are transiently available in RAWtoALL, retrieve them if available
+    static const SG::Accessor< std::vector< xAOD::CaloVertexedTopoCluster > > vertexedClustersAcc( "VertexedClusters" );
+    if (vertexedClustersAcc.isAvailable(*tau)) {
+      std::vector<xAOD::CaloVertexedTopoCluster> vertexedClusters = tau->vertexedClusters();
+      for (const auto& cluster : vertexedClusters) {
+	// Check if the cluster is within R = 0.2 of tau axis
+	if (cluster.p4().DeltaR(tau->p4(xAOD::TauJetParameters::IntermediateAxis)) > 0.2) continue;
+	// Get the index of the cluster associated to the tau
+	map_tau_clusters.insert(std::make_pair<size_t,size_t>(tau->index(),cluster.clust().index()));
+      }
+    }
+    else {
+      // Recompute vertexed clusters
       // Get tau vertex
       const xAOD::Vertex* tauVertex = tau->vertex();
       // Get the clusters associated to the tau
@@ -96,17 +98,41 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
         }
         // Check if the cluster is within R = 0.2 of tau axis
         if (clusterp4.DeltaR(tau->p4(xAOD::TauJetParameters::IntermediateAxis)) > 0.2) continue;
-        // Get the index of the cluster associated to the tau
-        size_t tauClusterIndex = clus->index();
+	// Get the index of the cluster associated to the tau
+	map_tau_clusters.insert(std::make_pair<size_t,size_t>(tau->index(),clus->index()));
+      }
+    }
 
-        // Link the tau and the neutral FE if the cluster indices match
-        if (tauClusterIndex == FEClusterIndex) {
-          FETauJetLinks.emplace_back(*tauJetReadHandle,tau->index() );
-          tauNeutralFEVec.at(tau->index()).emplace_back(*neutralFEReadHandle, FE->index() );
-        }
+    // Get tau tracks associated to the tau
+    std::vector<const xAOD::TauTrack*> tauTracks = tau->tracks();
+    for (const auto *tauTrack : tauTracks) {
+      // Get track associated to the tau track to use for matching
+      const xAOD::TrackParticle* tauIDTrack = tauTrack->track();
+      // Get the index of the track associated to the tau
+      map_tau_tracks.insert(std::make_pair<size_t,size_t>(tau->index(),tauIDTrack->index()));
+    }
+  }
 
-      } // end tau cluster loop
-    } // end tau loop
+  ////////////////////////////////////////////
+  // Loop over the neutral flow elements
+  ////////////////////////////////////////////
+  for (const xAOD::FlowElement* FE : *neutralFETauWriteDecorHandle) {
+    // Check that the flow element cluster exists and is not null
+    if (FE->otherObjects().empty()) continue;
+    if (FE->otherObjects().at(0) == nullptr) continue;
+    // Get the index of the flow element cluster
+    size_t FEClusterIndex = FE->otherObjects().at(0)->index();
+
+    std::vector<TauJetLink_t> FETauJetLinks;
+
+    // Loop over the tau/clusters map
+    for (const auto [tauIndex, tauClusterIndex] : map_tau_clusters) {
+      // Link the tau and the neutral FE if the cluster indices match
+      if (tauClusterIndex == FEClusterIndex) {
+	FETauJetLinks.emplace_back(*tauJetReadHandle, tauIndex);
+	tauNeutralFEVec.at(tauIndex).emplace_back(*neutralFEReadHandle, FE->index() );
+      }
+    }
 
     // Add vector of elements links to the tau jets as a decoration to the FE container
     neutralFETauWriteDecorHandle (*FE) = FETauJetLinks;
@@ -126,26 +152,14 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
 
     std::vector<TauJetLink_t> FETauJetLinks;
 
-    // Loop over the taus
-    for (const xAOD::TauJet* tau : *tauChargedFEWriteDecorHandle) {
-      // Skip taus that won't be written to AOD - first check the variable exists                                                                                                                                                                                              
-      // because older ESD and any AOD used as input do not have this variable. 
-      if(acc_passThinning.isAvailable(*tau) && !acc_passThinning(*tau)) continue;
-      // Get tau tracks associated to the tau
-      std::vector<const xAOD::TauTrack*> tauTracks = tau->tracks();
-      for (const auto *tauTrack : tauTracks) {
-        // Get track associated to the tau track to use for matching
-        const xAOD::TrackParticle* tauIDTrack = tauTrack->track();
-        // Get the index of the track associated to the tau
-        size_t tauIDTrackIndex = tauIDTrack->index();
-
-        // Link the tau and the charged FE if the track indices match
-        if (tauIDTrackIndex == FETrackIndex) {
-          FETauJetLinks.emplace_back(*tauJetReadHandle,tau->index() );
-          tauChargedFEVec.at(tau->index()).emplace_back(*chargedFEReadHandle, FE->index() );
-        }
-      } // end tau track loop
-    } // end tau loop
+    // Loop over the tau/tracks map
+    for (const auto [tauIndex, tauIDTrackIndex] : map_tau_tracks) {
+      // Link the tau and the charged FE if the track indices match
+      if (tauIDTrackIndex == FETrackIndex) {
+	FETauJetLinks.emplace_back(*tauJetReadHandle, tauIndex);
+	tauChargedFEVec.at(tauIndex).emplace_back(*chargedFEReadHandle, FE->index() );
+      }
+    }
 
     // Add vector of elements links to the tau jets as a decoration to the FE container
     chargedFETauWriteDecorHandle (*FE) = FETauJetLinks;

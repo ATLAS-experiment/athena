@@ -1,7 +1,5 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from collections import OrderedDict as odict
-
 from ..Base.L1MenuFlags import L1MenuFlags
 from ..Base.MenuConfObj import TopoMenuDef
 
@@ -31,15 +29,15 @@ def remapThresholds(L1MenuFlags):
 
 def defineInputsMenu():
 
-    ctpinBoards = odict() # Ctpin/Slot9 (CTPCAL, NIM1, NIM2)
-    topoBoards = odict()  # Topo1, Topo2, Topo3
-    muctpiBoard = odict() # MuCTPi
+    ctpinBoards = {} # Ctpin/Slot9 (CTPCAL, NIM1, NIM2)
+    topoBoards = {}  # Topo1, Topo2, Topo3
+    muctpiBoard = {} # MuCTPi
 
     #-----------------------------------
     # SLOT 9 / CON 1 (CTPCal, NIM1,NIM2)
     # https://twiki.cern.ch/twiki/bin/view/Atlas/LevelOneCentralTriggerSetup#CTPIN_Slot_9
     #-----------------------------------
-    ctpinBoards["Ctpin9"] = odict()
+    ctpinBoards["Ctpin9"] = {}
     ctpinBoards["Ctpin9"]["connectors"] = []
     ctpinBoards["Ctpin9"]["connectors"] += [
         {
@@ -100,7 +98,7 @@ def defineInputsMenu():
     #
     # new topo board for multiplicities
     #
-    topoBoards["Topo1"] = odict([("connectors",[])])
+    topoBoards["Topo1"] = {"connectors": []}
     topoBoards["Topo1"]["connectors"].append({ # first optical connector
         "name" : "Topo1Opt0",
         "format" : "multiplicity",
@@ -269,7 +267,7 @@ def defineInputsMenu():
         ]
     })
 
-    topoBoards["Topo2"] = odict()
+    topoBoards["Topo2"] = {}
     topoBoards["Topo2"]["connectors"] = []
     topoBoards["Topo2"]["connectors"].append({
         "name" : "Topo2El",
@@ -363,7 +361,7 @@ def defineInputsMenu():
         ]
     })
 
-    topoBoards["Topo3"] = odict()
+    topoBoards["Topo3"] = {}
     topoBoards["Topo3"]["connectors"] = []
     topoBoards["Topo3"]["connectors"].append({
         "name" : "Topo3El",
@@ -458,7 +456,7 @@ def defineInputsMenu():
         ]
     })
 
-    muctpiBoard["MuCTPi"] = odict() 
+    muctpiBoard["MuCTPi"] = {}
     muctpiBoard["MuCTPi"]["connectors"] = []
     muctpiBoard["MuCTPi"]["connectors"].append({
         "name" : "MuCTPiOpt0",

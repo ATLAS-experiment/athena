@@ -220,6 +220,15 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     , 'GN2_ptau' : 'fastGNTau20240216_ptau'
                     , 'GN2_pu' : 'fastGNTau20240216_pu'
                     }
+                ],
+
+                [ 'BTagging/20250813trig/uht1/antikt4emtopo/UHT1.onnx',
+                    { 'BTagTrackToJetAssociator': tracksOnJetDecoratorName
+                    , 'FastGNTau_ptau' : 'fastUHT120250605_ptau'
+                    , 'FastGNTau_pu'   : 'fastUHT120250605_pu'
+                    , 'FastGNTau_pc'   : 'fastUHT120250605_pc'
+                    , 'FastGNTau_pb'   : 'fastUHT120250605_pb'
+                    }
                 ]   
             ]
 

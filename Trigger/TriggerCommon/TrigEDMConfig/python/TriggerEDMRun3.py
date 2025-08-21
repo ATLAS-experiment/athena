@@ -74,8 +74,9 @@ def getJetCopyVars(suffix):
         discriminants = ['fastDips','fastGN120230327','fastGN120230331','fastGN220240122',]
         JetCopyVars += [f'{disc}_p{flavour}' for disc in discriminants for flavour in 'cub']
         JetCopyVars += [f'fastGNTau20240216_p{flavour}' for disc in discriminants for flavour in ['tau','u']]
+        JetCopyVars += [f'fastUHT120250605_p{x}' for x in ["tau" , "u" , "c" , "b"]]
         JetCopyVars += ['dipz20231122_z','dipz20231122_negLogSigma2']
-        JetCopyVars.append('TracksForMinimalJetTag')
+        JetCopyVars += ['TracksForMinimalJetTag']
 
     TLAJetVarsToKeep = [
         'ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt',

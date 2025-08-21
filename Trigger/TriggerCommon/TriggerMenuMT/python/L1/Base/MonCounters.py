@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from collections import OrderedDict as odict
 from functools import total_ordering
 
 from AthenaCommon.Logging import logging
@@ -10,9 +9,10 @@ class MenuMonCountersCollection(object):
 
     def __init__(self):
         # list of monitoring counters
-        self.counters = odict()
-        self.counters['ctpmon'] = []
-        self.counters['ctpin'] = []
+        self.counters = {
+            'ctpmon': [],
+            'ctpin': []
+        }
 
     def addCounter(self, c):
         if c.montype not in self.counters:
@@ -20,11 +20,7 @@ class MenuMonCountersCollection(object):
         self.counters[c.montype] += [c]
 
     def json(self):
-        confObj = odict()
-        for key,clist in self.counters.items():
-            confObj[key] = odict()
-            for c in clist:
-                confObj[key][c.name] = c.json()
+        confObj = { key: {c.name: c.json() for c in clist} for key,clist in self.counters.items() }
         return confObj
 
 
@@ -47,9 +43,10 @@ class MonCounter(object):
         return self.name == o.name
 
     def json(self):
-        confObj = odict()
-        confObj["thr"] = self.threshold
-        confObj["multiplicity"] = self.multiplicity
+        confObj = {
+            "thr": self.threshold,
+            "multiplicity": self.multiplicity
+        }
         return confObj
 
     

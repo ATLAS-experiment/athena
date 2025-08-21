@@ -4,7 +4,6 @@ log = logging.getLogger( __name__ )
 log.debug("Importing %s",__name__)
 
 from copy import deepcopy
-from collections import OrderedDict
 import itertools
 
 #==========================================================
@@ -15,7 +14,7 @@ import itertools
 # 'signature': ('substring', 'group')
 # if the substring is '', the signature is not mapped to the chain name
 # if the group is '', the signature is not mapped to any group
-SignatureDict = OrderedDict({
+SignatureDict = {
     'Electron': ('e','AllTag'),
     'Photon'  : ('g','AllTag'),
     'Muon'    : ('mu','AllTag'),
@@ -41,19 +40,19 @@ SignatureDict = OrderedDict({
     'Photonprobe'  : ('', 'AllProbe'),
     'Tauprobe'     : ('', 'AllProbe'),
     'Muonprobe'    : ('', 'AllProbe')
-})
+}
 
 
 def getSignatureDict():
     # removes the grouping from the dict and creates a new one signature : string
-    new_dict = OrderedDict({key: value[0] for key, value in SignatureDict.items() if value[0] != ''})
+    new_dict = {key: value[0] for key, value in SignatureDict.items() if value[0] != ''}
     return new_dict
 
 SliceIDDict = getSignatureDict()
 
 def getSignatureGroupingDict():
     # removes the substring from the dict and creates a new one signature : group
-    new_dict = OrderedDict({key: value[1] for key, value in SignatureDict.items() if value[1] != ''})
+    new_dict = {key: value[1] for key, value in SignatureDict.items() if value[1] != ''}
     return new_dict
 
 def getListOfSignatureStrings():   
@@ -93,18 +92,18 @@ class ChainStore(dict):
 # ---- signature specific dictionaries below    ----
 #==========================================================
 ChainDictTemplate = {
-    'chainName'    : '',
-    'L1item'        : '',
-    'topo'          : '',
-    'signatures'    : [],
+    'chainName'       : '',
+    'L1item'          : '',
+    'topo'            : '',
+    'signatures'      : [],
     'alignmentGroups' : [],
-    'stream'        : '',
-    'groups'        : [],
-    'EBstep'        : '',
-    'chainParts'   : [],
-    'sigDicts' : OrderedDict(),
-    'sigFolder'     : [],
-    'subSigs'        : [],
+    'stream'          : '',
+    'groups'          : [],
+    'EBstep'          : '',
+    'chainParts'      : [],
+    'sigDicts'        : {},
+    'sigFolder'       : [],
+    'subSigs'         : [],
     'extraComboHypos' : []
 }
 
@@ -285,6 +284,10 @@ JetChainParts = {
        'presel2c20XX1c20bgtwo82XX1c20gntau85',
        'presel2c20XX1c20bgtwo82XX1c20gntau80',
        'presel2c20XX1c20bgtwo80XX1c20gntau80',
+       'presel2c20XX1c20bgtwo85XX1c20uht1tau90',
+       'presel2c20XX1c20bgtwo85XX1c20uht1tau85',
+       'presel2c20XX1c20bgtwo85XX1c20uht1tau82',
+       'presel2c20XX1c20bgtwo85XX1c20uht1tau80',
        'presel5c25XXc25bgtwo85',
        'presel3j45bgtwo95',
        'presel4j25bgtwo95',
@@ -463,8 +466,17 @@ JetChainParts = {
      'PTRANGE2r3',
      'MAXMULT20c',
      'MAXMULT6c',],
-    'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone','60bgntwoxt', '65bgntwoxt', '70bgntwoxt', '75bgntwoxt', '80bgntwoxt', '85bgntwoxt', '90bgntwoxt', '95bgntwoxt', '79bgntwox', '86bgntwox', '91bgntwox', '96bgntwox','95bgntwo','90bgntwo','85bgntwo','80bgntwo','82bgntwo','77bgntwo','75bgntwo','60bgntwo'],
-    'tausel': [ '75gntau' , '80gntau', '85gntau' , '90gntau' ],
+    'bsel': [ '95bdips','90bdips','85bdips','80bdips','77bdips'
+            , '95bgnone','90bgnone','85bgnone','80bgnone','77bgnone'
+            , '60bgntwoxt', '65bgntwoxt', '70bgntwoxt', '75bgntwoxt'
+            , '80bgntwoxt', '85bgntwoxt', '90bgntwoxt', '95bgntwoxt'
+            , '79bgntwox', '86bgntwox', '91bgntwox', '96bgntwox'
+            , '95bgntwo','90bgntwo','85bgntwo','80bgntwo','82bgntwo','77bgntwo','75bgntwo','60bgntwo'
+            ],
+    'tausel':
+        [ '75gntau' , '80gntau', '85gntau' , '90gntau'
+        , '75uht1tau' , '80uht1tau', '85uht1tau' , '90uht1tau'
+        ],
     'smc'           : # "Single mass condition" -- rename?
       ['30smcINF', '35smcINF', '40smcINF', '50smcINF', '60smcINF', 'nosmc'],
     # Setup for alternative data stream readout
