@@ -152,6 +152,7 @@ if __name__=='__main__':
     # Initially the following flags are not set up (they must be provided)
     flags.Input.Files = []
     flags.Tile.RunType = TileRunType.UNDEFINED
+    flags.LAr.doHVCorr = False
 
     # Initial configuration flags from command line arguments (to be used to set up defaults)
     flags.fillFromArgs(parser=parser)
@@ -221,7 +222,7 @@ if __name__=='__main__':
     # Set up the DB global conditions tag
     if flags.Input.Format is Format.BS:
         if args.run3:
-            condDbTag = 'CONDBR2-BLKPA-2024-04' if args.upd4 else 'CONDBR2-ES1PA-2024-05'
+            condDbTag = 'CONDBR2-BLKPA-2025-03' if args.upd4 else 'CONDBR2-ES1PA-2025-02'
             detDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif args.run2:
             condDbTag = 'CONDBR2-BLKPA-2018-16' if args.upd4 else 'CONDBR2-ES1PA-2018-05'
