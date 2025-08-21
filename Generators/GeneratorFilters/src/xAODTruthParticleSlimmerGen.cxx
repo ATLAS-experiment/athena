@@ -43,7 +43,7 @@ StatusCode xAODTruthParticleSlimmerGen::execute()
     SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerGen(m_xaodTruthParticleContainerNameGen, ctx);
     ATH_CHECK(xTruthParticleContainerGen.record(std::make_unique<xAOD::TruthParticleContainer>(),
                                                  std::make_unique<xAOD::TruthParticleAuxContainer>()));
-    ATH_MSG_INFO("Recorded TruthParticleContainerGen with key: " << m_xaodTruthParticleContainerNameGen.key());
+    ATH_MSG_DEBUG("Recorded TruthParticleContainerGen with key: " << m_xaodTruthParticleContainerNameGen.key());
 
     // Retrieve full TruthEventContainer container
     SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_xaodTruthEventContainerName};
@@ -87,7 +87,7 @@ StatusCode xAODTruthParticleSlimmerGen::execute()
           *xTruthParticle=*theParticle;
 
         }
-        if (zero_uniqueID != 0 || dup_uniqueID != 0) ATH_MSG_INFO("Found " << zero_uniqueID << " uniqueID=0 particles and " << dup_uniqueID << " duplicated");
+        if (zero_uniqueID != 0 || dup_uniqueID != 0) ATH_MSG_DEBUG("Found " << zero_uniqueID << " uniqueID=0 particles and " << dup_uniqueID << " duplicated");
     }
 
     return StatusCode::SUCCESS;
