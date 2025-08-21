@@ -87,9 +87,12 @@ namespace TrigCompositeUtils {
     // Here we use a std::set to de-duplicate IDs from src and dest before setting dest
     decisionIDs( dest, collateIDs ); // Set operation 1. Get from dest
     collateIDs.insert( src.begin(), src.end() ); // Set operation 2. Get from src
-    decisionIDs( dest ).clear(); // Clear target
+    std::vector<DecisionID>& vdest = decisionIDs( dest );
+    // Clear and reserve target
+    vdest.clear();
+    vdest.reserve(collateIDs.size());
     // Copy from set to (ordered) vector
-    decisionIDs( dest ).insert( decisionIDs(dest).end(), collateIDs.begin(), collateIDs.end() );
+    vdest.insert( vdest.end(), collateIDs.begin(), collateIDs.end() );
   }
 
   void uniqueDecisionIDs(Decision* dest) {
