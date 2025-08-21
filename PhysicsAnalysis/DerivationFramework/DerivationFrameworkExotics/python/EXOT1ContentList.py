@@ -10,8 +10,8 @@ EXOT1SmartContent = [
     #"AntiKt4LCTopoJets",
     #"BTagging_AntiKt4Truth",
     "BTagging_AntiKt4EMTopo",
-    #"xAOD::EventShape_v1#*",
-    #"xAOD::EventShapeAuxInfo_v1#*",
+    #"xAOD::EventShape#*",
+    #"xAOD::EventShapeAuxInfo#*",
     "PrimaryVertices",
     "AntiKt4EMTopoJets",
     "AntiKt4LCTopoJets",
@@ -51,9 +51,9 @@ EXOT1AllVariablesContent = [
 #]
 
 EXOT1Content = [
-#        "xAOD::MissingETComponentMap_v1#METMap_RefFinalFix",
-#        "xAOD::MissingETAuxComponentMap_v1#METMap_RefFinalFixAux.",
-#        "xAOD::MissingETContainer_v1#MET_RefFinalFix",
-#        "xAOD::MissingETAuxContainer_v1#MET_RefFinalFixAux."
+#        "xAOD::MissingETComponentMap#METMap_RefFinalFix",
+#        "xAOD::MissingETAuxComponentMap#METMap_RefFinalFixAux.",
+#        "xAOD::MissingETContainer#MET_RefFinalFix",
+#        "xAOD::MissingETAuxContainer#MET_RefFinalFixAux."
 ]
 
