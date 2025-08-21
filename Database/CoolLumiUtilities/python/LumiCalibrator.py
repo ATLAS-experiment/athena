@@ -12,7 +12,6 @@
 # This must be initialized with the payload of a calibration record from COOL, then the raw luminosity
 # will be calibrated with a call to calibrate
 
-from __future__ import print_function
 import math
 
 from CoolLumiUtilities.LumiBlobConversion import bConvertList

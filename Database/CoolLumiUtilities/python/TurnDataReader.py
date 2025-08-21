@@ -9,7 +9,6 @@
 #                  data in COOL, but at the moment this is the best we have...
 #
 
-from __future__ import print_function
 import re
 import sys
 

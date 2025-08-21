@@ -4,7 +4,6 @@
 Utility module for things not specific to DQ
 """
 
-from __future__ import with_statement
 
 from contextlib import contextmanager
 from logging import getLogger; log = getLogger("DQUtils.general")

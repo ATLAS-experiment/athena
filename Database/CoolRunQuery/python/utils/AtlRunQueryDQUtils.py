@@ -10,7 +10,6 @@
 # Created: May 6, 2010
 # ----------------------------------------------------------------
 #
-from __future__ import division, print_function
 
 import sys, time
 from functools import reduce

@@ -9,7 +9,6 @@
 #
 
 
-from __future__ import print_function
 from PyUtils.fprint import fprint
 import ROOT
 

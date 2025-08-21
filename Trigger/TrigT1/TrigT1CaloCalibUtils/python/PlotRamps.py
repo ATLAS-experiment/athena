@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 from ROOT import gROOT, gDirectory, gPad, gStyle, kYellow, kGray, TCanvas, TFile, TPaveLabel, TH1F
 from optparse import OptionParser

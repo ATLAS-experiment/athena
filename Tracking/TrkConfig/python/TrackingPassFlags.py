@@ -1,6 +1,5 @@
 #Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 import AthenaCommon.SystemOfUnits as Units
 from AthenaConfiguration.Enums import BeamType, FlagEnum

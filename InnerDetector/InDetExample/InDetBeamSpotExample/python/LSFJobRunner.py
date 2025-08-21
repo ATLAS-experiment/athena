@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 LSFJobRunner is a JobRunner for running jobs with the LSF batch system.

@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Author: nils.gollub@cern.ch
 
-from __future__ import print_function
 
 import time
 import pytz

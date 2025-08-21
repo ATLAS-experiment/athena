@@ -7,7 +7,6 @@
 # Purpose: Test reading xAOD objects directly from root.
 #
 
-from __future__ import print_function
 import ROOT
 import cppyy
 

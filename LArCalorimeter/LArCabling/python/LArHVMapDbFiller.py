@@ -5,7 +5,6 @@
 #
 #
 
-from __future__ import print_function
 
 __version__ = "$Id: LArHVMapDbFiller.py"
 __author__  = "G.Unal"

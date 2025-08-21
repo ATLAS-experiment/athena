@@ -6,7 +6,6 @@
 # and Angelo Guida angelo.guida@le.infn.it
 # 08/April/2009
 # ************************************************
-from __future__ import print_function
 
 def createRPCDQMFDB():
     import os

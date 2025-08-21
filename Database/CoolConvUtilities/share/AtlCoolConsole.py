@@ -2,7 +2,6 @@
 # version modified by Richard Hawkings from COOl1.3.2 distribution
 # original by Sven Schmitt (Abstracture/Mainz)
 
-from __future__ import print_function
 import sys
 import code
 import readline

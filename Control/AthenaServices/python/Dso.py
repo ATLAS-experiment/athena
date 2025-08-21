@@ -6,7 +6,6 @@
 # @author: Sebastien Binet <binet@cern.ch>
 # @date:   September 2008
 
-from __future__ import with_statement
 
 __version__ = "$Revision: 1.12 $"
 __author__  = "Sebastien Binet <binet@cern.ch>"

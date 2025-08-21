@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import with_statement
 
 from logging import getLogger; log = getLogger("DQUtils.db")
 

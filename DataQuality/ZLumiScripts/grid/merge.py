@@ -2,7 +2,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 # Simple script to invoke DQHistogramMerge for merging Grid output
 
-from __future__ import print_function
 
 import commands, argparse, sys
 parser = argparse.ArgumentParser()

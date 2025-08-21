@@ -4,7 +4,6 @@
 # @purpose: log the vmem usage at each dso being dlopen'd
 # @author: Sebastien Binet <binet@cern.ch>
 
-from __future__ import with_statement
 
 __doc__ = "log the vmem usage at each dso being dlopen'd"
 __version__ = "$Revision: 1.3 $"

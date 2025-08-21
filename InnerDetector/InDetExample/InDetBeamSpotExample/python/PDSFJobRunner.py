@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 PDSFJobRunner is a JobRunner for running jobs with the SGE batch system on pdsf.nersc.gov.

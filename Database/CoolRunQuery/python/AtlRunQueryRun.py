@@ -10,7 +10,6 @@
 # Created: Feb 10, 2009
 # ----------------------------------------------------------------
 #
-from __future__ import with_statement, print_function
 from functools import total_ordering
 from CoolRunQuery.utils.AtlRunQueryTimer import timer
 

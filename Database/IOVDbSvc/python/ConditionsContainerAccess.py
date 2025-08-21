@@ -40,7 +40,6 @@
 #        attrListColl.add(chans[i], iov)
 #        i += 1
 
-from __future__ import print_function
 import cppyy as PyLCGDict
 import string
 

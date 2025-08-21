@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 beamspotman is a command line utility to do typical beam spot related tasks.

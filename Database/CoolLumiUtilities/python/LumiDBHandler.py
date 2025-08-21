@@ -23,7 +23,6 @@
 # The CoolDataReader uses this class internally to make for more easy access
 #
 
-from __future__ import print_function
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 
 class LumiDBHandler:

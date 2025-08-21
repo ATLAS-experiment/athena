@@ -3,7 +3,6 @@
 ## @file PerfMonTests.IoTestsLib
 ## @date April 2009
 
-from __future__ import print_function
 
 __author__ = "Sebastien Binet <binet@cern.ch>"
 __version__ = "$Revision: 1.1 $"
@@ -12,7 +11,6 @@ a set of simple minded functions to test ROOT I/O (from python)
 """
 
 from array import array as carray
-from builtins import range
 
 import random
 # set some dummy seed, for reproducibility

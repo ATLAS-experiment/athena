@@ -11,7 +11,6 @@
 # ----------------------------------------------------------------
 #
 
-from __future__ import with_statement, print_function
 from CoolRunQuery.utils.AtlRunQueryTimer import timer
 
 import sys, os, time, re, calendar

@@ -6,7 +6,6 @@
 # The TrackCollection converter has some conditions dependencies,
 # so to read TrackCollection property in MT, we need to use an algorithm.
 
-from __future__ import print_function
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 

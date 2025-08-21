@@ -60,7 +60,6 @@
 ##    J. Guenther (February 2017)
 #########################################################################
 
-from __future__ import print_function
 import sys, os.path, os, json, time, pprint, traceback
 from six.moves import xmlrpc_client as xmlrpclib
 import six
