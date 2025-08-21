@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -106,7 +106,7 @@ void TTileTripReader::buildOffsets(){
     ostream& msg=*m_msglog;
     m_Offsets.clear();
     m_Offsets.push_back(0);
-    int nTrees=((TChain*)m_trips)->GetNtrees();
+    int nTrees=(static_cast<TChain*>(m_trips))->GetNtrees();
     if(nTrees==1){
         int mapentries=m_runMap->GetEntries();
         for(int i=0;i<mapentries;++i){
@@ -260,7 +260,7 @@ int TTileTripReader::findStartEntry(int run){
         m_startEntry=m_FirstEntry;
     }
     else{
-        if(m_ChainsLoaded || ((TChain*)m_runMap)->GetNtrees()==1){
+        if(m_ChainsLoaded || (static_cast<TChain*>(m_runMap))->GetNtrees()==1){
             size_t nOffsets=m_Offsets.size();
             for(size_t i=0;i<nOffsets;++i){
                 m_trips->GetEntry(m_FirstEntry+m_Offsets[i]);
@@ -400,8 +400,8 @@ int TTileTripReader::initialize(){
 
 void TTileTripReader::memLoadTripFile(){
     if(m_ChainsLoaded)return;
-    TChain* tripMap=(TChain*)m_trips;
-    TChain* runMap=(TChain*)m_runMap;
+    TChain* tripMap=static_cast<TChain*>(m_trips);
+    TChain* runMap=static_cast<TChain*>(m_runMap);
     m_trips=new TTree("TripList_Mem","Memory loaded TripList");
     m_runMap=new TTree("RunMap_Mem","Starting entry for each run in TripList");
     
@@ -610,8 +610,8 @@ int TTileTripReader::setTripFile(const char* file){
         return 0;
     }
     int files_connected=0;
-    files_connected=((TChain*)m_trips)->Add(file);
-    if(files_connected!=((TChain*)m_runMap)->Add(file))
+    files_connected=(static_cast<TChain*>(m_trips))->Add(file);
+    if(files_connected!=(static_cast<TChain*>(m_runMap))->Add(file))
         msg<<"Connected file missmatch.\n";
     
     m_mapRun=0;
