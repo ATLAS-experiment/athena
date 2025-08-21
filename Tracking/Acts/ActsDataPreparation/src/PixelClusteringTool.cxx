@@ -33,7 +33,7 @@ namespace ActsTrk {
   static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
 				    const PixelClusteringTool::Cell& cell)
   {
-    cl.ids.push_back(cell.ID.get_compact());
+    cl.ids.push_back(cell.ID);
     cl.tots.push_back(cell.TOT);
     if (cell.LVL1 < cl.lvl1min)
       cl.lvl1min = cell.LVL1;
@@ -303,16 +303,16 @@ PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
     static_cast<const InDetDD::PixelModuleDesign&>(element.design());
   CellCollection cells;
   cells.reserve(300);
-
+  
   const IdentifierHash& idHash = RDOs.identifyHash();
   for (const auto *const rdo : RDOs) {
     const Identifier& rdoID = rdo->identify();
     std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
-       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(rdoID),
-                                                m_pixelID->eta_index(rdoID));
+      = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(rdoID),
+                                               m_pixelID->eta_index(rdoID));
     InDetDD::PixelDiodeTree::DiodeProxy si_param ( design.diodeProxyFromIdx(diode_idx));
     std::uint32_t fe = design.getFE(si_param);
-
+    
     // check if good RDO
     // the pixel RDO tool here says always good if m_useModuleMap is false
     if (not pixelDetElStatus.isChipGood(idHash, fe)) {
@@ -321,23 +321,21 @@ PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
     
     const int lvl1 = rdo->getLVL1A();
     const int tot = rdo->getToT();
-
-    cells.emplace_back(
-		       m_pixelID->phi_index(rdoID),
-		       m_pixelID->eta_index(rdoID),
-		       tot,
-		       lvl1,
-		       rdoID);
-
+    
+    cells.emplace_back(m_pixelID->phi_index(rdoID),
+                       m_pixelID->eta_index(rdoID),
+                       tot,
+                       lvl1,
+                       rdoID.get_compact());
+    
     if ( m_checkGanged ) {
       std::optional<Identifier> gangedID = isGanged(rdoID, element);
       if (gangedID.has_value()) {
-	cells.emplace_back(
-			   m_pixelID->phi_index(*gangedID),
-			   m_pixelID->eta_index(*gangedID),
-			   tot,
-			   lvl1,
-			   *gangedID);
+        cells.emplace_back(m_pixelID->phi_index(*gangedID),
+                           m_pixelID->eta_index(*gangedID),
+                           tot,
+                           lvl1,
+                           gangedID->get_compact());
       }
     }
     
