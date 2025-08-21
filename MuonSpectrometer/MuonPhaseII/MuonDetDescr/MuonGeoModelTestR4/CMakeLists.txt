@@ -75,13 +75,13 @@ atlas_add_test( testR4SensitiveDetectors
                 POST_EXEC_SCRIPT nopost.sh)
 #### Test that the sector envelopes fully enclose the particular chambers
 atlas_add_test( testChamberBuilding
-                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noSTGC 
+                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder 
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 #### Test that the sector envelopes fully enclose the particular chambers (R4)
 atlas_add_test( testChamberBuildingR4
-                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noSTGC --defaultGeoFile RUN4
+                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)

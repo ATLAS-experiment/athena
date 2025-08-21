@@ -205,7 +205,6 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = True
     #flags.PerfMon.doFullMonMT = True
-   
     flags.lock()
     flags.dump(evaluate = True)
     cfg = setupServicesCfg(flags)
