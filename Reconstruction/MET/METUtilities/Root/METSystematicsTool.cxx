@@ -882,7 +882,7 @@ namespace met {
     return random;
   }
 
-  void METSystematicsTool::setRandomSeed(int seed) const {
+  void METSystematicsTool::setRandomSeed(unsigned long seed) const {
     ATH_MSG_VERBOSE(__PRETTY_FUNCTION__);
     getTLSRandomGen()->SetSeed(seed);
   }

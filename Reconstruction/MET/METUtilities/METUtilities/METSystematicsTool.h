@@ -125,7 +125,7 @@ namespace met {
     StatusCode applySystematicVariation(const CP::SystematicSet& set){		  return CP::SystematicsTool::applySystematicVariation(set) ;}
     StatusCode sysApplySystematicVariation(const CP::SystematicSet&); //when inheriting from SystematicsTool, we should only have to implement this one
 
-    void setRandomSeed(int seed) const;
+    void setRandomSeed(unsigned long seed) const;
 
   private:
 
