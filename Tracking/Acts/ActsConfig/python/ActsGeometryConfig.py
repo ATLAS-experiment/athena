@@ -53,7 +53,7 @@ def ActsTrackingGeometrySvcCfg(flags,
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
 
-  if flags.Muon.usePhaseIIGeoSetup:
+  if flags.Muon.usePhaseIIGeoSetup and not flags.Acts.TrackingGeometry.UseBlueprint:
     subDetectors += ["Muon"]
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     acc.merge(MuonGeoModelCfg(flags))    
@@ -62,7 +62,7 @@ def ActsTrackingGeometrySvcCfg(flags,
 
   #first add the itk builder and then the muon system - this is the correct order
   if flags.Acts.TrackingGeometry.UseBlueprint:    
-    if flags.Detector.GeometryITkPixel or flags.Detector.GeometryTkStrip:
+    if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryMuon:
       from ActsMuonDetector.ActsMuonDetectorCfg import MuonBlueprintNodeBuilderCfg
