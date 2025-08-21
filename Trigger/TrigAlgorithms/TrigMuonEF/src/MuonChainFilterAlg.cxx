@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonChainFilterAlg.h"
@@ -56,26 +56,25 @@ StatusCode MuonChainFilterAlg::execute(const EventContext& ctx) const {
         // i.e. use HLT_mu6_mu4_bJpsimumu_L1MU6_2MU4 instead of leg001_HLT_mu6_mu4_bJpsimumu_L1MU6_2MU4;
         // TrigCompositeUtils::getIDFromLeg() will return unchanged id for the symmetric trigger
         HLT::Identifier id = TrigCompositeUtils::getIDFromLeg(HLT::Identifier(legID));
-        std::string chainName = HLT::Identifier(id).name();
         const auto itr = m_filterChainIDs.find(id.numeric());
         if (!m_notGate) {  // pass if id does NOT match to any trigger from the filter list
           if (itr != m_filterChainIDs.end()) {
-            ATH_MSG_DEBUG( "chain " << chainName << " is on the filter list, keep looking" );
+            ATH_MSG_DEBUG( "chain " << id.name() << " is on the filter list, keep looking" );
           }
           else {
-            ATH_MSG_DEBUG( "chain " << chainName << " is not on the filter list, passing" );
+            ATH_MSG_DEBUG( "chain " << id.name() << " is not on the filter list, passing" );
             setFilterPassed(true, ctx);
             return StatusCode::SUCCESS;
           }
         }
         else {  // pass if id is found in the filter list
           if (itr != m_filterChainIDs.end()) {
-            ATH_MSG_DEBUG( "chain " << chainName << " is on the not-filter list, passing" );
+            ATH_MSG_DEBUG( "chain " << id.name() << " is on the not-filter list, passing" );
             setFilterPassed(true, ctx);
             return StatusCode::SUCCESS;
           }
           else {
-            ATH_MSG_DEBUG( "chain " << chainName << " is not on the not-filter list, keep looking" );
+            ATH_MSG_DEBUG( "chain " << id.name() << " is not on the not-filter list, keep looking" );
           }
         }
       }
