@@ -131,7 +131,6 @@ namespace GlobalSim {
 
     std::map<std::string,std::vector<GlobalSim::GlobalLArCell>> gblLArCellsPerFEB2;
 
-    int i_cell = 0;
     for(const auto *cell: cells){
 
         int cell_id = (cell->ID().get_identifier32()).get_compact();
@@ -148,7 +147,6 @@ namespace GlobalSim {
         if (sigma < 2.0) continue;
 
         if (cell->badcell()) continue;
-        ++i_cell;
 
         std::pair<float, boost::dynamic_bitset<>> gep_energy = encodeEnergy(cell->energy() / TMath::CosH(cell->eta()));
 
