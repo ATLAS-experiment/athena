@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -711,7 +711,7 @@ void TileTBStat::find_frag(const uint32_t * data, unsigned int size, T_RobRodFra
   }
   
   while (offset < size ) {
-    const T_RodDataFrag* frag = (const T_RodDataFrag *)(data + offset);
+    const T_RodDataFrag* frag = reinterpret_cast<const T_RodDataFrag *>(data + offset);
     if ( frag->size < sizeOverhead ) { // too small size, frag contains garbage
       break;
     }
