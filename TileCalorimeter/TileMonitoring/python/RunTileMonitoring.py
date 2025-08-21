@@ -191,6 +191,7 @@ if __name__=='__main__':
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
     flags.Tile.RunType = TileRunType.PHY
+    flags.LAr.doHVCorr = False
 
     if args.mbts and args.useMbtsTrigger:
         flags.Trigger.triggerConfig = 'DB'
@@ -250,7 +251,7 @@ if __name__=='__main__':
         flags.DQ.Environment = 'online'
         flags.DQ.FileKey = ''
     else:
-        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2024-04' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
+        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2025-03' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
 
     if any([args.laser, args.cis]):
         if args.laser:
