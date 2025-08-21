@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////
@@ -12,7 +12,6 @@
 void TauShotCnv_p1::persToTrans(const TauShot_p1 *persObj, Analysis::TauShot *transObj, MsgStream &log)
 {
   /// links to CaloClusters
-  //m_clusterVectCnv.persToTrans( &persObj->m_CaloClusterVector, &transObj->m_CaloClusterVector, log );
   m_clusterCnv.persToTrans( &persObj->m_cluster, &transObj->clusterLink(), log );
   m_seedCellCnv.persToTrans( &persObj->m_seedCell, &transObj->seedCellLink(), log );
 
@@ -21,8 +20,7 @@ void TauShotCnv_p1::persToTrans(const TauShot_p1 *persObj, Analysis::TauShot *tr
   m_P4EEtaPhiMCnv.persToTrans(&persObj->m_P4EEtaPhiM,&mom,log);
   transObj->set4Mom (mom);
   /// simple standard member data
-  // vectors
-  //transObj->m_clusterValueVector1 = persObj->m_clusterValueVector1;
+ 
   // floats or ints
   transObj->setNCellsInEta (persObj->m_nCellsInEta);
   transObj->setpt1 (persObj->m_pt1);
@@ -49,15 +47,14 @@ void TauShotCnv_p1::persToTrans(const TauShot_p1 *persObj, Analysis::TauShot *tr
 void TauShotCnv_p1::transToPers(const Analysis::TauShot *transObj, TauShot_p1 *persObj, MsgStream &log)
 {
   /// links to CaloClusters
-  //m_clusterVectCnv.transToPers( &transObj->m_CaloClusterVector, &persObj->m_CaloClusterVector, log );
   m_clusterCnv.transToPers( &transObj->clusterLink(), &persObj->m_cluster, log );
   m_seedCellCnv.transToPers( &transObj->seedCellLink(), &persObj->m_seedCell, log );
 
   // 4momentum
-  m_P4EEtaPhiMCnv.transToPers((P4EEtaPhiM*)transObj,&persObj->m_P4EEtaPhiM,log); 
+  //!! Dangerous cast: was another class intended?
+  m_P4EEtaPhiMCnv.transToPers(reinterpret_cast<const P4EEtaPhiM*>(transObj),&persObj->m_P4EEtaPhiM,log); 
   /// simple standard member data
-  // vector
-  //persObj->m_clusterValueVector1 = transObj->m_clusterValueVector1;
+ 
   // floats or ints
   persObj->m_nCellsInEta = transObj->nCellsInEta();
   persObj->m_pt1 = transObj->pt1();
