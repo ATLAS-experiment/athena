@@ -160,7 +160,7 @@ def createMuonConfigFlags():
     #Use charge weighted only for trigger and 2022 where not sure if the t0 calibrations that we have are ok dor the commissioning phase of the NSW in 2022
     mcf.addFlag("Muon.MMClusterCalibRecoTool", lambda prevFlags: MMClusterBuilderEnum.Centroid if (prevFlags.Common.isOnline or prevFlags.Input.DataYear == 2022 or prevFlags.Beam.Type is not BeamType.Collisions) else MMClusterBuilderEnum.ClusterTimeProjection, type=MMClusterBuilderEnum)
 
-    mcf.addFlag("Muon.writexAODPRD", False) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
+    mcf.addFlag("Muon.writexAODPRD", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
     # use the MDT DCS data to determine if a chamber is alive or not. This is used in the hole search and the region selector. Needs to be false if the job is running online or is the reconstruction of the MDT calib stream
     mcf.addFlag("Muon.useMdtDcsData", lambda prevFlags : not prevFlags.Common.isOnline)
 
