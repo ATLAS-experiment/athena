@@ -122,6 +122,9 @@ if options.flav == "PHYSLITE":
    config.SUSYTools.ConfigFile = STconfig_lite
    config.SUSYTools.IsPHYSLITE = True
 
+# The config file is also needed directly in SUSYToolsAlg
+config.ConfigFile = config.SUSYTools.ConfigFile
+
 # set datasource if AF3
 if options.AF:
    config.SUSYTools.DataSource = 2

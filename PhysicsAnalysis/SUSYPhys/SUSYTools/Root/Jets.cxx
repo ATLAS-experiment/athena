@@ -412,12 +412,10 @@ namespace ST {
         dec_ztagged(input) = -1;
         dec_toptagged(input) = -1;
         if (doLargeRdecorations) {
-          ATH_CHECK(m_WTaggerTool->tag(input));
-          ATH_CHECK(m_ZTaggerTool->tag(input));
-          ATH_CHECK(m_TopTaggerTool->tag(input));
 
           // Retrieve large-R tagging results for W/Z/top
           if (!m_WtagConfig.empty()) {
+            ATH_CHECK(m_WTaggerTool->tag(input));
             // Only tag jets if they are inside the kinematic range
             if ( !acc_wValidKinRange(input) ) {
               ATH_MSG_VERBOSE("Large-R W candidate jet outside of recommended tagging range. Will set score to 0.");
@@ -426,6 +424,7 @@ namespace ST {
             else dec_wtagged(input) = acc_wtagged(input);
           }
           if (!m_ZtagConfig.empty()) {
+            ATH_CHECK(m_ZTaggerTool->tag(input));
             // Only tag jets if they are inside the kinematic range
             if ( !acc_zValidKinRange(input) ) {
               ATH_MSG_VERBOSE("Large-R Z candidate jet outside of recommended tagging range. Will set score to 0.");
@@ -434,6 +433,7 @@ namespace ST {
             else dec_ztagged(input) = acc_ztagged(input);
           }
           if (!m_ToptagConfig.empty()) {
+            ATH_CHECK(m_TopTaggerTool->tag(input));
             // Only tag jets if they are inside the kinematic range
             if ( !acc_topValidKinRange(input) ) {
               ATH_MSG_VERBOSE("Large-R Top candidate jet outside of recommended tagging range. Will set score to 0.");
