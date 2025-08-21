@@ -193,19 +193,19 @@ bool TrigBtagEmulationTool::evaluate_preselection(const TrigBtagEmulationChain& 
     
     for( const auto& preseljet: preselJets ) {
       if((preseljet.pt() / Gaudi::Units::GeV) >= presel_ptcut &&
-	 presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
-	
-	ATH_MSG_DEBUG( "   - Preselection jet pt=" << (preseljet.pt() / Gaudi::Units::GeV) << " eta=" << preseljet.eta() << " passed.");
-	preseljets_passed++;
+         presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
+        
+        ATH_MSG_DEBUG( "   - Preselection jet pt=" << (preseljet.pt() / Gaudi::Units::GeV) << " eta=" << preseljet.eta() << " passed.");
+        preseljets_passed++;
       }
       else if((preseljet.pt() / Gaudi::Units::GeV) < presel_ptcut) {
-	// no more Preselection jets left with high enough pt
-	break;
+        // no more Preselection jets left with high enough pt
+        break;
       }
       
       if(preseljets_passed >= presel_multiplicity) {
-	res = true;
-	break;
+        res = true;
+        break;
       }
     }
   }
@@ -220,29 +220,29 @@ bool TrigBtagEmulationTool::evaluate_preselection(const TrigBtagEmulationChain& 
       multiplicities.push_back(presel_multiplicity);
       
       for ( const auto& preseljet : preselJets ) {
-	if((preseljet.pt() / Gaudi::Units::GeV) >= presel_ptcut &&
-	   presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
-	  // flag jet as passed this part of preselection
-	  chainPart_passedjets[chainPart_idx].push_back(true);
-	}
-	else {
-	  chainPart_passedjets[chainPart_idx].push_back(false);
-	}
-	
-	if((preseljet.pt() / Gaudi::Units::GeV) < presel_ptcut) {
-	  // no more Preselection jets left with high enough pt
-	  if(chainPart_passedjets[chainPart_idx].size() > chainPart_passedjets_lenmax) {
-	    chainPart_passedjets_lenmax = chainPart_passedjets[chainPart_idx].size();
-	  }
-	  break;
-	}
+        if((preseljet.pt() / Gaudi::Units::GeV) >= presel_ptcut &&
+           presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
+          // flag jet as passed this part of preselection
+          chainPart_passedjets[chainPart_idx].push_back(true);
+        }
+        else {
+          chainPart_passedjets[chainPart_idx].push_back(false);
+        }
+        
+        if((preseljet.pt() / Gaudi::Units::GeV) < presel_ptcut) {
+          // no more Preselection jets left with high enough pt
+          if(chainPart_passedjets[chainPart_idx].size() > chainPart_passedjets_lenmax) {
+            chainPart_passedjets_lenmax = chainPart_passedjets[chainPart_idx].size();
+          }
+          break;
+        }
       }
     }
-							
+
     for( auto& chainPart_passedjets_row : chainPart_passedjets ) {
       // make all rows in the chainPart_jet_matrix equal length
       while(chainPart_passedjets_row.size() < chainPart_passedjets_lenmax) {
-	chainPart_passedjets_row.push_back(false);
+        chainPart_passedjets_row.push_back(false);
       }
     }
     
@@ -385,11 +385,11 @@ bool TrigBtagEmulationTool::allocate_jets_to_chainParts(const std::vector<std::v
     int njet_passed = 0;
     for(bool pass: chainPart_jet_matrix[0]) {
       if(pass) {
-	njet_passed++;
-	if(njet_passed >= multiplicities[0]) {
-	  chainPart_subset_passed.back() = true;
-	  break;
-	}
+        njet_passed++;
+        if(njet_passed >= multiplicities[0]) {
+          chainPart_subset_passed.back() = true;
+          break;
+        }
       }
     }
   }
@@ -410,33 +410,33 @@ bool TrigBtagEmulationTool::allocate_jets_to_chainParts(const std::vector<std::v
       
       std::string subset_str = "";
       for(size_t chainPart_idx = 0; chainPart_idx < chainPart_jet_matrix.size(); ++chainPart_idx) {
-	if(subset[chainPart_idx]) {
-	  subset_str += std::to_string(chainPart_idx);
-	  njets_required_subset += multiplicities[chainPart_idx];
-	  
-	  for(size_t jet_idx = 0; jet_idx < chainPart_jet_matrix[chainPart_idx].size(); ++jet_idx) {
-	    if(chainPart_jet_matrix[chainPart_idx][jet_idx]) {
-	      subset_passedJets[jet_idx] = true;
-	    }
-	  }
-	}
+        if(subset[chainPart_idx]) {
+          subset_str += std::to_string(chainPart_idx);
+          njets_required_subset += multiplicities[chainPart_idx];
+          
+          for(size_t jet_idx = 0; jet_idx < chainPart_jet_matrix[chainPart_idx].size(); ++jet_idx) {
+            if(chainPart_jet_matrix[chainPart_idx][jet_idx]) {
+              subset_passedJets[jet_idx] = true;
+            }
+          }
+        }
       }
       
       int njets_passed_subset = 0;
       for(bool pass: subset_passedJets) {
-	if(pass) {
-	  njets_passed_subset++;
-	}
+        if(pass) {
+          njets_passed_subset++;
+        }
       }
       
       ATH_MSG_DEBUG( "Subset {" << subset_str << "} requires " << njets_required_subset << " jets, and has " << njets_passed_subset << " jets passed." );
       
       if(njets_passed_subset < njets_required_subset) {
-	chainPart_subset_passed.push_back(false);
-	break;
+        chainPart_subset_passed.push_back(false);
+        break;
       }
       else {
-	chainPart_subset_passed.push_back(true);
+        chainPart_subset_passed.push_back(true);
       }
     }
   }
@@ -470,6 +470,46 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
   const std::vector<double>& gsc_pt_vec = chain.gsc_pt();
 
   std::vector<std::vector<bool>> chainPart_passedjets(idx_end - idx_begin);
+
+  std::vector<const TrigBtagEmulationJet*> mainJets, gscJets_indexed, splitJets_indexed;
+  mainJets.reserve(jets.size());
+  for (const auto &jet : jets)
+    mainJets.push_back(&jet);
+
+  if (m_LHCPeriod == 2) {
+    // Multiple jet collections in Run2.
+    // Re-index split and GSC jets to match the a4tcemsubjesJets.
+    // This index will be used in the chainPart_jet_matrix to calculate the emulation result
+    gscJets_indexed.reserve(jets.size());
+    splitJets_indexed.reserve(jets.size());
+
+    for (const auto &jet : jets) {
+      bool splitJetFound = false;
+      bool gscJetFound = false;
+
+      if (splitJets) {
+        for (const auto &splitJet : *splitJets) {
+          if (jet.p4().DeltaR(splitJet.p4()) < 0.05) {
+            splitJets_indexed.push_back(&splitJet);
+            splitJetFound = true;
+            break;
+          }
+        }
+      }
+      if (!splitJetFound) splitJets_indexed.push_back(nullptr);
+
+      if (gscJets) {
+        for (const auto &gscJet : *gscJets) {
+          if (jet.p4().DeltaR(gscJet.p4()) < 0.05) {
+            gscJets_indexed.push_back(&gscJet);
+            gscJetFound = true;
+            break;
+          }
+        }
+        if (!gscJetFound) gscJets_indexed.push_back(nullptr);
+      }
+    }
+  }
   
   for(size_t chainPart_idx = 0; chainPart_idx < chainPart_passedjets.size(); chainPart_idx++) {
     double jet_pt = jet_pt_vec[chainPart_idx +idx_begin];
@@ -478,22 +518,21 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
     double jvtcut = jvt_vec[chainPart_idx +idx_begin];
     std::string tagger = tagger_vec[chainPart_idx +idx_begin];
     std::string chain_part_name = chainPartName_vec[chainPart_idx +idx_begin];
-    const std::vector<TrigBtagEmulationJet>* jets_to_use = &jets;
+    std::vector<const TrigBtagEmulationJet*> jets_to_use = mainJets;
 
     // Set the jet collection to use based on the chain part name
-    // TODO: GSC should have priority
     if (chain_part_name.find("gsc") != std::string::npos) {
       jet_pt = gsc_pt_vec[chainPart_idx +idx_begin];
       if (gscJets) {
-        jets_to_use = gscJets;
+        jets_to_use = gscJets_indexed;
         ATH_MSG_DEBUG("Using GSC jets for chain part: " << chain_part_name);
       } else {
-        ATH_MSG_ERROR("GSC jets not available to emulate chain part: " << chain_part_name << ". Use a4tcemsubjesJets instead. Note that b-tagging emulation may not work.");
+        ATH_MSG_ERROR("GSC jets not available to emulate chain part: " << chain_part_name << ". Use a4tcemsubjesJets instead. Note that jet pT emulation may not be accurate.");
       }
     }
     else if (chain_part_name.find("split") != std::string::npos) {
       if (splitJets) {
-        jets_to_use = splitJets;
+        jets_to_use = splitJets_indexed;
         ATH_MSG_DEBUG("Using Split jets for chain part: " << chain_part_name);
       } else {
         ATH_MSG_ERROR("Split jets not available to emulate chain part: " << chain_part_name << ". Use a4tcemsubjesJets instead. Note that b-tagging emulation may not work.");
@@ -501,22 +540,27 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
     }
     
     ATH_MSG_DEBUG( ">-- " << chain_part_name << ":" );
-    for( const auto& jet : *jets_to_use ) {
+    for( const auto& jet : jets_to_use ) {
+      if (jet == nullptr) {
+        chainPart_passedjets[chainPart_idx].push_back(false);
+        continue;
+      }
+
       bool passedJvt = true;
       if (jvtcut > 0.) {
-        float jvt = jet.jvt();
-        passedJvt = jvt > jvtcut || jet.pt() / Gaudi::Units::GeV > 120. || std::fabs(jet.eta()) > 2.5;
+        float jvt = jet->jvt();
+        passedJvt = jvt > jvtcut || jet->pt() / Gaudi::Units::GeV > 120. || std::fabs(jet->eta()) > 2.5;
       }
       
       if (tagger == "ewTagger") tagger = "newTagger";
-      bool is_bjet = isPassedBTagger(jet, tagger);
+      bool is_bjet = isPassedBTagger(*jet, tagger);
 
-      bool passedPt = jet.pt() > jet_pt;
-      if (m_LHCPeriod == 2) passedPt = jet.et() > jet_pt;
+      bool passedPt = jet->pt() > jet_pt;
+      if (m_LHCPeriod == 2) passedPt = jet->et() > jet_pt;
       
       if(passedPt &&
-	        std::fabs(jet.eta()) > jet_eta_min &&
-	        std::fabs(jet.eta()) < jet_eta_max &&
+	        std::fabs(jet->eta()) > jet_eta_min &&
+	        std::fabs(jet->eta()) < jet_eta_max &&
 	        passedJvt &&
 	        ((tagger != "") ? is_bjet : true) ) {
         // flag jet as passing current chainPart
@@ -526,8 +570,8 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
         chainPart_passedjets[chainPart_idx].push_back(false);
       }
       
-      ATH_MSG_DEBUG( " - pt:" << (jet.pt() / Gaudi::Units::GeV)
-		     << ", eta:" << jet.eta()
+      ATH_MSG_DEBUG( " - pt:" << (jet->pt() / Gaudi::Units::GeV)
+		     << ", eta:" << jet->eta()
 		     << ", passedJvt:" << (passedJvt?"Y":"N")
 		     << ((tagger != "") ? ", btag:" : "") << ((tagger != "") ? (is_bjet?"Y":"N") : "")
 		     << ", pass:" << (chainPart_passedjets[chainPart_idx].back()?"Y":"N")
