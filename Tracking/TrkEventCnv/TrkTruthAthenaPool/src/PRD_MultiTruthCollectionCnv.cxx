@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PRD_MultiTruthCollectionCnv.h"
@@ -27,9 +27,9 @@ PRD_MultiTruthCollectionCnv::PRD_MultiTruthCollectionCnv(ISvcLocator* svcLoc) :
 //================================================================
 PRD_MultiTruthCollectionPERS* PRD_MultiTruthCollectionCnv::createPersistent(PRD_MultiTruthCollection* trans) {
   MsgStream log(msgSvc(), "PRD_MultiTruthCollectionCnv");
-  log<<MSG::DEBUG<<"Writing PRD_MultiTruthCollection_p3"<<endmsg;
+  log<<MSG::DEBUG<<"Writing PRD_MultiTruthCollection_p4"<<endmsg;
   PRD_MultiTruthCollectionPERS* pers=new PRD_MultiTruthCollectionPERS();
-  m_converter_p3.transToPers(trans,pers,log);
+  m_converter_p4.transToPers(trans,pers,log);
   return pers;
 }
 
