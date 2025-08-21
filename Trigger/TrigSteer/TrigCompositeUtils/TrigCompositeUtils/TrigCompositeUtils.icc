@@ -3,6 +3,7 @@
 */
 
 #include "AsgMessaging/MessageCheck.h"
+#include "AsgTools/CurrentContext.h"
 #include <regex>
 
 namespace TrigCompositeUtils {
@@ -56,13 +57,14 @@ namespace TrigCompositeUtils {
     }
     const bool linkFound = (featureLinks.size() > 0);
     const std::vector<DecisionID> &ids = decisionIDs(start);
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     for (const ElementLink<T>& featureLink : featureLinks) {
       // Check for duplicates
       bool duplicate = false;
       for (LinkInfo<T> &info : links)
       {
         if (info.link == featureLink) {
-          const auto  A = decisionToElementLink(start);
+          const auto  A = decisionToElementLink(start, ctx);
           const auto& B = info.link;
           if (info.source != start 
             && linkName != initialRoIString() // Allow multiple nodes to reference the same initial ROI

@@ -172,7 +172,7 @@ namespace TrigCompositeUtils {
 
   void NavGraph::recursivePrintNavPath(const NavGraphNode& nav, size_t level, MsgStream& log, MSG::Level msgLevel) const {
     const Decision* node = nav.node();
-    const ElementLink<DecisionContainer> nodeEL = decisionToElementLink( node );
+    const ElementLink<DecisionContainer> nodeEL = decisionToElementLink( node, Gaudi::Hive::currentContext() );
     std::stringstream ss;
     for (size_t i = 0; i < level; ++i) {
       ss << "  ";
