@@ -22,8 +22,9 @@ class RatesBins(Enum):
   UNIQUE_BIN = 7
 
 class RatesTrigger:
-  def __init__(self, name, metadata, data, masterGroup):
+  def __init__(self, name, metadata, data, masterGroup, suffix):
     self.name = name
+    self.chainName = self.name.removesuffix(suffix)
     # Total weighted events passing the trigger
     self.passWeighted    = data.GetBinContent(RatesBins.PASS_WEIGHTED_OR_BIN.value)
     self.passWeightedErr = data.GetBinError(RatesBins.PASS_WEIGHTED_OR_BIN.value)
@@ -50,7 +51,7 @@ class RatesTrigger:
     self.activeWeightedErr = data.GetBinError(RatesBins.ACTIVE_WEIGHTED_BIN.value)
 
     # Wall-time in seconds. No error on this.
-    self.rateDenominator = metadata['normalisation']
+    self.rateDenominator = metadata['normalisation'+suffix]
     if not self.rateDenominator:
       log.error("Normalisation factor not found in the input ntuple! Check if it's not corrupted")
       raise ValueError
@@ -72,11 +73,13 @@ class RatesTrigger:
 
     # Some menu-derived metadata
     prescales = metadata['prescales']
+
     lowers = metadata['lowers']
     express = metadata['express']
-    self.prescale = prescales.get(name, 1)
-    self.lower = lowers.get(name)
-    self.expressPrescale = express.get(name)
+
+    self.prescale = prescales.get(self.chainName,1)
+    self.lower = lowers.get(self.chainName)
+    self.expressPrescale = express.get(self.chainName)
 
     # Unique rate requires the subtraction of the (all minus this trigger) total from the (all triggers) total
     # The error is taken as a fractional error on the main rate calc

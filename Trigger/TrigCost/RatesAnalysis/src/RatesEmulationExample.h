@@ -20,6 +20,11 @@ class RatesEmulationExample: public ::RatesAnalysisAlg {
 
   Gaudi::Property<float> m_lumi{this, "TargetLuminosity", 2e34, "Targer inst. luminosity, assuming full ring."};
 
+  SG::ReadHandleKey<xAOD::JetContainer> m_jet_RHKey{this, "JetsKey", "AntiKt4EMTopoJets", "Key for the jet collection"};
+  SG::ReadHandleKey<xAOD::ElectronContainer> m_electron_RHKey{this, "ElectronsKey", "Electrons", "Key for the electrons collection"};
+  virtual StatusCode initialize_extra_content() override;
+
+
 }; 
 
 #endif //> !RATESANALYSIS_RATESEMULATIONEXAMPLE_H

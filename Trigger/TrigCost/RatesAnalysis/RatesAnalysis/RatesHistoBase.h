@@ -100,8 +100,11 @@ class RatesHistoBase : public AthMessaging {
   const std::string& getExtrapolationFactorString(ExtrapStrat_t strat) const;
   double getExtrapolationFactor(const WeightingValuesSummary_t& weights, const ExtrapStrat_t strat) const;
 
-  static bool isZero(double v) { return fabs(v) < 1e-10; } //<! Helper fn
-  static bool isNotPositive(double v) { return v < 1e-10; } //<! Helper fn to check if the value is non positive = trigger is disabled
+  static bool isZero(double v) { return abs(v) < std::numeric_limits<double>::min(); } //<! Helper fn
+  static bool isNotPositive(double v) { return v < std::numeric_limits<double>::min(); } //<! Helper fn to check if the value is non positive = trigger is disabled
+  void setDataName(const std::string& newName);
+  void setRateVsMuName(const std::string& newName);
+  void setRateVsTrainName(const std::string& newName);
 
  protected:
 
