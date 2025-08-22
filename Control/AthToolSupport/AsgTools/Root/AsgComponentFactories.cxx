@@ -73,6 +73,12 @@ namespace asg
       for (const auto& p : paths)
       {
         if (p.empty()) continue;
+        std::error_code ec;
+        if (!std::filesystem::exists(p, ec))
+        {
+          ANA_MSG_DEBUG ("skipping non-existent directory for component factory maps: " << p);
+          continue;
+        }
         ANA_MSG_DEBUG ("checking for component factory map in " << p);
         // find all files that end in ".asgcomponents"
         for (auto const& entry : std::filesystem::directory_iterator(p))
