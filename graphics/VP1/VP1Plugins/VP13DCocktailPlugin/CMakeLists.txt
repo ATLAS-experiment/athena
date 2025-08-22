@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP13DCocktailPlugin )
@@ -26,8 +26,10 @@ atlas_add_library( ${pkgName} ${pkgName}/VP13DCocktail*.h src/VP13DCocktail*.cxx
 )
 
 # Enable Qt support for cppcheck:
-set_property( TARGET ${pkgName}
-   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET ${pkgName}
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()
 
 # Make the package target depend on this one:
 #add_dependencies( Package_VP13DCocktailPlugin Package_VP1PlugUtils Package_VP1PRDSystems Package_VP1TrackSystems Package_VP1AODSystems Package_VP1BPhysSystems )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1RawDataSystems )
@@ -28,5 +28,7 @@ atlas_add_library( VP1RawDataSystems VP1RawDataSystems/*.h src/*.h src/*.cxx src
                    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${GEOMODEL_LIBRARIES} EventPrimitives LUCID_RawEvent GaudiKernel InDetIdentifier InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry InDetBCM_RawData InDetRawData VP1HEPVis VP1Utils )
 
 # Enable Qt support for cppcheck:
-set_property( TARGET VP1RawDataSystems
-   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1RawDataSystems
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()
