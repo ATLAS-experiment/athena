@@ -6,7 +6,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-from ROOT import egammaPID
 
 def same( val , tool):
   return [val]*( len( tool.EtaBins ) - 1 )
@@ -320,18 +319,17 @@ def TrigEgammaPrecisionElectronDNNSelectorCfg(flags, name='TrigEgammaPrecisionEl
     if not ConfigFilePath:
       ConfigFilePath = flags.Trigger.egamma.dnnVersion
   
-    import collections.abc
-    SelectorNames = collections.OrderedDict({
+    SelectorNames = {
           'dnntight'  :'AsgElectronDNNTightSelector',
           'dnnmedium' :'AsgElectronDNNMediumSelector',
           'dnnloose'  :'AsgElectronDNNLooseSelector',
-          })
+    }
 
-    ElectronToolConfigFile = collections.OrderedDict({
+    ElectronToolConfigFile = {
           'dnntight'  :'ElectronDNNMulticlassTight.conf',
           'dnnmedium' :'ElectronDNNMulticlassMedium.conf',
           'dnnloose'  :'ElectronDNNMulticlassLoose.conf',
-          })
+    }
 
     for dnnname, name in SelectorNames.items():
       SelectorTool = CompFactory.AsgElectronSelectorTool(name)
@@ -350,20 +348,19 @@ def TrigEgammaPrecisionElectronLHSelectorCfg(flags, name='TrigEgammaPrecisionEle
     acc = ComponentAccumulator()
 
     # Must be careful that order matches LHNames at the start of the file!
-    import collections.abc
-    SelectorConfigFiles = collections.OrderedDict({
+    SelectorConfigFiles = {
         'lhtight'  : 'ElectronLikelihoodTightTriggerConfig',
         'lhmedium' : 'ElectronLikelihoodMediumTriggerConfig',
         'lhloose'  : 'ElectronLikelihoodLooseTriggerConfig',
         'lhvloose' : 'ElectronLikelihoodVeryLooseTriggerConfig'
-    })
+    }
 
-    VariationConfigInfos = collections.OrderedDict({
+    VariationConfigInfos = {
         '_default'     : {},
         '_nopix'       : {},
         '_nogsf'       : {},
         '_nogsf_nopix' : {}
-    })
+    }
 
     VariationConfigInfos['_default']['postfix']      = ''
     VariationConfigInfos['_nopix']['postfix']        = '_NoPix'
@@ -404,6 +401,7 @@ def TrigEgammaPrecisionElectronLHSelectorCfg(flags, name='TrigEgammaPrecisionEle
 def TrigEgammaPrecisionElectronCBSelectorCfg(flags, name='TrigEgammaPrecisionElectronCBSelector', ConfigFilePath=None):
     acc = ComponentAccumulator()
     from ElectronPhotonSelectorTools.TrigEGammaPIDdefs import BitDefElectron
+    from ROOT import egammaPID
 
     ElectronLooseHI = (0
             | 1 << BitDefElectron.ClusterEtaRange_Electron
@@ -427,12 +425,11 @@ def TrigEgammaPrecisionElectronCBSelectorCfg(flags, name='TrigEgammaPrecisionEle
     if not ConfigFilePath:
         ConfigFilePath = flags.Trigger.egamma.electronHIPidVersion
 
-    from collections import OrderedDict
-    SelectorNames = OrderedDict({
+    SelectorNames = {
           'medium': 'AsgElectronIsEMSelectorHIMedium',
           'loose': 'AsgElectronIsEMSelectorHILoose',
           'mergedtight'  : 'AsgElectronIsEMSelectorMergedTight',
-    })
+    }
 
     ElectronToolConfigFile = {
           'medium': 'ElectronIsEMMediumSelectorCutDefs.conf',
