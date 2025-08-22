@@ -29,9 +29,9 @@ def trigger_set(config, triggerChainsPerYear, includeAllYearsPerRun, log):
         triggers.update(get_year_data(triggerChainsPerYear, 2017))
     elif config.campaign() is Campaign.MC20e:
         triggers.update(get_year_data(triggerChainsPerYear, 2018))
-    elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
+    elif config.campaign() is Campaign.MC23a:
         triggers.update(get_year_data(triggerChainsPerYear, 2022))
-    elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
+    elif config.campaign() is Campaign.MC23d:
         triggers.update(get_year_data(triggerChainsPerYear, 2023))
     else:
         log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))

@@ -507,9 +507,9 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 triggers.update(self.get_year_data(self.triggerChainsPerYear, 2017))
             elif config.campaign() is Campaign.MC20e:
                 triggers.update(self.get_year_data(self.triggerChainsPerYear, 2018))
-            elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
+            elif config.campaign() is Campaign.MC23a:
                 triggers.update(self.get_year_data(self.triggerChainsPerYear, 2022))
-            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
+            elif config.campaign() is Campaign.MC23d:
                 triggers.update(self.get_year_data(self.triggerChainsPerYear, 2023))
             else:
                 log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))
