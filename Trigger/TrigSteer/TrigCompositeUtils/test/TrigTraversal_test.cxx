@@ -64,7 +64,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
   electronContainerKey.initialize().ignore();
   muonContainerKey.initialize().ignore();
 
-  SG::WriteHandle<DecisionContainer> decisionContainer = createAndStore( decisionContainerKey);
+  SG::WriteHandle<DecisionContainer> decisionContainer = createAndStore( decisionContainerKey, ctx1 );
   DecisionContainer* decisionContainerPtr = decisionContainer.ptr();
 
   SG::WriteHandle<xAOD::ElectronContainer> electronContainer = createAndStoreWithAux<xAOD::ElectronContainer, xAOD::ElectronAuxContainer>( electronContainerKey, ctx1 );
@@ -146,29 +146,29 @@ int main ATLAS_NOT_THREAD_SAFE () {
     addDecisionID(HLT_mu_em_chain, MU0);
 
     Decision* MU_F_1__MU0 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(MU_F_1__MU0, MU0);
+    linkToPrevious(MU_F_1__MU0, MU0, ctx1);
     addDecisionID(HLT_mufast_chain, MU_F_1__MU0);
     addDecisionID(HLT_mu_chain, MU_F_1__MU0);
 
     Decision* MUEM_F_1__MU0 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(MUEM_F_1__MU0, MU0);
+    linkToPrevious(MUEM_F_1__MU0, MU0, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_F_1__MU0);
 
     Decision* MU_IM_1__MU0 = newDecisionIn(decisionContainerPtr, inputMakerNodeName());
-    linkToPrevious(MU_IM_1__MU0, MU_F_1__MU0);
-    linkToPrevious(MU_IM_1__MU0, MUEM_F_1__MU0);
+    linkToPrevious(MU_IM_1__MU0, MU_F_1__MU0, ctx1);
+    linkToPrevious(MU_IM_1__MU0, MUEM_F_1__MU0, ctx1);
     addDecisionID(HLT_mufast_chain, MU_IM_1__MU0);
     addDecisionID(HLT_mu_chain, MU_IM_1__MU0);
     addDecisionID(HLT_mu_em_chain, MU_IM_1__MU0);
 
     Decision* MU_H_1__MU0 = newDecisionIn(decisionContainerPtr, hypoAlgNodeName());
-    linkToPrevious(MU_H_1__MU0, MU_IM_1__MU0);
+    linkToPrevious(MU_H_1__MU0, MU_IM_1__MU0, ctx1);
     MU_H_1__MU0->setObjectLink<xAOD::MuonContainer>(featureString(), rec_1__mu0_link);
     // Fails HLT_mufast_chain
     // Fails HLT_mu_chain
 
     Decision* MUEM_CH_1__MU0 = newDecisionIn(decisionContainerPtr, comboHypoAlgNodeName());
-    linkToPrevious(MUEM_CH_1__MU0, MU_H_1__MU0);
+    linkToPrevious(MUEM_CH_1__MU0, MU_H_1__MU0, ctx1);
     // Note: Combo hypo does not re-link to feature.
     // Fails HLT_mu_em_chain
   }
@@ -185,23 +185,23 @@ int main ATLAS_NOT_THREAD_SAFE () {
     addDecisionID(HLT_mu_em_chain, MU1);
 
     Decision* MU_F_1__MU1 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(MU_F_1__MU1, MU1);
+    linkToPrevious(MU_F_1__MU1, MU1, ctx1);
     addDecisionID(HLT_mufast_chain, MU_F_1__MU1);
     addDecisionID(HLT_mu_chain, MU_F_1__MU1);
 
     Decision* MUEM_F_1__MU1 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(MUEM_F_1__MU1, MU1);
+    linkToPrevious(MUEM_F_1__MU1, MU1, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_F_1__MU1);
 
     Decision* MU_IM_1__MU1 = newDecisionIn(decisionContainerPtr, inputMakerNodeName());
-    linkToPrevious(MU_IM_1__MU1, MU_F_1__MU1);
-    linkToPrevious(MU_IM_1__MU1, MUEM_F_1__MU1);
+    linkToPrevious(MU_IM_1__MU1, MU_F_1__MU1, ctx1);
+    linkToPrevious(MU_IM_1__MU1, MUEM_F_1__MU1, ctx1);
     addDecisionID(HLT_mufast_chain, MU_IM_1__MU1);
     addDecisionID(HLT_mu_chain, MU_IM_1__MU1);
     addDecisionID(HLT_mu_em_chain, MU_IM_1__MU1);
 
     Decision* MU_H_1__MU1 = newDecisionIn(decisionContainerPtr, hypoAlgNodeName());
-    linkToPrevious(MU_H_1__MU1, MU_IM_1__MU1);
+    linkToPrevious(MU_H_1__MU1, MU_IM_1__MU1, ctx1);
     MU_H_1__MU1->setObjectLink<xAOD::MuonContainer>(featureString(), rec_1__mu1_link);
     addDecisionID(HLT_mufast_chain, MU_H_1__MU1);
     addDecisionID(HLT_mu_chain, MU_H_1__MU1);
@@ -210,29 +210,29 @@ int main ATLAS_NOT_THREAD_SAFE () {
     Decision* MU_SUMF_H_1__MU1 = newDecisionIn(decisionContainerPtr, summaryFilterNodeName());
     addDecisionID(HLT_mufast_chain, MU_SUMF_H_1__MU1);
     addDecisionID(HLT_mufast_chain, END);
-    linkToPrevious(MU_SUMF_H_1__MU1, MU_H_1__MU1);
-    linkToPrevious(END, MU_SUMF_H_1__MU1);
+    linkToPrevious(MU_SUMF_H_1__MU1, MU_H_1__MU1, ctx1);
+    linkToPrevious(END, MU_SUMF_H_1__MU1, ctx1);
 
     Decision* MUEM_CH_1__MU1 = newDecisionIn(decisionContainerPtr, comboHypoAlgNodeName());
-    linkToPrevious(MUEM_CH_1__MU1, MU_H_1__MU1);
+    linkToPrevious(MUEM_CH_1__MU1, MU_H_1__MU1, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_CH_1__MU1);
 
     Decision* MU_F_2__MU1 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(MU_F_2__MU1, MU_H_1__MU1);
+    linkToPrevious(MU_F_2__MU1, MU_H_1__MU1, ctx1);
     addDecisionID(HLT_mu_chain, MU_F_2__MU1);
 
     Decision* MUEM_F_2__MU1 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(MUEM_F_2__MU1, MUEM_CH_1__MU1);
+    linkToPrevious(MUEM_F_2__MU1, MUEM_CH_1__MU1, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_F_2__MU1);
 
     Decision* MU_IM_2__MU1 = newDecisionIn(decisionContainerPtr, inputMakerNodeName());
-    linkToPrevious(MU_IM_2__MU1, MU_F_2__MU1);
-    linkToPrevious(MU_IM_2__MU1, MUEM_F_2__MU1);
+    linkToPrevious(MU_IM_2__MU1, MU_F_2__MU1, ctx1);
+    linkToPrevious(MU_IM_2__MU1, MUEM_F_2__MU1, ctx1);
     addDecisionID(HLT_mu_chain, MU_IM_2__MU1);
     addDecisionID(HLT_mu_em_chain, MU_IM_2__MU1);
 
     Decision* MU_H_2__MU1 = newDecisionIn(decisionContainerPtr, hypoAlgNodeName());
-    linkToPrevious(MU_H_2__MU1, MU_IM_2__MU1);
+    linkToPrevious(MU_H_2__MU1, MU_IM_2__MU1, ctx1);
     MU_H_2__MU1->setObjectLink<xAOD::MuonContainer>(featureString(), rec_2__mu1_link);
     addDecisionID(HLT_mu_chain, MU_H_2__MU1);
     addDecisionID(HLT_mu_em_chain, MU_H_2__MU1);
@@ -240,18 +240,18 @@ int main ATLAS_NOT_THREAD_SAFE () {
     Decision* MU_SUMF_H_2__MU1 = newDecisionIn(decisionContainerPtr, summaryFilterNodeName());
     addDecisionID(HLT_mu_chain, MU_SUMF_H_2__MU1);
     addDecisionID(HLT_mu_chain, END);
-    linkToPrevious(MU_SUMF_H_2__MU1, MU_H_2__MU1);
-    linkToPrevious(END, MU_SUMF_H_2__MU1);
+    linkToPrevious(MU_SUMF_H_2__MU1, MU_H_2__MU1, ctx1);
+    linkToPrevious(END, MU_SUMF_H_2__MU1, ctx1);
 
     Decision* MUEM_CH_2__MU1 = newDecisionIn(decisionContainerPtr, comboHypoAlgNodeName());
-    linkToPrevious(MUEM_CH_2__MU1, MU_H_2__MU1);
+    linkToPrevious(MUEM_CH_2__MU1, MU_H_2__MU1, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_CH_2__MU1);
     // HLT_mu_em_chain passes the event
     Decision* MU_SUMF_CH_2__MU1 = newDecisionIn(decisionContainerPtr, summaryFilterNodeName());
     addDecisionID(HLT_mu_em_chain, MU_SUMF_CH_2__MU1);
     addDecisionID(HLT_mu_em_chain, END);
-    linkToPrevious(MU_SUMF_CH_2__MU1, MUEM_CH_2__MU1);
-    linkToPrevious(END, MU_SUMF_CH_2__MU1);
+    linkToPrevious(MU_SUMF_CH_2__MU1, MUEM_CH_2__MU1, ctx1);
+    linkToPrevious(END, MU_SUMF_CH_2__MU1, ctx1);
   }
 
 
@@ -265,45 +265,45 @@ int main ATLAS_NOT_THREAD_SAFE () {
     addDecisionID(HLT_mu_em_chain, EM0);
 
     Decision* EM_F_1__EM0 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(EM_F_1__EM0, EM0);
+    linkToPrevious(EM_F_1__EM0, EM0, ctx1);
     addDecisionID(HLT_em_chain, EM_F_1__EM0);
 
     Decision* MUEM_F_1__EM0 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(MUEM_F_1__EM0, EM0);
+    linkToPrevious(MUEM_F_1__EM0, EM0, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_F_1__EM0);
 
     Decision* EM_IM_1__EM0 = newDecisionIn(decisionContainerPtr, inputMakerNodeName());
-    linkToPrevious(EM_IM_1__EM0, EM_F_1__EM0);
-    linkToPrevious(EM_IM_1__EM0, MUEM_F_1__EM0);
+    linkToPrevious(EM_IM_1__EM0, EM_F_1__EM0, ctx1);
+    linkToPrevious(EM_IM_1__EM0, MUEM_F_1__EM0, ctx1);
     addDecisionID(HLT_em_chain, EM_IM_1__EM0);
     addDecisionID(HLT_mu_em_chain, EM_IM_1__EM0);
 
     Decision* EM_H_1__EM0 = newDecisionIn(decisionContainerPtr, hypoAlgNodeName());
-    linkToPrevious(EM_H_1__EM0, EM_IM_1__EM0);
+    linkToPrevious(EM_H_1__EM0, EM_IM_1__EM0, ctx1);
     EM_H_1__EM0->setObjectLink<xAOD::ElectronContainer>(featureString(), rec_1__em0_link);
     addDecisionID(HLT_em_chain, EM_H_1__EM0);
     addDecisionID(HLT_mu_em_chain, EM_H_1__EM0);
 
     Decision* MUEM_CH_1__EM0 = newDecisionIn(decisionContainerPtr, comboHypoAlgNodeName());
-    linkToPrevious(MUEM_CH_1__EM0, EM_H_1__EM0);
+    linkToPrevious(MUEM_CH_1__EM0, EM_H_1__EM0, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_CH_1__EM0);
 
     Decision* EM_F_2__EM0 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(EM_F_2__EM0, EM_H_1__EM0);
+    linkToPrevious(EM_F_2__EM0, EM_H_1__EM0, ctx1);
     addDecisionID(HLT_em_chain, EM_F_2__EM0);
 
     Decision* MUEM_F_2__EM0 = newDecisionIn(decisionContainerPtr, filterNodeName());
-    linkToPrevious(MUEM_F_2__EM0, MUEM_CH_1__EM0);
+    linkToPrevious(MUEM_F_2__EM0, MUEM_CH_1__EM0, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_F_2__EM0);
 
     Decision* EM_IM_2__EM0 = newDecisionIn(decisionContainerPtr, inputMakerNodeName());
-    linkToPrevious(EM_IM_2__EM0, EM_F_2__EM0);
-    linkToPrevious(EM_IM_2__EM0, MUEM_F_2__EM0);
+    linkToPrevious(EM_IM_2__EM0, EM_F_2__EM0, ctx1);
+    linkToPrevious(EM_IM_2__EM0, MUEM_F_2__EM0, ctx1);
     addDecisionID(HLT_em_chain, EM_IM_2__EM0);
     addDecisionID(HLT_mu_em_chain, EM_IM_2__EM0);
 
     Decision* EM_H_2__EM0 = newDecisionIn(decisionContainerPtr, hypoAlgNodeName());
-    linkToPrevious(EM_H_2__EM0, EM_IM_2__EM0);
+    linkToPrevious(EM_H_2__EM0, EM_IM_2__EM0, ctx1);
     EM_H_2__EM0->setObjectLink<xAOD::ElectronContainer>(featureString(), rec_2__em0_link);
     addDecisionID(HLT_em_chain, EM_H_2__EM0);
     addDecisionID(HLT_mu_em_chain, EM_H_2__EM0);
@@ -311,18 +311,18 @@ int main ATLAS_NOT_THREAD_SAFE () {
     Decision* EM_SUMF_H_2__EM0 = newDecisionIn(decisionContainerPtr, summaryFilterNodeName());
     addDecisionID(HLT_em_chain, EM_SUMF_H_2__EM0);
     addDecisionID(HLT_em_chain, END);
-    linkToPrevious(EM_SUMF_H_2__EM0, EM_H_2__EM0);
-    linkToPrevious(END, EM_SUMF_H_2__EM0);
+    linkToPrevious(EM_SUMF_H_2__EM0, EM_H_2__EM0, ctx1);
+    linkToPrevious(END, EM_SUMF_H_2__EM0, ctx1);
 
     Decision* MUEM_CH_2__EM0 = newDecisionIn(decisionContainerPtr, comboHypoAlgNodeName());
-    linkToPrevious(MUEM_CH_2__EM0, EM_H_2__EM0);
+    linkToPrevious(MUEM_CH_2__EM0, EM_H_2__EM0, ctx1);
     addDecisionID(HLT_mu_em_chain, MUEM_CH_2__EM0);
     // HLT_mu_em_chain passes the event
     Decision* EM_SUMF_CH_2__EM0 = newDecisionIn(decisionContainerPtr, summaryFilterNodeName());
     addDecisionID(HLT_mu_em_chain, EM_SUMF_CH_2__EM0);
     addDecisionID(HLT_mu_em_chain, END);
-    linkToPrevious(EM_SUMF_CH_2__EM0, MUEM_CH_2__EM0);
-    linkToPrevious(END, EM_SUMF_CH_2__EM0);
+    linkToPrevious(EM_SUMF_CH_2__EM0, MUEM_CH_2__EM0, ctx1);
+    linkToPrevious(END, EM_SUMF_CH_2__EM0, ctx1);
   }
 
   // Apply uniqueness

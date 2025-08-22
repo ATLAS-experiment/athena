@@ -57,8 +57,8 @@ int main ATLAS_NOT_THREAD_SAFE () {
   std::cout << "initialize SG::WriteHandleKey<DecisionContainer> whkT" << std::endl;
   assert( whkT.initialize().isSuccess() );
   std::cout << "call createAndStore( whkT ) with default context, twice" << std::endl;
-  SG::WriteHandle<DecisionContainer> whT1 = createAndStore( whkT );
-  SG::WriteHandle<DecisionContainer> whT2 = createAndStore( whkT );
+  SG::WriteHandle<DecisionContainer> whT1 = createAndStore( whkT, ctx );
+  SG::WriteHandle<DecisionContainer> whT2 = createAndStore( whkT, ctx );
   // There will be WARNING ERROR and FATAL messages from the above line
   std::cout << "handle name \"" << whT1.name() << "\" isPresent " << whT1.isPresent()<< " isValid " << whT1.isValid() << std::endl;
   std::cout << "handle name \"" << whT2.name() << "\" isPresent " << whT2.isPresent()<< " isValid " << whT2.isValid() << std::endl;
@@ -70,7 +70,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
   std::cout << "initialize SG::WriteHandleKey<DecisionContainer> whk1" << std::endl;
   assert( whk1.initialize().isSuccess() );
   std::cout << "call createAndStore( whk1 ) with default context" << std::endl;
-  SG::WriteHandle<DecisionContainer> wh1 = createAndStore( whk1 );
+  SG::WriteHandle<DecisionContainer> wh1 = createAndStore( whk1, ctx );
   std::cout << "handle name " << wh1.name() << " store " << wh1.store() << std::endl;
   VALUE( wh1.store() ) EXPECTED ( "StoreGateSvc_Impl" );
   assert( wh1.isValid() );

@@ -26,14 +26,14 @@
 #include "DecisionHandling/DebugComboHypoTool.h"
 #include "DecisionHandling/ComboHypo.h"
 
-void test_set_pass(HLT::Identifier id, TrigCompositeUtils::Decision* d, Combo::LegDecisionsMap& ldm) {
+void test_set_pass(const EventContext& ctx, HLT::Identifier id, TrigCompositeUtils::Decision* d, Combo::LegDecisionsMap& ldm) {
   // Set the DecisionObject as having passed this leg.
   // In the real trigger, this happens in the chain's (or chain leg's) HypoTool, which runs in the HypoAlg prior to the ComboHypo
   TrigCompositeUtils::addDecisionID(id, d); 
   // Register the DecisionObject against the chain ID (or chain leg ID) 'id' in the Combo::LegDecisionsMap
   // In the real trigger, this happens in the ComboHypo and is the format used to communicate which decision objects are active on which legs
   // to the ComboHypo's ComboHypoTools (one per combined chain which needs to apply cuts which cover >1 legs, and/or >1 physics object per leg)
-  ldm[id].push_back( TrigCompositeUtils::decisionToElementLink(d) );
+  ldm[id].push_back( TrigCompositeUtils::decisionToElementLink(d, ctx) );
 }
 
 /// @brief Test the ComboHypoTool class by simulating the execution of a variety of single- and multi-leg trigger topologies over 
@@ -180,9 +180,9 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_e25 = HLT::Identifier("HLT_e25");
 
   // Set the result of the HLT_e25 HypoTool
-  test_set_pass(HLT_e25, electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
-  test_set_pass(HLT_e25, electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
-  test_set_pass(HLT_e25, electronDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV electron
+  test_set_pass(ctx, HLT_e25, electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, HLT_e25, electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
+  test_set_pass(ctx, HLT_e25, electronDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV electron
 
   //
   // SETUP: HLT_e25_mu35. 3Choose1 * 2Choose1 = 6 combinations
@@ -190,13 +190,13 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_e25_mu35 = HLT::Identifier("HLT_e25_mu35");
 
   // Set the result of the leg000_HLT_e25_mu35 HypoTool
-  test_set_pass(createLegName(HLT_e25_mu35, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
-  test_set_pass(createLegName(HLT_e25_mu35, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
-  test_set_pass(createLegName(HLT_e25_mu35, 0), electronDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e25_mu35, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e25_mu35, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e25_mu35, 0), electronDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV electron
 
   // Set the result of the leg001_HLT_e25_mu35 HypoTool 
-  test_set_pass(createLegName(HLT_e25_mu35, 1), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(createLegName(HLT_e25_mu35, 1), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e25_mu35, 1), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e25_mu35, 1), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
 
   //
   // SETUP: HLT_e35_e35. 2Choose1 * 2Choose1 = 4 combinations
@@ -204,12 +204,12 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_e35_e35 = HLT::Identifier("HLT_e35_e35");
 
   // Set the result of the leg000_HLT_e35_e35 HypoTool
-  test_set_pass(createLegName(HLT_e35_e35, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
-  test_set_pass(createLegName(HLT_e35_e35, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e35_e35, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e35_e35, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
 
   // Set the result of the leg001_HLT_e35_e35 HypoTool 
-  test_set_pass(createLegName(HLT_e35_e35, 1), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
-  test_set_pass(createLegName(HLT_e35_e35, 1), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e35_e35, 1), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e35_e35, 1), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
 
   //
   // SETUP: HLT_2mu15. 4Choose2 = 6 combinations
@@ -217,10 +217,10 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_2mu15 = HLT::Identifier("HLT_2mu15");
 
   // Set the result of the HLT_2mu15 HypoTool 
-  test_set_pass(HLT_2mu15, muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(HLT_2mu15, muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
-  test_set_pass(HLT_2mu15, muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
-  test_set_pass(HLT_2mu15, muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
+  test_set_pass(ctx, HLT_2mu15, muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, HLT_2mu15, muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, HLT_2mu15, muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
+  test_set_pass(ctx, HLT_2mu15, muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
 
   //
   // SETUP: HLT_5mu5. 5Choose5 = 1 combination
@@ -228,11 +228,11 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_5mu5 = HLT::Identifier("HLT_5mu5");
 
   // Set the result of the HLT_5mu5 HypoTool 
-  test_set_pass(HLT_5mu5, muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(HLT_5mu5, muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
-  test_set_pass(HLT_5mu5, muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
-  test_set_pass(HLT_5mu5, muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
-  test_set_pass(HLT_5mu5, muonDecisionContainerPtr->at(4), passingLegs); // This is the 10 GeV muon
+  test_set_pass(ctx, HLT_5mu5, muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, HLT_5mu5, muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, HLT_5mu5, muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
+  test_set_pass(ctx, HLT_5mu5, muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
+  test_set_pass(ctx, HLT_5mu5, muonDecisionContainerPtr->at(4), passingLegs); // This is the 10 GeV muon
 
   //
   // SETUP: HLT_6mu5. 5Choose6. Not possible! Should exit before combination loop.
@@ -240,11 +240,11 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_6mu5 = HLT::Identifier("HLT_6mu5");
 
   // Set the result of the HLT_6mu5 HypoTool 
-  test_set_pass(HLT_6mu5, muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(HLT_6mu5, muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
-  test_set_pass(HLT_6mu5, muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
-  test_set_pass(HLT_6mu5, muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
-  test_set_pass(HLT_6mu5, muonDecisionContainerPtr->at(4), passingLegs); // This is the 10 GeV muon
+  test_set_pass(ctx, HLT_6mu5, muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, HLT_6mu5, muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, HLT_6mu5, muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
+  test_set_pass(ctx, HLT_6mu5, muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
+  test_set_pass(ctx, HLT_6mu5, muonDecisionContainerPtr->at(4), passingLegs); // This is the 10 GeV muon
 
   //
   // SETUP: HLT_2e25_3mu15. 3Choose2 * 4Choose3 = 12 combinations
@@ -252,15 +252,15 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_2e25_3mu15 = HLT::Identifier("HLT_2e25_3mu15");
 
   // Set the result of the leg000_HLT_2e25_3mu15 HypoTool
-  test_set_pass(createLegName(HLT_2e25_3mu15, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
-  test_set_pass(createLegName(HLT_2e25_3mu15, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
-  test_set_pass(createLegName(HLT_2e25_3mu15, 0), electronDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV electron
+  test_set_pass(ctx, createLegName(HLT_2e25_3mu15, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, createLegName(HLT_2e25_3mu15, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
+  test_set_pass(ctx, createLegName(HLT_2e25_3mu15, 0), electronDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV electron
 
   // Set the result of the leg001_HLT_2e25_3mu15 HypoTool 
-  test_set_pass(createLegName(HLT_2e25_3mu15, 1), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(createLegName(HLT_2e25_3mu15, 1), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
-  test_set_pass(createLegName(HLT_2e25_3mu15, 1), muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
-  test_set_pass(createLegName(HLT_2e25_3mu15, 1), muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e25_3mu15, 1), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e25_3mu15, 1), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e25_3mu15, 1), muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e25_3mu15, 1), muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
 
   //
   // SETUP: HLT_e35_2mu25_4j5. 2Choose1 * 3Choose2 * 5Choose4 = 30 combinations
@@ -268,20 +268,20 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_e35_2mu25_4j5 = HLT::Identifier("HLT_e35_2mu25_4j5");
 
   // Set the result of the leg000_HLT_e35_2mu25_4j5 HypoTool
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
 
   // Set the result of the leg001_HLT_e35_2mu25_4j5 HypoTool 
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 1), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 1), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 1), muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 1), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 1), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 1), muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
 
   // Set the result of the leg002_HLT_e35_2mu25_4j5 HypoTool 
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV jet
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV jet
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV jet
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV jet
-  test_set_pass(createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(4), passingLegs); // This is the 10 GeV jet
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV jet
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV jet
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV jet
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV jet
+  test_set_pass(ctx, createLegName(HLT_e35_2mu25_4j5, 2), jetDecisionContainerPtr->at(4), passingLegs); // This is the 10 GeV jet
 
   //
   // SETUP: HLT_e35_2mu15_g25. 2Choose1 * 4Choose2 * 0Choose1. Not possible! Should exit before combination loop.
@@ -289,14 +289,14 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_e35_2mu15_g25 = HLT::Identifier("HLT_e35_2mu15_g25");
 
   // Set the result of the leg000_HLT_e35_2mu15_g25 HypoTool
-  test_set_pass(createLegName(HLT_e35_2mu15_g25, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
-  test_set_pass(createLegName(HLT_e35_2mu15_g25, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e35_2mu15_g25, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, createLegName(HLT_e35_2mu15_g25, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
 
   // Set the result of the leg001_HLT_e35_2mu15_g25 HypoTool 
-  test_set_pass(createLegName(HLT_e35_2mu15_g25, 1), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(createLegName(HLT_e35_2mu15_g25, 1), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
-  test_set_pass(createLegName(HLT_e35_2mu15_g25, 1), muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
-  test_set_pass(createLegName(HLT_e35_2mu15_g25, 1), muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e35_2mu15_g25, 1), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e35_2mu15_g25, 1), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e35_2mu15_g25, 1), muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
+  test_set_pass(ctx, createLegName(HLT_e35_2mu15_g25, 1), muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
 
   // Set the result of the leg002_HLT_e35_2mu15_g25 HypoTool 
   // - Nothing
@@ -307,26 +307,26 @@ int main ATLAS_NOT_THREAD_SAFE () {
   HLT::Identifier HLT_2e35_e45_3mu15_mu35_j25 = HLT::Identifier("HLT_2e35_e45_3mu15_mu35_j25");
 
   // Set the result of the leg000_HLT_2e35_e45_3mu15_mu35_j25 HypoTool
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 0), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 0), electronDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV electron
 
   // Set the result of the leg001_HLT_2e35_e45_3mu15_mu35_j25 HypoTool 
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 1), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 1), electronDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV electron
 
   // Set the result of the leg002_HLT_2e35_e45_3mu15_mu35_j25 HypoTool 
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 2), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 2), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 2), muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 2), muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 2), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 2), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 2), muonDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 2), muonDecisionContainerPtr->at(3), passingLegs); // This is the 20 GeV muon
 
   // Set the result of the leg003_HLT_2e35_e45_3mu15_mu35_j25 HypoTool 
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 3), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 3), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 3), muonDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV muon
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 3), muonDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV muon
 
   // Set the result of the leg004_HLT_2e35_e45_3mu15_mu35_j25 HypoTool 
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 4), jetDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV jet
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 4), jetDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV jet
-  test_set_pass(createLegName(HLT_2e35_e45_3mu15_mu35_j25, 4), jetDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV jet
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 4), jetDecisionContainerPtr->at(0), passingLegs); // This is the 50 GeV jet
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 4), jetDecisionContainerPtr->at(1), passingLegs); // This is the 40 GeV jet
+  test_set_pass(ctx, createLegName(HLT_2e35_e45_3mu15_mu35_j25, 4), jetDecisionContainerPtr->at(2), passingLegs); // This is the 30 GeV jet
 
   //
   // TEST: Each tool. Reference file based validation
