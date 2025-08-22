@@ -91,7 +91,7 @@ StatusCode LArCaliWaveBuilder::initialize()
   if ( m_isSC ) {
     const LArOnline_SuperCellID* ll;
     ATH_CHECK( detStore()->retrieve(ll, "LArOnline_SuperCellID") );
-    m_onlineID = (const LArOnlineID_Base*)ll;
+    m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG(" Found the LArOnline_SuperCellID helper. ");
   } else { // m_isSC
     const LArOnlineID* ll;
