@@ -11,7 +11,6 @@ __author__  = "G.Unal"
 
 import sys, os
 from PyCool import cool
-import six
 
 class LArHVMapDbFillerError(Exception):
     def __init__(self, value):
@@ -118,7 +117,7 @@ class LArHVMapDbFiller(object):
         myfolder=db.createFolder(folderPath, spec, desc, cool.FolderVersioning.MULTI_VERSION,True)
         # now fill in simlation parameters
         data=cool.Record(spec)
-        for k, v in six.iteritems (self.Params):
+        for k, v in self.Params.items():
             data[k] = v
 
         print ("LArHVMapDbFiller.genDb:  Recording parameters", data)

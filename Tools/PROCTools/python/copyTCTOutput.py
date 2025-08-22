@@ -4,7 +4,6 @@
 
 import sys,os,shutil
 from PROCTools.getFileLists import findTCTFiles
-import six
 
 from future import standard_library
 standard_library.install_aliases()
@@ -83,7 +82,7 @@ if __name__=="__main__":
     allFilesToCopy=dict()
 
     print ("Searching for files to copy...")
-    for name,tci in six.iteritems (ff._commonDirs):
+    for name,tci in ff._commonDirs.items():
         filesToCopy=[tci[0].logfile,]
         for p in patterns:
             filesToCopy+=ff.findFilesInDir(tci[0].directory,p)
@@ -92,7 +91,7 @@ if __name__=="__main__":
 
     totalSize=0
     nFiles=0
-    for n,fs in six.iteritems (allFilesToCopy):
+    for n,fs in allFilesToCopy.items():
         #print (n)
         nFiles+=len(fs)
         for f in fs:
@@ -103,7 +102,7 @@ if __name__=="__main__":
     print ("Start Copying:")
 
 
-    for n,fs in six.iteritems (allFilesToCopy):
+    for n,fs in allFilesToCopy.items():
         if len(fs)>1:
             print ("Working on ",n)
             logpath=fs[0]

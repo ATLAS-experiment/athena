@@ -16,9 +16,6 @@ from sys import stdout, stderr
 
 from ctypes import PyDLL, CDLL, c_void_p, c_char_p, py_object
 
-from six import print_
-import six
-
 pyapi = PyDLL(None)
 this_exe = CDLL(None)
 
@@ -42,7 +39,7 @@ def fifo():
     try:
         mkfifo(filename)
     except OSError as e:
-        print_("Failed to create FIFO: %s" % e, file=stderr)
+        print("Failed to create FIFO: %s" % e, file=stderr)
         raise
     else:
         try:
@@ -100,9 +97,8 @@ def silence(filter_=lambda line: True, file_=stdout):
         yield
         return
 
-    if six.PY3:
-        import io
-        file = io.IOBase
+    import io
+    file = io.IOBase
     if not isinstance(file_, file):
         # Unable to filter because it's not a file instance.
         yield
@@ -128,8 +124,8 @@ def silence(filter_=lambda line: True, file_=stdout):
                     freopen("/dev/fd/%i" % saved_stdout, "w", stdout_file)
                     
         except Exception:
-            print_("Hit an exception. Filtered content:")
-            print_(filt_content.getvalue())
+            print("Hit an exception. Filtered content:")
+            print(filt_content.getvalue())
             raise
 
 @contextmanager
@@ -144,28 +140,28 @@ def test():
         if line.startswith("Data source lookup using"):
             return True
             
-    print_("Before with block..")
+    print("Before with block..")
     
     with silence(filter_hello):
         from DQUtils.db import Databases
         f = Databases.get_folder("DQMFONL")
-        print_("Sensible stuff!")
+        print("Sensible stuff!")
     
-    print_("f =", f)
+    print("f =", f)
     
-    print_("I am after the silence block")
+    print("I am after the silence block")
 
 def test_with_exception():
     
-    print_("Before silence.")
+    print("Before silence.")
     try:
         with silence() as filt_content:
-            print_("Hmm.")
+            print("Hmm.")
             raise RuntimeError("Error.")
     except Exception:
         pass
-    print_("After silence")
-    print_("Stuff?", len(filt_content.getvalue()))
+    print("After silence")
+    print("Stuff?", len(filt_content.getvalue()))
 
 if __name__ == "__main__":
     # test()

@@ -3,7 +3,6 @@
 
 
 import sys
-import six
 
 def usage():
    print ("Syntax for UPD4 open-end IoV noise update")
@@ -119,7 +118,7 @@ try:
                    48 : ( 5184,      0, defVecTile, 'TILE'     ) 
                    }
     fltDict = {}
-    for systemId, info in six.iteritems (systemDict):
+    for systemId, info in systemDict.items():
      if (systemId<48) :
         nChannel = info[0] 
         defVec   = info[2]
@@ -149,7 +148,7 @@ try:
         flt.setData(hash,gain,1,noiseB)
         
     #=== write to DB
-    for systemId, dataList in six.iteritems (fltDict):
+    for systemId, dataList in fltDict.items():
       if (systemId<48):
         sysName  = systemDict[systemId][3]
         log.info("Committing BLOB for %s", sysName)

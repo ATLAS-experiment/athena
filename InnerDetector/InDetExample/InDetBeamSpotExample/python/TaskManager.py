@@ -21,8 +21,6 @@ import time, os, glob
 
 from InDetBeamSpotExample.Utils import getRunFromName
 from InDetBeamSpotExample.Utils import getUserName
-import six
-
 
 # Exception classes
 class TaskManagerCheckError(Exception):
@@ -328,7 +326,7 @@ end;
         if isinstance(statementParts,str):
             raise TypeError ('Must pass list or tuple to TaskManager.execute')
         for p in statementParts:
-            if not (isinstance(p,DbParam) or isinstance(p,six.string_types)):
+            if not (isinstance(p,DbParam) or isinstance(p,str)):
                 raise ValueError ('Can only pass SQL string fragments and DbParam objects in list'
                                    'to TaskManager.execute, found %s with "%s"' % (type(p),str(p)))
         sqlParts = None

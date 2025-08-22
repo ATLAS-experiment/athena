@@ -5,7 +5,6 @@ from pkg_resources import resource_string
 from ..lib import (DCSC_DefectTranslate_Subdetector,
                    DCSC_Variable_With_Mapping,
                    make_multi_mapping)
-import six
 
 MDTBA, MDTBC, MDTEA, MDTEC = 302, 303, 304, 305
 
@@ -107,7 +106,7 @@ class MDT(DCSC_DefectTranslate_Subdetector):
         # save the reverse mapping, too
         self.input_to_output_map = name_to_output
         self.mapping = {}
-        for key, value in six.iteritems(self.input_to_output_map):
+        for key, value in self.input_to_output_map.items():
             self.mapping.setdefault(value, []).append(key)
 
         self.set_input_mapping("HV",     hv_to_name)

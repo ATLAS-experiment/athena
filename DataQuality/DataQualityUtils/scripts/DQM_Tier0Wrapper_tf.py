@@ -61,12 +61,9 @@
 #########################################################################
 
 import sys, os.path, os, json, time, pprint, traceback
-from six.moves import xmlrpc_client as xmlrpclib
+from xmlrpc import client as xmlrpclib
 import six
-if six.PY2:
-  from commands import getstatusoutput
-else:
-  from subprocess import getstatusoutput
+from subprocess import getstatusoutput
 #sami
 import hashlib
 
@@ -176,7 +173,7 @@ def dq_combined_trf(jsonfile, outmap):
   nevts = 0
 
   try:
-    if isinstance(inputfilelist[0], six.text_type) :  
+    if isinstance(inputfilelist[0], str) :  
       histtmpdsname = (inputfilelist[0]).split('#')[0]
       for val in inputfilelist :
         histtmpflist.append(val.split('#')[1])

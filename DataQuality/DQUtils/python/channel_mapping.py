@@ -1,8 +1,5 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-import six
-
-
 try:
     from CoolRunQuery.utils.AtlRunQueryLookup import DQChannelDict
 except ImportError:
@@ -18,7 +15,7 @@ else:
     channel_mapping = DQChannelDict.copy()
     channel_names = channel_mapping.keys()
 
-cm_reversed = dict((value, key) for key, value in six.iteritems(channel_mapping))
+cm_reversed = {value: key for key, value in channel_mapping.items()}
 channel_mapping.update(cm_reversed)
 
 def convert_channel(name, want_id=True, channel_mapping=channel_mapping):
