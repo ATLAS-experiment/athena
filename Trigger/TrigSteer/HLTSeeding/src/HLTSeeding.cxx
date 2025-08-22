@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTSeeding.h"
@@ -100,9 +100,9 @@ StatusCode HLTSeeding::execute (const EventContext& ctx) const {
 
   HLT::IDVec l1SeededChains;
   if (decodeRoIB) {
-    ATH_CHECK( m_ctpUnpacker->decode( *roib, l1SeededChains ) );
+    ATH_CHECK( m_ctpUnpacker->decode( ctx, *roib, l1SeededChains ) );
   } else if (m_ctpUnpacker->isEmulated()) {
-    ATH_CHECK( m_ctpUnpacker->decode( ROIB::RoIBResult{}, l1SeededChains ) );
+    ATH_CHECK( m_ctpUnpacker->decode( ctx, ROIB::RoIBResult{}, l1SeededChains ) );
   }
 
   // important: sorting of the list of seeded chains is needed so that the deduplication and following set difference are correct

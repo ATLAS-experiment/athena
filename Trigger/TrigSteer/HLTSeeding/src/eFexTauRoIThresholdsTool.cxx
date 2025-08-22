@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "eFexTauRoIThresholdsTool.h"
 
-uint64_t eFexTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& roi,
+uint64_t eFexTauRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
+                                              const xAOD::eFexTauRoI& roi,
                                               const RoIThresholdsTool::ThrVec& menuThresholds,
                                               const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
   // Get RoI properties (once, rather than for every threshold in the menu)

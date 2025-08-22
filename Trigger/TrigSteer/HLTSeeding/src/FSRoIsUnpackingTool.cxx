@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FSRoIsUnpackingTool.h"
@@ -74,7 +74,7 @@ StatusCode FSRoIsUnpackingTool::unpack(const EventContext& ctx,
   }
 
   ATH_MSG_DEBUG("Linking to FS RoI descriptor");
-  decision->setObjectLink( initialRoIString(), ElementLink<TrigRoiDescriptorCollection>( m_trigRoIsKey.key(), 0 ) );
+  decision->setObjectLink( initialRoIString(), ElementLink<TrigRoiDescriptorCollection>( m_trigRoIsKey.key(), 0, ctx ) );
 
   return StatusCode::SUCCESS;
 }
