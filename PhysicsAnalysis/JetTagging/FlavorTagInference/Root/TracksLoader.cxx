@@ -283,9 +283,9 @@ namespace FlavorTagInference {
         //
         if (options.track_link_type == TrackLinkType::IPARTICLE) {
             SG::AuxElement::ConstAccessor<PartLinks> acc(options.track_link_name);
-            m_associator = [acc](const SG::AuxElement& btag) -> Tracks {
+            m_associator = [acc](const SG::AuxElement& jet) -> Tracks {
             Tracks tracks;
-            for (const ElementLink<IPC>& link: acc(btag)) {
+            for (const ElementLink<IPC>& link: acc(jet)) {
                 if (!link.isValid()) {
                 throw std::logic_error("invalid particle link");
                 }
@@ -297,6 +297,7 @@ namespace FlavorTagInference {
             }
             return tracks;
             };
+        //! kept for DL2 track loading only. Can be removed once DL2 is fully deprecated.
         } else if (options.track_link_type == TrackLinkType::TRACK_PARTICLE){
             SG::AuxElement::ConstAccessor<TrackLinks> acc(options.track_link_name);
             m_associator = [acc](const SG::AuxElement& btag) -> Tracks {
@@ -322,7 +323,44 @@ namespace FlavorTagInference {
         m_name = cfg.name;
     }
 
+
     Tracks TracksLoader::getTracksFromJet(
+        const xAOD::Jet& jet) const
+    {
+        std::vector<std::pair<double, const Track*>> tracks;
+        for (const Track *tp : m_associator(jet)) {
+            if (m_trackFilter(tp)) {
+                tracks.push_back({m_trackSortVar(tp, jet), tp});
+            };
+        }
+        std::sort(tracks.begin(), tracks.end(), std::greater<>());
+        std::vector<const Track*> only_tracks;
+        only_tracks.reserve(tracks.size());
+        for (const auto& trk: tracks) {
+            only_tracks.push_back(trk.second);
+        }
+        return only_tracks;
+    }
+
+    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>>
+    TracksLoader::getData(const xAOD::Jet& jet) const
+    {
+        Tracks sorted_tracks = getTracksFromJet(jet);
+        Tracks flipped_tracks = m_trackFlipper(sorted_tracks, jet);
+        
+        // cast to IParticle for aux task decoration
+        // this could probably be templated since we cast back again later
+        std::vector<const xAOD::IParticle*> flipped_iparticles;
+        for (const auto& trk: flipped_tracks) {
+          flipped_iparticles.push_back(trk);
+        }
+
+        Inputs features = m_seqGetter.getFeats(jet, flipped_tracks);
+        return std::make_tuple(m_config.output_name, features, flipped_iparticles);
+    }
+
+    //! kept for DL2 track loading only. Can be removed once DL2 is fully deprecated.
+    Tracks TracksLoader::getTracksFromJetDL2(
         const xAOD::Jet& jet,
         const SG::AuxElement& btag) const
     {
@@ -340,24 +378,7 @@ namespace FlavorTagInference {
         }
         return only_tracks;
     }
-
-    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>>
-    TracksLoader::getData(const xAOD::Jet& jet, [[maybe_unused]] const SG::AuxElement& btag) const
-    {
-        Tracks sorted_tracks = getTracksFromJet(jet, btag);
-        Tracks flipped_tracks = m_trackFlipper(sorted_tracks, jet);
-        
-        // cast to IParticle for aux task decoration
-        // this could probably be templated since we cast back again later
-        std::vector<const xAOD::IParticle*> flipped_iparticles;
-        for (const auto& trk: flipped_tracks) {
-          flipped_iparticles.push_back(trk);
-        }
-
-        Inputs features = m_seqGetter.getFeats(jet, flipped_tracks);
-        return std::make_tuple(m_config.output_name, features, flipped_iparticles);
-    }
-
+    //! kept for DL2 track loading only. Can be removed once DL2 is fully deprecated.
     std::tuple<char, std::map<std::string, std::vector<double>>> TracksLoader::getDL2Data(
       const xAOD::Jet& jet, 
       const SG::AuxElement& btag, 
@@ -366,7 +387,7 @@ namespace FlavorTagInference {
       Tracks flipped_tracks;
       std::vector<const xAOD::IParticle*> flipped_tracks_ip;
 
-      Tracks sorted_tracks = getTracksFromJet(jet, btag);
+      Tracks sorted_tracks = getTracksFromJetDL2(jet, btag);
       if (ip_checker(sorted_tracks)) invalid = 1;
       flipped_tracks = m_trackFlipper(sorted_tracks, jet);
       

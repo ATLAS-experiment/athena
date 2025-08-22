@@ -58,7 +58,7 @@ FlavorTagInference::SaltModelData FlavorTagInference::GNNDataLoader::loadInputs(
 
     // constituent level inputs
     for (const auto& loader : constituents_loaders){
-      auto [input_name, input_data, input_objects] = loader->getData(*jet, *jet);
+      auto [input_name, input_data, input_objects] = loader->getData(*jet);
       if (salt_model->getSaltModelVersion() != SaltModelVersion::V2) {
         input_name.pop_back();
         input_name.append("_features");

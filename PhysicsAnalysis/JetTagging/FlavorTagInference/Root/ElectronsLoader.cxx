@@ -137,9 +137,7 @@ namespace FlavorTagInference {
         return only_electrons;
     }
 
-    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> ElectronsLoader::getData(
-      const xAOD::Jet& jet, 
-      [[maybe_unused]] const SG::AuxElement& btag) const {
+    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> ElectronsLoader::getData(const xAOD::Jet& jet) const {
         Electrons sorted_electrons = getElectronsFromJet(jet);
 
         // We return a dummy vector of IParticles as we don't decorate flow elements

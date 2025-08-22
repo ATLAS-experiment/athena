@@ -47,8 +47,7 @@ namespace FlavorTagInference {
 
         TracksLoader(const ConstituentsInputConfig&, const FTagOptions& options);
         std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
-          const xAOD::Jet& jet, 
-          [[maybe_unused]] const SG::AuxElement& btag) const override;
+          const xAOD::Jet& jet ) const override;
         std::tuple<char, std::map<std::string, std::vector<double>>>  getDL2Data(
           const xAOD::Jet& jet, 
           const SG::AuxElement& btag, 
@@ -81,7 +80,8 @@ namespace FlavorTagInference {
         std::pair<TrackSequenceFilter,std::set<std::string>> trackFlipper(
           const FTagOptions&);
         
-        Tracks getTracksFromJet(const Jet& jet, const AE& btag) const;
+        Tracks getTracksFromJet(const Jet& jet) const;
+        Tracks getTracksFromJetDL2(const Jet& jet, const AE& btag) const;
 
         TrackSortVar m_trackSortVar;
         TrackFilter m_trackFilter;
