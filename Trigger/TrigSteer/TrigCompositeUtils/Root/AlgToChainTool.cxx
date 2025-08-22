@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCompositeUtils/AlgToChainTool.h"
@@ -240,11 +240,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getChainInfo(const EventContext& 
     SG::ReadHandle<TrigConf::HLTMenu>  hltMenuHandle = SG::makeHandle( m_HLTMenuKey, context );
     ATH_CHECK( hltMenuHandle.isValid() );
 
-    HLT::Identifier id = HLT::Identifier(decId);
-    if (TrigCompositeUtils::isLegId(id)){
-        id = getIDFromLeg(id);
-    }
-
+    HLT::Identifier id = getIDFromLeg(decId);
     info.id = id;
 
     // Find chain with given id

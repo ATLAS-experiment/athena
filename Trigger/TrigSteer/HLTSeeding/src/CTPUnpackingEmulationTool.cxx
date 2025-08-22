@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "CTPUnpackingEmulationTool.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
@@ -53,14 +53,15 @@ StatusCode CTPUnpackingEmulationTool::initialize() {
 }
 
 
-StatusCode CTPUnpackingEmulationTool::decode( const ROIB::RoIBResult& /*roib*/,  HLT::IDVec& enabledChains ) const {
+StatusCode CTPUnpackingEmulationTool::decode( const EventContext& ctx,
+                                              const ROIB::RoIBResult& /*roib*/,
+                                              HLT::IDVec& enabledChains ) const {
   if ( m_events.empty() ){
     ATH_MSG_ERROR( "No chain set found. Cannot decode CTP emulation" );
     return StatusCode::FAILURE;
   }
 
-  const EventContext& context = Gaudi::Hive::currentContext();
-  size_t line = context.evt() % m_events.size();
+  size_t line = ctx.evt() % m_events.size();
   enabledChains =  m_events[line];
 
   return StatusCode::SUCCESS;

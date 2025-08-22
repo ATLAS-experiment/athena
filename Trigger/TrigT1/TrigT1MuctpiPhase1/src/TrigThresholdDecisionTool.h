@@ -1,7 +1,7 @@
 // This file is really -*- C++ -*-.
 
 /*                                                                                                                      
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1MUCTPIPHASE1_TRIGTHRESHOLDECISIONTOOL_H
@@ -48,7 +48,8 @@ namespace LVL1 {
     virtual StatusCode initialize() override;
     virtual StatusCode start() override;
 
-    virtual uint64_t getPattern(const xAOD::MuonRoI& roi,
+    virtual uint64_t getPattern(const EventContext& ctx,
+                                const xAOD::MuonRoI& roi,
                                 const ThrVec& menuThresholds,
                                 const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const override;
 

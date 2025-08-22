@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep, BeamType
@@ -9,7 +9,7 @@ def TileGMCfg(flags):
     result.getPrimary().DetectorTools += [ CompFactory.TileDetectorTool() ]
     if flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]:
         result.getPrimary().DetectorTools["TileDetectorTool"].GeometryConfig = "RECO"
-    if flags.Common.ProductionStep is ProductionStep.Simulation and flags.Beam.Type is BeamType.TestBeam:
+    if flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.Digitization] and flags.Beam.Type is BeamType.TestBeam:
         if (flags.TestBeam.Layout=='tb_Tile2000_2003_2B2EB'):
             # 2 Barrels + 2 Extended Barrels
             result.getPrimary().TileVersionOverride='TileTB-2B2EB-00'

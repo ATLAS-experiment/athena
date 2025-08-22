@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "jFexSRJetRoIThresholdsTool.h"
 
-uint64_t jFexSRJetRoIThresholdsTool::getPattern(const xAOD::jFexSRJetRoI& roi,
+uint64_t jFexSRJetRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
+                                                const xAOD::jFexSRJetRoI& roi,
                                                 const RoIThresholdsTool::ThrVec& menuThresholds,
                                                 const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
     

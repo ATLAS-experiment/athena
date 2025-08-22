@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MURoIsUnpackingTool.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
@@ -75,15 +75,15 @@ StatusCode MURoIsUnpackingTool::unpack(const EventContext& ctx,
     // The hltSeedingNodeName() denotes an initial node with no parents
     Decision* decisionMain  = TrigCompositeUtils::newDecisionIn( decisionOutput.ptr(), hltSeedingNodeName() );
     decisionMain->setObjectLink( initialRoIString(),
-                                 ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1) );
+                                 ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
     decisionMain->setObjectLink( initialRecRoIString(),
-                                 ElementLink<DataVector<LVL1::RecMuonRoI>>(m_recRoIsKey.key(), recRoIs->size()-1) );
+                                 ElementLink<DataVector<LVL1::RecMuonRoI>>(m_recRoIsKey.key(), recRoIs->size()-1, ctx) );
 
     Decision* decisionProbe  = TrigCompositeUtils::newDecisionIn( decisionOutputProbe.ptr(), hltSeedingNodeName() );
     decisionProbe->setObjectLink( initialRoIString(),
-                                  ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1) );
+                                  ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
     decisionProbe->setObjectLink( initialRecRoIString(),
-                                  ElementLink<DataVector<LVL1::RecMuonRoI>>(m_recRoIsKey.key(), recRoIs->size()-1) );
+                                  ElementLink<DataVector<LVL1::RecMuonRoI>>(m_recRoIsKey.key(), recRoIs->size()-1, ctx) );
 
     std::vector<TrigCompositeUtils::DecisionID> passedThresholdIDs;
 

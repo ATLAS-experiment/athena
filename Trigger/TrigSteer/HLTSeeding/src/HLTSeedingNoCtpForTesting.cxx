@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "HLTSeedingNoCtpForTesting.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
@@ -60,7 +60,7 @@ StatusCode HLTSeedingNoCtpForTesting::execute (const EventContext& ctx) const {
 
       Decision* decision = TrigCompositeUtils::newDecisionIn( decisionOutput.ptr(), hltSeedingNodeName() );
       decision->setObjectLink( initialRoIString(),
-                               ElementLink<TrigRoiDescriptorCollection>(m_trigEMRoIsKey.key(), emRoIs->size()-1) );
+                               ElementLink<TrigRoiDescriptorCollection>(m_trigEMRoIsKey.key(), emRoIs->size()-1, ctx) );
       addDecisionID( HLT::Identifier( "HLT_EMTestChain" ), decision );
     }
   }
