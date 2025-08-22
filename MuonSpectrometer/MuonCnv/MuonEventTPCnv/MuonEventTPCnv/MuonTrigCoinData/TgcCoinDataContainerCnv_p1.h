@@ -16,6 +16,7 @@
 
 #include "MuonTrigCoinData/TgcCoinDataContainer.h"
 #include "MuonEventTPCnv/MuonTrigCoinData/MuonCoinDataContainer_p1.h"
+#include "TrkEventCnvTools/IEventCnvSuperTool.h"
 
 namespace MuonGM{ class MuonDetectorManager;}
 
@@ -29,7 +30,7 @@ namespace Muon{
     public:
         typedef Muon::MuonCoinDataContainer_p1 PERS; 
         typedef Muon::TgcCoinDataContainer TRANS;
-        TgcCoinDataContainerCnv_p1(): m_TgcId(0), m_muonDetMgr(0), m_isInitialized(0) {}
+        TgcCoinDataContainerCnv_p1(): m_TgcId(0), m_isInitialized(0) {}
         virtual void persToTrans(const PERS* persCont, TRANS* transCont, MsgStream &log); 
         virtual void transToPers(const TRANS* transCont, PERS* persCont, MsgStream &log);
         virtual Muon::TgcCoinDataContainer* createTransient(const Muon::MuonCoinDataContainer_p1* persObj, MsgStream& log);
@@ -37,7 +38,8 @@ namespace Muon{
         StatusCode initialize(MsgStream &log);
 
         const TgcIdHelper *m_TgcId;
-        const MuonGM::MuonDetectorManager* m_muonDetMgr;
+        ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"}; 
+        const MuonGM::TgcReadoutElement* getReadOutElement(const Identifier& id ) const;
         bool m_isInitialized;
     };
 
