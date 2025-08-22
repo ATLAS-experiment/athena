@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_HLTIdentifier_h
@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <map>
 
 #include "AsgMessaging/MsgStream.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
@@ -19,12 +18,7 @@
 namespace HLT {
 class Identifier {
 public:
-  /**
-   * @brief disables reporting human readable names == no debugging, fast execution
-   **/
-  static void reportStringIDs( bool report ) { s_reportStringIDs = report; }
-  static bool reportStringIDs() { return s_reportStringIDs; }
-  
+
   static HLT::Identifier fromToolName( const std::string& tname );
   /**
    * @brief constructs identifier from human redable name
@@ -37,7 +31,7 @@ public:
  Identifier( TrigCompositeUtils::DecisionID id ) : m_id( id ) {}
 
   /**
-   * @brief reports human redable name if it is enabled or, empty string
+   * @brief reports human redable name
    **/  
   std::string name() const;
   
@@ -56,12 +50,10 @@ public:
   bool operator < ( TrigCompositeUtils::DecisionID id ) const { return numeric() < id; } 
 private:
   TrigCompositeUtils::DecisionID m_id;
-  static std::atomic<bool> s_reportStringIDs;
-  
+
 };
  typedef std::vector<HLT::Identifier> IDVec;
  typedef std::set<HLT::Identifier> IDSet;
- typedef std::map<HLT::Identifier,  IDVec> IDtoIDVecMap;
 }
 
 MsgStream& operator<< ( MsgStream& m, const HLT::Identifier& id );
