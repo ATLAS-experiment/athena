@@ -276,8 +276,11 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
 
     mon.L1Decisions  = hltSeeding.HLTSeedingSummaryKey
 
-    from DecisionHandling.DecisionHandlingConfig import setupFilterMonitoring
-    [ [ setupFilterMonitoring( flags, alg ) for alg in algs ]  for algs in list(filters.values()) ]
+    if flags.Trigger.doValidationMonitoring:
+        from DecisionHandling.DecisionHandlingConfig import setupFilterMonitoring
+        for algs in filters.values():
+            for alg in algs:
+                setupFilterMonitoring( flags, alg )
 
     return acc, mon
 
