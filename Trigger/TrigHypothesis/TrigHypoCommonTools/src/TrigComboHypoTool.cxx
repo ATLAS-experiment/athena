@@ -195,7 +195,7 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
   if (!hasViableLegs) {
     ATH_MSG_DEBUG("This ComboHypoTool cannot run in this event, this chain **REJECTS** this event.");
     eraseFromLegDecisionsMap(passingLegs);
-    ATH_CHECK(printDebugInformation(passingLegs));
+    if (msgLvl(MSG::DEBUG)) printDebugInformation(passingLegs);
     return StatusCode::SUCCESS;
   }
 
@@ -338,7 +338,7 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
     eraseFromLegDecisionsMap(passingLegs);
   }
 
-  ATH_CHECK(printDebugInformation(passingLegs));
+  if (msgLvl(MSG::DEBUG)) printDebugInformation(passingLegs);
   return StatusCode::SUCCESS;
 }
 
