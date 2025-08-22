@@ -22,7 +22,6 @@ except ImportError:
     # Fall back to Python 2's urllib2
     from urllib2 import urlopen
 import cppyy
-import six
 
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibDrawerCmt, \
      TileCalibDrawerInt, TileCalibDrawerOfc, TileCalibDrawerBch, \
@@ -385,7 +384,7 @@ def getFolderTag(db, folderPath, globalTag):
         else:
             dbname ='COOLOFL_TILE'
         schema=dbname+'/CONDBR2'
-        if isinstance(db, six.string_types):
+        if isinstance(db, str):
             if 'OFLP200' in db or 'MC' in db:
                 schema=dbname+'/OFLP200'
                 if not globalTag.startswith("OFLCOND"):
@@ -419,7 +418,7 @@ def getFolderTag(db, folderPath, globalTag):
                 tag='CALO'+tag[4:]
             log.info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
         else:
-            if not isinstance(db, six.string_types):
+            if not isinstance(db, str):
                 try:
                     folder = db.getFolder(folderPath)
                     tag = folder.resolveTag(globalTag)

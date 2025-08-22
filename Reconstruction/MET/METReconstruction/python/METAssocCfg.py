@@ -7,7 +7,6 @@ from AthenaCommon import Logging
 metlog = Logging.logging.getLogger('METConfig')
 
 from GaudiKernel.Constants import INFO
-import six
 
 #################################################################################
 # Define some default values
@@ -224,7 +223,7 @@ def getMETAssocAlg(algName='METAssociation',configs={},tools=[],msglvl=INFO):
 
     if configs=={} and tools==[]:
         metlog.info("{} Empty list of MET association configs provided. None will be reconstructed.".format(prefix))
-    for key,conf in six.iteritems(configs):
+    for key,conf in configs.items():
         metlog.info("{} Generate METAssocTool for MET_{}".format(prefix,key))
         assoctool = getMETAssocTool(conf,msglvl)
         assocTools.append(assoctool)

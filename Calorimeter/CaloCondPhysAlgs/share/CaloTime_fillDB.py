@@ -3,7 +3,6 @@
 
 
 import sys
-import six
 
 def usage():
    print ("Syntax for open-end IoV time constant update")
@@ -129,7 +128,7 @@ try:
                  }
 
     print ("before fill virtual database")
-    for systemId, info in six.iteritems (systemDict):
+    for systemId, info in systemDict.items():
      print ("before fill virtual database for sysId=", systemId)
      if (systemId<=3) :
         print ("Creating BLOB for Calo sysId=", systemId)
@@ -151,7 +150,7 @@ try:
 
     fltDict_1 = {}
     print ("Prepare BLOB for Calo")
-    for systemId, info in six.iteritems (systemDict):
+    for systemId, info in systemDict.items():
      print ("before check sysId=", systemId )
      if (systemId<=3) :
         print ("Creating BLOB for Calo sysId=", systemId )
@@ -253,7 +252,7 @@ try:
 
     #=== write to DB
     print ("Committing BLOB for Calo")
-    for systemId, dataList in six.iteritems (fltDict_1):
+    for systemId, dataList in fltDict_1.items():
       if (systemId<=3):
         sysName  = systemDict[systemId][3]
         log.info("Committing BLOB for %s", sysName)
@@ -367,7 +366,7 @@ try:
 
     print ("after enter file line loop")
 
-    for runId, dataList in six.iteritems (fltDict_2):
+    for runId, dataList in fltDict_2.items():
         print ("Committing BLOB for run ", runId)
         iovSince_run = CaloCondTools.iovFromRunLumi(runId,lbkdown)
         iovUntil_run = CaloCondTools.iovFromRunLumi(runId,lbkup)

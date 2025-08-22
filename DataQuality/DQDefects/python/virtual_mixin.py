@@ -6,7 +6,6 @@ from DQUtils import fetch_iovs
 from .exceptions import DefectUnknownError, DefectExistsError
 from .ids import choose_new_defect_id
 from .virtual_logic import DefectLogic
-import six
 
 from typing import Optional, Iterable, Mapping, Set, Sequence, List
 
@@ -240,7 +239,7 @@ class DefectsDBVirtualDefectsMixin(object):
 
         logics = {l.channel: DefectLogic(l) for l in logics}
         
-        for _, defect_logic in six.iteritems (logics):
+        for _, defect_logic in logics.items():
             defect_logic._populate(logics)
             
         return logics
@@ -273,7 +272,7 @@ class DefectsDBVirtualDefectsMixin(object):
         used_defects = set()
         
         used_by = {}
-        for defect, logic in six.iteritems (self.virtual_defect_logics):
+        for defect, logic in self.virtual_defect_logics.items():
             used_defects.update(logic.realclauses)
             for clause in logic.realclauses:
                 used_by.setdefault(clause, []).append(defect)

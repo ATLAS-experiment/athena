@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from logging import getLogger; log = getLogger("DQUtils.general")
 
 from time import time, mktime, strptime, strftime, gmtime
-from six.moves import getoutput
+from subprocess import getoutput
 
 def get_package_version(package_name, default_prefix="DataQuality"):
     """

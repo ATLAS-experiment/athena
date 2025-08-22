@@ -10,7 +10,6 @@ import os
 import fnmatch
 import re
 import subprocess
-import six
 
 from PyJobTransforms.trfExe import athenaExecutor
 
@@ -43,9 +42,9 @@ class trigRecoExecutor(athenaExecutor):
             msg.debug('Will test for events to process')
             for dataType in input:
                 inputEvents = self.conf.dataDictionary[dataType].nentries
-                msg.debug('Got {0} events for {1}'.format(inputEvents, dataType))
-                if not isinstance(inputEvents, six.integer_types):
-                    msg.warning('Are input events countable? Got nevents={0} so disabling event count check for this input'.format(inputEvents))
+                msg.debug('Got {} events for {}'.format(inputEvents, dataType))
+                if not isinstance(inputEvents, int):
+                    msg.warning('Are input events countable? Got nevents={} so disabling event count check for this input'.format(inputEvents))
                 elif self.conf.argdict['skipEvents'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor) >= inputEvents:
                     raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_NOEVENTS'),
                                                                     'No events to process: {0} (skipEvents) >= {1} (inputEvents of {2}'.format(self.conf.argdict['skipEvents'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor), inputEvents, dataType))

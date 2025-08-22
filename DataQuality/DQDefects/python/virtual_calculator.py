@@ -11,8 +11,6 @@ from DQUtils.sugar import IOVSet, RunLumi
 
 from DQDefects import DEFECT_IOV
 
-import six
-
 from collections.abc import Container
 from typing import Tuple, Union, Optional, Iterable, Generator, Mapping
 
@@ -31,7 +29,7 @@ def generate_virtual_defects(by_channel: Mapping[str, IOVSet], logics: Iterable[
     all_channels = list(by_channel.keys()) + [l.name for l in logics]
     states = dict((channel, None) for channel in all_channels)
     
-    channels, iovsets = zip(*sorted(six.iteritems(by_channel)))
+    channels, iovsets = zip(*sorted(by_channel.items()))
         
     for since, until, current_iovs, changes in process_iovs_changed(*iovsets):
         # Update things that changed since last iteration in the states dict
@@ -82,7 +80,7 @@ def calculate_virtual_defects(primary_iovs: IOVSet, evaluation_order: Iterable[D
     primary_by_channel = primary_iovs.by_channel
     
     # Copy desired primary channels to the result
-    for primary_channel, primary_iovs in six.iteritems(primary_by_channel):
+    for primary_channel, primary_iovs in primary_by_channel.items():
         if primary_channel in primary_output_channels:
             if ignore is not None and primary_channel in ignore:
                 continue
@@ -107,7 +105,7 @@ def calculate_virtual_defects(primary_iovs: IOVSet, evaluation_order: Iterable[D
     # Sort them by traditional COOL sort ordering (by channelId first, 
     # then by since. `iovs` are already ordered by since.)
     result_list = IOVSet()
-    for _, iovs in sorted(six.iteritems(result)):
+    for _, iovs in sorted(result.items()):
         result_list.extend(iovs.solidify(DEFECT_IOV))
         
     return result_list

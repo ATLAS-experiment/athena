@@ -12,8 +12,6 @@ __doc__ = "provide components to peek into pool files"
 import AthenaPython.PyAthena as PyAthena
 StatusCode = PyAthena.StatusCode
 
-import six
-
 
 ### helper functions ----------------------------------------------------------
 def _import_ROOT():
@@ -486,7 +484,7 @@ class FilePeeker(PyAthena.Alg):
         def mergeMultipleDict(inDicts):
             outDict={}
             for d in inDicts:
-                for k,o in six.iteritems(d):
+                for k,o in d.items():
                     if k not in outDict:
                         outDict[k]=o
             if len(outDict)==0:
