@@ -37,10 +37,10 @@ IncidentSvc         DEBUG Adding [ModuleLoaded] listener 'ClassIDSvc' with prior
 ClassIDSvc           INFO  getRegistryEntries: read 1206 CLIDRegistry entries for module ALL
 ClassIDSvc          DEBUG processCLIDDB: read 1484 entries from CLIDDB file: /home/leggett/work/v30r1.002/bld/x86_64-slc6-gcc62-dbg/share/clid.db
 ClassIDSvc          DEBUG processCLIDDB: read 1484 entries from CLIDDB file: /bld2/build/v30r1.002/build/install/Athena/22.0.0/InstallArea/x86_64-slc6-gcc62-dbg/share/clid.db
-ToolSvc.MyFolder  WARNING add: can not find type [Baricco] in clid db
-ToolSvc.MyFolder  WARNING add: can not find type [basfbojjvd] in clid db
-ToolSvc.MyFolder  WARNING add: can not find type [cucu] in clid db
-ToolSvc.MyFolder  WARNING add: can not find clid 56789401 in clid db
+ToolSvc.MyFolder    ERROR add: can not find type [Baricco] in clid db
+ToolSvc.MyFolder    ERROR add: can not find type [basfbojjvd] in clid db
+ToolSvc.MyFolder    ERROR add: can not find type [cucu] in clid db
+ToolSvc.MyFolder    ERROR add: can not find clid 56789401 in clid db
 8101/
 8101/Bla
 8107/

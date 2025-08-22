@@ -16,12 +16,19 @@ from PyUtils import MetaReader
 from xAODEventInfoCnv import xAODEventInfoCnvConfig
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+from AthenaConfiguration.Enums import Project
 
 
 def writeFileMetaData(flags):
     """set up an output stream and xAOD::EventInfo"""
     accumulator = OutputStreamConfig.OutputStreamCfg(flags, streamName="AOD")
     accumulator.merge(SetupMetaDataForStreamCfg(flags, streamName="AOD"))
+    # AthAnalysis doesn't have the dictionary for ByteStreamMetadata(Container)
+    # Therefore, do not attempt to write it - although this is more of a hack
+    if flags.Common.Project == Project.AthAnalysis:
+        originalList = accumulator.getEventAlgo('StreamAOD').MetadataItemList
+        modifiedList = [s for s in originalList if s != "ByteStreamMetadataContainer#*"]
+        accumulator.getEventAlgo('StreamAOD').MetadataItemList = modifiedList
 
     accumulator.merge(
         xAODEventInfoCnvConfig.EventInfoCnvAlgCfg(
