@@ -120,7 +120,7 @@ set( ATLAS_ALWAYS_CHECK_WILDCARDS TRUE CACHE BOOL
 
 # Set up CppCheck.
 if( ATLAS_USE_CPPCHECK )
-   find_package( Cppcheck 2.14 )
+   find_package( Cppcheck 2.17 )
 
    # Find ATLAS-specific wrapper:
    find_program( CPPCHECK_ATLAS cppcheck_atlas
@@ -128,12 +128,6 @@ if( ATLAS_USE_CPPCHECK )
    mark_as_advanced( CPPCHECK_ATLAS )
 
    if( CPPCHECK_FOUND AND CPPCHECK_ATLAS )
-      # TODO: remove this once cppcheck 2.17 is default in main
-      if( CPPCHECK_LCGVERSION VERSION_LESS "2.17" )
-         list( APPEND CMAKE_CPPCHECK_DEFAULT
-            "--library=${CxxUtilsSettings_DIR}/../share/cppcheck_2.16_athena.cfg" )
-      endif()
-
       # Prepend cppcheck command to already defined command line options:
       list( PREPEND CMAKE_CPPCHECK_DEFAULT ${CPPCHECK_ATLAS} )
 
