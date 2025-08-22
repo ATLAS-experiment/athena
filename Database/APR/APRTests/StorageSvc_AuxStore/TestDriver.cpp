@@ -38,7 +38,7 @@ static const int nObjects = 10;
 
 class TestClassNoDict {
 public:
-  TestClassNoDict(int v=12345) { _val=v; };
+  explicit TestClassNoDict(int v=12345) { _val=v; };
   int _val;
 };
 

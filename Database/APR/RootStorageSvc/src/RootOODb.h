@@ -40,7 +40,7 @@ namespace pool  {
     typedef Gaudi::PluginService::Factory<IOODatabase*()> Factory;
 
     /// Standard Constructor
-    RootOODb(DbType typ=ROOT_StorageType);
+    explicit RootOODb(DbType typ=ROOT_StorageType);
     /// Standard Destructor
     virtual ~RootOODb();
 

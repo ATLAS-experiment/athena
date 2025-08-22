@@ -20,7 +20,7 @@ namespace pool {
 
   class TestDriver {
   public:
-    TestDriver( const std::string& catname = "PersF.catatlog.xml" );
+    explicit TestDriver( const std::string& catname = "PersF.catatlog.xml" );
     ~TestDriver();
     TestDriver(const TestDriver & ) = delete;
     TestDriver& operator=(const TestDriver & ) = delete;

@@ -225,7 +225,7 @@ namespace pool {
           delayedFileOpen("close");
               
           if( m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-             TObject* tree = getCollectionTree();
+             const TObject* tree = getCollectionTree();
              if( tree )
                 m_mode = ICollection::UPDATE;
              else {
@@ -455,12 +455,7 @@ namespace pool {
 
       if( m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
         // create a new TTree
-        if( 0 && m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-          m_poolOut << coral::Warning <<  "Cleaning previous collection object from the file..." << coral::MessageStream::endmsg;
-          std::string treeName = std::string(APRDefaults::TTreeNames::EventTag) + ";*";
-          m_file->Delete(treeName.c_str());
-          m_file->Delete("Schema;*");
-        }
+
         m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
         m_poolOut << coral::Debug << "Created Collection TTree. Collection file will be " << m_fileName << coral::MessageStream::endmsg;
         m_schemaWritten = false;

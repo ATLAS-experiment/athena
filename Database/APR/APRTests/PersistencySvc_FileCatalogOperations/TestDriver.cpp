@@ -160,7 +160,7 @@ pool::TestDriver::read()
   }
 
   int i = 0;
-  std::vector< SimpleTestClass* > v_simpleTestClass;
+
   Token* token = tokenIterator->next();
   while ( token ) {
     void* data_simpleTestClass = persistencySvc->readObject( *token );

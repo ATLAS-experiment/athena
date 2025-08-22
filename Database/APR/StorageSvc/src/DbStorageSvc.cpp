@@ -313,7 +313,7 @@ DbStatus DbStorageSvc::read( const FileDescriptor& fDesc,
                              ShapeH                shape,
                              void**                object)
 {
-  string err = "";
+
   pool::AccessMode mode = pool::READ;
   if ( m_domH.isValid() ) {
     DbType typ(token.technology());
@@ -407,11 +407,11 @@ DbStatus DbStorageSvc::connect(const SessionH session,int mod,FileDescriptor& fD
       int wr  = pool::CREATE + pool::UPDATE;
       int m   = dbH.openMode();
       if ( (m&all) && mod == pool::READ )
-        sc = Success;
+        ;
       else if ( m&wr && mod&pool::CREATE )
-        sc = Success;
+        ;
       else if ( m&wr && mod&pool::UPDATE )
-        sc = Success;
+        ;
       else
         dbH.close();
     }

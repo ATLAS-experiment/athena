@@ -44,7 +44,7 @@ namespace pool  {
     */
   struct DbObjectHolder  {
     DbObject* m_obj;
-    DbObjectHolder(DbObject* p) : m_obj(p) {}
+    explicit DbObjectHolder(DbObject* p) : m_obj(p) {}
     int release();
   };
   class DbContainerObj : public  DbAccessObj<DbObject*, DbObjectHolder >  {

@@ -244,7 +244,7 @@ DbStatus DbTypeInfo::i_fromString( const std::string& string_rep)  {
   size_t i;
   int ncol=-1;
   std::string tmp = string_rep;
-  std::string cl_name;
+
   m_mult = 0;
   for(i = 0; i < m_columns.size(); ++i)
     delete m_columns[i];

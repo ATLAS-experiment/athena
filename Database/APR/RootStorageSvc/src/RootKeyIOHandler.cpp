@@ -154,8 +154,7 @@ namespace pool {
         UChar_t *bufcur = (UChar_t *)&fBuffer[fKeylen];
         Int_t nin, nout, nbuf;
         Int_t noutot = 0;
-        bool loop = true;
-        while (loop) {
+        while (true) {
           nin  = 9 + ((Int_t)bufcur[3] | ((Int_t)bufcur[4] << 8) | ((Int_t)bufcur[5] << 16));
           nbuf = (Int_t)bufcur[6] | ((Int_t)bufcur[7] << 8) | ((Int_t)bufcur[8] << 16);
           R__unzip(&nin, bufcur, &nbuf, (unsigned char*)objbuf, &nout);

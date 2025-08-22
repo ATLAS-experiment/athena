@@ -45,7 +45,7 @@ int main(int argc, char** argv)
       printUsage();
       return 0;
     }
-  }catch(std::string& strError){
+  }catch(const std::string& strError){
     std::cerr << "error "<<strError<<std::endl;
     return 1;
   }

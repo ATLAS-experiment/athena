@@ -28,7 +28,7 @@ namespace pool {
     {
     public:
       /// Constructor
-      UserSession( IFileCatalog& fileCatalog );
+      explicit UserSession( IFileCatalog& fileCatalog );
 
       /// Destructor
       virtual ~UserSession();

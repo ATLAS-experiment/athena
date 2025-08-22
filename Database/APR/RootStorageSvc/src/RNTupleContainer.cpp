@@ -364,7 +364,6 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
              << "[RNTupleContainer] Could not write an object of type " << dsc.typeName()
              << DbPrint::endmsg;
 	 throw std::runtime_error(std::string("[RNTupleContainer] Could not write an object of type  ") + dsc.typeName());
-         return pool::Error; // throwing exception instead
       }
       m_ntupleWriter->addFieldValue( dsc.fieldname, p.ptr );
       // fill the index field
@@ -406,7 +405,6 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
              err << DbPrintLvl::Fatal << "[RNTupleContainer] - BLOB reading not implemented yet" << DbPrint::endmsg;
              return pool::Error;
           }
-          break;
        case DbColumn::ANY:
        case DbColumn::POINTER:
           // MN: should not need any special action here

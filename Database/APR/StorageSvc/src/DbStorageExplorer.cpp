@@ -100,7 +100,7 @@ DbStatus DbStorageExplorer::disconnect(FileDescriptor& fDesc) {
 
 /// Access the size of the database: May be undefined for some technologies
 long long int DbStorageExplorer::databaseSize(FileDescriptor& refDB)  const   {
-  DbConnection* dbc = dynamic_cast<DbConnection*>(refDB.dbc());
+  const DbConnection* dbc = dynamic_cast<const DbConnection*>(refDB.dbc());
   if ( dbc )   {
     DbDatabase  dbH(__DB(refDB));
     return dbH.size();
