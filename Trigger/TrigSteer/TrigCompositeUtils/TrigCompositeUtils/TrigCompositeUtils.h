@@ -8,7 +8,6 @@
 #include <set>
 #include <memory>
 #include <functional>
-#include <iostream>
 
 #include "AthLinks/ElementLink.h"
 #include "AsgDataHandles/WriteHandle.h"
@@ -206,6 +205,14 @@ namespace TrigCompositeUtils {
    * @return HLT::Identifier corresponding to the specified leg. Call .numeric() on this to get the DecisionID.
    **/
   HLT::Identifier createLegName(const HLT::Identifier& chainIdentifier, size_t counter);
+
+  /**
+   * @brief Generate the HLT::Identifier which corresponds to a specific leg of a given chain. This can be queried for its DecisionID.
+   * @param name The chain name.
+   * @param counter The numeral of the leg.
+   * @return HLT::Identifier corresponding to the specified leg. Call .numeric() on this to get the DecisionID.
+   **/
+  HLT::Identifier createLegName(const std::string& name, size_t counter);
 
  /**
    * @brief Generate the HLT::Identifier which corresponds to the chain name from the leg name. This can be queried for its DecisionID.
