@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JRoIsUnpackingTool.h"
@@ -95,9 +95,9 @@ StatusCode JRoIsUnpackingTool::unpack(const EventContext& ctx,
 
       decision->setDetail( "thresholds", passedThresholdIDs );
       decision->setObjectLink( initialRoIString(),
-                               ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1) );
+                               ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
       decision->setObjectLink( initialRecRoIString(),
-                               ElementLink<DataVector<LVL1::RecJetRoI>>(m_recRoIsKey.key(), recRoIs->size()-1) );
+                               ElementLink<DataVector<LVL1::RecJetRoI>>(m_recRoIsKey.key(), recRoIs->size()-1, ctx) );
     }
   }
 

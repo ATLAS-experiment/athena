@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "gFexLRJetRoIThresholdsTool.h"
 
-uint64_t gFexLRJetRoIThresholdsTool::getPattern(const xAOD::gFexJetRoI& roi,
+uint64_t gFexLRJetRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
+                                                const xAOD::gFexJetRoI& roi,
                                                 const RoIThresholdsTool::ThrVec& menuThresholds,
                                                 const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
   float et = roi.et();
