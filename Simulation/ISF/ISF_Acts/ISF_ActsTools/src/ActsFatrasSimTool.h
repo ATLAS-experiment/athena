@@ -24,6 +24,7 @@
 // ACTS
 #include "Acts/Utilities/UnitVectors.hpp"
 #include "ActsInterop/Logger.h"
+#include "ActsInterop/UnitConverters.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
@@ -73,7 +74,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   struct HitSurfaceSelector {
     /// Check if the surface should be used.
     bool operator()(const Acts::Surface &surface) const {
-      bool isSensitive = surface.associatedDetectorElement();
+      bool isSensitive = surface.associatedDetectorElement() != nullptr;
       return isSensitive;
     }
   };
@@ -214,8 +215,16 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
             ISFParticleContainer& secondaries,
             McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr) override;
   virtual StatusCode setupEvent(const EventContext&) override {
+    ATH_CHECK(m_truthRecordSvc->initializeTruthCollection());
+    m_pixelSiHits.Clear();
+    m_sctSiHits.Clear();
     return StatusCode::SUCCESS; };
-  virtual StatusCode releaseEvent(const EventContext&) override {
+  virtual StatusCode releaseEvent(const EventContext& ctx) override {
+    std::vector<SiHitCollection> hitcolls;
+    hitcolls.push_back(m_pixelSiHits);
+    hitcolls.push_back(m_sctSiHits);
+    ATH_CHECK(m_ActsFatrasWriteHandler->WriteHits(hitcolls,ctx));
+    ATH_CHECK(m_truthRecordSvc->releaseEvent());
     return StatusCode::SUCCESS; };
   virtual ISF::SimulationFlavor simFlavor() const override{
     return ISF::Fatras; };
@@ -224,6 +233,9 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     const EventContext&) const;
 
  private:
+  // For sihit creation
+  SiHitCollection m_pixelSiHits;
+  SiHitCollection m_sctSiHits;
   // Templated tool retrieval
   template <class T>
   StatusCode retrieveTool(ToolHandle<T>& thandle) {

@@ -64,7 +64,7 @@ void ActsFatrasWriteHandler::createHits(const ISF::ISFParticle& isp,
     ATH_MSG_VERBOSE(name() << " particle " << isp << " with " << hits.size() << " hits");
     for (auto& hit:hits){
       double energyDeposit = hit.depositedEnergy() / Acts::UnitConstants::MeV;
-      double time          = hit.time();
+      double time          = ActsTrk::timeToAthena(hit.time());
 
       // get the ACTS geo identifier
       auto hit_geoid = hit.geometryId();
@@ -138,7 +138,7 @@ void ActsFatrasWriteHandler::createHits(const ISF::ISFParticle& isp,
           pixelSiHits.push_back(siHit);
         else
           sctSiHits.push_back(siHit);
-        ATH_MSG_VERBOSE(name() << " convert and store 1 hit, total" << pixelSiHits.size() << "Pixel | "<<sctSiHits.size()<< " SCT hits stored for particle" << isp);
+        ATH_MSG_VERBOSE(name() << " convert and store 1 hit, total " << pixelSiHits.size() << " Pixel | "<<sctSiHits.size()<< " SCT hits stored for particle" << isp);
       }
       catch (const std::exception& e){
         ATH_MSG_DEBUG(name() << "Can not find Acts Surface (" << e.what() << ")...Skip...");
