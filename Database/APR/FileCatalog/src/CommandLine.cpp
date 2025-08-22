@@ -110,7 +110,7 @@ pool::CommandLine::ParseSettings(const std::string& strInput)
           }
           ++mnParameterCount;
        }
-       else if ( strNextWord.length() > 0 )
+       else
        {
           TranslateQuotes(ist, strNextWord);
           pResult = mArgMap.insert(std::make_pair(GetParamName(strWord),strNextWord));

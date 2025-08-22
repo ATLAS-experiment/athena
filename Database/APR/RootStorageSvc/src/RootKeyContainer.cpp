@@ -105,7 +105,7 @@ DbStatus RootKeyContainer::transAct(Transaction::Action action)
 DbStatus RootKeyContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt) {
   char txt[64];
   ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(linkH.second));
-  TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
+  const TKey* key = (const TKey*)m_dir->GetListOfKeys()->FindObject(txt);
   if ( key )    {
     stmt = linkH;
     return Success;
@@ -196,7 +196,7 @@ DbStatus RootKeyContainer::destroyObject(ActionList::value_type& entry) {
   // Does not work, because container size is changed...
   ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(lnkH.second));
   TDirectory::TContext dirCtxt(m_dir);
-  TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
+  const TKey* key = (const TKey*)m_dir->GetListOfKeys()->FindObject(txt);
   if ( key )    {
     if ( m_policy == 0 || m_policy == TObject::kSingleKey )  {
       strcat(txt,";*");

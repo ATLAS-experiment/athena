@@ -25,7 +25,7 @@ void printUsage(){
 
 class contactParser{
 public:
-  contactParser(const std::string& contact):m_contact(contact){}
+  explicit contactParser(const std::string& contact):m_contact(contact){}
   void getContacts(std::vector<std::string>& uris){
     std::string delim(" ");
     std::string::size_type begIdx,endIdx;
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
       printUsage();
       return 0;
     }
-  }catch(std::string& strError){
+  }catch(const std::string& strError){
     std::cerr<< "Error: command parsing error "<<strError<<std::endl;
     return 1;
   }

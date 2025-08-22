@@ -60,7 +60,7 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
    pool::CollectionRowBuffer rowBuffer;
    collection->initNewRow( rowBuffer );
 
-   unsigned long long ntab[] = {
+   const unsigned long long ntab[] = {
       0x0000000000000000ULL,
       0x0000000000000001ULL,
       0x0000000000010000ULL,

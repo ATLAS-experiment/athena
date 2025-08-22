@@ -157,7 +157,7 @@ DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
       return sc;
     }
   }
-  else if ( m_isOpen && typ ) {
+  else if ( typ ) {
     return m_dbH.addShape(typ);
   }
   return Error;

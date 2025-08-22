@@ -322,7 +322,6 @@ pool::TestDriver::read()
       throw std::runtime_error( error.str() );
     }
     delete object_testClassVectors;
-    ++j;
 
     // Commit and hold the transaction
     if ( ( i + 1 ) % m_eventsToCommitAndHold == 0 ) {
@@ -439,7 +438,7 @@ pool::TestDriver::readBackUpdatedObjects()
   }
 
   int i = 0;
-  std::vector< SimpleTestClass* > v_simpleTestClass;
+
   Token* token = tokenIterator->next();
   while ( token ) {
     void* data_simpleTestClass = persistencySvc->readObject( *token );

@@ -73,7 +73,7 @@ class RNTupleContainer : public pool::DbContainerImp
     // AuxDyn RNTuple writer
     std::unique_ptr<RootAuxDynIO::IRNTupleAuxDynWriter> auxdyn_writer;
 
-    FieldDesc(const DbColumn& c);
+    explicit FieldDesc(const DbColumn& c);
     FieldDesc(FieldDesc const& other) = delete;
     FieldDesc(FieldDesc&& other) = default;
     ~FieldDesc() = default;

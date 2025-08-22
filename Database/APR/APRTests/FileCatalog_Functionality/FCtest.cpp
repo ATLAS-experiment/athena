@@ -26,11 +26,8 @@ class FCtest: public CppUnit::TestFixture
 
 public:
   IFileCatalog* mycatalog, *source, *dest;
-  std::string sourcecatalogtype;
   std::string sourcecatalogurl;
-  std::string destcatalogtype;
   std::string destcatalogurl;
-  std::string mycatalogtype;
   std::string mycatalogurl;
   
   std::vector<std::string> names;
