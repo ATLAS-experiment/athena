@@ -1,14 +1,18 @@
 """Combined Tile Digitization functions
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import BeamType
 from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileTriggerDigitizationCfg(flags):
     """Return ComponentAccumulator with standard Tile Trigger Digitization configuration"""
+
+    if flags.Beam.Type is BeamType.TestBeam:
+        return ComponentAccumulator()
 
     from TileSimAlgs.TileHitToTTL1Config import TileHitToTTL1OutputCfg
     acc = TileHitToTTL1OutputCfg(flags)
