@@ -85,7 +85,7 @@ Folder::add(const std::string& typeName, const std::string& skey) {
   if (sc.isSuccess()) sc=add(clid, skey, false, exact);
   else {
     MsgStream log(msgSvc(), name());
-    log << MSG::WARNING << "add: can not find type ["
+    log << MSG::ERROR << "add: can not find type ["
 	<< typeName << "] in clid db" << endmsg;
   }
   return sc;
@@ -101,7 +101,7 @@ Folder::add(const CLID& clid, const std::string& skey,
     sc = StatusCode::SUCCESS;
   } else if (0 != clid) {
     MsgStream log(msgSvc(), name());
-    log << MSG::WARNING << "add: can not find clid "
+    log << MSG::ERROR << "add: can not find clid "
 	<< clid << " in clid db" << endmsg;
   }
 #ifdef SGFOLDER_DEBUG

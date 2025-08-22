@@ -38,7 +38,8 @@ atlas_add_test( AthenaOutputStream_test
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} TestTools AthenaKernel AthContainers
                   AthContainersInterfaces CxxUtils SGTools StoreGateLib GaudiKernel AthenaBaseComps
                   PersistentDataModel RootAuxDynIOHeaders xAODCore
-   LOG_SELECT_PATTERN "AthenaOutputStream_test" )
+   LOG_SELECT_PATTERN "AthenaOutputStream_test"
+   LOG_IGNORE_PATTERN "ERROR add: can not find clid 13 in clid db" )
 # Avoid spurious ubsan warnings.
 set_target_properties( AthenaServices_AthenaOutputStream_test PROPERTIES ENABLE_EXPORTS True )
 
