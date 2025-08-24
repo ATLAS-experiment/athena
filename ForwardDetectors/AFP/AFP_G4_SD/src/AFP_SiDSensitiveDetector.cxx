@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -192,12 +192,12 @@ bool AFP_SiDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
             const G4ThreeVector normpZ( 0., 0., 1.);
             const G4ThreeVector normnZ( 0., 0.,-1.);
 
-            G4double BarpX = ((G4ReflectedSolid *)(myTouch->GetSolid()))->DistanceToOut(localPosition_pre, normpX);
-            G4double BarnX = ((G4ReflectedSolid *)(myTouch->GetSolid()))->DistanceToOut(localPosition_pre, normnX);
-            G4double BarpY = ((G4ReflectedSolid *)(myTouch->GetSolid()))->DistanceToOut(localPosition_pre, normpY);
-            G4double BarnY = ((G4ReflectedSolid *)(myTouch->GetSolid()))->DistanceToOut(localPosition_pre, normnY);
-            G4double BarpZ = ((G4ReflectedSolid *)(myTouch->GetSolid()))->DistanceToOut(localPosition_pre, normpZ);
-            G4double BarnZ = ((G4ReflectedSolid *)(myTouch->GetSolid()))->DistanceToOut(localPosition_pre, normnZ);
+            G4double BarpX = static_cast<G4ReflectedSolid *>(myTouch->GetSolid())->DistanceToOut(localPosition_pre, normpX);
+            G4double BarnX = static_cast<G4ReflectedSolid *>(myTouch->GetSolid())->DistanceToOut(localPosition_pre, normnX);
+            G4double BarpY = static_cast<G4ReflectedSolid *>(myTouch->GetSolid())->DistanceToOut(localPosition_pre, normpY);
+            G4double BarnY = static_cast<G4ReflectedSolid *>(myTouch->GetSolid())->DistanceToOut(localPosition_pre, normnY);
+            G4double BarpZ = static_cast<G4ReflectedSolid *>(myTouch->GetSolid())->DistanceToOut(localPosition_pre, normpZ);
+            G4double BarnZ = static_cast<G4ReflectedSolid *>(myTouch->GetSolid())->DistanceToOut(localPosition_pre, normnZ);
 
             G4double BarHalfX = .5 * (BarpX+BarnX);
             G4double BarHalfY = .5 * (BarpY+BarnY);
