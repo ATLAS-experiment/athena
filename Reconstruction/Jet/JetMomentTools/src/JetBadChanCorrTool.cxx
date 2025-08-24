@@ -94,7 +94,7 @@ StatusCode JetBadChanCorrTool::initialize()
           ATH_MSG( ERROR ) << "failed to get histo " << location << endmsg;
           return StatusCode::FAILURE;
         }
-        m_profileDatas[sample].emplace_back(static_cast<TH1D*>(th),sample,ptMin,ptMax,etaMin,etaMax,phiMin,phiMax);
+        m_profileDatas[sample].emplace_back(th,sample,ptMin,ptMax,etaMin,etaMax,phiMin,phiMax);
         ATH_MSG( DEBUG ) << "read hist=" << th->GetName() 
                          << " tag=" << tag << " sample=" << sample 
                          << " ptMin=" << ptMin << " ptMax=" << ptMax 
