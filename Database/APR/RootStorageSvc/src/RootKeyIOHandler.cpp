@@ -10,7 +10,6 @@
 //====================================================================
 #include "RootKeyIOHandler.h"
 #include "TKey.h"
-#include "TMath.h"
 #include "TFile.h"
 #include "TClass.h"
 #include "TROOT.h"
@@ -21,6 +20,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/no_sanitize_undefined.h"
 
+#include <algorithm>
 #include <iostream>
 
 namespace pool {
@@ -62,7 +62,7 @@ namespace pool {
       if (cxlevel && fObjlen > 256) {
         if (cxlevel == 2) cxlevel--;
         Int_t nbuffers = fObjlen/kMAXZIPBUF;
-        Int_t buflen = TMath::Max(512,fKeylen + fObjlen + 9*nbuffers + 8); //add 8 bytes in case object is placed in a deleted gap
+        Int_t buflen = std::max(512,fKeylen + fObjlen + 9*nbuffers + 8); //add 8 bytes in case object is placed in a deleted gap
         fBuffer = new char[buflen];
         char *objbuf = fBufferRef->Buffer() + fKeylen;
         char *bufcur = &fBuffer[fKeylen];
