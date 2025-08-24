@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -56,7 +56,7 @@ G4bool TrackFastSimSD::ProcessHits(G4Step* aStep,G4TouchableHistory* )
   if(m_SD_type==2)
     {
       // need to get the local position
-      const G4TouchableHistory* touchHist = (G4TouchableHistory*)preStep->GetTouchable();
+      const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
       const G4AffineTransform trans = track->GetTouchable()->GetHistory()->GetTopTransform(); // trans from global to local
       G4ThreeVector localPos=trans.TransformPoint(pos);
       G4ThreeVector localMom=mom;

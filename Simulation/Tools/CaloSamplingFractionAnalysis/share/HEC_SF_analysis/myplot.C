@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ void myplot (Float_t x1=0, Float_t x2=1, Float_t y1=0, Float_t y2=1,
    TIter next(gPad->GetListOfPrimitives());
    while ((obj = next())) {
       if (!obj->InheritsFrom(TPaveText::Class())) continue;
-      title = (TPaveText*)obj;
+      title = static_cast<TPaveText*>(obj);
       if (strcmp(title->GetName(),"title")) {title = 0; continue;}
       break;
    }
