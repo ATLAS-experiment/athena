@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef DECISIONHANDLING_COMBOHYPOTOOLBASE_H
 #define DECISIONHANDLING_COMBOHYPOTOOLBASE_H
@@ -101,7 +101,7 @@ public:
   /**
   * @brief Print the output of the tool, after having removed failed Decision Objects. Restricted to the ComboHypoTool's chain's legs.
   **/
-  StatusCode printDebugInformation(const Combo::LegDecisionsMap & passingLegs) const;
+  void printDebugInformation(const Combo::LegDecisionsMap & passingLegs) const;
 
   Gaudi::Property<size_t> m_combinationsThresholdWarn {this, "CombinationsThresholdWarn", 1000,
     "Events processing this many combinations will generate a WARNING message."};

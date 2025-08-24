@@ -15,7 +15,6 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/WriteHandleKey.h"
 #include "AsgDataHandles/ReadHandleKey.h"
-#include "AsgTools/CurrentContext.h"
 #include "AsgTools/EventStoreType.h"
 #include "AsgMessaging/MsgStream.h"
 #include "AsgMessaging/MessageCheck.h"
@@ -54,26 +53,23 @@ namespace TrigCompositeUtils {
    * @brief Creates and right away records the Container CONT with the key.
    * Returns the WriteHandle. 
    * No Aux store.
-   * If possible provide the context that comes via an argument to execute otherwise it will default to looking it up which is slower.
    **/
   template<class CONT>
-    SG::WriteHandle<CONT> createAndStoreNoAux( const SG::WriteHandleKey<CONT>& key, const EventContext& ctx = Gaudi::Hive::currentContext());
+    SG::WriteHandle<CONT> createAndStoreNoAux( const SG::WriteHandleKey<CONT>& key, const EventContext& ctx );
 
   /**
    * @brief Creates and right away records the Container CONT with the key.
    * Returns the WriteHandle. 
    * With Aux store.
-   * If possible provide the context that comes via an argument to execute otherwise it will default to looking it up which is slower.
    **/
   template<class CONT, class AUX>
-    SG::WriteHandle<CONT> createAndStoreWithAux( const SG::WriteHandleKey<CONT>& key, const EventContext& ctx = Gaudi::Hive::currentContext());
+    SG::WriteHandle<CONT> createAndStoreWithAux( const SG::WriteHandleKey<CONT>& key, const EventContext& ctx );
 
   /**
    * @brief Creates and right away records the DecisionContainer with the key.
    * Returns the WriteHandle. 
-   * If possible provide the context that comes via an argument to execute otherwise it will default to looking it up which is slower.
    **/
-  SG::WriteHandle<DecisionContainer> createAndStore( const SG::WriteHandleKey<DecisionContainer>& key, const EventContext& ctx = Gaudi::Hive::currentContext() );
+  SG::WriteHandle<DecisionContainer> createAndStore( const SG::WriteHandleKey<DecisionContainer>& key, const EventContext& ctx );
 
   /**
    * @brief Creates and right away records the DecisionContainer using the provided WriteHandle.
@@ -89,18 +85,17 @@ namespace TrigCompositeUtils {
    * output->push_back(d);    
    * If provided, the name is assigned to the TC object
    * Note that the supplied DecisionContainer must have been recorded in the event store.
-   * If possible provide the context that comes via an argument to execute otherwise it will default to looking it up which is slower.
-   **/  
+   **/
   Decision* newDecisionIn ( DecisionContainer* dc, const std::string& name = "" );
 
   /**
    * @brief Helper method to create a Decision object, place it in the container and return a pointer to it. RoI, view and feature links will be copied from the previous to the new decision and a "seed" link made between them
    * @arg the container in which to place the new Decision
    * @arg the previous decision to which the new one should be connected
-   * If provided, the name is assigned to the TC object
+   * @arg the name is assigned to the TC object
    * Note that the supplied DecisionContainer must have been recorded in the event store.
    **/ 
-  Decision* newDecisionIn( DecisionContainer* dc, const Decision* dOld, const std::string& name = "", const EventContext& ctx = Gaudi::Hive::currentContext() );
+  Decision* newDecisionIn( DecisionContainer* dc, const Decision* dOld, const std::string& name, const EventContext& ctx );
 
   /**
    * @brief Appends the decision (given as ID) to the decision object
@@ -175,7 +170,7 @@ namespace TrigCompositeUtils {
   /**
    * @brief Takes a raw pointer to a Decision and returns an ElementLink to the Decision. The Decision must already be in a container in SG.
    **/
-  ElementLink<DecisionContainer> decisionToElementLink(const Decision* d, const EventContext& ctx = Gaudi::Hive::currentContext());
+  ElementLink<DecisionContainer> decisionToElementLink(const Decision* d, const EventContext& ctx);
   
   /**
    * @brief Links to the previous object, location of previous 'seed' decision supplied by hand
@@ -185,7 +180,7 @@ namespace TrigCompositeUtils {
   /**
    * @brief Links to the previous object, 'seed' decision provided explicitly.
    **/
-  void linkToPrevious(Decision* d, const Decision* dOld, const EventContext& ctx = Gaudi::Hive::currentContext());
+  void linkToPrevious(Decision* d, const Decision* dOld, const EventContext& ctx);
 
   /**
    * @brief checks if there is at least one 'seed' link to previous object

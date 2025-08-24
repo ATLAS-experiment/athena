@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "cTauRoIThresholdsTool.h"
 #include "StoreGate/ReadDecorHandle.h"
@@ -14,13 +14,14 @@ StatusCode cTauRoIThresholdsTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
+uint64_t cTauRoIThresholdsTool::getPattern(const EventContext& ctx,
+                                           const xAOD::eFexTauRoI& eTau,
                                            const RoIThresholdsTool::ThrVec& menuThresholds,
                                            const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
 
   // Get the jTau matched to the eTau
   using jTauLink_t = ElementLink<xAOD::jFexTauRoIContainer>;
-  SG::ReadDecorHandle<xAOD::eFexTauRoIContainer, jTauLink_t> jTauLinkAcc{m_jTauLinkKey, Gaudi::Hive::currentContext()};
+  SG::ReadDecorHandle<xAOD::eFexTauRoIContainer, jTauLink_t> jTauLinkAcc{m_jTauLinkKey, ctx};
   if (not jTauLinkAcc.isPresent()) {
     ATH_MSG_ERROR("Decoration " << m_jTauLinkKey.key() << " is missing, cannot create cTau threshold pattern");
     throw SG::ExcNullReadHandle(m_jTauLinkKey.clid(), m_jTauLinkKey.key(), m_jTauLinkKey.storeHandle().name());

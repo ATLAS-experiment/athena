@@ -93,7 +93,8 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     return StatusCode::SUCCESS;
 }
 
-  uint64_t TrigThresholdDecisionTool::getPattern(const xAOD::MuonRoI& roi,
+  uint64_t TrigThresholdDecisionTool::getPattern(const EventContext& /*ctx*/,
+                                                 const xAOD::MuonRoI& roi,
                                                  const ThrVec& menuThresholds,
                                                  const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const {
     return getPattern(roi.roiWord(), menuThresholds, menuExtraInfo);
