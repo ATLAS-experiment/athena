@@ -299,13 +299,13 @@ def TrigMufastHypoToolFromDict(flags, chainDict):
 
     doMonitoring = monitorAll or any(group in muonHypoMonGroups for group in chainDict['monGroups'])
 
-    config = TrigMufastHypoToolConfig(chainDict['chainName'], chainPart, doOverlapRemoval, doMonitoring)
+    config = TrigMufastHypoToolConfig(chainDict['chainName'], chainPart, chainDict['eventBuildType'], doOverlapRemoval, doMonitoring)
     config.compile(flags)
     return config.tool()
 
 
 class TrigMufastHypoToolConfig:
-    def __init__(self, name, cpart, doOverlapRemoval = False, doMonitoring = False):
+    def __init__(self, name, cpart, eventBuildType, doOverlapRemoval = False, doMonitoring = False):
 
         from AthenaCommon.Logging import logging
         self.__log = logging.getLogger('TrigMufastHypoToolConfig')
@@ -315,7 +315,7 @@ class TrigMufastHypoToolConfig:
         self.__multiplicity = int(cpart['multiplicity'])
         self.__isPassThrough = 'mucombTag' in cpart['extra']
         self.__isCalibration = 'muoncalib' in cpart['extra']
-        self.__isMuonDSCalibration = 'MuonDS' in cpart['extra']
+        self.__isMuonDSCalibration = 'MuonDS' in eventBuildType
         self.__isBarrelOnly = '0eta105' in cpart['etaRange']
         self.__useGeV_v15a = any(x in cpart['addInfo'] for x in ['idperf', 'idtp', '3layersEC'])
         self.__doL2MT = 'l2mt' in cpart['l2AlgInfo']
@@ -415,6 +415,7 @@ class TrigMufastHypoToolConfig:
     def compile(self, flags):
 
         nt = self.multiplicity()
+        
         if self.isCalibration():
             if self.isMuonDSCalibration():
                 self.tool().AcceptAll = True
