@@ -175,7 +175,7 @@ TRT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   // negative barrel
   if (m_dict->get_label_value("barrel_endcap", "negative_barrel", barrel_value)) {
     log << MSG::ERROR << "Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary "
-          << m_dict->m_name
+          << m_dict->name()
           << endmsg;
     
     m_is_valid = false;
@@ -185,7 +185,7 @@ TRT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   // negative barrel
   if (m_dict->get_label_value("barrel_endcap", "positive_barrel", barrel_value)) {
     log << MSG::ERROR << "Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary "
-          << m_dict->m_name
+        << m_dict->name()
           << endmsg;
    
     m_is_valid = false;
@@ -209,7 +209,7 @@ TRT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   int inDetField = -1;
   if (atlasDict->get_label_value("subdet", "InnerDetector", inDetField)) {
     log << MSG::ERROR << "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary "
-          << atlasDict->m_name
+          << atlasDict->name()
           << endmsg;
    
     m_is_valid = false;
@@ -220,7 +220,7 @@ TRT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   int trtField = -1;
   if (m_dict->get_label_value("part", "TRT", trtField)) {
     log << MSG::ERROR << "Could not get value for label 'TRT' of field 'part' in dictionary "
-          << m_dict->m_name
+          << m_dict->name()
           << endmsg;
    
     m_is_valid = false;
@@ -596,7 +596,7 @@ TRT_ID::initLevelsFromDict() {
   // Find a TRT region
   IdDictField* field = m_dict->find_field("subdet");
   if (field) {
-    m_INDET_INDEX = field->m_index;
+    m_INDET_INDEX = field->index();
   } else {
       log << MSG::ERROR << "TRT_ID::initLevelsFromDict - unable to find 'subdet' field "
           << endmsg;
@@ -605,7 +605,7 @@ TRT_ID::initLevelsFromDict() {
   }
   field = m_dict->find_field("part");
   if (field) {
-    m_TRT_INDEX = field->m_index;
+    m_TRT_INDEX = field->index();
   } else {
       log << MSG::ERROR << "TRT_ID::initLevelsFromDict - unable to find 'part' field "
           << endmsg;
@@ -614,7 +614,7 @@ TRT_ID::initLevelsFromDict() {
   }
   field = m_dict->find_field("barrel_endcap");
   if (field) {
-    m_BARREL_EC_INDEX = field->m_index;
+    m_BARREL_EC_INDEX = field->index();
   } else {
       log << MSG::ERROR << "TRT_ID::initLevelsFromDict - unable to find 'barrel_endcap' field "
           << endmsg;
@@ -624,7 +624,7 @@ TRT_ID::initLevelsFromDict() {
   }
   field = m_dict->find_field("phi_sector");
   if (field) {
-    m_PHI_MODULE_INDEX = field->m_index;
+    m_PHI_MODULE_INDEX = field->index();
   } else {
       log << MSG::ERROR << "TRT_ID::initLevelsFromDict - unable to find 'phi_sector' field "
           << endmsg;
@@ -634,7 +634,7 @@ TRT_ID::initLevelsFromDict() {
   }
   field = m_dict->find_field("layer_or_wheel");
   if (field) {
-    m_LAYER_OR_WHEEL_INDEX = field->m_index;
+    m_LAYER_OR_WHEEL_INDEX = field->index();
   } else {
       log << MSG::ERROR << "TRT_ID::initLevelsFromDict - unable to find 'layer' field "
           << endmsg;
@@ -644,7 +644,7 @@ TRT_ID::initLevelsFromDict() {
   }
   field = m_dict->find_field("straw_layer");
   if (field) {
-    m_STRAW_LAYER_INDEX = field->m_index;
+    m_STRAW_LAYER_INDEX = field->index();
   } else {
       log << MSG::ERROR << "TRT_ID::initLevelsFromDict - unable to find 'straw_layer' field "
           << endmsg;
@@ -654,7 +654,7 @@ TRT_ID::initLevelsFromDict() {
   }
   field = m_dict->find_field("straw");
   if (field) {
-    m_STRAW_INDEX = field->m_index;
+    m_STRAW_INDEX = field->index();
   } else {
       log << MSG::ERROR << "TRT_ID::initLevelsFromDict - unable to find 'straw' field "
           << endmsg;
@@ -665,15 +665,15 @@ TRT_ID::initLevelsFromDict() {
 
   // Set the field implementations: for bec, lay/disk, eta/phi mod
 
-  const IdDictRegion& region = *m_dict->m_regions[m_trt_region_index];
+  const IdDictRegion& region = m_dict->region(m_trt_region_index);
 
-  m_indet_impl = region.m_implementation[m_INDET_INDEX];
-  m_trt_impl = region.m_implementation[m_TRT_INDEX];
-  m_bec_impl = region.m_implementation[m_BARREL_EC_INDEX];
-  m_phi_mod_impl = region.m_implementation[m_PHI_MODULE_INDEX];
-  m_lay_wheel_impl = region.m_implementation[m_LAYER_OR_WHEEL_INDEX];
-  m_str_lay_impl = region.m_implementation[m_STRAW_LAYER_INDEX];
-  m_straw_impl = region.m_implementation[m_STRAW_INDEX];
+  m_indet_impl = region.implementation(m_INDET_INDEX);
+  m_trt_impl = region.implementation(m_TRT_INDEX);
+  m_bec_impl = region.implementation(m_BARREL_EC_INDEX);
+  m_phi_mod_impl = region.implementation(m_PHI_MODULE_INDEX);
+  m_lay_wheel_impl = region.implementation(m_LAYER_OR_WHEEL_INDEX);
+  m_str_lay_impl = region.implementation(m_STRAW_LAYER_INDEX);
+  m_straw_impl = region.implementation(m_STRAW_INDEX);
 
     log << MSG::DEBUG << "decode index and bit fields for each level: " << endmsg;
     log << MSG::DEBUG << "indet     " << m_indet_impl.show_to_string() << endmsg;
