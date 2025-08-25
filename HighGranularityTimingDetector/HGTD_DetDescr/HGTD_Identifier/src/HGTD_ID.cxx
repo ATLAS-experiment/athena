@@ -249,10 +249,10 @@ HGTD_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
     int inDetField   = -1;
     if (atlasDict->get_label_value("subdet", "InnerDetector", inDetField)) {
         if(m_msgSvc) log << MSG::FATAL << "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " 
-                         << atlasDict->m_name
+                         << atlasDict->name()
                          << endmsg;
         else std::cout << " FATAL Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " 
-                       << atlasDict->m_name
+                       << atlasDict->name()
                        << std::endl;
         return (1);
     }
@@ -261,10 +261,10 @@ HGTD_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
     int hgtdField   = -1;
     if (m_dict->get_label_value("part", "HGTD", hgtdField)) {
         if(m_msgSvc) log << MSG::FATAL << "Could not get value for label 'HGTD' of field 'part' in dictionary " 
-                         << m_dict->m_name
+                         << m_dict->name()
                          << endmsg;
         else std::cout << " FATAL Could not get value for label 'HGTD' of field 'part' in dictionary " 
-                       << m_dict->m_name
+                       << m_dict->name()
                        << std::endl;
         return (1);
     }
@@ -648,7 +648,7 @@ HGTD_ID::initLevelsFromDict()
     // Get levels
     IdDictField* field = m_dict->find_field("subdet");
     if (field) {
-        m_INDET_INDEX = field->m_index;
+        m_INDET_INDEX = field->index();
     }
     else {
         if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'subdet' field "        
@@ -660,7 +660,7 @@ HGTD_ID::initLevelsFromDict()
 
     field = m_dict->find_field("part");
     if (field) {
-        m_HGTD_INDEX = field->m_index;
+        m_HGTD_INDEX = field->index();
     }
     else {
         if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'part' field " << endmsg;       
@@ -670,7 +670,7 @@ HGTD_ID::initLevelsFromDict()
  
     field = m_dict->find_field(m_endcap_ID);
     if (field) {
-        m_ENDCAP_INDEX = field->m_index;
+        m_ENDCAP_INDEX = field->index();
     }
     else {
         if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'endcap' field "  << endmsg;     
@@ -679,7 +679,7 @@ HGTD_ID::initLevelsFromDict()
     }
     field = m_dict->find_field(m_layer_ID);
     if (field) {
-        m_LAYER_INDEX = field->m_index;
+        m_LAYER_INDEX = field->index();
     }
     else {
         if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'layer' field "  << endmsg;     
@@ -688,7 +688,7 @@ HGTD_ID::initLevelsFromDict()
     }
     field = m_dict->find_field(m_moduleInLayer_Or_Row);
     if (field) {
-        m_PHI_MODULE_INDEX = field->m_index;
+        m_PHI_MODULE_INDEX = field->index();
     }
     else {
         if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'moduleInLayer' field "  << endmsg;     
@@ -697,7 +697,7 @@ HGTD_ID::initLevelsFromDict()
     }
     field = m_dict->find_field(m_moduleInRow);
     if (field) {
-        m_ETA_MODULE_INDEX = field->m_index;
+        m_ETA_MODULE_INDEX = field->index();
     }
     else {
         if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'hgtd_eta_module' field "  << endmsg;     
@@ -706,7 +706,7 @@ HGTD_ID::initLevelsFromDict()
     }
     field = m_dict->find_field(m_padInModuleRow);
     if (field) {
-        m_PHI_INDEX_INDEX = field->m_index;
+        m_PHI_INDEX_INDEX = field->index();
     }
     else {
         if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'hgtd_phi_index' field "  << endmsg;     
@@ -715,7 +715,7 @@ HGTD_ID::initLevelsFromDict()
     }
     field = m_dict->find_field(m_padInModuleColumn);
     if (field) {
-        m_ETA_INDEX_INDEX = field->m_index;
+        m_ETA_INDEX_INDEX = field->index();
     }
     else {
         if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'hgtd_eta_index' field "  << endmsg;     
@@ -724,16 +724,16 @@ HGTD_ID::initLevelsFromDict()
     }
     // Set the field implementations
 
-    const IdDictRegion& region = *m_dict->m_regions[m_hgtd_region_index];
+    const IdDictRegion& region = m_dict->region(m_hgtd_region_index);
 
-    m_indet_impl      = region.m_implementation[m_INDET_INDEX];
-    m_hgtd_impl       = region.m_implementation[m_HGTD_INDEX];
-    m_ec_impl         = region.m_implementation[m_ENDCAP_INDEX];
-    m_layer_impl      = region.m_implementation[m_LAYER_INDEX];
-    m_phi_mod_impl    = region.m_implementation[m_PHI_MODULE_INDEX];
-    m_eta_mod_impl    = region.m_implementation[m_ETA_MODULE_INDEX];
-    m_phi_index_impl  = region.m_implementation[m_PHI_INDEX_INDEX];
-    m_eta_index_impl  = region.m_implementation[m_ETA_INDEX_INDEX];
+    m_indet_impl      = region.implementation(m_INDET_INDEX);
+    m_hgtd_impl       = region.implementation(m_HGTD_INDEX);
+    m_ec_impl         = region.implementation(m_ENDCAP_INDEX);
+    m_layer_impl      = region.implementation(m_LAYER_INDEX);
+    m_phi_mod_impl    = region.implementation(m_PHI_MODULE_INDEX);
+    m_eta_mod_impl    = region.implementation(m_ETA_MODULE_INDEX);
+    m_phi_index_impl  = region.implementation(m_PHI_INDEX_INDEX);
+    m_eta_index_impl  = region.implementation(m_ETA_INDEX_INDEX);
 
     if(m_msgSvc) {
         log << MSG::DEBUG << "decode index and bit fields for each level: " << endmsg;
