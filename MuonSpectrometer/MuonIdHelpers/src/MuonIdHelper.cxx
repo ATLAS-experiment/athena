@@ -269,14 +269,14 @@ int MuonIdHelper::initLevelsFromDict() {
     // Find a Muon region
     IdDictField* field = m_dict->find_field("subdet");
     if (field) {
-        m_MUON_INDEX = field->m_index;
+        m_MUON_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'subdet' field ");
         return 1;
     }
     field = m_dict->find_field("stationName");
     if (field) {
-        m_NAME_INDEX = field->m_index;
+        m_NAME_INDEX = field->index();
 
         if (m_stationIdxToNameMap.empty()) {
             // we only need to fill the vectors and sets once
@@ -307,21 +307,21 @@ int MuonIdHelper::initLevelsFromDict() {
     }
     field = m_dict->find_field("stationEta");
     if (field) {
-        m_ETA_INDEX = field->m_index;
+        m_ETA_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'stationEta' field ");
         return 1;
     }
     field = m_dict->find_field("stationPhi");
     if (field) {
-        m_PHI_INDEX = field->m_index;
+        m_PHI_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'stationPhi' field ");
         return 1;
     }
     field = m_dict->find_field("technology");
     if (field) {
-        m_TECHNOLOGY_INDEX = field->m_index;
+        m_TECHNOLOGY_INDEX = field->index();
 
         if (m_technologyNameToIdxMap.empty()) {
             for (size_t i = 0; i < field->get_label_number(); ++i) {
@@ -340,9 +340,9 @@ int MuonIdHelper::initLevelsFromDict() {
     m_MODULE_INDEX = m_TECHNOLOGY_INDEX;
 
     // Set the field implementations down to the technology
-    const IdDictRegion& region = *m_dict->m_regions[m_station_region_index];
-    m_muon_impl = region.m_implementation[m_MUON_INDEX];
-    m_sta_impl = region.m_implementation[m_NAME_INDEX];
+    const IdDictRegion& region = m_dict->region(m_station_region_index);
+    m_muon_impl = region.implementation(m_MUON_INDEX);
+    m_sta_impl = region.implementation(m_NAME_INDEX);
 
     // m_stationNameField = m_dict->find_field ("stationName"); // Philipp
     // m_technologyField  = m_dict->find_field ("technology"); // Philipp
