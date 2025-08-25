@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -23,8 +23,6 @@
 #include "TrkAlignEvent/AlignTrack.h"
 
 #include "TrkAlignGenTools/AlignTrackCreator.h"
-#include "TrkAlignGenTools/AlignModuleTool.h"
-#include "TrkAlignInterfaces/IAlignResidualCalculator.h"
 
 #include <fstream>
 
@@ -35,28 +33,8 @@ namespace Trk {
                                      const IInterface* parent)
     : IAlignTrackCreator()
     , AthAlgTool(type,name,parent)
-    , m_residualCalculator("Trk::AlignResidualCalculator/ResidualCalculator")
-    , m_idHelper{}
-    , m_measTypeIdHelper{}
   {
     declareInterface<IAlignTrackCreator>(this);
-
-    declareProperty("ResidualCalculator",          m_residualCalculator);
-    declareProperty("AlignModuleTool",             m_alignModuleTool);
-
-    declareProperty("EventList",                   m_eventListName  = "goodEvents.txt");
-    declareProperty("WriteEventList",              m_writeEventList = false );
-    declareProperty("RequireOverlap",              m_requireOverlap = false);
-    declareProperty("RemoveATSOSNotInAlignModule", m_removeATSOSNotInAlignModule=true);
-    declareProperty("IncludeScatterers",           m_includeScatterers = true );
-
-    m_logStream = nullptr;
-  }
-
-  //________________________________________________________________________
-  AlignTrackCreator::~AlignTrackCreator()
-  {
-    ATH_MSG_DEBUG("in AlignTrackCreator d'tor");
   }
 
   //________________________________________________________________________
@@ -70,14 +48,14 @@ namespace Trk {
     m_measTypeIdHelper=new MeasurementTypeID(m_idHelper);
 
     if (m_residualCalculator.retrieve().isFailure()) {
-      msg(MSG::FATAL) << "Could not get " << m_residualCalculator << endmsg;
+      ATH_MSG_FATAL("Could not get " << m_residualCalculator);
       return StatusCode::FAILURE;
     }
     ATH_MSG_INFO("Retrieved " << m_residualCalculator);
 
     // get AlignModuleTool
     if (m_alignModuleTool.retrieve().isFailure()) {
-      msg(MSG::FATAL) << "Could not get " << m_alignModuleTool << endmsg;
+      ATH_MSG_FATAL("Could not get " << m_alignModuleTool);
       return StatusCode::FAILURE;
     }
     ATH_MSG_INFO("Retrieved " << m_alignModuleTool);
@@ -94,7 +72,7 @@ namespace Trk {
 
     // write run/evt to ASCII file
     if (m_writeEventList) {
-      std::ofstream output(m_eventListName.c_str());
+      std::ofstream output(m_eventListName.value().c_str());
       for (std::vector<std::pair<int,int> >::iterator it=
              m_goodEventList.begin(); it!=m_goodEventList.end(); ++it) {
         int run=(*it).first;
@@ -147,11 +125,6 @@ namespace Trk {
         if (!rio && crio) rio=&crio->rioOnTrack(0);
 
         if (rio && tparp) {
-
-          //AlignModule::DetectorType detType=AlignModule::NDetectorTypes;
-          //if (measType!=TrackState::unidentified && measType<=TrackState::TGC)
-          //detType=(AlignModule::DetectorType)(measType-1);
-
           //get detector type
           AlignModule::DetectorType detType = m_alignModuleTool->getDetectorType(rio->detectorElement());
 	  ATH_MSG_DEBUG("detType: "<<detType);

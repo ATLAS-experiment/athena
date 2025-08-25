@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -12,7 +12,6 @@
 
 #include "TrkTrack/Track.h"
 
-#include "TrkAlignInterfaces/IDerivCalcTool.h"
 #include "TrkAlignInterfaces/IFillNtupleTool.h"
 #include "TrkAlignEvent/AlignTSOS.h"
 #include "TrkAlignEvent/AlignModule.h"
@@ -25,19 +24,9 @@ namespace Trk {
   //________________________________________________________________________
   AlignTrackDresser::AlignTrackDresser(const std::string & type, const std::string & name, const IInterface * parent)
     : AthAlgTool(type,name,parent)
-    , m_derivCalcTool("Trk::AnalyticalDerivCalcTool", this)
-    , m_numBadCovWMatrix(0)
   {
     declareInterface<IAlignTrackDresser>(this);
-
-    declareProperty("DerivCalcTool",   m_derivCalcTool,   "tool for calculating derivatives");
-
-    m_logStream = nullptr;
   }
-
-  //________________________________________________________________________
-  AlignTrackDresser::~AlignTrackDresser()
-  = default;
 
   //________________________________________________________________________
   StatusCode AlignTrackDresser::initialize()
@@ -46,7 +35,7 @@ namespace Trk {
 
     // Get DerivCalcTool (will have to be moved to AlignTool)
     if ( m_derivCalcTool.retrieve().isFailure() ) {
-      msg(MSG::FATAL)<< "Failed to retrieve tool " << m_derivCalcTool << endmsg;
+      ATH_MSG_FATAL("Failed to retrieve tool " << m_derivCalcTool);
       return StatusCode::FAILURE;
     } 
     ATH_MSG_INFO("Retrieved tool " << m_derivCalcTool);
@@ -120,7 +109,7 @@ namespace Trk {
     }
 
     if (imeas!=NMEAS) {
-      msg(MSG::ERROR)<<"problem with nmeas.  imeas="<<imeas<<", NMEAS="<<NMEAS<<endmsg;
+      ATH_MSG_ERROR("problem with nmeas.  imeas="<<imeas<<", NMEAS="<<NMEAS);
       throw std::runtime_error("Error in AlignTrackDresser::setResiduals");
     }
 
