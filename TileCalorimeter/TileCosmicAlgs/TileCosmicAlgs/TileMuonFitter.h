@@ -92,9 +92,9 @@ class TileMuonFitter: public AthAlgorithm {
     TileMuonFitter(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~TileMuonFitter();
 
-    virtual StatusCode initialize();
-    virtual StatusCode execute();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
     virtual bool isClonable() const override final { return true; }
 
     /** Creates an internal cell container (just vectors) from the
