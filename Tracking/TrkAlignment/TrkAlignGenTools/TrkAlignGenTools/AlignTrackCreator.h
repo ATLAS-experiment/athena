@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENTOOLS_ALIGN_TRACK_CREATOR_H
@@ -9,6 +9,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "TrkAlignInterfaces/IAlignTrackCreator.h"
+#include "TrkAlignInterfaces/IAlignResidualCalculator.h"
+#include "TrkAlignInterfaces/IAlignModuleTool.h"
 
 #include <vector>
 
@@ -29,15 +31,12 @@ namespace Trk {
   class AlignTrack;
   class AlignTSOS;
   class MeasurementTypeID;
-  class IAlignModuleTool;
-  class IAlignResidualCalculator;
   
   class AlignTrackCreator : virtual public IAlignTrackCreator, public AthAlgTool {
 
   public:
     AlignTrackCreator(const std::string& type, const std::string& name,
 		     const IInterface* parent);
-    virtual ~AlignTrackCreator();
 
     StatusCode initialize();
     StatusCode finalize();
@@ -48,19 +47,26 @@ namespace Trk {
   private:
 
     // private variables
-    ToolHandle<IAlignModuleTool>                  m_alignModuleTool;
-    ToolHandle<IAlignResidualCalculator>          m_residualCalculator;
+    ToolHandle<IAlignModuleTool> m_alignModuleTool{this, "AlignModuleTool", ""};
+    ToolHandle<IAlignResidualCalculator> m_residualCalculator{
+      this, "ResidualCalculator", "Trk::AlignResidualCalculator/ResidualCalculator"};
 
-    const AtlasDetectorID*   m_idHelper;
-    MeasurementTypeID* m_measTypeIdHelper;
+    const AtlasDetectorID*   m_idHelper = nullptr;
+    MeasurementTypeID* m_measTypeIdHelper = nullptr;
 
     std::vector< std::pair<int,int> > m_goodEventList; //!> good events read in from ASCII file
 
-    std::string m_eventListName;             //!> name of event list ASCII file    
-    bool m_writeEventList;                   //!> write selected events to event list ASCII file
-    bool m_requireOverlap;                   //!> keep only tracks that pass through 2 or more AlignModules
-    bool m_removeATSOSNotInAlignModule;      //!> remove AlignTSOS not in AlignModules
-    bool m_includeScatterers;                //!> includes scatterers on track
+    StringProperty m_eventListName{this, "EventList", "goodEvents.txt",
+      "name of event list ASCII file"};
+    BooleanProperty m_writeEventList{this, "WriteEventList", false,
+      "write selected events to event list ASCII file"};
+    BooleanProperty m_requireOverlap{this, "RequireOverlap", false,
+      "keep only tracks that pass through 2 or more AlignModules"};
+    BooleanProperty m_removeATSOSNotInAlignModule{
+      this, "RemoveATSOSNotInAlignModule", true,
+      "remove AlignTSOS not in AlignModules"};
+    BooleanProperty m_includeScatterers{this, "IncludeScatterers", true,
+      "includes scatterers on track"};
 
   }; // end class
 

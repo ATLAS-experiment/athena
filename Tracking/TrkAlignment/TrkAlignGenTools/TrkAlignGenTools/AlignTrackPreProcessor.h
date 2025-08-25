@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENTOOLS_ALIGNTRACKPREPROCESSOR_H
@@ -12,6 +12,7 @@
 #include "TrkAlignInterfaces/IAlignTrackPreProcessor.h"
 #include "InDetAlignGenTools/IInDetAlignHitQualSelTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "TrkFitterInterfaces/IGlobalTrackFitter.h"
 
 #include <vector>
 
@@ -32,14 +33,11 @@
 namespace Trk {
 
   class Track;
-  class IGlobalTrackFitter;
-  //class ITrackSelectorTool;
   class AlignTrackPreProcessor : virtual public IAlignTrackPreProcessor, public AthAlgTool
   {
 
   public:
     AlignTrackPreProcessor(const std::string & type, const std::string & name, const IInterface * parent);
-    virtual ~AlignTrackPreProcessor();
     
     StatusCode initialize();
     StatusCode finalize();
@@ -49,27 +47,39 @@ namespace Trk {
    
 
   private:
-    ToolHandle<IGlobalTrackFitter> m_trackFitterTool;
-    ToolHandle<IGlobalTrackFitter> m_SLTrackFitterTool;
+    ToolHandle<IGlobalTrackFitter> m_trackFitterTool{
+      this, "TrackFitterTool", "Trk::GlobalChi2Fitter/InDetTrackFitter"};
+    ToolHandle<IGlobalTrackFitter> m_SLTrackFitterTool{
+      this, "SLTrackFitterTool", ""};
 
-    //ToolHandle<ITrackSelectorTool> m_trackSelectorTool;
-    ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectorTool;
-    ToolHandle<IInDetAlignHitQualSelTool> m_hitQualityTool;
+    ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectorTool{
+      this, "TrackSelectorTool", ""};
+    ToolHandle<IInDetAlignHitQualSelTool> m_hitQualityTool{
+      this, "HitQualityTool", ""};
     
     /** select silicon hits by quality. keep all the rest **/
     Track * performSiliconHitSelection(const Track *, const ToolHandle<Trk::IGlobalTrackFitter> &);
 
-    bool m_refitTracks; //!> flag to refit tracks
-    bool m_storeFitMatricesAfterRefit; //!> flag to store derivative and covariance matrices after refit
+    BooleanProperty m_refitTracks{this, "RefitTracks", true, "flag to refit tracks"};
+    BooleanProperty m_storeFitMatricesAfterRefit{
+      this, "StoreFitMatricesAfterRefit", true,
+      "flag to store derivative and covariance matrices after refit"};
 
-    bool m_runOutlierRemoval;  //!> run outlier removal in track refit
-    int  m_particleHypothesis; //!> particle hypothesis in track refit
+    BooleanProperty m_runOutlierRemoval{this, "RunOutlierRemoval", false,
+      "run outlier removal in track refit"};
+    IntegerProperty m_particleHypothesis{
+      this, "ParticleHypothesis", Trk::nonInteracting,
+      "particle hypothesis in track refit"};
 
-    bool m_useSingleFitter;    //!< only use 1 fitter for refitting track
+    BooleanProperty m_useSingleFitter{this, "UseSingleFitter", false,
+      "only use 1 fitter for refitting track"};
 
-    bool m_selectTracks;       //!< do the track selection
-    bool m_selectHits;         //!< perform the hit InnerDetector selection
-    bool m_fixMomentum;        //!< Fix the momentum of the track so it is not refitted 
+    BooleanProperty m_selectTracks{this, "SelectTracks", false,
+      "do the track selection"};
+    BooleanProperty m_selectHits{this, "SelectHits", false,
+      "perform the hit InnerDetector selection"};
+    BooleanProperty m_fixMomentum{this, "FixMomentum", false,
+      "Fix the momentum of the track so it is not refitted"};
 
   }; // end class
 

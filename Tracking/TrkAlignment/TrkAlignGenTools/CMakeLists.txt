@@ -15,8 +15,8 @@ atlas_add_library( TrkAlignGenToolsLib
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaBaseComps BeamSpotConditionsData EventPrimitives GaudiKernel GeoPrimitives InDetAlignGenToolsLib InDetTrackSelectionToolLib MuonRecToolInterfaces TrkAlignEvent TrkAlignInterfaces TrkEventPrimitives TrkFitterUtils TrkVertexFitterInterfaces VxVertex muonEvent xAODTracking
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AtlasDetDescr MuonSegment Particle TrkAlgebraUtils TrkCompetingRIOsOnTrack TrkDetElementBase TrkEventUtils TrkExInterfaces TrkFitterInterfaces TrkMaterialOnTrack TrkMeasurementBase TrkParameters TrkParticleBase TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkSurfaces TrkToolInterfaces TrkTrack TrkVertexOnTrack xAODEventInfo )
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaBaseComps BeamSpotConditionsData EventPrimitives GaudiKernel GeoPrimitives InDetAlignGenToolsLib InDetTrackSelectionToolLib MuonRecToolInterfaces TrkAlignEvent TrkAlignInterfaces TrkEventPrimitives TrkFitterInterfaces TrkFitterUtils TrkVertexFitterInterfaces VxVertex muonEvent xAODTracking
+                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AtlasDetDescr MuonSegment Particle TrkAlgebraUtils TrkCompetingRIOsOnTrack TrkDetElementBase TrkEventUtils TrkExInterfaces TrkMaterialOnTrack TrkMeasurementBase TrkParameters TrkParticleBase TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkSurfaces TrkToolInterfaces TrkTrack TrkVertexOnTrack xAODEventInfo )
 
 atlas_add_component( TrkAlignGenTools
                      src/components/*.cxx
