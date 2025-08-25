@@ -163,6 +163,17 @@ def ITkGlobalChi2AlignToolCfg(flags, name="ITkGlobalChi2AlignTool", **kwargs):
 def ITkAlignResidualCalculatorCfg(flags, name="ITkAlignResidualCalculator", **kwargs):
     cfg = ComponentAccumulator()
 
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", cfg.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+
+    if "UpdatorTool" not in kwargs:
+        from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
+        kwargs.setdefault("UpdatorTool", cfg.popToolsAndMerge(
+            KalmanUpdatorCfg(flags)))
+
     kwargs.setdefault("ResidualType", 0)
         
     cfg.setPrivateTools(CompFactory.Trk.AlignResidualCalculator(name, **kwargs))
