@@ -29,7 +29,7 @@ def getBJetTriggerContent(flags):
     if flags.Trigger.EDMVersion == 2:
         triggerContent = [
             "HLT_xAOD__BTaggingContainer_HLTBjetFex",
-            "HLT_xAOD__BTaggingContainer_HLTBjetFexAux.MV2c00_discriminant.MV2c10_discriminant.MV2c20_discriminant",
+            "HLT_xAOD__BTaggingContainer_HLTBjetFexAux.MV2c00_discriminant.MV2c10_discriminant.MV2c20_discriminant.BTagBtagToJetAssociator",
         ]
         jetCollections = {
             2016: [
@@ -47,7 +47,7 @@ def getBJetTriggerContent(flags):
                 "HLT_xAOD__JetContainer_a4tcemsubjesISFS",
                 "HLT_xAOD__JetContainer_a4tcemsubjesISFSAux.pt.eta.phi.m",
                 # B-jet collections needed for HLT jet matching
-                "HLT_xAOD__JetContainer_SplitJet", # Mainly for low-pt 2b2j in 2018
+                "HLT_xAOD__JetContainer_SplitJet", # For Btag->Split->GSC matching in 2017 and 2018, and low-pt 2b2j in 2018
                 "HLT_xAOD__JetContainer_SplitJetAux.pt.eta.phi.m",
                 "HLT_xAOD__JetContainer_GSCJet",
                 "HLT_xAOD__JetContainer_GSCJetAux.pt.eta.phi.m",
