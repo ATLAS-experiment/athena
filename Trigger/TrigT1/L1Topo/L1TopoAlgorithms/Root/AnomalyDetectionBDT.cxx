@@ -72,7 +72,7 @@ namespace {
 }
 
 namespace {
-   int mapval(int value, std::string vartype){
+   int mapval(int value, const std::string & vartype){
 
       static const std::map<int,int> eta_LUT = {
       ///////////////////////
