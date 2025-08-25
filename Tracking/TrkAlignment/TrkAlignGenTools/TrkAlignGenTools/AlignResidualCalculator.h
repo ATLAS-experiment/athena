@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENTOOLS_ALIGNRESIDUALCALCULATOR_H
@@ -10,6 +10,10 @@
 #include "AthContainers/DataVector.h"
 
 #include "TrkAlignInterfaces/IAlignResidualCalculator.h"
+
+#include "TrkToolInterfaces/IResidualPullCalculator.h"
+#include "TrkToolInterfaces/IUpdator.h"
+#include "TrkAlignEvent/AlignResidualType.h"
 
 /**
    @file AlignResidualCalculator.h
@@ -27,8 +31,6 @@ class AtlasDetectorID;
 namespace Trk {
 
   class AlignTrack;
-  class IUpdator;
-  class IResidualPullCalculator;
   class ResidualPull;
   class Track;
   class AlignTSOS;
@@ -68,18 +70,22 @@ namespace Trk {
     void   accumulateScattering(const TrackStateOnSurface* tsos);
     const TrackStateOnSurface* getMatchingTSOS(const AlignTSOS* atsos, const Track* track);
 
-    ToolHandle <IResidualPullCalculator> m_pullCalculator;
-    ToolHandle <IUpdator>                m_updator;
+    ToolHandle <IResidualPullCalculator> m_pullCalculator{
+      this, "ResidualPullCalculator", "Trk::ResidualPullCalculator/ResidualPullCalculator"};
+    ToolHandle <IUpdator>                m_updator{
+      this, "UpdatorTool", "Trk::KalmanUpdator/TrkKalmanUpdator"};
 
-    int m_resType; //<! residual type as defined in the Trk::AlignResidualType enum
+    IntegerProperty m_resType{
+      this, "ResidualType", Trk::AlignResidualType::HitOnly,
+      "residual type as defined in the Trk::AlignResidualType enum"};
 
-    bool   m_includeScatterers;
-    double m_qOverP;
-    double m_previousQOverP;
+    BooleanProperty m_includeScatterers{this, "IncludeScatterers", false};
+    double m_qOverP{};
+    double m_previousQOverP{};
    
-    int    m_nDoF;
+    int    m_nDoF{};
 
-    double* m_chi2ForMeasType; 
+    double* m_chi2ForMeasType = nullptr;
 
     std::vector<const TrackStateOnSurface*> m_matchedTSOS;
 

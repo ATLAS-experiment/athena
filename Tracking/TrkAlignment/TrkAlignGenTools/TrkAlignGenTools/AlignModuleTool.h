@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENTOOLS_ALIGNMODULETOOL_H
@@ -41,11 +41,13 @@ namespace Trk {
 
     AlignModuleTool(const std::string& type, const std::string& name,
 		    const IInterface* parent);
-    virtual ~AlignModuleTool();
     
     virtual StatusCode initialize();
     virtual StatusCode finalize();
 
+    AlignModuleListType alignModuleListType() const override{
+      return static_cast<AlignModuleListType>(m_alignModuleListType.value());
+    }
 
     //
     // GeometryManagerTool methods
@@ -144,15 +146,17 @@ namespace Trk {
     AlignPar2DVec* fullAlignParList() const { return m_fullAlignParList; }
 
   protected:
-    const AtlasDetectorID* m_idHelper;          //!< Used to identify type of detector
+    const AtlasDetectorID* m_idHelper = nullptr;          //!< Used to identify type of detector
 
   private:
 
-    AlignModuleList*                    m_alignModules;    //!< list of AlignModules
+    IntegerProperty m_alignModuleListType{this, "AlignModuleListType", Trk::L3}; //!< uses Trk enum AlignModuleListType (L1,L2,L3,L1_5,L2_5)
+
+    AlignModuleList*                    m_alignModules = nullptr;    //!< list of AlignModules
     std::vector<const AlignModuleList*> m_alignModuleMaps; //!< maps detector element idHash to AlignModule
 
-    AlignPar2DVec*            m_alignParList;     //!< contains active parameters
-    AlignPar2DVec*            m_fullAlignParList; //!< contains all parameters
+    AlignPar2DVec*            m_alignParList = nullptr;     //!< contains active parameters
+    AlignPar2DVec*            m_fullAlignParList = nullptr; //!< contains all parameters
 
     std::vector<AlignModule*> m_alignModules1D;    //!< 1-D vector of AlignModules
     AlignParVec               m_alignParList1D;    //!< 1-D vector of AlignPars

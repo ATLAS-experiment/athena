@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: InDetAlignConfig/python/IDAlignToolsConfig.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
@@ -274,6 +274,17 @@ def GlobalChi2AlignToolCfg(flags, name="GlobalChi2AlignTool", **kwargs):
     
 def AlignResidualCalculatorCfg(flags, name="AlignResidualCalculator", **kwargs):
     cfg = ComponentAccumulator()
+
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", cfg.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+
+    if "UpdatorTool" not in kwargs:
+        from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
+        kwargs.setdefault("UpdatorTool", cfg.popToolsAndMerge(
+            KalmanUpdatorCfg(flags)))
 
     kwargs.setdefault("ResidualType", 0)
         
