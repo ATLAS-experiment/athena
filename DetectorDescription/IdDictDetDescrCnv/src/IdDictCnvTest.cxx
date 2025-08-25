@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -83,8 +83,8 @@ IdDictCnvTest::initialize()
  
  
  	ATH_MSG_INFO( "---- " << n << " ----------------------------" );
- 	std::string version = ("" != dictionary.m_version) ? dictionary.m_version : "default";
- 	ATH_MSG_INFO ( "Dictionary " << dictionary.m_name 
+ 	std::string version = ("" != dictionary.version()) ? dictionary.version() : "default";
+ 	ATH_MSG_INFO ( "Dictionary " << dictionary.name()
                        << " version " << version );
 
  	if(dictionary.verify()) {
@@ -92,7 +92,7 @@ IdDictCnvTest::initialize()
  	}
  	else {
           ATH_MSG_FATAL( "Dictionary verification has failed: "
-                         << dictionary.m_name << " multirange: "
+                         << dictionary.name() << " multirange: "
                          << (std::string)dictionary.build_multirange() );
  	    return StatusCode::FAILURE;
  	}

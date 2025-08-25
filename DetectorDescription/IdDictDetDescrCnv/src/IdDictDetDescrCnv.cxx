@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -284,10 +284,10 @@ void IdDictDetDescrCnv::printDicts(const IdDictManager *dictMgr) {
     for (it = dm.begin(); it != dm.end(); ++it, ++n) {
         const IdDictDictionary &dictionary = *((*it).second);
         std::string version =
-            ("" != dictionary.m_version) ? dictionary.m_version : "default";
-        msg(MSG::INFO) << "Dictionary " << dictionary.m_name;
-        if (dictionary.m_name.size() < 20) {
-            std::string space(20 - dictionary.m_name.size(), ' ');
+          ("" != dictionary.version()) ? dictionary.version() : "default";
+        msg(MSG::INFO) << "Dictionary " << dictionary.name();
+        if (dictionary.name().size() < 20) {
+            std::string space(20 - dictionary.name().size(), ' ');
             msg(MSG::INFO) << space;
         }
         msg(MSG::INFO) << " version " << version;
