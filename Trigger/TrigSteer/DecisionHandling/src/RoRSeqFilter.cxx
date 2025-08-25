@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // DecisionHandling includes
@@ -107,6 +107,12 @@ StatusCode RoRSeqFilter::initialize()
   if ( not m_monTool.name().empty() ) {
     ATH_CHECK( m_monTool.retrieve() );
   }
+
+  // Prepare monitoring vector
+  m_monInputNames = {"exec", "anyvalid"};
+  for (const auto& k : m_inputKeys) {
+    m_monInputNames.push_back( k.key() );
+  }
   
   return StatusCode::SUCCESS;
 }
@@ -121,22 +127,17 @@ StatusCode RoRSeqFilter::execute( const EventContext& ctx ) const {
   auto inputHandles  = m_inputKeys.makeHandles( ctx );
   auto outputHandles = m_outputKeys.makeHandles( ctx );
 
-  std::vector<std::string> inputNames( {"exec", "anyvalid"} );
-  std::vector<bool> inputStats({true, false}); // position 0 for number of execs, always true, bool at position 1 is set later
-  inputNames.reserve(inputHandles.size() + 2);
-  inputStats.reserve(inputHandles.size() + 2);
+  std::vector<bool> inputStats(inputHandles.size() + 2, false);
+  inputStats[0] = true;  // position 0 for number of execs, always true
   bool validInputs = false;
-  for ( auto& inputHandle: inputHandles ) {
-    inputNames.push_back( inputHandle.name() );
-    if( inputHandle.isValid() ) {// this is because input is implicit
+  for ( size_t i=0; i<inputHandles.size(); i++) {
+    if( inputHandles[i].isValid() ) { // this is because input is implicit
       validInputs = true;
-      inputStats.push_back( true );
-    } else {
-      inputStats.push_back( false );
+      inputStats[i+2] = true;
     }
   }
   inputStats[1] = validInputs; // position 1 for number of execes with any collection valid
-  auto inputName = Monitored::Collection<std::vector<std::string>>( "name", inputNames );
+  auto inputName = Monitored::Collection<std::vector<std::string>>( "name", m_monInputNames );
   auto inputStat = Monitored::Collection<std::vector<bool>>( "stat", inputStats );
   Monitored::Group( m_monTool, inputStat, inputName );
   
@@ -179,14 +180,14 @@ StatusCode RoRSeqFilter::execute( const EventContext& ctx ) const {
   }
 
   setFilterPassed( passCounter != 0, ctx );
-  ATH_MSG_DEBUG( "Filter " << ( filterPassed(ctx) ? "passed" : "rejected" ) );
+
   if ( msgLvl( MSG::DEBUG ) ){
+    ATH_MSG_DEBUG( "Filter " << ( filterPassed(ctx) ? "passed" : "rejected" ) );
     for ( auto& output: outputHandles ) {
       if( output.isValid() ) ATH_MSG_DEBUG( " "<<output.key() );
     }
   }
 
-  
   return StatusCode::SUCCESS;
 }
   

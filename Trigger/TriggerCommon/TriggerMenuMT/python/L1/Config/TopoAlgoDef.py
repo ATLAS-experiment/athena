@@ -1857,7 +1857,7 @@ class TopoAlgoDef:
             "WPList": ["Tight", "Loose"],
             "MinET1": 0,#min muon1 threshold in GeV, the 0 sets the muon to the min TOB threshold avaiable in Topo 
             "MinET2": 0,#min muon2 threshold in Gev 
-            "ScoreThreshold": [25, 40]
+            "ScoreThreshold": [40, 25]
         }
         
         class d:
