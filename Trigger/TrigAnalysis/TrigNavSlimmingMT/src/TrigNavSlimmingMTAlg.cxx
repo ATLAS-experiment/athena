@@ -480,6 +480,7 @@ StatusCode TrigNavSlimmingMTAlg::repackLinks(
 
     // Do any IParticle repacking
     ATH_CHECK( doRepack<xAOD::ParticleContainer>(output, outputContainers.particles, featureString()) );
+    ATH_CHECK( doRepack<xAOD::ParticleContainer>(output, outputContainers.particles, "subfeature") );
 
     // Debug printing. Look at the four-momentum of any feature after the repacking (the stored link is re-written)
     printIParticleRepackingDebug(output, " After");

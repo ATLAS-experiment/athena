@@ -467,7 +467,7 @@ namespace TrigCompositeUtils {
 
     if (keepOnlyFinalFeatures) {
       // Check if we have reached the first feature
-      if ( modeKeep == true && me->hasObjectLink(featureString()) ) {
+      if ( modeKeep == true && (me->hasObjectLink(featureString()) || me->hasObjectLink("subfeature")) ) {
         // Just to be explicit, we keep this node
         keep = true;
 

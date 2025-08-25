@@ -15,6 +15,7 @@
 #include "xAODTrigger/TrigComposite.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
+#include "xAODBase/IParticleContainer.h"
 #include "TrigNavStructure/Types.h"
 #include "TrigNavStructure/TypedHolder.h"
 #include "TrigNavStructure/TrigNavStructure.h"
@@ -154,6 +155,12 @@ private:
 
 
   std::size_t getFeaSize(const ConvProxy &) const;
+
+  /// Return pair of indices (feature index in proxy->features vector, object index)
+  /// identifying the highest pT object attached to the proxy. If retrieval fails
+  /// returns {std::numeric_limits<size_t>::max(), 0}.
+  std::pair<std::size_t, std::size_t> getHighestPtObject(const ConvProxy&,
+                                                         const HLT::TrigNavStructure&) const;
 
   // self validators
   // they return failure if something is not ok
