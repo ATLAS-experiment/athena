@@ -33,14 +33,14 @@ int main (int argc, char* argv[])
       const IdDictDictionary& dictionary = *((*it).second); 
  
       std::cout << "---- " << n << " ----------------------------" << std::endl; 
-      std::cout << "Dictionary " << dictionary.m_name << std::endl; 
+      std::cout << "Dictionary " << dictionary.name() << std::endl;
  
-      IdDictDictionary::regions_const_it rit; 
-      for (rit = dictionary.m_regions.begin (); rit != dictionary.m_regions.end (); ++rit) 
+      size_t nregions = dictionary.n_regions();
+      for (size_t i = 0; i < nregions; ++i)
         { 
-          const IdDictRegion& region = *(*rit);
+          const IdDictRegion& region = dictionary.region(i);
  
-          std::cout << "region #" << region.m_index << std::endl; 
+          std::cout << "region #" << region.index() << std::endl;
  
           std::vector <IdDictFieldImplementation>::const_iterator fit; 
            
@@ -67,7 +67,7 @@ int main (int argc, char* argv[])
  
               size_t w = impl.range()->m_field->m_name.size (); 
  
-              std::cout << "  implement field #" << impl.range()->m_field->m_index <<  
+              std::cout << "  implement field #" << impl.range()->m_field->index() <<
                   " " << impl.range()->m_field->m_name; 
  
               tab (width - w); 

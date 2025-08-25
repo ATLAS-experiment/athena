@@ -69,56 +69,56 @@ initLevelsFromDict(const IdDictDictionary* dict){
   
   IdDictField* field = dict->find_field("subdet");
   if (field) {
-    INDET_INDEX = field->m_index;
+    INDET_INDEX = field->index();
   } else {
     std::cout << "PixelID::initLevelsFromDict - unable to find 'subdet' field " 	
     << std::endl;
   }
   field = dict->find_field("part");
   if (field) {
-    PIXEL_INDEX = field->m_index;
+    PIXEL_INDEX = field->index();
   } else {
     std::cout << "PixelID::initLevelsFromDict - unable to find 'part' field " 	
     << std::endl;
   }
   field = dict->find_field("barrel_endcap");
   if (field) {
-    BARREL_EC_INDEX = field->m_index;
+    BARREL_EC_INDEX = field->index();
   } else {
     std::cout << "PixelID::initLevelsFromDict - unable to find 'barrel_endcap' field " 	
     << std::endl;
   }
   field = dict->find_field("layer");
   if (field) {
-    LAYER_DISK_INDEX = field->m_index;
+    LAYER_DISK_INDEX = field->index();
   } else {
     std::cout << "PixelID::initLevelsFromDict - unable to find 'layer' field " 	
     << std::endl;
   }
   field = dict->find_field("phi_module");
   if (field) {
-    PHI_MODULE_INDEX = field->m_index;
+    PHI_MODULE_INDEX = field->index();
   } else {
     std::cout << "PixelID::initLevelsFromDict - unable to find 'phi_module' field " 	
     << std::endl;
   }
   field = dict->find_field("eta_module");
   if (field) {
-    ETA_MODULE_INDEX = field->m_index;
+    ETA_MODULE_INDEX = field->index();
   } else {
     std::cout << "PixelID::initLevelsFromDict - unable to find 'eta_module' field " 	
       << std::endl;
   }
   field = dict->find_field("phi_index");
   if (field) {
-    PHI_INDEX_INDEX = field->m_index;
+    PHI_INDEX_INDEX = field->index();
   } else {
     std::cout << "PixelID::initLevelsFromDict - unable to find 'phi_index' field " 	
     << std::endl;
   }
   field = dict->find_field("eta_index");
   if (field) {
-    ETA_INDEX_INDEX = field->m_index;
+    ETA_INDEX_INDEX = field->index();
   } else {
     std::cout << "PixelID::initLevelsFromDict - unable to find 'eta_index' field " 	
     << std::endl;
@@ -144,30 +144,30 @@ test_lar (const IdDictMgr& idd){
     return (1);
   }
 
-  IdDictDictionary::regions_const_it rit; 
-  for (rit = dictionary->m_regions.begin (); rit != dictionary->m_regions.end (); ++rit) { 
-	  const IdDictRegion& region = *(*rit);
-	  std::cout << "region #" << region.m_index << std::endl; 
+  size_t nregions = dictionary->n_regions();
+  for (size_t i = 0; i < nregions; ++i) {
+	  const IdDictRegion& region = dictionary->region(i);
+	  std::cout << "region #" << region.index() << std::endl;
 	  std::cout << "name "
-		  << region.m_name << " group " 
-		  << region.m_group << " tag " 
+		  << region.name() << " group "
+		  << region.m_group << " tag "
 		  << region.m_tag << " next eta ";
-	  if (region.m_next_abs_eta) {
-	    std::cout << region.m_next_abs_eta->m_name << " ";
-	    if (region.m_next_abs_eta->m_prev_abs_eta) {
-        std::cout << region.m_next_abs_eta->m_prev_abs_eta->m_name;
+	  if (region.next_abs_eta()) {
+	    std::cout << region.next_abs_eta()->name() << " ";
+	    if (region.next_abs_eta()->prev_abs_eta()) {
+        std::cout << region.next_abs_eta()->prev_abs_eta()->name();
       }
 	  }
     std::cout << " prev samp ";
-    for (unsigned int i = 0; i < region.m_prev_samp.size(); ++i) {
-        std::cout << region.m_prev_samp[i]->m_name << " ";
+    for (const IdDictRegion* r : region.prev_samp()) {
+        std::cout << r->name() << " ";
     }
     std::cout << "  next samp ";
-    for (unsigned int i = 0; i < region.m_next_samp.size(); ++i) {
-        std::cout << region.m_next_samp[i]->m_name << " ";
+    for (const IdDictRegion* r : region.next_samp()) {
+        std::cout << r->name() << " ";
     }
-    std::cout << " eta0 " << region.m_eta0 << " deta "
-        << region.m_deta << " "
+    std::cout << " eta0 " << region.eta0() << " deta "
+        << region.deta() << " "
         << std::endl; 
   }
   // Set up id for region and range prefix
@@ -200,7 +200,7 @@ test_pixel (const IdDictMgr& idd, Identifier::size_type pixel_region){
     int inDetField   = -1;
     if (atlasDict->get_label_value("subdet", "InnerDetector", inDetField)) {
       std::cout << "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " 
-          << atlasDict->m_name
+          << atlasDict->name()
           << std::endl;
       return (1);
     }
@@ -214,7 +214,7 @@ test_pixel (const IdDictMgr& idd, Identifier::size_type pixel_region){
     int pixelField   = -1;
     if (dict->get_label_value("part", "Pixel", pixelField)) {
 	    std::cout << "Could not get value for label 'Pixel' of field 'part' in dictionary " 
-		    << dict->m_name
+		    << dict->name()
 		    << std::endl;
 	    return (1);
     }
@@ -374,12 +374,12 @@ print_bits (const IdDictMgr& idd){
   for (it = dm.begin (); it != dm.end (); ++it, ++n) { 
     const IdDictDictionary& dictionary = *((*it).second); 
     std::cout << "---- " << n << " ----------------------------" << std::endl; 
-    std::cout << "Dictionary " << dictionary.m_name << std::endl; 
-    IdDictDictionary::regions_const_it rit; 
-    for (rit = dictionary.m_regions.begin (); rit != dictionary.m_regions.end (); ++rit) { 
-      const IdDictRegion& region = *(*rit);
-      std::cout << "region #" << region.m_index
-          << " name "   << region.m_name 
+    std::cout << "Dictionary " << dictionary.name() << std::endl;
+    size_t nregions = dictionary.n_regions();
+    for (size_t i = 0; i < nregions; ++i) {
+      const IdDictRegion& region = dictionary.region(i);
+      std::cout << "region #" << region.index()
+          << " name "   << region.name()
           << " group "  << region.m_group 
           << " tag "    << region.m_tag	
           << std::endl;  
@@ -394,8 +394,8 @@ print_bits (const IdDictMgr& idd){
       for (fit = region.m_implementation.begin ();fit != region.m_implementation.end ();++fit) { 
         const IdDictFieldImplementation& impl = *fit; 
         size_t w = impl.range()->m_field->m_name.size (); 
-        std::cout << "  implement field #" << impl.range()->m_field->m_index <<  
-          " " << impl.range()->m_field->m_name; 
+        std::cout << "  implement field #" << impl.range()->m_field->index() <<
+          " " << impl.range()->m_field->m_name;
         tab (width - w); 
         std::cout << " -> " << (std::string) impl.field() <<  
           "/" << (std::string) impl.ored_field() <<  
@@ -420,8 +420,8 @@ print_ranges (const IdDictMgr& idd){
     for (it = dm.begin (); it != dm.end (); ++it, ++n) { 
       const IdDictDictionary& dictionary = *((*it).second); 
      
-      std::cout << "---- " << n << " ----------------------------" << std::endl; 
-      std::cout << "Dictionary " << dictionary.m_name << std::endl; 
+      std::cout << "---- " << n << " ----------------------------" << std::endl;
+      std::cout << "Dictionary " << dictionary.name() << std::endl;
     
       MultiRange mr = dictionary.build_multirange(); 
       std::cout << "Multirange: " << (std::string)mr << std::endl;
@@ -449,29 +449,30 @@ int main (int argc, char* argv[])  {
     const IdDictField* partField = atlasDict->find_field("subdet");
     if (partField) {
       std::cout << "Found field " << partField->m_name 
-          << " from dictionary " << atlasDict->m_name
+          << " from dictionary " << atlasDict->name()
           << std::endl;
     } else {
       std::cout << "Could not find 'part' field"
-          << " in dictionary " << atlasDict->m_name
+          << " in dictionary " << atlasDict->name()
           << std::endl;
       return 1;
     }
-    std::vector <IdDictLabel*>::const_iterator itLabels = partField->m_labels.begin();
     int inDetField = -1;
     std::cout << "Found field label size "  
-        << partField->m_labels.size()
+        << partField->get_label_number()
         << std::endl;
-    for (; itLabels != partField->m_labels.end(); ++itLabels) {
+    size_t nlabels = partField->get_label_number();
+    for (size_t ilabel = 0; ilabel < nlabels; ++ilabel) {
+      const IdDictLabel& label = partField->label(ilabel);
       std::cout << "Field label  "  
-          << (*itLabels)->m_name << " " 
-          << (*itLabels)->m_valued
-          << " " 	<< (*itLabels)->m_value
+          << label.name() << " "
+          << label.valued()
+          << " " 	<< label.value()
           << std::endl;
   
-      if("InnerDetector" == (*itLabels)->m_name) {
-        if ((*itLabels)->m_valued) {
-            inDetField = (*itLabels)->m_value;
+      if("InnerDetector" == label.name()) {
+        if (label.valued()) {
+            inDetField = label.value();
         }
 	    }
     }
@@ -482,7 +483,7 @@ int main (int argc, char* argv[])  {
     if (dictionary != 0) { 
       ExpandedIdentifier id ("1/0/0/21/6/319/191"); 
       if(!dictionary->verify()) {
-        std::cout << "Unable to verify dictionary " << dictionary->m_name << std::endl; 
+        std::cout << "Unable to verify dictionary " << dictionary->name() << std::endl;
       }
       Identifier packedB((Identifier::value_type)0);
       dictionary->pack32 (id, 0, 6, packedB); 
