@@ -116,7 +116,7 @@ int  LArElectrodeID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int larField   = -1;
   if (atlasDict->get_label_value("subdet", "LArElectrode", larField)) {
     std::stringstream strm;
-    strm << atlasDict->m_name;
+    strm << atlasDict->name();
     strg= " Could not get value for label 'LArElectrode' of field 'subdet' in dictionary "+strm.str();
     if(m_msgSvc){
       log << MSG::ERROR << strg << endmsg;
@@ -133,7 +133,7 @@ int  LArElectrodeID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int configurationValue   = 1;
   if (m_dict->get_label_value("configuration", "Atlas", configurationValue)) {
     std::stringstream strm;
-    strm <<  m_dict->m_name;      
+    strm <<  m_dict->name();
     strg = "WARNING : Could not get value for label 'configuration' in dictionary "+strm.str();
     if(m_msgSvc) {
       log << MSG::INFO << strg << endmsg;
@@ -223,7 +223,7 @@ int LArElectrodeID::initLevelsFromDict()
   // Search with region name
   IdDictRegion* reg = m_dict->find_region("EM-BARREL-ALL");
   if (reg) {
-      m_larElectrodeRegion_index = reg->m_index;}
+      m_larElectrodeRegion_index = reg->index();}
   else {
     log << MSG::INFO  << "WARNING : [initLevelsFromDict] - unable to find 'EM-BARREL-ALL' region"  
 	      << endmsg;
@@ -235,7 +235,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_atlas_index = field->m_index ;}
+    m_atlas_index = field->index();}
   else {
     log << MSG::INFO  
 	<< "LArElectrodeID::initLevelsFromDict - unable to find 'subdet' field " << endmsg ;
@@ -248,7 +248,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   field = m_dict->find_field("configuration") ;
   if (field) {
-    m_configuration_index = field->m_index ;}
+    m_configuration_index = field->index();}
   else {
     log << MSG::INFO  
 	<< "LArHVLineID::initLevelsFromDict - unable to find 'configuration' field " << endmsg ;
@@ -261,7 +261,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   field = m_dict->find_field("detector") ;
   if (field) {
-    m_detector_index = field->m_index ;}
+    m_detector_index = field->index();}
   else {
     log << MSG::INFO  
 	<< "LArElectrodeID::initLevelsFromDict - unable to find 'detector' field " << endmsg ;
@@ -275,7 +275,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   field = m_dict->find_field("zside") ;
   if (field) {
-    m_zside_index = field->m_index ;}
+    m_zside_index = field->index();}
   else {
     log << MSG::INFO  <<  "LArElectrodeID::initLevelsFromDict - unable to find 'zside' field "
               << endmsg ;
@@ -288,7 +288,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   field = m_dict->find_field("module") ;
   if (field) {
-    m_module_index = field->m_index ;
+    m_module_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "LArElectrodeID::initLevelsFromDict - unable to find 'module' field "
@@ -301,7 +301,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   field = m_dict->find_field("hvphi") ;
   if (field) {
-    m_hvphi_index = field->m_index ;
+    m_hvphi_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "initLevelsFromDict - unable to find 'hvphi' field "<< endmsg ;
@@ -313,7 +313,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   field = m_dict->find_field("hveta") ;
   if (field) {
-    m_hveta_index = field->m_index ;
+    m_hveta_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "[initLevelsFromDict] - unable to find 'hveta' field "
@@ -326,7 +326,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   field = m_dict->find_field("hvgap") ;
   if (field) {
-    m_hvgap_index = field->m_index ;
+    m_hvgap_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "[initLevelsFromDict] - unable to find 'hvgap' field "
@@ -340,7 +340,7 @@ int LArElectrodeID::initLevelsFromDict()
   // ========================================================================
   field = m_dict->find_field("electrode") ;
   if (field) {
-    m_electrode_index = field->m_index ;
+    m_electrode_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "[initLevelsFromDict] - unable to find 'electrode' field "
@@ -353,7 +353,7 @@ int LArElectrodeID::initLevelsFromDict()
   // Set the field implementation
   // ========================================================================
 
-  const IdDictRegion& region = *m_dict->m_regions[m_larElectrodeRegion_index];
+  const IdDictRegion& region = m_dict->region(m_larElectrodeRegion_index);
   log << MSG::DEBUG  << "[initLevelsFromDict] Found levels: " << endmsg ;
   log << MSG::DEBUG  << "[initLevelsFromDict] > Atlas     : " << m_atlas_index  << endmsg ;
   log << MSG::DEBUG  << "[initLevelsFromDict] > Configurat: " << m_configuration_index  << endmsg ;
@@ -363,15 +363,15 @@ int LArElectrodeID::initLevelsFromDict()
   log << MSG::DEBUG  << "[initLevelsFromDict] > hveta     : " << m_hveta_index     << endmsg ;
   log << MSG::DEBUG  << "[initLevelsFromDict] > hvgap     : " << m_hvgap_index     << endmsg ;
   log << MSG::DEBUG  << "[initLevelsFromDict] > electrode : " << m_electrode_index << endmsg ;
-  m_atlas_impl      = region.m_implementation[m_atlas_index]; 
-  m_configuration_impl= region.m_implementation[m_configuration_index]; 
-  m_detector_impl   = region.m_implementation[m_detector_index]; 
-  m_zside_impl      = region.m_implementation[m_zside_index]; 
-  m_module_impl     = region.m_implementation[m_module_index];
-  m_hvphi_impl      = region.m_implementation[m_hvphi_index]; 
-  m_hveta_impl      = region.m_implementation[m_hveta_index]; 
-  m_hvgap_impl      = region.m_implementation[m_hvgap_index];  
-  m_electrode_impl  = region.m_implementation[m_electrode_index]; 
+  m_atlas_impl      = region.implementation(m_atlas_index);
+  m_configuration_impl= region.implementation(m_configuration_index);
+  m_detector_impl   = region.implementation(m_detector_index);
+  m_zside_impl      = region.implementation(m_zside_index);
+  m_module_impl     = region.implementation(m_module_index);
+  m_hvphi_impl      = region.implementation(m_hvphi_index);
+  m_hveta_impl      = region.implementation(m_hveta_index);
+  m_hvgap_impl      = region.implementation(m_hvgap_index);
+  m_electrode_impl  = region.implementation(m_electrode_index);
   
   log << MSG::DEBUG  << "[initLevelsFromDict] Decode index and bit fields for each level: " << endmsg;
   log << MSG::DEBUG  << "[initLevelsFromDict] > Atlas       "  << m_atlas_impl.show_to_string() << endmsg;
