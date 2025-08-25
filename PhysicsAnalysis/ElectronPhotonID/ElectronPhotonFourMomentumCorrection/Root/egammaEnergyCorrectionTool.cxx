@@ -2005,7 +2005,9 @@ namespace AtlasRoot {
   // constant term fitted in data (long range)
   double egammaEnergyCorrectionTool::dataConstantTerm( double eta ) const {
       double val ;
-      if (m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 && m_RunNumber<=341184 && m_RunNumber>=340634)
+      if ((m_esmodel == egEnergyCorr::es2018_R21_lowmu_v0 || 
+          m_esmodel == egEnergyCorr::es2022_R21_Precision_lowmu) &&
+          m_RunNumber<=341184 && m_RunNumber>=340634)
           val = m_resNom_datalowmu->GetBinContent(m_resNom_datalowmu->FindBin(eta)) ;
           else
           val =  m_resNom->GetBinContent(m_resNom->FindBin(eta));
