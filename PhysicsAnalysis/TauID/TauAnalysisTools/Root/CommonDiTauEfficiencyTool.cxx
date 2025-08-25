@@ -252,11 +252,8 @@ void CommonDiTauEfficiencyTool::generateSystematicSets()
   std::string sSystematicBaseString = "TAUS_"+sTruthType+"_EFF_"+sEfficiencyType+"_";
   // set truth type to check for in truth matching
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
-  if (sTruthType=="TRUEELECTRON") m_eCheckTruth = TauAnalysisTools::TruthElectron;
-  if (sTruthType=="TRUEMUON") m_eCheckTruth = TauAnalysisTools::TruthMuon;
-  if (sTruthType=="TRUEJET") m_eCheckTruth = TauAnalysisTools::TruthJet;
   if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
-  if (sEfficiencyType=="ELEOLR") m_bNoMultiprong = true;
+
   for (auto mSF : *m_mSF)
   {
     // parse for nuisance parameter in histogram name
