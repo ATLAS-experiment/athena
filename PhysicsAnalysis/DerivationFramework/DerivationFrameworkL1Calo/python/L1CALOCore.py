@@ -32,6 +32,9 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     
     fillSuperCells=False
 
+    # has the L1Calo simulation been configured by job flags
+    isL1CaloSim = flags.Trigger.L1.doeFex and flags.Trigger.L1.dojFex and flags.Trigger.L1.dogFex
+
     # decode the legacy L1Calo information - required because flags.Trigger.doLVL1 is False
     if isNotPool:
         from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
@@ -112,11 +115,12 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         eFexEmulatedTool = eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers')
         acc.merge(eFexEmulatedTool)
 
+
     # Re-simulate from LATOME (for both data and POOL files with SCells)
     from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
     if isNotPool:
         acc.merge(L1CaloFEXSimCfg(flags, simulateAltTau=True))
-    else:
+    elif isL1CaloSim:
         SCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
         if SCellType in flags.Input.Collections:
             acc.merge(L1CaloFEXSimCfg(flags, simulateAltTau=True))
@@ -176,6 +180,11 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # Container selection based on share/L1CALO versions
     # Note: if the container is in the on-the-fly list (ContainersOnTheFly.py) then we do not have to add it to the dictionary
     # We can do smart slimming if the container is in the smart list (FullListOfSmartContainers.py)
+
+    # if we do not run the simulation on MC, write SCells
+    if flags.Input.isMC and not isL1CaloSim:
+        L1CaloSlimmingHelper.AppendToDictionary.update({"SCell":"CaloCellContainer"})
+        AllVariables += ["SCell"]
 
     # some gymnastics for HLT from RAWD
     if isNotPool and L1CaloSlimmingHelper.IncludeEGammaTriggerContent:
@@ -486,6 +495,14 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "L1_jFexEmulatedTowersAux":"xAOD::jFexTowerAuxContainer"}
     )    
     AllVariables += ["L1_jFexEmulatedTowers"]
+
+    # For MC, add emulated gFEX input towers
+    if flags.Input.isMC:
+        L1CaloSlimmingHelper.AppendToDictionary.update (
+            {"L1_gFexEmulatedTowers":"xAOD::gFexTowerContainer",
+             "L1_gFexEmulatedTowersAux":"xAOD::gFexTowerAuxContainer"}
+        )
+        AllVariables += [ "L1_gFexEmulatedTowers" ]
 
     # In case MC has no jets, b-tagging or MET, schedule reconstruction
     if flags.Input.isMC:
