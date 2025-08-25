@@ -10,7 +10,6 @@ from AthenaCommon.CFElements import parOR, seqAND, findAlgorithmByPredicate
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
-from TrigCompositeUtils.TrigCompositeUtils import legName
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
 from collections.abc import MutableSequence
@@ -547,21 +546,26 @@ class Chain(object):
 
         return
 
-    def checkMultiplicity(self):
-        #TODO: Not used anymore, can we delete it?
-        if len(self.steps) == 0:
-            return 0
-        mult=[sum(step.multiplicity) for step in self.steps] # on mult per step
+    def checkNumberOfLegs(self):
+        """ return 0 if the chain has unexpected number of step legs """
+        if len(self.steps) == 0: # skip if it's noAlg chains            
+            return 1
+
+        mult=[step.nLegs for step in self.steps] # one nLegs per step
         not_empty_mult = [m for m in mult if m!=0]
-        if len(not_empty_mult) == 0: #empty chain?
-            log.error("checkMultiplicity: Chain %s has all steps with multiplicity =0: what to do?", self.name)
-            return 0
-        if not_empty_mult.count(not_empty_mult[0]) != len(not_empty_mult):
-            log.error("checkMultiplicity: Chain %s has steps with differnt multiplicities: %s", self.name, ' '.join(mult))
+        # cannot accept chains with all empty steps 
+        if len(not_empty_mult) == 0: 
+            log.error("checkNumberOfLegs: Chain %s has all steps with nLegs =0: what to do?", self.name)
             return 0
 
+        # cannot accept chains with steps with different number of legs
+        if not_empty_mult.count(not_empty_mult[0]) != len(not_empty_mult):
+            log.error("checkNumberOfLegs: Chain %s has steps with differnt number of legs: %s", self.name, ' '.join(mult))
+            return 0
+
+        # check that the chain number of legs is the same as the number of L1 seeds
         if not_empty_mult[0] != len(self.L1decisions):
-            log.error("checkMultiplicity: Chain %s has %d multiplicity per step, and %d L1Decisions", self.name, mult, len(self.L1decisions))            
+            log.error("checkNumberOfLegs: Chain %s has %i legs per step, and %d L1Decisions", self.name, mult, len(self.L1decisions))            
             return 0
         return not_empty_mult[0]
     
@@ -583,10 +587,15 @@ class Chain(object):
                     self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups, '\n '.join(map(str, self.steps)))       
         
 
-# next:  can we remove multiplicity array, if it can be retrieved from the ChainDict?
-# next: can we describe emtpy steps with isEmpty flag only (not via multiplicity and setting comboHypoCfg=None)?
+# TODO: can we describe emtpy steps with isEmpty flag only (not via nLegs and setting comboHypoCfg=None)?
 class ChainStep(object):
-    """Class to describe one step of a chain; if multiplicity is greater than 1, the step is combo/combined.  Set one multiplicity value per sequence"""
+    """ Class to describe one step of a chain; 
+    a step is described by a list of ChainDicts and a list of sequence generators;
+    a step can have one leg (single) or more legs (combined);
+    not-empty steps have one sequence and one ChainDict per leg;
+    empty steps have zero legs, while chainDict len is not zero; 
+    legID is taken from the ChainDict;
+    """
     #TODO remove default argument comboHypoCfg
     def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = ComboHypoCfg , comboToolConfs = None, isEmpty = False, createsGhostLegs = False):
 
@@ -594,27 +603,25 @@ class ChainStep(object):
         if SequenceGens is None:  SequenceGens = []
         if comboToolConfs is None: comboToolConfs = []
 
-        assert chainDicts is not None,"Error building a ChainStep without a chainDicts"
+        assert chainDicts is not None,"Error building a ChainStep without chainDicts"
 
         self.name = name
         self.sequences = []
         self.sequenceGens = SequenceGens 
         self.comboHypoCfg = comboHypoCfg
         self.comboToolConfs = list(comboToolConfs)
-        self.stepDicts = chainDicts # one dict per leg
-
-        self.isEmpty = isEmpty        
-        if self.isEmpty:
-            self.multiplicity = []
-        else:
-            self.multiplicity = [1 for seq in self.sequenceGens]                    
-            log.debug("Building step %s for chain %s: len=%d multiplicty=%s",  name, chainDicts[0]['chainName'], len(chainDicts), ' '.join(map(str,[mult for mult in self.multiplicity])))           
-            # sanity check on inputs, excluding empty steps
-            if len(chainDicts) != len(self.multiplicity) and 'Jet' not in chainDicts[0]['signatures']:
+        self.nLegs = len (self.sequenceGens) 
+        self.stepDicts = chainDicts # one dict per leg        
+        self.isEmpty = isEmpty                
+        
+        # sanity check on inputs, excluding empty steps 
+        if not self.isEmpty:                     
+            log.debug("Building step %s for chain %s: Dict len=%d, nLegs=%i", name, chainDicts[0]['chainName'], len(chainDicts), self.nLegs )             
+            if len(chainDicts) != self.nLegs: 
                 log.error("[ChainStep] SequenceGens: %s",self.sequenceGens)
-                log.error("[ChainStep] chainDicts: %s",chainDicts)
-                log.error("[ChainStep] multiplicity: %s",self.multiplicity)
-                raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with %i multiplicity and %i dictionaries. These lists must have the same size" % (name, len(self.multiplicity), len(chainDicts)) )
+                log.error("[ChainStep] chainDicts: %s",self.stepDicts)
+                log.error("[ChainStep] n.legs: %i",self.nLegs)
+                raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with %i legs and %i dictionaries. These lists must have the same size" % (name, self.nLegs, len(chainDicts)) )
                         
            
         for iseq, seq in enumerate(self.sequenceGens):              
@@ -625,11 +632,7 @@ class ChainStep(object):
                                                  
         self.onlyJets  = False
         sig_set = None
-        if len(chainDicts) > 0  and 'signature' in chainDicts[0]: 
-            leg_signatures = [step['signature'] for step in chainDicts if step['signature'] != 'Bjet']
-            if (len(self.multiplicity) > 0 and leg_signatures.count('Jet') == 1) and (len(set(leg_signatures)) > 1 and chainDicts[0]['signatures'].count('Jet') > 1) and (len(leg_signatures) != 2 or leg_signatures.count('MET') == 0):
-                index_jetLeg = leg_signatures.index('Jet')
-                self.multiplicity[index_jetLeg:index_jetLeg] = [1] * (len(chainDicts[0]['chainMultiplicities']) - len(self.multiplicity))
+        if len(chainDicts) > 0  and 'signature' in chainDicts[0]:             
             sig_set = set([step['signature'] for step in chainDicts])
             if len(sig_set) == 1 and ('Jet' in sig_set or 'Bjet' in sig_set):
                 self.onlyJets = True
@@ -639,7 +642,6 @@ class ChainStep(object):
         
         
         if not self.isEmpty:
-            #self.relabelLegIdsForJets()
             self.setChainPartIndices()
         self.legIds = self.getLegIds() 
         self.makeCombo()
@@ -649,48 +651,7 @@ class ChainStep(object):
         log.debug("creating sequences for step %s", self.name)
         for seq in self.sequenceGens:
             self.sequences.append(seq()) # create the sequences         
-        
-    def relabelLegIdsForJets(self):
-        has_jets = False
-        leg_counter = []    
-
-        for step_dict in self.stepDicts:
-            if 'Jet' in step_dict['signatures'] or 'Bjet' in step_dict['signatures']:
-                has_jets = True
-                leg_counter += [len(step_dict['chainParts'])]
-            elif len(step_dict['chainParts']) > 1:
-                log.error("[relabelLegIdsForJets] this should only happen for jet chains, but the signatures are %s",step_dict['signatures'])
-                raise Exception("[relabelLegIdsForJets] leg labelling is probably wrong...")
-            else:
-                leg_counter +=[1]
-
-        self.onlyJets = False
-        if len(leg_counter) == len(self.multiplicity):
-            self.onlyJets = True
- 
-        log.debug("[relabelLegIdsForJets] leg_counter: %s , onlyjets: %s, multiplicity: %s...",leg_counter, self.onlyJets, self.multiplicity) 
-
-        if not has_jets or len(leg_counter) == len(self.multiplicity): #also don't relabel only jets since no offset needed
-            return
-
-        if len(leg_counter) == 1 or (len(set(leg_counter)) == 1 and leg_counter[0] == 1):
-            #all legs are already length 1, or there's only one jet blocks nothing to do
-            return
-        elif len(set(leg_counter[:-1])) == 1 and leg_counter[0] == 1:
-            #it's the last leg that's not length one, so we don't need to relabel any end legs
-            return
-        else:
-            nLegs = 0
-            for i,nLegParts in enumerate(leg_counter):
-                oldLegName = self.stepDicts[i]['chainName']
-                if re.search('^leg[0-9]{3}_',oldLegName):
-                    oldLegName = oldLegName[7:]
-                else:
-                    log.error("[relabelLegIdsForJets] you told me to relabel the legs for %s",self.stepDicts)
-                    raise Exception("[relabelLegIdsForJets] you told me to relabel the legs but this leg doesn't have a legXXX_ name!")
-                self.stepDicts[i]['chainName'] = legName(oldLegName,nLegs)
-                nLegs += nLegParts
-        return
+            
     
     #Heather updated for full jet chain dicts
     def setChainPartIndices(self):    
@@ -710,7 +671,7 @@ class ChainStep(object):
 
     def getLegIds(self):
         """ get the gelId from the step dictionary for multi-leg chains"""
-        if len(self.multiplicity) <= 1: # single leg step
+        if self.nLegs <= 1: # single leg or empty steps
             return [0]
         leg_ids = []
         for istep,step_dict in enumerate(self.stepDicts):
@@ -718,7 +679,7 @@ class ChainStep(object):
                 if self.onlyJets:
                     leg_ids += [istep]
                 else:
-                    log.error("[getLegIds] chain %s has multiplicities %s but no legs? ",step_dict['chainName'], self.multiplicity)
+                    log.error("[getLegIds] step %s for chain %s has %i dictionaries but no leg IDs? ",self.name, step_dict['chainName'], self.nLegs)
                     raise Exception("[getLegIds] cannot extract leg IDs, exiting.")
             else:
                 leg_ids += [int(step_dict['chainName'][3:6])]
@@ -772,8 +733,8 @@ class ChainStep(object):
         if len(self.sequenceGens) == 0:        
             return "\n--- ChainStep %s ---\n is Empty, ChainDict = %s "%(self.name,  ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])) )
         
-        repr_string= "\n--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequenceGens = %s "%\
-          (self.name,  ' '.join(map(str,[mult for mult in self.multiplicity])),
+        repr_string= "\n--- ChainStep %s ---\n , nLegs = %s  ChainDict = %s \n + MenuSequenceGens = %s "%\
+          (self.name,  self.nLegs, 
              ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])),
              ' '.join(map(str, [seq.func.__name__ for seq in self.sequenceGens]) ))
              
