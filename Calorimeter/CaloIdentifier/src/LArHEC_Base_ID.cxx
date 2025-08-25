@@ -208,7 +208,7 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
       std::stringstream strm ;
-      strm <<  atlasDict->m_name ;
+      strm <<  atlasDict->name();
       strg = "Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary " 
       + strm.str();
       if(m_msgSvc) {
@@ -224,7 +224,7 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
     int larHecField   = -1;
     if (dict()->get_label_value("part", "LArHEC", larHecField)) {
       std::stringstream strm ;
-      strm <<  atlasDict->m_name ;
+      strm <<  atlasDict->name();
       strg = "Could not get value for label 'LArHEC' of field 'part' in dictionary " 
       + strm.str();
       if(m_msgSvc) {
@@ -513,7 +513,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
-    m_LAR_INDEX = field->m_index ;
+    m_LAR_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'subdet' field ";
@@ -528,7 +528,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   field = dict()->find_field("part") ;
   if (field) {
-    m_HEC_INDEX = field->m_index ;
+    m_HEC_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'part' field ";
@@ -543,7 +543,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   field = dict()->find_field("barrel-endcap") ;
   if (field) {
-    m_POSNEG_INDEX = field->m_index ;
+    m_POSNEG_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'barrel-endcap' field ";
@@ -558,7 +558,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   field = dict()->find_field("sampling") ;
   if (field) {
-    m_SAMPLING_INDEX = field->m_index ;
+    m_SAMPLING_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'sampling' field ";
@@ -573,7 +573,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   field = dict()->find_field("region") ;
   if (field) {
-    m_REGION_INDEX = field->m_index ;
+    m_REGION_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'region' field ";
@@ -588,7 +588,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   field = dict()->find_field("eta") ;
   if (field) {
-    m_ETA_INDEX = field->m_index ;
+    m_ETA_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'eta' field ";
@@ -603,7 +603,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   field = dict()->find_field("phi") ;
   if (field) {
-    m_PHI_INDEX = field->m_index ;
+    m_PHI_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'phi' field ";
@@ -618,7 +618,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   field = dict()->find_field("is-slar-hec") ;
   if (field) {
-    m_SLAR_INDEX = field->m_index ;
+    m_SLAR_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -635,7 +635,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
 
   // Set the field implementations
 
-  const IdDictRegion& region = *dict()->m_regions[m_hec_region_index];
+  const IdDictRegion& region = dict()->region(m_hec_region_index);
 
   /*
   std::cout << "LArHEC_Base_ID::initLevelsFromDict - found levels " << std::endl ;
@@ -649,14 +649,14 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
   std::cout << "slar           " << m_SLAR_INDEX     << std::endl ;
   */
 
-  m_lar_impl      = region.m_implementation[m_LAR_INDEX]; 
-  m_hec_impl      = region.m_implementation[m_HEC_INDEX]; 
-  m_pn_impl       = region.m_implementation[m_POSNEG_INDEX]; 
-  m_sampling_impl = region.m_implementation[m_SAMPLING_INDEX]; 
-  m_region_impl   = region.m_implementation[m_REGION_INDEX]; 
-  m_eta_impl      = region.m_implementation[m_ETA_INDEX]; 
-  m_phi_impl      = region.m_implementation[m_PHI_INDEX]; 
-  m_slar_impl     = region.m_implementation[m_SLAR_INDEX]; 
+  m_lar_impl      = region.implementation(m_LAR_INDEX);
+  m_hec_impl      = region.implementation(m_HEC_INDEX);
+  m_pn_impl       = region.implementation(m_POSNEG_INDEX);
+  m_sampling_impl = region.implementation(m_SAMPLING_INDEX);
+  m_region_impl   = region.implementation(m_REGION_INDEX);
+  m_eta_impl      = region.implementation(m_ETA_INDEX);
+  m_phi_impl      = region.implementation(m_PHI_INDEX);
+  m_slar_impl     = region.implementation(m_SLAR_INDEX);
 
 
   if (!m_quiet) {
@@ -1234,9 +1234,9 @@ int LArHEC_Base_ID::init_neighbors()
       // .... compute prev/next regions in eta 
       //
       short int regForPrevEta=NOT_VALID_HEC_REGION;
-      IdDictRegion* prevEtaDicReg =  vecOfDictRegions[reg]->m_prev_abs_eta;
+      const IdDictRegion* prevEtaDicReg =  vecOfDictRegions[reg]->prev_abs_eta();
       short int regForNextEta=NOT_VALID_HEC_REGION;
-      IdDictRegion* nextEtaDicReg =  vecOfDictRegions[reg]->m_next_abs_eta;
+      const IdDictRegion* nextEtaDicReg =  vecOfDictRegions[reg]->next_abs_eta();
       for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
 	if(vecOfDictRegions[ireg] == prevEtaDicReg) regForPrevEta = ireg;
 	if(vecOfDictRegions[ireg] == nextEtaDicReg) regForNextEta = ireg;
@@ -1247,18 +1247,16 @@ int LArHEC_Base_ID::init_neighbors()
       //                                            
       //
       std::vector<short int> regForPrevSamp;
-      std::vector<const IdDictRegion*> prevSampDicReg =  vecOfDictRegions[reg]->m_prev_samp;
-      for(unsigned int isam=0;isam<prevSampDicReg.size();isam++){
+      for (const IdDictRegion* dictreg : vecOfDictRegions[reg]->prev_samp()) {
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
-	  if(vecOfDictRegions[ireg] == prevSampDicReg[isam]) regForPrevSamp.push_back(ireg);
+	  if(vecOfDictRegions[ireg] == dictreg) regForPrevSamp.push_back(ireg);
 	}
       }
 
       std::vector<short int> regForNextSamp;
-      std::vector<const IdDictRegion*> nextSampDicReg =  vecOfDictRegions[reg]->m_next_samp;
-      for(unsigned int isam=0;isam<nextSampDicReg.size();isam++){
+      for (const IdDictRegion* dictreg : vecOfDictRegions[reg]->next_samp()) {
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
-	  if(vecOfDictRegions[ireg] == nextSampDicReg[isam]) regForNextSamp.push_back(ireg);
+	  if(vecOfDictRegions[ireg] == dictreg) regForNextSamp.push_back(ireg);
 	}
       }
 
