@@ -7,7 +7,6 @@
 #include "EFTrackingFPGAUtility/PassThroughTool.h"
 #include "EFTrackingFPGAUtility/EFTrackingDataStreamLoaderAlgorithm.h"
 #include "EFTrackingFPGAUtility/EFTrackingDataStreamUnloaderAlgorithm.h"
-#include "EFTrackingFPGAUtility/MasqueradeCoordinates.h"
 #include "EFTrackingFPGAUtility/TestVectorGenerator.h"
 #include "EFTrackingFPGAUtility/TestVectorChecker.h"
 
@@ -20,7 +19,6 @@ DECLARE_COMPONENT(xAODSpacePointMaker)
 DECLARE_COMPONENT(PassThroughTool)
 DECLARE_COMPONENT(EFTrackingDataStreamLoaderAlgorithm)
 DECLARE_COMPONENT(EFTrackingDataStreamUnloaderAlgorithm)
-DECLARE_COMPONENT(MasqueradeCoordinates)
 DECLARE_COMPONENT(EFTrackingFPGAUtility::TestVectorGenerator)
 DECLARE_COMPONENT(EFTrackingFPGAUtility::TestVectorChecker)
 
