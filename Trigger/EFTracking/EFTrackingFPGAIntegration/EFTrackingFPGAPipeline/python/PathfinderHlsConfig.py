@@ -74,29 +74,12 @@ if __name__ == "__main__":
         inputDataStream = "inputHitDataStream",
     ))
 
-    # Once the pathfinder neural net has been trained on (r, phi, z) we can 
-    # remove this step (along with the actual algorithm).
-    from EFTrackingFPGAUtility.MasqueradeCoordinatesConfig import MasqueradeCoordinatesCfg
-    acc.merge(MasqueradeCoordinatesCfg(
-        flags,
-        name = "TrackMasqueradeCoordinates",
-        cylindricalDataStream = "inputTrackDataStream",
-        cartesianDataStream = "inputMasqueradedTrackDataStream",
-    ))
-
-    acc.merge(MasqueradeCoordinatesCfg(
-        flags,
-        name = "HitMasqueradeCoordinates",
-        cylindricalDataStream = "inputHitDataStream",
-        cartesianDataStream = "inputMasqueradedHitDataStream",
-    ))
-
     from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
     acc.merge(EFTrackingXrtAlgorithmCfg(
         flags, 
         inputInterfaces = [
-            ["loader:{loader_1}", "inputMasqueradedTrackDataStream", 0],
-            ["loader:{loader_2}", "inputMasqueradedHitDataStream", 0],
+            ["loader:{loader_1}", "inputTrackDataStream", 0],
+            ["loader:{loader_2}", "inputHitDataStream", 0],
         ],
         outputInterfaces = [
             ["unloader:{unloader_1}", "outputDataStream", 1],
