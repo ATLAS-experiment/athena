@@ -47,7 +47,7 @@ namespace Trk {
   private:
 
     // private variables
-    ToolHandle<IAlignModuleTool> m_alignModuleTool{this, "AlignModuleTool", ""};
+    PublicToolHandle<IAlignModuleTool> m_alignModuleTool{this, "AlignModuleTool", "InDet::InDetAlignModuleTool/InDetAlignModuleTool"};
     ToolHandle<IAlignResidualCalculator> m_residualCalculator{
       this, "ResidualCalculator", "Trk::AlignResidualCalculator/ResidualCalculator"};
 
