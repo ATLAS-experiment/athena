@@ -74,24 +74,25 @@ class LogicalExpressionFilter( PyAthena.Alg ):
            filterType = l[0]
            filterName = l[1]
            filterNames += [filterName]
-           _alg = PyAthena.py_alg(filterName,'IAlgorithm')
-           if not _alg:
-              #try to create 
-              algmgr = PyAthena.py_svc('ApplicationMgr',iface='IAlgManager')
-              if not algmgr:
-                  error = 'could not retrieve IAlgManager/ApplicationMgr'
-                  self.msg.error (error)
-                  raise RuntimeError (error)
-              import cppyy
-              _alg = cppyy.bind_object(0, "IAlgorithm")
-              if algmgr.createAlgorithm(filterType,filterName,_alg).isFailure() or not _alg:
-                  self.msg.error ('could not create alg: ' + filterTypeAndName)
-                  raise RuntimeError ('could not create alg: ' + filterTypeAndName)
-              #we are responsible for initializing it too 
-              if _alg.sysInitialize().isFailure():
-                 self.msg.error('Failed to initialize alg: ' + filterTypeAndName)
-                 raise RuntimeError('Failed not initialize alg: ' + filterTypeAndName)
-              self.ownedAlgs += [_alg]
+# commenting out for now, as in the new Gaudi version it throws errors
+#           _alg = PyAthena.py_alg(filterName,'IAlgorithm')
+#           if not _alg:
+           #try to create 
+           algmgr = PyAthena.py_svc('ApplicationMgr',iface='IAlgManager')
+           if not algmgr:
+              error = 'could not retrieve IAlgManager/ApplicationMgr'
+              self.msg.error (error)
+              raise RuntimeError (error)
+           import cppyy
+           _alg = cppyy.bind_object(0, "IAlgorithm")
+           if algmgr.createAlgorithm(filterType,filterName,_alg).isFailure() or not _alg:
+              self.msg.error ('could not create alg: ' + filterTypeAndName)
+              raise RuntimeError ('could not create alg: ' + filterTypeAndName)
+           #we are responsible for initializing it too 
+           if _alg.sysInitialize().isFailure():
+              self.msg.error('Failed to initialize alg: ' + filterTypeAndName)
+              raise RuntimeError('Failed not initialize alg: ' + filterTypeAndName)
+           self.ownedAlgs += [_alg]
            self.algdict[filterName] = _alg
        
        
@@ -103,16 +104,16 @@ class LogicalExpressionFilter( PyAthena.Alg ):
 
         # look if parentheses are matched
         if self.Expression.count("(") != self.Expression.count(")"):
-            self.msg.fatal("Mismatched parentheses in filter string: %s" % self.Expression)
-            return StatusCode.Failure
+           self.msg.fatal("Mismatched parentheses in filter string: %s" % self.Expression)
+           return StatusCode.Failure
 
         # these parentheses are not logically correct
         if self.Expression.count("{") != 0 or \
-               self.Expression.count("}") != 0 or \
-               self.Expression.count("[") != 0 or \
-               self.Expression.count("]") != 0:
-            self.msg.fatal("Wrong type of parentheses in filter string: %s" % self.Expression)
-            return StatusCode.Failure        
+           self.Expression.count("}") != 0 or \
+           self.Expression.count("[") != 0 or \
+           self.Expression.count("]") != 0:
+           self.msg.fatal("Wrong type of parentheses in filter string: %s" % self.Expression)
+           return StatusCode.Failure        
 
         
            
