@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALCSLOPE_H
@@ -26,6 +26,7 @@ so that he can determine the validity of the constants
 #include "TGraph.h"
 #include "TH1I.h"
 
+#include <array>
 #include <vector>
 #include <string>
 #include <map>
@@ -61,7 +62,6 @@ namespace MuonCalib{
 
     private:
 
-      /***********Private member functions*/
       /**event loop functions*/
       StatusCode collectEventInfo();
       /**Finalize functions*/
@@ -75,7 +75,6 @@ namespace MuonCalib{
       StatusCode calOutput3();
       void outputParameter3(const CscCalibResultCollection & results, std::ofstream & out);
 
-      /*********Private member variables*/
       /**Services and tools*/
       ToolHandle<ICscCalibTool> m_cscCalibTool{this, "CscCalibTool", "CscCalibTool"};
       ToolHandle<Muon::ICSC_RDO_Decoder> m_cscRdoDecoderTool{this,"CscRDODecoder","Muon::CscRDO_Decoder"};
@@ -118,7 +117,7 @@ namespace MuonCalib{
       //Temporary for testing:
       BipolarFit m_bipolarFit;
       bool m_doBipolarFit;
-      double * m_crossTalkFix; 
+      std::array<double, 24> m_crossTalkFix{}; 
       bool m_doCrossTalkFix;
       std::vector<float>  m_dbLevels;
 

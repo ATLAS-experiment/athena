@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalcSlope.h"
@@ -8,13 +8,10 @@
 #include "MuonRDO/CscRawDataCollection.h"
 #include "MuonRDO/CscRawDataContainer.h"
 #include "GaudiKernel/Chrono.h"
-#include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
 #include "CscCalibData/CscCalibResultContainer.h"
 #include "CscCalibData/CscCalibReportContainer.h"
 #include "CscCalibData/CscCalibReportSlope.h"
-#include "BipolarFit.h"
 
-#include "TH1I.h"
 #include "TF1.h"
 #include "TGraphErrors.h"
 #include "TFile.h"
@@ -90,7 +87,6 @@ namespace MuonCalib {
     
     declareProperty("CalOutputVersion", m_calOutputVersion="03-00");
 
-    m_crossTalkFix = new double[24];
     m_crossTalkFix[0] = 1.0322840930;
     m_crossTalkFix[1] = 1.0422690324;
     m_crossTalkFix[2] = 1.0235384586;
@@ -298,7 +294,6 @@ namespace MuonCalib {
 
     delete m_peakTimeProf;
 
-    delete [] m_crossTalkFix;
     ATH_MSG_DEBUG("Finished finalize()");
 
     if(thereIsAFatal)
