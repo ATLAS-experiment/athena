@@ -143,7 +143,7 @@ def fromRunArgs(runArgs):
             # General
             'xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',
             'xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',
-            'xAOD::TrigRoiDescriptorCollection#HLT_Roi_DarkJetPEBTLA',
+            'TrigRoiDescriptorCollection#HLT_Roi_DarkJetPEBTLA',
             'xAOD::VertexContainer#HLT_IDVertex_FS',
             'xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,
             # MET 
