@@ -73,13 +73,22 @@ if __name__ == '__main__':
 
     gepAlgs_output_level = DEBUG
     
-    # Add algorithm to simulate cells from LASP 
+    # Add algorithm to prepare LAr cells for Global
     from  GlobalSimulation.LArCellPreparationAlgCfg import LArCellPreparationAlgCfg
+    gblLArCellContainerKey = "GlobalLArCells"
     acc.merge(LArCellPreparationAlgCfg(flags,
                                NumberOfEnergyBits = 6,
                                ValueLeastSignificantBit = 40,
                                ValueGainFactor = 4,
-                               gblLArCellsKey = "GlobalLArCells",
+                               gblLArCellsKey = gblLArCellContainerKey,
+                               OutputLevel=DEBUG))
+
+    # Add algorithm to simulate MUX input/output for LAr cells
+    from  GlobalSimulation.LArCellMuxAlgCfg import LArCellMuxAlgCfg
+    acc.merge(LArCellMuxAlgCfg(flags,
+                               gblLArCellsKey = gblLArCellContainerKey,
+                               writeMuxInputBitstreamToFile = True,
+                               writeMuxOutputBitstreamToFile = True,
                                OutputLevel=DEBUG))
 
     if acc.run().isFailure():

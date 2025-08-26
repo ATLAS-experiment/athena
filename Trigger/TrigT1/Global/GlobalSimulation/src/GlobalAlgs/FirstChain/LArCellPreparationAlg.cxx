@@ -72,6 +72,8 @@ namespace GlobalSim {
     unsigned n_cells = 0;
     m_gblLArCellMap.clear();
 
+    std::map<std::string,Feb2MuxInfo> feb2MuxAssoc;
+
     // Read input file
     if (file.is_open()) {
 
@@ -95,6 +97,16 @@ namespace GlobalSim {
 
             m_gblLArCellMap.insert(std::pair<int, GlobalSim::GlobalLArCell>(offline_id, gblLArCell));
 
+            int indexOnMux = fbr;
+            if (cnnctr == "B") indexOnMux += 24;
+            if (cnnctr == "C") indexOnMux += 32;
+
+            // Add FEB2 to MUX association map
+            auto itr = feb2MuxAssoc.find(assocFEB2);
+            if (itr == feb2MuxAssoc.end()) {
+                feb2MuxAssoc.insert(std::pair<std::string,Feb2MuxInfo>(assocFEB2, {muxname, indexOnMux}));
+            }
+
             ++n_cells;
         }
     }
@@ -104,6 +116,10 @@ namespace GlobalSim {
     }
 
     ATH_MSG_DEBUG("Loaded FEB2 information for " << n_cells << " LAr cells");
+
+    // Constructing the GlobalLArCellContainer
+    m_gblLArCellContainerTemplate = std::make_unique<GlobalSim::GlobalLArCellContainer>(feb2MuxAssoc);
+    m_gblLArCellContainerTemplate->setMaxCellsPerFeb2(m_maxCellsPerFEB);
   
     return StatusCode::SUCCESS;
   }
@@ -164,19 +180,28 @@ namespace GlobalSim {
         }
     }
 
-    auto gblLArCellContainer = std::make_unique<GlobalSim::GlobalLArCellContainer>();
+    // Set up a GlobalLArCellContainer from template
+    const GlobalSim::GlobalLArCellContainer& templateRef = *m_gblLArCellContainerTemplate;
+    auto gblLArCellContainer = std::make_unique<GlobalSim::GlobalLArCellContainer>(templateRef);
 
     // do truncation
-    for (auto& [febName, cells] : gblLArCellsPerFEB2) {
+    for (auto& [feb2Name, cells] : gblLArCellsPerFEB2) {
+
+        // Overflow and error flags
+        bool inOverflow = false;
+        bool inError = false;
 
         // LAr FEBs might overflow, so they will get truncated
         if (cells.size() > m_maxCellsPerFEB) {
-            ATH_MSG_INFO("FEB " << febName << " is sending " << cells.size() << " cells, which is more cells than GEP can receive. Removing all but the possible " << m_maxCellsPerFEB << " cells.");
+            ATH_MSG_INFO("FEB " << feb2Name << " is sending " << cells.size() << " cells, which is more cells than GEP can receive. Removing all but the possible " << m_maxCellsPerFEB << " cells.");
             CHECK(removeCellsFromOverloadedFEB(cells));
+            inOverflow = true;
         }
 
         for (auto& gblLArCell : cells)
             gblLArCellContainer->push_back(std::move(gblLArCell));
+
+        gblLArCellContainer->setFeb2Flags(feb2Name, inOverflow, inError);
     }
     ATH_MSG_DEBUG("Global is receiving a total of " << gblLArCellContainer->size() << " LAr cells in this event");
 

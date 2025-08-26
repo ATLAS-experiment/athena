@@ -59,6 +59,8 @@ namespace GlobalSim{
     uint32_t getID () const;
     /** @brief get the channel of this cell on its associated FEB2 */
     int getChannel () const;
+    /** @brief get the significance of the energy deposit of this cell */
+    float getSigma () const;
     /** @brief get the eta position of the cell */
     float eta () const;
     /** @brief get the phi position of the cell */
@@ -144,7 +146,7 @@ namespace GlobalSim{
   // Setter functions
   inline void GlobalLArCell::setEnergy (float energy) { m_energy = energy; }
   inline void GlobalLArCell::setEnergy (float energy, boost::dynamic_bitset<>&& energy_bitset) { 
-      m_energy = energy;;
+      m_energy = energy;
       m_energy_bitset = std::move(energy_bitset);
   }
   inline void GlobalLArCell::setPosition (float eta, float phi) { 
@@ -166,6 +168,7 @@ namespace GlobalSim{
   inline const boost::dynamic_bitset<>& GlobalLArCell::getEnergyBitstring() const { return m_energy_bitset; }
   inline uint32_t GlobalLArCell::getID () const { return m_id; }
   inline int GlobalLArCell::getChannel () const { return m_channel; }
+  inline float GlobalLArCell::getSigma () const { return m_sigma; }
   inline float GlobalLArCell::eta () const { return m_eta; }
   inline float GlobalLArCell::phi () const { return m_phi; }
   inline const std::string& GlobalLArCell::getFEB2 () const { return m_feb2; }
