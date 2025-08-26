@@ -124,6 +124,9 @@ def ActsFastPixelSeedingToolCfg(flags,
     kwargs.setdefault("rMax", 320 * UnitConstants.mm)
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
 
+    kwargs.setdefault("deltaRMaxTopSP", 220 * UnitConstants.mm)
+    kwargs.setdefault("deltaRMaxBottomSP", 145 * UnitConstants.mm)
+
     return ActsPixelSeedingToolCfg(flags, name, **kwargs)
 
 def ActsStripSeedingToolCfg(flags,
