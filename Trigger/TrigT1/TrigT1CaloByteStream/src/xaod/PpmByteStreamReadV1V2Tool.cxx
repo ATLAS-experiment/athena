@@ -1054,11 +1054,12 @@ StatusCode PpmByteStreamReadV1V2Tool::addTriggerTowerV1_(
 
     std::vector<int16_t> pedCor;
     std::vector<uint8_t> pedEn;
+    std::vector<uint8_t> luts_copy =luts; 
 
    CHECK(addTriggerTowerV2_(state,
                             crate, module, channel,
                             std::move(luts), std::move(lcpBcidVec),
-                            std::move(luts) , std::move(ljeSat80Vec),
+                            std::move(luts_copy) , std::move(ljeSat80Vec),
                             std::move(fadc), std::move(bcidExt),
                             std::move(pedCor), std::move(pedEn))
    );
