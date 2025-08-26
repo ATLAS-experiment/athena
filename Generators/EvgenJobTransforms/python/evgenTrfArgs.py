@@ -74,6 +74,13 @@ def addStdEvgenArgs(parser):
                                  trfArgClasses.argString("hepmc3", runarg=True)],
                         type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
 
+    parser.add_argument("--extension", group="Evgen",
+                        help="Extension to use when writing HepMC files",
+                        default=trfArgClasses.argString("hepmc", runarg=True),
+                        choices=[trfArgClasses.argString("hepmc", runarg=True),
+                                 trfArgClasses.argString("events", runarg=True)],
+                        type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
+
     parser.add_argument("--rivetAnas", group="Evgen",
                         help="a comma-separated list of Rivet analyses to run on the resulting events",
                         type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True))
