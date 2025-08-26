@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionHandling/ComboHypo.h"
@@ -161,9 +161,8 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
 
 
   // loop over all chains in the mult-map
-  for ( const auto& m : m_multiplicitiesReqMap ) { 
-    const HLT::Identifier chainId = HLT::Identifier(m.first);
-    const std::vector<int>& multiplicityPerLeg = m.second;
+  for ( const auto& [chainName, multiplicityPerLeg] : m_multiplicitiesReqMap ) {
+    const HLT::Identifier chainId = HLT::Identifier(chainName);
     const DecisionID requiredDecisionID = chainId.numeric();
 
     DecisionIDContainer allDecisionIds;
@@ -195,7 +194,7 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
       // If there is only one leg, then we just use the chain's name.
       if (multiplicityPerLeg.size() > 1) {
         ATH_MSG_DEBUG(chainId << " has multiplicityPerLeg.size() > 1, so we use legXXX_HLT_YYY, instead of HLT_YYY");
-        legId = TrigCompositeUtils::createLegName(chainId, legIndex);
+        legId = TrigCompositeUtils::createLegName(chainName, legIndex);
       }
 
       const DecisionID requiredDecisionIDLeg = legId.numeric();
