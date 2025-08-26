@@ -52,6 +52,8 @@ namespace GlobalSim {
 
     /** @brief LAr cell map where the key is the offline cell ID */
     std::map<int,GlobalSim::GlobalLArCell> m_gblLArCellMap = {};
+    /** @brief GlobalLArCellContainer template which is constructed in initialize and used in execute */
+    std::unique_ptr<GlobalSim::GlobalLArCellContainer> m_gblLArCellContainerTemplate;
 
     /** @brief Key for the EventInfo object */
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfo", "EventInfo", "Key for the EventInfo container"};

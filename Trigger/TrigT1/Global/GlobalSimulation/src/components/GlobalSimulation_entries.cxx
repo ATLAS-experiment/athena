@@ -31,6 +31,7 @@
 #include "../GlobalAlgs/Hypothesis/UCL/InvariantMassDeltaPhiInclusive2AlgTool.h"
 
 #include "../GlobalAlgs/FirstChain/LArCellPreparationAlg.h"
+#include "../GlobalAlgs/FirstChain/LArCellMuxAlg.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
@@ -63,3 +64,4 @@ DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerComparator)
 DECLARE_COMPONENT(GlobalSim::InvariantMassDeltaPhiInclusive2AlgTool)
 
 DECLARE_COMPONENT(GlobalSim::LArCellPreparationAlg)
+DECLARE_COMPONENT(GlobalSim::LArCellMuxAlg)
