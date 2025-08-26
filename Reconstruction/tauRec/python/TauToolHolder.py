@@ -728,7 +728,7 @@ def TauWPDecoratorJetRNNCfg(flags):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
-def TauGNNEvaluatorCfg(flags, version=0, applyTrackSel=False, tauContainerName=""):
+def TauGNNEvaluatorCfg(flags, version=0, applyLooseTrackSel=False, applyTightTrackSel=False, tauContainerName=""):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauGNN_v' + str(version)
 
@@ -743,7 +743,8 @@ def TauGNNEvaluatorCfg(flags, version=0, applyTrackSel=False, tauContainerName="
                                               MaxClusters = flags.Tau.GNTauMaxClusters[version],
                                               MaxClusterDR = 15.0,
                                               MinTauPt = flags.Tau.MinPtDAOD,
-                                              ApplyTrackSel = applyTrackSel,
+                                              ApplyLooseTrackSel = applyLooseTrackSel,
+                                              ApplyTightTrackSel = applyTightTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
                                               InputLayerScalar = "tau_vars",
                                               InputLayerTracks = "track_vars",

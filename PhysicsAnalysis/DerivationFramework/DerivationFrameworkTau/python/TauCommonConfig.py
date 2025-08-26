@@ -177,8 +177,8 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         # vertex-corrected clusters must be rebuilt for tau ID
         tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
         # Add in GNTau!
-        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,0)) )
-        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,1)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,0,applyLooseTrackSel=True)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,1,applyLooseTrackSel=True)) )
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,0)) )
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,1)) )
 

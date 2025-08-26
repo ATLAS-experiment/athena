@@ -48,6 +48,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.MinPt0p", 9.25*Units.GeV)
     tau_cfg.addFlag("Tau.MinPt", 6.75*Units.GeV)
     tau_cfg.addFlag("Tau.MinPtDAOD", 13*Units.GeV)
+    tau_cfg.addFlag("Tau.MaxTracksDAOD", 5)
     tau_cfg.addFlag("Tau.TauJetRNNConfig", ["tauid_rnn_1p_R22_v1.json", "tauid_rnn_2p_R22_v1.json", "tauid_rnn_3p_R22_v1.json"])
     tau_cfg.addFlag("Tau.TauJetRNNWPConfig", ["tauid_rnnWP_1p_R22_v0.root", "tauid_rnnWP_2p_R22_v0.root", "tauid_rnnWP_3p_R22_v0.root"])
     tau_cfg.addFlag("Tau.TauEleRNNConfig", ["taueveto_rnn_config_1P_r22.json", "taueveto_rnn_config_3P_r22.json"])

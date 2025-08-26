@@ -162,7 +162,7 @@ def TauRunnerAlgCfg(flags):
         # added for offline tau trigger monitoring at T0, not needed for TauJets_EleRM
         if not flags.Tau.ActiveConfig.inTauEleRM:
             # only compute GNTau for 1p/3p, as this is internally required by the tau trigger monitoring
-            tools.append( result.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags, version=0, applyTrackSel=True)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags, version=0, applyTightTrackSel=True)) )
             tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags, version=0, tauContainerName=flags.Tau.ActiveConfig.TauJets)) )
 
     TauRunnerAlg = CompFactory.getComp("TauRunnerAlg")
