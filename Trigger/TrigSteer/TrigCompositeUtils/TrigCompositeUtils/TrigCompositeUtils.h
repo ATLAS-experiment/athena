@@ -234,7 +234,15 @@ namespace TrigCompositeUtils {
    * @return Index of the leg, e.g. leg002_HLT_mu50_L1MU20 would return 2. Returns -1 if not a leg identifier or 0 if a chain identifier.
    **/
   int32_t getIndexFromLeg(const std::string& name);
- 
+
+  /**
+   * @brief Extract the name and numeric index of a leg identifier.
+   * @param name The name of the HLT::Identifier corresponding to the specific leg.
+   * @return Name and index of the leg, e.g. leg002_HLT_mu50_L1MU20 would return {HLT_mu50_L1MU20, 2}.
+             If not a leg, returns {chainName, 0}. Throws if neither leg nor chain.
+   **/
+  std::pair<std::string, int32_t> getNameAndIndexFromLeg(const std::string& name);
+
 /**
    * @brief Recognise whether the chain ID is a leg ID
    * @param legIdentifier The HLT::Identifier corresponding to the specific ID.
