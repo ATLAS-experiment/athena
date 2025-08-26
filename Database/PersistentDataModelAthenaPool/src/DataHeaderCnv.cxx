@@ -42,7 +42,11 @@ DataHeaderCnv::~DataHeaderCnv()
    // Remove itself from the IncidentSvc - if it is still around
    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", "DataHeaderCnv");
    if( incSvc.retrieve().isSuccess() ) {
+   try{
       incSvc->removeListener(this, IncidentType::EndInputFile);
+    } catch ( GaudiException & e){
+       ATH_MSG_FATAL("Gaudi exception caught in DataHeaderCnv::~DataHeaderCnv");
+    }
    }
 }
 //______________________________________________________________________________
@@ -131,7 +135,7 @@ void DataHeaderCnv::handle(const Incident& incident)
             if( !form_token ) {
                std::string errmsg = std::format("Failed to write {} {}", dhFormType.Name(), placementStr);
                ATH_MSG_FATAL( errmsg );
-               throw GaudiException(errmsg, "DataHeaderCnv::WriteDataHeaderForms", StatusCode::FAILURE);
+               throw GaudiException(std::move(errmsg), "DataHeaderCnv::WriteDataHeaderForms", StatusCode::FAILURE);
             }
             ATH_MSG_DEBUG("Wrote DatHeaderForm, placeemnt was " << placementStr << "  token=" << form_token->toString());
             form_token->release(); form_token = nullptr;
@@ -236,7 +240,7 @@ StatusCode DataHeaderCnv::updateRep(IOpaqueAddress* pAddress, DataObject* pObjec
       }
       // remember this DH and finish processing in updateRepRefs()
       m_sharedWriterCachedDH = dataHeader;
-      m_sharedWriterCachedDHToken = dhRef;
+      m_sharedWriterCachedDHToken = std::move(dhRef);
       std::size_t tagBeg = dhPlacementStr.find("[KEY=") + 5;
       std::size_t tagSize = dhPlacementStr.find(']', tagBeg) - tagBeg;
       m_sharedWriterCachedDHKey = dhPlacementStr.substr( tagBeg, tagSize );

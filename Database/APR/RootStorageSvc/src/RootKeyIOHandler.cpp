@@ -109,7 +109,7 @@ namespace pool {
       if (!gFile) return 0;
       fBufferRef->SetParent(gFile);
       if (fObjlen > fNbytes-fKeylen) {
-        fBuffer = new char[fNbytes];
+        fBuffer = new char[fNbytes]{};
         ReadFile();                    //Read object structure from file
         memcpy(fBufferRef->Buffer(),fBuffer,fKeylen);
       }
