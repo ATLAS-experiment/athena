@@ -5,8 +5,12 @@
 #include "TrigBjetHypo/safeLogRatio.h"
 
 #include <cmath>
+#include <limits>
 
 float safeLogRatio(float num, float denom) {
-  float ratio = (denom == 0 ? INFINITY : num / denom);
-  return ratio == 0 ? -INFINITY : std::log( ratio );
+  // ep(silon) is the smallest non-subnormal number
+  // the recyprocal of this should not overflow
+  float ep = std::numeric_limits<float>::min();
+  float ratio = (std::abs(denom) < ep ? INFINITY : num / denom);
+  return std::abs(ratio) < ep ? -INFINITY : std::log( ratio );
 }
