@@ -4,11 +4,11 @@
 #ifndef XAODMUONPREPDATA_CHAMBERVIEWER_H
 #define XAODMUONPREPDATA_CHAMBERVIEWER_H
 
-#include <type_traits>
+#include <stdexcept>
+#include <format>
 
 #include <xAODMeasurementBase/MeasurementDefs.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <GeoModelKernel/throwExcept.h>
 
 #include "Acts/Utilities/PointerTraits.hpp"
 
@@ -106,7 +106,8 @@ namespace xAOD{
                 /** @brief Returns the i-the measurement from the current chamber */
                 const_ref at(const std::size_t idx) const {
                     if (idx >= size()) {
-                        THROW_EXCEPTION("Invalid index given "<<typeid(const_ref).name()<<" Size: "<<size()<<", requested: "<<idx);
+                        throw std::domain_error(std::format("Invalid index given {:}. size: {:}, requested:{:} ", 
+                                                        typeid(const_ref).name(), size(), idx));
                     }
                     return (*m_begin +idx);
                 }
@@ -118,16 +119,16 @@ namespace xAOD{
                     }
                     m_begin = m_end;
                     if constexpr (ChamberViewConcepts::identifierHashConcept<element_type>) {
-                        m_currentHash = (*m_end)->identifierHash();
+                        const IdentifierHash currentHash = (*m_end)->identifierHash();
                         m_end = std::find_if(m_begin, m_container.end(),
-                                         [this](const_ref meas){
-                                            return meas->identifierHash() != m_currentHash;
+                                         [&currentHash](const_ref meas){
+                                            return meas->identifierHash() != currentHash;
                                         });
                     } else {
-                         m_currentHash = idHash((*m_end)->identify());
+                         const IdentifierHash currentHash = idHash((*m_end)->identify());
                          m_end = std::find_if(m_begin, m_container.end(),
-                                         [this](const_ref meas){
-                                            return idHash(meas->identify()) != m_currentHash;
+                                         [this,&currentHash](const_ref meas){
+                                            return idHash(meas->identify()) != currentHash;
                                         });                       
                     }
                     if (m_begin == m_end) {
@@ -174,6 +175,22 @@ namespace xAOD{
                                         });
                     return m_begin != m_end;
                 }
+                bool next(std::function<bool(const_ref)> selector) {
+                    if (m_end == m_container.end()) {
+                        return false;
+                    }
+                    /** Check whether a new element is available */
+                    const_iterator nextBegin = std::ranges::find_if(m_end, m_container.end(), selector);
+                    if (nextBegin == m_container.end()) {
+                        return false;
+                    }
+                    m_begin = nextBegin;
+                    m_end = std::find_if(m_begin, m_container.end(),
+                                         [&selector](const_ref meas) {
+                                            return !selector(meas);
+                                        });
+                    return true;
+                }
 
             private:
                 /** @brief Returns the IdentifierHash from an Identifier */
@@ -184,9 +201,9 @@ namespace xAOD{
                 const HitObjContainer& m_container;
                 const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
                 const ViewMode m_mode{ViewMode::DetElement};
-                DetectorIDHashType m_currentHash{0};
                 const_iterator m_end{m_container.begin()};
                 const_iterator m_begin{m_container.begin()};
     };
 }
 #endif
+
