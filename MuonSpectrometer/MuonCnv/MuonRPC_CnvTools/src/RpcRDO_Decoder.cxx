@@ -3,7 +3,7 @@
 */
 
 #include "RpcRDO_Decoder.h"
-
+#include "RPC_CondCabling/RpcCablingCondData.h"
 #include "MuonDigitContainer/RpcDigit.h"
 #include "MuonRDO/RpcFiredChannel.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
