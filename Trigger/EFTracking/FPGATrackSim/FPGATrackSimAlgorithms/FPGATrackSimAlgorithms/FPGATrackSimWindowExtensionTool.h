@@ -87,7 +87,7 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
 
         // Temporary, used in the hit sorting implementation, borrowed from the NN pathfinder tool. Likely to change.
         Gaudi::Property <double> m_phiScale {this, "phiScale", 3.15, "Phi scale used when calculating distance from predicted window position" };
-        Gaudi::Property <double> m_zScale {this, "zScale", 1015, "z scale used when calculating distance from predicted window position" };
+        Gaudi::Property <double> m_zScale {this, "zScale", 3000, "z scale used when calculating distance from predicted window position" };
 
         std::vector<FPGATrackSimRoad> m_roads;
         //This is a map(dict python equivalent) of slice IDs that have a map of layer IDs in it. That map has a vector of hits associated with it
