@@ -1552,10 +1552,6 @@ class athenaExecutor(scriptExecutor):
                         any('--nprocs' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
                         self._cmd.append('--nprocs=%s' % str(self._athenaMP))
 
-        #Switch to ComponentAccumulator based config if requested
-        if self._isCAEnabled():
-            self._cmd.append("--CA")
-
         # Add topoptions
         if self._skeleton or self._skeletonCA:
             self._cmd += self._topOptionsFiles
