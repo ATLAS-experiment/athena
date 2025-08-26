@@ -42,8 +42,8 @@ namespace Trk {
     AlignModuleTool(const std::string& type, const std::string& name,
 		    const IInterface* parent);
     
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
 
     AlignModuleListType alignModuleListType() const override{
       return static_cast<AlignModuleListType>(m_alignModuleListType.value());
@@ -55,15 +55,15 @@ namespace Trk {
 
     /** sets alignModuleLists and idHash maps for a set of AlignModules.  AlignModuleList should be of type Combined, containing detector elements of different types. */
     void setAlignModules(AlignModuleList* alignmods,
-			 std::vector<AlignModuleList*>* idHashMaps);
+			 std::vector<AlignModuleList*>* idHashMaps) override;
     
     /** Sets the AlignParLists using boost::multi_array.  Lists are owned by GeometryManagerTool. */
     void setAlignParLists(AlignPar2DVec* fullAlignParList, 
-			  AlignPar2DVec* alignParList=0);
+			  AlignPar2DVec* alignParList=0) override;
 
     /** set and retrieve flag whether or not the sub-TrkDetElementBase structures are aligned for a given detector type */
-    void setSubDetElement(AlignModule::DetectorType detType, bool status) { m_subDetElement[detType]=status; }
-    bool subDetElement(AlignModule::DetectorType detType) const { return m_subDetElement[detType]; }
+    void setSubDetElement(AlignModule::DetectorType detType, bool status) override { m_subDetElement[detType]=status; }
+    bool subDetElement(AlignModule::DetectorType detType) const override { return m_subDetElement[detType]; }
 
     //
     // AlignTrackCreator methods
@@ -71,24 +71,24 @@ namespace Trk {
 
     /** Returns pointer to AlignModule containing RIO.  Returns 0 if not found. */
     virtual AlignModule * findAlignModule(const RIO_OnTrack * rio,
-                                          AlignModule::DetectorType detType) const;
+                                          AlignModule::DetectorType detType) const override;
 
     /** Returns pointer to AlignModule containing RIO.  Returns 0 if not found. */
     virtual AlignModule * findAlignModule(const TrkDetElementBase* det,
-                                          AlignModule::DetectorType detType) const;
+                                          AlignModule::DetectorType detType) const override;
 
     //
     // MatrixTool methods
     //
 
     /** Returns total number of alignment parameters. */
-    int nAlignParameters() const { return m_alignParList1D.size(); }
+    int nAlignParameters() const override { return m_alignParList1D.size(); }
     
     /** Returns 1-D vector of all AlignModules containing all detector types. */
-    const AlignModuleList* alignModules1D() { return &m_alignModules1D; }
+    const AlignModuleList* alignModules1D() override { return &m_alignModules1D; }
     
     /** Returns 1-D vector of all AlignPars for all detector types. */
-    AlignParVec* alignParList1D() { return &m_alignParList1D; }
+    AlignParVec* alignParList1D() override { return &m_alignParList1D; }
     
     
     //
@@ -96,14 +96,14 @@ namespace Trk {
     //
 
     /** returns vector of AlignPars for an AlignModule */
-    AlignParVec* getAlignPars(const AlignModule* alignModule) const;
+    AlignParVec* getAlignPars(const AlignModule* alignModule) const override;
     
     /** methods used for numerical derivative to shift module before 
 	refitting track and restore to normal position, to be inherited by 
 	detector-specific align modules */
     virtual void shiftModule(const AlignModule*, const Track*, 
-			     AlignModule::TransformParameters, double) const {}
-    virtual void restoreModule(const AlignModule*) const {}
+			     AlignModule::TransformParameters, double) const override {}
+    virtual void restoreModule(const AlignModule*) const override {}
     
     
     //
@@ -114,10 +114,10 @@ namespace Trk {
         transforms if necessary */ 
     virtual void fillDetAlignmentParameters(const TrkDetElementBase* det,
 					    DataVector<AlignPar>* apVec,
-					    AlignModule::DetectorType detType) const;
+					    AlignModule::DetectorType detType) const override;
 
     /** Returns collection of AlignModules for a particular detector type.*/    
-    virtual const AlignModuleList* getAlignModuleCollection() const 
+    virtual const AlignModuleList* getAlignModuleCollection() const override
     { return m_alignModules; }
 
     //
@@ -125,7 +125,7 @@ namespace Trk {
     //
 
     /** returns vector of full AlignPars for an AlignModule */
-    AlignParVec* getFullAlignPars(const AlignModule* alignModule) const;
+    AlignParVec* getFullAlignPars(const AlignModule* alignModule) const override;
 
 
     //
@@ -133,7 +133,7 @@ namespace Trk {
     //
 
     /** Returns detector type (AlignModule enum) for a detector element. */
-    AlignModule::DetectorType getDetectorType(const TrkDetElementBase* det) const;
+    AlignModule::DetectorType getDetectorType(const TrkDetElementBase* det) const override;
 
     /** Returns identifier hash for sub-TrkDetElementBase structure based on detector type.
         It needs detector specific implementation in a derived class */
