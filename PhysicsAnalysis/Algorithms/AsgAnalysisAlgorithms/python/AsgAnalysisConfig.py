@@ -712,7 +712,7 @@ class SelectionDecorationBlock (ConfigBlock):
 
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.selectionName
+        return ''
 
     def makeAlgs(self, config):
         for container in self.containers:
@@ -724,7 +724,7 @@ class SelectionDecorationBlock (ConfigBlock):
                     continue
                 alg = config.createAlgorithm(
                     'CP::AsgSelectionAlg',
-                    f'SelectionDecoration_{originContainerName}')
+                    f'SelectionDecoration_{originContainerName}_{selectionName}')
                 selectionDecoration = f'baselineSelection_{selectionName}_%SYS%'
                 alg.selectionDecoration =  f'{selectionDecoration},as_char'
                 alg.particles = config.readName (originContainerName)
