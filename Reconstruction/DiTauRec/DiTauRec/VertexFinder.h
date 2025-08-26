@@ -46,6 +46,7 @@ class VertexFinder : public DiTauToolBase {
     { this, "TrackVertexAssociation", "JetTrackVtxAssoc_forDiTaus", "" };
 
   Gaudi::Property<std::string> m_assocTracksName{this, "AssociatedTracks", "GhostTrack"};
+  Gaudi::Property<bool> m_useTJVA {this, "UseTJVA", true};
 
 };
 

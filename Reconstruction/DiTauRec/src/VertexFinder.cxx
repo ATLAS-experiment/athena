@@ -61,21 +61,23 @@ StatusCode VertexFinder::execute(DiTauCandidateData * data,
   pDiTau->setVertex(vxContainer.get(), vxPrimary);
        
 
-  // try to find new PV with TJVA
-  ATH_MSG_DEBUG("TJVA enabled -> try to find new PV for the tau candidate");
+  if(m_useTJVA){
+    // try to find new PV with TJVA
+    ATH_MSG_DEBUG("TJVA enabled -> try to find new PV for the tau candidate");
 
-  float maxJVF = -100.;
-  ElementLink<xAOD::VertexContainer> newPrimaryVertexLink = getPV_TJVA(pDiTau, vxContainer.get(), maxJVF, ctx);
-  if (newPrimaryVertexLink.isValid()) {
-    // set new primary vertex
-    // will overwrite default one which was set above
-    pDiTau->setVertexLink(newPrimaryVertexLink);
-    // save highest JVF value
-    pDiTau->setDetail(xAOD::DiTauJetParameters::TauJetVtxFraction,static_cast<float>(maxJVF));
-    ATH_MSG_DEBUG("TJVA vertex found and set");
-  }
-  else {
-    ATH_MSG_DEBUG("couldn't find new PV for TJVA");
+    float maxJVF = -100.;
+    ElementLink<xAOD::VertexContainer> newPrimaryVertexLink = getPV_TJVA(pDiTau, vxContainer.get(), maxJVF, ctx);
+    if (newPrimaryVertexLink.isValid()) {
+      // set new primary vertex
+      // will overwrite default one which was set above
+      pDiTau->setVertexLink(newPrimaryVertexLink);
+      // save highest JVF value
+      pDiTau->setDetail(xAOD::DiTauJetParameters::TauJetVtxFraction,static_cast<float>(maxJVF));
+      ATH_MSG_DEBUG("TJVA vertex found and set");
+    }
+    else {
+      ATH_MSG_DEBUG("couldn't find new PV for TJVA");
+    }
   }
 
   return StatusCode::SUCCESS;

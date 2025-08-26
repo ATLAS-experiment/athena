@@ -51,6 +51,7 @@ def VertexFinderCfg(flags, name="DiTauRec_VertexFinder", **kwargs):
     kwargs.setdefault("PrimVtxContainerName", "PrimaryVertices")
     kwargs.setdefault("AssociatedTracks", "GhostTrack")
     kwargs.setdefault("TrackVertexAssociation", "JetTrackVtxAssoc_forDiTaus")
+    kwargs.setdefault("UseTJVA", flags.Tau.doTJVA)
 
     acc.setPrivateTools(CompFactory.VertexFinder(name, **kwargs))
     return acc
