@@ -112,8 +112,14 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   if (tau.pt() < m_minTauPt) {
     return StatusCode::SUCCESS;
   }
+
+  // save CPU when running PHYS derivations
+  if (m_applyLooseTrackSel) {
+    if (tau.nTracks()>5) return StatusCode::SUCCESS;
+  }
+
   // save CPU when running in RAWtoALL for tau trigger monitoring purpose
-  if (m_applyTrackSel) {
+  if (m_applyTightTrackSel) {
     if (tau.nTracks()!=1 && tau.nTracks()!=3) return StatusCode::SUCCESS;
   }
 

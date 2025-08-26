@@ -77,7 +77,8 @@ private:
     Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
     Gaudi::Property<bool> m_doTrackClassification{this, "TrackClassification", true};
     Gaudi::Property<float> m_minTauPt{this, "MinTauPt", 0.};
-    Gaudi::Property<bool> m_applyTrackSel{this, "ApplyTrackSel", false};
+    Gaudi::Property<bool> m_applyLooseTrackSel{this, "ApplyLooseTrackSel", false};
+    Gaudi::Property<bool> m_applyTightTrackSel{this, "ApplyTightTrackSel", false};
     Gaudi::Property<float> m_min_prong_track_pt{this, "MinProngTrackPt", 0.};
     Gaudi::Property<std::string> m_input_layer_scalar{this, "InputLayerScalar", "tau_vars"};
     Gaudi::Property<std::string> m_input_layer_tracks{this, "InputLayerTracks", "track_vars"};
