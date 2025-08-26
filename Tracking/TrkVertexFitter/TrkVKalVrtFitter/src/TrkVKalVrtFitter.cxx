@@ -686,14 +686,22 @@ xAOD::Vertex * TrkVKalVrtFitter::makeXAODVertex( int Neutrals,
     if( m_makeExtendedVertex && covarExist ) {
        floatErrMtx.resize(CovFull.size());
        for(int i=0; i<(int)CovFull.size(); i++) {
-         floatErrMtx[i]=static_cast<float>(CovFull[i]);
-         if(std::isinf(floatErrMtx[i]))floatErrMtx[i]=std::numeric_limits<float>::max();
+         if( CovFull[i] < std::numeric_limits<float>::max() &&
+             CovFull[i] > std::numeric_limits<float>::lowest() ){
+           floatErrMtx[i]=static_cast<float>(CovFull[i]);
+         } else {
+           floatErrMtx[i]=std::numeric_limits<float>::max();
+         }
        }
     }else{
        floatErrMtx.resize(fitErrorMatrix.size());
        for(int i=0; i<(int)fitErrorMatrix.size(); i++) {
-         floatErrMtx[i]=static_cast<float>(fitErrorMatrix[i]);
-         if(std::isinf(floatErrMtx[i]))floatErrMtx[i]=std::numeric_limits<float>::max();
+         if( fitErrorMatrix[i] < std::numeric_limits<float>::max() &&
+             fitErrorMatrix[i] > std::numeric_limits<float>::lowest() ){
+           floatErrMtx[i]=static_cast<float>(fitErrorMatrix[i]);
+         } else {
+           floatErrMtx[i]=std::numeric_limits<float>::max();
+         }
        }
     }
     tmpVertex->setCovariance(floatErrMtx);
