@@ -2,6 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "jFexTauRoIThresholdsTool.h"
+#include "utilities.h"
+using namespace HLTSeedingNs;
 
 
 
@@ -34,7 +36,7 @@ uint64_t jFexTauRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
         
         // Checking et and isolation thresholds
         if (et > thr->thrValueMeV(ieta) && isobit >= static_cast<unsigned int>(thr->isolation()) ) {
-            thresholdMask |= (1<<thr->mapping());
+            thresholdMask |= (1_u64<<thr->mapping());
         }
         
         ATH_MSG_DEBUG("jFEX Taus HLT seeding for ("<< thr->name() <<"): et=" << et << " > "<<thr->thrValueMeV(ieta) << " and iso="<<iso << " >= "<<static_cast<unsigned int>(thr->isolation()));
