@@ -39,7 +39,7 @@ StatusCode TrigMufastHypoTool::initialize()
      ATH_MSG_DEBUG("Accepting all the events!");
   }
   else if(m_doCalib){
-     ATH_MSG_DEBUG("This is muon calibration chain.");
+     ATH_MSG_DEBUG("This is a muon calibration chain.");
   }
   else {
      ATH_MSG_DEBUG("AcceptAll = False");

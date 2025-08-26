@@ -197,7 +197,7 @@ def createDataFlow(flags, chains):
 
     # loop over chains
     for chain in chains:
-        log.debug("\n Configuring chain %s with %d steps: \n   - %s ", chain.name,len(chain.steps),'\n   - '.join(map(str, [{step.name:step.multiplicity} for step in chain.steps])))
+        log.debug("\n Configuring chain %s with %d steps: \n   - %s ", chain.name,len(chain.steps),'\n   - '.join(map(str, [{step.name:step.nLegs} for step in chain.steps])))
 
         lastCFgroup = None
         lastDecisions = []
@@ -269,7 +269,7 @@ def createDataFlow(flags, chains):
                     log.debug(dec)
                     
         #end of loop over steps
-        log.debug("\n Built CD for chain %s with %d steps: \n   - %s ", chain.name,len(chain.steps),'\n   - '.join(map(str, [{step.name:step.multiplicity} for step in chain.steps])))
+        log.debug("\n Built CD for chain %s with %d steps: \n   - %s ", chain.name,len(chain.steps),'\n   - '.join(map(str, [{step.name:step.nLegs} for step in chain.steps])))
     #end of loop over chains
 
     log.debug("End of createDataFlow for %d chains and total %d steps", len(chains), NSTEPS)
