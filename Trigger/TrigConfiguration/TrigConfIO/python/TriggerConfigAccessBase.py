@@ -4,7 +4,6 @@ import os
 import json
 import re
 from typing import Any
-import six
 import xml.etree.ElementTree as ET
 import coral
 
@@ -33,7 +32,7 @@ class ConfigType(Enum):
         self.filetype = filetype
         self.crestkey = crestkey
     def __eq__(self, other):
-        if isinstance(other,six.string_types):
+        if isinstance(other,str):
             return self.filetype == other
         else:
             return self.filetype == other.filetype

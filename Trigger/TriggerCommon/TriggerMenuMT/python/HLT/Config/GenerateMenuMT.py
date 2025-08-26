@@ -596,8 +596,13 @@ def generateMenuMT(flags):
 
     # Generate all chains configuration
     finalListOfChainConfigs = menu.generateAllChainConfigs(flags)
-
+    
+    checkNumberOfLegs = [chain.checkNumberOfLegs() for chain in finalListOfChainConfigs]
+    if 0 in checkNumberOfLegs:
+        log.error('There is a chain with unexpected number of legs. Revisit your configuration')
+    
     log.info('Number of configured chains: %d', len(finalListOfChainConfigs))
+
     from TriggerMenuMT.HLT.Config import MenuComponents
     if len(MenuComponents._CustomComboHypoAllowed)> _maxAllowedCustomCH:
         log.error(f'Found {len(MenuComponents._CustomComboHypoAllowed)} ComboHypo algorithms  violating the one-CH-per-step rule, only {_maxAllowedCustomCH} are allowed (which are BLS ComboHypos). This is the list of current violations: {MenuComponents._CustomComboHypoAllowed}. Please consolidate your choice of ComboHypo, by checking that it is able to handle decisions internally; if yes eventually increase the limit set by _maxAllowedCustomCH, after discussing with experts')

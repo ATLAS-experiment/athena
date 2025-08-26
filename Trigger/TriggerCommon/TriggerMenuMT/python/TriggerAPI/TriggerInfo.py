@@ -7,7 +7,6 @@ __doc__="Class containing all the information of an HLT chain"
 import re
 from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerType, TriggerPeriod
 from collections import Counter
-import six
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ class TriggerInfo:
                 for run,lb in tc.activeLBByRun.items():
                     if run not in mergedHLTmap[tc.name].activeLBByRun: mergedHLTmap[tc.name].activeLBByRun = 0
                     mergedHLTmap[tc.name].activeLBByRun += lb
-        for tc in six.itervalues (mergedHLTmap):
+        for tc in mergedHLTmap.values():
             tc.livefraction = tc.activeLB/float(mergedTI.totalLB)
         mergedTI.triggerChains = list(mergedHLTmap.values())
         return mergedTI
@@ -97,7 +96,7 @@ class TriggerInfo:
                 if comp ==  1:    typeMap[chain.triggerType].remove(other)
             if append:
                 typeMap[chain.triggerType].append(chain)
-        return [x.name for t in six.itervalues (typeMap) for x in t ]
+        return [x.name for t in typeMap.values() for x in t ]
 
 
     def _getAllHLT(self,triggerType, additionalTriggerType, matchPattern, livefraction):
