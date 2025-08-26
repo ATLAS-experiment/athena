@@ -3,17 +3,21 @@
 */
 
 
-// $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDictParser/test/test_indet_id.cxx,v 1.13 2008-12-09 09:55:22 dquarrie Exp $ 
-
-
 #include "IdDictParser/IdDictParser.h"  
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictFieldImplementation.h"
+#include "IdDict/IdDictLabel.h"
+#include "IdDict/IdDictRange.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/Range.h" 
+#include "Identifier/MultiRange.h" 
 #include "Identifier/Identifier.h" 
 #include "Identifier/RangeIterator.h" 
  
 #include <cstdlib>
 #include <iostream> 
- 
+
 static void 
 tab (size_t level) { 
   std::cout << std::string(level,' '); 

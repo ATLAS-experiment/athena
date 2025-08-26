@@ -7,7 +7,17 @@
  * @date 2008-12-09 
 **/
  
-#include "IdDictParser/IdDictParser.h"  
+#include "IdDictParser/IdDictParser.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictDictionaryRef.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictFieldImplementation.h"
+#include "IdDict/IdDictLabel.h"
+#include "IdDict/IdDictRange.h"
+#include "IdDict/IdDictReference.h"
+#include "IdDict/IdDictRegion.h"
+#include "IdDict/IdDictSubRegion.h"
+#include "IdDict/IdDictAltRegions.h"
  
 #include <cstdlib>
 #include <iostream> 
