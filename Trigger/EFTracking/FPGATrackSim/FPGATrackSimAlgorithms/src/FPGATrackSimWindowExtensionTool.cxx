@@ -356,14 +356,14 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
                 // scaled distance because z and phi are not in same units
                 // these scales are the same as what the pathfinder uses for the time being,
                 // I don't't really know if that makes sense.
-                float distance_a = dphi*dphi*phiScale*phiScale + dz*dz*zScale*zScale;
+                float distance_a = dphi*dphi/(phiScale*phiScale) + dz*dz/(zScale*zScale);
 
                 // HitB
                 dphi = std::get<0>(b);
                 dz = std::get<1>(b);
 
                 // scaled distance because z and phi are not in same units
-                float distance_b = dphi*dphi*phiScale*phiScale + dz*dz*zScale*zScale;
+                float distance_b = dphi*dphi/(phiScale*phiScale) + dz*dz/(zScale*zScale);
 
                 return distance_a < distance_b;
             });
