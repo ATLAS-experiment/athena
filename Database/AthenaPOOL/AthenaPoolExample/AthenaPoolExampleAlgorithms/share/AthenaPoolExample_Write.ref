@@ -105,7 +105,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -388,7 +388,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -432,7 +432,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -476,7 +476,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -520,7 +520,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -564,7 +564,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -608,7 +608,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -652,7 +652,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -696,7 +696,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -740,7 +740,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -784,7 +784,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -828,7 +828,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -872,7 +872,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches, original pattern being PetersHits, is false
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.

@@ -116,7 +116,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -242,7 +242,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -376,7 +376,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -405,7 +405,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -465,7 +465,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -494,7 +494,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -554,7 +554,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -583,7 +583,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -643,7 +643,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -672,7 +672,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -732,7 +732,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -762,7 +762,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -823,7 +823,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -852,7 +852,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -912,7 +912,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -941,7 +941,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1001,7 +1001,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1030,7 +1030,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1090,7 +1090,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1119,7 +1119,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1179,7 +1179,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1209,7 +1209,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1270,7 +1270,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1299,7 +1299,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1359,7 +1359,7 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
@@ -1388,7 +1388,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1449,9 +1449,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1479,7 +1479,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1539,9 +1539,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1569,7 +1569,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1629,9 +1629,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1660,7 +1660,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1721,9 +1721,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1751,7 +1751,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1811,9 +1811,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1841,7 +1841,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1901,9 +1901,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1931,7 +1931,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.
@@ -1991,9 +1991,9 @@ StreamStream1                                       DEBUG addItemObjects(9102,"M
 StreamStream1                                       DEBUG            Key:My*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG  Added object 9102,"MyHits"
-StreamStream1                                       DEBUG Result of checking MyHits against My.* to see if it matches, original pattern being My*, is true
+StreamStream1                                       DEBUG Result of checking MyHits against My* to see if it matches is true
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -2021,7 +2021,7 @@ StreamStream2                                       DEBUG addItemObjects(9103,"*
 StreamStream2                                       DEBUG            Key:*Trackss
 StreamStream2                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream2                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream2                                       DEBUG Result of checking MyTracks against .*Trackss to see if it matches, original pattern being *Trackss, is false
+StreamStream2                                       DEBUG Result of checking MyTracks against *Trackss to see if it matches is false
 StreamStream2                                       DEBUG  No object matching 9103,"*Trackss" found
 StreamStream2                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream2                                       DEBUG            Key:EventInfoAux.

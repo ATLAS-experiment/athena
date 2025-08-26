@@ -8,7 +8,6 @@
 #include <cassert>
 #include <format>
 #include <sstream>
-#include <ranges>
 
 // Framework include files
 #include "AthContainersInterfaces/IAuxStore.h"
@@ -635,16 +634,9 @@ StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
             // For item list we currently allow wildcards ('*'), which has limited use, e.g.:
             // xAOD::CutBookkeeperAuxContainer#IncompleteCutBookkeepers*Aux.
             // Here we look for those few cases...
-            // Escape some regex metacharacters first
-            std::string item_key_escaped = std::regex_replace(item_key, std::regex(R"([${}|(){}\[\]+?])"), R"(\\$&)");
-            // Replace '*' with '.*'
-            item_key_escaped = std::regex_replace(item_key_escaped, std::regex(R"(\*)"), ".*");
-            // Now see if proxyName matches the pattern in the item list
-            const std::regex pattern(item_key_escaped);
-            keyMatch = std::regex_match(proxyName, pattern);
-            ATH_MSG_DEBUG(std::format("Result of checking {} against {} to see if it matches,"
-                                      " original pattern being {}, is {}",
-                                      proxyName, item_key_escaped, item_key, keyMatch));
+            keyMatch = simpleMatch(item_key, proxyName);
+            ATH_MSG_DEBUG(std::format("Result of checking {} against {} to see if it matches is {}",
+                                      proxyName, item_key, keyMatch));
          }
 
          // Now check if this item is marked for another output stream, if so we reject it
@@ -960,4 +952,21 @@ void AthenaOutputStream::loadDict (CLID clid)
   if (tpcnv) {
     m_dictLoader->load_type (tpcnv->persistentTInfo());
   }
+}
+
+/// Glob-style matcher, where the only meta-character is '*'
+bool AthenaOutputStream::simpleMatch(const std::string& pattern,
+                                     const std::string& text) {
+   size_t pi = 0, ti = 0, star = std::string::npos, match = 0;
+   while (ti < text.size()) {
+      if (pi < pattern.size() && (pattern[pi] == text[ti] || pattern[pi] == '*')) {
+         if (pattern[pi] == '*') { star = pi++; match = ti; }
+         else { ++pi; ++ti; }
+      } else if (star != std::string::npos) {
+         pi = star + 1;
+         ti = ++match;
+      } else return false;
+   }
+   while (pi < pattern.size() && pattern[pi] == '*') ++pi;
+   return pi == pattern.size();
 }
