@@ -258,6 +258,9 @@ private:
   /// failures seen loading dictionaries while multiple threads are running.
   /// See ATEAM-697 and ATEAM-749.
   void loadDict (CLID clid);
+
+  /// Glob-style matcher, where the only meta-character is '*'
+  bool simpleMatch(const std::string& pattern, const std::string& text);
 };
 
 #endif // ATHENASERVICES_OUTPUTSTREAM_H
