@@ -2,6 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "gFexSRJetRoIThresholdsTool.h"
+#include "utilities.h"
+using namespace HLTSeedingNs;
 
 uint64_t gFexSRJetRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
                                                 const xAOD::gFexJetRoI& roi,
@@ -15,7 +17,7 @@ uint64_t gFexSRJetRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
     auto thr = static_cast<TrigConf::L1Threshold_gJ*>(thrBase.get());
     
     if (et > thr->thrValueMeV(ieta)) {
-      thresholdMask |= (1<<thr->mapping());
+      thresholdMask |= (1_u64<<thr->mapping());
     }
     
   }

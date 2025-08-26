@@ -6,6 +6,8 @@
 #include "StoreGate/exceptions.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "L1TopoAlgorithms/cTauMultiplicity.h"
+#include "utilities.h"
+using namespace HLTSeedingNs;
 
 
 StatusCode cTauRoIThresholdsTool::initialize() {
@@ -61,7 +63,7 @@ uint64_t cTauRoIThresholdsTool::getPattern(const EventContext& ctx,
     bool passEt = eTau.etTOB() > thr->thrValue100MeV(eTau.iEta());
 
     if (passIso && passeTAUWP && passEt) {
-      thresholdMask |= (1<<thr->mapping());
+      thresholdMask |= (1_u64<<thr->mapping());
     }
 
   } // loop over thr

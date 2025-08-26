@@ -2,6 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "jFexLRJetRoIThresholdsTool.h"
+#include "utilities.h"
+using namespace HLTSeedingNs;
 
 uint64_t jFexLRJetRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
                                                 const xAOD::jFexLRJetRoI& roi,
@@ -19,7 +21,7 @@ uint64_t jFexLRJetRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
         
         //Checking et thresholds
         if (et > thr->thrValueMeV(ieta)) {
-            thresholdMask |= (1<<thr->mapping());
+            thresholdMask |= (1_u64<<thr->mapping());
         }
         
         ATH_MSG_DEBUG("jFEX LRjets HLT seeding for ("<< thr->name() <<"): et=" << et << " > "<<thr->thrValueMeV(ieta));
