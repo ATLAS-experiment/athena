@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArBadChannelTool/LArBadChannelDecoder.h"
@@ -7,6 +7,7 @@
 #include "LArRecConditions/LArBadChannelParser.h"
 #include "GaudiKernel/MsgStream.h"
 #include "LArIdentifier/LArOnlineID_Base.h"
+#include "LArIdentifier/LArOnlID_Exception.h"
 
 std::vector<LArBadChannelDecoder::BadChanEntry>
 LArBadChannelDecoder::readASCII( const std::string& fname, 
