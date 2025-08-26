@@ -14,3 +14,14 @@ atlas_add_library( xAODMuonViews
 
 
    
+file(GLOB_RECURSE tests "test/*.cxx")
+
+foreach(_theTestSource ${tests})
+    get_filename_component(_theTest ${_theTestSource} NAME_WE)
+    atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
+                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
+                    LINK_LIBRARIES ${ROOT_LIBRARIES} xAODMuonViews AthenaBaseComps TestTools
+                    POST_EXEC_SCRIPT nopost.sh)
+    
+
+endforeach()
