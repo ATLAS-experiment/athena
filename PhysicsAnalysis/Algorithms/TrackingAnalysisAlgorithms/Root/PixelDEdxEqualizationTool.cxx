@@ -105,18 +105,20 @@ namespace CP {
   ////////////////////////////
 
   std::shared_ptr<std::vector<TrackSFRecord>> PixelDEdxEqualizationTool::getRunTrackSFs(const int runNumber) const {
-    // Lock for map access
+    // First try a shared lock for read-only access
     {
-      std::lock_guard<std::mutex> lock(m_mapMutex);
+      std::shared_lock readLock(m_mapMutex);
       auto it = m_cachedTrackSFData.find(runNumber);
       if (it != m_cachedTrackSFData.end()) {
         ATH_MSG_DEBUG("Track SF data for run " << runNumber << " already cached!");
-        return std::make_shared<std::vector<TrackSFRecord>>(it->second);
+        return it->second;
       }
     }
     
+    // SF data not found in the cache, so prepare to find it in the dataframe.
+    // Need a unique write lock for caching.
     ATH_MSG_INFO("Track SF data for run " << runNumber << " not cached. Will filter and cache now.");
-    
+
     // Find closest run number in m_df
     auto runNumbers = m_df->Take<int>("runNumber");
     int closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
@@ -130,11 +132,12 @@ namespace CP {
        runNumber==410000 || runNumber==450000 || runNumber==470000) { //MC23a/d/e
       if(runNumber!=closestRunNumber) {
         ATH_MSG_ERROR("Could not find exact match for this MC event!");
+        auto emptyPtr = std::make_shared<std::vector<TrackSFRecord>>();
         {
-          std::lock_guard<std::mutex> lock(m_mapMutex);
-           m_cachedTrackSFData[runNumber] = {}; //empty
+          std::unique_lock writeLock(m_mapMutex);
+          m_cachedTrackSFData[runNumber] = emptyPtr;
         }
-        return std::make_shared<std::vector<TrackSFRecord>>();
+        return emptyPtr;
       }
     }
     
@@ -149,9 +152,10 @@ namespace CP {
     auto sfNo = filtered.Take<double>("SF_IBLOFNo");
     
     // Build vector of TrackSFRecord
-    std::vector<TrackSFRecord> records;
+    auto records = std::make_shared<std::vector<TrackSFRecord>>();
+    records->reserve(etaLows->size());
     for (size_t i = 0; i < etaLows->size(); ++i) {
-      records.emplace_back(TrackSFRecord{
+      records->emplace_back(TrackSFRecord{
           etaLows->at(i),
           etaHighs->at(i),
           sfYes->at(i),
@@ -160,21 +164,26 @@ namespace CP {
     }
     
     {
-      std::lock_guard<std::mutex> lock(m_mapMutex);
-      m_cachedTrackSFData[runNumber] = records;
+      std::unique_lock writeLock(m_mapMutex);
+      auto [it, inserted] = m_cachedTrackSFData.emplace(runNumber, records);
+      if (!inserted) {
+        // Another thread beat us — reuse theirs
+        return it->second;
+      }
     }
     
-    return std::make_shared<std::vector<TrackSFRecord>>(std::move(records));
+    return records;
   }
 
   std::shared_ptr<std::vector<ClusterSFRecord>> PixelDEdxEqualizationTool::getRunClusterSFs(const int runNumber) const {
-    // Lock for map access
+
+    // First try a shared lock for read-only access
     {
-      std::lock_guard<std::mutex> lock(m_mapMutex);
+      std::shared_lock readLock(m_mapMutex);
       auto it = m_cachedClusterSFData.find(runNumber);
       if (it != m_cachedClusterSFData.end()) {
-        ATH_MSG_DEBUG("SF data for run " << runNumber << " already cached!");
-        return std::make_shared<std::vector<ClusterSFRecord>>(it->second);
+        ATH_MSG_DEBUG("Cluster SF data for run " << runNumber << " already cached!");
+        return it->second;
       }
     }
     
@@ -193,11 +202,12 @@ namespace CP {
        runNumber==410000 || runNumber==450000 || runNumber==470000) { //MC23a/d/e
       if(runNumber!=closestRunNumber) {
         ATH_MSG_ERROR("Could not find exact match for this MC event!");
+        auto emptyPtr = std::make_shared<std::vector<ClusterSFRecord>>();
         {
-          std::lock_guard<std::mutex> lock(m_mapMutex);
-          m_cachedClusterSFData[runNumber] = {}; //empty
+          std::unique_lock writeLock(m_mapMutex);
+          m_cachedClusterSFData[runNumber] = emptyPtr;
         }
-        return std::make_shared<std::vector<ClusterSFRecord>>();
+        return emptyPtr;
       }
     }
     
@@ -212,18 +222,25 @@ namespace CP {
     auto sfs = filtered.Take<double>("SF");
     auto sf_errors = filtered.Take<double>("SF_error");
     
-    // Build vector of SFRecords 
-    std::vector<ClusterSFRecord > records;
+    // Build vector of SFRecords
+    auto records = std::make_shared<std::vector<ClusterSFRecord>>();
+    records->reserve(becs->size());
     for (size_t i = 0; i < becs->size(); ++i) {
-      records.emplace_back(ClusterSFRecord{becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)});
+      records->emplace_back(ClusterSFRecord{
+          becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)
+        });
     }
-    
+
     {
-      std::lock_guard<std::mutex> lock(m_mapMutex);
-      m_cachedClusterSFData[runNumber] = records;
+      std::unique_lock writeLock(m_mapMutex);
+      auto [it, inserted] = m_cachedClusterSFData.emplace(runNumber, records);
+      if (!inserted) {
+        // Another thread beat us — reuse theirs
+        return it->second;
+      }
     }
     
-    return std::make_shared<std::vector<ClusterSFRecord>>(std::move(records));
+    return records;
   }
 
   //////////////////////

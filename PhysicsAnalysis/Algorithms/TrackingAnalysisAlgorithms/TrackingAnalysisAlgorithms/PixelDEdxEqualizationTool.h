@@ -26,6 +26,7 @@
 #include <cmath>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 
 namespace CP {
 
@@ -82,9 +83,9 @@ namespace CP {
     /// So not filtering everytime in execute().
     /// Will be updated in execute, so must be mutable
     /// Cache map: runNumber -> vector<SFRecord>
-    mutable std::map<int, std::vector<ClusterSFRecord>> m_cachedClusterSFData;
-    mutable std::map<int, std::vector<TrackSFRecord>> m_cachedTrackSFData;
-    mutable std::mutex m_mapMutex;
+    mutable std::map<int, std::shared_ptr<std::vector<ClusterSFRecord>>> m_cachedClusterSFData ATLAS_THREAD_SAFE;
+    mutable std::map<int, std::shared_ptr<std::vector<TrackSFRecord>>> m_cachedTrackSFData ATLAS_THREAD_SAFE;
+    mutable std::shared_mutex m_mapMutex ATLAS_THREAD_SAFE;
 
     /// Highest eta bin for which track-based equalization SFs are define.
     /// If track has higher eta, use SF from highest bin.

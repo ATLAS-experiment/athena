@@ -22,16 +22,6 @@ StatusCode InDet::PixelToTPIDTool::initialize() {
     ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and return the truncated mean.");
   }
   
-  /// FIXME TODO: Check if running on data or simulation
-
-  /// For now, cannot equalize dE/dx measurements in simulation. 
-  if(m_isMC && m_equalizeClusterMeasurements) {
-    ATH_MSG_ERROR("Requested to equalize the dE/dx, but this is not yet supported for MC.");
-    ATH_MSG_ERROR("Eventually, can apply scale factors to \"undo\" the radiation modeling in MC23.");
-    ATH_MSG_ERROR("Or equalize the MC to the data reference run.");        
-    return StatusCode::FAILURE;
-  }
-
   ATH_CHECK(detStore()->retrieve(m_pixelid,"PixelID"));
 
   if (m_IBLParameterSvc.retrieve().isFailure()) {
