@@ -323,6 +323,11 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.rin=cutset["rin"]
     tool.rout=cutset["rout"]
 
+    # For the 'track fitter' part of GenScanTool.
+    tool.inBinFiltering = flags.Trigger.FPGATrackSim.GenScan.filterInBin
+    tool.phiChi2Weight = flags.Trigger.FPGATrackSim.GenScan.phiChi2Weight
+    tool.etaChi2Weight = flags.Trigger.FPGATrackSim.GenScan.etaChi2Weight
+
     # configure which filers and thresholds to apply
     tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
@@ -499,6 +504,7 @@ def FPGATrackSimTrackFitterToolCfg(flags,name="FPGATrackSimTrackFitterTool"):
     TF_1st.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     TF_1st.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan
     TF_1st.SPRoadFilterTool = result.popToolsAndMerge(SPRoadFilterToolCfg(flags))
+    TF_1st.fitFromRoad = flags.Trigger.FPGATrackSim.ActiveConfig.fitFromRoad
     result.addPublicTool(TF_1st, primary=True)
     return result
 

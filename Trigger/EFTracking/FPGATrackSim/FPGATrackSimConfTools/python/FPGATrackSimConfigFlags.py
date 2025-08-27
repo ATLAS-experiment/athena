@@ -234,6 +234,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doDeltaGPhis', False)
     cf.addFlag('chi2cut', 9)
     cf.addFlag('useVaryingChi2Cut', False)
+    cf.addFlag('fitFromRoad', True)
 
     # second stage fitting
     cf.addFlag('secondStage', False)
@@ -361,6 +362,10 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('layerStudy',False)
     cf.addFlag('layerMapFile','')
     cf.addFlag('noCuts',False)
+
+    cf.addFlag('filterInBin', False)
+    cf.addFlag('phiChi2Weight', 1.0)
+    cf.addFlag('etaChi2Weight', 1.0)
 
     # These are used by the layer study, to avoid the need for Cuts_step0.
     # They are only used in the layer study if initialLayerStudy is set to True

@@ -76,6 +76,9 @@ class TrackFitter
 	void setDoDeltaGPhis(bool v) { m_doDeltaGPhis = v; }
 	bool getDoDeltaGPhis() const { return m_doDeltaGPhis; }
 
+        void setFitFromRoad(bool v) { m_fitFromRoad = v; }
+        bool getFitFromRoad() const { return m_fitFromRoad; }
+
         ///////////////////////////////////////////////////////////////////////
         // Getters of data flow quantities
 
@@ -109,6 +112,7 @@ class TrackFitter
         // Output
         bool m_identify_badhit = false; // enables the identification of the bad hits for the recovery
 
+        bool m_fitFromRoad = false;
 
         ///////////////////////////////////////////////////////////////////////
         // Storage
