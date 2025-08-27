@@ -256,9 +256,9 @@ namespace Tau{
     };
     std::sort(clusters.begin(), clusters.end(), et_cmp);
 
-    // keep first 6 leading clusters as in RNN ID
-    if (clusters.size() > 6) {
-      clusters.resize(6, clusters[0]);
+    // keep first 20 leading clusters as in GNTau
+    if (clusters.size() > 20) {
+      clusters.resize(20, clusters[0]);
     }
 
     double moment;
