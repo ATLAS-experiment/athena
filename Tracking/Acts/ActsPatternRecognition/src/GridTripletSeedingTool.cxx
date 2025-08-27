@@ -381,7 +381,6 @@ StatusCode GridTripletSeedingTool::createSeeds2(
     const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
     ActsTrk::SeedContainer& seedContainer) const {
   (void)ctx;
-  (void)beamSpotPos;
 
   auto gridCfg = m_gridCfg;
   gridCfg.bFieldInZ = bFieldInZ;
@@ -401,8 +400,8 @@ StatusCode GridTripletSeedingTool::createSeeds2(
 
   for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
     for (const xAOD::SpacePoint* sp : *spacePoints) {
-      float x = static_cast<float>(sp->x());
-      float y = static_cast<float>(sp->y());
+      float x = static_cast<float>(sp->x() - beamSpotPos[0]);
+      float y = static_cast<float>(sp->y() - beamSpotPos[1]);
       float z = static_cast<float>(sp->z());
       float r = std::hypot(x, y);
       float phi = std::atan2(y, x);
@@ -449,8 +448,8 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       auto newSp = selectedSpacePoints.createSpacePoint();
       newSp.assignSourceLinks(
           std::array<Acts::SourceLink, 1>{Acts::SourceLink(sp)});
-      newSp.xy() = std::array<float, 2>{static_cast<float>(sp->x()),
-                                        static_cast<float>(sp->y())};
+      newSp.xy() = std::array<float, 2>{static_cast<float>(sp->x() - beamSpotPos[0]),
+                                        static_cast<float>(sp->y() - beamSpotPos[1])};
       newSp.zr() = std::array<float, 2>{static_cast<float>(sp->z()),
                                         selectedSpacePointsR[spIndex]};
       newSp.varianceZ() = static_cast<float>(sp->varianceZ());
