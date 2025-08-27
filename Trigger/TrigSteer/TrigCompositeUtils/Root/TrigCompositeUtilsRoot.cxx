@@ -189,12 +189,27 @@ namespace TrigCompositeUtils {
   }
 
   int32_t getIndexFromLeg(const std::string& name) {
+    int32_t id = 0;
     if (isChainId(name)){
-      return 0;
-    } else if (!isLegId(name)) {
-      return -1;
+      // pass
+    } else if (isLegId(name)) {
+      std::from_chars(name.data()+3, name.data()+6, id);
+    } else {
+      id = -1;
     }
-    return std::stoi( name.substr(3,3) ); 
+    return id;
+  }
+
+  std::pair<std::string, int32_t> getNameAndIndexFromLeg(const std::string& name) {
+    int32_t id = 0;
+    if (isChainId(name)) {
+      return {name, id};
+    } else if (isLegId(name)) {
+      std::from_chars(name.data()+3, name.data()+6, id);
+      return {name.substr(7), id};
+    } else {
+      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+name+"' does not start with 'HLT_' or 'leg' ");
+    }
   }
 
   bool isLegId(const HLT::Identifier& legIdentifier) {
