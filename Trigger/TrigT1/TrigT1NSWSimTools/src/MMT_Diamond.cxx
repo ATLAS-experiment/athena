@@ -140,7 +140,8 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, con
     } // loop on plane for VMM and ART ASIC filter
 
     for (auto &road : roads) {
-      road->incrementAge(bc_wind);
+
+      if (!road->getHitVector().empty()) road->incrementAge(bc_wind);
       if (!hits_now.empty()) road->addHits(hits_now);
 
       if (road->checkCoincidences(bc_wind) && bc >= (bc_start - 1)) {
