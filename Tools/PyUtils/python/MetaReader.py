@@ -182,21 +182,19 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             meta_dict[filename]['file_comp_level'] = current_file.GetCompressionLevel()
 
             if (
-                isRNTuple(current_file.Get(PoolOpts.RNTupleNames.MetaData))
+                isRNTuple(md:=current_file.Get(PoolOpts.RNTupleNames.MetaData))
                 and mode != "tiny"
             ):
                 msg.warning(
                     "Reading in-file metadata from RNTuple is currently of limited support"
                 )
-                meta_dict[filename]["nentries"] = dataheader_nentries(current_file)
                 meta_dict[filename]["metadata_items"] = {}
 
                 try:
                     from ROOT import RNTupleReader
                 except ImportError:
                     from ROOT.Experimental import RNTupleReader
-                file_handle = ROOT.TFile.Open(filename)
-                md = file_handle.Get("MetaData")
+
                 reader = RNTupleReader.Open(md)
                 entry = reader.CreateEntry()
                 reader.LoadEntry(0, entry)
