@@ -231,7 +231,7 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
     tools_after.append( acc.popToolsAndMerge(tauTools.TauIDVarCalculatorCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags,applyLooseTrackSel=True)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
-    tools_after.append( acc.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
+    tools_after.append( acc.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags,applyLooseTrackSel=True )) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauDecayModeNNClassifierCfg(flags)) )
     TauAODRunnerAlg=CompFactory.getComp("TauAODRunnerAlg")
