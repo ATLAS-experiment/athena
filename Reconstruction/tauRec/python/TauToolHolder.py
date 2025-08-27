@@ -778,7 +778,7 @@ def TauWPDecoratorGNNCfg(flags, version, tauContainerName=""):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
-def TauEleRNNEvaluatorCfg(flags):
+def TauEleRNNEvaluatorCfg(flags, applyLooseTrackSel=False):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauEleRNN'
 
@@ -791,6 +791,7 @@ def TauEleRNNEvaluatorCfg(flags):
                                               MaxTracks = 10,
                                               MaxClusters = 6,
                                               MaxClusterDR = 1.0,
+                                              ApplyLooseTrackSel = applyLooseTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
                                               InputLayerScalar = "scalar",
                                               InputLayerTracks = "tracks",
