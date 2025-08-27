@@ -129,10 +129,10 @@ namespace Muon::Test{
         }
         /** @brief Recieve all technologies in a station */
          const std::set<MuonStationIndex::TechnologyIndex>& 
-                    technologiesInStation(MuonStationIndex::StIndex /*stIndex*/) const  {
-                        static const std::set<MuonStationIndex::TechnologyIndex> emptySet;
-                        return emptySet;
-                    }
+          technologiesInStation(MuonStationIndex::StIndex /*stIndex*/) const  override {
+              static const std::set<MuonStationIndex::TechnologyIndex> emptySet;
+              return emptySet;
+          }
         /** @brief Return stationPhi for all technologies */
          int stationPhi(const Identifier& /*id*/) const override { return 0; }
         /** @brief Return stationEta for all technologies */
@@ -140,19 +140,19 @@ namespace Muon::Test{
         /** @brief Return stationName for all technologies */
          int stationName(const Identifier& /*id*/) const override { return 0; }
         /** @brief Return the stationName string for all technologies*/
-         std::string stationNameString(const Identifier& /*id*/) const  { return "TEST";}
+         std::string stationNameString(const Identifier& /*id*/) const override { return "TEST";}
         /** @brief Return stationRegion for all technologies */
-         int stationRegion(const Identifier& /*id*/) const  { return 0;}
+         int stationRegion(const Identifier& /*id*/) const  override { return 0;}
         /** @brief return sector number 1-16, odd=large, even=small */
          int sector(const Identifier& /*id*/) const override { return 0; }
         /** @brief returns whether the RPC identifiers are loaded */
-         bool hasRPC() const  { return false; }
+         bool hasRPC() const  override { return false; }
         /** @brief returns whether the sTGC identifiers are loaded */
-         bool hasTGC() const  { return false; }
+         bool hasTGC() const  override { return false; }
         /** @brief returns whether the MDT identifiers are loaded */
          bool hasMDT() const override { return false; }
         /** @brief returns whether the CSC identifiers are loaded */
-         bool hasCSC() const  { return false; }
+         bool hasCSC() const  override { return false; }
         /** @brief returns whether the sTGC identifiers are loaded */
          bool hasSTGC() const override { return false; }
         /** @brief returns whether the Mircomegas identifiers are loaded */
