@@ -12,6 +12,8 @@
 #include "InDetIdentifier/PixelID.h"
 
 #include "IdDictDetDescr/IdDictManager.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
 
 namespace JiveXML {
 

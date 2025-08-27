@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetJiveXML )
@@ -11,4 +11,4 @@ atlas_add_component( InDetJiveXML
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps StoreGateLib GaudiKernel InDetRawData TrkSpacePoint TrkTruthData JiveXMLLib AthContainers IdDictDetDescr InDetIdentifier ReadoutGeometryBase InDetReadoutGeometry TRT_ReadoutGeometry InDetPrepRawData TrkEventPrimitives TrkPrepRawData BeamSpotConditionsData  InDetCondTools )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps StoreGateLib GaudiKernel InDetRawData TrkSpacePoint TrkTruthData JiveXMLLib AthContainers IdDictDetDescr IdDict InDetIdentifier ReadoutGeometryBase InDetReadoutGeometry TRT_ReadoutGeometry InDetPrepRawData TrkEventPrimitives TrkPrepRawData BeamSpotConditionsData  InDetCondTools )
