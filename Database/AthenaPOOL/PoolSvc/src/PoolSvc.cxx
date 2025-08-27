@@ -512,7 +512,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
    pool::CollectionDescription collDes(collection, collectionType, collectionType == "ImplicitCollection" ? connection : "");
    if (collectionType == "RootCollection" &&
 	   m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
-      ATH_MSG_INFO("Writing ExplicitROOT Collection - do not pass session pointer");
+      ATH_MSG_INFO("Writing RootCollection - do not pass session pointer");
       std::scoped_lock lock(m_pool_mut);
       collPtr = collFac->create(collDes,  pool::ICollection::READ);
    } else {
