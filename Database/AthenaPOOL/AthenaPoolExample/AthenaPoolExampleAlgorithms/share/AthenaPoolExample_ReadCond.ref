@@ -99,41 +99,6 @@ MetaDataSvc                                         DEBUG Registering all Tools 
 MetaDataSvc                                         DEBUG Adding public ToolHandle tool ToolSvc.xAODMaker::FileMetaDataTool (xAODMaker::FileMetaDataTool)
 CondProxyProvider                                    INFO Initializing CondProxyProvider
 CondProxyProvider                                    INFO Inputs: SimplePoolFile4.root
-CondProxyProvider                                   DEBUG Try item: "SimplePoolFile4.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile4.root, name=SimplePoolFile4.root, contextID=2
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile4.root, name=POOLContainer(DataHeader), contextID=2
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
-##Shapes                                            DEBUG Opening
-##Shapes                                            DEBUG    attributes# = 1
-##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Reading Shape[0 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]: [1 Column(s)]
-SimplePoolFile4.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile4.root                                DEBUG --->Reading Shape[1 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
-SimplePoolFile4.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile4.root                                DEBUG --->Reading Shape[2 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
-SimplePoolFile4.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-##Shapes                                            DEBUG No objects passing selection criteria... Container has 3 Entries in total.
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
-##Links                                             DEBUG Opening
-##Links                                             DEBUG    attributes# = 1
-##Links                                             DEBUG Opened container ##Links of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Reading Assoc:298DE14D-49CF-674A-9171-CEBBD9BEC6F8/##Params [200]  (2 , ffffffffffffffff)
-SimplePoolFile4.root                                DEBUG ---->ClassID:DA8F479C-09BC-49D4-94BC-99D025A23A3B
-SimplePoolFile4.root                                DEBUG --->Reading Assoc:298DE14D-49CF-674A-9171-CEBBD9BEC6F8/ConditionsContainerExampleHitContainer_p1(PedestalWriteData) [202]  (3 , ffffffffffffffff)
-SimplePoolFile4.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
-SimplePoolFile4.root                                DEBUG --->Reading Assoc:298DE14D-49CF-674A-9171-CEBBD9BEC6F8/POOLContainer(DataHeader) [202]  (4 , ffffffffffffffff)
-SimplePoolFile4.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile4.root                                DEBUG --->Reading Assoc:298DE14D-49CF-674A-9171-CEBBD9BEC6F8/POOLContainerForm(DataHeaderForm) [202]  (5 , ffffffffffffffff)
-SimplePoolFile4.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-##Links                                             DEBUG No objects passing selection criteria... Container has 4 Entries in total.
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
-##Params                                            DEBUG Opening
-##Params                                            DEBUG    attributes# = 1
-##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Reading Param:FID=[298DE14D-49CF-674A-9171-CEBBD9BEC6F8]
-SimplePoolFile4.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
-##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 ReadData                                            DEBUG data dependencies:
   + INPUT   ( 'DataHeader' , 'StoreGateSvc+EventSelector' ) 
   + INPUT   ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
@@ -305,6 +270,41 @@ ReadData                                             INFO Hit x = 126.915 y = 52
 ReadData                                             INFO Hit x = 130.125 y = 46.5439 z = -56.169 detector = DummyHitDetector
 ReadCond                                            DEBUG in execute()
 AthenaPoolAddressProviderSvc                        DEBUG Cannot retrieve DataHeader from DetectorStore.
+CondProxyProvider                                   DEBUG Try item: "SimplePoolFile4.root" from the collection list.
+PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile4.root, name=SimplePoolFile4.root, contextID=2
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile4.root, name=POOLContainer(DataHeader), contextID=2
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+##Shapes                                            DEBUG Opening
+##Shapes                                            DEBUG    attributes# = 1
+##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
+SimplePoolFile4.root                                DEBUG --->Reading Shape[0 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]: [1 Column(s)]
+SimplePoolFile4.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile4.root                                DEBUG --->Reading Shape[1 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
+SimplePoolFile4.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile4.root                                DEBUG --->Reading Shape[2 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
+SimplePoolFile4.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
+##Shapes                                            DEBUG No objects passing selection criteria... Container has 3 Entries in total.
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
+##Links                                             DEBUG Opening
+##Links                                             DEBUG    attributes# = 1
+##Links                                             DEBUG Opened container ##Links of type ROOT_Tree
+SimplePoolFile4.root                                DEBUG --->Reading Assoc:298DE14D-49CF-674A-9171-CEBBD9BEC6F8/##Params [200]  (2 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG ---->ClassID:DA8F479C-09BC-49D4-94BC-99D025A23A3B
+SimplePoolFile4.root                                DEBUG --->Reading Assoc:298DE14D-49CF-674A-9171-CEBBD9BEC6F8/ConditionsContainerExampleHitContainer_p1(PedestalWriteData) [202]  (3 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
+SimplePoolFile4.root                                DEBUG --->Reading Assoc:298DE14D-49CF-674A-9171-CEBBD9BEC6F8/POOLContainer(DataHeader) [202]  (4 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
+SimplePoolFile4.root                                DEBUG --->Reading Assoc:298DE14D-49CF-674A-9171-CEBBD9BEC6F8/POOLContainerForm(DataHeaderForm) [202]  (5 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
+##Links                                             DEBUG No objects passing selection criteria... Container has 4 Entries in total.
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
+##Params                                            DEBUG Opening
+##Params                                            DEBUG    attributes# = 1
+##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
+SimplePoolFile4.root                                DEBUG --->Reading Param:FID=[298DE14D-49CF-674A-9171-CEBBD9BEC6F8]
+SimplePoolFile4.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
+##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1

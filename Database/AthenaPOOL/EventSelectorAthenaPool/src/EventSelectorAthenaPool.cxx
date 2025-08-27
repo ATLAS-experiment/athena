@@ -140,8 +140,8 @@ StatusCode EventSelectorAthenaPool::initialize() {
          ATH_MSG_DEBUG("Events to skip: " << skip_ranges_ss.str());
    }
    // CollectionType must be one of:
-   if (m_collectionType.value() != "ExplicitROOT" && m_collectionType.value() != "ImplicitROOT") {
-      ATH_MSG_FATAL("EventSelector.CollectionType must be one of: ExplicitROOT, ImplicitROOT (default)");
+   if (m_collectionType.value() != "RootCollection" && m_collectionType.value() != "ImplicitCollection") {
+      ATH_MSG_FATAL("EventSelector.CollectionType must be one of: RootCollection, ImplicitCollection (default)");
       return(StatusCode::FAILURE);
    }
    // Get IncidentSvc
@@ -287,7 +287,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
 	 m_inputCollectionsIterator = m_inputCollectionsProp.value().end();
 	 if (!m_inputCollectionsProp.value().empty()) --m_inputCollectionsIterator;
 	//NOTE (wb may 2016): this will make the FirstInputFile incident correspond to last file in the collection ... if want it to be first file then move iterator to begin and then move above two lines below this incident firing
-         if (m_collectionType.value() == "ImplicitROOT" && !m_firedIncident && !m_inputCollectionsProp.value().empty()) {
+         if (m_collectionType.value() == "ImplicitCollection" && !m_firedIncident && !m_inputCollectionsProp.value().empty()) {
             FileIncident firstInputFileIncident(name(), "FirstInputFile", *m_inputCollectionsIterator);
             m_incidentSvc->fireIncident(firstInputFileIncident);
             m_firedIncident = true;
@@ -667,7 +667,7 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
       m_activeEventsPerSource[guid.toString()] = 0;
       // Fire BeginInputFile incident if current InputCollection is a payload file;
       // otherwise, ascertain whether the pointed-to file is reachable before firing any incidents and/or proceeding
-      if (m_collectionType.value() == "ImplicitROOT") {
+      if (m_collectionType.value() == "ImplicitCollection") {
          // For now, we can only deal with input metadata from POOL files, but we know we have a POOL file here
          if (!m_athenaPoolCnvSvc->setInputAttributes(*m_inputCollectionsIterator).isSuccess()) {
                ATH_MSG_ERROR("Failed to set input attributes.");
@@ -769,7 +769,7 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
       }
    } else {
       ATH_MSG_WARNING("Cannot find AthenaAttribute, key = " << m_attrListKey.value());
-      tokenStr = m_poolCollectionConverter->retrieveToken(m_headerIterator, "");
+      tokenStr = m_headerIterator->eventRef().toString();
    }
    auto token = std::make_unique<Token>();
    token->fromString(tokenStr);

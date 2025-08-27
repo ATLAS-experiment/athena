@@ -32,4 +32,4 @@ for inpfile in inputs:
 
 # Tell Athena to use the sorted collection instead of the original inputs
 ServiceMgr.EventSelector.InputCollections = [tmpCollFile + ".root"]
-ServiceMgr.EventSelector.CollectionType = "ExplicitROOT"
+ServiceMgr.EventSelector.CollectionType = "RootCollection"

@@ -182,8 +182,8 @@ private: // properties
    Gaudi::Property<bool> m_isSecondary{this, "IsSecondary", false, ""};
    /// ProcessMetadata, switch on firing of FileIncidents which will trigger processing of metadata: default = true.
    Gaudi::Property<bool> m_processMetadata{this, "ProcessMetadata", true, ""};
-   /// CollectionType, type of the collection: default = "ImplicitROOT".
-   Gaudi::Property<std::string> m_collectionType{this, "CollectionType", "ImplicitROOT", ""};
+   /// CollectionType, type of the collection: default = "ImplicitCollection".
+   Gaudi::Property<std::string> m_collectionType{this, "CollectionType", "ImplicitCollection", ""};
    /// CollectionTree, prefix of the collection TTree: default = "POOLContainer".
    Gaudi::Property<std::string> m_collectionTree{this, "CollectionTree", APRDefaults::TTreeNames::DataHeader, ""};
    /// Connection, connection string.

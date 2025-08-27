@@ -55,8 +55,6 @@ public: // Constructor and Destructor
 
 private: // data
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc"};
-
-   mutable PoolCollectionConverter* m_poolCollectionConverter ATLAS_THREAD_SAFE;
    unsigned int m_contextId;
 
 private: // properties
@@ -68,7 +66,6 @@ private: // properties
 private: // internal helper functions
    /// Return pointer to new PoolCollectionConverter
    PoolCollectionConverter* getCollectionCnv();
-
 };
 
 #endif
