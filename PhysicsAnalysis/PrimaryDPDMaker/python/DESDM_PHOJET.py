@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DESDM_PHOJET.py
@@ -113,7 +113,7 @@ def DESDM_PHOJETCfg(configFlags):
              #Trigger navigation
              'xAOD::TrigDecision#*','xAOD::TrigDecisionAuxInfo#*',
              'xAOD::TrigConfKeys#*',
-             'xAOD::BunchConfKey#*'
+             'xAOD::BunchConfKey#*',
              'xAOD::TrigNavigation#*','xAOD::TrigNavigationAuxInfo#*',
              'xAOD::TrigCompositeContainer#HLTNav*', 'xAOD::TrigCompositeAuxContainer#HLTNav*'
              ]
