@@ -164,6 +164,7 @@ namespace ChainNameParser {
         }
         else if (next == m_end)
         {
+            m_current.legParts.emplace_back(m_itr, next);
             // Setting the iterator to the end
             m_itr = m_end;
             return true;
