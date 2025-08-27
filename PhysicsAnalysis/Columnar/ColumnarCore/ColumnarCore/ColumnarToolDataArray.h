@@ -60,6 +60,13 @@ namespace columnar
 
   struct ColumnarToolDataArray final
   {
+    struct StringHash {
+        using is_transparent = void; // enables heterogeneous lookup
+        size_t operator()(std::string_view sv) const noexcept {
+            return std::hash<std::string_view>{}(sv);
+        }
+    };
+
     /// @brief the main tool that is associated with this object
     ColumnarTool<ColumnarModeArray>* mainTool = nullptr;
 
@@ -67,7 +74,7 @@ namespace columnar
     std::vector<ColumnarTool<ColumnarModeArray>*> sharedTools;
 
     /// @brief the names associated with all container ids
-    std::unordered_map<ContainerId,std::string> containerNames;
+    std::unordered_map<std::string,std::string,StringHash,std::equal_to<>> containerStoreNames;
 
     /// @brief the name-column map
     std::unordered_map<std::string,ColumnDataArray> columns;

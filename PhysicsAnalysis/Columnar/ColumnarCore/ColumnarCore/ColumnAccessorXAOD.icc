@@ -8,7 +8,7 @@
 namespace columnar
 {
   // the xAOD specialization for native types
-  template<ContainerId CI,typename CT,ColumnAccessMode CAM>
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM>
     requires (ColumnTypeTraits<CT,ColumnarModeXAOD>::isNativeType)
   class AccessorTemplate<CI,CT,CAM,ColumnarModeXAOD> final
   {
@@ -16,7 +16,6 @@ namespace columnar
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
     static_assert (!std::is_const_v<CT>, "CT must not be const");
 
     using CM = ColumnarModeXAOD;

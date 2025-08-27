@@ -26,60 +26,53 @@ namespace columnar
     static const SG::AuxElement::Accessor< std::vector<float> > dec_constitObjWeights("ConstitObjectWeights");
   }
 
-  template<ContainerId CI> requires (CI == ContainerId::met0 || CI == ContainerId::met1)
-  struct ContainerIdTraits<CI> final
+  namespace ContainerId
   {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+    struct met : regularCIBase<xAOD::MissingET,xAOD::MissingETContainer>
+    {
+      static constexpr std::string_view idName = "met";
+    };
+    using met0 = met;
+    using mutableMet = mutableCI<met>;
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::MissingET;
+    struct met1 : met
+    {
+      static constexpr std::string_view idName = "met1";
+    };
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::MissingETContainer;
+    struct metAssociation : regularCIBase<xAOD::MissingETAssociation,xAOD::MissingETAssociationMap>
+    {
+      static constexpr std::string_view idName = "metAssociation";
+    };
+  }
 
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::MissingETContainer;
-  };
+  using MetRange = ObjectRange<ContainerId::met>;
+  using MetId = ObjectId<ContainerId::met>;
+  using OptMetId = OptObjectId<ContainerId::met>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MetAccessor  = AccessorTemplate<ContainerId::met,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MetDecorator = AccessorTemplate<ContainerId::met,CT,ColumnAccessMode::output,CM>;
 
-  template<>
-  struct ContainerIdTraits<ContainerId::mutableMet> final
-  {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = true;
-    static constexpr ContainerId constId = ContainerId::met;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+  using Met0Range = ObjectRange<ContainerId::met0>;
+  using Met0Id = ObjectId<ContainerId::met0>;
+  using OptMet0Id = OptObjectId<ContainerId::met0>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Met0Accessor  = AccessorTemplate<ContainerId::met0,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Met0Decorator = AccessorTemplate<ContainerId::met0,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = xAOD::MissingET;
+  using Met1Range = ObjectRange<ContainerId::met1>;
+  using Met1Id = ObjectId<ContainerId::met1>;
+  using OptMet1Id = OptObjectId<ContainerId::met1>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Met1Accessor  = AccessorTemplate<ContainerId::met1,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Met1Decorator = AccessorTemplate<ContainerId::met1,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = xAOD::MissingETContainer;
+  using MutableMetRange = ObjectRange<ContainerId::mutableMet>;
+  using MutableMetId = ObjectId<ContainerId::mutableMet>;
+  using OptMutableMetId = OptObjectId<ContainerId::mutableMet>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableMetAccessor  = AccessorTemplate<ContainerId::mutableMet,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableMetDecorator = AccessorTemplate<ContainerId::mutableMet,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::MissingETContainer;
-  };
-
-  template<>
-  struct ContainerIdTraits<ContainerId::metAssociation> final
-  {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
-
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::MissingETAssociation;
-
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::MissingETAssociationMap;
-
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::MissingETAssociationMap;
-  };
+  using MetAssociationRange = ObjectRange<ContainerId::metAssociation>;
+  using MetAssociationId = ObjectId<ContainerId::metAssociation>;
+  using OptMetAssociationId = OptObjectId<ContainerId::metAssociation>;
 }
 
 #endif

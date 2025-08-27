@@ -11,6 +11,10 @@
 #include <ColumnarCore/LinkColumn.h>
 #include <ColumnarCore/VectorColumn.h>
 
+#include <boost/mp11/list.hpp>
+#include <boost/mp11/algorithm.hpp>
+#include <tuple>
+
 namespace columnar
 {
   /// @brief a "variant" @ref ContainerId
@@ -50,12 +54,26 @@ namespace columnar
   ///
   /// If you are wondering about the name, I named it after
   /// `std::variant`, as it seems like a similar concept.
-  template<ContainerId LT,ContainerId... LTList>
+  template<ContainerIdConcept LT,ContainerIdConcept... LTList>
   struct VariantContainerId
   {
-    using xAODObjectIdType = typename ContainerIdTraits<LT>::xAODObjectIdType;
-    using xAODElementLinkType = typename ContainerIdTraits<LT>::xAODElementLinkType;
-    static constexpr std::array containers = {LT,LTList...};
+    using xAODObjectIdType = typename LT::xAODObjectIdType;
+    using xAODElementLinkType = typename LT::xAODElementLinkType;
+
+    static constexpr std::size_t numVariants = 1 + sizeof...(LTList);
+    template<ContainerIdConcept CI>
+    static constexpr bool isValidContainer ()
+    {
+      return (std::is_same_v<CI,LT> || ... || std::is_same_v<CI,LTList>);
+    }
+
+    /// get the index of the given container in the list
+    template<ContainerIdConcept CI>
+    static constexpr unsigned getVariantIndex ()
+    {
+      constexpr unsigned index = boost::mp11::mp_find<std::tuple<LT,LTList...>,CI>::value;
+      return index;
+    }
   };
 
 
@@ -86,7 +104,7 @@ namespace columnar
 
 
 
-  template<ContainerId... LTList>
+  template<ContainerIdConcept... LTList>
   class VariantObjectLink<VariantContainerId<LTList...>,ColumnarModeXAOD> final
   {
     /// Public Members
@@ -95,7 +113,6 @@ namespace columnar
 
     using CI = VariantContainerId<LTList...>;
     using CM = ColumnarModeXAOD;
-    static constexpr std::array containers = CI::containers;
 
     using LinkType = ElementLink<typename CI::xAODElementLinkType>;
 
@@ -131,22 +148,20 @@ namespace columnar
     /// Note that this is only exact in columnar mode, in xAOD mode it
     /// will employ a dynamic_cast, and may return true for multiple
     /// containers.
-    template<ContainerId CI>
+    template<ContainerIdConcept CI2>
     [[nodiscard]] bool isContainer () const
     {
-      static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-      static constexpr unsigned ciIndex = std::find (containers.begin(), containers.end(), CI) - containers.begin();
-      static_assert (ciIndex < containers.size(), "invalid container id");
-      return m_link->isValid() && dynamic_cast<typename ContainerIdTraits<CI>::xAODObjectRangeType*>(m_link->getStorableObjectPointer());
+      static constexpr unsigned variantIndex = CI::template getVariantIndex<CI2>();
+      static_assert (variantIndex < CI::numVariants, "invalid container id");
+      return m_link->isValid() && dynamic_cast<typename CI2::xAODObjectRangeType*>(m_link->getStorableObjectPointer());
     }
 
     /// whether this link points to the given object
-    template<ContainerId CI>
-    [[nodiscard]] bool operator == (ObjectId<CI,CM> id) const
+    template<ContainerIdConcept CI2>
+    [[nodiscard]] bool operator == (ObjectId<CI2,CM> id) const
     {
-      static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-      static constexpr unsigned ciIndex = std::find (containers.begin(), containers.end(), CI) - containers.begin();
-      static_assert (ciIndex < containers.size(), "invalid container id");
+      static constexpr unsigned variantIndex = CI::template getVariantIndex<CI2>();
+      static_assert (variantIndex < CI::numVariants, "invalid container id");
       return m_link->isValid() && (**m_link) == &id.getXAODObject();
     }
 
@@ -161,17 +176,16 @@ namespace columnar
     }
 
     /// return the ObjectId if it is in the given container or `nullopt` otherwise
-    template<ContainerId CI>
-    [[nodiscard]] OptObjectId<CI,CM> tryGetObject () const
+    template<ContainerIdConcept CI2>
+    [[nodiscard]] OptObjectId<CI2,CM> tryGetObject () const
     {
-      static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-      static constexpr unsigned ciIndex = std::find (containers.begin(), containers.end(), CI) - containers.begin();
-      static_assert (ciIndex < containers.size(), "invalid container id");
+      static constexpr unsigned variantIndex = CI::template getVariantIndex<CI2>();
+      static_assert (variantIndex < CI::numVariants, "invalid container id");
       if (m_link->isValid())
       {
-        return OptObjectId<CI,CM> (dynamic_cast<const typename ContainerIdTraits<CI>::xAODObjectIdType*>(**m_link));
+        return OptObjectId<CI2,CM> (dynamic_cast<const typename CI2::xAODObjectIdType*>(**m_link));
       } else
-        return OptObjectId<CI,CM> ();
+        return OptObjectId<CI2,CM> ();
     }
 
     /// Private Members
@@ -180,7 +194,7 @@ namespace columnar
 
     const LinkType* m_link = nullptr;
   };
-  template<ContainerId... LTList>
+  template<typename... LTList>
   std::ostream& operator<< (std::ostream& str, const VariantObjectLink<VariantContainerId<LTList...>,ColumnarModeXAOD>& obj)
   {
     return str << obj.getXAODObject() << "/" << obj.getXAODObject()->type();
@@ -188,7 +202,7 @@ namespace columnar
 
   // in xAOD mode we can do a fairly straightforward conversion from
   // std::vector as the logic is inside VariantObjectLink
-  template<ContainerId... LTList>
+  template<typename... LTList>
   struct ColumnTypeTraits<std::vector<VariantObjectLink<VariantContainerId<LTList...>,ColumnarModeXAOD>>,ColumnarModeXAOD> final
   {
     using CI = VariantContainerId<LTList...>;
@@ -206,7 +220,7 @@ namespace columnar
 
 
 
-  template<ContainerId... LTList>
+  template<ContainerIdConcept... LTList>
   class VariantObjectLink<VariantContainerId<LTList...>,ColumnarModeArray> final
   {
     /// Public Members
@@ -215,7 +229,6 @@ namespace columnar
 
     using CI = VariantContainerId<LTList...>;
     using CM = ColumnarModeArray;
-    static constexpr std::array containers = CI::containers;
 
     VariantObjectLink (ColumnarOffsetType val_link, const std::uint8_t* val_keys, void** val_data)
       : m_link (val_link), m_keys (val_keys), m_data (val_data)
@@ -243,23 +256,21 @@ namespace columnar
     /// Note that this is only exact in columnar mode, in xAOD mode it
     /// will employ a dynamic_cast, and may return true for multiple
     /// containers.
-    template<ContainerId CI>
+    template<ContainerIdConcept CI2>
     [[nodiscard]] bool isContainer () const
     {
-      static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-      static constexpr unsigned ciIndex = std::find (containers.begin(), containers.end(), CI) - containers.begin();
-      static_assert (ciIndex < containers.size(), "invalid container id");
-      return getLinkKey() == m_keys[ciIndex];
+      static constexpr unsigned variantIndex = CI::template getVariantIndex<CI2>();
+      static_assert (variantIndex < CI::numVariants, "invalid container id");
+      return getLinkKey() == m_keys[variantIndex];
     }
 
     /// whether this link points to the given object
-    template<ContainerId CI>
-    [[nodiscard]] bool operator == (ObjectId<CI,CM> id) const
+    template<ContainerIdConcept CI2>
+    [[nodiscard]] bool operator == (ObjectId<CI2,CM> id) const
     {
-      static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-      static constexpr unsigned ciIndex = std::find (containers.begin(), containers.end(), CI) - containers.begin();
-      static_assert (ciIndex < containers.size(), "invalid container id");
-      return getLinkIndex() == id.getIndex() && getLinkKey() == m_keys[ciIndex];
+      static constexpr unsigned variantIndex = CI::template getVariantIndex<CI2>();
+      static_assert (variantIndex < CI::numVariants, "invalid container id");
+      return getLinkIndex() == id.getIndex() && getLinkKey() == m_keys[variantIndex];
     }
 
     /// whether this link points to the given object
@@ -275,7 +286,7 @@ namespace columnar
         return false;
       const auto thisKey = getLinkKey();
       const auto thatKey = obj.getLinkKey();
-      for (unsigned i = 0; i < containers.size(); ++ i)
+      for (unsigned i = 0; i < CI::numVariants; ++ i)
       {
         if (m_keys[i] == thisKey)
         {
@@ -290,16 +301,15 @@ namespace columnar
     }
 
     /// return the ObjectId if it is in the given container or `nullopt` otherwise
-    template<ContainerId CI>
-    [[nodiscard]] OptObjectId<CI,CM> tryGetObject () const
+    template<ContainerIdConcept CI2>
+    [[nodiscard]] OptObjectId<CI2,CM> tryGetObject () const
     {
-      static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-      static constexpr unsigned ciIndex = std::find (containers.begin(), containers.end(), CI) - containers.begin();
-      static_assert (ciIndex < containers.size(), "invalid container id");
-      if (getLinkKey() == m_keys[ciIndex])
-        return OptObjectId<CI,CM> (m_data, getLinkIndex());
+      static constexpr unsigned variantIndex = CI::template getVariantIndex<CI2>();
+      static_assert (variantIndex < CI::numVariants, "invalid container id");
+      if (getLinkKey() == m_keys[variantIndex])
+        return OptObjectId<CI2,CM> (m_data, getLinkIndex());
       else
-        return OptObjectId<CI,CM> ();
+        return OptObjectId<CI2,CM> ();
     }
 
     [[nodiscard]] ColumnarOffsetType getLinkIndex () const noexcept
@@ -320,7 +330,7 @@ namespace columnar
     const std::uint8_t* m_keys = nullptr;
     void** m_data = nullptr;
   };
-  template<ContainerId... LTList>
+  template<typename... LTList>
   std::ostream& operator<< (std::ostream& str, const VariantObjectLink<VariantContainerId<LTList...>,ColumnarModeArray>& obj)
   {
     return str << obj.getLinkKey() << "/" << obj.getLinkIndex();
@@ -328,36 +338,37 @@ namespace columnar
 
   // in external mode we need to use a vector column, as well as an
   // extra column to contain our keys in order.
-  template<ContainerId CI,ContainerId... LTList>
+  template<ContainerIdConcept CI,typename... LTList>
   class AccessorTemplate<CI,std::vector<VariantObjectLink<VariantContainerId<LTList...>,ColumnarModeArray>>,ColumnAccessMode::input,ColumnarModeArray> final
   {
     /// Public Members
     /// ==============
   public:
 
+    using VariantCI = VariantContainerId<LTList...>;
     static constexpr ColumnAccessMode CAM = ColumnAccessMode::input;
     using CM = ColumnarModeArray;
-    static constexpr std::array containers = {LTList...};
+    static constexpr std::array containerIdNames = {LTList::idName...};
 
     AccessorTemplate () = default;
 
     AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
     {
-      std::string offsetName = columnBase.objectName (CI) + "." + name + ".offset";
-      std::string dataName = columnBase.objectName (CI) + "." + name + ".data";
-      std::string keysName = columnBase.objectName (CI) + "." + name + ".keys";
+      std::string offsetName = columnBase.containerStoreName (CI::idName) + "." + name + ".offset";
+      std::string dataName = columnBase.containerStoreName (CI::idName) + "." + name + ".data";
+      std::string keysName = columnBase.containerStoreName (CI::idName) + "." + name + ".keys";
 
       auto offsetInfo = info;
-      offsetInfo.offsetName = columnBase.objectName (CI);
+      offsetInfo.offsetName = columnBase.containerStoreName (CI::idName);
       offsetInfo.isOffset = true;
       auto dataInfo = info;
       dataInfo.offsetName = offsetName;
       dataInfo.variantLinkKeyColumn = keysName;
-      dataInfo.variantLinkContainers.reserve (containers.size());
-      for (unsigned i = 0; i < containers.size(); ++ i)
-        dataInfo.variantLinkContainers.push_back (columnBase.objectName (containers[i]));
+      dataInfo.variantLinkContainers.reserve (VariantCI::numVariants);
+      for (unsigned i = 0; i < VariantCI::numVariants; ++ i)
+        dataInfo.variantLinkContainers.push_back (columnBase.containerStoreName (containerIdNames[i]));
       auto keyInfo = info;
-      keyInfo.fixedDimensions.push_back (containers.size());
+      keyInfo.fixedDimensions.push_back (VariantCI::numVariants);
 
       m_offsetData = std::make_unique<ColumnAccessorDataArray> (&m_offsetIndex, &m_offsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       columnBase.addColumn (offsetName, m_offsetData.get(), std::move (offsetInfo));

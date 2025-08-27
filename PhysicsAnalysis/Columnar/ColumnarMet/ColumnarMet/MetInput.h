@@ -28,7 +28,7 @@ namespace columnar
     /// but with MET being the only user (so far) it is a specialized
     /// helper for the MET tools.
 
-    template<ContainerId CI = ContainerId::particle,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::particle,typename CM=ColumnarModeDefault>
     struct InputMomentumAccessors final
     {
       InputMomentumAccessors (ColumnarTool<CM>& columnarBase)
@@ -68,10 +68,10 @@ namespace columnar
 
 
 
-    template<ContainerId CI = ContainerId::particle,typename CM = ColumnarModeDefault> class OriginalObjectHandle;
-    template<ContainerId CI,typename CM> OriginalObjectHandle (const asg::AsgTool&,ObjectRange<CI,CM>) -> OriginalObjectHandle<CI,CM>;
+    template<ContainerIdConcept CI = ContainerId::particle,typename CM = ColumnarModeDefault> class OriginalObjectHandle;
+    template<ContainerIdConcept CI,typename CM> OriginalObjectHandle (const asg::AsgTool&,ObjectRange<CI,CM>) -> OriginalObjectHandle<CI,CM>;
 
-    template<ContainerId CI> class OriginalObjectHandle<CI,ColumnarModeXAOD> final
+    template<ContainerIdConcept CI> class OriginalObjectHandle<CI,ColumnarModeXAOD> final
     {
       bool m_originalInputs = false;
       bool m_isShallowCopy = false;
@@ -113,7 +113,7 @@ namespace columnar
           auto *originalObject = *acc_originalObject(id.getXAODObject());
           if (!originalObject)
             throw std::runtime_error ("originalObjectLink not available for MET input");
-          return ObjectId<CI,CM> (dynamic_cast<typename ContainerIdTraits<CI>::xAODObjectIdType&>(*originalObject));
+          return ObjectId<CI,CM> (dynamic_cast<typename CI::xAODObjectIdType&>(*originalObject));
         }
       }
 
@@ -124,8 +124,7 @@ namespace columnar
           auto nominal = acc_nominalObject(jet.getXAODObject());
           if (nominal && *nominal)
           {
-            static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-            return ObjectId<CI,CM> {static_cast<ContainerIdTraits<CI>::xAODObjectIdType&>(**nominal)};
+            return ObjectId<CI,CM> {static_cast<CI::xAODObjectIdType&>(**nominal)};
           }
         }
         std::ostringstream message;
@@ -134,7 +133,7 @@ namespace columnar
       }
     };
 
-    template<ContainerId CI> class OriginalObjectHandle<CI,ColumnarModeArray> final
+    template<ContainerIdConcept CI> class OriginalObjectHandle<CI,ColumnarModeArray> final
     {
     public:
 
@@ -166,10 +165,10 @@ namespace columnar
 
     /// @brief an accessor that allows to access the xAOD object type of
     /// an input object
-    template<ContainerId CI,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI,typename CM=ColumnarModeDefault>
     struct ObjectTypeAccessor;
 
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     struct ObjectTypeAccessor<CI,ColumnarModeXAOD> final
     {
       using CM = ColumnarModeXAOD;
@@ -189,7 +188,7 @@ namespace columnar
       }
     };
 
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     struct ObjectTypeAccessor<CI,ColumnarModeArray> final
     {
       using CM = ColumnarModeArray;

@@ -99,7 +99,7 @@ inline float get_eta_calo(const xAOD::CaloCluster& cluster, int author,
 namespace columnar {
   namespace ClusterHelpers {
 
-    template<ContainerId CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
     class PhiCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_phiCaloAcc;
@@ -137,7 +137,7 @@ namespace columnar {
       }
     };
 
-    template<ContainerId CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
     class EtaCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_etaCaloAcc;

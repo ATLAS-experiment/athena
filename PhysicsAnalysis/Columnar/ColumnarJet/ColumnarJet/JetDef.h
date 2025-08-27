@@ -13,40 +13,27 @@
 
 namespace columnar
 {
-  template<> struct ContainerIdTraits<ContainerId::jet> final
+  namespace ContainerId
   {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+    struct jet : regularCIBase<xAOD::Jet,xAOD::JetContainer>
+    {
+      static constexpr std::string_view idName = "jet";
+    };
+    using mutableJet = mutableCI<jet>;
+  }
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::Jet;
+  using JetRange = ObjectRange<ContainerId::jet>;
+  using JetId = ObjectId<ContainerId::jet>;
+  using OptJetId = OptObjectId<ContainerId::jet>;
+  template<typename CT,typename CM=ColumnarModeDefault> using JetAccessor  = AccessorTemplate<ContainerId::jet,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using JetDecorator = AccessorTemplate<ContainerId::jet,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::JetContainer;
-
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::JetContainer;
-  };
-
-  template<> struct ContainerIdTraits<ContainerId::mutableJet> final
-  {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = true;
-    static constexpr ContainerId constId = ContainerId::jet;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
-
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = xAOD::Jet;
-
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = xAOD::JetContainer;
-
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::JetContainer;
-  };
+  using MutableJetRange = ObjectRange<ContainerId::mutableJet>;
+  using MutableJetId = ObjectId<ContainerId::mutableJet>;
+  using OptMutableJetId = OptObjectId<ContainerId::mutableJet>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetAccessor  = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetDecorator = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::output,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetUpdater = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::update,CM>;
 }
 
 #endif

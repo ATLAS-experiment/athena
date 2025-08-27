@@ -28,10 +28,10 @@ namespace columnar
     /// up to the user to make sure that for each term a different
     /// weight vector gets passed in.
 
-    template<ContainerId CI_MET=ContainerId::mutableMet,ContainerId CI_OBJ=ContainerId::particle,typename CM=ColumnarModeDefault> class ObjectWeightDecorator;
+    template<ContainerIdConcept CI_MET=ContainerId::mutableMet,ContainerIdConcept CI_OBJ=ContainerId::particle,typename CM=ColumnarModeDefault> class ObjectWeightDecorator;
 
 
-    template<ContainerId CI_MET,ContainerId CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeXAOD> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeXAOD> final
     {
       /// Common Public Members
       /// =====================
@@ -45,7 +45,7 @@ namespace columnar
     };
 
 
-    template<ContainerId CI_MET,ContainerId CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeArray> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeArray> final
     {
       /// Common Public Members
       /// =====================
@@ -67,9 +67,9 @@ namespace columnar
     /// container and then does the "right thing" to record the object
     /// weight based on the columnar mode.
 
-    template<ContainerId CI_MET=ContainerId::mutableMet,ContainerId CI_OBJ=ContainerId::particle,typename CM=ColumnarModeDefault> class ObjectWeightHandle;
+    template<ContainerIdConcept CI_MET=ContainerId::mutableMet,ContainerIdConcept CI_OBJ=ContainerId::particle,typename CM=ColumnarModeDefault> class ObjectWeightHandle;
 
-    template<ContainerId CI_MET,ContainerId CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeXAOD> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeXAOD> final
     {
       /// Common Public Members
       /// =====================
@@ -145,7 +145,7 @@ namespace columnar
 
 
 
-    template<ContainerId CI_MET,ContainerId CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeArray> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeArray> final
     {
       /// Common Public Members
       /// =====================
