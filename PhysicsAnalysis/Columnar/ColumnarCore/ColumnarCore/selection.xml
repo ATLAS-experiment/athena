@@ -2,8 +2,6 @@
 
   <namespace name="columnar" />
 
-  <enum name="columnar::ContainerId" />
-
   <class name="columnar::ColumnarTool<ColumnarModeXAOD>" />
   <class name="columnar::ColumnarTool<ColumnarModeArray>" />
 

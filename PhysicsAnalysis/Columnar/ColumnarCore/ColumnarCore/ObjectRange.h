@@ -16,22 +16,20 @@
 namespace columnar
 {
   /// @brief a class representing a continuous sequence of objects (a.k.a. a container)
-  template<ContainerId CI,typename CM=ColumnarModeDefault> class ObjectRange;
+  template<ContainerIdConcept CI,typename CM> class ObjectRange;
 
 
 
 
-  template<ContainerId CI,typename IteratorType> class ObjectRangeIteratorXAODContainer;
+  template<ContainerIdConcept CI,typename IteratorType> class ObjectRangeIteratorXAODContainer;
 
-  template<ContainerId CI> class ObjectRange<CI,ColumnarModeXAOD> final
+  template<ContainerIdConcept CI> class ObjectRange<CI,ColumnarModeXAOD> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-
-    using xAODContainer = typename ContainerIdTraits<CI>::xAODObjectRangeType;
+    using xAODContainer = typename CI::xAODObjectRangeType;
     using CM = ColumnarModeXAOD;
 
     ObjectRange (xAODContainer& val_container) noexcept
@@ -101,11 +99,9 @@ namespace columnar
     xAODContainer *m_container = nullptr;
   };
 
-  template<ContainerId CI,typename IteratorType> class ObjectRangeIteratorXAODContainer final
+  template<ContainerIdConcept CI,typename IteratorType> class ObjectRangeIteratorXAODContainer final
   {
   public:
-
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
 
     using CM = ColumnarModeXAOD;
 
@@ -130,20 +126,18 @@ namespace columnar
 
 
 
-  template<ContainerId CI> class ObjectRangeIteratorXAODSinglet;
+  template<ContainerIdConcept CI> class ObjectRangeIteratorXAODSinglet;
 
   // template specialization for EventInfo objects (and potentially other singlet objects)
-  template<ContainerId CI>
-      requires (std::is_same_v<typename ContainerIdTraits<CI>::xAODObjectRangeType,typename ContainerIdTraits<CI>::xAODObjectIdType>)
+  template<ContainerIdConcept CI>
+      requires (std::is_same_v<typename CI::xAODObjectRangeType,typename CI::xAODObjectIdType>)
   class ObjectRange<CI,ColumnarModeXAOD> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-
-    using xAODContainer = typename ContainerIdTraits<CI>::xAODObjectRangeType;
+    using xAODContainer = typename CI::xAODObjectRangeType;
     using CM = ColumnarModeXAOD;
 
     ObjectRange (xAODContainer& val_singlet) noexcept
@@ -190,14 +184,12 @@ namespace columnar
     xAODContainer *m_singlet = nullptr;
   };
 
-  template<ContainerId CI> class ObjectRangeIteratorXAODSinglet final
+  template<ContainerIdConcept CI> class ObjectRangeIteratorXAODSinglet final
   {
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-
     using CM = ColumnarModeXAOD;
-    using XAODObjectType = typename ContainerIdTraits<CI>::xAODObjectIdType;
+    using XAODObjectType = typename CI::xAODObjectIdType;
 
     ObjectRangeIteratorXAODSinglet (XAODObjectType *val_object) noexcept
       : m_object (val_object) {}
@@ -220,17 +212,15 @@ namespace columnar
 
 
 
-  template<ContainerId CI,int stepSize> class ObjectRangeIteratorArray;
+  template<ContainerIdConcept CI,int stepSize> class ObjectRangeIteratorArray;
 
-  template<ContainerId CI> class ObjectRange<CI,ColumnarModeArray> final
+  template<ContainerIdConcept CI> class ObjectRange<CI,ColumnarModeArray> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-
-    using xAODContainer = typename ContainerIdTraits<CI>::xAODObjectRangeType;
+    using xAODContainer = typename CI::xAODObjectRangeType;
     using CM = ColumnarModeArray;
 
     ObjectRangeIteratorArray<CI,1> begin () const noexcept {
@@ -311,7 +301,7 @@ namespace columnar
   ///
   /// This is primarily to allow the use of range-for for ObjectRange
 
-  template<ContainerId CI,int stepSize> class ObjectRangeIteratorArray final
+  template<ContainerIdConcept CI,int stepSize> class ObjectRangeIteratorArray final
   {
   public:
 
@@ -336,24 +326,6 @@ namespace columnar
     void **m_data = nullptr;
     std::size_t m_index = 0u;
   };
-
-  using EventInfoRange = ObjectRange<ContainerId::eventInfo>;
-  using EventContextRange = ObjectRange<ContainerId::eventContext>;
-  using JetRange = ObjectRange<ContainerId::jet>;
-  using MutableJetRange = ObjectRange<ContainerId::mutableJet>;
-  using EgammaRange = ObjectRange<ContainerId::egamma>;
-  using MutableEgammaRange = ObjectRange<ContainerId::mutableEgamma>;
-  using ElectronRange = ObjectRange<ContainerId::electron>;
-  using PhotonRange = ObjectRange<ContainerId::photon>;
-  using MuonRange = ObjectRange<ContainerId::muon>;
-  using ParticleRange = ObjectRange<ContainerId::particle>;
-  using Particle0Range = ObjectRange<ContainerId::particle0>;
-  using Particle1Range = ObjectRange<ContainerId::particle1>;
-  using MetRange = ObjectRange<ContainerId::met>;
-  using Met0Range = ObjectRange<ContainerId::met0>;
-  using Met1Range = ObjectRange<ContainerId::met1>;
-  using MutableMetRange = ObjectRange<ContainerId::mutableMet>;
-  using MetAssociationRange = ObjectRange<ContainerId::metAssociation>;
 }
 
 #endif

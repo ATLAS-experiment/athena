@@ -78,7 +78,7 @@ namespace columnar
   /// @par CT the column type
   /// @par CAM the column access mode
   /// @par CM the columnar mode
-  template<ContainerId CI,typename CT,ColumnAccessMode CAM,typename CM> class AccessorTemplate;
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM> class AccessorTemplate;
 
 
   /// @brief a trait class to provide information about the column type
@@ -155,13 +155,11 @@ namespace columnar
 
 
   // the accessor specialization for type conversions
-  template<ContainerId OT,typename CT,typename CM>
+  template<ContainerIdConcept CI,typename CT,typename CM>
     requires (ColumnTypeTraits<CT,CM>::useConvertInput || ColumnTypeTraits<CT,CM>::useConvertWithDataInput)
-  class AccessorTemplate<OT,CT,ColumnAccessMode::input,CM> final
+  class AccessorTemplate<CI,CT,ColumnAccessMode::input,CM> final
   {
   public:
-
-    static_assert (ContainerIdTraits<OT>::isDefined, "ContainerId not defined, include the appropriate header");
 
     using ColumnType = typename ColumnTypeTraits<CT,CM>::ColumnType;
     using UserType = typename ColumnTypeTraits<CT,CM>::UserType;
@@ -172,7 +170,7 @@ namespace columnar
       : m_base (columnBase, name, std::move (ColumnTypeTraits<CT,CM>::updateColumnInfo(columnBase, info)))
     {}
 
-    [[nodiscard]] decltype(auto) operator () (ObjectId<OT,CM> id) const noexcept
+    [[nodiscard]] decltype(auto) operator () (ObjectId<CI,CM> id) const noexcept
     {
       if constexpr (ColumnTypeTraits<CT,CM>::useConvertWithDataInput)
         return ColumnTypeTraits<CT,CM>::convertInput (id.getData(), m_base(id));
@@ -180,12 +178,12 @@ namespace columnar
         return ColumnTypeTraits<CT,CM>::convertInput (m_base(id));
     }
 
-    [[nodiscard]] bool isAvailable (ObjectId<OT,CM> id) const noexcept
+    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
     {
       return m_base.isAvailable (id);
     }
 
-    [[nodiscard]] std::optional<UserType> getOptional (ObjectId<OT,CM> id) const
+    [[nodiscard]] std::optional<UserType> getOptional (ObjectId<CI,CM> id) const
     {
       if (m_base.isAvailable (id))
         return operator()(id);
@@ -194,7 +192,7 @@ namespace columnar
     }
 
   private:
-    AccessorTemplate<OT,ColumnType,ColumnAccessMode::input,CM> m_base;
+    AccessorTemplate<CI,ColumnType,ColumnAccessMode::input,CM> m_base;
   };
 
 
@@ -208,7 +206,7 @@ namespace columnar
   /// constructs.  Besides making accessor use slightly more consistent
   /// it should also make the code a little more efficient.
 
-  template<ContainerId CI,typename CT,ColumnAccessMode CAM,typename CM>
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM>
   void resetAccessor (AccessorTemplate<CI,CT,CAM,CM>& accessor, ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
   {
     accessor = AccessorTemplate<CI,CT,CAM,CM> (columnBase, name, std::move (info));
@@ -218,52 +216,9 @@ namespace columnar
 
 
 
-  template<ContainerId CI,typename CT,typename CM=ColumnarModeDefault> using ColumnAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,CM>;
-  template<ContainerId CI,typename CT,typename CM=ColumnarModeDefault> using ColumnDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,CM>;
-  template<ContainerId CI,typename CT,typename CM=ColumnarModeDefault> using ColumnUpdater = AccessorTemplate<CI,CT,ColumnAccessMode::update,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using JetAccessor  = AccessorTemplate<ContainerId::jet,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using JetDecorator = AccessorTemplate<ContainerId::jet,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetAccessor  = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetDecorator = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetUpdater = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::update,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MuonAccessor  = AccessorTemplate<ContainerId::muon,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MuonDecorator = AccessorTemplate<ContainerId::muon,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TrackAccessor  = AccessorTemplate<ContainerId::track,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TrackDecorator = AccessorTemplate<ContainerId::track,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track0Accessor  = AccessorTemplate<ContainerId::track0,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track0Decorator = AccessorTemplate<ContainerId::track0,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track1Accessor  = AccessorTemplate<ContainerId::track1,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track1Decorator = AccessorTemplate<ContainerId::track1,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track2Accessor  = AccessorTemplate<ContainerId::track2,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track2Decorator = AccessorTemplate<ContainerId::track2,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using VertexAccessor  = AccessorTemplate<ContainerId::vertex,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using VertexDecorator = AccessorTemplate<ContainerId::vertex,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ElectronAccessor  = AccessorTemplate<ContainerId::electron,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ElectronDecorator = AccessorTemplate<ContainerId::electron,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using PhotonAccessor  = AccessorTemplate<ContainerId::photon,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using PhotonDecorator = AccessorTemplate<ContainerId::photon,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EgammaAccessor  = AccessorTemplate<ContainerId::egamma,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EgammaDecorator = AccessorTemplate<ContainerId::egamma,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaAccessor  = AccessorTemplate<ContainerId::mutableEgamma,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaDecorator = AccessorTemplate<ContainerId::mutableEgamma,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ClusterAccessor  = AccessorTemplate<ContainerId::cluster,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ClusterDecorator = AccessorTemplate<ContainerId::cluster,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EventInfoAccessor  = AccessorTemplate<ContainerId::eventInfo,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EventInfoDecorator = AccessorTemplate<ContainerId::eventInfo,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ParticleAccessor  = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ParticleDecorator = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle0Accessor  = AccessorTemplate<ContainerId::particle0,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle0Decorator = AccessorTemplate<ContainerId::particle0,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle1Accessor  = AccessorTemplate<ContainerId::particle1,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle1Decorator = AccessorTemplate<ContainerId::particle1,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MetAccessor  = AccessorTemplate<ContainerId::met,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MetDecorator = AccessorTemplate<ContainerId::met,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Met0Accessor  = AccessorTemplate<ContainerId::met0,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Met0Decorator = AccessorTemplate<ContainerId::met0,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Met1Accessor  = AccessorTemplate<ContainerId::met1,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Met1Decorator = AccessorTemplate<ContainerId::met1,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableMetAccessor  = AccessorTemplate<ContainerId::mutableMet,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableMetDecorator = AccessorTemplate<ContainerId::mutableMet,CT,ColumnAccessMode::output,CM>;
+  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,CM>;
+  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,CM>;
+  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnUpdater = AccessorTemplate<CI,CT,ColumnAccessMode::update,CM>;
 }
 
 #include "ColumnAccessorXAOD.icc"

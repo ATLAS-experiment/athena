@@ -28,10 +28,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 namespace columnar
 {
   using MyTool = ColumnarTool<ColumnarModeArray>;
-  template<typename CT,ContainerId CI=ContainerId::particle> using MyAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,ColumnarModeArray>;
-  template<typename CT,ContainerId CI=ContainerId::particle> using MyDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,ColumnarModeArray>;
-  template<ContainerId CI=ContainerId::particle> using MyId = ObjectId<CI,ColumnarModeArray>;
-  template<ContainerId CI=ContainerId::particle> using MyRange = ObjectRange<CI,ColumnarModeArray>;
+  template<typename CT,ContainerIdConcept CI=ContainerId::particle> using MyAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,ColumnarModeArray>;
+  template<typename CT,ContainerIdConcept CI=ContainerId::particle> using MyDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,ColumnarModeArray>;
+  template<ContainerIdConcept CI=ContainerId::particle> using MyId = ObjectId<CI,ColumnarModeArray>;
+  template<ContainerIdConcept CI=ContainerId::particle> using MyRange = ObjectRange<CI,ColumnarModeArray>;
 
 
   TEST (AccessorTest, defaultEventOffsets)

@@ -193,7 +193,7 @@ namespace columnar
 
     [[nodiscard]] ConstVec calVec(AssocId assoc, const xAOD::IParticle* pPart) const {
       return calVec(assoc, PartId(*pPart)); }
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     [[nodiscard]] ConstVec calVec(AssocId assoc, ObjectId<CI,CM> pPart) const {
       constvec_t totalvec;
       for (size_t iKey = 0; iKey < this->sizeCal(assoc); iKey++) {
@@ -220,7 +220,7 @@ namespace columnar
 
     [[nodiscard]] ConstVec trkVec(AssocId assoc, const xAOD::IParticle* pPart) const {
       return trkVec(assoc, PartId(*pPart)); }
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     [[nodiscard]] ConstVec trkVec(AssocId assoc, ObjectId<CI,CM> pPart) const {
       constvec_t totalvec;
       for (size_t iKey = 0; iKey < this->sizeTrk(assoc); iKey++) {
@@ -270,7 +270,7 @@ namespace columnar
 
     [[nodiscard]] std::size_t findIndex(AssocId assoc,const xAOD::IParticle* pPart) const {
       return findIndex(assoc, ParticleId(*pPart));}
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     [[nodiscard]] std::size_t findIndex(AssocId assoc,ObjectId<CI,CM> pPart) const {
       std::size_t idx = 0;
       for (auto link : this->objectLinks(assoc)) {
@@ -383,7 +383,7 @@ namespace columnar
 
     [[nodiscard]] bool objSelected (const xAOD::IParticle* obj) const {
       return objSelected(PartId(*obj));}
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     [[nodiscard]] bool objSelected (ObjectId<CI,CM> obj) const {
       for (decltype(auto) assoc : getAssociations(obj)) if(objSelected(assoc,obj)) return true;
       return false;}
@@ -400,7 +400,7 @@ namespace columnar
     }
     [[nodiscard]] bool objSelected(AssocId assocId, const xAOD::IParticle* pPart) const {
       return objSelected(assocId, PartId(*pPart));}
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     [[nodiscard]] bool objSelected(AssocId assocId, ObjectId<CI,CM> pPart) const {
       return objSelected(assocId, m_accessors->findIndex(assocId,pPart));}
     [[nodiscard]] bool objSelected(AssocId assocId, ObjectLinkType pPart) const {
@@ -428,7 +428,7 @@ namespace columnar
     }
     void setObjSelectionFlag(AssocId assocId, const xAOD::IParticle* pPart, bool status) {
       setObjSelectionFlag(assocId,PartId(*pPart),status);}
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     void setObjSelectionFlag(AssocId assocId, ObjectId<CI,CM> pPart, bool status) {
       setObjSelectionFlag(assocId,m_accessors->findIndex(assocId,pPart),status);}
     void setObjSelectionFlag(AssocId assocId, const ObjectLinkType& pPart, bool status) {
@@ -502,7 +502,7 @@ namespace columnar
 
     [[nodiscard]] auto getAssociations(const xAOD::IParticle* pPart) const {
       return getAssociations(PartId(*pPart));}
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     [[nodiscard]] auto getAssociations(ObjectId<CI,CM> pPart) const {
       // In the original xAOD code, this returned a `std::vector` by
       // value.  In columnar code we prefer not to pass vectors by

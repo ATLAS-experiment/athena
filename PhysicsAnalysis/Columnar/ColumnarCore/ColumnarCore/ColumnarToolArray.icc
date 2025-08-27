@@ -67,7 +67,7 @@ namespace columnar
     /// for other parts of the prototype to call.
   public:
 
-    void setContainerName (ContainerId container, const std::string& name);
+    void setContainerStoreName (std::string_view ciName, const std::string& name);
 
     void addColumn (const std::string& name, ColumnAccessorDataArray *accessorData, ColumnInfo&& info);
 
@@ -77,7 +77,7 @@ namespace columnar
     /// ============================
   public:
 
-    const std::string& objectName (ContainerId objectType) const;
+    const std::string& containerStoreName (std::string_view ciName) const;
 
 
 

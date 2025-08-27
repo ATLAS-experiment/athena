@@ -16,34 +16,32 @@
 namespace columnar
 {
   /// @brief a class representing a single object (electron, muons, etc.)
-  template<ContainerId O, typename CM = ColumnarModeDefault> class ObjectId;
+  template<ContainerIdConcept CI, typename CM> class ObjectId;
 
 
 
 
 
-  template<ContainerId O> class ObjectId<O,ColumnarModeXAOD> final
+  template<ContainerIdConcept CI> class ObjectId<CI,ColumnarModeXAOD> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<O>::isDefined, "ContainerId not defined, include the appropriate header");
-
-    using xAODObject = typename ContainerIdTraits<O>::xAODObjectIdType;
+    using xAODObject = typename CI::xAODObjectIdType;
 
     ObjectId (xAODObject& val_object) noexcept
       : m_object (&val_object)
     {}
 
-    ObjectId (const ObjectId<O,ColumnarModeXAOD>& that) noexcept = default;
+    ObjectId (const ObjectId<CI,ColumnarModeXAOD>& that) noexcept = default;
 
-    template<ContainerId CI2> requires (ContainerIdTraits<CI2>::isMutable && ContainerIdTraits<CI2>::constId == O)
+    template<ContainerIdConcept CI2> requires (CI2::isMutable && std::is_same_v<typename CI2::constId,CI>)
     ObjectId (const ObjectId<CI2,ColumnarModeXAOD>& that) noexcept
       : m_object (&that.getXAODObjectNoexcept())
     {}
 
-    ObjectId& operator = (const ObjectId<O,ColumnarModeXAOD>& that) noexcept = default;
+    ObjectId& operator = (const ObjectId<CI,ColumnarModeXAOD>& that) noexcept = default;
 
     [[nodiscard]] xAODObject& getXAODObject () const noexcept {
       // This object should ever be held within the context of a
@@ -61,7 +59,7 @@ namespace columnar
       return *result;}
 
       template<typename Acc,typename... Args>
-      requires std::invocable<Acc,ObjectId<O,ColumnarModeXAOD>,Args...>
+      requires std::invocable<Acc,ObjectId<CI,ColumnarModeXAOD>,Args...>
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
 
@@ -74,19 +72,19 @@ namespace columnar
     xAODObject *m_object = nullptr;
   };
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   std::ostream& operator<< (std::ostream& str, const ObjectId<CI,ColumnarModeXAOD>& obj)
   {
     return str << &obj.getXAODObjectNoexcept() << "/" << obj.getXAODObjectNoexcept().index();
   }
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator== (const ObjectId<CI,ColumnarModeXAOD>& lhs, const ObjectId<CI,ColumnarModeXAOD>& rhs)
   {
     return &lhs.getXAODObjectNoexcept() == &rhs.getXAODObjectNoexcept();
   }
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator!= (const ObjectId<CI,ColumnarModeXAOD>& lhs, const ObjectId<CI,ColumnarModeXAOD>& rhs)
   {
     return &lhs.getXAODObjectNoexcept() != &rhs.getXAODObjectNoexcept();
@@ -95,16 +93,14 @@ namespace columnar
 
 
 
-  template<ContainerId O> class ObjectId<O,ColumnarModeArray> final
+  template<ContainerIdConcept CI> class ObjectId<CI,ColumnarModeArray> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<O>::isDefined, "ContainerId not defined, include the appropriate header");
-
     using CM = ColumnarModeArray;
-    using xAODObject = typename ContainerIdTraits<O>::xAODObjectIdType;
+    using xAODObject = typename CI::xAODObjectIdType;
 
     // Whatever you do: Do not remove this function. Yes, it will always
     // throw. It is meant to throw in this template specialization, and
@@ -115,14 +111,14 @@ namespace columnar
       throw std::logic_error ("can't call xAOD function in columnar mode");
     }
 
-    ObjectId (const ObjectId<O,ColumnarModeArray>& that) noexcept = default;
+    ObjectId (const ObjectId<CI,ColumnarModeArray>& that) noexcept = default;
 
-    template<ContainerId CI2> requires (ContainerIdTraits<CI2>::isMutable && ContainerIdTraits<CI2>::constId == O)
+    template<ContainerIdConcept CI2> requires (CI2::isMutable && std::is_same_v<typename CI2::constId,CI>)
     ObjectId (const ObjectId<CI2,ColumnarModeArray>& that) noexcept
       : m_data (that.getData()), m_index (that.getIndex())
     {}
 
-    ObjectId& operator = (const ObjectId<O,ColumnarModeArray>& that) noexcept = default;
+    ObjectId& operator = (const ObjectId<CI,ColumnarModeArray>& that) noexcept = default;
 
     // Whatever you do: Do not remove this function. Yes, it will always
     // throw. It is meant to throw in this template specialization, and
@@ -132,7 +128,7 @@ namespace columnar
       throw std::logic_error ("can't call xAOD function in columnar mode");}
 
     template<typename Acc,typename... Args>
-      requires std::invocable<Acc,ObjectId<O,ColumnarModeArray>,Args...>
+      requires std::invocable<Acc,ObjectId<CI,ColumnarModeArray>,Args...>
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
 
@@ -162,47 +158,23 @@ namespace columnar
     std::size_t m_index = 0u;
   };
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   std::ostream& operator<< (std::ostream& str, const ObjectId<CI,ColumnarModeArray>& obj)
   {
-    return str << static_cast<unsigned>(CI) << "/" << obj.getIndex();
+    return str << CI::idName << "/" << obj.getIndex();
   }
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator== (const ObjectId<CI,ColumnarModeArray>& lhs, const ObjectId<CI,ColumnarModeArray>& rhs)
   {
     return lhs.getIndex() == rhs.getIndex();
   }
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator!= (const ObjectId<CI,ColumnarModeArray>& lhs, const ObjectId<CI,ColumnarModeArray>& rhs)
   {
     return lhs.getIndex() != rhs.getIndex();
   }
-
-
-
-
-  using JetId = ObjectId<ContainerId::jet>;
-  using MutableJetId = ObjectId<ContainerId::mutableJet>;
-  using MuonId = ObjectId<ContainerId::muon>;
-  using EventInfoId = ObjectId<ContainerId::eventInfo>;
-  using EventContextId = ObjectId<ContainerId::eventContext>;
-  using ElectronId = ObjectId<ContainerId::electron>;
-  using PhotonId = ObjectId<ContainerId::photon>;
-  using EgammaId = ObjectId<ContainerId::egamma>;
-  using MutableEgammaId = ObjectId<ContainerId::mutableEgamma>;
-  using ClusterId = ObjectId<ContainerId::cluster>;
-  using TrackId = ObjectId<ContainerId::track>;
-  using VertexId = ObjectId<ContainerId::vertex>;
-  using ParticleId = ObjectId<ContainerId::particle>;
-  using Particle0Id = ObjectId<ContainerId::particle0>;
-  using Particle1Id = ObjectId<ContainerId::particle1>;
-  using MetId = ObjectId<ContainerId::met>;
-  using Met0Id = ObjectId<ContainerId::met0>;
-  using Met1Id = ObjectId<ContainerId::met1>;
-  using MutableMetId = ObjectId<ContainerId::mutableMet>;
-  using MetAssociationId = ObjectId<ContainerId::metAssociation>;
 }
 
 #endif

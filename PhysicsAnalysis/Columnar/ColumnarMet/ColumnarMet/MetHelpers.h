@@ -34,10 +34,10 @@ namespace columnar
     /// avoided.  This creates a slightly different behavior for
     /// `fillMET` in that in array mode it fails if the term does not
     /// exist.
-    template<ContainerId CI = ContainerId::met,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::met,typename CM=ColumnarModeDefault>
     class MapLookupAccessor;
 
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     class MapLookupAccessor<CI,ColumnarModeXAOD> final
     {
     public:
@@ -76,7 +76,7 @@ namespace columnar
       }
     };
 
-    template<ContainerId CI>
+    template<ContainerIdConcept CI>
     class MapLookupAccessor<CI,ColumnarModeArray> final
     {
     public:
@@ -95,7 +95,7 @@ namespace columnar
       // for output MET terms this should be an `update` mode, but I
       // don't have that defined yet.
       static constexpr MissingETBase::Types::bitmask_t m_nullSource = 0;
-      AccessorTemplate<CI,MissingETBase::Types::bitmask_t,ContainerIdTraits<CI>::isMutable?ColumnAccessMode::output:ColumnAccessMode::input,CM> m_sourceAcc;
+      AccessorTemplate<CI,MissingETBase::Types::bitmask_t,CI::isMutable?ColumnAccessMode::output:ColumnAccessMode::input,CM> m_sourceAcc;
 
     public:
       MapLookupAccessor (ColumnarTool<CM>& columnBase) : m_nameHashAcc (columnBase, "nameHash"), m_sourceAcc (columnBase, "source") {}
@@ -163,10 +163,10 @@ namespace columnar
     /// tool also needs to add to the momentum in a special way.  So
     /// this class tries to provide a somewhat convenient and robust
     /// interface for that.
-    template<ContainerId CI = ContainerId::met,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::met,typename CM=ColumnarModeDefault>
     struct MetMomentumAccessors final
     {
-      static constexpr bool isMutable = ContainerIdTraits<CI>::isMutable;
+      static constexpr bool isMutable = CI::isMutable;
       static constexpr ColumnAccessMode CAM = isMutable?ColumnAccessMode::output:ColumnAccessMode::input;
 
 
@@ -190,10 +190,10 @@ namespace columnar
       void addParticle (ObjectId<CI,CM> met, const xAOD::IParticle& particle) const requires (isMutable) {
         auto p4 = particle.p4();
         addParticle (met, p4.Px(), p4.Py(), particle.pt());}
-      template<ContainerId CI2,typename MomAcc>
+      template<ContainerIdConcept CI2,typename MomAcc>
       void addParticle (ObjectId<CI,CM> met, const MomAcc& momAcc, const ObjectId<CI2,CM>& object) const requires (isMutable) && requires(const MomAcc& acc,ObjectId<CI2,CM> object) {float(acc.px(object));float(acc.py(object));float(acc.pt(object));} {
         this->addParticle(met, momAcc.px(object), momAcc.py(object), momAcc.pt(object));}
-      template<ContainerId CI2>
+      template<ContainerIdConcept CI2>
       void addMet (ObjectId<CI,CM> met, const MetMomentumAccessors<CI2,CM>& momAcc, ObjectId<CI2,CM> metSource) const requires (isMutable) {
         mpx(met) += momAcc.mpx(metSource); mpy(met) += momAcc.mpy(metSource); sumet(met) += momAcc.sumet(metSource);}
     };

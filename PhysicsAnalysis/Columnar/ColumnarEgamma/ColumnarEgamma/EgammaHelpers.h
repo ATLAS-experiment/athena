@@ -26,7 +26,7 @@ namespace columnar
 
 
 
-    template<ContainerId CI = ContainerId::egamma,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::egamma,typename CM=ColumnarModeDefault>
     class EnergyAccessor final
     {
       ColumnAccessor<CI,float,CM> m_ptAcc;
@@ -46,7 +46,7 @@ namespace columnar
 
     // not sure if this should live here, since it draws in a dependency
     // on ColumnarTracking/xAODTracking, but let's keep it here for now
-    template<ContainerId CI = ContainerId::egamma,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::egamma,typename CM=ColumnarModeDefault>
     class IsConvertedPhotonAccessor final
     {
       ColumnAccessor<CI,float,CM> m_etaAcc;
