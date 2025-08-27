@@ -12,13 +12,12 @@
 
 namespace TrigCompositeUtils {
 
-  NavGraphNode::NavGraphNode(const Decision* me) : m_decisionObject(me), 
-    m_filteredSeeds(), m_filteredChildren(), m_keepFlag(false)
+  NavGraphNode::NavGraphNode(const Decision* me) : m_decisionObject(me)
   {
   }
 
   bool NavGraphNode::addIfNotDuplicate(std::vector<NavGraphNode*>& container, NavGraphNode* toAdd) {
-    std::vector<NavGraphNode*>::iterator it = std::find(container.begin(), container.end(), toAdd);
+    const auto it = std::find(container.begin(), container.end(), toAdd);
     if (it == container.end()) {
       container.push_back(toAdd);
       return true;
@@ -71,25 +70,25 @@ namespace TrigCompositeUtils {
   // #################################################
 
 
-  NavGraph::NavGraph() : m_nodePositionMap(), m_nodes(), m_finalNodes(), m_edges(0) {
-  }
-
-
   void NavGraph::addNode(const Decision* node, const Decision* comingFrom) {
-    // m_node is a vector to preserve iteration ordering for stable output.
+    // m_nodes is a vector to preserve iteration ordering for stable output.
     // m_nodePositionMap assures that there is no duplicated NavGraphNode
     // with the same Decision pointer.
-    auto nodePairIt = m_nodePositionMap.insert(std::make_pair(node, m_nodes.size()));
-    if (nodePairIt.second) m_nodes.push_back( std::unique_ptr<NavGraphNode>(new NavGraphNode(node)) );
-    NavGraphNode& nodeObj = *m_nodes[nodePairIt.first->second];
+    const auto& [nodeItr, newNode] = m_nodePositionMap.emplace(node, m_nodes.size());
+    if (newNode) {
+      m_nodes.emplace_back( std::make_unique<NavGraphNode>(node) );
+    }
+    NavGraphNode* nodeObj = m_nodes[nodeItr->second].get();
 
     if (comingFrom == nullptr) { // Not coming from anywhere - hence a final node.
-      m_finalNodes.push_back( &nodeObj );
+      m_finalNodes.push_back( nodeObj );
     } else {
-      auto comingFromPairIt = m_nodePositionMap.insert( std::make_pair(comingFrom, m_nodes.size()) );
-      if (comingFromPairIt.second) m_nodes.push_back( std::unique_ptr<NavGraphNode>(new NavGraphNode(comingFrom)) );
-      NavGraphNode& comingFromNodeObj = *m_nodes[comingFromPairIt.first->second];
-      const bool newEdge = comingFromNodeObj.linksTo( &nodeObj );
+      const auto& [nodeItr, newNode] = m_nodePositionMap.emplace(comingFrom, m_nodes.size());
+      if (newNode) {
+        m_nodes.emplace_back( std::make_unique<NavGraphNode>(comingFrom) );
+      }
+      NavGraphNode* comingFromNodeObj = m_nodes[nodeItr->second].get();
+      const bool newEdge = comingFromNodeObj->linksTo( nodeObj );
       if (newEdge) {
         ++m_edges;
       }
