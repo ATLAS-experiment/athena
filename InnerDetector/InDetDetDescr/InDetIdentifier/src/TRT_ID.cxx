@@ -598,7 +598,7 @@ TRT_ID::initLevelsFromDict() {
   }
 
   // Find a TRT region
-  IdDictField* field = m_dict->find_field("subdet");
+  const IdDictField* field = m_dict->find_field("subdet");
   if (field) {
     m_INDET_INDEX = field->index();
   } else {
