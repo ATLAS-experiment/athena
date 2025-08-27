@@ -14,16 +14,21 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "MuonPatternEvent/MuonPatternContainer.h"
-#include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
 
+#include "ActsEvent/TrackContainer.h"
+#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsToolInterfaces/IFitterTool.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "MuonRecToolInterfacesR4/ITrackVisualizationTool.h"
+
+#include "ActsEvent/TrackContainerHandlesHelper.h"
+
 #include "GaudiKernel/SystemOfUnits.h"
 
 
@@ -46,6 +51,12 @@ namespace MuonR4{
             std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
                                                                  const xAOD::MuonSegmentContainer& segments) const;
 
+            
+            void fitSeedCandidate(const Acts::GeometryContext& gCtx,
+                                  const Acts::MagneticFieldContext& mCtx,
+                                  const Acts::CalibrationContext& cCtx,
+                                  const MsTrackSeed& seed,
+                                  ActsTrk::MutableTrackContainer& outContainer) const;
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
             SG::ReadHandleKeyArray<xAOD::MuonSegmentContainer> m_segmentKeys{this, "SegmentContainer", {} };
@@ -56,18 +67,21 @@ namespace MuonR4{
             
             /** @brief Temporary container write handle to push the seeds to store gate for later efficiency analysis */
             SG::WriteHandleKey<MsTrackSeedContainer> m_msTrkSeedKey{this, "MsTrkSeedKey", "MsTrackSeeds"};
-            /** @brief Fetch the detector alignment */
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
-            /** @brief  Fetch the magnetic field */
-            SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_magFieldKey{this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
             /** @brief Segment selection tool to pick the good quality segments */
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
+            /** @brief Track fitting tool */
+            ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
+            /** @brief Tracking geometry tool */
+            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
             /** @brief Track extrapolation tool */
-            ToolHandle<IActsExtrapolationTool> m_extrapolator{this, "Extrapolator" ,"" };
+            ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Visualization tool to debug the track finding */
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
             /** @brief Maximum search window to search segments for */
             Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
+            /** @brief Output track container prefix */
+            Gaudi::Property<std::string> m_writePrefix{this, "WritePrefix", "MuonSA"};
+            ActsTrk::MutableTrackContainerHandlesHelper m_trackContKeys{this};
     };      
 }
 
