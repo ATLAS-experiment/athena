@@ -125,6 +125,19 @@ namespace CP {
                                            });
     ATH_MSG_INFO("Closest run number: " << closestRunNumber);
     
+    // If MC, make sure the closest run number is the actual run number.
+    if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
+       runNumber==410000 || runNumber==450000 || runNumber==470000) { //MC23a/d/e
+      if(runNumber!=closestRunNumber) {
+        ATH_MSG_ERROR("Could not find exact match for this MC event!");
+        {
+          std::lock_guard<std::mutex> lock(m_mapMutex);
+           m_cachedTrackSFData[runNumber] = {}; //empty
+        }
+        return std::make_shared<std::vector<TrackSFRecord>>();
+      }
+    }
+    
     // Filter by closestRunNumber
     std::string expr = "runNumber == " + std::to_string(closestRunNumber);
     auto filtered = m_df->Filter(expr);
@@ -174,6 +187,19 @@ namespace CP {
                                                return std::abs(a - runNumber) < std::abs(b - runNumber);
                                              });
     ATH_MSG_INFO("Closest run number: " << closestRunNumber);
+
+    // If MC, make sure the closest run number is the actual run number.
+    if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
+       runNumber==410000 || runNumber==450000 || runNumber==470000) { //MC23a/d/e
+      if(runNumber!=closestRunNumber) {
+        ATH_MSG_ERROR("Could not find exact match for this MC event!");
+        {
+          std::lock_guard<std::mutex> lock(m_mapMutex);
+          m_cachedClusterSFData[runNumber] = {}; //empty
+        }
+        return std::make_shared<std::vector<ClusterSFRecord>>();
+      }
+    }
     
     // Filter by closestRunNumber
     std::string expr = "runNumber == " + std::to_string(closestRunNumber);

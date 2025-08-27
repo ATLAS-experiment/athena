@@ -129,31 +129,12 @@ namespace CP {
     /// Increase the event counter
     m_nEventsProcessed.fetch_add(1, std::memory_order_relaxed);
 
-    /// Determine if data or MC.
-    /// If data, get the run number for scale factor determination.  
-    /// If MC, throw error.
-    ///    Not supporting dE/dx equalization for MC at this time.
-    ///    The radiation damage is modeled in MC23, but not MC20.
-    ///    Eventually, can apply scale factors to "undo" MC23 rad damage modeling.
-    bool isMC = false;
-    int runNumber = 0; // won't be used if not in XAOD_STANDALONE, since not applying SFs from trees.
+    /// Get run number for scale factor determination.
+    /// For MC, run number indicates MC subcampaign.
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
-    if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) { //MC
-      ATH_MSG_DEBUG("The current event is simulation.");
-      isMC = true;
-    }
-    else { // Data
-      runNumber =  eventInfo->runNumber();
-      ATH_MSG_DEBUG("The current event is data with run number: " << runNumber);
-    }
+    int runNumber =  eventInfo->runNumber();
+    ATH_MSG_DEBUG("The current event has run number: " << runNumber);
     
-    if(isMC) {
-      ATH_MSG_ERROR("Requested to equalize the dE/dx, but this is not yet supported for MC."
-                    << "\nEventually, can apply scale factors to \"undo\" the radiation modeling in MC23."
-                    << "\nOr equalize the MC to the data reference run.");
-      return StatusCode::FAILURE;
-    }
-
     /// Get tracks
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName, ctx);
     ATH_CHECK( tracks.isValid() );
@@ -307,7 +288,7 @@ namespace CP {
 
         } // end loop over MSOSs / pixel clusters
 
-        /// Get equalized dE/dx metrics
+        /// Get unequalized dE/dx metrics first
         float averagedEdx = 0;
         float sigmadEdx = 0;
         PixelDEdx::getdEdxMetrics(clusters, averagedEdx, sigmadEdx, nUsedHits);
@@ -327,6 +308,11 @@ namespace CP {
           if ( (int) stored_numberOfUsedHitsdEdx != nUsedHits ) {
             ATH_MSG_DEBUG("The numberOfUsedHitsdEdx stored in the AOD ("<< (int) stored_numberOfUsedHitsdEdx
                             << ") does not match the value calculated here ("<< nUsedHits <<")!"
+                            << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
+          }
+          if ( (int) stored_numberOfIBLOverflowsdEdx != nUsedIBLOverflowHits) {
+            ATH_MSG_DEBUG("The numberOfIBLOverflowsdEdx stored in the AOD ("<< (int) stored_numberOfIBLOverflowsdEdx
+                            << ") does not match the value calculated here ("<< nUsedIBLOverflowHits <<")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
           }
         }
