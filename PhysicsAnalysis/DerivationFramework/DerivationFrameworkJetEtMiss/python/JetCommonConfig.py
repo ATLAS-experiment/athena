@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for common jet reconstruction + decorations
@@ -124,32 +124,18 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
     acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doRNNLoose=True))
-
-    # The overlap removal algorithm presents difficulties.
-    # It leaves decorations unlocked.
-    # Further, configurations may schedule multiple overlap removal algorithms,
-    # sometimes outside of this file, which then overwrite each other's
-    # results.  So to get decoration locking to work properly, we need
-    # to first group all the event cleaning algorithms together,
-    # immediately followed by LockDecorations algorithms to lock the
-    # decorations produced by overlap.  To accomplish this, we create
-    # two sequences, one for event cleaning and one for decoration locking
-    # and add the algorithms there.  By default, these sequences will
-    # be scheduled at the current point in the global algorithm sequence,
-    # but if another fragment adds additional overlap removal, it may need
-    # to move the sequences later.
-    # All this is of course not MT-safe.
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
-    acc.addSequence(CompFactory.AthSequencer('EventCleanLockSeq', Sequential=True))
 
     # Overlap for EMTopo
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
-    outputLabel_legacy = 'DFCommonJets_passOR'
+    inputLabel_legacy = 'selected_eventClean_EMTopo'
+    outputLabel_legacy = 'DFCommonJets_passOR_EMTopo'
     bJetLabel = '' #default
     tauLabel = 'DFTauRNNLoose'
-    orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
+    orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel_legacy,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
     algOR_legacy = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
                                                 JetKey="AntiKt4EMTopoJets",
+                                                SelectionLabel=inputLabel_legacy,
                                                 OverlapLabel=outputLabel_legacy,
                                                 OverlapRemovalTool=orTool_legacy,
                                                 TauLabel=tauLabel,
@@ -158,33 +144,16 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     acc.addEventAlgo(algOR_legacy, 'EventCleanSeq')
 
     # Overlap for EMPFlow
-    outputLabel = 'DFCommonJets_passOR'
-    orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,outputLabel=outputLabel,bJetLabel=bJetLabel))
+    inputLabel = 'selected_eventClean_EMPFlow'
+    outputLabel = 'DFCommonJets_passOR_EMPFlow'
+    orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel,outputLabel=outputLabel,bJetLabel=bJetLabel))
     algOR = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg',
+                                                SelectionLabel=inputLabel,
                                                 OverlapLabel=outputLabel,
                                                 OverlapRemovalTool=orTool,
                                                 TauLabel=tauLabel,
                                                 BJetLabel=bJetLabel)
     acc.addEventAlgo(algOR, 'EventCleanSeq')
-
-    # Explictly lock the decorations produced by overlap removal.
-    lockOR = CompFactory.DerivationFramework.LockDecorations \
-        ('OverlapRemovalLockDecorAlg',
-         Decorations = [
-             'Electrons.selected',
-             'Electrons.' + outputLabel,
-             'Muons.selected',
-             'Muons.' + outputLabel,
-             'Photons.selected',
-             'Photons.' + outputLabel,
-             'AntiKt4EMPFlowJets.selected',
-             'AntiKt4EMPFlowJets.' + outputLabel,
-             'AntiKt4EMTopoJets.selected',
-             'AntiKt4EMTopoJets.' + outputLabel,
-             'TauJets.selected',
-             'TauJets.' + outputLabel,
-         ])
-    acc.addEventAlgo(lockOR, 'EventCleanLockSeq')
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg
@@ -226,6 +195,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
             ecTool_legacy = acc.popToolsAndMerge(EventCleaningToolCfg(
                     ConfigFlags,'EventCleaningTool_'+wp+'_EMTopo', cleaningLevel))
             ecTool_legacy.JetCleanPrefix = prefix
+            ecTool_legacy.OrDecorator = "passOR_EMTopo"
             ecTool_legacy.JetContainer = "AntiKt4EMTopoJets"
             ecTool_legacy.JetCleaningTool = jetCleaningTool_legacy
             acc.addPublicTool(ecTool_legacy)
@@ -247,6 +217,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     
             ecTool = acc.popToolsAndMerge(EventCleaningToolCfg(ConfigFlags,'EventCleaningTool_' + wp, cleaningLevel))
             ecTool.JetCleanPrefix = prefix
+            ecTool.OrDecorator = "passOR_EMPFlow"
             ecTool.JetContainer = "AntiKt4EMPFlowJets"
             ecTool.JetCleaningTool = jetCleaningTool
             acc.addPublicTool(ecTool)
