@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecTools/src/ClusterTruthTool.cxx
  *
@@ -81,12 +81,11 @@ HGTD::ClusterTruthInfo HGTD::ClusterTruthTool::classifyCluster(
       if (gen_part) {
         TLorentzVector l4(gen_part->momentum().px(), gen_part->momentum().py(),
                           gen_part->momentum().pz(), gen_part->momentum().e());
-        // if the barcode is identical and spacial matching passes, then this
-        // deposit came from the tested truth particle
-        if (HepMC::is_same_particle(gen_part,tp) && tp->p4().DeltaR(l4) < 0.05) { 
+        // flag if this deposit came from the tested truth particle
+        if (HepMC::is_same_particle(gen_part,tp) && tp->p4().DeltaR(l4) < 0.05) {
           sorted_deposits.emplace(deposit.second,
                                   HGTD::ClusterTruthOrigin::TRUTH_PARTICLE);
-          // if given, the parent event can be checked
+          // otherwise if given, the parent event can be checked
         } else if (hard_scatter_evnt and
                    gen_part->parent_event() == hard_scatter_evnt) {
           sorted_deposits.emplace(deposit.second,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef PFCLUSTERSELECTORTOOL_H
 #define PFCLUSTERSELECTORTOOL_H
@@ -55,7 +55,7 @@ private:
     "input"
   };
 
-  /** Read handle key to decorate CaloCluster with threeN leading truth particle barcode and energy */
+  /** Read handle key to decorate CaloCluster with threeN leading truth particle uniqueID and energy */
   SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_caloClusterReadDecorHandleKeyNLeadingTruthParticles{this,"CaloClusterReadDecorHandleKey_NLeadingTruthParticles",""};
 
   /** ReadCondHandleKey for CaloDetDescrManager */

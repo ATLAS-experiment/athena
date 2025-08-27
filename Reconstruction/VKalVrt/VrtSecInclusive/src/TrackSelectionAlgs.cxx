@@ -187,14 +187,14 @@ namespace VKalVrtAthena {
       // Here we firstly need to register the empty pointer to the m_selectedTracks,
       // then need to do deep copy after then. This is the feature of xAOD.
         
-      int barcode=HepMC::UNDEFINED_ID; // FIXME barcode-based
+      int uniqueID = HepMC::UNDEFINED_ID;
       
       if( m_jp.doTruth ) {  
         
         const xAOD::TruthParticle *truth = getTrkGenParticle(trk);
         
         if ( truth ) {
-          barcode = HepMC::uniqueID(truth);
+          uniqueID = HepMC::uniqueID(truth);
         }
         
       }
@@ -209,7 +209,7 @@ namespace VKalVrtAthena {
       
       m_selectedTracks.emplace_back( trk );
       
-      if( m_jp.FillNtuple ) m_ntupleVars->get< vector<int> >( "SelTrk_barcode" ).emplace_back(barcode); // TODO Rename variable name to be consistent?
+      if( m_jp.FillNtuple ) m_ntupleVars->get< vector<int> >( "SelTrk_uniqueID" ).emplace_back(uniqueID);
       
       ATH_MSG_VERBOSE( " > " << __FUNCTION__ << ": Track index " << trk->index() << " has been selected." );
       ATH_MSG_VERBOSE( " > " << __FUNCTION__ << ": Track index " << trk->index()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ELECTRON_TRUTH_DECORATOR_ALG_HH
@@ -49,9 +49,9 @@ namespace FlavorTagDiscriminants {
     RDHK m_acc_vertex_index {
       this, "acc_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "Accessor for the truth vertex index of the truth particle"};
-    RDHK m_acc_parent_barcode {
-      this, "acc_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
-        "Accessor for the truth parent barcode of the truth particle"};
+    RDHK m_acc_parent_uniqueID {
+      this, "acc_ftagTruthParentBarcode", "ftagTruthParentBarcode",
+        "Accessor for the truth parent uniqueID of the truth particle"};
 
     // Decorators for electrons
     using WDHK = SG::WriteDecorHandleKey< xAOD::ElectronContainer >;
@@ -67,12 +67,12 @@ namespace FlavorTagDiscriminants {
     WDHK m_dec_vertex_index {
       this, "dec_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "Truth vertex index of the electron"};
-    WDHK m_dec_barcode {
-      this, "dec_ftagTruthBarcode", "ftagTruthBarcode", 
-        "Barcode of linked truth particle"};
-    WDHK m_dec_parent_barcode {
-      this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
-        "Barcode of parent of linked truth particle"};
+    WDHK m_dec_uniqueID {
+      this, "dec_ftagTruthBarcode", "ftagTruthBarcode",
+        "UniqueID of linked truth particle"};
+    WDHK m_dec_parent_uniqueID {
+      this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode",
+        "UniqueID of parent of linked truth particle"};
 
     // truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_trackTruthOriginTool {

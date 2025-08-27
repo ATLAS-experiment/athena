@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -365,7 +365,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
   calculate total calib energy inside clusters
   ******************************************** */
   unsigned int nHitsTotal = 0;
-  unsigned int nHitsWithoutParticleID = 0;
+  unsigned int nHitsWithoutParticleUID = 0;
   for (const CaloCalibrationHitContainer* cchc : v_cchc) {
     //loop over cells in calibration container
     for (const CaloCalibrationHit* hit : *cchc) {
@@ -391,7 +391,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
         }
       }
       if( m_useParticleID && HepMC::uniqueID(hit) == HepMC::UNDEFINED_ID) {
-        nHitsWithoutParticleID++;
+        nHitsWithoutParticleUID++;
       }
       nHitsTotal++;
     }
@@ -400,7 +400,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
   // if all calibration hits have ParticleUID(i.e GenParticle::id())==0 when simulation was done without ParticleUID
   bool doCalibFrac = m_doCalibFrac;
   bool useParticleID = m_useParticleID;
-  if(m_useParticleID && (nHitsTotal == nHitsWithoutParticleID) ) {
+  if(m_useParticleID && (nHitsTotal == nHitsWithoutParticleUID) ) {
     ATH_MSG_INFO("Calibration hits do not have ParticleUID, ids of particle-caused hits are always 0. Continuing without ParticleID machinery.");
     useParticleID = false;
   }

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -69,8 +69,8 @@ private:
   /// Variable: Status code for the particle.
   int* m_status;
 
-  /// Variable: Barcode for the particle.
-  int* m_barcode;
+  /// Variable: Unique Identifier for the particle.
+  int* m_uniqueID;
 
   /// Variable: Particle ID code.
   int* m_pdgId;

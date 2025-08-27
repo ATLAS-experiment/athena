@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRecoValidationTool.h"
@@ -111,7 +111,7 @@ namespace Muon {
         m_ntuple.trackParticleBlock.eta->push_back(indetTrackParticle.eta());
         m_ntuple.trackParticleBlock.phi->push_back(indetTrackParticle.phi());
         int pdg = 0;
-        int barcode = HepMC::INVALID_PARTICLE_ID; // FIXME barcode-based
+        int uniqueID = HepMC::INVALID_PARTICLE_ID;
         float beta = 1.;
         // set truth
         typedef ElementLink<xAOD::TruthParticleContainer> ElementTruthLink_t;
@@ -121,11 +121,11 @@ namespace Muon {
             const ElementTruthLink_t link = truthParticleLinkAcc(indetTrackParticle);
             if (link.isValid()) {
                 pdg = (*link)->pdgId();
-                barcode = HepMC::uniqueID(*link);
+                uniqueID = HepMC::uniqueID(*link);
                 beta = (*link)->p4().Beta();
             }
         }
-        m_ntuple.trackParticleBlock.truth.fill(pdg, barcode, beta); // FIXME barcode-based
+        m_ntuple.trackParticleBlock.truth.fill(pdg, uniqueID, beta);
 
         // try to find the pointer of the indetTrackParticle
         bool found = false;
@@ -152,14 +152,14 @@ namespace Muon {
         return true;
     }
 
-    int MuonRecoValidationTool::getBarcode(const std::set<Identifier>& ids) const {
+  int MuonRecoValidationTool::getUniqueID(const std::set<Identifier>& ids) const {
       if (!m_isMC) return HepMC::INVALID_PARTICLE_ID;
 
       // count how often a barcode occurs
       std::map<int, int> counters;
       for (std::set<Identifier>::const_iterator it = ids.begin(); it != ids.end(); ++it) {
-        const int bc = m_truthSummaryTool->getBarcode(*it); // FIXME barcode-based
-        if (bc != HepMC::INVALID_PARTICLE_ID) ++counters[bc];
+        const int uniqueID = m_truthSummaryTool->getUniqueID(*it);
+        if (uniqueID != HepMC::INVALID_PARTICLE_ID) ++counters[uniqueID];
       }
 
       // pick the most frequent
@@ -201,13 +201,13 @@ namespace Muon {
             m_ntuple.timeBlock.fill(type, m_idHelperSvc->gasGapId(id).get_identifier32().get_compact(), r, stauHit.z, stauHit.mToF - tof,
                                     stauHit.error, stauHit.propagationTime, stauHit.e, tof, 0., stauHit.shift, 1000 * m_candidateCounter);
 
-            // barcode + pdg
-            int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
+            // uniqueID + pdg
+            int uniqueID = HepMC::INVALID_PARTICLE_ID, pdg = 0;
             if (m_isMC) {
-              barcode = m_truthSummaryTool->getBarcode(id); // FIXME barcode-based
-              pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
+              uniqueID = m_truthSummaryTool->getUniqueID(id);
+              pdg = uniqueID != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(uniqueID) : 0;
             }
-            m_ntuple.timeBlock.truth.fill(pdg, barcode);
+            m_ntuple.timeBlock.truth.fill(pdg, uniqueID);
         }
         ++m_candidateCounter;
         return true;
@@ -224,13 +224,13 @@ namespace Muon {
         // position information
         m_ntuple.timeBlock.fill(2, m_idHelperSvc->gasGapId(id).get_identifier32().get_compact(), gpos.perp(), gpos.z(), time, errorTime);
 
-        // barcode + pdg
-        int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
+        // uniqueID + pdg
+        int uniqueID = HepMC::INVALID_PARTICLE_ID, pdg = 0;
         if (m_isMC) {
-            barcode = m_truthSummaryTool->getBarcode(id);
-            pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
+            uniqueID = m_truthSummaryTool->getUniqueID(id);
+            pdg = uniqueID != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(uniqueID) : 0;
         }
-        m_ntuple.timeBlock.truth.fill(pdg, barcode);
+        m_ntuple.timeBlock.truth.fill(pdg, uniqueID);
 
         return true;
     }
@@ -250,14 +250,14 @@ namespace Muon {
             m_ntuple.timeBlock.fill(1, m_idHelperSvc->chamberId(id).get_identifier32().get_compact(), seg->globalPosition().perp(),
                                     seg->globalPosition().z(), seg->time() - segmentTimeCorrection, seg->errorTime());
 
-            // barcode + pdg
+            // uniqueID + pdg
             std::set<Identifier> ids;
             std::vector<const MuonClusterOnTrack*> clusters;
             extract(*seg, ids, clusters);
-            int barcode = getBarcode(ids);
+            int uniqueID = getUniqueID(ids);
             int pdg = 0;
-            if (m_isMC) pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
-            m_ntuple.timeBlock.truth.fill(pdg, barcode);
+            if (m_isMC) pdg = uniqueID != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(uniqueID) : 0;
+            m_ntuple.timeBlock.truth.fill(pdg, uniqueID);
 
             return true;
         }
@@ -269,13 +269,13 @@ namespace Muon {
             Identifier id = rpc->identify();
             m_ntuple.timeBlock.id.fill(m_idHelperSvc->sector(id), toInt(m_idHelperSvc->chamberIndex(id)));
 
-            // barcode + pdg
-            int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
+            // uniqueID + pdg
+            int uniqueID = HepMC::INVALID_PARTICLE_ID, pdg = 0;
             if (m_isMC) {
-                barcode = m_truthSummaryTool->getBarcode(id);
-                pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
+                uniqueID = m_truthSummaryTool->getUniqueID(id);
+                pdg = uniqueID != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(uniqueID) : 0;
             }
-            m_ntuple.timeBlock.truth.fill(pdg, barcode);
+            m_ntuple.timeBlock.truth.fill(pdg, uniqueID);
 
             bool measphi = m_idHelperSvc->measuresPhi(id);
             const Amg::Vector3D& GP = rpc->globalPosition();
@@ -351,11 +351,11 @@ namespace Muon {
         m_ntuple.segmentBlock.ntrigEtaHits->push_back(hitCounts.netaTrigHitLayers);
         m_ntuple.segmentBlock.ntrigPhiHits->push_back(hitCounts.nphiTrigHitLayers);
 
-        // barcode + pdg
-        int barcode = getBarcode(ids);
+        // uniqueID + pdg
+        int uniqueID = getUniqueID(ids);
         int pdg = 0;
-        if (m_isMC) pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
-        m_ntuple.segmentBlock.truth.fill(pdg, barcode);
+        if (m_isMC) pdg = uniqueID != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(uniqueID) : 0;
+        m_ntuple.segmentBlock.truth.fill(pdg, uniqueID);
 
         m_ntuple.segmentBlock.track.fill(getIndex(intersection));
 
@@ -428,12 +428,12 @@ namespace Muon {
                 ids.insert((*hit)->prd->identify());
             }
         }
-        int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
+        int uniqueID = HepMC::INVALID_PARTICLE_ID, pdg = 0;
         if (m_isMC) {
-            barcode = getBarcode(ids);
-            pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
+            uniqueID = getUniqueID(ids);
+            pdg = uniqueID != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(uniqueID) : 0;
         }
-        m_ntuple.houghBlock.truth.fill(pdg, barcode);
+        m_ntuple.houghBlock.truth.fill(pdg, uniqueID);
 
         ATH_MSG_DEBUG(" Adding Hough maximum to ntuple ");
 
@@ -446,12 +446,12 @@ namespace Muon {
         m_ntuple.hitBlock.id.fill(m_idHelperSvc->sector(id), toInt(m_idHelperSvc->chamberIndex(id)));
         m_ntuple.hitBlock.track.fill(getIndex(intersection));
 
-        int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
+        int uniqueID = HepMC::INVALID_PARTICLE_ID, pdg = 0;
         if (m_isMC) {
-            barcode = m_truthSummaryTool->getBarcode(id);
-            pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
+            uniqueID = m_truthSummaryTool->getUniqueID(id);
+            pdg = uniqueID != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(uniqueID) : 0;
         }
-        m_ntuple.hitBlock.truth.fill(pdg, barcode);
+        m_ntuple.hitBlock.truth.fill(pdg, uniqueID);
 
         float sign = expos < 0 ? -1. : 1.;
         m_ntuple.hitBlock.residuals.fill(sign * prd.localPosition()[Trk::locX], Amg::error(prd.localCovariance(), Trk::locX), expos,

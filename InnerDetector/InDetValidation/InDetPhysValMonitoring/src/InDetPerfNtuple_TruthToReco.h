@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET__PERF__NTUPLE_TRUTHTORECO__H
@@ -31,7 +31,7 @@ private:
     //Truth variables
     InDetPerfNtupleBranch<int>   m_truth_selectedByPileupSwitch; 
     InDetPerfNtupleBranch<int>   m_truth_pdgId; 
-    InDetPerfNtupleBranch<int>   m_truth_barcode;
+    InDetPerfNtupleBranch<int>   m_truth_uniqueID;
     InDetPerfNtupleBranch<float> m_truth_charge;
     InDetPerfNtupleBranch<float> m_truth_eta;
     InDetPerfNtupleBranch<float> m_truth_pt; 
