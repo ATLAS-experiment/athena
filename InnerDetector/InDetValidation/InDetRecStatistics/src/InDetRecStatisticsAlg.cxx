@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //  file:   InDetRecStatisticsAlg.cxx
@@ -63,6 +63,8 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "InDetRecStatistics//PileUpType.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
 
 
 
