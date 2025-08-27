@@ -14,5 +14,6 @@
 #include <AsgAnalysisAlgorithms/AsgMassSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgNumDecorationSelectionTool.h>
 #include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
+#include <AsgAnalysisAlgorithms/SysTruthWeightAlg.h>
 
 #endif

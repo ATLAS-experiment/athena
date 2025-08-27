@@ -4,6 +4,7 @@
 #include "PMGTools/PMGSherpa22VJetsWeightTool.h"
 #include "PMGTools/PMGSherpaVjetsSysTool.h"
 #include "PMGTools/PMGTruthWeightTool.h"
+#include "PMGTools/PMGHFProductionFractionTool.h"
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -15,3 +16,4 @@ DECLARE_COMPONENT( PMGDecayProductsSelectionTool )
 DECLARE_COMPONENT( PMGSherpa22VJetsWeightTool )
 DECLARE_COMPONENT( PMGSherpaVjetsSysTool )
 DECLARE_COMPONENT( PMGTruthWeightTool )
+DECLARE_COMPONENT( PMGHFProductionFractionTool )

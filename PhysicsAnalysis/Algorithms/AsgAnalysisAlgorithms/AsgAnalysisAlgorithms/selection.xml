@@ -6,5 +6,6 @@
    <class name="CP::AsgNumDecorationSelectionToolInt" />
    <class name="CP::AsgNumDecorationSelectionToolUInt8" />
    <class name="CP::BootstrapGenerator" />
+   <class name="CP::SysTruthWeightAlg" />
 
 </lcgdict>

@@ -8,7 +8,7 @@ atlas_add_library( PMGAnalysisInterfacesLib
    PMGAnalysisInterfaces/*.h
    INTERFACE
    PUBLIC_HEADERS PMGAnalysisInterfaces
-   LINK_LIBRARIES AsgTools PATInterfaces xAODEventInfo )
+   LINK_LIBRARIES AsgTools PATInterfaces xAODEventInfo xAODTruth )
 
 atlas_add_dictionary( PMGAnalysisInterfacesDict
    PMGAnalysisInterfaces/PMGAnalysisInterfacesDict.h
