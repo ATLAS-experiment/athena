@@ -5,6 +5,7 @@
   <class name="PMGTools::PMGSherpa22VJetsWeightTool" />
   <class name="PMGTools::PMGSherpaVjetsSysTool" />
   <class name="PMGTools::PMGTruthWeightTool" />
+  <class name="PMGTools::PMGHFProductionFractionTool" />
   <!-- functions are ignored (ROOT 6.34) -->
   <function name="PMGTools::weightNameCleanup" />
   <function name="PMGTools::weightNameWithPrefix" />

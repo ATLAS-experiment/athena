@@ -332,7 +332,12 @@ class GeneratorAnalysisBlock (ConfigBlock):
         self.addOption ('detailedPDFinfo', False, type=bool,
             info="save the necessary information to run the LHAPDF tool offline. "
                  "The default is False.")
-
+        self.addOption ('doHFProdFracReweighting', False, type=bool,
+            info="whether to apply HF production fraction reweighting. "
+                 "The default is False.")
+        self.addOption ('truthParticleContainer', 'TruthParticles', type=str,
+            info="the name of the truth particle container to use for HF production fraction reweighting. "
+                 "The default is 'TruthParticles'. ")
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.streamName
@@ -342,6 +347,11 @@ class GeneratorAnalysisBlock (ConfigBlock):
         if config.dataType() is DataType.Data:
             # there are no generator weights in data!
             return
+        try:
+            from AthenaCommon.Logging import logging
+        except ImportError:
+            import logging
+        log = logging.getLogger('makeGeneratorAnalysisSequence')
 
         if self.runNumber is None:
             self.runNumber = config.runNumber()
@@ -372,7 +382,60 @@ class GeneratorAnalysisBlock (ConfigBlock):
             alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg', reentrant=True )
             for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
+        
+        if self.doHFProdFracReweighting:
+            generatorInfo = config.autoconfigFlags().Input.GeneratorsInfo
+            log.info(f"Loaded generator info: {generatorInfo}")
 
+            DSID = "000000"
+            
+            if not generatorInfo:
+                log.warning("No generator info found.")
+                DSID = "000000"
+            elif isinstance(generatorInfo, dict):
+                if "Pythia8" in generatorInfo:
+                    DSID = "410470"
+                elif "Sherpa" in generatorInfo and "2.2.8" in generatorInfo["Sherpa"]:
+                    DSID = "421152"
+                elif "Sherpa" in generatorInfo and "2.2.10" in generatorInfo["Sherpa"]:
+                    DSID = "700122"
+                elif "Sherpa" in generatorInfo and "2.2.11" in generatorInfo["Sherpa"]:
+                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.11. Using weights for Sherpa 2.2.10 instead.")
+                    DSID = "700122"
+                elif "Sherpa" in generatorInfo and "2.2.12" in generatorInfo["Sherpa"]:
+                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.12. Using weights for Sherpa 2.2.10 instead.")
+                    DSID = "700122"
+                elif "Sherpa" in generatorInfo and "2.2.14" in generatorInfo["Sherpa"]:
+                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.14. New weights need to be calculated.")
+                    DSID = "000000"
+                elif "Sherpa" in generatorInfo and "2.2.1" in generatorInfo["Sherpa"]:
+                    DSID = "410250"
+                elif "Herwig7" in generatorInfo and "7.1.3" in generatorInfo["Herwig7"]:
+                    DSID = "411233"
+                elif "Herwig7" in generatorInfo and "7.2.1" in generatorInfo["Herwig7"]:
+                    DSID = "600666"
+                elif "Herwig7" in generatorInfo and "7." in generatorInfo["Herwig7"]:
+                    DSID = "410558"
+                elif "amc@NLO" in generatorInfo:
+                    DSID = "410464"
+                else:
+                    log.warning(f"HF production fraction reweighting is not configured for this generator: {generatorInfo}")
+                    log.warning("New weights need to be calculated.")
+                    DSID = "000000"
+            else:
+                log.warning("Failed to determine generator from metadata")
+                DSID = "000000"
+
+            log.info(f"Using HF production fraction weights calculated using DSID {DSID}")
+            if DSID == "000000":
+                log.warning("HF production fraction reweighting will return dummy weights of 1.0")
+
+            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', 'SysTruthWeightAlg' + self.streamName )
+            config.addPrivateTool( 'sysTruthWeightTool', 'PMGTools::PMGHFProductionFractionTool' )
+            alg.decoration = 'prodFracWeight_%SYS%'
+            alg.TruthParticleContainer = self.truthParticleContainer
+            alg.sysTruthWeightTool.ShowerGenerator = DSID
+            config.addOutputVar ('EventInfo', 'prodFracWeight_%SYS%', 'weight_HF_prod_frac')
 
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""

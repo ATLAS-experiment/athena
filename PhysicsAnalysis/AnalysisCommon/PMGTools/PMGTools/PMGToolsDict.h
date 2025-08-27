@@ -15,4 +15,6 @@
 #include "PMGTools/PMGSherpaVjetsSysTool.h"
 #include "PMGTools/PMGTruthWeightTool.h"
 #include "PMGTools/WeightHelpers.h"
+#include "PMGTools/PMGHFProductionFractionTool.h"
+
 #endif // PMGTOOLS_PMGTOOLSDICT_H

@@ -43,6 +43,7 @@
 #include <AsgAnalysisAlgorithms/PileupReweightingAlg.h>
 #include <AsgAnalysisAlgorithms/PDFinfoAlg.h>
 #include <AsgAnalysisAlgorithms/PMGTruthWeightAlg.h>
+#include <AsgAnalysisAlgorithms/SysTruthWeightAlg.h>
 #include <AsgAnalysisAlgorithms/SysListDumperAlg.h>
 #include <AsgAnalysisAlgorithms/SystObjectLinkerAlg.h>
 #include <AsgAnalysisAlgorithms/SystObjectUnioniserAlg.h>
@@ -92,6 +93,7 @@ DECLARE_COMPONENT (CP::OverlapRemovalAlg)
 DECLARE_COMPONENT (CP::PileupReweightingAlg)
 DECLARE_COMPONENT (CP::PDFinfoAlg)
 DECLARE_COMPONENT (CP::PMGTruthWeightAlg)
+DECLARE_COMPONENT (CP::SysTruthWeightAlg)
 DECLARE_COMPONENT (CP::SysListDumperAlg)
 DECLARE_COMPONENT (CP::SystObjectLinkerAlg)
 DECLARE_COMPONENT (CP::TreeFillerAlg)
