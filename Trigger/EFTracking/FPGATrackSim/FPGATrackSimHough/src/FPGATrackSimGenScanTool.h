@@ -128,6 +128,9 @@ protected:
     Gaudi::Property<double> m_pairSetDeltaPhiCurvatureCut{this, "pairSetDeltaPhiCurvatureCut", {}, "Pair Set Delta Phi Curvature Cut Value"};
     Gaudi::Property<double> m_pairSetDeltaEtaCurvatureCut{this, "pairSetDeltaEtaCurvatureCut", {}, "Pair Set Delta Eta Curvature Cut Value"};
     Gaudi::Property<std::vector<double>> m_pairSetPhiExtrapCurvedCut{this, "pairSetPhiExtrapCurvedCut", {}, "Pair Set Phi Extrap Curved Cut Value(in/out pair)"};
+    Gaudi::Property<double> m_phiWeight{this, "phiChi2Weight", 1.0, "Weight for phi component of chi2 in genscan fit"};
+    Gaudi::Property<double> m_etaWeight{this, "etaChi2Weight", 1.0, "Weight for eta component of chi2 in genscan fit"};
+    Gaudi::Property<bool> m_inBinFiltering {this, "inBinFiltering", true, "Filter roads that appear to be outside their bin"};
 
     ///////////////////////////////////////////////////////////////////////
     // Core
@@ -165,6 +168,9 @@ protected:
 
     // format final pairsets into expected output of getRoads
     void addRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx);
+
+    // Experimental fit
+    bool fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2) const;
 
     ///////////////////////////////////////////////////////////////////////
     // HitPair and HitPairSet Storage Classes

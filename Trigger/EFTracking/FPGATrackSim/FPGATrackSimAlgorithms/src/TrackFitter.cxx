@@ -152,6 +152,19 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
             continue;
         }
 
+        // If the "fit from road" flag is set, then just assign track chi2 and parameters from that.
+        if (!m_do2ndStage && m_fitFromRoad) {
+            // Then actually do it using the road values.
+            track_cand.setChi2(road->getFitChi2());
+            track_cand.setPars(road->getFitParams());
+            ATH_MSG_DEBUG("Assigned chi2 = " << track_cand.getChi2() << " and parameters from genscan tool");
+            ATH_MSG_DEBUG("Set q/pt = " << track_cand.getQOverPt());
+            ATH_MSG_DEBUG("Set d0 = " << track_cand.getD0());
+            ATH_MSG_DEBUG("Set z0 = " << track_cand.getZ0());
+            ATH_MSG_DEBUG("Set eta = " << track_cand.getEta());
+            ATH_MSG_DEBUG("Set phi = " << track_cand.getPhi());
+        } else {
+
         if (nMissing == 0 || m_guessinghits)
         {
             ok = m_nominalBank->linfit(sector, track_cand, m_do2ndStage);
@@ -190,6 +203,7 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
                     }
                 }
             }
+        }
         }
         tracks.push_back(track_cand);
 

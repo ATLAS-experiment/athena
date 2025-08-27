@@ -80,9 +80,10 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
           }
           padding += stripLength*std::abs(FPGATrackSimBinUtil::GeomHelpers::dPhiHitTrkFromPars(hitr,trackpars));
         }
-        // add phiShift resolution padding
-        padding += m_d0pad + hitr*m_phipad + hitr*m_qptpad*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr);
+        // add phiShift resolution padding, 1000.0 is the GeV to MeV conversion
+        padding += m_d0pad + hitr*m_phipad + hitr*m_qptpad*1000.0*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr);
         passesPhi = std::abs(storedhit.phiShift) < (xrange+padding);
+        ATH_MSG_DEBUG("Phi qpt pad: " << storedhit.phiShift << " " << hitr*m_qptpad*1000.0*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr) << " " << m_qptpad);
         if (isTruthBin && !passesPhi) ATH_MSG_DEBUG("Hit fails Phi cut, lyr=" << storedhit.hitptr->getPhysLayer() << " "
                         << storedhit.phiShift << " " << xrange + padding << " " <<xrange << " "<< padding
                         << " " << m_d0pad << " "  << hitr*m_phipad  << " "  << hitr*m_qptpad*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr)
