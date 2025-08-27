@@ -120,6 +120,11 @@ StatusCode TauJetRNNEvaluator::execute(xAOD::TauJet &tau) const {
   // Set default score and overwrite later
   output(tau) = -1111.0f;
 
+  // save CPU when running PHYS derivations
+  if (m_applyLooseTrackSel) {
+    if (tau.nTracks()>5) return StatusCode::SUCCESS;
+  } 
+
   const auto nTracksCharged = tau.nTracksCharged();
 
   // Get input objects

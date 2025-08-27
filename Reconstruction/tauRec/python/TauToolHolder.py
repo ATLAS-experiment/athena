@@ -673,7 +673,7 @@ def TauIDVarCalculatorCfg(flags):
     result.setPrivateTools(myTauIDVarCalculator)
     return result
 
-def TauJetRNNEvaluatorCfg(flags):
+def TauJetRNNEvaluatorCfg(flags, applyLooseTrackSel=False):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauJetRNN'
 
@@ -688,6 +688,7 @@ def TauJetRNNEvaluatorCfg(flags):
                                               MaxTracks = 10,
                                               MaxClusters = 6,
                                               MaxClusterDR = 1.0,
+                                              ApplyLooseTrackSel = applyLooseTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
                                               InputLayerScalar = "scalar",
                                               InputLayerTracks = "tracks",

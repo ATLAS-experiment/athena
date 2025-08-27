@@ -229,7 +229,7 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
     tools_after[-1].EventShapeKey = ''
     tools_after.append( acc.popToolsAndMerge(tauTools.MvaTESEvaluatorCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauIDVarCalculatorCfg(flags)) )
-    tools_after.append( acc.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
+    tools_after.append( acc.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags,applyLooseTrackSel=True)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
