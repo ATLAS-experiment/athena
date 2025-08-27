@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_IDERIVCALCTOOL_IH
@@ -73,7 +73,7 @@ namespace Trk {
   protected:
     //bool m_storeSuperStructures;  //!< Store Super Structures information in txt file ?
 
-    std::ostream * m_logStream; //!< logfile output stream
+    std::ostream * m_logStream = nullptr; //!< logfile output stream
 
   private:
     
