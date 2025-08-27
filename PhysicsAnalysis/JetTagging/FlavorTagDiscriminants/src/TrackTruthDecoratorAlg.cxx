@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -40,26 +40,26 @@ namespace FlavorTagDiscriminants {
     m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
     m_acc_source_label = "TruthParticles." + m_acc_source_label.key();
     m_acc_vertex_index = "TruthParticles." + m_acc_vertex_index.key();
-    m_acc_parent_barcode = "TruthParticles." + m_acc_parent_barcode.key(); // FIXME make variable names consistent
+    m_acc_parent_uniqueID = "TruthParticles." + m_acc_parent_uniqueID.key();
     ATH_CHECK( m_acc_type_label.initialize() );
     ATH_CHECK( m_acc_source_label.initialize() );
     ATH_CHECK( m_acc_vertex_index.initialize() );
-    ATH_CHECK( m_acc_parent_barcode.initialize() ); // FIXME make variable names consistent
+    ATH_CHECK( m_acc_parent_uniqueID.initialize() );
 
     // Initialize decorators
     m_dec_origin_label = m_TrackContainerKey.key() + "." + m_dec_origin_label.key();
     m_dec_type_label = m_TrackContainerKey.key() + "." + m_dec_type_label.key();
     m_dec_source_label = m_TrackContainerKey.key() + "." + m_dec_source_label.key();
     m_dec_vertex_index = m_TrackContainerKey.key() + "." + m_dec_vertex_index.key();
-    m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key(); // FIXME make variable names consistent
-    m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key(); // FIXME make variable names consistent
+    m_dec_uniqueID = m_TrackContainerKey.key() + "." + m_dec_uniqueID.key();
+    m_dec_parent_uniqueID = m_TrackContainerKey.key() + "." + m_dec_parent_uniqueID.key();
     m_dec_muon_origin_label = m_TrackContainerKey.key() + "." + m_dec_muon_origin_label.key();
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_source_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
-    CHECK( m_dec_barcode.initialize() ); // FIXME make variable names consistent
-    CHECK( m_dec_parent_barcode.initialize() ); // FIXME make variable names consistent
+    CHECK( m_dec_uniqueID.initialize() );
+    CHECK( m_dec_parent_uniqueID.initialize() );
     CHECK( m_dec_muon_origin_label.initialize() );
 
     // Retrieve tools
@@ -88,7 +88,7 @@ namespace FlavorTagDiscriminants {
     RDH acc_type_label(m_acc_type_label, ctx);
     RDH acc_source_label(m_acc_source_label, ctx);
     RDH acc_vertex_index(m_acc_vertex_index, ctx);
-    RDH acc_parent_barcode(m_acc_parent_barcode, ctx);
+    RDH acc_parent_uniqueID(m_acc_parent_uniqueID, ctx);
 
     // instantiate decorators
     using WDH = SG::WriteDecorHandle<TPC, int>;
@@ -96,8 +96,8 @@ namespace FlavorTagDiscriminants {
     WDH dec_type_label(m_dec_type_label, ctx);
     WDH dec_source_label(m_dec_source_label, ctx);
     WDH dec_vertex_index(m_dec_vertex_index, ctx);
-    WDH dec_barcode(m_dec_barcode, ctx);
-    WDH dec_parent_barcode(m_dec_parent_barcode, ctx);
+    WDH dec_uniqueID(m_dec_uniqueID, ctx);
+    WDH dec_parent_uniqueID(m_dec_parent_uniqueID, ctx);
     WDH dec_muon_origin_label(m_dec_muon_origin_label, ctx);
 
     // decorate loop
@@ -110,8 +110,8 @@ namespace FlavorTagDiscriminants {
 
       // everything else is already decorated to the associated truth particle
       const auto truth = m_trackTruthOriginTool->getTruth(track);
-      dec_barcode(*track) = truth ? HepMC::uniqueID(truth) : HepMC::UNDEFINED_ID; // FIXME make variable names consistent
-      dec_parent_barcode(*track) = truth ? acc_parent_barcode(*truth) : HepMC::UNDEFINED_ID; // FIXME make variable names consistent
+      dec_uniqueID(*track) = truth ? HepMC::uniqueID(truth) : HepMC::UNDEFINED_ID;
+      dec_parent_uniqueID(*track) = truth ? acc_parent_uniqueID(*truth) : HepMC::UNDEFINED_ID;
       dec_type_label(*track) = truth ? acc_type_label(*truth) : TruthDecoratorHelpers::TruthType::Label::NoTruth;
       dec_source_label(*track) = truth ? acc_source_label(*truth) : TruthDecoratorHelpers::TruthSource::Label::NoTruth;
       dec_vertex_index(*track) = truth ? acc_vertex_index(*truth) : -2;

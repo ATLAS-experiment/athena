@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: James Catmore (James.Catmore@cern.ch) with modifications by Benjamin Nachman (bnachman@cern.ch)
@@ -176,15 +176,15 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 	      xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
 	      newParticleCollection->push_back( xTruthParticle );
 	      
-	      int motherBarcode = HepMC::INVALID_PARTICLE_ID;
+	      int motherUniqueID = HepMC::INVALID_PARTICLE_ID;
 	      int motherPDGid = 0;
 	      float mothermass = 0.;
 	      if (theParticle->hasProdVtx()){
 		const xAOD::TruthParticle * mother_hold = theParticle->prodVtx()->incomingParticle(0);
-		motherBarcode = HepMC::uniqueID(mother_hold);
+		motherUniqueID = HepMC::uniqueID(mother_hold);
 		motherPDGid = mother_hold->pdgId();
 		mothermass = mother_hold->p4().M()/1000.;
-		xTruthParticle->setUid(motherBarcode);
+		xTruthParticle->setUid(motherUniqueID);
 		int mcount = 0;
 		//Let's find the first mother of mothers that has a different PDGid
 		while (mother_hold->hasProdVtx() && mother_hold->pdgId()==theParticle->pdgId()){
@@ -193,16 +193,16 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 		    break; //should not come in here, but just in case we have a closed loop from a bug
 		  }
 		  mother_hold = mother_hold->prodVtx()->incomingParticle(0);
-		  motherBarcode = HepMC::uniqueID(mother_hold);
+		  motherUniqueID = HepMC::uniqueID(mother_hold);
 		  motherPDGid = mother_hold->pdgId();
 		  mothermass = mother_hold->p4().M()/1000.;
 		}
 	      }
 
           *xTruthParticle=*theParticle;
-          xTruthParticle->setUid(motherBarcode);
+          xTruthParticle->setUid(motherUniqueID);
           originDecorator(*xTruthParticle) = motherPDGid;
-          typeDecorator(*xTruthParticle) = motherBarcode; // FIXME barcode-based
+          typeDecorator(*xTruthParticle) = motherUniqueID;
           typeDecoratorMass(*xTruthParticle) = mothermass;
 	      
 	      //Check for tau decays

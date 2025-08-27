@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PFSUBTRACTIONTOOL_H
@@ -122,7 +122,7 @@ private:
 
   ToolHandle<PFSimulateTruthShowerTool> m_theTruthShowerSimulator{this, "PFSimulateTruthShowerTool", "", "The truth shower simulator"};
 
-  /** Read handle key to decorate CaloCluster with threeN leading truth particle barcode and energy */
+  /** Read handle key to decorate CaloCluster with threeN leading truth particle uniqueID and energy */
   SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_caloClusterReadDecorHandleKeyNLeadingTruthParticles{this,"CaloClusterReadDecorHandleKey_NLeadingTruthParticles",""};
 
   /** Further discussion about why this flag exists can be found in https://its.cern.ch/jira/browse/ATLJETMET-1692

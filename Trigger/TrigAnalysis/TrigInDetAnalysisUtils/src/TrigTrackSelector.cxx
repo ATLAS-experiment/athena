@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sun  2 Nov 2014 11:10:06 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -153,12 +153,12 @@ bool TrigTrackSelector::selectTrack( const TrigInDetTrack* track, const TrigInDe
 	double dof     = 0; /// not definied ofr TrigInDetTracks
 
 	bool truth = false;
-	int match_barcode = -1;
+	int match_uniqueID = HepMC::INVALID_PARTICLE_ID;
 	
 	if ( truthMap ) { 
 	  const TrigInDetTrackTruth* trackTruth = truthMap->truth(track);
 	  if (trackTruth!=0 && trackTruth->nrMatches() > 0) {
-	    match_barcode = HepMC::uniqueID(trackTruth->bestSiMatch());
+	    match_uniqueID = HepMC::uniqueID(trackTruth->bestSiMatch());
 	    truth = true;
 	  }
 	}
@@ -169,7 +169,7 @@ bool TrigTrackSelector::selectTrack( const TrigInDetTrack* track, const TrigInDe
 								     nBlayerHits, nPixelHits, nSctHits, nSiHits, 
 								     nStrawHits, nTrHits, 
 								     hitPattern, multiPattern, 
-								     algoid, truth, -1, match_barcode,
+								     algoid, truth, -1, match_uniqueID,
 								     expectBL, id) ; 
 	
 	//	std::cout << "SUTT ID track " << *t << "\t0x" << std::hex << track->HitPattern() << std::dec << std::endl;
@@ -645,7 +645,7 @@ bool TrigTrackSelector::selectTrack( const xAOD::TruthParticle* track, double x0
     unsigned bitmap = 0;
 
     int trackAuthor = track->pdgId();
-    int barcode     = HepMC::uniqueID(track);
+    int uniqueID     = HepMC::uniqueID(track);
 
 #if 0
     std::cout << "\t\t\tSUTT TP track" 
@@ -665,7 +665,7 @@ bool TrigTrackSelector::selectTrack( const xAOD::TruthParticle* track, double x0
 				      deta,  dphi, dz0, dd0, dpT,
 				      nBlayerHits, nPixelHits, nSctHits, nSiHits,
 				      nStrawHits,  nTrtHits,   bitmap, 0,
-				      trackAuthor,  false, barcode, -1,  
+				      trackAuthor,  false, uniqueID, -1,  
 				      expectBL, id) ;  
 
     /// useful debug info - leave in
@@ -819,9 +819,9 @@ TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned 
     ///   }
     /// }    
 
-    /// how about storing barcode/status/pidg info?
+    /// how about storing uniqueID/status/pidg info?
     int author  = track->pdgId();   /// this isn't good!! but it will do for testing 
-    int barcode = HepMC::uniqueID(track); /// probably won't work either
+    int uniqueID = HepMC::uniqueID(track); /// probably won't work either
 
 
     unsigned long id = (unsigned long)track;
@@ -849,7 +849,7 @@ TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned 
                                      0, 0, 0, 0, 0,
                                      0, 0, 0, 0,
                                      0, 0, 0, 0,
-                                     author, false, barcode, -1,
+                                     author, false, uniqueID, -1,
                                      false, 
                                      id ) ;  
 

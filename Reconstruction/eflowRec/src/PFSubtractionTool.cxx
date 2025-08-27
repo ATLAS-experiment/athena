@@ -140,7 +140,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
       if (truthLink.isValid()) trackMatchedTruthParticle = *truthLink;
  
       if (trackMatchedTruthParticle){
-        double barcode = HepMC::uniqueID(trackMatchedTruthParticle);
+        double uniqueID = HepMC::uniqueID(trackMatchedTruthParticle);
 
         SG::ReadDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterReadDecorHandleNLeadingTruthParticles(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles);
         if (!caloClusterReadDecorHandleNLeadingTruthParticles.isValid()){
@@ -157,10 +157,10 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
 
           SG::AuxElement::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
 
-          std::vector<std::pair<unsigned int, double > > barCodeTruthPairs = accessor(*(thisCluster->getCluster())); // FIXME barcode-based
+          std::vector<std::pair<unsigned int, double > > uniqueIDTruthPairs = accessor(*(thisCluster->getCluster()));
 
-          for (auto &barCodeTruthPair : barCodeTruthPairs){ // FIXME barcode-based
-            if (barCodeTruthPair.first == barcode){ // FIXME barcode-based
+          for (auto &uniqueIDTruthPair : uniqueIDTruthPairs){
+            if (uniqueIDTruthPair.first == uniqueID){
               eflowTrackClusterLink* thisLink = eflowTrackClusterLink::getInstance(thisEfRecTrack, thisCluster, ctx);
               bestClusters.push_back(thisLink);
               break;

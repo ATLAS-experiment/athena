@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MuonRecoValidationTool_H
@@ -97,8 +97,8 @@ namespace Muon {
             return index;
         }
 
-        // extract majority barcode out of a set of identifiers
-        int getBarcode(const std::set<Identifier>& ids) const; // FIXME barcode-based
+        // extract majority truth uniqueID out of a set of Identifiers
+        int getUniqueID(const std::set<Identifier>& ids) const;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         ServiceHandle<IMuonEDMHelperSvc> m_edmHelperSvc{this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",

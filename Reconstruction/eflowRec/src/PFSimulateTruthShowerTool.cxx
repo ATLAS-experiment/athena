@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "eflowRec/PFSimulateTruthShowerTool.h"
 
@@ -42,7 +42,7 @@ void PFSimulateTruthShowerTool::simulateShower(eflowCaloObject& thisEFlowCaloObj
         if (!truthLink.isValid()) continue;
 
         //get uniqueID of particle
-        const int barcode = (*truthLink)->uid();
+        const int uniqueID = (*truthLink)->uid();
 
         SG::ReadHandle<CaloCalibrationHitContainer> tileActiveCaloCalibrationHitReadHandle(m_tileActiveCaloCalibrationHitReadHandleKey);
         if (!tileActiveCaloCalibrationHitReadHandle.isValid()){
@@ -58,8 +58,8 @@ void PFSimulateTruthShowerTool::simulateShower(eflowCaloObject& thisEFlowCaloObj
 
         std::map<Identifier,double> identifierToTruthEnergyMap;
 
-        for (auto thisCalibHit : *tileActiveCaloCalibrationHitReadHandle) this->fillMap(identifierToTruthEnergyMap,barcode,*thisCalibHit); // FIXME barcode-based
-        for (auto thisCalibHit : *lArActiveCaloCalibrationHitReadHandle) this->fillMap(identifierToTruthEnergyMap,barcode,*thisCalibHit); // FIXME barcode-based
+        for (auto thisCalibHit : *tileActiveCaloCalibrationHitReadHandle) this->fillMap(identifierToTruthEnergyMap,uniqueID,*thisCalibHit);
+        for (auto thisCalibHit : *lArActiveCaloCalibrationHitReadHandle) this->fillMap(identifierToTruthEnergyMap,uniqueID,*thisCalibHit);
 
         //find the matched clusters
         std::vector<eflowRecCluster*> matchedClusters;
@@ -76,8 +76,8 @@ void PFSimulateTruthShowerTool::simulateShower(eflowCaloObject& thisEFlowCaloObj
     }//track loop
 }
 
-void PFSimulateTruthShowerTool::fillMap(std::map<Identifier,double>& identifierToTruthEnergyMap, int barcode, const CaloCalibrationHit& thisCalibHit) const{
-  if (HepMC::uniqueID(thisCalibHit) == barcode) {
+void PFSimulateTruthShowerTool::fillMap(std::map<Identifier,double>& identifierToTruthEnergyMap, int uniqueID, const CaloCalibrationHit& thisCalibHit) const{
+  if (HepMC::uniqueID(thisCalibHit) == uniqueID) {
         Identifier thisIdentifier = thisCalibHit.cellID();
         unsigned int count = identifierToTruthEnergyMap.count(thisIdentifier);
         if (0 == count) identifierToTruthEnergyMap[thisIdentifier] = thisCalibHit.energyEM() + thisCalibHit.energyNonEM();

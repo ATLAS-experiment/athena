@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTH_PARTICLE_DECORATOR_ALG_HH
@@ -49,9 +49,9 @@ namespace FlavorTagDiscriminants {
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_vertex_index {
       this, "ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "ftagTruth vertex index of the truth particle"};
-    SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_parent_barcode {
-      this, "ftagTruthParentBarcode", "ftagTruthParentBarcode", 
-        "Barcode of parent of linked truth particle"};
+    SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_parent_uniqueID {
+      this, "ftagTruthParentBarcode", "ftagTruthParentBarcode",
+        "UniqueID of parent of linked truth particle"};
 
     // truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_truthOriginTool {
