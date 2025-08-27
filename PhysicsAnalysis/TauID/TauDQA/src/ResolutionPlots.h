@@ -18,7 +18,8 @@ namespace Tau{
     
     TH1* m_ptResolution{};
     TH1* m_etaResolution{};
-    TH1* m_phiResolution{};	 
+    TH1* m_phiResolution{};
+    TH1* m_chargeResolution{};	 
     
   private:
     void initializePlots();

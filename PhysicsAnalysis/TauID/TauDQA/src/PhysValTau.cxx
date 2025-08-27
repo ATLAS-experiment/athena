@@ -78,11 +78,6 @@ StatusCode PhysValTau::fillHistograms()
 
   ATH_MSG_DEBUG("Number of taus: " << taus->size());
 
-  // Retrieve truth container
-  const xAOD::TruthParticleContainer* truthParticles = nullptr;
-  if ( m_isMC ) {
-    ATH_CHECK( evtStore()->retrieve(truthParticles, m_TruthParticleContainerName) );
-  }
   
   // Retrieve event info and beamSpotWeight
   const xAOD::EventInfo* eventInfo = nullptr;
