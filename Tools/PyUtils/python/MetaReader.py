@@ -367,7 +367,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         )
                     return main_base
 
-                def _find_associated_pairs(auxes: dict) -> set:
+                def _find_associated_pairs(auxes: dict) -> list[tuple[str, str]]:
                     # Build lookup tables
                     aux_map = {}
                     for k in auxes:
@@ -381,10 +381,10 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                             main_map[base] = k
 
                     # Find pairs
-                    pairs = set()
+                    pairs = []
                     for base, aux_key in aux_map.items():
                         if base in main_map:
-                            pairs.add((aux_key, main_map[base]))
+                            pairs.append((aux_key, main_map[base]))
                     return pairs
 
                 for pair in _find_associated_pairs(auxes):
