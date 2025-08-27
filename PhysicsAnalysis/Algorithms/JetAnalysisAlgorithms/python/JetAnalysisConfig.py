@@ -32,7 +32,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
             info="")
         self.addOption ('runGhostMuonAssociation', None, type=bool,
             info="whether to set up the jet-ghost-muon association algorithm "
-            "CP::JetGhostMuonAssociationAlg. The default is False.")
+            "CP::JetGhostMuonAssociationAlg. The default is True for non-PHYSLITE and False for PHYSLITE.")
         self.addOption ('runTruthJetTagging', None, type=bool,
             info="whether to set up the jet truth tagging algorithm "
             "CP::JetTruthTagAlg. The default is True.")
