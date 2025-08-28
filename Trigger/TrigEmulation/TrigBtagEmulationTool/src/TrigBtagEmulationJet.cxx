@@ -9,6 +9,16 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 namespace Trig {
 
+TrigBtagEmulationJet::TrigBtagEmulationJet()
+  : m_jet(nullptr),
+    m_btag(nullptr),
+    m_pt(0),
+    m_et(0),
+    m_eta(0),
+    m_phi(0),
+    m_p4()
+{}
+
 TrigBtagEmulationJet::TrigBtagEmulationJet(const xAOD::Jet& jet, const std::string& btagLink)
   : TrigBtagEmulationJet(jet, xAOD::BTaggingUtilities::getBTagging(jet, btagLink))
 {}
