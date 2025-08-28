@@ -4,6 +4,17 @@
 
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
 
+
+namespace {
+  // The stereo angle is fixed and can be hardcoded
+  const double tan_stereo_angle = std::tan(0.02618);
+
+  constexpr int bc_wind = 4; // fixed time window (in bunch crossings) during which the algorithm collects ART hits
+  constexpr int n_addc = 4;
+  constexpr int n_vmm  = 128;
+}
+
+
 MMT_Diamond::MMT_Diamond(const int diamXthreshold, const bool uv, const int diamUVthreshold, const int roadSize,
     const int olapEtaUp, const int olapEtaDown, const int olapStereoUp, const int olapStereoDown): AthMessaging(Athena::getMessageSvc(), "MMT_Diamond") {
     m_xthr = diamXthreshold;
@@ -51,27 +62,21 @@ void MMT_Diamond::createRoads(std::vector<std::shared_ptr<MMT_Road> >& roads, co
   }
 }
 
-void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std::vector<std::shared_ptr<MMT_Road> >& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const {
-
-  int bc_start = 999999;
-  int bc_end = -1;
-  int bc_wind = 4; // fixed time window (in bunch crossings) during which the algorithm collects ART hits
-  unsigned int ibc = 0;
+void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, const std::vector<std::shared_ptr<MMT_Road> >& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const {
 
   // Comparison with lambda function (easier to implement)
   std::sort(hits.begin(), hits.end(), [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
-  bc_start = hits.front()->getBC();
-  bc_end = hits.front()->getBC() + 16;
+  const int bc_start = hits.front()->getBC();
+  const int bc_end = hits.front()->getBC() + 16;
   ATH_MSG_DEBUG("Window Start: " << bc_start << " - Window End: " << bc_end);
 
-  std::vector<std::shared_ptr<MMT_Hit> > hits_now = {};
-  std::vector< std::pair<int, float> > vmm_same = {};
-  std::vector< std::pair<int, int> > addc_same = {};
-  std::vector<int> to_erase = {};
-  int n_addc = 4;
-  int n_vmm  = 128;
+  std::vector<std::shared_ptr<MMT_Hit> > hits_now;
+  std::vector< std::pair<int, float> > vmm_same;
+  std::vector< std::pair<int, int> > addc_same;
+  std::vector<int> to_erase;
 
   // each road makes independent triggers, evaluated on each BC
+  unsigned int ibc = 0;
   for (int bc = hits.front()->getBC(); bc < bc_end; bc++) {
     // Cleaning stuff
     hits_now.clear();
@@ -153,13 +158,13 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
 
         // evaluating mode of the BCID of the hits in the diamond
         // default setting in the firmware is the mode of the hits's bcid in the diamond
-        int bcidVal=bcidVec.at(0), bcidCount=1, modeCount=1, bcidMode=bcidVec.at(0);
+        int bcidVal=bcidVec[0], bcidCount=1, modeCount=1, bcidMode=bcidVec[0];
         for (unsigned int i=1; i<bcidVec.size(); i++){
-          if (bcidVec.at(i) == bcidVal){
+          if (bcidVec[i] == bcidVal){
             bcidCount++;
           } else {
             bcidCount = 1;
-            bcidVal = bcidVec.at(i);
+            bcidVal = bcidVec[i];
           }
           if (bcidCount > modeCount) {
             modeCount = bcidCount;
@@ -183,17 +188,14 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         slope.my = road->avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
         slope.uavg = road->avgSofUV(2,4);
         slope.vavg = road->avgSofUV(3,5);
-        static const double tan_stereo_angle = std::tan(0.02618); // The stereo angle is fixed and can be hardcoded
         slope.mx = (slope.uavg-slope.vavg)/(2.*tan_stereo_angle);
-        double theta = std::atan(std::sqrt(std::pow(slope.mx,2) + std::pow(slope.my,2)));
+        const double theta = std::atan(std::sqrt(std::pow(slope.mx,2) + std::pow(slope.my,2)));
         slope.theta = (slope.my > 0.) ? theta : M_PI - theta;
         slope.eta = -1.*std::log(std::tan(slope.theta/2.));
         slope.dtheta = (slope.mxl - slope.my)/(1. + slope.mxl*slope.my);
         slope.side = (slope.my > 0.) ? 'A' : 'C';
-        double phi = std::atan(slope.mx/slope.my);
-        double phiShifted = phiShift(sectorPhi, phi, slope.side);
-        slope.phi = phi;
-        slope.phiShf = phiShifted;
+        slope.phi = std::atan(slope.mx/slope.my);
+        slope.phiShf = phiShift(sectorPhi, slope.phi, slope.side);
         slope.lowRes = road->evaluateLowRes();
 
         diamondSlopes.push_back(slope);
@@ -209,9 +211,3 @@ double MMT_Diamond::phiShift(const int n, const double phi, const char side) con
   else if (n == 8) return (Phi + ((Phi > 0.) ? -1. : 1.)*shift);
   else             return (Phi - shift);
 }
-
-slope_t::slope_t(uint64_t ev, int bc, unsigned int tC, unsigned int rC, int iX, int iU, int iV, unsigned int uvb, unsigned int xb, unsigned int uvm, unsigned int xm,
-                 int age, double mxl, double my, double uavg, double vavg, double mx, double th, double eta, double dth, char side, double phi, double phiS,
-                 bool lowRes) :
-  event(ev), BC(bc), totalCount(tC), realCount(rC), iRoad(iX), iRoadu(iU), iRoadv(iV), uvbkg(uvb), xbkg(xb), uvmuon(uvm), xmuon(xm),
-  age(age), mxl(mxl), my(my), uavg(uavg), vavg(vavg), mx(mx), theta(th), eta(eta), dtheta(dth), side(side), phi(phi), phiShf(phiS), lowRes(lowRes) {}
