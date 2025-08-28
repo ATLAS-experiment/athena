@@ -14,7 +14,7 @@ from array import array
 import argparse
     
 parser = argparse.ArgumentParser()
-parser.add_argument('--year', type=str, help='A year number (15-24) or run3 for full Run3')
+parser.add_argument('--year', type=str, help='A year number (15-25) or run3 or year1_year2_...')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
@@ -26,19 +26,29 @@ indir = args.indir
 outdir = args.outdir
 
 if year == "run3": 
-    years = ["22", "23", "24"]
+    years = ["22", "23", "24", "25"]
     out_tag = "run3"
     time_format = "%m/%y"
     xtitle = 'Month / Year'
-    date_tag = "Run 3, #sqrt{s} = 13.6 TeV"
-    labelsize = 44
+    date_tag = "Run 3,#kern[-0.5]{ }#sqrt{s} = 13.6 TeV"
+    labelsize = 55
+    multiyear = True
+elif len(year.split("_")) > 1: 
+    years = year.split("_")
+    out_tag = "data"+year
+    time_format = "%m/%y"
+    xtitle = 'Month / Year'
+    date_tag = "Run 3,#kern[-0.5]{ }#sqrt{s} = 13.6 TeV"
+    labelsize = 55
+    multiyear = True
 else: 
     years = [year]
     out_tag = "data"+year
     time_format = "%d/%m"
     xtitle = 'Date in 20' + year
-    date_tag = "Data 20" + year  + ", #sqrt{s} = 13.6 TeV"
+    date_tag = "Data 20" + year  + ",#kern[-0.5]{ }#sqrt{s} = 13.6 TeV"
     labelsize = 22
+    multiyear = False
 
 def main():
     plot_efficiency(channel, years)
@@ -103,7 +113,7 @@ def plot_efficiency_comb(channel, years):
     comb_graph.GetXaxis().SetTimeOffset(0,"gmt")
     comb_graph.SetMarkerSize(1)
 
-    if out_tag == "run3":
+    if multiyear:
         c1 = R.TCanvas("c1", "c1", 2000, 1200)
     else:
         c1 = R.TCanvas()
@@ -124,14 +134,6 @@ def plot_efficiency_comb(channel, years):
     leg.AddEntry(comb_graph, "#varepsilon_{event}^{"+pt.plotlabel[channel]+"}", "ep")
     
     leg.Draw()
-
-    if channel == "Zee":
-        new_trig_line = R.TLine(1683743066.0, ymin, 1683743066.0, ymax)
-        new_trig_line.SetLineColor(R.kBlue)
-        new_trig_line.SetLineWidth(3)
-        new_trig_line.SetLineStyle(2)
-        new_trig_line.Draw("same")
-        R.gPad.Update()
 
     comb_graph.GetHistogram().SetXTitle("Date")
     c1.SaveAs(outdir + channel + "_eventeff_vs_time_"+out_tag+".pdf")
@@ -204,11 +206,11 @@ def plot_efficiency(channel, years):
     arr_recoeff = np.array(arr_recoeff)
     arr_recoerr = np.array(arr_recoerr)
 
+    ymin, ymax = 0.61, 0.96
     if channel == "Zee": 
         lep = "e"
     elif channel == "Zmumu": 
         lep = "#mu"
-    ymin, ymax = 0.64, 0.96
 
     trig_graph = R.TGraphErrors(len(arr_date), arr_date, arr_trigeff, R.nullptr,arr_trigerr)
     trig_graph.GetHistogram().SetYTitle("Efficiency")
@@ -230,7 +232,7 @@ def plot_efficiency(channel, years):
     reco_graph.SetMarkerColor(R.kRed)
     reco_graph.SetLineColor(R.kRed)
 
-    if out_tag == "run3":
+    if multiyear:
         c1 = R.TCanvas("c1", "c1", 2000, 1200)
     else:
         c1 = R.TCanvas()
@@ -256,14 +258,6 @@ def plot_efficiency(channel, years):
     
     leg.Draw()
     
-    if channel == "Zee":
-        new_trig_line = R.TLine(1683743066.0, ymin, 1683743066.0, ymax)
-        new_trig_line.SetLineColor(R.kBlue)
-        new_trig_line.SetLineWidth(3)
-        new_trig_line.SetLineStyle(2)
-        new_trig_line.Draw("same")
-        R.gPad.Update()
-
     trig_graph.GetHistogram().SetXTitle("Date")
     c1.SaveAs(outdir + channel + "_eff_vs_time_"+out_tag+".pdf")
 
