@@ -122,55 +122,16 @@ def fromRunArgs(runArgs):
     # import the TLA decoding
     cfg.flagPerfmonDomain('Trigger')
 
-    PhToKeep = ['topoetcone20', 'topoetcone40', 'etcone20']
-    PhVars = '.'.join(PhToKeep)
-    VtxToKeep = ['chiSquared','numberDoF','x','y','z','covariance','vertexType']
-    VtxVars = '.'.join(VtxToKeep)
-
+    # add additional objects reconstructed in RAWtoDAOD step (i.e. not in trigger EDM)
     additional_output_items = {
         'PhysicsTLA': [],
         'FTagPEBTLA':
         [
             'xAOD::BTaggingContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
             'xAOD::BTaggingAuxContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.',
-            'xAOD::VertexContainer#HLT_IDVertex_FS',
-            'xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,
         ],
-        'DarkJetPEBTLA': [
-            # Jets
-            'xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA', 
-            'xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.',
-            # General
-            'xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',
-            'xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',
-            'TrigRoiDescriptorCollection#HLT_Roi_DarkJetPEBTLA',
-            'xAOD::VertexContainer#HLT_IDVertex_FS',
-            'xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,
-            # MET 
-            # Disabled for now, to be added when TLA/PEB MET dev is completed
-            # 'xAOD::TrigMissingETContainer#HLT_MET_tcpufit',
-            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_tcpufitAux',
-            # 'xAOD::TrigMissingETContainer#HLT_MET_trkmht',
-            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_trkmhtAux',
-            # 'xAOD::TrigMissingETContainer#HLT_MET_pfopufit',
-            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_pfopufitAux',
-            # 'xAOD::TrigMissingETContainer#HLT_MET_mhtpufit_pf',
-            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_mhtpufit_pfAux',
-            # 'xAOD::TrigMissingETContainer#HLT_MET_nn',
-            # 'xAOD::TrigMissingETAuxContainer#HLT_MET_nnAux',
-        ],
-        'EgammaPEBTLA':
-        [
-            'xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',
-            'xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',
-            'xAOD::PhotonContainer#HLT_egamma_Photons_TLA',
-            'xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,
-            'xAOD::eFexEMRoIContainer#L1_eEMRoI',  
-            'xAOD::eFexEMRoIAuxContainer#L1_eEMRoIAux.thresholdPatterns',
-            'xAOD::CaloClusterContainer#HLT_CaloEMClusters_Photon', 
-            'xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.'
-
-        ],
+        'DarkJetPEBTLA': [],
+        'EgammaPEBTLA': [],
     }[flags.Trigger.AODEDMSet]
     from TLARecoConfig.DAOD_TLA_OutputConfig import DAOD_TLA_OutputCfg
     cfg.merge( DAOD_TLA_OutputCfg(flags, additional_output_items) )
