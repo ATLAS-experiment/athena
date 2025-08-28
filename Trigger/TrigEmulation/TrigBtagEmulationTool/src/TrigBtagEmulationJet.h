@@ -16,7 +16,7 @@ namespace Trig {
 
 class TrigBtagEmulationJet {
 public:
-  TrigBtagEmulationJet() = delete;
+  TrigBtagEmulationJet();
   TrigBtagEmulationJet(const xAOD::Jet&, const std::string& btagLink = "btaggingLink");
   TrigBtagEmulationJet(const xAOD::Jet&, const xAOD::BTagging* btag);
   virtual ~TrigBtagEmulationJet() = default;

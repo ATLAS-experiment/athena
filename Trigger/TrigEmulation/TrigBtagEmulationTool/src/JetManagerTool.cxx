@@ -103,7 +103,7 @@ StatusCode JetManagerTool::retrieveByContainer(const EventContext& ctx,
 
     ATH_MSG_DEBUG( " - Ten largest jets:");
     for(unsigned int i = 0; i < 10 and i < sortedPreselJets->size(); i++) {
-      ATH_MSG_DEBUG( " - pt=" << (sortedPreselJets->at(i).pt() / Gaudi::Units::GeV) << " eta=" << sortedPreselJets->at(i).eta() );
+      ATH_MSG_DEBUG( " - pt=" << (sortedPreselJets->at(i).pt() * 0.001) << " eta=" << sortedPreselJets->at(i).eta() );
     }
   }
   else if (m_LHCPeriod == 2) {
@@ -126,7 +126,7 @@ StatusCode JetManagerTool::retrieveByContainer(const EventContext& ctx,
 
       if (msgLvl(MSG::DEBUG)) {
         for (const xAOD::Jet *jet : *theJetContainer) {
-          ATH_MSG_DEBUG("Jet pt=" << (jet->pt() / Gaudi::Units::GeV) << " eta=" << jet->eta());
+          ATH_MSG_DEBUG("Jet pt=" << (jet->pt() * 0.001) << " eta=" << jet->eta());
         }
       }
 
@@ -142,7 +142,7 @@ StatusCode JetManagerTool::retrieveByContainer(const EventContext& ctx,
             btag->MVx_discriminant("MV2c20", mv2c20_score);
             btag->MVx_discriminant("MV2c10", mv2c10_score);
             ATH_MSG_DEBUG("BTagging jet link index "
-                          << jetLink.at(0).index() << " pt=" << (btaggedJet->pt() / Gaudi::Units::GeV) << " eta=" << btaggedJet->eta()
+                          << jetLink.at(0).index() << " pt=" << (btaggedJet->pt() * 0.001) << " eta=" << btaggedJet->eta()
                           << ", mv2c20=" << mv2c20_score << ", mv2c10=" << mv2c10_score);
 
             // First check if the btagged jet is present in the jets retrieved by // the container
