@@ -30,13 +30,13 @@ namespace DiTau{
 
   void ResolutionPlots::fill(const xAOD::DiTauJet& ditau, float weight) {
 
-    static const SG::ConstAccessor<double> acc_lead_subjet_ptvis("TruthVisLeadPt");
-    static const SG::ConstAccessor<double> acc_lead_subjet_etavis("TruthVisLeadEta");
-    static const SG::ConstAccessor<double> acc_lead_subjet_phivis("TruthVisLeadPhi");
+    static const SG::ConstAccessor<float> acc_lead_subjet_ptvis("TruthVisLeadPt");
+    static const SG::ConstAccessor<float> acc_lead_subjet_etavis("TruthVisLeadEta");
+    static const SG::ConstAccessor<float> acc_lead_subjet_phivis("TruthVisLeadPhi");
     
-    static const SG::ConstAccessor<double> acc_sublead_subjet_ptvis("TruthVisSubleadPt");
-    static const SG::ConstAccessor<double> acc_sublead_subjet_etavis("TruthVisSubleadEta");
-    static const SG::ConstAccessor<double> acc_sublead_subjet_phivis("TruthVisSubleadPhi");
+    static const SG::ConstAccessor<float> acc_sublead_subjet_ptvis("TruthVisSubleadPt");
+    static const SG::ConstAccessor<float> acc_sublead_subjet_etavis("TruthVisSubleadEta");
+    static const SG::ConstAccessor<float> acc_sublead_subjet_phivis("TruthVisSubleadPhi");
 
     // fill histograms for the leading subjet 
     float ptratio = -999;
