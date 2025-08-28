@@ -31,7 +31,7 @@ void TestAddReference()
   dqm_core::Result* result = algorithm->execute("test",*hin,*aconfig);
   std::cout<<"Result "<<result->status_<<std::endl;
   TObject* o = result->getObject();
-  std::cout<<o->GetName()<<" "<<(static_cast<TObjArray>(o))->GetEntries()<<std::endl;
+  std::cout<<o->GetName()<<" "<<static_cast<TObjArray*>(o)->GetEntries()<<std::endl;
   //TH1* modifiedhisto = (TH1*)result->getObject();
   //modifiedhisto->SetLineColor(kBlue);
   //modifiedhisto->Draw("same");

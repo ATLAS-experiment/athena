@@ -76,7 +76,7 @@ dqm_algorithms::summary::BinwiseSummary::execute( const std::string &,
 	 tagIter != inputResult->tags_.end(); ++tagIter ) {
       if( tagIter->first.find("Algorithm--BinsDiffByStrips") != std::string::npos) {
 	if( inputobject->IsA()->InheritsFrom("TObjArray") ) {
-	  firstBinwiseHist = static_cast<TH1*>( (static_cast<TObjArray*>(inputobject))->First() );
+	  firstBinwiseHist = static_cast<TH1*> (static_cast<TObjArray*>(inputobject)->First());
 	  nBinsX = firstBinwiseHist->GetNbinsX();
 	  nBinsY = firstBinwiseHist->GetNbinsY();
 	  break;
@@ -125,7 +125,8 @@ dqm_algorithms::summary::BinwiseSummary::execute( const std::string &,
       std::string tagType = "ConfParameter--Role--Mask";
       if ( (stringPos = tag.find(tagType)) != std::string::npos) {
 	if ( inputobject->IsA()->InheritsFrom("TH1") ) {
-	  if( ((static_cast<TH1*>(inputobject))->GetNbinsX() == nBinsX) && ((static_cast<TH1*>(inputobject))->GetNbinsY() == nBinsY)) {
+	  if( (static_cast<TH1*>(inputobject)->GetNbinsX() == nBinsX) &&
+              (static_cast<TH1*>(inputobject)->GetNbinsY() == nBinsY)) {
 	    mask = static_cast<TH1*>(inputobject);
 	  }
 	}
@@ -136,7 +137,7 @@ dqm_algorithms::summary::BinwiseSummary::execute( const std::string &,
       tagType = "Algorithm--BinsDiffByStrips"; //<-The only algorithm so far which produces a binwise status.
       if ( (stringPos = tag.find(tagType)) != std::string::npos) {
 	if( inputobject->IsA()->InheritsFrom("TObjArray") ) {
-	  binwiseStatHist = static_cast<TH1*> (static_cast<TObjArray*>( inputobject)->First());
+	  binwiseStatHist = static_cast<TH1*> (static_cast<TObjArray*> (inputobject)->First());
 	  if( (binwiseStatHist->GetNbinsX() != nBinsX) || (binwiseStatHist->GetNbinsY() != nBinsY) ) {
 	    binwiseStatHist = 0;
 	  }
