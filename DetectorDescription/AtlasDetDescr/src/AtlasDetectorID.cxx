@@ -14,9 +14,19 @@
 #include <assert.h>
 #include <format>
 
-AtlasDetectorID::AtlasDetectorID(const std::string &name) : AthMessaging(name) {}
+AtlasDetectorID::AtlasDetectorID(const std::string &name,
+                                 const std::string& group)
+  : AthMessaging(name),
+    m_group (group)
+{
+}
 AtlasDetectorID::~AtlasDetectorID() {
     if(m_helper) delete m_helper;
+}
+
+const std::string& AtlasDetectorID::group() const
+{
+  return m_group;
 }
 
 Identifier AtlasDetectorID::mdt() const {
