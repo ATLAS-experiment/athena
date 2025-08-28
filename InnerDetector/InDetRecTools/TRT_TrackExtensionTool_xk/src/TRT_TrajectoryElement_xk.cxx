@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkSurfaces/RectangleBounds.h"
@@ -562,7 +562,7 @@ const Trk::RIO_OnTrack* InDet::TRT_TrajectoryElement_xk::rioOnTrack()
 
   int l = m_bestlink;
 
-  const Trk::StraightLineSurface* line = (const Trk::StraightLineSurface*)
+  const Trk::StraightLineSurface* line = static_cast<const Trk::StraightLineSurface*>
     (&(m_link[l].cluster()->detectorElement())->surface(m_link[l].cluster()->identify()));
   Trk::AtaStraightLine Tp(m_link[l].impact(),m_link[l].zlocal(),1.,1.,1.,*line);
   if(m_status==2)
