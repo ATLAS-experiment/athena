@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -178,9 +178,6 @@ protected:
   TGraphAsymmErrors* bookGraphAsymmErrors (const std::string& dir, const std::string& nam, const std::string& tit,
                                            int N, float* X, float* Y, float* X_errors1,
                                            float* X_errors2, float* Y_errors1, float* Y_errors2);
-
-  TMultiGraph* bookMultiGraph (const std::string& dir, const std::string& nam, const std::string& tit);
-
 
   StatusCode removeTObj(TObject* obj);
 

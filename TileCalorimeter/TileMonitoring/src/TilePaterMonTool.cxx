@@ -383,7 +383,7 @@ TGraph* TilePaterMonTool::bookGraph(const std::string& subdir, const std::string
 
   regGraph(subdir, hist);
 
-  return static_cast<TGraph*> (hist);
+  return hist;
 }
 
 class TGraphErrors1: public TGraphErrors {
@@ -412,7 +412,7 @@ TGraphErrors * TilePaterMonTool::bookGraphErrors(const std::string& subdir, cons
   hist->SetTitle(TString(tit));
 
   regGraph(subdir, hist);
-  return static_cast<TGraphErrors *> (hist);
+  return hist;
 }
 
 StatusCode TilePaterMonTool::removeTObj(TObject *obj) {
@@ -472,7 +472,7 @@ TGraphAsymmErrors* TilePaterMonTool::bookGraphAsymmErrors(const std::string& sub
   hist->SetTitle(TString(tit));
 
   regGraph(subdir, hist);
-  return static_cast<TGraphAsymmErrors*> (hist);
+  return hist;
 }
 
 class TMultiGraph1: public TMultiGraph {
@@ -493,16 +493,4 @@ class TMultiGraph1: public TMultiGraph {
   private:
     TDirectory* fDirectory;
 };
-
-TMultiGraph* TilePaterMonTool::bookMultiGraph(const std::string& subdir, const std::string& nam, const std::string& tit) {
-
-  TMultiGraph1* hist = new TMultiGraph1();
-  hist->SetName(TString(nam));
-  hist->SetTitle(TString(tit));
-  //dangerous cast here
-  regGraph(subdir, reinterpret_cast<TGraph*> (hist));
-  return static_cast<TMultiGraph*> (hist);
-}
-
-
 

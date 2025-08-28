@@ -152,8 +152,8 @@ InputDialog::InputDialog(const char *prompt, const char *defval, char *retstr)
    int      ax, ay;
 
    gVirtualX->TranslateCoordinates(main->GetId(), main->GetId(),
-                          ((static_cast<TGFrame *> (main))->GetWidth() - width) >> 1,
-                          ((static_cast<TGFrame *> (main))->GetHeight() - height) >> 1,
+                          (static_cast<TGFrame *> (main)->GetWidth() - width) >> 1,
+                          (static_cast<TGFrame *> (main)->GetHeight() - height) >> 1,
                           ax, ay, wdum);
    fDialog->Move(ax, ay);
    fDialog->SetWMPosition(ax, ay);
