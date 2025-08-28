@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // HIJetConstituentSubtractionTool.h
@@ -87,7 +87,7 @@ private:
 protected:
   /// \brief Protected set/get functions provide access to private data
   /// members in derived classes
-  inline SG::ReadHandleKey< xAOD::HIEventShapeContainer > EventShapeKey()  { return m_eventShapeKey; };
+  inline const SG::ReadHandleKey< xAOD::HIEventShapeContainer >& EventShapeKey()  { return m_eventShapeKey; };
   //That looks useless. commented out for the moment
   //inline std::string ModulationKey() const {return m_modulation_key;};
   inline const std::string& momentName() const { return m_momentName; };
