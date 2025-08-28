@@ -183,7 +183,7 @@ int convert_file(TObject* obj_input, TObject* obj_outout) {
 }
 
 int work_with_results_dir(TObject* obj_input, TObject* obj_outout) {
-  TDirectory* dir = static_cast<TDirectory*>( obj_input);
+  TDirectory* dir = static_cast<TDirectory*> (obj_input);
   TDirectory* save_to = static_cast<TDirectory*> (obj_outout);
 
   if (include_hist(dir)) {
