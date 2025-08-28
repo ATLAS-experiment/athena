@@ -92,8 +92,6 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
 
 atlas_add_citest( RecoRun3Data_Express
     SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data24_13p6TeV.00477023.express_express.merge.RAW._lb0287._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2025-01 ' --no-output-checks
-    LOG_IGNORE_PATTERN "WARNING FPE .*PixelChargeLUTCalibCondAlg"
-    # ignore FPEs from PixelChargeLUTCalibCondAlg
   )
   
 atlas_add_citest( ZdcRec_ZDCCalib 

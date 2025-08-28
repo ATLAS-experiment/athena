@@ -97,7 +97,7 @@ namespace TrigCompositeUtils {
       const Decision* m_decisionObject; //!< The Decision object node which I shadow
       std::vector<NavGraphNode*> m_filteredSeeds; //!< My seeds (edges in the graph), filtered on per-chain requirements.
       std::vector<NavGraphNode*> m_filteredChildren; //!< Two-way linking information, used when thinning the graph.
-      bool m_keepFlag; //!< Keep this node when slimming the NavGraph. Needs to be set explicitly
+      bool m_keepFlag{false}; //!< Keep this node when slimming the NavGraph. Needs to be set explicitly
 
   };
 
@@ -115,7 +115,7 @@ namespace TrigCompositeUtils {
       /**
        * @brief Construct an empty NavGraph
        **/
-      NavGraph();
+      NavGraph() = default;
 
       /**
        * @brief Destruct a NavGraph, default
@@ -211,7 +211,7 @@ namespace TrigCompositeUtils {
       std::map<const Decision*, size_t> m_nodePositionMap; //!< Map of Decision pointer and index of the node(that contains the Decision) in m_nodes.
       std::vector<std::unique_ptr<NavGraphNode>> m_nodes; //!< Vector of unique pointers to nodes in the graph.
       std::vector<NavGraphNode*> m_finalNodes; //!< Entry points into the navigation graph. When iterating over the graph, start from all of these places.
-      size_t m_edges; //!< Statistics on the number of edges, connecting the nodes in the graph.
+      size_t m_edges{0}; //!< Statistics on the number of edges, connecting the nodes in the graph.
   };
 
 }

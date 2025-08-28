@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ATHENA_CORE_NUMBER=16
+#export ATHENA_CORE_NUMBER=16
 
 inputEVNT=$1
 outputHITS=$2
