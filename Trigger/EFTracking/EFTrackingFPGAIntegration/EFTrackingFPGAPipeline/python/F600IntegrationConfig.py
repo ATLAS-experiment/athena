@@ -7,7 +7,41 @@ def F600IntegrationCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
-    kwarg.setdefault('xclbin', '/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F610/kernels.hw.xclbin')
+    kwarg.setdefault('xclbin', '/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F611/kernels.hw.xclbin')
+
+    kwarg.setdefault('PixelClusterInputPath', '/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3a/DataPrep_FullDet_SingleMuon/pixel_cluster_input.txt')
+    kwarg.setdefault('PixelStageOneSlicingInputPath', '/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3a/DataPrep_FullDet_SingleMuon/pixelL2G_output.txt')
+    kwarg.setdefault('InsideOutInputPath', '/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3a/F600_Region34_SingleMuon/slicing_PixelFirst_output.txt')
+
+# DataPrep
+    kwarg.setdefault('PixelClusteringKernelName', 'pixel_clustering_tool')
+    kwarg.setdefault('ProcessHitsKernelName', 'processHits')
+    kwarg.setdefault('PixelL2gKernelName', 'l2g_pixel_tool')
+    kwarg.setdefault('StripL2gKernelName', 'l2g_strip_tool')
+    kwarg.setdefault('PixelEdmPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEdmPrepKernelName', 'StripEDMPrep')
+    kwarg.setdefault('PixelFirstStageInputKernelName', 'krnl_input_stage_rtl')
+    kwarg.setdefault('PixelFirstStageOutputKernelName', 'krnl_output_stage_rtl')
+
+# Slicing Engine
+    kwarg.setdefault('PixelFirstStageSlicingIPName', 'slicing_engine')
+
+# Inside Out
+    kwarg.setdefault('MemReadKernelName', 'mem_read')
+    kwarg.setdefault('MemWriteKernelName', 'mem_write')
+
+# Space Points
+    kwarg.setdefault('SpacepointKernelName', 'spacepoint_tool')
+
+# NN Pathfinder
+    kwarg.setdefault('LoaderKernelName', 'loader')
+    kwarg.setdefault('UnloaderKernelName', 'unloader')
+
+# NN Classifier
+    kwarg.setdefault('NnOverlapDecoratorKernelName', 'NNOverlapDecorator_kernel')
+
+# Duplicate Remover
+    kwarg.setdefault('RunnerKernelName', 'runner')
 
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
@@ -29,7 +63,10 @@ def F600IntegrationCfg(flags, name = 'BenckmarkAlg', **kwarg):
         PrintEllapsedTime = True
     ))
 
-    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F600IntegrationAlg(**kwarg))
+    alg = CompFactory.EFTrackingFPGAIntegration.F600IntegrationAlg(**kwarg)
+    import ROOT
+    alg.OutputLevel = ROOT.MSG.DEBUG
+    acc.addEventAlgo(alg)
 
     return acc
 
@@ -68,7 +105,10 @@ if __name__ == "__main__":
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"]
+    # single muon
+    #flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"]
+    # ttbar
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
     
     flags.fillFromArgs()
     
@@ -125,6 +165,7 @@ if __name__ == "__main__":
 
     from AthenaCommon.Constants import DEBUG
     cfg.foreach_component("AthEventSeq/*").OutputLevel = DEBUG
+
     cfg.printConfig(withDetails=True, summariseProps=True)
 
     cfg.run(flags.Exec.MaxEvents)
