@@ -319,26 +319,25 @@ def BeamspotVertexPreProcessorCfg(
 
     if "TrackFitter" not in kwargs:
         from TrkConfig.CommonTrackFitterConfig import InDetStandaloneTrackFitterCfg
-        kwargs.setdefault("TrackFitter", cfg.addPublicTool(
-            cfg.popToolsAndMerge(InDetStandaloneTrackFitterCfg(
-            flags, FillDerivativeMatrix = True))))
+        kwargs.setdefault("TrackFitter", cfg.popToolsAndMerge(
+            InDetStandaloneTrackFitterCfg(flags, FillDerivativeMatrix = True)))
 
     if "TrackToVertexIPEstimatorTool" not in kwargs:
         from TrkConfig.TrkVertexFitterUtilsConfig import (
             TrackToVertexIPEstimatorCfg)
-        kwargs.setdefault("TrackToVertexIPEstimatorTool", cfg.addPublicTool(
-            cfg.popToolsAndMerge(TrackToVertexIPEstimatorCfg(flags))))
+        kwargs.setdefault("TrackToVertexIPEstimatorTool", cfg.popToolsAndMerge(
+            TrackToVertexIPEstimatorCfg(flags)))
 
     if "BSConstraintTrackSelector" not in kwargs:
         from InDetConfig.InDetTrackSelectionToolConfig import (
             Align_InDetTrackSelectionToolCfg)
-        kwargs.setdefault("BSConstraintTrackSelector", cfg.addPublicTool(
-            cfg.popToolsAndMerge(Align_InDetTrackSelectionToolCfg(flags))))
+        kwargs.setdefault("BSConstraintTrackSelector", cfg.popToolsAndMerge(
+            Align_InDetTrackSelectionToolCfg(flags)))
 
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", cfg.addPublicTool(
-            cfg.popToolsAndMerge(InDetExtrapolatorCfg(flags))))
+        kwargs.setdefault("Extrapolator", cfg.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
 
     kwargs.setdefault("UseSingleFitter", True)
     kwargs.setdefault("RunOutlierRemoval", False)
