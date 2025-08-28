@@ -93,10 +93,7 @@ dqm_algorithms::MDTTDCOfflineSpectrum::execute(	const std::string &  name,
   
   if(!t0Fit || !tmaxFit){
     MDTFitTDC(histogram.get(), t0, t0Err, tmax, tmaxErr);
-    t0Fit = histogram->GetFunction("func1");
-    tmaxFit = histogram->GetFunction("func2");
     tdrift = tmax - t0;
-    if(!t0Fit || !tmaxFit) throw dqm_core::BadConfig( ERS_HERE, name, "TH1 has no TF1" );
   }else{
     t0 = t0Fit->GetParameter(1);
     tmax = tmaxFit->GetParameter(1);
@@ -104,6 +101,7 @@ dqm_algorithms::MDTTDCOfflineSpectrum::execute(	const std::string &  name,
     t0Err = t0Fit->GetParameter(2);
     tmaxErr = tmaxFit->GetParameter(2);
   }
+
   
   ERS_DEBUG(1, m_name << " TDrift " << " is " << tdrift );
   ERS_DEBUG(1,"Green threshold: "<< t0_low_warning << " < t0 < "<< t0_high_warning << " &&  " << tmax_low_warning <<" < tmax < " << tmax_high_warning <<   
@@ -190,7 +188,7 @@ void dqm_algorithms::MDTTDCOfflineSpectrum::MDTFitTDC(TH1* h, double &t0, double
   std::unique_ptr<TF1> func1 = std::make_unique<TF1>("func1", "[0]+([3]/(1+(TMath::Exp((-x+[1])/[2]))))", 0, up); // tzero             
   func1->SetParameters(parESD0, parESD1, parESD2, parESD3);
   if(h->GetEntries()>100){
-    h->Fit("func1","RQ");
+    h->Fit("func1","NRQ");
     t0 = func1->GetParameter(1) ;
     t0err = func1->GetParError(1);
     double binAtT0 = (double)h->GetBinContent(h->FindBin(t0));
@@ -208,7 +206,7 @@ void dqm_algorithms::MDTTDCOfflineSpectrum::MDTFitTDC(TH1* h, double &t0, double
     func2->SetParLimits(0, parESD0, 2.0*parESD0+1);
     func2->SetParLimits(2, 5, 90);
     func2->SetParLimits(3, 0.2*parESD3, 7*parESD3);
-    h->Fit("func2","WWRQ+");
+    h->Fit("func2","WWNRQ+");
     tmax = func2->GetParameter(1);
     tmaxerr = func2->GetParError(1);
     double binAtTmax = (double)h->GetBinContent(h->FindBin(tmax));
