@@ -13,12 +13,16 @@
 '''
 def ZdcLEDMonitoringConfig(inputFlags, run_type):
 
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+
 #---------------------------------------------------------------------------------------
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'ZdcAthMonitorCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     zdcLEDMonAlg = helper.addAlgorithm(CompFactory.ZdcLEDMonitorAlgorithm,'ZdcLEDMonAlg')
+    
     zdcLEDMonAlg.EnableZDC = inputFlags.Detector.EnableZDC_ZDC
     zdcLEDMonAlg.EnableRPD = inputFlags.Detector.EnableZDC_RPD
 # --------------------------------------------------------------------------------------------------
@@ -126,7 +130,9 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
                             ybins=n_time_bins_default,ymin=0.0,ymax=time_max)
 
 
-    return helper.result()
+    acc = helper.result()
+    result.merge(acc)
+    return result
     
 
 if __name__=='__main__':
