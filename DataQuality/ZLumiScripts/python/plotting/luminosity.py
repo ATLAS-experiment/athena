@@ -43,8 +43,7 @@ def plot_channel(channel):
 
     Lumi = channel+'Lumi'
     LumiErr = channel+'LumiErr'
-    LumiString = "Z #rightarrow "+channel[1:]
-    LumiString = LumiString.replace("mu", "#mu")
+    LumiString = pt.plotlabel[channel]
         
     # Drop LBs with no Z-counting information or short livetime
     dfz0 = dfz.copy()
@@ -55,15 +54,13 @@ def plot_channel(channel):
         print("No valid LBs found. Exiting")
         return
 
-    # Calculate overall ratio against ATLAS
-    normalisation = dfz[Lumi].sum() / dfz['OffLumi'].sum()
-    print(f"{Lumi}/OffLumi mean ratio = {normalisation:.3f}")
-
     dfz['OffDelLumi'] = dfz['OffLumi']*dfz['LBFull']
 
     # Add by groups of 20 LBs or pileup bins: scale by livetime, square errors, add, unscale livetime
+    # overall ratio against ATLAS after livetime scaling
     for entry in [Lumi, LumiErr, 'OffLumi']:  
         dfz[entry] *= dfz['LBLive']
+    normalisation = dfz[Lumi].sum() / dfz['OffLumi'].sum()
     dfz[LumiErr] *= dfz[LumiErr]
     if args.usemu:
         dfz['OffMu'] = dfz['OffMu'].astype(int)
@@ -74,6 +71,8 @@ def plot_channel(channel):
     dfz[LumiErr]   = np.sqrt(dfz[LumiErr])
     for entry in [Lumi, LumiErr, 'OffLumi']:  
         dfz[entry] /= dfz['LBLive']
+
+    print(f"{Lumi}/OffLumi mean ratio = {normalisation:.3f}")
 
     if args.t0:
         translist = []
@@ -190,14 +189,9 @@ def plot_channel(channel):
 
     hr.GetYaxis().SetNdivisions(3)
 
-    if run_number < 427394:
-        yearsqrtstxt = "Data 20" + pt.get_year(run_number) + ", #sqrt{s} = 13 TeV"
-    else:
-        yearsqrtstxt = "Data 20" + pt.get_year(run_number) + ", #sqrt{s} = 13.6 TeV"
-
     pt.drawAtlasLabel(0.2, 0.88, "Internal")
     if not args.t0:
-        pt.drawText(0.2, 0.82, yearsqrtstxt, size=22)
+        pt.drawText(0.2, 0.82, pt.get_yearsqrtstxt(run_number), size=22)
     pt.drawText(0.2, 0.77, "LHC Fill " + str(lhc_fill), size=22)
     pt.drawText(0.2, 0.72, LumiString + " counting", size=22)
        
@@ -236,7 +230,7 @@ def plot_channel(channel):
 
     pt.drawAtlasLabel(0.2, 0.88, "Internal")
     if not args.t0:
-        pt.drawText(0.2, 0.82, yearsqrtstxt, size=22)
+        pt.drawText(0.2, 0.82, pt.get_yearsqrtstxt(run_number), size=22)
     pt.drawText(0.2, 0.77, "LHC Fill " + str(lhc_fill), size=22)
     pt.drawText(0.2, 0.72, LumiString + " counting", size=22)
 
@@ -308,7 +302,8 @@ def plot_ratio():
         outfile = "ZeeZmm_ratio_vs_lb.pdf"
 
     gr.GetXaxis().SetTitle(xtitle)
-    gr.GetYaxis().SetTitle("L_{Z #rightarrow ee} / L_{Z #rightarrow #mu#mu}")
+    
+    gr.GetYaxis().SetTitle(pt.Leemumuratiolabel)
 
     ymin, ymax = 0.85, 1.15
     median = np.median(arr_rat)
@@ -325,21 +320,16 @@ def plot_ratio():
     gr.GetFunction("pol0").Draw("same l")
     gr.Draw("same ep")
 
-    if run_number < 427394:
-        yearsqrtstxt = "Data 20" + pt.get_year(run_number) + ", #sqrt{s} = 13 TeV"
-    else:
-        yearsqrtstxt = "Data 20" + pt.get_year(run_number) + ", #sqrt{s} = 13.6 TeV"
-
     pt.drawAtlasLabel(0.2, 0.88, "Internal")
     if not args.t0:
-        pt.drawText(0.2, 0.82, yearsqrtstxt, size=22)
+        pt.drawText(0.2, 0.82, pt.get_yearsqrtstxt(run_number), size=22)
     pt.drawText(0.2, 0.77, "LHC Fill " + str(lhc_fill), size=22)
 
     leg = R.TLegend(0.17, 0.2, 0.90, 0.3)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.05)
     leg.SetNColumns(3)
-    leg.AddEntry(gr, "L_{Z #rightarrow ee}/L_{Z #rightarrow #mu#mu}", "ep")
+    leg.AddEntry(gr, pt.Leemumuratiolabel, "ep")
     leg.AddEntry(gr.GetFunction("pol0"), f"Mean = {mean:.3f}", "l")
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()

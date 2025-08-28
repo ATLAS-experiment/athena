@@ -10,10 +10,12 @@ import pandas as pd
 import math
 import time
 
+narrowspace="#kern[-0.8]{ }"
 plotlabel = {}
-plotlabel["Zee"] = "Z #rightarrow ee"
-plotlabel["Zmumu"] = "Z #rightarrow #mu#mu"
-plotlabel["Zll"] = "Z #rightarrow ll"
+plotlabel["Zee"] = "Z"+narrowspace+"#rightarrow"+narrowspace+"ee"
+plotlabel["Zmumu"] = "Z"+narrowspace+"#rightarrow"+narrowspace+"#mu#mu"
+plotlabel["Zll"] = "Z"+narrowspace+"#rightarrow"+narrowspace+"ll"
+Leemumuratiolabel = "L_{"+plotlabel["Zee"]+"} / L_{"+plotlabel["Zmumu"]+"}"
 
 # global run livetime cut in seconds, for paper 40min, reduce to 10min for now
 runlivetimecut = 10*60 # in seconds
@@ -145,7 +147,8 @@ def make_bands(vec_in, stdev, yval):
 
 def get_year(run):
     run=int(run)
-    if run >= 472553: return "24"
+    if run >= 495667: return "25"
+    elif run >= 472553: return "24"
     elif run >= 450227: return "23"
     elif run >= 427394: return "22"
     elif run >= 348885: return "18"
@@ -155,12 +158,20 @@ def get_year(run):
     else:
         print("ERROR: Cannot classify run", run)
         exit(1)
+
+def get_yearsqrtstxt(run_number):
+    yearsqrtstxt = "Data 20" + get_year(run_number) + ",#kern[-0.5]{ }"
+    if run_number < 427394:
+        yearsqrtstxt += "#sqrt{s} = 13 TeV"
+    else:
+        yearsqrtstxt += "#sqrt{s} = 13.6 TeV"
+    return yearsqrtstxt
     
 def get_dfz(basedir, year, run, channel, standardcuts = True):
     '''
     Standard retrieval of Z counting Panda dataframe from CSV
     '''
-    if year=="run3":
+    if year=="run3" or len(year.split("_")) > 1:
         mydir = basedir + "data"+get_year(run)+"_13p6TeV/physics_Main/"
     elif year=="run2":
         mydir = basedir + "data"+get_year(run)+"_13TeV/physics_Main/"
