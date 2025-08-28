@@ -33,6 +33,8 @@ StatusCode IntegrationBase::initialize()
     std::vector<cl::Device> allDevices;
     int device_id = 0;
 
+    bool foundAccelerator = false;
+
     // Print platform information
     for (cl::Platform pf : platforms)
     {
@@ -44,10 +46,6 @@ StatusCode IntegrationBase::initialize()
 
         pf.getDevices(CL_DEVICE_TYPE_ALL, &allDevices);
         ATH_MSG_INFO("There are " << allDevices.size() << " devices in this platform.");
-
-        // Loop over all devices in the platform and see if there is an accelerator card
-        // If there is an accelerator card, use the first one
-        bool foundAccelerator = false;
 
         for(auto device : allDevices)
         {
@@ -85,12 +83,18 @@ StatusCode IntegrationBase::initialize()
         device_id++;
         }
 
-        // If there is no accelerator card, print error and return
         if(!foundAccelerator)
         {
-            ATH_MSG_ERROR("Couldn't find an FPGA accelerator card in this platform");
-            return StatusCode::FAILURE;
+            ATH_MSG_INFO("Couldn't find an FPGA accelerator card in this platform");
+        } else {
+          break;
         }
+    }
+
+    if(!foundAccelerator)
+    {
+        ATH_MSG_ERROR("Couldn't find an FPGA accelerator card on any platform");
+        return StatusCode::FAILURE;
     }
 
     ATH_MSG_INFO("Using device number " << device_id << " which is a FPGA accelerator card: " << m_accelerator.getInfo<CL_DEVICE_NAME>());
