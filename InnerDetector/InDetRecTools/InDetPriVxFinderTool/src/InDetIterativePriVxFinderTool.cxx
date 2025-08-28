@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -488,7 +488,8 @@ InDetIterativePriVxFinderTool::findVertex(
               (*tracksIter).initialPerigee();
 
             if (trackPerigee == nullptr) {
-              ATH_MSG_ERROR(" nullptr to perigee");
+              ATH_MSG_ERROR("Cast to perigee gives null pointer");
+              return std::make_pair(theVertexContainer, theVertexAuxContainer);
             }
 
             double chi2_newvtx = compatibility(*trackPerigee, *myxAODVertex);
