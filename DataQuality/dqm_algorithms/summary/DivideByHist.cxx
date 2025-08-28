@@ -257,7 +257,7 @@ dqm_algorithms::summary::DivideByHist::execute(const std::string & name,
   newresult = dqm_algorithms::tools::ExecuteNamedAlgorithm(algorithmName,*hQuotient,config);
   
   //Make the quotient histogram the output result object
-  newresult->object_ = (boost::shared_ptr<TObject>)static_cast<TObject*>(hQuotient);
+  newresult->object_ = boost::shared_ptr<TObject>(hQuotient);
 
   return newresult;
 }

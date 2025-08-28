@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 void TestDivideReference()
@@ -38,7 +38,7 @@ void TestDivideReference()
   dqm_core::Result* result = algorithm->execute("test",*hin,*aconfig);
   std::cout<<"Result "<<result->status_<<std::endl;
   TObject* o = result->getObject();
-  std::cout<<o->GetName()<<" "<<(static_cast<TObjArray*>(o))->GetEntries()<<std::endl;
+  std::cout<<o->GetName()<<" "<<static_cast<TObjArray*>(o)->GetEntries()<<std::endl;
   TObjArray* results = static_cast<TObjArray*>(o);
   TH1* modifiedhisto = static_cast<TH1*>(results->At(1));
   modifiedhisto->SetLineColor(kBlue);

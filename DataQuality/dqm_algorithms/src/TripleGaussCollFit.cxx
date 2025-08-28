@@ -329,7 +329,7 @@ namespace dqm_algorithms {
       for (int lb = 0; lb < nxbin; lb++) {
     
 	sprintf(buf, fmt, psz, lb); //to avoid possible leaks (?) - should see how DQ framework behaves
-	TH1D* proj = (static_cast<const TH2*>( histogram))->ProjectionY(buf, lb, lb);
+	TH1D* proj = static_cast<const TH2*>(histogram)->ProjectionY(buf, lb, lb);
 	Double_t good_entries = proj->GetEntries() - proj->GetBinContent(0) - proj->GetBinContent(proj->GetNbinsX()+1); 
 	if (good_entries < minEvents) {
 	  if (writeSig)

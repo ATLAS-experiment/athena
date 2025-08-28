@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinsDiffByStrips.cxx calculates average bin value for a strip of bins and finds bins that are outliers from that strip. DQ decision based on worst bin only, not number of bad bins.
@@ -901,7 +901,7 @@ if(name_flag==1) {
 
   resultList->SetOwner(true);
  
-  result->object_ =  (boost::shared_ptr<TObject>)static_cast<TObject*>(resultList);
+  result->object_ =  boost::shared_ptr<TObject>(resultList);
   
 
   if( doChiSquaredTest ) {

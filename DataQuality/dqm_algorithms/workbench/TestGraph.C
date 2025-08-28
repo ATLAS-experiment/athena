@@ -7,7 +7,7 @@ void TestGraph()
   dqm_algorithms::GraphTest* algorithm = new dqm_algorithms::GraphTest();
   TFile* f=TFile::Open("../share/Test.root");//##filename##);
   TObject* obj=f->Get("LBA19_hi_tails_5");//##histoname##);
-  (static_cast<TGraphAsymmErrors*>(obj))->SetPointError(23,0,0,0.5,0.5);// Set big errors on one point
+  static_cast<TGraphAsymmErrors*>(obj)->SetPointError(23,0,0,0.5,0.5);// Set big errors on one point
   // Creating a reference object...
   TGraphAsymmErrors* ref = new TGraphAsymmErrors(48);
   ref->SetNameTitle("reference","reference");
