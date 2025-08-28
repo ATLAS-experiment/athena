@@ -16,7 +16,6 @@ class EventLoopCPRunScript(CPBaseRunner):
                                  action='store_true', help='Run the job with the direct driver')
         derivedGroup.add_argument('--work-dir', dest='work_dir', nargs='?', const='workDir', default=None,
                                   help='The work directory for the EL job. defaults to "workDir".')
-        derivedGroup.add_argument('--no-factory-preload', dest='no_factory_preload', action='store_true', help='Do not preload the component factories for the EL job. The component factories save memory and sidestep some technical issues, so you should not disable them unless you have a good reason to do so.')
         derivedGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
         
         expertGroup = self.parser.add_argument_group('Experts arguments')
@@ -87,7 +86,6 @@ class EventLoopCPRunScript(CPBaseRunner):
         Assistant function to call driver submit. Move the submission to a child process to avoid the main process being terminated.
         Directly calling external driver submission will not return controls to the main process, the main thread will be terminated.
         '''
-        import os
         if (pid := os.fork()) == 0: # child process
             name = self.args.work_dir if self.args.work_dir else 'workDir'
             driver.submit(self.job, name)
@@ -118,10 +116,6 @@ class EventLoopCPRunScript(CPBaseRunner):
             self.job.options().setString(ROOT.EL.Job.optStreamAliases, "ANALYSIS=" + ROOT.EL.Job.histogramStreamName)
         else:
             self.job.outputAdd(ROOT.EL.OutputStream('ANALYSIS'))
-        if not self.args.no_factory_preload:
-            preload = os.getenv('EL_FACTORY_PRELOAD', 'libComponentFactoryPreloaderDict.so,CP::preloadComponentFactories')
-            self.logger.info(f"Preloading factories: {preload}")
-            self.job.options().setString(ROOT.EL.Job.optFactoryPreload, preload)
         
         if self.args.run_perf_stat:
             self.job.options().setBool(ROOT.EL.Job.optXAODPerfStats, 1)
