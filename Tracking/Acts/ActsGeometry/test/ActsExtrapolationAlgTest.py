@@ -61,8 +61,8 @@ if "__main__" == __name__:
   ]
 
   # needed to construct the calo geometry in ACTS
-  from AthenaConfiguration.ComponentFactory import CompFactory
-  tgSvc.CaloVolumeBuilder = CompFactory.ActsCaloTrackingVolumeBuilder()
+  #from AthenaConfiguration.ComponentFactory import CompFactory
+  #tgSvc.CaloVolumeBuilder = CompFactory.ActsCaloTrackingVolumeBuilder()
 
   cfg.printConfig()
 

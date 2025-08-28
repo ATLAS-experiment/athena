@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -242,14 +242,16 @@ namespace Athena_test
                       "UnLockedDelete", !LOCKED, DELETE).isSuccess());
     assert(foo12.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
-    assert(rSG.record(cpFoo=new Foo(13), "Const").isSuccess());
+    cpFoo = new Foo(13);
+    assert(rSG.record(cpFoo, "Const").isSuccess());
 
     std::unique_ptr<const Foo> foo13a (new Foo(130));
     assert(rSG.record(std::move(foo13a), "Const2").isSuccess());
     assert(foo13a.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
     //FIXME!!! assert(rSG.record(cpFoo=new Foo(14), "ConstUnLocked", !LOCKED).isSuccess());
-    SGASSERTERROR(rSG.record(cpFoo=new Foo(15), "Const").isSuccess());
+    cpFoo = new Foo(15);
+    SGASSERTERROR(rSG.record(cpFoo, "Const").isSuccess());
 
 
     /// Test overwriting.
@@ -481,34 +483,34 @@ namespace Athena_test
     : public implements<IConversionSvc>
   {
   public:
-    virtual StatusCode addConverter(IConverter*) { abort(); }
-    virtual StatusCode addConverter(const CLID&) { abort(); }
-    virtual StatusCode removeConverter(const CLID&) { abort(); }
-    virtual IConverter* converter(const CLID&) { abort(); }
-    virtual StatusCode connectOutput(const std::string&) { abort(); }
+    virtual StatusCode addConverter(IConverter*) override { abort(); }
+    virtual StatusCode addConverter(const CLID&) override { abort(); }
+    virtual StatusCode removeConverter(const CLID&) override { abort(); }
+    virtual IConverter* converter(const CLID&) override { abort(); }
+    virtual StatusCode connectOutput(const std::string&) override { abort(); }
     virtual StatusCode connectOutput(const std::string&,
-                                     const std::string&) { abort(); }
+                                     const std::string&) override { abort(); }
     virtual StatusCode commitOutput(const std::string&,
-                                    bool) { abort(); }
-    virtual StatusCode initialize() { abort(); }
-    virtual StatusCode finalize() { abort(); }
-    virtual const CLID& objType() const { abort(); }
-    virtual long repSvcType() const { abort(); }
-    virtual StatusCode setDataProvider(IDataProviderSvc*) { abort(); }
-    virtual SmartIF<IDataProviderSvc>& dataProvider() const { abort(); }
-    virtual StatusCode setConversionSvc(IConversionSvc*) { abort(); }
-    virtual SmartIF<IConversionSvc>& conversionSvc()    const { abort(); }
-    virtual StatusCode setAddressCreator(IAddressCreator*) { abort(); }
-    virtual SmartIF<IAddressCreator>& addressCreator()    const { abort(); }
-    virtual StatusCode fillObjRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateObj(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateObjRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode createRep(DataObject*, IOpaqueAddress*&) { abort(); }
-    virtual StatusCode fillRepRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateRep(IOpaqueAddress*, DataObject*)  { abort(); }
-    virtual StatusCode updateRepRefs(IOpaqueAddress*, DataObject*) { abort(); }
+                                    bool) override { abort(); }
+    virtual StatusCode initialize() override { abort(); }
+    virtual StatusCode finalize() override { abort(); }
+    virtual const CLID& objType() const override { abort(); }
+    virtual long repSvcType() const override { abort(); }
+    virtual StatusCode setDataProvider(IDataProviderSvc*) override { abort(); }
+    virtual SmartIF<IDataProviderSvc>& dataProvider() const override { abort(); }
+    virtual StatusCode setConversionSvc(IConversionSvc*) override { abort(); }
+    virtual SmartIF<IConversionSvc>& conversionSvc()    const override { abort(); }
+    virtual StatusCode setAddressCreator(IAddressCreator*) override { abort(); }
+    virtual SmartIF<IAddressCreator>& addressCreator()    const override { abort(); }
+    virtual StatusCode fillObjRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateObj(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateObjRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode createRep(DataObject*, IOpaqueAddress*&) override { abort(); }
+    virtual StatusCode fillRepRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateRep(IOpaqueAddress*, DataObject*)  override { abort(); }
+    virtual StatusCode updateRepRefs(IOpaqueAddress*, DataObject*) override { abort(); }
 
-    virtual StatusCode createObj(IOpaqueAddress*, DataObject*&);
+    virtual StatusCode createObj(IOpaqueAddress*, DataObject*&) override;
   };
 
 
@@ -525,14 +527,14 @@ namespace Athena_test
     : public IOpaqueAddress
   {
   public:
-    virtual unsigned long        addRef     () { return 0; }
-    virtual unsigned long        release    () { return 0; }
-    virtual const CLID&          clID       () const { abort(); }
-    virtual long                 svcType    () const { abort(); }
-    virtual IRegistry*           registry   () const { abort(); }
-    virtual void                 setRegistry(IRegistry*) { abort(); }
-    virtual const std::string*   par        () const { abort(); }
-    virtual const unsigned long* ipar       () const { abort(); }
+    virtual unsigned long        addRef     () override { return 0; }
+    virtual unsigned long        release    () override { return 0; }
+    virtual const CLID&          clID       () const override { abort(); }
+    virtual long                 svcType    () const override { abort(); }
+    virtual IRegistry*           registry   () const override { abort(); }
+    virtual void                 setRegistry(IRegistry*) override { abort(); }
+    virtual const std::string*   par        () const override { abort(); }
+    virtual const unsigned long* ipar       () const override { abort(); }
   };
 } // namespace Athena_test
 
@@ -733,11 +735,10 @@ namespace Athena_test {
 
   void testClear(::StoreGateSvc& rSG) {
 
-    Foo* pFoo;    
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     Bar* pBar = new Bar();
     Base* bDum(0);
     assert(rSG.record(pBar, "aBar", LOCKED, DELETE).isSuccess());
@@ -785,8 +786,8 @@ namespace Athena_test {
     //try to put a VersionedKey on top
     VersionedKey myKey("aVersObj", 77);
     assert(rSG.record(new Foo(77), (std::string)myKey).isSuccess());
-    const Foo* pFoo77(0);
-    assert(0 != (pFoo77 = rSG.retrieve<Foo>(myKey)));
+    const Foo* pFoo77 = rSG.retrieve<Foo>(myKey);
+    assert(0 != pFoo77);
     assert(pFoo77->i() == 77);
     //test that we can retrieve the same object with an unversioned key
     assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
@@ -831,11 +832,11 @@ namespace Athena_test {
     cout << "\n*** StoreGateSvcClient_test Keys BEGINS ***" << endl;
     rSG.clearStore().ignore();
 
-    Foo* pFoo;    
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    Foo* pFoo = new Foo;
+    assert(rSG.record(pFoo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     assert (rSG.setAlias(pFoo, "fooAlias").isSuccess());
 
     std::vector<std::string> keys;
@@ -862,10 +863,10 @@ namespace Athena_test {
     //get rid of the two RESET dobjs
     rSG.clearStore(/*force=*/true).ignore();
 
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     rSG.clearStore().ignore();
     rSG.keys<Foo>(keys);
     //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
@@ -916,12 +917,14 @@ namespace Athena_test {
 
     assert(rSG.retrieve(pVec,"BVec").isSuccess());    
     //second retrieve does not trigger retrieve of AuxStore
-    assert( 0 != (pVec=rSG.retrieve<TestVector<BX> >("BVec")) );
+    pVec = rSG.retrieve<TestVector<BX> >("BVec");
+    assert( 0 != pVec );
 
     const TestVector<BX>* cpVec(0);
     assert(rSG.retrieve(cpVec, "CVec").isSuccess());    
     // a regular retrieve ignores a missing aux store
-    assert( 0 != (cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec")) );
+    cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec");
+    assert( 0 != cpVec );
     
     //deprecated but we need to test it nonetheless...
 #ifdef TEST_DEPRECATED

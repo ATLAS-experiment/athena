@@ -113,6 +113,12 @@ StatusCode HitValAlg::setupPRDs(){
     if (m_doTGCPRD) { 
         m_tree.addBranch(std::make_unique<TGCPRDVariables>(m_tree, m_TgcPrdKey, msgLevel())); 
     }
+    if (m_doMDTPRD) { 
+        m_tree.addBranch(std::make_unique<MDTPRDVariables>(m_tree, m_MdtPrdKey, msgLevel())); 
+    }
+    if (m_doRPCPRD) { 
+        m_tree.addBranch(std::make_unique<RPCPRDVariables>(m_tree, m_RpcPrdKey, msgLevel())); 
+    }
     return StatusCode::SUCCESS;
 }
 

@@ -2,9 +2,7 @@
 from AthenaConfiguration.Enums import HIMode
 from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
-
-def beamSpotRecoPreInc(flags):
-    """beamSpotReco pre exec flags for Reco_tf with CA"""
+def beamSpotRecoPreIncCommon(flags):
     flags.Detector.EnableAFP = False
     flags.Detector.EnableLucid = False
     flags.Detector.EnableCalo = False
@@ -13,7 +11,6 @@ def beamSpotRecoPreInc(flags):
     flags.Detector.EnableTRT = False
     flags.Detector.EnableZDC = False
 
-    flags.Common.doExpressProcessing = True
     flags.Reco.EnableTrigger = False
     flags.Reco.EnableCombinedMuon = False
     flags.Reco.EnableEgamma = False
@@ -31,8 +28,19 @@ def beamSpotRecoPreInc(flags):
     flags.Tracking.PrimaryPassConfig = PrimaryPassConfig.VtxBeamSpot
     flags.Tracking.doTrackSegmentsDisappearing = False
 
-    flags.GeoModel.Align.Dynamic = True
     flags.DQ.enableLumiAccess = False
+
+
+def beamSpotRecoPreInc(flags):
+    beamSpotRecoPreIncCommon(flags)
+
+    flags.Common.doExpressProcessing = True
+
+    flags.GeoModel.Align.Dynamic = True
+
+
+def beamSpotRecoPreIncMC(flags):
+    beamSpotRecoPreIncCommon(flags)
 
 
 def beamSpotRecoPostInc(flags, cfg):

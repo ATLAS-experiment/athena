@@ -6,8 +6,6 @@
 #ifndef COLUMNAR_CORE_COLUMNAR_CORE_DICT_H
 #define COLUMNAR_CORE_COLUMNAR_CORE_DICT_H
 
-#include <ColumnarCore/ContainerId.h>
-
 #include <ColumnarCore/ColumnarTool.h>
 
 #endif

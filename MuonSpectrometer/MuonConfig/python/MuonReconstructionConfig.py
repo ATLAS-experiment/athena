@@ -39,7 +39,7 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::VertexContainer#MSDisplacedVertex"]
     aod_items += ["xAOD::VertexAuxContainer#MSDisplacedVertexAux."]
 
-    if flags.Input.isMC:
+    if flags.Input.isMC or flags.Overlay.DataOverlay:
         # Truth Particle Container
         aod_items += ["xAOD::TruthParticleContainer#MuonTruthParticles"]
         aod_items += ["xAOD::TruthParticleAuxContainer#MuonTruthParticlesAux."]
@@ -70,11 +70,16 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["Muon::MdtPrepDataContainer#MDT_DriftCircles"]
 
     if flags.Muon.writexAODPRD:
-        esd_items += ["xAOD::MdtDriftCircleContainer#*", "xAOD::MdtDriftCircleAuxContainer#*" ]
-        esd_items += ["xAOD::sTgcStripContainer#*", "xAOD::sTgcStripAuxContainer#*" ]
-        esd_items += ["xAOD::MMClusterContainer#*", "xAOD::MMClusterAuxContainer#*" ]
-        esd_items += ["xAOD::TgcStripContainer#*", "xAOD::TgcStripAuxContainer#*" ]
-        esd_items += ["xAOD::RpcStripContainer#*", "xAOD::RpcStripAuxContainer#*" ]
+        esd_items += ["xAOD::MdtDriftCircleContainer#xMdtDriftCircles", "xAOD::MdtDriftCircleAuxContainer#xMdtDriftCirclesAux." ]
+        esd_items += ["xAOD::MdtTwinDriftCircleContainer#xMdtTwinDriftCircles", "xAOD::MdtTwinDriftCircleAuxContainer#xMdtTwinDriftCirclesAux." ]
+        esd_items += ["xAOD::sTgcStripContainer#xAODsTgcStrips", "xAOD::sTgcStripAuxContainer#xAODsTgcStripsAux." ]
+        esd_items += ["xAOD::sTgcPadContainer#xAODsTgcPads", "xAOD::sTgcPadAuxContainer#xAODsTgcPadsAux." ]
+        esd_items += ["xAOD::sTgcWireContainer#xAODsTgcWires", "xAOD::sTgcWireAuxContainer#xAODsTgcWiresAux." ]
+        esd_items += ["xAOD::MMClusterContainer#xAODMMClusters", "xAOD::MMClusterAuxContainer#xAODMMClustersAux." ]
+        esd_items += ["xAOD::TgcStripContainer#xTgcStrips", "xAOD::TgcStripAuxContainer#xTgcStripsAux." ]
+        esd_items += ["xAOD::RpcStripContainer#xRpcStrips", "xAOD::RpcStripAuxContainer#xRpcStripsAux." ]
+        esd_items += ["xAOD::RpcStrip2DContainer#xRpcBILStrips", "xAOD::RpcStrip2DAuxContainer#xRpcBILStripsAux." ]
+
 
     # trigger related info for offline DQA
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
@@ -157,11 +162,13 @@ def MuonReconstructionCfg(flags):
 
     # FIXME - this is copied from the old configuration, but I'm not sure it really belongs here.
     # It's probably better to have as part of TrackBuilding, or Segment building...
-    if flags.Input.isMC:
+    if flags.Input.isMC  or flags.Overlay.DataOverlay:
         # filter TrackRecordCollection (true particles in muon spectrometer)
-        if "MuonEntryLayerFilter" not in flags.Input.Collections:
+        if "MuonEntryLayerFilter" not in flags.Input.Collections and \
+            ("MuonEntryLayer" in flags.Input.Collections):
             result.addEventAlgo(CompFactory.TrackRecordFilter())
-        if "MuonExitLayerFilter" not in flags.Input.Collections:
+        if "MuonExitLayerFilter" not in flags.Input.Collections and \
+            ("MuonExitLayer" in flags.Input.Collections):
             result.addEventAlgo(CompFactory.TrackRecordFilter("TrackRecordFilterMuonExitLayer",
                                                               inputName="MuonExitLayer",
                                                               outputName="MuonExitLayerFilter"))
@@ -186,7 +193,7 @@ def MuonReconstructionCfg(flags):
 
         # Check if we're making PRDs
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.
-        if flags.Muon.makePRDs and flags.Input.isMC:
+        if flags.Muon.makePRDs:
             if not flags.Muon.usePhaseIIGeoSetup:
                 from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
                 result.merge(MuonPRD_MultiTruthMakerCfg(flags))

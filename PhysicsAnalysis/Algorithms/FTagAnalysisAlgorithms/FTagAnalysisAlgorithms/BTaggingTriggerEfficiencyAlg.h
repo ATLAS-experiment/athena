@@ -17,6 +17,7 @@
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODJet/JetContainer.h>
+#include "xAODBTagging/BTaggingContainer.h"
 #include <TrigDecisionTool/TrigDecisionTool.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <memory>
@@ -54,6 +55,9 @@ namespace CP
     Gaudi::Property<float> m_btagThreshold {this, "btagThreshold", -1.,
 	"b-tag trigger cut, only used with Run 2 trigger EDM"};
 
+    Gaudi::Property<float> m_etamax {this, "etaMax", 2.4, 
+  "eta max cut from trigger chain"};
+
     /// \brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
@@ -85,12 +89,17 @@ namespace CP
       this, "selectionDecoration", "", "the decoration for the asg selection"};
 
   private:
-    StatusCode passTriggerBtag(const xAOD::Jet* jet, bool& pass) const;
+    StatusCode passTriggerBtag(const xAOD::Jet* jet, bool& pass, bool& matched) const;
 
     bool isSameJet(const xAOD::IParticle *jet1, const xAOD::IParticle *jet2) const;
-
+    
     StatusCode getBtagScore(const xAOD::IParticle* jet, double& hlt_bscore) const;
-
+    
+    SG::ReadHandleKey<xAOD::JetContainer> m_bjetInput {this, "HLT_BJets", 
+      "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets", "Input b-Jet Collection Key, retrieved from reconstructed jets"};    
+  
+    private:
+    std::map<const xAOD::Jet*, const xAOD::Jet*> m_matchedOfflineOnlineJets;
   };
 }
 

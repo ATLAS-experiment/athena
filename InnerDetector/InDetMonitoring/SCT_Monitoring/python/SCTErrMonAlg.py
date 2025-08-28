@@ -10,9 +10,18 @@
 
 
 def SCTErrMonAlgConfig(flags):
+    import logging
+    local_logger = logging.getLogger('AthenaMonitoringCfg')
+    info = local_logger.info
+    info('SCTErrMonAlgConfig')
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
+
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if flags.Common.isOnline:
+        result.merge(addFolders(flags,'/TDAQ/RunCtrl/DataTakingMode','TDAQ',className='AthenaAttributeList'))
+        info('SCTErrMonAlgConfig: added DATA COOL folders')
 
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, 'SCTErrMonCfg')
@@ -238,6 +247,20 @@ def SCTErrMonAlgConfig(flags):
             xmin=0.5,
             xmax=sctMon.NBINS_LBs+0.5,
             opt='kAlwaysCreate')
+
+        if iProblem == sctMon.summary:
+            myMonGroup.defineHistogram(
+                varname="lumiBlock, detectorCoverage" +
+                sctMon.coverageVarNames[iProblem]+"InR4P;SCT_Coverage" +
+                sctMon.coverageVarNames[iProblem]+"InR4PVsLbs",
+                type="TProfile",
+                title=coverageTitles[iProblem] + " in Ready for Physics" +
+                ";LumiBlock;Detector Coverage [%]",
+                path="DetectorCoverage",
+                xbins=sctMon.NBINS_LBs,
+                xmin=0.5,
+                xmax=sctMon.NBINS_LBs+0.5,
+                opt='kAlwaysCreate')
 
     # Fiiled in fillByteStreamErrors
     myMonGroup.defineHistogram(varname="lumiBlock, psTripModules;SCT_ModulesWithPSTripVsLbs",

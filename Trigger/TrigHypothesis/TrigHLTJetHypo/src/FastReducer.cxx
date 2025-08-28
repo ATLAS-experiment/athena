@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./FastReducer.h"
@@ -18,7 +18,7 @@ public:
     return m_tree.depth(rhs) > m_tree.depth(lhs);
   }
 private:
-  Tree m_tree;
+  const Tree& m_tree;
 };
 
 

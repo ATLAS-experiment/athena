@@ -9,7 +9,7 @@
 
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "ActsEvent/MultiTrajectory.h"
-#include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/PersistentTrackContainer.h"
 #include "ActsEvent/TrackSummaryContainer.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "GaudiKernel/StatusCode.h"
@@ -32,6 +32,15 @@ std::string prefixFromTrackContainerName(const std::string& tracks);
 
 class MutableTrackContainerHandlesHelper {
  public:
+  
+ /** @brief Constructor taking the pointer to the class holding the object used to declare the 
+  *         data dependency from the WriteHandleKeys to the AvalancheScheduler. The object should be
+  *         defined in the header like
+  *             ActsTrk::MutableTrackContainerHandlesHelper m_trackHelper{this};
+  */ 
+ template <class PropOwner> 
+      MutableTrackContainerHandlesHelper(PropOwner* owner);
+
   /**
    * Sets up the handles
    * @arg prefix - common prefix for all the names
@@ -46,8 +55,8 @@ class MutableTrackContainerHandlesHelper {
    * @arg - geoContext - geometry context, needed in surfaces conversion
    * @arg evtContext - event context (needed for SG operations)
    */
-  std::unique_ptr<ActsTrk::TrackContainer> moveToConst(
-      ActsTrk::MutableTrackContainer&& tc,
+  std::unique_ptr<ActsTrk::PersistentTrackContainer> moveToConst(
+      ActsTrk::MutablePersistentTrackContainer&& tc,
       const Acts::GeometryContext& geoContext,
       const EventContext& evtContext) const;
 
@@ -82,7 +91,15 @@ class ConstTrackContainerHandlesHelper {
    */
   StatusCode initialize(const std::string& prefix);
 
-  std::unique_ptr<ActsTrk::TrackContainer> build(
+   /** @brief Constructor taking the pointer to the class holding the object used to declare the 
+  *         data dependency from the WriteHandleKeys to the AvalancheScheduler. The object should be
+  *         defined in the header like
+  *             ActsTrk::ConstTrackContainerHandlesHelper m_trackHelper{this};
+  */ 
+ template <class PropOwner> 
+      ConstTrackContainerHandlesHelper(PropOwner* owner);
+
+  std::unique_ptr<ActsTrk::PersistentTrackContainer> build(
       const Acts::TrackingGeometry* geo,
       const Acts::GeometryContext& geoContext,
       const EventContext& context) const;
@@ -100,8 +117,7 @@ class ConstTrackContainerHandlesHelper {
   SG::WriteHandleKey<ActsTrk::MultiTrajectory> m_mtjKey;
   // build for MTJ part
   std::unique_ptr<ActsTrk::MultiTrajectory> buildMtj(
-      const Acts::TrackingGeometry* geo,
-      const Acts::GeometryContext& geoContext,
+      const Acts::TrackingGeometry* geo,      
       const EventContext& context) const;
   // TrackContainer part
 
@@ -112,5 +128,5 @@ class ConstTrackContainerHandlesHelper {
 };
 
 }  // namespace ActsTrk
-
+#include "ActsEvent/TrackContainerHandlesHelper.icc"
 #endif

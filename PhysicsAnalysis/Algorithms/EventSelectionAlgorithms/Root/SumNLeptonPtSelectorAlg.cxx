@@ -65,9 +65,9 @@ namespace CP {
         for (const xAOD::IParticle *el : *electrons) {
           if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
             if (m_useDressedProperties) {
-              if (acc_pt_dressed(*el) > m_elptmin) count++;
+              if (acc_pt_dressed(*el) >= m_elptmin) count++;
             } else {
-              if (el->pt() > m_elptmin) count++;
+              if (el->pt() >= m_elptmin) count++;
             }
           }
         }
@@ -76,9 +76,9 @@ namespace CP {
         for (const xAOD::IParticle *mu : *muons) {
           if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
               if (m_useDressedProperties) {
-                if (acc_pt_dressed(*mu) > m_muptmin) count++;
+                if (acc_pt_dressed(*mu) >= m_muptmin) count++;
               } else {
-                if (mu->pt() > m_muptmin) count++;
+                if (mu->pt() >= m_muptmin) count++;
             }
           }
         }
@@ -87,7 +87,7 @@ namespace CP {
         for (const xAOD::IParticle *tau : *taus) {
           if (!m_tauSelection || m_tauSelection.getBool(*tau, sys)) {
             // for taus dressed properties do not make a big difference
-            if (tau->pt() > m_tauptmin) count++;
+            if (tau->pt() >= m_tauptmin) count++;
           }
         }
       }

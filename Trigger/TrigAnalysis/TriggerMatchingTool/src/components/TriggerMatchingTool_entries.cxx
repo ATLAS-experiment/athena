@@ -8,7 +8,8 @@
 #include "TriggerMatchingTool/EgammaDRScoringTool.h"
 #include "TriggerMatchingTool/TrigMatchTestAlg.h"
 
-DECLARE_COMPONENT(Trig::MatchingTool)
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT(Trig::MatchingTool)
 DECLARE_COMPONENT(Trig::IParticleRetrievalTool)
@@ -20,5 +21,7 @@ DECLARE_COMPONENT(Trig::TypedScoringTool)
 DECLARE_COMPONENT(Trig::EgammaDRScoringTool)
 DECLARE_COMPONENT(Trig::TrigMatchTestAlg)
 
+#ifndef XAOD_STANDALONE
 #include "../TestMatchingToolAlg.h"
 DECLARE_COMPONENT(TestMatchingToolAlg)
+#endif

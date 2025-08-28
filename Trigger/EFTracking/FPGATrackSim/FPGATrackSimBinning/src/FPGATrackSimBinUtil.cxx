@@ -43,7 +43,8 @@ IdxSet::operator const std::vector<unsigned>() const {
 // ----------------------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream &os, const StoredHit &hit)
 {
-  os << "lyr: " << hit.layer << " ";
+  os << " lyr: " << hit.layer << " ";
+  os << " hash: " << hit.hitptr->getIdentifierHash() << " ";
   os << "(" << hit.hitptr->getR() << ", " << hit.hitptr->getGPhi() << ", " << hit.hitptr->getZ() << ") ";
   os << "[" << hit.phiShift << ", " << hit.etaShift << "]";
   return os;
@@ -144,6 +145,9 @@ double GeomHelpers::EtaFromTheta(double theta)
     return -log(tan(theta / 2.0));
 }
 
+
+
+
 double GeomHelpers::zFromPars(double r, const FPGATrackSimTrackPars &pars)
 {
     double theta = ThetaFromEta(pars.eta);
@@ -155,8 +159,12 @@ double GeomHelpers::zFromPars(double r, const FPGATrackSimTrackPars &pars)
     return zhit;
 }
 
+double GeomHelpers::dPhiHitTrkFromPars(double r, const FPGATrackSimTrackPars &pars) {
+    return asin(r * CurvatureConstant * pars.qOverPt - pars.d0 / r);
+}
+
 double GeomHelpers::phiFromPars(double r, const FPGATrackSimTrackPars &pars) {
-    double phi_hit = xAOD::P4Helpers::deltaPhi(pars.phi,asin(r * CurvatureConstant * pars.qOverPt - pars.d0 / r));
+    double phi_hit = xAOD::P4Helpers::deltaPhi(pars.phi,dPhiHitTrkFromPars(r,pars));
     return phi_hit;
 }
 
@@ -164,10 +172,21 @@ double GeomHelpers::parsToTrkPhi(const FPGATrackSimTrackPars &pars, FPGATrackSim
 {
     double r = hit->getR();          // mm
     double phi_hit = hit->getGPhi(); // radians
-    double phi_trk = xAOD::P4Helpers::deltaPhi(phi_hit,asin(r * CurvatureConstant * pars.qOverPt - pars.d0 / r));    
+    double phi_trk = xAOD::P4Helpers::deltaPhi(phi_hit,dPhiHitTrkFromPars(r,pars));
     return phi_trk;
 }
 
+double GeomHelpers::dZdEta(double eta)
+{
+  // dtheta/deta = -sin(theta)
+  return -1.0/std::sin(ThetaFromEta(eta));
+}
 
+double GeomHelpers::dPhidQOverPt(double hitr)
+{
+  // full answer = rA/cos(dphi)
+  // approx answer = rA  b/c  dphi is small (~0.4 max)
+  return hitr*CurvatureConstant;
+}
 
 } // namespace FPGATrackSimBinUtil

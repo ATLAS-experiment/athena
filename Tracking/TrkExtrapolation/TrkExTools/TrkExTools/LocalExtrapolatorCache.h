@@ -22,6 +22,15 @@
    class TrackStateOnSurface;
  }
 
+namespace Dbg {
+   // counters to gather statistics for abort conditions
+   struct PropStat {
+      std::atomic<unsigned int> m_maxRecursionCount{};
+      std::atomic<unsigned int> m_maxPropagations{};
+      std::atomic<unsigned int> m_maxMethodSequence{};
+   };
+}
+
 namespace Trk{
 struct Cache
   {
@@ -52,10 +61,15 @@ struct Cache
     const Trk::TrackingVolume* m_currentStatic = nullptr;
     const Trk::TrackingVolume* m_currentDense = nullptr;
     const Trk::TrackingVolume* m_highestVolume = nullptr;
+    //Tracking Geometry ptr
+    const Trk::TrackingGeometry *m_trackingGeometry = nullptr;
+    //path
+    double m_path{};
     //!< Pointer (not owning) pointing
     //to a vector of unique parameters of detector elements
     TrackParametersUVector* m_parametersOnDetElements = nullptr;
     //!< cache layer with last material update
+    bool m_cacheLastMatLayer = false;
     const Layer* m_lastMaterialLayer = nullptr;
     //!< cache for collecting the total X0 ans Eloss
     Trk::ExtrapolationCache* m_extrapolationCache = nullptr;
@@ -64,42 +78,46 @@ struct Cache
     //!< cache of TrackStateOnSurfaces
     std::vector<const Trk::TrackStateOnSurface*>* m_matstates = nullptr;
     // for active volumes
-    std::unique_ptr<identifiedParameters_t> m_identifiedParameters;
+    std::unique_ptr<identifiedParameters_t> m_identifiedParameters{};
+    //
+    std::pair<unsigned int, unsigned int> m_denseResolved{};
+    //
+    std::vector<DestSurf> m_staticBoundaries{};
+    std::vector<DestSurf> m_detachedBoundaries{};
+    std::vector<DestSurf> m_denseBoundaries{};
+    std::vector<DestSurf> m_navigBoundaries{};
+    std::vector<DestSurf> m_layers{};
+    //
+    std::vector<std::pair<const Trk::DetachedTrackingVolume*, unsigned int>> m_detachedVols{};
+    std::vector<std::pair<const Trk::TrackingVolume*, unsigned int>> m_denseVols{};
+    std::vector<std::pair<const Trk::TrackingVolume*, const Trk::Layer*>> m_navigLays{};
+    std::vector<std::pair<const Trk::Surface*, Trk::BoundaryCheck>> m_navigSurfs{};
+    std::vector<const Trk::DetachedTrackingVolume*> m_navigVols{};
+    std::vector<std::pair<const Trk::TrackingVolume*, unsigned int>> m_navigVolsInt{};
 
-    const Trk::TrackingGeometry *m_trackingGeometry = nullptr;
-    double m_path{};
-
-    std::pair<unsigned int, unsigned int> m_denseResolved;
-
-    std::vector<DestSurf> m_staticBoundaries;
-    std::vector<DestSurf> m_detachedBoundaries;
-    std::vector<DestSurf> m_denseBoundaries;
-    std::vector<DestSurf> m_navigBoundaries;
-    std::vector<DestSurf> m_layers;
-
-    std::vector<std::pair<const Trk::DetachedTrackingVolume*, unsigned int>> m_detachedVols;
-    std::vector<std::pair<const Trk::TrackingVolume*, unsigned int>> m_denseVols;
-    std::vector<std::pair<const Trk::TrackingVolume*, const Trk::Layer*>> m_navigLays;
-    std::vector<std::pair<const Trk::Surface*, Trk::BoundaryCheck>> m_navigSurfs;
-    std::vector<const Trk::DetachedTrackingVolume*> m_navigVols;
-    std::vector<std::pair<const Trk::TrackingVolume*, unsigned int>> m_navigVolsInt;
+    // To gather statistics to tune abort condition based for to large call depth, or too many propagations
+    Dbg::PropStat *m_statPtr=nullptr;
+    enum ERecursionValues {kCurrentRecursionCount,kMaxRecursionCount, kNRecursionValues};
+    std::array<unsigned short,kNRecursionValues> m_recursionCount {}; // current-recursion-level, max
+    unsigned int m_nPropagations {};
+    enum EStatus {kContinue, kRecursionCountExceeded} m_status=kContinue;
 
     //methods
-    Cache();
+    Cache(Dbg::PropStat &stat);
     ~Cache();
     Cache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
 
-    const Trk::TrackingGeometry *trackingGeometry( const Trk::INavigator &navigator, const EventContext &ctx) {
-       if (!m_trackingGeometry) {
-          m_trackingGeometry = navigator.trackingGeometry(ctx);
-       }
-       return m_trackingGeometry;
+    void setTrackingGeometry(const Trk::INavigator& navigator,
+                             const EventContext& ctx) {
+      if (!m_trackingGeometry) {
+        m_trackingGeometry = navigator.trackingGeometry(ctx);
+      }
     }
 
-    const Trk::TrackingVolume
-    *volume(const EventContext&, const Amg::Vector3D& gp) const {
-       assert(m_trackingGeometry);
-       return m_trackingGeometry->lowestTrackingVolume(gp);
+    const Trk::TrackingVolume* volume(const EventContext&,
+                                      const Amg::Vector3D& gp) const {
+      assert(m_trackingGeometry);
+      return m_trackingGeometry->lowestTrackingVolume(gp);
     }
 
     /** Get the IMaterialEffectsUpdator::ICache  for the MaterialEffectsUpdator*/

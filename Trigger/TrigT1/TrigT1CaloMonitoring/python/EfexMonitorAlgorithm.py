@@ -98,17 +98,29 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
     }
 
     knownAnomalies_eEM = {
-        "KnownDead":"\"48,8;49,41;49,42\"",
-        "KnownCold":"\"2,18;3,17;4,18;5,17;20,31;21,31;23,26;49,10;11,29;11,30;11,44;11,51;14,51;15,51;40,12;40,19;40,26;10,17;10,18;11,17;11,18\"",
-        "KnownWarm":"\"11,26;11,52;21,48\""
+        "KnownDead":"\"49,41;49,42;48,8\"", #26,14 and 27,14 are L2 masked so cannot seed, but other layers still there so will just be cold in input (not dead). These were unmasked again in 502880 onwards
+        "KnownCold":"\"48,8;2,18;3,17;4,18;5,17;20,31;21,31;23,26;49,10;11,30;11,44;11,51;15,51;40,12;40,19;40,26;10,17;10,18;10,20;2,50;24,49;14,54;12,20;14,51;16,49;21,46;23,47;31,24;34,40;35,40;36,39;37,39;42,38;46,41;47,47;47,8\"",
+        "KnownWarm":"\"11,26;11,52;21,48;40,21;41,21;42,21;43,21;44,21;45,21;46,21;47,21;50,21\"", # there's a warm strip @ phi=21
+        "KnownHot":"\"4,5;6,2;13,48;21,48;14,49;27,53;35,13;22,14\""
+        # HI Running
+        # "KnownDead":"\"49,41;49,42;26,14;27,14;42,37;42,38;46,3;14,51\"", #26,14 and 27,14 are L2 masked so cannot seed, but other layers still there so will just be cold in input (not dead)
+        # "KnownCold":"\"48,8;2,18;3,17;4,18;5,17;20,31;21,31;23,26;49,10;11,30;11,44;11,51;15,51;40,12;40,19;40,26;10,17;10,18;10,20;2,50;24,49;14,54\"",
+        # "KnownWarm":"\"11,26;11,52;21,48;40,21;41,21;42,21;43,21;44,21;45,21;46,21;47,21;50,21\"", # there's a warm strip @ phi=21
+        # "KnownHot":"\"4,5;6,2;13,48;21,48;14,49;27,53;30,23;35,13;22,14\"" # these spots from HI running
     }
 
     # use KnownDead list from input hcal as an automatic cold-spot for eTAU
     from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import knownAnomalies_hotHcal
 
+    # even though dead hcal @ 41,21 .. it's in a warm ecal area, meaning it isn't actually cold
     knownAnomalies_eTAU = {
-        "KnownCold":knownAnomalies_eEM["KnownDead"][:-1]+";"+knownAnomalies_hotHcal["KnownDead"][1:-1]+";2,18;3,17;4,18;5,17;49,10;10,20;20,31;21,31;14,51;15,51;23,26;29,7;17,32;14,54\"",
-        "KnownWarm":"\"\""
+        "KnownCold":knownAnomalies_eEM["KnownDead"][:-1]+";"+knownAnomalies_hotHcal["KnownDead"][1:-1].replace("41,21;","")+knownAnomalies_hotHcal["KnownCold"][1:-1]+";48,8;2,18;3,17;4,18;5,17;49,10;10,18;10,20;20,31;21,31;14,51;15,51;23,26;29,7;17,32;14,54;34,6;40,12;40,19;26,20;11,44;24,49;30,15;32,46;29,5;16,49;12,19;12,20;17,3;20,10;22,47;23,47;34,10;34,40;35,40;37,39;40,26;43,59;47,47;47,8\"",
+        "KnownWarm":"\"24,39;41,21;43,21;44,21;47,21\"",
+        "KnownHot":"\"4,5;6,2;11,27;13,48;15,49;21,48;40,24;42,35;18,4\""
+        # HI Running
+        # "KnownCold":knownAnomalies_eEM["KnownDead"][:-1]+";"+knownAnomalies_hotHcal["KnownDead"][1:-1].replace("41,21;","")+knownAnomalies_hotHcal["KnownCold"][1:-1]+";48,8;2,18;3,17;4,18;5,17;49,10;10,18;10,20;20,31;21,31;14,51;15,51;23,26;29,7;17,32;14,54;34,6;40,12;40,19;26,20;11,44;24,49;30,15;32,46\"",
+        # "KnownWarm":"\"24,39;43,21;44,21\"",
+        # "KnownHot":"\"4,5;6,2;11,27;13,48;15,49;21,48;40,24;42,35;18,4\"" # these spots from HI running
     }
 
     helper.defineDQAlgorithm("Efex_eEM_etaThiMapFilled",
@@ -165,7 +177,7 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
             helper.defineHistogram(f"TOBEta,TOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title=tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                    fillGroup=fillGroup,
                                    hanConfig={"display":"SetPalette(55)",
-                                       "description":f"Inspect for hot/cold spots - check help for list of known hot/coldspots, then check <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Warning if more than 1 deadspot, but could just be low stats","algorithm":"Efex_eEM_etaThiMapFilled"},
+                                       "description":f"Any really significant hot/cold spots (see results for significances) should check over what LBs they occurred, using <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Any new (unknown) spots, if they occur multiple times in a week, please report","algorithm":"Efex_eEM_etaThiMapFilled"},
                                     type='TH2F',
                                     path=(("Expert/Outputs/"+pathFromKey(containerKey,"")) if "Sim" not in containerKey and "x" not in containerKey else trigPath+pathFromKey(containerKey)+cut_name),
                                     xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
@@ -245,7 +257,7 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
             helper.defineHistogram(f"tauTOBEta,tauTOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eTAU '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                     fillGroup = fillGroup,
                                    hanConfig={"display":"SetPalette(55)",
-                                              "description":f"Inspect for hot/cold spots - check help for list of known hot/coldspots, then check <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Warning if any deadspots/empty, but could just be low stats","algorithm":"Efex_eTAU_etaThiMapFilled"},
+                                              "description":f"Any really significant hot/cold spots (see results for significances) should check over what LBs they occurred, using <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Any new (unknown) spots, if they occur multiple times in a week, please report","algorithm":"Efex_eTAU_etaThiMapFilled"},
                                    type='TH2F',
                                    path=(("Expert/Outputs/"+pathFromKey(containerKey,"")) if "Sim" not in containerKey and "x" not in containerKey else (trigPath+pathFromKey(containerKey)+cut_name)),
                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])

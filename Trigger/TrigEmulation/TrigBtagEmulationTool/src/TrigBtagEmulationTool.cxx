@@ -30,8 +30,16 @@ StatusCode TrigBtagEmulationTool::initialize() {
 
   ATH_CHECK( m_trigDec.retrieve() );
 
-  ATH_CHECK( m_manager_PFlow_cnt.retrieve() );  
-  ATH_CHECK( m_manager_EMTopo_presel.retrieve() );
+  if (m_LHCPeriod == 3) {
+    ATH_CHECK( m_manager_PFlow_cnt.retrieve() );  
+    ATH_CHECK( m_manager_EMTopo_presel.retrieve() );
+  }
+  else if (m_LHCPeriod == 2) {
+    ATH_CHECK( m_manager_a4tcemsubjesJet_cnt.retrieve() );
+  } else {
+    ATH_MSG_ERROR("EDM Version not supported: " << m_LHCPeriod);
+    return StatusCode::FAILURE;
+  }
   
   for(const auto& [chain_name, definition] : m_emulatedChainDefinitions) {
     ATH_CHECK( addEmulatedChain(chain_name, definition) );
@@ -59,13 +67,19 @@ bool TrigBtagEmulationTool::isPassed(const std::string& chain,
     ATH_MSG_WARNING( "Chain " << chain << " requested but not in the list of emulated chains" );
     return false;
   }
-  return isPassed(*(itr->second.get()), emulCtx);
+  return isPassed(chain, *(itr->second.get()), emulCtx);
 }
 
-bool TrigBtagEmulationTool::isPassed(const TrigBtagEmulationChain& chain,
+bool TrigBtagEmulationTool::isPassed(const std::string& chain, const TrigBtagEmulationChain& chainDefinition,
 				     const EmulContext& emulCtx) const
 {
-  return evaluate_L1(chain, emulCtx) and evaluate_HLT(chain, emulCtx);
+  bool passL1 = false;
+  if (chainDefinition.l1_requirement().empty()) {
+    passL1 = evaluate_L1(chain, emulCtx);
+  } else {
+    passL1 = evaluate_L1(chainDefinition, emulCtx);
+  }
+  return passL1 and evaluate_HLT(chainDefinition, emulCtx);
 }
 
 bool TrigBtagEmulationTool::evaluate_L1(const TrigBtagEmulationChain& chain,
@@ -77,52 +91,82 @@ bool TrigBtagEmulationTool::evaluate_L1(const TrigBtagEmulationChain& chain,
   return res;
 }
 
+bool TrigBtagEmulationTool::evaluate_L1(const std::string& chain,
+					const EmulContext&) const
+{ 
+  // For Run2 triggers where L1 item is not explicitly written in the chain name
+  const bool res = m_trigDec->isPassedBits(chain) & TrigDefs::L1_isPassedAfterVeto;
+  ATH_MSG_DEBUG( name() << " passed L1: " << (res ? "YES":"NO") );
+  return res;
+}
 
 bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
 					 const EmulContext& emulCtx) const
 {
-  for ( bool is_chainPart_PFlow : chain.is_PFlow() ) {
-    if ( not is_chainPart_PFlow ) {
-      ATH_MSG_ERROR( "Only PFlow jets are supported at this moment" );
-      return false;
+  if (m_LHCPeriod == 3) {
+    for ( bool is_chainPart_PFlow : chain.is_PFlow() ) {
+      if ( not is_chainPart_PFlow ) {
+        ATH_MSG_ERROR( "Only PFlow jets are supported at this moment" );
+        return false;
+      }
     }
-  }
 
-  const std::vector<TrigBtagEmulationJet>& emtopo_presel_jets =  m_manager_EMTopo_presel->getSortedPreselJets(emulCtx);
-  // preselection
-  if (not evaluate_preselection(chain, emtopo_presel_jets) ) return false;
-  // dijet mass
-  if (not evaluate_dijetmass(chain, emtopo_presel_jets) ) return false;
+    const std::vector<TrigBtagEmulationJet>& emtopo_presel_jets =  m_manager_EMTopo_presel->getSortedPreselJets(emulCtx);
+    // preselection
+    if (not evaluate_preselection(chain, emtopo_presel_jets) ) return false;
+    // dijet mass
+    if (not evaluate_dijetmass(chain, emtopo_presel_jets) ) return false;
+  }
 
   // computation
   const int shared_idx = chain.shared_idx();
   const std::vector<int>& jet_multiplicity = chain.jet_multiplicity();
   const std::vector<std::string>& chainPartName = chain.chainPartName();
-  const std::vector<TrigBtagEmulationJet>& pflow_jets = m_manager_PFlow_cnt->getJets(emulCtx);
 
   int nChainParts = static_cast<int>( jet_multiplicity.size() );
 
   bool res = false;
-  if( shared_idx ) {
-    // chain uses the shared operator, we basically have two chains to check
-    std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, pflow_jets, 0, shared_idx);
-    std::vector<std::vector<bool>> chainPart_passedjets_btag = evaluate_HLT_chainParts(chain, pflow_jets, shared_idx, nChainParts);
-      
-    std::vector<std::string> chainPartNames_leg1(chainPartName.begin(), chainPartName.begin() + shared_idx);
-    std::vector<int> multiplicities_leg1(jet_multiplicity.begin(), jet_multiplicity.begin() + shared_idx);
-    std::vector<std::string> chainPartNames_leg2(chainPartName.begin() + shared_idx, chainPartName.end());
-    std::vector<int> multiplicities_leg2(jet_multiplicity.begin() + shared_idx, jet_multiplicity.end());
-      
-    res = allocate_jets_to_chainParts(chainPart_passedjets, chainPartNames_leg1, multiplicities_leg1) &&
-      allocate_jets_to_chainParts(chainPart_passedjets_btag, chainPartNames_leg2, multiplicities_leg2);
-  }
-  else {
-    std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, pflow_jets, 0, nChainParts);
-      
-    std::vector<std::string> chainPartNames(chainPartName.begin(), chainPartName.end());
-    std::vector<int> multiplicities(jet_multiplicity.begin(), jet_multiplicity.end());
-      
-    res = allocate_jets_to_chainParts(chainPart_passedjets, chainPartNames, multiplicities);
+  if (m_LHCPeriod == 3) {
+    const std::vector<TrigBtagEmulationJet>& pflow_jets = m_manager_PFlow_cnt->getJets(emulCtx);
+    if( shared_idx ) {
+      // chain uses the shared operator, we basically have two chains to check
+      std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, pflow_jets, 0, shared_idx);
+      std::vector<std::vector<bool>> chainPart_passedjets_btag = evaluate_HLT_chainParts(chain, pflow_jets, shared_idx, nChainParts);
+        
+      std::vector<std::string> chainPartNames_leg1(chainPartName.begin(), chainPartName.begin() + shared_idx);
+      std::vector<int> multiplicities_leg1(jet_multiplicity.begin(), jet_multiplicity.begin() + shared_idx);
+      std::vector<std::string> chainPartNames_leg2(chainPartName.begin() + shared_idx, chainPartName.end());
+      std::vector<int> multiplicities_leg2(jet_multiplicity.begin() + shared_idx, jet_multiplicity.end());
+        
+      res = allocate_jets_to_chainParts(chainPart_passedjets, chainPartNames_leg1, multiplicities_leg1) &&
+        allocate_jets_to_chainParts(chainPart_passedjets_btag, chainPartNames_leg2, multiplicities_leg2);
+    }
+    else {
+      std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, pflow_jets, 0, nChainParts);
+
+      std::vector<std::string> chainPartNames(chainPartName.begin(), chainPartName.end());
+      std::vector<int> multiplicities(jet_multiplicity.begin(), jet_multiplicity.end());
+        
+      res = allocate_jets_to_chainParts(chainPart_passedjets, chainPartNames, multiplicities);
+    }
+  } else if (m_LHCPeriod == 2) {
+      const std::vector<TrigBtagEmulationJet>& ef_jets = m_manager_a4tcemsubjesJet_cnt->getJets(emulCtx);
+      const std::vector<TrigBtagEmulationJet> *split_jets = nullptr;
+      const std::vector<TrigBtagEmulationJet> *gsc_jets = nullptr;
+      if (!m_manager_SplitJet_cnt->jetContainerName().empty()) {
+        split_jets = &m_manager_SplitJet_cnt->getJets(emulCtx);
+      }
+      if (!m_manager_GSCJet_cnt->jetContainerName().empty()) {
+        gsc_jets = &m_manager_GSCJet_cnt->getJets(emulCtx);
+      }
+      std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, ef_jets, 0, nChainParts, split_jets, gsc_jets);
+
+      std::vector<std::string> chainPartNames(chainPartName.begin(), chainPartName.end());
+      std::vector<int> multiplicities(jet_multiplicity.begin(), jet_multiplicity.end());
+
+      res = allocate_jets_to_chainParts(chainPart_passedjets, chainPartNames, multiplicities);
+  } else {
+    ATH_MSG_ERROR("Emulation not supported for LHC Period " << m_LHCPeriod);
   }
 
   return res; 
@@ -149,19 +193,19 @@ bool TrigBtagEmulationTool::evaluate_preselection(const TrigBtagEmulationChain& 
     
     for( const auto& preseljet: preselJets ) {
       if((preseljet.pt() / Gaudi::Units::GeV) >= presel_ptcut &&
-	 presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
-	
-	ATH_MSG_DEBUG( "   - Preselection jet pt=" << (preseljet.pt() / Gaudi::Units::GeV) << " eta=" << preseljet.eta() << " passed.");
-	preseljets_passed++;
+         presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
+        
+        ATH_MSG_DEBUG( "   - Preselection jet pt=" << (preseljet.pt() / Gaudi::Units::GeV) << " eta=" << preseljet.eta() << " passed.");
+        preseljets_passed++;
       }
       else if((preseljet.pt() / Gaudi::Units::GeV) < presel_ptcut) {
-	// no more Preselection jets left with high enough pt
-	break;
+        // no more Preselection jets left with high enough pt
+        break;
       }
       
       if(preseljets_passed >= presel_multiplicity) {
-	res = true;
-	break;
+        res = true;
+        break;
       }
     }
   }
@@ -176,29 +220,29 @@ bool TrigBtagEmulationTool::evaluate_preselection(const TrigBtagEmulationChain& 
       multiplicities.push_back(presel_multiplicity);
       
       for ( const auto& preseljet : preselJets ) {
-	if((preseljet.pt() / Gaudi::Units::GeV) >= presel_ptcut &&
-	   presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
-	  // flag jet as passed this part of preselection
-	  chainPart_passedjets[chainPart_idx].push_back(true);
-	}
-	else {
-	  chainPart_passedjets[chainPart_idx].push_back(false);
-	}
-	
-	if((preseljet.pt() / Gaudi::Units::GeV) < presel_ptcut) {
-	  // no more Preselection jets left with high enough pt
-	  if(chainPart_passedjets[chainPart_idx].size() > chainPart_passedjets_lenmax) {
-	    chainPart_passedjets_lenmax = chainPart_passedjets[chainPart_idx].size();
-	  }
-	  break;
-	}
+        if((preseljet.pt() / Gaudi::Units::GeV) >= presel_ptcut &&
+           presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
+          // flag jet as passed this part of preselection
+          chainPart_passedjets[chainPart_idx].push_back(true);
+        }
+        else {
+          chainPart_passedjets[chainPart_idx].push_back(false);
+        }
+        
+        if((preseljet.pt() / Gaudi::Units::GeV) < presel_ptcut) {
+          // no more Preselection jets left with high enough pt
+          if(chainPart_passedjets[chainPart_idx].size() > chainPart_passedjets_lenmax) {
+            chainPart_passedjets_lenmax = chainPart_passedjets[chainPart_idx].size();
+          }
+          break;
+        }
       }
     }
-							
+
     for( auto& chainPart_passedjets_row : chainPart_passedjets ) {
       // make all rows in the chainPart_jet_matrix equal length
       while(chainPart_passedjets_row.size() < chainPart_passedjets_lenmax) {
-	chainPart_passedjets_row.push_back(false);
+        chainPart_passedjets_row.push_back(false);
       }
     }
     
@@ -341,11 +385,11 @@ bool TrigBtagEmulationTool::allocate_jets_to_chainParts(const std::vector<std::v
     int njet_passed = 0;
     for(bool pass: chainPart_jet_matrix[0]) {
       if(pass) {
-	njet_passed++;
-	if(njet_passed >= multiplicities[0]) {
-	  chainPart_subset_passed.back() = true;
-	  break;
-	}
+        njet_passed++;
+        if(njet_passed >= multiplicities[0]) {
+          chainPart_subset_passed.back() = true;
+          break;
+        }
       }
     }
   }
@@ -366,33 +410,33 @@ bool TrigBtagEmulationTool::allocate_jets_to_chainParts(const std::vector<std::v
       
       std::string subset_str = "";
       for(size_t chainPart_idx = 0; chainPart_idx < chainPart_jet_matrix.size(); ++chainPart_idx) {
-	if(subset[chainPart_idx]) {
-	  subset_str += std::to_string(chainPart_idx);
-	  njets_required_subset += multiplicities[chainPart_idx];
-	  
-	  for(size_t jet_idx = 0; jet_idx < chainPart_jet_matrix[chainPart_idx].size(); ++jet_idx) {
-	    if(chainPart_jet_matrix[chainPart_idx][jet_idx]) {
-	      subset_passedJets[jet_idx] = true;
-	    }
-	  }
-	}
+        if(subset[chainPart_idx]) {
+          subset_str += std::to_string(chainPart_idx);
+          njets_required_subset += multiplicities[chainPart_idx];
+          
+          for(size_t jet_idx = 0; jet_idx < chainPart_jet_matrix[chainPart_idx].size(); ++jet_idx) {
+            if(chainPart_jet_matrix[chainPart_idx][jet_idx]) {
+              subset_passedJets[jet_idx] = true;
+            }
+          }
+        }
       }
       
       int njets_passed_subset = 0;
       for(bool pass: subset_passedJets) {
-	if(pass) {
-	  njets_passed_subset++;
-	}
+        if(pass) {
+          njets_passed_subset++;
+        }
       }
       
       ATH_MSG_DEBUG( "Subset {" << subset_str << "} requires " << njets_required_subset << " jets, and has " << njets_passed_subset << " jets passed." );
       
       if(njets_passed_subset < njets_required_subset) {
-	chainPart_subset_passed.push_back(false);
-	break;
+        chainPart_subset_passed.push_back(false);
+        break;
       }
       else {
-	chainPart_subset_passed.push_back(true);
+        chainPart_subset_passed.push_back(true);
       }
     }
   }
@@ -413,7 +457,9 @@ bool TrigBtagEmulationTool::allocate_jets_to_chainParts(const std::vector<std::v
 std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(const TrigBtagEmulationChain& chain,
 									      const std::vector<TrigBtagEmulationJet>& jets,
 									      int idx_begin, 
-									      int idx_end) const 
+									      int idx_end,
+									      const std::vector<TrigBtagEmulationJet>* splitJets,
+									      const std::vector<TrigBtagEmulationJet>* gscJets) const 
 {
   const std::vector<double>& jet_pt_vec = chain.jet_pt();
   const std::vector<double>& jet_eta_min_vec = chain.jet_eta_min();
@@ -421,8 +467,49 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
   const std::vector<double>& jvt_vec = chain.jvt();
   const std::vector<std::string>& tagger_vec = chain.tagger(); 
   const std::vector<std::string>& chainPartName_vec = chain.chainPartName();
+  const std::vector<double>& gsc_pt_vec = chain.gsc_pt();
 
   std::vector<std::vector<bool>> chainPart_passedjets(idx_end - idx_begin);
+
+  std::vector<const TrigBtagEmulationJet*> mainJets, gscJets_indexed, splitJets_indexed;
+  mainJets.reserve(jets.size());
+  for (const auto &jet : jets)
+    mainJets.push_back(&jet);
+
+  if (m_LHCPeriod == 2) {
+    // Multiple jet collections in Run2.
+    // Re-index split and GSC jets to match the a4tcemsubjesJets.
+    // This index will be used in the chainPart_jet_matrix to calculate the emulation result
+    gscJets_indexed.reserve(jets.size());
+    splitJets_indexed.reserve(jets.size());
+
+    for (const auto &jet : jets) {
+      bool splitJetFound = false;
+      bool gscJetFound = false;
+
+      if (splitJets) {
+        for (const auto &splitJet : *splitJets) {
+          if (jet.p4().DeltaR(splitJet.p4()) < 0.05) {
+            splitJets_indexed.push_back(&splitJet);
+            splitJetFound = true;
+            break;
+          }
+        }
+      }
+      if (!splitJetFound) splitJets_indexed.push_back(nullptr);
+
+      if (gscJets) {
+        for (const auto &gscJet : *gscJets) {
+          if (jet.p4().DeltaR(gscJet.p4()) < 0.05) {
+            gscJets_indexed.push_back(&gscJet);
+            gscJetFound = true;
+            break;
+          }
+        }
+        if (!gscJetFound) gscJets_indexed.push_back(nullptr);
+      }
+    }
+  }
   
   for(size_t chainPart_idx = 0; chainPart_idx < chainPart_passedjets.size(); chainPart_idx++) {
     double jet_pt = jet_pt_vec[chainPart_idx +idx_begin];
@@ -430,32 +517,62 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
     double jet_eta_max = jet_eta_max_vec[chainPart_idx +idx_begin];
     double jvtcut = jvt_vec[chainPart_idx +idx_begin];
     std::string tagger = tagger_vec[chainPart_idx +idx_begin];
+    std::string chain_part_name = chainPartName_vec[chainPart_idx +idx_begin];
+    std::vector<const TrigBtagEmulationJet*> jets_to_use = mainJets;
+
+    // Set the jet collection to use based on the chain part name
+    if (chain_part_name.find("gsc") != std::string::npos) {
+      jet_pt = gsc_pt_vec[chainPart_idx +idx_begin];
+      if (gscJets) {
+        jets_to_use = gscJets_indexed;
+        ATH_MSG_DEBUG("Using GSC jets for chain part: " << chain_part_name);
+      } else {
+        ATH_MSG_ERROR("GSC jets not available to emulate chain part: " << chain_part_name << ". Use a4tcemsubjesJets instead. Note that jet pT emulation may not be accurate.");
+      }
+    }
+    else if (chain_part_name.find("split") != std::string::npos) {
+      if (splitJets) {
+        jets_to_use = splitJets_indexed;
+        ATH_MSG_DEBUG("Using Split jets for chain part: " << chain_part_name);
+      } else {
+        ATH_MSG_ERROR("Split jets not available to emulate chain part: " << chain_part_name << ". Use a4tcemsubjesJets instead. Note that b-tagging emulation may not work.");
+      }
+    }
     
-    ATH_MSG_DEBUG( ">-- " << chainPartName_vec[chainPart_idx +idx_begin] << ":" );
-    for( const auto& jet : jets ) {
-      float jvt = jet.jvt();
-      bool passedJvt = jvt > jvtcut ||
-	jet.pt() / Gaudi::Units::GeV > 120. ||
-	std::fabs(jet.eta()) > 2.5;
+    ATH_MSG_DEBUG( ">-- " << chain_part_name << ":" );
+    for( const auto& jet : jets_to_use ) {
+      if (jet == nullptr) {
+        chainPart_passedjets[chainPart_idx].push_back(false);
+        continue;
+      }
+
+      bool passedJvt = true;
+      if (jvtcut > 0.) {
+        float jvt = jet->jvt();
+        passedJvt = jvt > jvtcut || jet->pt() / Gaudi::Units::GeV > 120. || std::fabs(jet->eta()) > 2.5;
+      }
       
       if (tagger == "ewTagger") tagger = "newTagger";
-      bool is_bjet = isPassedBTagger(jet, tagger);
+      bool is_bjet = isPassedBTagger(*jet, tagger);
+
+      bool passedPt = jet->pt() > jet_pt;
+      if (m_LHCPeriod == 2) passedPt = jet->et() > jet_pt;
       
-      if(jet.pt() > jet_pt &&
-	 std::fabs(jet.eta()) > jet_eta_min &&
-	 std::fabs(jet.eta()) < jet_eta_max &&
-	 passedJvt &&
-	 ((tagger != "") ? is_bjet : true) ) {
-	// flag jet as passing current chainPart
-	chainPart_passedjets[chainPart_idx].push_back(true);
+      if(passedPt &&
+	        std::fabs(jet->eta()) > jet_eta_min &&
+	        std::fabs(jet->eta()) < jet_eta_max &&
+	        passedJvt &&
+	        ((tagger != "") ? is_bjet : true) ) {
+        // flag jet as passing current chainPart
+        chainPart_passedjets[chainPart_idx].push_back(true);
       }
       else {
-	chainPart_passedjets[chainPart_idx].push_back(false);
+        chainPart_passedjets[chainPart_idx].push_back(false);
       }
       
-      ATH_MSG_DEBUG( " - pt:" << (jet.pt() / Gaudi::Units::GeV)
-		     << ", eta:" << jet.eta()
-		     << ", jvt:" << jvt
+      ATH_MSG_DEBUG( " - pt:" << (jet->pt() / Gaudi::Units::GeV)
+		     << ", eta:" << jet->eta()
+		     << ", passedJvt:" << (passedJvt?"Y":"N")
 		     << ((tagger != "") ? ", btag:" : "") << ((tagger != "") ? (is_bjet?"Y":"N") : "")
 		     << ", pass:" << (chainPart_passedjets[chainPart_idx].back()?"Y":"N")
 		     );
@@ -472,19 +589,29 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
 const EmulContext& TrigBtagEmulationTool::populateJetManagersTriggerObjects() const {
   EmulContext *emulCtx = new EmulContext();
 
-  // Check if input chain exists
-  if ( checkInputChainExists( m_inputChains_PFlow ).isFailure() )
-    return *emulCtx;
+  if (m_LHCPeriod == 3) {
 
-  // Retrieve input container vectors  
-  if ( retrieveTriggerObjects( *m_manager_PFlow_cnt, *emulCtx ).isFailure() ) {
-    ATH_MSG_ERROR("Could not retrieve trigger objects from " << m_manager_PFlow_cnt->name());
-    return *emulCtx;
+    // Retrieve input container vectors  
+    if ( retrieveTriggerObjects( *m_manager_PFlow_cnt, *emulCtx ).isFailure() ) {
+      ATH_MSG_ERROR("Could not retrieve trigger objects from " << m_manager_PFlow_cnt->name());
+      return *emulCtx;
+    }
+
+    if ( retrieveTriggerObjects( *m_manager_EMTopo_presel, *emulCtx ).isFailure() ) {
+      ATH_MSG_ERROR("Could not retrieve trigger objects from " << m_manager_EMTopo_presel->name());
+      return *emulCtx;
+    }
   }
-
-  if ( retrieveTriggerObjects( *m_manager_EMTopo_presel, *emulCtx ).isFailure() ) {
-    ATH_MSG_ERROR("Could not retrieve trigger objects from " << m_manager_EMTopo_presel->name());
-    return *emulCtx;
+  else if (m_LHCPeriod == 2) {
+    if ( retrieveTriggerObjects( *m_manager_a4tcemsubjesJet_cnt, *emulCtx ).isFailure() ) {
+      ATH_MSG_ERROR("Could not retrieve trigger objects from " << m_manager_a4tcemsubjesJet_cnt->name());
+    }
+    if ( retrieveTriggerObjects( *m_manager_SplitJet_cnt, *emulCtx ).isFailure() ) {
+      ATH_MSG_DEBUG("Could not retrieve trigger objects from " << m_manager_SplitJet_cnt->name());
+    }
+    if ( retrieveTriggerObjects( *m_manager_GSCJet_cnt, *emulCtx ).isFailure() ) {
+      ATH_MSG_DEBUG("Could not retrieve trigger objects from " << m_manager_GSCJet_cnt->name());
+    }
   }
   
   return *emulCtx;
@@ -494,29 +621,19 @@ StatusCode TrigBtagEmulationTool::retrieveTriggerObjects(const Trig::JetManagerT
 							 EmulContext& emulCtx) const
 {
   const EventContext& ctx = Gaudi::Hive::currentContext();
+  const std::string& jetContainerName = manager.jetContainerName();
+
+  if (jetContainerName.empty()) {
+    ATH_MSG_DEBUG("Jet container name is empty for " << manager.name());
+    return StatusCode::FAILURE;
+  }
+
   ATH_CHECK(manager.retrieveByContainer(ctx, emulCtx));
   
-  const std::string& jetContainerName = manager.jetContainerName();
   const unsigned int jetSize = manager.getJets(emulCtx).size();
   
   ATH_MSG_DEBUG( "Size of input containers ['" << jetContainerName << "'] :"
   		 << " jet=" << jetSize);
-  
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TrigBtagEmulationTool::checkInputChainExists( const std::string &inputChain ) const 
-{
-  std::vector<std::string> listOfTriggers = m_trigDec->getChainGroup( inputChain )->getListOfTriggers();
-  if ( listOfTriggers.empty() ) {
-    ATH_MSG_ERROR( "Input Chain ('" << inputChain << "') is not in the list of available triggers: {" << m_trigDec->getListOfTriggers(".*") << "}" );
-    return StatusCode::FAILURE;
-  }
-  
-  ATH_MSG_DEBUG( "Triggers in configured ChainGroup " << inputChain << ":" );
-  for (const auto& cname: listOfTriggers) {
-    ATH_MSG_DEBUG( " └ " << cname );
-  }
   
   return StatusCode::SUCCESS;
 }
@@ -555,8 +672,9 @@ bool TrigBtagEmulationTool::isPassedBTagger(const TrigBtagEmulationJet& jet,
     const xAOD::BTagging *btag = jet.btag();
     if (not btag) return false;
     m_dl2->decorate(*btag);
-    
     res = jet.satisfy("DL1dEMUL", workingPoint);
+  } else if (btagger.substr(0, 4) == "mv2c") {
+    res = jet.satisfy(btagger, workingPoint);
   } else {
     ATH_MSG_WARNING( "Tagger " << btagger << " not supported." );
   }

@@ -19,10 +19,8 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
-
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Utilities/BoundFactory.hpp"
 #endif
 
 using namespace CxxUtils;
@@ -37,17 +35,37 @@ using defineArgs = RpcReadoutElement::defineArgs;
 /// gas gap volumes
 struct gapVolume: public GeoChildNodeWithTrf {
     gapVolume(GeoChildNodeWithTrf&& physVol,
-              unsigned int gap,
-              unsigned int phi):
+              unsigned gap,
+              unsigned phi):
               GeoChildNodeWithTrf{std::move(physVol)},
         gasGap{gap},
         doubPhi{phi} {}
-    unsigned int gasGap{0};
-    unsigned int doubPhi{0};
+    unsigned gasGap{0};
+    unsigned doubPhi{0};
     
 };
 
 
+std::unique_ptr<StripDesign> RpcReadoutGeomTool::constructDesign(const GeoBox* planeBox,
+                                                                 const wRPCTable& paramBook,
+                                                                 bool phiPlane) const {
+    const unsigned nStrips = phiPlane ? paramBook.numPhiStrips : paramBook.numEtaStrips;
+    if (!nStrips) {
+        ATH_MSG_VERBOSE("Parameter book does not for see a readout in "<<(phiPlane? "phi" : "eta")<<" direction");
+        return nullptr;
+    }
+
+    const double halfX = phiPlane ? planeBox->getYHalfLength() : planeBox->getZHalfLength();
+    const double halfY = phiPlane ? planeBox->getZHalfLength() : planeBox->getYHalfLength();
+
+    const double pitch = phiPlane ? paramBook.stripPitchPhi : paramBook.stripPitchEta;
+    const double width = phiPlane ? paramBook.stripWidthPhi : paramBook.stripWidthEta;
+    const double firstPos = -halfX + (phiPlane ? paramBook.firstOffSetPhi : paramBook.firstOffSetEta);
+    auto newDesign = std::make_unique<StripDesign>();
+    newDesign->defineTrapezoid(halfY, halfY, halfX);
+    newDesign->defineStripLayout(firstPos * Amg::Vector2D::UnitX(), pitch,width, nStrips); 
+    return newDesign;
+}
 
 StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& define,
                                               FactoryCache& factoryCache) {    
@@ -95,8 +113,8 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         return StatusCode::FAILURE;
     }
     /// Fetch for each rpc layer the gasGaps
-    unsigned int gasGap{0};
-    const unsigned int modulePhi = m_idHelperSvc->rpcIdHelper().doubletPhi(define.detElId);
+    unsigned gasGap{0};
+    const unsigned modulePhi = m_idHelperSvc->rpcIdHelper().doubletPhi(define.detElId);
 
     std::vector<gapVolume> allGapsWithIdx{};
     for (const GeoChildNodeWithTrf& rpcSinglet : rpcLayers) {
@@ -137,6 +155,14 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     }
     const wRPCTable& paramBook{parBookItr->second};
 
+    auto insertStripLayer = [this, &define, &factoryCache](std::unique_ptr<StripLayer> stripLay) {
+        const unsigned layIdx = static_cast<unsigned>(stripLay->hash());
+        if (layIdx >= define.layers.size()) {
+            define.layers.resize(layIdx + 1);
+        }
+        define.layers[layIdx] = (*factoryCache.stripLayers.emplace(std::move(stripLay)).first);
+        ATH_MSG_VERBOSE("Added new eta gap at "<<(*define.layers[layIdx]));
+    };
     for (gapVolume& gapVol : allGapsWithIdx) {
         const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.volume);
         if (gapShape->typeID() != GeoBox::getClassTypeID()) {
@@ -145,56 +171,33 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         }
         const GeoBox* gapBox = static_cast<const GeoBox*>(gapShape);
         ATH_MSG_DEBUG("Gas gap dimensions "<<m_geoUtilTool->dumpShape(gapBox));
-        StripDesignPtr etaDesign = std::make_unique<StripDesign>();
-        /// Define the strip layout
-        const double firstStripPosEta = -gapBox->getZHalfLength() + paramBook.firstOffSetEta;
-        etaDesign->defineStripLayout(firstStripPosEta * Amg::Vector2D::UnitX(),
-                                     paramBook.stripPitchEta,
-                                     paramBook.stripWidthEta,
-                                     paramBook.numEtaStrips);
-        /// Define the box layout
-        etaDesign->defineTrapezoid(gapBox->getYHalfLength(), gapBox->getYHalfLength(), gapBox->getZHalfLength());
+        StripDesignPtr etaDesign = constructDesign(gapBox, paramBook, false);
+        StripDesignPtr phiDesign = constructDesign(gapBox, paramBook, true);
+        if (etaDesign) {
+            etaDesign = (*factoryCache.stripDesigns.emplace(etaDesign).first);
+        }
+        if (phiDesign) {
+            phiDesign = (*factoryCache.stripDesigns.emplace(phiDesign).first);
+        }
+        if (!define.etaDesign) {
+            define.etaDesign = etaDesign;
+        }
+        if (!define.phiDesign) {
+            define.phiDesign = phiDesign;
+        }
         gapVol.transform = gapVol.transform * Amg::getRotateY3D( (isAside ? -90. :  90.)* Gaudi::Units::degree);
-        
-        etaDesign = (*factoryCache.stripDesigns.emplace(etaDesign).first);
-        const IdentifierHash etaHash {RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)};
-        const unsigned int etaIdx = static_cast<unsigned int>(etaHash);
-        if (etaIdx >= define.layers.size()) {
-            define.layers.resize(etaIdx + 1);
-        }
 
-        auto etaLayer = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform), 
-                                                     etaDesign, etaHash);
-        define.layers[etaIdx] = (*factoryCache.stripLayers.emplace(std::move(etaLayer)).first);
-        
-        ATH_MSG_VERBOSE("Added new eta gap at "<<(*define.layers[etaIdx]));
-        if (!define.etaDesign) define.etaDesign = etaDesign;
-        
-        if (!paramBook.numPhiStrips) {
-            ATH_MSG_VERBOSE("Rpc readout element without phi strips");
-            continue;
+        if (etaDesign) {
+            insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform), 
+                                                          etaDesign,
+                                                          RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)));
         }
-        StripDesignPtr phiDesign = std::make_unique<StripDesign>();
-        const double firstStripPosPhi = -gapBox->getYHalfLength() + paramBook.firstOffSetPhi;
-        phiDesign->defineStripLayout(firstStripPosPhi * Amg::Vector2D::UnitX(),
-                                     paramBook.stripPitchPhi,
-                                     paramBook.stripWidthPhi,
-                                     paramBook.numPhiStrips);
-        phiDesign->defineTrapezoid(gapBox->getZHalfLength(), gapBox->getZHalfLength(), gapBox->getYHalfLength());
-        /// Next build the phi layer
-        phiDesign = (*factoryCache.stripDesigns.emplace(phiDesign).first);
-        
-        const IdentifierHash phiHash {RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, true)};
-        const unsigned int phiIdx = static_cast<unsigned int>(phiHash);
-        if (phiIdx >= define.layers.size()) {
-            define.layers.resize(phiIdx + 1);
-        }
-        auto phiLayer = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform  * 
-                                                        Amg::getRotateZ3D(90. * Gaudi::Units::deg)),
-                                                     phiDesign, phiHash);
-        define.layers[phiIdx] = (*factoryCache.stripLayers.emplace(std::move(phiLayer)).first);
-        ATH_MSG_VERBOSE("Added new phi gap at "<<(*define.layers[phiIdx]));
-        if (!define.phiDesign) define.phiDesign = phiDesign;
+        if (phiDesign) {
+            insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform*
+                                                                                                  Amg::getRotateZ3D(90. * Gaudi::Units::deg)), 
+                                                          phiDesign,
+                                                          RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, true))); 
+        }     
     }
     return StatusCode::SUCCESS;
 }
@@ -214,7 +217,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     /// Retrieve the list of full physical volumes & alignable nodes and connect them together afterwards
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
 #ifndef SIMULATIONBASE
-    SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::RectangleBounds>>();
+    auto layerBounds = std::make_shared<Acts::SurfaceBoundFactory>();
 #endif
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like

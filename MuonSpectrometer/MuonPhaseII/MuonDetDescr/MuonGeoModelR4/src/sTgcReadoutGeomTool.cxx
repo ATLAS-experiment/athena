@@ -13,7 +13,6 @@
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoSimplePolygonBrep.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
@@ -22,7 +21,7 @@
 #include <RDBAccessSvc/IRDBRecord.h>
 
 #ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Utilities/BoundFactory.hpp"
 #endif
 
 using namespace CxxUtils;
@@ -246,7 +245,7 @@ StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
 #ifndef SIMULATIONBASE
-    SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
+    auto layerBounds = std::make_shared<Acts::SurfaceBoundFactory>();
 #endif
 
     for (auto& [key, pv] : mapFPV) {

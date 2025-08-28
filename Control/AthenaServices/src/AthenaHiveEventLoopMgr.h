@@ -240,13 +240,21 @@ private:
   UnsignedIntegerProperty m_writeInterval;
   bool m_writeHists;
 
-  bool m_terminateLoop { false };
+protected:
+  // These are now protected so we can access them in MPIHiveEventLoopMgr
 
+  bool m_terminateLoop { false };
   /// events processed
   unsigned int m_nev;
   unsigned int m_proc;
   bool m_useTools;
   bool m_doEvtHeartbeat;
+
+  // Save a copy of the last event context to use
+  // at the end of event processing.
+  EventContext m_lastEventContext;
+
+private:
   bool m_firstEventAlone;
 
   unsigned int m_flmbi, m_timeStampInt;
@@ -262,10 +270,6 @@ private:
   StoreGateSvc* eventStore() const;
 
   ServiceHandle<Athena::IConditionsCleanerSvc> m_conditionsCleaner;
-  
-  // Save a copy of the last event context to use
-  // at the end of event processing.
-  EventContext m_lastEventContext;
 };
 
 #endif // ATHENASERVICES_ATHENAHIVEEVENTLOOPMGR_H

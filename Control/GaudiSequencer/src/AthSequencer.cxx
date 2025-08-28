@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthSequencer.cxx
@@ -118,7 +118,7 @@ AthSequencer::execute( const EventContext& ctx ) const
 
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  auto& state = execState( ctx );
+  auto state = execState( ctx );
   
   // Bypass the loop if this sequencer is disabled or has already been executed
   if ( isEnabled( ) && state.state() != AlgExecState::State::Done ) {

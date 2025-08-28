@@ -13,14 +13,25 @@ def getStreamHITS_ItemList(flags):
     #--------------------------------------------------------------
     # Specify collections for output HIT files, as not all are required.
     #--------------------------------------------------------------
-    ItemList = ["McEventCollection#TruthEvent", # mc truth (hepmc)
-                "TrackRecordCollection#MuonEntryLayer", # others not used in pileup
-                "xAOD::JetContainer#AntiKt4TruthJets",
-                "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-constituentLinks.-constituentWeights",
-                "xAOD::JetContainer#AntiKt6TruthJets",
-                "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-constituentLinks.-constituentWeights",
-                "xAOD::TruthParticleContainer#TruthPileupParticles",
-                "xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
+    ItemList = []
+
+    if "McEventCollection#TruthEvent" in flags.Input.TypedCollections:
+        ItemList += ["McEventCollection#TruthEvent"] # mc truth (hepmc)
+
+    if "TrackRecordCollection#MuonEntryLayer" in flags.Input.TypedCollections:
+        ItemList += ["TrackRecordCollection#MuonEntryLayer"] # others not used in pileup
+
+    if "xAOD::JetContainer#AntiKt4TruthJets" in flags.Input.TypedCollections:
+        ItemList += ["xAOD::JetContainer#AntiKt4TruthJets",
+                     "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-constituentLinks.-constituentWeights"]
+
+    if "xAOD::JetContainer#AntiKt6TruthJets" in flags.Input.TypedCollections:
+        ItemList += ["xAOD::JetContainer#AntiKt6TruthJets",
+                     "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-constituentLinks.-constituentWeights"]
+
+    if "xAOD::TruthParticleContainer#TruthPileupParticles" in flags.Input.TypedCollections:
+        ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles",
+                     "xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
 
     if "xAOD::EventInfo#EventInfo" in flags.Input.TypedCollections:
         ItemList += ["xAOD::EventInfo#EventInfo",

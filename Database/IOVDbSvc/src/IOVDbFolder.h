@@ -27,13 +27,12 @@
 #include <memory>
 #include <algorithm>
 #include "FolderTypes.h"
-#include "BasicFolder.h"
 #include "IovStore.h"
 
 #include <map> 
 #include "nlohmann/json.hpp"
 
-#include "CrestFunctions.h"
+#include "CoralCrestManager.h"
 
 class MsgStream;
 class IOVDbConn;
@@ -46,7 +45,6 @@ class ITagInfoMgr;
 
 namespace IOVDbNamespace {
   class Cool2Json;
-  class BasicFolder;
 }
 
 class IOVDbFolder : public AthMessaging {
@@ -54,7 +52,7 @@ public:
   IOVDbFolder(IOVDbConn* conn, const IOVDbParser& folderprop, MsgStream& msg,
               IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
               const bool checklock, const bool outputToFile=false,
-              const std::string & source="COOL_DATABASE", const bool crestToFile=false,
+              const std::string & source="COOL_DATABASE",
               const std::string & crestServer="",const std::string & crestTag="",const bool crestCoolToFile=false);
   ~IOVDbFolder();
   
@@ -241,11 +239,7 @@ private:
   std::vector<IOVHash> fetchCrestIOVs(cool::ValidityKey since, cool::ValidityKey until); 
 
   // Function which reads CREST objects by the cache IOV boundaries
-  std::vector<IOVDbNamespace::BasicFolder> fetchCrestObjects(cool::ValidityKey since
-		                                             , cool::ValidityKey until
-					                     , bool vectorPayloadFlag
-					                     , cool::ValidityKey vkey /* Temporary! */
-							     , const std::string& nodeDesc);
+  std::vector<IOVHash> fetchCrestObjects(cool::ValidityKey since, cool::ValidityKey until, cool::ValidityKey vkey);
 
   // __________________________________________________________
 
@@ -254,9 +248,8 @@ private:
 		, const cool::ValidityKey& vkey
 		, IOVDbNamespace::Cool2Json* json          // Argument for dumping COOL data
 		, bool skipCoolIoV                         // Argument for dumping COOL data
-		, IOVDbNamespace::BasicFolder* basicFolder // Argument for dumping CREST data
-		, const std::string& crestNodeDescr        // Argument for dumping CREST data
-		, const std::string& specString            // Argument for dumping CREST data
+		, CoralCrestManager* mng=NULL              // Argument for dumping CREST data
+		, const cool::ValidityKey crestVkey=0      // Argument for dumping CREST data
 	       ) const;
 
   ITagInfoMgr*         p_tagInfoMgr{nullptr};   // pointer to TagInfoMgr
@@ -323,15 +316,12 @@ private:
   std::vector<unsigned int> m_cacheccend;
   IOVDbNamespace::IovStore m_iovs;
   const bool m_outputToFile{false};
-  const bool m_crestToFile{false};
   const bool m_crestCoolToFile{false};
   const std::string m_source;
   const std::string m_crestServer;
   const std::string m_crestTag;
-  std::string m_crest_tag = "";
-  nlohmann::json m_tag_info = nullptr;
 
-  std::optional<IOVDbNamespace::CrestFunctions> m_cfunctions;
+  std::optional<CoralCrestManager> m_crest_mng;
 };
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}

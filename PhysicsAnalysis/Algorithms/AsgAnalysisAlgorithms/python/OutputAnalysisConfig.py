@@ -3,7 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AnalysisAlgorithmsConfig.ConfigSequence import filter_dsids
+from AnalysisAlgorithmsConfig.ConfigBlock import filter_dsids
 from AthenaCommon.Logging import logging
 import copy, re
 
@@ -80,6 +80,12 @@ class OutputAnalysisConfig (ConfigBlock):
             "The default is True.")
         # helper to protect for second pass
         self.validated = False
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None and self.postfix != '':
+            return self.postfix
+        return self.treeName
 
     @staticmethod
     def branchSortOrder (rule):
@@ -184,10 +190,14 @@ class OutputAnalysisConfig (ConfigBlock):
             if filter_dsids([dsid], config):
                 self.commands += dsid_commands
 
+        outputConfigsRename = {}
         for command in self.commands :
             words = command.split (' ')
             if len (words) == 0 :
                 raise ValueError ('received empty command for "commands" option')
+            optional = words[0] == 'optional'
+            if optional :
+                words = words[1:]  # remove the 'optional' keyword
             if words[0] == 'enable' :
                 if len (words) != 2 :
                     raise ValueError ('enable takes exactly one argument: ' + command)
@@ -196,7 +206,7 @@ class OutputAnalysisConfig (ConfigBlock):
                     if re.match (words[1], name) :
                         outputConfigs[name].enabled = True
                         used = True
-                if not used and config.dataType() is not DataType.Data:
+                if not used and not optional and config.dataType() is not DataType.Data:
                     raise KeyError ('unknown branch pattern for enable: ' + words[1])
             elif words[0] == 'disable' :
                 if len (words) != 2 :
@@ -206,16 +216,30 @@ class OutputAnalysisConfig (ConfigBlock):
                     if re.match (words[1], name) :
                         outputConfigs[name].enabled = False
                         used = True
-                if not used and config.dataType() is not DataType.Data:
+                if not used and not optional and config.dataType() is not DataType.Data:
                     raise KeyError ('unknown branch pattern for disable: ' + words[1])
+            elif words[0] == 'rename' :
+                if len (words) != 3 :
+                    raise ValueError ('rename takes exactly two arguments: ' + command)
+                used = False
+                for name in outputConfigs :
+                    if re.match (words[1], name) :
+                        new_name = re.sub (words[1], words[2], name)
+                        outputConfigsRename[new_name] = copy.deepcopy(outputConfigs[name])
+                        outputConfigs[name].enabled = False
+                        used = True
+                if not used and not optional and config.dataType() is not DataType.Data:
+                    raise KeyError ('unknown branch pattern for rename: ' + words[1])
             else :
                 raise KeyError ('unknown command for "commands" option: ' + words[0])
+
+        # update the outputConfigs with renamed branches
+        outputConfigs.update(outputConfigsRename)
 
         autoVars = set()
         autoMetVars = set()
         autoTruthMetVars = set()
-        for outputName in outputConfigs :
-            outputConfig = outputConfigs[outputName]
+        for outputName, outputConfig in outputConfigs.items():
             if outputConfig.enabled :
                 if config.isMetContainer (outputConfig.origContainerName) and outputConfig.prefix not in self.containersFullMET:
                     if "Truth" in outputConfig.origContainerName:
@@ -233,30 +257,25 @@ class OutputAnalysisConfig (ConfigBlock):
                     outputName += '_%SYS%'
                 myVars.add(f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}")
 
-        if self.postfix:
-            postfix = self.postfix
-        else:
-            postfix = self.treeName
-
         # Add an ntuple dumper algorithm:
-        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', f'TreeMaker{postfix}' )
+        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
         treeMaker.TreeName = self.treeName
         treeMaker.RootStreamName = self.streamName
         # the auto-flush setting still needs to be figured out
         #treeMaker.TreeAutoFlush = 0
 
         if self.vars or autoVars:
-            ntupleMaker = self.createOutputAlgs(config, f'NTupleMaker{postfix}', self.vars | autoVars)
+            ntupleMaker = self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
 
         if self.metVars or autoMetVars:
-            ntupleMaker = self.createOutputAlgs(config, f'MetNTupleMaker{postfix}', self.metVars | autoMetVars, isMet=True)
+            ntupleMaker = self.createOutputAlgs(config, 'MetNTupleMaker', self.metVars | autoMetVars, isMet=True)
             ntupleMaker.termName = self.metTermName
 
         if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
-            ntupleMaker = self.createOutputAlgs(config, f'TruthMetNTupleMaker{postfix}', self.truthMetVars | autoTruthMetVars, isMet=True)
+            ntupleMaker = self.createOutputAlgs(config, 'TruthMetNTupleMaker', self.truthMetVars | autoTruthMetVars, isMet=True)
             ntupleMaker.termName = self.truthMetTermName
 
-        treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
+        treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
         treeFiller.TreeName = self.treeName
         treeFiller.RootStreamName = self.streamName
 

@@ -71,8 +71,7 @@ namespace FlavorTagInference {
     }
 
     std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> FlowElementsLoader::getData(
-      const xAOD::Jet& jet, 
-      [[maybe_unused]] const SG::AuxElement& btag) const {
+      const xAOD::Jet& jet) const {
         FlowElements sorted_flows = getFlowElementsFromJet(jet);
 
         // We return a dummy vector of IParticles as we don't decorate flow elements

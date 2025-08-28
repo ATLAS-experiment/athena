@@ -51,11 +51,18 @@ def fromRunArgs(runArgs):
     if hasattr(runArgs, 'outputHEPMCFile'):
        if ('.tar' in runArgs.outputHEPMCFile):
           index = re.search(".tar",runArgs.outputHEPMCFile).span()[0]
-          my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.hepmc'
+          if hasattr(runArgs, 'extension') and ('events' in runArgs.extension):
+               my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.events'
+          else:
+               my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.hepmc'
        else:
           log.error('Output should be a tar.gz file but it is '+runArgs.outputHEPMCFile)
     else:
         log.error('OutputHEPMCFile required for POOLtoHEPMC')
+
+    hepMCFormat = 'hepmc2'
+    if hasattr(runArgs, 'hepmcFormat'):
+       hepMCFormat = runArgs.hepmcFormat
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
@@ -91,8 +98,9 @@ def fromRunArgs(runArgs):
     # Use the WriteHepMC AlgTool from TruthIO to do the conversion
     cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
                       OutputFile = my_output_HepMCFile,
+                      Format = hepMCFormat,
                       McEventKey = McEventKey ) )
-
+    # Here one should set the output format
     # Post-include
     processPostInclude(runArgs, flags, cfg)
 

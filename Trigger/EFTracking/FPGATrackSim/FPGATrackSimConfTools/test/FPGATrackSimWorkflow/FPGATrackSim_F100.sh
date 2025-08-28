@@ -30,13 +30,14 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.pipeline='F-100' \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
-    Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
+    Trigger.FPGATrackSim.mapsDir=$MAPS_5L \
     Trigger.FPGATrackSim.writeToAOD=True \
-    Trigger.FPGATrackSim.oldRegionDefs=True \
-    Trigger.FPGATrackSim.region=0 \
+    Trigger.FPGATrackSim.oldRegionDefs=False \
+    Trigger.FPGATrackSim.region=34 \
     Trigger.FPGATrackSim.spacePoints=False \
     Trigger.FPGATrackSim.writeOfflPRDInfo=True \
     Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
+    Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root"
 
 

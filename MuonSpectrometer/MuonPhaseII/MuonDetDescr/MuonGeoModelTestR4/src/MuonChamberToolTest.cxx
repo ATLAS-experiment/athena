@@ -19,6 +19,8 @@
 #include <GaudiKernel/SystemOfUnits.h>
 
 #include "Acts/Geometry/TrapezoidVolumeBounds.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
 
 #include <format>
 namespace{
@@ -30,6 +32,7 @@ namespace MuonGMR4 {
     StatusCode MuonChamberToolTest::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         return StatusCode::SUCCESS;
     }
@@ -74,6 +77,22 @@ namespace MuonGMR4 {
                      <<std::endl<<std::endl<<chamb<<std::endl<<"Local position "<<Amg::toString(locPos)
                      <<", box left edge: "<<Amg::toString(planeTrapezoid.leftEdge(1).value_or(Amg::Vector2D::Zero()))
                      <<", box right edge "<<Amg::toString(planeTrapezoid.rightEdge(1).value_or(Amg::Vector2D::Zero())));
+        return StatusCode::FAILURE;
+    }
+
+    StatusCode MuonChamberToolTest::pointInside(const Acts::TrackingVolume& volume,
+                                                const Amg::Vector3D& point,
+                                                const std::string& descr,
+                                                const Identifier& chamberId) const {
+        if (volume.inside(point)) {
+            return StatusCode::SUCCESS;
+        }
+        const auto& volumeCorners = cornerPoints(volume);
+        ATH_MSG_FATAL("In channel "<<m_idHelperSvc->toString(chamberId) <<", the point "
+                     << descr <<" "<<Amg::toString(point)<<" is not part of the chamber volume. The corners of the volume are:");
+        for(const auto& corner : volumeCorners) {
+            ATH_MSG_FATAL("  "<<Amg::toString(corner));
+        }
         return StatusCode::FAILURE;
     }
 
@@ -150,9 +169,80 @@ namespace MuonGMR4 {
         return edges;
     }
 
+    std::array<Amg::Vector3D, 8> MuonChamberToolTest::cornerPoints(const Acts::GeometryContext& gctx, const Acts::StrawSurface& surface) const {
+        std::array<Amg::Vector3D, 8> edges{make_array<Amg::Vector3D,8>(Amg::Vector3D::Zero())};
+        using BoundEnum = Acts::LineBounds::BoundValues;
+        const auto& bounds = static_cast<const Acts::LineBounds&>(surface.bounds());
+        unsigned int edgeIdx{0};
+        
+        ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(surface.transform(gctx)));
+        for (const double signX : {-1., 1.}) {
+            for (const double signY : { -1., 1.}) {
+                for (const double signZ: {-1., 1.}) {
+                    const Amg::Vector3D edge{signX*bounds.get(BoundEnum::eR),
+                                             signY*bounds.get(BoundEnum::eR),
+                                             signZ*bounds.get(BoundEnum::eHalfLengthZ)};
+                    edges[edgeIdx] = surface.transform(gctx) * edge;
+                    ++edgeIdx;
+                }
+            }
+        }
+        
+        return edges;
+    }
+    
+    std::array<Amg::Vector3D, 4> MuonChamberToolTest::cornerPoints(const Acts::GeometryContext& gctx, const Acts::PlaneSurface& surface) const {
+        std::array<Amg::Vector3D, 4> edges{make_array<Amg::Vector3D,4>(Amg::Vector3D::Zero())};
+        if(surface.bounds().type() == Acts::SurfaceBounds::BoundsType::eRectangle) { //RPC surfaces are rectangles
+            const Acts::RectangleBounds& bounds = static_cast<const Acts::RectangleBounds&>(surface.bounds());
+            using BoundEnum = Acts::RectangleBounds::BoundValues;
+            
+            unsigned int edgeIdx{0};
+            for(const double signX : {-1., 1.}) {
+                for (const double signY : { -1., 1.}) {
+                    const Amg::Vector3D edge{ signX < 0 ? bounds.get(BoundEnum::eMinX) : bounds.get(BoundEnum::eMaxX), 
+                                              signY < 0 ? bounds.get(BoundEnum::eMinY) : bounds.get(BoundEnum::eMaxY), 
+                                              0};
+                    edges[edgeIdx] = surface.transform(gctx) * edge;
+                    ++edgeIdx;  
+                }
+            } 
+            return edges;
+
+        } else if(surface.bounds().type() == Acts::SurfaceBounds::BoundsType::eTrapezoid) {
+            using BoundEnum = Acts::TrapezoidBounds::BoundValues;
+            const auto& bounds = static_cast<const Acts::TrapezoidBounds&>(surface.bounds());
+            unsigned int edgeIdx{0};
+        
+
+            ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(surface.transform(gctx)));
+            for (const double signX : {-1., 1.}) {
+                for (const double signY : { -1., 1.}) {
+                        const Amg::Vector3D edge  {    
+                                                Amg::getRotateZ3D(-1*bounds.get(BoundEnum::eRotationAngle))*
+
+                                                Amg::Vector3D(signX*bounds.get(signY < 0 ? BoundEnum::eHalfLengthXnegY : BoundEnum::eHalfLengthXposY),
+                                                signY*bounds.get(BoundEnum::eHalfLengthY),
+                                                0)};
+                    
+                        edges[edgeIdx] = surface.transform(gctx) * edge;
+                        ++edgeIdx;
+                }
+            }
+        
+            return edges;
+        } else {
+                ATH_MSG_FATAL("The surface bounds are neither a rectangle nor a trapezoid, this is not supported yet");
+                return edges;
+        }
+        
+    }
+
+
     StatusCode MuonChamberToolTest::execute(const EventContext& ctx) const {
         const ActsGeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
+        std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
         /** Check that all chambers covered by their sector envelopes */
         using SectorSet = MuonDetectorManager::MuonSectorSet;
         const SectorSet sectors = m_detMgr->getAllSectors();
@@ -168,8 +258,71 @@ namespace MuonGMR4 {
                               std::format("Edge {:}", edgeCount++),
                               chamber->readoutEles().front()->identify()));
                 }
-            }
-        } 
+                const Acts::TrackingVolume* trkGeoVol = trackingGeometry->lowestTrackingVolume(gctx->context(), chamber->boundingVolume(*gctx)->center());
+                ATH_MSG_DEBUG("Found "<<trkGeoVol->volumeName()<< " with " << trkGeoVol->volumes().size() <<" sub volumes for chamber "<<m_idHelperSvc->toString(chamber->readoutEles().front()->identify()));
+
+                if(trkGeoVol->volumes().size() > 2) continue; // temporary workaround for overlaps in the tracking geometry
+                
+                trkGeoVol->visitVolumes([&](const Acts::TrackingVolume* volume) {
+                    ATH_MSG_DEBUG("Found sub volume "<<volume->volumeName());
+                });
+
+            
+                std::map<Identifier, const std::array<Amg::Vector3D, 8>> strawCorners;
+                std::map<Identifier, const std::array<Amg::Vector3D, 4>> trapezoidCorners;
+
+
+                trkGeoVol->visitSurfaces([&](const Acts::Surface* surface) {
+                    if(surface->type() == Acts::Surface::SurfaceType::Plane){
+                        const auto* planeSurface = static_cast<const Acts::PlaneSurface*>(surface);
+                        ATH_MSG_DEBUG("Found plane surface  with id" << planeSurface->geometryId());
+                        if(planeSurface->associatedDetectorElement()){ // skip the material surfaces
+                            const ActsTrk::IDetectorElementBase* iDetElement =  static_cast<const ActsTrk::IDetectorElementBase*> (planeSurface->associatedDetectorElement());
+                            trapezoidCorners.emplace(iDetElement->identify(), cornerPoints(gctx->context(), *planeSurface));
+                        }
+                    } else if (surface->type() == Acts::Surface::SurfaceType::Straw) {
+                        const auto* strawSurface = static_cast<const Acts::StrawSurface*>(surface);
+                        if(strawSurface->associatedDetectorElement() ) { 
+                            const ActsTrk::IDetectorElementBase* iDetElement =  static_cast<const ActsTrk::IDetectorElementBase*> (strawSurface->associatedDetectorElement());
+                            strawCorners.emplace(iDetElement->identify(), cornerPoints(gctx->context(), *strawSurface));
+                        }
+                    } else {
+
+                        ATH_MSG_FATAL("Got non muon surface");
+                    }
+
+                }
+                , true);
+
+                ATH_MSG_DEBUG("Found "<<strawCorners.size()<<" straw corners and "<<trapezoidCorners.size()<<" trapezoid corners in chamber "<<m_idHelperSvc->toString(chamber->readoutEles().front()->identify()));
+
+                for (const auto& [id, corners] : strawCorners) {
+                    edgeCount = 0;
+                    for (unsigned int i = 0; i < corners.size(); ++i) {
+                        ATH_CHECK(pointInside(*trkGeoVol, corners[i], 
+                              std::format("Straw corner {:}", i),
+                              chamber->readoutEles().front()->identify()));
+                    }
+                }
+                
+                unsigned int surfaceCount{0};
+                for (const auto& [id, corners] : trapezoidCorners) {
+                    ATH_MSG_DEBUG("Found "<<corners.size()<<" corners for straw chamber "<<m_idHelperSvc->toString(id));
+                    if(strawCorners.size() != 0){
+                        break; // this is a straw chamber and I dont know were the plane surface comes from
+                    }
+
+                    edgeCount = 0;
+                    for (unsigned int i = 0; i < corners.size(); ++i) {
+                        ATH_CHECK(pointInside(*trkGeoVol, corners[i], 
+                              std::format("Trapezoid corner {:} of surface {:}", i, ++surfaceCount),
+                              id));
+                    }
+                }
+            
+        
+            }           
+        }
         using ChamberSet = MuonDetectorManager::MuonChamberSet;
         const ChamberSet chambers = m_detMgr->getAllChambers();
         for (const Chamber* chamber : chambers) {
@@ -241,14 +394,13 @@ namespace MuonGMR4 {
                                                    const TgcReadoutElement& tgc,
                                                    const EnevelopeType& chamber,
                                                    const Acts::Volume& detVol) const {        
-      
-        const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
         for (unsigned int gasGap = 1; gasGap <= tgc.nGasGaps(); ++gasGap){
             for (bool isStrip : {false}) {
-                unsigned int nChannel = isStrip ? tgc.numStrips(gasGap) : tgc.numWireGangs(gasGap);
+                const IdentifierHash layHash = tgc.constructHash(0, gasGap, isStrip);
+                const unsigned int nChannel = tgc.numChannels(layHash);
                 for (unsigned int channel = 1; channel <= nChannel ; ++channel) {
-                    const Identifier stripId = idHelper.channelID(tgc.identify(), gasGap, isStrip, channel);
-                    ATH_CHECK(pointInside(chamber, detVol, tgc.channelPosition(gctx, stripId), "center", stripId));
+                    const IdentifierHash measHash = tgc.constructHash(channel, gasGap, isStrip);
+                    ATH_CHECK(pointInside(chamber, detVol, tgc.channelPosition(gctx, measHash), "center", tgc.measurementId(measHash)));
                 }
             }
         }

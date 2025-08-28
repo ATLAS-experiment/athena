@@ -16,7 +16,7 @@ def FPGATrackExtensionAlgCfg(flags,enableTrackStatePrinter=False, **kwargs):
 
     if "TrackingGeometryTool" not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs["TrackingGeometryTool"] = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+        kwargs["TrackingGeometryTool"] = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
 
     if 'ActsFitter' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg

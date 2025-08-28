@@ -3,7 +3,7 @@
 */
 
 
-#include "L1CaloFEXSim/eSuperCellTowerMapper.h"
+#include "eSuperCellTowerMapper.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
 

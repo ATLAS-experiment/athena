@@ -13,6 +13,7 @@
 #include "EventPrimitives/EventPrimitives.h"
 //Trk
 #include "TrkEventPrimitives/ParamDefs.h"
+#include "TruthUtils/ParticleConstants.h"
 
 namespace Trk {
   
@@ -27,7 +28,7 @@ namespace Trk {
   */
   class JacobianPerigeeToCartesian : public AmgMatrix(7,5) {
     public:
-    JacobianPerigeeToCartesian(const double d0, const double z0, const double phi0, const double theta, const double qOverP, const double mass = 105.6583692  );
+    JacobianPerigeeToCartesian(const double d0, const double z0, const double phi0, const double theta, const double qOverP, const double mass = ParticleConstants::muonMassInMeV  );
       ~JacobianPerigeeToCartesian(){}
   };
 

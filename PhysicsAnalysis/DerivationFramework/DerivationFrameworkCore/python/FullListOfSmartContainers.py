@@ -50,6 +50,7 @@ def FullListOfSmartContainers(flags=None):
       "BTagging_AntiKt4UFOCSSK",
       "BTagging_AntiKt4UFOCSSK_expert",
       "BTagging_AntiKtVR30Rmax4Rmin02Track_expert",
+      "AntiKtVR30Rmax4Rmin02Track_FTAG",
       "BTagging_AntiKt4EMTopo",
       "BTagging_AntiKtVR30Rmax4Rmin02Track",
       "BTagging_AntiKt4HI",

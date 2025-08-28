@@ -12,6 +12,12 @@
 
 namespace CxxUtils {
 
+template <class T>
+inline
+void CachedPointerStaticAsserts()
+{
+}
+
 
 /**
  * @brief Default constructor.  Sets the element to null.
@@ -21,8 +27,11 @@ inline
 CachedPointer<T>::CachedPointer()
   : m_a (nullptr)
 {
+  static_assert(std::is_nothrow_copy_assignable_v<CachedPointer<T>> &&
+                std::is_nothrow_move_assignable_v<CachedPointer<T>> &&
+                std::is_nothrow_copy_constructible_v<CachedPointer<T>> &&
+                std::is_nothrow_move_constructible_v<CachedPointer<T>>);
 }
-
 
 /**
  * @brief Constructor from an element.
@@ -32,6 +41,10 @@ inline
 CachedPointer<T>::CachedPointer (pointer_t elt)
   : m_a (elt)
 {
+  static_assert(std::is_nothrow_copy_assignable_v<CachedPointer<T>> &&
+                std::is_nothrow_move_assignable_v<CachedPointer<T>> &&
+                std::is_nothrow_copy_constructible_v<CachedPointer<T>> &&
+                std::is_nothrow_move_constructible_v<CachedPointer<T>>);
 }
 
 
@@ -46,25 +59,12 @@ CachedPointer<T>::CachedPointer (const CachedPointer& other) noexcept
 }
 
 /**
- * @brief Move constructor.
- */
-template <class T>
-inline
-CachedPointer<T>::CachedPointer ( CachedPointer&& other) noexcept
-  : m_a (other.get())
-{
-   //Does not own pointer so don't need to null
-}
-
-
-
-/**
  * @brief Assignment.
  */
 template <class T>
 inline
 CachedPointer<T>&
-CachedPointer<T>::operator= (const CachedPointer& other)
+CachedPointer<T>::operator= (const CachedPointer& other) noexcept
 {
   if (this != &other) {
     store (other.get());
@@ -134,6 +134,5 @@ CachedPointer<T>::ptr() const
 {
   return &m_e;
 }
-
 
 } // namespace CxxUtils

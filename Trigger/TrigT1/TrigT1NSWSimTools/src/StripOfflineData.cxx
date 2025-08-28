@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -98,7 +98,7 @@ namespace NSWL1 {
     char StripOfflineData::type()    const {
         if (m_helper) {
             std::string stName = m_helper->stationNameString(m_helper->stationName(m_id));
-            bool isSmall = stName[2]=='S';
+            bool isSmall = stName.size() > 2 && stName[2]=='S';
             return (isSmall)? 'S' : 'L';
         }
         return -1;
@@ -112,7 +112,7 @@ namespace NSWL1 {
   int StripOfflineData::isSmall() const {
     if (m_helper) {
         std::string stName = m_helper->stationNameString(m_helper->stationName(m_id));
-        bool isSmall = stName[2]=='S';
+        bool isSmall = stName.size() > 2 && stName[2]=='S';
         return isSmall;
     }
     return 0;

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "EvaluateModelWithAthInfer.h"
@@ -19,7 +19,7 @@ StatusCode EvaluateModelWithAthInfer::initialize() {
 	   return StatusCode::FAILURE;
    }
    // read input file, and the target file for comparison.
-   std::string pixelFilePath = PathResolver::find_file(m_pixelFileName.value(), "CALIBPATH", PathResolver::RecursiveSearch);
+   std::string pixelFilePath = PathResolver::find_calib_file(m_pixelFileName.value());
    ATH_MSG_INFO( "Using pixel file: " << pixelFilePath );
   
    m_input_tensor_values_notFlat = EvaluateUtils::read_mnist_pixel_notFlat(pixelFilePath);

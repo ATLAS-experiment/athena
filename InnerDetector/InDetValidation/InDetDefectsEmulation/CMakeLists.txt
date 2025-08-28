@@ -14,6 +14,6 @@ atlas_add_component( InDetDefectsEmulation
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AtlasDetDescr  GaudiKernel
                      Identifier InDetIdentifier InDetRawData InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry StoreGateLib
-                     SCT_ConditionsToolsLib ActsCore ActsGeometryLib ActsGeometryInterfacesLib )
+                     SCT_ConditionsToolsLib Acts::Core ActsGeometryLib ActsGeometryInterfacesLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -10,7 +10,6 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 #include "CxxUtils/checker_macros.h"
 
@@ -119,25 +118,6 @@ class CaloGPUHybridClusterProcessor : public AthReentrantAlgorithm, public CaloG
    */
   ToolHandle<ICaloClusterGPUPlotter> m_plotterTool{this, "PlotterTool", "", "An optional plotter, for testing and/or debugging purposes"};
 
-
-  /** @brief If @p true, uses the monitoring tool specified by @p m_monitorTool.
-    */
-  Gaudi::Property<bool> m_doMonitoring{this, "DoMonitoring", false, "Do monitoring."};
-  Gaudi::Property<bool> m_monitorCells{this, "MonitorCells", false, "Whether to monitor cells too."};
-  Gaudi::Property<float> m_monitoring1thr { this, "Thr1", 2, "First Threshold to pass for cell monitoring" };
-  Gaudi::Property<float> m_monitoring2thr { this, "Thr2", 4, "Second Threshold to pass for cell monitoring" };
-
-
-  // adding noise handle for monitoring purposes
-  SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this, "CaloNoiseKey", "totalNoise", "SG Key of CaloNoise data object"};
-
-  /** @brief Monitoring tool.
-    */
-  ToolHandle<GenericMonitoringTool> m_moniTool { this, "MonitoringTool", "", "Monitoring tool" };
-
-  ///Event input: To get <mu> from Event Info
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_avgMuKey { this, "averageInteractionsPerCrossingKey", "EventInfo.averageInteractionsPerCrossing", "Decoration for Average Interaction Per Crossing" };
-
   /** @brief If @p true, writes some trigger-specific decorations.
     */
   Gaudi::Property<bool> m_writeTriggerSpecificInfo{this, "WriteTriggerSpecificInfo", false, "Write some trigger-specific decorations and use the trigger auxiliary container."};
@@ -152,11 +132,6 @@ class CaloGPUHybridClusterProcessor : public AthReentrantAlgorithm, public CaloG
    *
    */
   Gaudi::Property<size_t> m_numPreAllocatedGPUData{this, "NumPreAllocatedDataHolders", 0, "Number of event data holders to pre-allocate on GPU memory"};
-
-  /**
-   * @brief vector of names of the cell containers to use as input.
-   */
-  SG::ReadHandleKey<CaloCellContainer> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
 
   /** @brief The name of the key in StoreGate for the output
       CaloClusterContainer */

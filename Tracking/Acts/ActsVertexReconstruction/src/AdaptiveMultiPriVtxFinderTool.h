@@ -24,7 +24,7 @@
 #include "ActsInterop/Logger.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -82,8 +82,6 @@ namespace ActsTrk {
                                   const std::string& name,
                                   const IInterface* parent);
 
-    using InDet::IVertexFinder::findVertex;
-
     virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
        findVertex(const EventContext& ctx, const TrackCollection* trackTES) const override;
 
@@ -105,7 +103,7 @@ namespace ActsTrk {
 
     // Provide access to the geometry tool
     virtual
-    const IActsTrackingGeometryTool*
+    const ActsTrk::ITrackingGeometryTool*
     trackingGeometryTool() const
     {
       return m_trackingGeometryTool.get();
@@ -114,7 +112,7 @@ namespace ActsTrk {
     /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger {nullptr};
     const Acts::Logger &logger() const { return *m_logger; }
-    
+
     using Propagator = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
     using TrackLinearizer = Acts::HelicalTrackLinearizer;
     using VertexFitter = Acts::AdaptiveMultiVertexFitter;
@@ -129,7 +127,7 @@ namespace ActsTrk {
     // optional because of late initializatio
     std::optional<TrackLinearizer> m_linearizer = std::nullopt;
 
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "", "ActsExtrapolationTool"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter{this, "TrackSelector", "", "InDetTrackSelectionTool"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};

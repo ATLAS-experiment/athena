@@ -32,6 +32,9 @@
 #include "tauRecTools/TauAODMuonRemovalTool.h"
 #include "tauRecTools/TauEleOverlapChecker.h"
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 #ifndef XAOD_ANALYSIS
 DECLARE_COMPONENT( JetSeedBuilder )
 DECLARE_COMPONENT( TauAxisSetter )

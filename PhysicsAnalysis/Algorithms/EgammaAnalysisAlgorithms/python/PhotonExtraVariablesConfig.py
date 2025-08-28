@@ -11,9 +11,13 @@ class PhotonExtraVariablesBlock(ConfigBlock):
         super(PhotonExtraVariablesBlock, self).__init__()
         self.addOption('containerName', None, type=str, info='the input photon container')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs(self, config):
 
-        alg = config.createAlgorithm('CP::PhotonExtraVariablesAlg', 'PhotonExtraVariables' + self.containerName)
+        alg = config.createAlgorithm('CP::PhotonExtraVariablesAlg', 'PhotonExtraVariables')
         alg.photons = config.readName(self.containerName)
         alg.affectingSystematicsFilter = '.*'
 

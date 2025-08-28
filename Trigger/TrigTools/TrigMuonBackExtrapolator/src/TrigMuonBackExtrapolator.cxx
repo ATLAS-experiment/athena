@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -10,13 +10,9 @@
 TrigMuonBackExtrapolator::TrigMuonBackExtrapolator(const std::string& t, 
 						   const std::string& n,
 						   const IInterface*  p ): 
-  AthAlgTool(t,n,p),
-  m_aligned(true),
-  m_dataset(false)
+  AthAlgTool(t,n,p)
 {
   declareInterface <ITrigMuonBackExtrapolator> ( this );
-  declareProperty( "Aligned", m_aligned=true);
-  declareProperty( "DataSet", m_dataset=false);
 
   //load LUT
   init_LUT();

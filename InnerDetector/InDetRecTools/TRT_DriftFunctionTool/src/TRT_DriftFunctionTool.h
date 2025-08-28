@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -100,8 +100,8 @@ private:
   double m_radius[MaxTimeBin]{};         //!< most probable radius in each bin
   double m_errors[MaxTimeBin]{};         //!< width of radius dist in each bin
 
-  BooleanProperty m_ismc{this, "IsMC", true};
-  BooleanProperty m_isoverlay{this, "IsOverlay", false};
+  BooleanProperty m_isMC{this, "IsMC", true};
+  BooleanProperty m_isDataOverlay{this, "IsDataOverlay", false};
   BooleanProperty m_dummy{this, "DummyMode", false,
     "flag for ignoring drift time info"};
 
@@ -110,10 +110,8 @@ private:
   DoubleProperty m_err_fudge{this, "ErrorFudgeFactor", 1.0,
     "fudge_factor for error scaling"};
 
-  BooleanProperty m_allow_digi_version_override
-    {this, "AllowDigiVersionOverride", false}; //!< flag for using constants for
-  IntegerProperty m_forced_digiversion
-    {this, "ForcedDigiVersion", 11};           //!< this digi version
+  BooleanProperty m_enable_t0_barrel_shift
+    {this, "T0BarrelShift", true}; //!< enable T0 barrel shift
 
   BooleanProperty m_force_universal_errors
     {this, "ForceUniversalErrors", false}; //!< use one universal error

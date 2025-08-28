@@ -14,8 +14,9 @@ atlas_add_component( L1CaloFEXAlgos
                      src/components/*.cxx
                      DEFINITIONS OFFLINE_DECODER
                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
-                     LINK_LIBRARIES PathResolver CaloEvent xAODTrigL1Calo ${TDAQ-COMMON_LIBRARIES} ${ROOT_LIBRARIES} L1CaloFEXSimLib LArRecConditions )
+                     LINK_LIBRARIES L1CaloFEXByteStreamLib PathResolver CaloEvent xAODTrigL1Calo LArRawEvent xAODTrigger L1CaloFEXToolInterfaces
+        ${TDAQ-COMMON_LIBRARIES} ${ROOT_LIBRARIES} L1CaloFEXSimLib LArRecConditions )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-# atlas_install_data( data/* )
+atlas_install_data( data/* )

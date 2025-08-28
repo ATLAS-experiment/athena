@@ -11,16 +11,8 @@
 #include "GeoModelKernel/GeoVDetectorElement.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
-#include "ActsGeoUtils/TransformCache.h"
 // ATHENA INCLUDES
-#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
-#include "HGTD_Identifier/HGTD_ID.h"
-#include "InDetIdentifier/PixelID.h"
-#include "InDetIdentifier/SCT_ID.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "TRT_ReadoutGeometry/TRT_BaseElement.h"
-#include "TrkSurfaces/AnnulusBounds.h"
-#include "CxxUtils/CachedValue.h"
+#include "ActsGeoUtils/TransformCache.h"
 
 // ACTS
 #include "Acts/Geometry/DetectorElementBase.hpp"
@@ -28,6 +20,16 @@
 
 // STL
 #include <iostream>
+
+namespace InDetDD {
+class TRT_BaseElement;
+class SiDetectorElement;
+class HGTD_DetectorElement;
+}
+
+namespace Trk {
+class Surface;
+}
 
 namespace Acts {
 class SurfaceBounds;
@@ -114,7 +116,6 @@ private:
   double m_thickness{0.};
   /// Corresponding Surface
   std::shared_ptr<Acts::Surface> m_surface{};
-  std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces{};
 
   std::unique_ptr<const Amg::Transform3D> m_trtTrf{};
 

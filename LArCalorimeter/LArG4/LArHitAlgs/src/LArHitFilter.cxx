@@ -1,12 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-//
-// algorithm to merge LArHit from different subevents from pileup service to
-//   a single event, assuming all subevents are at the same time and neglecting the
-//   individual hit times
-//  This is aimed to run at first stage for very large luminosity pileup
 
 #include "LArHitFilter.h"
 #include "LArSimEvent/LArHit.h"
@@ -19,13 +13,7 @@
 
 LArHitFilter::LArHitFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_larem_id(nullptr)
-  , m_larhec_id(nullptr)
-  , m_larfcal_id(nullptr)
-  , m_SubDetectors("LAr_All")
 {
-  declareProperty("SubDetectors"   ,m_SubDetectors,"subdetector selection");
-
   m_ecut[0][0]=0.05;
   m_ecut[0][1]=0.2;
   m_ecut[0][2]=0.1;
@@ -45,13 +33,6 @@ LArHitFilter::LArHitFilter(const std::string& name, ISvcLocator* pSvcLocator)
 
   return;
 }
-
-
-LArHitFilter::~LArHitFilter()
-{
-  return;
-}
-
 
 StatusCode LArHitFilter::initialize()
 {
@@ -244,11 +225,5 @@ StatusCode LArHitFilter::filterContainer(SG::ReadHandle<LArHitContainer>& inputC
     outputContainer->push_back(hit);
   }
   ATH_MSG_DEBUG("  -- > size after filtering " << outputContainer->size());
-  return StatusCode::SUCCESS;
-}
-
-StatusCode LArHitFilter::finalize()
-{
-  ATH_MSG_DEBUG(" LArHitFilter finalize completed successfully");
   return StatusCode::SUCCESS;
 }

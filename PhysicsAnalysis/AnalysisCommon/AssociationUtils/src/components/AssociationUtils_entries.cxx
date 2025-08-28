@@ -10,10 +10,15 @@
 #include "AssociationUtils/TauLooseMuOverlapTool.h"
 #include "AssociationUtils/TauJetOverlapTool.h"
 #include "AssociationUtils/TauAntiTauJetOverlapTool.h"
+#include "AssociationUtils/OverlapRemovalGenUseAlg.h"
 
+#ifndef XAOD_STANDALONE
 #include "../OverlapRemovalTestAlg.h"
 #include "../ORToolBoxTestAlg.h"
-#include "AssociationUtils/OverlapRemovalGenUseAlg.h"
+#endif
+
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT( ORUtils::OverlapRemovalTool )
 DECLARE_COMPONENT( ORUtils::DeltaROverlapTool )
@@ -27,7 +32,9 @@ DECLARE_COMPONENT( ORUtils::TauLooseEleOverlapTool )
 DECLARE_COMPONENT( ORUtils::TauLooseMuOverlapTool )
 DECLARE_COMPONENT( ORUtils::TauJetOverlapTool )
 DECLARE_COMPONENT( ORUtils::TauAntiTauJetOverlapTool )
-
-DECLARE_COMPONENT( OverlapRemovalTestAlg )
 DECLARE_COMPONENT( OverlapRemovalGenUseAlg )
+
+#ifndef XAOD_STANDALONE
+DECLARE_COMPONENT( OverlapRemovalTestAlg )
 DECLARE_COMPONENT( ORToolBoxTestAlg )
+#endif

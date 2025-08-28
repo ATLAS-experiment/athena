@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -85,7 +85,8 @@ namespace Root {
       
       // For all the "conventional" inputs
       template <class T> TMsgLogger& operator<< ( T arg ) {
-         *(std::ostringstream*)this << arg; return *this;
+         *static_cast<std::ostringstream*>(this) << arg; 
+         return *this;
       }
 
       static void SetMinLevel( TMsgLevel minLevel ) { m_minLevel = minLevel; }

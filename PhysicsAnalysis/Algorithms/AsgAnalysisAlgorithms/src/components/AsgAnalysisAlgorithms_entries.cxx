@@ -4,6 +4,7 @@
 
 /// @author Nils Krumnack
 
+// Local include(s).
 #include <AsgAnalysisAlgorithms/AsgClassificationDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEnergyDecoratorAlg.h>
@@ -17,6 +18,7 @@
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgMassSelectionTool.h>
+#include <AsgAnalysisAlgorithms/AsgNumDecorationSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 #include <AsgAnalysisAlgorithms/AsgUnionPreselectionAlg.h>
@@ -41,12 +43,16 @@
 #include <AsgAnalysisAlgorithms/PileupReweightingAlg.h>
 #include <AsgAnalysisAlgorithms/PDFinfoAlg.h>
 #include <AsgAnalysisAlgorithms/PMGTruthWeightAlg.h>
+#include <AsgAnalysisAlgorithms/SysTruthWeightAlg.h>
 #include <AsgAnalysisAlgorithms/SysListDumperAlg.h>
 #include <AsgAnalysisAlgorithms/SystObjectLinkerAlg.h>
 #include <AsgAnalysisAlgorithms/SystObjectUnioniserAlg.h>
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
 #include <AsgAnalysisAlgorithms/VGammaORAlg.h>
+
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT (CP::AsgClassificationDecorationAlg)
 DECLARE_COMPONENT (CP::AsgCutBookkeeperAlg)
@@ -61,6 +67,8 @@ DECLARE_COMPONENT (CP::AsgOriginalObjectLinkAlg)
 DECLARE_COMPONENT (CP::AsgPriorityDecorationAlg)
 DECLARE_COMPONENT (CP::AsgPtEtaSelectionTool)
 DECLARE_COMPONENT (CP::AsgMassSelectionTool)
+DECLARE_COMPONENT (CP::AsgNumDecorationSelectionToolInt)
+DECLARE_COMPONENT (CP::AsgNumDecorationSelectionToolUInt8)
 DECLARE_COMPONENT (CP::AsgSelectionAlg)
 DECLARE_COMPONENT (CP::AsgShallowCopyAlg)
 DECLARE_COMPONENT (CP::AsgUnionPreselectionAlg)
@@ -85,6 +93,7 @@ DECLARE_COMPONENT (CP::OverlapRemovalAlg)
 DECLARE_COMPONENT (CP::PileupReweightingAlg)
 DECLARE_COMPONENT (CP::PDFinfoAlg)
 DECLARE_COMPONENT (CP::PMGTruthWeightAlg)
+DECLARE_COMPONENT (CP::SysTruthWeightAlg)
 DECLARE_COMPONENT (CP::SysListDumperAlg)
 DECLARE_COMPONENT (CP::SystObjectLinkerAlg)
 DECLARE_COMPONENT (CP::TreeFillerAlg)

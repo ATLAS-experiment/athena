@@ -66,6 +66,7 @@ private:
     Gaudi::Property<std::string> m_input_layer_clusters{this, "InputLayerClusters", "clusters"};
     Gaudi::Property<std::string> m_output_layer{this, "OutputLayer", "rnnid_output"};
     Gaudi::Property<std::string> m_output_node{this, "OutputNode", "sig_prob"};
+    Gaudi::Property<bool> m_applyLooseTrackSel{this, "ApplyLooseTrackSel", false};
 
     // Wrappers for lwtnn
     std::unique_ptr<TauJetRNN> m_net_0p; //!

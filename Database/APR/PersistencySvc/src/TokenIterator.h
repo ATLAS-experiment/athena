@@ -33,12 +33,11 @@ namespace pool {
       {
       public:
 	/** Constructor taking as argument a DbSelection object,
-	 *  the file descriptor, the container name and the selection string
+	 *  the file descriptor, the container name
 	 */
 	TokenIterator( FileDescriptor& fileDescriptor,
 		       const std::string& containerName,
-		       IStorageExplorer& storageExplorer,
-		       const std::string& selection );
+		       IStorageExplorer& storageExplorer );
 	/// Destructor
 	~TokenIterator();
 

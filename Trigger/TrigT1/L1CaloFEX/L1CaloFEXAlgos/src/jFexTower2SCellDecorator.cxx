@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -286,11 +286,11 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         // Decorating the tower with the corresponding information
         //Setup Decorator Handlers
         if(m_save_extras) {
-            (*jTowerSCellEt)   (*jTower) = scEt;
-            (*jTowerSCellEta)  (*jTower) = scEta;
-            (*jTowerSCellPhi)  (*jTower) = scPhi;
-            (*jTowerSCellID)   (*jTower) = scID;
-            (*jTowerSCellMask) (*jTower) = scMask;
+            (*jTowerSCellEt)   (*jTower) = std::move(scEt);
+            (*jTowerSCellEta)  (*jTower) = std::move(scEta);
+            (*jTowerSCellPhi)  (*jTower) = std::move(scPhi);
+            (*jTowerSCellID)   (*jTower) = std::move(scID);
+            (*jTowerSCellMask) (*jTower) = std::move(scMask);
             (*jTowerTileEt)    (*jTower) = static_cast<int>( TileEt );
             (*jTowerTileEta)   (*jTower) = TileEta;
             (*jTowerTilePhi)   (*jTower) = TilePhi;
@@ -366,8 +366,8 @@ StatusCode  jFexTower2SCellDecorator::ReadSCfromFile(const std::string& fileName
             }
         }
 
-        m_map_TTower2SCellsEM[TTID] = SCellvectorEM;
-        m_map_TTower2SCellsHAD[TTID] = SCellvectorHAD;
+        m_map_TTower2SCellsEM[TTID] = std::move(SCellvectorEM);
+        m_map_TTower2SCellsHAD[TTID] = std::move(SCellvectorHAD);
 
     }
     myfile.close();

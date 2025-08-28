@@ -25,7 +25,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
-
+#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 
 class FPGATrackSimRoad
 {
@@ -68,7 +68,7 @@ public:
     void setHits(unsigned layer, std::vector<std::shared_ptr<const FPGATrackSimHit>> && hits);
 
     void repopulateTransHits();
-  
+
     void setEtaPatternID(int patternID) { m_etaPatternID = patternID; }
 
     void setSubRegion(int v) { m_subRegion = v; }
@@ -77,6 +77,8 @@ public:
     void setX(float v) { m_x = v; }
     void setY(float v) { m_y = v; }
 
+    void setFitParams(const FPGATrackSimTrackPars& v) { m_fitTrackPars = v; }
+    void setFitChi2(double v) { m_fitChi2 = v; }
 
     ///////////////////////////////////////////////////////////////////////
     // Getters
@@ -100,6 +102,9 @@ public:
     const std::vector<std::shared_ptr<const FPGATrackSimHit>> &getHits(size_t layer) const { return m_hits_trans.at(layer); }
     const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &getAllHits() const { return m_hits_trans; }
     std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> getHits_flat() const;
+
+    const FPGATrackSimTrackPars& getFitParams() const { return m_fitTrackPars; }
+    double getFitChi2() const { return m_fitChi2; }
 
     ///////////////////////////////////////////////////////////////////////
     // Utility
@@ -135,6 +140,9 @@ private:
     float m_x = 0; // x value of Hough bin
     float m_y = 0; // y value of Hough bin
 
+    FPGATrackSimTrackPars m_fitTrackPars;
+    double m_fitChi2 = 0;
+
     std::vector<std::vector<FPGATrackSimHit>> m_hits; // [layer, hit#] (used for ROOT storing)
     std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> m_hits_trans; //! (transient) [layer, hit#]
     // A list of hits in the road for each layer.
@@ -144,7 +152,7 @@ private:
     ///////////////////////////////////////////////////////////////////////
     // Misc
     friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
-    ClassDefNV(FPGATrackSimRoad, 6);
+    ClassDefNV(FPGATrackSimRoad, 7);
 };
 
 #endif // FPGATrackSimROAD_H

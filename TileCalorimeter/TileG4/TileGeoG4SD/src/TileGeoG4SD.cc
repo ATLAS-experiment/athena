@@ -18,32 +18,17 @@
 // package headers
 #include "TileG4Interfaces/ITileCalculator.h"
 #include "TileGeoG4SD/TileSDOptions.h"
-#include "TileGeoG4SD/TileGeoG4LookupBuilder.hh"
-#include "TileGeoG4SD/TileGeoG4Lookup.hh"
 // Geant4 headers
+#include "G4EventManager.hh"
 #include "G4Step.hh"
 #include "G4Geantino.hh"
 
 TileGeoG4SD::TileGeoG4SD(G4String name, const std::string& hitCollectionName, ITileCalculator* tileCalculator)
   : G4VSensitiveDetector(name)
   , m_calc(tileCalculator)
-  , m_HitColl(hitCollectionName)
+  , m_hitCollectionName(hitCollectionName)
 {
-
   verboseLevel = std::max(verboseLevel, m_calc->GetOptions()->verboseLevel);
-
-  //build tilecal ordinary look-up table
-  m_lookup = m_calc->GetLookupBuilder();
-  if (verboseLevel >= 5)
-    G4cout << "Lookup built for Tile" << G4endl;
-}
-
-TileGeoG4SD::~TileGeoG4SD() {
-}
-
-void TileGeoG4SD::Initialize(G4HCofThisEvent* /*HCE*/) {
-  if (!m_HitColl.isValid())
-    m_HitColl = std::make_unique<TileHitVector>(m_HitColl.name());
 }
 
 G4bool TileGeoG4SD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/) {
@@ -92,8 +77,3 @@ G4bool TileGeoG4SD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/) {
 
   return true;
 }
-
-void TileGeoG4SD::EndOfAthenaEvent() {
-  m_lookup->ResetCells(&*m_HitColl);
-}
-

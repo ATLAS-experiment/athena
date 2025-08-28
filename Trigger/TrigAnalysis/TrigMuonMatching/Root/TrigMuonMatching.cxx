@@ -14,8 +14,9 @@
 #include "xAODTrigger/MuonRoIContainer.h"
 #include "xAODTrigMuon/L2StandAloneMuonContainer.h"
 #include "xAODTrigMuon/L2CombinedMuonContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 
-#define MUONMASS 105.65837
+#define MUONMASS ParticleConstants::muonMassInMeV
 
 namespace Trig {
 

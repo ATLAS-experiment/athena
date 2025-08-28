@@ -24,6 +24,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 // PyROOT includes
 #include <TPython.h>
+#include "CPyCppyy/API.h"
 
 // fixes 'dereferencing type-punned pointer will break strict-aliasing rules'
 #ifdef Py_True
@@ -128,23 +129,6 @@ new_pylist(PyObject *pylist, PyObject *item)
   PyObject *obj = PySequence_List(pylist);
   PyList_Append(obj, item);
   return obj;
-}
-
-// PySequence_Check returns true if the class implements __getitem__
-// In newer cppyy versions, e.g. 3+, every class has __getitem__ implemented
-// even if the class does not provide sequence protocol
-// This is one practical way of dealing with this issue (not strictly 1-to-1)
-// See ATEAM-974 and root/issues/15161
-inline
-bool is_sequence(PyObject *obj)
-{
-  auto item = PySequence_Size(obj) > 0 ? PySequence_GetItem(obj, 0) : nullptr;
-  if (item) {
-    Py_DECREF(item);
-    return true;
-  }
-  PyErr_Clear();
-  return false;
 }
 
 void
@@ -295,8 +279,13 @@ recurse_pyinspect(PyObject *pyobj,
     }
   }
 
+// PySequence_Check returns true if the class implements __getitem__
+// In newer cppyy versions, e.g. 3+, every class has __getitem__ implemented
+// even if the class does not provide sequence protocol
+// Hence, use the cppyy API CPyCppyy::Sequence_Check(PyObject*) function
+// See ATEAM-974 and root/issues/15161
   Int_t hdr = 0;
-  if (is_sequence(pyobj)) {
+  if (CPyCppyy::Sequence_Check(pyobj)) {
     if (clsname == "CLHEP::Hep3Vector" ||
         clsname == "TLorentzVector" ||
         clsname == "TVector3")
@@ -338,36 +327,39 @@ recurse_pyinspect(PyObject *pyobj,
     //    then with python 3, pyroot will try to convert its contents
     //    to a unicode string object, which will likely fail.
     Py_ssize_t nelems = PySequence_Size(pyobj);
-    if (clsname == "TileCellVec" ||
-        clsname == "vector<char>")
-    {
-      for (Py_ssize_t i = 0; i < nelems; ++i) {
-        PyObject *pyidx = PyLong_FromLong(i);
-        PyObject *itr = PySequence_GetItem(pyobj, i);
-        PyObject *itr_name = ::new_pylist(pyobj_name, pyidx);
-        recurse_pyinspect(itr, itr_name, pystack, persistentOnly, retvecs);
-        Py_XDECREF(itr_name);
-        Py_XDECREF(pyidx);
-        Py_XDECREF(itr);
-      }
-    }
-    else {
-      PyObject* iter = PyObject_GetIter(pyobj);
-      size_t i = 0;
-      if (iter) {
-        PyObject* item = nullptr;
-        // Sometimes iterator comparison doesn't work correctly in pyroot.
-        // So protect against overrunning by also counting
-        // the number of elements.
-        while (nelems-- && (item = PyIter_Next(iter))) {
-          PyObject *pyidx = PyLong_FromLong(i++);
+    if( nelems > 0 ) {
+      // only try iterating if there are elements
+      if (clsname == "TileCellVec" ||
+          clsname == "vector<char>")
+      {
+        for (Py_ssize_t i = 0; i < nelems; ++i) {
+          PyObject *pyidx = PyLong_FromLong(i);
+          PyObject *itr = PySequence_GetItem(pyobj, i);
           PyObject *itr_name = ::new_pylist(pyobj_name, pyidx);
-          recurse_pyinspect(item, itr_name, pystack, persistentOnly, retvecs);
+          recurse_pyinspect(itr, itr_name, pystack, persistentOnly, retvecs);
           Py_XDECREF(itr_name);
           Py_XDECREF(pyidx);
-          Py_DECREF(item);
+          Py_XDECREF(itr);
         }
-        Py_DECREF(iter);
+      }
+      else {
+        PyObject* iter = PyObject_GetIter(pyobj);
+        size_t i = 0;
+        if (iter) {
+          PyObject* item = nullptr;
+          // Sometimes iterator comparison doesn't work correctly in pyroot.
+          // So protect against overrunning by also counting
+          // the number of elements.
+          while (nelems-- && (item = PyIter_Next(iter))) {
+            PyObject *pyidx = PyLong_FromLong(i++);
+            PyObject *itr_name = ::new_pylist(pyobj_name, pyidx);
+            recurse_pyinspect(item, itr_name, pystack, persistentOnly, retvecs);
+            Py_XDECREF(itr_name);
+            Py_XDECREF(pyidx);
+            Py_DECREF(item);
+          }
+          Py_DECREF(iter);
+        }
       }
     }
 
@@ -483,7 +475,7 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
   }
 
   Int_t hdr = 0;
-  if (is_sequence(pyobj)) {
+  if (CPyCppyy::Sequence_Check(pyobj)) {
     if (!strcmp(tcls->GetName(), "CLHEP::Hep3Vector")) {
       hdr = 0;
     } else {

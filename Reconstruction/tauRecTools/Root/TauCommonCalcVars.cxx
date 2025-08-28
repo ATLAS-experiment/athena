@@ -19,7 +19,6 @@
 
 TauCommonCalcVars::TauCommonCalcVars(const std::string &name) :
   TauRecToolBase(name) {
-  declareProperty("isolationTrackType", m_isolationTrackType=xAOD::TauJetParameters::modifiedIsolationTrack);
 }
 
 //-----------------------------------------------------------------------------
@@ -39,7 +38,7 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
   ////////////////////////////////////////////////
 
   //init some vars
-  pTau.setDetail( xAOD::TauJetParameters::SumPtTrkFrac, (float) 0. );
+  pTau.setDetail( xAOD::TauJetParameters::SumPtTrkFrac, 0.f );
 
   // Leading track pT and et/pt(lead track)
   if (pTau.nTracks() > 0) {
@@ -65,7 +64,7 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
 
   // invariant mass of track system
   std::vector<const xAOD::TauTrack*> tauTracks = pTau.tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged);
-  for( const xAOD::TauTrack* trk : pTau.tracks((xAOD::TauJetParameters::TauTrackFlag) m_isolationTrackType) ) tauTracks.push_back(trk);
+  for( const xAOD::TauTrack* trk : pTau.tracks((xAOD::TauJetParameters::TauTrackFlag) m_isolationTrackType.value()) ) tauTracks.push_back(trk);
   if (!tauTracks.empty()) {
 
     TLorentzVector sumOfTrackVector;
@@ -95,7 +94,7 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
     double trkWidth2 = (ptSum!=0.) ? (sumWeightedDR2/ptSum - std::pow(sumWeightedDR/ptSum, 2.)) : 0.;
 
     if (trkWidth2 > 0.) pTau.setDetail( xAOD::TauJetParameters::trkWidth2, static_cast<float>( trkWidth2 ) );
-    else pTau.setDetail( xAOD::TauJetParameters::trkWidth2, (float) 0. );
+    else pTau.setDetail( xAOD::TauJetParameters::trkWidth2, 0.f );
   }
 
   if (!tauTracks.empty()) {
@@ -131,15 +130,15 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
 	pTau.setDetail( xAOD::TauJetParameters::trkRmsDist, static_cast<float>( std::sqrt(trkRmsDist2) ) );
       } 
       else {
-	pTau.setDetail( xAOD::TauJetParameters::trkRmsDist, (float) 0. );
+	pTau.setDetail( xAOD::TauJetParameters::trkRmsDist, 0.f );
       }
 
       // SumPtTrkFrac
       pTau.setDetail( xAOD::TauJetParameters::SumPtTrkFrac, static_cast<float>( 1. - innerPtSum/ptSum ) );
     }
     else {
-      pTau.setDetail( xAOD::TauJetParameters::trkAvgDist, (float) 0. );
-      pTau.setDetail( xAOD::TauJetParameters::SumPtTrkFrac, (float) 0. );
+      pTau.setDetail( xAOD::TauJetParameters::trkAvgDist, 0.f );
+      pTau.setDetail( xAOD::TauJetParameters::SumPtTrkFrac, 0.f );
     }
 
     if (innerPtSum > 0.) {	   	   
@@ -147,7 +146,7 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
       pTau.setDetail( xAOD::TauJetParameters::innerTrkAvgDist, static_cast<float>( innerSumWeightedDR / innerPtSum ) );
     }
     else {
-      pTau.setDetail( xAOD::TauJetParameters::innerTrkAvgDist, (float) 0. );
+      pTau.setDetail( xAOD::TauJetParameters::innerTrkAvgDist, 0.f );
     }
 
   }

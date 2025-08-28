@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <iostream>           //input-output
@@ -183,8 +183,8 @@ int convert_file(TObject* obj_input, TObject* obj_outout) {
 }
 
 int work_with_results_dir(TObject* obj_input, TObject* obj_outout) {
-  TDirectory* dir = (TDirectory*) obj_input;
-  TDirectory* save_to = (TDirectory*) obj_outout;
+  TDirectory* dir = static_cast<TDirectory*>( obj_input);
+  TDirectory* save_to = static_cast<TDirectory*> (obj_outout);
 
   if (include_hist(dir)) {
     TKey* key;
@@ -215,7 +215,7 @@ int work_with_results_dir(TObject* obj_input, TObject* obj_outout) {
 }
 
 int work_with_no_hist_dir(TObject* obj, TObject* destination_to_save) {
-  TDirectory* save_place = (TDirectory*) destination_to_save;
+  TDirectory* save_place = static_cast<TDirectory*> (destination_to_save);
 
   // If directory has no hists in it, we convert it to JSON
   //  histogram_ Tdirectory is an exception. It will always be a Tdirectory
@@ -241,7 +241,7 @@ int work_with_no_hist_dir(TObject* obj, TObject* destination_to_save) {
 int include_hist(TObject* obj) {
   using namespace std;
 
-  TDirectory* dir = (TDirectory*) obj;
+  TDirectory* dir = static_cast<TDirectory*> (obj);
   TKey* key;
   TString key_type;
   TString key_name;
@@ -293,7 +293,7 @@ nlohmann::ordered_json to_JSON(TObject* obj) {
     std::cout << "WARNING: Strange type: " << obj_type << std::endl;
   }
 
-  TDirectory* dir = (TDirectory*) obj;
+  TDirectory* dir = static_cast<TDirectory*> (obj);
   TString dir_name = dir->GetName();
   TIter next(dir->GetListOfKeys());
   TKey* key;

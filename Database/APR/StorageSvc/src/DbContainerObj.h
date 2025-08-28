@@ -44,7 +44,7 @@ namespace pool  {
     */
   struct DbObjectHolder  {
     DbObject* m_obj;
-    DbObjectHolder(DbObject* p) : m_obj(p) {}
+    explicit DbObjectHolder(DbObject* p) : m_obj(p) {}
     int release();
   };
   class DbContainerObj : public  DbAccessObj<DbObject*, DbObjectHolder >  {
@@ -82,8 +82,6 @@ namespace pool  {
     IDbContainer* info()                    {  return m_info;         }
     /// Retrieve persistent type information by name
     const DbTypeInfo* objectShape(const Guid& nam);
-    /// Add persistent type. Returns error if the type is not supported.
-    DbStatus addShape(const DbTypeInfo* typ);
     /// Handle to Database (CONST)
     DbDatabase& database()                  {  return m_dbH;          }
     /// Access the token of the container object
@@ -165,10 +163,6 @@ namespace pool  {
                    bool          any_next);
     //@}
 
-    /// Perform UPDATE select
-    DbStatus update(DbSelect& sel);
-    /// Perform DELETE statement
-    DbStatus destroy(DbSelect& sel);
     /// Perform selection. The statement belongs to the container afterwards.
     DbStatus select(DbSelect& sel);
     /// Fetch next object address of the selection to set token

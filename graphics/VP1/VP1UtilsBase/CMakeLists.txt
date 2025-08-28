@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1UtilsBase )
@@ -13,8 +13,10 @@ atlas_add_library( VP1UtilsBase
    PRIVATE_LINK_LIBRARIES Qt5::Core )
 
 # Enable Qt support for cppcheck:
-set_property( TARGET VP1UtilsBase
-   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1UtilsBase
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()
 
 # Install files from the package:
 atlas_install_runtime( share/*.vp1 ) # default VP1 config files for batch mode

@@ -46,7 +46,7 @@ namespace Muon {
             if (!MC::isStable(truth)	 || !m_pdgIds.value().count(truth->absPdgId()) || truth->pt() < m_pt) continue;
             xAOD::TruthParticle* truthParticle = muonTruthContainer->push_back(std::make_unique<xAOD::TruthParticle>());
             truthParticle->setPdgId(truth->pdgId());
-            truthParticle->setBarcode(HepMC::barcode(truth)); // FIXME barcode-based
+            truthParticle->setUid(HepMC::uniqueID(truth));
             truthParticle->setStatus(truth->status());
             truthParticle->setPx(truth->px());
             truthParticle->setPy(truth->py());
@@ -59,9 +59,9 @@ namespace Muon {
             itruthLink.toPersistent();
             truthLink(*truthParticle) = itruthLink;
             ATH_MSG_DEBUG("Found stable muon: " << truth->pt() << " eta " << truth->eta() << " phi " << truth->phi() << " mass "
-                          << truth->m() << " barcode " << HepMC::barcode(truth) << " truthParticle->barcode "
-                          << HepMC::barcode(truthParticle) << " (*truthLink)->barcode " << HepMC::barcode(*itruthLink) << " "
-                                                << itruthLink); // FIXME barcode-based
+                          << truth->m() << " unique ID " << HepMC::uniqueID(truth) << " HepMC::uniqueID(truthParticle) "
+                          << HepMC::uniqueID(truthParticle) << " HepMC::uniqueID(*itruthLink) " << HepMC::uniqueID(*itruthLink) << " "
+                          << itruthLink);
             int iType{0}, iOrigin{0};
 
             // if configured look up truth classification

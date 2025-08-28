@@ -79,9 +79,16 @@ class DiTauMassBlock(ConfigBlock):
     self.addOption('saveLlhHisto', False, type=bool,
                    info='save likelihood histograms for debugging purpose. If enabled, it can slow down MMC running time.')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.algName:
+            return self.taus.replace('.', '_') + self.algName
+        else:
+            return self.taus.replace('.', '_')
+
   def makeAlgs(self, config):
 
-    alg = config.createAlgorithm('CP::DiTauMassCalculatorAlg', 'DiTauMMCAlg' + self.algName)
+    alg = config.createAlgorithm('CP::DiTauMassCalculatorAlg', 'DiTauMMCAlg')
 
     alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
     alg.muons,     alg.muonSelection     = config.readNameAndSelection(self.muons)

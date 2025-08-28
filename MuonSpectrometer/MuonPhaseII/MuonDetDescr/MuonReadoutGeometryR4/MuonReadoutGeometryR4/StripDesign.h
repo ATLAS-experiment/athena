@@ -110,8 +110,7 @@ namespace MuonGMR4 {
             /// Returns the geometrical center of a given strip
             CheckVector2D stripCenter(int stripNum) const;
         public:
-
-            /// Returns the bottom left corner  of the trapezoid
+            /// Returns the bottom left corner of the trapezoid
             const Amg::Vector2D& cornerBotLeft() const;
             /// Returns the bottom right corner of the trapezoid
             const Amg::Vector2D& cornerBotRight() const;
@@ -119,16 +118,21 @@ namespace MuonGMR4 {
             const Amg::Vector2D& cornerTopLeft() const;
             /// Returns the top right corner of the trapezoid
             const Amg::Vector2D& cornerTopRight() const;
-
-            /// Returns the unit vector pointing from the bottom left -> right corner
+            /// Returns the unit vector pointing from the bottom left -> bottom right corner
             const Amg::Vector2D& edgeDirBottom() const;
-            /// Returns the unit vector pointing from the top left -> right corner
+            /// Returns the unit vector pointing from the top left -> top right corner
             const Amg::Vector2D& edgeDirTop() const;
-            /// Returns the unit vector pointing from the left bottom -> top corner
+            /// Returns the unit vector pointing from the left bottom -> left top corner
             const Amg::Vector2D& edgeDirLeft() const;
-            /// Returns the unit vector pointing from the right bottom -> top corner
+            /// Returns the unit vector pointing from the right bottom -> right top corner
             const Amg::Vector2D& edgeDirRight() const;
-
+        public:
+            /// Vector pointing to the next strip
+            const Amg::Vector2D& stripNormal() const;
+            /// Vector pointing along the strip
+            const Amg::Vector2D& stripDir() const;
+            /// Vector indicating the first strip position
+            const Amg::Vector2D& firstStripPos() const;
             /// Length of the the edge from top left -> top right
             double lenTopEdge() const;
             /// Length of the edge from bottom left -> top left
@@ -138,12 +142,6 @@ namespace MuonGMR4 {
             /// Length of the dge from bottom right -> top right
             double lenRightEdge() const;
 
-            /// Vector pointing to the next strip
-            const Amg::Vector2D& stripNormal() const;
-            /// Vector pointing along the strip
-            const Amg::Vector2D& stripDir() const;
-            /// Vector indicating the first strip position
-            const Amg::Vector2D& firstStripPos() const;
         private:
             void setStereoAngle(double stereo);
             /// Resets the cache of the directions

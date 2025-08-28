@@ -128,11 +128,11 @@ namespace FlavorTagInference {
       ConstituentsInputConfig config;
       TypeRegexes electron_type_regexes {
           // default electron variables
-          {"(deltaEta1|deltaPhiRescaled2|"
-               "ftag_energyOverP|Rhad|Rhad1|"
+          {"(deltaEta1|deltaPhiRescaled2|Rhad|Rhad1|"
                "Eratio|weta2|Rphi|Reta|wtots1|f1|f3|pt|eta|phi)"_r, ConstituentsEDMType::FLOAT},
           // custom variables
-          {"(ftag_.*|ptfrac|ptrel|dr)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(ftag_.*|ptfrac|ptrel|dr|"
+               "et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           // variables extracted from the corresponding track
           {"(numberOf.*|d0.*|abs_eta|qOverP|eProbabilityHT)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };

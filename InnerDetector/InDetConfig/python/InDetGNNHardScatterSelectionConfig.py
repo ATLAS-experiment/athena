@@ -99,7 +99,7 @@ def GNNHSOverlapRemovalAlgCfg(flags, name="GNNHS_OverlapRemovalAlg",
             input = overlapInputNames[obj],
             output = overlapOutputNames[obj],
             selection = [kwargs["OutputLabel"]+",as_char"],
-            deepCopy = False))
+            deepCopy = True))
     
     return cfg
 
@@ -164,10 +164,6 @@ def GNNSequenceCfg(flags, **kwargs):
         "photons": "Photons",
     }
 
-    from PhotonVertexSelection.PhotonVertexSelectionConfig import (
-        DecoratePhotonPointingAlgCfg)
-    cfg.merge(DecoratePhotonPointingAlgCfg(flags, PhotonContainerKey=inputCollections["photons"]))
-    
     ptThresholds = {
         "jets": 15000,
         "electrons": 4500,
@@ -188,6 +184,9 @@ def GNNSequenceCfg(flags, **kwargs):
 
     cfg.merge(GNNHSOverlapRemovalAlgCfg(flags, overlapInputNames = inputCollections,
                                         overlapOutputNames = overlapOutputNames))
+
+    from PhotonVertexSelection.PhotonVertexSelectionConfig import DecoratePhotonPointingAlgCfg
+    cfg.merge(DecoratePhotonPointingAlgCfg(flags, PhotonContainerKey=overlapOutputNames["photons"]))
 
     cfg.merge(
         GNNHSVertexDecoratorAlgCfg(

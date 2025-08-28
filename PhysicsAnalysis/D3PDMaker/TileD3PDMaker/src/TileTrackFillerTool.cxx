@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -15,6 +15,14 @@
 
 //xAOD tools
 #include "xAODPrimitives/IsolationType.h"
+
+namespace{
+  uint8_t *
+  uint8Ptr(auto * pv){
+    return reinterpret_cast<uint8_t *>(pv);
+  }
+
+}
 
 // ADD TILETRACKFILLERTOOL TO D3PD NAMESPACE
 namespace D3PD{
@@ -170,9 +178,9 @@ StatusCode TileTrackFillerTool::fill(const xAOD::TrackParticle& p){
             }
 	} // IF
 
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfPixelHits), xAOD::numberOfPixelHits );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfSCTHits), xAOD::numberOfSCTHits );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfTRTHits), xAOD::numberOfTRTHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfPixelHits), xAOD::numberOfPixelHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfSCTHits), xAOD::numberOfSCTHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfTRTHits), xAOD::numberOfTRTHits );
   
         *m_d0                               = perigee->parameters()[Trk::d0];
         *m_z0                               = perigee->parameters()[Trk::d0];
@@ -220,19 +228,19 @@ StatusCode TileTrackFillerTool::fill(const xAOD::TrackParticle& p){
     } // IF
     
     if(m_LevelOfDetails > 3){
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfBLayerHits), xAOD::numberOfInnermostPixelLayerHits );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfTRTHighThresholdHits), xAOD::numberOfTRTHighThresholdHits );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfBLayerSharedHits), xAOD::numberOfInnermostPixelLayerSharedHits );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfPixelSharedHits), xAOD::numberOfPixelSharedHits );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfPixelHoles), xAOD::numberOfPixelHoles );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfSCTSharedHits), xAOD::numberOfSCTSharedHits );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfPixelHoles), xAOD::numberOfPixelHoles );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfSCTSharedHits), xAOD::numberOfSCTSharedHits );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfSCTHoles), xAOD::numberOfSCTHoles );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfTRTOutliers), xAOD::numberOfTRTOutliers );
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfTRTHighThresholdOutliers), xAOD::numberOfTRTHighThresholdOutliers );
-	trackPointer->summaryValue( *((uint8_t*)m_numberOfGangedPixels), xAOD::numberOfGangedPixels);
-        trackPointer->summaryValue( *((uint8_t*)m_numberOfOutliersOnTrack), xAOD::numberOfOutliersOnTrack);
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfBLayerHits), xAOD::numberOfInnermostPixelLayerHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfTRTHighThresholdHits), xAOD::numberOfTRTHighThresholdHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfBLayerSharedHits), xAOD::numberOfInnermostPixelLayerSharedHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfPixelSharedHits), xAOD::numberOfPixelSharedHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfPixelHoles), xAOD::numberOfPixelHoles );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfSCTSharedHits), xAOD::numberOfSCTSharedHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfPixelHoles), xAOD::numberOfPixelHoles );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfSCTSharedHits), xAOD::numberOfSCTSharedHits );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfSCTHoles), xAOD::numberOfSCTHoles );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfTRTOutliers), xAOD::numberOfTRTOutliers );
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfTRTHighThresholdOutliers), xAOD::numberOfTRTHighThresholdOutliers );
+	trackPointer->summaryValue( *uint8Ptr(m_numberOfGangedPixels), xAOD::numberOfGangedPixels);
+        trackPointer->summaryValue( *uint8Ptr(m_numberOfOutliersOnTrack), xAOD::numberOfOutliersOnTrack);
     }
 
     return StatusCode::SUCCESS;

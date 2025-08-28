@@ -122,21 +122,7 @@ StatusCode Sherpa_i::genInitialize(){
   #endif
 
 
-  /***
-      translate ATOOLS:SignalHandler
-  ***/
-  std::set_terminate(ATOOLS::Terminate);
-  std::set_unexpected(ATOOLS::Terminate);
   #ifdef IS_SHERPA_3
-  signal(SIGSEGV,ATOOLS::HandleSignal);
-  signal(SIGINT,ATOOLS::HandleSignal);
-  signal(SIGPIPE,ATOOLS::HandleSignal);
-  signal(SIGBUS,ATOOLS::HandleSignal);
-  signal(SIGFPE,ATOOLS::HandleSignal);
-  signal(SIGABRT,ATOOLS::HandleSignal);
-  signal(SIGTERM,ATOOLS::HandleSignal);
-  signal(SIGXCPU,ATOOLS::HandleSignal);
-  signal(SIGUSR1,ATOOLS::HandleSignal);
 
   try {
     p_sherpa->InitializeTheRun();
@@ -154,13 +140,6 @@ StatusCode Sherpa_i::genInitialize(){
     return StatusCode::FAILURE;
   }
   #else 
-  signal(SIGSEGV,ATOOLS::SignalHandler);
-  signal(SIGINT,ATOOLS::SignalHandler);
-  signal(SIGBUS,ATOOLS::SignalHandler);
-  signal(SIGFPE,ATOOLS::SignalHandler);
-  signal(SIGABRT,ATOOLS::SignalHandler);
-  signal(SIGTERM,ATOOLS::SignalHandler);
-  signal(SIGXCPU,ATOOLS::SignalHandler);
 
   try {
     int argc;

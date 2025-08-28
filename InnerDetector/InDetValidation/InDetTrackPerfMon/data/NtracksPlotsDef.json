@@ -62,12 +62,12 @@
     "avgNum_$TRKTAG_all_vs_truthMu" : {
         "type" : "TProfile",
         "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
-        "yAxis" : { "title" : "Average N. $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+        "yAxis" : { "title" : "Average N. $TRKTYPEs", "nBins" : "350", "low" : "0", "high" : "3500" }
     },
     "avgNum_$TRKTAG_selected_vs_truthMu" : {
         "type" : "TProfile",
         "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
-        "yAxis" : { "title" : "Average N. Selected $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+        "yAxis" : { "title" : "Average N. Selected $TRKTYPEs", "nBins" : "350", "low" : "0", "high" : "3500" }
     },
     "avgNum_$TRKTAG_selectedInRoI_vs_truthMu" : {
         "type" : "TProfile",
@@ -82,12 +82,12 @@
     "avgNum_$TRKTAG_all_vs_actualMu" : {
         "type" : "TProfile",
         "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
-        "yAxis" : { "title" : "Average N. $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+        "yAxis" : { "title" : "Average N. $TRKTYPEs", "nBins" : "350", "low" : "0", "high" : "3500" }
     },
     "avgNum_$TRKTAG_selected_vs_actualMu" : {
         "type" : "TProfile",
         "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
-        "yAxis" : { "title" : "Average N. Selected $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+        "yAxis" : { "title" : "Average N. Selected $TRKTYPEs", "nBins" : "350", "low" : "0", "high" : "3500" }
     },
     "avgNum_$TRKTAG_selectedInRoI_vs_actualMu" : {
         "type" : "TProfile",

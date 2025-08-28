@@ -30,7 +30,7 @@ def ActsProtoTackCreationAndFitAlgCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )  # PrivateToolHandle
         
     if 'ExtrapolationTool' not in kwargs:

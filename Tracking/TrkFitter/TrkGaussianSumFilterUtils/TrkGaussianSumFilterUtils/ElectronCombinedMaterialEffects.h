@@ -32,26 +32,13 @@ public:
     double mean;
     double variance;
   };
-  using MixtureParameters =
-    std::array<ComponentValues, GSFConstants::maxNumberofMatComponents>;
-
+  using MixtureParameters = std::array<ComponentValues, GSFConstants::maxNumberofMatComponents>;
   using Polynomial = std::array<double, GSFConstants::polynomialCoefficients>;
 
   // ctor with arguments
   ElectronCombinedMaterialEffects(
-    const std::string& parameterisationFileName,
-    const std::string& parameterisationFileNameHighX0);
-
-  // ctor with arguments
-  ElectronCombinedMaterialEffects() = default;
-  ElectronCombinedMaterialEffects(const ElectronCombinedMaterialEffects&) =
-    default;
-  ElectronCombinedMaterialEffects(ElectronCombinedMaterialEffects&&) = default;
-  ElectronCombinedMaterialEffects& operator=(
-    const ElectronCombinedMaterialEffects&) = default;
-  ElectronCombinedMaterialEffects& operator=(
-    ElectronCombinedMaterialEffects&&) = default;
-  ~ElectronCombinedMaterialEffects() = default;
+      const std::string& parameterisationFileName,
+      const std::string& parameterisationFileNameHighX0);
 
   void compute(GsfMaterial::Combined&,
                const Trk::ComponentParameters&,
@@ -60,30 +47,23 @@ public:
                Trk::PropDirection = anyDirection) const;
 
 private:
-  // Electron enrrgy loss due to Bremsstrahlung
+  /* brief Electron energy loss due to Bremsstrahlung*/
   void BetheHeitler(GsfMaterial::EnergyLoss& cache,
                     const ComponentParameters& componentParameters,
                     const MaterialProperties& materialProperties,
                     double pathLenght,
                     PropDirection direction = anyDirection) const;
 
+  //Actual number of Material components
   int m_BHnumberOfComponents{};
-  int m_BHtransformationCode{};
   int m_BHnumberOfComponentsHighX0{};
-  int m_BHtransformationCodeHighX0{};
-
-  std::array<Polynomial, GSFConstants::maxNumberofMatComponents>
-    m_BHpolynomialWeights{};
-  std::array<Polynomial, GSFConstants::maxNumberofMatComponents>
-    m_BHpolynomialMeans{};
-  std::array<Polynomial, GSFConstants::maxNumberofMatComponents>
-    m_BHpolynomialVariances{};
-  std::array<Polynomial, GSFConstants::maxNumberofMatComponents>
-    m_BHpolynomialWeightsHighX0{};
-  std::array<Polynomial, GSFConstants::maxNumberofMatComponents>
-    m_BHpolynomialMeansHighX0{};
-  std::array<Polynomial, GSFConstants::maxNumberofMatComponents>
-    m_BHpolynomialVariancesHighX0{};
+  //These are nested std arrays.
+  std::array<Polynomial, GSFConstants::maxNumberofMatComponents> m_BHpolynomialWeights{};
+  std::array<Polynomial, GSFConstants::maxNumberofMatComponents> m_BHpolynomialMeans{};
+  std::array<Polynomial, GSFConstants::maxNumberofMatComponents> m_BHpolynomialVariances{};
+  std::array<Polynomial, GSFConstants::maxNumberofMatComponents> m_BHpolynomialWeightsHighX0{};
+  std::array<Polynomial, GSFConstants::maxNumberofMatComponents> m_BHpolynomialMeansHighX0{};
+  std::array<Polynomial, GSFConstants::maxNumberofMatComponents> m_BHpolynomialVariancesHighX0{};
 };
 
 } // end Trk namespace

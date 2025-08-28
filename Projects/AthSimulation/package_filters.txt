@@ -76,7 +76,6 @@
 + Database/AthenaPOOL/OutputStreamAthenaPool
 + Database/AthenaPOOL/PoolSvc
 + Database/AthenaPOOL/RootConversions
-+ Database/AthenaPOOL/RootFileTools
 + Database/AthenaPOOL/StlAthenaPoolCnv
 + Database/AthenaRoot/AthenaRootComps
 + Database/AthenaRoot/AthenaRootKernel
@@ -99,6 +98,7 @@
 + Database/PersistentDataModelTPCnv
 + Database/RDBAccessSvc
 + Database/RegistrationServices
++ Database/SQLiteDBSvc
 + Database/TPTools
 + DetectorDescription/AGDD/AGDD2GeoSvc
 + DetectorDescription/AGDD/AGDDControl

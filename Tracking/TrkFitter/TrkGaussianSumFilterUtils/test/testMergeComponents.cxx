@@ -9,7 +9,7 @@
 
 using namespace GSFUtils;
 namespace {
-constexpr int16_t n = 72;
+constexpr size_t n = 72;
 constexpr std::array<Component1D, n> input = {
   { { -4.66462e-06, 1.06618e-11, 9.37928e+10, 0.00608503 },
     { -2.08263e-05, 7.533e-11, 1.32749e+10, 0.0274963 },
@@ -89,20 +89,17 @@ constexpr std::array<Component1D, n> input = {
 int
 main()
 {
-  GSFUtils::Component1DArray componentsArray;
-  componentsArray.numComponents = n;
   // Create an array of all components to be merged
-  for (int8_t i = 0; i < n; ++i) {
-    componentsArray.components[i].mean = input[i].mean;
-    componentsArray.components[i].cov = input[i].cov;
-    componentsArray.components[i].invCov = input[i].invCov;
-    componentsArray.components[i].weight = input[i].weight;
+  GSFUtils::Component1DArray componentsArray(n);
+  for (size_t i = 0; i < n; ++i) {
+    componentsArray[i].mean = input[i].mean;
+    componentsArray[i].cov = input[i].cov;
+    componentsArray[i].invCov = input[i].invCov;
+    componentsArray[i].weight = input[i].weight;
   }
-  const GSFUtils::MergeArray order = findMerges(componentsArray, 12);
-  const int numMerges = order.numMerges;
-  for (int i = 0; i < numMerges; ++i) {
-    std::cout << "[" << static_cast<int>(order.merges[i].To) << ", "
-              << static_cast<int>(order.merges[i].From) << "]" << '\n';
+  const GSFUtils::MergeArray order = findMerges(std::move(componentsArray), 12);
+  for (const auto& merges : order) {
+    std::cout << "[" << merges.To << ", " << merges.From << "]" << '\n';
   }
   return 0;
 }

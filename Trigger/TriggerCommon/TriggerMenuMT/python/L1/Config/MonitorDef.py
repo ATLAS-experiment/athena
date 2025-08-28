@@ -154,7 +154,8 @@ class MonitorDef:
                 "L1_2eEM10L_MU8F", "L1_MU3V_jJ40",
                 # L1Topo (Topo2 always in)
                 "L1_LLPDPHI-jXE40-jJ40",
-                "L1_BPH-0DR3-eEM9jJ40_MU5VF", "L1_BPH-0M9-eEM9-eEM7_MU5VF", "L1_BPH-0DR3-eEM9jJ40_2MU3V",
+                "L1_BPH-0M9-eEM9-eEM7_MU5VF",
+                "L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25",
                 "L1_BPH-0M9-eEM9-eEM7",  "L1_BPH-0M10-3MU3V", "L1_BPH-0M10-3MU3VF",
                 "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
                 "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ80",
@@ -218,7 +219,6 @@ class MonitorDef:
                     "L1_jJ30p0ETA25", "L1_jJ40p0ETA25",
                     "L1_jJ70p0ETA23", "L1_jJ55p0ETA23",
                     "L1_jJ80p0ETA25", "L1_jJ85p0ETA21",
-                    "L1_jLJ180",
                     "L1_jEM25", "L1_jEM20M",
                     #
                     "L1_eEM7", "L1_eEM10L", "L1_eEM15",
@@ -445,8 +445,8 @@ class MonitorDef:
             if "lowMu" in menuFullName:
                 monItemsHF[TBP|TAP|TAV].extend([
                     # ATR-31296 – Oxygen/Neon runs
-                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_XOR",
-                    "L1_TRT_FILLED"
+                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_LOR",
+                    "L1_ZDC_XN_XOR", "L1_ZDC_YN_XOR", "L1_ZDC_ZN_XOR"
                 ])
             else: # HI HLT menu
                 monItemsHF[TBP|TAP|TAV].extend([

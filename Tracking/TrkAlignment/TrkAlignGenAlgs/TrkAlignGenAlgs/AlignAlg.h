@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENALGS_ALIGNALG_H
@@ -8,9 +8,15 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 
+#include "TrkAlignInterfaces/ITrackCollectionProvider.h"
+#include "TrkAlignInterfaces/IAlignTrackPreProcessor.h"
 #include "TrkAlignInterfaces/IAlignTrackCreator.h"
 #include "TrkAlignInterfaces/IAlignTrackDresser.h"
 #include "TrkAlignInterfaces/IAlignTool.h"
+#include "TrkAlignInterfaces/IGeometryManagerTool.h"
+#include "TrkAlignInterfaces/ITrkAlignDBTool.h"
+#include "TrkAlignInterfaces/IFillNtupleTool.h"
+
 
 #include <string>
 #include <fstream>
@@ -29,18 +35,14 @@
 
 namespace Trk {
   
-  class IGeometryManagerTool;
   class IFillNtupleTool;
-  class ITrkAlignDBTool;
-  class IAlignTrackPreProcessor;
-  class ITrackCollectionProvider;
 
   class AlignAlg : public AthAlgorithm {
     
   public: 
 
     /** constructor */
-    AlignAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthAlgorithm::AthAlgorithm;
 
     /** destructor */
     virtual ~AlignAlg();
@@ -63,69 +65,74 @@ namespace Trk {
     /** dumps statistics accumulated in each event */
     void showStatistics();
     
-    /* 
-    int nDoF() { return m_nDoF; }
-   
-    const AlignModuleList* moduleList() const { return m_modules; }
-
-    bool doPixel() const { return m_doPixel; } 
-    bool doSCT()   const { return m_doSCT; } 
-    bool doTRT()   const { return m_doTRT; } 
-    bool doMDT()   const { return m_doMDT; } 
-
-    ToolHandle<IFillNtupleTool>* fillNtupleTool() { return &m_fillNtupleTool; }
-    */
-    
   private:
     
-    ToolHandle <ITrackCollectionProvider> m_trackCollectionProvider;
+    ToolHandle <ITrackCollectionProvider> m_trackCollectionProvider{
+      this, "TrackCollectionProvider", "Trk::TrackCollectionProvider",
+	"tool for getting track collection from StoreGate"};
 
     /** Pointer to AlignTrackPreProcessor, used to select hits on tracks and/or tracks before passing to AlignTrackCreator */
-    ToolHandle<IAlignTrackPreProcessor> m_alignTrackPreProcessor;
+    ToolHandle<IAlignTrackPreProcessor> m_alignTrackPreProcessor{
+      this, "AlignTrackPreProcessor", "Trk::AlignTrackPreProcessor",
+      "tool for converting Trk::Track to AlignTrack after processing if necessary"};
 
     /** Pointer to alignTrackCreator, used to convert Trk::Track to vector of AlignTrack */
-    ToolHandle <IAlignTrackCreator>  m_alignTrackCreator;
+    ToolHandle <IAlignTrackCreator>  m_alignTrackCreator{
+      this, "AlignTrackCreator", "Trk::AlignTrackCreator",
+      "tool for creating AlignTSOSCollection to store on AlignTrack"};
     
     /** Pointer to alignTrackDresser, used to add residuals, derivatives, etc. to vector of AlignTrack */
-    ToolHandle <IAlignTrackDresser>  m_alignTrackDresser;
+    ToolHandle <IAlignTrackDresser>  m_alignTrackDresser{
+      this, "AlignTrackDresser", "Trk::AlignTrackDresser",
+      "tool for dressing AlignTrack with residuals, derivatives, etc."};
     
     /** Pointer to alignTool */
-    ToolHandle <IAlignTool>  m_alignTool;
+    ToolHandle <IAlignTool>  m_alignTool{
+      this, "AlignTool", "Trk::GlobalChi2AlignTool",
+      "alignment algorithm-specific tool"};
         
     /** Pointer to GeometryManagerTool, used to get lists of chambers for which alignment parameters will be determined */
-    ToolHandle <IGeometryManagerTool> m_geometryManagerTool;
+    PublicToolHandle <IGeometryManagerTool> m_geometryManagerTool{
+      this, "GeometryManagerTool", "InDet::InDetGeometryManagerTool",
+      "tool for configuring geometry"};
     
     /** Pointer to TrkAlignDBTool, used for reading/writing alignment parameters from/to the database */
-    ToolHandle <ITrkAlignDBTool> m_trkAlignDBTool;
+    ToolHandle <ITrkAlignDBTool> m_trkAlignDBTool{
+      this, "AlignDBTool", "Trk::TrkAlignDBTool", "tool for handling DB stuff"};
     
     /** Pointer to FillNtupleTool, used to write track information to ntuple */
-    ToolHandle <IFillNtupleTool> m_fillNtupleTool;
-
+    ToolHandle <IFillNtupleTool> m_fillNtupleTool{
+      this, "FillNtupleTool", "",
+      "tool for storing Trk::Track information into the ntuple"};
 
     // various job options
-    std::string m_filename;  //!< name of ntuple file
-    std::string m_filepath;  //!< path to ntuple file
+    StringProperty m_filename{this, "FileName", "Align.root", "name of ntuple file"};
+    StringProperty m_filepath{this, "FilePath", "./", "path to ntuple file"};
 
-    bool m_solveOnly;           //!< only do the solving (accumulate from binaries)
-    bool m_writeNtuple;         //!< write track and event information to ntuple
+    BooleanProperty m_solveOnly{this, "SolveOnly", false,
+      "only do the solving (accumulate from binaries)"};
+    BooleanProperty m_writeNtuple{this, "WriteNtuple", true,
+      "write track and event information to ntuple"};
 
-    int m_alignSolveLevel;      //!< Set the Alignment Solve Level
+    IntegerProperty m_alignSolveLevel{this, "AlignSolveLevel", 3,
+      "Set the Alignment Solve Level"};
 
-    int m_nDoF;     //!< Number of degrees of freedom = sum over chambers(DoF per chamber)
+    TFile*         m_ntuple = nullptr;        //!< output ntuple
+    BooleanProperty m_writeLogfile{this, "WriteLogFile", true,
+      "write a logfile for solving"};
+    StringProperty m_logfileName{this, "LogFileName", "alignlogfile.txt",
+      "name of the logfile"};
+    std::ostream * m_logStream = nullptr;     //!< logfile output stream
 
-    TFile*         m_ntuple;        //!< output ntuple
-    bool           m_writeLogfile;  //!< write a logfile for solving
-    std::string    m_logfileName;   //!< name of the logfile
-    std::ostream * m_logStream;     //!< logfile output stream
+    int m_nevents = 0;    //!< number of processed events
+    int m_ntracks = 0;    //!< number of processed tracks
+    int m_ntracksSel = 0; //!< number of selected tracks
+    int m_ntracksProc = 0;  //!< number of tracks successfully processed
+    int m_ntracksDress = 0; //!< number of tracks successfully dressed
+    int m_ntracksAccum = 0; //!< number of tracks successfully accumulated
 
-    int m_nevents;    //!< number of processed events
-    int m_ntracks;    //!< number of processed tracks
-    int m_ntracksSel; //!< number of selected tracks
-    int m_ntracksProc;  //!< number of tracks successfully processed
-    int m_ntracksDress; //!< number of tracks successfully dressed
-    int m_ntracksAccum; //!< number of tracks successfully accumulated
-
-    std::string m_alignTracksName; //!< name of the AlignTrack collection in the StoreGate
+    StringProperty m_alignTracksName{this, "AlignTracksName", "AlignTracks",
+      "name of the AlignTrack collection in the StoreGate"};
 
    };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -13,6 +13,7 @@
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysWriteHandle.h>
+#include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <METInterface/IMETSignificance.h>
 #include <xAODMissingET/MissingETContainer.h>
 #include <AsgTools/PropertyWrapper.h>
@@ -58,11 +59,19 @@ namespace CP
 
     /// \brief the decoration for the significance
   private:
-    Gaudi::Property<std::string> m_significanceDecoration {this, "significanceDecoration", "significance", "the decoration to use for the significance"};
+    CP::SysWriteDecorHandle<float> m_significanceDecorHandle { this, "significanceDecoration", "significance_%SYS%", "decoration name to use for the significance" };
 
-    /// \brief the accessor for \ref m_selectionDecoration
+    /// \brief the decoration for the directional significance
   private:
-    std::unique_ptr<const SG::AuxElement::Accessor<float> > m_significanceAccessor;
+    CP::SysWriteDecorHandle<float> m_sigDirectionalDecorHandle { this, "sigDirectionalDecoration", "", "decoration name to use for the directional significance" };
+
+    /// \brief the decoration for METOverSqrtSumET
+  private:
+    CP::SysWriteDecorHandle<float> m_metOverSqrtSumETDecorHandle { this, "METOverSqrtSumETDecoration", "", "decoration name to use for METOverSqrtSumET" };
+
+    /// \brief the decoration for the METOverSqrtHT
+  private:
+    CP::SysWriteDecorHandle<float> m_metOverSqrtHTDecorHandle { this, "METOverSqrtHTDecoration", "", "decoration name to use for METOverSqrtHT" };
   };
 }
 

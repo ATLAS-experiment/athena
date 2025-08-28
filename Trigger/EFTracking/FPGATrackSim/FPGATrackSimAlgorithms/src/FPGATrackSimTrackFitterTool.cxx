@@ -72,6 +72,8 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 
     m_tfpobj->setNorecoveryNhits(m_noRecoveryNHits);
 
+    m_tfpobj->setFitFromRoad(m_fitFromRoad);
+
     if (!m_guessHits && m_doMissingHitsChecks) ATH_MSG_WARNING("We can't do missing hits check if we don't guess hits");
     m_tfpobj->setDoMissingHitsCheck(m_doMissingHitsChecks);
     m_tfpobj->setIdealCoordFitType(static_cast<TrackCorrType>(m_idealCoordFitType.value()));
@@ -81,12 +83,38 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode FPGATrackSimTrackFitterTool::getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks) {
+StatusCode FPGATrackSimTrackFitterTool::getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max) {
     // elaborate the next event
     ATH_CHECK(setRoadSectors(roads));
     int status = m_tfpobj->fitTracks(roads,tracks);
     if (status != FITTRACKS_OK) return StatusCode::FAILURE;
 
+    // Make sure none of our track parameters go outside the appropriate boundary
+    for (auto track : tracks) {
+
+      double qopt = track.getQOverPt();
+      double eta = track.getEta();
+      double phi = track.getPhi();
+      double d0 = track.getD0();
+      double z0 = track.getZ0();
+      if (qopt < min[FPGATrackSimTrackPars::IHIP]) qopt = min[FPGATrackSimTrackPars::IHIP];
+      if (qopt > max[FPGATrackSimTrackPars::IHIP]) qopt = max[FPGATrackSimTrackPars::IHIP];
+      if (eta < min[FPGATrackSimTrackPars::IETA]) eta = min[FPGATrackSimTrackPars::IETA];
+      if (eta > max[FPGATrackSimTrackPars::IETA]) eta = max[FPGATrackSimTrackPars::IETA];
+      if (phi < min[FPGATrackSimTrackPars::IPHI]) phi = min[FPGATrackSimTrackPars::IPHI];
+      if (phi > max[FPGATrackSimTrackPars::IPHI]) phi = max[FPGATrackSimTrackPars::IPHI];
+      if (d0 < min[FPGATrackSimTrackPars::ID0]) d0 = min[FPGATrackSimTrackPars::ID0];
+      if (d0 > max[FPGATrackSimTrackPars::ID0]) d0 = max[FPGATrackSimTrackPars::ID0];
+      if (z0 < min[FPGATrackSimTrackPars::IZ0]) z0 = min[FPGATrackSimTrackPars::IZ0];
+      if (z0 > max[FPGATrackSimTrackPars::IZ0]) z0 = max[FPGATrackSimTrackPars::IZ0];
+      
+      track.setQOverPt(qopt);
+      track.setEta(eta);
+      track.setPhi(phi);
+      track.setD0(d0);
+      track.setZ0(z0);           
+    }
+    
     if (msgLvl(MSG::DEBUG))
     {
         ATH_MSG_DEBUG("getTracks() returning " << tracks.size() << " tracks:");

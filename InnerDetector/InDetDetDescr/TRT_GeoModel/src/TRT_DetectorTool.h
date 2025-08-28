@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_GEOMODEL_TRTDETECTORTOOL_H
@@ -42,7 +42,6 @@ public:
 private:
   Gaudi::Property<bool> m_useOldActiveGasMixture{this,"UseOldActiveGasMixture",false};
   Gaudi::Property<bool> m_DC2CompatibleBarrelCoordinates{this,"DC2CompatibleBarrelCoordinates",false};
-  Gaudi::Property<int> m_overridedigversion{this,"OverrideDigVersion",-999};
   Gaudi::Property<bool> m_alignable{this,"Alignable",true};
   Gaudi::Property<bool> m_useDynamicAlignFolders{this,"useDynamicAlignFolders",false};
 

@@ -93,11 +93,10 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
         # This appears to be very much a hack... we should just have separate
         # functions for with/without bjet or tau selections. -- Chris Pollard
         if not doTaggingSel:  # Removing b-jet and tau parts if b-jet presel is not requested
-            p = re.sub(r'b\d\d|bg\d\d|bgtwo\d\d', '', p)
-            p = re.sub(r'gntau\d\d', '', p)
+            p = re.sub(r'(b|bg|bgtwo|gntau|uht1tau)\d\d', '', p)
 
-        hasBjetSel = bool(re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)', p))
-        hasTauSel = bool(re.match(r'.*(gntau\d\d)', p))
+        hasBjetSel = bool(re.match(r'.*(b|bg|bgtwo)\d\d', p))
+        hasTauSel = bool(re.match(r'.*(gntau|uht1tau)\d\d', p))
         hasDIPZsel = bool(re.match(r'.*Z', p))
 
         if hasDIPZsel and not doTaggingSel: continue # Skipping calopresel step when DIPZ is run
@@ -105,12 +104,15 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
 
         assert not ( (hasBjetSel or hasDIPZsel) and not doTaggingSel), "Your jet preselection has a b-jet or DIPZ part but a calo-only preselection was requested instead. This should not be possible. Please investigate."        
 
+        bmatches = r'(?P<btagger>(b|bg|bgtwo))(?P<bwp>\d\d)' if hasBjetSel else ""
+        taumatches = r'(?P<tauid>(gntau|uht1tau))(?P<tauwp>\d\d)' if hasTauSel else ""
+
         pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
         pattern_to_test += r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
-        pattern_to_test += r'b(?P<btagger>\D*)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
-        pattern_to_test += r'gntau(?P<tauwp>\d\d)' if hasTauSel else '' # tau preselection if needed
+        pattern_to_test += bmatches
+        pattern_to_test += taumatches
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
-        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+[jacf]?)?)'
+        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)(?P<dipzwp>\d+)?(?P<prefilt>(MAXMULT\d+[jacf]?)?)'
         matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
@@ -129,12 +131,12 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
         for k in testkeys:
             cut_dict.setdefault(k, "")
 
-        # why oh why is it written this way?
-        mult,region,scenario,cut,btagger,bwp,dipzwp,emfc = \
-            cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'],cut_dict['bwp'],cut_dict['dipzwp'],cut_dict['emfc']
-
-        tauwp = cut_dict["tauwp"]
-
+        mult = cut_dict['mult']
+        region = cut_dict['region']
+        scenario = cut_dict['scenario']
+        cut = cut_dict['cut']
+        dipzwp = cut_dict['dipzwp']
+        emfc = cut_dict['emfc']
         prefilters = []
 
         if mult=='': mult='1'
@@ -154,14 +156,26 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
             threshold=cut
             chainPartName=f'{mult}j{cut}_{etarange}'
         
-        if btagger == 'g':
-            btagger = 'gnone'
-        elif btagger =='gtwo':
-            btagger = 'gntwo'
-        elif btagger == '':
-            btagger = 'dips'
+        if hasBjetSel:
+            btagger = cut_dict['btagger']
+            bwp = cut_dict['bwp']
+
+            if btagger == 'bg':
+                btagger = 'gnone'
+            elif btagger =='bgtwo':
+                btagger = 'bgntwo'
+            elif btagger == 'b':
+                btagger = 'bdips'
+
 
         tmpChainDict = dict(preselCommonJetParts)
+
+        if hasTauSel:
+            tauid = cut_dict["tauid"]
+            tauwp = cut_dict["tauwp"]
+
+            tmpChainDict[tauid] = tauwp+tauid
+
         tmpChainDict.update(
             {'L1threshold': 'FSNOSEED',
             'chainPartName': chainPartName,
@@ -170,13 +184,13 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
             'etaRange':etarange,
             'jvt':'',
             'clrsel': emfc,
-            'bsel': '' if bwp == '' else f'{bwp}b{btagger}',
-            'tausel': "" if tauwp == '' else f'{tauwp}gntau',
+            'bsel': f'{bwp}{btagger}' if hasBjetSel else "",
             'chainPartIndex': ip,
             'hypoScenario': hyposcenario,
             'prefilters': prefilters,
             }
         )
+
         preselChainDict['chainParts'] += [tmpChainDict] 
 
 

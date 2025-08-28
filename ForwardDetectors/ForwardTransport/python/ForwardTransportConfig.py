@@ -9,6 +9,6 @@ def ForwardTransportModelCfg(flags, name="ForwardTransportModel", **kwargs):
     serviceName ="ForwardTransportSvc"
     result.merge(ForwardTransportSvcCfg(flags, serviceName, **kwargs))
     kwargs.setdefault("ForwardTransportSvcName", serviceName) #Not a ServiceHandle
-    kwargs.setdefault("RegionNames" , ["FWDBeamLine"] )
+    kwargs.setdefault("RegionName" , "FWDBeamLine")
     result.setPrivateTools(CompFactory.ForwardTransportModelTool(name, **kwargs))
     return result

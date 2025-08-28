@@ -1,3 +1,7 @@
+/*
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "PadTrig_ROD_Decoder.h"
 
 #include <byteswap.h>
@@ -32,7 +36,7 @@ StatusCode PadTrig_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
   const std::string trigger{"PadL1A"};
   const Muon::nsw::NSWTriggerCommonDecoder decoder{fragment, trigger};
   for (const auto& baselink: decoder.get_elinks()) {
-    const auto link = dynamic_cast<const Muon::nsw::NSWPadTriggerL1a*>(baselink.get());
+    const auto link = static_cast<const Muon::nsw::NSWPadTriggerL1a*>(baselink.get());
     auto *const collection = new NSW_PadTriggerData{
       fragment.rob_source_id(),
       link->getFlags(),

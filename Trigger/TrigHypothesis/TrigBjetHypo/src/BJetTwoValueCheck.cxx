@@ -25,10 +25,10 @@ StatusCode BJetTwoValueCheck::initialize() {
   return StatusCode::SUCCESS;
 }
 
-bool BJetTwoValueCheck::passThreshold(const SG::AuxElement& btag) const
+bool BJetTwoValueCheck::passThreshold(const xAOD::Jet& bjet) const
 {
-  float n = m_acc->n(btag);
-  float d = m_acc->d(btag);
+  float n = m_acc->n(bjet);
+  float d = m_acc->d(bjet);
   float llr = safeLogRatio(n, d);
   Monitored::Group(m_monTool, Monitored::Scalar(m_llrName, llr));
   return llr > m_threshold;

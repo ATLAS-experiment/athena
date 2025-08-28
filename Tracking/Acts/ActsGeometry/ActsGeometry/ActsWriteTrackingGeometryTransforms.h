@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSWRITETRACKINGGEOMETRYTRANSFORMS_H
@@ -17,7 +17,7 @@
 
 // PACKAGE
 #include "ActsGeometry/ActsObjWriterTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // STL
 #include <fstream>
@@ -32,19 +32,19 @@ class ActsTrackingGeometryTool;
 
 class ActsWriteTrackingGeometryTransforms : public AthAlgorithm {
 public:
-  ActsWriteTrackingGeometryTransforms (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
+
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
-  virtual StatusCode finalize() override;
 
   virtual ~ActsWriteTrackingGeometryTransforms() = default;
 
 private:
 
-  const PixelID *m_pixelID;
-  const SCT_ID  *m_SCT_ID;
+  const PixelID *m_pixelID{nullptr};
+  const SCT_ID  *m_SCT_ID{nullptr};
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
   Gaudi::Property<std::string> m_outputName{this, "OutputName", "transforms.csv", "Filename to write the transform output to"};
   Gaudi::Property<bool> m_writeFullTransform{this,"WriteFullTransform",false,"Decide if full transformation needs to be written"};

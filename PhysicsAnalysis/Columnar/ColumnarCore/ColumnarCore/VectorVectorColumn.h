@@ -17,7 +17,7 @@ namespace columnar
   // This is one of the more tricky accessors, as it need to connect to
   // three underlying columns.  The first two columns are the offset
   // columns, the third is the data column.
-  template<ContainerId CI,typename CT>
+  template<ContainerIdConcept CI,typename CT>
     requires (ColumnTypeTraits<CT,ColumnarModeArray>::isNativeType)
   class AccessorTemplate<CI,std::vector<std::vector<CT>>,ColumnAccessMode::input,ColumnarModeArray> final
   {
@@ -34,18 +34,18 @@ namespace columnar
     AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
     {
       auto myinfoOuter = info;
-      myinfoOuter.offsetName = columnBase.objectName (CI);
+      myinfoOuter.offsetName = columnBase.containerStoreName (CI::idName);
       myinfoOuter.isOffset = true;
       auto myinfoInner = info;
-      myinfoInner.offsetName = columnBase.objectName (CI) + "." + name + ".outerOffset";
+      myinfoInner.offsetName = columnBase.containerStoreName (CI::idName) + "." + name + ".outerOffset";
       myinfoInner.isOffset = true;
-      info.offsetName = columnBase.objectName (CI) + "." + name + ".innerOffset";
+      info.offsetName = columnBase.containerStoreName (CI::idName) + "." + name + ".innerOffset";
       m_outerOffsetData = std::make_unique<ColumnAccessorDataArray> (&m_outerOffsetIndex, &m_outerOffsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       columnBase.addColumn (myinfoInner.offsetName, m_outerOffsetData.get(), std::move (myinfoOuter));
       m_innerOffsetData = std::make_unique<ColumnAccessorDataArray> (&m_innerOffsetIndex, &m_innerOffsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       columnBase.addColumn (info.offsetName, m_innerOffsetData.get(), std::move (myinfoInner));
       m_dataData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_dataData, &typeid (ElementType), ColumnAccessMode::input);
-      columnBase.addColumn (columnBase.objectName(CI) + "." + name + ".data", m_dataData.get(), std::move (info));
+      columnBase.addColumn (columnBase.containerStoreName (CI::idName) + "." + name + ".data", m_dataData.get(), std::move (info));
     }
 
     AccessorTemplate (AccessorTemplate&& that)
@@ -71,9 +71,9 @@ namespace columnar
       auto *outerOffset = static_cast<const ColumnarOffsetType*>(id.getData()[m_outerOffsetIndex]);
       auto *innerOffset = static_cast<const ColumnarOffsetType*>(id.getData()[m_innerOffsetIndex]);
       auto *data = static_cast<const ElementType*>(id.getData()[m_dataIndex]);
-      return detail::VectorConvertView ([innerOffset,data] (const ColumnarOffsetType& index) noexcept {
+      return detail::VectorConvertView ([data] (const ColumnarOffsetType& index) noexcept {
           const ColumnarOffsetType& endIndex = (&index)[1];
-          return std::span<const ElementType> (data + innerOffset[index], data + innerOffset[endIndex]);},
+          return std::span<const ElementType> (data + index, data + endIndex);},
         std::span<const ColumnarOffsetType> (innerOffset + outerOffset[id.getIndex()], innerOffset + outerOffset[id.getIndex()+1]));
     }
 

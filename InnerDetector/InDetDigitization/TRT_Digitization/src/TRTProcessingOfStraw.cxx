@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTProcessingOfStraw.h"
@@ -32,6 +32,7 @@
 // Particle data table
 #include "HepPDT/ParticleData.hh"
 #include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // For the Athena-based random numbers.
 #include "CLHEP/Random/RandPoisson.h" //randpoissonq? (fixme)
@@ -336,74 +337,69 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
 
       // If it is a photon we assume it was absorbed entirely at the point of interaction.
       // we simply deposit the entire energy into the last point of the sim. step.
-      if (particleEncoding == 22)
-        {
+      if ( MC::isPhoton(particleEncoding) ) {
 
-          const double energyDeposit = (*theHit)->GetEnergyDeposit(); // keV (see comment below)
-          // Apply radiator efficiency "fudge factor" to ignore some TR photons (assuming they are over produced in the sim. step.
-          // The fraction removed is based on tuning pHT for electrons to data, after tuning pHT for muons (which do not produce TR).
-          // The efficiency is different for Xe, Kr and Ar. Avoid fudging non-TR photons (TR is < 30 keV).
-          // Also: for |eta|<0.5 apply parabolic scale; see "Parabolic Fudge" https://indico.cern.ch/event/304066/
+        const double energyDeposit = (*theHit)->GetEnergyDeposit(); // keV (see comment below)
+        // Apply radiator efficiency "fudge factor" to ignore some TR photons (assuming they are over produced in the sim. step.
+        // The fraction removed is based on tuning pHT for electrons to data, after tuning pHT for muons (which do not produce TR).
+        // The efficiency is different for Xe, Kr and Ar. Avoid fudging non-TR photons (TR is < 30 keV).
+        // Also: for |eta|<0.5 apply parabolic scale; see "Parabolic Fudge" https://indico.cern.ch/event/304066/
 
-          if ( energyDeposit<30.0 ) {
+        if ( energyDeposit<30.0 ) {
 
-            // Improved Argon Emulation tuning October 2018 by Hassane Hamdaoui https://cds.cern.ch/record/2643784
-            // Previously 0.15, 0.28, 0.28
-            double ArEmulationScaling_BA  = 0.05;
-            double ArEmulationScaling_ECA = 0.20;
-            double ArEmulationScaling_ECB = 0.20;
+          // Improved Argon Emulation tuning October 2018 by Hassane Hamdaoui https://cds.cern.ch/record/2643784
+          // Previously 0.15, 0.28, 0.28
+          double ArEmulationScaling_BA  = 0.05;
+          double ArEmulationScaling_ECA = 0.20;
+          double ArEmulationScaling_ECB = 0.20;
 
-            // ROUGH GUESSES RIGHT NOW
-            double KrEmulationScaling_BA = 0.20;
-            double KrEmulationScaling_ECA = 0.39;
-            double KrEmulationScaling_ECB = 0.39;
+          // ROUGH GUESSES RIGHT NOW
+          double KrEmulationScaling_BA = 0.20;
+          double KrEmulationScaling_ECA = 0.39;
+          double KrEmulationScaling_ECB = 0.39;
 
-            if (isBarrel) { // Barrel
-              double trEfficiencyBarrel = m_settings->trEfficiencyBarrel(strawGasType);
-              double hitx = TRThitGlobalPos[0];
-              double hity = TRThitGlobalPos[1];
-              double hitz = TRThitGlobalPos[2];
-              double hitEta = std::abs(log(tan(0.5*atan2(sqrt(hitx*hitx+hity*hity),hitz))));
-              if ( hitEta < 0.5 ) { trEfficiencyBarrel *= ( 0.833333+0.6666667*hitEta*hitEta ); }
+          if (isBarrel) { // Barrel
+            double trEfficiencyBarrel = m_settings->trEfficiencyBarrel(strawGasType);
+            double hitx = TRThitGlobalPos[0];
+            double hity = TRThitGlobalPos[1];
+            double hitz = TRThitGlobalPos[2];
+            double hitEta = std::abs(log(tan(0.5*atan2(sqrt(hitx*hitx+hity*hity),hitz))));
+            if ( hitEta < 0.5 ) { trEfficiencyBarrel *= ( 0.833333+0.6666667*hitEta*hitEta ); }
+            // scale down the TR efficiency if we are emulating
+            if ( strawGasType == 0 && emulationArflag ) { trEfficiencyBarrel *= ArEmulationScaling_BA; }
+            if ( strawGasType == 0 && emulationKrflag ) { trEfficiencyBarrel *= KrEmulationScaling_BA; }
+            if ( CLHEP::RandFlat::shoot(rndmEngine) > trEfficiencyBarrel ) continue; // Skip this photon
+          } // close if barrel
+          else { // Endcap - no eta dependence here.
+            if (isECA) {
+              double trEfficiencyEndCapA = m_settings->trEfficiencyEndCapA(strawGasType);
               // scale down the TR efficiency if we are emulating
-              if ( strawGasType == 0 && emulationArflag ) { trEfficiencyBarrel *= ArEmulationScaling_BA; }
-              if ( strawGasType == 0 && emulationKrflag ) { trEfficiencyBarrel *= KrEmulationScaling_BA; }
-              if ( CLHEP::RandFlat::shoot(rndmEngine) > trEfficiencyBarrel ) continue; // Skip this photon
-            } // close if barrel
-            else { // Endcap - no eta dependence here.
-              if (isECA) {
-                double trEfficiencyEndCapA = m_settings->trEfficiencyEndCapA(strawGasType);
-                // scale down the TR efficiency if we are emulating
-                if ( strawGasType == 0 && emulationArflag ) { trEfficiencyEndCapA *= ArEmulationScaling_ECA; }
-                if ( strawGasType == 0 && emulationKrflag ) { trEfficiencyEndCapA *= KrEmulationScaling_ECA; }
-                if ( CLHEP::RandFlat::shoot(rndmEngine) > trEfficiencyEndCapA ) continue; // Skip this photon
-              }
-              if (isECB) {
-                double trEfficiencyEndCapB = m_settings->trEfficiencyEndCapB(strawGasType);
-                // scale down the TR efficiency if we are emulating
-                if ( strawGasType == 0 && emulationArflag ) { trEfficiencyEndCapB *= ArEmulationScaling_ECB; }
-                if ( strawGasType == 0 && emulationKrflag ) { trEfficiencyEndCapB *= KrEmulationScaling_ECB; }
-                if ( CLHEP::RandFlat::shoot(rndmEngine) > trEfficiencyEndCapB ) continue; // Skip this photon
-              }
-            } // close else (end caps)
-          } // energyDeposit < 30.0
+              if ( strawGasType == 0 && emulationArflag ) { trEfficiencyEndCapA *= ArEmulationScaling_ECA; }
+              if ( strawGasType == 0 && emulationKrflag ) { trEfficiencyEndCapA *= KrEmulationScaling_ECA; }
+              if ( CLHEP::RandFlat::shoot(rndmEngine) > trEfficiencyEndCapA ) continue; // Skip this photon
+            }
+            if (isECB) {
+              double trEfficiencyEndCapB = m_settings->trEfficiencyEndCapB(strawGasType);
+              // scale down the TR efficiency if we are emulating
+              if ( strawGasType == 0 && emulationArflag ) { trEfficiencyEndCapB *= ArEmulationScaling_ECB; }
+              if ( strawGasType == 0 && emulationKrflag ) { trEfficiencyEndCapB *= KrEmulationScaling_ECB; }
+              if ( CLHEP::RandFlat::shoot(rndmEngine) > trEfficiencyEndCapB ) continue; // Skip this photon
+            }
+          } // close else (end caps)
+        } // energyDeposit < 30.0
 
           // Append this (usually highly energetic) cluster to the list:
-          m_clusterlist.emplace_back( energyDeposit*CLHEP::keV, timeOfHit, (*theHit)->GetPostStepX(), (*theHit)->GetPostStepY(), (*theHit)->GetPostStepZ() 
-                                  );
+        m_clusterlist.emplace_back( energyDeposit*CLHEP::keV, timeOfHit, (*theHit)->GetPostStepX(), (*theHit)->GetPostStepY(), (*theHit)->GetPostStepZ() );
 
-          // Regarding the CLHEP::keV above: In TRT_G4_SD we converting the hits to keV,
-          // so here we convert them back to CLHEP units by multiplying by CLHEP::keV.
-        }
-      //Special treatment of magnetic monopoles && highly charged Qballs (charge > 10)
-      else if ( (MC::isMonopole(particleEncoding)) ||
-                ((static_cast<int>(abs(particleEncoding)/10000000) == 1) &&
-                 (static_cast<int>(abs(particleEncoding)/100000) == 100) &&
-                 (static_cast<int>((abs(particleEncoding))-10000000)/100>10)) )
-        {
-          m_clusterlist.emplace_back((*theHit)->GetEnergyDeposit()*CLHEP::keV, timeOfHit, (*theHit)->GetPostStepX(), (*theHit)->GetPostStepY(), (*theHit)->GetPostStepZ() 
-                                  );
-        }
+        // Regarding the CLHEP::keV above: In TRT_G4_SD we converting the hits to keV,
+        // so here we convert them back to CLHEP units by multiplying by CLHEP::keV.
+      }
+      else if ( MC::isMonopole(particleEncoding)
+                || ( MC::isGenericMultichargedParticle(particleEncoding) && MC::charge(particleEncoding) > 10. )
+                ) {
+        //Special treatment of magnetic monopoles && highly charged Qballs (charge > 10)
+        m_clusterlist.emplace_back( (*theHit)->GetEnergyDeposit()*CLHEP::keV, timeOfHit, (*theHit)->GetPostStepX(), (*theHit)->GetPostStepY(), (*theHit)->GetPostStepZ() );
+      }
       else { // It's not a photon, monopole or Qball with charge > 10, so we proceed with regular ionization using the PAI model
 
         // Lookup mass and charge from the PDG info in CLHEP HepPDT:
@@ -411,69 +407,49 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
         double particleCharge(0.);
         double particleMass(0.);
 
-        if (particle)
-          {
-            particleCharge = particle->charge();
-            particleMass = particle->mass().value();
-            if ((static_cast<int>(abs(particleEncoding)/10000000) == 1) && (static_cast<int>(abs(particleEncoding)/100000)==100))
-              {
-                particleCharge =  (particleEncoding>0 ? 1. : -1.) *(((abs(particleEncoding) / 100000.0) - 100.0) * 1000.0);
-              }
-            else if ((static_cast<int>(abs(particleEncoding)/10000000) == 2) && (static_cast<int>(abs(particleEncoding)/100000)==200))
-              {
-                particleCharge =  (particleEncoding>0 ? 1. : -1.) *((double)((abs(particleEncoding) / 1000) % 100) / (double)((abs(particleEncoding) / 10) % 100));
-              }
+        if (particle) {
+          particleCharge = particle->charge();
+          particleMass = particle->mass().value();
+          // Override ParticleData charge value for Qballs and similar exotic multi-charged particles
+          if (MC::isGenericMultichargedParticle(particleEncoding)) {
+            particleCharge =MC::charge(particleEncoding);
           }
-        else
-          {
-            const int number_of_digits(static_cast<int>(log10((double)abs(particleEncoding))+1.));
-            if (number_of_digits != 10)
-              {
-                ATH_MSG_ERROR ( "Data for sim. particle with pdgcode "<<particleEncoding
-                                <<" does not have 10 digits and could not be retrieved from PartPropSvc. Assuming mass and charge as pion." );
-                particleCharge = 1.;
-                particleMass = 139.57018*CLHEP::MeV;
-              }
-            else if (( number_of_digits == 10 ) && (static_cast<int>(abs(particleEncoding)/100000000)!=10) )
-              {
-                ATH_MSG_ERROR ( "Data for sim. particle with pdgcode "<<particleEncoding
-                                <<" has 10 digits, could not be retrieved from PartPropSvc, and is inconsistent with ion pdg convention (+/-10LZZZAAAI)."
-                                <<" Assuming mass and charge as pion." );
-                particleCharge = 1.;
-                particleMass = 139.57018*CLHEP::MeV;
-              }
-            else if ((number_of_digits==10) && (static_cast<int>(abs(particleEncoding)/100000000)==10))
-              {
-                const int A(static_cast<int>((((particleEncoding)%1000000000)%10000)/10.));
-                const int Z(static_cast<int>((((particleEncoding)%10000000)-(((particleEncoding)%1000000000)%10000))/10000.));
-
-                const double Mp(938.272*CLHEP::MeV);
-                const double Mn(939.565*CLHEP::MeV);
-
-                particleCharge = (particleEncoding>0 ? 1. : -1.) * static_cast<double>(Z);
-                particleMass = std::abs( Z*Mp+(A-Z)*Mn );
-
-                if (!alreadyPrintedPDGcodeWarning)
-                  {
-                    ATH_MSG_WARNING ( "Data for sim. particle with pdgcode "<<particleEncoding
-                                      <<" could not be retrieved from PartPropSvc (unexpected ion)."
-                                      <<" Calculating mass and charge from pdg code. "
-                                      <<" The result is: Charge = "<<particleCharge<<" Mass = "<<particleMass<<"MeV" );
-                    alreadyPrintedPDGcodeWarning = true;
-                  }
-              }
+        }
+        else {
+          // TODO Should we handle charged Geantinos gracefully here?
+          if (!MC::isNucleus(particleEncoding)) {
+            ATH_MSG_WARNING ( "Data for sim. particle with pdgcode "<<particleEncoding
+                              <<"  is not a nucleus and could not be retrieved from PartPropSvc. Assuming mass and charge as pion. Please investigate." );
+            particleCharge = 1.;
+            particleMass = ParticleConstants::chargedPionMassInMeV;
           }
+          else {
+            particleCharge = MC::charge(particleEncoding);
 
-        if (!particleCharge)//Abort if uncharged particle.
-          {
-            continue;
+            const int A(static_cast<int>(MC::baryonNumber(particleEncoding)));
+            const int Z(static_cast<int>(std::abs(MC::numberOfProtons(particleEncoding))));
+            static constexpr double Mp(ParticleConstants::protonMassInMeV);
+            static constexpr double Mn(ParticleConstants::neutronMassInMeV);
+            particleMass = std::abs( Z*Mp+(A-Z)*Mn );
+
+            if (!alreadyPrintedPDGcodeWarning) {
+              ATH_MSG_WARNING ( "Data for sim. particle with pdgcode "<<particleEncoding
+                                <<" could not be retrieved from PartPropSvc (unexpected ion)."
+                                <<" Please Investigate the PDGTABLE.MeV file."
+                                <<" Calculating mass and charge from pdg code."
+                                <<" The result is: Charge = "<<particleCharge<<" Mass = "<<particleMass<<"MeV" );
+              alreadyPrintedPDGcodeWarning = true;
+            }
           }
-        if (!particleMass)
-          { //Abort if weird massless charged particle.
-            ATH_MSG_WARNING ( "Ignoring ionization from sim. particle with pdgcode "<<particleEncoding
-                              <<" since it appears to be a massless charged particle." );
-            continue;
-          }
+        }
+        // Abort if uncharged particle.
+        if (!particleCharge) { continue; }
+        // Abort if weird massless charged particle.
+        if (!particleMass) {
+          ATH_MSG_WARNING ( "Ignoring ionization from particle with pdg code "<<particleEncoding
+                            <<" since it appears to be a massless charged particle. Please investigate." );
+          continue;
+        }
 
         //We are now in the most likely case: A normal ionizing
         //particle. Using the PAI model we are going to distribute

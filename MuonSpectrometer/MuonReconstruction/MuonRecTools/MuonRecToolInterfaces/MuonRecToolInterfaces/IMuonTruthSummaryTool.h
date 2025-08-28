@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONTRUTHSUMMARYTOOL_H
@@ -30,11 +30,11 @@ namespace Muon {
         /** init truth */
         virtual void init() const = 0;
 
-        /** get the associated barcode for the identifier, return -1 if the channel was not hit by a muon */
-        virtual int getBarcode(const Identifier& id) const = 0;
+        /** get the associated uniqueID for the identifier, return -1 if the channel was not hit by a muon */
+        virtual int getUniqueID(const Identifier& id) const = 0;
 
-        /** get the associated pdgId for a given barcode */
-        virtual int getPdgId(int barcode) const = 0;
+        /** get the associated pdgId for a given uniqueID */
+        virtual int getPdgId(int uniqueID) const = 0;
 
         /** add identifier */
         virtual void add(const Identifier& id, int level) const = 0;

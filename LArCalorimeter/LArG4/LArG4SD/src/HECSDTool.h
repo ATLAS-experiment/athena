@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4SD_HECSDTOOL_H
@@ -24,28 +24,25 @@ namespace LArG4
   class HECSDTool : public SimpleSDTool
   {
 
-    public:
+  public:
 
-      /// Constructor
-      HECSDTool(const std::string& type, const std::string& name,
-                const IInterface* parent);
+    /// Constructor
+    HECSDTool(const std::string& type, const std::string& name,
+	      const IInterface* parent);
 
-    private:
+  private:
+    /// Initialize Calculator Services
+    StatusCode initializeCalculators() override final;
 
-      /// Initialize Calculator Services
-      StatusCode initializeCalculators() override final;
+    /// Create the SD wrapper for current worker thread
+    G4VSensitiveDetector* makeSD() const override final;
 
-     /// Create the SD wrapper for current worker thread
-      G4VSensitiveDetector* makeSD() const override final;
+    /// List of volumes for each SD
+    /// @{
+    Gaudi::Property<std::vector<std::string>> m_wheelVolumes{this, "WheelVolumes"};
+    /// @}
 
-      /// List of volumes for each SD
-      /// @{
-      std::vector<std::string> m_sliceVolumes;
-      std::vector<std::string> m_localVolumes;
-      std::vector<std::string> m_wheelVolumes;
-      /// @}
-
-      ServiceHandle<ILArCalculatorSvc> m_heccalc; //LArHECWheelCalculator::GetCalculator()
+    ServiceHandle<ILArCalculatorSvc> m_heccalc{this, "HECWheelCalculator", "HECWheelCalculator"}; //LArHECWheelCalculator::GetCalculator()
   }; // class HECSDTool
 
 } // namespace LArG4

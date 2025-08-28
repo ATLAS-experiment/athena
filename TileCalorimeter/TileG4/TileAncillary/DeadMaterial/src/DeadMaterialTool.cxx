@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //class header
@@ -20,20 +20,8 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 
 DeadMaterialTool::DeadMaterialTool(const std::string& type, const std::string& name, const IInterface* parent)
-  : DetectorGeometryBase(type,name,parent),
-    m_zLength(0),
-    m_yLength(0),
-    m_xLength(0)
+  : DetectorGeometryBase(type,name,parent)
 {
-  ATH_MSG_DEBUG( "DeadMaterialTool constructor for " << name );
-  declareProperty("ZLength", m_zLength, "");
-  declareProperty("YLength", m_yLength, "");
-  declareProperty("XLength", m_xLength, "");
-}
-
-DeadMaterialTool::~DeadMaterialTool()
-{
-
 }
 
 void DeadMaterialTool::BuildGeometry()

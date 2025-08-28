@@ -35,7 +35,7 @@ StatusCode SharedWriterTool::initialize()
   ATH_MSG_DEBUG("In initialize");
 
   ATH_CHECK(AthenaMPToolBase::initialize());
-  m_cnvSvc = serviceLocator()->service("AthenaPoolCnvSvc");
+  m_cnvSvc = serviceLocator()->service("AthenaPoolSharedIOCnvSvc");
   ATH_CHECK(m_cnvSvc.isValid());
 
   return StatusCode::SUCCESS;

@@ -3,11 +3,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def OutputStreamSequencerSvcCfg(flags, incidentName='', reportingOn=False):
+def OutputStreamSequencerSvcCfg(flags, incidentName='', reportingOn=False, replaceRangeMode=False):
     result = ComponentAccumulator()
     service = CompFactory.OutputStreamSequencerSvc("OutputStreamSequencerSvc",
                                                    SequenceIncidentName=incidentName,
-                                                   ReportingOn=reportingOn)
+                                                   ReportingOn=reportingOn,
+                                                   ReplaceRangeMode=replaceRangeMode)
     result.addService(service)
     return result
     

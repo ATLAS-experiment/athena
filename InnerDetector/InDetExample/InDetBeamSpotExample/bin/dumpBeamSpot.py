@@ -3,7 +3,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 # Dump beam spot in a COOL SQLite file (using AtlCoolTool).
 
-from __future__ import print_function
 
 __author__  = 'Juerg Beringer'
 __version__ = '$Id: dumpBeamSpot.py 217369 2009-10-05 18:43:35Z atlidbs $'

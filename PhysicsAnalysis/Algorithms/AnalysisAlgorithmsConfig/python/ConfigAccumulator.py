@@ -42,7 +42,8 @@ class OutputConfig :
         self.noSys = noSys
         self.enabled = enabled
 
-
+    def __repr__ (self):
+        return f'OutputConfig("{self.outputContainerName}.{self.variableName}" [enabled={self.enabled}])'
 
 class ContainerConfig :
     """all the auto-generated meta-configuration data for a single container
@@ -165,6 +166,7 @@ class ConfigAccumulator :
         self._algSeq = algSeq
         self._noSystematics = noSystematics
         self._noSysSuffix = noSysSuffix
+        self._algPostfix = ''
         self._containerConfig = {}
         self._outputContainers = {}
         self._pass = 0
@@ -231,12 +233,48 @@ class ConfigAccumulator :
     def hltSummary(self) :
         """the HLTSummary configuration to be used for the trigger decision tool"""
         return self._hltSummary
+    
+    def algPostfix (self) :
+        """the current postfix to be appended to algorithm names
+        
+        Blocks should not call this directly, but rather implement the
+        instanceName method, which will be used to generate the postfix
+        automatically."""
+        return self._algPostfix
+    
+    def setAlgPostfix (self, postfix : str) :
+        """set the current postfix to be appended to algorithm names
+
+        Blocks should not call this directly, but rather implement the
+        instanceName method, which will be used to generate the postfix
+        automatically."""
+        # make sure the postfix matches the expected format ([_a-zA-Z0-9]*)
+        if re.compile ('^[_a-zA-Z0-9]*$').match (postfix) is None :
+            raise ValueError ('invalid algorithm postfix: ' + postfix)
+        if postfix == '' :
+            self._algPostfix = ''
+        elif postfix[0] != '_' :
+            self._algPostfix = '_' + postfix
+        else :
+            self._algPostfix = postfix
+
+    def getAlgorithm (self, name : str):
+        """get the algorithm with the given name
+        
+        Despite the name this will also return services and tools. It is
+        mostly meant for internal use, particularly for the property
+        overrides."""
+        name = name + self._algPostfix
+        if name not in self._algorithms:
+            return None
+        return self._algorithms[name]
 
     def createAlgorithm (self, type, name, reentrant=False) :
         """create a new algorithm and register it as the current algorithm"""
+        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
-                raise Exception ('duplicate algorithms: ' + name)
+                raise Exception ('duplicate algorithms: ' + name + ' with algPostfix=' + self._algPostfix)
             if reentrant:
                 alg = DualUseConfig.createReentrantAlgorithm (type, name)
             else:
@@ -263,6 +301,7 @@ class ConfigAccumulator :
 
     def createService (self, type, name) :
         '''create a new service and register it as the "current algorithm"'''
+        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate service: ' + name)
@@ -287,6 +326,7 @@ class ConfigAccumulator :
 
     def createPublicTool (self, type, name) :
         '''create a new public tool and register it as the "current algorithm"'''
+        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate public tool: ' + name)
@@ -507,6 +547,9 @@ class ConfigAccumulator :
         excludeFrom --- a set of string names of selection sources to exclude
                         e.g. to exclude OR selections from MET
         """
+        if "." in containerName:
+            raise ValueError (f'invalid containerName argument: {containerName} , it contains a "." '
+            'which is used to indicate container+selection. You should only pass the container.')
         if containerName not in self._containerConfig :
             return ""
 
@@ -539,7 +582,7 @@ class ConfigAccumulator :
             subresult = self.getFullSelection (containerName, '', excludeFrom=excludeFrom)
             if subresult != '' :
                 result = subresult + '&&(' + result + ')'
-            return result
+            return '(' + result + ')' if result !='' else ''
 
         config = self._containerConfig[containerName]
         decorations = []

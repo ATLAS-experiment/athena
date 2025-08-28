@@ -10,7 +10,6 @@
 #include <string>
 #include <iostream>
 #include "FileCatalog/URIParser.h"
-#include "POOLCore/Exception.h"
 
 using namespace pool;
 
@@ -34,7 +33,7 @@ int main(){
     std::cout << "[OVAL]----------"<<std::endl;
     p.setURI("edgcatalog_http://ciccio.cern.ch/mycatalog");
     p.parse();p.dump(); 
-  }catch(const pool::Exception& er){
+  }catch(const std::runtime_error& er){
     std::cerr <<er.what()<< std::endl;
     return 1;
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -48,7 +48,7 @@ class CondAttrListVec : public DataObject
   };
 
   // constructor with specification of type of time: run/event or timestamp
-  CondAttrListVec(bool runevent);
+  explicit CondAttrListVec(bool runevent);
   // constructor with specification of type and initial size
   CondAttrListVec(bool runevent, size_type nelm);
   // destructor to release specification

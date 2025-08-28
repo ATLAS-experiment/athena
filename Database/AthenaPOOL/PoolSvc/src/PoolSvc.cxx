@@ -48,6 +48,7 @@
 #include <algorithm>  // for STL find()
 #include <cstdio>     // for fopen
 #include <ctype.h>    // for isdigit
+#include <exception>  // for runtime_error
 
 bool isNumber(const std::string& s) {
    return !s.empty() and ( isdigit(s[0]) or s[0]=='+' or s[0]=='-' );
@@ -511,7 +512,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
    pool::CollectionDescription collDes(collection, collectionType, collectionType == "ImplicitCollection" ? connection : "");
    if (collectionType == "RootCollection" &&
 	   m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
-      ATH_MSG_INFO("Writing ExplicitROOT Collection - do not pass session pointer");
+      ATH_MSG_INFO("Writing RootCollection - do not pass session pointer");
       std::scoped_lock lock(m_pool_mut);
       collPtr = collFac->create(collDes,  pool::ICollection::READ);
    } else {
@@ -537,9 +538,8 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
          }
          rntuple_error = e.what();
       }
-      if( !collPtr ) throw pool::Exception( "Failed to open APR Collection as RootCollection or RNTCollection: "
-                                            + tree_error + " | " + rntuple_error,
-                                            "PoolSvc::createCollection", "PoolSvc" );
+      if( !collPtr ) throw std::runtime_error( "Failed to open APR Collection as RootCollection or RNTCollection: "
+                                            + tree_error + " | " + rntuple_error + "PoolSvc::createCollection" );
    }
    if (insertFile && m_attemptCatalogPatch.value()) {
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
@@ -586,7 +586,7 @@ Token* PoolSvc::getToken(const std::string& connection,
    if (contH == nullptr) {
       return(nullptr);
    }
-   pool::ITokenIterator* tokenIter = contH->tokens("");
+   pool::ITokenIterator* tokenIter = contH->tokens();
    Token* thisToken = tokenIter->next();
    for (unsigned long ipos = 0; ipos < ientry; ipos++) {
       delete thisToken; thisToken = tokenIter->next();
@@ -993,7 +993,6 @@ PoolSvc::~PoolSvc() {
 }
 //__________________________________________________________________________
 std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, const std::string& dbName) const {
-   pool::IDatabase* dbH = nullptr;
    if (contextId >= m_persistencySvcVec.size()) {
       ATH_MSG_WARNING("getDbHandle: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
@@ -1011,15 +1010,13 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       }
    }
    if (dbName.compare(0, 4,"PFN:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
    } else if (dbName.compare(0, 4, "LFN:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
    } else if (dbName.compare(0, 4,"FID:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
-   } else {
-      dbH = sesH.databaseHandle(dbName, pool::DatabaseSpecification::PFN);
-   }
-   return(std::unique_ptr<pool::IDatabase>(dbH));
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
+   } 
+   return sesH.databaseHandle(dbName, pool::DatabaseSpecification::PFN);
 }
 //__________________________________________________________________________
 std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* dbH, const std::string& contName) const {

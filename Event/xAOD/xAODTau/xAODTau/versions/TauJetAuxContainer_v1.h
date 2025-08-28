@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJetAuxContainer_v1.h 750177 2016-05-27 08:12:45Z krasznaa $
@@ -72,17 +72,6 @@ namespace xAOD {
     std::vector< float > etaTauEtaCalib;
     std::vector< float > phiTauEtaCalib;
     std::vector< float > mTauEtaCalib;
-   
-
-    // std::vector< float > ptPanTauEFlowRecProto;
-    // std::vector< float > etaPanTauEFlowRecProto;
-    // std::vector< float > phiPanTauEFlowRecProto;
-    // std::vector< float > mPanTauEFlowRecProto;
-   
-    // std::vector< float > ptPanTauEFlowRec;
-    // std::vector< float > etaPanTauEFlowRec;
-    // std::vector< float > phiPanTauEFlowRec;
-    // std::vector< float > mPanTauEFlowRec;
    
     std::vector< float > ptPanTauCellBasedProto;
     std::vector< float > etaPanTauCellBasedProto;
@@ -300,32 +289,6 @@ namespace xAOD {
     std::vector< float > pantau_CellBasedInput_BDTVar_Neutral_Ratio_EtOverEtAllConsts;
     std::vector< float > pantau_CellBasedInput_BDTVar_Neutral_Shots_NPhotonsInSeed;
     std::vector< float > pantau_CellBasedInput_BDTVar_Combined_DeltaR1stNeutralTo1stCharged;
-    
-    // //!PanTau variables when using eflowRec pfos
-    // //Flag whether this seed has pantau info
-    // std::vector< int > pantau_eflowRecInput_isPanTauCandidate;
-    // //decay modes (input mode [proto] and output mode )
-    // std::vector< int > pantau_eflowRecInput_DecayModeProto;
-    // std::vector< int > pantau_eflowRecInput_DecayMode;
-    // //BDT output distributions
-    // std::vector< float > pantau_eflowRecInput_BDTValue_1p0n_vs_1p1n;
-    // std::vector< float > pantau_eflowRecInput_BDTValue_1p1n_vs_1pXn;
-    // std::vector< float > pantau_eflowRecInput_BDTValue_3p0n_vs_3pXn;
-    // //Variables used in BDTs
-    // //NOTE: They are different from the CellBased ones in general!
-    // std::vector< int > pantau_eflowRecInput_BDTVar_Basic_NPi0NeutConsts;
-    // std::vector< int > pantau_eflowRecInput_BDTVar_Basic_NNeutralConsts;
-    // std::vector< float > pantau_eflowRecInput_BDTVar_Charged_HLV_SumPt;
-    // std::vector< float > pantau_eflowRecInput_BDTVar_Charged_Ratio_EtOverEtAllConsts;
-    // std::vector< float > pantau_eflowRecInput_BDTVar_Neutral_HLV_SumM;
-    // std::vector< float > pantau_eflowRecInput_BDTVar_Neutral_PID_BDTValues_EtSort_1;
-    // std::vector< float > pantau_eflowRecInput_BDTVar_Neutral_PID_BDTValues_BDTSort_2;
-    // std::vector< float > pantau_eflowRecInput_BDTVar_Neutral_Ratio_EtOverEtAllConsts;
-    // std::vector< float > pantau_eflowRecInput_BDTVar_Neutral_Mean_DRToLeading_WrtEtAllConsts;
-    // std::vector< float > pantau_eflowRecInput_BDTVar_Combined_DeltaR1stNeutralTo1stCharged;
-
-    
-    
     
   }; // class TauJetAuxContainer_v1
 

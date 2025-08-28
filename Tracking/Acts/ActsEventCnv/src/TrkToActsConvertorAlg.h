@@ -36,7 +36,7 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
   SG::ReadHandleKey<ActsGeometryContext> m_geometryContextKey {
       this, "ActsAlignmentKey", "ActsAlignment", "Cond read key for the alignment"};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey {this, "TrackContainerLocation", "ConvertedTracks", "Location of the converted TrackContainer"};
-  ActsTrk::MutableTrackContainerHandlesHelper m_trackContainerBackendsHelper;
+  ActsTrk::MutableTrackContainerHandlesHelper m_trackContainerBackendsHelper{this};
 
 };
 }  // namespace ActsTrk

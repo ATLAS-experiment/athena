@@ -26,8 +26,8 @@ class PixelSensorSDTool : public SensitiveDetectorBase
   // Constructor
   PixelSensorSDTool(const std::string& type, const std::string& name, const IInterface *parent);
 
-  // Destructor
-  virtual ~PixelSensorSDTool() {}
+  virtual StatusCode SetupEvent(HitCollectionMap&) override;
+  virtual StatusCode Gather(HitCollectionMap&) override;
 
 protected:
   // Make me an SD!

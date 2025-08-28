@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionHandling/ComboHypoToolBase.h"
@@ -68,7 +68,7 @@ StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const 
       ATH_MSG_DEBUG("Too few features are found for " << m_decisionId << " on leg " << legIndex <<", require:" << m_legMultiplicities.at(legIndex) << " have:" << legDecisions.at(legIndex).size());
       ATH_MSG_DEBUG("This ComboHypoTool cannot run in this event, this chain **REJECTS** this event.");
       eraseFromLegDecisionsMap(passingLegs);
-      ATH_CHECK(printDebugInformation(passingLegs));
+      if (msgLvl(MSG::DEBUG)) printDebugInformation(passingLegs);
       return StatusCode::SUCCESS;
     }
   }
@@ -164,7 +164,7 @@ StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const 
     eraseFromLegDecisionsMap(passingLegs);
   }
 
-  ATH_CHECK(printDebugInformation(passingLegs));
+  if (msgLvl(MSG::DEBUG)) printDebugInformation(passingLegs);
   return StatusCode::SUCCESS;
 }
 
@@ -261,7 +261,7 @@ void ComboHypoToolBase::eraseFromLegDecisionsMap(Combo::LegDecisionsMap& passing
   }
 }
 
-StatusCode ComboHypoToolBase::printDebugInformation(const Combo::LegDecisionsMap& passingLegs) const {
+void ComboHypoToolBase::printDebugInformation(const Combo::LegDecisionsMap& passingLegs) const {
   ATH_MSG_DEBUG("ComboHypoToolBase: End of " << m_decisionId << ", passing elements are: ");
   for (const auto& [id, ELV] : passingLegs) {
     // Only print for this chain
@@ -272,7 +272,6 @@ StatusCode ComboHypoToolBase::printDebugInformation(const Combo::LegDecisionsMap
       }
     }
   }
-  return StatusCode::SUCCESS;
 }
 
 

@@ -259,6 +259,23 @@ def defineMenu():
         'L1_ZDC_ZN',
         'L1_ZDC_LOR',
         'L1_ZDC_YNYN',
+        'L1_ZDC_LOR_EMPTY', 'L1_ZDC_LOR_UNPAIRED_NONISO',
+        
+        # Run3 TRT+ZDC items for O+O runs (ATR-30690)
+        'L1_TRT_ZDC_OR',
+        'L1_TRT_ZDC_XNXN',
+        'L1_TRT_ZDC_XNYN',
+        'L1_TRT_ZDC_XNZN',
+        'L1_TRT_ZDC_XN_XOR',
+        'L1_TRT_ZDC_YN_XOR',
+        'L1_TRT_ZDC_ZN_XOR',
+        'L1_TRT_ZDC_YN',
+        'L1_TRT_ZDC_ZN',
+        'L1_TRT_ZDC_LOR',
+        'L1_TRT_ZDC_YNYN',
+        'L1_TRT_ZDC_A',
+        'L1_TRT_ZDC_C',
+        'L1_TRT_ZDC_A_C',
 
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
@@ -322,9 +339,6 @@ def defineMenu():
         'L1_1INVM-DPHI-2eTAU1_VjTE200', 'L1_2INVM-DPHI-2eTAU1_VjTE200', 'L1_3INVM-DPHI-2eTAU1_VjTE200', 'L1_4INVM-DPHI-2eTAU1_VjTE200',
         'L1_3SUM-DPHI-2eTAU1_VjTE200', 'L1_4SUM-DPHI-2eTAU1_VjTE200',
 
-        #ATR-17320
-        # 'L1_CEP-CjJ100',
-        # 'L1_CEP-CjJ90' ,
         
         #ATR-28678 Ph1 Items for Phisics_pp_Run3
         "L1_jJ30_BGRP12",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DetectorTool.h"
@@ -16,7 +16,6 @@
 #include "DetDescrConditions/AlignableTransformContainer.h"
 #include "TRT_ConditionsData/StrawDxContainer.h"
 
-#include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
 
 /////////////////////////////////// Constructor //////////////////////////////////
@@ -66,7 +65,6 @@ StatusCode TRT_DetectorTool::create()
 					  m_sumTool.get(),
 					  m_useOldActiveGasMixture,
 					  m_DC2CompatibleBarrelCoordinates,
-					  m_overridedigversion,
 					  m_alignable,
 					  m_useDynamicAlignFolders
 					  );
@@ -128,7 +126,6 @@ StatusCode TRT_DetectorTool::create()
 					  m_sumTool.get(),
 					  m_useOldActiveGasMixture,
 					  m_DC2CompatibleBarrelCoordinates,
-					  m_overridedigversion,
 					  m_alignable,
 					  m_doArgonMixture,
 					  m_doKryptonMixture,

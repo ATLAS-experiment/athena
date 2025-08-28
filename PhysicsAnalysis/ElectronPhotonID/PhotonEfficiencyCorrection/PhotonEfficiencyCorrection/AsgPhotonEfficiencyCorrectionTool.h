@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -23,18 +23,26 @@
 
 //xAOD includes
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "PATInterfaces/ISystematicsTool.h"
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PATInterfaces/CorrectionCode.h"
 #include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
 
-#include "xAODEgamma/Egamma.h"
+#include <ColumnarCore/ColumnAccessor.h>
+#include "ColumnarCluster/ClusterHelpers.h"
+#include <ColumnarEventInfo/EventInfoDef.h>
+#include <ColumnarCore/LinkColumn.h>
+#include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/VectorColumn.h>
+#include <ColumnarEgamma/EgammaHelpers.h>
 
 class AsgPhotonEfficiencyCorrectionTool
   : virtual public IAsgPhotonEfficiencyCorrectionTool,
     virtual public CP::ISystematicsTool,
-            public asg::AsgTool
+            public asg::AsgTool,
+            public columnar::ColumnarTool<>
 {
   ASG_TOOL_CLASS3(AsgPhotonEfficiencyCorrectionTool, IAsgPhotonEfficiencyCorrectionTool, CP::ISystematicsTool, CP::IReentrantSystematicsTool )
 
@@ -52,7 +60,9 @@ public:
 public:
   ///Add some method for now as a first step to move the tool to then new interface 
   virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::Egamma& inputObject, double& efficiencyScaleFactor) const override;
+  CP::CorrectionCode getEfficiencyScaleFactor(columnar::EgammaId inputObject, columnar::EventInfoId eventInfo, double& efficiencyScaleFactor) const;
   virtual CP::CorrectionCode getEfficiencyScaleFactorError(const xAOD::Egamma& inputObject, double& efficiencyScaleFactorError) const override;
+  CP::CorrectionCode getEfficiencyScaleFactorError(columnar::EgammaId inputObject, columnar::EventInfoId eventInfo, double& efficiencyScaleFactorError) const;
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(xAOD::Egamma& inputObject) const override;
 
   ///The methods below should notify the user of what is actually in the list , without him having to go in the wiki
@@ -81,7 +91,7 @@ public:
 private:
   typedef Root::TElectronEfficiencyCorrectionTool::Result Result;
   /// I think these calculate methods are only used internally
-  CP::CorrectionCode calculate( const xAOD::Egamma* egam, Result& result ) const;
+  CP::CorrectionCode calculate( columnar::EgammaId egam, columnar::EventInfoId eventInfo, Result& result ) const;
 
   /// Pointer to the underlying ROOT based tool
   Root::TElectronEfficiencyCorrectionTool* m_rootTool_unc;
@@ -138,7 +148,42 @@ private:
 
   // remove TRT converted photon for Run-3
   bool m_removeTRTConversion;
- 
+
+  Gaudi::Property<bool> m_allowMissingLinks{ this, "AllowMissingLinks", false, "Allow missing links in the input objects. This should only be used by experts running on expert formats." };
+
+  // an accessor structure that hides the columnar accessors from the
+  // root dictionaries that can't handle them.  these dictionaries are
+  // used by some users to instantiate the tools (instead of using the
+  // factory mechanism).
+  struct Accessors : public columnar::ColumnarTool<>
+  {
+    Accessors(AsgPhotonEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<>(&tool) {}
+
+    columnar::EventInfoAccessor<columnar::ObjectColumn> eventInfoAcc {*this, "EventInfo"};
+    columnar::EgammaAccessor<columnar::ObjectColumn> photonsAcc {*this, "Photons"};
+    columnar::ClusterAccessor<columnar::ObjectColumn> clusterAcc {*this, "egammaClusters"};
+    columnar::VertexAccessor<columnar::ObjectColumn> verticesAcc {*this, "GSFConversionVertices"};
+    columnar::TrackAccessor<columnar::ObjectColumn> tracksAcc {*this, "InDetTrackParticles"};
+
+    columnar::EventInfoAccessor<uint32_t> randomRunNumberAcc {*this, "RandomRunNumber"};
+  
+    columnar::EgammaAccessor<float> etaAcc{*this,"eta"};
+    columnar::EgammaHelpers::IsConvertedPhotonAccessor<> isConvertedPhotonAcc{*this};
+    columnar::EgammaDecorator<float> sfDec{*this,"sfOut"};
+    columnar::EgammaDecorator<char> validDec{*this,"validOut"};
+  
+    columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ClusterAccessor<float> clusterEAcc {*this, "calE"};
+    columnar::ClusterAccessor<float> clusterEtaAcc {*this, "calEta"};
+    columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
+  };
+  std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors>(*this)};
+
+
+public:
+
+  void callSingleEvent (columnar::EgammaRange photons, columnar::EventInfoId event) const;
+  void callEvents (columnar::EventContextRange events) const override;
 
 }; // End: class definition
 

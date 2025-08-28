@@ -18,10 +18,8 @@ atlas_add_dictionary( EventSelectionAlgorithmsDict
    EventSelectionAlgorithms/selection.xml
    LINK_LIBRARIES EventSelectionAlgorithmsLib )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( EventSelectionAlgorithms
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES EventSelectionAlgorithmsLib )
-endif()
+atlas_add_component( EventSelectionAlgorithms
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES EventSelectionAlgorithmsLib )
 
 atlas_install_python_modules( python/*.py )

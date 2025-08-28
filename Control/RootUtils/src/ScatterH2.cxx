@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ScatterH2.cxx,v 1.5 2008-01-17 20:56:38 ssnyder Exp $
@@ -185,8 +185,10 @@ void ScatterH2::Paint (Option_t* option /*= ""*/)
   if (m_shadestep) {
     if (m_shadestep > 0)
       step = m_shadestep;
-    else
+    else if (maxcount > 2)
       step = static_cast<float>(NCOLOR-1)/(maxcount-1);
+    else
+      step = NCOLOR-1;
   }
 
   // Count the number of points for each color.

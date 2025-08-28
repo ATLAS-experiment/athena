@@ -50,7 +50,7 @@ def TRT_DriftFunctionToolCfg(flags, name = "InDetTRT_DriftFunctionTool", **kwarg
             from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_MCCalDbToolCfg
             kwargs.setdefault("TRTCalDbTool2", acc.popToolsAndMerge(TRT_MCCalDbToolCfg(flags)))
 
-        kwargs.setdefault("IsOverlay", True)
+        kwargs.setdefault("IsDataOverlay", True)
 
     acc.setPrivateTools(CompFactory.TRT_DriftFunctionTool(name, **kwargs))
     return acc
@@ -61,6 +61,5 @@ def TRT_NoTime_DriftFunctionToolCfg(flags, name = "InDetTRT_NoTime_DriftFunction
     return TRT_DriftFunctionToolCfg(flags, name, **kwargs)
     
 def TRT_Phase_DriftFunctionToolCfg(flags, name = "InDetTRT_Phase_DriftFunctionTool", **kwargs):
-    kwargs.setdefault("AllowDigiVersionOverride", True)
-    kwargs.setdefault("ForcedDigiVersion", 9)
+    kwargs.setdefault("T0BarrelShift", False)
     return TRT_DriftFunctionToolCfg(flags, name, **kwargs)

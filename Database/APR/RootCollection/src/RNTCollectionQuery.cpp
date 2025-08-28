@@ -13,8 +13,6 @@
 #include "CollectionBase/CollectionBaseNames.h"
 #include "CollectionBase/boost_tokenizer_headers.h"
 
-#include "POOLCore/Exception.h"
-
 #include "CoralBase/AttributeList.h"
 
 #include <ROOT/RNTuple.hxx>
@@ -37,37 +35,6 @@ RNTCollectionQuery::RNTCollectionQuery( const pool::ICollectionDescription& desc
 RNTCollectionQuery::~RNTCollectionQuery()
 {
    delete m_cursor;   m_cursor = 0;
-}
-
-
-void RNTCollectionQuery::addToOutputList( const std::string& columnNames )
-{
-   typedef boost::tokenizer<boost::char_separator<char> > Tizer;
-   boost::char_separator<char> sep(" ,");
-   Tizer tizer( columnNames, sep );
-
-   for( Tizer::iterator token = tizer.begin(); token != tizer.end(); ++token ) { 
-      if( *token == "*" ) {
-         selectAll();
-         return;
-      }
-      // Check if is a Token column.
-      if( m_description.column( *token ).type() == CollectionBaseNames::tokenTypeName ) {
-         addToTokenOutputList( *token );
-      } else {
-         addToAttributeOutputList( *token );
-      }
-   }
-}
-
-
-void RNTCollectionQuery::addToOutputList( const std::vector<std::string>& columnNames )
-{
-  for ( std::vector< std::string >::const_iterator
-           iName = columnNames.begin(); iName != columnNames.end(); ++iName )
-  {
-     addToOutputList( *iName );
-  }
 }
 
 
@@ -94,29 +61,6 @@ void RNTCollectionQuery::selectAll()
 }
 
 
-void RNTCollectionQuery::setCondition( const std::string& whereClause,
-              coral::AttributeList* /* attributeBindData */,
-              pool::TokenList* /*tokenBindData */ )
-{
-   if( !whereClause.empty() and whereClause != "*" ) {
-      ATH_MSG_WARNING("Selective queries not supported - will return all rows. Attempted query: "
-                      << whereClause);
-   }
-   m_whereClause += whereClause;
-}
-
-
-const std::string& RNTCollectionQuery::whereClause() const
-{
-  return m_whereClause;
-}
-
-
-void RNTCollectionQuery::setRowCacheSize( int )
-{
-}
-
-
 pool::ICollectionCursor&  RNTCollectionQuery::execute()
 {
    if( !m_skipEventRef && m_description.hasEventReferenceColumn() )  {
@@ -134,14 +78,7 @@ void RNTCollectionQuery::addToTokenOutputList( const std::string& columnName )
 {
    // Add to select list, if not already present
    if( m_selectedColumnNames.find( columnName ) == m_selectedColumnNames.end() ) {
-      try {
-         m_description.tokenColumn( columnName ); 
-      } catch( pool::Exception& /* e */ ) {
-         std::string errorMsg( "Token column with name `" + columnName + "' does not exist." );
-         throw pool::Exception( errorMsg,
-                             "RNTCollectionQuery::addToTokenOutputList",
-                             "RootCollection" );
-      }
+      m_description.tokenColumn( columnName ); 
       m_outputTokenList.extend( columnName );
       m_selectedColumnNames.insert( columnName );
    }
@@ -152,20 +89,7 @@ void RNTCollectionQuery::addToAttributeOutputList( const std::string& columnName
 {  
    // Add to select list, if not already present
    if( m_selectedColumnNames.find( columnName ) == m_selectedColumnNames.end() ) {
-      try {
-         m_outputAttributeList.extend( columnName, m_description.attributeColumn( columnName ).type() );
-      } catch( pool::Exception& /* e */) {
-         std::string errorMsg( "Attribute column with name `" + columnName + "' does not exist." );
-         throw pool::Exception( errorMsg,
-                             "RNTCollectionQuery::addToAttributeOutputList",
-                             "RootCollection" );
-      }         
+      m_outputAttributeList.extend( columnName, m_description.attributeColumn( columnName ).type() );
       m_selectedColumnNames.insert( columnName );
    }
-}
-
-
-void RNTCollectionQuery::skipEventReference( bool skip )
-{
-   m_skipEventRef = skip;
 }

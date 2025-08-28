@@ -7,7 +7,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
 from AthenaCommon.Logging import logging
 msg = logging.getLogger('PHYSCommonConfig')
 
@@ -70,7 +69,6 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(EGammaCommonCfg(flags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     acc.merge(JetCommonCfg(flags))
@@ -86,11 +84,16 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     # for AOD produced before 24.0.17, the electron removal tau is not available
     if flags.Tau.TauEleRM_isAvailable:
         acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_EleRM"))
-    FTagJetColl = ['AntiKt4EMPFlowJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets']
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        FTagJetColl.append('AntiKt4EMTopoJets')
     if flags.Reco.EnableBTagging:
-        acc.merge(FtagJetCollectionsCfg(flags,FTagJetColl))
+        from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+        from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
+            BTagLargeRDecoration, LegacyBTaggingCfg
+        )
+        acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
+        acc.merge(BTagLargeRDecoration(flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
+        if flags.BTagging.EnableLegacyBTagging:
+            acc.merge(LegacyBTaggingCfg(flags, "AntiKt4EMPFlowJets"))
+
     acc.merge(METCommonCfg(flags))
 
     # Trigger matching

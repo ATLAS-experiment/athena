@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_H
@@ -8,9 +8,9 @@
 #include <MuonReadoutGeometryR4/StripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
 
-namespace Acts{
-    class RectangleBounds;
-}
+#ifndef SIMULATIONBASE
+#   include "Acts/Utilities/BoundFactory.hpp"
+#endif
 
 namespace MuonGMR4 {
 
@@ -29,7 +29,7 @@ class RpcReadoutElement : public MuonReadoutElement {
         double halfWidth{0.};        
         /// The number of gas gaps (along the radial direction)
         /// in the RPC chamber (2 or 3) 
-        unsigned int nGasGaps{0};
+        unsigned nGasGaps{0};
         /// Each gas gap is usually subdivided into 2 phi panels
         /// which is actually the sector granularity of the Rpc trigger
         int nPanelsInPhi{0};
@@ -37,8 +37,10 @@ class RpcReadoutElement : public MuonReadoutElement {
 
         StripDesignPtr phiDesign{nullptr};
         StripDesignPtr etaDesign{nullptr};
+        /** @brief at which side is the readout plane of the strip */
+        double readoutSide{-1};
 #ifndef SIMULATIONBASE
-        ActsTrk::SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds;
+        std::shared_ptr<Acts::SurfaceBoundFactory> layerBounds{};
 #endif
     };
 
@@ -65,18 +67,18 @@ class RpcReadoutElement : public MuonReadoutElement {
     int doubletPhi() const;
 
     /// Returns the number of gasgaps described by this ReadOutElement (usally 2 or 3)
-    unsigned int nGasGaps() const;
+    unsigned nGasGaps() const;
     /// Returns the number of phi panels (1 or 2)
     int nPhiPanels() const;
     /// Returns the maximum phi panel
     int doubletPhiMax() const;
 
     /// Number of strips measuring the eta coordinate
-    unsigned int nEtaStrips() const;
+    unsigned nEtaStrips() const;
     /// Number of strips measuring the phi coordinate
-    unsigned int nPhiStrips() const;
+    unsigned nPhiStrips() const;
     /// Returns the number of strips
-    unsigned int nStrips(const IdentifierHash& hash) const;
+    unsigned nStrips(const IdentifierHash& hash) const;
 
     /// Strip pitch in eta
     double stripEtaPitch() const;
@@ -109,11 +111,10 @@ class RpcReadoutElement : public MuonReadoutElement {
         highVoltage,
     };
     /** @brief Returns the disance to the readout
-     *  @param layerHash: Hash of the considered gasGap (Essentially whether it's the phi or eta gasGap)
+     *  @param measHash: Hash of the measurement to check
      *  @param posInStripPlane: Local position of the crossing point on the plane (In gasGap frame)
-     *  @param side: Switch indicating whether the readout or the highVoltage side is targeted. 
-     */
-    double distanceToEdge(const IdentifierHash& layerHash, 
+     *  @param side: Switch indicating whether the readout or the highVoltage side is targeted. */
+    double distanceToEdge(const IdentifierHash& measHash, 
                           const Amg::Vector2D& posInStripPlane,
                           const EdgeSide side) const;
 
@@ -129,9 +130,9 @@ class RpcReadoutElement : public MuonReadoutElement {
 
     /// Constructs an Identifier hash from the Identifier fields controlled by this
     /// readout element 
-    static IdentifierHash createHash(const unsigned int strip, 
-                                     const unsigned int gasGap, 
-                                     const unsigned int doubPhi, 
+    static IdentifierHash createHash(const unsigned strip, 
+                                     const unsigned gasGap, 
+                                     const unsigned doubPhi, 
                                      const bool measPhi);
     
     friend class ActsTrk::TransformCacheDetEle<RpcReadoutElement>;
@@ -139,10 +140,12 @@ class RpcReadoutElement : public MuonReadoutElement {
 
         /// Access to the StripLayer associated to a given measurement Hash
         const StripLayer& sensorLayout(const IdentifierHash& measHash) const;
+        /// @brief Access the associated strip design for a given measurement hash
+        const StripDesign& stripDesign(const IdentifierHash& meaHash) const;
     private:
-        static unsigned int stripNumber(const IdentifierHash& measHash);
-        static unsigned int gasGapNumber(const IdentifierHash& measHash);
-        static unsigned int doubletPhiNumber(const IdentifierHash& measHash);
+        static unsigned stripNumber(const IdentifierHash& measHash);
+        static unsigned gasGapNumber(const IdentifierHash& measHash);
+        static unsigned doubletPhiNumber(const IdentifierHash& measHash);
         static bool measuresPhi(const IdentifierHash& measHash);
 
 

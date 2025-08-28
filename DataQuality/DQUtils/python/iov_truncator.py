@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import with_statement, print_function
 from collections import namedtuple
 
 from .sugar import RunLumi

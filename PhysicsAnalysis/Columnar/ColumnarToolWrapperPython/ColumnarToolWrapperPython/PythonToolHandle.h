@@ -73,7 +73,7 @@ namespace columnar
     }
 
     /// rename the columns the tool uses
-    void renameContainers (const std::vector<std::pair<std::string,std::string>> renames)
+    void renameContainers (const std::vector<std::pair<std::string,std::string>>& renames)
     {
       if (m_tool == nullptr)
         preinitialize ();

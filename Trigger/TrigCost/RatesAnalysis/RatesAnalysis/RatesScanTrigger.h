@@ -103,7 +103,7 @@ class RatesScanTrigger : public RatesTrigger {
   const std::string printRate(const double ratesDenominator) const override;
 
   StatusCode giveThresholdHist(const ServiceHandle<ITHistSvc>& svc, const std::string& name); 
-
+  void setHistoName(const std::string& newName);
  private: 
 
   std::unique_ptr<TH1> m_rateScanHist; //!< Even if we are not exporting it - we still need this histo 

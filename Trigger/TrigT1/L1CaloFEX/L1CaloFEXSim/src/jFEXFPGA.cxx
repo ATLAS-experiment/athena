@@ -9,21 +9,24 @@
 //     email                : jacob.julian.kempster@cern.ch
 //  ***************************************************************************/
 
-#include "L1CaloFEXSim/jFEXFPGA.h"
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jFEXSmallRJetAlgo.h" 
-#include "L1CaloFEXSim/jFEXLargeRJetAlgo.h" 
-#include "L1CaloFEXSim/jFEXOutputCollection.h" 
-#include "L1CaloFEXSim/jFEXtauAlgo.h" 
-#include "L1CaloFEXSim/jFEXsumETAlgo.h" 
-#include "L1CaloFEXSim/jFEXmetAlgo.h" 
-#include "L1CaloFEXSim/jFEXForwardJetsAlgo.h"
-#include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
-#include "L1CaloFEXSim/jFEXForwardElecAlgo.h"
+#include "jFEXFPGA.h"
+#include "jFEXFormTOBs.h"
+#include "jFEXForwardElecAlgo.h"
+#include "jFEXForwardJetsAlgo.h"
+#include "jFEXLargeRJetAlgo.h"
+#include "jFEXPileupAndNoise.h"
+#include "jFEXSmallRJetAlgo.h"
+#include "jFEXmetAlgo.h"
+#include "jFEXsumETAlgo.h"
+#include "jFEXtauAlgo.h"
+
 #include "L1CaloFEXSim/jFEXForwardElecInfo.h"
-#include "L1CaloFEXSim/jFEXPileupAndNoise.h"
-#include "L1CaloFEXSim/jFEXFormTOBs.h"
-#include "L1CaloFEXSim/jFEXTOB.h" 
+#include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
+#include "L1CaloFEXSim/jFEXOutputCollection.h"
+#include "L1CaloFEXSim/jFEXTOB.h"
+#include "L1CaloFEXSim/jTower.h"
+
+#include "StoreGate/ReadHandle.h"
 
 
 namespace LVL1 {
@@ -236,7 +239,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
     //Central region algorithms
     if(m_jfexid > 0 && m_jfexid < 5) {
         m_jFEXSmallRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
-        m_jFEXLargeRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
+        if(!m_jFEXLargeRJetAlgoTool.empty()) m_jFEXLargeRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         m_jFEXtauAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         
         for(int mphi = 8; mphi < FEXAlgoSpaceDefs::jFEX_algoSpace_height-8; mphi++) {
@@ -278,9 +281,9 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
                 
                 // ********  jJ and jLJ algorithms  ********
                 ATH_CHECK( m_jFEXSmallRJetAlgoTool->safetyTest());
-                ATH_CHECK( m_jFEXLargeRJetAlgoTool->safetyTest());
+                if(!m_jFEXLargeRJetAlgoTool.empty()) ATH_CHECK( m_jFEXLargeRJetAlgoTool->safetyTest());
                 m_jFEXSmallRJetAlgoTool->setup(Jet_SearchWindow, Jet_SearchWindowDisplaced);
-                m_jFEXLargeRJetAlgoTool->setupCluster(largeRCluster_IDs);
+                if(!m_jFEXLargeRJetAlgoTool.empty()) m_jFEXLargeRJetAlgoTool->setupCluster(largeRCluster_IDs);
                 m_jFEXSmallRJetAlgoTool->buildSeeds();
                 
                 bool is_Jet_LM = m_jFEXSmallRJetAlgoTool->isSeedLocalMaxima(srJet_seedThresholdMeV);
@@ -289,11 +292,11 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
                     
                     //getting the energies
                     int SRj_Et = m_jFEXSmallRJetAlgoTool->getSmallClusterET();
-                    int LRj_Et = m_jFEXLargeRJetAlgoTool->getLargeClusterET(SRj_Et,m_jFEXLargeRJetAlgoTool->getRingET());
+                    int LRj_Et = (m_jFEXLargeRJetAlgoTool.empty()) ? 0 : m_jFEXLargeRJetAlgoTool->getLargeClusterET(SRj_Et,m_jFEXLargeRJetAlgoTool->getRingET());
                     int seed_Et = m_jFEXSmallRJetAlgoTool->getSeedET();
                     
                     bool SRj_Sat = m_jFEXSmallRJetAlgoTool->getSRjetSat();
-                    bool LRj_Sat = SRj_Sat || m_jFEXLargeRJetAlgoTool->getLRjetSat();
+                    bool LRj_Sat = (m_jFEXLargeRJetAlgoTool.empty()) ? false : (SRj_Sat || m_jFEXLargeRJetAlgoTool->getLRjetSat());
                     
                     int meta_LM = meta;
                     int mphi_LM = mphi;
@@ -309,12 +312,17 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
                     } 
                     
                     //Creating LR TOB
-                    uint32_t LRJet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, mphi_LM, meta_LM, LRj_Et, LRj_Sat, thr_jLJ.resolutionMeV(), thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
+                    if(!m_jFEXLargeRJetAlgoTool.empty()) {
+                        uint32_t LRJet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, mphi_LM, meta_LM, LRj_Et,
+                                                                                   LRj_Sat, thr_jLJ.resolutionMeV(),
+                                                                                   thr_jLJ.ptMinToTopoMeV(
+                                                                                           m_jfex_string[m_jfexid]));
 
-                    std::unique_ptr<jFEXTOB> jLJ_tob = std::make_unique<jFEXTOB>(); 
-                    jLJ_tob->initialize(m_id,m_jfexid,LRJet_tobword,thr_jLJ.resolutionMeV(),m_jTowersIDs_Thin[mphi_LM][meta_LM],seed_Et);              
-                    if ( LRJet_tobword != 0 ) m_LRJet_tobwords.push_back(std::move(jLJ_tob));                    
-                    
+                        std::unique_ptr <jFEXTOB> jLJ_tob = std::make_unique<jFEXTOB>();
+                        jLJ_tob->initialize(m_id, m_jfexid, LRJet_tobword, thr_jLJ.resolutionMeV(),
+                                            m_jTowersIDs_Thin[mphi_LM][meta_LM], seed_Et);
+                        if (LRJet_tobword != 0) m_LRJet_tobwords.push_back(std::move(jLJ_tob));
+                    }
                 }
                 // ********  jTau algorithm  ********
                 
@@ -374,7 +382,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
                 m_SRJet_tobwords.push_back(std::move(jJ_tob));
             } 
             
-            if(std::fabs(FCALJets.getCentreTTEta())<2.51){
+            if(std::fabs(FCALJets.getCentreTTEta())<2.51 && !m_jFEXLargeRJetAlgoTool.empty()){
                 bool LRJ_sat = FCALJets.getLRjetSat();
                 uint32_t LRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, iphi, ieta, m_LRJetET, LRJ_sat, thr_jLJ.resolutionMeV(),thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
 

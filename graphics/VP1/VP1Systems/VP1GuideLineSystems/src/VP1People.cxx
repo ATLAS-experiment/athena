@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -132,7 +132,7 @@ SoSeparator* VP1People::Imp::loadModel(const std::string& fpath)
         std::cout << "node " << i << ": " << node << std::endl;
         if (node->getTypeId() == SoVRMLMaterial::getClassTypeId()) {
             std::cout << "Found a SoVRMLMaterial node!\n";
-            SoNode * matvrmlnode = (SoVRMLMaterial *)node;  // safe downward cast, knows the type
+            const SoNode * matvrmlnode = static_cast<const SoVRMLMaterial *>(node);  // safe downward cast, knows the type
             std::cout << "Material node: " << matvrmlnode << std::endl;
         }
     }

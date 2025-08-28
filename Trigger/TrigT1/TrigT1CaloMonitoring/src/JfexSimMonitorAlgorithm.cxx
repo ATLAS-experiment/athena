@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "JfexSimMonitorAlgorithm.h"
 
@@ -41,6 +41,7 @@ StatusCode JfexSimMonitorAlgorithm::initialize() {
     ATH_CHECK( m_simu_key_jTE.initialize()  );
     
     ATH_CHECK( m_jFexTowerKey.initialize()  );
+    ATH_CHECK( m_scellKey.initialize()      );
 
     ATH_CHECK( m_bcContKey.initialize() );
     
@@ -72,6 +73,15 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     auto EventType = Monitored::Scalar<std::string>("EventType","DataTowers");
     if(jFexTowerContainer->empty()) {
         EventType = "EmulatedTowers";
+        if (timeUntil>=0 && timeUntil<=5) {
+            EventType += "+JustBeforeOTF";
+        }
+    }
+
+    // check if any supercells are missing, there should be 34048
+    SG::ReadHandle<CaloCellContainer> scells(m_scellKey,ctx);
+    if (!scells.isValid() || scells->size() != 34048) {
+        EventType += "+MissingSCells";
     }
 
 
@@ -83,7 +93,7 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     compareRoI("jJ",EventType,m_data_key_jJ, m_simu_key_jJ,ctx,simReady,jJmaxTobs);
     //compareRoI("jLJ",EventType,m_data_key_jLJ, m_simu_key_jLJ,ctx,false); - commented out b.c. jFEX doesn't produce Large jets now
     compareRoI("jTAU",EventType,m_data_key_jTau, m_simu_key_jTau,ctx,simReady,jTAUmaxTobs);
-    compareRoI("jEM",EventType,m_data_key_jEM, m_simu_key_jEM,ctx,false,jEMmaxTobs);
+    compareRoI("jEM",EventType,m_data_key_jEM, m_simu_key_jEM,ctx,simReady,jEMmaxTobs);
     compareRoI("jXE",EventType,m_data_key_jXE, m_simu_key_jXE,ctx,simReady);
     compareRoI("jTE",EventType,m_data_key_jTE, m_simu_key_jTE,ctx,simReady);
 
@@ -115,7 +125,7 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
     auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
     auto simReady = Monitored::Scalar<bool>("SimulationReady",simReadyFlag);
     auto IsDataTowers = Monitored::Scalar<bool>("IsDataTowers",evenType=="DataTowers");
-    auto IsEmulatedTowers = Monitored::Scalar<bool>("IsEmulatedTowers",!IsDataTowers);
+    auto IsEmulatedTowers = Monitored::Scalar<bool>("IsEmulatedTowers",evenType=="EmulatedTowers");
 
     // saturation bits currently not properly simulated. But because they aren't used anywhere downstream
     // in the trigger, we will allow mismatches in these bits. 

@@ -12,6 +12,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int)
     IDPVMparser.add_argument("--skipEvents", help="Skip this number of events. Default: no events are skipped", default=0, type=int)
     IDPVMparser.add_argument("--doLargeD0Tracks", help='also run LRT plots', action='store_true', default=False)
+    IDPVMparser.add_argument("--largeD0TrackCollection", help='Name of LRT collection',default="InDetLargeD0TrackParticles")
     IDPVMparser.add_argument("--doLowPtRoITracks", help='also run low pt tracks', action='store_true', default=False)
     IDPVMparser.add_argument("--doMergedLargeD0Tracks", help='also run merged STD+LRT plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doRecoOnly", help='skip truth-specific processing', action='store_true', default=False)
@@ -76,7 +77,6 @@ if MyArgs.truthMinPt is None:
                                 
 flags.PhysVal.IDPVM.setTruthStrategy = MyArgs.HSFlag
 flags.PhysVal.IDPVM.doExpertOutput   = MyArgs.doExpertPlots or MyArgs.doPerAuthor
-flags.PhysVal.IDPVM.doPhysValOutput  = not MyArgs.doExpertPlots
 flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple = MyArgs.doTruthToRecoNtuple
 flags.PhysVal.IDPVM.doIDTIDE= MyArgs.doIDTIDE
 if MyArgs.doTracksInJets:
@@ -97,6 +97,7 @@ flags.PhysVal.IDPVM.doDuplicatePlots = MyArgs.doDuplicate
 flags.PhysVal.IDPVM.doValidateMuonMatchedTracks = MyArgs.doMuonMatchedTracks
 flags.PhysVal.IDPVM.doValidateElectronMatchedTracks = MyArgs.doElectronMatchedTracks
 flags.PhysVal.IDPVM.doValidateLargeD0Tracks = MyArgs.doLargeD0Tracks
+flags.PhysVal.IDPVM.largeD0TrackCollection = MyArgs.largeD0TrackCollection
 flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks = MyArgs.doMergedLargeD0Tracks
 flags.PhysVal.IDPVM.doValidateLowPtRoITracks = MyArgs.doLowPtRoITracks
 flags.PhysVal.IDPVM.doRecoOnly = MyArgs.doRecoOnly

@@ -136,6 +136,25 @@ namespace columnar
     /// and then have a separate column that contains the index in that
     /// vector for each index.
     std::string linkToName {};
+
+
+    /// @brief if this is a variant link column, this is the name of the
+    /// column with the container keys
+    ///
+    /// A variant link is a link that can point to multiple containers.
+    /// The way that is encoded is that the highest byte of the link is
+    /// used as a key that indicates the container.  This is the name of
+    /// a column that contains the keys for the different containers I
+    /// am referencing.
+    std::string variantLinkKeyColumn {};
+
+
+    /// @brief if this is a variant link column, this is a vector of all
+    /// the containers linked in order
+    ///
+    /// Essentially this should be used with the key column to figure
+    /// out whether all my variant links are indeed valid or not.
+    std::vector<std::string> variantLinkContainers {};
   };
 }
 

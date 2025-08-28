@@ -30,6 +30,7 @@
 #include "GaudiKernel/GaudiException.h"
 #include "GaudiKernel/GenericAddress.h"
 #include "GaudiKernel/StatusCode.h"
+#include "AthenaKernel/IDataShare.h"
 
 // Pool
 #include "PersistencySvc/IPositionSeek.h"
@@ -139,8 +140,8 @@ StatusCode EventSelectorAthenaPool::initialize() {
          ATH_MSG_DEBUG("Events to skip: " << skip_ranges_ss.str());
    }
    // CollectionType must be one of:
-   if (m_collectionType.value() != "ExplicitROOT" && m_collectionType.value() != "ImplicitROOT") {
-      ATH_MSG_FATAL("EventSelector.CollectionType must be one of: ExplicitROOT, ImplicitROOT (default)");
+   if (m_collectionType.value() != "RootCollection" && m_collectionType.value() != "ImplicitCollection") {
+      ATH_MSG_FATAL("EventSelector.CollectionType must be one of: RootCollection, ImplicitCollection (default)");
       return(StatusCode::FAILURE);
    }
    // Get IncidentSvc
@@ -286,7 +287,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
 	 m_inputCollectionsIterator = m_inputCollectionsProp.value().end();
 	 if (!m_inputCollectionsProp.value().empty()) --m_inputCollectionsIterator;
 	//NOTE (wb may 2016): this will make the FirstInputFile incident correspond to last file in the collection ... if want it to be first file then move iterator to begin and then move above two lines below this incident firing
-         if (m_collectionType.value() == "ImplicitROOT" && !m_firedIncident && !m_inputCollectionsProp.value().empty()) {
+         if (m_collectionType.value() == "ImplicitCollection" && !m_firedIncident && !m_inputCollectionsProp.value().empty()) {
             FileIncident firstInputFileIncident(name(), "FirstInputFile", *m_inputCollectionsIterator);
             m_incidentSvc->fireIncident(firstInputFileIncident);
             m_firedIncident = true;
@@ -535,12 +536,17 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
           && (m_skipEventRanges.empty() || m_evtCount < m_skipEventRanges.front().first))
       {
          if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isServer()) {
+            IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
+            if (ds == nullptr) {
+               ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
+               return(StatusCode::FAILURE);
+            }
             std::string token = m_headerIterator->eventRef().toString();
             StatusCode sc;
             while ( (sc = putEvent_ST(*m_eventStreamingTool,
                                       m_evtCount - 1, token.c_str(),
                                       token.length() + 1, 0)).isRecoverable() ) {
-               while (m_athenaPoolCnvSvc->readData().isSuccess()) {
+               while (ds->readData().isSuccess()) {
                   ATH_MSG_VERBOSE("Called last readData, while putting next event in next()");
                }
                // Nothing to do right now, trigger alternative (e.g. caching) here? Currently just fast loop.
@@ -661,7 +667,7 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
       m_activeEventsPerSource[guid.toString()] = 0;
       // Fire BeginInputFile incident if current InputCollection is a payload file;
       // otherwise, ascertain whether the pointed-to file is reachable before firing any incidents and/or proceeding
-      if (m_collectionType.value() == "ImplicitROOT") {
+      if (m_collectionType.value() == "ImplicitCollection") {
          // For now, we can only deal with input metadata from POOL files, but we know we have a POOL file here
          if (!m_athenaPoolCnvSvc->setInputAttributes(*m_inputCollectionsIterator).isSuccess()) {
                ATH_MSG_ERROR("Failed to set input attributes.");
@@ -763,7 +769,7 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
       }
    } else {
       ATH_MSG_WARNING("Cannot find AthenaAttribute, key = " << m_attrListKey.value());
-      tokenStr = m_poolCollectionConverter->retrieveToken(m_headerIterator, "");
+      tokenStr = m_headerIterator->eventRef().toString();
    }
    auto token = std::make_unique<Token>();
    token->fromString(tokenStr);
@@ -890,13 +896,18 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
 
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::makeServer(int num) {
+   IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
+   if (ds == nullptr) {
+      ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
+      return(StatusCode::FAILURE);
+   }
    if (num < 0) {
-      if (m_athenaPoolCnvSvc->makeServer(num - 1).isFailure()) {
+      if (ds->makeServer(num - 1).isFailure()) {
          ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to output DataStreaming server");
       }
       return(StatusCode::SUCCESS);
    }
-   if (m_athenaPoolCnvSvc->makeServer(num + 1).isFailure()) {
+   if (ds->makeServer(num + 1).isFailure()) {
       ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to input DataStreaming server");
       return(StatusCode::FAILURE);
    }
@@ -910,7 +921,12 @@ StatusCode EventSelectorAthenaPool::makeServer(int num) {
 
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::makeClient(int num) {
-   if (m_athenaPoolCnvSvc->makeClient(num + 1).isFailure()) {
+   IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
+   if (ds == nullptr) {
+      ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
+      return(StatusCode::FAILURE);
+   }
+   if (ds->makeClient(num + 1).isFailure()) {
       ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to DataStreaming client");
       return(StatusCode::FAILURE);
    }
@@ -924,6 +940,11 @@ StatusCode EventSelectorAthenaPool::makeClient(int num) {
 
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::share(int evtnum) {
+   IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
+   if (ds == nullptr) {
+      ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
+      return(StatusCode::FAILURE);
+   }
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
       StatusCode sc = m_eventStreamingTool->lockEvent(evtnum);
       while (sc.isRecoverable()) {
@@ -932,7 +953,7 @@ StatusCode EventSelectorAthenaPool::share(int evtnum) {
       }
 // Send stop client and wait for restart
       if (sc.isFailure()) {
-         if (m_athenaPoolCnvSvc->makeClient(0).isFailure()) {
+         if (ds->makeClient(0).isFailure()) {
             return(StatusCode::FAILURE);
          }
          sc = m_eventStreamingTool->lockEvent(evtnum);
@@ -941,7 +962,7 @@ StatusCode EventSelectorAthenaPool::share(int evtnum) {
             sc = m_eventStreamingTool->lockEvent(evtnum);
          }
 //FIXME
-         if (m_athenaPoolCnvSvc->makeClient(1).isFailure()) {
+         if (ds->makeClient(1).isFailure()) {
             return(StatusCode::FAILURE);
          }
       }
@@ -952,6 +973,11 @@ StatusCode EventSelectorAthenaPool::share(int evtnum) {
 
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
+   IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
+   if (ds == nullptr) {
+      ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
+      return(StatusCode::FAILURE);
+   }
    if (m_eventStreamingTool.empty()) {
       ATH_MSG_ERROR("No AthenaSharedMemoryTool configured for readEvent()");
       return(StatusCode::FAILURE);
@@ -975,7 +1001,7 @@ StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
    // End of file, wait for last event to be taken
    StatusCode sc;
    while ( (sc = putEvent_ST(*m_eventStreamingTool, 0, 0, 0, 0)).isRecoverable() ) {
-      while (m_athenaPoolCnvSvc->readData().isSuccess()) {
+      while (ds->readData().isSuccess()) {
          ATH_MSG_VERBOSE("Called last readData, while marking last event in readEvent()");
       }
       usleep(1000);
@@ -984,9 +1010,9 @@ StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
       ATH_MSG_ERROR("Cannot put last Event marker to AthenaSharedMemoryTool");
       return(StatusCode::FAILURE);
    } else {
-      sc = m_athenaPoolCnvSvc->readData();
+      sc = ds->readData();
       while (sc.isSuccess() || sc.isRecoverable()) {
-         sc = m_athenaPoolCnvSvc->readData();
+         sc = ds->readData();
       }
       ATH_MSG_DEBUG("Failed last readData -> Clients are stopped, after marking last event in readEvent()");
    }

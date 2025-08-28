@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArG4_HEC_LocalCalibrationCalculator_H
@@ -28,17 +28,17 @@ namespace LArG4 {
       LocalCalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocatorconst);
       void GeometryTypeUpdateHandler(Gaudi::Details::PropertyBase&);
       StatusCode initialize() override final;
-      virtual ~LocalCalibrationCalculator();
+      virtual ~LocalCalibrationCalculator() = default;
 
       virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
                               std::vector<G4double> & energies,
                               const eCalculatorProcessing process = kEnergyAndID) const override final;
    private:
 
-      ServiceHandle<ILocalGeometry> m_geometryCalculator;
+      ServiceHandle<ILocalGeometry> m_geometryCalculator{this, "GeometryCalculator", "LocalHECGeometry"};
 
-      eLocalGeometryType m_geometryType;
-      StringProperty m_strgeometryType;
+      eLocalGeometryType m_geometryType{kLocActive};
+      StringProperty m_strgeometryType{this, "GeometryType", "ACTIVE", &LocalCalibrationCalculator::GeometryTypeUpdateHandler};
 
       CaloG4::SimulationEnergies m_energyCalculator;
 

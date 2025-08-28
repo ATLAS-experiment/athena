@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCRATE_LARCRATETOOL_H
@@ -21,15 +21,15 @@ class LArCrateTool final : public DetectorGeometryBase
 public:
   // Basic constructor and destructor
   LArCrateTool(const std::string& type, const std::string& name, const IInterface *parent);
-  ~LArCrateTool() {}
+  ~LArCrateTool() = default;
 
   /** virtual methods being implemented here */
   virtual void BuildGeometry() override final;
 
 private:
-  double m_zLength;
-  double m_yLength;
-  double m_xLength;
+  Gaudi::Property<double> m_zLength{this, "ZLength", 0.};
+  Gaudi::Property<double> m_yLength{this, "YLength", 0.};
+  Gaudi::Property<double> m_xLength{this, "XLength", 0.};
 };
 
 #endif //LARCRATE_LARCRATETOOL_H

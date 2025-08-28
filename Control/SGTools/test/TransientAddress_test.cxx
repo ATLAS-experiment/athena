@@ -24,21 +24,21 @@ class TestAddress
 public:
   TestAddress (int x) : m_x (x), m_ref(0) {}
   /// Add reference to object
-  virtual unsigned long        addRef     ();
+  virtual unsigned long        addRef     () override;
   /// release reference to object
-  virtual unsigned long        release    ();
+  virtual unsigned long        release    () override;
   /// Retrieve class information from link
-  virtual const CLID&          clID       () const { std::abort(); }
+  virtual const CLID&          clID       () const override { std::abort(); }
   /// Retrieve service type
-  virtual long                 svcType    () const { std::abort(); }
+  virtual long                 svcType    () const override { std::abort(); }
   /// Update branch name
-  virtual IRegistry*           registry   () const { std::abort(); }
+  virtual IRegistry*           registry   () const override { std::abort(); }
   /// Update directory pointer
-  virtual void                 setRegistry(IRegistry* /*r*/) { std::abort(); }
+  virtual void                 setRegistry(IRegistry* /*r*/) override { std::abort(); }
   /// Retrieve String parameters
-  virtual const std::string*   par        () const { std::abort(); }
+  virtual const std::string*   par        () const override { std::abort(); }
   /// Access to generic link parameters
-  virtual const unsigned long* ipar       () const { std::abort(); }
+  virtual const unsigned long* ipar       () const override { std::abort(); }
 
   int m_x;
   int m_ref;

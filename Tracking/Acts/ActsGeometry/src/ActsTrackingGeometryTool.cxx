@@ -12,7 +12,11 @@
 using namespace ActsTrk;
 
 StatusCode ActsTrackingGeometryTool::initialize() {
-    ATH_MSG_INFO(name() << " initializing");
+    ATH_MSG_DEBUG(name() << " initializing");
+    if (parent() != toolSvc()) {
+        ATH_MSG_ERROR("The tool is initialized as a private tool but should be public");
+        return StatusCode::FAILURE;
+    }
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
     ATH_CHECK(m_rchk.initialize());
     m_detIdMap = createDetectorElementToGeoIdMap();

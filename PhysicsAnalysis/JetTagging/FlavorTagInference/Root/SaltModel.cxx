@@ -25,6 +25,14 @@ namespace FlavorTagInference {
     session_options.SetLogSeverityLevel(4);
     session_options.SetGraphOptimizationLevel(
       GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+    // this should reduce memory use while slowing things down slightly
+    // see
+    //
+    // https://github.com/microsoft/onnxruntime/issues/11627#issuecomment-1137668551
+    //
+    // and also https://its.cern.ch/jira/browse/AFT-818
+    //
+    session_options.DisableCpuMemArena();
 
     // declare an allocator with default options
     Ort::AllocatorWithDefaultOptions allocator;

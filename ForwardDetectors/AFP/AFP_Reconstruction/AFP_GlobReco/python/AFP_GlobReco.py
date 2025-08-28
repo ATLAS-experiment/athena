@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_GlobReco package
@@ -10,8 +10,8 @@ from TrigEDMConfig.TriggerEDM import recordable
 
 def AFP_GlobReco_Cfg(flags, kwargs={}):
 	# side A = 0, side C = 1
-	afpProtonRecoToolA = CompFactory.AFP_ProtonRecoAnalytical("AFP_ProtonRecoAnalyticalA", parametrizationFileName="param_mad_b1_def.txt", side=0, **kwargs)
-	afpProtonRecoToolC = CompFactory.AFP_ProtonRecoAnalytical("AFP_ProtonRecoAnalyticalC", parametrizationFileName="param_mad_b2_def.txt", side=1, **kwargs)
+	afpProtonRecoToolA = CompFactory.AFP_ProtonRecoAnalytical("AFP_ProtonRecoAnalyticalA", parametrizationFileName="AFP_GlobReco/param_mad_b1_def.txt", side=0, **kwargs)
+	afpProtonRecoToolC = CompFactory.AFP_ProtonRecoAnalytical("AFP_ProtonRecoAnalyticalC", parametrizationFileName="AFP_GlobReco/param_mad_b2_def.txt", side=1, **kwargs)
 
 	protonsToolsList=[afpProtonRecoToolA, afpProtonRecoToolC]
 

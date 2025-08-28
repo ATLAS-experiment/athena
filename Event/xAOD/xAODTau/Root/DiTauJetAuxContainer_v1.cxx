@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -23,7 +23,6 @@ DiTauJetAuxContainer_v1::DiTauJetAuxContainer_v1()
    AUX_VARIABLE( BDT );
    
    AUX_VARIABLE( vertexLink );
-   // AUX_VARIABLE( secVertexLinks );
    AUX_VARIABLE( TauJetVtxFraction );
 
    AUX_VARIABLE( trackLinks );

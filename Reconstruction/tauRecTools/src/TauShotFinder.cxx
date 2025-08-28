@@ -94,10 +94,10 @@ StatusCode TauShotFinder::executeShotFinder(xAOD::TauJet& tau, xAOD::CaloCluster
       float phi = cell->phi()+dPhi*ratio;
       float pt = cell->pt()*m_caloWeightTool->wtCell(cell)+phiNeigCell->pt()*m_caloWeightTool->wtCell(phiNeigCell);
 
-      shot->setP4( (float) pt, (float) cell->eta(), (float) phi, (float) cell->m());
+      shot->setP4( static_cast<float>(pt), static_cast<float>(cell->eta()), static_cast<float>(phi), static_cast<float>(cell->m()));
     }
     else {
-      shot->setP4( (float) cell->pt()*m_caloWeightTool->wtCell(cell), (float) cell->eta(), (float) cell->phi(), (float) cell->m()); 
+      shot->setP4( static_cast<float>(cell->pt()*m_caloWeightTool->wtCell(cell)), static_cast<float>(cell->eta()), static_cast<float>(cell->phi()), static_cast<float>(cell->m())); 
     }
 
     // -- Set the Attribute 

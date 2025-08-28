@@ -27,12 +27,20 @@ namespace EFTrackingTransient
   constexpr unsigned int MAX_NUM_CLUSTERS = 409600;
   constexpr unsigned int NUM_PIXEL_WORD = 10;
   constexpr unsigned int NUM_STRIP_WORD = 9;
+
+
   constexpr unsigned int NUM_PIXEL_ROW = 19;
   constexpr unsigned int NUM_STRIP_ROW = 14;
   constexpr unsigned long PIXEL_BLOCK_BUF_SIZE = NUM_PIXEL_WORD * MAX_NUM_CLUSTERS;
   constexpr unsigned long STRIP_BLOCK_BUF_SIZE = NUM_STRIP_WORD * MAX_NUM_CLUSTERS;
   constexpr unsigned long PIXEL_CONTAINER_BUF_SIZE = (NUM_PIXEL_ROW*MAX_NUM_CLUSTERS + 4096);
   constexpr unsigned long STRIP_CONTAINER_BUF_SIZE = (NUM_STRIP_ROW*MAX_NUM_CLUSTERS + 4096);
+
+  // Optimize these, 
+  constexpr unsigned int NUM_MAXINPUT_PIXEL_ROW = 3;
+  constexpr unsigned int NUM_MAXINPUT_STRIP_ROW = 2;
+  constexpr unsigned long PIXEL_CONTAINER_INPUT_BUF_SIZE = (NUM_MAXINPUT_PIXEL_ROW*MAX_NUM_CLUSTERS + 4096);
+  constexpr unsigned long STRIP_CONTAINER_INPUT_BUF_SIZE = (NUM_MAXINPUT_STRIP_ROW*MAX_NUM_CLUSTERS + 4096);
 
   /**
    * @brief The StripClusters struct contains all xAOD::StripCluster data members

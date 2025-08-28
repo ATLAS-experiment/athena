@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolConverter.cxx
@@ -159,7 +159,7 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
 		::AthMessaging((pSvcLocator != nullptr ? msgSvc() : nullptr),
                                name ? name : "AthenaPoolConverter"),
 	m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
-	m_athenaPoolCnvSvc("AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
+	m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
 	m_classDesc(),
 	m_className(),
 	m_classDescs(),

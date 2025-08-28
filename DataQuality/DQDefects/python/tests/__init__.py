@@ -160,12 +160,11 @@ def test_defect_insertion_retrieval():
 
 @with_setup(create_database, teardown_database)
 def test_defect_insertion_retrieval_unicode():
-    if six.PY3:
-        import ROOT
-        if ROOT.gROOT.GetVersionInt() < 62000:
-            # Passing str objects using multibyte encodings is broken
-            # with pyroot up to 6.18.  Should be fixed in 6.20?
-            return
+    import ROOT
+    if ROOT.gROOT.GetVersionInt() < 62000:
+        # Passing str objects using multibyte encodings is broken
+        # with pyroot up to 6.18.  Should be fixed in 6.20?
+        return
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     
     TEST_ID = 0
@@ -195,12 +194,11 @@ def test_defect_failure_nonascii_name():
     """
     Check that we raise an error if the defect name is not ASCII
     """
-    if six.PY3:
-        import ROOT
-        if ROOT.gROOT.GetVersionInt() < 62000:
-            # Passing str objects using multibyte encodings is broken
-            # with pyroot up to 6.18.  Should be fixed in 6.20?
-            return
+    import ROOT
+    if ROOT.gROOT.GetVersionInt() < 62000:
+        # Passing str objects using multibyte encodings is broken
+        # with pyroot up to 6.18.  Should be fixed in 6.20?
+        return
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     
     ddb.create_defect(u"DQD_TÉST_DÉFÉCT_0", "Test")
@@ -210,12 +208,11 @@ def test_defect_mangle_bad_stored_unicode():
     """
     Check that we recover if any of the string payloads are bad UTF-8
     """
-    if six.PY3:
-        import ROOT
-        if ROOT.gROOT.GetVersionInt() < 62000:
-            # Passing str objects using multibyte encodings is broken
-            # with pyroot up to 6.18.  Should be fixed in 6.20?
-            return
+    import ROOT
+    if ROOT.gROOT.GetVersionInt() < 62000:
+        # Passing str objects using multibyte encodings is broken
+        # with pyroot up to 6.18.  Should be fixed in 6.20?
+        return
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     
     TEST_DEFECT_NAME = 'DQD_TEST_DEFECT_0'
@@ -325,12 +322,11 @@ def test_virtual_defect_failure_nonascii_name():
     """
     Check that we raise an error if the virtual defect name is not ASCII
     """
-    if six.PY3:
-        import ROOT
-        if ROOT.gROOT.GetVersionInt() < 62000:
-            # Passing str objects using multibyte encodings is broken
-            # with pyroot up to 6.18.  Should be fixed in 6.20?
-            return
+    import ROOT
+    if ROOT.gROOT.GetVersionInt() < 62000:
+        # Passing str objects using multibyte encodings is broken
+        # with pyroot up to 6.18.  Should be fixed in 6.20?
+        return
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     
     ddb.create_defect(u"DQD_TEST_DEFECT_0", "Test")

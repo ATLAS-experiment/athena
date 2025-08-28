@@ -78,6 +78,7 @@ Pythia8_i::Pythia8_i(const std::string &name, ISvcLocator *pSvcLocator)
   m_particleIDs["ANTIMUON"]    = ANTIMUON;
   m_particleIDs["LEAD"]        = LEAD;
   m_particleIDs["OXYGEN"]      = OXYGEN;
+  m_particleIDs["HELIUM"]      = HELIUM;
 
 }
 

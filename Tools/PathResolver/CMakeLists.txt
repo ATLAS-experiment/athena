@@ -1,24 +1,18 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PathResolver )
 
-# Extra dependencies based on which environment we are in:
-if( NOT XAOD_STANDALONE )
-   set( extra_libs GaudiKernel )
-endif()
-
 # External dependencies:
-find_package( Boost COMPONENTS filesystem )
 find_package( ROOT COMPONENTS RIO Core )
 
 # Component(s) in the package:
 atlas_add_library( PathResolver
    Root/*.cxx
    PUBLIC_HEADERS PathResolver
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${extra_libs} )
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} )
 
 atlas_add_dictionary( PathResolverDict
    PathResolver/PathResolverDict.h PathResolver/selection.xml
@@ -26,7 +20,6 @@ atlas_add_dictionary( PathResolverDict
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_scripts( python/showReleaseNotes.py )
 
 # Set up a helper environment variable for the test(s):
 set( _dpath "${CMAKE_CURRENT_SOURCE_DIR}/test" )
@@ -36,8 +29,9 @@ set( _dpath "${CMAKE_CURRENT_SOURCE_DIR}/test/A:${_dpath}" )
 # Test(s) in the package:
 atlas_add_test( PathResolver_test
    SOURCES test/PathResolver_test.cxx
-   LINK_LIBRARIES PathResolver
-   ENVIRONMENT "DATAPATH=${_dpath}:$ENV{DATAPATH}" )
+   LINK_LIBRARIES CxxUtils PathResolver
+   ENVIRONMENT "DATAPATH=${_dpath}:$ENV{DATAPATH}"
+   LOG_IGNORE_PATTERN "MessageSvc not found" )
 
 # Skip the runtime environment setup in release rebuilding mode:
 if( ATLAS_RELEASE_MODE )

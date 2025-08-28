@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
-    kwarg.setdefault('bdfID','0000:83:00.1') # On the testbed
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
     kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
     kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
     kwarg.setdefault('StripClusterKernelName','processHits')
@@ -52,10 +52,6 @@ def FPGAClusterSortingCfg(flags):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    
-    # Add FPGA Integration flags
-    from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
-    addFPGADataPrepFlags(flags)
     
     flags.Detector.EnableCalo = False
     flags.FPGADataPrep.DoActs = True
@@ -140,6 +136,16 @@ if __name__ == "__main__":
                     "xAOD::TrackParticleContainer#FPGATrackParticles",
                     "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
                     ]
+        
+        # This part is needed to extract technical efficiency
+        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+        cfg.merge( ITkActsPrepDataToxAODCfg( flags,
+                    PixelMeasurementContainer = "ITkPixelMeasurements_offl",
+                    StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
+        OutputItemList += ['xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl',
+                            'xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
+                            'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl',
+                            'xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.']
 
     from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
     cfg.merge(FPGAOutputValidationCfg(flags, **{

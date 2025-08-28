@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 from AthenaPython.PyAthena import StatusCode
 import AthenaPython.PyAthena as PyAthena

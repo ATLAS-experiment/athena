@@ -153,7 +153,7 @@ using namespace InDet;
       
       Amg::Vector3D jetMomSpatial( jetMomentum.X(),jetMomentum.Y(),jetMomentum.Z() );
       double compatibilityValue = m_jetFitterUtils->compatibility( *myMeasuredPerigee,primaryVertexRecVertex ).first;
-      compatibilityValue = fabs( compatibilityValue ) * m_jetFitterUtils->get3DLifetimeSignOfTrack( *myMeasuredPerigee,
+      compatibilityValue = fabs( compatibilityValue ) * InDet::InDetJetFitterUtils::get3DLifetimeSignOfTrack( *myMeasuredPerigee,
 												    jetMomSpatial,
 												    primaryVertexRecVertex );
       

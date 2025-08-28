@@ -12,7 +12,9 @@ namespace GeoModel {
     /// The class takes the ownership of the object using a shared_ptr
     template <typename Obj> class TransientConstSharedPtr {
     public:
-        template <typename ObjGrp> friend class GeoModel::TransientConstSharedPtr;
+        template <typename DerivType> friend class GeoModel::TransientConstSharedPtr;
+        /// @brief type name
+        using element_type = Obj;
         /// Get (non-const) access to the underlying object
         Obj* get() { return m_ptr.get(); }
         Obj* operator->() { return get(); }
@@ -23,58 +25,80 @@ namespace GeoModel {
         const Obj& operator*() const { return *m_ptr; }
         Obj& operator*() { return *m_ptr; }
 
-        /// Constructor from unique_ptr
-        template <typename ObjGrp>
-        TransientConstSharedPtr(std::unique_ptr<ObjGrp> ptr) : m_ptr{std::move(ptr)} {}
+        /// Constructor from a unique_ptr
+        template <typename DerivType>
+        TransientConstSharedPtr(std::unique_ptr<DerivType> ptr) 
+        requires(std::is_base_of_v<Obj, DerivType>): m_ptr{std::move(ptr)} {}
         /// Constructor from shared_ptr
-        template <typename ObjGrp>
-        TransientConstSharedPtr(std::shared_ptr<ObjGrp> ptr) : m_ptr{std::move(ptr)} {}
+        template <typename DerivType>
+        TransientConstSharedPtr(std::shared_ptr<DerivType> ptr) 
+            requires(std::is_base_of_v<Obj, DerivType>) : m_ptr{std::move(ptr)} {}
         /// Constructor from raw ptr
         TransientConstSharedPtr(Obj* ptr) : m_ptr{ptr} {}
 
         /// Standard constructor
         TransientConstSharedPtr() = default;
         /// Delete the copy constructor if the object is const
-        template <typename ObjGrp>
-        TransientConstSharedPtr(const TransientConstSharedPtr<ObjGrp>& other):
+        template <typename DerivType>
+        TransientConstSharedPtr(const TransientConstSharedPtr<DerivType>& other)
+            requires(std::is_base_of_v<Obj, DerivType>) :
              m_ptr{other.m_ptr}{}
         /// Standard move constructor
-        template <typename ObjGrp>
-        TransientConstSharedPtr(TransientConstSharedPtr<ObjGrp>&& other):
-            m_ptr{std::move(other.m_ptr)}{}
+        template <typename DerivType>
+        TransientConstSharedPtr(TransientConstSharedPtr<DerivType>&& other)
+            requires(std::is_base_of_v<Obj, DerivType>) :
+                m_ptr{std::move(other.m_ptr)}{}
 
         /// Assignment operator
-        template <typename ObjGrp>
-        TransientConstSharedPtr& operator=(const TransientConstSharedPtr<ObjGrp>& other){
+        template <typename DerivType>
+        TransientConstSharedPtr& operator=(const TransientConstSharedPtr<DerivType>& other)
+            requires(std::is_base_of_v<Obj, DerivType>) {
             if (&other != this) {
                 m_ptr = other.m_ptr;
             }
             return *this;
         }
-        template <typename ObjGrp>
-        TransientConstSharedPtr& operator=(const std::shared_ptr<ObjGrp>& other) {
+        template <typename DerivType>
+        TransientConstSharedPtr& operator=(const std::shared_ptr<DerivType>& other)
+            requires(std::is_base_of_v<Obj, DerivType>) {
             m_ptr = other.m_ptr;
             return *this;
         }
         /// Move assignment operator
-        template <typename ObjGrp>
-        TransientConstSharedPtr& operator=(TransientConstSharedPtr<ObjGrp>&& other){
+        template <typename DerivType>
+        TransientConstSharedPtr& operator=(TransientConstSharedPtr<DerivType>&& other)
+            requires(std::is_base_of_v<Obj, DerivType>) {
             m_ptr = std::move(other.m_ptr);
             return *this;
         }
-        template <typename ObjGrp>
-        TransientConstSharedPtr& operator=(std::unique_ptr<ObjGrp>&& other) {
+        template <typename DerivType>
+        TransientConstSharedPtr& operator=(std::unique_ptr<DerivType>&& other) 
+            requires(std::is_base_of_v<Obj, DerivType>) {
             m_ptr = std::move(other);
             return *this;
         }
-        template <typename ObjGrp>
-        TransientConstSharedPtr& operator=(std::shared_ptr<ObjGrp>&& other) {
+        template <typename DerivType>
+        TransientConstSharedPtr& operator=(std::shared_ptr<DerivType>&& other)
+            requires(std::is_base_of_v<Obj, DerivType>) {
             m_ptr = std::move(other);
             return *this;
         }
         /// Overload the pointer
-        template <typename ObjGrp>
-        void reset(std::unique_ptr<ObjGrp> newObj) { m_ptr = std::move(newObj); }
+        template <typename DerivType>
+        void reset(std::unique_ptr<DerivType> newObj) 
+            requires(std::is_base_of_v<Obj, DerivType>) { 
+                m_ptr = std::move(newObj); 
+        }
+        template <typename DerivType>
+        void reset(std::shared_ptr<DerivType>&& newObj) 
+            requires(std::is_base_of_v<Obj, DerivType>) { 
+                m_ptr = std::move(newObj); 
+        }
+        template <typename DerivType>
+        void reset(const std::shared_ptr<DerivType>& newObj) 
+            requires(std::is_base_of_v<Obj, DerivType>) { 
+                m_ptr = std::move(newObj); 
+        }
         void reset() { m_ptr.reset(); }
         /// Release the memory
         std::shared_ptr<const Obj> release() { return std::move(m_ptr); }
@@ -85,7 +109,16 @@ namespace GeoModel {
         size_t use_count() const { return m_ptr.use_count(); }
 
         /// Smaller operator to insert the pointer into sets
-        bool operator<(const TransientConstSharedPtr& other) const { return m_ptr.get() < other.m_ptr.get(); }
+        bool operator<(const TransientConstSharedPtr& other) const { 
+            return get() < other.get(); 
+        }
+        /// Equal operator
+        bool operator ==(const TransientConstSharedPtr& other) const {
+            return other.get() == get();
+        }
+        bool operator !=(const TransientConstSharedPtr& other) const {
+            return other.get() != get();
+        }
 
     private:
         std::shared_ptr<Obj> m_ptr{};

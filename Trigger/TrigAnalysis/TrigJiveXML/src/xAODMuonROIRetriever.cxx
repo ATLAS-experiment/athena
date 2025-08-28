@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/xAODMuonROIRetriever.h"
@@ -7,11 +7,6 @@
 #include <string>
 
 #include "CLHEP/Units/SystemOfUnits.h"
-
-//#include "AnalysisTriggerEvent/LVL1_ROI.h"
-
-//#include "TrigT1CaloEvent/CPMRoI.h"
-//#include "TrigT1Interfaces/CPRoIDecoder.h"
 
 #include "xAODTrigger/MuonRoIContainer.h"
 
@@ -57,7 +52,6 @@ namespace JiveXML {
     xAOD::MuonRoIContainer::const_iterator itMU  = muonROIs->begin();
     xAOD::MuonRoIContainer::const_iterator itMUe = muonROIs->end();
 
-    //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "xAOD MuonROIs retrieved from StoreGate with size: " << (MuonROIs->size()) <<endmsg;
 
     int counter = 0;
     for (; itMU != itMUe; ++itMU)
@@ -68,13 +62,6 @@ namespace JiveXML {
 	roiWord.push_back(DataType( (*itMU)->getRoI()) );
         thrNumber.push_back(DataType( (*itMU)->getThrNumber()));
 
-//	std::string m_thrName = (*itMU)->getThrName();
-//        if (m_thrName ==""){ m_thrName = "empty"; };
-//        thrName.push_back(DataType( m_thrName ));
-//
-//        thrValue.push_back(DataType( (*itMU)->getThrValue()));
-//        energy.push_back(DataType( (*itMU)->getThrValue()/CLHEP::GeV));
-
 	thrName.push_back(DataType( "n_a" )); // placeholders
         thrValue.push_back(DataType( 1. ));
         energy.push_back(DataType( 1. ));
@@ -82,33 +69,20 @@ namespace JiveXML {
        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "xAOD MuonROI #" << counter++ 
           << ", eta: " << (*itMU)->eta() << ", phi: " << (*itMU)->phi() << endmsg;
 
-/* from old MuonRoI object: 'getThrNumber', 'getThrName' and 'getROIWord' have gone !
-    for (; itMU != itMUe; ++itMU){
-        roiWord.push_back(DataType( itMU->getROIWord()));
-        thrNumber.push_back(DataType( itMU->getThrNumber()));
-
-	std::string m_thrName = itMU->getThrName();
-        if (m_thrName ==""){ m_thrName = "empty"; };
-        thrName.push_back(DataType( m_thrName ));
-
-        thrValue.push_back(DataType( itMU->getThrValue()));
-        energy.push_back(DataType( itMU->getThrValue()/CLHEP::GeV));
-    }
-*/
-
       }
 
     DataMap myDataMap;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
+    const auto nPhi = phi.size();
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
     myDataMap["energy"] = energy;
-    myDataMap["roiWord"] = roiWord;
-    myDataMap["thrNumber"] = thrNumber;
-    myDataMap["thrName"] = thrName;
-    myDataMap["thrValue"] = thrValue;
+    myDataMap["roiWord"] = std::move(roiWord);
+    myDataMap["thrNumber"] = std::move(thrNumber);
+    myDataMap["thrName"] = std::move(thrName);
+    myDataMap["thrValue"] = std::move(thrValue);
     myDataMap["energy"] = energy;
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size()
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi
 					    << " from: " << m_sgKey << endmsg;
 
     //forward data to formating tool

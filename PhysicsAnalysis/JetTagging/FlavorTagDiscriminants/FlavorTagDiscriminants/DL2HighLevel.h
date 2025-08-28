@@ -13,7 +13,7 @@
 // EDM includes
 #include "xAODBTagging/BTaggingFwd.h"
 #include "xAODJet/JetFwd.h"
-#include "AthContainers/AuxElement.h"
+#include "xAODBase/IParticle.h"
 
 #include <memory>
 #include <string>
@@ -40,8 +40,8 @@ namespace FlavorTagDiscriminants {
     DL2HighLevel(const DL2HighLevel&);
     ~DL2HighLevel();
     void decorate(const xAOD::BTagging& btag) const;
-    void decorate(const xAOD::Jet& jet) const;
-    void decorateWithDefaults(const SG::AuxElement& jet) const;
+    void decorate(const xAOD::IParticle& i_jet) const;
+    void decorateWithDefaults(const xAOD::IParticle& i_jet) const;
     FTagDataDependencyNames getDataDependencyNames() const;
   private:
     std::shared_ptr<const DL2> m_dl2;

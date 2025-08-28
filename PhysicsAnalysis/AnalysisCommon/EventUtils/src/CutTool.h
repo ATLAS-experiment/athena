@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CutTool.h
@@ -55,7 +55,7 @@ class CutTool
  private:
 
   /// The cut string
-  StringProperty m_cut;
+  StringProperty m_cut{this, "Cut", "", "The cut expression"};
 
 
   /// Internal event counter

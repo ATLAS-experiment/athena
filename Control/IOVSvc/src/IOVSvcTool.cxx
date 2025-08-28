@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IOVSvcTool.h"
@@ -246,7 +246,7 @@ IOVSvcTool::handle(const Incident &inc) {
      }
      // cppcheck-suppress identicalInnerCondition
      if (m_first) {
-        for (auto e : m_ignoredProxyNames) {
+        for (const auto& e : m_ignoredProxyNames) {
            DataProxy* proxy = p_cndSvc->proxy(e.first,e.second);
            ATH_MSG_DEBUG("retrieving "<<fullProxyName(e.first,e.second));
            if (proxy == nullptr) {
@@ -343,7 +343,7 @@ IOVSvcTool::handle(const Incident &inc) {
       }
 
       // preLoad the ranges and data if requested.
-      if (preLoadProxies().isFailure()) {
+      if (preLoadProxies(inc.context()).isFailure()) {
         ATH_MSG_ERROR("Problems preloading IOVRanges");
         throw( std::runtime_error("IOVSvcTool::preLoadProxies") );
       }
@@ -469,17 +469,16 @@ IOVSvcTool::handle(const Incident &inc) {
 
           if (node->trigger()) {
             BFCN *ff = node->fcn();
-            auditorSvc()->before("Callback",m_fcnMap.at(ff).name());
+            auditorSvc()->before("Callback",m_fcnMap.at(ff).name(),inc.context());
             if ((*ff)(i,resetKeys[ff]).isFailure()) {
-              auditorSvc()->after("Callback",m_fcnMap.at(ff).name());
+              auditorSvc()->after("Callback",m_fcnMap.at(ff).name(),inc.context());
               ATH_MSG_ERROR("Problems calling " << m_fcnMap.at(ff).name()
                             << std::endl << "Skipping all subsequent callbacks.");
               // this will cause a mem leak, but I don't care
               perr = new IOVCallbackError(m_fcnMap.at(ff).name());
               break;            
-	    }
-	    auditorSvc()->after("Callback",m_fcnMap.at(ff).name());
-
+            }
+            auditorSvc()->after("Callback",m_fcnMap.at(ff).name(),inc.context());
           }
         }
         if (perr != nullptr) break;
@@ -957,7 +956,7 @@ IOVSvcTool::setRangeInDB(const CLID& clid, const std::string& key,
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode 
-IOVSvcTool::preLoadProxies() {
+IOVSvcTool::preLoadProxies(const EventContext& ctx) {
  
   ATH_MSG_DEBUG("preLoadProxies()");
 
@@ -1052,13 +1051,13 @@ IOVSvcTool::preLoadProxies() {
       if (node->trigger()) {
         BFCN *ff = node->fcn();
         if (m_sortKeys) { resetKeys[ff].sort(); }
-        auditorSvc()->before("Callback",m_fcnMap[ff].name());
+        auditorSvc()->before("Callback",m_fcnMap[ff].name(),ctx);
         if ((*ff)(i,resetKeys[ff]).isFailure()) {
-          auditorSvc()->after("Callback",m_fcnMap[ff].name());
+          auditorSvc()->after("Callback",m_fcnMap[ff].name(),ctx);
           ATH_MSG_ERROR("Problems calling ");
           return StatusCode::FAILURE;
         }
-        auditorSvc()->after("Callback",m_fcnMap[ff].name());
+        auditorSvc()->after("Callback",m_fcnMap[ff].name(),ctx);
       }
     }
   }
@@ -1192,8 +1191,10 @@ IOVSvcTool::PrintProxyMap(const SG::DataProxy* dp) const {
     for (auto pitr=pi.first; pitr!=pi.second; ++pitr) {
       BFCN* fcn = pitr->second;
       map<BFCN*,CallBackID>::const_iterator fitr = m_fcnMap.find(fcn);
-      CallBackID cbid = fitr->second;
-      msg() << "         ->  " << fcn << "  " << cbid.name() << endl;
+      if (fitr != m_fcnMap.end()) {
+        CallBackID cbid = fitr->second;
+        msg() << "         ->  " << fcn << "  " << cbid.name() << endl;
+      }
     }
   }
 }

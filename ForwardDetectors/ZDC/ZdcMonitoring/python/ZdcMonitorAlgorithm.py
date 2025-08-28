@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file ZdcMonitorAlgorithm.py
@@ -16,10 +16,6 @@
 import numpy as np
 
 module_FPGA_max_ADC = 4096 
-nominal_lg_gain_factor = 10
-nominal_lg_max_ADC = module_FPGA_max_ADC * nominal_lg_gain_factor
-
-
 
 def create_log_bins(min_value, max_value, num_bins):
     # Calculate the logarithmic bin edges
@@ -98,13 +94,51 @@ def ZdcMonitoringConfig(inputFlags):
     
     # Edit properties of a algorithm
     zdcMonAlg.EnableZDCSingleSideTriggers = inputFlags.DQ.useTrigger and inputFlags.Input.TriggerStream == 'calibration_ZDCCalib' # added for online: enable trigger if we are running in ATLAS partition (DQ.useTrigger flag not set offline)
-    zdcMonAlg.CalInfoOn = inputFlags.Input.TriggerStream == 'physics_MinBias' or inputFlags.Input.TriggerStream == 'express_express' or inputFlags.Input.TriggerStream == 'physics_UCC' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias / express_express / physics_UCC
+    zdcMonAlg.CalInfoOn = 'physics_' in inputFlags.Input.TriggerStream or inputFlags.Input.TriggerStream == 'express_express' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias / express_express / physics_UCC
     zdcMonAlg.EnableUCCTriggers = inputFlags.DQ.useTrigger and inputFlags.Input.TriggerStream == 'physics_UCC'
     zdcMonAlg.IsOnline = inputFlags.Common.isOnline # if running online select a subset of histograms & use coarser binnings
     zdcMonAlg.IsInjectedPulse = inputFlags.Input.TriggerStream == 'calibration_ZDCInjCalib' or inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
     zdcMonAlg.IsStandalone = inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
-    zdcMonAlg.IsPPMode = 'pp' in config
     
+    zdcMonAlg.IsPEBStream = 'calibration_' in inputFlags.Input.TriggerStream
+    zdcMonAlg.IsPPMode = 'pp' in config
+    zdcMonAlg.IspOMode = 'pO' in config
+    zdcMonAlg.IsOOMode = 'OO' in config
+    zdcMonAlg.EnableOOpOTriggers = (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode) and inputFlags.DQ.useTrigger and ('physics_' in inputFlags.Input.TriggerStream or inputFlags.Input.TriggerStream == 'calibration_ZDCCalib')
+
+    phys_stream_trig_map = {
+        "physics_MinBias": ['HLT_mb_sptrk_L1TRT_FILLED', 'HLT_mb_sptrk_L1jTE10', 'HLT_mb_sptrk_L1ZDC_OR', 'HLT_mb_sptrk_L1ZDC_LOR', 'HLT_noalg_L1ZDC_OR_EMPTY', 'HLT_noalg_L1ZDC_OR_UNPAIRED_NONISO', 'HLT_noalg_L1ZDC_LOR_EMPTY', 'HLT_noalg_L1ZDC_LOR_UNPAIRED_NONISO'],
+        "physics_UPC": ["L1_ZDC_XOR_jTE10_VjTE200", "L1_TRT_VjTE50", "L1_1ZDC_NZDC_jTE10_VjTE200", "L1_5ZDC_A_5ZDC_C_jTE5_VjTE200", "HLT_noalg_L1TRT_VjTE50"],
+        "physics_PC": ["HLT_mb_sptrk_L1ZDC_A_C_VTE50", "L1_ZDC_A_C_VTE50", "HLT_noalg_pc_L1TE50_VTE600.0ETA49", "L1_TE50_VTE600.0ETA49"], #Run2; ["HLT_noalg_L1jTE50_VjTE600", "HLT_mb_sptrk_pc_L1ZDC_A_C_VjTE50", "L1_jTE50_VjTE600", "L1_ZDC_A_C_VjTE50"] for #Run3 
+        "physics_Standby": ["HLT_noalg_L1Standby"]
+    }
+
+    OOpOTriggerChains = phys_stream_trig_map.get(inputFlags.Input.TriggerStream, [])
+
+    OOpOCTPIDtoL1TriggerStreamMap = {
+        "calibration_ZDCCalib": {
+            331: "L1_ZDC_OR",
+            345: "L1_ZDC_LOR",
+            200: "L1_ZDC_A_C"
+        },
+        "physics_MinBias": {
+            120: 'L1_jTE10',
+        },
+        "physics_Standby": {
+            331: "L1_ZDC_OR",
+            345: "L1_ZDC_LOR",
+            1: "L1_TRT_FILLED",
+            121: "L1_jTE20"
+        }
+    }
+
+    OOpOCTPIDtoL1TriggerMap = OOpOCTPIDtoL1TriggerStreamMap.get(inputFlags.Input.TriggerStream, {})
+    OOpOL1TriggerChainsFromCTP = list(OOpOCTPIDtoL1TriggerMap.values())
+    OOpOTriggerChains += OOpOL1TriggerChainsFromCTP
+
+    zdcMonAlg.OOpOTriggers = OOpOTriggerChains
+    zdcMonAlg.OOpOL1TriggerFromCTPIDMap = OOpOCTPIDtoL1TriggerMap
+
     zdcMonAlg.RunNumber = inputFlags.Input.RunNumbers[0] if len(inputFlags.Input.RunNumbers) > 0 else 0
     if (len(inputFlags.Input.RunNumbers) == 0):
         print ('ZdcMonitorAlgorithm.py:  WARNING the list in the input flag Input.RunNumbers is empty - run number not set! Likely to use default pulser setting')
@@ -119,6 +153,9 @@ def ZdcMonitoringConfig(inputFlags):
 
     print ("ZdcMonitorAlgorithm.py: IsInjectedPulse? ",zdcMonAlg.IsInjectedPulse)
     print ("ZdcMonitorAlgorithm.py: IsPPMode? ",zdcMonAlg.IsPPMode)
+    print ("ZdcMonitorAlgorithm.py: IspOMode? ",zdcMonAlg.IspOMode)
+    print ("ZdcMonitorAlgorithm.py: IsOOMode? ",zdcMonAlg.IsOOMode)
+    print ("ZdcMonitorAlgorithm.py: EnableOOpOTriggers? ",zdcMonAlg.EnableOOpOTriggers)
 
 # --------------------------------------------------------------------------------------------------
     # Configure histograms
@@ -156,10 +193,24 @@ def ZdcMonitoringConfig(inputFlags):
     zdcMonAlg.ZDCModuleChisqOverAmpHistMaxvalue = module_chisq_over_amp_max
     zdcMonAlg.ZDCModuleChisqOverAmpHistNumBins = module_chisq_over_amp_nbins
     
-    zdcMonAlg.EnergyCutForModuleFractMonitor = 402 if zdcMonAlg.IsPPMode else 13400
+    zdcMonAlg.EnergyCutForModuleFractMonitor = 400 if zdcMonAlg.IsPPMode or zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode else 13400
     zdcMonAlg.triggerSideA = "L1_ZDC_PP_A" if zdcMonAlg.IsPPMode else "L1_ZDC_A"
     zdcMonAlg.triggerSideC = "L1_ZDC_PP_C" if zdcMonAlg.IsPPMode else "L1_ZDC_C"
+# --------------------------------------------------------------------------------------------------
+    if (zdcMonAlg.IsInjectedPulse):
+        from ZdcMonitoring.ZdcInjPulserVoltageReader import load_voltage_steps
+        voltage_values_list = []
+        voltage_strs_list = []
+        load_voltage_steps(zdcMonAlg.RunNumber, voltage_values_list, voltage_strs_list)
 
+        if len(voltage_values_list) == 0:
+            voltage_values_list = [0.]
+            voltage_strs_list = ["0.00000"]
+
+        zdcMonAlg.InjPulseVoltageSteps = voltage_values_list
+        zdcMonAlg.InjPulseVoltageStepsStr = voltage_strs_list
+
+# --------------------------------------------------------------------------------------------------
     amp_LG_refit_max_ADC = module_FPGA_max_ADC
 
     fCal_single_side_min = -0.2
@@ -169,12 +220,40 @@ def ZdcMonitoringConfig(inputFlags):
     fCal_single_side_nbins = 240
     fCal_sum_nbins = 240
 
+    total_Et_sum_min = -0.5
+    total_Et_sum_max = 5.5
+    total_Et_sum_nbins = 240
+
+    uncalib_sum_zoomin_nbins = 100
     energy_sum_zoomin_nbins = 200
     energy_sum_1n_nbins = 350
     energy_sum_1n_xmin = 1000.
     energy_sum_1n_xmax = 4500.
     
-    if config == "LHCf2022":
+    ########### DEFAULT SETTINGS FOR PBPB ###########
+    if "PbPb" in config or "Injector" in config:
+        print ("looking at pbpb / injected-pulse data")
+        energy_sum_xmax = 200000.0
+        energy_sum_two_sides_xmax_TeV = 400.0
+        energy_sum_single_side_xmax_TeV = 200.0
+        energy_sum_zoomin_xmax = 13000.0
+        uncalib_amp_sum_zoomin_xmax = 7200.0
+        time_in_data_buffer = 75. #75 ns (3 BCID's) in buffer
+        x_centroid_min = -20 #small amplitude sum --> large range for x, y position
+        x_centroid_max = 20
+        y_centroid_min = -20
+        y_centroid_max = 60
+        zdc_amp_sum_xmax = 163840.0
+        rpd_channel_amp_min = - 2000. 
+        rpd_amp_sum_xmax = 245760.0 #not the full range but a reasonable value
+        rpd_max_adc_sum_xmax = 40960.0
+        rpd_sum_adc_max = 25000.
+        lg_gain_factor = 10
+        module_calib_amp_xmax = 100000.0 #about the full dynamic range: 160 N / 4 * 2.5TeV
+        module_amp_1Nmonitor_xmax = 1250.0 #about 5N / 4 * 2.7TeV
+        module_calib_amp_1Nmonitor_xmax = 3400.0 #about 5N / 4 * 2.7TeV
+
+    elif config == "LHCf2022":  ########### overwrite for LHCf ###########
         print ("looking at 2022 lhcf data")
         energy_sum_xmax = 3000
         energy_sum_two_sides_xmax_TeV = 10.0
@@ -190,14 +269,14 @@ def ZdcMonitoringConfig(inputFlags):
         rpd_channel_amp_min = - 200. 
         rpd_amp_sum_xmax = 3000
         rpd_max_adc_sum_xmax = 3000
-        module_amp_xmax = 2000
         rpd_sum_adc_max = 5000
+        lg_gain_factor = 1
         module_calib_amp_xmax = 5000
         module_amp_1Nmonitor_xmax = 2000 #about 5N / 4 * 2.7TeV
         module_calib_amp_1Nmonitor_xmax = 5000 #about 5N / 4 * 2.7TeV
 
-    elif config == "pp2023" or config == "pp2024" or config == "Injectorpp2024":
-        print ("looking at pp reference run")
+    elif zdcMonAlg.IsPPMode:  ########### overwrite for pp mode ###########
+        print ("looking at pp data")
         energy_sum_xmax = 5000
         energy_sum_two_sides_xmax_TeV = 10.0
         energy_sum_single_side_xmax_TeV = 5.0
@@ -212,35 +291,81 @@ def ZdcMonitoringConfig(inputFlags):
         rpd_channel_amp_min = - 200. 
         rpd_amp_sum_xmax = 5000
         rpd_max_adc_sum_xmax = 5000
-        module_amp_xmax = module_FPGA_max_ADC
         rpd_sum_adc_max = 5000.
+        lg_gain_factor = 1
         module_calib_amp_xmax = 5000
         module_amp_1Nmonitor_xmax = 2000 #about 5N / 4 * 2.7TeV
         module_calib_amp_1Nmonitor_xmax = 5000 #about 5N / 4 * 2.7TeV
-
-    elif config == "PbPb2023" or config == "PbPb2024" or config == "InjectorPbPb2024":
-        print ("looking at pbpb run")
-        energy_sum_xmax = 200000.0
-        energy_sum_two_sides_xmax_TeV = 400.0
-        energy_sum_single_side_xmax_TeV = 200.0
-        energy_sum_zoomin_xmax = 13000.0
-        uncalib_amp_sum_zoomin_xmax = 7200.0
+    elif zdcMonAlg.IsOOMode:  ########### overwrite for OO mode ###########
+        print ("looking at OO data")
+        energy_sum_xmax = 10000.
+        energy_sum_two_sides_xmax_TeV = 40.
+        energy_sum_single_side_xmax_TeV = 20.0
+        energy_sum_zoomin_xmax = 13000.0 #4.85N (tail of 4N)
+        uncalib_amp_sum_zoomin_xmax = 7200.0 #tail of 4N
         time_in_data_buffer = 75. #75 ns (3 BCID's) in buffer
         x_centroid_min = -20 #small amplitude sum --> large range for x, y position
         x_centroid_max = 20
         y_centroid_min = -20
         y_centroid_max = 60
-        zdc_amp_sum_xmax = 163840.0
+        zdc_amp_sum_xmax = 50000.0
         rpd_channel_amp_min = - 2000. 
-        rpd_amp_sum_xmax = 245760.0 #not the full range but a reasonable value
+        rpd_amp_sum_xmax = 245760.0
         rpd_max_adc_sum_xmax = 40960.0
-        module_amp_xmax = nominal_lg_max_ADC
         rpd_sum_adc_max = 25000.
-        module_calib_amp_xmax = 100000.0 #about the full dynamic range: 160 N / 4 * 2.5TeV
+        lg_gain_factor = 4
+        module_calib_amp_xmax = 13400.0 #20N / 4 * 2680.
         module_amp_1Nmonitor_xmax = 1250.0 #about 5N / 4 * 2.7TeV
         module_calib_amp_1Nmonitor_xmax = 3400.0 #about 5N / 4 * 2.7TeV
+        fCal_single_side_min = -0.02 # overwrite FCal binning
+        fCal_single_side_max = 0.43
+        fCal_sum_min = -0.03
+        fCal_sum_max = 0.72
+        fCal_single_side_nbins = 90
+        fCal_sum_nbins = 150
+        total_Et_sum_min = -0.1 # overwrite total ET binning 
+        total_Et_sum_max = 1.5
+        total_Et_sum_nbins = 160
 
-    
+    elif zdcMonAlg.IspOMode:  ########### overwrite for OO mode ###########
+        print ("looking at pO data")
+        energy_sum_xmax = 30000.
+        energy_sum_two_sides_xmax_TeV = 40. #22.4N per side
+        energy_sum_single_side_xmax_TeV = 20.0
+        energy_sum_zoomin_xmax = 13000.0 #4.85N (tail of 4N)
+        uncalib_amp_sum_zoomin_xmax = 7200.0 #tail of 4N
+        time_in_data_buffer = 75. #75 ns (3 BCID's) in buffer
+        x_centroid_min = -20 #small amplitude sum --> large range for x, y position
+        x_centroid_max = 20
+        y_centroid_min = -20
+        y_centroid_max = 60
+        zdc_amp_sum_xmax = 50000.0
+        rpd_channel_amp_min = - 2000. 
+        rpd_amp_sum_xmax = 245760.0
+        rpd_max_adc_sum_xmax = 40960.0
+        rpd_sum_adc_max = 25000.
+        lg_gain_factor = 4
+        module_calib_amp_xmax = 13400.0 #20N / 4 * 2680.
+        module_amp_1Nmonitor_xmax = 1250.0 #about 5N / 4 * 2.7TeV
+        module_calib_amp_1Nmonitor_xmax = 3400.0 #about 5N / 4 * 2.7TeV
+        fCal_single_side_min = -0.05 # overwrite FCal binning
+        fCal_single_side_max = 0.2
+        fCal_sum_min = -0.05
+        fCal_sum_max = 0.35
+        fCal_single_side_nbins = 100
+        fCal_sum_nbins = 100
+        total_Et_sum_min = -0.1 # overwrite total ET binning 
+        total_Et_sum_max = 0.5
+        total_Et_sum_nbins = 120
+    else:
+        import sys
+        print("ZdcMonitorAlgorithm      ERROR: Invalid configuration! Config tag is", config)
+        sys.exit(1)
+
+
+    lg_max_ADC = module_FPGA_max_ADC * lg_gain_factor
+    module_amp_xmax = lg_max_ADC
+
     hg_lg_amp_ratio_min_nominal = 0.6
     hg_lg_amp_ratio_min_tight = 0.9
     hg_lg_amp_ratio_max_nominal = 1.4
@@ -260,7 +385,6 @@ def ZdcMonitoringConfig(inputFlags):
     genZdcMonTool = helper.addGroup(zdcMonAlg, 'genZdcMonTool', topPath = 'ZDC')
 
     nDecodingErrorBits = 3
-    nUCCTrigBits = 7
 
     genZdcMonTool.defineHistogram('decodingErrorBits',title=';;Events',
                             path='/EXPERT/Global/DecodingErrors',
@@ -268,11 +392,24 @@ def ZdcMonitoringConfig(inputFlags):
                             xbins=nDecodingErrorBits,xmin=0.0,xmax=nDecodingErrorBits,
                             xlabels=['No Decoding Error', 'ZDC Decoding Error', 'RPD Decoding Error'])
     
+    nUCCTrigBits = 7
+
     genZdcMonTool.defineHistogram('uccTrigBits',title=';;Events',
                             path='/EXPERT/Global/UCCTrigs',
                             opt='kVec',
                             xbins=nUCCTrigBits,xmin=0.0,xmax=nUCCTrigBits,
                             xlabels=['UCC Trig Enabled', 'Pass HELT50', 'Pass HELT35', 'Pass HELT25', 'Pass HELT20', 'Pass HELT15', 'UCC Trig Disabled'])
+
+    if zdcMonAlg.EnableOOpOTriggers:
+        OOpOTriggerLabels = ['OOpO Trig Enabled'] + OOpOTriggerChains + ['OOpO Trig Disabled']
+        
+        nOOpOTrigBits = len(OOpOTriggerLabels)
+
+        genZdcMonTool.defineHistogram('OOpOTrigBits',title=';;Events',
+                                path='/EXPERT/Global/OOpOTrigs',
+                                opt='kVec',
+                                xbins=nOOpOTrigBits,xmin=0.0,xmax=nOOpOTrigBits,
+                                xlabels=OOpOTriggerLabels)
 
     if (zdcMonAlg.EnableCentroid):
         genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle', title=';Cos (#Delta #phi_{AorC});Events',
@@ -290,7 +427,36 @@ def ZdcMonitoringConfig(inputFlags):
                                 path='/EXPERT/Global/SideACCorr',
                                 xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
                                 ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
-        
+        if (zdcMonAlg.IspOMode or zdcMonAlg.IsOOMode): #OO mode --> add zoomed-in AC-correlation
+            genZdcMonTool.defineHistogram('zdcEnergySumA, zdcEnergySumC;zdcEnergySumC_vs_zdcEnergySumA_zoomin', type='TH2F', title=';E_{ZDC,A} [GeV];E_{ZDC,C} [GeV]',
+                                    path='/EXPERT/Global/SideACCorr',
+                                    xbins=energy_sum_zoomin_nbins,xmin=0.0,xmax=energy_sum_zoomin_xmax,
+                                    ybins=energy_sum_zoomin_nbins,ymin=0.0,ymax=energy_sum_zoomin_xmax)
+            genZdcMonTool.defineHistogram('zdcUncalibSumA, zdcUncalibSumC;zdcUncalibSumC_vs_zdcUncalibSumA_zoomin', type='TH2F', title=';Amp Sum SideA [ADC];Amp Sum SideC [ADC]',
+                                    path='/EXPERT/Global/SideACCorr',
+                                    xbins=uncalib_sum_zoomin_nbins,xmin=0.0,xmax=uncalib_amp_sum_zoomin_xmax,
+                                    ybins=uncalib_sum_zoomin_nbins,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax)
+
+            if (zdcMonAlg.EnableOOpOTriggers):
+                for oo_po_trig in OOpOTriggerChains:
+                    genZdcMonTool.defineHistogram('zdcEnergySumA, zdcEnergySumC;zdcEnergySumC_vs_zdcEnergySumA_pass'+oo_po_trig, type='TH2F', title=';E_{ZDC,A} [GeV];E_{ZDC,C} [GeV]',
+                                        path='/EXPERT/Global/SideACCorr',
+                                        cutmask='pass'+oo_po_trig,
+                                        xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
+                                        ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
+                    genZdcMonTool.defineHistogram('zdcEnergySumA, zdcEnergySumC;zdcEnergySumC_vs_zdcEnergySumA_zoomin_pass'+oo_po_trig, type='TH2F', title=';E_{ZDC,A} [GeV];E_{ZDC,C} [GeV]',
+                                        path='/EXPERT/Global/SideACCorr',
+                                        cutmask='pass'+oo_po_trig,
+                                        xbins=energy_sum_zoomin_nbins,xmin=0.0,xmax=energy_sum_zoomin_xmax,
+                                        ybins=energy_sum_zoomin_nbins,ymin=0.0,ymax=energy_sum_zoomin_xmax)
+                    genZdcMonTool.defineHistogram('zdcUncalibSumA, zdcUncalibSumC;zdcUncalibSumC_vs_zdcUncalibSumA_zoomin_pass'+oo_po_trig, type='TH2F', title=';Amp Sum SideA [ADC];Amp Sum SideC [ADC]',
+                                        path='/EXPERT/Global/SideACCorr',
+                                        cutmask='pass'+oo_po_trig,
+                                        xbins=uncalib_sum_zoomin_nbins,xmin=0.0,xmax=uncalib_amp_sum_zoomin_xmax,
+                                        ybins=uncalib_sum_zoomin_nbins,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax)
+
+
+
         # FCal E_T vs ZDC E_T
         # to be run on min bias stream
         if (zdcMonAlg.CalInfoOn):
@@ -310,6 +476,27 @@ def ZdcMonitoringConfig(inputFlags):
                                 opt='kAlwaysCreate',
                                 xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
                                 ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+
+            genZdcMonTool.defineHistogram('totalEt24, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_totalEt', type='TH2F', title=';Total Et |#eta| < 2.4 [TeV];ZDC Energy [TeV]',
+                                path = '/EXPERT/Global/ZDCTotalEtCorr',
+                                opt='kAlwaysCreate',
+                                xbins=total_Et_sum_nbins,xmin=total_Et_sum_min,xmax=total_Et_sum_max,
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+
+
+            if (zdcMonAlg.EnableOOpOTriggers):
+                for oo_po_trig in OOpOTriggerChains:
+                    genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_pass'+oo_po_trig, type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
+                                        path = '/EXPERT/Global/ZDCFcalCorr',
+                                        cutmask='pass'+oo_po_trig,
+                                        xbins=fCal_sum_nbins,xmin=fCal_sum_min,xmax=fCal_sum_max,
+                                        ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+                    genZdcMonTool.defineHistogram('totalEt24, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_totalEt_pass'+oo_po_trig, type='TH2F', title=';Total Et |#eta| < 2.4 [TeV];ZDC Energy [TeV]',
+                                        path = '/EXPERT/Global/ZDCTotalEtCorr',
+                                        cutmask='pass'+oo_po_trig,
+                                        xbins=total_Et_sum_nbins,xmin=total_Et_sum_min,xmax=total_Et_sum_max,
+                                        ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_two_sides_xmax_TeV)
+
 
             if (zdcMonAlg.EnableUCCTriggers):
                 genZdcMonTool.defineHistogram('fcalEtSumTwoSides, zdcEnergySumTwoSidesTeV;zdcEnergySum_vs_fCalEt_passUCCTrig_HELT15', type='TH2F', title=';FCal Energy [TeV];ZDC Energy [TeV]',
@@ -404,6 +591,13 @@ def ZdcMonitoringConfig(inputFlags):
                                 path = '/SHIFT/ZDC/PerArm/Energy',
                                 opt='kAlwaysCreate', # always create for shift-needed histograms
                                 xbins=energy_sum_zoomin_nbins,xmin=0.0,xmax=energy_sum_zoomin_xmax) # up to the "far end" of 4-neutron peak
+        if (zdcMonAlg.EnableOOpOTriggers):
+            for oo_po_trig in OOpOTriggerChains:
+                zdcSideMonToolArr.defineHistogram('zdcEnergySum;zdcEnergySum_zoomin_pass'+oo_po_trig,title='ZDC Side {0} Energy Sum (1-to-4n, no trigger selection);Side {0} Energy[GeV];Events',
+                                        path = '/SHIFT/ZDC/PerArm/Energy',
+                                        cutmask='pass'+oo_po_trig,
+                                        opt='kAlwaysCreate', # always create for shift-needed histograms
+                                        xbins=energy_sum_zoomin_nbins,xmin=0.0,xmax=energy_sum_zoomin_xmax) # up to the "far end" of 4-neutron peak
 
         if (zdcMonAlg.EnableZDCSingleSideTriggers):
             zdcSideMonToolArr.defineHistogram('zdcEnergySum;zdcEnergySum_zoomin_wTrigSelec',title='ZDC Side {0} Energy Sum (1-to-4n, require opposite-side trigger);Side {0} Energy[GeV];Events',
@@ -636,28 +830,19 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=n_fpga_bins,xmin=0.0,xmax=module_amp_xmax / 2.)
     
 
-    if (zdcMonAlg.IsInjectedPulse or not zdcMonAlg.IsOnline):
-        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_HG_profile',type='TProfile',title=';Module Max ADC HG [ADC];Avg Amp/Max ADC',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
-                                cutmask='zdcModuleHG',
-                                xbins=n_fpga_bins,xmin=0.0,xmax=module_FPGA_max_ADC)
-    
+    # ---------------------------- ZDC-module amplitude to max ADC ratio (debug purpose) ---------------------------- 
+    if (not zdcMonAlg.IsOnline): # 2D (memory consuming): offline only for calib stream
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_HG',type='TH2F',title=';Module Max ADC HG [ADC];Avg Amp/Max ADC',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
                                 cutmask='zdcModuleHG',
                                 xbins=n_fpga_bins,xmin=0.0,xmax=module_FPGA_max_ADC,
                                 ybins=100,ymin=0.0,ymax=2.)
 
-        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_LG_profile',type='TProfile',title=';Module Max ADC LG [ADC];Avg Amp/Max ADC',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
-                                cutmask='zdcModuleLG',
-                                xbins=n_fpga_bins,xmin=0.0,xmax=nominal_lg_max_ADC) #max ADC has no LG gain factor
-
         zdcModuleMonToolArr.defineHistogram('zdcModuleAmp,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_LG',type='TH2F',title=';Module Max ADC LG [ADC];Avg Amp/Max ADC',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleAmpToMaxADCRatio', 
                                 cutmask='zdcModuleLG',
-                                xbins=n_fpga_bins,xmin=0.0,xmax=nominal_lg_max_ADC, #max ADC has no LG gain factor
-                                ybins=100,ymin=0.0,ymax=2./nominal_lg_gain_factor)
+                                xbins=n_fpga_bins,xmin=0.0,xmax=module_amp_xmax, #max ADC has no LG gain factor
+                                ybins=100,ymin=0.0,ymax=2.)
     
     # ---------------------------- ZDC-module amplitude fractions & correlations with energy deposits ---------------------------- 
     
@@ -712,18 +897,17 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=create_vinj_bins(),
                                 ybins=create_hg_fit_amp_inj_bins())
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleFitAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcHGInjPulseValid',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltage',
-                                xbins=create_vinj_bins())
-        
-        # ---------------------------- HG response max ADC ----------------------------
-
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCHG', type='TH2F', title=';Pulse amp [V];Max ADC HG',
-                                cutmask='zdcHGInjPulseValid',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltage',
-                                xbins=create_vinj_bins(),
-                                ybins=create_hg_fit_amp_inj_bins())
+        if (zdcMonAlg.IsOnline): # also plot profile online in case 2D-hist scale is wrong by a large factor (e.g, due to attenuator setting)
+            zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleFitAmp;zdcModuleAmpHG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
+                                    cutmask='zdcHGInjPulseValid',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltage',
+                                    xbins=create_vinj_bins())
+        else: # ---------------------------- HG response max ADC (offline only) ----------------------------
+            zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCHG', type='TH2F', title=';Pulse amp [V];Max ADC HG',
+                                    cutmask='zdcHGInjPulseValid',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCHGVsInputVoltage',
+                                    xbins=create_vinj_bins(),
+                                    ybins=create_hg_fit_amp_inj_bins())
 
         # ---------------------------- LG response ----------------------------
         zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGFitAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
@@ -732,18 +916,46 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=create_vinj_bins(),
                                 ybins=create_lg_fit_amp_inj_bins())
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGFitAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
-                                cutmask='zdcLGInjPulseValid',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltage',
-                                xbins=create_vinj_bins())
-        
-        # ---------------------------- LG response max ADC ----------------------------
+        if (zdcMonAlg.IsOnline): # also plot profile online in case 2D-hist scale is wrong by a large factor (e.g, due to attenuator setting)
+            zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleLGFitAmp;zdcModuleAmpLG_vs_injectedPulseInputVoltage_profile', type='TProfile', title=';Pulse amp [V];Signal Fit Amp [ADC Counts]',
+                                    cutmask='zdcLGInjPulseValid',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltage',
+                                    xbins=create_vinj_bins())
+        else: # ---------------------------- LG response max ADC (offline only) ----------------------------
+            zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG;zdcModuleMaxADCLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Max ADC LG',
+                                    cutmask='zdcLGInjPulseValid',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltage',
+                                    xbins=create_vinj_bins(),
+                                    ybins=create_hg_fit_amp_inj_bins()) # maxADC has no LG gain factor multiplied
 
-        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleMaxADCLG;zdcModuleMaxADCLG_vs_injectedPulseInputVoltage', type='TH2F', title=';Pulse amp [V];Max ADC LG',
-                                cutmask='zdcLGInjPulseValid',
-                                path='/EXPERT/ZDC/ZdcModule/ModuleMaxADCLGVsInputVoltage',
-                                xbins=create_vinj_bins(),
-                                ybins=create_hg_fit_amp_inj_bins()) # maxADC has no LG gain factor multiplied
+        # ---------------------------- HG & LG response binned by the voltage strings ----------------------------
+        if (not zdcMonAlg.IsOnline):
+            zdcModuleMonToolArr.defineHistogram('VoltageIndex, zdcModuleFitAmp', type='TH2F', title=';;Signal Fit Amp [ADC Counts]',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleAmpHGVsInputVoltageStr',
+                            cutmask='zdcHGInjPulseValid',
+                            xbins=len(voltage_strs_list),xmin=0.0,xmax=len(voltage_strs_list),
+                            ybins=create_hg_fit_amp_inj_bins(),
+                            xlabels=voltage_strs_list)
+
+            zdcModuleMonToolArr.defineHistogram('VoltageIndex, zdcModuleLGFitAmp', type='TH2F', title=';;Signal Fit Amp [ADC Counts]',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleAmpLGVsInputVoltageStr',
+                            cutmask='zdcLGInjPulseValid',
+                            xbins=len(voltage_strs_list),xmin=0.0,xmax=len(voltage_strs_list),
+                            ybins=create_lg_fit_amp_inj_bins(),
+                            xlabels=voltage_strs_list)
+
+        # ---------------------------- HG & LG response 1D histograms ----------------------------
+        # ---------------------------- only offline ----------------------------
+
+        if (not zdcMonAlg.IsOnline):
+            zdcModuleSingleVoltageResponseArr = helper.addArray([sides,modules,voltage_strs_list],zdcMonAlg,'LucrodResponseSingleVoltageMonitor', topPath = 'ZDC/EXPERT/ZDC/ZdcModule/LucrodResponseSingleVoltage')
+            zdcModuleSingleVoltageResponseArr.defineHistogram('zdcModuleFitAmp;zdcModuleAmpHG_fixed_vInj', type='TH1F', title=';Signal Fit Amp [ADC Counts];Events',
+                                    cutmask='zdcHGInjPulseValid',
+                                    xbins=create_hg_fit_amp_inj_bins())
+
+            zdcModuleSingleVoltageResponseArr.defineHistogram('zdcModuleLGFitAmp;zdcModuleAmpLG_fixed_vInj', type='TH1F', title=';Signal Fit Amp [ADC Counts];Events',
+                                    cutmask='zdcLGInjPulseValid',
+                                    xbins=create_lg_fit_amp_inj_bins())
 
     # ---------------------------- ZDC-module times ---------------------------- 
 
@@ -891,7 +1103,6 @@ def ZdcMonitoringConfig(inputFlags):
                                 ybins=n_module_amp_coarse_bins, ymin=0.0, ymax=module_calib_amp_1Nmonitor_xmax)
 
     # ---------------------------- ZDC-module times ---------------------------- 
-
     if (not zdcMonAlg.IsOnline): #offline - fine binnings
         zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
@@ -903,6 +1114,16 @@ def ZdcMonitoringConfig(inputFlags):
                                 xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                                 ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
         zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                cutmask='zdcModuleHG',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleCalibTime;zdcModuleCalibTime_LG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                cutmask='zdcModuleLG',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleCalibTime;zdcModuleCalibTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
                                 path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
                                 cutmask='zdcModuleHG',
                                 xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,

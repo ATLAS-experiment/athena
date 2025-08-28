@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -45,7 +45,7 @@ StatusCode LArAutoCorrAlgToDB::initialize()
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineHelper = (const LArOnlineID_Base*)ll;
+      m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG("Found the LArOnlineID helper");
     }
     m_nGains=1;
@@ -57,7 +57,7 @@ StatusCode LArAutoCorrAlgToDB::initialize()
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineHelper = (const LArOnlineID_Base*)ll;
+      m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     }
     m_nGains=(unsigned) CaloGain::LARNGAIN;

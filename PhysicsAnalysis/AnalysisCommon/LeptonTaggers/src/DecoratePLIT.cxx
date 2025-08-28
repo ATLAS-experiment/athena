@@ -63,9 +63,9 @@ namespace Prompt {
 
         std::vector<std::string> output_names;
         for (auto& singlefloat : out_f){
-	  ATH_MSG_DEBUG("Found Electron output: "+singlefloat.first);
-	  std::string outname = m_electronsKey.key()+"." + m_TaggerName + "_" + (singlefloat.first.find("elxpromp") != std::string::npos ? "PLITel_pelxpromp" : "PLITel_pnpxall" );
-	  ATH_MSG_DEBUG("Decorating as "+outname);
+          ATH_MSG_DEBUG("Found Electron output: "+singlefloat.first);
+          std::string outname = m_electronsKey.key()+"." + m_TaggerName + "_" + (singlefloat.first.find("elxpromp") != std::string::npos ? "PLITel_pelxpromp" : "PLITel_pnpxall" );
+          ATH_MSG_DEBUG("Decorating as "+outname);
           output_names.push_back(outname);
         }
         ATH_CHECK(m_dec_el_plit_output.assign(output_names));
@@ -95,7 +95,7 @@ namespace Prompt {
 
         std::vector<std::string> output_names;
         for (auto& singlefloat : out_f){
-	  ATH_MSG_DEBUG("Found Muon output: "+singlefloat.first);
+	        ATH_MSG_DEBUG("Found Muon output: "+singlefloat.first);
           std::string outname =	m_muonsKey.key()+"." + m_TaggerName + "_" + (singlefloat.first.find("muxpromp") != std::string::npos ? "TPLTmu_pmuxpromp" : "TPLTmu_pnpxall" );
           ATH_MSG_DEBUG("Decorating as "+outname);
           output_names.push_back(outname);
@@ -212,12 +212,15 @@ namespace Prompt {
     const xAOD::CaloCluster* cluster = muon.cluster();
     if (cluster) {
       float energyloss = 0;
-      if (!muon.parameter(energyloss,xAOD::Muon::MeasEnergyLoss)) {
+      if (!muon.parameter(energyloss,xAOD::Muon::EnergyLoss)) {
         ATH_MSG_WARNING("DecoratePLIT::execute - failed to retrieve energy loss");
         return StatusCode::FAILURE;
       }
       float calE = cluster->calE();
-      if (std::abs(energyloss) > 0)
+      // TODO: in future trainings, we need to prevent negative energy loss values
+      // keeping it as is for now, since latest trainings have been done without this check
+      // only protecting against zero energy loss
+      if (std::abs(energyloss) != 0)
         muon_caloClusterERel = calE / energyloss;
     }
 
@@ -399,6 +402,7 @@ namespace Prompt {
     // filling the tagger scores
     auto it_dec_mu_plit_output = dec_mu_plit_output.begin();
     for (auto& singlefloat : out_f){
+      ATH_MSG_DEBUG("DecoratePLIT::execute - Muon output: " + singlefloat.first + " = " + std::to_string(singlefloat.second));
       (*it_dec_mu_plit_output)(muon) = singlefloat.second;
       ++it_dec_mu_plit_output;
     }
@@ -650,6 +654,7 @@ namespace Prompt {
     // filling the tagger scores
     auto it_dec_el_plit_output = dec_el_plit_output.begin();
     for (auto& singlefloat : out_f){
+      ATH_MSG_DEBUG("DecoratePLIT::execute - Electron output: " + singlefloat.first + " = " + std::to_string(singlefloat.second));
       (*it_dec_el_plit_output)(electron) = singlefloat.second;
       ++it_dec_el_plit_output;
     }
@@ -754,7 +759,7 @@ namespace Prompt {
         tracksUsedForElectron = xAOD::EgammaHelpers::getTrackParticles(elec, true); // useBremAssoc = true
     } else if (const auto* muon = dynamic_cast<const xAOD::Muon*>(&lepton)) {
         if (muon->muonType() == xAOD::Muon::Combined && muon->inDetTrackParticleLink().isValid()) {
-            tracksUsedForMuon.insert(muon->primaryTrackParticle()); // in the case of a muon, this is always 1 only
+            tracksUsedForMuon.insert(*(muon->inDetTrackParticleLink())); // even if the primary track should be a combined track, we still use the id for the match
         }
     }
 

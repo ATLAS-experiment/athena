@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -20,12 +20,11 @@
 #include "TileGeoG4SDCalc.hh"
 //package headers
 #include "TileGeoG4SD/TileGeoG4LookupBuilder.hh"
-#include "TileGeoG4SD/TileGeoG4Lookup.hh"
+#include "TileGeoG4SD/TileHitVectorBuilder.hh"
 //Athena headers
-#include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "PathResolver/PathResolver.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "TileSimEvent/TileHitVector.h"
 #include "TileGeoModel/TileDetectorTool.h"
 //Gaudi headers
 #include "GaudiKernel/ISvcLocator.h"
@@ -33,6 +32,8 @@
 //CLHEP headers
 #include "CLHEP/Units/SystemOfUnits.h"
 //Geant4 headers
+#include <G4Event.hh>
+#include <G4EventManager.hh>
 #include "G4Geantino.hh"
 #include "G4LogicalVolume.hh"
 #include "G4SDManager.hh"
@@ -45,47 +46,34 @@
 #include "G4VTouchable.hh"
 //STL headers
 #include <iostream>
+#include <memory>
 #include <string>
-#include <stdexcept>
 
 
 ATLAS_CHECK_FILE_THREAD_SAFETY;
-
-namespace
-{
-  thread_local std::unique_ptr<TileGeoG4LookupBuilder> s_lookup(nullptr);
-}
 
 static const double tanPi64 = 0.049126849769467254105343321271314; //FIXME!!!!!
 
 TileGeoG4SDCalc::TileGeoG4SDCalc(const std::string& name, ISvcLocator *pSvcLocator)
   : base_class(name, pSvcLocator)
-  , m_detStore("DetectorStore",name)
-  , m_geoModSvc("GeoModelSvc",name)
-  , m_keepHitTime(false)
 {
-  declareProperty( "DetectorStore", m_detStore );
-  declareProperty( "GeoModelSvc", m_geoModSvc );
-  declareProperty( "DeltaTHit" , m_options.deltaTHit );
-  declareProperty( "TimeCut" , m_options.timeCut );
-  declareProperty( "TileTB" , m_options.tileTB );
-  declareProperty( "Ushape" , m_options.uShape );
-  declareProperty( "DoBirk" , m_options.doBirk );
-  declareProperty( "DoTileRow" , m_options.doTileRow );
-  declareProperty( "DoTOFCorrection" , m_options.doTOFCorrection );
-
-  declareProperty("PlateToCell", m_options.plateToCell);
-  declareProperty("DoCalibHitParticleID", m_options.doCalibHitParticleID);
-  declareProperty("RDBAccessSvcName", m_options.rDBAccessSvcName);
-  declareProperty("GeoModelSvcName", m_options.geoModelSvcName);
-
-  declareProperty("VerboseLevel", m_options.verboseLevel);
-}
-
-TileGeoG4SDCalc::~TileGeoG4SDCalc() {
 }
 
 StatusCode TileGeoG4SDCalc::initialize() {
+
+  // Collect options
+  m_options.deltaTHit = m_deltaTHit.value();
+  m_options.timeCut = m_timeCut.value();
+  m_options.tileTB = m_tileTB.value();
+  m_options.plateToCell = m_plateToCell.value();
+  m_options.uShape = m_uShape.value();
+  m_options.doBirk = m_doBirk.value();
+  m_options.doTileRow = m_doTileRow.value();
+  m_options.doTOFCorrection = m_doTOFCorrection.value();
+  m_options.doCalibHitParticleID = m_doCalibHitParticleID.value();
+  m_options.verboseLevel = m_verboseLevel.value();
+  m_options.rDBAccessSvcName = m_rDBAccessSvcName.value();
+  m_options.geoModelSvcName = m_geoModelSvcName.value();
 
   ATH_CHECK(m_detStore.retrieve());
   ATH_MSG_DEBUG("DetectorStore Svc initialized.");
@@ -225,14 +213,12 @@ int TileGeoG4SDCalc::getUshapeFromGM() const {
   return (tileDetectorTool) ? tileDetectorTool->uShape() : 0;
 }
 
-TileGeoG4LookupBuilder* TileGeoG4SDCalc::GetLookupBuilder() const
+std::unique_ptr<TileGeoG4LookupBuilder> TileGeoG4SDCalc::GetLookupBuilder() const
 {
-  // Setup the lookup table if necessary
-  if(!s_lookup) {
-    s_lookup = std::make_unique<TileGeoG4LookupBuilder>(&*m_detStore, m_options.verboseLevel);
-    s_lookup->BuildLookup(m_options.tileTB);
-  }
-  return s_lookup.get();
+  auto lookupBuilder = std::make_unique<TileGeoG4LookupBuilder>(&*m_detStore, m_options.verboseLevel);
+
+  lookupBuilder->BuildLookup(m_options.tileTB);
+  return lookupBuilder;
 }
 
 const TileSDOptions* TileGeoG4SDCalc::GetOptions() const
@@ -242,8 +228,10 @@ const TileSDOptions* TileGeoG4SDCalc::GetOptions() const
 
 G4bool TileGeoG4SDCalc::FindTileScinSection(const G4Step* aStep, TileHitData& hitData) const
 {
-  // Get the lookup table
-  auto lookup = GetLookupBuilder();
+  // Get the lookup table for the current event
+  auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetUserInformation());
+  auto* hitColl = eventInfo->GetHitCollectionMap()->Find<TileHitVectorBuilder>(m_outputCollectionNames[0]);
+  auto lookup = hitColl->GetLookupBuilder();
 
   // Determine touchablehistory for the step
   const G4TouchableHistory* theTouchable = dynamic_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());

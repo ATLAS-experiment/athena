@@ -8,11 +8,11 @@
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/IStorageExplorer.h"
 #include "StorageSvc/pool.h"
-#include "PersistencySvc/PersistencySvcException.h"
 #include "PersistencySvc/ITransaction.h"
 #include "StorageSvc/DbStatus.h"
 #include "StorageSvc/DbOption.h"
 
+#include <exception>
 
 pool::PersistencySvc::MicroSessionManager::MicroSessionManager( pool::PersistencySvc::DatabaseRegistry& registry,
                                                                 pool::ITransaction& transaction,
@@ -28,16 +28,14 @@ pool::PersistencySvc::MicroSessionManager::MicroSessionManager( pool::Persistenc
   void* ppvoid = 0;
   m_storageSvc = createStorageSvc("StorageSvc");
   if ( ! m_storageSvc ) {
-    throw pool::PersistencySvcException( "Could not create a StorageSvc object",
-                                         "PersistencySvc::MicroSessionManager::MicroSessionManager" );
+    throw std::runtime_error( "Could not create a StorageSvc object (APR: \" MicroSessionManager::MicroSessionManager \" from \" PersistencySvc \"" );
   }
   m_storageSvc->addRef();
   pool::DbStatus sc = m_storageSvc->queryInterface( pool::IStorageExplorer::interfaceID(),&ppvoid );
   m_storageExplorer = (IStorageExplorer*)ppvoid;
   if ( !( sc.isSuccess() && m_storageExplorer ) ) {
     m_storageSvc->release();
-    throw pool::PersistencySvcException( "Could not retrieve a IStorageExplorer interface",
-                                         "PersistencySvc::MicroSessionManager::MicroSessionManager" );
+    throw std::runtime_error( "Could not retrieve a IStorageExplorer interface (APR: \" MicroSessionManager::MicroSessionManager \" from \" PersistencySvc \"" );
   }
 }
 
@@ -83,7 +81,7 @@ pool::PersistencySvc::MicroSessionManager::connect( const std::string& fid,
     m_registry.registerDatabaseHandler( db );
     m_databaseHandlers.insert( db );
   }
-  catch( pool::PersistencySvcException& /* error */) {
+  catch( std::runtime_error& /* error */) { // FIXME, this looks dangerous
   }
 
   if ( m_databaseHandlers.empty() && m_session ) {

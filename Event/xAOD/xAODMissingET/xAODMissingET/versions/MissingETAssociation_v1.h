@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMISSINGET_VERSIONS_MISSINGETASSOCIATION_v1_H
@@ -9,21 +9,17 @@
 
 #include "AthContainers/AuxElement.h"
 
-#include "xAODBase/IParticle.h"
 #include "xAODBase/IParticleContainer.h"
 
-#include "xAODMissingET/versions/MissingETCompositionBase.h"
-#include "xAODMissingET/versions/MissingET_v1.h"
-#include "xAODMissingET/MissingETAssociationHelper.h"
+#include "xAODMissingET/versions/MissingETCompositionBase.h" //MissingETBase::UsageHandler
 
 #include <vector>
-#include <set>
 
 namespace xAOD
 {
   // Forward declaration
   class MissingETAssociationHelper;
-
+  class IParticle;
   /*!  @brief MET association descriptor contains object links and corresponding parameters */ 
   class MissingETAssociation_v1 : public SG::AuxElement
   {

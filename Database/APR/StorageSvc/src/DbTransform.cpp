@@ -51,7 +51,7 @@ namespace {
 const ShapeVector allShapes() {
    upgrading_lock_t lock(shapesMutex); 
    ShapeVector sv;
-   for( auto& map_entry : _Init::shapes() ) {
+   for( const auto& map_entry : _Init::shapes() ) {
       for( const DbTypeInfo* info : map_entry.second ) {
          sv.push_back(info);
       }

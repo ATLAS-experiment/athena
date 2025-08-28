@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BaseSimulationSelector.h"
@@ -10,15 +10,8 @@
 
 /** Constructor with parameters */
 ISF::BaseSimulationSelector::BaseSimulationSelector(const std::string& type, const std::string& name, const IInterface* parent) :
-  base_class(type, name, parent),
-  m_simulator("", name),
-  m_isDynamic(false),
-  m_invertCuts(false)
+  base_class(type, name, parent)
 {
-  declareProperty("Simulator",      m_simulator  );
-  declareProperty("IsDynamic",      m_isDynamic  );
-  declareProperty("InvertCuts",     m_invertCuts );
-  declareProperty("SimulationFlavor", m_simFlavorProp);
   m_simFlavorProp.verifier().setLower(ISF::UndefinedSim+1);
   m_simFlavorProp.verifier().setUpper(ISF::NFlavors-1);
   m_simFlavorProp.declareUpdateHandler(&ISF::BaseSimulationSelector::SimulationFlavorHandler, this);

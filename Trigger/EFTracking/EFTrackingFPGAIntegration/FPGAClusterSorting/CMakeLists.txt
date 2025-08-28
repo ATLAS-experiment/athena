@@ -6,7 +6,7 @@ atlas_subdir(FPGAClusterSorting)
 atlas_add_component(FPGAClusterSorting
     src/*.cxx
     src/components/*.cxx
-    LINK_LIBRARIES  AthenaBaseComps AthenaKernel GaudiKernel xAODInDetMeasurement StoreGateLib
+    LINK_LIBRARIES  AthenaBaseComps AthenaKernel GaudiKernel xAODInDetMeasurement StoreGateLib AthContainers
 )
 
 atlas_install_python_modules( python/*.py )

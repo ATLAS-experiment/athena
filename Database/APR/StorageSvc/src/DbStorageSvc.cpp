@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //  ====================================================================
@@ -17,8 +17,6 @@
 #include "DbStorageSvc.h"
 #include "DbStorageExplorer.h"
 #include "POOLCore/DbPrint.h"
-#include "StorageSvc/DbToken.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -28,9 +26,7 @@
 #include "StorageSvc/DbTransform.h"
 #include "StorageSvc/DbConnection.h"
 #include "DbDatabaseObj.h"
-#include "StorageSvc/IOODatabase.h"
 #include "StorageSvc/FileDescriptor.h"
-#include "StorageSvc/DatabaseConnection.h"
 
 #include <vector>
 #include <memory>
@@ -175,10 +171,12 @@ DbStatus DbStorageSvc::createShape( const FileDescriptor&  /*fDesc   */,
                                     const Guid&              shapeID,
                                     ShapeH&                  shapeH)
 {
-  DbStatus sc = DbTransform::getShape(shapeID, (const DbTypeInfo*&)shapeH);
+  const DbTypeInfo* typ_info;
+  DbStatus sc = DbTransform::getShape(shapeID, typ_info);
+  shapeH = typ_info;
   if ( !sc.isSuccess() )    {
     DbPrint log(name());
-    DbTypeInfo* typ = DbTypeInfo::create(shapeID);
+    const DbTypeInfo* typ = DbTypeInfo::create(shapeID);
     if ( 0 != typ )   {
       log << DbPrintLvl::Info 
           << "Building shape according to reflection information using "
@@ -315,7 +313,7 @@ DbStatus DbStorageSvc::read( const FileDescriptor& fDesc,
                              ShapeH                shape,
                              void**                object)
 {
-  string err = "";
+
   pool::AccessMode mode = pool::READ;
   if ( m_domH.isValid() ) {
     DbType typ(token.technology());
@@ -409,11 +407,11 @@ DbStatus DbStorageSvc::connect(const SessionH session,int mod,FileDescriptor& fD
       int wr  = pool::CREATE + pool::UPDATE;
       int m   = dbH.openMode();
       if ( (m&all) && mod == pool::READ )
-        sc = Success;
+        ;
       else if ( m&wr && mod&pool::CREATE )
-        sc = Success;
+        ;
       else if ( m&wr && mod&pool::UPDATE )
-        sc = Success;
+        ;
       else
         dbH.close();
     }

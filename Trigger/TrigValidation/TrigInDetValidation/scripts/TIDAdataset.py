@@ -1,6 +1,5 @@
 #!/bin/env python
 
-from __future__ import print_function
 
 #Import datasets from RTT--------------------------------------------------------------------------                                                   
 def importRTTdatasets(jobID):

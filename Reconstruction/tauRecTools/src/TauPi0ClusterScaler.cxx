@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -202,7 +202,7 @@ void TauPi0ClusterScaler::associateChargedToNeutralPFOs(const xAOD::TauJet& tau,
     // Assign extrapolated chargedPFO to closest neutralPFO within dR<0.04
     xAOD::PFO* neutralPFOMatch = nullptr;
     
-    float dRmin = 0.04; 
+    float dRmin = m_maxDeltaRNeutralCharged; 
     for(size_t i=0; i<tau.nProtoNeutralPFOs(); i++) {
       xAOD::PFO* neutralPFO = neutralPFOContainer.at( tau.protoNeutralPFO(i)->index() );
 

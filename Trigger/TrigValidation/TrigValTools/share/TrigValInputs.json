@@ -3,37 +3,31 @@
         "source": "data",
         "format": "BS",
         "paths": [
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-12._0001.1"
+	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1_200evt",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-12._0001.1"
         ]
     },
     "data_Main": {
         "source": "data",
         "format": "BS",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_Main.daq.RAW._lb0247._SFO-11._0006.data"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_Main.daq.RAW._lb0247._SFO-11._0006.data_150evt",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data24_13p6TeV.00475321.physics_Main.daq.RAW._lb0247._SFO-11._0006.data"
         ]
     },
     "data_run1": {
         "source": "data",
         "format": "BS",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigAnalysisTest/data12_8TeV.00209109.physics_JetTauEtmiss.merge.RAW._lb0186._SFO-1._0001.1"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigAnalysisTest/data12_8TeV.00209109.physics_JetTauEtmiss.merge.RAW._lb0186._SFO-1._0001.1_20evt"
         ]
     },
     "data_run2_EB": {
         "source": "data",
         "format": "BS",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0002.1"
-        ]
-    },
-    "data_run2_Main": {
-        "source": "data",
-        "format": "BS",
-        "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_Main.daq.RAW._lb0100._SFO-1._0001.data"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1_80evt"
         ]
     },
     "data_dbg_stream": {
@@ -54,17 +48,18 @@
         "source": "data",
         "format": "BS",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0036._SFO-ALL._0001.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0039._SFO-ALL._0001.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0042._SFO-ALL._0001.1",
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0043._SFO-ALL._0001.1"
+	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0036._SFO-ALL._0001.1_200evt",
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0036._SFO-ALL._0001.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0039._SFO-ALL._0001.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0042._SFO-ALL._0001.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0043._SFO-ALL._0001.1"
 	]
     },
     "data_ALFACalib": {
         "source": "data",
         "format": "BS",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00354863.calibration_ALFACalib.daq.RAW._lb0000._SFO-1._0018.data"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00354863.calibration_ALFACalib.daq.RAW._lb0000._SFO-1._0018.data_300evt"
         ]
     },
     "data_lowmu": {
@@ -117,7 +112,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-01/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583_tid39626672_00/RDO.39626672._001121.pool.root.1"
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583_tid39626672_00/RDO.39626672._001121.pool.root.1"
         ]
     },
     "bphysics_mumu": {
@@ -195,7 +190,8 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/mc23_13p6TeV.310772.CosmicRays_CollisionSetup.recon.RDO.s4261_s4260_r15236_tid36836491_00/RDO.36836491._001912.pool.root.1"
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/valid1.310772.CosmicRays_CollisionSetup.recon.RDO.s4559_s4560_r16709_tid45807425_00/RDO.45807425._000001.pool.root.1",
+	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/valid1.310772.CosmicRays_CollisionSetup.recon.RDO.s4559_s4560_r16709_tid45807425_00/RDO.45807425._000002.pool.root.1"
         ]
     },
     "Zmumu": {
@@ -242,7 +238,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-01/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864949_00/RDO.41864949._000217.pool.root.1"
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864949_00/RDO.41864949._000217.pool.root.1"
         ]
     },
     "Bphys_JpsiPhi": {
@@ -305,7 +301,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-01/mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864936_00/RDO.41864936._000339.pool.root.1"
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864936_00/RDO.41864936._000339.pool.root.1"
         ]
     },
     "Ztautau": {

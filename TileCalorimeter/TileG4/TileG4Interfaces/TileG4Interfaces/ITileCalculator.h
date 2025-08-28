@@ -82,7 +82,7 @@ class ITileCalculator : virtual public IService {
   /// Used by FastCaloSimParamAction
   virtual TileMicroHit GetTileMicroHit(const G4Step*, TileHitData& hitData) const = 0;
   ///
-  virtual TileGeoG4LookupBuilder* GetLookupBuilder() const = 0;
+  virtual std::unique_ptr<TileGeoG4LookupBuilder> GetLookupBuilder() const = 0;
   /// pointer to class with all options
   virtual const TileSDOptions* GetOptions() const = 0;
   /// Method used by TileFastCaloSim/TileFCSmStepToTileHitVec

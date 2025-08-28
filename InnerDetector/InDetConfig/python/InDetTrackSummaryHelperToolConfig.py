@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackSummaryHelperTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,6 +19,9 @@ def InDetTrackSummaryHelperToolCfg(flags, name='InDetSummaryHelper', **kwargs):
 
     if not flags.Detector.EnableTRT:
         kwargs.setdefault("TRTStrawSummarySvc", "")
+    else:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+        kwargs.setdefault("TRTStrawSummarySvc", result.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
 
     kwargs.setdefault("usePixel", flags.Detector.EnablePixel)
     kwargs.setdefault("useSCT", flags.Detector.EnableSCT)

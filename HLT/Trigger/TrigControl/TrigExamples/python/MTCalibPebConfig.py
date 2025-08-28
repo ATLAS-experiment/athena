@@ -226,8 +226,8 @@ def hlt_result_cfg(flags, hypo_algs):
     ])
     for hypo in hypo_algs:
         serialiser.addCollectionListToMainResult([
-            'xAOD::TrigCompositeContainer_v1#%s' % hypo.HypoOutputDecisions,
-            'xAOD::TrigCompositeAuxContainer_v2#%sAux.' % hypo.HypoOutputDecisions,
+            'xAOD::TrigCompositeContainer#%s' % hypo.HypoOutputDecisions,
+            'xAOD::TrigCompositeAuxContainer#%sAux.' % hypo.HypoOutputDecisions,
         ])
 
     # Data scouting example
@@ -242,8 +242,8 @@ def hlt_result_cfg(flags, hypo_algs):
                     collections.add(coll_name)
     for coll_name in collections:
         serialiser.addCollectionListToResults([
-            'xAOD::TrigCompositeContainer_v1#{:s}'.format(coll_name),
-            'xAOD::TrigCompositeAuxContainer_v2#{:s}Aux.'.format(coll_name)
+            'xAOD::TrigCompositeContainer#{:s}'.format(coll_name),
+            'xAOD::TrigCompositeAuxContainer#{:s}Aux.'.format(coll_name)
         ], resultList)
 
     # StreamTag definitions

@@ -22,11 +22,9 @@ atlas_add_library( IsolationCorrectionsLib
    egammaUtils
    PRIVATE_LINK_LIBRARIES PathResolver ${extra_libs} )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( IsolationCorrections
-      src/components/*.cxx
-      LINK_LIBRARIES IsolationCorrectionsLib )
-endif()
+atlas_add_component( IsolationCorrections
+   src/components/*.cxx
+   LINK_LIBRARIES IsolationCorrectionsLib )
 
 atlas_add_dictionary( IsolationCorrectionsDict
    IsolationCorrections/IsolationCorrectionsDict.h

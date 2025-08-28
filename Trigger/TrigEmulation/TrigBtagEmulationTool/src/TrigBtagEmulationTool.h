@@ -38,8 +38,9 @@ public:
   virtual bool isPassed(const std::string& chain, const EmulContext&) const override;
 
 private:
-  bool isPassed(const TrigBtagEmulationChain&, const EmulContext&) const;
+  bool isPassed(const std::string&, const TrigBtagEmulationChain&, const EmulContext&) const;
   bool evaluate_L1(const TrigBtagEmulationChain&, const EmulContext&) const;
+  bool evaluate_L1(const std::string&, const EmulContext&) const;
   bool evaluate_HLT(const TrigBtagEmulationChain&, const EmulContext&) const;
 
   bool evaluate_preselection(const TrigBtagEmulationChain& chain,
@@ -62,10 +63,13 @@ private:
 				   const std::vector<std::string>& chainPartNames,
 				   const std::vector<int>& multiplicities) const;
 
-  std::vector<std::vector<bool>> evaluate_HLT_chainParts(const TrigBtagEmulationChain& chain,
-							 const std::vector<TrigBtagEmulationJet>& jets,
-							 int idx_begin,
-							 int idx_end) const;
+  std::vector<std::vector<bool>>
+  evaluate_HLT_chainParts(const TrigBtagEmulationChain &chain,
+                          const std::vector<TrigBtagEmulationJet> &jets,
+                          int idx_begin, int idx_end,
+                          const std::vector<TrigBtagEmulationJet> *splitJets = nullptr,
+                          const std::vector<TrigBtagEmulationJet> *gscJets = nullptr
+                          ) const;
 
   bool isPassedBTagger(const TrigBtagEmulationJet& jet,
 		       const std::string& btagger) const;
@@ -73,23 +77,25 @@ private:
   StatusCode addEmulatedChain(const std::string& name, 
 			      const std::vector< std::string >& definition);
 
-  StatusCode checkInputChainExists(const std::string&) const;
   StatusCode retrieveTriggerObjects(const Trig::JetManagerTool&,
 				    EmulContext&) const;
 
 private:
   PublicToolHandle<Trig::TrigDecisionTool> m_trigDec {this, "TrigDecisionTool", "",""};
   
-  // Input properties
-  Gaudi::Property< std::string > m_inputChains_PFlow {this, "InputChain", "HLT_j45_pf_subjesgsc_ftf_L1J15", ""};
-    
   // jet Managers
   ToolHandle< Trig::JetManagerTool > m_manager_PFlow_cnt {this, "JM_PFlow_CNT", "",""};
   ToolHandle< Trig::JetManagerTool > m_manager_EMTopo_presel {this, "JM_EMTopo_PRESEL", "",""};
+  ToolHandle< Trig::JetManagerTool > m_manager_a4tcemsubjesJet_cnt {this, "JM_a4tcemsubjes_CNT", "",""};
+  ToolHandle< Trig::JetManagerTool > m_manager_SplitJet_cnt {this, "JM_Split_CNT", "",""};
+  ToolHandle< Trig::JetManagerTool > m_manager_GSCJet_cnt {this, "JM_GSC_CNT", "",""};
 
   // Flavour Tagging
   Gaudi::Property< std::map<std::string, double> > m_tagger_wp {this, "WorkingPoints", {}};
   Gaudi::Property< std::map<std::string, std::string> > m_remapping {this, "FTD_Remapping", {}};
+
+  // LHC period Run2 or Run3
+  Gaudi::Property<int> m_LHCPeriod {this, "LHCPeriod", 3, "LHC Period Run2 or Run3"};
 
   // EMULATED CHAINS
   Gaudi::Property< std::map< std::string, std::vector< std::string >>> m_emulatedChainDefinitions {this, "EmulatedChainDefinitions", {}, ""};

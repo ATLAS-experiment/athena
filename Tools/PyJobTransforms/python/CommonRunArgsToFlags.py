@@ -71,3 +71,6 @@ def commonRunArgsToFlags(runArgs,configFlags):
 
     if hasattr(runArgs,"executorEventSkips"):
         configFlags.Exec.SkipEvents = runArgs.executorEventSkips[configFlags.ExecutorSplitting.Step]
+
+    if hasattr(runArgs,"mpi"):
+        configFlags.Exec.MPI = runArgs.mpi

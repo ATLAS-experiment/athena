@@ -1,0 +1,43 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+#include <format>
+
+// Used by std::format to format ClusterMessageType enums
+template <>
+struct std::formatter<ClusterMessageType>
+    : public std::formatter<std::string_view> {
+  using formatter<string_view>::formatter;
+  // parse is inherited from formatter<string_view>.
+  template <typename FormatContext>
+  auto format(const ClusterMessageType& mType, FormatContext& ctx) const {
+    string_view str = "ERROR";
+    switch (mType) {
+      case ClusterMessageType::RequestEvent:
+        str = "RequestEvent";
+        break;
+      case ClusterMessageType::ProvideEvent:
+        str = "ProvideEvent";
+        break;
+      case ClusterMessageType::EventsDone:
+        str = "EventsDone";
+        break;
+      case ClusterMessageType::FinalWorkerStatus:
+        str = "FinalWorkerStatus";
+        break;
+      case ClusterMessageType::WorkerError:
+        str = "WorkerError";
+        break;
+      case ClusterMessageType::EmergencyStop:
+        str = "EmergencyStop";
+        break;
+      case ClusterMessageType::Data:
+        str = "Data (Variable Size)";
+        break;
+      case ClusterMessageType::EMPTY:
+        str = "[Empty Message]";
+        break;
+    }
+    return formatter<string_view>::format(str, ctx);
+  }
+};

@@ -135,8 +135,7 @@ Jet ID scale factors are provided for a couple of working points:
 
 These can be accessed, for example via::
 
-  TauEffTool.setProperty("IDLevel", (int)JETIDBDTLOOSE);
-
+  TauEffTool.setProperty("IDLevel", static_cast<int>(JETIDBDTLOOSE));
 
 Scale Factor Extraction
 =========================

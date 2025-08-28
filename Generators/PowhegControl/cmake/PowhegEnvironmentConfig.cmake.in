@@ -1,36 +1,44 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This module is used to set up the runtime environment for Powheg
-# 
 #
 
-# Set the environment variable(s):
+# Convenience cache variable(s).
+set( ATLAS_POWHEGVER "08-05" CACHE STRING "Version of the Powheg configuration files" )
 
-set( ATLAS_POWHEGVER "08-04" CACHE STRING
-   "Version of the Powheg configuration files" )
-set( ATLAS_POWHEGPATH "/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-${ATLAS_POWHEGVER}-${CMAKE_HOST_SYSTEM_PROCESSOR}"
-   CACHE PATH "Path to the Powheg configuration files" )
+# Reset the environment variable as a first step.
+set( POWHEGENVIRONMENT_ENVIRONMENT )
+
+# Look for OpenLoops and LHAPDF.
 find_package( OpenLoops )
 find_package( Lhapdf )
 
+# If they are found, set up environment variables for them.
 if(LHAPDF_FOUND AND OPENLOOPS_FOUND)
-set( POWHEGENVIRONMENT_ENVIRONMENT
-    SET POWHEGVER "${ATLAS_POWHEGVER}"
-    SET POWHEGPATH "${ATLAS_POWHEGPATH}" 
-    FORCESET OPENLOOPSVER ${OPENLOOPS_LCGVERSION} 
-    FORCESET OPENLOOPSPATH ${OPENLOOPS_LCGROOT}    
-    FORCESET OpenLoopsPath ${OPENLOOPS_LCGROOT}    
-    FORCESET LHAPDFVER ${LHAPDF_LCGVERSION} 
-    FORCESET LHAPDF_INSTAL_PATH ${LHAPDF_LCGROOT}
-    PREPEND LHAPDF_DATA_PATH
-      /cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current
-    PREPEND LHAPATH
-      /cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current    
-    APPEND PYTHONPATH
-      "${_LHAPDF_PYTHON_PATH}"
-    )
+   list( APPEND POWHEGENVIRONMENT_ENVIRONMENT
+      FORCESET OPENLOOPSVER "${OPENLOOPS_LCGVERSION}"
+      FORCESET OPENLOOPSPATH "${OPENLOOPS_LCGROOT}"
+      FORCESET OpenLoopsPath "${OPENLOOPS_LCGROOT}"
+      FORCESET LHAPDFVER "${LHAPDF_LCGVERSION}"
+      FORCESET LHAPDF_INSTAL_PATH "${LHAPDF_LCGROOT}"
+      PREPEND LHAPDF_DATA_PATH
+         "/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current"
+      PREPEND LHAPATH
+         "/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current"
+      )
+endif()
+
+# Check if CompileBox is part of the LCG version in use.
+if(NOT "${COMPILEBOX_LCGROOT}" STREQUAL "")
+   # If yes, add it to the runtime environment.
+   list( APPEND POWHEGENVIRONMENT_ENVIRONMENT
+      SET POWHEGVER "${ATLAS_POWHEGVER}"
+      SET POWHEGPATH "${COMPILEBOX_LCGROOT}"
+      )
+   # And also set up an RPM dependency on it.
+   set(COMPILEBOX_FOUND TRUE)
+   lcg_need_rpm(compilebox)
+endif()
 
 # Silently declare the module found.
 set( POWHEGENVIRONMENT_FOUND TRUE )
-endif()
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of TileROD_Decoder class
@@ -590,7 +590,7 @@ void TileROD_Decoder::unpack_frag1(uint32_t /* version */,
     std::vector<float> digiVec(nsamp);
     pDigits.reserve(nchan);
     
-    const uint16_t* p16 = (const uint16_t *) p;
+    const uint16_t* p16 = reinterpret_cast<const uint16_t *>(p);
     
     for (int ch = 0; ch < nchan; ++ch) {
       
@@ -866,7 +866,7 @@ void TileROD_Decoder::unpack_frag3(uint32_t /* version */,
   // followed by 2 map words
   const uint32_t* pMap = p + 2;
   
-  const short* p16 = (const short *)p;
+  const short* p16 = reinterpret_cast<const short *>(p);
   
   p16 = p16 + 8; // 8 16bit words so far
   short wc16 = 4 + sizeOverhead * 2; // can be 8 or 10 (if overhead is 3 words)
@@ -1301,7 +1301,7 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
             }
           }
 
-          const uint16_t* sample = (const uint16_t *) (++data);
+          const uint16_t* sample = reinterpret_cast<const uint16_t *> (++data);
 
           for (int gain = 1; gain > -1; --gain) { // HG seems to be first
             int start_channel(miniDrawer * Tile::MAX_MINIDRAWER_CHAN);
@@ -3877,7 +3877,7 @@ void TileROD_Decoder::unpack_frag3HLT(uint32_t /* version */,
   // followed by 2 map words
   const uint32_t* pMap = p + 2;
   
-  const short* p16 = (const short *)p;
+  const short* p16 = reinterpret_cast<const short *>(p);
   
   p16 = p16 + 8; // 8 16bit words so far
   short wc16 = 4 + sizeOverhead * 2; // can be 8 or 10 (if overhead is 3 words)

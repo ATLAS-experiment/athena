@@ -19,14 +19,19 @@
 #include "../L1TopoAlgs/jXEInputAlgTool.h"
 
 #include "../GlobalAlgs/Egamma1_LArStrip_Fex.h"
+#include "../GlobalAlgs/Egamma1_LArStrip_Fex_RowAware.h"
 #include "../GlobalAlgs/EMB1CellsFromCaloCells.h"
 #include "../GlobalAlgs/eFexRoIAlgTool.h"
 #include "../GlobalAlgs/ERatioAlgTool.h"
 #include "../GlobalAlgs/Egamma1BDTAlgTool.h"
+#include "../GlobalAlgs/Egamma1BaselineAlgTool.h"
 
 #include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerAlgTool.h"
 #include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerComparator.h"
 #include "../GlobalAlgs/Hypothesis/UCL/InvariantMassDeltaPhiInclusive2AlgTool.h"
+
+#include "../GlobalAlgs/FirstChain/LArCellPreparationAlg.h"
+#include "../GlobalAlgs/FirstChain/LArCellMuxAlg.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
@@ -47,11 +52,16 @@ DECLARE_COMPONENT(GlobalSim::cTauInputAlgTool)
 DECLARE_COMPONENT(GlobalSim::jXEInputAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
+DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
 DECLARE_COMPONENT(GlobalSim::EMB1CellsFromCaloCells)
 DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
 DECLARE_COMPONENT(GlobalSim::ERatioAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
+DECLARE_COMPONENT(GlobalSim::Egamma1BaselineAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerAlgTool)
 DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerComparator)
 DECLARE_COMPONENT(GlobalSim::InvariantMassDeltaPhiInclusive2AlgTool)
+
+DECLARE_COMPONENT(GlobalSim::LArCellPreparationAlg)
+DECLARE_COMPONENT(GlobalSim::LArCellMuxAlg)

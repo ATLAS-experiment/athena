@@ -5,9 +5,6 @@
 #define MUONR4_MUONSPACEPOINT_SPACEPOINTPERLAYERSORTER_H
 
 #include <MuonSpacePoint/SpacePointContainer.h>
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonIdHelpers/MuonIdHelper.h"
-
 
 namespace MuonR4{
     /** @brief The SpacePointPerLayerSorter sort two given space points by their layer Identifier. It is defined as the
@@ -18,19 +15,15 @@ namespace MuonR4{
     class SpacePointPerLayerSorter {
         public:
 
-            SpacePointPerLayerSorter(const Muon::IMuonIdHelperSvc* idHelperSvc);
+            SpacePointPerLayerSorter() = default;
             
             bool operator()(const std::shared_ptr<SpacePoint>& sp1, const std::shared_ptr<SpacePoint>& sp2) const;
             bool operator()(const std::unique_ptr<SpacePoint>& sp1, const std::unique_ptr<SpacePoint>& sp2) const;
             bool operator()(const SpacePoint* sp1, const SpacePoint* sp2) const;
-            bool operator()(const SpacePoint& sp1, const SpacePoint& sp2) const;
+            bool operator()(const SpacePoint& sp1, const SpacePoint& sp2) const;    
             
-            // This function computes the layer Identifier.
-            Identifier detectorLayerId(const Identifier& id) const;
-
-        private:
-
-            const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
+            /** @brief method returning the logic layer number */
+            unsigned int sectorLayerNum(const SpacePoint& sp) const;
     };    
 
 }

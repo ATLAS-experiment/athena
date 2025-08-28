@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: RootObjectMetadata.cxx 472095 2011-12-02 10:27:01Z krasznaa $
 
-// STL include(s):
-#include <vector>
-#include <algorithm>
+
 
 // Gaudi/Athena include(s):
 #include "AthenaKernel/errorcheck.h"
@@ -14,6 +12,8 @@
 // Local include(s):
 #include "RootObjectMetadata.h"
 #include "isPrimitive.h"
+// STL include(s):
+#include <set>
 
 namespace D3PD {
 
@@ -32,8 +32,7 @@ namespace D3PD {
                                                const std::string& docstring ) {
 
       // Check that the variable has the correct prefix:
-      if( ( m_prefix != "" ) &&
-          ( name.find( m_prefix ) != 0 ) ) {
+      if( ( not m_prefix.empty() ) && ( not name.starts_with( m_prefix )) ) {
          REPORT_MESSAGE_WITH_CONTEXT( MSG::ERROR, "RootObjectMetadata" )
             << "Specified variable name (" << name << ") doesn't have the "
             << "expected prefix (" << m_prefix << ")";
@@ -89,8 +88,8 @@ namespace D3PD {
       for( ; itr != end; ++itr ) {
 
          // Check if the variable name begins with the prefix (it shouldn't):
-         if( ( m_prefix != "" ) &&
-             ( itr->name().find( m_prefix ) == 0 ) ) {
+         if( ( not m_prefix.empty() ) &&
+             ( itr->name().starts_with( m_prefix )) ) {
             // Create a copy of the variable, and remove the prefix from its name:
             Variable var = *itr;
             var.setName( var.name().substr( m_prefix.size(), var.name().npos ) );

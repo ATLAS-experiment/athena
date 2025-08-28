@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "EfexSimMonitorAlgorithm.h"
 #include "eFEXTOBSimDataCompare.h"
@@ -24,6 +24,7 @@ StatusCode EfexSimMonitorAlgorithm::initialize() {
   ATH_CHECK( m_eFexEmSimContainerKey.initialize() );
   ATH_CHECK( m_eFexTauContainerKey.initialize() );
   ATH_CHECK( m_eFexTauSimContainerKey.initialize() );
+    ATH_CHECK( m_scellKey.initialize() );
     ATH_CHECK( m_eFexEmxContainerKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_eFexEmxSimContainerKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_eFexTauxContainerKey.initialize(SG::AllowEmpty) );
@@ -50,7 +51,15 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
     if(!m_eFexTowerContainerKey.empty()) {
         SG::ReadHandle<xAOD::eFexTowerContainer> towers{m_eFexTowerContainerKey, ctx};
         if(towers.isValid() && !towers->empty()) {
-            fexReadout = 1;
+            // check towers aren't all in error ... if they are
+            // this is a debug readout event not a fexReadout event
+            size_t badTowers=0;
+            for(auto eFexTower : *towers) {
+                if(eFexTower->em_status()||eFexTower->had_status()) badTowers++;
+            }
+            if(badTowers != towers->size()) {
+                fexReadout = 1;
+            }
         }
     }
     auto IsDataTowers = Monitored::Scalar<bool>("IsDataTowers",fexReadout==1);
@@ -70,7 +79,19 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
         EventType = "EmulatedTowers";
         // removing next two lines until further investigation of cause of mismatches by LATOME
         //if((timeSince>=0&&timeSince<10)) EventType+="+JustAfter";
-        //else if((timeUntil>=0&&timeUntil<10)) EventType+="+JustBefore";
+        if((timeUntil>=0&&timeUntil<=5)) { // events within 5s of an OTF masking change may have mismatches
+            EventType+="+JustBeforeOTF";
+            IsEmulatedTowers=false; // wont fill emulated tower plots with mismatches from these types of events
+        }
+
+        // also check if any supercells are missing ... mismatches will get an entry in the TTree (and entries)
+        // but not feature in the EmulatedTowers mismatches plots
+        SG::ReadHandle<CaloCellContainer> scells(m_scellKey,ctx); // n.b. 34048 is a full complement of scells
+        if(!scells.isValid() || scells->size()!=34048){
+            IsEmulatedTowers=false;
+            EventType+="+MissingSCells";
+        }
+
     }
 
     SG::ReadHandle<T> tobs1{key1, ctx};
@@ -170,7 +191,8 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
             for(auto w : sword0s) s << w << " ";
             ATH_MSG_DEBUG(s.str());
         }
-        fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
+        auto signatureEvtType = Monitored::Scalar<std::string>("SignatureEvtType",signa+":"+static_cast<std::string>(evtType));
+        fill("mismatches",signatureEvtType,simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
     } else {
         tobMismatched=0;
         fill("mismatches",tobMismatched,lbn,signature,simReady,evtType);

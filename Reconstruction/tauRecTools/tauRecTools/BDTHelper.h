@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_BDTHELPER_H
@@ -24,10 +24,6 @@ namespace tauRecTools {
 
       float getResponse(const std::map<TString, float*>& availableVariables) const; 
 
-      float getClassification(const std::map<TString, float*>& availableVariables) const;
-
-      float getGradBoostMVA(const xAOD::TauJet& tau) const; 
-
       MVAUtils::BDT* getBDT() const { return m_BDT.get(); }
 
     private:
@@ -36,8 +32,6 @@ namespace tauRecTools {
       std::vector<float> getInputVariables(const std::map<TString, float>& availableVariables) const ;
       
       std::vector<float> getInputVariables(const std::map<TString, float*>& availableVariables) const;
-
-      std::vector<float> getInputVariables(const xAOD::TauJet& tau) const ;
 
       std::unique_ptr<MVAUtils::BDT> m_BDT;
       std::vector<TString> m_inputVariableNames;

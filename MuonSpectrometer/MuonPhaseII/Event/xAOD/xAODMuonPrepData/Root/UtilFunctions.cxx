@@ -26,7 +26,13 @@
 namespace {
     template <class MeasType> const Acts::Surface& fetchSurface(const xAOD::UncalibratedMeasurement* meas) {
         auto castedM = static_cast<const MeasType*>(meas);
-        return castedM->readoutElement()->surface(castedM->measurementHash());
+        IdentifierHash hash{};
+        if constexpr(std::is_same_v<xAOD::MdtDriftCircle, MeasType>) {
+            hash = castedM->measurementHash();
+        } else {
+            hash = castedM->layerHash();
+        }
+        return castedM->readoutElement()->surface(hash);
     }
 }
 

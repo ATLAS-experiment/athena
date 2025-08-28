@@ -9,6 +9,8 @@
 #include "FlavorTagInference/GNNTool.h"
 #include "FlavorTagInference/NNSharingSvc.h"
 #include "FlavorTagInference/MultifoldGNNTool.h"
+#include "FlavorTagInference/GNNDataLoader.h"
+
 
 #include "src/FoldDecoratorAlg.h"
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArAutoCorrDecoderTool.h"
@@ -14,13 +14,13 @@ StatusCode LArAutoCorrDecoderTool::initialize()
   if ( m_isSC ) {
     const LArOnline_SuperCellID* ll;
     ATH_CHECK( detStore()->retrieve(ll, "LArOnline_SuperCellID") );
-    m_onlineID = (const LArOnlineID_Base*)ll;
+    m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG("Found the LArOnlineID helper");
     
   } else { // m_isSC
     const LArOnlineID* ll;
     ATH_CHECK( detStore()->retrieve(ll, "LArOnlineID") );
-    m_onlineID = (const LArOnlineID_Base*)ll;
+    m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
   }
 

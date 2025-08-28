@@ -387,7 +387,7 @@ void TrackHandle_TrackContainer::ensureInitTSOSs(
 }
 
 void TrackHandle_TrackContainer::addTrackState(
-    const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy& state,
+    const typename ActsTrk::TrackContainer::ConstTrackStateProxy& state,
     std::vector<AssociatedObjectHandleBase*>* ascobjs, unsigned int index) {
 
   AscObj_TrackState* ao = new AscObj_TrackState(this, index, state);
@@ -401,7 +401,7 @@ void TrackHandle_TrackContainer::addTrackState(
 }
 
 TrkObjToString::MeasurementType TrackHandle_TrackContainer::measurementType(
-    const ActsTrk::TrackStateBackend::ConstTrackStateProxy& state) const {
+    const ActsTrk::TrackContainer::ConstTrackStateProxy& state) const {
   TrkObjToString::MeasurementType type = TrkObjToString::Unknown;
   if (state.hasReferenceSurface()) {
       const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
@@ -428,7 +428,7 @@ TrkObjToString::MeasurementType TrackHandle_TrackContainer::measurementType(
 }
 
 QString TrackHandle_TrackContainer::measurementText(
-    const ActsTrk::TrackStateBackend::ConstTrackStateProxy& state) const {
+    const ActsTrk::TrackContainer::ConstTrackStateProxy& state) const {
   QString text("Unknown Measurement");
   if (state.hasReferenceSurface()) {
     const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(

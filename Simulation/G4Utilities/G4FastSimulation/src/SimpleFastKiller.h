@@ -14,7 +14,9 @@
 class SimpleFastKiller: public G4VFastSimulationModel
 {
  public:
-  SimpleFastKiller(const std::string& name);
+  // Standard constructor
+  using G4VFastSimulationModel::G4VFastSimulationModel;
+
   ~SimpleFastKiller() {}
 
   //Fast sim methods

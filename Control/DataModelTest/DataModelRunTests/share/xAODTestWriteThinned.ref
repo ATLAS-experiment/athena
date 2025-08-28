@@ -58,7 +58,6 @@ AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-StreamThinned1       INFO Metadata records written: 21
 ApplicationMgr       INFO Application Manager Stopped successfully
 AthDictLoaderSvc     INFO in finalize...
 ToolSvc              INFO Removing all tools created by ToolSvc

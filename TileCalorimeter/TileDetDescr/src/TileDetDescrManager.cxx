@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -230,7 +230,7 @@ void TileDetDescrManager::create_elements(bool checks)
 
         CaloCell_ID::CaloSample sample = (CaloCell_ID::CaloSample)(calo_sample0 + isamp);
 
-        caloDescr = new CaloDetDescriptor(reg_id,(AtlasDetectorID *)m_tile_id,m_cell_id,sample,isamp);
+        caloDescr = new CaloDetDescriptor(reg_id,static_cast<const AtlasDetectorID *>(m_tile_id),m_cell_id,sample,isamp);
         // caloDescr->set_cylindric(emin,emax,phi_min,phi_max,rmin,rmax,zmin,zmax,gap);
         // --
         caloDescr->setCaloEtaMin(emin);
@@ -286,7 +286,7 @@ void TileDetDescrManager::create_elements(bool checks)
       depth_out[0] = zmax;
       CaloCell_ID::CaloSample sample = CaloCell_ID::TileGap3;
 
-      caloDescr = new CaloDetDescriptor(reg_id,(AtlasDetectorID *)m_tile_id,m_cell_id,sample,TileID::SAMP_E);
+      caloDescr = new CaloDetDescriptor(reg_id,static_cast<const AtlasDetectorID *>(m_tile_id),m_cell_id,sample,TileID::SAMP_E);
       // caloDescr->set_cylindric(emin,emax,phi_min,phi_max,rmin,rmax,zmin,zmax,true);
       // --
       caloDescr->setCaloEtaMin(emin);
@@ -344,7 +344,7 @@ void TileDetDescrManager::create_elements(bool checks)
         Identifier id = m_tile_id->module_id(section,side,module, checks);
         IdentifierHash idhash;
         /* int result = */ m_tile_id->get_hash(id,idhash,&module_context);
-        modDescr = new CaloDetDescriptor(id,(AtlasDetectorID *)m_tile_id,m_cell_id);
+        modDescr = new CaloDetDescriptor(id,static_cast<const AtlasDetectorID *>(m_tile_id),m_cell_id);
         // modDescr->set_cylindric(emin,emax,phi-dphi/2.,phi+dphi/2,rmin,rmax);
         // --
         modDescr->setCaloEtaMin(emin);

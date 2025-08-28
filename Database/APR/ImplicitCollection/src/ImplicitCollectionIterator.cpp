@@ -31,29 +31,11 @@ pool::ImplicitCollectionIterator::~ImplicitCollectionIterator()
 }
 
 
-void
-pool::ImplicitCollectionIterator::
-setCondition( const std::string& whereClause,
-              coral::AttributeList*,
-              TokenList* )
-{
-   m_whereClause += whereClause;
-}
-
-
 pool::ICollectionCursor&
 pool::ImplicitCollectionIterator::execute()
 {
-   m_tokenIterator = m_container.tokens( m_whereClause );
+   m_tokenIterator = m_container.tokens();
    return *this;
-}
-
-
-
-const std::string&
-pool::ImplicitCollectionIterator::whereClause() const
-{
-  return m_whereClause;
 }
 
 

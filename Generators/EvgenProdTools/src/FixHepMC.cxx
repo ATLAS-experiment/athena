@@ -24,6 +24,7 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("KillPDG0", m_killPDG0 = true, "Remove particles with PDG ID 0?");
   declareProperty("CleanDecays", m_cleanDecays = true, "Clean decay chains from non-propagating particles?");
   declareProperty("PurgeUnstableWithoutEndVtx", m_purgeUnstableWithoutEndVtx = false, "Remove unstable particles without decay vertex?");
+  declareProperty("IgnoreSemiDisconnected", m_ignoreSemiDisconnected = false, "Ignore semi-disconnected particles (normal in Sherpa)");
   declareProperty("PIDmap", m_pidmap = std::map<int,int>(), "Map of PDG IDs to replace");
 }
 #ifndef HEPMC3
@@ -173,10 +174,16 @@ StatusCode FixHepMC::execute() {
     /// AV: In case we have 3 particles, we try to add a vertex 
     /// that corresponds to 1->2 and 1->1 splitting.
     /// AV: In case we have 4 particles, we can try to do that as well.
-    if ( semi_disconnected.size() == 4 || semi_disconnected.size() == 3 || semi_disconnected.size() == 2) {
+
+    /// YH: In the case of Sherpa with HEPMC_TREE_LIKE: 1, where the
+    /// YH: incoming/outgoing particles of the signal process have no
+    /// YH: production/end vertices, this treatment can produce a loop.
+    /// YH: Skip it by setting IgnoreSemiDisconnected = True.
+    if ( !m_ignoreSemiDisconnected && (semi_disconnected.size() == 4 || semi_disconnected.size() == 3 || semi_disconnected.size() == 2)) {
       size_t no_endv = 0;
       size_t no_prov = 0;
       HepMC::FourVector sum(0,0,0,0);
+      std::set<HepMC::GenVertexPtr> standalone;
       for (const auto& part : semi_disconnected) {
         if (!part->production_vertex() || !part->production_vertex()->id()) {
           no_prov++; sum += part->momentum();
@@ -184,10 +191,13 @@ StatusCode FixHepMC::execute() {
         if (!part->end_vertex()) { 
           no_endv++;  sum -= part->momentum();
         }
+        if (part->production_vertex()) standalone.insert(part->production_vertex());
+        if (part->end_vertex()) standalone.insert(part->end_vertex());
       }
-      ATH_MSG_INFO("Heuristics: found " << semi_disconnected.size() << " semi-disconnected particles. Momentum sum is " << sum);
+      ATH_MSG_INFO("Heuristics: found " << semi_disconnected.size() << " semi-disconnected particles. Momentum sum is " << sum << " Standalone vertices " << standalone.size());
+      bool standalonevertex = (standalone.size() == 1 && (*standalone.begin())->particles_in().size() + (*standalone.begin())->particles_out().size() == semi_disconnected.size());
       /// The condition below will cover 1->1, 1->2 and 2->1 cases
-      if (no_endv && no_prov  && ( no_endv + no_prov  == semi_disconnected.size() )) {
+      if (! standalonevertex && no_endv && no_prov  && ( no_endv + no_prov  == semi_disconnected.size() )) {
         if (std::abs(sum.px()) < 1e-2  && std::abs(sum.py()) < 1e-2  && std::abs(sum.pz()) < 1e-2 ) {
           ATH_MSG_INFO("Try " << no_endv << "->" << no_prov << " splitting/merging.");
           auto v = HepMC::newGenVertexPtr();

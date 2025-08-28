@@ -40,8 +40,8 @@ struct AlignedDynArray
     "Alignment not an integral multiple of sizeof(void*)");
   //Also we assert is POD
   static_assert(
-    std::is_pod_v<T>,
-    "Type T is not POD");
+    std::is_standard_layout_v<T>,
+    "Type T is not standard layout");
   ///@{
   // Standard typedefs
   typedef T value_type;

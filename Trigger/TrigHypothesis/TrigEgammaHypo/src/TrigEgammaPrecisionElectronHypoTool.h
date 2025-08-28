@@ -37,6 +37,7 @@ class TrigEgammaPrecisionElectronHypoTool : public extends<AthAlgTool, ITrigEgam
   Gaudi::Property< float >              m_detacluster { this, "dETACLUSTERthr", 0. , "" };
   Gaudi::Property< float >              m_dphicluster { this, "dPHICLUSTERthr", 0. , "" };  
   Gaudi::Property< float >              m_RelPtConeCut { this, "RelPtConeCut", -999., "Track isolation cut" };
+  Gaudi::Property< float >              m_TopoEtConeCut { this, "TopoEtConeCut", -999., "Calorimeter isolation cut" };
   Gaudi::Property< float >              m_d0{ this,  "d0Cut", -1., "d0 cut" };
   Gaudi::Property<std::string>          m_pidName{this,"PidName", "", "Pid name"};
   Gaudi::Property< bool >               m_acceptAll { this, "AcceptAll", false , "accept all." };
@@ -44,6 +45,7 @@ class TrigEgammaPrecisionElectronHypoTool : public extends<AthAlgTool, ITrigEgam
   ToolHandle< GenericMonitoringTool >   m_monTool { this, "MonTool", "", "Monitoring tool" };
   /*switch between relptvarcone30 and relptvarcone20 isolation*/
   Gaudi::Property<bool> m_useRelptvarcone30{ this, "UseRelptvarcone30", false};
+  Gaudi::Property<bool> m_useTopoetCone20{ this, "UseTopoetcone20", false};
 
 
   int findCutIndex( float eta ) const;

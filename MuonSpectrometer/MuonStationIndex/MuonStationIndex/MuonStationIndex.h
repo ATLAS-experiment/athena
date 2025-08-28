@@ -78,6 +78,8 @@ namespace Muon {
 
     /** @brief Returns true if the chamber index points to a barrel chamber */
     bool isBarrel(const ChIndex index);
+    /** @brief Returns true if the station index points to a barrel chamber */
+    bool isBarrel(const StIndex index);
     /** @brief Returns true if the chamber index is in a small sector */
     bool isSmall(const ChIndex index);
     /** convert StIndex + isSmall into ChIndex */

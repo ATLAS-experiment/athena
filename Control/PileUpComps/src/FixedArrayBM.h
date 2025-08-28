@@ -1,7 +1,7 @@
 /*  -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPCOMPS_FIXEDARRAYBM
@@ -46,22 +46,29 @@ private:
     //FIXME to be completely safe this should should probably depend on the bunch spacing too. Perhaps that concept should be deprecated though?
     return static_cast<unsigned int>((((iXing + static_cast<int>(m_t0Offset)) % static_cast<int>(m_maxBunchCrossingPerOrbit)) + static_cast<int>(m_maxBunchCrossingPerOrbit) )  % static_cast<int>(m_maxBunchCrossingPerOrbit));
   }
-  /// max bunch crossings per orbit
-  unsigned int m_maxBunchCrossingPerOrbit;
-  /// offset of the t0 wrto our intensity pattern
-  unsigned int m_t0Offset;
-  /// allow t0 to be in an empty bunch crossing
-  Gaudi::Property<bool> m_allowEmptyT0BunchCrossing;
-  /// user-defined intensity pattern
-  Gaudi::Property<std::vector<float>> m_intensityPatternProp;
+
+  Gaudi::Property<unsigned int> m_maxBunchCrossingPerOrbit{this, "MaxBunchCrossingPerOrbit", 3564,
+    "The number of slots in each LHC beam. Default: 3564."};
+
+  Gaudi::Property<unsigned int> m_t0Offset{this, "T0Offset", 0,
+    "Offset of the T0 w.r.t. our intensity pattern"};
+
+  Gaudi::Property<bool> m_allowEmptyT0BunchCrossing{this, "AllowEmptyT0BunchCrossing", false,
+    "Allow the offset of the T0 to sit in an empty bunch crossing."};
+
+  Gaudi::Property<std::vector<float>> m_intensityPatternProp{this, "IntensityPattern", {},
+    "An array of floats containing the beam intensity distribution as a function of "
+    "time in bins of 25ns. FixedArrayBM normalizes the distribution and uses it as a "
+    "stencil to determine the relative intensity at each beam xing in the simulated range"};
+
   /// length of the intensity pattern
-  unsigned int m_ipLength;
+  unsigned int m_ipLength{1};
   /// normalized intensity pattern.
   double* m_intensityPattern;
   /// The largest value in the pattern assuming that the pattern has
   /// mean value 1.0. Multiplying by this converts values in the
   /// m_intensityPattern from having max value 1.0 to having mean
   /// value 1.0.
-  float m_largestElementInPattern;
+  float m_largestElementInPattern{1.0};
 };
 #endif

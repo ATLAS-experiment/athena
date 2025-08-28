@@ -14,6 +14,7 @@ class SystematicsCategories(Enum):
     PHOTONS = ['EG_', 'PH_']
     TAUS = ['TAUS_']
     MET = ['MET_']
+    TRACKS = ['TRK_']
     EVENT = ['GEN_', 'PRW_']
     FTAG = ['FT_']
 
@@ -37,18 +38,27 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('onlySystematicsCategories', None, type=list,
             info="a list of strings defining categories of systematics to enable "
             "(only recommended for studies / partial ntuple productions). Choose amongst: "
-            "jets, electrons, muons, photons, taus, met, ftag, event. This option is overridden "
+            "jets, electrons, muons, photons, taus, met, tracks, ftag, event. This option is overridden "
             "by 'filterSystematics'.")
         self.addOption ('systematicsHistogram', None , type=str,
             info="the name (string) of the histogram to which a list of executed "
             "systematics will be printed. The default is None (don't write out "
             "the histogram).")
+        self.addOption ('separateWeightSystematics', False, type=bool,
+            info="if 'systematicsHistogram' is enabled, whether to create a separate "
+            "histogram holding only the names of weight-based systematics. This is useful "
+            "to help make histogramming frameworks more efficient by knowing in advance which "
+            "systematics need to recompute the observable and which don't.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # no instance name, this is a singleton
 
     def makeAlgs (self, config) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
 
-        if self.runSystematics is not None :
+        if self.runSystematics is False :
             runSystematics = self.runSystematics
         elif config.noSystematics() is not None :
             # if option not set:
@@ -80,8 +90,16 @@ class CommonServicesConfig (ConfigBlock) :
         config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
 
         if self.systematicsHistogram is not None:
-            sysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
-            sysDumper.histogramName = self.systematicsHistogram
+            # print out all systematics
+            allSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
+            allSysDumper.histogramName = self.systematicsHistogram
+
+            if self.separateWeightSystematics:
+                # print out only the weight systematics (for more efficient histogramming down the line)
+                weightSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'OnlyWeightSystematicsPrinter' )
+                weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
+                weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|extrapolation_pt_|JET_.*JvtEfficiency_|PRW_).*"
+
 
 
 class IOStatsBlock(ConfigBlock):
@@ -91,6 +109,10 @@ class IOStatsBlock(ConfigBlock):
         super(IOStatsBlock, self).__init__()
         self.addOption("printOption", "Summary", type=str,
                        info='option to pass the standard ROOT printing function. Can be "Summary", "ByEntries" or "ByBytes".')
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return ''  # no instance name, this is a singleton
 
     def makeAlgs(self, config):
         alg = config.createAlgorithm('CP::IOStatsAlg', 'IOStatsAlg')
@@ -127,7 +149,12 @@ class PileupReweightingBlock (ConfigBlock):
         self.addOption ('alternativeConfig', False, type=bool,
             info="whether this is used as an additional alternative config for PileupReweighting. "
             "Will only store the alternative pile up weight in that case.")
+        self.addOption ('writeColumnarToolVariables', False, type=bool,
+            info="whether to add EventInfo variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL)")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.postfix
 
     def makeAlgs (self, config) :
 
@@ -142,6 +169,11 @@ class PileupReweightingBlock (ConfigBlock):
         eventInfoVar = ['runNumber', 'eventNumber', 'actualInteractionsPerCrossing', 'averageInteractionsPerCrossing']
         if config.dataType() is not DataType.Data:
             eventInfoVar += ['mcChannelNumber']
+        if self.writeColumnarToolVariables:
+            # This is not strictly necessary, as the columnar users
+            # could recreate this, but it is also a single constant int,
+            # that should compress exceedingly well.
+            eventInfoVar += ['eventTypeBitmask']
 
         if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output
@@ -248,13 +280,13 @@ class PileupReweightingBlock (ConfigBlock):
         # Set up the only algorithm of the sequence:
         if config.geometry() is LHCPeriod.Run4:
             log.warning ('Pileup reweighting is not yet supported for Run 4 geometry')
-            alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg'+self.postfix )
+            alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg' )
             alg.uint32Decorations = { 'RandomRunNumber' :
                                       config.autoconfigFlags().Input.RunNumbers[0] }
 
         else:
             alg = config.createAlgorithm( 'CP::PileupReweightingAlg',
-                                        'PileupReweightingAlg'+self.postfix )
+                                        'PileupReweightingAlg' )
             config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
             alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
             if not toolConfigFiles and config.dataType() is not DataType.Data:
@@ -300,12 +332,26 @@ class GeneratorAnalysisBlock (ConfigBlock):
         self.addOption ('detailedPDFinfo', False, type=bool,
             info="save the necessary information to run the LHAPDF tool offline. "
                  "The default is False.")
+        self.addOption ('doHFProdFracReweighting', False, type=bool,
+            info="whether to apply HF production fraction reweighting. "
+                 "The default is False.")
+        self.addOption ('truthParticleContainer', 'TruthParticles', type=str,
+            info="the name of the truth particle container to use for HF production fraction reweighting. "
+                 "The default is 'TruthParticles'. ")
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.streamName
 
     def makeAlgs (self, config) :
 
         if config.dataType() is DataType.Data:
             # there are no generator weights in data!
             return
+        try:
+            from AthenaCommon.Logging import logging
+        except ImportError:
+            import logging
+        log = logging.getLogger('makeGeneratorAnalysisSequence')
 
         if self.runNumber is None:
             self.runNumber = config.runNumber()
@@ -315,38 +361,91 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
-            alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg' + self.streamName)
+            alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
             alg.RootStreamName = self.streamName
             alg.runNumber = self.runNumber
-            if self.cutBookkeepersSystematics:
-                alg.enableSystematics = self.cutBookkeepersSystematics
-            else:
+            if self.cutBookkeepersSystematics is None:
                 alg.enableSystematics = not config.noSystematics()
+            else:
+                alg.enableSystematics = self.cutBookkeepersSystematics
             if self.histPattern:
                 alg.histPattern = self.histPattern
             config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
 
         # Set up the weights algorithm:
-        alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' + self.streamName )
+        alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
         config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'weight_mc')
 
         if self.detailedPDFinfo:
-            alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg' + self.streamName, reentrant=True )
+            alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg', reentrant=True )
             for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
+        
+        if self.doHFProdFracReweighting:
+            generatorInfo = config.autoconfigFlags().Input.GeneratorsInfo
+            log.info(f"Loaded generator info: {generatorInfo}")
 
+            DSID = "000000"
+            
+            if not generatorInfo:
+                log.warning("No generator info found.")
+                DSID = "000000"
+            elif isinstance(generatorInfo, dict):
+                if "Pythia8" in generatorInfo:
+                    DSID = "410470"
+                elif "Sherpa" in generatorInfo and "2.2.8" in generatorInfo["Sherpa"]:
+                    DSID = "421152"
+                elif "Sherpa" in generatorInfo and "2.2.10" in generatorInfo["Sherpa"]:
+                    DSID = "700122"
+                elif "Sherpa" in generatorInfo and "2.2.11" in generatorInfo["Sherpa"]:
+                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.11. Using weights for Sherpa 2.2.10 instead.")
+                    DSID = "700122"
+                elif "Sherpa" in generatorInfo and "2.2.12" in generatorInfo["Sherpa"]:
+                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.12. Using weights for Sherpa 2.2.10 instead.")
+                    DSID = "700122"
+                elif "Sherpa" in generatorInfo and "2.2.14" in generatorInfo["Sherpa"]:
+                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.14. New weights need to be calculated.")
+                    DSID = "000000"
+                elif "Sherpa" in generatorInfo and "2.2.1" in generatorInfo["Sherpa"]:
+                    DSID = "410250"
+                elif "Herwig7" in generatorInfo and "7.1.3" in generatorInfo["Herwig7"]:
+                    DSID = "411233"
+                elif "Herwig7" in generatorInfo and "7.2.1" in generatorInfo["Herwig7"]:
+                    DSID = "600666"
+                elif "Herwig7" in generatorInfo and "7." in generatorInfo["Herwig7"]:
+                    DSID = "410558"
+                elif "amc@NLO" in generatorInfo:
+                    DSID = "410464"
+                else:
+                    log.warning(f"HF production fraction reweighting is not configured for this generator: {generatorInfo}")
+                    log.warning("New weights need to be calculated.")
+                    DSID = "000000"
+            else:
+                log.warning("Failed to determine generator from metadata")
+                DSID = "000000"
+
+            log.info(f"Using HF production fraction weights calculated using DSID {DSID}")
+            if DSID == "000000":
+                log.warning("HF production fraction reweighting will return dummy weights of 1.0")
+
+            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', 'SysTruthWeightAlg' + self.streamName )
+            config.addPrivateTool( 'sysTruthWeightTool', 'PMGTools::PMGHFProductionFractionTool' )
+            alg.decoration = 'prodFracWeight_%SYS%'
+            alg.TruthParticleContainer = self.truthParticleContainer
+            alg.sysTruthWeightTool.ShowerGenerator = DSID
+            config.addOutputVar ('EventInfo', 'prodFracWeight_%SYS%', 'weight_HF_prod_frac')
 
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (PtEtaSelectionBlock, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the selection to append this to. The default is "
             "'' (empty string), meaning that the cuts are applied to every "
@@ -360,6 +459,8 @@ class PtEtaSelectionBlock (ConfigBlock):
             info="minimum |eta| value to cut on. No default value.")
         self.addOption ('maxEta', None, type=float,
             info="maximum |eta| value to cut on. No default value.")
+        self.addOption ('maxRapidity', None, type=float,
+            info="maximum rapidity value to cut on. No default value.")
         self.addOption ('etaGapLow', None, type=float,
             info="low end of the |eta| gap. No default value.")
         self.addOption ('etaGapHigh', None, type=float,
@@ -374,10 +475,13 @@ class PtEtaSelectionBlock (ConfigBlock):
             info="whether to use the dressed kinematic properties "
             "(for truth particles only). The default is False.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + "_" + self.selectionName
 
     def makeAlgs (self, config) :
 
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PtEtaSelectionAlg' + self.containerName + self.selectionName )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PtEtaSelectionAlg' )
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         if self.minPt is not None :
             alg.selectionTool.minPt = self.minPt
@@ -387,6 +491,8 @@ class PtEtaSelectionBlock (ConfigBlock):
             alg.selectionTool.minEta = self.minEta
         if self.maxEta is not None :
             alg.selectionTool.maxEta = self.maxEta
+        if self.maxRapidity is not None :
+            alg.selectionTool.maxRapidity = self.maxRapidity
         if self.etaGapLow is not None:
             alg.selectionTool.etaGapLow = self.etaGapLow
         if self.etaGapHigh is not None:
@@ -405,12 +511,12 @@ class PtEtaSelectionBlock (ConfigBlock):
 class ObjectCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an object cutflow"""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (ObjectCutFlowBlock, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the selection to perform the cutflow for. The "
             "default is '' (empty string), meaning that the cutflow is "
@@ -421,9 +527,13 @@ class ObjectCutFlowBlock (ConfigBlock):
             info="whether to force the cut sequence and not accept objects "
             "if previous cuts failed. The default is False.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.selectionName
+
     def makeAlgs (self, config) :
 
-        alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName )
+        alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg' )
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + '_%SYS%'
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
@@ -434,12 +544,12 @@ class ObjectCutFlowBlock (ConfigBlock):
 class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (EventCutFlowBlock, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container, typically EventInfo.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of an optional selection decoration to use.")
         self.addOption ('customSelections', [], type=None,
@@ -452,13 +562,17 @@ class EventCutFlowBlock (ConfigBlock):
             info="a postfix to apply in the naming of cutflow histograms. Set "
             "it when defining multiple cutflows.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.selectionName + self.postfix
+
     def makeAlgs (self, config) :
 
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        alg = config.createAlgorithm( 'CP::EventCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName + postfix )
+        alg = config.createAlgorithm( 'CP::EventCutFlowHistAlg', 'CutFlowDumperAlg' )
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
         # find out which selection decorations to use
         if isinstance(self.customSelections, str):
@@ -480,10 +594,9 @@ class EventCutFlowBlock (ConfigBlock):
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
-    def __init__ (self, containerName='', configName='') :
-        # configName is not used. To be removed.
+    def __init__ (self) :
         super (OutputThinningBlock, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
         self.addOption ('postfix', '', type=str,
@@ -507,6 +620,10 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('noUniformSelection', False, type=bool,
             info="")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.selectionName + self.postfix
+
     def makeAlgs (self, config) :
 
         postfix = self.postfix
@@ -520,14 +637,14 @@ class OutputThinningBlock (ConfigBlock):
             selection = selection + '&&' + self.selection
 
         if selection != '' and not self.noUniformSelection :
-            alg = config.createAlgorithm( 'CP::AsgUnionSelectionAlg', 'UnionSelectionAlg' + self.containerName + postfix)
+            alg = config.createAlgorithm( 'CP::AsgUnionSelectionAlg', 'UnionSelectionAlg')
             alg.preselection = selection
             alg.particles = config.readName (self.containerName)
             alg.selectionDecoration = 'outputSelect' + postfix
             config.addSelection (self.containerName, alg.selectionDecoration, selection)
             selection = 'outputSelect' + postfix
 
-        alg = config.createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'DeepCopyAlg' + self.containerName + postfix )
+        alg = config.createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'DeepCopyAlg' )
         alg.input = config.readName (self.containerName)
         if self.outputName is not None :
             alg.output = self.outputName + '_%SYS%'
@@ -547,9 +664,9 @@ class OutputThinningBlock (ConfigBlock):
 class IFFLeptonDecorationBlock (ConfigBlock):
     """the ConfigBlock for the IFF classification of leptons"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (IFFLeptonDecorationBlock, self).__init__()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input electron or muon container.")
         self.addOption ('separateChargeFlipElectrons', True, type=bool,
@@ -561,10 +678,14 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs (self, config) :
         particles = config.readName(self.containerName)
 
-        alg = config.createAlgorithm( 'CP::AsgClassificationDecorationAlg', 'IFFClassifierAlg' + self.containerName )
+        alg = config.createAlgorithm( 'CP::AsgClassificationDecorationAlg', 'IFFClassifierAlg' )
         # the IFF classification tool
         config.addPrivateTool( 'tool', 'TruthClassificationTool')
         # label charge-flipped electrons as such
@@ -578,10 +699,10 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 
 class MCTCLeptonDecorationBlock (ConfigBlock):
 
-    def __init__ (self, containerName="") :
+    def __init__ (self) :
         super (MCTCLeptonDecorationBlock, self).__init__ ()
 
-        self.addOption ("containerName", containerName, type=str,
+        self.addOption ("containerName", '', type=str,
                         noneAction='error',
                         info="the input lepton container, with a possible selection, "
                         "in the format container or container.selection.")
@@ -591,10 +712,14 @@ class MCTCLeptonDecorationBlock (ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs (self, config) :
         particles, selection = config.readNameAndSelection(self.containerName)
 
-        alg = config.createAlgorithm ("CP::MCTCDecorationAlg", f"MCTCDecorationAlg{self.containerName}")
+        alg = config.createAlgorithm ("CP::MCTCDecorationAlg", "MCTCDecorationAlg")
         alg.particles = particles
         alg.preselection = selection
         alg.affectingSystematicsFilter = '.*'
@@ -607,10 +732,9 @@ class MCTCLeptonDecorationBlock (ConfigBlock):
 class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
-    def __init__ (self, algoName=''):
+    def __init__ (self):
         super(PerEventSFBlock, self).__init__()
-        self.addOption('algoName', algoName, type=str,
-            noneAction='error',
+        self.addOption('algoName', None, type=str,
             info="unique name given to the underlying algorithm computing the "
             "per-event scale factors")
         self.addOption('particles', '', type=str,
@@ -621,11 +745,15 @@ class PerEventSFBlock (ConfigBlock):
         self.addOption('eventSF', '', type=str,
             info="the name of the per-event SF decoration.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.particles + '_' + self.objectSF + '_' + self.eventSF
+
     def makeAlgs(self, config):
         if config.dataType() is DataType.Data:
             return
         particles, selection = config.readNameAndSelection(self.particles)
-        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algoName)
+        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algoName if self.algoName else 'AsgEventScaleFactorAlg')
         alg.particles = particles
         alg.preselection = selection
         alg.scaleFactorInputDecoration = self.objectSF
@@ -638,12 +766,16 @@ class PerEventSFBlock (ConfigBlock):
 class SelectionDecorationBlock (ConfigBlock):
     """the ConfigBlock to add selection decoration to a container"""
 
-    def __init__ (self, containers='') :
+    def __init__ (self) :
         super (SelectionDecorationBlock, self).__init__ ()
         # TODO: add info string
-        self.addOption('containers', containers, type=list,
+        self.addOption('containers', [], type=list,
             noneAction='error',
             info="")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return ''
 
     def makeAlgs(self, config):
         for container in self.containers:
@@ -675,7 +807,9 @@ def makeEventCutFlowConfig(seq, containerName,
     customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
     """
 
-    config = EventCutFlowBlock(containerName, selectionName)
+    config = EventCutFlowBlock()
+    config.setOptionValue('containerName', containerName)
+    config.setOptionValue('selectionName', selectionName)
     config.setOptionValue('postfix', postfix)
     config.setOptionValue('customSelections', customSelections)
     seq.append(config)

@@ -7,21 +7,18 @@
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/FileDescriptor.h"
-#include "PersistencySvc/PersistencySvcException.h"
 
+#include <exception>
 
 pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
                                                     const std::string& containerName,
-                                                    IStorageExplorer& storageExplorer,
-                                                    const std::string& selection ):
+                                                    IStorageExplorer& storageExplorer):
   m_storageExplorer( storageExplorer ),
-  m_selection( new pool::DbSelect( selection ) )
+  m_selection( new pool::DbSelect() )
 {
    DbStatus sc = m_storageExplorer.select( fileDescriptor, containerName, *m_selection );
    if( sc.isError() )
-      throw PersistencySvcException( std::string("Selection from ") + fileDescriptor.PFN()
-				     + "(" + containerName + ") failed",
-				     "TokenIterator::TokenIterator()" );
+      throw std::runtime_error( "Selection from " + fileDescriptor.PFN() + "(" + containerName + ") failed (APR: \" TokenIterator::TokenIterator() \" from \" PersistencySvc \")" );
 }
 
 pool::PersistencySvc::TokenIterator::~TokenIterator()

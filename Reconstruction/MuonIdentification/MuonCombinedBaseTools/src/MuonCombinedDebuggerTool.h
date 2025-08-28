@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDBASETOOLS_MUONCOMBINEDDEBUGGERTOOL_H
@@ -56,7 +56,7 @@ namespace MuonCombined {
         std::vector<int> m_mstrack_has_truth;
         std::vector<int> m_mstrack_has_truth_par;
         std::vector<int> m_mstrack_truth_pdgid;
-        std::vector<int> m_mstrack_truth_barcode;
+        std::vector<int> m_mstrack_truth_uniqueID;
         std::vector<double> m_mstrack_truth_sur_x;
         std::vector<double> m_mstrack_truth_sur_y;
         std::vector<double> m_mstrack_truth_sur_z;
@@ -98,7 +98,7 @@ namespace MuonCombined {
         std::vector<int> m_idtrack_has_truth;
         std::vector<int> m_idtrack_has_truth_par;
         std::vector<int> m_idtrack_truth_pdgid;
-        std::vector<int> m_idtrack_truth_barcode; // FIXME barcode-based
+        std::vector<int> m_idtrack_truth_uniqueID;
         std::vector<double> m_idtrack_truth_sur_x;
         std::vector<double> m_idtrack_truth_sur_y;
         std::vector<double> m_idtrack_truth_sur_z;

@@ -684,7 +684,11 @@ class argFile(argList):
                     self._getDatasetFromFilename(reset = False)
                     self._resetMetadata()
                 else:
-                    self._value = value.split(self._splitter)
+                    # Don't split output filename if it contains a list in square brackets
+                    if self._io == 'output' and ('[' in value) and (']' in value):
+                        self._value = [value]
+                    else:
+                        self._value = value.split(self._splitter)
                     self._getDatasetFromFilename(reset = False)
                     self._resetMetadata()
             except (AttributeError, TypeError):
@@ -779,12 +783,12 @@ class argFile(argList):
                                 if fileMask != '':
                                     if(patt.search(srmFile)) is not None:
                                     #if fnmatch.fnmatch(srmFile, fileMask):
-                                        msg.debug('match: ',srmFile)
+                                        msg.debug('match: %s',srmFile)
                                         newValue.extend(([srmFile]))
                                 else:
                                     newValue.extend(([srmFile]))
                                 
-                            msg.debug('Selected files: ', newValue)
+                            msg.debug('Selected files: %s', newValue)
                         except (AttributeError, TypeError, OSError):
                             raise trfExceptions.TransformArgException(trfExit.nameToCode('TRF_RUNTIME_ERROR'),
                                                                       'Failed to convert %s to a list' % str(value))
@@ -1174,27 +1178,38 @@ class argFile(argList):
     #  @param @c files List of paths to test for existance
     #  @return None (internal @c self._fileMetadata cache is updated)
     def _exists(self, files):
+        import re
         msg.debug('Testing existance for {0}'.format(files))
+        def split_filelist(fn):
+            if self.io != 'output':
+                return [fn]
+            file_split_regex = re.compile(r"(.+)\[(.+)](.+)")
+            if ('[' in fn) and (']' in fn):
+                match = file_split_regex.match(fn)
+                return [f"{match.group(1)}{it}{match.group(3)}" for it in match.group(2).split(',')]
+            else:
+                return [fn]
         for fname in files:
+            file_list = split_filelist(fname)
             if self._urlType == 'posix':
                 try:
-                    size = os.stat(fname).st_size
-                    self._fileMetadata[fname]['file_size'] = size
+                    size = map(lambda fn: os.stat(fn).st_size, file_list)
+                    self._fileMetadata[fname]['file_size'] = sum(size)
                     self._fileMetadata[fname]['_exists'] = True
-                    msg.debug('POSIX file {0} exists'.format(fname))
+                    msg.debug('POSIX file {0} exists (or all elements of list)'.format(fname))
                 except OSError as e:
-                    msg.error('Got exception {0!s} raised while stating file {1}  - probably it does not exist'.format(e, fname))
+                    msg.error('Got exception {0!s} raised while stating file {1} (or some element of list)  - probably it does not exist'.format(e, fname))
                     self._fileMetadata[fname]['_exists'] = False
             else:
                 # OK, let's see if ROOT can do it...
-                msg.debug('Calling ROOT TFile.GetSize({0})'.format(fname))
-                size = ROOTGetSize(fname)
-                if size is None:
+                msg.debug('Calling ROOT TFile.GetSize on {0} (or elements of list)'.format(fname))
+                size = map(ROOTGetSize, file_list)
+                if None in size:
                     self._fileMetadata[fname]['_exists'] = False
-                    msg.error('Non-POSIX file {0} could not be opened - probably it does not exist'.format(fname))
+                    msg.error('Non-POSIX file {0} (or element of list) could not be opened - probably it does not exist'.format(fname))
                 else:
-                    msg.debug('Non-POSIX file {0} exists'.format(fname))
-                    self._fileMetadata[fname]['file_size'] = size
+                    msg.debug('Non-POSIX file {0} (or all elements of list) exists'.format(fname))
+                    self._fileMetadata[fname]['file_size'] = sum(size)
                     self._fileMetadata[fname]['_exists'] = True
 
     ## @brief String representation of a file argument
@@ -1509,7 +1524,7 @@ class argHITSFile(argPOOLFile):
                                   skeletonCA = 'SimuJobTransforms.HITSMerge_Skeleton',
                                   conf=myMergeConf, 
                                   inData=set(['HITS']), outData=set(['HITS_MRG']),
-                                  disableMT=True, disableMP=True)
+                                  disableMT=False, disableMP=True)
         myMerger.doAll(input=set(['HITS']), output=set(['HITS_MRG']))
         
         # OK, if we got to here with no exceptions, we're good shape
@@ -1548,7 +1563,7 @@ class argEVNT_TRFile(argPOOLFile):
         myMerger = athenaExecutor(name = mySubstepName, skeletonFile = 'SimuJobTransforms/skeleton.EVNT_TRMerge.py',
                                   conf=myMergeConf, 
                                   inData=set(['EVNT_TR']), outData=set(['EVNT_TR_MRG']),
-                                  disableMT=True, disableMP=True)
+                                  disableMT=False, disableMP=True)
         myMerger.doAll(input=set(['EVNT_TR']), output=set(['EVNT_TR_MRG']))
         
         # OK, if we got to here with no exceptions, we're good shape
@@ -1587,7 +1602,7 @@ class argRDOFile(argPOOLFile):
                                   skeletonCA = 'SimuJobTransforms.RDOMerge_Skeleton',
                                   conf=myMergeConf, 
                                   inData=set(['RDO']), outData=set(['RDO_MRG']),
-                                  disableMT=True, disableMP=True)
+                                  disableMT=False, disableMP=True)
         myMerger.doAll(input=set(['RDO']), output=set(['RDO_MRG']))
         
         # OK, if we got to here with no exceptions, we're good shape
@@ -1625,7 +1640,7 @@ class argEVNTFile(argPOOLFile):
         myMerger = athenaExecutor(name = mySubstepName, skeletonCA = 'EvgenJobTransforms.EVNTMerge_Skeleton',
                                   conf=myMergeConf,
                                   inData=set(['EVNT']), outData=set(['EVNT_MRG']),
-                                  disableMT=True, disableMP=True)
+                                  disableMT=False, disableMP=True)
         myMerger.doAll(input=set(['EVNT']), output=set(['EVNT_MRG']))
         
         # OK, if we got to here with no exceptions, we're good shape

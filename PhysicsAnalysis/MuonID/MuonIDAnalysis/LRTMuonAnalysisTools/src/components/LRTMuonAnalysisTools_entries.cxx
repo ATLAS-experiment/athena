@@ -4,4 +4,7 @@
 //Local includes:
 #include "LRTMuonAnalysisTools/MuonLRTOverlapRemovalTool.h"
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT(CP::MuonLRTOverlapRemovalTool)

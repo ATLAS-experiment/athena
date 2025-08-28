@@ -69,7 +69,6 @@ streamCA = OutputStreamCfg(flags, streamName, disableEventTag = noTag,
                            ItemList = ["EventInfo#*", "ExampleHitContainer#MyHits"])
 stream = streamCA.getEventAlgo( outputStreamName( streamName ) )
 stream.ExtendProvenanceRecord = False
-stream.ExcludeList += ["xAOD::EventInfo#*", "xAOD::EventAuxInfo#*"]
 acc.merge( streamCA )
 
 # Run

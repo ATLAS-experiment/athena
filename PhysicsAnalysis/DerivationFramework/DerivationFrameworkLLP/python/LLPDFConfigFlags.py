@@ -9,5 +9,6 @@ def createLLPDFConfigFlags():
     llpdcf = AthConfigFlags()
     llpdcf.addFlag("Derivation.LLP.saveFullTruth", False)
     llpdcf.addFlag("Derivation.LLP.doTrackSystematics", False)
+    llpdcf.addFlag("Derivation.LLP.doMuSAValidation", False)
     return llpdcf
 

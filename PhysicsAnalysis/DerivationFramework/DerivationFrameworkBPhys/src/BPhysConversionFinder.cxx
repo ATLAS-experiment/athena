@@ -16,6 +16,7 @@
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "TLorentzVector.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TruthUtils/ParticleConstants.h"
 
 namespace DerivationFramework {
 
@@ -292,8 +293,8 @@ namespace DerivationFramework {
                       std::vector<float> diMuon_Pz = RefTrackPzAcc(*oniaVertex);
 
                       TLorentzVector muon1, muon2;
-                      muon1.SetXYZM(diMuon_Px.at(0),diMuon_Py.at(0),diMuon_Pz.at(0),105.658);
-                      muon2.SetXYZM(diMuon_Px.at(1),diMuon_Py.at(1),diMuon_Pz.at(1),105.658);
+                      muon1.SetXYZM(diMuon_Px.at(0),diMuon_Py.at(0),diMuon_Pz.at(0),ParticleConstants::muonMassInMeV);
+                      muon2.SetXYZM(diMuon_Px.at(1),diMuon_Py.at(1),diMuon_Pz.at(1),ParticleConstants::muonMassInMeV);
 
                       TLorentzVector diMuon = muon1 + muon2;
 
@@ -365,7 +366,7 @@ namespace DerivationFramework {
                       // Only bother with the fit if di-muon mass is within the relveant range,
                       // but still fill an dummy 4-vector to preserve one to one correspondance with "DiMuonLinks"
                       if(passed_Psi) {
-                          ATH_CHECK( doCascadeFit(*vtxItr,constConvVertex,3096.916,fitResult_Psi1S,fitChiSq_Psi1S) );
+                          ATH_CHECK( doCascadeFit(*vtxItr,constConvVertex,ParticleConstants::JpsiMassInMeV,fitResult_Psi1S,fitChiSq_Psi1S) );
                       }
 
                       fit_Psi1S_Px.push_back(fitResult_Psi1S.Px());
@@ -564,16 +565,16 @@ namespace DerivationFramework {
       diMuonTracks.push_back(diMuonVertex->trackParticle(1));
 
       std::vector<double> diMuonTrackMasses;
-      diMuonTrackMasses.push_back(105.658);
-      diMuonTrackMasses.push_back(105.658);
+      diMuonTrackMasses.push_back(ParticleConstants::muonMassInMeV);
+      diMuonTrackMasses.push_back(ParticleConstants::muonMassInMeV);
 
       std::vector<const xAOD::TrackParticle*> convTracks;
       convTracks.push_back(convVertex->trackParticle(0));
       convTracks.push_back(convVertex->trackParticle(1));
 
       std::vector<double> convTrackMasses;
-      convTrackMasses.push_back(0.511);
-      convTrackMasses.push_back(0.511);
+      convTrackMasses.push_back(ParticleConstants::electronMassInMeV);
+      convTrackMasses.push_back(ParticleConstants::electronMassInMeV);
 
       // Reset
       std::unique_ptr<Trk::IVKalState> state = m_cascadeFitter->makeState();

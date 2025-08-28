@@ -44,6 +44,8 @@ namespace Acts {
 #include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/EventData/Seed.hpp"
 
+#include "InDetIdentifier/PixelID.h"
+
 #include <numbers>
 
 namespace ActsTrk {
@@ -99,6 +101,9 @@ namespace ActsTrk {
     // *********************************************************************
 
   protected:
+
+    const PixelID* m_pixelId{ nullptr };
+
     Acts::SeedFinder< value_type, Acts::CylindricalSpacePointGrid<value_type> > m_finder;
     Acts::SeedFinderConfig< value_type > m_finderCfg;
     Acts::CylindricalSpacePointGridConfig m_gridCfg;
@@ -297,43 +302,87 @@ namespace ActsTrk {
 
     // A conservative guess of the size of the vectors needed for seeding
     
+    Gaudi::Property<float> m_ExpCutrMin {this, "SpSelectionExpCutrMin", 45. * Acts::UnitConstants::mm};
     
-    static constexpr float m_ExpCutrMin = 45.;
-    
-    static inline bool itkFastTrackingSPselect(const value_type& sp) {
-      // At small r we remove points beyond |z| > 200.
+    inline bool spacePointSelectionFunction(const value_type& sp) const {
+
       float r = sp.radius();
       float zabs = std::abs(sp.z());
+      float absCotTheta = zabs / r;
+      
+      // checking configuration to remove pixel space points
+      Identifier identifier = m_pixelId->wafer_id(sp.externalSpacePoint().elementIdList().at(0));
+      if (m_pixelId->is_barrel(identifier)) {
+	if (zabs > 200 and
+	    r < 40)
+	  return false;
+	
+      	return true;
+      }
+      
+      // Inner layers
+      // Below 1.20 - accept all
+      static constexpr float cotThetaEta120 = 1.5095;
+      if (absCotTheta < cotThetaEta120)
+      	return true;
+      
+      // Below 3.40 - remove if too close to beamline
+      static constexpr float cotThetaEta340 = 14.9654;
+      if (absCotTheta < cotThetaEta340 and
+	  r < m_ExpCutrMin)
+	return false;	
 
-      if (zabs > 200. && r < m_ExpCutrMin) {
+      
+      // Outer layers
+      // Above 2.20
+      static constexpr float cotThetaEta220 = 4.4571;
+      if (absCotTheta > cotThetaEta220 and
+	  r > 260.)
 	return false;
-      }
-            
-      /// Remove space points beyond eta=4 if their z is
-      /// larger than the max seed z0 (150.)
-      float cotTheta = 27.2899;  // corresponds to eta=4
-      if ((zabs - 150.) > cotTheta * r) {
+      
+      // Above 2.60
+      static constexpr float cotThetaEta260 = 6.6947;
+      if (absCotTheta > cotThetaEta260 and
+          r > 200.)
 	return false;
-      }
+
+      // Above 3.20
+      static constexpr float cotThetaEta320 = 12.2459;
+      if (absCotTheta > cotThetaEta320 and
+          r > 140.)
+	return false;
+
+      // Above 4.00
+      static constexpr float cotThetaEta400 = 27.2899;
+      if (absCotTheta > cotThetaEta400)
+	return false;
+      
       return true;
     }
 
-    static inline bool itkFastDoubletCut(float bottomRadius, float cotTheta) {
-      //float fastTrackingRMin = m_ExpCutrMin;
-      float fastTrackingCotThetaMax = 1.5;
+    inline bool doubletSelectionFunction(
+      const value_type& /*middle*/,
+      const value_type& other,
+      float cotTheta, bool isBottomCandidate) const {
+      // We remove here some seeds, in case the bottom space point radius is
+      // too small (i.e. < fastTrackingRMin)
+
+      // This operation is done only within a specific eta window
+      // Instead of eta we use the doublet cottheta      
+      static constexpr float cotThetaEta120 = 1.5095;
+      static constexpr float cotThetaEta360 = 18.2855;
       
-      //if (bottomRadius < fastTrackingRMin and
-      if (bottomRadius < m_ExpCutrMin and
-	  (cotTheta > fastTrackingCotThetaMax or
-	   cotTheta < -fastTrackingCotThetaMax)) {
+      float absCotTheta = std::abs(cotTheta);
+      if (isBottomCandidate and other.radius() < m_ExpCutrMin and
+	  absCotTheta > cotThetaEta120 and
+	  absCotTheta < cotThetaEta360) {
 	return false;
       }
+
       return true;
     }
   };
 
-  
-  
 } // namespace
 
 #endif

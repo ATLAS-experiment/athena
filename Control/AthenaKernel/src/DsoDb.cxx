@@ -426,7 +426,7 @@ DsoDb::build_repository()
         if (db->find(dso_key) == db->end()) {
           db->insert(std::make_pair(dso_key, Strings_t()));
         }
-        (*db)[dso_key].push_back(fullpath_libname);
+        (*db)[dso_key].push_back(std::move(fullpath_libname));
       }
       // std::cerr << "=== [" << dso << "] === [EOF]\n";
     }
@@ -578,7 +578,7 @@ DsoDb::content(bool pedantic) const
           const std::string baselib = to_string(fs::path(*ilib).filename());
           if (baselibs.find(baselib) == baselibs.end()) {
             libs.push_back(*ilib);
-            baselibs.insert(baselib);
+            baselibs.insert(std::move(baselib));
           }
         }
         db[idb->first] = std::move(libs);

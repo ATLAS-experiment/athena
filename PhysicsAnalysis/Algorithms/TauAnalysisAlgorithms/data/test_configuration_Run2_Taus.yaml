@@ -18,15 +18,27 @@ TauJets:
       2015:
       - HLT_tau25_medium1_tracktwo
       - HLT_tau35_medium1_tracktwo
+      - HLT_tau80L1TAU60_medium1_tracktwo  
+      - HLT_tau125_medium1_tracktwo  
       2016:
       - HLT_tau25_medium1_tracktwo
       - HLT_tau35_medium1_tracktwo
+      - HLT_tau50L1TAU12_medium1_tracktwo
+      - HLT_tau80L1TAU60_medium1_tracktwo
+      - HLT_tau160_medium1_tracktwo
       2017:
       - HLT_tau25_medium1_tracktwo
       - HLT_tau35_medium1_tracktwo
+      - HLT_tau50L1TAU12_medium1_tracktwo
+      - HLT_tau60_medium1_tracktwo  
+      - HLT_tau80L1TAU60_medium1_tracktwo
+      - HLT_tau160_medium1_tracktwo
       2018:
-      - HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA
-      - HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA
+      - HLT_tau25_medium1_tracktwoEF
+      - HLT_tau35_medium1_tracktwoEF
+      - HLT_tau60_medium1_tracktwoEF  
+      - HLT_tau80L1TAU60_medium1_tracktwoEF
+      - HLT_tau160L1TAU100_medium1_tracktwoEF  
   MCTCClassification:
     prefix: truth_
 

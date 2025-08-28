@@ -3,21 +3,32 @@
 */
 
 #include "TruthIO/WriteHepMC.h"
-
+#ifdef HEPMC3
+#include "HepMC3/WriterAscii.h"
+#endif
 
 WriteHepMC::WriteHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   : GenBase(name, pSvcLocator)
 {
   declareProperty("OutputFile", m_outfile="events.hepmc");
   declareProperty("Precision", m_precision=8);
+  declareProperty("Format", m_format="hepmc2");
 }
 
 
 StatusCode WriteHepMC::initialize() {
   CHECK(GenBase::initialize());
 #ifdef HEPMC3
-  m_hepmcio.reset(new HepMC3::WriterAsciiHepMC2(m_outfile) );
-  m_hepmcio->set_precision(m_precision);
+  if (m_format == "hepmc2") {
+    auto writer = new HepMC3::WriterAsciiHepMC2(m_outfile);
+    writer->set_precision(m_precision);
+    m_hepmcio.reset(writer);
+  }
+  if (m_format == "hepmc3") {
+    auto writer = new HepMC3::WriterAscii(m_outfile);
+    writer->set_precision(m_precision);
+    m_hepmcio.reset(writer);
+  }
 #else
   m_hepmcio.reset( new HepMC::IO_GenEvent(m_outfile) );
   m_hepmcio->precision(m_precision);

@@ -14,7 +14,6 @@
 #include "G4VSensitiveDetector.hh"
 
 // For the hits
-#include "StoreGate/WriteHandle.h"
 #include "InDetSimEvent/SiHitCollection.h"
 #include <gtest/gtest_prod.h>
 
@@ -26,15 +25,11 @@ class G4TouchableHistory;
 
 class SctSensor_CTB : public G4VSensitiveDetector
 {
- FRIEND_TEST( SctSensor_CTBtest, Initialize );
  FRIEND_TEST( SctSensor_CTBtest, ProcessHits );
  FRIEND_TEST( SctSensor_CTBtest, AddHit );
  public:
   // Constructor
   SctSensor_CTB( const std::string& name, const std::string& hitCollectionName );
-
-  // Destructor
-  ~SctSensor_CTB() { /* If all goes well we do not own myHitColl at this point */ }
 
   // Process each G4 hit
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
@@ -49,7 +44,8 @@ class SctSensor_CTB : public G4VSensitiveDetector
 
  private:
   // The hits collection
-  SG::WriteHandle<SiHitCollection> m_HitColl;
+  std::string m_HitCollName;
+  SiHitCollection* m_HitColl{nullptr};
 };
 
 #endif //SCT_G4_SD_SCTSENSOR_CTB_H

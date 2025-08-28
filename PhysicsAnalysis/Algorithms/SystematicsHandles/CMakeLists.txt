@@ -18,11 +18,9 @@ atlas_add_dictionary( SystematicsHandlesDict
    SystematicsHandles/selection.xml
    LINK_LIBRARIES SystematicsHandlesLib )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( SystematicsHandles
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel SystematicsHandlesLib )
-endif()
+atlas_add_component( SystematicsHandles
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES SystematicsHandlesLib )
 
 if( XAOD_STANDALONE )
    atlas_add_test( ut_CopyHelpers

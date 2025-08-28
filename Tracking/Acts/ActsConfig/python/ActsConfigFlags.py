@@ -8,10 +8,20 @@ class SeedingStrategy(FlagEnum):
     Orthogonal = "Orthogonal"
     Gbts = "Gbts"
     Gbts2 = "Gbts2"
+    GridTriplet = "GridTriplet"
 
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
     ScoreBased = "ScoreBasedAmbiguitySolver"
+
+# Define the Ambiguity resolution strategy modes
+# OUTSIDE_TF : run the ambiguity resolution in a separate algorithm
+# END_OF_TF  : run the ambiguity resolution at the end of the track finding, on the track candidate container
+# DURING_TF  : remove the tracks that share too many hits during track finding, when deciding good candidates
+class AmbiguitySolverMode(FlagEnum):
+    OUTSIDE_TF = 0
+    END_OF_TF = 1
+    DURING_TF = 2
 
 
 # This is temporary during the integration of ACTS.
@@ -35,6 +45,7 @@ class PixelCalibrationStrategy(FlagEnum):
     AnalogueClustering = "AnalogueClustering"
     AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
 
+    
 def createActsConfigFlags():
     actscf = AthConfigFlags()
     
@@ -58,6 +69,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.MaterialSource', 'Default')
     actscf.addFlag('Acts.TrackingGeometry.MaterialCalibrationFolder', 'ACTS/MaterialMaps/ITk')
     actscf.addFlag('Acts.TrackingGeometry.MaterialFileExtension', '')
+    actscf.addFlag('Acts.TrackingGeometry.UseBlueprint', False)
 
     ## Enable Tracking geometry with additional passive layers
     actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
@@ -84,14 +96,14 @@ def createActsConfigFlags():
 
     # Cluster
     actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)
+    actscf.addFlag("Acts.Clusters.RetrieveChargeInformation", lambda pcf: not pcf.Tracking.doPixelDigitalClustering)
     
     # SpacePoint
     actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, type=SeedingStrategy)  # Define Seeding Strategy
-    actscf.addFlag('Acts.GbtsConnectionTableVersion', 1)  # 0=01/09/2022, 1=10/04/2025, 2=test
-
+    
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClusteringAfterSelection, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.doRotCorrection', True)
@@ -101,10 +113,14 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useStripSeedsFirst', False) # switch order of seed collections
     actscf.addFlag('Acts.autoReverseSearchCKF', False) # track finding starts going inward first if we are outside the defined RZ boundary
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
-
+    actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
+    actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
+        
+    # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', True)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
-
+    actscf.addFlag('Acts.AmbiguitySolverMode', lambda pcf: AmbiguitySolverMode.OUTSIDE_TF if pcf.Acts.doAmbiguityResolution else AmbiguitySolverMode.DURING_TF, type=AmbiguitySolverMode)
+    
     # Calibrations
     actscf.addFlag('Acts.OnTrackCalibration.performCovarianceCalibration', True) # perform calibration of covariance during on track analogue cluster calibration
     

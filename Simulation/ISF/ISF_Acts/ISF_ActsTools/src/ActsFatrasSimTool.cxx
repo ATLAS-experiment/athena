@@ -68,7 +68,6 @@ StatusCode ISF::ActsFatrasSimTool::simulate(const EventContext& ctx,
   // Process ParticleState from particle stack
   // Wrap the input ISFParticle in an STL vector with size of 1
   const ISF::ISFParticleVector ispVector(1, &isp);
-  ATH_CHECK(m_truthRecordSvc->initializeTruthCollection());
   ATH_CHECK(this->simulateVector(ctx, ispVector, secondaries, mcEventCollection));
   ATH_MSG_VERBOSE("Simulation done");
   return StatusCode::SUCCESS;
@@ -126,20 +125,17 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     // Convert to ActsFatras::Particle
     // ISF: Energy, mass, and momentum are in MeV, position in mm
     // Acts: Energy, mass, and momentum are in GeV, position in mm
+    ATH_MSG_DEBUG(name() << " Convert ISF::Particle(mass) " << isfp->id()<<"|" << isfp<<"(" << isfp->mass() << ")");
     std::vector<ActsFatras::Particle> input = std::vector<ActsFatras::Particle>{
-      ActsFatras::Particle(ActsFatras::Barcode().setVertexPrimary(0).setParticle(
-                           HepMC::barcode(isfp)), static_cast<Acts::PdgParticle>(isfp->pdgCode()),
+      ActsFatras::Particle(ActsFatras::Barcode().setVertexPrimary(0).setParticle(isfp->id()), static_cast<Acts::PdgParticle>(isfp->pdgCode()),
                            isfp->charge(),isfp->mass() * Acts::UnitConstants::MeV)
-      .setDirection(Acts::makeDirectionFromPhiEta(
-                    isfp->momentum().phi(), isfp->momentum().eta()))
-      .setAbsoluteMomentum(isfp->momentum().mag() * Acts::UnitConstants::MeV)
-      .setPosition4(isfp->position().x(), isfp->position().y(),
-                    isfp->position().z(), isfp->timeStamp())};
+        .setDirection(Acts::makeDirectionFromPhiEta(isfp->momentum().phi(), isfp->momentum().eta()))
+        .setAbsoluteMomentum(isfp->momentum().mag() * Acts::UnitConstants::MeV)
+        .setPosition4(ActsTrk::convertPosToActs(isfp->position(), isfp->timeStamp()))};
+    ATH_MSG_DEBUG(name() << " Propagating ActsFatras::Particle  vertex|particle|generation|subparticle, " << input[0]);
     std::vector<ActsFatras::Particle> simulatedInitial;
     std::vector<ActsFatras::Particle> simulatedFinal;
     std::vector<ActsFatras::Hit> hits;
-    ATH_MSG_DEBUG(name() << " Convert ISF::Particle " << isfp->barcode() << " to ActsFatras::Particle " << input[0].particleId().value());
-    ATH_MSG_DEBUG(name() << " Propagating ActsFatras::Particle  vertex|particle|generation|subparticle, " << input[0]);
     // simulate
     auto result=simulator.simulate(anygctx, mctx, generator, input, simulatedInitial, simulatedFinal, hits);
     auto simulatedFailure=result.value();
@@ -161,48 +157,65 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       if (i>5) break;
     }
     ATH_MSG_DEBUG(name() << " No. of particles after ActsFatras simulator: " << simulatedFinal.size());
-    if (simulatedFinal.size()>1){
+    if (!simulatedFinal.empty()){
       ATH_MSG_DEBUG(name() << " start procesing secondaries");
-    // convert final particles to ISF::particle
-      auto isAlive = ISF::fPrimarySurvives;
-      // int generation = simulatedFinal[-1].particleId().generation();
-      int n = 1;
-      for (std::vector<ActsFatras::Particle>::iterator itr=simulatedFinal.begin()+1;itr!=simulatedFinal.end();++itr){
-        ATH_MSG_DEBUG(name() << " secondaries particle " <<n<<"/"<< simulatedFinal.size()-1<<": "<< *itr);
-        ++n;
-        const auto pos = Amg::Vector3D(itr->position()[Acts::ePos0],itr->position()[Acts::ePos1],itr->position()[Acts::ePos2]);
-        const auto mom = Amg::Vector3D(itr->fourMomentum()[Acts::eMom0] / Acts::UnitConstants::MeV,itr->fourMomentum()[Acts::eMom1] / Acts::UnitConstants::MeV,itr->fourMomentum()[Acts::eMom2] / Acts::UnitConstants::MeV);
-        double mass = itr->mass() / Acts::UnitConstants::MeV;
-        double charge = itr->charge();
-        int pdgid = itr->pdg();
-        double properTime = itr->properTime();
-        const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
-        const int id = HepMC::UNDEFINED_ID;
-        ATH_MSG_DEBUG(name() << " secondaries particle process code " << itr->process());
-        auto secisfp = new ISF::ISFParticle (pos,mom,mass,charge,pdgid,status,properTime,*isfp,id);
+      auto itr = simulatedFinal.begin();
+      // Save hits of isfp
+      std::vector<ActsFatras::Hit> particle_hits;
+      std::copy(hits.begin(), hits.begin()+itr->numberOfHits(), std::back_inserter(particle_hits));
+      m_ActsFatrasWriteHandler->createHits(*isfp, m_trackingGeometry,particle_hits,m_pixelSiHits,m_sctSiHits);
+      // Process secondaries
+      auto isKilled = !itr->isAlive();
+      int maxGeneration = (simulatedFinal.back()).particleId().generation();
+      ATH_MSG_DEBUG(name() << " maxGeneration: "<< maxGeneration);
+      for (int gen = 0; gen <= maxGeneration; ++gen){
+        ATH_MSG_DEBUG(name() << " start with genration "<< gen << "|" << maxGeneration << ": "<< *itr);
         auto vecsecisfp = std::make_unique<ISF::ISFParticleVector>();
-        vecsecisfp->push_back(secisfp);
-        ATH_MSG_DEBUG(name() << " vecsecisfp barcode|p: " << (*vecsecisfp)[0]->barcode() <<"|"<< (*vecsecisfp)[0]->momentum().mag());
-        if(!itr->isAlive()) isAlive = ISF::fKillsPrimary;
-        ISF::ISFTruthIncident truth(*isfp,
-                                    *vecsecisfp,
-                                    getATLASProcessCode(itr->process()),
-                                    isfp->nextGeoID(),  // inherits from the parent
-                                    isAlive
+        while (static_cast<int>(itr->particleId().generation()) == gen){
+          ATH_MSG_DEBUG(name() << " genration "<< gen << "|" << maxGeneration << ": "<< *itr);
+          if(itr->isSecondary()){
+            // convert final particles to ISF::particle
+            const auto pos = ActsTrk::convertPosFromActs(itr->fourPosition()).first;
+            const auto mom = ActsTrk::convertMomFromActs(itr->fourMomentum()).first;
+            double mass = itr->mass() / Acts::UnitConstants::MeV;
+            double charge = itr->charge();
+            int pdgid = itr->pdg();
+            auto properTime = ActsTrk::timeToAthena(itr->time());
+            const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+            const int id = HepMC::UNDEFINED_ID;
+            auto secisfp = new ISF::ISFParticle (pos,mom,mass,charge,pdgid,status,properTime,*isfp,id);
+            ATH_MSG_DEBUG(name() <<" secondaries particle (ACTS): "<<*itr<< "("<<itr->momentum()<<")|time "<<itr->time()<<"|process "<< getATLASProcessCode(itr->process()));
+            ATH_MSG_DEBUG(name() <<" secondaries particle (ISF): " << *secisfp << " time "<<secisfp->timeStamp());
+            vecsecisfp->push_back(secisfp);
+          }
+          else{
+            ATH_MSG_DEBUG(name() <<" primary particle found with generation "<< gen);
+          }
+          ++itr;
+        }
+        if (!vecsecisfp->empty()) {
+          ISF::ISFTruthIncident truth(*isfp,
+                                      *vecsecisfp,
+                                      getATLASProcessCode((itr-1)->process()),
+                                      isfp->nextGeoID(),
+                                      isKilled&&gen==maxGeneration ? ISF::fKillsPrimary : ISF::fPrimarySurvives
                                     );
-        ATH_MSG_DEBUG(name() << " Truth incident physicsProcessCode()" << truth.physicsProcessCode());
-        m_truthRecordSvc->registerTruthIncident(truth, true);
-        truth.updateChildParticleProperties();
-        ATH_MSG_DEBUG(name() << " Create secondariy ISF::Particle " << secisfp->barcode());
-        if (secisfp->getTruthBinding()) {
-            ATH_MSG_DEBUG(name() << " Save secondariy " << *secisfp);
-            secondaries.push_back(secisfp);
-        }
-        else {
-            ATH_MSG_WARNING("Secondary particle not written out to truth.\n Parent (" << isfp << ")\n Secondary (" << *secisfp <<")");
-        }
-      }
-    }//end of secondaries
+          ATH_MSG_DEBUG(name() << " Truth incident parentPt2(MinPt2) " << truth.parentPt2() <<" (100 MeV)");
+          ATH_MSG_DEBUG(name() << " Truth incident ChildPt2(MinPt2) " << truth.childrenPt2Pass(300) <<" (300 MeV)");
+          m_truthRecordSvc->registerTruthIncident(truth,  true);
+          truth.updateParentAfterIncidentProperties();
+          truth.updateChildParticleProperties();
+          for (auto *secisfp : *vecsecisfp){
+            if (secisfp->getTruthBinding()) {
+                secondaries.push_back(secisfp);
+            }
+            else {
+                ATH_MSG_WARNING("Secondary particle not written out to truth.\n Parent (" << isfp << ")\n Secondary (" << *secisfp <<")");
+            }
+          } // end of truth binding 
+        }// end of store truth bind secondaries
+      } 
+    }// end of secondaries
     ATH_MSG_VERBOSE(name() << " No. of secondaries: " << secondaries.size());
     ATH_MSG_DEBUG(name() << " End of particle " << isfp->barcode());
     m_ActsFatrasWriteHandler->createHits(*isfp, m_trackingGeometry,hits,pixelSiHits,sctSiHits);
@@ -212,10 +225,6 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     std::vector<ActsFatras::Particle>().swap(simulatedFinal);
     std::vector<ActsFatras::Hit>().swap(hits);
   } // end of isfp loop
-  std::vector<SiHitCollection> hitcolls;
-  hitcolls.push_back(pixelSiHits);
-  hitcolls.push_back(sctSiHits);
-  ATH_CHECK(m_ActsFatrasWriteHandler->WriteHits(hitcolls,ctx));
   return StatusCode::SUCCESS;
 }
 

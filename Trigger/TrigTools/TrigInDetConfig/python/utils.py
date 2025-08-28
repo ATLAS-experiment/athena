@@ -24,7 +24,10 @@ def getFlagsForActiveConfig(
     -------
     Either the current flags instance if all the ActiveConfig is correct or a new
     version with cloned flags
+    
+    the flags correspond to InDet/ITk format
     """
+
     if flags.hasFlag("Tracking.ActiveConfig.input_name"):
         if flags.Tracking.ActiveConfig.input_name == config_name:
             log.debug(
@@ -33,32 +36,46 @@ def getFlagsForActiveConfig(
             )
             return flags
         else:
-            log.warning(
+            log.info(
                 "flags.Tracking.ActiveConfig is not for %s but %s",
                 config_name,
                 flags.Tracking.ActiveConfig.input_name,
             )
     else:
 
-        log.warning(
+        log.info(
             "Menu code invoked ID config without flags.Tracking.ActiveConfig for %s",
             config_name,
         )
 
-    if flags.Trigger.useActsTracking:
-        return flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.ActsTracking."+config_name)
-    
-    return cloneFlagsToActiveConfig(flags, config_name)
-
+    return _cloneFlagsToActiveConfig(flags, config_name)
 
 
 def cloneFlagsToActiveConfig(
-    flags: AthConfigFlags, config_name: str) -> AthConfigFlags:
+        flags: AthConfigFlags, config_name: str, log: logging.Logger) -> AthConfigFlags:
+
     """
-    do InDet/ITk specific clone and replace of ActiveConfig without checking flags vs config_name
+    InDet/ITk specific clone and replace of ActiveConfig without checking flags vs config_name
+    
+    this function should be used only high up in the menu creation where a context of tracking flags 
+    does not exist yet and is created for the first time in generateChainConfigs function
+    or there are multiple contexts for ActiveConfig like in LRT
+
+    in other cases getFlagsForActiveConfig should be used instead
     
     """
-    prefix = "Trigger.ITkTracking." if flags.Detector.GeometryITk else "Trigger.InDetTracking." 
+    
+    log.info(f"Cloning tracking config for {config_name} to flags.Tracking.ActiveConfig")
+    return _cloneFlagsToActiveConfig(flags, config_name)
+
+def _cloneFlagsToActiveConfig(flags: AthConfigFlags, config_name: str) -> AthConfigFlags:
+
+    prefix = "Trigger.InDetTracking."
+    if flags.Detector.GeometryITk:
+      prefix = "Trigger.ITkTracking."
+      if flags.Trigger.useActsTracking: 
+        prefix = "Trigger.ActsTracking."
+      
     return flags.cloneAndReplace(
         "Tracking.ActiveConfig",
         prefix + config_name,

@@ -29,12 +29,15 @@
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 
+
 #include "FPGATrackSimKeyLayerTool.h"
 
 #include <cmath>
 #include <initializer_list>
 #include <string>
 #include <vector>
+
+#include"FPGATrackSimObjects/FPGATrackSimFunctions.h"
 
 class FPGATrackSimKeyLayerBinDesc : public  extends<AthAlgTool, IFPGATrackSimBinDesc> {
 
@@ -48,9 +51,17 @@ public:
 
     // convert back and forth from pT, eta, phi, d0, z0 and internal paramater set
     virtual const FPGATrackSimBinUtil::ParSet
-    trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
-      return keyparsToParSet(m_keylyrtool.trackParsToKeyPars(pars));
+    trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {   
+      FPGATrackSimKeyLayerTool::KeyLyrPars keypars = m_keylyrtool.trackParsToKeyPars(pars);
+      if (m_fieldCorrection) {
+        keypars.phi1+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R1());
+        keypars.phi2+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R2());
+      }
+      return keyparsToParSet(keypars);
     }
+
+    
+
     virtual const FPGATrackSimTrackPars parSetToTrackPars(const FPGATrackSimBinUtil::ParSet &parset) const override {
       return m_keylyrtool.keyParsToTrackPars(parSetToKeyPars(parset));
     }
@@ -83,7 +94,24 @@ public:
     Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for keylayer definition"};
     Gaudi::Property<double> m_rout{this, "rout", {-1.0}, "Radius of outer layer for keylayer definition"};
     Gaudi::Property<bool> m_approxMath{this, "approxMath", {false}, "Use approximate math to emulate possible firmware"};
+    Gaudi::Property<double> m_d0pad{this, "D0Pad", 0.0, "Extra phi padding from d0 resolution"};
+    Gaudi::Property<double> m_phipad{this, "PhiPad", 0.0, "Extra phi padding from phi resolution"};
+    Gaudi::Property<double> m_qptpad{this, "QPtPad", 0.0, "Extra phi padding from q/pT resolution"};
+    Gaudi::Property<double> m_z0pad{this, "Z0Pad", 0.0, "Extra eta padding from z0 resolution"};
+    Gaudi::Property<double> m_etapad{this, "EtaPad", 0.0, "Extra eta padding from eta resolution"};
+    Gaudi::Property<std::vector<double>> m_slPerEtaMod{
+    this,
+        "slPerEtaMod",
+        std::vector<double>{19.0, 24.0, 29.0, 32.0, 18.1, 27.1, 24.1, 15.1, 30.8,
+                            30.8, 26.2, 32.2, 32.2, 26.2, 54.6, 54.6, 40.2, 60.2},
+        "Strip length per eta eta mod"
+    };
 
+
+    Gaudi::Property<unsigned> m_fieldCorRegion  { this, "fieldCorRegion", 2, "region for fieldCorrection"};
+    Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};
+        
+  
     // convert to/from the KeyLyrPars struct and the ParSet
     FPGATrackSimBinUtil::ParSet keyparsToParSet(const FPGATrackSimKeyLayerTool::KeyLyrPars& keypars) const {
       return FPGATrackSimBinUtil::ParSet({keypars.z1,keypars.z2,keypars.phi1,keypars.phi2,keypars.xm});

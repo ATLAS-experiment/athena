@@ -44,8 +44,8 @@ namespace PanTau {
         t_Charged   = 1,
         t_Neutral   = 2,
         t_Pi0Neut   = 3,
-        t_OutChrg   = 4,
-        t_OutNeut   = 5,
+        //t_OutChrg   = 4,
+        //t_OutNeut   = 5,
         //t_NeutLowA  = 6,
         //t_NeutLowB  = 7,
         t_nTypes    = 8

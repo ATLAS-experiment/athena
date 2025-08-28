@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -38,12 +38,12 @@ DECLARE_TPCNV_FACTORY(TrackParticleTruthCollectionContainerCnv_tlp1,
 DECLARE_TPCNV_FACTORY(TrackParticleTruthCollectionContainerCnv_tlp2,
                       DataVector<TrackParticleTruthCollection>,
                       TrackParticleTruthCollectionContainer_tlp2,
-                      Athena::TPCnvVers::Current)
+                      Athena::TPCnvVers::Old)
 
 DECLARE_TPCNV_FACTORY(TrackParticleTruthCollectionContainerCnv_tlp3,
                       DataVector<TrackParticleTruthCollection>,
                       TrackParticleTruthCollectionContainer_tlp3,
-                      Athena::TPCnvVers::Old)  
+                      Athena::TPCnvVers::Current)
 
 DECLARE_TPCNV_FACTORY(TrackParticleTruthCollectionCnv_p1,
                       TrackParticleTruthCollection,
@@ -53,10 +53,9 @@ DECLARE_TPCNV_FACTORY(TrackParticleTruthCollectionCnv_p1,
 DECLARE_TPCNV_FACTORY(TrackParticleTruthCollectionCnv_p2,
                       TrackParticleTruthCollection,
                       Rec::TrackParticleTruthCollection_p2,
-                      Athena::TPCnvVers::Current)
+                      Athena::TPCnvVers::Old)
 
 DECLARE_TPCNV_FACTORY(TrackParticleTruthCollectionCnv_p3,
                       TrackParticleTruthCollection,
                       Rec::TrackParticleTruthCollection_p3,
-                      Athena::TPCnvVers::Old)
-                      
+                      Athena::TPCnvVers::Current)

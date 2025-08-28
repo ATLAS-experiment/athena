@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -10,9 +10,6 @@ namespace Tau{
 
   Migration::Migration(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
     PlotBase(pParent, sDir),
-    m_migration_panTau(nullptr),
-    m_migration_panTauProto(nullptr),
-    m_migration_cellBased(nullptr),
     m_sTauJetContainerName(std::move(sTauJetContainerName))
   {
   }
@@ -25,14 +22,11 @@ namespace Tau{
   {
     m_migration_panTau = Book1D("panTau_migration",m_sTauJetContainerName + " panTau migration",DECAYSIZE,0,DECAYSIZE);
     m_migration_panTauProto = Book1D("panTauProto_migration",m_sTauJetContainerName + " panTau proto migration",DECAYSIZE,0,DECAYSIZE);
-    m_migration_cellBased = Book1D("cellBased_migration",m_sTauJetContainerName + " cellBased migration",DECAYSIZE,0,DECAYSIZE);
     m_migration_panTau->GetXaxis()->SetLabelSize(0.05);
     m_migration_panTauProto->GetXaxis()->SetLabelSize(0.05);
-    m_migration_cellBased->GetXaxis()->SetLabelSize(0.05);
     for(int i=1; i<= DECAYSIZE;i++){
       m_migration_panTauProto->GetXaxis()->SetBinLabel(i,m_lable[i-1]);
       m_migration_panTau->GetXaxis()->SetBinLabel(i,m_lable[i-1]);
-      m_migration_cellBased->GetXaxis()->SetBinLabel(i,m_lable[i-1]);
     }
   }
 
@@ -55,19 +49,6 @@ namespace Tau{
       decayModeFill(trueMode, recMode, m_migration_panTauProto, weight);
     }
 
-    int cellP = thisTau.nTracks();
-
-    // Get number of neutral pions
-    int nPi0_tau = 0;
-    const std::vector<ElementLink<xAOD::PFOContainer>>& cellBased_neutralPFO = thisTau.protoNeutralPFOLinks();
-    for(const auto& link : cellBased_neutralPFO) {
-      const xAOD::PFO* PFO = *link;
-      int myNPi0Proto = 0;
-      if ( PFO->attribute(xAOD::PFODetails::nPi0Proto, myNPi0Proto) ) {
-	nPi0_tau+=myNPi0Proto;
-      }
-    }
-    decayModeFill(trueMode, cellP, nPi0_tau, m_migration_cellBased, weight);
   }
 
   void Migration::decayModeFill(int trueMode, int recMode, TH1 *histo, float weight)

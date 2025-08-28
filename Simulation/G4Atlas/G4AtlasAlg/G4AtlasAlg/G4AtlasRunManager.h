@@ -15,10 +15,8 @@
 // Athena headers
 #include "AthenaBaseComps/AthMessaging.h"
 #include "CxxUtils/checker_macros.h"
-#include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
-#include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
+#include "G4AtlasInterfaces/IDetectorConstructionTool.h"
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
-#include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 #include "G4AtlasInterfaces/IFluxRecorder.h"
 
 /// ATLAS custom singleton run manager.
@@ -39,17 +37,15 @@ public:
   /// Does the work of simulating an ATLAS event
   bool ProcessEvent(G4Event* event);
 
+  /// G4 function called at start of run
+  void RunInitialization() override final;
+
   /// G4 function called at end of run
   void RunTermination() override final;
 
-  /// Configure the detector geometry service handle
-  void SetDetGeoSvc(const std::string& typeAndName) {
-    m_detGeoSvc.setTypeAndName(typeAndName);
-  }
-
-  /// Configure the Fast Simulation Master Tool handle
-  void SetFastSimMasterTool(const std::string& typeAndName) {
-    m_fastSimTool.setTypeAndName(typeAndName);
+  /// Configure the detector construction tool
+  void SetDetConstructionTool(IDetectorConstructionTool* detConstruction) {
+    m_detConstruction = detConstruction;
   }
 
   /// Configure the Physics List Tool handle
@@ -67,6 +63,14 @@ public:
   /// Configure the QuietMode option
   void SetQuietMode(bool quietMode) {
     m_quietMode = quietMode;
+  }
+
+  /// Bring in all overloads from G4RunManager
+  using G4RunManager::SetUserInitialization;
+
+  /// Allow user worker initialization for single-threaded runmanager
+  void SetUserInitialization(G4UserWorkerInitialization* userInit) override {
+    userWorkerInitialization = userInit;
   }
 
 protected:
@@ -87,10 +91,9 @@ private:
 
   bool m_recordFlux;
 
-  ToolHandle<IFastSimulationMasterTool> m_fastSimTool;
   ServiceHandle<IPhysicsListSvc> m_physListSvc;
 
-  ServiceHandle<IDetectorGeometrySvc> m_detGeoSvc;
+  IDetectorConstructionTool* m_detConstruction{nullptr};
 
   /// Interface to flux recording
 

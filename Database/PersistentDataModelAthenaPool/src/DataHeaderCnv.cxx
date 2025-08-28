@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv.cxx
@@ -42,7 +42,11 @@ DataHeaderCnv::~DataHeaderCnv()
    // Remove itself from the IncidentSvc - if it is still around
    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", "DataHeaderCnv");
    if( incSvc.retrieve().isSuccess() ) {
+   try{
       incSvc->removeListener(this, IncidentType::EndInputFile);
+    } catch ( GaudiException & e){
+       ATH_MSG_FATAL("Gaudi exception caught in DataHeaderCnv::~DataHeaderCnv");
+    }
    }
 }
 //______________________________________________________________________________
@@ -51,7 +55,8 @@ StatusCode DataHeaderCnv::initialize()
    // Read properties from the ConversionSvc
    m_inDHFMapMaxsize = 100;   // default DHForm cache size
    bool doFilterDHAliases = true;
-   SmartIF<IProperty> cnvSvc{service("AthenaPoolCnvSvc")};
+   const std::string svcName = (serviceLocator()->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc");
+   SmartIF<IProperty> cnvSvc{service(svcName, false)};
    if( cnvSvc ) {
       IntegerProperty sizeProp("maxDHFormCacheSize", m_inDHFMapMaxsize);
       if( cnvSvc->getProperty(&sizeProp).isSuccess() ) {
@@ -130,7 +135,7 @@ void DataHeaderCnv::handle(const Incident& incident)
             if( !form_token ) {
                std::string errmsg = std::format("Failed to write {} {}", dhFormType.Name(), placementStr);
                ATH_MSG_FATAL( errmsg );
-               throw GaudiException(errmsg, "DataHeaderCnv::WriteDataHeaderForms", StatusCode::FAILURE);
+               throw GaudiException(std::move(errmsg), "DataHeaderCnv::WriteDataHeaderForms", StatusCode::FAILURE);
             }
             ATH_MSG_DEBUG("Wrote DatHeaderForm, placeemnt was " << placementStr << "  token=" << form_token->toString());
             form_token->release(); form_token = nullptr;
@@ -235,7 +240,7 @@ StatusCode DataHeaderCnv::updateRep(IOpaqueAddress* pAddress, DataObject* pObjec
       }
       // remember this DH and finish processing in updateRepRefs()
       m_sharedWriterCachedDH = dataHeader;
-      m_sharedWriterCachedDHToken = dhRef;
+      m_sharedWriterCachedDHToken = std::move(dhRef);
       std::size_t tagBeg = dhPlacementStr.find("[KEY=") + 5;
       std::size_t tagSize = dhPlacementStr.find(']', tagBeg) - tagBeg;
       m_sharedWriterCachedDHKey = dhPlacementStr.substr( tagBeg, tagSize );

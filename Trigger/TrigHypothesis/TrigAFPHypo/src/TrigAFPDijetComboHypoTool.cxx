@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigAFPDijetComboHypoTool.h"
@@ -52,7 +52,7 @@ StatusCode TrigAFPDijetComboHypoTool::initialize() {
   //Retrieving the parameterization file for A side
   // By default it used file final_parameterization_b1.txt
   ATH_MSG_DEBUG("Parameterization file for A side: "<< m_protonTransportParamFileNameA);
-  std::string filePathA = PathResolver::find_file(m_protonTransportParamFileNameA, "DATAPATH", PathResolver::RecursiveSearch);
+  const std::string filePathA = PathResolver::find_file(m_protonTransportParamFileNameA, "DATAPATH");
   ATH_MSG_DEBUG("Path to param file side A: "<<filePathA);
   //Defining the parameterization object   
   m_transportBeamA->setParamFile(filePathA);
@@ -61,8 +61,8 @@ StatusCode TrigAFPDijetComboHypoTool::initialize() {
   //Retrieving the parameterization file for C side
   // By default it used file final_parameterization_b2.txt
   ATH_MSG_DEBUG("Parameterization file for C side: "<< m_protonTransportParamFileNameC);
-  std::string filePathC = PathResolver::find_file(m_protonTransportParamFileNameC, "DATAPATH", PathResolver::RecursiveSearch);
-  ATH_MSG_DEBUG("Path to param file side A: "<<filePathA);
+  const std::string filePathC = PathResolver::find_file(m_protonTransportParamFileNameC, "DATAPATH");
+  ATH_MSG_DEBUG("Path to param file side C: "<<filePathC);
   //Defining the parameterization object   
   m_transportBeamC->setParamFile(filePathC);
   ATH_CHECK(m_transportBeamC->load());

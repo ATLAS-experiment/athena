@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,7 +23,6 @@
 #include "InDetGeoModelUtils/InDetMaterialManager.h"
 
 #include "GeoModelKernel/GeoDefinitions.h"
-#include <string>
 
 class GeoPhysVol;
 class GeoFullPhysVol;
@@ -38,7 +37,6 @@ class TRTDetectorFactory_Full : public InDetDD::DetectorFactoryBase  {
 			  const ITRT_StrawStatusSummaryTool * sumTool,
 			  bool useOldActiveGasMixture,
 			  bool DC2CompatibleBarrelCoordinates,
-			  int overridedigversion,
 			  bool alignable,
 			  bool doArgon,
 			  bool doKrypton,
@@ -94,7 +92,6 @@ class TRTDetectorFactory_Full : public InDetDD::DetectorFactoryBase  {
 
   bool m_useOldActiveGasMixture;
   bool m_DC2CompatibleBarrelCoordinates;
-  int m_overridedigversion;
   bool m_alignable;
   const ITRT_StrawStatusSummaryTool* m_sumTool; // added for Argon
   bool m_strawsvcavailable;

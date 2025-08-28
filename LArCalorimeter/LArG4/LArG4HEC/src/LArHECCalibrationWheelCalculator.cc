@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHECCalibrationWheelCalculator.h"
@@ -19,31 +19,21 @@ namespace LArG4 {
 
     LArHECCalibrationWheelCalculator::LArHECCalibrationWheelCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_geometryCalculator("HECGeometry",name) //FIXME LArG4::HEC::HECGeometry
-      , m_geometryTypeProp(0)
-      , m_geometryType(kWheelActive)
     {
-      declareProperty("GeometryCalculator",m_geometryCalculator);
-      declareProperty("GeometryType",m_geometryTypeProp);
-      m_geometryTypeProp.declareUpdateHandler(&LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler, this);
     }
 
     void LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler(Gaudi::Details::PropertyBase&)
     {
-      switch(m_geometryTypeProp.value())
-        {
-        case 0: m_geometryType = kWheelActive; break;
-        case 1: m_geometryType = kWheelInactive; break;
-        case 2: m_geometryType = kWheelDead; break;
-        default:
-          std::ostringstream merr;
-          merr <<
-            "LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler FATAL: invalid eHECGeometryType specified "
-               << m_geometryTypeProp.value();
-          std::cerr << merr.str() << std::endl;
-          throw GaudiException(merr.str(), "LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler", StatusCode::FAILURE);
-        }
-
+      switch(m_geometryTypeProp.value()) {
+      case 0: m_geometryType = kWheelActive; break;
+      case 1: m_geometryType = kWheelInactive; break;
+      case 2: m_geometryType = kWheelDead; break;
+      default:
+	std::string merr{"LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler FATAL: invalid eHECGeometryType specified "};
+	merr += m_geometryTypeProp.value();
+	ATH_MSG_ERROR(merr);
+	throw GaudiException(merr, "LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler", StatusCode::FAILURE);
+      }
     }
 
     StatusCode LArHECCalibrationWheelCalculator::initialize() {
@@ -51,9 +41,6 @@ namespace LArG4 {
       ATH_MSG_DEBUG("Use the LArHECCalibrationWheelCalculator for the HEC");
       ATH_CHECK(m_geometryCalculator.retrieve());
       return StatusCode::SUCCESS;
-    }
-
-    LArHECCalibrationWheelCalculator::~LArHECCalibrationWheelCalculator() {
     }
 
     G4bool LArHECCalibrationWheelCalculator::Process(const G4Step* step, LArG4Identifier & identifier,

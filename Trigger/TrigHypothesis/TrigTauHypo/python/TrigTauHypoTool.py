@@ -106,7 +106,7 @@ def TrigTauPrecisionIDHypoToolFromDict(flags, chainDict):
         # Monitor this algorithm only
         id_score_monitoring[identification] = getTauIDScoreVariables(identification, precision_seq_name)
 
-    # For any triggers following the tracktwo reconstruction (2023 DeepSet)
+    # For any triggers following the tracktwoMVA reconstruction (2023+ DeepSet and GNTau)
     if chainPart['reconstruction'] == 'tracktwoMVA':
         currentHypo.TrackPtCut = 1.5*GeV
         currentHypo.HighPtSelectionLooseIDThr = 200*GeV
@@ -191,7 +191,7 @@ def TrigTauPrecisionDiKaonHypoToolFromDict(flags, chainDict):
 #============================================================================================
 # Precision Tracking step hypothesis tool (without selection)
 #============================================================================================
-def TrigTauPrecTrackHypoToolFromDict(chainDict):
+def TrigTauPrecTrackHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
 
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -204,7 +204,7 @@ def TrigTauPrecTrackHypoToolFromDict(chainDict):
 #============================================================================================
 # FTF steps hypothesis tools (without selection)
 #============================================================================================
-def TrigTauFastTrackHypoToolFromDict(chainDict):
+def TrigTauFastTrackHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
 
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -217,7 +217,7 @@ def TrigTauFastTrackHypoToolFromDict(chainDict):
 #============================================================================================
 # CaloMVA step hypothesis tool
 #============================================================================================
-def TrigTauCaloMVAHypoToolFromDict(chainDict):
+def TrigTauCaloMVAHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
     threshold = float(chainDict['chainParts'][0]['threshold'])
 

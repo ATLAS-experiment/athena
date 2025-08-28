@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
 log.debug("Importing %s",__name__)
 
 from copy import deepcopy
-from collections import OrderedDict
 import itertools
 
 #==========================================================
@@ -15,7 +14,7 @@ import itertools
 # 'signature': ('substring', 'group')
 # if the substring is '', the signature is not mapped to the chain name
 # if the group is '', the signature is not mapped to any group
-SignatureDict = OrderedDict({
+SignatureDict = {
     'Electron': ('e','AllTag'),
     'Photon'  : ('g','AllTag'),
     'Muon'    : ('mu','AllTag'),
@@ -41,19 +40,19 @@ SignatureDict = OrderedDict({
     'Photonprobe'  : ('', 'AllProbe'),
     'Tauprobe'     : ('', 'AllProbe'),
     'Muonprobe'    : ('', 'AllProbe')
-})
+}
 
 
 def getSignatureDict():
     # removes the grouping from the dict and creates a new one signature : string
-    new_dict = OrderedDict({key: value[0] for key, value in SignatureDict.items() if value[0] != ''})
+    new_dict = {key: value[0] for key, value in SignatureDict.items() if value[0] != ''}
     return new_dict
 
 SliceIDDict = getSignatureDict()
 
 def getSignatureGroupingDict():
     # removes the substring from the dict and creates a new one signature : group
-    new_dict = OrderedDict({key: value[1] for key, value in SignatureDict.items() if value[1] != ''})
+    new_dict = {key: value[1] for key, value in SignatureDict.items() if value[1] != ''}
     return new_dict
 
 def getListOfSignatureStrings():   
@@ -71,7 +70,7 @@ def getListOfSignatures():
 
 class ChainStore(dict):
     """Class to hold list of chains for each signature (dictionary with fixed set of keys)"""
-    _allowedSignatures = ['Egamma', 'Muon', 'Jet', 'Bjet', 'Bphysics', 'MET', 'Tau',
+    _allowedSignatures = ['Egamma', 'Muon', 'Jet', 'Bjet', 'Bphysics', 'MET', 'Tau', 
                           'HeavyIon', 'Beamspot', 'Cosmic', 'EnhancedBias',
                           'Monitor', 'Calib', 'Streaming', 'Combined', 'MinBias',
                           'UnconventionalTracking', 'Test']
@@ -93,18 +92,18 @@ class ChainStore(dict):
 # ---- signature specific dictionaries below    ----
 #==========================================================
 ChainDictTemplate = {
-    'chainName'    : '',
-    'L1item'        : '',
-    'topo'          : '',
-    'signatures'    : [],
+    'chainName'       : '',
+    'L1item'          : '',
+    'topo'            : '',
+    'signatures'      : [],
     'alignmentGroups' : [],
-    'stream'        : '',
-    'groups'        : [],
-    'EBstep'        : '',
-    'chainParts'   : [],
-    'sigDicts' : {},
-    'sigFolder'     : [],
-    'subSigs'        : [],
+    'stream'          : '',
+    'groups'          : [],
+    'EBstep'          : '',
+    'chainParts'      : [],
+    'sigDicts'        : {},
+    'sigFolder'       : [],
+    'subSigs'         : [],
     'extraComboHypos' : []
 }
 
@@ -179,7 +178,7 @@ JetChainParts = {
     'scan'         : # No longer used?
       ['FS',],
     'ionopt'       : # Heavy ion configuration
-      ['noion','ion'],
+      ['noion','ion','ionp'],
     'trkopt'       : # Tracking configuration
       ['notrk','ftf','roiftf'],
     'trkpresel'    : # Tracking preselection
@@ -262,6 +261,11 @@ JetChainParts = {
        'preselcHT650',
        'preselcHT850',
        #b-jet preselections
+       'presel1c100XX2c20bgtwo85',
+       'presel1c120XX2c20bgtwo90',
+       'presel1c120CXX1c20XX1c20bgtwo85',
+       'presel1c160XX1c20bgtwo90',
+       'presel1c160XX1c20bgtwo85',
        'presel2c20XX2c20b85',
        'presel2c20XX2c20b82',
        'presel2c20XX2c20b80',
@@ -280,6 +284,10 @@ JetChainParts = {
        'presel2c20XX1c20bgtwo82XX1c20gntau85',
        'presel2c20XX1c20bgtwo82XX1c20gntau80',
        'presel2c20XX1c20bgtwo80XX1c20gntau80',
+       'presel2c20XX1c20bgtwo85XX1c20uht1tau90',
+       'presel2c20XX1c20bgtwo85XX1c20uht1tau85',
+       'presel2c20XX1c20bgtwo85XX1c20uht1tau82',
+       'presel2c20XX1c20bgtwo85XX1c20uht1tau80',
        'presel5c25XXc25bgtwo85',
        'presel3j45bgtwo95',
        'presel4j25bgtwo95',
@@ -458,24 +466,51 @@ JetChainParts = {
      'PTRANGE2r3',
      'MAXMULT20c',
      'MAXMULT6c',],
-    'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone', '79bgntwox', '86bgntwox', '91bgntwox', '96bgntwox','95bgntwo','90bgntwo','85bgntwo','80bgntwo','82bgntwo','77bgntwo','75bgntwo','60bgntwo'],
-    'tausel': [ '75gntau' , '80gntau', '85gntau' , '90gntau' ],
+    'bsel': [ '95bdips','90bdips','85bdips','80bdips','77bdips'
+            , '95bgnone','90bgnone','85bgnone','80bgnone','77bgnone'
+            , '60bgntwoxt', '65bgntwoxt', '70bgntwoxt', '75bgntwoxt'
+            , '80bgntwoxt', '85bgntwoxt', '90bgntwoxt', '95bgntwoxt'
+            , '79bgntwox', '86bgntwox', '91bgntwox', '96bgntwox'
+            , '95bgntwo','90bgntwo','85bgntwo','80bgntwo','82bgntwo','77bgntwo','75bgntwo','60bgntwo'
+            ],
+    'tausel':
+        [ '75gntau' , '80gntau', '85gntau' , '90gntau'
+        , '75uht1tau' , '80uht1tau', '85uht1tau' , '90uht1tau'
+        ],
     'smc'           : # "Single mass condition" -- rename?
       ['30smcINF', '35smcINF', '40smcINF', '50smcINF', '60smcINF', 'nosmc'],
     # Setup for alternative data stream readout
     # B-tagging information
     'bTag'         : ['boffperf'  ,
-                      'bdl1r60', 'bdl1r70', 'bdl1r77', 'bdl1r85',
-                      'bdl1d60',  'bdl1d65', 'bdl1d70', 'bdl1d72',
-                      'bdl1d75', 'bdl1d77', 'bdl1d80', 'bdl1d82',
-                      'bdl1d85',
+                      # GN1 series
                       'bgn160', 'bgn165', 'bgn170', 'bgn172',
                       'bgn175', 'bgn177', 'bgn180', 'bgn182',
                       'bgn185',
                       'bgn182bb96', 'bgn177bb96', 'bgn175bb90',
+                      # GN2 series
                       'bgn260', 'bgn265', 'bgn270', 'bgn272',
                       'bgn275', 'bgn277', 'bgn280', 'bgn282',
                       'bgn285',                       ],
+    'ditauTag'     : ['ditauOmni0Trk3',  'ditauOmni0Trk4',  'ditauOmni0Trk5',  'ditauOmni0Trk9', 
+                      'ditauOmni1Trk3',  'ditauOmni1Trk4',  'ditauOmni1Trk5',  'ditauOmni1Trk9', 
+                      'ditauOmni2Trk3',  'ditauOmni2Trk4',  'ditauOmni2Trk5',  'ditauOmni2Trk9', 
+                      'ditauOmni3Trk3',  'ditauOmni3Trk4',  'ditauOmni3Trk5',  'ditauOmni3Trk9', 
+                      'ditauOmni4Trk3',  'ditauOmni4Trk4',  'ditauOmni4Trk5',  'ditauOmni4Trk9', 
+                      'ditauOmni5Trk3',  'ditauOmni5Trk4',  'ditauOmni5Trk5',  'ditauOmni5Trk9', 
+                      'ditauOmni6Trk3',  'ditauOmni6Trk4',  'ditauOmni6Trk5',  'ditauOmni6Trk9', 
+                      'ditauOmni7Trk3',  'ditauOmni7Trk4',  'ditauOmni7Trk5',  'ditauOmni7Trk9', 
+                      'ditauOmni8Trk3',  'ditauOmni8Trk4',  'ditauOmni8Trk5',  'ditauOmni8Trk9', 
+                      'ditauOmni9Trk3',  'ditauOmni9Trk4',  'ditauOmni9Trk5',  'ditauOmni9Trk9',
+                      'ditauOmni01Trk3', 'ditauOmni01Trk4', 'ditauOmni01Trk5', 'ditauOmni01Trk9',
+                      'ditauOmni02Trk3', 'ditauOmni02Trk4', 'ditauOmni02Trk5', 'ditauOmni02Trk9',
+                      'ditauOmni03Trk3', 'ditauOmni03Trk4', 'ditauOmni03Trk5', 'ditauOmni03Trk9',
+                      'ditauOmni04Trk3', 'ditauOmni04Trk4', 'ditauOmni04Trk5', 'ditauOmni04Trk9',
+                      'ditauOmni05Trk3', 'ditauOmni05Trk4', 'ditauOmni05Trk5', 'ditauOmni05Trk9',
+                      'ditauOmni06Trk3', 'ditauOmni06Trk4', 'ditauOmni06Trk5', 'ditauOmni06Trk9',
+                      'ditauOmni07Trk3', 'ditauOmni07Trk4', 'ditauOmni07Trk5', 'ditauOmni07Trk9',
+                      'ditauOmni08Trk3', 'ditauOmni08Trk4', 'ditauOmni08Trk5', 'ditauOmni08Trk9',
+                      'ditauOmni09Trk3', 'ditauOmni09Trk4', 'ditauOmni09Trk5', 'ditauOmni09Trk9',
+                     ],
     'bTracking'    : [],
     'bConfig'      : ['split',],
     'bMatching'    : ['antimatchdr05mu'],
@@ -526,6 +561,7 @@ JetChainParts_Default = {
     'smc'           : 'nosmc',
     #
     'bTag'          : '',
+    'ditauTag'      : '',
     'bTracking'     : '',
     'bConfig'       : [],
     'bMatching'     : [],
@@ -543,6 +579,10 @@ bJetChainParts_Default = {
     'subSigs'       : ['Bjet'],
 }
 
+ditauJetChainParts_Default = {
+    'sigFolder'     : ['Tau'],
+    'subSigs'       : ['Ditau'],
+}
 # ---- Beamspot Dictionary for chains confiugred through jets
 BeamspotJetChainParts_Default = {
     'signature'      : 'Beamspot',
@@ -1420,6 +1460,8 @@ def getSignatureInformation(signature):
         return [BeamspotJetChainParts_Default, JetChainParts]
     if signature == "Tau":
         return [TauChainParts_Default, TauChainParts]
+    if signature == "Ditau":
+        return [ditauJetChainParts_Default, JetChainParts]
     if (signature == "Muon"):
         return [MuonChainParts_Default, MuonChainParts]
     if  (signature == "Bphysics"):

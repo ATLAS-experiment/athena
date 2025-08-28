@@ -372,6 +372,12 @@ class MutableMultiTrajectory final
   inline xAOD::TrackSurfaceAuxContainer* trackSurfacesAux() {
     return m_surfacesBackendAux.get();
   }
+  inline xAOD::TrackSurfaceContainer* trackSurfaces() {
+    return m_surfacesBackend.get();
+  }
+    inline const xAOD::TrackSurfaceContainer* trackSurfaces() const {
+    return m_surfacesBackend.get();
+  }
 
   static const std::set<std::string> s_staticVariables;
 
@@ -471,7 +477,7 @@ class MultiTrajectory
    * Fill surfaces either from persistency or from geometry
    * If the surfaces are already there it means that the container is trainsient and this is void operation
    */
-  void fillSurfaces(const Acts::TrackingGeometry* geo, const Acts::GeometryContext& geoContext );
+  void fillSurfaces(const Acts::TrackingGeometry* geo);
   /**
    * reuse surfaces from MutableMultiTrajectory
    */

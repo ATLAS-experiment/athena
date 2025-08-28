@@ -15,7 +15,6 @@
 #  mh.run()
 #
 
-from __future__ import print_function
 
 from PyCool import cool
 import CoolConvUtilities.AtlCoolLib as AtlCoolLib

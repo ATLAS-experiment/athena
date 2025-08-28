@@ -53,35 +53,33 @@ public:
   virtual MultiComponentState update(std::vector<GsfMaterial::Combined>&,
                                      const MultiComponentState&,
                                      const Layer&,
-                                     PropDirection direction = anyDirection,
-                                     ParticleHypothesis particleHypothesis =
-                                       nonInteracting) const override final;
+                                     PropDirection direction = anyDirection) const override final;
 
   //!< Convolution with pre-measurement-update material properties
   virtual MultiComponentState preUpdate(std::vector<GsfMaterial::Combined>&,
                                         const MultiComponentState&,
                                         const Layer&,
-                                        PropDirection direction = anyDirection,
-                                        ParticleHypothesis particleHypothesis =
-                                          nonInteracting) const override final;
+                                        PropDirection direction = anyDirection) const override final;
 
   //!< Convolution with post-measurement-update material properties
   virtual MultiComponentState postUpdate(std::vector<GsfMaterial::Combined>&,
                                          const MultiComponentState&,
                                          const Layer&,
-                                         PropDirection direction = anyDirection,
-                                         ParticleHypothesis particleHypothesis =
-                                           nonInteracting) const override final;
+                                         PropDirection direction = anyDirection) const override final;
 
-private:
+  virtual Trk::ParticleHypothesis particleHypothesis() const override final {
+    return Trk::electron;
+  }
+
+ private:
   Trk::MultiComponentState update(std::vector<GsfMaterial::Combined>&,
                                   const Trk::MultiComponentState& inputState,
                                   const Trk::Layer& layer,
                                   Trk::PropDirection direction,
-                                  Trk::ParticleHypothesis particleHypothesis,
-                                  MaterialUpdateType updateType) const;
+                                  double updateFactor) const;
 
-  ElectronCombinedMaterialEffects m_materialEffects{};
+  //pimpl
+  std::unique_ptr<ElectronCombinedMaterialEffects> m_materialEffects;
 
   Gaudi::Property<unsigned int> m_maximumNumberOfComponents{
     this,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -64,7 +64,7 @@ void fill(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip,
 		       globalPosition,
 		       globalVariance(0,0),
 		       globalVariance(1,0),
-		       pixel_meas);
+		       std::move(pixel_meas));
 
   std::vector< const xAOD::UncalibratedMeasurement* > strip_meas({sclus0, sclus1});
   
@@ -82,7 +82,7 @@ void fill(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip,
 		       globalPosition,
                        globalVariance(0,0),
                        globalVariance(1,0),
-		       strip_meas,
+		       std::move(strip_meas),
 		       topHalfStripLength,
 		       bottomHalfStripLength,
 		       topStripDirection,

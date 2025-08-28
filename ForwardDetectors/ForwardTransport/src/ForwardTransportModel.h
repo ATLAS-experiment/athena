@@ -6,6 +6,7 @@
 #define FORWARDTRANSPORT_FORWARD_TRANSPORT_MODEL_H
 
 #include "G4VFastSimulationModel.hh"
+#include "G4Region.hh"
 #include "ForwardTransportSvc/IForwardTransportSvc.h"
 #include "ForwardTracker/ForwardTrack.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -16,7 +17,7 @@ class ForwardTransportModel: public G4VFastSimulationModel {
 
  public:
 
-  ForwardTransportModel(const std::string& name, const int verboseLevel, const std::string& FwdTrSvcName);
+  ForwardTransportModel(const std::string& name, G4Region* region, const int verboseLevel, const std::string& FwdTrSvcName);
 
   // methods being inherited from base class
   G4bool IsApplicable(const G4ParticleDefinition&) override final { return true; } // IDLE: we do selection in DoIt method

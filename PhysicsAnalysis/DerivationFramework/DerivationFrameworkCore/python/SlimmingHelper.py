@@ -516,6 +516,9 @@ class SlimmingHelper:
                 elif collectionName=="BTagging_AntiKtVR30Rmax4Rmin02Track_expert":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
                         items.extend(BTaggingExpertContent("AntiKtVR30Rmax4Rmin02PV0TrackJets", self.flags))
+                elif collectionName=="AntiKtVR30Rmax4Rmin02Track_FTAG":
+                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingVRContent
+                        items.extend(BTaggingVRContent("AntiKtVR30Rmax4Rmin02PV0TrackJets", self.flags))
                 elif collectionName=="BTagging_AntiKt2Track":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
                         items.extend(BTaggingStandardContent("AntiKt2PV0TrackJets", self.flags))

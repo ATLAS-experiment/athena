@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelSvc.h"
@@ -24,6 +24,8 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
+
+#include "GeoModelHelpers/defineWorld.h"
 
 #include <fstream>
 
@@ -57,6 +59,10 @@ StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
 
   // Working around Gaudi Issue https://gitlab.cern.ch/gaudi/Gaudi/issues/82
   Service* convSvc=dynamic_cast<Service*>(conversionSvc.get());
+  if (not convSvc){
+    ATH_MSG_ERROR("Dynamic cast to service failed");
+    return StatusCode::FAILURE;
+  }
   if (convSvc->FSMState() < Gaudi::StateMachine::INITIALIZED) {
     ATH_MSG_INFO("Explicitly initializing DetDescrCnvSvc");
     ATH_CHECK( convSvc->sysInitialize() );
@@ -122,7 +128,7 @@ StatusCode GeoModelSvc::finalize()
 
 StatusCode GeoModelSvc::geoInit()
 {
-  GeoPhysVol* worldPhys{nullptr};
+  PVLink worldPhys{nullptr};
   ServiceHandle<IRDBAccessSvc> rdbAccess("RDBAccessSvc",name());
 
   // Setup the GeoDbTagSvc
@@ -155,9 +161,9 @@ StatusCode GeoModelSvc::geoInit()
       ATH_MSG_FATAL("Failed to open SQLite database " << sqliteDbPath << " for reading in persistent GeoModel tree");
       return StatusCode::FAILURE;
     }
-    m_sqliteReader = std::make_unique<GeoModelIO::ReadGeoModel>(m_sqliteDbManager.get());
-    GeoVPhysVol* vWorldPhys ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(m_sqliteReader->buildGeoModel());
-    worldPhys = dynamic_cast<GeoPhysVol*>(vWorldPhys);
+    m_sqliteReader = std::make_unique<GeoModelIO::ReadGeoModel>(m_sqliteDbManager);
+    PVConstLink vWorldPhys{m_sqliteReader->buildGeoModel()};
+    worldPhys = const_pointer_cast(vWorldPhys);
     if(!worldPhys) {
       ATH_MSG_FATAL("Having Full Physical Volumes as World Volumes not supported!");
       return StatusCode::FAILURE;
@@ -257,32 +263,27 @@ StatusCode GeoModelSvc::geoInit()
     }
 
     // Create a material manager
-    StoredMaterialManager *theMaterialManager{nullptr};
+    std::unique_ptr<StoredMaterialManager> theMaterialManager{};
     try{
-      theMaterialManager = new RDBMaterialManager(m_pSvcLocator);
+      theMaterialManager = std::make_unique<RDBMaterialManager>(m_pSvcLocator);
     }
     catch(std::runtime_error& e) {
       ATH_MSG_FATAL(e.what());
       return StatusCode::FAILURE;
     }
-    ATH_CHECK( m_detStore->record(theMaterialManager,"MATERIALS") );
+    ATH_CHECK( m_detStore->record(std::move(theMaterialManager),"MATERIALS") );
 
-    // Build the world node from which everything else will be suspended
-    const GeoMaterial* air = theMaterialManager->getMaterial("std::Air");  
-    const GeoBox* worldBox = new GeoBox(1000*Gaudi::Units::cm,1000*Gaudi::Units::cm, 1000*Gaudi::Units::cm);
-    const GeoLogVol* worldLog = new GeoLogVol("WorldLog", worldBox, air);
-    worldPhys=new GeoPhysVol(worldLog);
+    worldPhys= createGeoWorld();
   } // End of the GeometryDB-specific part
 
   // Create AtlasExperiment and register it within the transient detector store
-  GeoModelExperiment* theExperiment = new GeoModelExperiment(worldPhys);
-  ATH_CHECK( m_detStore->record(theExperiment,"ATLAS") );
+  auto theExperiment = std::make_unique<GeoModelExperiment>(std::move(worldPhys));
+  ATH_CHECK( m_detStore->record(std::move(theExperiment),"ATLAS") );
 
-  int mem,cpu;
-  std::unique_ptr<std::ofstream> geoModelStats;
-  if(m_statisticsToFile) {
-    geoModelStats = std::make_unique<std::ofstream>("GeoModelStatistics");
-    *geoModelStats << "Detector Configuration flag = " << m_atlasVersion << std::endl; 
+  int mem{},cpu{};
+  std::ofstream geoModelStats(m_statisticsToFile ? "GeoModelStatistics":"");
+  if(geoModelStats) {
+    geoModelStats << "Detector Configuration flag = " << m_atlasVersion << std::endl; 
   }
     
   // Loop over all tools
@@ -297,8 +298,8 @@ StatusCode GeoModelSvc::geoInit()
       
     ATH_CHECK(theTool->create());
       
-    if(m_statisticsToFile) {
-      *geoModelStats << theTool->name() << "\t SZ= " 
+    if(geoModelStats) {
+      geoModelStats << theTool->name() << "\t SZ= " 
 		     << GeoPerfUtils::getMem() - mem << "Kb \t Time = " << (GeoPerfUtils::getCpu() - cpu) * 0.01 << "S" << std::endl;
     }
     else {
@@ -306,11 +307,7 @@ StatusCode GeoModelSvc::geoInit()
 		   << GeoPerfUtils::getMem() - mem << "Kb \t Time = " << (GeoPerfUtils::getCpu() - cpu) * 0.01 << "S");
     }
   }
-    
-  if(m_statisticsToFile) {
-    geoModelStats->close();
-  }
-
+  
   if(!m_sqliteDb) {
     // Close connection to the GeometryDB
     rdbAccess->shutdown();

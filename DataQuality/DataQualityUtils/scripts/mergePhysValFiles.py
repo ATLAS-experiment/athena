@@ -8,7 +8,6 @@
 #16 May 2016
 #----------------------------------------------------------------------
 
-from __future__ import print_function
 import os,glob,argparse,ROOT,time
 
 start = time.clock()

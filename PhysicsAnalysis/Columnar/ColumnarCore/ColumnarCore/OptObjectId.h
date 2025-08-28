@@ -21,21 +21,19 @@ namespace columnar
   /// `nullptr` taking the empty value.  This is its own type both for
   /// compactness and to allow a slightly more efficient representation
   /// internally.
-  template<ContainerId CI, typename CM = ColumnarModeDefault> class OptObjectId;
+  template<ContainerIdConcept CI, typename CM> class OptObjectId;
 
 
 
 
 
-  template<ContainerId CI> class OptObjectId<CI,ColumnarModeXAOD> final
+  template<ContainerIdConcept CI> class OptObjectId<CI,ColumnarModeXAOD> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-
-    using xAODObject = typename ContainerIdTraits<CI>::xAODObjectIdType;
+    using xAODObject = typename CI::xAODObjectIdType;
 
     OptObjectId () noexcept = default;
 
@@ -62,7 +60,11 @@ namespace columnar
     [[nodiscard]] ObjectId<CI,ColumnarModeXAOD> value () const {
       if (m_object == nullptr)
         throw std::bad_optional_access();
-      return ObjectId<CI,ColumnarModeXAOD> (*m_object);}
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *result ATLAS_THREAD_SAFE = m_object;
+      return ObjectId<CI,ColumnarModeXAOD> (*result);}
 
     [[nodiscard]] ObjectId<CI,ColumnarModeXAOD> operator * () const {
       if (m_object == nullptr)
@@ -88,13 +90,13 @@ namespace columnar
     xAODObject *m_object = nullptr;
   };
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator== (const OptObjectId<CI,ColumnarModeXAOD>& lhs, const OptObjectId<CI,ColumnarModeXAOD>& rhs)
   {
     return lhs.getXAODObjectNoexcept() == rhs.getXAODObjectNoexcept();
   }
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator!= (const OptObjectId<CI,ColumnarModeXAOD>& lhs, const OptObjectId<CI,ColumnarModeXAOD>& rhs)
   {
     return lhs.getXAODObjectNoexcept() != rhs.getXAODObjectNoexcept();
@@ -103,15 +105,13 @@ namespace columnar
 
 
 
-  template<ContainerId CI> class OptObjectId<CI,ColumnarModeArray> final
+  template<ContainerIdConcept CI> class OptObjectId<CI,ColumnarModeArray> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-
-    using xAODObject = typename ContainerIdTraits<CI>::xAODObjectIdType;
+    using xAODObject = typename CI::xAODObjectIdType;
 
     OptObjectId () noexcept = default;
 
@@ -194,43 +194,17 @@ namespace columnar
     std::size_t m_index = invalidObjectIndex;
   };
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator== (const OptObjectId<CI,ColumnarModeArray>& lhs, const OptObjectId<CI,ColumnarModeArray>& rhs)
   {
     return lhs.getIndex() == rhs.getIndex();
   }
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator!= (const OptObjectId<CI,ColumnarModeArray>& lhs, const OptObjectId<CI,ColumnarModeArray>& rhs)
   {
     return lhs.getIndex() != rhs.getIndex();
   }
-
-
-
-
-  using OptJetId = OptObjectId<ContainerId::jet>;
-  using OptMutableJetId = OptObjectId<ContainerId::mutableJet>;
-  using OptMuonId = OptObjectId<ContainerId::muon>;
-  using OptElectronId = OptObjectId<ContainerId::electron>;
-  using OptPhotonId = OptObjectId<ContainerId::photon>;
-  using OptEgammaId = OptObjectId<ContainerId::egamma>;
-  using OptMutableEgammaId = OptObjectId<ContainerId::mutableEgamma>;
-  using OptClusterId = OptObjectId<ContainerId::cluster>;
-  using OptTrackId = OptObjectId<ContainerId::track>;
-  using OptTrack0Id = OptObjectId<ContainerId::track0>;
-  using OptTrack1Id = OptObjectId<ContainerId::track1>;
-  using OptTrack2Id = OptObjectId<ContainerId::track2>;
-  using OptVertexId = OptObjectId<ContainerId::vertex>;
-  using OptParticleId = OptObjectId<ContainerId::particle>;
-  using OptParticle0Id = OptObjectId<ContainerId::particle0>;
-  using OptParticle1Id = OptObjectId<ContainerId::particle1>;
-  using OptMetId = OptObjectId<ContainerId::met>;
-  using OptMet0Id = OptObjectId<ContainerId::met0>;
-  using OptMet1Id = OptObjectId<ContainerId::met1>;
-  using OptMutableMetId = OptObjectId<ContainerId::mutableMet>;
-  using OptMetAssociationId = OptObjectId<ContainerId::metAssociation>;
-  using OptEventInfoId = OptObjectId<ContainerId::eventInfo>;
 }
 
 #endif

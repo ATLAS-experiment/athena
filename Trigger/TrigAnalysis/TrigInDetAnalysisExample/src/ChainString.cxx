@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Thu 30 Apr 2015 14:06:56 CEST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -109,7 +109,7 @@ void ChainString::parse( std::string s ) {
     if ( !m_passed ) raw += ";DTE";
   
     /// overwrite with the parsed string 
-    *(std::string*)(this) = raw;
+    *static_cast<std::string*>(this) = raw;
 
     raw = m_head;
     for ( int i=0 ; i<5 ; i++ ) if ( *values[i]!="" ) raw += ":" + tags[i] + "=" + *values[i];

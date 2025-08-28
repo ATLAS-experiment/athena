@@ -205,6 +205,11 @@ namespace ActsTrk {
     m_navigation[1ul] = m_finderCfg.zBinsCustomLooping;
     m_navigation[2ul] = m_rBinsCustomLooping.value();
 
+    if (detStore()->retrieve(m_pixelId, "PixelID").isFailure()) {
+        ATH_MSG_ERROR("Could not get PixelID helper !");
+        return StatusCode::FAILURE;
+    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -437,16 +442,17 @@ ATH_FLATTEN
 	
 	m_finderCfg.rRangeMiddleSP.push_back(convertedVec);
     }
-    
-    // define cuts used for fast tracking configuration
-    if (m_useExperimentCuts) {
 
+
+    // define cuts used for fast tracking configuration
+    if (m_useExperimentCuts) {      
+      
       // This function will be applied to select space points during grid filling
       m_finderCfg.spacePointSelector
-        .connect<itkFastTrackingSPselect>();
+        .connect<&ActsTrk::SeedingTool::spacePointSelectionFunction>(this);
 
       m_finderCfg.experimentCuts
-        .connect<itkFastDoubletCut>();
+        .connect<&ActsTrk::SeedingTool::doubletSelectionFunction>(this);
       
     }
     

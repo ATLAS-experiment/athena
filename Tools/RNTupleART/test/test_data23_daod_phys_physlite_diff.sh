@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# art-description: Derivation_tf.py data23 w/ PHYS and PHYSLITE in TTree/RNTuple Formats w/ a diff at the end
+# art-description: Derivation_tf.py data23 w/ PHYS and PHYSLITE in TTree/RNTuple Formats w/ a diff of event data and metadata at the end
 # art-type: grid
 # art-include: main/Athena
 # art-include: main--dev3LCG/Athena
@@ -22,7 +22,7 @@ Derivation_tf.py \
   --inputAODFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1" \
   --outputDAODFile="ttree.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.Output.StorageTechnology.EventData=\"ROOTTREEINDEX\";flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";
+  --preExec="flags.Output.StorageTechnology.EventData=\"ROOTTREEINDEX\";flags.Output.StorageTechnology.MetaData=\"ROOTTREE\";flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";
 
 echo "art-result: $? ttree";
 
@@ -37,7 +37,7 @@ Derivation_tf.py \
   --inputAODFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1" \
   --outputDAODFile="rntuple.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.Output.StorageTechnology.EventData=\"ROOTRNTUPLE\";flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";
+  --preExec="flags.Output.StorageTechnology.EventData=\"ROOTRNTUPLE\";flags.Output.StorageTechnology.MetaData=\"ROOTRNTUPLE\";flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";
 
 echo "art-result: $? rntuple";
 
@@ -72,3 +72,12 @@ acmd diff-root \
   --order-trees DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.rntuple-to-ttree.pool.root;
 
 echo "art-result: $? diff (PHYSLITE)";
+
+# Metadata diff
+meta-diff -d file_size file_guid -m full -x diff -s DAOD_PHYS.ttree.pool.root DAOD_PHYS.rntuple.pool.root
+
+echo "art-result: $? metadata diff (PHYS)";
+
+meta-diff -d file_size file_guid -m full -x diff -s DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.rntuple.pool.root
+
+echo "art-result: $? metadata diff (PHYSLITE)";

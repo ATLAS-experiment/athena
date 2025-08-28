@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloClusterCorrection/CaloClusterLocalCalib.h"
@@ -171,9 +171,10 @@ StatusCode  CaloClusterLocalCalib::execute(const EventContext& ctx,
          if(m_calibTools[0].typeAndName() == "CaloLCOutOfClusterTool/LCOutPi0") 
          {
            double ooc_weight;
-           theCluster->retrieveMoment(xAOD::CaloCluster::OOC_WEIGHT,ooc_weight);
-           newWeightMoment *= ooc_weight;
-           theCluster->insertMoment(xAOD::CaloCluster::OOC_WEIGHT,newWeightMoment);
+           if (theCluster->retrieveMoment(xAOD::CaloCluster::OOC_WEIGHT,ooc_weight)) {
+             newWeightMoment *= ooc_weight;
+             theCluster->insertMoment(xAOD::CaloCluster::OOC_WEIGHT,newWeightMoment);
+           }
          }
       }
 //    else, what as was always done     

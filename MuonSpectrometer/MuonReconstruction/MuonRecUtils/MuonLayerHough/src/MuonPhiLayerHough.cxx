@@ -73,7 +73,7 @@ namespace MuonHough {
                 if ((*it)->debugInfo()) {
                     const HitDebugInfo* db1 = (*it)->debugInfo();
                     std::cout << " sec " << db1->sector << " r " <<Muon::MuonStationIndex::regionName(db1->region) << " type " << db1->type 
-                               << " lay " << Muon::MuonStationIndex::layerName(db1->layer) << " bc "<< db1->barcode << std::endl;
+                               << " lay " << Muon::MuonStationIndex::layerName(db1->layer) << " bc "<< db1->uniqueID << std::endl;
                 } else
                     std::cout << std::endl;
             }

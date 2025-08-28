@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/PackedLinkVectorHelper.h
@@ -144,7 +144,7 @@ PackedLinkVectorHelperBase::applyThinningBase (IAuxTypeVector& linkedVec,
       if (sg) {
         sg->tryELRemap (sgkey, index, sgkey_out, index_out);
       }
-      DataProxyHolder::thin (sgkey_out, index_out, tc);
+      (void)DataProxyHolder::thin (sgkey_out, index_out, tc);
       l.setIndex (index_out);
       if (sgkey_out != sgkey) {
         LinkedVector lv (linkedVec);

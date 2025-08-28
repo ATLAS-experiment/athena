@@ -24,7 +24,7 @@ atlas_add_poolcnv_library( xAODTruthAthenaPoolPoolCnv
    xAOD::TruthMetaDataContainer xAOD::TruthMetaDataAuxContainer
    CNV_PFX xAOD
    LINK_LIBRARIES AthContainers AthenaKernel AthenaPoolCnvSvcLib
-   AthenaPoolUtilities xAODTruth )
+   AthenaPoolUtilities xAODTruth TruthUtils )
 
 # Install files from the package.
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
@@ -35,7 +35,7 @@ find_package( AthenaPoolUtilitiesTest )
 if( ATHENAPOOLUTILITIESTEST_FOUND AND NOT SIMULATIONBASE
    AND NOT GENERATIONBASE )
    set( XAODTRUTHATHENAPOOL_REFERENCE_TAG
-      xAODTruthAthenaPoolReference-01-01-00 )
+      xAODTruthAthenaPoolReference-02-00-01 )
    run_tpcnv_test( xAODTruthAthenaPool_21.0.79   AOD-21.0.79-full
       REQUIRED_LIBRARIES xAODTruthAthenaPoolPoolCnv
       REFERENCE_TAG ${XAODTRUTHATHENAPOOL_REFERENCE_TAG} )

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFEXSuperCellTowerIdProvider.h"
@@ -11,7 +11,7 @@
 LVL1::eFEXSuperCellTowerIdProvider::eFEXSuperCellTowerIdProvider(const std::string &type, const std::string &name, const IInterface *parent):
   AthAlgTool(type, name, parent)
 {
-  declareInterface<IeFEXSuperCellTowerIdProvider>(this);
+  declareInterface<eFEXSuperCellTowerIdProvider>(this);
 }
 
 LVL1::eFEXSuperCellTowerIdProvider::~eFEXSuperCellTowerIdProvider()
@@ -28,7 +28,7 @@ StatusCode LVL1::eFEXSuperCellTowerIdProvider::initialize()
   return StatusCode::SUCCESS;   
 }
 
-StatusCode LVL1::eFEXSuperCellTowerIdProvider::setAddress(std::string inputaddress)
+StatusCode LVL1::eFEXSuperCellTowerIdProvider::setAddress(const std::string& inputaddress)
 {
   if (inputaddress.empty()) {
     m_hascsvfile = false;

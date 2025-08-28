@@ -2,9 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ScoreBasedAmbiguityResolutionAlg.h"
-
-#include "ScoreBasedSolverCutsImpl.h"
+#include "src/ScoreBasedAmbiguityResolutionAlg.h"
 
 // Athena
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -26,9 +24,10 @@
 #include "ActsInterop/TableUtils.h"
 #include "src/detail/MeasurementIndex.h"
 #include "src/detail/SharedHitCounter.h"
+#include "src/detail/Definitions.h"
 
 namespace {
-std::size_t sourceLinkHash(const Acts::SourceLink &slink) {
+static std::size_t sourceLinkHash(const Acts::SourceLink &slink) {
   const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink =
       slink.get<ActsTrk::ATLASUncalibSourceLink>();
   const xAOD::UncalibratedMeasurement &uncalibMeas =
@@ -36,7 +35,7 @@ std::size_t sourceLinkHash(const Acts::SourceLink &slink) {
   return uncalibMeas.identifier();
 }
 
-bool sourceLinkEquality(const Acts::SourceLink &a, const Acts::SourceLink &b) {
+static bool sourceLinkEquality(const Acts::SourceLink &a, const Acts::SourceLink &b) {
   const xAOD::UncalibratedMeasurement &uncalibMeas_a =
       ActsTrk::getUncalibratedMeasurement(
           a.get<ActsTrk::ATLASUncalibSourceLink>());
@@ -89,13 +88,9 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::initialize() {
   }
 
   ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_tracksKey.initialize());
   ATH_CHECK(m_resolvedTracksKey.initialize());
-  ATH_CHECK(m_resolvedTracksBackendHandles.initialize(
-      ActsTrk::prefixFromTrackContainerName(
-          m_resolvedTracksKey.key())));  // TODO choose prefix related to the
-                                         // output tracks name
+
   return StatusCode::SUCCESS;
 }
 
@@ -117,16 +112,17 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
   SG::ReadHandle<ActsTrk::TrackContainer> trackHandle =
       SG::makeHandle(m_tracksKey, ctx);
   ATH_CHECK(trackHandle.isValid());
-  m_stat[kNInputTracks] += trackHandle->size();
+  const ActsTrk::TrackContainer* trackContainer = trackHandle.cptr();
+  m_stat[kNInputTracks] += trackContainer->size();
 
   // creates mutable tracks from the input tracks to add summary information
   // NOTE: this operation likely needs to moved outside ambiguity resolution
-  ActsTrk::MutableTrackContainer updatedTracks =
-      ScoreBasedSolverCutsImpl::addSummaryInformation(*trackHandle);
-
+  auto updatedTracks =
+    ScoreBasedSolverCutsImpl::addSummaryInformation(*trackContainer);
+  
   // create the optional cuts for the ambiguity resolution
   Acts::ScoreBasedAmbiguityResolution::Optionals<
-      ActsTrk::MutableTrackContainer::ConstTrackProxy>
+    typename decltype(updatedTracks)::ConstTrackProxy>
       Optionals;
 
   // Adding optional cuts
@@ -145,45 +141,50 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
       updatedTracks, &sourceLinkHash, &sourceLinkEquality, Optionals);
 
   ATH_MSG_DEBUG("Resolved to " << goodTracks.size() << " tracks from "
-                              << updatedTracks.size());
+                << updatedTracks.size());
   m_stat[kNResolvedTracks] += goodTracks.size();
 
-  ActsTrk::MutableTrackContainer solvedTracks;
-  solvedTracks.ensureDynamicColumns(updatedTracks);
 
+  // we start shortlisting the container
+  Acts::VectorTrackContainer resolvedTrackBackend;
+  Acts::VectorMultiTrajectory resolvedTrackStateBackend;
+  detail::RecoTrackContainer resolvedTracksContainer(resolvedTrackBackend, resolvedTrackStateBackend);
+  
+  resolvedTracksContainer.ensureDynamicColumns(updatedTracks);
+  
   detail::MeasurementIndex measurementIndex;
   detail::SharedHitCounter sharedHits;
 
   std::size_t totalShared = 0;
   for (auto iTrack : goodTracks) {
-    auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
+    auto destProxy = resolvedTracksContainer.getTrack(resolvedTracksContainer.addTrack());
     destProxy.copyFrom(updatedTracks.getTrack(iTrack));
+    
     if (m_countSharedHits) {
-      auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, solvedTracks, measurementIndex);
+      auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, resolvedTracksContainer, measurementIndex);
       if (nBadTrackMeasurements > 0) {
         ATH_MSG_ERROR("computeSharedHits: " << nBadTrackMeasurements << " track measurements not found in input track");
       }
       totalShared += nShared;
     }
   }
+  
   if (m_countSharedHits) {
     ATH_MSG_DEBUG("total number of shared hits = " << totalShared);
     m_stat[kNSharedHits] += totalShared;
   }
 
-  std::unique_ptr<ActsTrk::TrackContainer> outputTracks =
-      m_resolvedTracksBackendHandles.moveToConst(
-          std::move(solvedTracks),
-          m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);
-  SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle(
-      m_resolvedTracksKey, ctx);
-
-  if (resolvedTrackHandle.record(std::move(outputTracks)).isFailure()) {
-    ATH_MSG_ERROR("Failed to record resolved ACTS tracks with key "
-                  << m_resolvedTracksKey.key());
+  // make const collection
+  Acts::ConstVectorTrackContainer storableTrackBackend( std::move(resolvedTrackBackend) );
+  Acts::ConstVectorMultiTrajectory storableTrackStateBackend( std::move(resolvedTrackStateBackend) );
+  std::unique_ptr< ActsTrk::TrackContainer > storableTracksContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(storableTrackBackend),
+                                                                                                                    std::move(storableTrackStateBackend) );
+  SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle = SG::makeHandle( m_resolvedTracksKey, ctx );
+  if (resolvedTrackHandle.record( std::move(storableTracksContainer)).isFailure()) {
+    ATH_MSG_ERROR("Failed to record resolved ACTS tracks with key " << m_resolvedTracksKey.key() );
     return StatusCode::FAILURE;
   }
-
+  
   return StatusCode::SUCCESS;
 }
 

@@ -32,7 +32,7 @@ class LArFastShower : public G4VFastSimulationModel
 public:
 
   /// Constructor
-  LArFastShower(const std::string& name, const FastShowerConfigStruct& config,
+  LArFastShower(const std::string& name, G4Region* region, const FastShowerConfigStruct& config,
                 IFastSimDedicatedSD* fastSimDedicatedSD);
 
   /// Destructor

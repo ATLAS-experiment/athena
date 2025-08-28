@@ -54,7 +54,7 @@ class FPGATrackSimSpacepointRoadFilterTool : public extends<AthAlgTool, IFPGATra
 
         ///////////////////////////////////////////////////////////////////////
         // Handles
-        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", ""};
+        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc {this, "FPGATrackSimBankSvc", ""};
 
         ///////////////////////////////////////////////////////////////////////
@@ -66,6 +66,7 @@ class FPGATrackSimSpacepointRoadFilterTool : public extends<AthAlgTool, IFPGATra
         Gaudi::Property <bool> m_filtering {this, "filtering", 0, "Filter out unpaired strip hits"};
         Gaudi::Property <bool> m_setSectors {this, "setSectors", true, "Should the bank service be used to set sectors."};
         Gaudi::Property <bool> m_isSecondStage {this, "isSecondStage", false, "Is this the second stage?"};
+        Gaudi::Property <bool> m_dropUnpairedIfSP {this, "dropUnpairedIfSP", true, "If there are spacepoints in a layer, drop any additional unpaired strip hits" };
 
         ///////////////////////////////////////////////////////////////////////
         // Event Storage

@@ -56,7 +56,8 @@ CaloNoiseCompCondAlg::initialize() {
    ATH_CHECK(m_LArMinBiasObjKey.initialize());
    ATH_CHECK(m_cablingKey.initialize());
    ATH_CHECK(m_adc2mevKey.initialize());
-   ATH_CHECK(m_pedestalKey.initialize());
+   ATH_CHECK(m_pedestalKey.initialize(m_noiseKey.empty()));
+   ATH_CHECK(m_noiseKey.initialize(!m_noiseKey.empty()));
    ATH_CHECK(m_acorrKey.initialize());
 
    //diagnostic
@@ -153,13 +154,24 @@ CaloNoiseCompCondAlg::execute() {
    writeElecHandle.addDependency (adc2mevHdl);
    writePileupHandle.addDependency (adc2mevHdl);
 
-   auto pedHdl=SG::ReadCondHandle<ILArPedestal>(m_pedestalKey, ctx);
-   if(!pedHdl.isValid()){
-      ATH_MSG_ERROR( "Do not have pedestals");
-      return StatusCode::FAILURE;
+   if(m_noiseKey.empty()) {
+      auto pedHdl=SG::ReadCondHandle<ILArPedestal>(m_pedestalKey, ctx);
+      if(!pedHdl.isValid()){
+         ATH_MSG_ERROR( "Do not have pedestals");
+         return StatusCode::FAILURE;
+      }
+      m_ped=*pedHdl;
+      writeElecHandle.addDependency (pedHdl);
+   } else {
+      auto noiseHdl=SG::ReadCondHandle<ILArNoise>(m_noiseKey, ctx);
+      if(!noiseHdl.isValid()){
+         ATH_MSG_ERROR( "Do not have noise");
+         return StatusCode::FAILURE;
+      }
+      m_noise=*noiseHdl;
+      writeElecHandle.addDependency (noiseHdl);
+
    }
-   m_ped=*pedHdl;
-   writeElecHandle.addDependency (pedHdl);
 
    auto acorrHdl=SG::ReadCondHandle<ILArAutoCorr>(m_acorrKey, ctx);
    if(!acorrHdl.isValid()){
@@ -286,9 +298,6 @@ CaloNoiseCompCondAlg::initIndex() {
 
     IdentifierHash idCaloHash=static_cast<IdentifierHash>(intIdCaloHash);
 
-    //    std::cout << "DRDEBUG in initIndex loop " << intIdCaloHash << std::endl ;
-
-    
     // initialize the vector of indexes (big vector without symmetry)
 
 
@@ -367,13 +376,10 @@ CaloNoiseCompCondAlg::initIndex() {
 
     if(iCalo!=CaloCell_ID::TILE) {
       if(this->checkIfConnected(id)==false) {
-        std::cout << "DRDEBUG ... NOT connected " << std::endl ;
         continue; 
       }
-      // else { std::cout << "DRDEBUG ... connected " << std::endl ;}
     }
 
-    //  std::cout << "DRDEBUG ... check connected OK " << intIdCaloHash << std::endl ;
 
     /* cabling eta= 0 -> 0.8  (for private debug)
        int samp  = m_lar_em_id->sampling(id);
@@ -387,7 +393,6 @@ CaloNoiseCompCondAlg::initIndex() {
        if(region>0) return;
     */
   
-    // std::cout << "DRDEBUG ... register under  " << m_new_index << std::endl ;
 
     //we come here if idSymmHash is not yet indexed (and is connected)   
     m_indexContainer[idCaloHash] = 
@@ -410,15 +415,11 @@ CaloNoiseCompCondAlg::checkIfConnected(const Identifier &id)
     HWIdentifier hwid = m_cabling->createSignalChannelID(id);
     if(!m_cabling->isOnlineConnected(hwid)) 
     {
-      //std::cout<<m_lar_em_id->show_to_string(id)
-      //	       <<" not connected !!"<<std::endl;
       return false;
     }
   }
   catch(LArID_Exception & except) 
     {return false;}
-  //std::cout<<m_lar_em_id->show_to_string(id)
-  //	       <<" connected !!"<<std::endl;  
   return true;
 }
 
@@ -723,15 +724,12 @@ CaloNoiseCompCondAlg::calculatePileUpNoise(const IdentifierHash & idCaloHash,
   float OFC_AC_OFC,OFC_OFC; 
   unsigned int firstSample=m_firstSample; 
   // for HEC, always use firstSample=1 when the number of samples is 4 
-  if (m_lar_hec_id->is_lar_hec(id) && m_nsamples==4 && m_firstSample==0) firstSample=1; 
+  if (m_lar_hec_id->is_lar_hec(id) && m_nsamples==4 && m_firstSample==0u) firstSample=1; 
   this->commonCalculations(OFC_AC_OFC,OFC_OFC,2,firstSample); 
  
   //::::::::::::::::::::::::::::::::::::::
 
   PileUp*=std::sqrt(OFC_AC_OFC);
-
-  //std::cout<<"PILEUP "<<m_lar_em_id->show_to_string(id)<<" "
-  //	   <<MinBiasRMS<<" "<<OFC_AC_OFC<<" "<<PileUp<<std::endl;
 
   return PileUp; 
 }
@@ -785,7 +783,6 @@ CaloNoiseCompCondAlg::commonCalculations(float & OFC_AC_OFC,float & OFC_OFC,int 
     tmp*=m_OFC[i]; 
     OFC_AC_OFC+=tmp;  
     OFC_OFC+= m_OFC[i] * m_OFC[i]; 
-    //std::cout<<"    "<<i<<" "<<OFC_AC_OFC<<" "<<OFC_OFC<<std::endl;
   }
   //::::::::::::::::::::::::::::::::::::::
 }
@@ -806,21 +803,24 @@ CaloNoiseCompCondAlg::retrieveCellDatabase(const IdentifierHash & idCaloHash,
       int index=this->index(idCaloHash);
       m_Adc2MeVFactor = (m_adc2mevContainer[index])[igain];       
     } 
-    ATH_MSG_VERBOSE("m_Adc2MeVFactor="<<m_Adc2MeVFactor);
   }
 
   //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   //SIGMANOISE
   if(retrieve[iSIGMANOISE])
   {
-    m_RMSpedestal = m_ped->pedestalRMS(m_cabling->createSignalChannelID(id),igain);
-    if(m_RMSpedestal>(1.0+LArElecCalib::ERRORCODE)) 
-      m_SigmaNoise = m_RMSpedestal;
-    else
-    {     
-      m_SigmaNoise = 0.;
+    if(m_ped) { 
+       m_RMSpedestal = m_ped->pedestalRMS(m_cabling->createSignalChannelID(id),igain);
+       if(m_RMSpedestal>(1.0+LArElecCalib::ERRORCODE)) 
+         m_SigmaNoise = m_RMSpedestal;
+       else
+       {     
+         m_SigmaNoise = 0.;
+       }
+    } else {
+       m_SigmaNoise = m_noise->noise(m_cabling->createSignalChannelID(id),igain);
+
     }
-    ATH_MSG_VERBOSE("m_SigmaNoise(inADC)="<<m_SigmaNoise<<" m_RMSpedestal="<<m_RMSpedestal);
   }
 
   //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -1026,8 +1026,6 @@ CaloNoiseCompCondAlg::updateDiagnostic(int ireason,const std::string &nameReason
   ++m_nReason[nTmp][igain];
   ++m_itReason[ireason][igain]; 
   noiseOK=false;
-  //std::cout<<nTmp<<" "<<n_reason[nTmp][igain]<<" "
-  //         <<it_reason[ireason][igain]<<std::endl;
 }
 
 //////////////////////////////////////////////////

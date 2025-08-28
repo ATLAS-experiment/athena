@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_TGCREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_TGCREADOUTELEMENT_ICC
@@ -18,98 +18,99 @@ namespace ActsTrk{
 }
 
 namespace MuonGMR4 {
-inline double TgcReadoutElement::moduleWidthS() const { return 2.*m_pars.halfWidthShort; }
-inline double TgcReadoutElement::moduleWidthL() const { return 2.*m_pars.halfWidthLong; }
-inline double TgcReadoutElement::moduleHeight() const { return 2.*m_pars.halfHeight; }
-inline double TgcReadoutElement::moduleThickness() const { return 2.*m_pars.halfThickness; }
-inline double TgcReadoutElement::thickness() const { return moduleThickness(); }
-inline double TgcReadoutElement::gasGapPitch() const {return m_gasThickness; }
+    inline double TgcReadoutElement::moduleWidthS() const { return 2.*m_pars.halfWidthShort; }
+    inline double TgcReadoutElement::moduleWidthL() const { return 2.*m_pars.halfWidthLong; }
+    inline double TgcReadoutElement::moduleHeight() const { return 2.*m_pars.halfHeight; }
+    inline double TgcReadoutElement::moduleThickness() const { return 2.*m_pars.halfThickness; }
+    inline double TgcReadoutElement::thickness() const { return moduleThickness(); }
+    inline double TgcReadoutElement::gasGapPitch() const {return m_gasThickness; }
 
-inline IdentifierHash TgcReadoutElement::constructHash(unsigned int measCh,
-                                                       unsigned int gasGap,
-                                                       const bool isStrip) {
-    /// Bit mask layout (measurment channel) | (gasGap [1-3]) | isStrip
-    constexpr unsigned gapShift = 1;
-    constexpr unsigned chanShift = 2 + gapShift;
-    return IdentifierHash{measCh << chanShift | (gasGap -1) << gapShift | isStrip}; 
-}
-inline IdentifierHash TgcReadoutElement::measurementHash(const Identifier& measId) const {
-    if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify())) {
-        ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
-                        << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+    inline IdentifierHash TgcReadoutElement::constructHash(unsigned measCh,
+                                                           unsigned gasGap,
+                                                           const bool isStrip) {
+        /// Bit mask layout (measurment channel) | (gasGap [1-3]) | isStrip
+        constexpr unsigned gapShift = 1;
+        constexpr unsigned chanShift = 2 + gapShift;
+        assert(gasGap > 0);
+        return IdentifierHash{measCh << chanShift | (gasGap -1) << gapShift | isStrip}; 
     }
-    return constructHash(m_idHelper.channel(measId),
-                         m_idHelper.gasGap(measId),
-                         m_idHelper.isStrip(measId));
-}
-inline IdentifierHash TgcReadoutElement::layerHash(const Identifier& measId) const {
-    if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
-        ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
-                        << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+    inline IdentifierHash TgcReadoutElement::measurementHash(const Identifier& measId) const {
+        if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify())) {
+            ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
+                            << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+        }
+        return constructHash(m_idHelper.channel(measId), m_idHelper.gasGap(measId), m_idHelper.isStrip(measId));
     }
-    return constructHash(0, m_idHelper.gasGap(measId),
-                            m_idHelper.isStrip(measId));
-}
-inline IdentifierHash TgcReadoutElement::layerHash(const IdentifierHash& measHash) const {
-    constexpr unsigned gapStripMask{(1<<2) | (1<<1) | 1};
-    return IdentifierHash{static_cast<unsigned int>(measHash) & gapStripMask};
-}
-inline unsigned int TgcReadoutElement::channelNumber(const IdentifierHash& measHash) {
-    constexpr unsigned int chanShift = 3;
-    return static_cast<unsigned>(measHash) >> chanShift;
-}
-inline unsigned int TgcReadoutElement::gasGapNumber(const IdentifierHash& measHash) {
-    /// The hash is (0/1/2/ | 0/1) -> 3 bits for the gasgap + 1 bit strip
-    constexpr unsigned gapMask{(1<<1) | 1};
-    constexpr unsigned stripBit{1};
-    unsigned int unstripped = static_cast<unsigned>(measHash) >> stripBit;
-    return (unstripped & gapMask) + 1;
-}
-inline bool TgcReadoutElement::isStrip(const IdentifierHash& measHash) {
-    constexpr unsigned stripBit{1};
-    return static_cast<unsigned>(measHash) & stripBit;
-}
+    inline IdentifierHash TgcReadoutElement::layerHash(const Identifier& measId) const {
+        if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
+            ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
+                            << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+        }
+        return constructHash(0, m_idHelper.gasGap(measId), m_idHelper.isStrip(measId));
+    }
+    inline IdentifierHash TgcReadoutElement::layerHash(const IdentifierHash& measHash) const {
+        return constructHash(0, gasGapNumber(measHash), isStrip(measHash));
+    }
+    inline unsigned TgcReadoutElement::channelNumber(const IdentifierHash& measHash) {
+        constexpr unsigned chanShift = 3;
+        return static_cast<unsigned>(measHash) >> chanShift;
+    }
+    inline unsigned TgcReadoutElement::gasGapNumber(const IdentifierHash& measHash) {
+        /// The hash is (0/1/2/ | 0/1) -> 3 bits for the gasgap + 1 bit strip
+        constexpr unsigned gapMask{(1<<1) | 1};
+        constexpr unsigned stripBit{1};
+        unsigned unstripped = static_cast<unsigned>(measHash) >> stripBit;
+        return (unstripped & gapMask) + 1;
+    }
+    inline bool TgcReadoutElement::isStrip(const IdentifierHash& measHash) {
+        constexpr unsigned stripBit{1};
+        return static_cast<unsigned>(measHash) & stripBit;
+    }
+    inline Identifier TgcReadoutElement::measurementId(const IdentifierHash& measHash) const {
+        return m_idHelper.channelID(identify(), 
+                                    gasGapNumber(measHash),
+                                    isStrip(measHash),
+                                    channelNumber(measHash));
+    }
+    inline unsigned TgcReadoutElement::nGasGaps() const { return m_pars.nGasGaps; }
 
-inline Identifier TgcReadoutElement::measurementId(const IdentifierHash& measHash) const {
-    return m_idHelper.channelID(identify(), 
-                                gasGapNumber(measHash),
-                                isStrip(measHash),
-                                channelNumber(measHash));
-}
-inline unsigned int TgcReadoutElement::nGasGaps() const { return m_pars.nGasGaps; }
-
-inline unsigned int TgcReadoutElement::numChannels(const IdentifierHash& measHash) const {
-    return isStrip(measHash) ? numStrips(gasGapNumber(measHash)) 
-                             : numWireGangs(gasGapNumber(measHash));
-}
-inline unsigned int TgcReadoutElement::numStrips(unsigned int gasGap) const {
-    const StripLayerPtr& sensor{sensorLayout(constructHash(0, gasGap, true))};
-    return sensor ? sensor->design().numStrips() : 0;
-}
-inline unsigned int TgcReadoutElement::numWireGangs(unsigned int gasGap) const {
-    const StripLayerPtr& sensor{sensorLayout(constructHash(0, gasGap, false))};
-    return sensor ? sensor->design().numStrips() : 0;
-}
-inline const StripLayerPtr& TgcReadoutElement::sensorLayout(const IdentifierHash& measHash) const {
-    return m_pars.sensorLayouts.at(layerHash(measHash));
-}
-inline const WireGroupDesign& TgcReadoutElement::wireGangLayout(unsigned int gasGap) const {
-    const StripLayerPtr& layerPtr = sensorLayout(constructHash(0, gasGap, false));
-    if (!layerPtr) {
-        THROW_EXCEPTION(" Gas gap "<<gasGap<<" has no wire gangs in "<<idHelperSvc()->toStringDetEl(identify()));
+    inline unsigned TgcReadoutElement::numChannels(const IdentifierHash& measHash) const {
+        return isStrip(measHash) ? numStrips(measHash) : numWireGangs(measHash);
     }
-    return static_cast<const WireGroupDesign&>(layerPtr->design());
-}
-inline const RadialStripDesign& TgcReadoutElement::stripLayout(unsigned int gasGap)  const {
-    const StripLayerPtr& layerPtr = sensorLayout(constructHash(0, gasGap, true));
-    if (!layerPtr) {
-        THROW_EXCEPTION(" Gas gap "<<gasGap<<" has no strips in "<<idHelperSvc()->toStringDetEl(identify()));
+    inline unsigned TgcReadoutElement::numStrips(const IdentifierHash& measHash) const {
+        const StripLayerPtr& sensor{sensorLayout(flipIsStrip(measHash, true))};
+        return sensor && (sensor->hasPhiDesign() || isStrip(sensor->hash())) ? sensor->design(true).numStrips() : 0;
     }
-    return static_cast<const RadialStripDesign&>(layerPtr->design());
-}
-inline Amg::Vector3D TgcReadoutElement::channelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
-   return channelPosition(ctx, measurementHash(measId));
-}
-
+    inline IdentifierHash TgcReadoutElement::flipIsStrip(const IdentifierHash& meashHash,
+                                                         const bool isStrip) {
+        return constructHash(channelNumber(meashHash), gasGapNumber(meashHash), isStrip);
+    }
+    inline unsigned TgcReadoutElement::numWireGangs(const IdentifierHash& measHash) const {
+        const StripLayerPtr& sensor{sensorLayout(flipIsStrip(measHash, false))};
+        if (!sensor) {
+            THROW_EXCEPTION("Arsch : gasGap"<<gasGapNumber(measHash)<<", "<<isStrip(measHash));
+        }
+        return sensor && !isStrip(sensor->hash()) ? sensor->design().numStrips() : 0;
+    }
+    inline const StripLayerPtr& TgcReadoutElement::sensorLayout(const IdentifierHash& measHash) const {
+        return m_pars.sensorLayouts.at(layerHash(measHash));
+    }
+    inline const WireGroupDesign& TgcReadoutElement::wireGangLayout(const IdentifierHash& measHash) const {
+        const StripLayerPtr& layerPtr = sensorLayout(flipIsStrip(measHash, false));
+        if (!layerPtr || isStrip(layerPtr->hash())) {
+            THROW_EXCEPTION(" Gas gap "<<gasGapNumber(measHash)<<" has no wire gangs in "<<idHelperSvc()->toStringDetEl(identify()));
+        }
+        return static_cast<const WireGroupDesign&>(layerPtr->design());
+    }
+    inline const RadialStripDesign& TgcReadoutElement::stripLayout(const IdentifierHash& measHash)  const {
+        const StripLayerPtr& layerPtr = sensorLayout(flipIsStrip(measHash, true));
+        if (!layerPtr || !(layerPtr->hasPhiDesign() || isStrip(layerPtr->hash()))) {
+            THROW_EXCEPTION(" Gas gap "<<gasGapNumber(measHash)<<" has no strips in "<<idHelperSvc()->toStringDetEl(identify()));
+        }
+        return static_cast<const RadialStripDesign&>(layerPtr->design(true));
+    }
+    inline Amg::Vector3D TgcReadoutElement::channelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+        return channelPosition(ctx, measurementHash(measId));
+    }
 }  // namespace MuonGMR4
 #endif

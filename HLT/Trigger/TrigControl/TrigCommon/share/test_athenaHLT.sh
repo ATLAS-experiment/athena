@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Configuration testing script for athenaHLT.py
 #
@@ -16,7 +16,7 @@ function cleanup {
 
 # Data file not really important, as we only test the configuration stage.
 # Specifying run/lb/sor/detmask avoids the COOL lookup.
-file="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1"
+file="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1_80evt"
 run="360026"
 lb="151"
 sortime="1536143452000000000"

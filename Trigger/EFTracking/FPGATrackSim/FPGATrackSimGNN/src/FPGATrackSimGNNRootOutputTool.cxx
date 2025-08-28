@@ -22,7 +22,8 @@ StatusCode FPGATrackSimGNNRootOutputTool::initialize()
 
 StatusCode FPGATrackSimGNNRootOutputTool::bookTree()
 {
-  m_hit_tree = new TTree("FPGATrackSimHit","FPGATrackSimHit");
+  std::string hittree_str = "FPGATrackSimHit_reg" + m_region.value();
+  m_hit_tree = new TTree(hittree_str.c_str(), hittree_str.c_str());
   m_hit_tree->Branch("hit_id",&m_hit_id);
   m_hit_tree->Branch("hit_module_id",&m_hit_module_id);
   m_hit_tree->Branch("hit_x",&m_hit_x);
@@ -39,7 +40,8 @@ StatusCode FPGATrackSimGNNRootOutputTool::bookTree()
   m_hit_tree->Branch("hit_cluster_y",&m_hit_cluster_y);
   m_hit_tree->Branch("hit_cluster_z",&m_hit_cluster_z);
 
-  m_GNNHit_tree = new TTree("FPGATrackSimGNNHit","FPGATrackSimGNNHit");
+  std::string GNNhittree_str = "FPGATrackSimGNNHit_reg" + m_region.value();
+  m_GNNHit_tree = new TTree(GNNhittree_str.c_str(), GNNhittree_str.c_str());
   m_GNNHit_tree->Branch("hit_id",&m_GNNHit_id);
   m_GNNHit_tree->Branch("hit_module_id",&m_GNNHit_module_id);
   m_GNNHit_tree->Branch("hit_road_id",&m_GNNHit_road_id);
@@ -62,7 +64,8 @@ StatusCode FPGATrackSimGNNRootOutputTool::bookTree()
   m_GNNHit_tree->Branch("hit_cluster_phi_2",&m_GNNHit_cluster_phi_2);
   m_GNNHit_tree->Branch("hit_cluster_eta_2",&m_GNNHit_cluster_eta_2);
 
-  m_GNNEdge_tree = new TTree("FPGATrackSimGNNEdge","FPGATrackSimGNNEdge");
+  std::string GNNedgetree_str = "FPGATrackSimGNNEdge_reg" + m_region.value();
+  m_GNNEdge_tree = new TTree(GNNedgetree_str.c_str(), GNNedgetree_str.c_str());
   m_GNNEdge_tree->Branch("edge_index_1",&m_GNNEdge_index_1);
   m_GNNEdge_tree->Branch("edge_index_2",&m_GNNEdge_index_2);
   m_GNNEdge_tree->Branch("edge_dr",&m_GNNEdge_dR);
@@ -73,7 +76,8 @@ StatusCode FPGATrackSimGNNRootOutputTool::bookTree()
   m_GNNEdge_tree->Branch("edge_rphislope",&m_GNNEdge_rPhiSlope);
   m_GNNEdge_tree->Branch("edge_score",&m_GNNEdge_score);
 
-  m_road_tree = new TTree("FPGATrackSimRoad","FPGATrackSimRoad");
+  std::string roadtree_str = "FPGATrackSimRoad_reg" + m_region.value();
+  m_road_tree = new TTree(roadtree_str.c_str(), roadtree_str.c_str());
   m_road_tree->Branch("road_id",&m_road_id);
   m_road_tree->Branch("road_nHits",&m_road_nHits);
   m_road_tree->Branch("road_nHits_layer",&m_road_nHits_layer);

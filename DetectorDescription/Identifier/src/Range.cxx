@@ -70,11 +70,7 @@ void Range::build (const ExpandedIdentifier& root) {
   } 
 } 
  
-    // Modifications 
-//----------------------------------------------- 
-void Range::add () { 
-  m_fields.emplace_back(); 
-} 
+
  
 //----------------------------------------------- 
 void Range::add (element_type value) { 
@@ -128,15 +124,10 @@ void Range::clear () {
  
 //----------------------------------------------- 
 int Range::match (const ExpandedIdentifier& id) const { 
+
   size_type my_fields = m_fields.size (); 
   const size_type id_fields = id.fields (); 
-    // Remove trailing wild cards since they are meaningless. 
-  while ((my_fields > 1) && 
-         (m_fields[my_fields-1].empty())){ 
-      my_fields--; 
-    } 
-    // Ranges with only wild cards always match. 
-  if (my_fields == 0) return (1); 
+  
   // More fields in the range than in the identifier will never match. 
   //if (my_fields > id_fields) return (0); 
 
@@ -158,81 +149,25 @@ int Range::match (const ExpandedIdentifier& id) const {
 ExpandedIdentifier Range::minimum () const { 
   size_type my_fields = m_fields.size (); 
   ExpandedIdentifier result; 
-    // Remove trailing wild cards since they are meaningless. 
-  while ((my_fields > 1) && 
-         (m_fields[my_fields-1].empty())){ 
-      my_fields--; 
-  } 
-    // Ranges with only wild cards: set first field of min to 0 
-  if (my_fields == 0) {
-    result << 0;
-    return result; // Don't combine these two lines --- it inhibits RVO.
-  }
-    // Copy fields to result - look for wild cards 
+  // Copy fields to result 
   for (size_type field_number = 0; field_number < my_fields; field_number++) { 
       const field& f = m_fields[field_number]; 
-      if (f.empty()){ 
-            // Wilds card -> set field to 0 
-          result << 0; 
-        } else { 
-            // Valued field 
-          result << f.get_minimum (); 
-        } 
-    } 
-   
+      // Valued field 
+      result << f.get_minimum (); 
+  } 
   return (result); 
 } 
  
 //----------------------------------------------- 
 ExpandedIdentifier Range::maximum () const { 
   size_type my_fields = m_fields.size (); 
-  ExpandedIdentifier result; 
-    // Remove all by the last trailing wild card, extra ones are 
-    // meaningless. 
-  while ((my_fields > 1) && 
-         (m_fields[my_fields-1].empty())) { 
-      my_fields--; 
-  } 
- 
-    // Ranges with only wild cards: set first field of min to ExpandedIdentifier::max_value 
-  if (my_fields == 0) {
-    result << ExpandedIdentifier::max_value;
-    return result; // Don't combine these two lines --- it inhibits RVO.
-  }
- 
-    // Copy fields to result - look for wild cards 
+  ExpandedIdentifier result;
+  // Copy fields to result  
   for (size_type field_number = 0; field_number < my_fields; field_number++) { 
       const field& f = m_fields[field_number]; 
-      if (f.empty()) { 
-            // Wilds card  
-          if (field_number == 0) { 
-                // For 1st field set it to ExpandedIdentifier::max_value 
-              result << ExpandedIdentifier::max_value; 
-            } else { 
-                // 
-                // For subsequent fields, set do ++ for field-1 
-                // This requires rebuilding the result 
-                // 
-              ExpandedIdentifier new_result; 
- 
-              for (size_type new_field_number = 0;  
-                   new_field_number < (field_number - 1); 
-                   ++new_field_number) { 
-                  new_result << result[new_field_number]; 
-                } 
- 
-              element_type last = result[field_number - 1]; 
-               new_result << ((ExpandedIdentifier::max_value == last) ? last : last + 1); 
-              new_result << 0; 
-               assert ( result.fields () == new_result.fields () ); 
-               result = new_result; 
-            } 
-        } else  { 
-            // Normal field 
-          result << f.get_maximum (); 
-        } 
+       // Normal field 
+      result << f.get_maximum (); 
     } 
-   
     return (result); 
 } 
  
@@ -363,11 +298,6 @@ void Range::show (std::ostream& s) const {
 Range::operator std::string () const { 
   std::string result; 
   size_type my_fields = m_fields.size (); 
-    // Remove trailing wild cards since they are meaningless. 
-  while ((my_fields > 1) && 
-         (m_fields[my_fields-1].empty()))  { 
-      my_fields--; 
-  } 
   if (my_fields == 0) return (result); 
     // print fields one by one. 
   for (size_type field_number = 0; field_number < my_fields; field_number++) { 

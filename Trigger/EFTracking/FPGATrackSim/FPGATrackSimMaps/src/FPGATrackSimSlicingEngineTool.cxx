@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "FPGATrackSimMaps/FPGATrackSimSlicingEngineTool.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 #include "FPGATrackSimObjects/FPGATrackSimTowerInputHeader.h"
 #include <nlohmann/json.hpp>
@@ -47,6 +48,8 @@ void FPGATrackSimSlicingEngineTool::readLayerMap() {
             m_layerMapModules.merge(modules);
         }
     }
+
+    ATH_MSG_DEBUG("Region Modules: " << m_layerMapModules);
 }
 
 // While this method returns *two* streams, it outputs *three* branches since in the firmware
@@ -63,11 +66,13 @@ void FPGATrackSimSlicingEngineTool::sliceHits(const std::vector<std::shared_ptr<
     if (m_rootOutput) {
         FPGATrackSimTowerInputHeader towerFirstPixel = FPGATrackSimTowerInputHeader(0);
         FPGATrackSimTowerInputHeader towerSecondPixel = FPGATrackSimTowerInputHeader(0);
-        FPGATrackSimTowerInputHeader towerStrips = FPGATrackSimTowerInputHeader(0);
         m_slicedFirstPixelHeader->addTower(towerFirstPixel);
         m_slicedSecondPixelHeader->addTower(towerSecondPixel);
-        m_slicedStripHeader->addTower(towerStrips);
     }
+
+    // We need to process the strips into a header object no matter what.
+    FPGATrackSimTowerInputHeader towerStrips = FPGATrackSimTowerInputHeader(0);
+    m_slicedStripHeader->addTower(towerStrips);
 
     // Loop over all of the hits. Test if they pass region boundaries or not.
     for (const std::shared_ptr<const FPGATrackSimHit>& hit : hits) {
@@ -92,7 +97,8 @@ void FPGATrackSimSlicingEngineTool::sliceHits(const std::vector<std::shared_ptr<
             }
         } else {
             // Strip hits need to be post-processed in LogicalHitsProcessAlg, so we only put them in a header here.
-            if (m_rootOutput) m_slicedStripHeader->getTower(0)->addHit(*hit);
+            // Unfortunately this has to happen no matter what.
+            m_slicedStripHeader->getTower(0)->addHit(*hit);
         }
     }
 

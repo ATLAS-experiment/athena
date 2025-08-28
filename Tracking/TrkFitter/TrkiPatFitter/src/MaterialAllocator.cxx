@@ -216,7 +216,7 @@ void MaterialAllocator::addLeadingMaterial(
     // delimiter
     // FIXME: currently only for indet
     // first create the fitted perigee (ignoring the leading material)
-    Perigee perigee(fitParameters.position(), p * fitParameters.direction(),
+    const Perigee perigee(fitParameters.position(), p * fitParameters.direction(),
                     charge, fitParameters.vertex());
     bool haveMaterial = false;
     const std::vector<const TrackStateOnSurface*>* indetMaterial = nullptr;
@@ -267,12 +267,12 @@ void MaterialAllocator::addLeadingMaterial(
 
       std::vector<const TrackStateOnSurface*>* indetMaterialF = nullptr;
       const std::vector<const TrackStateOnSurface*>* indetMaterialR = nullptr;
-      CurvilinearUVT uvt(intersection->direction());
+      const CurvilinearUVT uvt(intersection->direction());
       Amg::Vector2D localPos;
-      PlaneSurface plane(intersection->position(), uvt);
+      const PlaneSurface plane(intersection->position(), uvt);
       if (plane.globalToLocal(intersection->position(),
                                intersection->direction(), localPos)) {
-        AtaPlane parameters(localPos[locR], localPos[locZ],
+        const AtaPlane parameters(localPos[locR], localPos[locZ],
                             intersection->direction().phi(),
                             intersection->direction().theta(), qOverP, plane);
 
@@ -332,7 +332,7 @@ void MaterialAllocator::addLeadingMaterial(
 
         if (leadingScatterers++ || !firstMeasurementSurface) {
           if (m_useStepPropagator == 99) {
-            std::optional<TrackSurfaceIntersection> newIntersectionSTEP =
+            std::optional<TrackSurfaceIntersection> const newIntersectionSTEP =
                 m_stepPropagator->intersectSurface(
                     ctx, (**r).trackParameters()->associatedSurface(),
                     *intersection, qOverP,
@@ -385,7 +385,7 @@ void MaterialAllocator::addLeadingMaterial(
         // put corresponding scatterer FitMeasurement at front of list,
         // after re-inserting any intermediate leadingOutliers
         if (leadingOutlier) {
-          double radius =
+          const double radius =
               leadingMeas->intersection(FittedTrajectory).position().perp();
           while (
               leadingOutlier &&
@@ -419,7 +419,7 @@ void MaterialAllocator::addLeadingMaterial(
     // final step to give intersection at perigee surface plus memory management
     if (leadingMeas) {
       if (m_useStepPropagator == 99) {
-        std::optional<TrackSurfaceIntersection> newIntersectionSTEP =
+        std::optional<TrackSurfaceIntersection> const newIntersectionSTEP =
             m_stepPropagator->intersectSurface(
                 ctx, perigee.associatedSurface(), *intersection, qOverP,
                 Trk::MagneticFieldProperties(Trk::FullField), Trk::muon);
@@ -463,9 +463,9 @@ void MaterialAllocator::addLeadingMaterial(
 
       // set the scattering angle and X0Integral
       leadingX0Integral += (**m).materialEffects()->thicknessInX0();
-      double logTerm = 1.0 + m_scatteringLogCoeff * std::log(leadingX0Integral);
+      const double logTerm = 1.0 + m_scatteringLogCoeff * std::log(leadingX0Integral);
       leadingScattering = leadingX0Integral * logTerm * logTerm;
-      double scatteringAngle =
+      const double scatteringAngle =
           m_scatteringConstant *
           std::sqrt(leadingScattering - previousScattering);
       previousScattering = leadingScattering;
@@ -473,10 +473,10 @@ void MaterialAllocator::addLeadingMaterial(
 
       // the scattering contribution to the covariance at perigee
       double angleSquared = 1. / (**m).weight();
-      double deltaR = ((**m).intersection(FittedTrajectory).position() -
+      const double deltaR = ((**m).intersection(FittedTrajectory).position() -
                        fitParameters.vertex())
                           .perp();
-      double sinThetaSquared =
+      const double sinThetaSquared =
           (**m).intersection(FittedTrajectory).direction().perp2();
       angleSquared *= angleSquared / sinThetaSquared;
 
@@ -558,7 +558,7 @@ void MaterialAllocator::initializeScattering(
         std::vector<Trk::FitMeasurement*>::iterator next = m;
         if (++next != measurements.end() && !(**next).hitOnTrack() &&
             (**next).isPositionMeasurement() && !(**next).isOutlier()) {
-          Amg::Vector3D position =
+          const Amg::Vector3D position =
               (**next).intersection(FittedTrajectory).position();
           if (((**m).intersection(FittedTrajectory).position() - position)
                   .mag() < 1. * Gaudi::Units::mm)
@@ -591,8 +591,8 @@ void MaterialAllocator::initializeScattering(
                         << *(**m).materialEffects());
         X0Integral = 1e-6;
       }
-      double scattering = X0Integral * logTerm * logTerm;
-      double angle =
+      const double scattering = X0Integral * logTerm * logTerm;
+      const double angle =
           m_scatteringConstant * std::sqrt(scattering - previousScattering);
       previousScattering = scattering;
       (**m).numberDoF(2);
@@ -612,7 +612,7 @@ MaterialAllocator::leadingSpectrometerTSOS(
   if (m_calorimeterVolume->inside(spectrometerParameters.position()))
     return nullptr;
 
-  std::unique_ptr<const TrackParameters> entranceParameters(
+  std::unique_ptr<const TrackParameters> const entranceParameters(
       m_extrapolator->extrapolateToVolume(ctx, spectrometerParameters,
                                           *spectrometerEntrance, anyDirection,
                                           Trk::nonInteracting));
@@ -652,7 +652,7 @@ MaterialAllocator::leadingSpectrometerTSOS(
       std::make_unique<std::vector<const TrackStateOnSurface*>>();
   leadingTSOS->reserve(extrapolatedTSOS->size());
   double outgoingEnergy = spectrometerParameters.momentum().mag();
-  double particleMass = Trk::ParticleMasses::mass[Trk::muon];
+  const double particleMass = Trk::ParticleMasses::mass[Trk::muon];
   for (const auto* s : *extrapolatedTSOS) {
     if (!(*s).trackParameters())
       continue;
@@ -756,7 +756,7 @@ bool MaterialAllocator::reallocateMaterial(
     if (!(*measurement).isMaterialDelimiter())
       continue;
 
-    double distance =
+    const double distance =
         ((*measurement).intersection(FittedTrajectory).position() -
          (*measurement).position())
             .mag();
@@ -793,14 +793,14 @@ bool MaterialAllocator::reallocateMaterial(
   }
 
   // allocate material from outside inwards
-  double mass = Trk::ParticleMasses::mass[Trk::muon];
+  const double mass = Trk::ParticleMasses::mass[Trk::muon];
   MsgStream log(msgSvc(), name());
   const TrackParameters* trackParameters =
       parameters.trackParameters(log, *measurements.back());
 
   // protect the momentum to avoid excessive Eloss
   Amg::VectorX parameterVector = trackParameters->parameters();
-  double Emax = 50000.;
+  const double Emax = 50000.;
   if (parameterVector[Trk::qOverP] == 0.) {
     parameterVector[Trk::qOverP] = 1. / Emax;
   } else {
@@ -839,7 +839,7 @@ bool MaterialAllocator::reallocateMaterial(
       //      (**s).trackParameters()->position() );
       //      }
 
-      std::pair<FitMeasurement*, FitMeasurement*> fms =
+      std::pair<FitMeasurement*, FitMeasurement*> const fms =
           materialAggregation(*spectrometerMaterial, measurements, mass);
       delete fms.first;
       delete fms.second;
@@ -863,7 +863,7 @@ bool MaterialAllocator::reallocateMaterial(
     if (!(**m).isMaterialDelimiter())
       continue;
     delete *m;
-    std::vector<Trk::FitMeasurement*>::iterator n = m;
+    std::vector<Trk::FitMeasurement*>::iterator const n = m;
     --m;
     measurements.erase(n);
   }
@@ -898,7 +898,7 @@ void MaterialAllocator::addSpectrometerDelimiters(
 
     // material delimiters in MS follow the entrance break which should be
     // already present
-    Amg::Vector3D position = (**m).position();
+    const Amg::Vector3D position = (**m).position();
     if (m_calorimeterVolume->inside(position))
       continue;
 
@@ -1055,13 +1055,13 @@ void MaterialAllocator::indetMaterial(
   // gather material between first and last measurements inside indet volume
   // allow a few mm radial tolerance around first&last measurements for their
   // associated material
-  double tolerance =
+  const double tolerance =
       10. * Gaudi::Units::mm / startParameters.momentum().unit().perp();
 
   // loop over measurements to define portions of track needing indet material
   double endIndetDistance = 0.;
   FitMeasurement* endIndetMeasurement = nullptr;
-  double qOverP = startParameters.charge() / startParameters.momentum().mag();
+  const double qOverP = startParameters.charge() / startParameters.momentum().mag();
 
   Amg::Vector3D startDirection = startParameters.momentum().unit();
   Amg::Vector3D startPosition = startParameters.position();
@@ -1088,12 +1088,12 @@ void MaterialAllocator::indetMaterial(
            (**m).surface()->type() == Trk::SurfaceType::Disc)) {
         std::optional<TrackSurfaceIntersection> intersection =
             (**m).intersection(FittedTrajectory);
-        Amg::Vector3D offset = intersection->direction() * tolerance;
-        CurvilinearUVT uvt(intersection->direction());
-        PlaneSurface plane(intersection->position() - offset, uvt);
+        const Amg::Vector3D offset = intersection->direction() * tolerance;
+        const CurvilinearUVT uvt(intersection->direction());
+        const PlaneSurface plane(intersection->position() - offset, uvt);
 
         if (m_useStepPropagator == 99) {
-          std::optional<TrackSurfaceIntersection> newIntersectionSTEP =
+          std::optional<TrackSurfaceIntersection> const newIntersectionSTEP =
               m_stepPropagator->intersectSurface(
                   ctx, plane, *intersection, qOverP,
                   Trk::MagneticFieldProperties(Trk::FullField), Trk::muon);
@@ -1133,7 +1133,7 @@ void MaterialAllocator::indetMaterial(
       }
 
       // save the last indet measurement, signal any out-of-order meas
-      double distance = startDirection.dot(
+      const double distance = startDirection.dot(
           (**m).intersection(FittedTrajectory).position() - startPosition);
       if (!endIndetMeasurement || distance > endIndetDistance) {
         endIndetDistance = distance;
@@ -1150,7 +1150,7 @@ void MaterialAllocator::indetMaterial(
   ATH_MSG_DEBUG(" indetMaterial: ALARM no material found on track");
 
   // allocate indet material from TrackingGeometry
-  Amg::Vector3D endPosition =
+  const Amg::Vector3D endPosition =
       endIndetMeasurement->intersection(FittedTrajectory).position();
   startDirection = (endPosition - startPosition).unit();
   endIndetDistance =
@@ -1208,7 +1208,7 @@ void MaterialAllocator::indetMaterial(
          s != indetMaterialEnd; ++s) {
       if (!(**s).trackParameters())
         continue;
-      double distance = startDirection.dot((**s).trackParameters()->position() -
+      const double distance = startDirection.dot((**s).trackParameters()->position() -
                                            startPosition);
       double deltaE = 0.;
       double thickness = 0.;
@@ -1220,7 +1220,7 @@ void MaterialAllocator::indetMaterial(
           deltaE = materialEffects->energyLoss()->deltaE();
         thickness = (**s).materialEffectsOnTrack()->thicknessInX0();
       }
-      double p2 = (**s).trackParameters()->momentum().mag();
+      const double p2 = (**s).trackParameters()->momentum().mag();
       ATH_MSG_VERBOSE(
           std::setiosflags(std::ios::fixed)
           << "         material: RZ" << std::setw(9) << std::setprecision(3)
@@ -1266,7 +1266,7 @@ void MaterialAllocator::indetMaterial(
         continue;
       nextMomentum = (**s).trackParameters()->momentum();
       nextPosition = (**s).trackParameters()->position();
-      double distance = direction.dot(nextPosition - position);
+      const double distance = direction.dot(nextPosition - position);
 
       // increasing distance - break when past minimum
       if (distance > closestDistance)
@@ -1277,7 +1277,7 @@ void MaterialAllocator::indetMaterial(
       //  (material too early is better than too late)
       if (distance > 0.) {
         ++m;
-        double nextDistance = direction.dot(
+        const double nextDistance = direction.dot(
             (**s).trackParameters()->position() - (**m).position());
         --m;
         if (std::abs(nextDistance) < distance && distance > tolerance) {
@@ -1316,7 +1316,7 @@ void MaterialAllocator::indetMaterial(
     if (!leadingDelimiter) {
       position = 0.5 * (materialParameters->position() + nextPosition);
       direction = (materialParameters->momentum() + nextMomentum).unit();
-      TrackSurfaceIntersection breakIntersection(position, direction, 0.);
+      TrackSurfaceIntersection const breakIntersection(position, direction, 0.);
       leadingDelimiter = new FitMeasurement(breakIntersection, 0.);
       while (*m != endIndetMeasurement &&
              direction.dot((**m).intersection(FittedTrajectory).position() -
@@ -1373,7 +1373,7 @@ void MaterialAllocator::indetMaterial(
       continue;
     }
 
-    double distance =
+    const double distance =
         startDirection.dot((**s).trackParameters()->position() - startPosition);
 
     ATH_MSG_VERBOSE("	startPosition " << startPosition.perp() << " z "
@@ -1479,7 +1479,7 @@ MaterialAllocator::materialAggregation(
   std::vector<FitMeasurement*> aggregateScatterers;
   bool hasReferencePosition = false;
   Amg::Vector3D referencePosition;
-  bool haveAggregation = false;
+  bool const haveAggregation = false;
   //     bool makeAggregation		= false;
   //     double maxDistance			= 0.;
   for (std::vector<const TrackStateOnSurface*>::const_reverse_iterator tsos =
@@ -1493,9 +1493,9 @@ MaterialAllocator::materialAggregation(
       referencePosition = Amg::Vector3D((**tsos).trackParameters()->position());
       hasReferencePosition = true;
     }
-    double distance =
+    const double distance =
         ((**tsos).trackParameters()->position() - referencePosition).mag();
-    double weight = (**tsos).materialEffectsOnTrack()->thicknessInX0();
+    const double weight = (**tsos).materialEffectsOnTrack()->thicknessInX0();
 
     ATH_MSG_INFO(" material position " << (**tsos).trackParameters()->position()
                                        << "   distance " << distance
@@ -1560,13 +1560,13 @@ void MaterialAllocator::materialAggregation(
     // look for adjacent scatterers
     else if (adjacentScatterers) {
       if ((**m).isScatterer()) {
-        Amg::Vector3D position =
+        const Amg::Vector3D position =
             (**m).intersection(FittedTrajectory).position();
-        double distance =
+        const double distance =
             std::abs(referenceDirection.dot(position - referencePosition));
         if (distance < maxDistance) {
           ++adjacentScatterers;
-          double weight = (**m).radiationThickness();
+          const double weight = (**m).radiationThickness();
           totalDistance += weight * distance;
           totalDistanceSq += weight * distance * distance;
           totalEnergyDeposit += (**m).energyLoss();
@@ -1613,21 +1613,21 @@ void MaterialAllocator::materialAggregation(
       //           << "   distance "
       //           << std::setw(8) << std::setprecision(0)
       //           << dist );
-      double meanDistance = totalDistance / totalThickness;
+      const double meanDistance = totalDistance / totalThickness;
       double rmsDistance = 0.;
-      double meanSquare =
+      const double meanSquare =
           totalDistanceSq / totalThickness - meanDistance * meanDistance;
       if (meanSquare > 0.)
         rmsDistance = std::sqrt(meanSquare);
-      double gap = 2. * rmsDistance;
+      const double gap = 2. * rmsDistance;
       if (adjacentScatterers > 2 || gap < m_scattererMinGap) {
-        double distance1 = meanDistance - rmsDistance;
+        const double distance1 = meanDistance - rmsDistance;
         double distance2 = meanDistance + rmsDistance;
         if (gap < m_scattererMinGap)
           distance2 = meanDistance;
-        Amg::Vector3D position =
+        const Amg::Vector3D position =
             (**m).intersection(FittedTrajectory).position();
-        double distance =
+        const double distance =
             std::abs(referenceDirection.dot(position - referencePosition));
         //      ATH_MSG_INFO(std::setiosflags(std::ios::fixed)
         //               << "     distance1 "
@@ -1654,15 +1654,15 @@ void MaterialAllocator::materialAggregation(
               continue;
             Amg::Vector3D position =
                 (**s).intersection(FittedTrajectory).position();
-            double distance =
+            const double distance =
                 std::abs(referenceDirection.dot(position - referencePosition));
             if (!measurement1 && distance > distance1 &&
                 gap > m_scattererMinGap) {
               after = *s;
-              double separation = distance - previousDistance;
-              double fractionAfter =
+              const double separation = distance - previousDistance;
+              const double fractionAfter =
                   (distance1 - previousDistance) / separation;
-              double fractionBefore = (distance - distance1) / separation;
+              const double fractionBefore = (distance - distance1) / separation;
               //              ATH_MSG_INFO( std::setiosflags(std::ios::fixed)
               //                    << "         distance "
               //                    << std::setw(8) << std::setprecision(0)
@@ -1676,12 +1676,12 @@ void MaterialAllocator::materialAggregation(
                              before->intersection(FittedTrajectory).position() +
                          fractionAfter *
                              after->intersection(FittedTrajectory).position();
-              Amg::Vector3D direction =
+              const Amg::Vector3D direction =
                   fractionBefore *
                       before->intersection(FittedTrajectory).direction() +
                   fractionAfter *
                       after->intersection(FittedTrajectory).direction();
-              double qOverP = fractionBefore * before->qOverP() +
+              const double qOverP = fractionBefore * before->qOverP() +
                               fractionAfter * after->qOverP();
               measurement1 = new FitMeasurement(
                   0.5 * totalThickness, -0.5 * totalEnergyDeposit, particleMass,
@@ -1690,10 +1690,10 @@ void MaterialAllocator::materialAggregation(
 
             if (distance > distance2) {
               after = *s;
-              double separation = distance - previousDistance;
-              double fractionAfter =
+              const double separation = distance - previousDistance;
+              const double fractionAfter =
                   (distance2 - previousDistance) / separation;
-              double fractionBefore = (distance - distance2) / separation;
+              const double fractionBefore = (distance - distance2) / separation;
               //              ATH_MSG_INFO( std::setiosflags(std::ios::fixed)
               //                    << "         distance "
               //                    << std::setw(8) << std::setprecision(0)
@@ -1707,12 +1707,12 @@ void MaterialAllocator::materialAggregation(
                              before->intersection(FittedTrajectory).position() +
                          fractionAfter *
                              after->intersection(FittedTrajectory).position();
-              Amg::Vector3D direction =
+              const Amg::Vector3D direction =
                   fractionBefore *
                       before->intersection(FittedTrajectory).direction() +
                   fractionAfter *
                       after->intersection(FittedTrajectory).direction();
-              double qOverP = fractionBefore * before->qOverP() +
+              const double qOverP = fractionBefore * before->qOverP() +
                               fractionAfter * after->qOverP();
               if (measurement1) {
                 measurement2 = new FitMeasurement(
@@ -1755,13 +1755,13 @@ void MaterialAllocator::materialAggregation(
     if ((**m).isScatterer() && !adjacentScatterers &&
         !m_calorimeterVolume->inside((**m).position())) {
       adjacentScatterers = 1;
-      double weight = (**m).radiationThickness();
+      const double weight = (**m).radiationThickness();
       referencePosition =
           (**previous).intersection(FittedTrajectory).position();
       referenceDirection =
           (**previous).intersection(FittedTrajectory).direction();
-      Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
-      double distance =
+      const Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
+      const double distance =
           std::abs(referenceDirection.dot(position - referencePosition));
       maxDistance = distance + 2. * Gaudi::Units::meter;
       start = m;
@@ -1800,8 +1800,8 @@ void MaterialAllocator::materialAggregation(
     for (std::vector<Trk::FitMeasurement*>::iterator m = measurements.begin();
          m != measurements.end(); ) {
       // insert scatterers from aggregrate vector
-      Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
-      double distance =
+      const Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
+      const double distance =
           std::abs(referenceDirection.dot(position - referencePosition));
       while (distance <= scattererDistance && s != aggregateScatterers.rend()) {
         m = measurements.insert(m, *s);
@@ -1829,14 +1829,14 @@ void MaterialAllocator::materialAggregation(
   if (msgLvl(MSG::VERBOSE)) {
     ATH_MSG_VERBOSE("  finished material aggregation: ");
     int n = 0;
-    Amg::Vector3D startPosition =
+    const Amg::Vector3D startPosition =
         measurements.front()->intersection(FittedTrajectory).position();
-    Amg::Vector3D startDirection =
+    const Amg::Vector3D startDirection =
         measurements.front()->intersection(FittedTrajectory).direction();
     for (auto* measurement : measurements) {
-      Amg::Vector3D position =
+      const Amg::Vector3D position =
           (*measurement).intersection(FittedTrajectory).position();
-      double distance = std::abs(startDirection.dot(position - startPosition));
+      const double distance = std::abs(startDirection.dot(position - startPosition));
       msg(MSG::VERBOSE) << std::setiosflags(std::ios::fixed) << std::setw(5)
                         << ++n << std::setw(10) << std::setprecision(3)
                         << distance << "  " << (*measurement).type();
@@ -1881,10 +1881,10 @@ FitMeasurement* MaterialAllocator::measurementFromTSOS(
   if (!tsos.trackParameters() || !tsos.materialEffectsOnTrack())
     return nullptr;
 
-  double deltaE = outgoingEnergy - tsos.trackParameters()->momentum().mag();
-  double thicknessInX0 = tsos.materialEffectsOnTrack()->thicknessInX0();
-  Amg::Vector3D position = tsos.trackParameters()->position();
-  Amg::Vector3D direction = tsos.trackParameters()->momentum().unit();
+  const double deltaE = outgoingEnergy - tsos.trackParameters()->momentum().mag();
+  const double thicknessInX0 = tsos.materialEffectsOnTrack()->thicknessInX0();
+  const Amg::Vector3D position = tsos.trackParameters()->position();
+  const Amg::Vector3D direction = tsos.trackParameters()->momentum().unit();
   double qOverP = 1. / outgoingEnergy;
   if (tsos.trackParameters()->charge() < 0)
     qOverP = -qOverP;
@@ -1909,8 +1909,8 @@ void MaterialAllocator::printMeasurements(
   if (m == measurements.end())
     m = measurements.begin();
 
-  Amg::Vector3D direction = (**m).intersection(FittedTrajectory).direction();
-  Amg::Vector3D startPosition = (**m).intersection(FittedTrajectory).position();
+  const Amg::Vector3D direction = (**m).intersection(FittedTrajectory).direction();
+  const Amg::Vector3D startPosition = (**m).intersection(FittedTrajectory).position();
   int scatterers = 0;
   int leadingMaterial = 0;
   double leadingX0 = 0.;
@@ -1919,7 +1919,7 @@ void MaterialAllocator::printMeasurements(
   double sumELoss = 0.;
   int n = 0;
   for (auto& measurement : measurements) {
-    double distance =
+    const double distance =
         direction.dot((*measurement).intersection(FittedTrajectory).position() -
                       startPosition);
     msg(MSG::VERBOSE) << std::setiosflags(std::ios::fixed) << std::setw(5)
@@ -2030,13 +2030,13 @@ void MaterialAllocator::spectrometerMaterial(
   double minZDistanceMS = 0.;
   std::vector<Trk::FitMeasurement*>::iterator m = measurements.begin();
   for (; m != measurements.end(); ++m) {
-    Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
-    Amg::Vector3D positionSurf = (**m).surface()->center();
+    const Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
+    const Amg::Vector3D positionSurf = (**m).surface()->center();
     Amg::Vector3D positionMst = startPosition;
     if ((**m).measurementBase())
       positionMst = (**m).measurementBase()->globalPosition();
-    double distance = startDirection.dot(position - startPosition);
-    double distanceR = std::hypot(positionMst.x() - startPosition.x(),
+    const double distance = startDirection.dot(position - startPosition);
+    const double distanceR = std::hypot(positionMst.x() - startPosition.x(),
                                   positionMst.y() - startPosition.y());
     double distanceZ = (positionMst.z() - startPosition.z());
     if (startDirection.z() < 0)
@@ -2115,7 +2115,7 @@ void MaterialAllocator::spectrometerMaterial(
   for (m = measurements.begin(); m != measurements.end(); ++m) {
     if (!(**m).isPositionMeasurement() || (**m).isOutlier())
       continue;
-    Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
+    const Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
     if (m_calorimeterVolume->inside(position))
       continue;
     if (innerMeasurement) {
@@ -2200,7 +2200,7 @@ void MaterialAllocator::spectrometerMaterial(
       new FitMeasurement(endIntersection, 20. * Gaudi::Units::mm);
   measurements.push_back(endBreak);
 
-  double endSpectrometerDistance = startDirection.dot(
+  const double endSpectrometerDistance = startDirection.dot(
       measurements.back()->intersection(FittedTrajectory).position() -
       startPosition);
   const std::vector<const TrackStateOnSurface*>* spectrometerMaterial = nullptr;
@@ -2208,7 +2208,7 @@ void MaterialAllocator::spectrometerMaterial(
   // protect the momentum to avoid excessive Eloss
 
   Amg::VectorX parameterVector = endParameters->parameters();
-  double Emax = 50000.;
+  const double Emax = 50000.;
   if (parameterVector[Trk::qOverP] == 0.) {
     parameterVector[Trk::qOverP] = 1. / Emax;
   } else {
@@ -2247,16 +2247,16 @@ void MaterialAllocator::spectrometerMaterial(
     for (const auto* ss : *spectrometerMaterial) {
       if (!(*ss).trackParameters() || !(*ss).materialEffectsOnTrack())
         continue;
-      double distance = startDirection.dot((*ss).trackParameters()->position() -
+      const double distance = startDirection.dot((*ss).trackParameters()->position() -
                                            startPosition);
       double deltaE = 0.;
-      double thickness = (*ss).materialEffectsOnTrack()->thicknessInX0();
+      const double thickness = (*ss).materialEffectsOnTrack()->thicknessInX0();
       const MaterialEffectsOnTrack* materialEffects =
           dynamic_cast<const MaterialEffectsOnTrack*>(
               (*ss).materialEffectsOnTrack());
       if (materialEffects && materialEffects->energyLoss())
         deltaE = materialEffects->energyLoss()->deltaE();
-      double p2 = (*ss).trackParameters()->momentum().mag();
+      const double p2 = (*ss).trackParameters()->momentum().mag();
       ATH_MSG_VERBOSE(
           std::setiosflags(std::ios::fixed)
           << "         material: RZ" << std::setw(9) << std::setprecision(3)
@@ -2275,8 +2275,8 @@ void MaterialAllocator::spectrometerMaterial(
 
   // insert the material into the measurement list
   if (!spectrometerMaterial || spectrometerMaterial->empty()) {
-    // m_messageHelper->printWarning(5);  
-    // Suppressing, as discussed in ATLASRECTS-7515, but keeping this here to remind us 
+    // m_messageHelper->printWarning(5);
+    // Suppressing, as discussed in ATLASRECTS-7515, but keeping this here to remind us
     // to investigate it properly.
     delete spectrometerMaterial;
     spectrometerMaterial = nullptr;
@@ -2284,7 +2284,7 @@ void MaterialAllocator::spectrometerMaterial(
     std::vector<const TrackStateOnSurface*>::const_reverse_iterator s =
         spectrometerMaterial->rbegin();
     std::vector<FitMeasurement*> material;
-    double particleMass = Trk::ParticleMasses::mass[particleHypothesis];
+    const double particleMass = Trk::ParticleMasses::mass[particleHypothesis];
     material.reserve(spectrometerMaterial->size());
     std::vector<FitMeasurement*>::iterator m = measurements.begin();
     for (; s != spectrometerMaterial->rend();) {
@@ -2306,7 +2306,7 @@ void MaterialAllocator::spectrometerMaterial(
 
       // insert next to adjacent measurement
       material.push_back(measurement);
-      double distance = startDirection.dot(tsos.trackParameters()->position() -
+      const double distance = startDirection.dot(tsos.trackParameters()->position() -
                                            startPosition);
       if (distance > endSpectrometerDistance) {
         delete measurement;

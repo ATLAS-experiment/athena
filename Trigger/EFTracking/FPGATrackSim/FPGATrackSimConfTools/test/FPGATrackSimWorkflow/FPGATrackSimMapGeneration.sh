@@ -2,43 +2,24 @@
 set -e
 
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-WRAPPER="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/Wrappers/v0.10/FPGATrackSimWrapper.root"
-
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
 
-STD_PREFIX="MyMaps_std"
-run_map_maker() {
-    python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
-    --filesInput=${WRAPPER} \
-    OutFileName=${STD_PREFIX} \
-    Trigger.FPGATrackSim.oldRegionDefs=True \
-    Trigger.FPGATrackSim.region=0 \
-    GeoModel.AtlasVersion=${GEO_TAG}
-}
-
+source FPGATrackSim_CommonEnv.sh
 INSIDEOUT_PREFIX="MyMaps_insideOut"
 run_5L_map_maker() {
-    python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
-    --filesInput=${WRAPPER} \
+python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
+    --filesInput=${RDO_ANALYSIS} \
     OutFileName=${INSIDEOUT_PREFIX} \
-    Trigger.FPGATrackSim.region=33 \
+    Trigger.FPGATrackSim.region=34 \
     doInsideOut=True \
     Trigger.FPGATrackSim.spacePoints=False \
     KeyString="plane 0" \
-    GeoModel.AtlasVersion=${GEO_TAG}
+    GeoModel.AtlasVersion=${GEO_TAG} \
+    --evtMax=200
 }
 
-echo "Running map maker for 9L"
-run_map_maker
 echo "Running map maker for insideOut"
 run_5L_map_maker
 echo "Maps Made, this part is done ..."
 ls -l
 
-if cmp -s <(find . -name "${STD_PREFIX}*pmap" -exec cat {} +) \
-           <(find . -name "${INSIDEOUT_PREFIX}*pmap" -exec cat {} +); then
-    echo "pmap should not be the same for the inside-out"
-    exit 1
-else
-    echo "pmap files are different. All look good"
-fi

@@ -11,12 +11,14 @@
 #include "SimKernelMT.h"
 
 // ISF includes
+#include "AtlasDetDescr/AtlasRegionHelper.h"
+#include "HitManagement/HitCollectionMap.h"
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleOrderedQueue.h"
-
-#include "AtlasDetDescr/AtlasRegionHelper.h"
+#include "ISF_Interfaces/BaseSimulatorG4Tool.h"
 
 // STL
+#include <memory>
 #include <queue>
 #include <utility>
 
@@ -132,10 +134,16 @@ StatusCode ISF::SimKernelMT::initialize() {
 StatusCode ISF::SimKernelMT::execute() {
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
+  auto hitCollections = std::make_shared<HitCollectionMap>();
   // Call setupEvent for all simulators (TODO: make the tools do this)
   for (auto& curSimTool: m_simulationTools) {
     if ( curSimTool ) {
-      ATH_CHECK(curSimTool->setupEvent(ctx));
+      if (auto* g4sim =
+              dynamic_cast<ISF::BaseSimulatorG4Tool*>(curSimTool.get())) {
+        ATH_CHECK(g4sim->setupEvent(ctx, *hitCollections));
+      } else {
+        ATH_CHECK(curSimTool->setupEvent(ctx));
+      }
       ATH_MSG_DEBUG( "Event setup done for " << curSimTool->name() );
     }
   }
@@ -261,7 +269,16 @@ StatusCode ISF::SimKernelMT::execute() {
 
     ATH_MSG_VERBOSE("Selected " << particles.size() << " particles to be processed by " << lastSimulator->name());
     // Run the simulation
-    ATH_CHECK( lastSimulator->simulateVector( ctx, particles, newSecondaries, outputTruth.ptr(), shadowTruth.get() ) );
+    if (auto* g4sim = dynamic_cast<ISF::BaseSimulatorG4Tool*>(lastSimulator)) {
+      ATH_CHECK(g4sim->simulateVector(ctx, particles, newSecondaries,
+                                      outputTruth.ptr(), hitCollections,
+                                      shadowTruth.get()));
+    } else {
+      ATH_CHECK(lastSimulator->simulateVector(ctx, particles, newSecondaries,
+                                              outputTruth.ptr(),
+                                              shadowTruth.get()));
+    }
+
     ATH_MSG_VERBOSE(lastSimulator->name() << " returned " << newSecondaries.size() << " new particles to be added to the queue." );
     // Register returned particles with the entry layer tool, set their order and enqueue them
     for ( auto* secondary : newSecondaries ) {
@@ -294,7 +311,12 @@ StatusCode ISF::SimKernelMT::execute() {
   // Release the event from all simulators (TODO: make the tools do this)
   for (auto& curSimTool: m_simulationTools) {
     if ( curSimTool ) {
-      ATH_CHECK(curSimTool->releaseEvent(ctx));
+      if (auto* g4sim =
+              dynamic_cast<ISF::BaseSimulatorG4Tool*>(curSimTool.get())) {
+        ATH_CHECK(g4sim->releaseEvent(ctx, *hitCollections));
+      } else {
+        ATH_CHECK(curSimTool->releaseEvent(ctx));
+      }
       ATH_MSG_DEBUG( "releaseEvent() completed for " << curSimTool->name() );
     }
   }

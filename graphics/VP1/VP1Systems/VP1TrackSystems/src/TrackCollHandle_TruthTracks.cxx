@@ -649,7 +649,7 @@ std::list<SimHitHandleBase*>::iterator TrackCollHandle_TruthTracks::Imp::closest
   const double speedSqMax = 4.0* CLHEP::c_squared * betaSqMax;//NB: The factor of 4 is a fudge factor, not really clear why needed!!! VP1 or GEANT4 bug!
   //  const double speedSqMax = 1.0001 * c_squared;/*fixme test*/
 //    const double speedSqMax = 1.1*betaSqMax*300*300;/*fixme test*/
-//   double testmsq=0.511*MeV*0.511*MeV;
+//   double testmsq=ParticleConstants::electronMassInMeV*MeV*ParticleConstants::electronMassInMeV;
 //   const double speedSqMax = 1.0001 * c_squared * ( (mom < 0 || testmsq<=0 ? 1 : (momSq/(momSq+testmsq)) ));
 
   unsigned ichecked(0);

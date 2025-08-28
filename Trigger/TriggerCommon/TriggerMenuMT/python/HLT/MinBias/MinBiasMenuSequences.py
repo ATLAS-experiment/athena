@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 from TrigEDMConfig.TriggerEDM import recordable
 import AthenaCommon.SystemOfUnits as Units
@@ -14,7 +14,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 
-def SPCountHypoToolGen(chainDict):
+def SPCountHypoToolGen(flags, chainDict):
     hypo = CompFactory.SPCountHypoTool(chainDict["chainName"])
     if "hmt" in chainDict["chainName"]:
         hypo.sctSP = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("sp"))
@@ -43,7 +43,7 @@ def SPCountHypoToolGen(chainDict):
     return hypo
 
 
-def TrackCountHypoToolGen(chainDict):
+def TrackCountHypoToolGen(flags, chainDict):
     def ptToGeV(v):        
         if "p" in v:
             sv = v.split("p")
@@ -94,7 +94,7 @@ def MbtsHypoToolGen(flags, chainDict):
 
 
 
-def TrigZVertexHypoToolGen(chainDict):
+def TrigZVertexHypoToolGen(flags, chainDict):
     hypo = CompFactory.TrigZVertexHypoTool(chainDict["chainName"])
     if "pusup" in chainDict["chainName"]:
         hypo.minWeight = int(chainDict["chainParts"][0]["pileupInfo"].removeprefix("pusup"))

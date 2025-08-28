@@ -11,7 +11,7 @@ atlas_add_component( DiTauRec
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${FASTJET_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${FASTJET_LIBRARIES} AthenaBaseComps xAODJet xAODTau GaudiKernel JetEDM TrkToolInterfaces CaloEvent xAODTracking RecoToolInterfaces StoreGateLib tauRecToolsLib TrkParametersIdentificationHelpers )
+                     LINK_LIBRARIES ${FASTJET_LIBRARIES} AthenaBaseComps xAODJet xAODTau GaudiKernel JetEDM TrkToolInterfaces CaloEvent xAODTracking RecoToolInterfaces StoreGateLib tauRecToolsLib TrkParametersIdentificationHelpers PathResolver)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

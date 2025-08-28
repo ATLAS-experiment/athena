@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 import functools
 from TrigEDMConfig import DataScoutingInfo
@@ -11,6 +11,7 @@ from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
 from AthenaConfiguration.ComponentFactory import CompFactory
 from .LATOMESourceIDs import LATOMESourceIDs
+from .FEXSourceIDs import FEXSourceIDs
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
@@ -110,7 +111,7 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
     elif 'LATOMEPEB' == eventBuildType:
         acc = StaticPEBInfoWriterToolCfg(
             flags, name,
-            ROBs = LATOMESourceIDs, # add full-scan LATOME data
+            ROBs = LATOMESourceIDs + FEXSourceIDs, # add full-scan LATOME and FEX data
             subDets = [SubDetector.TDAQ_CTP] )
 
     elif 'SCTPEB' == eventBuildType:
@@ -291,7 +292,7 @@ def pebMenuSequenceGenCfg(flags, chain, eventBuildType, chainDict):
     Return the MenuSequence for the PEB input maker for this chain.
     '''
 
-    def pebInfoWriterToolGenerator(chainDict):
+    def pebInfoWriterToolGenerator(flags, chainDict):
         return pebInfoWriterToolCfg(flags, chainDict['chainName'], eventBuildType)
 
     suffix = getPEBBuildSuffix(chain, eventBuildType)

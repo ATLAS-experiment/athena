@@ -44,9 +44,13 @@ public:
     inline bool areAnyL1TauIsolated() const { for(const std::string& iso : m_tauL1Iso) { if(iso.size()) return true; }; return false; } // Returns true any of the L1 items are isolated
     inline int64_t getL1TauThresholdPattern() const { return m_tauL1ThresholdPattern.size() ? m_tauL1ThresholdPattern[0] : -1; } // Returns the main L1 item thresholdPattern mask
     inline const std::vector<int64_t>& getL1TauThresholdPatterns() const { return m_tauL1ThresholdPattern; }
+    inline const std::vector<std::string>& getHLTBoostedDitauName() const { return m_HLTBoostedDitauName; }
+
+
 
     inline bool isHLTSingleTau() const { return m_HLTThr.size() == 1 && (m_HLTElecThr.size() + m_HLTMuonThr.size() + m_HLTGammaThr.size() + m_HLTJetThr.size() + m_HLTMETThr.size()) == 0; }
     inline bool isHLTDiTau() const { return m_HLTThr.size() > 1 && (m_HLTElecThr.size() + m_HLTMuonThr.size() + m_HLTGammaThr.size() + m_HLTJetThr.size() + m_HLTMETThr.size()) == 0; }
+    inline bool isHLTBoostedDiTau() const { return m_HLTBoostedDitauName.size() > 0  && (m_HLTThr.size() + m_HLTElecThr.size() + m_HLTMuonThr.size() + m_HLTGammaThr.size() + m_HLTMETThr.size()) == 0; }
     inline bool isHLTTandP() const { return m_HLTThr.size() == 1 && (m_HLTElecThr.size() + m_HLTMuonThr.size()) == 1 && (m_HLTGammaThr.size() + m_HLTJetThr.size() + m_HLTMETThr.size()) == 0; }
     inline bool isL1TauOnly() const { return (m_HLTThr.size() + m_HLTElecThr.size() + m_HLTMuonThr.size() + m_HLTGammaThr.size() + m_HLTJetThr.size() + m_HLTMETThr.size()) == 0 && !m_tauL1Items.empty(); }
     inline bool isTauStreamer() const { return m_isStreamer && !m_tauL1Items.empty(); }
@@ -88,6 +92,9 @@ private:
     std::vector<float> m_HLTGammaThr; // List of all photon leg thresholds
     std::vector<float> m_HLTJetThr; // List of all jet leg thresholds
     std::vector<float> m_HLTMETThr; // List of all MET leg thresholds
+
+    std::vector<std::string> m_HLTBoostedDitauName;
+
 
     inline bool is_number(const std::string& s) {
         return !s.empty() && std::find_if(s.begin(), s.end(), [](unsigned char c) {return !std::isdigit(c);}) == s.end();

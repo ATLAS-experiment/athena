@@ -640,9 +640,6 @@ private:
 
   BooleanProperty m_includeMaterialEffects{this, "ApplyMaterialEffects", true,
     "boolean to switch on/off material effects"};
-  BooleanProperty m_requireMaterialDestinationHit
-    {this, "RequireMaterialDestinationHit", false,
-     "require the destination surface hit for material collection"};
   BooleanProperty m_stopWithNavigationBreak
     {this, "StopWithNavigationBreak", false,
      "return 0 if navigation breaks - for validation reasons"};
@@ -650,12 +647,8 @@ private:
     "return 0 if update kills the trajectory"};
   BooleanProperty m_skipInitialLayerUpdate{this, "SkipInitialPostUpdate", false,
     "skip the initial post-Update at the layer [Fatras conversion mode]"};
-  BooleanProperty m_extendedLayerSearch{this, "ExtendedLayerSearch", true,
-    "extended layer search"};
   BooleanProperty m_resolveActive{this, "ResolveMuonStation", false};
   BooleanProperty m_resolveMultilayers{this, "ResolveMultilayers", true};
-  BooleanProperty m_cacheLastMatLayer{this, "CacheLastMaterialLayer", false,
-    "steering of the material layer cache"};
   //!< number of sub valid propagators in the m_subPropagators array
   //if we have no valid subpropagatos it will be set to an INVALID value
   unsigned int m_numOfValidPropagators;
@@ -670,13 +663,12 @@ private:
   DoubleProperty m_tolerance{this, "Tolerance", 0.002,
     "surface & volume tolerance"};
   // ------------------------------------------------------- //
-  BooleanProperty m_activeOverlap{this, "ConsiderMuonStationOverlaps", false,
-    "consider overlaps between active muon volumes"};
   BooleanProperty m_useMuonMatApprox{this, "UseMuonMatApproximation", false,
     "use approximative MS inert material"};
   BooleanProperty m_useDenseVolumeDescription
     {this, "UseDenseVolumeDescription", true,
      "use dense volume description when available in ID/Calo"};
+  UnsignedIntegerProperty m_maxRecursion{this, "MaxRecursion", 1000};
 
   static const unsigned int m_maxNavigSurf = 1000;
   static const unsigned int m_maxNavigVol = 50;
@@ -718,6 +710,8 @@ private:
   mutable Gaudi::Accumulators::Counter<> m_navigationBreakDistIncrease{}; //!< number of navigation breaks due to distance increase
   mutable Gaudi::Accumulators::Counter<> m_navigationBreakVolumeSignature{}; //!< number of navigation breaks due to distance increase
   mutable Gaudi::Accumulators::Counter<> m_overlapSurfaceHit{}; //!< number of OverlapSurfaces found
+
+  mutable Dbg::PropStat m_propStat ATLAS_THREAD_SAFE;
 };
 
 } // end of namespace

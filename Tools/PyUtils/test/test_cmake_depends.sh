@@ -22,8 +22,8 @@ cmds+=("acmd.py cmake depends xAODEventInfo IOVDbSvc AthenaKernel --dot")
 cmds+=("acmd.py cmake depends IOVDbSvc --py --dot")
 cmds+=("acmd.py cmake depends xAODEventInfo IOVDbSvc AthenaKernel --py --dot")
 # Test of an external library:
-cmds+=("acmd.py cmake depends ActsCore --clients --target --recursive --external --dot")
-cmds+=("acmd.py cmake depends ActsCore --clients --target --recursive")
+cmds+=("acmd.py cmake depends Acts::Core --clients --target --recursive --external --dot")
+cmds+=("acmd.py cmake depends Acts::Core --clients --target --recursive")
 
 for c in "${cmds[@]}"; do
    echo "${c}"

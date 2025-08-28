@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -9,37 +9,33 @@
  */
 #ifndef GSFCONSTANTS_H
 #define GSFCONSTANTS_H
-
+#include "TrkGaussianSumFilterUtils/GsfFindIndexOfMinimum.h"
 #include <cstddef>
 #include <cstdint>
 namespace GSFConstants {
+/**
+ * @brief Alignment used  for SIMD operations
+ * internally to GSF.
+ */
+constexpr size_t alignment = vAlgs::alignmentForArray<256>();
 
 /**
- * Note the Gaussian sum approach as describe
- * e.g in " Optimal Filtering" Anderson and Moore
- * "Track Fitting with non-Gaussan noise" Fruhwirth
- *
- * The state is described by N Gaussian components
+ * @brief The state is described by N Gaussian components
  * The Beth Heitler Material effect are also described
- * by M components
- * Which futher can involve polynomial parametetrization
- * with C coeffiencts.
+ * by M components.
+ * Thee components are parametetrization
+ * via polynomials  with C coeffiencts.
  *
- * Each step we have a N x M convolution
- * And then a reduction back to N
+ * The number of coefficients
+ * is assumed to be fixed as all the parametrization
+ * have the same number.
  *
- * The max numbers for N , M  should be enforced in configuration.
- * As is an error to configure for more.
+ * The max number of Material Components
+ * and maxNumberOfStateComponents are
+ * more constraint by "reason".
  *
- * This lead to a max allowed NXM after convolution.
- * Trying to somehow  by pass that is a configuration
- * error (GSF code throws an exception).
- *
- * Furthermore, the  number of coefficients is also
- * fixed and checked during configuration.
- *
- * So here is a list of these constants all in one
- * place.
+ * These numbers also mean we can use
+ * std::array in places.
  */
 
 /// Maximum number of Gaussian components for the
@@ -52,19 +48,5 @@ constexpr int8_t maxNumberofMatComponents = 6;
 /// parametrizing the mean,variace, weights of the
 /// Gaussian components describing the material effects.
 constexpr int8_t polynomialCoefficients = 6;
-
-/**
- * The maximum size State x Bethe-Heitler components
- * The typical number we use is the max 6x12 = 72 i.e as
- * we try to have the maximum practical precision for the GSF.
- */
-constexpr int8_t maxComponentsAfterConvolution =
-  maxNumberofMatComponents * maxNumberofStateComponents;
-
-/**
- * @brief Alignment used  for SIMD operations
- * internally to GSF.
- */
-constexpr size_t alignment = 32;
 }
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -33,7 +33,7 @@ class Algtest
 public:
   Algtest()
     : Algorithm ("algname", Gaudi::svcLocator()) {}
-  virtual StatusCode execute() { return StatusCode (StatusCode::SUCCESS); }
+  virtual StatusCode execute() override { return StatusCode (StatusCode::SUCCESS); }
   StatusCode test1();
 };
 

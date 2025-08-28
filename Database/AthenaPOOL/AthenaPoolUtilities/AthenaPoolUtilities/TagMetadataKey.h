@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAGMETADATAKEY_H
@@ -33,7 +33,7 @@ public:
    static std::string vermark()  {return "Ver@";}
 
    TagMetadataKey();
-   TagMetadataKey(std::string key, std::string qual="", bool versioned=false);
+   explicit TagMetadataKey(std::string key, std::string qual="", bool versioned=false);
 
    void setEncoded(bool flag);
    void setKey(std::string key);

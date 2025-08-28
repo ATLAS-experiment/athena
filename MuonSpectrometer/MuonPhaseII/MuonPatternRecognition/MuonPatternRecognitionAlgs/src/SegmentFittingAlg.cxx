@@ -206,6 +206,7 @@ namespace MuonR4 {
         }
 
         MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
+        ATH_MSG_VERBOSE("fitSegmentHits() - Start segment seed search");
         while (auto seed = seedGen.nextSeed(ctx)) {
             SegmentFitResult data{};
             data.segmentPars = seed->parameters;
@@ -233,6 +234,8 @@ namespace MuonR4 {
             }
             segments.push_back(convertToSegment(locToGlob, patternSeed, std::move(data)));
         }
+        ATH_MSG_VERBOSE("fitSegmentHits() - In total "<<segments.size()<<" segment were constructed ");
+      
         return segments;
     }
      std::unique_ptr<Segment> SegmentFittingAlg::convertToSegment(const Amg::Transform3D& locToGlob, 

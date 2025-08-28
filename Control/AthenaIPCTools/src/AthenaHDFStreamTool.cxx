@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* file contains the implementation for the AthenaHDFStreamTool class.
@@ -198,7 +198,7 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
          } else if (nbytes < 16 * 512) {
             chunkdim[0] = 4 * 4096;
          } else {
-            chunkdim[0] = (int(nbytes / 4096) + 1) * 4096;
+            chunkdim[0] = (hsize_t(nbytes / 4096) + 1) * 4096;
          }
       }
       ds_prop.setChunk(1, chunkdim);

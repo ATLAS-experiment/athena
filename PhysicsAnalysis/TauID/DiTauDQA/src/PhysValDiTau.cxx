@@ -37,6 +37,10 @@ StatusCode PhysValDiTau::initialize()
   // selections are configured in PhysicsValidation job options
   ATH_CHECK(m_nomiDiTauSel.retrieve());
 
+  if ( m_isMC ) {
+    ATH_CHECK(m_truthTool.retrieve());
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -63,7 +67,13 @@ StatusCode PhysValDiTau::fillHistograms()
 
   // Retrieve tau container
   const xAOD::DiTauJetContainer* ditaus = nullptr;
-  ATH_CHECK( evtStore()->retrieve(ditaus, m_DiTauJetContainerName) ); 
+  if(evtStore()->contains<xAOD::DiTauJetContainer>(m_DiTauJetContainerName)){
+    ATH_CHECK( evtStore()->retrieve(ditaus, m_DiTauJetContainerName) ); 
+  } else {
+    ATH_MSG_INFO("Input collection " << m_DiTauJetContainerName << " not found. Skip the monitoring ..");
+    return StatusCode::SUCCESS;   
+  } 
+
 
   ATH_MSG_DEBUG("Number of ditaus: " << ditaus->size());
   
@@ -85,6 +95,25 @@ StatusCode PhysValDiTau::fillHistograms()
        m_oDiTauValidationPlots->m_oNewCorePlotsNom.fill(*ditau, weight);
     }
 
+    // Don't fill truth and fake histograms if we are running on data.
+    if ( !m_isMC ) continue;
+
+    ATH_MSG_DEBUG("Trying to truth-match ditau");
+    m_truthTool->getTruth(*ditau);
+
+    static const SG::ConstAccessor<char> IsTruthMatchedAcc("IsTruthHadronic");
+    if ( (bool)IsTruthMatchedAcc(*ditau) ) {
+       m_oDiTauValidationPlots->m_oNewCorePlotsTrue.fill(*ditau, weight);
+       if(nominal){
+          m_oDiTauValidationPlots->m_oNewCorePlotsNomTrue.fill(*ditau, weight);
+          m_oDiTauValidationPlots->m_oNewResolutionPlotsTrue.fill(*ditau, weight);	  
+       }  
+    } else {
+       m_oDiTauValidationPlots->m_oNewCorePlotsFake.fill(*ditau, weight);
+       if(nominal){
+          m_oDiTauValidationPlots->m_oNewCorePlotsNomFake.fill(*ditau, weight); 	       
+       }
+    }
   }
 
   return StatusCode::SUCCESS;

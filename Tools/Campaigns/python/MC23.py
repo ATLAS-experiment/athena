@@ -163,8 +163,8 @@ def MC23g(flags):
     flags.Digitization.PU.NumberOfHighPtMinBias = 0.192
     # TODO new bunch structure?
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
-    # TODO: replace with the actual profile
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run470000_MC23e_MultiBeamspot' 
+    # TODO: replace with the actual mc23g profile - this is a validation PileupProfile file
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run495000_MC23g_MultiBeamspot_VALIDATION' 
 
 
 def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
@@ -172,7 +172,6 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     flags.Input.MCCampaign = Campaign.MC23e
 
     flags.Beam.NumberOfCollisions = 0.
-    flags.Input.ConditionsRunNumber = 488000
 
     from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
     LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
@@ -182,12 +181,15 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
-    flags.Digitization.PileUp = True
-    flags.Digitization.DoXingByXingPileUp = True
-    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructureHeavyIon2022'  # New file being prepared ATLGBLCONDTAGS-182
-    flags.Digitization.PU.InitialBunchCrossing = 0
-    flags.Digitization.PU.FinalBunchCrossing = 0
-    flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
+    # These numbers are based upon a relative XS scaling of the high-pt slice
+    # of 64%, which leads to a relative high-pt / low-pt sampling of
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 7.5
+    # to follow pile-up profile. Only a relevant number of significant digits
+    # are kept.
+    flags.Digitization.PU.NumberOfLowPtMinBias = 7.485
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.015
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run488000_MC23e_SingleBeamspot'
 
     from HIRecConfig.HIModeFlags import HIPmode
     HIPmode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
@@ -253,32 +255,32 @@ def MC23HeavyIons2024(flags): # FIXME This configuration is a placeholder
     flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
 
 
-def MC23HeavyIons2025OO(flags): # FIXME This configuration is a placeholder
+def MC23HeavyIons2025OO(flags):
     """MC23 flags for the 2025 Heavy Ions (Oxygen) run"""
     flags.Input.MCCampaign = Campaign.MC23g
 
     flags.Beam.BunchSpacing = 500
-    flags.Beam.NumberOfCollisions = 0.0 # TODO: change once we have 
-    flags.Input.ConditionsRunNumber = 488000 # TODO: replace with the actual run number once we have the conditions
+    flags.Beam.NumberOfCollisions = 0.0
+    flags.Input.ConditionsRunNumber = 500700 
 
     from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
-    LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
+    LArConfigRun3NoPileUp(flags)
 
     # radiation damage
     from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     # pile-up
-    flags.Digitization.PileUp = False #TODO: change once we have the conditions
-    flags.Digitization.DoXingByXingPileUp = False #TODO: as above
-    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructureHeavyIon2022'  # New file being prepared ATLGBLCONDTAGS-182
+    flags.Digitization.PileUp = False
+    flags.Digitization.DoXingByXingPileUp = False
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructureHeavyIon2025OO'
     flags.Digitization.PU.InitialBunchCrossing = 0
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
     from HIRecConfig.HIModeFlags import HIPmode
     HIPmode(flags)
-    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+    flags.Reco.EnableZDC = False
 
     #all
     flags.Trigger.AODEDMSet = 'AODFULL'
@@ -450,10 +452,17 @@ def BeamspotSplitMC23e():
 def BeamspotSplitMC23g():
     """MC23g beamspot splitting configuration."""
     substeps = 4
-    event_fractions = [0.22, 0.22, 0.22, 0.34]
+    event_fractions = [0.3, 0.41, 0.09, 0.2]
 
     return substeps, event_fractions
 
+
+def BeamspotSplitMC23g_VALIDATION():
+    """MC23g beamspot splitting configuration for Validation purposes. The values are kept the same as BeamspotSplitMC23e"""
+    substeps = 4
+    event_fractions = [0.22, 0.22, 0.22, 0.34]
+
+    return substeps, event_fractions
 
 def MC23SimulationNoIoV(flags):
     """MC23 base flags for simulation without specifying conditions IoVs"""
@@ -520,7 +529,7 @@ def MC23Simulation2025OORun(flags):
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23g
 
-    flags.Input.RunNumbers = [488000]
+    flags.Input.RunNumbers = [500700]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1] # dummy value
 

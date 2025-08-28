@@ -29,6 +29,7 @@
 #include "../TrigJetConditionConfig_clean.h"
 #include "../TrigJetConditionConfig_bdips.h"
 #include "../TrigJetConditionConfig_gntau.h"
+#include "../TrigJetConditionConfig_uht1tau.h"
 #include "../TrigJetConditionConfig_acceptAll.h"
 #include "../TrigJetConditionConfig_moment.h"
 #include "../TrigJetConditionConfig_repeated.h"
@@ -41,7 +42,6 @@
 #include "../TrigJetHypoToolHelperNoGrouper.h"
 #include "../TrigJetTLAHypoAlg.h"
 #include "../TrigJetTLAHypoTool.h"
-#include "../TrigBtagTLATool.h"
 #include "../TrigJetEJsHypoAlg.h"
 #include "../TrigJetEJsHypoTool.h"
 #include "../TrigJetCRHypoAlg.h"
@@ -75,6 +75,7 @@ DECLARE_COMPONENT(TrigJetConditionConfig_timesig)
 DECLARE_COMPONENT(TrigJetConditionConfig_clean)
 DECLARE_COMPONENT(TrigJetConditionConfig_bdips)
 DECLARE_COMPONENT(TrigJetConditionConfig_gntau)
+DECLARE_COMPONENT(TrigJetConditionConfig_uht1tau)
 DECLARE_COMPONENT(TrigJetConditionConfig_acceptAll)
 DECLARE_COMPONENT(TrigJetConditionConfig_moment)
 DECLARE_COMPONENT(TrigJetConditionConfig_repeated)
@@ -85,7 +86,6 @@ DECLARE_COMPONENT(TrigJetHypoAlg)
 DECLARE_COMPONENT(TrigJetHypoTool)
 DECLARE_COMPONENT(TrigJetTLAHypoAlg)
 DECLARE_COMPONENT(TrigJetTLAHypoTool)
-DECLARE_COMPONENT(TrigBtagTLATool)
 DECLARE_COMPONENT(TrigJetHypoToolHelperNoGrouper)
 
 DECLARE_COMPONENT(TrigJetEJsHypoAlg)

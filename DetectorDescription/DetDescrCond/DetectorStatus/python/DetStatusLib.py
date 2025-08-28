@@ -4,7 +4,6 @@
 # python functions/classes to help management of detector status information
 # Richard Hawkings, 5/2/07
 
-from __future__ import print_function
 
 def folderName(runLumi=True):
     if (runLumi):

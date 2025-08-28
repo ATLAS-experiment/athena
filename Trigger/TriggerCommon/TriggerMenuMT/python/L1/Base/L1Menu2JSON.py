@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -13,6 +13,7 @@ class L1MenuJSONConverter(object):
         self.bgsOutputFile = bgsOutputFile
 
     def writeJSON(self,pretty=False):
+        import json
 
         if not self.outputFile:
             log.warning("Can't write json file since no name was provided")
@@ -21,7 +22,6 @@ class L1MenuJSONConverter(object):
         # L1Menu json
         confObj = self.generateJSON()
         with open( self.outputFile, mode="wt" ) as fh:
-            import json
             json.dump(confObj, fh, indent = 4 if pretty else None, separators=(',', ': '))
             fh.write("\n")
         log.info("Wrote %s", self.outputFile)
@@ -29,37 +29,29 @@ class L1MenuJSONConverter(object):
         if self.bgsOutputFile is not None:
             confObj = self.generateJsonBunchgroupset()
             with open( self.bgsOutputFile, mode="wt" ) as fh:
-                import json
                 json.dump(confObj, fh, indent = 4 if pretty else None, separators=(',', ': '))
                 fh.write("\n")
             log.info("Wrote %s", self.bgsOutputFile)
 
-
         return self.outputFile
 
 
-
     def generateJSON(self):
-        #        import json
-        from collections import OrderedDict as odict
-        confObj = odict()
-
-        confObj["filetype"] = "l1menu" 
-
-        confObj["name"] = self.menu.menuName
-
-        confObj["run"] = 3 # will be useful for later (we also record this for Run 1 and 2)
-
-        # items
-        confObj["items"] = self.menu.items.json()
+        confObj = {
+            "filetype": "l1menu",
+            "name": self.menu.menuName,
+            "run": 3,  # will be useful for later (we also record this for Run 1 and 2)
+            "items": self.menu.items.json(),
+            "thresholds": {}
+        }
 
         # thresholds
-        confObj["thresholds"] = odict()
-        confObj["thresholds"]["internal"] = odict()
-        confObj["thresholds"]["internal"]["type"] = "internal"
-        confObj["thresholds"]["internal"]["names"] = [ "BGRP%i" % bg.internalNumber for bg in self.menu.ctp.bunchGroupSet.bunchGroups] + \
-                                                     [ "RNDM%i" % i for i in range(0,len(self.menu.ctp.random.names)) ]
-        confObj["thresholds"]["internal"]["randoms"] = odict( [ ("RNDM%i" %i , { "cut" : c }) for i,c in enumerate( self.menu.ctp.random.cuts) ] )
+        confObj["thresholds"]["internal"] = {
+            "type": "internal",
+            "names": [ f"BGRP{bg.internalNumber}" for bg in self.menu.ctp.bunchGroupSet.bunchGroups] + \
+                     [ f"RNDM{i}" for i in range(0,len(self.menu.ctp.random.names)) ],
+            "randoms": { f"RNDM{i}": { "cut" : c } for i,c in enumerate( self.menu.ctp.random.cuts ) }
+        }
 
         # run 3 thresholds
         confObj["thresholds"].update( self.menu.thresholds.json() )
@@ -83,14 +75,9 @@ class L1MenuJSONConverter(object):
 
 
     def generateJsonBunchgroupset(self):
-        from collections import OrderedDict as odict
-        confObj = odict()
-
-        confObj["filetype"] = "bunchgroupset" 
-
-        confObj["name"] = self.menu.menuName
-
-        # bunchgroups
-        confObj["bunchGroups"] = self.menu.ctp.bunchGroupSet.json()
-
+        confObj = {
+            "filetype": "bunchgroupset",
+            "name": self.menu.menuName,
+            "bunchGroups": self.menu.ctp.bunchGroupSet.json()
+        }
         return confObj

@@ -35,9 +35,6 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     if flags.BTagging.AddV0Finder:
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix=nametag, container_name_prefix="FTAG"))
 
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
-
     # thinning tools
     thinningTools = []
 
@@ -105,6 +102,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
             "AntiKt4UFOCSSKJets",
+            "CaloCalFwdTopoTowers",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             "UFOCSSK",
             "GlobalChargedParticleFlowObjects",

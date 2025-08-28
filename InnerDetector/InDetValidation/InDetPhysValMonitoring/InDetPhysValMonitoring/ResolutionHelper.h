@@ -33,7 +33,7 @@ namespace IDPVM {
     };
     
     /// methods acc to which mean&RMS can be evaluated
-    enum methods { iterRMS_convergence, Gauss_fit, fusion_iterRMS_Gaussfit };
+    enum methods { iterRMS_convergence, Gauss_fit, fusion_iterRMS_Gaussfit, iterGaussFit_convergence };
 
     /// package the output of a single bin resolution measurement
     struct resolutionResultInBin{
@@ -108,6 +108,8 @@ namespace IDPVM {
     /// iteratively change histogram range, until convergence
     /// return # remaining iterations before hitting the max. allowed
     int setIterativeConvergence(TH1* p_input_hist);
+    /// same as above but performs a gaussian fit at avery iteration, until convergence
+    int setIterativeGaussFitConvergence(TH1* p_input_hist);
     /// evaluate the fraction of evens out of signal region and its uncertainty
     void setFout(double p_nsig,double p_ntot);    
     /// set large mean and RMS errors in case we eg. exclude too many events during evaluation

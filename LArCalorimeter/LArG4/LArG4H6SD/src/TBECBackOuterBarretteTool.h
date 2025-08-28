@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TBECBackOuterBarretteTool__H
-#define TBECBackOuterBarretteTool__H
+#ifndef TBECBackOuterBarretteTool_H
+#define TBECBackOuterBarretteTool_H
 
 #include "LArG4Code/LArG4SDTool.h"
 #include <string>
@@ -27,7 +27,7 @@ class TBECBackOuterBarretteTool : public LArG4SDTool
   TBECBackOuterBarretteTool(const std::string& type, const std::string& name, const IInterface *parent);
 
   // Destructor
-  virtual ~TBECBackOuterBarretteTool() {}
+  virtual ~TBECBackOuterBarretteTool() = default;
 
   virtual StatusCode initializeCalculators() override final;
 
@@ -36,10 +36,6 @@ class TBECBackOuterBarretteTool : public LArG4SDTool
 
   // Calls down to all the SDs to get them to pack their hits into a central collection
   StatusCode Gather() override final;
-
-  /** Beginning of an athena event.  This is where collection initialization should happen.
-    If we are using a WriteHandle, then this could be empty. */
-//  StatusCode SetupEvent() override final;
 
  private:
   // The actual hit container - here because the base class is for both calib and standard SD tools
@@ -51,22 +47,29 @@ class TBECBackOuterBarretteTool : public LArG4SDTool
   SG::WriteHandle<LArHitContainer> m_HitColl_chcoll;
   SG::WriteHandle<LArHitContainer> m_HitColl_ropt;
 
-  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjcalc;// LArG4::EMEC_ECOR_GADJ
-  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjoldcalc;// LArG4::EMEC_ECOR_GADJ_OLD
-  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjecalc;// LArG4::EMEC_ECOR_GADJ_E
-  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjscalc;// LArG4::EMEC_ECOR_GADJ_S
-  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjsecalc;// LArG4::EMEC_ECOR_GADJ_SE
-  ServiceHandle<ILArCalculatorSvc> m_emecbobchclcalc;// LArG4::EMEC_ECOR_CHCL
-  ServiceHandle<ILArCalculatorSvc> m_emecbobcalc;// LArG4::EMEC_ECOR_ROPT
+  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjcalc {this, "EMECPosBOBWheel_ECOR_GADJCalculator"
+    , "EMECPosBOBWheel_ECOR_GADJCalculator"}; // LArG4::EMEC_ECOR_GADJ
+  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjoldcalc {this, "EMECPosBOBWheel_ECOR_GADJ_OLDCalculator"
+    , "EMECPosBOBWheel_ECOR_GADJ_OLDCalculator"}; // LArG4::EMEC_ECOR_GADJ_OLD
+  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjecalc {this, "EMECPosBOBWheel_ECOR_GADJ_ECalculator"
+    , "EMECPosBOBWheel_ECOR_GADJ_ECalculator"}; // LArG4::EMEC_ECOR_GADJ_E
+  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjscalc {this, "EMECPosBOBWheel_ECOR_GADJ_SCalculator"
+    , "EMECPosBOBWheel_ECOR_GADJ_SCalculator"}; // LArG4::EMEC_ECOR_GADJ_S
+  ServiceHandle<ILArCalculatorSvc> m_emecbobgadjsecalc {this, "EMECPosBOBWheel_ECOR_GADJ_SECalculator"
+    , "EMECPosBOBWheel_ECOR_GADJ_SECalculator"}; // LArG4::EMEC_ECOR_GADJ_SE
+  ServiceHandle<ILArCalculatorSvc> m_emecbobchclcalc {this, "EMECPosBOBWheel_ECOR_CHCLCalculator"
+    , "EMECPosBOBWheel_ECOR_CHCLCalculator"}; // LArG4::EMEC_ECOR_CHCL
+  ServiceHandle<ILArCalculatorSvc> m_emecbobcalc {this, "EMECPosBOBWheelCalculator"
+    , "EMECPosBOBWheelCalculator"}; // LArG4::EMEC_ECOR_ROPT
 
   // List of volumes for each SD and the corresponding SDs
-  LArG4SimpleSD* m_gapadjSD;
-  LArG4SimpleSD* m_gapoldSD;
-  LArG4SimpleSD* m_gap_eSD;
-  LArG4SimpleSD* m_gap_sSD;
-  LArG4SimpleSD* m_gap_seSD;
-  LArG4SimpleSD* m_chcollSD;
-  LArG4SimpleSD* m_roptSD;
+  LArG4SimpleSD* m_gapadjSD {nullptr};
+  LArG4SimpleSD* m_gapoldSD {nullptr};
+  LArG4SimpleSD* m_gap_eSD {nullptr};
+  LArG4SimpleSD* m_gap_sSD {nullptr};
+  LArG4SimpleSD* m_gap_seSD {nullptr};
+  LArG4SimpleSD* m_chcollSD {nullptr};
+  LArG4SimpleSD* m_roptSD {nullptr};
 };
 
 #endif

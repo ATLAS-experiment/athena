@@ -239,7 +239,7 @@ namespace InDet {
   ConversionPostSelector::fourP(const Trk::TrackParameters& per1,
                                 const Trk::TrackParameters& per2,
                                 double mass,
-                                bool isBar) const
+                                bool isBar) 
   {
     CLHEP::HepLorentzVector momentum;
     Amg::Vector3D sum_mom = per1.momentum() + per2.momentum();

@@ -8,7 +8,7 @@
 
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ActsCalibration/MeasurementCalibratorBase.h"
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "MuonSpacePoint/SpacePoint.h"
 #include "MuonSpacePoint/CalibratedSpacePoint.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -18,6 +18,9 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
+#include "NSWCalibTools/INSWCalibTool.h"
+#include "MMClusterization/IMMClusterBuilderTool.h"
+
 namespace MuonR4{
     /*** @brief Implementation of the space point calibrator interface */
     class SpacePointCalibrator : public extends<AthAlgTool, ISpacePointCalibrator>,
@@ -59,10 +62,10 @@ namespace MuonR4{
                                      const CalibratedSpacePoint& spacePoint) const override final;
 
 
-            void calibrate(const Acts::GeometryContext& geoctx,
-                           const Acts::CalibrationContext& cctx,
-                           const Acts::SourceLink& link,
-                           ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
+            void calibrateSourceLink(const Acts::GeometryContext& geoctx,
+                                     const Acts::CalibrationContext& cctx,
+                                     const Acts::SourceLink& link,
+                                     ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
         private:
             /// access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 
@@ -70,6 +73,10 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
             ToolHandle<IMdtCalibrationTool> m_mdtCalibrationTool{this, "MdtCalibrationTool", ""};
+
+            ToolHandle<Muon::INSWCalibTool> m_nswCalibTool{this, "NSWCalibTool", ""};
+
+            ToolHandle<Muon::IMMClusterBuilderTool> m_clusterBuilderToolMM{this, "MMClusterBuilder", ""};
 
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 

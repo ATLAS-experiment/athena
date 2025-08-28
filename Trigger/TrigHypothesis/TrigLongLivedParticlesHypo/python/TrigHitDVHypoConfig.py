@@ -71,7 +71,7 @@ def TrigHitDVHypoAlgCfg(flags : AthConfigFlags, name : str) -> ComponentAccumula
     return acc
 
 
-def TrigHitDVHypoToolFromDict( chainDict ):
+def TrigHitDVHypoToolFromDict( flags, chainDict ):
 
     log = logging.getLogger('TrigHitDVHypoTool')
 

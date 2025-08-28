@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfExe
 #
@@ -34,6 +34,7 @@ import PyJobTransforms.trfExceptions as trfExceptions
 import PyJobTransforms.trfValidation as trfValidation
 import PyJobTransforms.trfArgClasses as trfArgClasses
 import PyJobTransforms.trfEnv as trfEnv
+import PyJobTransforms.trfMPITools as mpi
 
 
 # Depending on the setting of LANG, sys.stdout may end up with ascii or ansi
@@ -558,7 +559,7 @@ class logscanExecutor(transformExecutor):
                 self._isValidated = False
                 msg.error('Fatal error in athena logfile (level {0})'.format(worstError['level']))
                 raise trfExceptions.TransformLogfileErrorException(trfExit.nameToCode('TRF_EXEC_LOGERROR'), 
-                                                                       'Fatal error in athena logfile: "{0}"'.format(exitErrorMessage))
+                                                                       'Fatal error in athena logfile: "{0}"'.format(exitErrorMessage))            
 
         # Must be ok if we got here!
         msg.info('Executor {0} has validated successfully'.format(self.name))
@@ -827,10 +828,13 @@ class scriptExecutor(transformExecutor):
         if 'checkEventCount' in self.conf.argdict and self.conf.argdict['checkEventCount'].returnMyValue(exe=self) is False:
             msg.info('Event counting for substep {0} is skipped'.format(self.name))
         else:
-            checkcount=trfValidation.eventMatch(self)
-            checkcount.decide()
-            self._eventCount = checkcount.eventCount
-            msg.info('Event counting for substep {0} passed'.format(self.name))
+            if 'mpi' in self.conf.argdict and not mpi.mpiShouldValidate():
+                msg.info('MPI mode -- skipping output event count check')
+            else:
+                checkcount=trfValidation.eventMatch(self)
+                checkcount.decide()
+                self._eventCount = checkcount.eventCount
+                msg.info('Event counting for substep {0} passed'.format(self.name))
 
         self._valStop = os.times()
         msg.debug('valStop time is {0}'.format(self._valStop))
@@ -1149,6 +1153,10 @@ class athenaExecutor(scriptExecutor):
         else:
             self._athenaMPWorkerTopDir = self._athenaMPFileReport = None
 
+        ## Handle MPI setup
+        if 'mpi' in self.conf.argdict:
+            msg.info("Running in MPI mode")
+            mpi.setupMPIConfig(output, self.conf.dataDictionary)
 
         ## Write the skeleton file and prep athena
         if self._skeleton or self._skeletonCA:
@@ -1232,6 +1240,9 @@ class athenaExecutor(scriptExecutor):
                 
     def postExecute(self):
         super(athenaExecutor, self).postExecute()
+        # MPI merging
+        if 'mpi' in self.conf.argdict:
+            mpi.mergeOutputs()
 
         # Handle executor substeps
         if self.conf.totalExecutorSteps > 1:
@@ -1361,6 +1372,7 @@ class athenaExecutor(scriptExecutor):
         self._logScan = trfValidation.athenaLogFileReport(logfile=self._logFileName, substepName=self._substep,
                                                           ignoreList=ignorePatterns)
         worstError = self._logScan.worstError()
+        eventLoopWarnings = self._logScan.eventLoopWarnings()
         self._dbMonitor = self._logScan.dbMonitor()
         
 
@@ -1402,6 +1414,12 @@ class athenaExecutor(scriptExecutor):
             raise trfExceptions.TransformLogfileErrorException(trfExit.nameToCode('TRF_EXEC_LOGERROR'), 
                                                                    'Fatal error in athena logfile: "{0}"'.format(exitErrorMessage))
 
+        # Print event loop warnings
+        if (len(eventLoopWarnings) > 0):
+            msg.warning('Found WARNINGS in the event loop, as follows:')
+            for element in eventLoopWarnings:
+                msg.warning('{0} {1} ({2} instances)'.format(element['item']['service'],element['item']['message'],element['count']))
+        
         # Must be ok if we got here!
         msg.info('Executor {0} has validated successfully'.format(self.name))
         self._isValidated = True

@@ -1,5 +1,6 @@
 // JetSubStructureMomentTools_entries.cxx
 
+#include "JetSubStructureMomentTools/LundVariablesTool.h"
 #include "JetSubStructureMomentTools/KtDeltaRTool.h"
 #include "JetSubStructureMomentTools/NSubjettinessTool.h"
 #include "JetSubStructureMomentTools/NSubjettinessRatiosTool.h"
@@ -26,7 +27,7 @@
 #include "JetSubStructureMomentTools/QwTool.h"
 #include "JetSubStructureMomentTools/BoostedXbbTagTool.h"
 
-
+DECLARE_COMPONENT( LundVariablesTool )
 DECLARE_COMPONENT( KtDeltaRTool )
 DECLARE_COMPONENT( NSubjettinessTool )
 DECLARE_COMPONENT( NSubjettinessRatiosTool )

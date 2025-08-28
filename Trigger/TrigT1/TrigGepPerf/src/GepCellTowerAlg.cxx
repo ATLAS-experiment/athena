@@ -74,6 +74,7 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
       TLorentzVector cellsVector;
       cellsVector.SetPtEtaPhiE(cell.et, cell.eta, cell.phi, cell.e);
       tow[eta_index][phi_index].vec += cellsVector;
+      tow[eta_index][phi_index].cell_id.push_back(cell.id);
   }
 
   // Collect non-empty towers into a vector
@@ -96,6 +97,13 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
     ptr->setEta(gepclus.vec.Eta());
     ptr->setPhi(gepclus.vec.Phi());
     ptr->setTime(gepclus.time);
+
+    CaloClusterCellLink *cccl = new CaloClusterCellLink();
+
+    for (auto cell_id : gepclus.cell_id)
+      cccl->addCell(cell_map->at(cell_id).index, 1.0);
+
+    ptr->addCellLink(std::make_unique<CaloClusterCellLink>(*cccl));
   }
 
   setFilterPassed(true,context); //if got here, assume that means algorithm passed

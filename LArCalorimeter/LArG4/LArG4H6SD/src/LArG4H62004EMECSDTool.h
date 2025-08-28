@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004EMECSDTOOL_H
@@ -26,7 +26,7 @@ public:
   LArG4H62004EMECSDTool(const std::string& type, const std::string& name, const IInterface *parent);
 
   // Destructor
-  virtual ~LArG4H62004EMECSDTool() {}
+  virtual ~LArG4H62004EMECSDTool() = default;
 
   // Method in which all the SDs are created and assigned to the relevant volumes
   StatusCode initializeSD() override final;
@@ -43,10 +43,8 @@ private:
 
   // The actual hit container - here because the base class is for both calib and standard SD tools
   SG::WriteHandle<LArHitContainer> m_HitColl;
-  ServiceHandle<ILArCalculatorSvc> m_calculator;
-
-  LArG4SimpleSD* m_emecSD;
-
+  ServiceHandle<ILArCalculatorSvc> m_calculator{this, "Calculator", "EMECPosInnerWheel_ECOR_GADJCalculator"};
+  LArG4SimpleSD* m_emecSD{nullptr};
 };
 
 #endif

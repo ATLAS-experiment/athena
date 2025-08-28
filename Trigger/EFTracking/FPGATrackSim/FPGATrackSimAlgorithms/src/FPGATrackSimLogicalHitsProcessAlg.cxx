@@ -170,7 +170,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
 
-    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_all, phits_1st, phits_2nd;
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_output, phits_all, phits_1st, phits_2nd;
     phits_1st.reserve(FPGAHits->size());
     phits_2nd.reserve(FPGAHits->size());
     ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
@@ -198,6 +198,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
     for (auto& hit : phits_2nd) {
         FPGAHits_2nd->push_back(*hit);
+    }
+
+    // Add all hits including SPs to this for the HoughRootOutputTool
+    for (const FPGATrackSimHit& hit : *(FPGAHits_2nd.cptr())) {
+        phits_output.emplace_back(&hit, [](const FPGATrackSimHit*){});
     }
 
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
@@ -272,7 +277,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
                     // Collect tracks for this road
                     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadVec = {road};
-                    ATH_CHECK(m_trackFitterTool_1st->getTracks(roadVec, tracksForCurrentRoad));
+                    ATH_CHECK(m_trackFitterTool_1st->getTracks(roadVec, tracksForCurrentRoad, m_evtSel->getMin(), m_evtSel->getMax()));
 
                     // Find the best track for this road
                     if (!tracksForCurrentRoad.empty()) {
@@ -303,7 +308,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                     Monitored::Group(m_monTool, mon_best_chi2_1st);
                 }
             } else { // Pass all tracks with chi2 < 1e15
-                ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
+	      ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st, m_evtSel->getMin(), m_evtSel->getMax()));
                 float bestchi2 = 1.e15;
                 for (const FPGATrackSimTrack& track : tracks_1st) {
                     float chi2 = track.getChi2ndof();
@@ -315,15 +320,29 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                 Monitored::Group(m_monTool, mon_best_chi2_1st);
             }
         }
-    } else { // No tracking; add dummy tracks for monitoring
-        ATH_MSG_DEBUG("No tracking. Adding dummy tracks...");
-        int ntrackDummy = 0;
-        for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads_1st) {
-            ntrackDummy += road->getNHitCombos();
-        }
-        tracks_1st.resize(ntrackDummy); // Just filled with dummy tracks for monitoring
+    } else { // No tracking; 
+      ATH_MSG_DEBUG("No tracking. Just running dummy road2track algorith");
+      roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0));
     }
 
+    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
+    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
+    //Loop over tracks and set the region for all of them, also optionally set track parameters to truth
+    for (FPGATrackSimTrack& track : tracks_1st) {
+        track.setRegion(m_region);
+	if (m_SetTruthParametersForTracks >= 0 && truthtracks.size() > 0) {
+	  if (m_SetTruthParametersForTracks != 0)
+	    track.setQOverPt(truthtracks.front().getQOverPt());
+	  else if	(m_SetTruthParametersForTracks != 1)
+	    track.setD0(truthtracks.front().getD0());
+	  else if (m_SetTruthParametersForTracks != 2)
+	    track.setPhi(truthtracks.front().getPhi());
+	  else if (m_SetTruthParametersForTracks != 3)
+	    track.setZ0(truthtracks.front().getZ0());
+	  else if (m_SetTruthParametersForTracks != 4)
+	    track.setEta(truthtracks.front().getEta());
+	}
+    }
     // Loop over roads and store them in SG (after track finding to also copy the sector information)
     for (auto const& road : roads_1st) {
         std::vector<FPGATrackSimHit> road_hits;
@@ -345,11 +364,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Overlap removal
     if (m_doOverlapRemoval)  ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
 
-    // If running NN Track tool, now we get the track parameters (it's slow so we only do it for tracks passing OLR)
-    if (m_doTracking && m_doNNTrack) {
-      ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks_1st,true));
-    }
-    
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks_1st) {
       if (track.getChi2ndof() < m_trackScoreCut.value()) {
@@ -373,8 +387,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_nTracksTot += tracks_1st.size();
 
     // Do some simple monitoring of efficiencies. okay, we need truth tracks here.
-    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
-    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
     if (truthtracks.size() > 0) {
         m_evt_truth++;
         auto passroad = Monitored::Scalar<bool>("eff_road",(roads_1st.size() > 0));
@@ -454,7 +466,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
 
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_all, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_output, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
     }
 
     // Reset data pointers
@@ -507,16 +519,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS");
     ATH_MSG_INFO("========================================================================================");
     ATH_MSG_INFO("Ran on events = " << m_evt);
-    ATH_MSG_INFO("Inclusive efficiency to find a road = " << m_nRoadsFound/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track = " << m_nTracksFound/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << m_nTracksChi2Found/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 and OLR = " << m_nTracksChi2OLRFound/m_evt_truth);
+    ATH_MSG_INFO("Inclusive efficiency to find a road = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nRoadsFound/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksFound/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2Found/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 and OLR = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRFound/(float)m_evt_truth)));
 
 
-    ATH_MSG_INFO("Number of 1st stage roads/event = " << m_nRoadsTot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage track combinations/event = " << m_nTracksTot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage tracks passing chi2/event = " << m_nTracksChi2Tot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage tracks passing chi2 and OLR/event = " << m_nTracksChi2OLRTot/m_evt);
+    ATH_MSG_INFO("Number of 1st stage roads/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nRoadsTot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage track combinations/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksTot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage tracks passing chi2/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksChi2Tot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage tracks passing chi2 and OLR/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRTot/(float)m_evt)));
     ATH_MSG_INFO("========================================================================================");
 
     ATH_MSG_INFO("Max number of 1st stage roads in an event = " << m_maxNRoadsFound);

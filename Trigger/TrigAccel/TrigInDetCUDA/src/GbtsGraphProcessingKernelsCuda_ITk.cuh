@@ -24,11 +24,11 @@ __global__ static void CCA_IterationKernel_ITk(const int* d_output_graph, char* 
 
 	__shared__ int nEdgesLeft;
 	int edge_size = 2 + 1 + TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;	
-
+	
 	int toggle     = iter%2;	
 	int levelLoad  = toggle*nEdges;	
 	int levelStore = (1-toggle)*nEdges;
-
+	
 	if(threadIdx.x == 0) {
 		nEdgesLeft = d_counters[3+toggle];//from the previous iteration
 	}
@@ -41,7 +41,7 @@ __global__ static void CCA_IterationKernel_ITk(const int* d_output_graph, char* 
 		int edge_pos = edge_size*edgeIdx;
 		
 		int nNei = d_output_graph[edge_pos + TrigAccel::ITk::nNei];
-
+		
 		char next_level = d_levels[levelLoad + edgeIdx];
 
 		bool localChange = false;
@@ -58,8 +58,8 @@ __global__ static void CCA_IterationKernel_ITk(const int* d_output_graph, char* 
 				break;
 			}
 		}
-
-		if(localChange) {
+		// add all remianing edges to level_views on the last iteration
+		if(localChange && iter < TrigAccel::ITk::GBTS_MAX_CCA_ITERATIONS - 1) {
 			int edgesLeftPlace = atomicAdd(&d_counters[4-toggle], 1); //nChanges
 			d_active_edges[edgesLeftPlace] = edgeIdx;//for the next iteration
 		}
@@ -78,6 +78,7 @@ __global__ static void CCA_IterationKernel_ITk(const int* d_output_graph, char* 
 		}
 	}
 }
+
 
 /** @brief initialize the Kalman filter for this new edgeState from the starting edge (2 nodes)
 *
@@ -117,16 +118,16 @@ __device__ inline void edgeState::initialize(const float4& node1_params, const f
 
 	m_Y[0] = node2_params.z;
 	m_Y[1] = (node1_params.z - node2_params.z)/(r1 - r2);
+	
+	memset(&m_Cx[0], 0, sizeof(m_Cx));
+	memset(&m_Cy[0], 0, sizeof(m_Cy));
 
-	memset(&m_Cx[0][0], 0, sizeof(m_Cx));
-	memset(&m_Cy[0][0], 0, sizeof(m_Cy));
+	m_Cx[M3_0_0] = 0.25f;
+	m_Cx[M3_1_1] = 0.001f;
+	m_Cx[M3_2_2] = 0.001f;
 
-	m_Cx[0][0] = 0.25f;
-	m_Cx[1][1] = 0.001f;
-	m_Cx[2][2] = 0.001f;
-
-	m_Cy[0][0] = 1.5f;
-	m_Cy[1][1] = 0.001f;
+	m_Cy[M2_0_0] = 1.5f;
+	m_Cy[M2_1_1] = 0.001f;
 
 }
 
@@ -160,8 +161,8 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 
 	//add ms.
 
-	float m_Cx22 = ts->m_Cx[2][2] + sigma_w*sigma_w;
-	float m_Cx11 = ts->m_Cx[1][1] + sigma_t*sigma_t;
+	float m_Cx22 = ts->m_Cx[M3_2_2] + sigma_w*sigma_w;
+	float m_Cx11 = ts->m_Cx[M3_1_1] + sigma_t*sigma_t;
 
 	float t2 = node1_params.w != -1 ? 1 + ts->m_Y[1]*ts->m_Y[1] : 1 + 1/(ts->m_Y[1]*ts->m_Y[1]); 
 	
@@ -170,7 +171,7 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 
 	s2 *= sqrtf(t2);
 
-	float m_Cy11 = ts->m_Cy[1][1] + s2;  
+	float m_Cy11 = ts->m_Cy[M2_1_1] + s2;  
 
 	//extrapolation
 
@@ -193,34 +194,29 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 	new_ts->m_X[1] = ts->m_X[1] + ts->m_X[2]*A;
 	new_ts->m_X[2] = ts->m_X[2];
 	
-	new_ts->m_Cx[0][0] = ts->m_Cx[0][0] + 2*ts->m_Cx[0][1]*A + 2*ts->m_Cx[0][2]*B + A*m_Cx11*A + 2*A*ts->m_Cx[1][2]*B + B*m_Cx22*B;
-	new_ts->m_Cx[0][1] = new_ts->m_Cx[1][0] = ts->m_Cx[0][1] + m_Cx11*A + ts->m_Cx[1][2]*B + ts->m_Cx[0][2]*A + A*A*ts->m_Cx[1][2]  + A*m_Cx22*B;
-	new_ts->m_Cx[0][2] = new_ts->m_Cx[2][0] = ts->m_Cx[0][2] + ts->m_Cx[1][2]*A + ts->m_Cx[2][2]*B;   
+	new_ts->m_Cx[M3_0_0] = ts->m_Cx[M3_0_0] + 2*ts->m_Cx[M3_0_1]*A + 2*ts->m_Cx[M3_0_2]*B + A*m_Cx11*A + 2*A*ts->m_Cx[M3_1_2]*B + B*m_Cx22*B;
+	new_ts->m_Cx[M3_0_1] = ts->m_Cx[M3_0_1] + m_Cx11*A + ts->m_Cx[M3_1_2]*B + ts->m_Cx[M3_0_2]*A + A*A*ts->m_Cx[M3_1_2]  + A*m_Cx22*B;
+	new_ts->m_Cx[M3_0_2] = ts->m_Cx[M3_0_2] + ts->m_Cx[M3_1_2]*A + m_Cx22*B;   
 		
-	new_ts->m_Cx[1][1] = m_Cx11 + 2*A*ts->m_Cx[1][2] + A*ts->m_Cx[2][2]*A;
-	new_ts->m_Cx[1][2] = new_ts->m_Cx[2][1] = ts->m_Cx[1][2] + m_Cx22*A;
+	new_ts->m_Cx[M3_1_1] = m_Cx11 + 2*A*ts->m_Cx[M3_1_2] + A*m_Cx22*A;
+	new_ts->m_Cx[M3_1_2] = ts->m_Cx[M3_1_2] + m_Cx22*A;
 
-	new_ts->m_Cx[2][2] = m_Cx22;
+	new_ts->m_Cx[M3_2_2] = m_Cx22;
 
 	new_ts->m_Y[0] = ts->m_Y[0] + ts->m_Y[1]*dr;
 	new_ts->m_Y[1] = ts->m_Y[1];
 	
-	new_ts->m_Cy[0][0] = ts->m_Cy[0][0] + 2*ts->m_Cy[0][1]*dr + dr*m_Cy11*dr;
-	new_ts->m_Cy[0][1] = new_ts->m_Cy[1][0] = ts->m_Cy[0][1] + dr*m_Cy11;
-	new_ts->m_Cy[1][1] = m_Cy11;
+	new_ts->m_Cy[M2_0_0] = ts->m_Cy[M2_0_0] + 2*ts->m_Cy[M2_0_1]*dr + dr*m_Cy11*dr;
+	new_ts->m_Cy[M2_0_1] = ts->m_Cy[M2_0_1] + dr*m_Cy11;
+	new_ts->m_Cy[M2_1_1] = m_Cy11;
 	
 	//chi2 test
 	float resid_x = mx - new_ts->m_X[0];
 	float resid_y = my - new_ts->m_Y[0];
 	
-	float CHx[3] = {new_ts->m_Cx[0][0], new_ts->m_Cx[0][1], new_ts->m_Cx[0][2]};
-	float CHy[2] = {new_ts->m_Cy[0][0], new_ts->m_Cy[0][1]};
-
-
 	float sigma_rz = 0;
-	float type = ts->m_head_node_type; //head nodes' type; 
 
-	if(type != -1) {//barrel TO-DO: split into barrel Pixel and barrel SCT
+	if(ts->m_head_node_type != -1) {//barrel TO-DO: split into barrel Pixel and barrel SCT
 		sigma_rz = sigma_y*sigma_y;
 	}
 	else {
@@ -228,14 +224,13 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 		sigma_rz = sigma_rz*sigma_rz;
 	}
 
-	float Dx = 1/(new_ts->m_Cx[0][0] + sigma_x*sigma_x);
+	float Dx = 1/(new_ts->m_Cx[M3_0_0] + sigma_x*sigma_x);
 
-	float Dy = 1/(new_ts->m_Cy[0][0] + sigma_rz);
+	float Dy = 1/(new_ts->m_Cy[M3_0_0] + sigma_rz);
 
 	float dchi2_x = resid_x*resid_x*Dx;
 	float dchi2_y = resid_y*resid_y*Dy;
 	
-
 	if(dchi2_x > maxDChi2_x || dchi2_y > maxDChi2_y) {
 		return false;
 	}
@@ -244,23 +239,19 @@ inline __device__ bool update(edgeState* new_ts, const edgeState* ts, const floa
 	new_ts->m_J = ts->m_J + add_hit - dchi2_x*weight_x - dchi2_y*weight_y;
 	new_ts->m_length = ts->m_length+1;	
 
-	float Kx[3] = {Dx*new_ts->m_Cx[0][0], Dx*new_ts->m_Cx[0][1], Dx*new_ts->m_Cx[0][2]};
-	float Ky[2] = {Dy*new_ts->m_Cy[0][0], Dy*new_ts->m_Cy[0][1]};
-
-	for(int i=0;i<3;i++) new_ts->m_X[i] += Kx[i]*resid_x;
-	for(int i=0;i<2;i++) new_ts->m_Y[i] += Ky[i]*resid_y;
-
-	for(int i=0;i<3;i++) {
-		for(int j=0;j<3;j++) {
-			new_ts->m_Cx[i][j] -= Kx[i]*CHx[j];
-		}	
-	}
-
-	for(int i=0;i<2;i++) {
-		for(int j=0;j<2;j++) {
-			new_ts->m_Cy[i][j] -= Ky[i]*CHy[j];
-		}
-	}
+	for(int i=0;i<3;i++) new_ts->m_X[i] += Dx*new_ts->m_Cx[i]*resid_x; //M3_0_i
+	for(int i=0;i<2;i++) new_ts->m_Y[i] += Dx*new_ts->m_Cy[i]*resid_y; //M2_0_i
+	
+	new_ts->m_Cx[M3_2_2] -= Dx*new_ts->m_Cx[M3_0_2]*new_ts->m_Cx[M3_0_2];
+	new_ts->m_Cx[M3_1_2] -= Dx*new_ts->m_Cx[M3_0_1]*new_ts->m_Cx[M3_0_2];
+	new_ts->m_Cx[M3_1_1] -= Dx*new_ts->m_Cx[M3_0_1]*new_ts->m_Cx[M3_0_1];
+	new_ts->m_Cx[M3_0_2] -= Dx*new_ts->m_Cx[M3_0_0]*new_ts->m_Cx[M3_0_2];
+	new_ts->m_Cx[M3_0_1] -= Dx*new_ts->m_Cx[M3_0_0]*new_ts->m_Cx[M3_0_1];
+	new_ts->m_Cx[M3_0_0] -= Dx*new_ts->m_Cx[M3_0_0]*new_ts->m_Cx[M3_0_0];
+	
+	new_ts->m_Cy[M2_1_1] -= Dx*new_ts->m_Cy[M2_0_1]*new_ts->m_Cy[M2_0_1];
+	new_ts->m_Cy[M2_0_1] -= Dx*new_ts->m_Cy[M2_0_0]*new_ts->m_Cy[M2_0_1];
+	new_ts->m_Cy[M2_0_0] -= Dx*new_ts->m_Cy[M2_0_0]*new_ts->m_Cy[M2_0_0];
 	
 	new_ts->m_c = ts->m_c;
 	new_ts->m_s = ts->m_s;	
@@ -286,18 +277,17 @@ inline __device__ float qual_ItoF(int int_m_J) {return static_cast<float>(int_m_
 inline __device__ void add_seed_proposal(const int int_m_J, const int mini_idx, const unsigned int prop_idx, char* d_seed_ambiguity, int2* d_seed_proposals, 
                                          unsigned long long int* d_edge_bids, const int2* d_mini_states) {
 	//new seed bids for its edges
+	d_seed_proposals[prop_idx] = make_int2(int_m_J, mini_idx);
+	d_seed_ambiguity[prop_idx] = 0;
+	__threadfence(); //ensure above proposal info is written before biding
 	
 	unsigned long long int seed_bid = (static_cast<unsigned long long int>(int_m_J) << 32) | (static_cast<unsigned long long int>(prop_idx));
 	
-	d_seed_proposals[prop_idx] = make_int2(int_m_J, mini_idx);
-	d_seed_ambiguity[prop_idx] = 0;
-
 	int2 mini_state;
-	for(int next_mini = mini_idx; next_mini != -1;) {
+	for(int next_mini = mini_idx; next_mini >= 0;) {
 		mini_state = d_mini_states[next_mini];
-
-		unsigned long long int competing_offer = atomicMax(&d_edge_bids[mini_state.x], seed_bid);	
 		
+		unsigned long long int competing_offer = atomicMax(&d_edge_bids[mini_state.x], seed_bid);	
 		if(competing_offer > seed_bid) {d_seed_ambiguity[prop_idx] = -1;} 
 		else if(competing_offer != 0) {d_seed_ambiguity[competing_offer & 0xFFFFFFFFLL] = -1;} //default bids are 0 so no need to replace	
 		
@@ -310,8 +300,8 @@ inline __device__ void add_seed_proposal(const int int_m_J, const int mini_idx, 
 *  We start with higher levels so that the best seeds are found first and pruned from the graph
 *  The last block to finsh perfoms disambiguation through iteritive biding and fills d_seeds with the winning seeds with the nodes in inside-out order
 *
-*  @param[in] veiw_min/view_max the range of input edges in the d_level_views to start forming seeds from 
-*  @param[in] d_level_views veiw on the edges of d_output_graph calculated by the CCA
+*  @param[in] view_min/view_max the range of input edges in the d_level_views to start forming seeds from 
+*  @param[in] d_level_views view on the edges of d_output_graph calculated by the CCA
 *  @param[in/out] d_levels the level of each edge by edge, -1 signifes an edge that is allready used in seed found from a previous iteration and so has been removed from the graph 
 *  @param[in] d_sp_params x,y,z,cluster-width for all nodes. Here cluster width denotes if a sp is in the barrel (cw != -1 => barrel)
 *  @param[in] d_output_graph stores the nodes, number of neighbours and self-referential neighbour index.
@@ -326,10 +316,10 @@ inline __device__ void add_seed_proposal(const int int_m_J, const int mini_idx, 
 
 __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_level_views, char* d_levels, float4* d_sp_params, int* d_output_graph, 
                      int2* d_mini_states, edgeState* d_state_store, unsigned long long int* d_edge_bids, char* d_seed_ambiguity, int2* d_seed_proposals, TrigAccel::ITk::Tracklet* d_seeds,
-                     unsigned int* d_counters, int nEdges, int minLevel, int nMaxMini, int nMaxProps, int nMaxStateStorePerBlock, int nMaxSeeds) {
+                     unsigned int* d_counters, int minLevel, int nMaxMini, int nMaxProps, int nMaxStateStorePerBlock, int nMaxSeeds) {
 	
 	__shared__ int block_start;
-
+	
 	__shared__ int total_live_states;
 	__shared__ int nStates;
 	__shared__ int nSharedSpace;
@@ -337,16 +327,14 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 	__shared__ edgeState current_states[TrigAccel::ITk::GBTS_MAX_SHARED_STATES];
 	
 	int edge_size = 2 + 1 + TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;
-
 	//TO-DO? each block to take the same distribution of levels
 	if(threadIdx.x == 0) {
 		total_live_states = 0;
 		
 		int total_nStates = view_max - view_min;
 		nStates = 1+(total_nStates-1)/gridDim.x;
-
+			
 		block_start = view_min + nStates*blockIdx.x;
-		
 		if(block_start >= view_max) nStates = 0;
 		else if(block_start + nStates >= view_max) nStates = view_max - block_start;
 	}
@@ -357,29 +345,30 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 	for(int root_edge_idx = threadIdx.x; root_edge_idx<nStates; root_edge_idx+=blockDim.x) {
 		
 		int edge_idx = d_level_views[block_start + root_edge_idx]; 
-			
-		if(d_levels[edge_idx] == -1) continue;
+		char level = d_levels[edge_idx];	
+		if(level == -1) continue;
+
 		int edge_pos = edge_size*edge_idx;	
 
 		float4 node1_params = d_sp_params[d_output_graph[edge_pos + TrigAccel::ITk::node1]]; 
 		float4 node2_params = d_sp_params[d_output_graph[edge_pos + TrigAccel::ITk::node2]];
-		
+
 		int root_idx = atomicAdd(&total_live_states, 1);
-		
 		current_states[root_idx].initialize(node1_params, node2_params);
 		current_states[root_idx].m_edge_idx = edge_idx;		
 		
 		int mini_idx = atomicAdd(&d_counters[7], 1);
 		d_mini_states[mini_idx] = make_int2(edge_idx, -1); //prev mini -1 for roots with no prev
 		current_states[root_idx].m_mini_idx = mini_idx; 			
+		
 	}
 	__syncthreads();
 	if(threadIdx.x == 0) nStates = total_live_states; //update after removed edges are exculded	
-	
+		
 	edgeState state;
 	edgeState new_state;
-	__syncthreads();	
 	
+	__syncthreads();	
 	while(total_live_states>0) { 
 		// propogate to next level 
 		bool has_state = false;
@@ -388,13 +377,11 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 		__syncthreads();
 		if(threadIdx.x == 0) { //update state counts
 			total_live_states = (total_live_states < blockDim.x) ? 0 : total_live_states - blockDim.x;
-
-			nStates = (nStates < blockDim.x) ? 0 : nStates - blockDim.x;
 			
-			nSharedSpace = total_live_states + TrigAccel::ITk::GBTS_MAX_SHARED_STATES - nStates; //total state count when shared memory is filled
-		} 
+			nStates = (nStates < blockDim.x) ? 0 : nStates - blockDim.x;
+			nSharedSpace = total_live_states - nStates; //total state count when shared memory is filled - max shared states
+		}
 		__syncthreads();
-		
 		if(has_state) {
 
 			int edge_idx = state.m_edge_idx;
@@ -406,12 +393,13 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 			char edge_level = d_levels[edge_idx];
 			
 			bool no_updates = true;
+			
 			for(unsigned char nei = 0;nei<nNei;nei++) {
 				int nei_idx	 = d_output_graph[edge_pos + TrigAccel::ITk::nei_idx_start + nei];
 				
 				char nei_level = d_levels[nei_idx];
 				if(edge_level - 1 != nei_level) continue;
-					
+				
 				float4 node1_params = d_sp_params[d_output_graph[edge_size*nei_idx + TrigAccel::ITk::node1]];	
 				bool success = update(&new_state, &state, node1_params);
 				
@@ -426,46 +414,50 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 						
 					if(d_output_graph[edge_size*nei_idx + TrigAccel::ITk::nNei] == 0) { //no neighbours so will fail next round anyway so save shared
 						if(new_state.m_length >= minLevel) {
-							unsigned int prop_idx = atomicAdd(&d_counters[8], 1);
-							
+							int prop_idx = atomicAdd(&d_counters[8], 1);
 							if(prop_idx < nMaxProps) add_seed_proposal(qual_FtoI(new_state.m_J), new_state.m_mini_idx, prop_idx, d_seed_ambiguity, d_seed_proposals, d_edge_bids, d_mini_states);
 						}
 					}
 					else {
-						int curr_idx = atomicAdd(&total_live_states, 1); 
-						if(curr_idx<nSharedSpace) {current_states[atomicAdd(&nStates, 1)] = new_state;}
+						int stateStoreIdx = atomicAdd(&total_live_states, 1) - TrigAccel::ITk::GBTS_MAX_SHARED_STATES; 
+						if(stateStoreIdx<nSharedSpace) {current_states[atomicAdd(&nStates, 1)] = new_state;}
 						else { //TO-DO? make state_store shared between blocks
-							if(curr_idx-TrigAccel::ITk::GBTS_MAX_SHARED_STATES<nMaxStateStorePerBlock) d_state_store[curr_idx-TrigAccel::ITk::GBTS_MAX_SHARED_STATES+nMaxStateStorePerBlock*blockIdx.x] = new_state;
+							if(stateStoreIdx<nMaxStateStorePerBlock) d_state_store[stateStoreIdx+nMaxStateStorePerBlock*blockIdx.x] = new_state;
+							else d_counters[10] = stateStoreIdx; 
 						}
 					}
 				}
 			}
 			if(no_updates) {
 				if(state.m_length >= minLevel) {
-					unsigned int prop_idx = atomicAdd(&d_counters[8], 1);
-					if(prop_idx < nMaxProps) add_seed_proposal(qual_FtoI(state.m_J), state.m_mini_idx, prop_idx, d_seed_ambiguity, d_seed_proposals, d_edge_bids, d_mini_states);
+					int prop_idx = atomicAdd(&d_counters[8], 1);
+					if(prop_idx < nMaxProps ) add_seed_proposal(qual_FtoI(state.m_J), state.m_mini_idx, prop_idx, d_seed_ambiguity, d_seed_proposals, d_edge_bids, d_mini_states);
 				}
 			}
 		}
 		__syncthreads(); //wait for current_states to repopulate
 	}
-	__syncthreads();
+	__syncthreads();	
 	//move remianing seed props to seeds after all tracking for this set is done //seperate kernel?
-	if(threadIdx.x == 0) nStates = atomicAdd(&d_counters[10], 1);
-			
+	if(threadIdx.x == 0) nStates = atomicAdd(&d_counters[11], 1);
 	__syncthreads();
 	if(nStates != gridDim.x-1) return;
-	
 	unsigned int nProps = d_counters[8];
 	__syncthreads();
+
 	//reset for next launch
-	if(threadIdx.x == 0) { 
+	if(threadIdx.x == 0) {
+		//exit if any overflows have occured
+		if(nProps > nMaxProps || d_counters[7] > nMaxMini || d_counters[10] != 0) nStates = 0;	
+		else nStates = 1;
+		d_counters[11] = 0;
 		d_counters[10] = 0;
-		d_counters[7] = 0;
-		d_counters[8] = 0;
-		nStates = 1; //re-using as #maybe states
-	}		
+		d_counters[7]  = 0;
+		d_counters[8]  = 0;
+	}
 	__syncthreads();	
+	if(nProps == 0 || nStates == 0) return;	
+		
 	for(int round=0; round<5 && nStates > 0 ;round++) { //re-check maybe seeds that don't clash with a definte seed
 		if(threadIdx.x == 0) nStates = 0;
 		__syncthreads(); // fit maybe seeds into unused spaces	
@@ -473,20 +465,19 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 			
 			char ambiguity = d_seed_ambiguity[prop_idx];
 			if(ambiguity == 0 || ambiguity == -2)  continue; //is not ambiguous		
-
+			
 			int2 prop = d_seed_proposals[prop_idx];				
 			
 			bool isgood = true;
 
 			int2 mini_state;
-			for(int next_mini = prop.y; next_mini != -1;) {
-				
+			for(int next_mini = prop.y; next_mini >= 0;) {
 				mini_state = d_mini_states[next_mini];
 				next_mini = mini_state.y;
 				
 				unsigned long long int best_bid = d_edge_bids[mini_state.x];
 				if(best_bid == 0) continue; //already reset
-					
+				
 				if(d_seed_ambiguity[best_bid & 0xFFFFFFFFLL] == 0) {isgood = false; break;} //clashes with definate seed
 				d_edge_bids[mini_state.x] = 0; //reset edge bid from (possibly) fake seed	
 			}
@@ -505,16 +496,15 @@ __global__ void seed_extracting_kernel_ITk(int view_min, int view_max, int* d_le
 	}
 	__syncthreads();
 	for(int prop_idx = threadIdx.x; prop_idx<nProps; prop_idx+=blockDim.x) {
-		
 		if(d_seed_ambiguity[prop_idx] != 0) continue;			
-		
 		int2 prop = d_seed_proposals[prop_idx];		
 		
 		unsigned int seed_idx = atomicAdd(&d_counters[9], 1);
+		if(seed_idx > nMaxSeeds) break;
 
 		int2 mini_state;
 		int length = 0;
-		for(int next_mini = prop.y; next_mini != -1; length++) {
+		for(int next_mini = prop.y; next_mini >= 0; length++) {
 			
 			mini_state = d_mini_states[next_mini];
 			next_mini = mini_state.y;

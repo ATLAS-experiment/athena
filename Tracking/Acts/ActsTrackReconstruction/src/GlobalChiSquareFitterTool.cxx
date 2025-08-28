@@ -36,16 +36,11 @@
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsInterop/Logger.h"
 
-#include "ActsCalibration/CalibrationContext.h"
-#include "ActsCalibration/xAODUncalibMeasSurfAcc.h"
-#include "ActsCalibration/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibBase/CalibrationContext.h"
 // STL
 #include <vector>
 
 namespace ActsTrk {
-
-
-
 
 StatusCode GlobalChiSquareFitterTool::initialize() {
 
@@ -54,21 +49,27 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ATLASConverterTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{m_doReFitFromPRD}));
-  
+  ATH_CHECK(m_muonCalibrator.retrieve(EnableTool{!m_muonCalibrator.empty()}));
 
   m_logger = makeActsAthenaLogger(this, "Gx2fRefit");
-  // Fitter
-  Acts::SympyStepper stepper{std::make_shared<ATLASMagneticFieldWrapper>()};
-  Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
-  Acts::Navigator navigator(std::move(navConfig), logger().cloneWithSuffix("Navigator"));
-  Acts::Propagator<Acts::SympyStepper, Acts::Navigator> propagator{stepper, 
-                                                                   std::move(navigator), 
-                                                                   logger().cloneWithSuffix("Prop")};
+  if (!m_doStraightLine){
+      // Fitter
+      Acts::SympyStepper stepper{std::make_shared<ATLASMagneticFieldWrapper>()};
+      Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+      Acts::Navigator navigator(std::move(navConfig), logger().cloneWithSuffix("Navigator"));
+      CurvedPropagator_t propagator{stepper, std::move(navigator), logger().cloneWithSuffix("Prop")};
 
-  m_fitter = std::make_unique<Fitter>(std::move(propagator), 
-                                      logger().cloneWithSuffix("GlobalChiSquareFitter"));
+      m_fitter = std::make_unique<CurvedFitter_t>(std::move(propagator), 
+                                                  logger().cloneWithSuffix("GlobalChiSquareFitter"));
+  } else {
+      Acts::StraightLineStepper stepper{};
+      Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+      Acts::Navigator navigator(std::move(navConfig), logger().cloneWithSuffix("Navigator"));
+      StraightPropagator_t propagator{stepper, std::move(navigator), logger().cloneWithSuffix("Prop")};
 
-  
+      m_slFitter = std::make_unique<StraightFitter_t>(std::move(propagator), 
+                                                      logger().cloneWithSuffix("GlobalChiSquareFitter"));
+  }
 
 
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
@@ -80,12 +81,12 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
 
   /// Configure the fit extensions for Trk::MeasuremenBase pass through fits.
   {
-    m_calibrator = detail::TrkMeasurementCalibrator{};
+    m_trkMeasCalibrator = detail::TrkMeasurementCalibrator{};
     m_trkMeasSurfAcc = detail::TrkMeasSurfaceAccessor{m_ATLASConverterTool.get()};
 
     Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::TrkMeasurement)];
     configureMe = extensionTemplate;
-    configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&m_calibrator);
+    configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<MutableTrackStateBackend>>(&m_trkMeasCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_trkMeasSurfAcc);
   }
   /// Configure the fit extensions for Trk::PrepRawData fits
@@ -93,10 +94,36 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
     m_prdCalibrator = detail::TrkPrepRawDataCalibrator{m_ATLASConverterTool.get(), m_ROTcreator.get()};
     m_prdSurfaceAcc = detail::TrkPrepRawDataSurfaceAcc{m_ATLASConverterTool.get()};
     Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::TrkPrepRawData)];
+    configureMe = extensionTemplate;
     configureMe.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<MutableTrackStateBackend>>(&m_prdCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&m_prdSurfaceAcc);
   }
+  {
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+    /// Needs to be filled with live.
+    Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::xAODUnCalibMeas)];
+    configureMe = extensionTemplate;
+    configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
+    configureMe.calibrator.connect<&detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
+    /// Connect the muon types with the muon calibrator
+    if (m_muonCalibrator.isEnabled()) {
+      for (const auto& muonType : {xAOD::UncalibMeasType::MdtDriftCircleType, xAOD::UncalibMeasType::RpcStripType, 
+                                   xAOD::UncalibMeasType::TgcStripType, xAOD::UncalibMeasType::MMClusterType, 
+                                   xAOD::UncalibMeasType::sTgcStripType}) {
+        m_uncalibMeasCalibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(muonType, m_muonCalibrator.get());
+      }
+    }
+  }
   return StatusCode::SUCCESS;
+}
+inline GlobalChiSquareFitterTool::TrackFitResult_t
+    GlobalChiSquareFitterTool::fit(const std::vector<Acts::SourceLink>& soureLinks,
+                                   const Acts::BoundTrackParameters& initialPars,
+                                   const Gx2FitterOptions_t& gx2fOptions, 
+                                   MutableTrackContainer& tracks) const {
+    return ATH_LIKELY(m_fitter) ? 
+        m_fitter->fit(soureLinks.begin(), soureLinks.end(), initialPars, gx2fOptions, tracks) :
+        m_slFitter->fit(soureLinks.begin(), soureLinks.end(), initialPars, gx2fOptions, tracks);
 }
 
 GlobalChiSquareFitterTool::Gx2FitterOptions_t 
@@ -107,13 +134,13 @@ GlobalChiSquareFitterTool::Gx2FitterOptions_t
                                             detail::SourceLinkType slType) const {
     Acts::PropagatorPlainOptions propagationOption{tgContext, mfContext};
     propagationOption.maxSteps = m_option_maxPropagationStep;
+    propagationOption.maxTargetSkipping = m_option_maxNavSurfaces;
     // Set the Gx2Fitter options
     return Gx2FitterOptions_t{tgContext, mfContext, calContext, 
                               m_gx2fExtensions[static_cast<int>(slType)], 
                               std::move(propagationOption),
-                              surface, true, true};
-  
-                                        
+                              surface, m_option_includeScat, 
+                              m_option_includeELoss};
 }
 
 // refit a track
@@ -163,16 +190,17 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext, 
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
-  MutableTrackContainer tracks;
-  // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-                              initialParamsWithHypothesis, gx2fOptions, tracks);
 
-  auto trackone =  m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
+  // Perform the fit
+  auto result = fit(trackSourceLinks, initialParamsWithHypothesis, gx2fOptions, tracks);
+
+  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
                                                 Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                                 detail::SourceLinkType::TrkMeasurement);
-  return trackone;
-
 }
 
 // fit a set of MeasurementBase objects
@@ -211,13 +239,15 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
 
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext);
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
   // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-                              initialParams, gx2fOptions, tracks);
+  auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
   return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
                                                 Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                                 detail::SourceLinkType::TrkMeasurement);
@@ -257,10 +287,13 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(const EventContext& c
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 pSurface.get(), detail::SourceLinkType::TrkPrepRawData);
 
-  MutableTrackContainer tracks;
+
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
   // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-                              initialParams, gx2fOptions, tracks);
+  auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
 
   return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
                                   Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
@@ -269,17 +302,47 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(const EventContext& c
 
 // fit a set of PrepRawData objects
 // --------------------------------
-std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
-    const EventContext& /*eventContext*/,
-    const std::vector<ATLASUncalibSourceLink>& /*clusterList*/,
-    const Acts::BoundTrackParameters& /*initialParams*/,
-    const Acts::GeometryContext& /*tgContext*/,
-    const Acts::MagneticFieldContext& /*mfContext*/,
-    const Acts::CalibrationContext& /*calContext*/,
-    const DetectorElementToActsGeometryIdMap& /*detectorElementToGeometryIdMap*/,
-    const Acts::Surface* /*targetSurface*/) const {
-  ATH_MSG_ERROR("The ACTS Global Chi Square Fitter has no direct fitter.");
-  return nullptr;
+std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(    
+    const std::vector<ATLASUncalibSourceLink>& measList,
+    const Acts::BoundTrackParameters& initialParams,
+    const Acts::GeometryContext& tgContext,
+    const Acts::MagneticFieldContext& mfContext,
+    const Acts::CalibrationContext& calContext,   
+    const Acts::Surface* targetSurface) const {
+  
+  if (measList.empty()) {
+      ATH_MSG_DEBUG("No measurements given. Nothing to do");
+      return nullptr;
+  }
+  // Construct a perigee surface as the target surface
+  std::shared_ptr<Acts::Surface> pSurface{};
+  if (!targetSurface) {
+    pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
+    targetSurface = pSurface.get();
+  }
+ 
+  std::vector<Acts::SourceLink> sourceLinks;
+  sourceLinks.reserve(measList.size());
+  std::ranges::transform(measList, std::back_inserter(sourceLinks), 
+                         [](const xAOD::UncalibratedMeasurement* meas){
+                             return detail::xAODUncalibMeasCalibrator::pack(meas);
+                         });
+
+  Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
+                                                targetSurface, detail::SourceLinkType::xAODUnCalibMeas);
+
+
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  auto tracks = std::make_unique<MutableTrackContainer>( std::move(trackContainerBackEnd),
+                                                         std::move(multiTrajBackEnd) ); 
+  // Perform the fit
+  auto result = fit(sourceLinks, initialParams, gx2fOptions, *tracks);
+  if (not result.ok()) {
+      ATH_MSG_VERBOSE("Global chi2 fit failed");
+      return nullptr;
+  }
+  return tracks;
 }
 
 // extend a track fit to include an additional set of MeasurementBase objects
@@ -331,14 +394,15 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), 
                                                                                       tgContext);
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
   // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-                              initialParams, gx2fOptions, tracks);
-
+  auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
   return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
                                 Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                 detail::SourceLinkType::TrkMeasurement);
@@ -412,49 +476,44 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
       initialParams.parameters(), initialParams.covariance(), 
       ParticleHypothesis::convert(matEffects));
 
-  MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
   // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
-                              initialParamsWithHypothesis, gx2fOptions, tracks);
+  auto result = fit(trackSourceLinks, initialParamsWithHypothesis, gx2fOptions, tracks);
+      
   return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
                                 Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                 detail::SourceLinkType::TrkMeasurement);
 }
 
 std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
-    const EventContext& ctx, const Seed& seed,
+    const Seed& seed,
     const Acts::BoundTrackParameters& initialParams,
     const Acts::GeometryContext& tgContext,
     const Acts::MagneticFieldContext& mfContext,
     const Acts::CalibrationContext& calContext,
-    const DetectorElementToActsGeometryIdMap& detectorElementToGeometryIdMap)
-    const {
-  const Acts::TrackingGeometry* actsTrackingGeometry =
-      m_trackingGeometryTool->trackingGeometry().get();
-  if (!actsTrackingGeometry) {
-    throw std::runtime_error("No Acts tracking geometry.");
-  }
-
+    const Acts::Surface& targetSurface) const {
+  
   std::vector<ATLASUncalibSourceLink> sourceLinks;
   sourceLinks.reserve(6);
-
   
-  detail::xAODUncalibMeasSurfAcc surfAcc{actsTrackingGeometry, &detectorElementToGeometryIdMap};
   for (const xAOD::SpacePoint* sp : seed.sp()) {
     sourceLinks.insert(sourceLinks.end(), sp->measurements().begin(), sp->measurements().end());
   }
-  return fit(ctx, sourceLinks, initialParams, tgContext, mfContext, calContext,
-             detectorElementToGeometryIdMap, surfAcc.get(sourceLinks.front()));
+  return fit(sourceLinks, initialParams, tgContext, mfContext, calContext, &targetSurface);
 }
 
 
 StatusCode GlobalChiSquareFitterTool::fit(
   const EventContext& /*ctx*/,
-    const TrackContainer::ConstTrackProxy& /*track*/,          
-  MutableTrackContainer& /*trackContainer*/) const 
+  const TrackContainer::ConstTrackProxy& /*track*/,          
+  MutableTrackContainer& /*trackContainer*/,
+  const Acts::PerigeeSurface& /*pSurface*/) const
 {
   ATH_MSG_ERROR("Track refit method not implemented in GlobalChiSquareFitterTool yet");
   return StatusCode::FAILURE;

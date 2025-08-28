@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGC_EVENT_H
@@ -49,13 +49,13 @@ class TGCEvent {
 
   const TGCASDOut* GetASDOut(int index) const
   {
-    if(index<=0 || (unsigned int)index> m_vecASDOut.size()) return 0;
+    if(index<=0 || index> std::ssize(m_vecASDOut) ) return 0;
     else return m_vecASDOut[index-1];
   }
 
   const std::vector<TGCASDOut*>& GetASDOutVector() const
   {
-    return (std::vector<TGCASDOut*>&)m_vecASDOut;
+    return static_cast< const std::vector<TGCASDOut*>&> (m_vecASDOut);
   }
 
   // operations

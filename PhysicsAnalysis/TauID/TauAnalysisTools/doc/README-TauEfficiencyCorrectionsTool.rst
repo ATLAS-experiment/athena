@@ -166,7 +166,7 @@ are available for tool steering:
    * - ``TriggerName``
      - ``std::string``
      - ``""``
-     - ``"HLT_tau25_mediumRNN_tracktwoMVA"``, ``"HLT_tau35_mediumRNN_tracktwoMVA"``,``"HLT_tau40_mediumRNN_tracktwoMVA"``,``"HLT_tau60_mediumRNN_tracktwoMVA"``,``"HLT_tau80_mediumRNN_tracktwoMVA"``,``"HLT_tau160_mediumRNN_tracktwoMVA"``
+     - ``"HLT_tau25_mediumRNN_tracktwoMVA"``, ``"HLT_tau35_mediumRNN_tracktwoMVA"``,``"HLT_tau40_mediumRNN_tracktwoMVA"``,``"HLT_tau60_mediumRNN_tracktwoMVA"``,``"HLT_tau80_mediumRNN_tracktwoMVA"``,``"HLT_tau160_mediumRNN_tracktwoMVA"``,``"HLT_tau80L1TAU60_medium1_tracktwoEF"``,``HLT_tau35_medium1_tracktwoEF"``,``"HLT_tau25_medium1_tracktwoEF"``,``"HLT_tau160L1TAU100_medium1_tracktwoEF"``,``HLT_tau80L1TAU60_medium1_tracktwo"``,``HLT_tau50L1TAU12_medium1_tracktwo"``,``"HLT_tau35_medium1_tracktwo"``,``HLT_tau25_medium1_tracktwo"``,``HLT_tau160_medium1_tracktwo"``
 
    * - ``TriggerSFMeasurement``
      - ``std::string``
@@ -198,28 +198,6 @@ In addition the following properties are available for further configurations:
    * - ``InputFilePathEleIDElectron``
      - ``std::string``
      - ``""``  
-
-   * - ``VarNameRecoHadTau``
-     - ``std::string``
-     - ``""`` 
-
-   * - ``VarNameEleIDHadTau``
-     - ``std::string``
-     - ``""`` 
-
-   * - ``VarNameEleIDElectron``
-     - ``std::string``
-     - ``""`` 
-
-   * - ``VarNameJetIDHadTau``
-     - ``std::string``
-     - ``""`` 
-
-   * - ``VarNameTriggerHadTau``
-     - ``std::string``
-     - ``""`` 
-
-
 
 Details
 =======
@@ -269,7 +247,7 @@ Jet ID scale factors are provided for a couple of working points:
 
 These can be accessed, for example via::
 
-  TauEffTool.setProperty("IDLevel", (int)JETIDRNNLOOSE);
+  TauEffTool.setProperty("IDLevel", static_cast<int>(JETIDRNNLOOSE));
 
 SFEleIDElectron
 ----------------
@@ -295,7 +273,7 @@ points:
 
 These can be accessed, for example via::
 
-  TauEffTool.setProperty("EleIDLevel", (int)ELEIDRNNLOOSE);
+  TauEffTool.setProperty("EleIDLevel", static_cast<int>(ELEIDRNNLOOSE));
 
 ---
 FAQ
@@ -335,7 +313,7 @@ FAQ
      TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffTool( "TauEfficiencyCorrectionsTool" );
 
      // set the IDLevel property to the loose working point
-     TauEffTool.setProperty("IDLevel",(int)JETIDRNNLOOSE)
+     TauEffTool.setProperty("IDLevel",static_cast<int>(JETIDRNNLOOSE))
 
      // initialize the tool
      TauEffTool.initialize();

@@ -12,11 +12,11 @@ atlas_add_component( ActsTrackReconstruction
                      src/components/*.cxx
              INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
             LINK_LIBRARIES ${Boost_LIBRARIES}
-               ActsCore
+               Acts::Core
                ActsEventLib
                ActsGeometryLib
                ActsGeometryInterfacesLib
-               ActsCalibrationLib
+               ActsCalibratorsLib
                ActsInteropLib
                ActsToolInterfacesLib
                AthenaBaseComps
@@ -34,6 +34,7 @@ atlas_add_component( ActsTrackReconstruction
                InDetRecToolInterfaces
                MagFieldConditions
                MagFieldElements
+               MuonRecToolInterfacesR4
                PixelConditionsData
                StoreGateLib
                TRT_ReadoutGeometry

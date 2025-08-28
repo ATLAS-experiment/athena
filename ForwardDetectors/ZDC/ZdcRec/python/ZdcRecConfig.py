@@ -43,6 +43,14 @@ def zdcGeometry(flags):
             return defaultGeometryTags.RUN3_ZDC24
         case "data24_hicomm":
             return defaultGeometryTags.RUN3_ZDC24
+        case "data25_hip":
+            return defaultGeometryTags.RUN3_ZDC24
+        case "data25_hi":
+            return defaultGeometryTags.RUN3_ZDC24
+        case "data25_hipcomm":
+            return defaultGeometryTags.RUN3_ZDC24
+        case "data25_hicomm":
+            return defaultGeometryTags.RUN3_ZDC24
         case _:
             run = flags.GeoModel.Run
             if run == LHCPeriod.Run2:
@@ -82,11 +90,19 @@ def GenerateConfigTagDict():
     
 def SetConfigTag(flags):
 
-    if flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # calibration_DcmDummyProcessor is the "trigger stream" in the data we record in the standalone partition that is NOT LED data                
-        config = "InjectorPbPb2024" # default config tag for injector pulse - suitable also for running in standalone partition (except for standalone data taken during pp reference run + its commissionging period)
-
+    # terrible kludge for early 2025
+    if flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib":
+        config = "InjectorpOOONeNe2025"
+    
+    elif flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # calibration_DcmDummyProcessor is the "trigger stream" in the data we record in the standalone partition that is NOT LED data                
+        config = "InjectorpOOONeNe2025" # default config tag for injector pulse - suitable also for running in standalone partition (except for standalone data taken during pp reference run + its commissionging period)
         if flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
-            config = "Injectorpp2024" 
+            config = "Injectorpp2024"
+        if flags.Input.ProjectName in ["data24_hi","data24_hicomm"]:
+            config = "InjectorPbPb2024"
+        if flags.Input.ProjectName in ["data25_hi","data25_hicomm","data25_hip"] :
+            config = "InjectorpOOONeNe2025"
+
     else:
         config = "PbPb2023" # default config tag
         
@@ -96,14 +112,20 @@ def SetConfigTag(flags):
                 config = "MonteCarloPbPb2023"
             elif flags.Input.ProjectName == "data22_13p6TeV":
                 config = "LHCf2022"
-            elif flags.Input.ProjectName == "data23_5p36TeV" or flags.Input.ProjectName == "data23_900GeV" or flags.Input.ProjectName == "data23_13p6TeV":
+            elif flags.Input.ProjectName in ["data23_5p36TeV", "data23_900GeV", "data23_13p6TeV"]:
                 config = "pp2023"
-            elif flags.Input.ProjectName == "data23_hi" or flags.Input.ProjectName == "data23_comm":
+            elif flags.Input.ProjectName in ["data23_hi", "data23_comm"]:
                 config = "PbPb2023"
-            elif flags.Input.ProjectName == "data24_5p36TeV" or flags.Input.ProjectName == "data24_900GeV" or flags.Input.ProjectName == "data24_13p6TeV" or flags.Input.ProjectName == "data24_refcomm":
+            elif flags.Input.ProjectName in ["data24_5p36TeV", "data24_900GeV", "data24_13p6TeV", "data24_refcomm"]:
                 config = "pp2024"
-            elif flags.Input.ProjectName == "data24_hi" or flags.Input.ProjectName == "data24_hicomm":
-                config = "PbPb2024"
+            elif flags.Input.ProjectName in ["data24_hi", "data24_hicomm"]:
+                config = "PbPb2024" 
+            elif flags.Input.ProjectName in ["data25_hipcomm"]:
+                config = "pO2025"
+            elif flags.Input.ProjectName in ["data25_hip"]:
+                config = "pO2025B"
+            elif flags.Input.ProjectName in ["data25_hi","data25_hicomm"]:
+                config = "OONeNe2025"
         elif run == LHCPeriod.Run2:
             if flags.Input.ProjectName == "data15_hi":
                 config = "PbPb2015"
@@ -149,8 +171,6 @@ def ZdcGenericFlagSetting(flags): # pass flags object by reference: directly set
     parser.add_argument('--runInjForStandaloneData',default="Inj",help="indicate if we run inj/LED reconstruction for standalone data: inj (default) --> run injected-pulse reconstruction for injector-pulse events; LED --> run LED reconstruction for LED events")
     flags.fillFromArgs(parser=parser)
 
-    flags.GeoModel.AtlasVersion=zdcGeometry(flags)
-
 
 def ZdcStreamDependentFlagSetting(flags): 
     '''Function that checks on data type from triggerstream tag
@@ -162,9 +182,10 @@ def ZdcStreamDependentFlagSetting(flags):
         pn - string, project name such as data24_hi
     '''
     # check for LED / calibration data running, and configure appropriately
+    isComm = (flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib")
     isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
-    isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib")
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" or flags.Input.TriggerStream == "physics_UCC")
+    isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib" or isComm)
+    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or "physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express" and not isComm)
     
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
         runInjForStandaloneDataArgValid = False
@@ -227,6 +248,8 @@ def ZdcStreamDependentFlagSetting(flags):
         flags.DQ.useTrigger = False
         flags.DQ.triggerDataAvailable = False 
 
+    flags.GeoModel.AtlasVersion=zdcGeometry(flags)
+
     return isLED, isInj, isCalib, pn # return a ntuple of stream and project-name info for further use
 
 
@@ -251,7 +274,7 @@ def ZdcRecOutputCfg(flags):
     return acc
 
 
-def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=False, DoNonLinCorr=False, DoTimeCalib=False, DoTrigEff=False, ForceCalibRun=-1, ForceCalibLB=814):
+def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=False, DoNonLinCorr=False, DoTimeCalib=False, DoTrigEff=False, ForceCalibRun=-1, ForceCalibLB=814, AuxSuffix=""):
     acc = ComponentAccumulator()
 
     log.info('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
@@ -265,7 +288,8 @@ def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=
         DoTimeCalib = DoTimeCalib,
         DoTrigEff = DoTrigEff,
         ForceCalibRun = ForceCalibRun,
-        ForceCalibLB = ForceCalibLB, 
+        ForceCalibLB = ForceCalibLB,
+        AuxSuffix = AuxSuffix,
         LHCRun = run ))
     return acc
 
@@ -298,22 +322,24 @@ def ZdcTrigValToolCfg(flags, config = 'PbPb2023'):
       
     return acc
 
-def RPDAnalysisToolCfg(flags, config: str):
+def RPDAnalysisToolCfg(flags, config: str, AuxSuffix=""):
     acc = ComponentAccumulator()
     acc.setPrivateTools(
         CompFactory.ZDC.RPDAnalysisTool(
             name="RPDAnalysisTool",
-            Configuration=config
+            Configuration=config,
+            AuxSuffix = AuxSuffix
         )
     )
     return acc
 
-def RpdSubtractCentroidToolCfg(flags, config: str):
+def RpdSubtractCentroidToolCfg(flags, config: str, AuxSuffix=""):
     acc = ComponentAccumulator()
     acc.setPrivateTools(
         CompFactory.ZDC.RpdSubtractCentroidTool(
             name="RpdSubtractCentroidTool",
-            Configuration=config
+            Configuration=config,
+            AuxSuffix = AuxSuffix
         )
     )
     return acc
@@ -328,7 +354,7 @@ def ZdcRecRun2Cfg(flags):
     doTrigEff = False
     doNonLinCorr = False
     doFADCCorr = False
-    
+
     if flags.Input.ProjectName == "data15_hi":
         doCalib = True
         doTimeCalib = True
@@ -371,6 +397,7 @@ def ZdcRecRun3Cfg(flags):
     doNonLinCorr = True #default for 2023
     ForceCalibRun = -1
     ForceCalibLB = 814
+    AuxSuffix = ""
     
     if flags.Input.TriggerStream != "calibration_ZDCInjCalib" and flags.Input.TriggerStream != "calibration_DcmDummyProcessor":
         if flags.Common.isOnline: # calibration file for ongoing run not available - copy calib file from eos & hard code the run + lb
@@ -395,6 +422,16 @@ def ZdcRecRun3Cfg(flags):
             doTimeCalib = True
             doFADCCorr = False
             doNonLinCorr = False
+        elif flags.Input.ProjectName in ["data25_hip","data25_hipcomm"]: # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
+            doCalib = True
+            doTimeCalib = False
+            doFADCCorr = False
+            doNonLinCorr = False
+        elif flags.Input.ProjectName in ["data25_hi","data25_hicomm"]: # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
+            doCalib = True
+            doTimeCalib = False
+            doFADCCorr = False
+            doNonLinCorr = False
 
     # No calibration required (or exists) for MC
     if flags.Input.isMC:
@@ -404,12 +441,19 @@ def ZdcRecRun3Cfg(flags):
 
     log.info('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
     log.info('RPD enable flag is '+str(doRPD))
-    
-    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doFADCCorr,doNonLinCorr,doTimeCalib,doTrigEff,ForceCalibRun,ForceCalibLB))
 
-    if doRPD:
-        rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags, config))
-        centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags, config))
+    zdcReproc = False
+    if "ZdcModules" in flags.Input.Collections:
+        log.info('ZdcRecConfig.py: found ZdcModules in input, reprocessing mode set')
+        AuxSuffix="RP"
+        zdcReproc = True
+        
+    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doFADCCorr,doNonLinCorr,doTimeCalib,doTrigEff,ForceCalibRun,ForceCalibLB, AuxSuffix))
+
+        
+    if (doRPD):
+        rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags, config, AuxSuffix))
+        centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags, config, AuxSuffix))
 
     if  flags.Input.isMC :
         zdcTools = [anaTool] # expand list as needed
@@ -421,6 +465,10 @@ def ZdcRecRun3Cfg(flags):
         zdcTools = [anaTool] # no trigger / RPD / centroid - either online or offline
     elif flags.Common.isOnline: # running online + NOT injector pulse: with RPD + centroid but no trigger validation for now; may add later
         zdcTools = [anaTool] # expand list as needed
+        if doRPD:
+            zdcTools += [rpdAnaTool,centroidTool]
+    elif (zdcReproc): # ZDC reprocessing (will take work to make it work for RPD)
+        zdcTools = [anaTool]
         if doRPD:
             zdcTools += [rpdAnaTool,centroidTool]
     else: # default (not MC, not trigger repoc, not injector pulse, not online)

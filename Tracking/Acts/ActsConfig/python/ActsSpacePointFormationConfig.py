@@ -43,7 +43,11 @@ def ActsSpacePointCacheCreatorAlgCfg(flags,
 def ActsPixelSpacePointToolCfg(flags,
                                name: str = "ActsPixelSpacePointTool",
                                **kwargs: dict) -> ComponentAccumulator:
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+
     acc = ComponentAccumulator()
+    if isFastPrimaryPass(flags):
+        kwargs.setdefault('UseMaxVariance', True)
     acc.setPrivateTools(CompFactory.ActsTrk.PixelSpacePointFormationTool(name, **kwargs))
     return acc
 
@@ -74,7 +78,7 @@ def ActsCoreStripSpacePointToolCfg(flags,
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
         
     acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
     return acc
@@ -149,7 +153,9 @@ def ActsPixelSpacePointFormationAlgCfg(flags,
 
     kwargs.setdefault('PixelClusters', 'ITkPixelClusters')
     kwargs.setdefault('PixelSpacePoints', 'ITkPixelSpacePoints') 
-
+    kwargs.setdefault('ExtraOutputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["PixelSpacePoints"]}.measurements')])
+    
     if useCache:
         kwargs.setdefault('SPCacheBackend', 'ActsPixelSpacePointCache_Back')
         kwargs.setdefault('SPCache', 'ActsPixelSpacePointCache')
@@ -189,7 +195,11 @@ def ActsStripSpacePointFormationAlgCfg(flags,
     kwargs.setdefault('StripClusters', 'ITkStripClusters')
     kwargs.setdefault('StripSpacePoints', 'ITkStripSpacePoints')
     kwargs.setdefault('StripOverlapSpacePoints', 'ITkStripOverlapSpacePoints')
+    kwargs.setdefault('ExtraOutputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["StripSpacePoints"]}.measurements'),
+                       ('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["StripOverlapSpacePoints"]}.measurements')])
 
+    
     if useCache:
         kwargs.setdefault('SPCacheBackend', 'ActsStripSpacePointCache_Back')
         kwargs.setdefault('SPCache', 'ActsStripSpacePointCache')
@@ -264,6 +274,14 @@ def ActsMainSpacePointFormationCfg(flags,
 
     return acc
 
+# Config to be called outside of loops over tracking passes in main reco
+# Will configure subtools based on MainPass
+def ActsMainSpacePointFormationStandaloneCfg(flags) -> ComponentAccumulator:
+    primaryFlags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")
+    return ActsMainSpacePointFormationCfg(primaryFlags)
+
 def ActsSpacePointFormationCfg(flags,
                                *,
                                previousActsExtension = None) -> ComponentAccumulator:
@@ -279,7 +297,8 @@ def ActsSpacePointFormationCfg(flags,
         processPixels = False
     elif isPrimaryPass(flags) and flags.Tracking.doITkFastTracking:
         processStrips = reconstructStripSpacePointsInPrimaryPass(flags)
-    
+    elif flags.Tracking.ActiveConfig.extension == "ActsValidateF100" and flags.Tracking.doITkFastTracking:
+        processStrips = False
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)

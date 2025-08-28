@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArAlignDbAlg.h"
@@ -16,22 +16,10 @@ using CLHEP::Hep3Vector;
 /////////////////////////////////////////////////////////////////////////////
 
 LArAlignDbAlg::LArAlignDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator),
-    m_writeCondObjs(false),
-    m_regIOV(false),
-    m_streamName("CondStream1"),
-    m_inpFile("LArAlign.inp"),
-    m_outpFile("LArAlign-TEST.pool.root"),
-    m_outpTag("LARAlign-TEST"),
-    m_regSvc("IOVRegistrationSvc",name),
-    m_streamer("AthenaOutputStreamTool")
+  AthAlgorithm(name, pSvcLocator),
+  m_regSvc("IOVRegistrationSvc",name),
+  m_streamer("AthenaOutputStreamTool")
 {
-    declareProperty("WriteCondObjs",     m_writeCondObjs);
-    declareProperty("RegisterIOV",       m_regIOV);
-    declareProperty("StreamName",        m_streamName);
-    declareProperty("InpFile",           m_inpFile);
-    declareProperty("OutpFile",           m_outpFile);
-    declareProperty("TagName",           m_outpTag);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 

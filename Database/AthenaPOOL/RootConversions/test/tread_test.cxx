@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: tread_test.cxx,v 1.8 2009-01-21 04:34:40 ssnyder Exp $
 /**
  * @file tread_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -219,7 +217,7 @@ public:
 void T13_conv::Convert (T13* newobj, const T13_old* oldobj)
 {
   //std::cout << "convert " << newobj << " " << oldobj << "\n";
-  *(TObject*)newobj = *(TObject*)oldobj;
+  *static_cast<TObject*>(newobj) = *static_cast<TObject*>(oldobj);
   newobj->a = oldobj->a;
   newobj->bb = oldobj->b;
   newobj->c = oldobj->c;

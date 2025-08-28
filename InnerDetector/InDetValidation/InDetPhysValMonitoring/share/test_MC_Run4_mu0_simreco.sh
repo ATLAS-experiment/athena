@@ -67,13 +67,12 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
  run ls -la "$lastref_dir"
 
  # DCube Sim hit plots
- # To be enabled when references are available
- #$art_dcube \
- #    -p -x ${dcube_sim_fixref} \
- #    -c ${dcubecfg_sim} \
- #    -r ${dcuberef_sim} \
- #    ${dcubemon_sim}
- #echo "art-result: $? dcube_sim"
+ $art_dcube \
+     -p -x ${dcube_sim_fixref} \
+     -c ${dcubecfg_sim} \
+     -r ${dcuberef_sim} \
+     ${dcubemon_sim}
+ echo "art-result: $? dcube_sim"
 
  $art_dcube \
     -p -x ${dcube_sim_lastref} \
@@ -101,14 +100,13 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
     ITkPixel ITkStrip
  echo "art-result: $? RDOAnalysis"
 
- # To be enabled when references are available
- #echo "compare with a fixed reference for RDOAnalysis"
- #$art_dcube \
- #    -p -x ${dcube_rdo_fixref} \
- #    -c ${dcubecfg_rdo} \
- #    -r ${dcuberef_rdo} \
- #    ${dcubemon_rdo}
- #echo "art-result: $? dcube_rdo"
+ echo "compare with a fixed reference for RDOAnalysis"
+ $art_dcube \
+     -p -x ${dcube_rdo_fixref} \
+     -c ${dcubecfg_rdo} \
+     -r ${dcuberef_rdo} \
+     ${dcubemon_rdo}
+ echo "art-result: $? dcube_rdo"
 
  echo "compare with last build"
  $art_dcube \
@@ -136,14 +134,13 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
 
  if [ $rec_tf_exit_code -eq 0 ]  ;then
 
-   # To be enabled when references are available
-   #echo "compare with a fixed reference"
-   #$art_dcube \
-   #    -p -x ${dcube_rec_fixref} \
-   #    -c ${dcubeshiftercfg_rec} \
-   #    -r ${dcuberef_rec} \
-   #    ${dcubemon_rec}
-   #echo "art-result: $? dcube_rec"
+   echo "compare with a fixed reference"
+   $art_dcube \
+       -p -x ${dcube_rec_fixref} \
+       -c ${dcubeshiftercfg_rec} \
+       -r ${dcuberef_rec} \
+       ${dcubemon_rec}
+   echo "art-result: $? dcube_rec"
 
    echo "compare with last build"
    $art_dcube \

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSortingAlg.cxx
@@ -24,37 +24,8 @@
 ////////////////
 ParticleSortingAlg::ParticleSortingAlg( const std::string& name,
                                         ISvcLocator* pSvcLocator ) :
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_jos("JobOptionsSvc", name),
-  m_tool("ParticleSortingTool/ParticleSortingTool", this),
-  m_inCollKey(""),
-  m_setInCollKey(false),
-  m_outCollKey(""),
-  m_setOutCollKey(false),
-  m_sortVar("pt"),
-  m_setSortVar(false),
-  m_sortDescending(true),
-  m_setSortDescending(false),
-  m_nEventsProcessed(0)
+  ::AthAlgorithm( name, pSvcLocator )
 {
-  declareProperty("JobOptionsSvc",   m_jos, "The JobOptionService instance.");
-
-  declareProperty("SortingTool",        m_tool, "The private ParticleSortingTool" );
-
-  declareProperty("InputContainer",  m_inCollKey="",   "Input container name" );
-  m_inCollKey.declareUpdateHandler( &ParticleSortingAlg::setupInputContainer, this );
-
-  declareProperty("OutputContainer", m_outCollKey="",
-                  "The name of the output container (with SG::VIEW_ELEMENTS) with the sorted copy of input objects" );
-  m_outCollKey.declareUpdateHandler( &ParticleSortingAlg::setupOutputContainer, this );
-
-  declareProperty("SortVariable",    m_sortVar="pt",
-                  "Define by what parameter to sort (default: 'pt'; allowed: 'pt', 'eta', 'phi', 'm', 'e', 'rapidity')" );
-  m_sortVar.declareUpdateHandler( &ParticleSortingAlg::setupSortVar, this );
-
-  declareProperty("SortDescending",   m_sortDescending=true,
-                  "Define if the container should be sorted in a descending order (default=true)" );
-  m_sortDescending.declareUpdateHandler( &ParticleSortingAlg::setupSortDescending, this );
 }
 
 

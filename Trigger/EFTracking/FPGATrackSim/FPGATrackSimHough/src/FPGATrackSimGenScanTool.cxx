@@ -8,6 +8,8 @@
  */
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
@@ -125,6 +127,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
 {
   ATH_MSG_DEBUG("In getRoads, Processing Event# " << ++m_evtsProcessed << " hit size = " << hits.size());
 
+  
   roads.clear();
   m_roads.clear();
   m_monitoring->resetDataFlowCounters();
@@ -588,6 +591,12 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
     sorted_hits[hit->layer].push_back(hit->hitptr);
   }
 
+  // "Fit" the track.
+  FPGATrackSimTrackPars fittedpars;
+  double chi2;
+  bool inBin = fitRoad(hits, idx, fittedpars, chi2);
+  if (!inBin && m_inBinFiltering) return;
+
   m_roads.emplace_back(std::make_unique<FPGATrackSimRoad>());
   FPGATrackSimRoad *r = m_roads.back().get();
 
@@ -603,6 +612,10 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
   r->setYBin(idx[4]);
   r->setHitLayers(hitLayers);
   r->setSubRegion(0);
+
+  // Store the fitted information on the track.
+  r->setFitParams(fittedpars);
+  r->setFitChi2(chi2);
 }
 
 
@@ -702,4 +715,125 @@ double FPGATrackSimGenScanTool::HitPairSet::PhiOutExtrapCurved(const HitPair &pa
 {
   double r = std::max(lastpair().first->hitptr->getR(),lastpair().second->hitptr->getR());
   return pair.PhiOutExtrap(r_out) + 0.5 * PhiCurvature(pair) * (r_out - r) * (r_out - r);
+}
+
+
+// format final pairsets into expected output of getRoads
+bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2) const
+{
+
+  double N =hits.size();
+  double sum_Phi  = 0;
+  double sum_Phi2  = 0;
+  double sum_PhiR  = 0;
+  double sum_PhiR2  = 0;
+  double sum_Eta  = 0;
+  double sum_Eta2  = 0;
+  double sum_EtaR  = 0;
+  double sum_R  = 0;
+  double sum_R2  = 0;
+  double sum_R3  = 0;
+  double sum_R4  = 0;
+
+  for (const FPGATrackSimBinUtil::StoredHit* hit : hits)
+  {
+    // these are just relevant sums of variables (moments) needed for the chi2 calculation
+    // Calculate r^2, r^3, and r^4, we'll sum these up later below
+    double r = hit->hitptr->getR();
+    double r2 = r*r;
+    double r3 = r2*r;
+    double r4 = r3*r;
+    double dphi = hit->phiShift;
+    double dphi2 = dphi*dphi;
+    double deta = hit->etaShift;
+    double deta2 = deta*deta;
+
+    sum_Phi += dphi;
+    sum_Phi2 += dphi2;
+    sum_PhiR += dphi*r;
+    sum_PhiR2 += dphi*r2;
+    sum_Eta += deta;
+    sum_Eta2 += deta2;
+    sum_EtaR += deta*r;
+    sum_R += r;
+    sum_R2 += r2;
+    sum_R3 += r3;
+    sum_R4 += r4;
+  }
+
+  // phi var calculation
+  // phi(r) = phivars[0] + phivars[1]*r + phivars[2]*r^2
+  // math below is calculated by analytically minimizing the chi2
+  // and solving for the phivars.
+  // the terms below which recur in the phivar expression are just organized
+  // by the power of r (i.e. the dimension), but otherwise have no deep meaning
+  double r6_t0 = (-sum_R2 * sum_R4 + sum_R3*sum_R3);
+  double r5_t0 = (sum_R*sum_R4 - sum_R2*sum_R3);
+  double r4_t0 = (-sum_R * sum_R3 + sum_R2*sum_R2);
+  double r4_t1 = (-N*sum_R4 + sum_R2*sum_R2);
+  double r3_t0 = (N*sum_R3 - sum_R*sum_R2);
+  double r2_t0 = (-N*sum_R2 + sum_R*sum_R);
+
+  // all three phi var expresions use the same demoninator
+  double denom_phi = N * r6_t0 + sum_R * r5_t0 + sum_R2 * r4_t0;
+
+  // phivar expresions from analytic chi2 minimization
+  std::vector<double> phivars(3);
+  phivars[0] = (sum_Phi*r6_t0 + sum_PhiR*r5_t0 + sum_PhiR2*r4_t0)/denom_phi;
+  phivars[1] = (sum_Phi*r5_t0 + sum_PhiR*r4_t1 + sum_PhiR2*r3_t0)/denom_phi;
+  phivars[2] = (sum_Phi*r4_t0 + sum_PhiR*r3_t0 + sum_PhiR2*r2_t0)/denom_phi;
+
+  // eta vars
+  // same as phi but with not curvature (r^2) term
+  double denom_eta = N*sum_R2 - sum_R*sum_R;
+
+  std::vector<double> etavars(2);
+  etavars[0] = (-sum_R*sum_EtaR + sum_R2*sum_Eta)/denom_eta;
+  etavars[1] = (N*sum_EtaR - sum_R*sum_Eta)/denom_eta;
+
+  // bin center
+  FPGATrackSimBinUtil::ParSet parset = m_binnedhits->getBinTool().lastStep()->binCenter(idx);
+  double parshift[FPGATrackSimTrackPars::NPARS];
+  parshift[0] = etavars[0] + etavars[1]*m_rin; // z at r in
+  parshift[1]= etavars[0] + etavars[1]*m_rout; // z at r out
+  parshift[2]= -(phivars[0]/m_rin + phivars[1] + phivars[2]*m_rin) ; // phi at r in
+  parshift[3]= -(phivars[0]/m_rout + phivars[1] + phivars[2]*m_rout) ; // phi at r out
+  double y = (m_rout-m_rin); // midpoint between rin and rout from rin
+  parshift[4]= -phivars[2]/4.0*y*y ; // xm
+
+  bool inBin = true;
+  const auto& lastStep = m_binnedhits->getBinTool().lastStep();
+  for (int par = 0; par < FPGATrackSimTrackPars::NPARS; par++ ){
+    parset[par]+=parshift[par];
+    inBin = inBin && (std::abs(parshift[par]) < lastStep->binWidth(par)/2.0);
+  }
+
+  double ec0 = etavars[0];
+  double ec1 = etavars[1];
+  double eta_chi2 =  sum_Eta2 - 2*ec0*sum_Eta - 2*ec1*sum_EtaR + N*ec0*ec0 + 2*ec0*ec1*sum_R + ec1*ec1*sum_R2;
+
+  double pc0 = phivars[0];
+  double pc1 = phivars[1];
+  double pc2 = phivars[2];
+
+  double phi_chi2 = sum_Phi2 - 2*pc0*sum_Phi - 2*pc1*sum_PhiR - 2*pc2*sum_PhiR2 + N*pc0*pc0 + 2*pc0*pc1*sum_R + 2*pc0*pc2*sum_R2 + 2*pc1*pc2*sum_R3 + pc1*pc1*sum_R2 + pc2*pc2*sum_R4;
+
+  for (const FPGATrackSimBinUtil::StoredHit* hit : hits)
+  {
+    double r = hit->hitptr->getR();
+    ATH_MSG_VERBOSE("Fitted r= " << r << "    phishift " << hit->phiShift << " =?= " << pc0+pc1*r+pc2*r*r <<  "    etashift " << hit->etaShift << " =?= " << ec0+ec1*r);
+  }
+
+  ATH_MSG_DEBUG("Bin Info parset " << idx << " " << m_binnedhits->getBinTool().lastStep()->binCenter(idx));
+  ATH_MSG_DEBUG("Fitted parset inBin="<< inBin << " nhits=" << hits.size() << " "  << parset  <<  " chi2 " <<  eta_chi2 << "," << phi_chi2);
+
+  // Return by reference the "fitted" track parameters. shift q/pt dimension (GeV/MeV)
+  trackpars = m_binnedhits->getBinTool().binDesc()->parSetToTrackPars(parset);
+  trackpars[FPGATrackSimTrackPars::IHIP] = trackpars[FPGATrackSimTrackPars::IHIP] / 1000;
+  ATH_MSG_VERBOSE("Fitted track pars" << trackpars);
+
+  // and the summed chi2, which is assuming (right now) an even weighting between the two components.
+  chi2 = std::sqrt(m_etaWeight * eta_chi2 * eta_chi2 + m_phiWeight * phi_chi2 * phi_chi2);
+
+  return inBin;
 }

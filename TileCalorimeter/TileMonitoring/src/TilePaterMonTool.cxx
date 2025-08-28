@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -356,17 +356,6 @@ TTree* TilePaterMonTool::bookTree(const std::string & subdir, const std::string 
 */
 
 
-//
-// Terrible hack to register TGraph in THistSvc
-//
-
-//#define private public
-//#define GAUDISVC_THISTSVC_ICC
-//#include "THistSvc/THistSvc.h"
-//#undef GAUDISVC_THISTSVC_ICC
-//#include "THistSvc/THistSvc.icc"
-//#undef private
-
 class TGraph1: public TGraph {
   public:
     TGraph1(int N, float * X, float * Y)
@@ -394,7 +383,7 @@ TGraph* TilePaterMonTool::bookGraph(const std::string& subdir, const std::string
 
   regGraph(subdir, hist);
 
-  return (TGraph*) hist;
+  return static_cast<TGraph*> (hist);
 }
 
 class TGraphErrors1: public TGraphErrors {
@@ -423,20 +412,20 @@ TGraphErrors * TilePaterMonTool::bookGraphErrors(const std::string& subdir, cons
   hist->SetTitle(TString(tit));
 
   regGraph(subdir, hist);
-  return (TGraphErrors *) hist;
+  return static_cast<TGraphErrors *> (hist);
 }
 
 StatusCode TilePaterMonTool::removeTObj(TObject *obj) {
   if (obj != 0) {
     if (obj->IsA()->InheritsFrom("TH1")) {
-      if (deregHist((TH1*) obj).isFailure()) {
+      if (deregHist(static_cast<TH1*> (obj)).isFailure()) {
         ATH_MSG_WARNING( "Could not dereg Histogram : " << obj->GetName() );
         return StatusCode::FAILURE;
       } else {
         delete obj;
       }
     } else if (obj->IsA()->InheritsFrom("TGraph")) {
-      if (deregGraph((TGraph*) obj) != StatusCode::SUCCESS) {
+      if (deregGraph(static_cast<TGraph*> (obj)) != StatusCode::SUCCESS) {
         ATH_MSG_WARNING( "Could not dereg Graph : " << obj->GetName() );
         return StatusCode::FAILURE;
       } else {
@@ -483,7 +472,7 @@ TGraphAsymmErrors* TilePaterMonTool::bookGraphAsymmErrors(const std::string& sub
   hist->SetTitle(TString(tit));
 
   regGraph(subdir, hist);
-  return (TGraphAsymmErrors*) hist;
+  return static_cast<TGraphAsymmErrors*> (hist);
 }
 
 class TMultiGraph1: public TMultiGraph {
@@ -510,9 +499,9 @@ TMultiGraph* TilePaterMonTool::bookMultiGraph(const std::string& subdir, const s
   TMultiGraph1* hist = new TMultiGraph1();
   hist->SetName(TString(nam));
   hist->SetTitle(TString(tit));
-
-  regGraph(subdir, (TGraph*) hist);
-  return (TMultiGraph*) hist;
+  //dangerous cast here
+  regGraph(subdir, reinterpret_cast<TGraph*> (hist));
+  return static_cast<TMultiGraph*> (hist);
 }
 
 

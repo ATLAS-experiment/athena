@@ -1,18 +1,5 @@
 <lcgdict>
 
-   <class name="CP::EgammaCalibrationAndSmearingAlg" />
-   <class name="CP::EgammaCaloClusterEtaAlg" />
    <class name="CP::EgammaIsGoodOQSelectionTool" />
-   <class name="CP::EgammaIsolationCorrectionAlg" />
-   <class name="CP::EgammaIsolationSelectionAlg" />
-   <class name="CP::EgammaSamplingPatternDecoratorAlg" />
-   <class name="CP::ElectronEfficiencyCorrectionAlg" />
-   <class name="CP::PhotonEfficiencyCorrectionAlg" />
-   <class name="CP::PhotonShowerShapeFudgeAlg" />
-   <class name="CP::ElectronLRTMergingAlg" />
-   <class name="CP::PhotonOriginCorrectionAlg" />
-   <class name="CP::EgammaFSRForMuonsCollectorAlg" />
-   <class name="CP::ElectronSiHitDecAlg" />
-   <class name="CP::PhotonExtraVariablesAlg" />
 
 </lcgdict>

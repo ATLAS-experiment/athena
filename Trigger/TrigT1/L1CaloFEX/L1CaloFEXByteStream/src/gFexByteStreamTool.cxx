@@ -10,7 +10,7 @@
 //  ***************************************************************************/
 
 #include "gFexByteStreamTool.h"
-#include "gFexPos.h"
+#include "L1CaloFEXByteStream/gFexPos.h"
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
 
@@ -450,9 +450,11 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
                                        int16_t scalar/* = -1*/) const {
     
     ATH_MSG_DEBUG("fillGlobal with type " << type);
-
-    int16_t sum_x = 0;
-    int16_t sum_y = 0;
+    
+    // 32 bit integers to avoid interim overflows when summing 16b (signed) 
+    // quantities from each pFPGA. Proper clamping and bit masking follows afterwards
+    int32_t sum_x = 0;
+    int32_t sum_y = 0;
 
     // Extract the x and y components and sum them for the three FPGAs
     for (size_t fpga = 0; fpga < 3; fpga++) {
@@ -471,11 +473,11 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
         if( sum_y < 0) sum_y = 0;
 
     } else {
-        if (sum_x < -0x0007FF) sum_x = -0x0007FF;
-        if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
+        if (sum_x < -0x000800) sum_x = -0x000800; //-2048
+        if (sum_x > 0x0007FF) sum_x  = 0x0007FF; //2047
 
-        if (sum_y < -0x0007FF) sum_y = -0x0007FF;
-        if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
+        if (sum_y < -0x000800) sum_y = -0x000800; //-2048
+        if (sum_y > 0x0007FF) sum_y  = 0x0007FF; //2047
     }
 
     ATH_MSG_DEBUG("  fillGlobal type " << type << std::dec << " sum_x " << sum_x << " sum_y " << sum_y);

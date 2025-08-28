@@ -17,7 +17,6 @@ def getBJetSequenceGenCfg(flags, jc_name=None):
 
     jc_key = f'{jc_name}_'
     # Output container names as defined in TriggerEDMRun3
-    BTagName = recordable(f'{jc_key}BTagging')
 
     roiTool = CompFactory.ViewCreatorCentredOnJetWithPVConstraintROITool(
         RoisWriteHandleKey  = recordable( outputRoIName ),
@@ -52,7 +51,6 @@ def getBJetSequenceGenCfg(flags, jc_name=None):
                                            inputJets=str(InputMakerAlg.InViewJets),
                                            inputVertex=prmVtxKey,
                                            inputTracks=PTTrackParticles,
-                                           BTagName=BTagName,
                                            inputMuons=None)
     bJetBtagSequence.mergeReco(secondStageAlgs)
     bJetBtagSequence.mergeReco(flavourTaggingAlgs)
@@ -68,11 +66,9 @@ def getBJetSequenceGenCfg(flags, jc_name=None):
         f"TrigBjetBtagHypoAlg_{jc_name}",
         # keys
         BTaggedJetKey = InputMakerAlg.InViewJets,
-        BTaggingKey = BTagName,
         TracksKey = PTTrackParticles,
         PrmVtxKey = InputMakerAlg.RoITool.VertexReadHandleKey,
         # links for navigation
-        BTaggingLink = BTagName.replace( "HLT_","" ),
         PrmVtxLink = InputMakerAlg.RoITool.PrmVtxLink,
         # monitoring tool for the global histograms
         MonTool = TrigBjetOnlineMonitoring(flags)

@@ -32,12 +32,6 @@ StatusCode PanTau::Tool_TauConstituentSelector::initialize() {
     
   //et cuts for types used in mode reco
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Neutral_EtaBinned_EtCut", m_Selection_Neutral_EtaBinned_EtCut) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Pi0Neut_EtaBinned_EtCut", m_Selection_Pi0Neut_EtaBinned_EtCut) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Charged_EtaBinned_EtCut", m_Selection_Charged_EtaBinned_EtCut) );
-    
-  //et cuts for types interesting for jet rej.
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_OutNeut_EtaBinned_EtCut", m_Selection_OutNeut_EtaBinned_EtCut) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_OutChrg_EtaBinned_EtCut", m_Selection_OutChrg_EtaBinned_EtCut) );
     
   return StatusCode::SUCCESS;
 } 
@@ -48,11 +42,7 @@ double PanTau::Tool_TauConstituentSelector::getEtCut(double eta, PanTau::TauCons
   for (unsigned int iEtaBin=0; iEtaBin<m_BinEdges_Eta.size()-1; iEtaBin++) {
     if (m_BinEdges_Eta[iEtaBin] <= eta && eta < m_BinEdges_Eta[iEtaBin+1]) {
       switch(constituentType) {
-      case PanTau::TauConstituent::t_Charged:  return m_Selection_Charged_EtaBinned_EtCut[iEtaBin];
       case PanTau::TauConstituent::t_Neutral:  return m_Selection_Neutral_EtaBinned_EtCut[iEtaBin];
-      case PanTau::TauConstituent::t_Pi0Neut:  return m_Selection_Pi0Neut_EtaBinned_EtCut[iEtaBin];
-      case PanTau::TauConstituent::t_OutNeut:  return m_Selection_OutNeut_EtaBinned_EtCut[iEtaBin];
-      case PanTau::TauConstituent::t_OutChrg:  return m_Selection_OutChrg_EtaBinned_EtCut[iEtaBin];
       default:
 	return 9999999.;
       }
@@ -98,16 +88,8 @@ StatusCode PanTau::Tool_TauConstituentSelector::SelectTauConstituents(const std:
 	curConstituent->removeTypeFlag(PanTau::TauConstituent::t_Neutral);
 	curConstituent->removeTypeFlag(PanTau::TauConstituent::t_Pi0Neut);
       }            
-      // apply further selection to constituent in isolation cone:
-    } else if (curConstituent->isOfType(PanTau::TauConstituent::t_OutChrg)) {
-      // we want to use all tracks
-      passesSelection = true;
-            
-    } else if (curConstituent->isOfType(PanTau::TauConstituent::t_OutNeut)) {
-      passesSelection = passesSelection_OutNeutConstituent(curConstituent);
-            
     } else {
-      ATH_MSG_WARNING("Unhandled constituent type (" << curConstituent->getTypeNameString() 
+      ATH_MSG_DEBUG("Unhandled constituent type (" << curConstituent->getTypeNameString() 
 		      << ") when trying to apply constituent selection - constituent will not be selected!");
       passesSelection = false;
     }
@@ -131,24 +113,5 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutralConstituent(Pan
   }
 
   return true;
-}
-
-
-bool PanTau::Tool_TauConstituentSelector::passesSelection_Pi0NeutConstituent(PanTau::TauConstituent* tauConstituent) const {
-
-  TLorentzVector tlv_Constituent = tauConstituent->p4();
-  if (tlv_Constituent.Et() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_Pi0Neut)) {
-    ATH_MSG_DEBUG("\tNot using constituent at eta " << tlv_Constituent.Eta() << " with et of " << tlv_Constituent.Et());
-    return false;
-  }
-    
-  return true;
-}
-
-bool PanTau::Tool_TauConstituentSelector::passesSelection_OutNeutConstituent(TauConstituent* TauConstituent) const {
-  TLorentzVector tlv_Constituent = TauConstituent->p4();
-   
-  return tlv_Constituent.Et() >= getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_OutNeut);
-
 }
 

@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EMECSDTool.h"
-
 #include "LArG4Code/SDWrapper.h"
 
 namespace LArG4
@@ -15,29 +14,7 @@ namespace LArG4
   EMECSDTool::EMECSDTool(const std::string& type, const std::string& name,
                                  const IInterface *parent)
     : SimpleSDTool(type, name, parent)
-    , m_emepiwcalc("EMECPosInnerWheelCalculator", name)
-    , m_emeniwcalc("EMECNegInnerWheelCalculator", name)
-    , m_emepowcalc("EMECPosOuterWheelCalculator", name)
-    , m_emenowcalc("EMECNegOuterWheelCalculator", name)
-    , m_emepscalc("EMECPresamplerCalculator", name)
-    , m_emepobarcalc("EMECPosBackOuterBarretteCalculator", name)
-    , m_emenobarcalc("EMECNegBackOuterBarretteCalculator", name)
   {
-    declareProperty("PosIWVolumes", m_posIWVolumes);
-    declareProperty("NegIWVolumes", m_negIWVolumes);
-    declareProperty("PosOWVolumes", m_posOWVolumes);
-    declareProperty("NegOWVolumes", m_negOWVolumes);
-    declareProperty("PresVolumes", m_presVolumes);
-    declareProperty("PosBOBarretteVolumes", m_posBOBVolumes);
-    declareProperty("NegBOBarretteVolumes", m_negBOBVolumes);
-
-    declareProperty("EMECPosIWCalculator", m_emepiwcalc);
-    declareProperty("EMECNegIWCalculator", m_emeniwcalc);
-    declareProperty("EMECPosOWCalculator", m_emepowcalc);
-    declareProperty("EMECNegOWCalculator", m_emenowcalc);
-    declareProperty("EMECPSCalculator", m_emepscalc);
-    declareProperty("EMECPosBOBCalculator", m_emepobarcalc);
-    declareProperty("EMECNegBOBCalculator", m_emenobarcalc);
   }
 
   //---------------------------------------------------------------------------

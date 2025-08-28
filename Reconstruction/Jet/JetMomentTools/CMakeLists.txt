@@ -29,6 +29,10 @@ if( NOT XAOD_STANDALONE )
       src/*.h src/*.cxx src/components/*.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${FASTJET_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODCaloEvent xAODJet GaudiKernel JetCalibToolsLib JetEDM JetInterface JetRecLib JetUtils PFlowUtilsLib PathResolver JetMomentToolsLib FourMomUtils ${extra_libs} BoostedJetTaggersLib )
+else()
+   atlas_add_component( JetMomentTools
+      src/components/*.cxx
+      LINK_LIBRARIES JetMomentToolsLib )
 endif()
 
 atlas_add_dictionary( JetMomentToolsDict

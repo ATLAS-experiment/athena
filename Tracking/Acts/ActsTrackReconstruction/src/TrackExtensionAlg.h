@@ -11,7 +11,7 @@
 
 // Tools
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // ACTS
 #include "Acts/EventData/TrackContainer.hpp"
@@ -27,6 +27,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 
 // STL
 #include <memory>
@@ -65,9 +66,13 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{
       this, "ACTSTracksLocation", "",
       "Output track collection (ActsTrk variant)"};
-  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+  SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{
+    this, "BeamSpotKey", "BeamSpotData",
+    "SG key for beam spot"};
+  
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{
       this, "ExtrapolationTool", ""};

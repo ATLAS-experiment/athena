@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -18,10 +18,7 @@
 #include "GaudiKernel/FileIncident.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Incident.h"
-#include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/System.h"
-
-#include "AthenaKernel/ILoggedMessageSvc.h"
 
 #include <fstream>
 #include <unistd.h>
@@ -182,7 +179,12 @@ StatusCode AthenaSummarySvc::initialize() {
 
   // save some space for the summary output if we run out of memory
   ATH_MSG_DEBUG("allocating block of 100 pages");
-  s_block = new char[ sysconf( _SC_PAGESIZE ) * 100 ];
+  const long pageSize = sysconf( _SC_PAGESIZE );
+  if (pageSize < 1 || pageSize > 1024*1024*1024) {
+    ATH_MSG_FATAL ("Bad page size from sysconf");
+    return StatusCode::FAILURE;
+  }
+  s_block = new char[ pageSize * 100 ];
 
 
   return StatusCode(s_block!=nullptr);
@@ -194,7 +196,12 @@ StatusCode AthenaSummarySvc::initialize() {
 StatusCode AthenaSummarySvc::reinitialize() {
 
   delete[] s_block; s_block = nullptr;
-  s_block = new char[ sysconf( _SC_PAGESIZE ) * 100 ];
+  long pageSize = sysconf( _SC_PAGESIZE );
+  if (pageSize < 1 || pageSize > 1024*1024*1024) {
+    ATH_MSG_FATAL ("Bad page size from sysconf");
+    return StatusCode::FAILURE;
+  }
+  s_block = new char[ pageSize * 100 ];
   return s_block ? StatusCode::SUCCESS : StatusCode::FAILURE;
 
 }
@@ -424,9 +431,10 @@ AthenaSummarySvc::createASCII( std::ofstream& ofs ) {
     }
 
     ofs << "Keyword tracked messages: " << endl;
-    vector<ILoggedMessageSvc::LoggedMessage>::const_iterator ilm = p_logMsg->getKeyMessages().begin();
-    for (;ilm != p_logMsg->getKeyMessages().end(); ++ilm) {
-      ofs << "  " << levelNames[ilm->level] << "  " << ilm->source << "  " << ilm->message
+    for (const auto& msg : p_logMsg->getKeyMessages()) {
+      ofs << "  " << levelNames[msg.level]
+	  << "  " << msg.source
+	  << "  " << msg.message
 	  << endl;
     }
     

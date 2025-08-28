@@ -41,7 +41,6 @@
 #include "CoolKernel/ValidityKey.h"
 
 #include "IOVDbConn.h"
-#include "CrestFunctions.h"
 
 
 #include <string>
@@ -191,7 +190,7 @@ private:
   //  a list of folders to preload
   Gaudi::Property<std::vector<std::string> >  m_par_folders{this,"Folders",{},"List of database folders to preload","OrderedSet<std::string>"};
   //  a list of overriding tags definitions
-  Gaudi::Property<std::vector<std::string> >  m_par_overrideTags{this,"overrideTags",{},"List of foolder-tag overrides","OrderedSet<std::string>"};
+  Gaudi::Property<std::vector<std::string> >  m_par_overrideTags{this,"overrideTags",{},"List of xml-modifiers for folders like <prefix>/My/Folder</prefix><tag>MyFolderTag</tag>","OrderedSet<std::string>"};
   //  a list of folders to write to file meta data
   Gaudi::Property<std::vector<std::string> >  m_par_foldersToWrite{this,"FoldersToMetaData",{},"list of folders to write to file meta data","OrderedSet<std::string>"};    
   //  a flag to trigger the connections management
@@ -229,7 +228,6 @@ private:
   StringProperty m_par_format{this,"Format",{},"Format of data; default is empty string (default for a given source)"};
   // Can output to file for debugging purposes
   BooleanProperty m_outputToFile{this,"OutputToFile",false,"output to file for debugging purposes"};
-  BooleanProperty m_crestToFile{this,"CrestToFile",false,"output to file crest data for debugging purposes"};
   BooleanProperty m_crestCoolToFile{this,"CrestCoolToFile",false,"output to file crest or cool data in the same format for debugging purposes"};
   // internal parameters  
   // handles to other services and tools

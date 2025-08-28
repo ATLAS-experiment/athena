@@ -36,14 +36,10 @@ namespace ROOT { using ROOT::Experimental::RNTupleReader; }
 namespace ROOT { class RNTupleReader; }
 #endif
 
-/*
- * POOL namespace declaration
- */
-namespace pool {
-
 // Forward declaration
-class DbColumn;
-class RootDatabase;
+namespace pool {
+  class RootDatabase;
+}
 
 /** @class RNTupleContainer RNTupleContainer.h src/RNTupleContainer.h
  *
@@ -51,12 +47,12 @@ class RootDatabase;
  * RNTUPLE specific implementation of Database Container.
  */
 
-class RNTupleContainer : public DbContainerImp
+class RNTupleContainer : public pool::DbContainerImp
 {
   using DbContainerImp::save;
 
   /// Definition of a field info structure
-  struct FieldDesc : public DbColumn
+  struct FieldDesc : public pool::DbColumn
   {
     std::string fieldname;
     std::optional< ROOT::RNTupleView<void> > view;
@@ -77,7 +73,7 @@ class RNTupleContainer : public DbContainerImp
     // AuxDyn RNTuple writer
     std::unique_ptr<RootAuxDynIO::IRNTupleAuxDynWriter> auxdyn_writer;
 
-    FieldDesc(const DbColumn& c);
+    explicit FieldDesc(const DbColumn& c);
     FieldDesc(FieldDesc const& other) = delete;
     FieldDesc(FieldDesc&& other) = default;
     ~FieldDesc() = default;
@@ -88,15 +84,15 @@ class RNTupleContainer : public DbContainerImp
     const std::string typeName();
   };
 
- protected:
+ private:
    /// reference to exact type description
-   const DbTypeInfo*  m_type{};
+   const pool::DbTypeInfo*  m_type{};
    /// List of field descriptors
    std::vector<FieldDesc>  m_fieldDescs;
    /// Parent Database handle
-   DbDatabase         m_dbH;
+   pool::DbDatabase         m_dbH;
    /// Root database file reference
-   RootDatabase*      m_rootDb;
+   pool::RootDatabase*      m_rootDb;
    /// Number of bytes written/read during last operation. Set to -1 if it failed.
    int                m_ioBytes;
    /// flag set on writing to prevent double writes in the same commit
@@ -123,15 +119,15 @@ class RNTupleContainer : public DbContainerImp
   virtual ~RNTupleContainer();
 
   /// Close the container and deallocate resources
-  virtual DbStatus close() override final;
+  virtual pool::DbStatus close() override final;
 
   /// Open the container for object access
-  virtual DbStatus open(DbDatabase& dbH, const std::string& nam,
-                        const DbTypeInfo* info,
-                        DbAccessMode mod) override final;
+  virtual pool::DbStatus open(pool::DbDatabase& dbH, const std::string& nam,
+                        const pool::DbTypeInfo* info,
+                        pool::DbAccessMode mod) override final;
 
   /// Check if we can access the container for reading with the given type
-  virtual DbStatus checkAccess(DbDatabase& dbH,
+  virtual pool::DbStatus checkAccess(pool::DbDatabase& dbH,
                                const std::string& nam) const override final;
 
   /// Access options
@@ -139,17 +135,14 @@ class RNTupleContainer : public DbContainerImp
    *
    * @return DbStatus code indicating success or failure.
    */
-  virtual DbStatus getOption(DbOption& opt) override final;
+  virtual pool::DbStatus getOption(pool::DbOption& opt) override final;
 
   /// Set options
   /** @param opt      [IN]  Reference to option object.
    *
    * @return DbStatus code indicating success or failure.
    */
-  virtual DbStatus setOption(const DbOption& opt) override final;
-
-  /// Ask if a given shape is supported
-  virtual DbStatus isShapeSupported(const DbTypeInfo* typ) const override final;
+  virtual pool::DbStatus setOption(const pool::DbOption& opt) override final;
 
   /// Number of entries within the container
   virtual uint64_t size() override final;
@@ -171,33 +164,32 @@ class RNTupleContainer : public DbContainerImp
    *
    *  @return Status code indicating success or failure.
    */
-  virtual DbStatus loadObject(void** ptr, ShapeH shape,
+  virtual pool::DbStatus loadObject(void** ptr, pool::ShapeH shape,
                               Token::OID_t& oid) override final;
 
   /// Commit single entry to container
-  virtual DbStatus writeObject(ActionList::value_type&) override final;
+  virtual pool::DbStatus writeObject(ActionList::value_type&) override final;
 
   virtual uint64_t nextRecordId() override final;
 
   virtual void useNextRecordId(uint64_t nextID) override final;
 
-  /// Define selection criteria
-  virtual DbStatus select(DbSelect& criteria) override final;
+  /// Define selection
+  virtual pool::DbStatus select(pool::DbSelect& sel) override final;
 
   /// Equivalent to next()
-  using DbContainerImp::fetch;
-  virtual DbStatus fetch(DbSelect& sel) override final;
+  using pool::DbContainerImp::fetch;
+  virtual pool::DbStatus fetch(pool::DbSelect& sel) override final;
 
   /// Execute transaction action
-  virtual DbStatus transAct(Transaction::Action action) override final;
+  virtual pool::DbStatus transAct(pool::Transaction::Action action) override final;
 
   /// Add single entry to container
-  virtual DbStatus save(DbObjectHandle<DbObject>& objH) override final;
+  virtual pool::DbStatus save(pool::DbObjectHandle<pool::DbObject>& objH) override final;
 
  private:
   /// Init a field description for an object (i.e. find TClass etc.)
-  DbStatus initObjectFieldDesc(FieldDesc& dsc);
+  pool::DbStatus initObjectFieldDesc(FieldDesc& dsc);
 };
 
-}  // namespace pool
 #endif

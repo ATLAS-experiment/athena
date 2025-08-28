@@ -28,8 +28,8 @@ public:
     setCache (1, CxxUtils::as_const_ptr (m_arr));
     setCache (2, CxxUtils::as_const_ptr (m_arr));
   }
-  virtual size_t size_v() const { return 10; }
-  virtual size_t capacity_v() const { return 10; }
+  virtual size_t size_v() const override { return 10; }
+  virtual size_t capacity_v() const override { return 10; }
   int m_arr[10] = {0};
 };
 

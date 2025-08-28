@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum, HIMode, ProductionStep
 import AthenaCommon.SystemOfUnits as Units
 from Campaigns.Utils import Campaign
 
@@ -63,12 +63,14 @@ class TrackingComponent(FlagEnum):
     GNNChain = "GNNChain"
     # FPGA
     FPGAChain = "FPGAChain"
+    ActsValidateF100 = "ActsValidateF100"
 
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
 
     # Turn running of truth matching on and off (by default on for MC off for data)
-    icf.addFlag("Tracking.doTruth", lambda prevFlags: prevFlags.Input.isMC)
+    icf.addFlag("Tracking.doTruth", lambda prevFlags: prevFlags.Input.isMC or 
+        (prevFlags.Overlay.DataOverlay and prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing))
 
     # control which fitter to be used
     icf.addFlag("Tracking.trackFitterType",
@@ -179,7 +181,8 @@ def createTrackingConfigFlags():
     # Save xAOD TrackMeasurementValidation + TrackStateValidation containers
     icf.addFlag("Tracking.writeExtendedSi_PRDInfo", False)
     icf.addFlag("Tracking.writeExtendedTRT_PRDInfo", False)
-
+    icf.addFlag("Tracking.PRDInfo.KeepOnlyOnTrackMeasurements", False)
+    
     # Only keep entries in xAOD TrackMeasurementValidation + TrackStateValidation containers for tracks passing user cut
     # Indicate detector technology from which clusters should be thinned
     icf.addFlag("Tracking.thinPixelClustersOnTrack", False)
@@ -587,7 +590,8 @@ def createTrackingConfigFlags():
         createActsValidateLargeRadiusSeedsTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
-        createActsHeavyIonTrackingPassFlags
+        createActsHeavyIonTrackingPassFlags,
+        createEFValidateF100TrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
@@ -616,12 +620,17 @@ def createTrackingConfigFlags():
                           createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
                           createActsHeavyIonTrackingPassFlags, prefix=True)
+    
+    # Acts F100 validation pass
+    icf.addFlagsCategory ("Tracking.ITkActsValidateF100Pass",
+                          createEFValidateF100TrackingPassFlags, prefix=True)
+    
 
     # GNN
     from InDetGNNTracking.InDetGNNTrackingFlags import createGNNTrackingPassFlags
     icf.addFlagsCategory ("Tracking.ITkGNNPass",
                           createGNNTrackingPassFlags, prefix=True)
-    #FPGA 
+    # FPGA 
     from TrkConfig.InDetFPGATrackingFlags import createFPGATrackingPassFlags 
     icf.addFlagsCategory ("Tracking.ITkFPGAPass",
                           createFPGATrackingPassFlags, prefix=True)    

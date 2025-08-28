@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgDataHandles/ReadHandle.h"
@@ -129,7 +129,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::ChainGroup::feature
     << "Total nodes:" << navGraph.nodes() << " total edges:" << navGraph.edges() << " final nodes:" << navGraph.finalNodes().size());
   if (msg().level() <= MSG::DEBUG && navGraph.finalNodes().size()) {
     for (const TrigCompositeUtils::NavGraphNode* n : navGraph.finalNodes()) {
-      ATH_MSG_DEBUG("  Final node:" << TrigCompositeUtils::decisionToElementLink(n->node()).dataID() << " #" << n->node()->index());
+      ATH_MSG_DEBUG("  Final node:" << TrigCompositeUtils::decisionToElementLink(n->node(), ctx).dataID() << " #" << n->node()->index());
     }
   }
 

@@ -8,13 +8,18 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
+
+#include "xAODTruth/TruthParticleContainer.h"
 #include "xAODMuonRDO/NRPCRDOContainer.h"
 #include "xAODTrigger/MuonRoIContainer.h"
-#include "L0MuonInterface/BarrelCandDataContainer.h"
-#include "MuonDigitContainer/RpcDigitContainer.h"
-#include "MuonCablingData/RpcCablingMap.h"
-#include "GeneratorObjects/McEventCollection.h"
+#include "xAODMuonSimHit/MuonSimHit.h"
+
+#include "L0MuonInterface/RPCCandDataContainer.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 namespace L0Muon
 {
@@ -29,20 +34,37 @@ namespace L0Muon
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
+    /// build the candidates from the MC truth
+    StatusCode buildFromTruth(L0Muon::RPCCandDataContainer& outputCands,
+                              const EventContext &ctx) const;
+
+    std::vector<const xAOD::MuonSimHit*> collectHits(const xAOD::TruthParticle& truthPart,
+                                                     const EventContext& ctx) const;
+
+
+    /// configuration options
+    Gaudi::Property<bool> m_useTruth{this, "UseTruth", true, "Use truth information to build candidates"};
+    Gaudi::Property<bool> m_usePatterns{this, "UsePatterns", false, "Use patterns to build candidates"};
+
     /// RPC Rdo
     SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_keyRpcRdo{this, "NrpcRdoKey", "NRPCRDO", "Location of input RpcRDO"};
 
     /// Output Trigger candidates
-    SG::WriteHandleKey<L0Muon::BarrelCandDataContainer> m_outputCandKey{this, "L0MuonBarrelCandKey", "L0MuonBarrelCand",
-                                                                        "LVL0 trigger candidates in the Muon Barrel"};
-    /// NRPC cabling map
-    SG::ReadCondHandleKey<Muon::RpcCablingMap> m_cablingKey{this, "CablingKey", "MuonNRPC_CablingMap", "Key of MuonNRPC_CablingMap"};
+    SG::WriteHandleKey<L0Muon::RPCCandDataContainer> m_outputCandKey{this, "L0MuonRPCCandKey", "L0MuonRPCCand",
+                                                                        "LVL0 Barrel trigger candidates in the Muon RPC"};
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
-  
-    /// truth container
-    SG::ReadHandleKey<McEventCollection> m_mcEventCollectionKey{this, "TruthEventKey", "TruthEvent"};
 
+    /// truth containers
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartKey{this, "TruthPartKey", "MuonTruthParticles"};
 
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_segmentLinkKey{this, "SegmentLinkKey", m_truthPartKey, 
+                                                                          "truthSegmentLinks"};
+    
+    /// helper service
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc",
+                                                         "Muon Id Helper Service"};  
+    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};       
   };
 
 } // end of namespace

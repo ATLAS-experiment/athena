@@ -244,7 +244,7 @@ def SetupVP1():
 
         for file in flags.Input.Files:
             if not path.exists(flags.Input.Files[0]):
-                _logger.warning("Input file", file, "does not exist")
+                _logger.warning("Input file %s does not exist", file)
                 import sys
                 sys.exit(1)
     

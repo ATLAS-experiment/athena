@@ -32,11 +32,13 @@ Electrons:
     decorateTruth: true
     decorateCaloClusterEta: true
     writeTrackD0Z0: True
+    minPt: 10000.0
     WorkingPoint:
       - selectionName: loose
         forceFullSimConfig: True
         identificationWP: LooseBLayerLH
-        isolationWP: Loose_VarRad
+        isolationWP: Tight_VarRad
+        chargeIDSelectionRun2: True
     PtEtaSelection:
       minPt: 10000.0
     IFFClassification: {}
@@ -91,8 +93,14 @@ TauJets:
             - HLT_tau25_medium1_tracktwo
             - HLT_tau35_medium1_tracktwo
           2018:
-            - HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA
-            - HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA
+            - HLT_tau25_medium1_tracktwoEF
+            - HLT_tau35_medium1_tracktwoEF
+          2022:
+            - HLT_tau25_mediumRNN_tracktwoMVA
+            - HLT_tau35_mediumRNN_tracktwoMVA
+          2023:
+            - HLT_tau25_mediumRNN_tracktwoMVA
+            - HLT_tau35_mediumRNN_tracktwoMVA
     MCTCClassification:
       prefix: truth_
 

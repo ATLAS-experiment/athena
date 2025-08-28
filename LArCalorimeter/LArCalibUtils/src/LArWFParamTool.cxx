@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArWFParamTool.h" 
@@ -157,22 +157,18 @@ StatusCode LArWFParamTool::initialize()
   if ( m_isSC ) {
     const LArOnline_SuperCellID* ll;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnline_SuperCellID"));
-    m_onlineHelper = (const LArOnlineID_Base*)ll;
+    m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG("Found the LArOnlineID helper");
     
   } else { // m_isSC
     const LArOnlineID* ll;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnlineID") );
-    m_onlineHelper = (const LArOnlineID_Base*)ll;
+    m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     
   }
   
-  /*sc = detStore()->retrieve(m_emId, "LArEM_ID");
-  if (sc.isFailure()) {
-    msg(MSG::ERROR) << "Could not get LArOnlineID helper" << endmsg;
-    return sc;
-  }*/
+ 
   const CaloIdManager *caloIdMgr=nullptr;
   ATH_CHECK( detStore()->retrieve(caloIdMgr));
   if(!caloIdMgr){

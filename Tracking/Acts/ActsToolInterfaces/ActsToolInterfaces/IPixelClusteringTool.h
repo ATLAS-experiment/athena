@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_IPIXELPIXELCLUSTERINGTOOL_H
@@ -12,7 +12,7 @@
 #include <InDetRawData/PixelRDORawData.h>
 #include <xAODInDetMeasurement/PixelClusterContainer.h>
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
-
+#include "InDetReadoutGeometry/SiDetectorElementStatus.h"
 
 namespace ActsTrk {
 
@@ -26,11 +26,38 @@ public:
     using ClusterContainer = xAOD::PixelClusterContainer;
     using ClusterAuxContainer = xAOD::PixelClusterAuxContainer;
 
+    struct Cell {
+      Cell(int row, int col, int tot, int lvl1, Identifier::value_type id):
+        ROW(row), COL(col), TOT(tot), LVL1(lvl1), ID(id) {};
+      
+      int           ROW;
+      int           COL;
+      int           TOT;
+      int           LVL1;
+      Identifier::value_type    ID ;
+    };
+
+    using CellCollection = std::vector<Cell>;
+
+    struct Cluster {
+        std::vector<Identifier::value_type> ids;
+        std::vector<int> tots;
+        int lvl1min = std::numeric_limits<int>::max();
+    };
+    using ClusterCollection = std::vector<Cluster>;
+
     virtual StatusCode
-    clusterize(const RawDataCollection& RDOs,
-	       const IDHelper& pixelID,
-	       const EventContext& ctx,
-	       ClusterContainer& container) const = 0;
+    clusterize(const EventContext& ctx,
+	       const RawDataCollection& RDOs,
+	       const InDet::SiDetectorElementStatus& pixelDetElStatus,
+	       const InDetDD::SiDetectorElement& element,
+	       std::vector<ClusterCollection>& collection) const = 0;
+  
+    virtual StatusCode
+    makeClusters(const EventContext& ctx,
+		 ClusterCollection& cluster,
+		 const InDetDD::SiDetectorElement& element,
+		 typename ClusterContainer::iterator itrContainer) const = 0;
 };
 
 }

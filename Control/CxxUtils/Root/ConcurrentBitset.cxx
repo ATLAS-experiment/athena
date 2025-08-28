@@ -38,8 +38,12 @@ ConcurrentBitset::ConcurrentBitset (bit_t nbits /*= 0*/)
  * to @c other, then the copy may have this update only partially completed.
  */
 ConcurrentBitset::ConcurrentBitset (const ConcurrentBitset& other)
-  : m_impl (new ((*other.m_impl).nbits()) Impl ((*other.m_impl)))
 {
+  // Be careful: don't read other.m_impl more than once.  It may change
+  // at any time.
+  const Impl* otherImpl = other.m_impl;
+  // cppcheck-suppress useInitializationList
+  m_impl = new (otherImpl->nbits()) Impl (*otherImpl);
 }
 
 

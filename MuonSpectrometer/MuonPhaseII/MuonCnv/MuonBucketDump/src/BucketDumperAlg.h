@@ -9,11 +9,13 @@
 
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include "StoreGate/ReadHandleKeyArray.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
 #include <MuonSpacePoint/SpacePointContainer.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+#include "xAODMuon/MuonSegmentContainer.h"
 
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
@@ -42,14 +44,15 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
        *  @param segmentKey: Key to the fitted segments (Legacy / Nsw) */
       StatusCode dumpContainer(const EventContext& ctx,
                                const SG::ReadHandleKey<SpacePointContainer>& spacePointKey,
-                               const SG::ReadHandleKey<SegmentContainer>& segmentKey);
+                               const SG::ReadHandleKey<xAOD::MuonSegmentContainer>& segmentKey);
 
     SG::ReadHandleKeyArray<SpacePointContainer> m_spacePointKeys{this, "SpacePointKeys", {"MuonSpacePoints"}, 
                                                      "Key to the space point container"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    SG::ReadHandleKeyArray<MuonR4::SegmentContainer> m_inSegmentKeys{this, "SegmentKey", {"R4MuonSegments"}};
+    SG::ReadHandleKeyArray<xAOD::MuonSegmentContainer> m_inSegmentKeys{this, "SegmentKey", {"MuonSegmentsFromR4"}};
 
+    SG::ReadDecorHandleKeyArray<xAOD::MuonSegmentContainer> m_truthDecorKeys{this, "TruthDecorLinks", {}};
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     
     Gaudi::Property<bool> m_isMC{this, "isMC", true};
@@ -72,8 +75,10 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>&           m_bucket_posX{m_tree.newScalar<float>("bucket_positionX")};
     MuonVal::ScalarBranch<float>&           m_bucket_posY{m_tree.newScalar<float>("bucket_positionY")};
     MuonVal::ScalarBranch<float>&           m_bucket_posZ{m_tree.newScalar<float>("bucket_positionZ")};
-    MuonVal::ScalarBranch<uint8_t>&         m_bucket_chIdx{m_tree.newScalar<uint8_t>("bucket_chIndex")};
 
+    MuonVal::ScalarBranch<uint8_t>&         m_bucket_sector{m_tree.newScalar<uint8_t>("bucket_sector")};
+    MuonVal::ScalarBranch<uint8_t>&         m_bucket_chamberIdx{m_tree.newScalar<uint8_t>("bucket_chamberIndex")};
+    MuonVal::ScalarBranch<Char_t>&          m_bucket_side{m_tree.newScalar<Char_t>("bucket_side")};
 
     MuonVal::ThreeVectorBranch              m_spoint_localPosition{m_tree, "localPosition"}; 
     MuonVal::ThreeVectorBranch              m_spoint_globalPosition{m_tree, "globalPosition"}; 
@@ -101,11 +106,28 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
 
     MuonVal::VectorBranch<uint16_t>&        m_spoint_nSegments{m_tree.newVector<uint16_t>("nSegments")};
     MuonVal::MatrixBranch<int16_t>&         m_spoint_mat{m_tree.newMatrix<int16_t>("sp_seg_matching",-1)};
+    MuonVal::MatrixBranch<int16_t>&         m_spoint_trueSeg{m_tree.newMatrix<int16_t>("spacePoint_truthSegLink",-1)};
+    
+    
+    
+    MuonVal::VectorBranch<float>&           m_segmentLocX{m_tree.newVector<float>("segmentLocalX")};
+    MuonVal::VectorBranch<float>&           m_segmentLocY{m_tree.newVector<float>("segmentLocalY")};
+    MuonVal::VectorBranch<float>&           m_segmentLocTheta{m_tree.newVector<float>("segmentLocalTheta")};
+    MuonVal::VectorBranch<float>&           m_segmentLocPhi{m_tree.newVector<float>("segmentLocalPhi")};
+    
+    MuonVal::VectorBranch<uint16_t>&        m_segmentTruthIdx{m_tree.newVector<uint16_t>("segmentTruthPart")};
+    
     MuonVal::ThreeVectorBranch              m_segmentPos{m_tree, "segmentPosition"}; 
     MuonVal::ThreeVectorBranch              m_segmentDir{m_tree, "segmentDirection"};
     MuonVal::VectorBranch<float>&           m_segment_chiSquared{m_tree.newVector<float>("segment_chiSquared")};
     MuonVal::VectorBranch<float>&           m_segment_numberDoF{m_tree.newVector<float>("segment_numberDoF")};
 
+   MuonVal::VectorBranch<float>&            m_truthSegLocX{m_tree.newVector<float>("truthSegmentLocalX")};
+   MuonVal::VectorBranch<float>&            m_truthSegLocY{m_tree.newVector<float>("truthSegmentLocalY")};
+   MuonVal::VectorBranch<float>&            m_truthSegLocTheta{m_tree.newVector<float>("truthSegmentLocalTheta")};
+   MuonVal::VectorBranch<float>&            m_truthSegLocPhi{m_tree.newVector<float>("truthSegmentLocalPhi")};
+   
+   
 };
 }
 #endif

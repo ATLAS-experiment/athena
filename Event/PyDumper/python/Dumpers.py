@@ -11,7 +11,6 @@
 # It should be usable from both ARA and Athena.
 #
 
-from __future__ import with_statement, print_function
 
 __doc__ = """python library to dump various EDM classes"""
 __version__ = "$Revision: 1.32 $"

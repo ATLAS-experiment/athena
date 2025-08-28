@@ -96,8 +96,8 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   bool m_useRPDSumAdc{};
   bool m_useCalibDecorations{};
 
-  StatusCode initializeKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key);
-  StatusCode initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key);
+  StatusCode initializeReadKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key, bool addSuffix);
+  StatusCode initializeWriteKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key);
   static bool nonNegative(float const x) { return x >= 0; }
   static bool anyNonNegative(std::vector<float> const& v) { return std::any_of(v.begin(), v.end(), nonNegative); }
 

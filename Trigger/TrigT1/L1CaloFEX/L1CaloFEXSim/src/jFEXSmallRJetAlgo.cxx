@@ -8,7 +8,7 @@
 //     email                : varsiha.sothilingam@cern.ch
 //***************************************************************************  
 #include <vector>
-#include "L1CaloFEXSim/jFEXSmallRJetAlgo.h"
+#include "jFEXSmallRJetAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 

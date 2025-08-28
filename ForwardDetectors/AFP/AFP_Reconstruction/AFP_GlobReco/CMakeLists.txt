@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AFP_GlobReco )
@@ -15,6 +15,4 @@ atlas_add_component( AFP_GlobReco
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )   
 
-atlas_install_runtime( share/*.txt )
-
-
+atlas_install_data( share/*.txt )

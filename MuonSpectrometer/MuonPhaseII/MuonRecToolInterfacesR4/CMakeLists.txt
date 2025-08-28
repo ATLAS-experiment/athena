@@ -7,7 +7,7 @@ atlas_subdir( MuonRecToolInterfacesR4 )
 set( extra_libs )
 if( NOT SIMULATIONBASE )
     find_package( Acts COMPONENTS Core )
-    set( extra_libs ActsCore TrkGeometry)
+    set( extra_libs Acts::Core TrkGeometry)
 endif()
 
 # Component(s) in the package:

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSortingTool.h
@@ -99,23 +99,22 @@ private:
 private:
 
   /// Input container name
-  StringProperty m_inCollKey;
+  StringProperty m_inCollKey{ this, "InputContainer", "", "Input container name" };
 
   /// The name of the output container (with SG::VIEW_ELEMENTS) with the sorted copy of input objects
-  StringProperty m_outCollKey;
+  StringProperty m_outCollKey{ this, "OutputContainer", "", "The name of the output container (with SG::VIEW_ELEMENTS) with the sorted copy of input objects" };
 
   /// Define by what parameter to sort (default: 'pt')
-  StringProperty m_sortVar;
+  StringProperty m_sortVar{ this, "SortVariable", "pt", "Define by what parameter to sort (default: 'pt'; allowed: 'pt', 'eta', 'phi', 'm', 'e', 'rapidity')" };
 
   /// Define if the container should be sorted in a descending order (default=true)
-  BooleanProperty m_sortDescending;
-
+  BooleanProperty m_sortDescending{ this, "SortDescending", true, "Define if the container should be sorted in a descending order (default=true)" };
 
   /// Internal identifier for the type of sorting
-  int m_sortID;
+  int m_sortID{0};
 
   /// Internal event counter
-  mutable std::atomic<unsigned long> m_nEventsProcessed;
+  mutable std::atomic<unsigned long> m_nEventsProcessed{0};
 
 };
 

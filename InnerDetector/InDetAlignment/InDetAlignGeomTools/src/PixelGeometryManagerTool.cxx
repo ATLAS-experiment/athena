@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -451,7 +451,7 @@ namespace InDet {
       // get the element via hash
       const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+        const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
         // add element to the AlignModule
         pixel->addDetElement(Trk::AlignModule::Pixel,element,transform);
@@ -537,7 +537,7 @@ namespace InDet {
       // get the element via hash
       const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+        const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
         // add element to the AlignModule
         mod->addDetElement(Trk::AlignModule::Pixel,element,transform);
@@ -621,7 +621,7 @@ namespace InDet {
         for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
           ATH_MSG_DEBUG("iEta "<<iEta);
           const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-          const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+          const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
           if (element) {
 
@@ -710,7 +710,7 @@ namespace InDet {
         for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
           ATH_MSG_DEBUG("iEta "<<iEta);
           const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-          const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+          const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
           if (element) {
             // add element to the AlignModule
@@ -785,7 +785,7 @@ namespace InDet {
           for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForDiskRing(iWheel,iEta); iPhi++) {
             ATH_MSG_DEBUG("iPhi "<<iPhi);
             const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
             if (element) {
 
@@ -873,7 +873,7 @@ namespace InDet {
           for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
             ATH_MSG_DEBUG("iEta "<<iEta);
             const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
             if (element) {
 
@@ -916,7 +916,7 @@ namespace InDet {
           for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
             ATH_MSG_DEBUG("iEta "<<iEta);
             const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
             if (element) {
 
@@ -1011,7 +1011,7 @@ namespace InDet {
         for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
           ATH_MSG_DEBUG("iEta "<<iEta);
           const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-          const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+          const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
           if (element) {
 
@@ -1108,7 +1108,7 @@ namespace InDet {
         for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
           ATH_MSG_DEBUG("iEta "<<iEta);
           const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-          const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+          const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
           if (element) {
             // add element to the AlignModule
@@ -1191,7 +1191,7 @@ namespace InDet {
           for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
             ATH_MSG_DEBUG("iEta "<<iEta);
             const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
             if (element) {
 
@@ -1236,7 +1236,7 @@ namespace InDet {
           for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
             ATH_MSG_DEBUG("iEta "<<iEta);
             const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
             if (element) {
 
@@ -1325,7 +1325,7 @@ namespace InDet {
         for (int iEta = m_detManager->numerology().beginEtaModuleForLayer(iLayer); iEta < m_detManager->numerology().endEtaModuleForLayer(iLayer)-m_etaCorrection; iEta++) {
           ATH_MSG_DEBUG("iEta "<<iEta);
           const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-          const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+          const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
           if (element) {
 
@@ -1406,7 +1406,7 @@ namespace InDet {
           for (int iPhi = 0; iPhi < m_detManager->numerology().numPhiModulesForDiskRing(iWheel,iEta); iPhi++) {
             ATH_MSG_DEBUG("iPhi "<<iPhi);
             const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
             if (element) {
 
@@ -1493,7 +1493,7 @@ namespace InDet {
           ATH_MSG_DEBUG("Building module "<<mod->name());
 
           const SiDetectorElement * element2 = m_detManager->getDetectorElement(0, iLayer, iPhi, iEta);
-          const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+          const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
           if (element) {
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1582,7 +1582,7 @@ namespace InDet {
             ATH_MSG_DEBUG("Building module "<<mod->name());
 
             const SiDetectorElement * element2 = m_detManager->getDetectorElement(iSide, iWheel, iPhi, iEta);
-            const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+            const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
             if (element) {
               // add element to respective AlignModule
@@ -1674,7 +1674,7 @@ namespace InDet {
       // get the element via hash
       const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+        const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
         if (mod){
           // add element to the AlignModule
           mod->addDetElement(Trk::AlignModule::Pixel,element,transform);
@@ -1788,7 +1788,7 @@ namespace InDet {
       // get the element via hash
       const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
       if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+        const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
         // add element to the AlignModule
         mod->addDetElement(Trk::AlignModule::Pixel,element,transform);
@@ -1862,7 +1862,7 @@ namespace InDet {
       ATH_MSG_DEBUG("Building module "<<mod->name());
 
       const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
-      const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+      const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
       if (element) {
 
@@ -2078,10 +2078,7 @@ namespace InDet {
         msg(MSG::ERROR)<<"Layer 0 has only 22 phi modules: range 0-21, requested "<<phi<<endmsg;
         return false;
       }
-      if (phi>0 && phi<11)
-        return true;
-      else
-        return false;
+      return phi>0 && phi<11;
     }
     else if (layer==1) {
       if(phi>37) {

@@ -13,7 +13,7 @@
 
 #include "xAODEventInfo/EventInfo.h"
 
-#include "TrigDecisionTool/FeatureRequestDescriptor.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 
 #include "TrigInDetAnalysis/Filter_AcceptAll.h"
 #include "TrigInDetAnalysisUtils/Filter_etaPT.h"

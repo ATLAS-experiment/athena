@@ -110,15 +110,16 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
             ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromRoads, *FPGAHitsInRoadsCont, *FPGARoadColl));
             if constexpr (enableBenchmark) m_chrono->chronoStop("FPGAConversion: Prototrack formation (from roads)");
           }
-          else{
+          else{	    
             SG::ReadHandle<FPGATrackSimTrackCollection> FPGATracksHandle(m_FPGATrackKey, ctx);
             if (!FPGATracksHandle.isValid()) {
               ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimTrackCollection");
               return StatusCode::FAILURE;
             }
             const FPGATrackSimTrackCollection* FPGATrackColl = FPGATracksHandle.cptr();
+
             if constexpr (enableBenchmark) m_chrono->chronoStart("FPGAConversion: Prototrack formation (from tracks)");
-            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
+	    ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
             if constexpr (enableBenchmark) m_chrono->chronoStop("FPGAConversion: Prototrack formation (from tracks)");
           }
         }

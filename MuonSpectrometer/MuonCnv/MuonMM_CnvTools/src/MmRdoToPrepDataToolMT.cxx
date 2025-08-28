@@ -22,10 +22,6 @@ namespace {
 }  // namespace
 
 namespace Muon{
-MmRdoToPrepDataToolMT::MmRdoToPrepDataToolMT(const std::string& t,
-                                             const std::string& n,
-                                             const IInterface* p)
-    : base_class(t, n, p) {}
 
 StatusCode MmRdoToPrepDataToolMT::initialize() {
   ATH_MSG_DEBUG(" in initialize()");
@@ -100,7 +96,8 @@ StatusCode MmRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
     ATH_MSG_DEBUG("Adding a new MM PrepRawData");
 
     const Identifier rdoId = rdo->identify();
-    ATH_MSG_DEBUG(" dump rdo " << m_idHelperSvc->toString(rdoId));
+    // ATH_MSG_ALWAYS(" dump rdo " << m_idHelperSvc->toString(rdoId) << " pdo " << rdo->charge()
+    //               << " time " << rdo->time() << " relBCID " << rdo->relBcid());
 
     int channel = rdo->channel();
     std::vector<Identifier> rdoList;
@@ -168,8 +165,10 @@ StatusCode MmRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
 
     } else {
       if (calibStrip.charge < m_singleStripChargeCut) {
+        // ATH_MSG_ALWAYS("Strip with charge " << calibStrip.charge << " below the cut of " << m_singleStripChargeCut << ", skipping it");
         continue;
       }
+      // ATH_MSG_ALWAYS("producing prd with charge " << calibStrip.charge << " time " << calibStrip.time);
       MMPrepData mpd(prdId, hash, std::move(localPos), std::move(rdoList),
                      std::move(cov), detEl, calibStrip.time, calibStrip.charge,
                      calibStrip.distDrift);

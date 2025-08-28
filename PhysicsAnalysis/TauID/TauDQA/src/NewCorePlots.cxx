@@ -14,34 +14,6 @@ namespace Tau{
 
   NewCorePlots::NewCorePlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
     PlotBase(pParent, sDir),
-    m_ipZ0SinThetaSigLeadTrk(nullptr),
-    m_etOverPtLeadTrk(nullptr),
-    m_ipSigLeadTrk(nullptr),
-    m_massTrkSys(nullptr),
-    m_trkWidth2(nullptr),
-    m_trFlightPathSig(nullptr),
-    m_etEflow(nullptr),
-    m_nPi0(nullptr),
-    m_tauDRMax(nullptr),
-    m_EMRadius(nullptr),
-    m_hadRadius(nullptr),
-    m_isolFrac(nullptr),
-    m_centFrac(nullptr),
-    m_stripWidth2(nullptr),
-    m_nStrip(nullptr),
-    m_trkAvgDist(nullptr),
-    m_lead2ClusterEOverAllClusterE(nullptr),
-    m_lead3ClusterEOverAllClusterE(nullptr),
-    m_caloIso(nullptr),
-    m_mEflowTopo(nullptr),
-    m_ptRatioEflowTopo(nullptr),
-    m_nPi0Topo(nullptr),
-    m_PSSFraction(nullptr),
-    m_ChPiEMEOverCaloEME(nullptr),
-    m_EMPOverTrkSysP(nullptr),
-    m_innerTrkAvgDist(nullptr),
-    m_ptRatioEflowApprox(nullptr),
-    m_mEflowApprox(nullptr),
     m_sTauJetContainerName(std::move(sTauJetContainerName))
   {	
   }
@@ -56,18 +28,10 @@ namespace Tau{
     m_etOverPtLeadTrk                  = Book1D("etOverPtLeadTrk",m_sTauJetContainerName + "Tau etOverPtLeadTrk ;etOverPtLeadTrk ;# of Taus", 50, 0, 4.);
     m_ipSigLeadTrk 		       = Book1D("ipSigLeadTrk",m_sTauJetContainerName + "Tau ipSigLeadTrk ;ipSigLeadTrk ;# of Taus", 50,  -15, 15);
     m_massTrkSys 		       = Book1D("massTrkSys",m_sTauJetContainerName + "Tau massTrkSys ;massTrkSys ;# of Taus", 40, 0., 2.);
-    m_trkWidth2 		       = Book1D("trkWidth2",m_sTauJetContainerName + "Tau trkWidth2 ;trkWidth2 ;# of Taus", 50, 0, 0.1);		      
     m_trFlightPathSig 	               = Book1D("trFlightPathSig",m_sTauJetContainerName + "Tau trFlightPathSig ;trFlightPathSig ;# of Taus", 100, -5, 30);
-    m_EMRadius                         = Book1D("Seed_Calo_EMRadius",m_sTauJetContainerName + "Tau Seed Calo EMRadius ;EMRadius ;# of Taus",    50,  -0.2, 0.4);	  
-    m_hadRadius 	               = Book1D("Seed_Calo_hadRadius",m_sTauJetContainerName + "Tau Seed Calo hadRadius ;hadRadius ;# of Taus",   50,  -0.2, 0.5); 
     m_isolFrac 	                       = Book1D("Seed_Calo_isolFrac",m_sTauJetContainerName + "Tau Seed Calo isolFrac ;isolFrac ;# of Taus",    40,  0., 1.);	  
     m_centFrac 	                       = Book1D("Seed_Calo_centFrac",m_sTauJetContainerName + "Tau Seed Calo centFrac ;centFrac ;# of Taus",    40,  0., 1.2);
-    m_stripWidth2                      = Book1D("Seed_Calo_stripWidth2",m_sTauJetContainerName + "Tau Seed Calo stripWidth2 ;stripWidth2 ;# of Taus", 10, -0.5, 2.5);
-    m_nStrip                           = Book1D("Seed_Calo_nStrip",m_sTauJetContainerName + "Tau Seed Calo nStrip ;nStrip ;# of Taus",  20,  0, 100);
     m_trkAvgDist                       = Book1D("Seed_Calo_trkavgdist",m_sTauJetContainerName + "Tau Seed Calo trkavgdist ;trkavgdist ;# of Taus",  50, 0., 0.4);
-    m_lead2ClusterEOverAllClusterE     = Book1D("Seed_Calo_lead2ClusterEOverAllClusterE",m_sTauJetContainerName + "Tau Seed Calo lead2ClusterEOverAllClusterE ;lead2ClusterEOverAllClusterE ;# of Taus",40, 0.5, 1.);	
-    m_lead3ClusterEOverAllClusterE     = Book1D("Seed_Calo_lead3ClusterEOverAllClusterE",m_sTauJetContainerName + "Tau Seed Calo lead3ClusterEOverAllClusterE ;lead3ClusterEOverAllClusterE ;# of Taus",40, 0.5, 1.);	
-    m_caloIso	        	       = Book1D("Seed_Calo_caloIso",m_sTauJetContainerName + "Tau Seed Calo caloIso ;caloIso ;# of Taus", 15,  0, 200);
     m_tauDRMax                         = Book1D("DRMax",m_sTauJetContainerName + " Tau DR Max track-seed; DRMax; # Taus",20,0.,0.4);
     m_PSSFraction                      = Book1D("PSSFraction",m_sTauJetContainerName + "Tau PSSFraction; PSSFraction; # of Taus", 30, -15, 15);
     m_ChPiEMEOverCaloEME               = Book1D("ChPiEMEOverCaloEME",m_sTauJetContainerName + "Tau ChPiEMEOverCaloEME; ChPiEMEOverCaloEME; # of Taus", 40, -5, 5);
@@ -92,9 +56,7 @@ namespace Tau{
     m_track_dRJetSeedAxis = Book1D("track_dRJetSeedAxis" , "#DeltaR(tau,track);#DeltaR(tau,track);Entries",50,0.,0.5);
     m_track_nInnermostPixHits = Book1D("track_nInnermostPixHits" , "track nInnermostPixHits;track nInnermostPixHits;Entries",5,0.,5.);
     m_track_nPixHits = Book1D("track_nPixHits" , "track nPixHits;track nPixHits;Entries",10,0.,10.);
-    m_track_nPixelSharedHits = Book1D("track_nPixelSharedHits" , "track nPixelSharedHits;track nPixelSharedHits;Entries",6,0.,6.);
     m_track_nSiHits = Book1D("track_nSiHits" , "track nSiHits;track nSiHits;Entries",20,0.,20.);
-    m_track_nSCTSharedHits = Book1D("track_nSCTSharedHits" , "track nSCTSharedHits;track nSCTSharedHits;Entries",10,0.,10.);
     m_track_nTRTHits = Book1D("track_nTRTHits" , "track nTRTHits;track nTRTHits;Entries",60,0.,60.);
     m_track_eProbabilityHT = Book1D("track_eProbabilityHT" , "track eProbabilityHT;track eProbabilityHT;Entries",50,0.,1.);    
     m_track_eProbabilityNN = Book1D("track_eProbabilityNN" , "track eProbabilityNN;track eProbabilityNN;Entries",50,0.,1.);    
@@ -102,7 +64,6 @@ namespace Tau{
     m_track_idScoreCharged = Book1D("track_idScoreCharged" , "track RNN idScoreCharged;track idScoreCharged;Entries",50,0.,1.);
     m_track_idScoreIso = Book1D("track_idScoreIso" , "track RNN idScoreIso;track idScoreIso;Entries",50,0.,1.);
     m_track_idScoreConv = Book1D("track_idScoreConv" , "track RNN idScoreConv;track idScoreConv;Entries",50,0.,1.);
-    m_track_idScoreFake = Book1D("track_idScoreFake" , "track RNN idScoreFake;track idScoreFake;Entries",50,0.,1.);
 
     // cluster variables used for RNN tau ID
     m_cluster_logEt = Book1D("cluster_logEt" , "log(cluster E_{T});log(cluster E_{T});Entries",50,1.5,6.5);
@@ -128,7 +89,6 @@ namespace Tau{
   void NewCorePlots::fill(const xAOD::TauJet& tau, float weight) {
 
     float avariable = 0.;
-    int bvariable = 0;
 
     static const SG::ConstAccessor<float> acc_z0sinthetaSigTJVA("z0sinthetaSigTJVA");
     if(tau.nTracks()>0 && acc_z0sinthetaSigTJVA.isAvailable(*tau.track(0))) {
@@ -142,17 +102,8 @@ namespace Tau{
     test = tau.detail(xAOD::TauJetParameters::massTrkSys, avariable);
     if(test) m_massTrkSys->Fill(avariable/Athena::Units::GeV, weight);
 
-    test = tau.detail(xAOD::TauJetParameters::trkWidth2, avariable);
-    if(test) m_trkWidth2->Fill(avariable, weight);
-
     test = tau.detail(xAOD::TauJetParameters::trFlightPathSig, avariable);
     if(test) m_trFlightPathSig->Fill(avariable, weight);
-
-    test = tau.detail(xAOD::TauJetParameters::EMRadius, avariable);
-    if(test) m_EMRadius->Fill(avariable, weight);
-
-    test = tau.detail(xAOD::TauJetParameters::hadRadius, avariable);
-    if(test) m_hadRadius->Fill(avariable, weight);
 
     test = tau.detail(xAOD::TauJetParameters::isolFrac, avariable);
     if(test) m_isolFrac->Fill(avariable, weight);
@@ -160,23 +111,8 @@ namespace Tau{
     test = tau.detail(xAOD::TauJetParameters::centFrac, avariable);
     if(test) m_centFrac->Fill(avariable, weight);
 
-    test = tau.detail(xAOD::TauJetParameters::stripWidth2, avariable);
-    if(test) m_stripWidth2->Fill(avariable, weight);
-  
-    test = tau.detail(xAOD::TauJetParameters::nStrip, bvariable);
-    if(test) m_nStrip->Fill(bvariable, weight);
-  
     test = tau.detail(xAOD::TauJetParameters::trkAvgDist, avariable);
     if(test) m_trkAvgDist->Fill(avariable, weight);
-
-    test = tau.detail(xAOD::TauJetParameters::lead2ClusterEOverAllClusterE, avariable);
-    if(test) m_lead2ClusterEOverAllClusterE->Fill(avariable, weight);
-
-    test = tau.detail(xAOD::TauJetParameters::lead3ClusterEOverAllClusterE, avariable);
-    if(test) m_lead3ClusterEOverAllClusterE->Fill(avariable, weight);
-
-    test = tau.detail(xAOD::TauJetParameters::caloIso, avariable);
-    if(test) m_caloIso->Fill(avariable, weight);
 
     test = tau.detail(xAOD::TauJetParameters::PSSFraction, avariable);
     if(test) m_PSSFraction->Fill(avariable, weight);
@@ -245,14 +181,10 @@ namespace Tau{
       trackParticle->summaryValue(nInnermostPixelLayerHits, xAOD::numberOfInnermostPixelLayerHits);
       uint8_t nPixelHits = 0;
       trackParticle->summaryValue(nPixelHits, xAOD::numberOfPixelHits);
-      uint8_t nPixelSharedHits = 0;
-      trackParticle->summaryValue(nPixelSharedHits, xAOD::numberOfPixelSharedHits);
       uint8_t nPixelDeadSensors = 0;
       trackParticle->summaryValue(nPixelDeadSensors, xAOD::numberOfPixelDeadSensors);
       uint8_t nSCTHits = 0;
       trackParticle->summaryValue(nSCTHits, xAOD::numberOfSCTHits);
-      uint8_t nSCTSharedHits = 0;
-      trackParticle->summaryValue(nSCTSharedHits, xAOD::numberOfSCTSharedHits);
       uint8_t nSCTDeadSensors = 0;
       trackParticle->summaryValue(nSCTDeadSensors, xAOD::numberOfSCTDeadSensors);
       uint8_t nTRTHighThresholdHits = 0;
@@ -284,9 +216,7 @@ namespace Tau{
       m_track_dRJetSeedAxis->Fill(dRJetSeedAxis, weight);
       m_track_nInnermostPixHits->Fill(nInnermostPixelLayerHits, weight);
       m_track_nPixHits->Fill(nPixelHits + nPixelDeadSensors, weight);
-      m_track_nPixelSharedHits->Fill(nPixelSharedHits, weight);
       m_track_nSiHits->Fill(nPixelHits + nPixelDeadSensors + nSCTHits + nSCTDeadSensors, weight);
-      m_track_nSCTSharedHits->Fill(nSCTSharedHits, weight);
       m_track_nTRTHits->Fill(nTRTHits, weight);
       m_track_eProbabilityHT->Fill(eProbabilityHT, weight);
       m_track_eProbabilityNN->Fill(eProbabilityNN, weight);
@@ -296,14 +226,9 @@ namespace Tau{
 	float chargedScore = acc_trackScoreCharged(*track);
 	float isolationScore = acc_trackScoreIso(*track);
 	float conversionScore = acc_trackScoreConv(*track);
-	float fakeScore = 1. - chargedScore - isolationScore - conversionScore;
-	// ensure the probability is within [0.,1.]
-	fakeScore = std::max(0.f, fakeScore);
-	fakeScore = std::min(1.f, fakeScore);
 	m_track_idScoreCharged->Fill(chargedScore, weight);
 	m_track_idScoreIso->Fill(isolationScore, weight);
 	m_track_idScoreConv->Fill(conversionScore, weight);
-	m_track_idScoreFake->Fill(fakeScore, weight);
       }
     }
 
@@ -331,9 +256,9 @@ namespace Tau{
     };
     std::sort(clusters.begin(), clusters.end(), et_cmp);
 
-    // keep first 6 leading clusters as in RNN ID
-    if (clusters.size() > 6) {
-      clusters.resize(6, clusters[0]);
+    // keep first 20 leading clusters as in GNTau
+    if (clusters.size() > 20) {
+      clusters.resize(20, clusters[0]);
     }
 
     double moment;

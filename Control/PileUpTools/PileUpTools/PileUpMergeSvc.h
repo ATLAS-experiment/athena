@@ -116,7 +116,8 @@ public:
 
 private:
   ServiceHandle<StoreGateSvc> p_overStore;      ///< overlaid SG (default)
-  ToolHandleArray<IPileUpXingFolder> m_intervals; ///< Property: bunch xing intervals
+  ToolHandleArray<IPileUpXingFolder> m_intervals{this, "Intervals", {},
+    "Folders specifying bunch xing intervals for different data objects"};
 
   // Protect against multiple threads trying to make EventInfo
   // for the same slot.
@@ -169,17 +170,23 @@ private:
   typedef std::map<std::pair<CLID, std::string>, Range> RangeContainer;
   RangeContainer m_ranges;
 
-  ToolHandle<ITriggerTime> m_pITriggerTime; ///< allows to apply a trigger time offset
+  ToolHandle<ITriggerTime> m_pITriggerTime{this, "TriggerTimeTool", "",
+    "allows to apply a trigger time offset"};
+
   ///< controls PileUpTimedEventIndex for TimedData returned by retrieveSubEvts
-  BooleanProperty m_returnTimedData; 
+  BooleanProperty m_returnTimedData{this, "ReturnTimedData", true,
+    "determine whether the TimedData returned by retrieveSubEvts have non trivial "
+    "PileUpTimeEventIndex. May be set to false for overlay with real events"};
 
   bool doRefresh(const Range& r, int iXing);
 
   //Default name for EventInfo
-  std::string m_EventInfoKeyName;
+  StringProperty m_EventInfoKeyName{this, "EventInfoKeyName", "OverlayEvent",
+    "default name for EventInfo"};
 
   /// property: Handle to the EventInfo -> xAOD::EventInfo converter tool
-  ToolHandle< xAODMaker::IEventInfoCnvTool > m_xAODCnvTool;
+  ToolHandle< xAODMaker::IEventInfoCnvTool > m_xAODCnvTool{
+    this, "xAODCnvTool", "xAODMaker::EventInfoCnvTool/EventInfoCnvTool"};
 };
 #include "PileUpTools/PileUpMergeSvc.icc"
 #endif /* PILEUPTOOLS_PILEUPMERGESVC_H */

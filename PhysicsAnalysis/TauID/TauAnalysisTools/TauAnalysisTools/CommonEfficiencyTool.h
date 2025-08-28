@@ -53,10 +53,10 @@ public:
   //__________________________________________________________________________
 
   virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::TauJet& tau, double& dEfficiencyScaleFactor, 
-    unsigned int iRunNumber = 0, unsigned int iMu = 0 );
+    unsigned int iRunNumber = 0 );
 
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(const xAOD::TauJet& xTau, 
-    unsigned int iRunNumber = 0, unsigned int iMu = 0);
+    unsigned int iRunNumber = 0 );
 
   /// returns: whether this tool is affected by the given systematics
   virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const;
@@ -79,7 +79,6 @@ public:
 protected:
 
   std::string ConvertProngToString(const int iProngness) const;
-  std::string ConvertMuToString(const int iMu) const;
   std::string ConvertDecayModeToString(const int iDecayMode) const;
 
   typedef std::tuple<TObject*,
@@ -119,10 +118,6 @@ protected:
                                         double& dEfficiencyScaleFactor,
                                         double dVars[]
                                         );
-  static CP::CorrectionCode getValueTH3(const TObject* oObject,
-                                        double& dEfficiencyScaleFactor,
-                                        double dVars[]
-                                        );
   static CP::CorrectionCode getValueTF1(const TObject* oObject,
                                         double& dEfficiencyScaleFactor,
                                         double dVars[]
@@ -141,8 +136,8 @@ protected:
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
   Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDNONE)};
   Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(ELEIDNONE)};
-  Gaudi::Property<bool> m_bSplitMu{this, "SplitMu", false};
   Gaudi::Property<bool> m_bUseTauSubstructure{this, "UseTauSubstructure", false};
+  Gaudi::Property<bool> m_doTauTrig{this, "DoTauTrig", false};
 
   std::string m_sInputFileName;
   std::string m_sSFHistName;

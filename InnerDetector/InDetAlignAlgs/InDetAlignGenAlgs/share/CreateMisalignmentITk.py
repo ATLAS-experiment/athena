@@ -76,6 +76,11 @@ def getFlags(**kwargs):
         Rotation=bool(kwargs.get('Rotation','True')=='True')
         if not Rotation:
             print ("Rotation not set to \"True\" - disabling generation of rotations")
+    if MisalignMode == 7:
+        local_translation_str = kwargs.pop('Local_Translation', '0.0,0.0,0.0')
+        local_rotation_str = kwargs.pop('Local_Rotation', '0.0,0.0,0.0')
+        Local_Translation = [float(x) for x in local_translation_str.split(',')]
+        Local_Rotation = [float(x) for x in local_rotation_str.split(',')] 
     databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
     flags.IOVDb.DBConnection="sqlite://;schema=%s;dbname=OFLCOND" % (databaseFilename) 
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
@@ -104,16 +109,22 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
 
     if MisalignMode in [11, 12, 31]:
         shiftInMicrons = 500
+
     outFiles = 'MisalignmentSet%s' % (MisalignMode)
     misalignModeMap = {0:'no Misalignment',
                     1: 'misalignment by 6 parameters',
                     2: 'random misalignment',
                     3: 'IBL-stave temperature dependent bowing',
+                    7: 'misalignment according to module indices',
                     11: 'R deltaR (radial expansion)', 12: 'Phi deltaR (ellipse)',13: 'Z deltaR (funnel)',
                     21: 'R deltaPhi (curl)', 22: 'Phi deltaPhi (clamshell) ',23:'Z deltaPhi (twist)',
                     31: 'R deltaZ (telescope)',32:'Phi deltaZ (skew)',33:'Z deltaZ (z-expansion)'}
     ####################################################################################################################
-
+     
+    local_translation_str = kwargs.pop('Local_Translation', '0.0,0.0,0.0')
+    local_rotation_str = kwargs.pop('Local_Rotation', '0.0,0.0,0.0')
+    Local_Translation = [float(x) for x in local_translation_str.split(',')]
+    Local_Rotation = [float(x) for x in local_rotation_str.split(',')] 
     acc=MainServicesCfg(flags)
     print ("\n CreateMisalignAlg: Creation of misalignment mode %s: %s \n" % (int(MisalignMode),misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("ASCIIFilenameBase",outFiles)
@@ -121,6 +132,9 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     kwargs.setdefault("MisalignMode",int(MisalignMode))
     kwargs.setdefault("Translation",bool(str(kwargs.pop('Translation','True'))=='True'))
     kwargs.setdefault("Rotation",bool(str(kwargs.pop('Rotation','True'))=='True'))
+    kwargs.setdefault("Local_Translation",Local_Translation)
+    kwargs.setdefault("Local_Rotation",Local_Rotation)
+    kwargs.setdefault("Index", str(kwargs.pop('Index', '')))
     kwargs.setdefault("MaxShift",shiftInMicrons)
     kwargs.setdefault("CreateFreshDB",createFreshDB)
     #Create and configure the AlignDB tool
@@ -131,7 +145,6 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     kargsTool={}
     kargsTool.setdefault("SCTTwoSide",True)
     kargsTool.setdefault("DBRoot",outputAlignFolder)
-    kargsTool.setdefault("DBKey",outputAlignFolder)
     kargsTool.setdefault("forceUserDBConfig",True)
     if writeDBPoolFile:
         print("Writing DB Pool File")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EMECSupport::CalibrationCalculator
@@ -39,6 +39,8 @@ namespace LArG4 {
     public:
 
       EMECSupportCalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator);
+      EMECSupportCalibrationCalculator (const EMECSupportCalibrationCalculator&) = delete;
+      EMECSupportCalibrationCalculator& operator= (const EMECSupportCalibrationCalculator&) = delete;
       StatusCode initialize() override final;
       virtual ~EMECSupportCalibrationCalculator();
 
@@ -60,19 +62,16 @@ namespace LArG4 {
     private:
 
       // Energy calculator
-      CaloG4::SimulationEnergies m_energyCalculator;
+      CaloG4::SimulationEnergies m_energyCalculator{};
 
       class Parameters;
-      const Parameters *m_par;
+      const Parameters *m_par{nullptr};
 
       // Access to parameters.
       //LArGeo::VDetectorParameters* m_parameters;
 
       // Define a "backup" calculator.
-      ServiceHandle<ILArCalibCalculatorSvc> m_backupCalculator;
-
-      EMECSupportCalibrationCalculator (const EMECSupportCalibrationCalculator&);
-      EMECSupportCalibrationCalculator& operator= (const EMECSupportCalibrationCalculator&);
+      ServiceHandle<ILArCalibCalculatorSvc> m_backupCalculator{this, "BackupCalculator", "EndcapCryostatCalibrationLArCalculator"};
     };
 
     //  } // namespace EMECSupport

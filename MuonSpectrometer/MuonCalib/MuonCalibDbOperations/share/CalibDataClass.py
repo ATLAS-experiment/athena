@@ -1,6 +1,5 @@
 #!/bin/env python
 
-from __future__ import print_function
 
 import cx_Oracle
 import sys
@@ -51,7 +50,7 @@ class DataUniqueError(CalibDataError): pass
 class DataCopyError(CalibDataError): pass
 
 class CalibData:
-	service_re = re.compile('\(SERVICE_NAME\s*\=\s*([A-Za-z.]+)\)+')
+	service_re = re.compile(r'\(SERVICE_NAME\s*\=\s*([A-Za-z.]+)\)+')
 	# unix timestamp
 	unixts = re.compile('[0-9]{10,11}')
 
@@ -564,7 +563,7 @@ class CalibData:
 			return software_tubestring.group()
 		if (numeric_tubestring):
 			# make sure it is not actually a date 
-			datematch = re.compile('(19|20)\d\d(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])')
+			datematch = re.compile(r'(19|20)\d\d(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])')
 			if not datematch.search(fullstring):
 				return numeric_tubestring.group()
 	

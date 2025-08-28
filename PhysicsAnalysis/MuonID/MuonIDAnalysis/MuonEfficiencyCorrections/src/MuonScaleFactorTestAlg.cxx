@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // Local include(s):
@@ -31,13 +31,13 @@ namespace CP {
         ATH_CHECK(m_comparisonTools.retrieve());
         for (auto& tool : m_effiTools) {
             auto sfBranch = std::make_shared<TestMuonSF::MuonSFBranches>(m_tree,tool,
-                                                                         m_comparisonTools.empty() ? "" : m_defaultRelease);
+                                                                         m_comparisonTools.empty() ? "" : m_defaultRelease.value());
             
             m_sfBranches.push_back(sfBranch);
             m_tree.addBranch(sfBranch);
 
             auto replicaBranch = std::make_shared<TestMuonSF::MuonReplicaBranches>(m_tree, tool,
-                                                                                   m_comparisonTools.empty() ? "" : m_defaultRelease);
+                                                                                   m_comparisonTools.empty() ? "" : m_defaultRelease.value());
 
             m_sfBranches.push_back(replicaBranch);
             m_tree.addBranch(replicaBranch);        

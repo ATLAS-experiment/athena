@@ -5,10 +5,10 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 class XbbConfig (ConfigBlock):
     """the ConfigBlock for the Xbb tagging config"""
-    def __init__ (self, containerName=''):
+    def __init__ (self):
         super (XbbConfig, self).__init__ ()
         self.setBlockName('Xbb')
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
                         noneAction='error',
                         info="the name of the input container.")
         self.addOption('XbbWP', 'FlatMassQCDEff_0p25', type=str,
@@ -20,14 +20,16 @@ class XbbConfig (ConfigBlock):
         self.addOption('noEffSF', False, type=bool,
                        info="do not apply the eff SF")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.XbbWP
+
     def makeAlgs(self, config):
 
         jetContainer = config.originalName(self.containerName)
         selectionName = f'{self.Xbbtagger}_{self.XbbWP}'
 
-        postfix = self.XbbWP
-
-        alg = config.createAlgorithm( 'CP::XbbInformationDecoratorAlg', 'XbbInfoAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::XbbInformationDecoratorAlg', 'XbbInfoAlg' )
         config.addPrivateTool('selectionTool', 'BTaggingSelectionJsonTool' )
         alg.selectionTool.MaxEta = 4.5
         alg.selectionTool.MinPt = 0.
@@ -43,7 +45,7 @@ class XbbConfig (ConfigBlock):
 
         if not self.noEffSF and config.dataType() != DataType.Data:
             alg = config.createAlgorithm( 'CP::XbbEfficiencyAlg',
-                                         'XbbSFAlg' + postfix )
+                                         'XbbSFAlg' )
             config.addPrivateTool('efficiencyTool', 'BTaggingEfficiencyJsonTool' )
             alg.efficiencyTool.MaxEta = 4.5
             alg.efficiencyTool.MinPt = 0.

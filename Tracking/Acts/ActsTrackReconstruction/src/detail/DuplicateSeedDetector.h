@@ -21,8 +21,10 @@ namespace ActsTrk::detail {
   class DuplicateSeedDetector {
   public:
     using index_t = unsigned int;
+    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(std::size_t)>; // copied from ITrackParamsEstimationTool
+    using UseTopSpFun_t = std::function<bool(const ActsTrk::Seed&)>;
 
-    DuplicateSeedDetector(std::size_t numSeeds, bool enabled);
+    DuplicateSeedDetector(std::size_t numSeeds, unsigned int measOffset, bool enabled);
     DuplicateSeedDetector(const DuplicateSeedDetector &) = delete;
     DuplicateSeedDetector &operator=(const DuplicateSeedDetector &) = delete;
     DuplicateSeedDetector(DuplicateSeedDetector &&) noexcept = default;
@@ -31,6 +33,8 @@ namespace ActsTrk::detail {
 
     // add seeds from an associated measurements collection.
     void addSeeds(std::size_t typeIndex, const ActsTrk::SeedContainer &seeds, const MeasurementIndex &measurementIndex);
+    void addSeeds(std::size_t typeIndex, const ActsTrk::SeedContainer &seeds, const MeasurementIndex &measurementIndex,
+                  SpacePointIndicesFun_t spacePointIndicesFun, UseTopSpFun_t useTopSpFun);
     inline void newTrajectory();
     inline void addMeasurement(const ActsTrk::ATLASUncalibSourceLink &sl, const MeasurementIndex &measurementIndex);
 
@@ -39,8 +43,10 @@ namespace ActsTrk::detail {
 
   private:
     friend struct DuplicateSeedDetectorTest;  // allow unit test access to internals
-
+    
     bool m_disabled{false};
+    unsigned int m_measOffset{0ul}; // if a seed has N hits, only N - m_measOffset are needed
+                                    // to mark it as duplicate
     std::vector<boost::container::small_vector<index_t, 4>> m_seedIndex;  // m_seedIndex[measurementIndex][usedBySeedNumber]
     std::vector<std::size_t> m_nUsedMeasurements;
     std::vector<std::size_t> m_nSeedMeasurements;
@@ -49,6 +55,7 @@ namespace ActsTrk::detail {
     index_t m_numSeeds{0u};         // count of number of seeds so-far added with addSeeds()
     index_t m_nextSeed{0u};         // index of next seed expected with isDuplicate()
     std::size_t m_foundSeeds{0ul};  // count of found seeds for this/last trajectory
+    
   };
 
 }  // namespace ActsTrk::detail

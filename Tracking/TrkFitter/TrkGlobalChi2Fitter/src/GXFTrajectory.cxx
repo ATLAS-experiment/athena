@@ -377,7 +377,7 @@ namespace Trk {
   }
 
   void GXFTrajectory::updateTRTHitCount(int index, float oldError) {
-    double error = (m_states[index]->measurementErrors())[0];
+    const double error = (m_states[index]->measurementErrors())[0];
     if (m_states[index]->getStateType(TrackStateOnSurface::Outlier)) {
       if (oldError<1) { m_ntrtprechits--; }
       else {m_ntrttubehits--; }
@@ -519,11 +519,11 @@ namespace Trk {
       for (auto & state : m_states) {
         if ((*state).getStateType(TrackStateOnSurface::Scatterer)
             && ((m_prefit == 0) || (*state).materialEffects()->deltaE() == 0)) {
-          double scatphi = (*state).materialEffects()->deltaPhi();
-          double scattheta = (*state).materialEffects()->deltaTheta();
+          const double scatphi = (*state).materialEffects()->deltaPhi();
+          const double scattheta = (*state).materialEffects()->deltaTheta();
           m_scatteringangles.emplace_back(scatphi, scattheta);
-          double sigmascatphi = (*state).materialEffects()->sigmaDeltaPhi();
-          double sigmascattheta = (*state).materialEffects()->sigmaDeltaTheta();
+          const double sigmascatphi = (*state).materialEffects()->sigmaDeltaPhi();
+          const double sigmascattheta = (*state).materialEffects()->sigmaDeltaTheta();
           m_scatteringsigmas.
             emplace_back(sigmascatphi, sigmascattheta);
         }
@@ -553,8 +553,8 @@ namespace Trk {
     for (auto & state : m_states) {
       if ((*state).getStateType(TrackStateOnSurface::Scatterer)
           && ((m_prefit == 0) || (*state).materialEffects()->deltaE() == 0)) {
-        double scatphi = scatteringangles[scatno].first;
-        double scattheta = scatteringangles[scatno].second;
+        const double scatphi = scatteringangles[scatno].first;
+        const double scattheta = scatteringangles[scatno].second;
         (*state).materialEffects()->setScatteringAngles(scatphi, scattheta);
         scatno++;
       }

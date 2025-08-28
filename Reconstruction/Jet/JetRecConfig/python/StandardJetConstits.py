@@ -45,7 +45,7 @@ def isMC(flags):
     """A simple filter function for  testing if we're running in MC
     returns (bool, str) where the str contains an explanation of why the bool is False.
     (probably worth re-allocating somehere else)"""
-    return flags.Input.isMC, "Input file is not MC"
+    return flags.Input.isMC or flags.Overlay.DataOverlay, "Input file is not MC"
 
 def standardReco(input):
     """Returns a helper function which invokes the standard reco configuration for the container 'input' 
@@ -166,7 +166,12 @@ _stdInputList = [
                      algoBuilder = inputcfg.buildPFlowSel_noLeptons,
                      prereqs = ["input:JetETMissParticleFlowObjects", ],
                      ),
-    
+
+    JetInputExternal("GlobalParticleFlowObjects_tauSeedEleRM", xAODType.FlowElement,
+                     algoBuilder = inputcfg.buildPFlowSel_tauSeedEleRM,
+                     prereqs = ["input:JetETMissParticleFlowObjects", ],
+                    ),
+
     # *****************************
     JetInputExternal("InDetTrackParticles",   xAODType.TrackParticle,
                      algoBuilder = standardReco("Tracks"),
@@ -411,6 +416,11 @@ _stdSeqList = [
 
     JetInputConstitSeq("GPFlow_noLeptons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noLeptons', 'CHSGParticleFlowObjects_noLeptons',
                        label='EMPFlow_noLeptons'),
+
+    #GPFlow with tau seed electrons removed
+    JetInputConstitSeq("GPFlow_tauSeedEleRM", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_tauSeedEleRM', 'CHSGParticleFlowObjects_tauSeedEleRM',
+                        label='EMPFlow_tauSeedEleRM'),
+
 
     # Particle Flow Objects with several neutral PFO copies for by-vertex reconstruction
     JetInputConstitSeq("GPFlowByVtx", xAODType.FlowElement, ["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSByVtxGParticleFlowObjects',

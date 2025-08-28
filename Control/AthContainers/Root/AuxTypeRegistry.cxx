@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxTypeRegistry.cxx
@@ -545,14 +545,14 @@ AuxTypeRegistryImpl::addFactory (lock_t& /*lock*/,
       // Instead, push it on a vector to remember it so we can delete
       // it later.
       m_oldFactories.push_back (it->second);
-      m_factories.insert_or_assign (key, factory.release());
+      fac = m_factories.insert_or_assign (key, factory.release()).first->second;
     }
     else {
       fac = it->second;
     }
   }
   else
-    m_factories.insert_or_assign (key, factory.release());
+    fac = m_factories.insert_or_assign (key, factory.release()).first->second;
 
   return fac;
 }

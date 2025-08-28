@@ -18,6 +18,7 @@
 // Local includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "TauAnalysisTools/IDiTauSelectionTool.h"
+#include "TauAnalysisTools/IDiTauTruthMatchingTool.h"
 
 // Local includes
 #include "DiTauValidationPlots.h"
@@ -47,6 +48,7 @@ private:
   Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
   ToolHandle<TauAnalysisTools::IDiTauSelectionTool> m_nomiDiTauSel{this, "NominalDiTauSelectionTool", "TauAnalysisTools::DiTauSelectionTool/NominalDiTauSelectionTool"};
+  ToolHandle<TauAnalysisTools::IDiTauTruthMatchingTool> m_truthTool{this, "DiTauTruthMatchingTool", "TauAnalysisTools::DiTauTruthMatchingTool/DiTauTruthMatchingTool"};
 
   //Histograms
   std::unique_ptr<DiTauValidationPlots> m_oDiTauValidationPlots;

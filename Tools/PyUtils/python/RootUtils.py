@@ -184,15 +184,28 @@ def _pythonize_tfile():
 def _getLeaf (l):
     tname = l.GetTypeName()
     ndat = l.GetNdata()
-    if tname in ['UInt_t', 'Int_t', 'ULong64_t', 'Long64_t']:
-        return [l.GetValueLong64(i) for i in range(ndat)]
-    if tname in ['Float_t', 'Double_t']:
-        return [l.GetValue(i) for i in range(ndat)]
-    if tname in ['Char_t']:
-        try:
-            return l.GetValueString() # TLeafC for variable size string
-        except Exception:
-            return [l.GetValue(i) for i in range(ndat)] # TLeafB for 8-bit integers
+    if (l.GetLeafCount()  # a varying length array
+        or ndat > 1):     # a fixed size array
+        if tname in ['UInt_t', 'Int_t', 'ULong_t', 'Long_t', 'ULong64_t', 'Long64_t', 'UShort_t', 'Short_t', 'Bool_t']:
+            return tuple(l.GetValueLong64(i) for i in range(ndat))
+        elif tname in ['Float_t', 'Double_t', 'Float16_t', 'Double32_t']:
+            return tuple(l.GetValue(i) for i in range(ndat))
+        elif tname in ['UChar_t', 'Char_t']:
+            try:
+                return l.GetValueString() # TLeafC for variable size string
+            except Exception:
+                return tuple(l.GetValueLong64(i) for i in range(ndat)) # TLeafB for 8-bit integers
+    elif ndat == 1:  # a single value
+        if tname in ['UInt_t', 'Int_t', 'ULong_t', 'Long_t', 'ULong64_t', 'Long64_t', 'UShort_t', 'Short_t', 'Bool_t']:
+            return l.GetValueLong64()
+        elif tname in ['Float_t', 'Double_t', 'Float16_t', 'Double32_t']:
+            return l.GetValue()
+        elif tname in ['UChar_t', 'Char_t']:
+            try:
+                return l.GetValueString()  # TLeafC for variable size string
+            except Exception:
+                return l.GetValueLong64()  # TLeafB for 8-bit integers
+
     return None
 
 class RootFileDumper(object):
@@ -201,7 +214,7 @@ class RootFileDumper(object):
     any TTree.
     """
     
-    def __init__(self, fname, tree_name="CollectionTree"):
+    def __init__(self, fname, tree_name=None):
         object.__init__(self)
 
         ROOT = import_root()
@@ -215,9 +228,7 @@ class RootFileDumper(object):
             not self.root_file.IsOpen()):
             raise IOError('could not open [%s]'% fname)
 
-        self.tree = self.root_file.Get(tree_name)
-        if self.tree is None or not isinstance(self.tree, ROOT.TTree):
-            raise AttributeError('no tree [%s] in file [%s]', tree_name, fname)
+        self.__init_obj(tree_name)
 
         if 0:
             self._trees = []
@@ -230,21 +241,73 @@ class RootFileDumper(object):
 
         return
 
+    def __init_obj(self, obj_name):
+
+        ROOT = import_root()
+        from PyUtils.PoolFile import PoolOpts
+        TTreeNames = PoolOpts.TTreeNames
+        RNTupleNames = PoolOpts.RNTupleNames
+
+        if obj_name is None:
+            for id in ((TTreeNames.EventData, ROOT.TTree), (RNTupleNames.EventData, ROOT.RNTuple)):
+                name, klass = id
+                if (obj := self.root_file.Get(name)) and isinstance(obj, klass):
+                    self.obj_name = name
+                    break
+            else:
+                raise AttributeError('No TTree named %r or RNTuple named %r in file %r' %
+                                     (TTreeNames.EventData, RNTupleNames.EventData,
+                                      self.root_file.GetName()))
+        else:
+            if (not (obj := self.root_file.Get(obj_name)) or
+                not isinstance(obj, ROOT.TTree) and not isinstance(obj, ROOT.RNTuple)):
+                raise AttributeError('No TTree or RNTuple named %r in file %r' %
+                                     (obj_name, self.root_file.GetName()))
+            self.obj_name = obj_name
+
+        if isinstance(obj, ROOT.RNTuple):
+            try:
+                self.obj = ROOT.RNTupleReader.Open(obj)
+            except AttributeError:
+                self.obj = ROOT.Experimental.RNTupleReader.Open(obj)
+        elif isinstance(obj, ROOT.TTree):
+            self.obj = obj
+            # in case it is used somewhere
+            self.tree = self.obj
+
+    def _dump(self, obj, itr_entries, leaves=None, retvecs=False, sortleaves=True):
+        ROOT = import_root()
+        try:
+            RNTupleReader = ROOT.RNTupleReader
+        except AttributeError:
+            RNTupleReader = ROOT.Experimental.RNTupleReader
+        if isinstance(obj, ROOT.TTree):
+            yield from self._tree_dump(obj, itr_entries, leaves, retvecs, sortleaves)
+        elif isinstance(obj, RNTupleReader):
+            yield from self._reader_dump(obj, itr_entries, leaves, retvecs, sortleaves)
+        else:
+            raise NotImplementedError("'_dump' not implemented for object of class=%r" %
+                                      (obj.__class__.__name__,))
+
     def dump(self, tree_name, itr_entries, leaves=None, retvecs=False, sortleaves=True):
+        if (tree_name is None and getattr(self, "obj_name", None) is None or
+            tree_name is not None and getattr(self, "obj_name", None) != tree_name):
+                self.__init_obj(tree_name)
+        yield from self._dump(self.obj, itr_entries, leaves, retvecs, sortleaves)
+
+    def _tree_dump(self, tree, itr_entries, leaves=None, retvecs=False, sortleaves=True):
 
         ROOT = import_root()
         import AthenaPython.PyAthena as PyAthena
         _pythonize = PyAthena.RootUtils.PyROOTInspector.pyroot_inspect2
 
-        self.tree = self.root_file.Get(tree_name)
-        if self.tree is None or not isinstance(self.tree, ROOT.TTree):
-            raise AttributeError('no tree [%s] in file [%s]', tree_name, self.root_file.GetName())
-
-        tree = self.tree
+        tree_name = self.obj_name
         nentries = tree.GetEntries()
-        branches = sorted([b.GetName().rstrip('\0') for b in tree.GetListOfBranches()])
-        if leaves is None: leaves = branches
-        else:              leaves = [str(b).rstrip('\0') for b in leaves]
+        if leaves is not None:
+            leaves = [str(b).rstrip('\0') for b in leaves]
+            leaves.sort()
+        else:
+            leaves = sorted([b.GetName().rstrip('\0') for b in tree.GetListOfBranches()])
         
         # handle itr_entries
         if isinstance(itr_entries, str):
@@ -301,7 +364,7 @@ class RootFileDumper(object):
                 hdr = "::  branch [%s]..." % (br_name,)
                 #print (hdr)
                 #tree.GetBranch(br_name).GetEntry(ientry)
-                py_name = [br_name]
+                _vals = list()
 
                 br = tree.GetBranch (br_name)
                 if br.GetClassName() != '':
@@ -312,16 +375,17 @@ class RootFileDumper(object):
                     # See ATEAM-1000.
                     getattr (ROOT, br.GetClassName())
                     val = getattr(tree, br_name)
+                    _vals += [ ([br_name], val) ]
                 else:
-                    vals = [_getLeaf (l) for l in br.GetListOfLeaves()]
-                    if len(vals) == 0:
-                        val = None
-                    elif len(vals) == 1:
-                        val = vals
-                    else:
-                        val = tuple(vals)
-                if not (val is None):
-                    #print ("-->",val,br_name)
+                    for l in br.GetListOfLeaves():
+                        if (br.GetNleaves() == 1 and (br_name == l.GetName() or
+                                                      br_name.endswith('.' + l.GetName()))):
+                            _vals += [ ([br_name], _getLeaf (l)) ]
+                        else:
+                            _vals += [ ([br_name, l.GetName()], _getLeaf (l)) ]
+                for _val in _vals:
+                    py_name, val = _val
+                    if val is None: continue
                     try:
                         vals = _pythonize(val, py_name, True, retvecs)
                     except Exception as err:
@@ -342,6 +406,103 @@ class RootFileDumper(object):
                 pass # loop over branch names
             pass # loop over entries
     pass # class RootFileDumper
+
+    def _reader_dump(self, reader, itr_entries, leaves=None, retvecs=False, sortleaves=True):
+
+        ROOT = import_root()
+        import AthenaPython.PyAthena as PyAthena
+        _pythonize = PyAthena.RootUtils.PyROOTInspector.pyroot_inspect2
+
+        ntuple_name = self.obj_name
+        nentries = reader.GetNEntries()
+        from operator import methodcaller
+        if leaves is not None:
+            leaves = sorted(leaves)
+        else:
+            leaves = sorted(map(methodcaller('GetFieldName'), reader.GetDescriptor().GetTopLevelFields()))
+
+        # handle itr_entries
+        if isinstance(itr_entries, str):
+            if ':' in itr_entries:
+                def toint(s):
+                    if s == '':
+                        return None
+                    try:
+                        return int(s)
+                    except ValueError:
+                        return s
+                from itertools import islice
+                itr_entries = islice(range(nentries),
+                                     *map(toint, itr_entries.split(':')))
+            elif ('range' in itr_entries or
+                  ',' in itr_entries):
+                itr_entries = eval(itr_entries)
+            else:
+                try:
+                    _n = int(itr_entries)
+                    itr_entries = range(_n)
+                except ValueError:
+                    print ("** err ** invalid 'itr_entries' argument. will iterate over all entries.")
+                    itr_entries = range(nentries)
+        elif isinstance(itr_entries, list):
+            itr_entries = itr_entries
+        else:
+            itr_entries = range(itr_entries)
+
+        list_ = list
+        map_ = map
+        str_ = str
+        isinstance_ = isinstance
+
+        try:
+            from ROOT import RException
+        except ImportError:
+            from ROOT.Experimental import RException
+
+        try:
+            entry = reader.CreateEntry()
+        except AttributeError:
+            entry = reader.GetModel().CreateEntry()
+        # entry = self.reader.CreateEntry()
+        for ientry in itr_entries:
+            try:
+                reader.LoadEntry(ientry, entry)
+            except RException as err:
+                from traceback import format_exception
+                import sys
+                print("Exception reading entry=%05i of ntuple %r\n%s" %
+                      (ientry, ntuple_name, "".join(format_exception(err))), file=sys.stderr)
+                self.allgood = False
+                continue
+
+            for br_name in leaves:
+                py_name = [br_name]
+                token = entry.GetToken(br_name)
+                typeName = entry.GetTypeName(token)
+                # Make sure dictionaries are completely loaded before
+                # trying to fetch it from ROOT.  Otherwise we can run
+                # into cling parse failures due to it synthesizing
+                # incorrect forward declarations.
+                # See ATEAM-1000.
+                getattr(ROOT, typeName)
+                val = entry[token]
+                if val is not None:
+                    try:
+                        vals = _pythonize(val, py_name, True, retvecs)
+                    except Exception as err:
+                        print("**err** for branch [%s] val=%s (type=%s)" %
+                              (br_name, val, type(val)))
+                        self.allgood = False
+                        print(err)
+                    if sortleaves:
+                        viter = sorted(vals, key = lambda x: '.'.join(s for s in x[0] if isinstance_(s, str_)))
+                    else:
+                        viter = vals
+                    for o in viter:
+                        n = list_(map_(str_, o[0]))
+                        v = o[1]
+                        yield ntuple_name, ientry, n, v
+
 
 ### test support --------------------------------------------------------------
 def _test_main():

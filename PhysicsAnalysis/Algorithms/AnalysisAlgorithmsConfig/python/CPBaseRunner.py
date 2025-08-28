@@ -31,6 +31,13 @@ class CPBaseRunner(ABC):
                                         'Please provide a text file with a list of input files or a single root file.')
             self.logger.info("Initialized input files: %s", self._inputList)
         return self._inputList
+    
+    @property
+    def outputName(self):
+        if self.args.output_name.endswith('.root'):
+            return self.args.output_name[:-5]
+        else:
+            return self.args.output_name
 
     def printFlags(self):
         self.logger.info("="*73)
@@ -40,6 +47,8 @@ class CPBaseRunner(ABC):
         self.logger.info("    RunNumber:       %s", self.flags.Input.RunNumbers)
         self.logger.info("    MCCampaign:      %s", self.flags.Input.MCCampaign)
         self.logger.info("    GeneratorInfo:   %s", self.flags.Input.GeneratorsInfo)
+        self.logger.info("    MaxEvents:       %s", self.flags.Exec.MaxEvents)
+        self.logger.info("    SkipEvents:      %s", self.flags.Exec.SkipEvents)
         self.logger.info("="*73)
 
     @abstractmethod
@@ -60,6 +69,7 @@ class CPBaseRunner(ABC):
         flags = initConfigFlags()
         flags.Input.Files = self.inputList
         flags.Exec.MaxEvents = self.args.max_events
+        flags.Exec.SkipEvents = self.args.skip_n_events
         return flags
 
     def _defaultParseArguments(self):
@@ -76,14 +86,15 @@ class CPBaseRunner(ABC):
                             help='path to the YAML configuration file. Tips: use atlas_install_data(path/to/*.yaml) in CMakeLists.txt can help locating the config just by the config file name.')
         baseGroup.add_argument('--no-systematics', dest='no_systematics',
                             action='store_true', help='Disable systematics')
+        baseGroup.add_argument('--skip-n-events', dest='skip_n_events', type=int, default=0,
+                            help='Skip the first N events in the run, not first N events for each file. Does not work on EventLoop exec-driver yet')
         return parser
 
     def _readYamlConfig(self):
-        from ROOT import PathResolver
-        yamlconfig = PathResolver.find_file(
-            self.args.text_config, "DATAPATH", PathResolver.RecursiveSearch)
+        from AthenaCommon.Utils.unixtools import find_datafile
+        yamlconfig = find_datafile(self.args.text_config)
         if not yamlconfig:
-            raise FileNotFoundError(f'PathResolver failed to locate \"{self.args.text_config}\" config file!'
+            raise FileNotFoundError(f'Failed to locate \"{self.args.text_config}\" config file!'
                                     'Check if you have a typo in -t/--text-config argument or missing file in the analysis configuration sub-directory.')
         self.logger.info("Setting up configuration based on YAML config:")
         from AnalysisAlgorithmsConfig.ConfigText import TextConfig

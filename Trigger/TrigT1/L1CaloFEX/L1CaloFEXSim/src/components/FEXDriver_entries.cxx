@@ -2,50 +2,46 @@
     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "L1CaloFEXSim/eFEXDriver.h"
-#include "L1CaloFEXSim/eFEXSysSim.h"
-#include "L1CaloFEXSim/eFEXFillEDM.h"
-#include "L1CaloFEXSim/eFEXFormTOBs.h"
-#include "L1CaloFEXSim/eFEXSim.h"
-#include "L1CaloFEXSim/eFEXFPGA.h"
-#include "L1CaloFEXSim/eFEXtauAlgo.h"
-#include "L1CaloFEXSim/eFEXtauBDTAlgo.h"
+#include "../eFEXDriver.h"
+#include "../eFEXSysSim.h"
+#include "../eFEXFillEDM.h"
+#include "../eFEXFormTOBs.h"
+#include "../eFEXSim.h"
+#include "../eFEXFPGA.h"
+#include "../eFEXtauAlgo.h"
+#include "../eFEXtauBDTAlgo.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXTOBEtTool.h"
-#include "L1CaloFEXSim/eFEXNtupleWriter.h"
-#include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
-#include "L1CaloFEXSim/eTowerMakerFromSuperCells.h"
+#include "../eFEXFPGATowerIdProvider.h"
+#include "../eTowerMakerFromSuperCells.h"
 #include "../eTowerMakerFromEfexTowers.h"
 #include "L1CaloFEXSim/eFEXSuperCellTowerIdProvider.h"
-#include "L1CaloFEXSim/eFakeTower.h"
+#include "../eFakeTower.h"
 
 
-#include "L1CaloFEXSim/jFEXDriver.h"
-#include "L1CaloFEXSim/jFEXSysSim.h"
-#include "L1CaloFEXSim/jFEXSim.h"
-#include "L1CaloFEXSim/jFEXFPGA.h"
-#include "L1CaloFEXSim/jFEXSmallRJetAlgo.h"
-#include "L1CaloFEXSim/jFEXtauAlgo.h"
-#include "L1CaloFEXSim/jFEXsumETAlgo.h"
-#include "L1CaloFEXSim/jFEXmetAlgo.h"
-#include "L1CaloFEXSim/jFEXLargeRJetAlgo.h"
-#include "L1CaloFEXSim/jFEXForwardJetsAlgo.h"
-#include "L1CaloFEXSim/jFEXForwardElecAlgo.h"
-#include "L1CaloFEXSim/jFEXNtupleWriter.h"
-#include "L1CaloFEXSim/jFEXPileupAndNoise.h"
-#include "L1CaloFEXSim/jFEXFormTOBs.h"
-#include "L1CaloFEXSim/jTowerMakerFromSuperCells.h"
+#include "../jFEXDriver.h"
+#include "../jFEXSysSim.h"
+#include "../jFEXSim.h"
+#include "../jFEXFPGA.h"
+#include "../jFEXSmallRJetAlgo.h"
+#include "../jFEXtauAlgo.h"
+#include "../jFEXsumETAlgo.h"
+#include "../jFEXmetAlgo.h"
+#include "../jFEXLargeRJetAlgo.h"
+#include "../jFEXForwardJetsAlgo.h"
+#include "../jFEXForwardElecAlgo.h"
+#include "../jFEXPileupAndNoise.h"
+#include "../jFEXFormTOBs.h"
 #include "../jTowerMakerFromJfexTowers.h"
 
-#include "L1CaloFEXSim/gFEXDriver.h"
-#include "L1CaloFEXSim/gFEXSysSim.h"
-#include "L1CaloFEXSim/gFEXSim.h"
-#include "L1CaloFEXSim/gFEXFPGA.h"
-#include "L1CaloFEXSim/gFEXJetAlgo.h"
-#include "L1CaloFEXSim/gFEXJwoJAlgo.h"
-#include "L1CaloFEXSim/gFEXaltMetAlgo.h"
-#include "L1CaloFEXSim/gFEXNtupleWriter.h"
-#include "L1CaloFEXSim/gTowerMakerFromGfexTowers.h"
+#include "../gFEXDriver.h"
+#include "../gFEXSysSim.h"
+#include "../gFEXSim.h"
+#include "../gFEXFPGA.h"
+#include "../gFEXJetAlgo.h"
+#include "../gFEXJwoJAlgo.h"
+#include "../gFEXaltMetAlgo.h"
+#include "../gTowerMakerFromGfexTowers.h"
 
 
 
@@ -63,7 +59,6 @@ DECLARE_COMPONENT(eFEXtauAlgo)
 DECLARE_COMPONENT(eFEXtauBDTAlgo)
 DECLARE_COMPONENT(eFEXegAlgo)
 DECLARE_COMPONENT(eFEXTOBEtTool)
-DECLARE_COMPONENT(eFEXNtupleWriter)
 DECLARE_COMPONENT(eTowerMakerFromSuperCells)
 DECLARE_COMPONENT(eTowerMakerFromEfexTowers)
 DECLARE_COMPONENT(eFEXFPGATowerIdProvider)
@@ -84,9 +79,7 @@ DECLARE_COMPONENT(jFEXmetAlgo)
 DECLARE_COMPONENT(jFEXLargeRJetAlgo)
 DECLARE_COMPONENT(jFEXForwardJetsAlgo)
 DECLARE_COMPONENT(jFEXForwardElecAlgo)
-DECLARE_COMPONENT(jFEXNtupleWriter)
 DECLARE_COMPONENT(jFEXFormTOBs)
-DECLARE_COMPONENT(jTowerMakerFromSuperCells)
 DECLARE_COMPONENT(jTowerMakerFromJfexTowers)
 
 DECLARE_COMPONENT(gFEXDriver)
@@ -98,7 +91,6 @@ DECLARE_COMPONENT(gFEXFPGA)
 DECLARE_COMPONENT(gFEXJetAlgo)
 DECLARE_COMPONENT(gFEXJwoJAlgo)
 DECLARE_COMPONENT(gFEXaltMetAlgo)
-DECLARE_COMPONENT(gFEXNtupleWriter)
 DECLARE_COMPONENT(gTowerMakerFromGfexTowers)
 
 

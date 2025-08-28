@@ -33,7 +33,7 @@ public:
 
   StatusCode initialize() override;
 
-  StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads, std::vector<FPGATrackSimTrack> & tracks);
+  StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads, std::vector<FPGATrackSimTrack> & tracks, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max);
   StatusCode getMissingHitsCheckTracks(std::vector<FPGATrackSimTrack> & tracks_guessed);
 
   StatusCode getNFits(int & n)            { n = m_tfpobj->getNFits();             return StatusCode::SUCCESS; }
@@ -54,7 +54,7 @@ private:
   Gaudi::Property <bool> m_doDeltaGPhis { this, "DoDeltaGPhis", false, "If True will do the fit by the delta global phis method"};
   Gaudi::Property <bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false, "If True and we guess hits, when we have 8/8 we also drop hits and guess them to compare to true positions"};
   Gaudi::Property <int> m_idealCoordFitType {this, "IdealCoordFitType", 2, "Fit type for idealized coordinates, 0 if off"};
-
+  Gaudi::Property <bool> m_fitFromRoad {this, "fitFromRoad", true, "If set, perform the first stage fit using the genscan/inside out road-level information"};
 
 
 };

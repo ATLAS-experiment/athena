@@ -19,7 +19,7 @@ atlas_add_library( TileGeoG4SDLib
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} G4AtlasToolsLib TileDetDescr TileSimEvent TileG4InterfacesLib
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloIdentifier CxxUtils GeoModelInterfaces GeoModelUtilities GaudiKernel PathResolver StoreGateLib CaloDetDescrLib TileGeoModelLib )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloIdentifier CxxUtils GeoModelInterfaces GeoModelUtilities GaudiKernel PathResolver StoreGateLib CaloDetDescrLib MCTruth TileGeoModelLib )
 set_target_properties( TileGeoG4SDLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( TileGeoG4SD

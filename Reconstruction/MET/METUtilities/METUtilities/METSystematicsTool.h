@@ -125,7 +125,7 @@ namespace met {
     StatusCode applySystematicVariation(const CP::SystematicSet& set){		  return CP::SystematicsTool::applySystematicVariation(set) ;}
     StatusCode sysApplySystematicVariation(const CP::SystematicSet&); //when inheriting from SystematicsTool, we should only have to implement this one
 
-    void setRandomSeed(int seed) const;
+    void setRandomSeed(unsigned long seed) const;
 
   private:
 
@@ -147,7 +147,7 @@ namespace met {
 
     //declared properties
     Gaudi::Property<std::string> m_configPrefix{this, "ConfigPrefix", "METUtilities/R22_PreRecs", ""};
-    Gaudi::Property<std::string> m_configSoftTrkFile{this, "ConfigSoftTrkFile", "TrackSoftTerms-pflow.config", ""};
+    Gaudi::Property<std::string> m_configSoftTrkFile{this, "ConfigSoftTrkFile", "TrackSoftTerms-pflow_Dec24.config", ""};
     Gaudi::Property<std::string> m_configJetTrkFile{this, "ConfigJetTrkFile", "", ""};
     Gaudi::Property<std::string> m_configSoftCaloFile{this, "ConfigSoftCaloFile", "", ""};
     Gaudi::Property<bool> m_useDevArea{this, "UseDevArea", false, ""};

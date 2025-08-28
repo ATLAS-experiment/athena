@@ -252,7 +252,7 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                                 // Set with what makes sense here
                                 xTruthParticle->setPdgId(pdg_id);
                                 // Set dummy values
-                                xTruthParticle->setBarcode(HepMC::INVALID_PARTICLE_ID);
+                                xTruthParticle->setUid(HepMC::INVALID_PARTICLE_ID);
                                 xTruthParticle->setStatus(3);
                                 // Use the sum of the momenta
                                 xAOD::IParticle::FourMom_t new_mom = boson[0]->p4()+boson[1]->p4();

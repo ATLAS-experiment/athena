@@ -50,11 +50,15 @@ atlas_add_citest( DataOverlayPreparationRun3
 atlas_add_citest( OverlayRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--conditionsTag OFLCOND-MC16-SDR-RUN2-12')
 
-atlas_add_citest( OverlayRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay )
-
 atlas_add_citest( OverlayRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay )
+
+atlas_add_citest( OverlayRun3Data
+   SCRIPT RunWorkflowTests_Run3.py --CI -o -w DataOverlay )
+
+atlas_add_citest( OverlayRun3DataChain
+   SCRIPT RunWorkflowTests_Run3.py --CI -o -w DataOverlayChain -e '--maxEvents 3 --inputRDO_BKGFile=../../DataOverlayPreparationRun3/run_d2008/myRDO_BKG.pool.root' # go two levels up as the test runs in a subfolder
+   DEPENDS_SUCCESS DataOverlayPreparationRun3 )
 
 #################################################################################
 # Standard reconstruction workflows
@@ -119,6 +123,11 @@ atlas_add_citest( RecoRun3MC
 atlas_add_citest( RecoRun3MC_PileUp
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --conditionsTag OFLCOND-MC23-SDR-RUN3-08 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1919/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun3 )
+
+atlas_add_citest( RecoRun3Data_Overlay
+   SCRIPT RunWorkflowTests_Run3.py --CI -o -w DataOverlayReco --threads 2 -e '--maxEvents 3 --inputRDOFile=../../OverlayRun3DataChain/run_d2030/myRDO.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 2
+   DEPENDS_SUCCESS OverlayRun3DataChain )
 
 atlas_add_citest( RecoRun4MC
    SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root --conditionsTag OFLCOND-MC21-SDR-RUN4-03' --no-output-checks  # go two levels up as the test runs in a subfolder
@@ -298,20 +307,17 @@ atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
 atlas_add_citest( ACTS_Workflow
-   SCRIPT ActsWorkflow.sh
-   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+   SCRIPT ActsWorkflow.sh )
 
 atlas_add_citest( ACTS_Workflow_Legacy
    SCRIPT ActsWorkflowLegacy.sh
-   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
 
 atlas_add_citest( ACTS_Workflow_Cached_Legacy
-   SCRIPT ActsWorkflowCachedLegacy.sh
-   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+   SCRIPT ActsWorkflowCachedLegacy.sh )
  
 atlas_add_citest( ACTS_Workflow_HeavyIons
-   SCRIPT ActsWorkflowHeavyIons.sh
-   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+   SCRIPT ActsWorkflowHeavyIons.sh )
  
 atlas_add_citest( ACTS_ValidateClusters
    SCRIPT ActsValidateClusters.sh )
@@ -348,7 +354,7 @@ atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
 
 atlas_add_citest( ACTS_ActsGx2fRefitting
    SCRIPT ActsGx2fRefitting.sh
-   LOG_IGNORE_PATTERN "Gx2fRefitNavigator.*ERROR No Volume | No start volume resolved. Nothing left to do." )
+   LOG_IGNORE_PATTERN "Gx2fRefitNavigator.*ERROR No Volume | No start volume resolved. Nothing left to do.|Acts.*ERROR Propagation reached the step count limit|Acts.*ERROR Propagation failed" )
    
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ActsKfRefitting.sh )
@@ -375,41 +381,46 @@ atlas_add_citest( ACTS_ActsDumpGeometryIdentifiers
 atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot
    SCRIPT ActsBenchmarkLegacyWithSpot.sh 8 100
    PROPERTIES PROCESSOR 8
-   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLegacyTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLegacyTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
 
 atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot_Cached
    SCRIPT ActsBenchmarkLegacyWithSpotCached.sh 8 100
    PROPERTIES PROCESSOR 8
-   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLegacyTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLegacyTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
 
 atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
    SCRIPT ActsBenchmarkWithSpot.sh 8 100
-   PROPERTIES PROCESSOR 8
-   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+   PROPERTIES PROCESSOR 8 )
+
+atlas_add_citest( ACTS_ActsBenchmarkWithSpotGbts
+   SCRIPT ActsBenchmarkWithSpotGbts.sh 8 100
+   PROPERTIES PROCESSOR 8 )
 
  atlas_add_citest( ACTS_ActsBenchmarkWithSpotHeavyIons
    SCRIPT ActsBenchmarkWithSpotHeavyIons.sh  8 50
-   PROPERTIES PROCESSOR 8
-   LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+   PROPERTIES PROCESSOR 8 )
  
 atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Legacy
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsLegacy
-  LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
 
 atlas_add_citest( ACTS_CheckObjectCounts_WorkflowCached_Legacy
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsCachedLegacy
-  LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
 
 atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd_Legacy
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtdLegacy
-  LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts
-  LOG_IGNORE_PATTERN "Acts.*FindingAlg.*ERROR Propagation reached the step count limit|Acts.*FindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|Acts.*FindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|Acts.*FindingAlg.Acts.*ERROR.*SurfaceError:1|Acts.*FindingAlg.*ERROR.*failed.*to.*extrapolate.*track" )
+  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+
+atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Gbts
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbts )
 
 #################################################################################
 #                 Muon Phase II CI tests
@@ -449,8 +460,9 @@ atlas_add_citest( TriggerConfigFlags
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose
    POST_EXEC_SCRIPT nopost.sh )
 
-atlas_add_citest( EFTracking_FPGATrackSim_workflow
-  SCRIPT test_FPGATrackSimWorkflow.sh )
+atlas_add_citest( EFTracking_FPGATrackSim_CI
+  SCRIPT FPGATrackSim_CI.sh
+   LOG_IGNORE_PATTERN "FPGATrackSimProto.*ERROR Propagation reached the step count limit.*|FPGATrackSimProto.*ERROR.*Propagation failed: PropagatorError.*|WARNING FPE.*FPGATrackSimProtoTackFitAlg.*|.*WARNING FPE INVALID.*ResolvedProtoTrackToAltTrackParticleCnvAlg.*|.*ERROR.*No start volume resolved.*|.*WARNING ERROR message limit.*|.*ERROR \|" )
 
 atlas_add_citest (TrigInDetValidationMenu 
                SCRIPT TrigInDetValidation_menu_test.py

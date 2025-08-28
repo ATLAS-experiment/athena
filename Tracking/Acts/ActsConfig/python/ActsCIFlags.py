@@ -11,7 +11,7 @@ def actsLegacyWorkflowFlags(flags) -> None:
 def actsWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
-    flags.Acts.doAmbiguityResolution = True
+    flags.Acts.doAmbiguityResolution = False
     flags.Tracking.doITkFastTracking = True
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
 
@@ -109,3 +109,7 @@ def actsGSFEgammaFlags(flags) -> None:
     flags.Acts.GsfRefitActs = True
     flags.Acts.GsfDirectNavigation = True
     
+def actsValidateF100Flags(flags) -> None:
+    actsWorkflowFlags(flags)
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateF100]
+    flags.Acts.doAmbiguityResolution = True

@@ -20,13 +20,13 @@ def ActsEMBremCollectionBuilderCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
     kwargs.setdefault('RefittedTracksLocation', 'ActsRefittedGSFTracks')
     
     kwargs.setdefault("SelectedTrackParticleContainerName",
                       "InDetTrackParticles")
-    
+
     alg = CompFactory.ActsEMBremCollectionBuilder(name, **kwargs)
     acc.addEventAlgo(alg)
     
@@ -52,3 +52,39 @@ def ActsEMBremCollectionBuilderCfg(flags,
     
     return acc
 
+
+
+def TrigActsEMBremCollectionBuilderCfg(flags,
+                                       name="TrigActsEMBremCollectionBuilder",
+                                       **kwargs):
+
+  acc = ComponentAccumulator()
+  
+  tpName = kwargs.pop("TrackParticlesOutKey","GSFTrackParticles")
+
+  if "ActsFitter" not in kwargs:    
+    from ActsConfig.ActsGaussianSumFitterConfig import ActsGaussianSumFitterToolCfg
+    kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(
+        ActsGaussianSumFitterToolCfg(flags, name="ActsGSFTrackFitter")))
+        
+    
+  if 'TrackingGeometryTool' not in kwargs:
+      from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+      kwargs.setdefault(
+          "TrackingGeometryTool",
+          acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
+      )
+
+  kwargs.setdefault('RefittedTracksLocation', 'HLT_IDTrack_Electron_GSFTracks')
+  kwargs.setdefault("SelectedTrackParticleContainerName",
+                    flags.Tracking.ActiveConfig.tracks_IDTrig)
+    
+  alg = CompFactory.ActsEMBremCollectionBuilder(name, **kwargs)
+  acc.addEventAlgo(alg)
+
+  from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+  acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsGSFTrackParticleCnvAlg"+flags.Tracking.ActiveConfig.input_name,
+                                              ACTSTracksLocation=[kwargs['RefittedTracksLocation'],],
+                                              TrackParticlesOutKey=tpName))
+
+  return acc

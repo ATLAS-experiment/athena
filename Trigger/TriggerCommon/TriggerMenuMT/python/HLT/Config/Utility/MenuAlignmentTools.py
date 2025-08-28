@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 import numpy as np
-from collections import OrderedDict
 from AthenaCommon.Logging import logging
 import itertools
 
@@ -45,17 +44,12 @@ def remove_duplicates(config_tuples):
         return config_tuples
        
     else:
-        unique_list = OrderedDict()
+        unique_list = {}
         for ag_length, ag in config_tuples:
-            if ag in unique_list:
-                if ag_length > unique_list[ag]:
-                    unique_list[ag] = ag_length
-            else:
+            if ag not in unique_list or ag_length > unique_list[ag]:
                 unique_list[ag] = ag_length
 
-        unique_config_tuples = []
-        for ag, ag_length in unique_list.items():
-            unique_config_tuples += [(ag_length, ag)]
+        unique_config_tuples = [(ag_length, ag) for ag, ag_length in unique_list.items()]
         return unique_config_tuples
 
 class MenuAlignment():

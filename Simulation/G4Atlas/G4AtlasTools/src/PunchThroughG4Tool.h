@@ -7,6 +7,7 @@
 
 //
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "G4AtlasInterfaces/IPhysicsInitialization.h"
 #include "G4AtlasInterfaces/IPunchThroughG4Tool.h"
 
 //Envelope (Calo-MS boundary)
@@ -46,7 +47,7 @@ class TFile;
 class PunchThroughParticle;
 class PunchThroughPDFCreator;
 
-class PunchThroughG4Tool : virtual public extends<AthAlgTool, IPunchThroughG4Tool>
+class PunchThroughG4Tool : virtual public extends<AthAlgTool, IPunchThroughG4Tool, IPhysicsInitializationTool>
 {
   public:
     PunchThroughG4Tool(const std::string&, const std::string&, const IInterface*);
@@ -57,6 +58,8 @@ class PunchThroughG4Tool : virtual public extends<AthAlgTool, IPunchThroughG4Too
     virtual StatusCode initialize() override;
     /** AlgTool finalize method */
     virtual StatusCode finalize() override;
+
+    StatusCode initializePhysics() override;
 
     /** interface function: fill a vector with the punch-through particles */
     //virtual const G4TrackVector* computePunchThroughParticles(G4ParticleTable &ptable, const G4FastTrack& fastTrack, G4FastStep& fastStep, const TFCSSimulationState& simulstate, CLHEP::HepRandomEngine* rndmEngine);

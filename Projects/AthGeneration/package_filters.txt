@@ -67,7 +67,6 @@
 + Database/AthenaPOOL/OutputStreamAthenaPool
 + Database/AthenaPOOL/PoolSvc
 + Database/AthenaPOOL/RootConversions
-#+ Database/AthenaPOOL/RootFileTools
 + Database/AthenaRoot/AthenaRootComps
 + Database/AthenaRoot/AthenaRootKernel
 + Database/AthenaRoot/RootAuxDynIO
@@ -89,6 +88,7 @@
 + Database/PersistentDataModelTPCnv
 + Database/RDBAccessSvc
 #+ Database/RegistrationServices
++ Database/SQLiteDBSvc
 + Database/TPTools
 #+ DataQuality/GoodRunsLists
 + DetectorDescription/AtlasDetDescr

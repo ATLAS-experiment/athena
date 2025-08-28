@@ -711,10 +711,12 @@ void MuonIdHelper::addStationID(Identifier& id, int stationName, int stationEta,
 int MuonIdHelper::stationRegion(const Identifier& id) const {
     std::string name = stationNameString(stationName(id));
 
-    if ('I' == name[1] || '4' == name[1]) return 0;
-    if ('E' == name[1] || '1' == name[1]) return 1;
-    if ('M' == name[1] || '2' == name[1]) return 2;
-    if ('O' == name[1] || '3' == name[1]) return 3;
+    if (name.size() >= 2) {
+      if ('I' == name[1] || '4' == name[1]) return 0;
+      if ('E' == name[1] || '1' == name[1]) return 1;
+      if ('M' == name[1] || '2' == name[1]) return 2;
+      if ('O' == name[1] || '3' == name[1]) return 3;
+    }
     if (name == "CSS" || name == "CSL") return 0;
     ATH_MSG_ERROR(" MuonId::stationRegion / id = " << show_to_string(id) << " stationnamestring = " << name);
     return -1;

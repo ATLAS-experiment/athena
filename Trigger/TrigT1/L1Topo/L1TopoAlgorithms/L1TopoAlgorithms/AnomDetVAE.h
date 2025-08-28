@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //  AnomDetVAE.h
 //  Created by Sagar Addepalli on 25/11/2024.
@@ -39,7 +39,12 @@ namespace TCS {
       parType_t      p_minEt2 = { 0 };
       parType_t      p_minEt3 = { 0 };
       parType_t      p_minEt4 = { 0 };
+      parType_t      p_ScaleSqr1[2] = { 0, 0 };
+      parType_t      p_ScaleSqr2[2] = { 0, 0 };
+      parType_t      p_ScaleSqr3[2] = { 0, 0 };
       parType_t      p_AnomalyScoreThresh[2] = { 0, 0 };
+
+      unsigned int   p_ScaleSqr_DropBits = 7;
 
    };
    

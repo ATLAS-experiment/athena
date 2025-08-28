@@ -1,6 +1,6 @@
 #!/env/python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @file AthenaPoolExample_Write.py
 ## @brief Example job options file to illustrate how to write event data to Pool.
@@ -86,6 +86,9 @@ flags.lock()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc = MainServicesCfg( flags )
 
+from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+acc.merge( EventInfoCnvAlgCfg( flags, disableBeamSpot=True ) )
+
 # Load CutFlowSvc
 from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
 acc.merge( CutFlowSvcCfg( flags ) )    #addMetaDataToAllOutputFiles=True ) )
@@ -124,7 +127,6 @@ acc.merge( AthenaPoolExampleWriteCfg( flags, stream2name, disableEventTag = noTa
 stream2ca = OutputStreamCfg(flags, stream2name, disableEventTag = noTag,
                             ItemList = ['EventInfo#*', 'ExampleHitContainer#MyHits'] )
 stream2 = stream2ca.getEventAlgo( outputStreamName( stream2name ) )
-stream2.ExcludeList += [ "ExampleHitContainer#MyHits" ]
 stream2.WritingTool.AttributeListKey = "RunEventTag"
 acc.merge( stream2ca )
 

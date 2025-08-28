@@ -2,14 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cassert>
-#include <cmath>      /*ceil,sqrt*/
-#include <stdexcept>  /*runtime_error*/
-#include <string>
 
-#include <functional>
-#include "AthenaKernel/IAtRndmGenSvc.h"
-
+#include "BkgStreamsCache.h"
 #include "StoreGate/StoreGateSvc.h" /*to print name() */
 #include "GaudiKernel/IEvtSelector.h"
 
@@ -23,50 +17,18 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaKernel/errorcheck.h"
 
-#include "BkgStreamsCache.h"
+
+#include <cassert>
+#include <cmath>      /*ceil,sqrt*/
+#include <stdexcept>  /*runtime_error*/
+
 
 BkgStreamsCache::BkgStreamsCache( const std::string& type,
                                   const std::string& name,
                                   const IInterface* parent)
   : base_class( type, name, parent )
-  , m_nXings(0)
-  , m_nStores(0)
-  , m_collXing(23.0)
-  , m_occupationFraction(1.0)
-  , m_collDistrName("Poisson")
-  , m_selecName("FakeEventSelector", name)
-  , m_readDownscale(150)
-  , m_atRndmSvc("AtRndmGenSvc", name)
-  , m_randomStreamName("PileUpCollXingStream")
-  , m_pileUpEventTypeProp(0)
-  , m_pileUpEventType(xAOD::EventInfo::PileUpType::Signal)
-  , m_subtractBC0(0)
-  , m_ignoreBM(false)
-  , m_readEventRand(nullptr)
-  , m_chooseEventRand(nullptr)
-  , m_collXingPoisson(nullptr)
-  , m_f_collDistr(0)
-  , m_f_numberOfBackgroundForBunchCrossing(0)
-  , m_collXingSF(1.0)
-  , m_ignoreSF(false)
-  , m_zeroXing(-1)
-  , m_beamInt(nullptr)
-  , m_forceReadForBC0(true)
 {
-  declareProperty("CollPerXing", m_collXing, "(average) number of collisions per beam crossing");
-  declareProperty("OccupationFraction", m_occupationFraction, "The maximum fraction of bunch-crossings which will be occupied.");
-  declareProperty("CollDistribution", m_collDistrName, "nEvts/Xings can be either Fixed at CollPerXing or Poisson with average CollPerXing");
-  declareProperty("EventSelector", m_selecName);
-  declareProperty("PileUpEventType", m_pileUpEventTypeProp, "Type of the pileup events in this cache: 0:Signal, 1:MinimumBias, 2:Cavern, 3:HaloGas, 4:ZeroBias. Default=0 (Signal, Invalid)");
-  declareProperty("ReadDownscaleFactor", m_readDownscale, "read one event every downscaleFactor accesses (asymptotically -> number of times an event in the cache will be reused)");
-  declareProperty("RndmGenSvc", m_atRndmSvc, "IAtRndmGenSvc controlling the distribution of bkg events/xing");
-  declareProperty("RndmStreamName", m_randomStreamName, "IAtRndmGenSvc stream used as engine for our various random distributions, including the CollPerXing one ");
-  declareProperty("SubtractBC0", m_subtractBC0, "reduce the number of events at bunch xing t=0 by m_subtractBC0. Default=0, set to 1 when using the same type of events (e.g. minbias) for original and background streams");
   m_pileUpEventTypeProp.verifier().setUpper(xAOD::EventInfo::PileUp_NTYPES-2);
-  m_pileUpEventTypeProp.declareUpdateHandler(&BkgStreamsCache::PileUpEventTypeHandler, this);
-  declareProperty("IgnoreBeamInt", m_ignoreBM, "Default=False, set to True to ignore the PileUpEventLoopMgr beam intensity tool in setting the number of events per xing.");
-  declareProperty("IgnoreBeamLumi", m_ignoreSF, "Default=False, set to True to ignore the PileUpEventLoopMgr beam luminosity tool in setting the number of events per xing.");
-  declareProperty("ForceReadForBC0",m_forceReadForBC0,"Force events used in the central bunch crossing to be refreshed");
 }
 
 BkgStreamsCache::~BkgStreamsCache()

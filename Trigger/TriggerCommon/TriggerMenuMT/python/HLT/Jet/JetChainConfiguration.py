@@ -115,7 +115,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         # define here the names of the steps and obtain the chainStep configuration 
         # --------------------
         chainSteps = []
-        if self.recoDict["ionopt"]=="ion":
+        if self.recoDict["ionopt"] in ['ion', 'ionp']:
             jetHICaloHypoStep = self.getJetHICaloHypoChainStep(flags)
             chainSteps.append( jetHICaloHypoStep )
         elif self.recoDict["trkopt"]=="roiftf":
@@ -141,7 +141,7 @@ class JetChainConfiguration(ChainConfigurationBase):
                 preselJetDef, jetPreselStep = self.getJetCaloPreselChainStep(flags)
                 chainSteps.append( jetPreselStep )
 
-                if re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)|.*Z|.*gntau', self.trkpresel):
+                if re.match(r'.*((b|bg|bgtwo)\d\d)|.*Z|.*gntau|.*uht', self.trkpresel):
                     # Preselection with super-RoI tracking for b-tagging, tau-tagging or pileup tagging
                     roitrkPreselStep = self.getJetRoITrackJetTagPreselChainStep(flags, preselJetDef)
                 else:

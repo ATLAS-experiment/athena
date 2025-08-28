@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "LArClusterCellDumper/EventReaderBaseAlg.h"
 
@@ -421,7 +421,7 @@ void EventReaderBaseAlg::bookBranches(TTree *tree){
       tree->Branch("mc_part_phi",&m_mc_part_phi);
       tree->Branch("mc_part_pdgId",&m_mc_part_pdgId);
       tree->Branch("mc_part_status", &m_mc_part_status);
-      tree->Branch("mc_part_barcode", &m_mc_part_barcode);
+      tree->Branch("mc_part_barcode", &m_mc_part_uniqueID); // TODO Rename variable name to be consistent?
     }
     // ## Vertex Truth ##
     if (m_doTruthEventDump){
@@ -432,7 +432,7 @@ void EventReaderBaseAlg::bookBranches(TTree *tree){
       tree->Branch("mc_vert_perp", &m_mc_vert_perp);
       tree->Branch("mc_vert_eta", &m_mc_vert_eta);
       tree->Branch("mc_vert_phi", &m_mc_vert_phi);
-      tree->Branch("mc_vert_barcode", &m_mc_vert_barcode);
+      tree->Branch("mc_vert_barcode", &m_mc_vert_uniqueID); // TODO Rename variable name to be consistent?
       tree->Branch("mc_vert_status", &m_mc_vert_status);
     }
   }
@@ -670,7 +670,7 @@ void EventReaderBaseAlg::clear(){
       m_mc_part_phi->clear();
       m_mc_part_pdgId->clear();
       m_mc_part_status->clear();
-      m_mc_part_barcode->clear();
+      m_mc_part_uniqueID->clear();
     }
     // ## Vertex Truth ##
     if (m_doTruthEventDump){
@@ -681,7 +681,7 @@ void EventReaderBaseAlg::clear(){
       m_mc_vert_perp->clear();
       m_mc_vert_eta->clear();
       m_mc_vert_phi->clear();
-      m_mc_vert_barcode->clear();
+      m_mc_vert_uniqueID->clear();
       m_mc_vert_status->clear();
     }
   }

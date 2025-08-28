@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNUtils.h"
 #include "tauRecTools/HelperFunctions.h"
 #include <algorithm>
 #include <iostream>
+
 #define GeV 1000
 
 namespace TauGNNUtils {

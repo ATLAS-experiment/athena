@@ -7,6 +7,7 @@
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
+#include "xAODTracking/TrackingPrimitives.h"
 #include "src/detail/HitSummaryDataUtils.h"
 
 namespace ActsTrk::detail {
@@ -62,18 +63,8 @@ namespace ActsTrk::detail {
                    }
                 }
 
-                Acts::BoundaryTolerance tolerance = Acts::BoundaryTolerance::AbsoluteBound(
-                  // local0 tolerance
-                  (det_type == xAOD::UncalibMeasType::PixelClusterType
-                   || state.referenceSurface().bounds().type() != Acts::SurfaceBounds::eAnnulus)
-                  ? 0.0 : std::numeric_limits<double>::infinity(),
-                  // local1 tolerance
-                  (det_type == xAOD::UncalibMeasType::PixelClusterType
-                   || state.referenceSurface().bounds().type() == Acts::SurfaceBounds::eAnnulus)
-                  ? 0.0 : std::numeric_limits<double>::infinity()
-                );
                 Acts::Vector2 localPos(state.predicted()[Acts::eBoundLoc0],state.predicted()[Acts::eBoundLoc1]);
-                if (state.referenceSurface().insideBounds(localPos,tolerance)) {
+                if (state.referenceSurface().insideBounds(localPos)) {
                    // @TODO check whether detector element is dead..
                    // if (dead) {
                    // ++specialHitCounts.at(to_underlying(det_type)).at(HitCategory::DeadSensor);

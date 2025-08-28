@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETEVENT_TRIGHISTO_H
@@ -69,8 +69,8 @@ class TrigHisto {
 		       float value) const;
 
   std::vector<float> m_contents; //<! A vector to contain the contents of the histogram.
-  std::vector<float>::iterator m_itr;
-  std::vector<float>::iterator m_itr_end;
+  std::vector<float>::iterator m_itr{};
+  std::vector<float>::iterator m_itr_end{};
 
   // Histogram limits
   unsigned int m_nbins_x;

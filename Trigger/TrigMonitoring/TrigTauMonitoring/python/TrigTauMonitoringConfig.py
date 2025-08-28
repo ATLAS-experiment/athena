@@ -17,6 +17,7 @@ class TrigTauMonAlgBuilder:
   do_single_tau = True
   do_L1 = True
   do_ditau = True
+  do_boosted_ditau = True
   do_tag_and_probe = True
   do_truth = True # Truth monitoring will only be used when running on MC data
 
@@ -55,6 +56,7 @@ class TrigTauMonAlgBuilder:
     'GNTau': ('GNTauScore_v0prune', 'GNTauScoreSigTrans_v0prune'),
   }
   offline_taujets = 'TauJets'
+  offline_GNTau_WP = ''
 
   #=============================================
   # Setup for L1Calo monitoring
@@ -80,6 +82,10 @@ class TrigTauMonAlgBuilder:
     self.activate_ditau = self.do_ditau
     self.mon_alg_ditau = None
     self.HLT_ditau_items = []
+
+    self.activate_boosted_ditau = self.do_boosted_ditau
+    self.mon_alg_boosted_ditau = None
+    self.HLT_boosted_ditau_items = []
 
     self.activate_tag_and_probe = self.do_tag_and_probe
     self.mon_alg_tag_and_probe = None
@@ -127,6 +133,9 @@ class TrigTauMonAlgBuilder:
 
     if self.activate_ditau:
       self.configureAlgorithmDiTau()
+    
+    if self.activate_boosted_ditau:
+      self.configureAlgorithmBoostedDiTau()
 
     if self.activate_tag_and_probe:
       self.configureAlgorithmTagAndProbe()
@@ -191,6 +200,8 @@ class TrigTauMonAlgBuilder:
         self.HLT_single_items.append(trigger)
       elif self.activate_ditau and info.isHLTDiTau():
         self.HLT_ditau_items.append(trigger)
+      elif self.activate_boosted_ditau and info.isHLTBoostedDiTau():
+        self.HLT_boosted_ditau_items.append(trigger)
       elif self.activate_tag_and_probe and info.isHLTTandP():
         self.HLT_tag_and_probe_items.append(trigger)
 
@@ -219,6 +230,13 @@ class TrigTauMonAlgBuilder:
       if not self.HLT_ditau_items:
         self.logger.warning('Empty trigger list, disabling the di-tau monitoring')
         self.activate_ditau = False
+    
+    if self.activate_boosted_ditau:
+      self.HLT_boosted_ditau_items.sort()
+      self.logger.info(f'Configuring HLT Boosted di-tau monitored chains: {self.HLT_boosted_ditau_items}')
+      if not self.HLT_boosted_ditau_items:
+        self.logger.warning('Empty trigger list, disabling the boosted di-tau monitoring')
+        self.activate_boosted_ditau = False
 
     if self.activate_tag_and_probe:
       self.HLT_tag_and_probe_items.sort()
@@ -249,6 +267,7 @@ class TrigTauMonAlgBuilder:
     mon_alg.L1Phase1Thresholds = self.L1_Phase1_thresholds
     mon_alg.L1Phase1ThresholdPatterns = self.L1_Phase1_threshold_mappings
     mon_alg.OfflineTauJetKey = self.offline_taujets
+    mon_alg.OfflineGNTauDecorKey = self.offline_GNTau_WP
     return mon_alg
 
 
@@ -359,6 +378,13 @@ class TrigTauMonAlgBuilder:
         self.bookDiTauHLTEffHistograms(self.mon_alg_ditau_gntau, path, trigger)
         self.bookDiTauVars(self.mon_alg_ditau_gntau, path, trigger)
 
+  def configureAlgorithmBoostedDiTau(self):
+    self.mon_alg_boosted_ditau = self._configureAlgorithm(CompFactory.TrigTauMonitorBoostedDiTauAlgorithm, 'TrigTauMonAlgBoostedDiTau')
+    self.mon_alg_boosted_ditau.TriggerList = self.HLT_boosted_ditau_items
+
+    self.logger.info('  |- Booking all histograms')
+    for trigger in self.HLT_boosted_ditau_items:
+      self.bookBoostedDiTauVars(self.mon_alg_boosted_ditau, self.base_path, trigger)
 
   def configureAlgorithmTagAndProbe(self):
     self.mon_alg_tag_and_probe = self._configureAlgorithm(CompFactory.TrigTauMonitorTandPAlgorithm, 'TrigTauMonAlgTandP')
@@ -662,6 +688,29 @@ class TrigTauMonAlgBuilder:
     mon_group.defineTree('leadHLTEt,subleadHLTEt,leadHLTEta,subleadHLTEta,leadHLTPhi,subleadHLTPhi,dR,dEta,dPhi,Pt,Eta,Phi,M,dPt;DiTauVarsTree',
                         treedef='leadHLTEt/F:subleadHLTEt/F:leadHLTEta/F:subleadHLTEta/F:leadHLTPhi/F:subleadHLTPhi/F:dR/F:dEta/F:dPhi/F:Pt/F:Eta/F:Phi/F:M/F:dPt/F')
 
+#  def bookBoostedDiTauHLTEffHistograms(self, mon_alg, base_path, trigger):
+ #   mon_group_name = f'{trigger}_BoostedDiTauHLT_Efficiency'
+ #   mon_group_path = f'{base_path}/BoostedDiTauHLT_Efficiency/{trigger}
+ #   mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
+    
+    
+  def bookBoostedDiTauVars(self, mon_alg, base_path, trigger):
+    mon_group_name = f'{trigger}_BoostedDiTauVars'
+    mon_group_path = f'{base_path}/BoostedDiTauVars/{trigger}'
+    mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
+    
+    mon_group.defineHistogram('omni_score', title='omni_score; omni_score; Events', xbins=50, xmin=0, xmax=1, opt='kAlwaysCreate')
+    mon_group.defineHistogram('R_tracks_lead', title='R_tracks_lead; R_tracks_lead; Events', xbins=50, xmin=0, xmax=0.2, opt='kAlwaysCreate')
+    mon_group.defineHistogram('R_tracks_subl', title='R_tracks_subl; R_tracks_subl; Events', xbins=50, xmin=0, xmax=0.2, opt='kAlwaysCreate')
+    mon_group.defineHistogram('f_core_lead', title='f_core_lead; f_core_lead; Events', xbins=50, xmin=0, xmax=1, opt='kAlwaysCreate')
+    mon_group.defineHistogram('f_core_subl', title='f_core_subl; f_core_subl; Events', xbins=50, xmin=0, xmax=1, opt='kAlwaysCreate')
+    mon_group.defineHistogram('n_track', title='n_tracks; n_tracks; Events', xbins=50, xmin=0, xmax=50, opt='kAlwaysCreate')
+    mon_group.defineHistogram('n_tracks_lead', title='n_tracks_lead; n_tracks_lead; Events', xbins=50, xmin=0, xmax=30, opt='kAlwaysCreate')
+    mon_group.defineHistogram('n_tracks_subl', title='n_tracks_subl; n_tracks_subl; Events', xbins=50, xmin=0, xmax=30, opt='kAlwaysCreate')
+    mon_group.defineHistogram('Pt', title='p_{T}(#tau,#tau); p_{T} [GeV]; Events', xbins=50, xmin=160, xmax=1300, opt='kAlwaysCreate')
+    mon_group.defineHistogram('Eta', title='#eta(#tau,#tau); #eta(#tau,#tau); Events', xbins=26, xmin=-2.6, xmax=2.6, opt='kAlwaysCreate')
+    mon_group.defineHistogram('Phi', title='#phi(#tau,#tau); #phi(#tau,#tau); Events', xbins=16, xmin=-3.2, xmax=3.2, opt='kAlwaysCreate')
+    mon_group.defineHistogram('M', title='m(#tau,#tau); m_{#tau,#tau}; Events', xbins=50, xmin=0, xmax=250, opt='kAlwaysCreate')
 
   def bookTAndPHLTEffHistograms(self, mon_alg, base_path, trigger):
     mon_group_name = f'{trigger}_TAndPHLT_Efficiency'

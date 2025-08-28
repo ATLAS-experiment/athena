@@ -130,12 +130,9 @@ private:
     // Files already processed, maintain a set
     std::set<std::string> m_filesProcessed;
 
-    // Min/max run numbers for overriding meta data IOV  
-    UnsignedIntegerArrayProperty m_minMaxRunNumbers;
-
-    // Folders and attributes to be deleted
-    StringArrayProperty  m_foldersToBeModified;
-    StringArrayProperty  m_attributesToBeRemoved;
+    UnsignedIntegerArrayProperty m_minMaxRunNumbers{this, "MinMaxRunNumbers", {}, "Min/max run numbers for overriding meta data IOV"};
+    StringArrayProperty  m_foldersToBeModified{this, "FoldersToBeModified", {"/Simulation/Parameters"}};
+    StringArrayProperty  m_attributesToBeRemoved{this, "AttributesToBeRemoved", {"RandomSeedOffset"}};
     bool                 m_modifyFolders;
 
     // mutex for R/W locking of the entire tool (and supposedly all metadata objects it works with)

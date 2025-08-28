@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileDQFragMonitorAlgorithm.h"
@@ -353,10 +353,13 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
       bool isGoodModuleDCS(true);
 
       if (m_checkDCS && dcsState->isStatusBad(ros, drawer)) {
-
-        fractionOfBadDMUs = -1.0; // By convention
+        // Check if this module is completely masked
+        int frag_id = m_tileHWID->frag(ros, drawer);
+        const std::vector<int>& maskedDrawers = badChannels->getMaskedDrawers();
+        if (!std::binary_search(maskedDrawers.begin(), maskedDrawers.end(), frag_id)) {
+          fractionOfBadDMUs = -1.0; // By convention
+        }
         isGoodModuleDCS = false;
-
       }
 
       int status = dqStatus->checkGlobalErr(ros, drawer, 0);

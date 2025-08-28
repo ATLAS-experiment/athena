@@ -18,6 +18,12 @@
 #include <ActsGeometryInterfaces/IDetectorVolumeSvc.h>
 #include <StoreGate/ReadCondHandleKey.h>
 
+#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
+
+#include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Surfaces/StrawSurface.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+
 namespace MuonGMR4 { 
 
 
@@ -33,6 +39,8 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
     
     private:
         std::array<Amg::Vector3D, 8> cornerPoints(const Acts::Volume& volume) const;
+        std::array<Amg::Vector3D, 8> cornerPoints(const Acts::GeometryContext& gctx, const Acts::StrawSurface& surface) const;
+        std::array<Amg::Vector3D, 4> cornerPoints(const Acts::GeometryContext& gctx, const Acts::PlaneSurface&) const;
         /** @brief Checks whether the readout elements of an enevelope are completely embedded into the envelope */
         template <class EnvelopeType>
           StatusCode allReadoutInEnvelope(const ActsGeometryContext& ctx,
@@ -51,6 +59,17 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
                                    const Amg::Vector3D& point,
                                    const std::string& descr,
                                    const Identifier& channelId) const;
+
+        /** @brief Checks whether the point is inside a tracking volume
+         *  @param volume: Reference to the tracking volume to check
+         *  @param point: Point that needs to be inside the volume
+         *  @param descr: Description of the point
+         *  @param chamberId: Identifier for more information if the point is outside */
+
+        StatusCode pointInside(const Acts::TrackingVolume& volume,
+                                  const Amg::Vector3D& point,
+                                  const std::string& descr,
+                                  const Identifier& chamberId) const;
 
         /** @brief Checks whether all channels of a given readout element are fully covered by the
          *         envelope.
@@ -90,6 +109,8 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+
+        ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc","ActsTrackingGeometrySvc"};
 
         const MuonDetectorManager* m_detMgr{nullptr};
 

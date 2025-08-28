@@ -49,6 +49,15 @@
 #include "VP1Utils/VP1ErrorUtils.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
 
+#include "Acts/Surfaces/ConeSurface.hpp"
+#include "Acts/Surfaces/CylinderSurface.hpp"
+#include "Acts/Surfaces/DiscSurface.hpp"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/StrawSurface.hpp"
+#include "Acts/Surfaces/SurfaceBounds.hpp"
+
 static double surfaceThickness = 0.1;
 
 //____________________________________________________________________

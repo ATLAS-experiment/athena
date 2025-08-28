@@ -57,6 +57,13 @@ namespace met{
                          const met::METAssociator::ConstitHolder& constits,
                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const final; 
 
+    StatusCode extractFEHR(const xAOD::IParticle* obj,
+                           std::vector<const xAOD::IParticle*> hardObjs,
+                           std::vector<const xAOD::IParticle*>& felist,
+                           const met::METAssociator::ConstitHolder& constits,
+                           std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta,
+                           float& UEcorr) const final;
+
     StatusCode extractFEsFromLinks(const xAOD::Muon* mu, //TODO
     				    std::vector<const xAOD::IParticle*>& felist,
 				    const met::METAssociator::ConstitHolder& constits) const;
@@ -70,6 +77,10 @@ namespace met{
                              const met::METAssociator::ConstitHolder& constits) const final;
 
     private:
+
+    static constexpr float m_Drcone = 0.2;       // Cone size for mu-pfo association
+    static constexpr float m_MinDistCone = 0.4;  // Cone size for getting random Phi of PFO which is not assoc to mu or HR
+
 
     Gaudi::Property<bool> m_doMuonClusterMatch{this, "DoClusterMatch", true, ""};
 

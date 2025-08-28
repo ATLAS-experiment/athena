@@ -46,7 +46,15 @@ namespace Monitored {
     {}
 
     // store metadata trees on object destruction
-    virtual ~OfflineHistogramProvider() override { storeMetadata(); }
+    virtual ~OfflineHistogramProvider() override {
+      try {
+        storeMetadata();
+      }
+      catch (const GaudiException&) {
+        // storeMetadata can throw due to dereferencing a Gaudi handle
+        std::abort();
+      }
+    }
 
     /**
      * @brief Getter of ROOT object

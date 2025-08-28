@@ -141,7 +141,7 @@ namespace Muon {
             // only use segment that are matched
             ATH_MSG_DEBUG("Match reco segment " << m_printer->print(*(result.first)) << " truth " << result.second.truthTrack);
             if (!result.second.truthTrack) continue;
-            const int barcode = HepMC::barcode(result.second.truthTrack); // FIXME barcode-based - requires TrackRecords to be migrated to uniqueID
+            const int barcode = HepMC::uniqueID(result.second.truthTrack);
 
             // get chamber Identifier
             Identifier id;
@@ -223,7 +223,7 @@ namespace Muon {
                     muonTruthSegments(*truthSegment) = recoLink;
                     segments(*recoSegment) = truthSegLink;
                 } else {
-                  ATH_MSG_DEBUG("barcode mismatch " << barcode << " truthParticle->barcode " << HepMC::barcode(truthParticle));
+                  ATH_MSG_DEBUG("barcode mismatch " << barcode << " truthParticle->uniqueID " << HepMC::uniqueID(truthParticle));
                 }
             }
         }

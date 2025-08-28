@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Generic overlaying code for Identifiable Containers.
@@ -7,6 +7,7 @@
 /// @author Tadej Novak
 /// @author Andrei Gaponenko <agaponenko@lbl.gov>, 2006-2009
 
+#include <algorithm>
 #include <string>
 #include <typeinfo>
 
@@ -24,12 +25,12 @@ void mergeChannelData(Datum &/* baseDatum */,
 }
 
 
-template <bool usePool, typename Type, typename Collection, typename Alg>
+template <bool sortCollections, bool usePool, typename Type, typename Collection, typename Alg>
 void mergeCollectionsImpl(Collection *bkgCollection,
-                      Collection *signalCollection,
-                      Collection *outputCollection,
-                      const Alg *algorithm,
-                      DataPool<Type>* /*nothing*/)
+                          Collection *signalCollection,
+                          Collection *outputCollection,
+                          const Alg *algorithm,
+                          DataPool<Type>* /*nothing*/)
 {
   if (bkgCollection->identify() != signalCollection->identify()) {
     throw std::runtime_error("mergeCollections<>(): collection Id mismatch");
@@ -37,6 +38,11 @@ void mergeCollectionsImpl(Collection *bkgCollection,
 
   typedef typename Collection::base_value_type Datum;
   typedef typename Collection::size_type size_type;
+
+  if constexpr(sortCollections) {
+    sortCollection(bkgCollection);
+    sortCollection(signalCollection);
+  }
 
   // Merge by copying ptrs from background and signal to output collection
   size_type ibkg = 0, isig = 0;
@@ -73,12 +79,21 @@ void mergeCollectionsImpl(Collection *bkgCollection,
 
     outputCollection->push_back(tmp);
   } // <= while
+
+  if constexpr(sortCollections) {
+    if (!std::is_sorted(outputCollection->begin(), outputCollection->end(), [](const Datum *a, const Datum *b) {
+      return a->identify() < b->identify();
+    })) {
+      algorithm->msg(MSG::ERROR) << "Output collection not sorted" << endmsg;
+      throw std::runtime_error("mergeCollections<>(): output collection not sorted");
+    }
+  }
 }
 
 template <typename Collection, typename Alg>
 void mergeCollections(Collection *bkgCollection, Collection *signalCollection,
                       Collection *outputCollection, const Alg *algorithm) {
-  return mergeCollectionsImpl<false, void>(
+  return mergeCollectionsImpl<false, false, void>(
       bkgCollection, signalCollection, outputCollection, algorithm, nullptr);
 }
 
@@ -86,7 +101,15 @@ template <typename Type, typename Collection, typename Alg>
 void mergeCollections(Collection *bkgCollection, Collection *signalCollection,
                       Collection *outputCollection, const Alg *algorithm,
                       DataPool<Type> &dataItems) {
-  return mergeCollectionsImpl<true>(bkgCollection, signalCollection,
+  return mergeCollectionsImpl<false, true>(bkgCollection, signalCollection,
+                                    outputCollection, algorithm, &dataItems);
+}
+
+template <typename Type, typename Collection, typename Alg>
+void mergeSortedCollections(Collection *bkgCollection, Collection *signalCollection,
+                            Collection *outputCollection, const Alg *algorithm,
+                            DataPool<Type> &dataItems) {
+  return mergeCollectionsImpl<true, true>(bkgCollection, signalCollection,
                                     outputCollection, algorithm, &dataItems);
 }
 

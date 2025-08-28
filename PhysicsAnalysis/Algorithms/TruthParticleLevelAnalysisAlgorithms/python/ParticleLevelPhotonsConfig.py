@@ -22,18 +22,22 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + '_' + self.selectionName
+
     def makeAlgs(self, config):
         config.setSourceName (self.containerName, self.containerName)
 
         # decorate the missing elements of the 4-vector so we can save it later
         alg = config.createAlgorithm('CP::ParticleLevelPtEtaPhiDecoratorAlg',
-                                     'ParticleLevelPtEtaPhiDecoratorPhotons' + self.selectionName,
+                                     'ParticleLevelPtEtaPhiDecoratorPhotons',
                                      reentrant=True)
         alg.particles = self.containerName
 
         # check for prompt isolation
         alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg',
-                                     'ParticleLevelIsolationPhotons' + self.selectionName,
+                                     'ParticleLevelIsolationPhotons',
                                      reentrant=True)
         alg.particles    = self.containerName
         alg.isolation    = 'isIsolated' + self.selectionName if self.isolated else 'isIsolatedButNotRequired' + self.selectionName

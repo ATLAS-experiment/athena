@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTACTIVECONDALG_H
@@ -35,7 +35,7 @@ class TRTActiveCondAlg : public AthReentrantAlgorithm
 
   SG::WriteCondHandleKey<TRTCond::ActiveFraction> m_strawWriteKey{this,"ActiveWriteKey","ActiveFraction","ActiveFraction out-key"};
 
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_strawStatus;
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_strawStatus{this, "TRTStrawStatusSummaryTool", "TRT_StrawStatusSummaryTool"};
   const TRT_ID *m_trtId{};
 
 };

@@ -11,7 +11,7 @@ atlas_add_component( ActsMonitoring
                      src/*.h src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES 
-                ActsCore
+                Acts::Core
                 ActsEventLib
                 ActsGeometryLib
                 ActsGeometryInterfacesLib
@@ -36,6 +36,7 @@ atlas_add_component( ActsMonitoring
                 xAODEventInfo
                 xAODInDetMeasurement
                 xAODMeasurementBase
+		ActsTruthLib
                 InDetMeasurementUtilitiesLib
                 HGTD_ReadoutGeometry )
 

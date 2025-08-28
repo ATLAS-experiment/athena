@@ -11,12 +11,12 @@ atlas_add_component(ActsEventCnv
     src/*.h src/*.cxx
     src/components/*.cxx
     LINK_LIBRARIES
-    ActsCore
+    Acts::Core
     ActsEventLib
     ActsGeometryLib
     ActsGeometryInterfacesLib
     ActsToolInterfacesLib
-    ActsCalibrationLib
+    ActsCalibratorsLib
     ActsInteropLib
     AthenaBaseComps
     GaudiKernel

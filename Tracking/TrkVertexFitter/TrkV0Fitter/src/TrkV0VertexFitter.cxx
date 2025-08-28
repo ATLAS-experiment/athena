@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -133,26 +133,32 @@ namespace Trk
           Trk::CylinderSurface estimationCylinder(CylTrf, p->radiusOfFirstHit(), 10e10);
           const Trk::TrackParameters* chargeParameters = &p->perigeeParameters();
           MaterialUpdateMode mode = Trk::removeNoise;
-          const Trk::TrackParameters* extrapolatedPerigee(nullptr);
-          extrapolatedPerigee = m_extrapolator->extrapolate(ctx,
-                                                            *chargeParameters,
-                                                            estimationCylinder,
-                                                            Trk::alongMomentum,
-                                                            true,
-                                                            Trk::pion,
-                                                            mode).release();
+
+          const Trk::TrackParameters* extrapolatedPerigee =
+            std::abs(chargeParameters->position().z()) > m_maxZ ? nullptr :
+            m_extrapolator->extrapolate(ctx,
+					*chargeParameters,
+					estimationCylinder,
+					Trk::alongMomentum,
+					true,
+					Trk::pion,
+					mode).release();
+
           if (extrapolatedPerigee != nullptr) {
             ATH_MSG_DEBUG("extrapolated to first measurement");
             measuredPerigees.push_back (extrapolatedPerigee);
             measuredPerigees_delete.push_back (extrapolatedPerigee);
           } else {
+
             extrapolatedPerigee =
+              std::abs(chargeParameters->position().z()) > m_maxZ ? nullptr :
               m_extrapolator->extrapolateDirectly(ctx,
-                                                  *chargeParameters,
-                                                  estimationCylinder,
-                                                  Trk::alongMomentum,
-                                                  true,
-                                                  Trk::pion).release();
+						  *chargeParameters,
+						  estimationCylinder,
+						  Trk::alongMomentum,
+						  true,
+						  Trk::pion).release();
+
             if (extrapolatedPerigee != nullptr) {
               ATH_MSG_DEBUG( "extrapolated (direct) to first measurement");
               measuredPerigees.push_back (extrapolatedPerigee);
@@ -317,6 +323,7 @@ namespace Trk
 
     const Amg::Vector3D * globalPosition = &(firstStartingPoint);
     ATH_MSG_DEBUG("globalPosition of starting point: " << (*globalPosition)[0] << ", " << (*globalPosition)[1] << ", " << (*globalPosition)[2]);
+
     if (globalPosition->perp() > m_maxR && globalPosition->z() > m_maxZ) return nullptr;
 
     SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
@@ -357,14 +364,17 @@ namespace Trk
         MaterialUpdateMode mode = Trk::removeNoise;
         if(extrapolationDirection > 0) mode = Trk::addNoise;
         std::unique_ptr<const Trk::Perigee> extrapolatedPerigee(nullptr);
+
         std::unique_ptr<const Trk::TrackParameters> tmp =
+          std::abs(chargeParameters->position().z()) > m_maxZ ? nullptr :
           m_extrapolator->extrapolate(ctx,
-                                      *chargeParameters,
-                                      perigeeSurface,
-                                      Trk::anyDirection,
-                                      true,
-                                      Trk::pion,
-                                      mode);
+				      *chargeParameters,
+				      perigeeSurface,
+				      Trk::anyDirection,
+				      true,
+				      Trk::pion,
+				      mode);
+
         //if of right type we want to pass ownership
         if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
             extrapolatedPerigee.reset(static_cast<const Trk::Perigee*>(tmp.release()));
@@ -799,14 +809,17 @@ namespace Trk
             MaterialUpdateMode mode = Trk::removeNoise;
             if(extrapolationDirection > 0) mode = Trk::addNoise;
             std::unique_ptr<const Trk::Perigee> extrapolatedPerigee(nullptr);
+
             std::unique_ptr<const Trk::TrackParameters> tmp =
+              std::abs(chargeParameters->position().z()) > m_maxZ ? nullptr :
               m_extrapolator->extrapolate(ctx,
-                                          *chargeParameters,
-                                          perigeeSurfaceItr,
-                                          Trk::anyDirection,
-                                          true,
-                                          Trk::pion,
-                                          mode);
+					  *chargeParameters,
+					  perigeeSurfaceItr,
+					  Trk::anyDirection,
+					  true,
+					  Trk::pion,
+					  mode);
+
             // if of right type we want to pass ownership
             if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
               extrapolatedPerigee.reset(

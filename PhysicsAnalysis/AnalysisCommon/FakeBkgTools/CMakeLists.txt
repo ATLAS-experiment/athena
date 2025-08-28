@@ -15,11 +15,9 @@ atlas_add_library( FakeBkgToolsLib
   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgAnalysisInterfaces AsgTools AthContainers xAODBase xAODEventInfo CxxUtils
   PRIVATE_LINK_LIBRARIES xAODEgamma xAODMuon xAODTau PathResolver SelectionHelpersLib )
 
-if( NOT XAOD_STANDALONE )
-  atlas_add_component( FakeBkgTools
-    src/components/*.cxx
-    LINK_LIBRARIES FakeBkgToolsLib )
-endif()
+atlas_add_component( FakeBkgTools
+  src/components/*.cxx
+  LINK_LIBRARIES FakeBkgToolsLib )
 
 atlas_add_dictionary( FakeBkgToolsDict
    FakeBkgTools/FakeBkgToolsDict.h

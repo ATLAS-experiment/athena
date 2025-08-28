@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,7 +31,7 @@ class VP1Authenticator : public QDialog, public Ui::dlgAuthentication
 
 public:
 
-  VP1Authenticator(QWidget*,QString);
+  VP1Authenticator(QWidget*,const QString &);
   virtual ~VP1Authenticator();
 
   bool connectToServer();
@@ -55,7 +55,7 @@ private Q_SLOTS:
 
 private:
   class Imp;
-  Imp*  m_d;
+  Imp*  m_d{};
 };
 
 #endif

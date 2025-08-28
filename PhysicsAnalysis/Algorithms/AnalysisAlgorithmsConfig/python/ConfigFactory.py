@@ -46,8 +46,9 @@ def getFuncArgs(func):
 class FactoryBlock():
     """
     """
-    def __init__(self, alg, algName, options, defaults, subAlgs=None):
+    def __init__(self, alg, factoryName, algName, options, defaults, subAlgs=None):
         self.alg = alg
+        self.factoryName = factoryName
         self.algName = algName
         self.options = options
         self.defaults = defaults
@@ -102,6 +103,7 @@ class FactoryBlock():
                 configSeq.append(func(**args))
             else:
                 func(**args)
+            configSeq.setFactoryName(self.factoryName)
             return configSeq, args.keys()
 
 
@@ -144,9 +146,15 @@ class ConfigFactory():
             if alg in algs:
                 raise ValueError(f"{algName} has already been added.")
 
+            if block != self.ROOTNAME:
+                factoryName = f"{block}.{algName}"
+            else :
+                factoryName = algName
+
             # create FactoryBlock with alg information
             algs[algName] = FactoryBlock(
                 alg=alg,
+                factoryName=factoryName,
                 algName=algName,
                 options=opts,
                 defaults=defaults,
@@ -205,6 +213,16 @@ class ConfigFactory():
                 block = self._algs[name]
         except KeyError:
             raise ValueError(f"{name} config block not found. Make sure context is correct.")
+        # Optional **kwargs are in the process of being retired. While the process is not fully complete
+        # we still need to allow them to be passed. However, for blocks where they have already been retired
+        # we want to raise an error so users don't experience undesirable behaviour where their extra options
+        # are being ignored, or run into related cryptic crashes.
+        already_fixed_blocks = {
+            'Electrons','Photons','Muons','TauJets','DiTauJets','MissingET','FlavourTagging','FlavourTaggingEventSF','XbbTagging',
+            'InDetTracks','KLFitter','EventSelection','PtEtaSelection','ObjectCutFlow','EventCutFlow','Thinning',
+            'IFFClassification','MCTCClassification','PerEventSF','SelectionDecoration','SystObjectLink'}
+        if kwargs and name.split('.')[-1] in already_fixed_blocks:
+            raise ValueError(f"Config block '{name}' no longer accepts **kwargs. Use config.setOptionValue('option', value) instead!")
         configSeq, _ = block.makeConfig(kwargs)
         return configSeq
 
@@ -301,6 +319,20 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="TriggerSF", alg=TauTriggerAnalysisSFBlock,
                                superBlocks="TauJets")
 
+        # diTauJets
+        from TauAnalysisAlgorithms.DiTauAnalysisConfig import DiTauCalibrationConfig
+        self.addAlgConfigBlock(algName="DiTauJets", alg=DiTauCalibrationConfig)
+        from TauAnalysisAlgorithms.DiTauAnalysisConfig import DiTauWorkingPointConfig
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=DiTauWorkingPointConfig,
+            superBlocks="DiTauJets")
+
+        # tracks
+        from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackCalibrationConfig
+        self.addAlgConfigBlock(algName="InDetTracks", alg=InDetTrackCalibrationConfig)
+        from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackWorkingPointConfig
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=InDetTrackWorkingPointConfig,
+            superBlocks="InDetTracks")
+
         # SystObjectLink
         from AsgAnalysisAlgorithms.SystObjectLinkConfig import SystObjectLinkBlock
         self.addAlgConfigBlock(algName="SystObjectLink", alg=SystObjectLinkBlock,
@@ -344,7 +376,7 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="PtEtaSelection", alg=PtEtaSelectionBlock,
             defaults={'selectionName': ''},
             superBlocks=[self.ROOTNAME,
-                         "Jets", "Electrons", "Photons", "Muons", "TauJets",
+                         "Jets", "Electrons", "Photons", "Muons", "TauJets", "DiTauJets",
                          "PL_Jets", "PL_Electrons", "PL_Photons", "PL_Muons", "PL_Taus", "PL_Neutrinos"])
 
         # met

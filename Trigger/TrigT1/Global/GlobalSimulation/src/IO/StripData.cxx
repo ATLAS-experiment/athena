@@ -1,4 +1,8 @@
+/*
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ */
 #include "StripData.h"
+#include <ostream>
 
 
 std::ostream& operator<<(std::ostream& os,

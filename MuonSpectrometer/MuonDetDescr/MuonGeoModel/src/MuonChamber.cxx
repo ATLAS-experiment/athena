@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -158,7 +158,7 @@ namespace MuonGM {
             double cypos = 0;
             double cxpos = 0;
             for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
-                comp = (StandardComponent *)m_station->GetComponent(i);
+                comp = static_cast<StandardComponent *>(m_station->GetComponent(i));
                 if ((comp->name).compare(0, 3, "CSC") == 0) {
                     clen = comp->dy;
                     cthick = comp->GetThickness(mysql);
@@ -181,7 +181,7 @@ namespace MuonGM {
                 double cutthick = 0.;
                 double top_edge = 0.;
                 for (int i = m_station->GetNrOfComponents() - 2; i > -1; i--) {
-                    comp = (StandardComponent *)m_station->GetComponent(i);
+                    comp = static_cast<StandardComponent *>(m_station->GetComponent(i));
                     top_edge = comp->posy + comp->dy;
                     cutlen = length - top_edge;
                     if ((comp->posy != 0 && cutlen > 0.1) || comp->dy > 0.75 * length) {
@@ -209,7 +209,7 @@ namespace MuonGM {
                 int index = 0;
                 int mdt_index[4] = {0, 0, 0, 0};
                 for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
-                    comp = (StandardComponent *)m_station->GetComponent(i);
+                    comp = static_cast<StandardComponent *>(m_station->GetComponent(i));
                     if (comp->name.compare(0,3,"MDT") == 0) {
                         mdt_index[index] = i;
                         index += 1;
@@ -228,7 +228,7 @@ namespace MuonGM {
                     strd = &(strd->subtract((*box) << GeoTrf::Translate3D(0., 0., length / 2.)));
                     double sign = 1.;
                     for (int i = 0; i < index; i++) {
-                        comp = (StandardComponent *)m_station->GetComponent(mdt_index[i]);
+                        comp = static_cast<StandardComponent *>(m_station->GetComponent(mdt_index[i]));
                         mdt_half_thick = comp->GetThickness(mysql) / 2.;
                         mdt_pos = -totthick / 2. + comp->posz + mdt_half_thick;
                         mdt_pos += amdbOrigine_along_thickness;
@@ -284,7 +284,7 @@ namespace MuonGM {
                 // look for FIRST component with cutouts and loop over all of the cutouts:
                 bool foundCutouts = false;
                 for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
-                    StandardComponent *c = (StandardComponent *)m_station->GetComponent(j);
+                    StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(j));
 
                     if (!foundCutouts) {
                         for (int ii = 0; ii < m_station->GetNrOfCutouts(); ii++) {
@@ -347,7 +347,7 @@ namespace MuonGM {
         ATH_MSG_VERBOSE( " Station Name = " << stName << " fi/zi " << fi << "/" << zi << " defining the n. of DoubletR to " );
       
         for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
-            StandardComponent *d = (StandardComponent *)m_station->GetComponent(j);
+            StandardComponent *d = static_cast<StandardComponent *>(m_station->GetComponent(j));
             std::string_view cn = std::string_view(d->name).substr(0, 3);
             if (cn == "RPC") {
                 nRpc++;
@@ -381,7 +381,7 @@ namespace MuonGM {
         double LBheight{0.}, LBwidth{0.}, LByShift{0.};
         std::array<double, 2> LBpos{-1, -1};
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
-            StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
+            StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(i));
             std::string_view cname = std::string_view(c->name).substr(0, 2);
             if (cname == "LB") {
                 const LBI *lb = dynamic_cast<const LBI *>(mysql.GetTechnology(c->name));
@@ -397,10 +397,10 @@ namespace MuonGM {
         }
 
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
-            StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
+            StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(i));
             std::string_view cname = std::string_view(c->name).substr(0, 3);
             if (cname == "CRO" || cname == "CMI" || cname == "CHV") {
-                CbmComponent *ccbm = (CbmComponent *)c;
+                CbmComponent *ccbm = static_cast<CbmComponent *>(c);
                 ccbm->lb_height = LBheight;
                 ccbm->lb_width = LBwidth;
                 ccbm->hole_pos1 = LBpos[0];
@@ -411,7 +411,7 @@ namespace MuonGM {
         // Look for the subtype of the CMI in the chamber to let LB know ...
         std::string CMIcomponentNumber = "";
         for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
-            StandardComponent *d = (StandardComponent *)m_station->GetComponent(j);
+            StandardComponent *d = static_cast<StandardComponent *>(m_station->GetComponent(j));
             std::string_view cn = std::string_view(d->name).substr(0, 3);
             if (cn == "CMI") {
                 CMIcomponentNumber = (d->name).substr(3, 2);
@@ -420,10 +420,10 @@ namespace MuonGM {
         }
 
         for (int j = 0; j < m_station->GetNrOfComponents(); j++) {
-            StandardComponent *d = (StandardComponent *)m_station->GetComponent(j);
+            StandardComponent *d = static_cast<StandardComponent *>(m_station->GetComponent(j));
             std::string_view cn = std::string_view(d->name).substr(0, 2);
             if (cn == "LB") {
-                LbiComponent *lbic = (LbiComponent *)d;
+                LbiComponent *lbic = static_cast<LbiComponent *>(d);
                 if (lbic) {
                     lbic->associated_CMIsubtype = CMIcomponentNumber;
                 } else
@@ -448,7 +448,7 @@ namespace MuonGM {
         // here the big loop over the components !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
-            StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
+            StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(i));
             ATH_MSG_VERBOSE( " Component index " << c->index << " in loop for " << stName << " " << stationType << " at zi, fi " << zi << " " << fi + 1 << "  cName "
                 << c->name << " thickness " << c->GetThickness(mysql) << " length " << c->dy << " w, lw " << c->dx1 << " " << c->dx2 );
             ATH_MSG_VERBOSE( " Component local (amdb) coords " << c->posx << " " << c->posy << " " << c->posz );
@@ -578,7 +578,7 @@ namespace MuonGM {
                         cutRpcType->dx = cutRpcType->dx - c->posx;
 
                         if (type == "RPC") {
-                            RpcComponent *rp = (RpcComponent *)c;
+                            RpcComponent *rp = static_cast<RpcComponent *>(c);
                             if (rp->iswap == -1) {
                                 cutRpcType->dy = c->dy - (cutRpcType->dy + cutRpcType->lengthY);
                             }
@@ -667,7 +667,7 @@ namespace MuonGM {
                     }
                     m_FPVMAP->StoreDetector(lvm, key);                  
                 } else {
-                    GeoFullPhysVol *rfpv = (GeoFullPhysVol *)fpv;
+                    GeoFullPhysVol *rfpv = static_cast<GeoFullPhysVol *>(fpv);
                     ATH_MSG_VERBOSE( " This MDT for station " << key << " component name is " << c->name << " already exists; clone it " );
                     lvm = rfpv->clone();
                 }
@@ -780,7 +780,7 @@ namespace MuonGM {
 
             } else if (type == "RPC") {
                 // position stuff needed for cutout, used to be below:
-                RpcComponent *rp = (RpcComponent *)c;
+                RpcComponent *rp = static_cast<RpcComponent *>(c);
                 int ndivy = rp->ndivy;
                 int ndivz = rp->ndivz;
 
@@ -897,10 +897,10 @@ namespace MuonGM {
                 }
 
             } else if (type == "TGC") {
-                TgcComponent *tg = (TgcComponent *)m_station->GetComponent(i);
-                TgcComponent *tgInner = (TgcComponent *)m_station->GetComponent(0);
+                TgcComponent *tg = static_cast<TgcComponent *>(m_station->GetComponent(i));
+                TgcComponent *tgInner = static_cast<TgcComponent *>(m_station->GetComponent(0));
                 irad = tgInner->posy;
-                TgcComponent *tgOuter = (TgcComponent *)m_station->GetComponent(m_station->GetNrOfComponents() - 1);
+                TgcComponent *tgOuter = static_cast<TgcComponent *>(m_station->GetComponent(m_station->GetNrOfComponents() - 1));
                 double orad = tgOuter->posy + tgOuter->dy;
                 double start = -(orad - irad) / 2. + (tg->posy - irad) + tg->dy / 2;
                 double xstart = -thickness / 2. + tg->GetThickness(mysql) / 2.;
@@ -935,7 +935,7 @@ namespace MuonGM {
                     }
                     m_FPVMAP->StoreDetector(lvt, key);
                 } else {
-                    GeoFullPhysVol *rfpv = (GeoFullPhysVol *)fpv;
+                    GeoFullPhysVol *rfpv = static_cast<GeoFullPhysVol *>(fpv);
                     lvt = rfpv->clone();
                 }
 
@@ -963,7 +963,7 @@ namespace MuonGM {
 
                     m_FPVMAP->StoreDetector(lvc, key);
                 } else {
-                    GeoFullPhysVol *rfpv = (GeoFullPhysVol *)fpv;
+                    GeoFullPhysVol *rfpv = static_cast<GeoFullPhysVol *>(fpv);
                     lvc = rfpv->clone();
                 }
 
@@ -996,7 +996,7 @@ namespace MuonGM {
                 const MdtIdHelper *mdt_id = manager->mdtIdHelper();
                 std::unique_ptr<MdtReadoutElement> det = std::make_unique<MdtReadoutElement>(lvm, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
-                setMdtReadoutGeom(mysql, det.get(), (MdtComponent *)c, ip);
+                setMdtReadoutGeom(mysql, det.get(), static_cast<MdtComponent *>(c), ip);
                 det->setHasCutouts(ncutouts > 0);
                 det->setNMdtInStation(nMdt);
                 Identifier id = mdt_id->channelID(stationType, stationEta, stationPhi, ml, tubel, tube);
@@ -1026,7 +1026,7 @@ namespace MuonGM {
             }
 
             if (lvc && manager->cscIdHelper()) {
-                CscComponent *cs = (CscComponent *)m_station->GetComponent(i);
+                CscComponent *cs = static_cast<CscComponent *>(m_station->GetComponent(i));
                 int stationEta = zi;
                 int stationPhi = fi + 1;
                 int chamberLayer = 1;
@@ -1067,7 +1067,7 @@ namespace MuonGM {
             if (lvt && manager->tgcIdHelper()) {
                 ATH_MSG_DEBUG( " Adding a TGC chamber to the tree zi,fi, is_mirrored " << zi << " " << fi + 1 << " " << is_mirrored );
                
-                TgcComponent *tg = (TgcComponent *)m_station->GetComponent(i);
+                TgcComponent *tg = static_cast<TgcComponent *>(m_station->GetComponent(i));
                 ATH_MSG_VERBOSE( "There's a TGC named " << techname << " of thickness " << tg->GetThickness(mysql) );
                 
                 const TgcIdHelper *tgc_id = manager->tgcIdHelper();
@@ -1116,7 +1116,7 @@ namespace MuonGM {
             }
 
             if (lvr && RPCON && manager->rpcIdHelper()) {
-                RpcComponent *rp = (RpcComponent *)c;
+                RpcComponent *rp = static_cast<RpcComponent *>(c);
                 int ndivy = rp->ndivy;
                 int ndivz = rp->ndivz;
 

@@ -4,7 +4,7 @@
 
 #include "FPGATrackSimPrototrackFitterAlg.h"
 
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
 
 constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_FPGATRACKSIM
@@ -46,21 +46,22 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
   /// The block is borrowed from the ACTS TrackFindingAlg and 
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
-  const auto* detectorElementToGeometryIdMap = m_trackingGeometryTool->surfaceIdMap();
-
   const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
   const Acts::CalibrationContext calContext{ActsTrk::getCalibrationContext(ctx)};
 
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 
-  ActsTrk::MutableTrackContainer trackContainer;
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::MutableTrackContainer trackContainer( std::move(trackBackend),
+                                                 std::move(trackStateBackend) );
+  
   if constexpr (enableBenchmark) m_chrono->chronoStart("FPGATrackSimPrototrackFitterAlg: ACTS KF");
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
-    auto res = m_actsFitter->fit(ctx, proto.measurements, *proto.parameters,
-                                 tgContext, mfContext, calContext,
-                                 *detectorElementToGeometryIdMap);
+    auto res = m_actsFitter->fit(proto.measurements, *proto.parameters,
+                                 tgContext, mfContext, calContext);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;
@@ -75,8 +76,13 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
     destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
   }
   if constexpr (enableBenchmark) m_chrono->chronoStop("FPGATrackSimPrototrackFitterAlg: ACTS KF");
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), 
-    m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);  
+
+  // convert to const
+  Acts::ConstVectorTrackContainer ctrackBackend( std::move(trackContainer.container()) );
+  Acts::ConstVectorMultiTrajectory ctrackStateBackend( std::move(trackContainer.trackStateContainer()) );
+  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = std::make_unique<ActsTrk::TrackContainer>( std::move(ctrackBackend),
+                                                                                                             std::move(ctrackStateBackend) );
+
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
   return StatusCode::SUCCESS;

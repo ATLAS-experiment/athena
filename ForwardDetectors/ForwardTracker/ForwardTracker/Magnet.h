@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FORWARDTRACKER_MAGNET_H
@@ -30,7 +30,7 @@ namespace ForwardTracker {
 	   double              A3,
 	   double              A4,
 	   Side                side,
-	   IBender::ConstPtr_t bender, 
+	   IBender * bender, 
 	   const std::string&  label);
     
     enum Type {hbDipole, hfQuadrupole, vfQuadrupole, vbDipole, notAMagnet};
@@ -63,7 +63,7 @@ namespace ForwardTracker {
     double              m_A2;
     double              m_A3;
     double              m_A4;
-    IBender::ConstPtr_t m_bender;
+    IBender * m_bender;
 
     bool isOutOfAperture(IParticle&) const;
   };

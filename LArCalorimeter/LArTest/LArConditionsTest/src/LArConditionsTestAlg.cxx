@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -30,26 +30,8 @@
 /////////////////////////////////////////////////////////////////////
 
 LArConditionsTestAlg::LArConditionsTestAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-	AthAlgorithm(name,pSvcLocator),
-	m_onlineID(0),
-	m_testCondObjs(false),
-	m_readCondObjs(false),
-	m_writeCondObjs(false),
-	m_writeCorrections(false),
-	m_applyCorrections(false),
-	m_testReadDB(false), 
-	m_TB(false),
-	m_tbin(0)
+	AthAlgorithm(name,pSvcLocator)
 {
-    // switch for testing Filling IOV. 
-    declareProperty("TestCondObjs",      m_testCondObjs);
-    declareProperty("ReadCondObjs",     m_readCondObjs);
-    declareProperty("WriteCondObjs",    m_writeCondObjs);
-    declareProperty("WriteCorrections", m_writeCorrections);
-    declareProperty("ApplyCorrections", m_applyCorrections);
-    declareProperty("TestReadDBDirect", m_testReadDB) ;
-    declareProperty("Testbeam",         m_TB) ;
-    declareProperty("Tbin",         m_tbin) ;
 }
 
 /////////////////////////////////////////////////////////////////////

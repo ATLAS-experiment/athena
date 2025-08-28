@@ -64,7 +64,7 @@ def JetEfficiencyMonitoringConfig(flags):
     hltRandom_reference_triggers = ['HLT_j0_perf_L1RD0_FILLED', 'HLT_j0_perf_pf_ftf_L1RD0_FILLED']
     JetEfficiencyMonAlg.HLTRandomReferenceTriggers = hltRandom_reference_triggers
 
-    muon_reference_triggers = ["L1_MU14FCH", "L1_MU18VFCH", "L1_MU8F_TAU20IM", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF", "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V", "L1_RD0_FILLED"]
+    muon_reference_triggers = ["L1_MU14FCH", "L1_MU18VFCH", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF", "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V"]
     JetEfficiencyMonAlg.MuonReferenceTriggers = muon_reference_triggers
 
     JetEfficiencyMonAlg.BootstrapReferenceTrigger='L1_J15' 
@@ -83,7 +83,7 @@ def JetEfficiencyMonitoringConfig(flags):
     gfex_LR_triggers = ['L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25']
 
     jfex_SR_triggers = ['L1_jJ30','L1_jJ40','L1_jJ50', 'L1_jJ60', 'L1_jJ80','L1_jJ90', 'L1_jJ125','L1_jJ140','L1_jJ160', 'L1_jJ180']
-    jfex_LR_triggers = []#['L1_SC111-CjJ40']
+    jfex_LR_triggers = ['L1_SC175-SCjJ10']
     
     all_SR_triggers =  gfex_SR_triggers + jfex_SR_triggers
     all_LR_triggers = gfex_LR_triggers + jfex_LR_triggers
@@ -244,7 +244,7 @@ threshold_dict = {"L1_gJ20p0ETA25" : [55e3, 75e3], #hits 50% at 50 for a good ru
                     "L1_jJ140" : [160e3, 225e3],#hits 50% at 150 for a good run, 100% around 255
                     "L1_jJ160" : [180e3, 260e3],#hits 50% at 170 for a good run, 100% around 260
                     "L1_jJ180" : [235e3, 320e3],#hits 50% at 223 for a good run, 100% around 320
-                    "L1_SC111-CjJ40": [195e3, 300e3],#hits 50% at 190 for a good run, 100% around 300
+                    "L1_SC175-SCjJ10": [195e3, 300e3],#hits 50% at 190 for a good run, 100% around 300
 }
  
 

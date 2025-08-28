@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -13,7 +13,6 @@
 #include "LArFCALCalculatorBase.h"
 
 #include "LArG4Code/LArG4Identifier.h"
-//#include "LArG4Code/SimulationEnergies.h"
 #include "CaloG4Sim/SimulationEnergies.h"
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
 
@@ -64,19 +63,9 @@ namespace LArG4 {
 
   namespace FCAL {
 
-
     LArFCALCalibCalculatorBase::LArFCALCalibCalculatorBase(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_deltaX(0.)
-      , m_deltaY(0.)
-      , m_FCalSampling(0)
-      , m_zShift(0.)
-      , m_ChannelMap(nullptr)
     {
-      declareProperty("FCALdeltaX",m_deltaX);
-      declareProperty("FCALdeltaY",m_deltaY);
-      declareProperty("FCALSampling",m_FCalSampling);
-      //m_FCalSampling.verifier().setUpper(3); //Would need to make m_FCalSampling an IntegerProperty for this to work. Overkill?
     }
 
     StatusCode LArFCALCalibCalculatorBase::initialize() {
@@ -88,26 +77,27 @@ namespace LArG4 {
 
       ServiceHandle<StoreGateSvc> detStore ("DetectorStore" ,"LArFCALCalibCalculatorBase");
       ATH_CHECK(detStore.retrieve() );
-      if (detStore->retrieve(m_ChannelMap)==StatusCode::FAILURE)
-        throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot retrieve FCAL Channel Map!");
+      ATH_CHECK(detStore->retrieve(m_ChannelMap));
 
       SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service("GeoModelSvc")};
       if (!geoModel) {
-        throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot locate GeoModelSvc!");
+	ATH_MSG_ERROR("LArFCALCalibCalculatorBase ERROR: Cannot locate GeoModelSvc!");
+	return StatusCode::FAILURE;
       }
 
       SmartIF<IGeoDbTagSvc> geoDbTagSvc{Gaudi::svcLocator()->service("GeoDbTagSvc")};
       if (!geoDbTagSvc) {
-        throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot locate GeoDbTagSvc");
+        ATH_MSG_ERROR("LArFCALCalibCalculatorBase ERROR: Cannot locate GeoDbTagSvc");
+	return StatusCode::FAILURE;
       }
 
       SmartIF<IRDBAccessSvc> pAccessSvc{Gaudi::svcLocator()->service(geoDbTagSvc->getParamSvcName())};
       if (!pAccessSvc) {
-        throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot locate " + geoDbTagSvc->getParamSvcName());
+        ATH_MSG_ERROR("LArFCALCalibCalculatorBase ERROR: Cannot locate " << geoDbTagSvc->getParamSvcName());
+	return StatusCode::FAILURE;
       }
 
       // Obtain the geometry version information:
-
       std::string AtlasVersion = geoModel->atlasVersion();
       std::string LArVersion = geoModel->LAr_VersionOverride();
 
@@ -115,8 +105,10 @@ namespace LArG4 {
       std::string detectorNode = LArVersion.empty() ? "ATLAS" : "LAr";
 
       IRDBRecordset_ptr emecGeoPtr = pAccessSvc->getRecordsetPtr("EmecGeometry",detectorKey,detectorNode);
-      if (emecGeoPtr->size()==0)
-        throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot find the EmecGeometry Table");
+      if (emecGeoPtr->size()==0) {
+        ATH_MSG_ERROR("LArFCALCalibCalculatorBase ERROR: Cannot find the EmecGeometry Table");
+	return StatusCode::FAILURE;
+      }
 
       m_zShift = (*emecGeoPtr)[0]->getDouble("ZSHIFT")*CLHEP::cm;
       return StatusCode::SUCCESS;

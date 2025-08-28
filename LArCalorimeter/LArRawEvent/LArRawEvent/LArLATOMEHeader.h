@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARLATOMEHEADER_H
@@ -23,7 +23,7 @@ class LArLATOMEHeader
   LArLATOMEHeader(const uint32_t lid);
 
   /** @brief Constructor with all numbers*/
-  LArLATOMEHeader(const uint32_t sourceid, const uint32_t latomeId, const uint16_t nchan, const uint16_t bcid, const uint32_t l1Id, const uint32_t robfragsize=0);
+  LArLATOMEHeader(const uint32_t sourceid, const uint32_t latomeId, const uint16_t nchan, const uint16_t bcid, const uint32_t l1Id, const uint32_t robfragsize=0, const uint32_t latomeFwVersion = 0);
 
   /** @brief Destructor */
   ~LArLATOMEHeader(){ }
@@ -46,6 +46,9 @@ class LArLATOMEHeader
   /** @brief get the ROB frag size*/
   inline uint32_t ROBFragSize() const {return m_ROBFragSize;}
  
+  /** @brief get the FW version*/
+  inline uint32_t FWversion() const {return m_LATOMEFWVersion;}
+
   /** @brief set the LATOME Bunch Crossing ID*/
   inline void SetBCId(const uint16_t bcid)
     { m_BCId=bcid; return; }
@@ -66,10 +69,14 @@ class LArLATOMEHeader
   inline void SetL1Id(const uint32_t source)
     { m_l1Id=source; return; }
 
-
   /** @brief set the ROB frag size*/
   inline void SetROBFragSize(const uint32_t robfragsize)
     { m_ROBFragSize=robfragsize; return; }
+
+  /** @brief set the FW version*/
+  inline void SetFWversion(const uint32_t fwversion) 
+    { m_LATOMEFWVersion=fwversion; return;}
+
 
  private:
 
@@ -90,6 +97,9 @@ class LArLATOMEHeader
 
   /** @brief ROB frag size */
   uint32_t m_ROBFragSize; 
+
+  /** @brief FW version */
+  uint32_t m_LATOMEFWVersion; 
 };
 
 #endif

@@ -15,6 +15,9 @@
 #include <JetAnalysisAlgorithms/JetReclusteringAlg.h>
 #include <JetAnalysisAlgorithms/ReclusteredJetCalibrationAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (CP::JetCalibrationAlg)
 DECLARE_COMPONENT (CP::BJetCalibrationAlg)
 DECLARE_COMPONENT (CP::JetFFSmearingAlg)

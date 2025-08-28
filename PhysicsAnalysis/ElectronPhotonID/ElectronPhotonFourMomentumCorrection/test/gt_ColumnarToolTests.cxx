@@ -19,6 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <xAODCore/ShallowCopy.h>
 
 #include <ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h>
+#include <TruthUtils/ParticleConstants.h>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -62,7 +63,7 @@ TEST_F (ColumnarMemoryTest, EgammaCalibrationAndSmearingTool)
   columnMap.addColumn ("Electrons.pt", {10e5});
   columnMap.addColumn ("Electrons.eta", {1});
   columnMap.addColumn ("Electrons.phi", {1});
-  columnMap.addColumn ("Electrons.m", {0.511});
+  columnMap.addColumn ("Electrons.m", {ParticleConstants::electronMassInMeV});
   columnMap.addColumn ("Electrons.author", {unsigned (xAOD::EgammaParameters::AuthorElectron)});
   columnMap.addColumn ("Electrons.caloClusterLinks.data", {0});
   columnMap.addColumn ("Electrons.caloClusterLinks.offset", {0, columnMap.columnSize("Electrons.caloClusterLinks.data")});
@@ -104,7 +105,7 @@ void callXAOD (const CP::EgammaCalibrationAndSmearingTool& tool, const std::stri
   ANA_CHECK_THROW (tool.evtStore()->record (auxCopy, outputName + "Aux."));
 }
 
-TEST_F (ColumnarPhysLiteTest, DISABLED_EgammaCalibrationAndSmearingTool)
+TEST_F (ColumnarPhysLiteTest, EgammaCalibrationAndSmearingTool)
 {
   auto tool = new CP::EgammaCalibrationAndSmearingTool (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ESModel", "es2022_R22_PRE"));

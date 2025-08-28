@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
     ------ Documentation on HLT Tree creation -----
@@ -35,19 +35,10 @@ from DecisionHandling.DecisionHandlingConfig import TriggerSummaryAlg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from builtins import map, range, str, zip
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 import re
 
 log = logging.getLogger( __name__ )
-
-#### Functions to create the CF tree from CF configuration objects
-def makeSummary(flags, name, flatDecisions):
-    """ Returns a TriggerSummaryAlg connected to given decisions"""
-
-    summary = TriggerSummaryAlg( flags, CFNaming.stepSummaryName(name) )
-    summary.InputDecision = "HLTSeedingSummary"
-    summary.FinalDecisions = list(OrderedDict.fromkeys(flatDecisions))
-    return summary
 
 
 def createStepFilterNode(name, seq_list, dump=False):
@@ -93,7 +84,7 @@ def matrixDisplay( allCFSeq ):
                     mx[stepNumber, seq.sequence.Alg.getName()].extend(chains)
 
     # sort dictionary by fist key=step
-    sorted_mx = OrderedDict(sorted( list(mx.items()), key= lambda k: k[0]))
+    sorted_mx = dict(sorted( list(mx.items()), key= lambda k: k[0]))
 
     log.debug( "" )
     log.debug( "="*90 )
@@ -206,7 +197,7 @@ def createDataFlow(flags, chains):
 
     # loop over chains
     for chain in chains:
-        log.debug("\n Configuring chain %s with %d steps: \n   - %s ", chain.name,len(chain.steps),'\n   - '.join(map(str, [{step.name:step.multiplicity} for step in chain.steps])))
+        log.debug("\n Configuring chain %s with %d steps: \n   - %s ", chain.name,len(chain.steps),'\n   - '.join(map(str, [{step.name:step.nLegs} for step in chain.steps])))
 
         lastCFgroup = None
         lastDecisions = []
@@ -278,7 +269,7 @@ def createDataFlow(flags, chains):
                     log.debug(dec)
                     
         #end of loop over steps
-        log.debug("\n Built CD for chain %s with %d steps: \n   - %s ", chain.name,len(chain.steps),'\n   - '.join(map(str, [{step.name:step.multiplicity} for step in chain.steps])))
+        log.debug("\n Built CD for chain %s with %d steps: \n   - %s ", chain.name,len(chain.steps),'\n   - '.join(map(str, [{step.name:step.nLegs} for step in chain.steps])))
     #end of loop over chains
 
     log.debug("End of createDataFlow for %d chains and total %d steps", len(chains), NSTEPS)
@@ -333,8 +324,11 @@ def createControlFlow(flags, HLTNode, CFseqList):
         for CFseq in CFseqList[nstep]:
             stepDecisions.extend(CFseq.sequenceCA.decisions)
 
-        summary = makeSummary( flags, stepSequenceName, stepDecisions )
-        acc.addEventAlgo([summary],sequenceName = HLTNode.getName())
+        summaryAlg = TriggerSummaryAlg( flags, CFNaming.stepSummaryName(stepSequenceName),
+                                        InputDecision = "HLTSeedingSummary",
+                                        FinalDecisions = list(dict.fromkeys(stepDecisions)) )
+
+        acc.addEventAlgo(summaryAlg, sequenceName = HLTNode.getName())
 
         if flags.Trigger.generateMenuDiagnostics:
             log.debug("Now Draw Menu Diagnostic dot graphs...")

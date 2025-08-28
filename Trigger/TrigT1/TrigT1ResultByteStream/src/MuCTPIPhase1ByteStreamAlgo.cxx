@@ -8,6 +8,9 @@
 #include "TrigT1MuctpiBits/HelpersPhase1.h"
 #include "PathResolver/PathResolver.h"
 
+#include <atomic>
+
+static std::atomic<unsigned int> barrelROIFailCounter{0};
 
 //also inspired by Rafal's word decoding code from:
 //https://gitlab.cern.ch/atlas/athena/blob/release/22.0.91/Trigger/TrigT1/TrigT1ResultByteStream/src/MuonRoIByteStreamTool.cxx
@@ -281,7 +284,23 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
 
 		if(thistob.det == 0) // BA
 		{
-		  thistob.roi = m_l1topoLUT.getBarrelROI(thistob.side, thistob.sec, thistob.barrel_eta_lookup, thistob.barrel_phi_lookup);
+          try
+          {
+            thistob.roi = m_l1topoLUT.getBarrelROI(thistob.side, thistob.sec, thistob.barrel_eta_lookup, thistob.barrel_phi_lookup);
+          }
+          catch (const std::out_of_range& e) // Occurs when getBarrelROI fails to find entry in the map
+          { 
+            ++barrelROIFailCounter;
+            ATH_MSG_WARNING("TopoTOB word not found in LUT!"
+                            << " (" << e.what() << " exception)"
+                            << " Word info: det = " << thistob.det
+                            << ", subsystem = " << thistob.subsystem
+                            << ", side = " << thistob.side
+                            << ", sector = " << thistob.sec
+                            << ", ieta = " << thistob.barrel_eta_lookup
+                            << ", iphi = " << thistob.barrel_phi_lookup);
+            break;
+          }
 		  thistob.etaDecoded = m_l1topoLUT.getCoordinates(thistob.side, thistob.subsystem, thistob.sec, thistob.roi).eta;
 		  thistob.phiDecoded = m_l1topoLUT.getCoordinates(thistob.side, thistob.subsystem, thistob.sec, thistob.roi).phi;
 		}
@@ -316,9 +335,24 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
   ATH_MSG_DEBUG(" MUCTPI DQ DEBUG: out of words (pushing last slice)");
   slices.push_back( slice );
 
+  // Check that the number of exceptions is below a limit based on the number of slices.
+  // Exceptions can occur if word is present in multiple timeslices for same event.
+  // This allows for cases where we have one or two bad words per event, but not where lots of map errors arise. 
+  if (barrelROIFailCounter == slices.size() + 2 )
+  {
+    ATH_MSG_ERROR("TopoTOB word exception count exceeded limit!");
+    return StatusCode::FAILURE;
+  }
+
   // create MuCTPI RDO
   ATH_CHECK(outputHandle.record(
       std::make_unique<MuCTPI_Phase1_RDO>(std::move(slices), std::move(errorBits))
   ));
   return StatusCode::SUCCESS;
+}
+
+StatusCode MuCTPIPhase1ByteStreamAlgo::finalize()
+{
+    if (barrelROIFailCounter != 0) ATH_MSG_WARNING(barrelROIFailCounter << " TopoTOB words could not retrieve RoIs in the barrel");
+    return StatusCode::SUCCESS;
 }

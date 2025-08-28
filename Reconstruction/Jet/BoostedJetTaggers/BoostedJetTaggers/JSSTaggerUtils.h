@@ -31,6 +31,7 @@ class JSSTaggerUtils :
       StatusCode GetImageScore(const xAOD::JetContainer& jets) const override;
       StatusCode GetConstScore(const xAOD::JetContainer& jets) const override;
       StatusCode GetQGConstScore(const xAOD::JetContainer& jets) const override;
+      StatusCode GetTopConstScore(const xAOD::JetContainer& jets) const override;
 
       // HighLevel tagger
       StatusCode GetHLScore(const xAOD::JetContainer& jets) const override;

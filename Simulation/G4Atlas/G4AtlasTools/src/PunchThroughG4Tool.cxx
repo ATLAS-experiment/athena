@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PunchThrough headers
@@ -45,14 +45,6 @@ PunchThroughG4Tool::PunchThroughG4Tool(const std::string& type, const std::strin
 StatusCode PunchThroughG4Tool::initialize(){
   ATH_MSG_DEBUG("[PunchThroughG4Tool] ==>" << name() << "::initialize()");
 
-  // resolving lookuptable file
-  std::string resolvedFileName = PathResolverFindCalibFile (m_filenameLookupTable);
-  if (resolvedFileName.empty()) {
-    ATH_MSG_ERROR( "[PunchThroughG4Tool] Parametrisation file '" << m_filenameLookupTable << "' not found" );
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG( "[PunchThroughG4Tool] Parametrisation file found: " << resolvedFileName );
-
   //retrieve inverse CDF config file
   if (!initializeInverseCDF(PathResolverFindCalibFile(m_filenameInverseCDF)))
   {
@@ -74,6 +66,52 @@ StatusCode PunchThroughG4Tool::initialize(){
     return StatusCode::FAILURE;
   }
 
+  ATH_MSG_INFO( "[PunchThroughG4Tool] initialization is successful" );
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PunchThroughG4Tool::initializeRegisterPunchThroughParticles(){
+  G4ParticleTable *ptable = G4ParticleTable::GetParticleTable(); 
+  for ( unsigned int num = 0; num < m_punchThroughParticles.size(); num++ )
+  {
+    const int pdg = m_punchThroughParticles[num];
+    // if no information is given on the creation of anti-particles -> do not simulate anti-particles
+    const bool doAnti = ( num < m_doAntiParticles.size() ) ? m_doAntiParticles[num] : false;
+    // if no information is given on the minimum energy -> take 50. MeV as default
+    const double minEnergy = ( num < m_minEnergy.size() ) ? m_minEnergy[num] : 50.;
+    // if no information is given on the maximum number of punch-through particles -> take -1 as default
+    const int maxNum = ( num < m_minEnergy.size() ) ? m_maxNumParticles[num] : -1;
+    // if no information is given on the scale factor for the number of particles -> take 1. as defaulft
+    const double numFactor = ( num < m_numParticlesFactor.size() ) ? m_numParticlesFactor[num] : 1.;
+    // if no information is given on the position angle factor -> take 1.
+    const double posAngleFactor = ( num < m_posAngleFactor.size() ) ? m_posAngleFactor[num] : 1.;
+    // if no information is given on the momentum angle factor -> take 1.
+    const double momAngleFactor = ( num < m_momAngleFactor.size() ) ? m_momAngleFactor[num] : 1.;
+    // if no information is given on the scale factor for the energy -> take 1. as default
+    const double energyFactor = ( num < m_energyFactor.size() ) ? m_energyFactor[num] : 1.;
+
+    // register the particle
+    ATH_MSG_VERBOSE("VERBOSE: [PunchThroughG4Tool] registering punch-through particle type with pdg = " << pdg );    
+    if (registerPunchThroughParticle( *ptable, pdg, doAnti, minEnergy, maxNum, numFactor, energyFactor, posAngleFactor, momAngleFactor ) != StatusCode::SUCCESS)
+    {
+      ATH_MSG_ERROR("[PunchThroughG4Tool] unable to register punch-through particle type with pdg = " << pdg);
+      return StatusCode::FAILURE;
+    }
+  }
+  // if all goes well
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PunchThroughG4Tool::initializePhysics(){
+  // resolving lookuptable file
+
+  ATH_MSG_INFO("[PunchThroughG4Tool] PunchThroughG4Tool::initializePhysics() called");
+  std::string resolvedFileName = PathResolverFindCalibFile (m_filenameLookupTable);
+  if (resolvedFileName.empty()) {
+    ATH_MSG_ERROR( "[PunchThroughG4Tool] Parametrisation file '" << m_filenameLookupTable << "' not found" );
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG( "[PunchThroughG4Tool] Parametrisation file found: " << resolvedFileName );
   // open the LookupTable file
   m_fileLookupTable = new TFile( resolvedFileName.c_str(), "READ");
   if (!m_fileLookupTable) {
@@ -118,40 +156,6 @@ StatusCode PunchThroughG4Tool::initialize(){
   const std::vector<std::pair<double, double>>* rzMS = &(m_envDefSvc->getMuonRZBoundary());  
   const std::vector<std::pair<double, double>>* rzCalo = &(m_envDefSvc->getCaloRZBoundary());  
   ATH_CHECK(checkCaloMSBoundaries(rzMS, rzCalo));
-
-  ATH_MSG_INFO( "[PunchThroughG4Tool] initialization is successful" );
-  return StatusCode::SUCCESS;
-}
-
-StatusCode PunchThroughG4Tool::initializeRegisterPunchThroughParticles(){
-  G4ParticleTable *ptable = G4ParticleTable::GetParticleTable(); 
-  for ( unsigned int num = 0; num < m_punchThroughParticles.size(); num++ )
-  {
-    const int pdg = m_punchThroughParticles[num];
-    // if no information is given on the creation of anti-particles -> do not simulate anti-particles
-    const bool doAnti = ( num < m_doAntiParticles.size() ) ? m_doAntiParticles[num] : false;
-    // if no information is given on the minimum energy -> take 50. MeV as default
-    const double minEnergy = ( num < m_minEnergy.size() ) ? m_minEnergy[num] : 50.;
-    // if no information is given on the maximum number of punch-through particles -> take -1 as default
-    const int maxNum = ( num < m_minEnergy.size() ) ? m_maxNumParticles[num] : -1;
-    // if no information is given on the scale factor for the number of particles -> take 1. as defaulft
-    const double numFactor = ( num < m_numParticlesFactor.size() ) ? m_numParticlesFactor[num] : 1.;
-    // if no information is given on the position angle factor -> take 1.
-    const double posAngleFactor = ( num < m_posAngleFactor.size() ) ? m_posAngleFactor[num] : 1.;
-    // if no information is given on the momentum angle factor -> take 1.
-    const double momAngleFactor = ( num < m_momAngleFactor.size() ) ? m_momAngleFactor[num] : 1.;
-    // if no information is given on the scale factor for the energy -> take 1. as default
-    const double energyFactor = ( num < m_energyFactor.size() ) ? m_energyFactor[num] : 1.;
-
-    // register the particle
-    ATH_MSG_VERBOSE("VERBOSE: [PunchThroughG4Tool] registering punch-through particle type with pdg = " << pdg );    
-    if (registerPunchThroughParticle( *ptable, pdg, doAnti, minEnergy, maxNum, numFactor, energyFactor, posAngleFactor, momAngleFactor ) != StatusCode::SUCCESS)
-    {
-      ATH_MSG_ERROR("[PunchThroughG4Tool] unable to register punch-through particle type with pdg = " << pdg);
-      return StatusCode::FAILURE;
-    }
-  }
-  // if all goes well
   return StatusCode::SUCCESS;
 }
 
@@ -917,16 +921,16 @@ std::vector<std::map<std::string, std::string>> PunchThroughG4Tool::getInfoMap(c
                                 std::map<std::string, std::string>  xml_info_item;
 
                                 if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "name")) != nullptr) {
-                                    xml_info_item.insert({"name", (const char*)xmlBuff});
+                                    xml_info_item.insert({"name", reinterpret_cast<const char*>(xmlBuff)});
                                 }
                                 if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "etaMins")) != nullptr) {
-                                    xml_info_item.insert({"etaMins", (const char*)xmlBuff});
+                                    xml_info_item.insert({"etaMins", reinterpret_cast<const char*>(xmlBuff)});
                                 }
                                 if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "etaMaxs")) != nullptr) {
-                                    xml_info_item.insert({"etaMaxs", (const char*)xmlBuff});
+                                    xml_info_item.insert({"etaMaxs", reinterpret_cast<const char*>(xmlBuff)});
                                 }
                                 if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "pidStr")) != nullptr) {
-                                    xml_info_item.insert({"pidStr", (const char*)xmlBuff});
+                                    xml_info_item.insert({"pidStr", reinterpret_cast<const char*>(xmlBuff)});
                                 }
 
                                 xml_info.push_back(xml_info_item);                                
@@ -983,7 +987,7 @@ StatusCode PunchThroughG4Tool::initializeInversePCA(const std::string & inverseP
                                   for (int i = 0; i <= 4; ++i) {
                                       std::string propName = "comp_" + std::to_string(i); // Dynamically create property name
                                       if ((xmlBuff = xmlGetProp(pcaNode, BAD_CAST propName.c_str())) != nullptr) {
-                                          PCA_matrix_row.push_back(atof((const char*)xmlBuff)); // Convert and push to the row
+                                          PCA_matrix_row.push_back(atof(reinterpret_cast<const char*>(xmlBuff))); // Convert and push to the row
                                       }
                                   }
                                   PCA_matrix.push_back(PCA_matrix_row);          
@@ -993,7 +997,7 @@ StatusCode PunchThroughG4Tool::initializeInversePCA(const std::string & inverseP
                                   for (int i = 0; i <= 4; ++i) {
                                       std::string propName = "mean_" + std::to_string(i); // Dynamically create property name
                                       if ((xmlBuff = xmlGetProp(pcaNode, BAD_CAST propName.c_str())) != nullptr) {
-                                          PCA_means_row.push_back(atof((const char*)xmlBuff)); // Convert and push to the row
+                                          PCA_means_row.push_back(atof(reinterpret_cast<const char*>(xmlBuff))); // Convert and push to the row
                                       }
                                   }
                                   m_PCA_means.push_back(PCA_means_row);  
@@ -1090,10 +1094,10 @@ std::map<double, double> PunchThroughG4Tool::getVariableCDFmappings(xmlNodePtr& 
         //Get min and max values that we normalise values to
         if (xmlStrEqual( node->name, BAD_CAST "CDFmap" )) {
             if ((xmlBuff = xmlGetProp(node, BAD_CAST "ref")) != nullptr) {
-              ref = atof( (const char*) xmlBuff );
+              ref = atof( reinterpret_cast<const char*> (xmlBuff) );
             }
             if ((xmlBuff = xmlGetProp(node, BAD_CAST "quant")) != nullptr) {
-              quant = atof( (const char*) xmlBuff );
+              quant = atof( reinterpret_cast<const char*> (xmlBuff) );
             }
             mappings.insert(std::pair<double, double>(ref, quant) );
         }

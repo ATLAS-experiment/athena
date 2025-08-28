@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger BS->RDO_TRIG athena test of the Cosmic_run3_v1 menu on express stream from a cosmic run
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-input: group.trig-hlt.data23_cos.00457007.physics_CosmicMuons.merge.RAW
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log

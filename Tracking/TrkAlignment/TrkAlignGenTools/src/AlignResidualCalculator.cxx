@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TrkAlignEvent/AlignTrack.h"
-#include "TrkToolInterfaces/IResidualPullCalculator.h"
-#include "TrkToolInterfaces/IUpdator.h"
 #include "TrkAlignGenTools/AlignResidualCalculator.h"
 
 #include "TrkMeasurementBase/MeasurementBase.h"
@@ -23,24 +21,10 @@
 namespace Trk {
 
   //______________________________________________________________
-  AlignResidualCalculator::AlignResidualCalculator(const std::string& type, const std::string& name,
-           const IInterface* parent)
-
+  AlignResidualCalculator::AlignResidualCalculator(const std::string& type, const std::string& name, const IInterface* parent)
     : AthAlgTool(type,name,parent)
-    , m_pullCalculator("Trk::ResidualPullCalculator/ResidualPullCalculator")
-    , m_updator("Trk::KalmanUpdator/TrkKalmanUpdator")
-    , m_qOverP{}
-    , m_previousQOverP{}
-    , m_nDoF{}
-    , m_chi2ForMeasType(nullptr)
   {
     declareInterface<IAlignResidualCalculator>(this);
-
-    declareProperty("ResidualPullCalculator",   m_pullCalculator);
-    declareProperty("ResidualType",             m_resType = HitOnly);
-    declareProperty("IncludeScatterers",        m_includeScatterers = false );
-
-    declareProperty("UpdatorTool",              m_updator);
   }
 
   //________________________________________________________________________
@@ -54,7 +38,7 @@ namespace Trk {
   {
     // get residual pull calculator
     if (m_pullCalculator.retrieve().isFailure()) {
-      msg(MSG::FATAL) << "Could not get " << m_pullCalculator << endmsg;
+      ATH_MSG_FATAL("Could not get " << m_pullCalculator);
       return StatusCode::FAILURE;
     }
     ATH_MSG_INFO("Retrieved " << m_pullCalculator);
@@ -62,13 +46,13 @@ namespace Trk {
     // get updator
     if(m_resType==Unbiased) {
       if (m_updator.retrieve().isFailure()) {
-        msg(MSG::FATAL) << "Could not get " << m_updator << endmsg;
+        ATH_MSG_FATAL("Could not get " << m_updator);
         return StatusCode::FAILURE;
       }
       ATH_MSG_INFO("Retrieved " << m_pullCalculator);
     }
 
-    ATH_MSG_INFO("Using"<<AlignResidualType(m_resType)<<"residuals.");
+    ATH_MSG_INFO("Using"<<static_cast<AlignResidualType>(m_resType.value())<<"residuals.");
 
     return StatusCode::SUCCESS;
   }
@@ -124,16 +108,11 @@ namespace Trk {
 
       const MaterialEffectsBase*         meb        = tsos->materialEffectsOnTrack();
       const Trk::MaterialEffectsOnTrack* meot       = dynamic_cast<const MaterialEffectsOnTrack*>(meb);
-      //const ScatteringAngles*            scatterer = (meot) ? meot->scatteringAngles() : 0;
 
       // if scatterer, add scattering parameters
-      //int nScattererDim=0;
       if (m_includeScatterers && meb && meot) {
-        //nScattererDim = (scatterer) ? 2 : 1;
         accumulateScattering(tsos);
       }
-      //ATH_MSG_DEBUG("scattererDim="<<nScattererDim);
-      //(**atsos).setScatteringAngle(scatteringAngle);
 
       // set residuals for alignTSOS
       double dchi2 = setResidualsOnATSOS(*atsos,tsos);
@@ -143,7 +122,7 @@ namespace Trk {
       ATH_MSG_DEBUG("adding "<<dchi2<<", m_chi2ForMeasType["<<imeasType<<"]="<<m_chi2ForMeasType[imeasType]);
     }
 
-    return chi2;///(double)m_nDoF;
+    return chi2;
   }
 
   //_______________________________________________________________________
@@ -269,12 +248,12 @@ namespace Trk {
             }
 
             ATH_MSG_DEBUG("Calling ResidualPullCalculator for residual type "
-                          <<ResidualPullType(AlignResidualType(m_resType))
-                          <<" (AlignResidualType "<<AlignResidualType(m_resType)
+                          <<ResidualPullType(static_cast<AlignResidualType>(m_resType.value()))
+                          <<" (AlignResidualType "<<static_cast<AlignResidualType>(m_resType.value())
                           <<" "<<m_resType<<")");
             ATH_MSG_DEBUG("mesb->localErrorMatrix().covValue(Trk::loc1): "<<mesb->localCovariance()(Trk::loc1,Trk::loc1));
             resPull = m_pullCalculator->residualPull(mesb, trackPars,
-                                                     ResidualPullType(AlignResidualType(m_resType)),
+                                                     ResidualPullType(static_cast<AlignResidualType>(m_resType.value())),
                                                      atsos->measType());
             if ( resPull ) {
               residual = (resPull->residual())[iparam];
@@ -296,7 +275,9 @@ namespace Trk {
                           << atsos->dumpType()<<", meas type "<<atsos->measType() );
         }
 
-        Residual res(AlignResidualType(m_resType),Measurement,(ParamDefs)iparam,residual,errSq);
+        Residual res(static_cast<AlignResidualType>(m_resType.value()),
+		     Measurement, static_cast<ParamDefs>(iparam),
+		     residual, errSq);
         atsos->addResidual(res);
         dchi2 += res.residualNorm()*res.residualNorm();
         m_nDoF++;
@@ -322,7 +303,7 @@ namespace Trk {
       m_previousQOverP     = m_qOverP;
     }
 
-     }
+  }
 
   //________________________________________________________________________
   const TrackStateOnSurface*
@@ -381,7 +362,6 @@ namespace Trk {
     }
     else {
       ATH_MSG_WARNING("TSOS already found with position "<<addPosition<<"!");
-      //return 0;
     }
     return tsos;
   }

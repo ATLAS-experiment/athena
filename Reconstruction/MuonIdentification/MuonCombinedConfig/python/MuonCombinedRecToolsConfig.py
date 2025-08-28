@@ -318,6 +318,11 @@ def MuonCombinedFitTagToolCfg(flags, name="MuonCombinedFitTagTool", **kwargs):
     kwargs.setdefault("TrackScoringTool", result.popToolsAndMerge(
         MuonTrackScoringToolCfg(flags)))
 
+
+    #When both solenoid and toriod are off (e.g. cosmic runs) this cut is likely to kill the combined muon -> loosen up for cosmics
+    if flags.Beam.Type is BeamType.Cosmics and (not flags.BField.endcapToroidOn and not flags.BField.solenoidOn):
+        kwargs.setdefault("MomentumBalanceCut", 1e6)
+
     tool = CompFactory.MuonCombined.MuonCombinedFitTagTool(name, **kwargs)
     result.setPrivateTools(tool)
     return result

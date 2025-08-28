@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -238,6 +238,10 @@ bool LCE_CellList::applySelection(const LCE_CellList::thrCounter_t& counter) con
 
 void  LCE_CellList::writeList(const char* textfilename, const std::vector<LCE_CellList::thrCounter_t>& cellList) const {
   FILE* pFile = fopen (textfilename , "w");
+  if (not pFile) {
+    std::cout << "File " <<textfilename<<" could not be opened" <<std::endl;
+    throw std::runtime_error("File not opened");
+  }
   //               0          1        2      3       4         5                 6             7               8         9       10  
   fprintf(pFile,"onlid // partition // FT // Slot // channel // nAboveSigNoise // nAboveAbsE // MeanE [GeV] // fracQ4k // nLBs // Algoflag\n");
 
@@ -256,9 +260,7 @@ void  LCE_CellList::writeList(const char* textfilename, const std::vector<LCE_Ce
 	      cnt.FT, cnt.slot, cnt.channel, cnt.nAboveSigNoise, cnt.nAboveAbsE,
 	      cnt.Esum/(1000.0*cnt.nSeen), (float)cnt.nAboveQ/cnt.nSeen, 
 	      (unsigned)cnt.LBs.size(), flag );
-      //for (const unsigned lb : cnt.LBs) {
-      //	fprintf(pFile, "%i ", lb);
-      //}
+      
 
       fprintf(pFile,"\n");
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArOFPhasePicker.h"
@@ -64,7 +64,7 @@ StatusCode LArOFPhasePicker::initialize()
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineID = (const LArOnlineID_Base*)ll;
+      m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG("Found the LArOnlineID helper");
     }
   } else { // m_isSC
@@ -75,7 +75,7 @@ StatusCode LArOFPhasePicker::initialize()
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineID = (const LArOnlineID_Base*)ll;
+      m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     }
   }

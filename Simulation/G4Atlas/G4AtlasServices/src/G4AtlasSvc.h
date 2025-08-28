@@ -7,8 +7,8 @@
 
 // Base classes
 #include "AthenaBaseComps/AthService.h"
+#include "G4AtlasInterfaces/IDetectorConstructionTool.h"
 #include "G4AtlasInterfaces/IG4AtlasSvc.h"
-#include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
 #include "G4AtlasInterfaces/IUserLimitsSvc.h"
 // Member
@@ -25,7 +25,7 @@ class G4AtlasSvc : public extends<AthService , IG4AtlasSvc> {
   StatusCode initialize() override final;
 
  private:
-  ServiceHandle<IDetectorGeometrySvc> m_detGeoSvc{this, "DetectorGeometrySvc", "DetectorGeometrySvc"};
+  PublicToolHandle<IDetectorConstructionTool> m_detConstruction{this, "DetectorConstruction", "", "Tool handle of the DetectorConstruction"};
   ServiceHandle<IPhysicsListSvc> m_physicsListSvc{this, "PhysicsListSvc", "PhysicsListSvc"};
   ServiceHandle<IUserLimitsSvc> m_userLimitsSvc{this, "UserLimitsSvc", "UserLimitsSvc"};
   Gaudi::Property<bool> m_isMT{this, "isMT", false};

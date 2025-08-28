@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventDecisionAlg.h
@@ -17,9 +17,7 @@
 // FrameWork includes
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthFilterAlgorithm.h"
-
-// forward declarations
-class IDecisionSvc;
+#include "AthenaKernel/IDecisionSvc.h"
 
 
 class EventDecisionAlg
@@ -55,10 +53,12 @@ class EventDecisionAlg
   ///////////////////////////////////////////////////////////////////
  private:
   // The handle to the IDecisionSvc;
-  ServiceHandle<IDecisionSvc> m_decSvc;
+  ServiceHandle<IDecisionSvc> m_decSvc{ this, "DecisionService", "DecisionSvc/DecisionSvc",
+    "The handle to the IDecisionSvc" };
 
   /// The names of all output streams to check
-  StringArrayProperty m_streamNames;
+  StringArrayProperty m_streamNames{ this, "OutputStreamNames", {},
+    "The names of all output streams to check" };
 
 };
 

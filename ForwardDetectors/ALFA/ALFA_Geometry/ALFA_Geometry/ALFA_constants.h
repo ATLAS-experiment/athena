@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AlfaConstants_h
@@ -33,7 +33,7 @@ const int OD_Nb_Fibers = ODFIBERSCNT;
 #define INNERDETZSPACE (300*CLHEP::mm)
 #define ALFA_GVSTHICKNESS (0.001*CLHEP::mm)
 
-#define METROLOGYFILE "rpmetrology.dat"
+#define METROLOGYFILE "ALFA_Geometry/rpmetrology.dat"
 
 
 

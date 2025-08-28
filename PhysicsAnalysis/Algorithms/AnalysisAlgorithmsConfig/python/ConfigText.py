@@ -31,8 +31,11 @@ def printYaml(d, sort=False, jsonFormat=False):
 
 
 class TextConfig(ConfigFactory):
-    def __init__(self, yamlPath=None, *, addDefaultBlocks=True):
+    def __init__(self, yamlPath=None, *, config=None, addDefaultBlocks=True):
         super().__init__(addDefaultBlocks=False)
+
+        if yamlPath and config:
+            raise ValueError("Cannot specify both yamlPath and config. Use one or the other.")
 
         # Block to add new blocks to this object
         self.addAlgConfigBlock(algName="AddConfigBlocks", alg=self._addNewConfigBlocks,
@@ -44,8 +47,8 @@ class TextConfig(ConfigFactory):
         self._config = {}
         # do not allow for loading multiple yaml files
         self.__loadedYaml = False
-        if yamlPath is not None:
-            self.loadConfig(yamlPath)
+        if yamlPath is not None or config is not None:
+            self.loadConfig(yamlPath, configDict=config)
         # last is used for setOptionValue when using addBlock
         self._last = None
 
@@ -93,7 +96,7 @@ class TextConfig(ConfigFactory):
         for key, value in config.items():
             self.cleanupPlaceholders(value)
 
-    def loadConfig(self, yamlPath):
+    def loadConfig(self, yamlPath=None, *, configDict=None):
         """
         read a YAML file. Will combine with any config blocks added using python
         """
@@ -126,7 +129,11 @@ class TextConfig(ConfigFactory):
             return
 
         logCPAlgTextCfg.info(f'loading {yamlPath}')
-        config = readYaml(yamlPath)
+        if configDict is not None:
+            # if configDict is provided, use it directly
+            config = configDict
+        else:
+            config = readYaml(yamlPath)
         # check if blocks are defined in yaml file
         if "AddConfigBlocks" in config:
            self._configureAlg(self._algs["AddConfigBlocks"], config["AddConfigBlocks"])
@@ -348,6 +355,7 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
 # See the README for more info on how this works
 #
 def combineConfigFiles(local, config_path, fragment_key="include"):
+    combined = False
 
     # if this isn't an iterable there's nothing to combine
     if isinstance(local, dict):
@@ -355,15 +363,15 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
     elif isinstance(local, list):
         to_combine = local
     else:
-        return
+        return combined
 
     # otherwise descend into all the entries here
     for sub in to_combine:
-        combineConfigFiles(sub, config_path, fragment_key=fragment_key)
+        combined = combineConfigFiles(sub, config_path, fragment_key=fragment_key) or combined
 
     # if there are no fragments to include we're done
     if fragment_key not in local:
-        return
+        return combined
 
     fragment_path = _find_fragment(
         pathlib.Path(local[fragment_key]),
@@ -392,6 +400,10 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
 
     # delete the fragment so we don't stumble over it again
     del local[fragment_key]
+
+
+    # if we came to here we merged a fragment, so return True
+    return True
 
 
 def _find_fragment(fragment_path, config_path):

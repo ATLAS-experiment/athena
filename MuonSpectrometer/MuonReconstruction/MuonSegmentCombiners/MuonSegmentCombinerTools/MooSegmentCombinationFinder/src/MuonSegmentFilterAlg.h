@@ -16,7 +16,6 @@
 ///  or in a certain region of the muon spectrometer, e.g. BI, BIS, Barrel, Middle, etc... 
 ///  The pointers of the TrackSegements passing the filter are added to a SG::VIEW_ELEMENTS container.
 
-using namespace Muon::MuonStationIndex;
 class MuonSegmentFilterAlg : public AthReentrantAlgorithm {
 public:
     using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -46,10 +45,20 @@ private:
         "TrackMuonSegments",
         "Input container",
     };
-    Gaudi::Property<std::set<int>> m_thin_stations{this, "ThinStations", {toInt(StIndex::BI), toInt(StIndex::BM), 
-                                                                             toInt(StIndex::BO), toInt(StIndex::BE), toInt(StIndex::EI)}, "Removes sgements in a given Muon station" };
+    Gaudi::Property<std::set<int>> m_thin_stations
+      {this, "ThinStations",
+       {toInt(Muon::MuonStationIndex::StIndex::BI),
+        toInt(Muon::MuonStationIndex::StIndex::BM), 
+        toInt(Muon::MuonStationIndex::StIndex::BO),
+        toInt(Muon::MuonStationIndex::StIndex::BE),
+        toInt(Muon::MuonStationIndex::StIndex::EI)},
+       "Removes segments in a given Muon station" };
     Gaudi::Property<std::set<int>> m_thin_layers{this, "ThinLayers", {}, "Removes segments in a given layer of the MuonSpectrometer "};
-    Gaudi::Property<std::set<int>> m_thin_technology{this, "ThinTechnology", {toInt(TechnologyIndex::STGC), toInt(TechnologyIndex::MM)}, "Removes segments from a given chamber technology"};
+    Gaudi::Property<std::set<int>> m_thin_technology
+      {this, "ThinTechnology",
+       {toInt(Muon::MuonStationIndex::TechnologyIndex::STGC),
+        toInt(Muon::MuonStationIndex::TechnologyIndex::MM)},
+       "Removes segments from a given chamber technology"};
     Gaudi::Property<std::set<int>> m_thin_region{this, "ThinDetRegion", {}, "Removes all segments form Barrel / EndcapA / EndcapC"};
     Gaudi::Property<std::set<int>> m_thin_chamber_idx{this, "ThinChamberIndex", {}, "Removes all segments from a BIS/BIL/BMS/.."};
     

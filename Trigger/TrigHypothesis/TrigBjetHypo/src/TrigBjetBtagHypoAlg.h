@@ -38,27 +38,22 @@ class TrigBjetBtagHypoAlg : public TrigBjetHypoAlgBase {
   virtual StatusCode monitor_jets( const ElementLinkVector<xAOD::JetContainer >& jetELs, const ElementLinkVector<xAOD::JetContainer >& all_bTaggedJetELs ) const ;
   virtual StatusCode monitor_tracks( const EventContext& context, const TrigCompositeUtils::DecisionContainer* prevDecisionContainer ) const;
   virtual StatusCode monitor_primary_vertex( const ElementLink< xAOD::VertexContainer >& primVertexEL ) const;
-  virtual StatusCode monitor_flavor_probabilities( const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL, const std::string& var_name) const;
-  virtual StatusCode monitor_flavor_bb_probabilities( const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL, const std::string& var_name) const;
-  virtual ElementLinkVector<xAOD::BTaggingContainer> collect_valid_links(
-      const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL, std::string tagger ) const;
-  virtual StatusCode monitor_btagging( const ElementLinkVector< xAOD::BTaggingContainer >& bTaggingEL ) const;
+  virtual StatusCode monitor_flavor_probabilities( const ElementLinkVector< xAOD::JetContainer >& jetEL, const std::string& var_name) const;
+  virtual StatusCode monitor_flavor_bb_probabilities( const ElementLinkVector< xAOD::JetContainer >& jetEL, const std::string& var_name) const;
+  virtual ElementLinkVector<xAOD::JetContainer> collect_valid_links(const ElementLinkVector< xAOD::JetContainer >& jetEL, std::string tagger ) const;
+  virtual StatusCode monitor_btagging( const ElementLinkVector< xAOD::JetContainer >& jetEL ) const;
   
  private:
   ToolHandleArray< TrigBjetBtagHypoTool > m_hypoTools {this,"HypoTools",{},"Hypo Tools"};
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
   
   SG::ReadHandleKey< xAOD::JetContainer > m_bTaggedJetKey {this,"BTaggedJetKey","","Key for b-tagged jets"};
-  SG::ReadHandleKey< xAOD::BTaggingContainer> m_bTagKey {this,"BTaggingKey","","Key for BTagging"};
   SG::ReadHandleKey< xAOD::TrackParticleContainer > m_trackKey {this,"TracksKey","","Key for precision tracks"};
   SG::ReadHandleKey< xAOD::VertexContainer > m_inputPrmVtx {this,"PrmVtxKey","","Key for Primary vertex collection for monitoring"};
 
-  Gaudi::Property< std::string > m_bTaggingLink {this,"BTaggingLink","Unspecified","b-Tagging Link name in navigation (output)"};
   Gaudi::Property< std::string > m_prmVtxLink {this,"PrmVtxLink","Unspecified","Vertex Link name in navigation (input)"};
-  Gaudi::Property<std::string> m_btaggingLinkName{this, "BtaggingLinkName", "btag"}; // TM 2021-10-30
 
-  SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{ this,
-     "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+  SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{ this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
 };
 

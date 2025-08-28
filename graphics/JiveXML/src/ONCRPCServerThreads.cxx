@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -359,7 +359,7 @@ namespace JiveXML {
         memset(&server_addr.sin_zero, 0, sizeof(server_addr.sin_zero)); //zero padding
 
         //Now bind the socket to that inet address
-        if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) != 0){
+        if (bind(server_socket, reinterpret_cast<sockaddr *>(&server_addr), sizeof(struct sockaddr)) != 0){
           std::ostringstream msg; msg << "server thread binding socket to port " << PortNumber;
           checkResult(errno,msg.str(),ServerSvc);
           pthread_exit(NULL);

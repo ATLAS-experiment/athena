@@ -1,6 +1,5 @@
 #Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 import AthenaCommon.SystemOfUnits as Units
 from AthenaConfiguration.Enums import BeamType, FlagEnum
@@ -222,7 +221,8 @@ def createITkTrackingPassFlags():
 
     # ---flag for FPGA tracking
     icf.addFlag("doFPGASpacePoint", False)
-    icf.addFlag("doFPGATrack", False)
+    icf.addFlag("doFPGACluster", False)
+    icf.addFlag("doFPGATrackSim", False)
 
     # --- Flags for detailed information. 
     #     Ignored for Primary Pass (always active); 
@@ -262,7 +262,7 @@ def createITkFastTrackingPassFlags():
     icf = createITkTrackingPassFlags()
 
     icf.minPT                 = lambda pcf : (
-        [1.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+        [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
          0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
          0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
     icf.maxZImpact            = [150.0 * Units.mm]
@@ -271,7 +271,7 @@ def createITkFastTrackingPassFlags():
     icf.nHolesMax             = icf.maxHoles
     icf.nHolesGapMax          = [1]
     icf.minPTSeed             = lambda pcf: (
-        1.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
+        0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.maxZImpactSeed        = 150.0 * Units.mm
     icf.useITkStripSeeding    = False
 

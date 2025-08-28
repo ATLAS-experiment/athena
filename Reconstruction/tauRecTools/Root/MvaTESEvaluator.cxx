@@ -148,7 +148,7 @@ StatusCode MvaTESEvaluator::execute(xAOD::TauJet& xTau) const {
       vars.PanTauBDT_1p0n_vs_1p1n = std::max(acc_PanTauBDT_1p0n_vs_1p1n(xTau), -5.1f);
       vars.PanTauBDT_1p1n_vs_1pXn = std::max(acc_PanTauBDT_1p1n_vs_1pXn(xTau), -5.1f);
       vars.PanTauBDT_3p0n_vs_3pXn = std::max(acc_PanTauBDT_3p0n_vs_3pXn(xTau), -5.1f);
-      vars.nTracks = (float)xTau.nTracks();
+      vars.nTracks = static_cast<float>(xTau.nTracks());
       xTau.detail(xAOD::TauJetParameters::PFOEngRelDiff, vars.PFOEngRelDiff);
       
       ptMVA = float( ptCombined * m_bdtHelper->getResponse(availableVars) );

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( PhotonEfficiencyCorrection )
@@ -21,6 +21,10 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES AsgTools AthenaBaseComps EgammaAnalysisInterfacesLib
       ElectronEfficiencyCorrectionLib GaudiKernel PATCoreAcceptLib PATInterfaces
       xAODCore xAODEgamma xAODEventInfo PhotonEfficiencyCorrectionLib )
+else()
+   atlas_add_component( PhotonEfficiencyCorrection
+      src/components/*.cxx
+      LINK_LIBRARIES PhotonEfficiencyCorrectionLib )
 endif()
 
 atlas_add_dictionary( PhotonEfficiencyCorrectionDict
@@ -35,7 +39,7 @@ atlas_add_executable( PrintPhotonSF
    LINK_LIBRARIES ${ROOT_LIBRARIES} ElectronEfficiencyCorrectionLib PATCoreAcceptLib
    PhotonEfficiencyCorrectionLib )
 
-if( XAOD_STANDALONE )
+if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
    atlas_add_executable( TestxAODPhotonAlg
       util/TestxAODPhotonAlg.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -51,3 +55,9 @@ if( XAOD_STANDALONE )
 
 endif()
 
+
+atlas_add_test( gt_ColumnarToolTests
+                SOURCES test/gt_ColumnarToolTests.cxx
+                LINK_LIBRARIES ColumnarTestFixturesLib PhotonEfficiencyCorrectionLib
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh )

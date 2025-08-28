@@ -1,16 +1,25 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_GeoModelFactory_h
 #define AFP_GeoModelFactory_h 1
 
+#include "AFP_Geometry/AFP_ConfigParams.h"
+#include "AFP_GeoModelManager.h" //covariant return type, needs defined inheritance
+#include "GeoModelUtilities/GeoBorderSurfaceContainer.h" //typedef
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "GeoModelKernel/GeoVDetectorFactory.h"
 #include "GeoModelUtilities/GeoRef.h"
-#include "AFP_GeoModelManager.h"
-#include "AFP_Geometry/AFP_Geometry.h"
 #include <string>
 #include <map>
+
+class AFP_Geometry;
+class StoreGateSvc;
+class GeoOpticalSurface;
+class GeoOpticalPhysVol;
+class StatusCode;
+
 
 #define SLIMCUT (0.01*CLHEP::mm)
 
@@ -25,7 +34,7 @@ struct AFP_BPMCOOLPARAMS {
 };
 
 
-class StoreGateSvc;
+
 class AFP_GeoModelFactory : public GeoVDetectorFactory
 {
 
@@ -50,15 +59,14 @@ private:
     AFP_GeoModelFactory(const AFP_GeoModelFactory &right);
 
     // The manager:
-    AFP_GeoModelManager *m_pDetectorManager;
-    StoreGateSvc *m_pDetectorStore;
+    AFP_GeoModelManager *m_pDetectorManager{};
+    StoreGateSvc *m_pDetectorStore{};
 
-private:
     //common auxiliary map of solid shapes
     std::map<std::string,const GeoShape*> m_MapShape;
     AFP_CONFIGURATION m_CfgParams;
-    AFP_Geometry* m_pGeometry;
-    const bool m_addSeparationWindow;
+    AFP_Geometry* m_pGeometry{};
+    const bool m_addSeparationWindow{};
 
     //Si detector part
     GeoShape* createSolidSIDPlate();
@@ -66,8 +74,8 @@ private:
     void addRomanPot(GeoPhysVol* pPhysMotherVol, const char* pszStationName, HepGeom::Transform3D& TransInMotherVolume);
 
     //TOF part
-    GeoOpticalSurface* m_pOpticalSurface = nullptr;
-    GeoOpticalSurface* m_pReflectionOptSurface = nullptr;
+    GeoIntrusivePtr<GeoOpticalSurface> m_pOpticalSurface{};
+    GeoIntrusivePtr<GeoOpticalSurface> m_pReflectionOptSurface{};
     void initializeTDParameters();
     StatusCode addTimingDetector(const char* pszStationName, GeoOpticalPhysVol* pPhysMotherVol, HepGeom::Transform3D& TransInMotherVolume, GeoBorderSurfaceContainer* bsContainer);
     void addLQBarSegment(const char* pszStationName, const int nQuarticID, const int nLQBarID,AFPTOF_LBARDIMENSIONS& LQBarDims, GeoOpticalPhysVol* pPhysMotherVolume, HepGeom::Transform3D& TransInMotherVolume, GeoBorderSurfaceContainer* bsContainer);

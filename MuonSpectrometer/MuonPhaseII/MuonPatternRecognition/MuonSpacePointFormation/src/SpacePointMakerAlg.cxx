@@ -32,6 +32,7 @@ namespace MuonR4 {
 
 template<class MeasType>
 Amg::Transform3D SpacePointMakerAlg::toChamberTransform(const ActsGeometryContext& gctx, 
+                                                        const Amg::Transform3D& sectorTrans,
                                                         const MeasType* meas) const{
     IdentifierHash hash = {};
     if constexpr(std::is_same_v<MeasType, xAOD::MdtDriftCircle>) {
@@ -40,7 +41,7 @@ Amg::Transform3D SpacePointMakerAlg::toChamberTransform(const ActsGeometryContex
         hash = meas->layerHash();
     }
     const MuonGMR4::MuonReadoutElement* reEle{meas->readoutElement()};
-    return reEle->msSector()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, hash);
+    return sectorTrans * reEle->localToGlobalTrans(gctx, hash);
 }
 
 template<class MeasType>
@@ -48,11 +49,13 @@ Amg::Vector3D SpacePointMakerAlg::positionInChamber(const MeasType* meas,
                                                     const Amg::Transform3D& toChamberTrans) const{
     if constexpr (std::is_same_v<MeasType, xAOD::MdtDriftCircle>){
         return toChamberTrans * meas->localCirclePosition();
-    }
-    else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement>){
+    } else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement>){
         return toChamberTrans * meas->localMeasurementPos();
-    }
-    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip> or std::is_same_v<MeasType, xAOD::MMCluster>){
+    } else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){
+        const auto& stripLay = meas->readoutElement()->sensorLayout(meas->layerHash());
+        return toChamberTrans * stripLay->to3D(meas->template localPosition<1>()[0]*Amg::Vector2D::UnitX(),
+                                               meas->measuresPhi());
+    } else if constexpr (std::is_same_v<MeasType, xAOD::MMCluster>){
         return toChamberTrans * (meas->template localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
     }
     else if constexpr (std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
@@ -79,12 +82,13 @@ Amg::Vector3D SpacePointMakerAlg::channelDirInChamber(const MeasType* meas,
                        std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
         return toChamberTrans.linear() * Amg::Vector3D::UnitY();
     }
-    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){           
-        Amg::Vector3D dir{Amg::Vector3D::UnitY()};
+    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>) {           
+        const auto& stripLay = meas->readoutElement()->sensorLayout(meas->layerHash());
         if (meas->measuresPhi()) {
-            dir.block<2,1>(0,0) = meas->readoutElement()->stripLayout(meas->gasGap()).stripDir(meas->channelNumber());
-        } 
-        return toChamberTrans.linear() * dir;
+            const auto& sDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay->design(true));
+            return toChamberTrans.linear() * stripLay->to3D(sDesign.stripDir(meas->channelNumber()), true);
+        }
+        return toChamberTrans.linear() * stripLay->to3D(stripLay->design().stripDir(), false);
     }
     else static_assert(std::false_type::value, "Unsupported measurement type.");
     return Amg::Vector3D::Zero();      
@@ -101,12 +105,13 @@ Amg::Vector3D SpacePointMakerAlg::channelNormalInChamber(const MeasType* meas,
                        std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
         return toChamberTrans.linear() * Amg::Vector3D::UnitX();
     }
-    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){                     
-        Amg::Vector3D dir{Amg::Vector3D::UnitX()};
+    else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>) {                     
+        const auto& stripLay = meas->readoutElement()->sensorLayout(meas->layerHash());
         if (meas->measuresPhi()) {
-            dir.block<2,1>(0,0) = meas->readoutElement()->stripLayout(meas->gasGap()).stripNormal(meas->channelNumber());
-        } 
-        return toChamberTrans.linear() * dir;
+            const auto& sDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay->design(true));
+            return toChamberTrans.linear() * stripLay->to3D(sDesign.stripNormal(meas->channelNumber()), true);
+        }
+        return toChamberTrans.linear() * stripLay->to3D(stripLay->design().stripNormal(), false);
     }
     else static_assert(std::false_type::value, "Unsupported measurement type.");
     return Amg::Vector3D::Zero();     
@@ -132,9 +137,9 @@ AmgSymMatrix(2) SpacePointMakerAlg::computeCov(const MeasType* primaryMeas,
         }
         else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){
             if (primaryMeas->measuresPhi()) {
-                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->stripLayout(primaryMeas->gasGap()).stripLength(primaryMeas->channelNumber());
+                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->stripLayout(primaryMeas->layerHash()).stripLength(primaryMeas->channelNumber());
             } else {
-                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->wireGangLayout(primaryMeas->gasGap()).stripLength(primaryMeas->channelNumber());
+                uvcov(1,1) = 0.5 * primaryMeas->readoutElement()->wireGangLayout(primaryMeas->layerHash()).stripLength(primaryMeas->channelNumber());
             }
         }
         else if constexpr (std::is_same_v<MeasType, xAOD::MMCluster>){
@@ -177,58 +182,55 @@ AmgSymMatrix(2) SpacePointMakerAlg::computeCov(const xAOD::UncalibratedMeasureme
                                                const Amg::Vector3D& nor2) const {
     AmgSymMatrix(2) Jac{AmgSymMatrix(2)::Identity()}, uvcov {AmgSymMatrix(2)::Identity()};
 
-    if (primaryMeas->numDimensions() != 1) THROW_EXCEPTION("Unexpected numDimension");
-
+    if (primaryMeas->numDimensions() != 1) {
+        THROW_EXCEPTION("Unexpected numDimension");
+    }
     uvcov(0,0) = primaryMeas->localCovariance<1>()[0];
     uvcov(1,1) = secondaryMeas->localCovariance<1>()[0]; 
-
     Jac.col(0)  = nor1.block<2,1>(0,0).unit();
     Jac.col(1)  = nor2.block<2,1>(0,0).unit();
-
     return Jac * uvcov * Jac.inverse();
 }
 
 template<class MeasType>
 void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
-                                        const MeasType* primaryMeas,
-                                        const Amg::Transform3D& toChamberTrans) const {
+                                         const MeasType* primaryMeas,
+                                         const Amg::Transform3D& toChamberTrans) const {
     pointColl.emplace_back(primaryMeas);
     SpacePoint& sp {pointColl.back()};
 
-    Amg::Vector3D pos {positionInChamber(primaryMeas, toChamberTrans)};
-    Amg::Vector3D dir {channelDirInChamber(primaryMeas, toChamberTrans)};
-    Amg::Vector3D nor {channelNormalInChamber(primaryMeas, toChamberTrans)};
-    AmgSymMatrix(2) cov {computeCov(primaryMeas,dir,nor)};
-
-    sp.setDirection(dir);
-    sp.setPosition(pos);
-    sp.setNormal(nor);
-    sp.setCovariance(cov);
+    sp.setDirection(channelDirInChamber(primaryMeas, toChamberTrans));
+    sp.setNormal(channelNormalInChamber(primaryMeas, toChamberTrans));
+    sp.setPosition(positionInChamber(primaryMeas, toChamberTrans));
+    sp.setCovariance(computeCov(primaryMeas,sp.directionInChamber(),sp.normalInChamber()));
+    ATH_MSG_VERBOSE("Space point 1D: "<<m_idHelperSvc->toString(primaryMeas->identify())<<", "<<Amg::toString(sp.positionInChamber())
+        <<", "<<Amg::toString(sp.directionInChamber())<<", "<<Amg::toString(sp.normalInChamber()));
 }
 
 template<class MeasType>
-void SpacePointMakerAlg::fillSpacePoint (std::vector<SpacePoint>& pointColl,
-                                        const MeasType* primaryMeas,
-                                        const MeasType* secondaryMeas,
-                                        const Amg::Transform3D& toChamberTrans_eta, 
-                                        const Amg::Transform3D& toChamberTrans_phi) const{
+void SpacePointMakerAlg::fillSpacePoint(std::vector<SpacePoint>& pointColl,
+                                       const MeasType* primaryMeas,
+                                       const MeasType* secondaryMeas,
+                                       const Amg::Transform3D& toChamberTrans_eta, 
+                                       const Amg::Transform3D& toChamberTrans_phi) const{
     pointColl.emplace_back(primaryMeas, secondaryMeas);
     SpacePoint& sp {pointColl.back()};
 
-    Amg::Vector3D dir1 {channelDirInChamber(primaryMeas, toChamberTrans_eta)};
-    Amg::Vector3D nor1 {channelNormalInChamber(primaryMeas, toChamberTrans_eta)};
+    sp.setDirection(channelDirInChamber(primaryMeas, toChamberTrans_eta));
+    sp.setNormal(channelNormalInChamber(primaryMeas, toChamberTrans_eta));
+
     Amg::Vector3D pos1 {positionInChamber(primaryMeas, toChamberTrans_eta)};
-
     Amg::Vector3D dir2 {channelDirInChamber(secondaryMeas, toChamberTrans_phi)};
-    Amg::Vector3D nor2 {channelNormalInChamber(secondaryMeas, toChamberTrans_phi)};
     Amg::Vector3D pos2 {positionInChamber(secondaryMeas, toChamberTrans_phi)};
+    sp.setPosition(pos1 + Amg::intersect<3>(pos2,dir2, pos1, sp.directionInChamber()).value_or(0) * sp.directionInChamber());
+    ATH_MSG_VERBOSE("Space point: "<<m_idHelperSvc->toString(primaryMeas->identify())<<", "<<Amg::toString(pos1)
+        <<", "<<Amg::toString(sp.directionInChamber())<<", "<<Amg::toString(dir2));
+    sp.setCovariance(computeCov(primaryMeas,
+                                    secondaryMeas,
+                                    sp.normalInChamber(),
+                                    channelNormalInChamber(secondaryMeas, toChamberTrans_phi))
+                    );
     
-    AmgSymMatrix(2) cov {computeCov(primaryMeas,secondaryMeas,nor1,nor2)};
-
-    sp.setDirection(dir1);
-    sp.setPosition(pos1 + Amg::intersect<3>(pos2,dir2, pos1, dir1).value_or(0) * dir1);
-    sp.setNormal(nor1);
-    sp.setCovariance(cov);
 }
 
 bool SpacePointMakerAlg::SpacePointStatistics::FieldKey::operator<(const FieldKey& other) const{
@@ -359,6 +361,7 @@ template <class ContType>
     do {
 
       SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];
+      const Amg::Transform3D& sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTrans(*gctx);
       ATH_MSG_DEBUG("Fill space points for chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
       if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer> ||
                     std::is_same_v<ContType, xAOD::MMClusterContainer>) {
@@ -368,7 +371,7 @@ template <class ContType>
                 ATH_MSG_VERBOSE("Create space point from "<<m_idHelperSvc->toString(prd->identify())
                               <<", hash: "<<prd->identifierHash());
 
-                Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, prd)};
+                Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, sectorTrans,prd)};
                 fillSpacePoint(pointsInChamb.etaHits, prd, toChamberTrans);
             }
        } else {
@@ -387,7 +390,7 @@ template <class ContType>
                 if constexpr(std::is_same_v<ContType, xAOD::sTgcMeasContainer>) {
                     /// Make directly to a space point
                     if (prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                        Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, prd)};
+                        Amg::Transform3D toChamberTrans{ toChamberTransform(*gctx, sectorTrans, prd)};
                         fillSpacePoint(pointsInChamb.etaHits, prd, toChamberTrans);
                         continue;
                     }
@@ -413,10 +416,10 @@ template <class ContType>
 
                 Amg::Transform3D toChamberTrans_eta {}, toChamberTrans_phi {};
                 if (!etaHits.empty()){
-                    toChamberTrans_eta = toChamberTransform(*gctx, etaHits.at(0));
+                    toChamberTrans_eta = toChamberTransform(*gctx, sectorTrans, etaHits.at(0));
                 }
                 if (!phiHits.empty()){
-                    toChamberTrans_phi = toChamberTransform(*gctx, phiHits.at(0));
+                    toChamberTrans_phi = toChamberTransform(*gctx, sectorTrans, phiHits.at(0));
                 }
 
                 if (!passOccupancy2D(etaHits, phiHits)) {
@@ -430,8 +433,7 @@ template <class ContType>
                                 <<" "<<Amg::toString(pointsInChamb.etaHits.back().positionInChamber()));
 
                     }
-                    for (const PrdType phiPrd : phiHits) {
-    
+                    for (const PrdType phiPrd : phiHits) {    
                         fillSpacePoint(pointsInChamb.phiHits, phiPrd, toChamberTrans_phi);
                         ATH_MSG_VERBOSE("Add new phi hit "<<m_idHelperSvc->toString(pointsInChamb.phiHits.back().identify())
                                 <<" "<<Amg::toString(pointsInChamb.phiHits.back().positionInChamber()));
@@ -487,7 +489,7 @@ StatusCode SpacePointMakerAlg::execute(const EventContext& ctx) const {
     std::unique_ptr<SpacePointContainer> outContainer = std::make_unique<SpacePointContainer>();
     
     for (auto &[chamber, hitsPerChamber] : preSortedContainer){
-        ATH_MSG_VERBOSE("Fill space points for chamber "<<chamber);
+        ATH_MSG_DEBUG("Fill space points for chamber "<<chamber->identString());
         distributePointsAndStore(std::move(hitsPerChamber), *outContainer);
     }
     SG::WriteHandle<SpacePointContainer> writeHandle{m_writeKey, ctx};
@@ -495,8 +497,7 @@ StatusCode SpacePointMakerAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 
-void SpacePointMakerAlg::distributePointsAndStore(
-                                                  SpacePointsPerChamber&& hitsPerChamber,
+void SpacePointMakerAlg::distributePointsAndStore(SpacePointsPerChamber&& hitsPerChamber,
                                                   SpacePointContainer& finalContainer) const {
     SpacePointBucketVec splittedHits{};
     splittedHits.emplace_back();
@@ -505,99 +506,113 @@ void SpacePointMakerAlg::distributePointsAndStore(
         m_statCounter->addToStat(hitsPerChamber.phiHits);
 
     }
-    distributePointsAndStore(std::move(hitsPerChamber.etaHits), splittedHits);
-    distributePointsAndStore(std::move(hitsPerChamber.phiHits), splittedHits);
+    distributePrimaryPoints(std::move(hitsPerChamber.etaHits), splittedHits);
+    splittedHits.erase(std::remove_if(splittedHits.begin(), splittedHits.end(),
+                       [](const SpacePointBucket& bucket) {
+                           return bucket.size() <= 1;
+                       }), splittedHits.end());
+    distributePhiPoints(std::move(hitsPerChamber.phiHits), splittedHits);
     
     for (SpacePointBucket& bucket : splittedHits) {
-        if (bucket.size() > 1){
-            finalContainer.push_back(std::make_unique<SpacePointBucket>(std::move(bucket)));
+
+        std::ranges::sort(bucket, MuonR4::SpacePointPerLayerSorter{});
+
+        if (msgLvl(MSG::VERBOSE)){
+            std::stringstream spStr{};
+            for (const std::shared_ptr<SpacePoint>& sp : bucket){
+                spStr<<"SpacePoint: PrimaryMeas: " << m_idHelperSvc->toString(sp->identify()) << " SecondaryMeas: " 
+                 <<(sp->secondaryMeasurement() ? m_idHelperSvc->toString(xAOD::identify(sp->secondaryMeasurement())) : " None ") 
+                 << " Pos: " <<  Amg::toString(sp->positionInChamber())<<std::endl;
+            }
+            ATH_MSG_VERBOSE("Created a bucket, printing all spacepoints..."<<std::endl<<spStr.str());
         }
+
+        bucket.populateChamberLocations();
+        finalContainer.push_back(std::make_unique<SpacePointBucket>(std::move(bucket)));
     }
 
 }
+void SpacePointMakerAlg::distributePhiPoints(std::vector<SpacePoint>&& spacePoints,
+                                             SpacePointBucketVec& splittedContainer) const{
+    for (SpacePoint& sp : spacePoints) {
+        auto phiPoint = std::make_shared<SpacePoint>(std::move(sp));
+        const double minY = phiPoint->positionInChamber().y() - phiPoint->uncertainty().y();
+        const double maxY = phiPoint->positionInChamber().y() + phiPoint->uncertainty().y();
+        for (SpacePointBucket& bucket : splittedContainer){
+            /// If maxY is smaller than the lower cov boundary or minY is bigger than the 
+            /// other boundary, there's definetely no overlap
+            if (! (maxY < bucket.coveredMin() || bucket.coveredMax() < minY) ) {
+                bucket.emplace_back(phiPoint);
+            }
+        }
+    }
+}
+bool SpacePointMakerAlg::splitBucket(const SpacePoint& spacePoint,
+                                     const double firstSpPos,
+                                     const SpacePointBucketVec& sortedPoints) const {
+    /// Distance between this point and the first one exceeds the maximum length
+    const double spY = spacePoint.positionInChamber().y();
+    if (spY - firstSpPos > m_maxBucketLength){
+        return true;
+    }
+    
+    if (sortedPoints.empty() || sortedPoints.back().empty()) {
+        return false;
+    }
+    return spY - sortedPoints.back().back()->positionInChamber().y() > m_spacePointWindow;
+}
+void SpacePointMakerAlg::newBucket(const SpacePoint& refSpacePoint,
+                                   SpacePointBucketVec& sortedPoints) const {
+    SpacePointBucket& newContainer = sortedPoints.emplace_back();
+    newContainer.setBucketId(sortedPoints.size() -1);
 
-void SpacePointMakerAlg::distributePointsAndStore(
-    std::vector<SpacePoint>&& spacePoints, SpacePointBucketVec& splittedHits) const {
+    ///Set the boundaries from the previous bucket
+    SpacePointBucket& overlap{sortedPoints[sortedPoints.size() - 2]};
+    overlap.setCoveredRange(overlap.front()->positionInChamber().y(), 
+                            overlap.back()->positionInChamber().y());
+    
+    const double refBound = refSpacePoint.positionInChamber().y();
+                                
+    /** Copy space points that could be within the overlap region to the next bucket */
+    for (const std::shared_ptr<SpacePoint>& pointInBucket : overlap | std::views::reverse) {
+        const double overlapPos = pointInBucket->positionInChamber().y() + pointInBucket->uncertainty()[Amg::y];
+        if (refBound - overlapPos < m_spacePointOverlap) {    
+            newContainer.insert(newContainer.begin(), pointInBucket);
+        } else {
+            break;
+        }
+    }    
+
+}
+
+void SpacePointMakerAlg::distributePrimaryPoints(std::vector<SpacePoint>&& spacePoints, 
+                                                 SpacePointBucketVec& splittedHits) const {
 
     if (spacePoints.empty()) return;
+   
+    /** Order the space points by local chamber y which is along the tube-plane. */
+    std::ranges::sort(spacePoints, 
+                      [] (const SpacePoint& a, const SpacePoint& b) {
+                        return a.positionInChamber().y() < b.positionInChamber().y();
+                      });
 
-    const bool defineBuckets = splittedHits.size()==1 and splittedHits[0].empty();
-
-    std::sort(spacePoints.begin(), spacePoints.end(), 
-        [] (const SpacePoint& a, const SpacePoint& b) {
-        return a.positionInChamber().y() < b.positionInChamber().y();
-    });
-
-    // here we'll save the first element of the last bucket
-    double lastPointPos = spacePoints[0].positionInChamber().y();
-
-    // Sorter
-    MuonR4::SpacePointPerLayerSorter sorter(m_idHelperSvc.get());
-
-    auto newBucket = [this, &splittedHits, &sorter] () {
-        SpacePointBucket& newContainer = splittedHits.emplace_back();
-        newContainer.setBucketId(splittedHits.size() -1);
-
-        SpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
-        overlap.setCoveredRange(overlap.front()->positionInChamber().y(), overlap.back()->positionInChamber().y());
-        overlap.populateChamberLocations();
-        std::sort(overlap.begin(), overlap.end(), sorter);
-        
-        if (msgLvl(MSG::VERBOSE)){
-            ATH_MSG_VERBOSE("Created a bucket, printing all spacepoints...");
-            for (const std::shared_ptr<SpacePoint>& sp : overlap){
-                ATH_MSG_VERBOSE("SpacePoint: PrimaryMeas: " << m_idHelperSvc->toString(sp->identify()) << " SecondaryMeas: " << (sp->secondaryMeasurement() ? m_idHelperSvc->toString(xAOD::identify(sp->secondaryMeasurement())) : " None ") << " Pos: " <<  Amg::toString(sp->positionInChamber()));
-            }
-        }
-        
-        for (const std::shared_ptr<SpacePoint>& pointInBucket : overlap) {
-            const double overlapPos = pointInBucket->positionInChamber().y() + pointInBucket->uncertainty()[1];
-            if (overlapPos >= overlap.coveredMax() or (overlap.coveredMax() - overlapPos < m_spacePointOverlap)) {    //(std::abs(overlapPos - overlap.coveredMax()) < m_spacePointOverlap) 
-                newContainer.push_back(pointInBucket);
-            }
-        }
-    };    
-
+    double firstPointPos = spacePoints.front().positionInChamber().y();
+    
     for (SpacePoint& toSort : spacePoints) {        
-        const double currPoint = toSort.positionInChamber().y();
-        /// Only-phi measurements
-        if (!defineBuckets) {
-            std::shared_ptr<SpacePoint> madePoint = std::make_shared<SpacePoint>(std::move(toSort));
-            for (SpacePointBucket& bucket : splittedHits) {
-                const double posMin = currPoint - madePoint->uncertainty().y();
-                const double posMax = currPoint + madePoint->uncertainty().y();
+        ATH_MSG_VERBOSE("Add new primary space point "<<m_idHelperSvc->toString(toSort.identify())<<", "
+                     <<" @ "<<Amg::toString(toSort.positionInChamber()));
 
-                ATH_MSG_VERBOSE("Spacepoint range: "<< posMin << "," << posMax << " bucket range: " << bucket.coveredMin() << "," << bucket.coveredMax() << " Overlap: " << (posMax >= bucket.coveredMin() && bucket.coveredMax() >= posMin)); 
-                if (posMax >= bucket.coveredMin() and bucket.coveredMax() >= posMin) {
-                    bucket.push_back(madePoint);
-                }
-            }
-            continue;
-        }
-
-        /// The current measurement is too far away from the first one. Make a new bucket
-        if (currPoint - lastPointPos > m_maxBucketLength || (!splittedHits.empty() && !splittedHits.back().empty()  && (currPoint - splittedHits.back().back()->positionInChamber().y() > m_spacePointWindow) )) {
-            newBucket(); 
-            lastPointPos = splittedHits.back().empty() ? currPoint : splittedHits.back().front()->positionInChamber().y();   
-            ATH_MSG_VERBOSE("New bucket: id " << splittedHits.back().bucketId() << " Coverage: " << lastPointPos << "," << "-");        
+        if (splitBucket(toSort, firstPointPos, splittedHits)){
+            newBucket(toSort, splittedHits);
+            firstPointPos = splittedHits.back().empty() ? toSort.positionInChamber().y() : splittedHits.back().front()->positionInChamber().y();
+            ATH_MSG_VERBOSE("New bucket: id " << splittedHits.back().bucketId() << " Coverage: " << firstPointPos);
         }
         std::shared_ptr<SpacePoint> spacePoint = std::make_shared<SpacePoint>(std::move(toSort));
         splittedHits.back().emplace_back(spacePoint);
-
-        if (splittedHits.size() > 1) {
-            SpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
-            const double overlapPos = currPoint - spacePoint->uncertainty().y();
-            if (overlapPos < lastPointPos or (overlapPos - lastPointPos < m_spacePointOverlap)) {  
-                overlap.push_back(spacePoint);
-            }
-        }
     }
-    if (defineBuckets){
-    newBucket();
-    /// Remove the probably empty bucket again.
-    splittedHits.pop_back();
-    }
-
+    SpacePointBucket& lastBucket{splittedHits.back()};
+    lastBucket.setCoveredRange(lastBucket.front()->positionInChamber().y(), 
+                               lastBucket.back()->positionInChamber().y());
 }
 
 }

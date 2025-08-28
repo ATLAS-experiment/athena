@@ -6,12 +6,13 @@
 #define IBJetHypoDiscriminantCheck_hh
 
 #include "GaudiKernel/IAlgTool.h"
-#include "AthContainers/AuxElement.h"
+#include "xAODJet/Jet.h"
+#include "xAODJet/JetContainer.h"
 
 class IBJetHypoDiscriminantCheck: virtual public ::IAlgTool {
 public:
   DeclareInterfaceID( IBJetHypoDiscriminantCheck, 1, 0 );
-  virtual bool passThreshold(const SG::AuxElement&) const = 0;
+  virtual bool passThreshold(const xAOD::Jet&) const = 0;
 };
 
 #endif

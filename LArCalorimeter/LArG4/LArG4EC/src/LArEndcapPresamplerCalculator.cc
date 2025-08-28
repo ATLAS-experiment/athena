@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArEndcapPresamplerCalculator
@@ -19,7 +19,6 @@
 
 #include "LArG4Code/LArG4Identifier.h"
 #include "LArG4Code/LArVG4DetectorParameters.h"
-#include "LArG4Code/LArG4BirksLaw.h"
 
 #include "G4ThreeVector.hh"
 #include "G4StepPoint.hh"
@@ -41,10 +40,7 @@ namespace Units = Athena::Units;
 
 LArEndcapPresamplerCalculator::LArEndcapPresamplerCalculator(const std::string& name, ISvcLocator *pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
-  , m_geometry("EMECPresamplerGeometry", name) // LArG4::EC::PresamplerGeometry
-  , m_birksLaw(nullptr)
 {
-  declareProperty("GeometryCalculator", m_geometry);
 }
 
 StatusCode LArEndcapPresamplerCalculator::initialize()
@@ -53,7 +49,7 @@ StatusCode LArEndcapPresamplerCalculator::initialize()
   if(m_BirksLaw)
     {
       const double Birks_LAr_density = 1.396;
-      m_birksLaw = new LArG4BirksLaw(Birks_LAr_density,m_Birksk);
+      m_birksLaw = std::make_unique<LArG4BirksLaw>(Birks_LAr_density,m_Birksk);
       ATH_MSG_DEBUG(" LArEndcapPresamplerCalculator: Birks' law ON ");
       ATH_MSG_DEBUG(" LArEndcapPresamplerCalculator:   parameter k    " << m_birksLaw->k());
     }
@@ -65,13 +61,6 @@ StatusCode LArEndcapPresamplerCalculator::initialize()
   // Get the geometry routine.
   ATH_CHECK(m_geometry.retrieve());
 
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode LArEndcapPresamplerCalculator::finalize()
-{
-  if (m_birksLaw) delete m_birksLaw;
   return StatusCode::SUCCESS;
 }
 

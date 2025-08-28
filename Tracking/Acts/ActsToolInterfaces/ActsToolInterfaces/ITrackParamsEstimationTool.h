@@ -15,6 +15,7 @@
 #include "Acts/EventData/TrackParameters.hpp"
 
 // Others
+#include <array>
 #include <functional>
 
 namespace ActsTrk {
@@ -41,6 +42,10 @@ namespace ActsTrk {
             const Acts::MagneticFieldContext& magFieldContext,
             const Acts::Surface& surface,
             const Acts::Vector3& bField) const = 0;
+
+    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(std::size_t)>;
+    virtual SpacePointIndicesFun_t spacePointIndicesFun() const = 0;
+
   };
   
 } // namespace 

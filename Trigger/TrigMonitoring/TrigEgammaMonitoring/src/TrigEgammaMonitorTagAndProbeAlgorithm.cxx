@@ -27,6 +27,7 @@
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/Decorator.h"
+#include "TruthUtils/ParticleConstants.h"
 
 //**********************************************************************
 using namespace Trig;
@@ -498,8 +499,8 @@ float TrigEgammaMonitorTagAndProbeAlgorithm::getPseudoLifetime(const xAOD::Elect
   float Et1=hypot(el1->caloCluster()->m(),el1->caloCluster()->pt())/cosh(el1->trackParticle()->eta());
   float Et2=hypot(el2->caloCluster()->m(),el2->caloCluster()->pt())/cosh(el1->trackParticle()->eta());
 
-  el1track.SetPtEtaPhiM(Et1, el1->trackParticle()->eta(), el1->trackParticle()->phi(),0.511);
-  el2track.SetPtEtaPhiM(Et2, el2->trackParticle()->eta(), el2->trackParticle()->phi(), 0.511);
+  el1track.SetPtEtaPhiM(Et1, el1->trackParticle()->eta(), el1->trackParticle()->phi(),ParticleConstants::electronMassInMeV);
+  el2track.SetPtEtaPhiM(Et2, el2->trackParticle()->eta(), el2->trackParticle()->phi(), ParticleConstants::electronMassInMeV);
 
   float lxy=simple_lxy(0,
                        el1->trackParticle()->d0() , el2->trackParticle()->d0(),
@@ -512,7 +513,7 @@ float TrigEgammaMonitorTagAndProbeAlgorithm::getPseudoLifetime(const xAOD::Elect
   float den = (0.299792458*ptEECalo);
   if(fabs(den) < 1e-6) return simple;
 
-  return lxy*3096.916/den;
+  return lxy*ParticleConstants::JpsiMassInMeV/den;
 
 }
 

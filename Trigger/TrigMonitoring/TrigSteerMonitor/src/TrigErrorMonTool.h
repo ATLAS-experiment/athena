@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGSTEERMONITOR_TRIGERRORMONTOOL_H
 #define TRIGSTEERMONITOR_TRIGERRORMONTOOL_H
@@ -11,7 +11,6 @@
 #include "GaudiKernel/EventContext.h"
 #include "TrigCompositeUtils/AlgToChainTool.h"
 
-class IAlgExecStateSvc;
 
 /**
  * @class TrigErrorMonTool
@@ -30,7 +29,6 @@ public:
   virtual std::unordered_map<std::string_view, StatusCode> algExecErrors(const EventContext& eventContext) const override;
 
 private:
-  ServiceHandle<IAlgExecStateSvc> m_aess{this, "AlgExecStateSvc", "AlgExecStateSvc"};
   ServiceHandle<ITrigCostSvc>      m_trigCostSvcHandle{this, "TrigCostSvc", ""};
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
   ToolHandle<TrigCompositeUtils::AlgToChainTool> m_algToChainTool {this, "AlgToChainTool", "",  "Tool to retrieve chains for algorithm"};

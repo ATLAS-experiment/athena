@@ -12,11 +12,11 @@ atlas_add_component( ISF_ActsTools
                      src/components/*.cxx
 		             INCLUDE_DIRS
                      ${CLHEP_INCLUDE_DIRS} ${Acts_INCLUDE_DIR}
-                     LINK_LIBRARIES ActsCore ActsFatras AthenaBaseComps CxxUtils
+                     LINK_LIBRARIES Acts::Core Acts::Fatras AthenaBaseComps CxxUtils
                      TrkTrack ISF_Event AthenaKernel AtlasDetDescr GeoPrimitives
                      GaudiKernel GeneratorObjects ISF_Event StoreGateLib
                      GeoModelUtilities ActsInteropLib ActsGeometryLib TruthUtils
-                     ISF_InterfacesLib ActsPluginJson
+                     ISF_InterfacesLib Acts::PluginJson
                      InDetSimEvent)
 
 # Install files from the package:

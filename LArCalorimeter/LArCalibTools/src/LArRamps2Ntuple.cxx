@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArRamps2Ntuple.h"
@@ -407,6 +407,7 @@ StatusCode LArRamps2Ntuple::stop() {
        gain  = (long)igain;
        if ( !cellDone.empty() && cellDone.contains(std::make_pair(chid,gain)) ) continue;
        if (m_addCorrUndo) corrUndo = 0;
+       if (not ramp) continue; // No ramp for this cell
        const ILArRamp::RampRef_t  rampcoeff=ramp->ADC2DAC(chid, gain);
        if (rampcoeff.size()==0) continue; // No ramp for this cell
        cellIndex  = cellCounter;

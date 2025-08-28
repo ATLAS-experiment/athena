@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArROD includes
@@ -17,6 +17,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 
 #include "LArRawEvent/LArDigitContainer.h"
+#include <cmath>
 
 //needed for linker ...
 //constexpr double SuperCellVsCaloCellTestAlg::eBins[SuperCellVsCaloCellTestAlg::nBinsE+1];
@@ -33,7 +34,7 @@ SuperCellVsCaloCellTestAlg::SuperCellVsCaloCellTestAlg( const std::string& name,
    declareProperty("SuperCellContainer",m_scKey="SCell");
    declareProperty("CaloCellContainer",m_ccKey="AllCalo");
    declareProperty("TruthSuperCellContainer",m_tscKey="SCellTruth");
-   declareProperty("DigitContainer",m_digitKey="LArDigitSCL1","Only used for supicious supercells");
+   declareProperty("DigitContainer",m_digitKey="LArDigitSCL1","Only used for suspicious supercells");
 
    declareProperty("OutputStream",m_stream="SUPERCELLTEST");
 
@@ -151,8 +152,8 @@ StatusCode SuperCellVsCaloCellTestAlg::execute() {
          }
          if(cellEt>0) m_etReso[samplingEnum]->Fill(cellEt*1e-3,scellEt*1000./cellEt);
 	 float resolution = 0.0;
-	 if ( TMath::Abs(cellEt)>1 ) resolution = 100*(scellEt - cellEt*1e-3 ) / (cellEt*1e-3);
-	 if ( TMath::Abs(cellEt)>150 ) {
+	 if ( std::abs(cellEt)>1 ) resolution = 100*(scellEt - cellEt*1e-3 ) / (cellEt*1e-3);
+	 if ( std::abs(cellEt)>150 ) {
 	 	m_Reso_et[samplingEnum]->Fill( resolution );
 	 	m_Reso_et_vs_et[samplingEnum]->Fill( cellEt*1e-3, resolution );
 		m_Reso_et_vs_eta[samplingEnum]->Fill( scell->eta(), resolution );

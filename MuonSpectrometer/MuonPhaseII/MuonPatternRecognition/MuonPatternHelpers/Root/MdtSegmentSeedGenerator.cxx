@@ -27,6 +27,13 @@ namespace MuonR4{
     constexpr bool passRangeCut(const std::array<double, 2>& cutRange, const double value) {
         return cutRange[0] <= value && value <= cutRange[1];
     }
+    inline Muon::MdtDriftCircleStatus dcStatus(const SpacePoint& dc) {
+        const xAOD::UncalibratedMeasurement* prd = dc.primaryMeasurement();
+        if (prd->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+            return static_cast<const xAOD::MdtDriftCircle*>(prd)->status();
+        }
+        return Muon::MdtDriftCircleStatus::MdtStatusUnDefined;
+    }
 
     std::ostream& MdtSegmentSeedGenerator::SeedSolution::print(std::ostream& ostr) const{
         ostr<<"two circle solution with ";
@@ -155,7 +162,7 @@ namespace MuonR4{
             const HitVec& upper = m_hitLayers.mdtHits().at(m_upperLayer);
             ATH_MSG_VERBOSE("Layers with hits: "<<m_hitLayers.mdtHits().size()
                             <<" -- next bottom hit: "<<m_lowerLayer<<", hit: "<<m_lowerHitIndex
-                            <<" ("<<lower.size()<<"), topHit " <<m_upperLayer<<", "<<m_upperHitIndex
+                            <<" ("<<lower.size()<<"), top hit " <<m_upperLayer<<", "<<m_upperHitIndex
                             <<" ("<<upper.size()<<") - ambiguity "<<s_signCombos[m_signComboIndex]);
 
             found = buildSeed(ctx, upper.at(m_upperHitIndex), lower.at(m_lowerHitIndex), s_signCombos.at(m_signComboIndex));
@@ -176,8 +183,10 @@ namespace MuonR4{
         
         const auto* bottomPrd = static_cast<const xAOD::MdtDriftCircle*>(bottomHit->primaryMeasurement()); 
         const auto* topPrd = static_cast<const xAOD::MdtDriftCircle*>(topHit->primaryMeasurement());
-        if (bottomPrd->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime ||
-            topPrd->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
+
+        const Muon::IMuonIdHelperSvc* idHelperSvc{topHit->msSector()->idHelperSvc()};
+        if (dcStatus(*bottomHit) != Muon::MdtDriftCircleStatus::MdtStatusDriftTime ||
+            dcStatus(*topHit) != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
                 /// All other sign combinations will also get stuck -> force the measurement selector to get another combo
                 m_signComboIndex = s_signCombos.size();
                 return std::nullopt;
@@ -186,7 +195,7 @@ namespace MuonR4{
         double R = signBot *bottomHit->driftRadius() - signTop * topHit->driftRadius(); 
         const Amg::Vector3D& bottomPos{bottomHit->positionInChamber()};
         const Amg::Vector3D& topPos{topHit->positionInChamber()};
-        const Muon::IMuonIdHelperSvc* idHelperSvc{topHit->msSector()->idHelperSvc()};
+
         const Amg::Vector3D D = topPos - bottomPos;
         const double thetaTubes = std::atan2(D.y(), D.z()); 
         const double distTubes =  std::hypot(D.y(), D.z());
@@ -267,13 +276,17 @@ namespace MuonR4{
             ATH_MSG_VERBOSE( __func__<<"() "<<__LINE__<<": "<<hitsInLayer.size()<<" hits in layer "<<(layerNr +1));
             bool hadGoodHit{false};
             for (const HoughHitType testMe : hitsInLayer){
+                const double distance = std::abs(Amg::signedDistance(seedPos, seedDir, testMe->positionInChamber(),
+                                                                    testMe->directionInChamber()));
+                const auto* re = static_cast<const xAOD::MdtDriftCircle*>(testMe->primaryMeasurement())->readoutElement();
+
                 const double pull = std::sqrt(SegmentFitHelpers::chiSqTermMdt(seedPos, seedDir, *testMe, msg()));            
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Test hit "<<idHelperSvc->toString(testMe->identify())
-                            <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);              
-                if (pull < m_cfg.hitPullCut) {
+                            <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull<<", distance: "<<distance);
+                if (pull < m_cfg.hitPullCut && distance < re->tubeRadius()) {
                     hadGoodHit = true;
                     solCandidate.seedHits.emplace_back(testMe);
-                    ++candidateSeed.nMdt;
+                    candidateSeed.nMdt += (dcStatus(*testMe) == Muon::MdtDriftCircleStatus::MdtStatusDriftTime);
                 }/// what ever comes after is not matching onto the segment 
                 else if (hadGoodHit) {
                     break;

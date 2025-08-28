@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSectorLogic.h"
@@ -20,6 +20,11 @@
 #include "TrigT1TGC/TGCBIS78CoincidenceMap.h"
 #include "TrigT1TGC/TGCGoodMF.h"
 #include "TrigT1TGC/TGCTrackSelectorOut.h"
+
+#include "TrigT1TGC/TGCArguments.h"
+#include "TrigT1TGC/TGCNumbering.h"
+#include "TrigT1TGC/TGCReadoutIndex.h"
+#include "TrigT1TGC/TGCSSCControllerOut.h"
 
 #include "StoreGate/ReadCondHandle.h"
 #include "MuonCondSvc/TGCTriggerData.h"
@@ -97,19 +102,19 @@ TGCSectorLogic::~TGCSectorLogic()
 
 void TGCSectorLogic::setTMDB(std::shared_ptr<const LVL1TGC::TGCTMDB> tmdb)
 {
-  m_pTMDB = tmdb;
+  m_pTMDB = std::move(tmdb);
   if (m_pTMDB==0) m_useTileMu = false;
 }
 
 void TGCSectorLogic::setNSW(std::shared_ptr<const LVL1TGC::TGCNSW> nsw)
 {
-  m_nsw = nsw;
+  m_nsw = std::move(nsw);
   if(m_nsw == 0) tgcArgs()->set_USE_NSW(false);
 }
 
 void TGCSectorLogic::setBIS78(std::shared_ptr<const LVL1TGC::TGCBIS78> bis78)
 {
-  m_bis78 = bis78;
+  m_bis78 = std::move(bis78);
   if(m_bis78 == 0) tgcArgs()->set_USE_BIS78(false);
 }
 

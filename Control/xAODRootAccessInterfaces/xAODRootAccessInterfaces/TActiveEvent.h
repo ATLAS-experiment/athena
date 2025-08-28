@@ -12,6 +12,9 @@ namespace xAOD {
    // Forward declaration(s):
    class TVirtualEvent;
    class TEvent;
+   namespace Experimental {
+      class REvent;
+   }
 
    /// @short Helper class for finding the active TVirtualEvent object
    ///
@@ -28,6 +31,7 @@ namespace xAOD {
 
       /// Allow the TEvent class to register itself at the right time
       friend class TEvent;
+      friend class Experimental::REvent;
 
    public:
       /// Access the currently active TVirtualEvent object

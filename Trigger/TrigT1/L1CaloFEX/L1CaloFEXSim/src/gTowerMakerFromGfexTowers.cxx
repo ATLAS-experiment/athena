@@ -18,9 +18,9 @@
 #include "xAODTrigL1Calo/gFexTowerContainer.h"
 
 #include "L1CaloFEXSim/gTower.h"
-#include "L1CaloFEXSim/gTowerBuilder.h"
+#include "gTowerBuilder.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
-#include "L1CaloFEXSim/gTowerMakerFromGfexTowers.h"
+#include "gTowerMakerFromGfexTowers.h"
 #include "L1CaloFEXSim/gFEXCompression.h"
 
 #include "StoreGate/WriteHandle.h"
@@ -36,9 +36,7 @@ gTowerMakerFromGfexTowers::gTowerMakerFromGfexTowers(const std::string& name, IS
 
 StatusCode gTowerMakerFromGfexTowers::initialize()
 {
-    ATH_CHECK( m_gDataTowerKey.initialize(!m_isMC) );
-    // ATH_CHECK( m_gDataTower50Key.initialize(!m_isMC) );
-    ATH_CHECK( m_gEmulTowerKey.initialize(m_UseEmulated) );
+    ATH_CHECK( m_gDataTowerKey.initialize() );
     ATH_CHECK( m_gSuperCellTowerMapperTool.retrieve() );
     ATH_CHECK( m_gTowerBuilderTool.retrieve() );
     ATH_CHECK( m_gTowerContainerSGKey.initialize() );
@@ -57,28 +55,13 @@ StatusCode gTowerMakerFromGfexTowers::execute()
     //Reading the decoded Data gTower container
     SG::ReadHandle<xAOD::gFexTowerContainer> gDataTowerContainer;
     bool gDataTowerFilled = false;
-    if(!m_isMC){
-        gDataTowerContainer = SG::ReadHandle<xAOD::gFexTowerContainer>(m_gDataTowerKey, ctx);
-        if(!gDataTowerContainer.isValid()) {
-            ATH_MSG_FATAL("Could not retrieve collection " << gDataTowerContainer.key() );
-            return StatusCode::FAILURE;
-        }      
-        gDataTowerFilled = !gDataTowerContainer->empty();
-    }
-    
-    //Reading the Emulated gTower container
-    SG::ReadHandle<xAOD::gFexTowerContainer> gEmulatedTowerContainer;
-    
-    if(m_UseEmulated){
-        gEmulatedTowerContainer = SG::ReadHandle<xAOD::gFexTowerContainer>(m_gEmulTowerKey, ctx);
-        if(!gEmulatedTowerContainer.isValid()) {
-            ATH_MSG_FATAL("Could not retrieve collection " << gEmulatedTowerContainer.key() );
-            return StatusCode::FAILURE;
-        }           
-    }
-     
 
-
+    gDataTowerContainer = SG::ReadHandle<xAOD::gFexTowerContainer>(m_gDataTowerKey, ctx);
+    if(!gDataTowerContainer.isValid()) {
+        ATH_MSG_FATAL("Could not retrieve collection " << gDataTowerContainer.key() );
+        return StatusCode::FAILURE;
+    }      
+    gDataTowerFilled = !gDataTowerContainer->empty();
 
     // STEP 0 - Make a fresh local gTowerContainer
     std::unique_ptr<gTowerContainer> local_gTowerContainerRaw = std::make_unique<gTowerContainer>();
@@ -87,14 +70,11 @@ StatusCode gTowerMakerFromGfexTowers::execute()
     m_gTowerBuilderTool->init(local_gTowerContainerRaw);
     
     // STEP 2 - Mapping gFexTowers with decoded Energies
-    if( !m_isMC && (gDataTowerFilled || m_UseEmulated) ) {
+    if( gDataTowerFilled ) {
         
         SG::ReadHandle<xAOD::gFexTowerContainer> * data_gTowerContainer = &gDataTowerContainer;
         
-        if(m_UseEmulated){
-            // If we allow emulated input data, then we need to check if decoded data is available, otherwise use emulated
-            data_gTowerContainer = gDataTowerContainer->empty() ? &gEmulatedTowerContainer : &gDataTowerContainer;
-        }
+        data_gTowerContainer = &gDataTowerContainer;
         
         ATH_MSG_DEBUG("Collection used to build the gTower for simulation: " << (*data_gTowerContainer).key() << " with size: "<<(*data_gTowerContainer)->size() << ". Expected towers 1152");
 

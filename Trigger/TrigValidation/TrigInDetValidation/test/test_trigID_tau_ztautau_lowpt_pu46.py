@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Elliot - This test is a duplicate of test_trigID_tau_ztautau_lowpt_pu46.py which will use CA for the RDOtoRDOTrigger step. Included to ensure that results for non-CA and CA implementations are consistent, intended so that this duplicate will be deleted once all tests are migrated to use CA for the RDOtoRDOTrigger step. Confirmed with ID trigger coordinators.
 
@@ -38,7 +38,6 @@ Threads = 8
 Slots   = 8
 Release = "current"
 Input   = 'Ztautau'    # defined in TrigValTools/share/TrigValInputs.json  
-GridFiles = True
 
 preexec_trig = "from AthenaCommon.SystemOfUnits import GeV;flags.Trigger.InDetTracking.tauIso.pTmin=0.8*GeV;"
 

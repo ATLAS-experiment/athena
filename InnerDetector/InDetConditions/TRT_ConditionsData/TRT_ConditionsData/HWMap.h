@@ -1,40 +1,41 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HWMAP_H
 #define HWMAP_H
-#include <vector>
-#include <string>
+
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
+#include <vector>
+#include <string>
+#include <memory>
 namespace TRTCond{
   class HWMap{
   public:
     HWMap() {
     // Initialize HV-line/pad maps
-    const int nBarrelPadsTotal = 32*(42+65+100);
-    m_Barrel_HV_CoolChanNames = new std::vector<std::string>(nBarrelPadsTotal,"");
-    m_Barrel_HV_CoolChanNums  = new std::vector<int>(nBarrelPadsTotal,-1);
-    const int nEndcapCellsTotal = 32*3*(6*4+8*2);
-    m_EndcapA_HV_CoolChanNames = new std::vector<std::string>(nEndcapCellsTotal,"");
-    m_EndcapA_HV_CoolChanNums  = new std::vector<int>(nEndcapCellsTotal,-1);
-    m_EndcapC_HV_CoolChanNames = new std::vector<std::string>(nEndcapCellsTotal,"");
-    m_EndcapC_HV_CoolChanNums  = new std::vector<int>(nEndcapCellsTotal,-1);
-    // These are moved to CondStore which takes care of their deletion 
+    constexpr int nBarrelPadsTotal = 32*(42+65+100);
+    m_Barrel_HV_CoolChanNames.reset(new std::vector<std::string>(nBarrelPadsTotal,""));
+    m_Barrel_HV_CoolChanNums.reset(new std::vector<int>(nBarrelPadsTotal,-1));
+    constexpr int nEndcapCellsTotal = 32*3*(6*4+8*2);
+    m_EndcapA_HV_CoolChanNames.reset(new std::vector<std::string>(nEndcapCellsTotal,""));
+    m_EndcapA_HV_CoolChanNums.reset(new std::vector<int>(nEndcapCellsTotal,-1));
+    m_EndcapC_HV_CoolChanNames.reset(new std::vector<std::string>(nEndcapCellsTotal,""));
+    m_EndcapC_HV_CoolChanNums.reset(new std::vector<int>(nEndcapCellsTotal,-1));
   }
 
   HWMap (const HWMap&) = delete;
   HWMap& operator= (const HWMap&) = delete;
 
-  virtual ~HWMap() {}
+  virtual ~HWMap() = default;
 
-  const std::vector<std::string>* get_Barrel_HV_Names() const {return m_Barrel_HV_CoolChanNames; } 
-  const std::vector<std::string>* get_EndcapA_HV_Names() const {return m_EndcapA_HV_CoolChanNames; } 
-  const std::vector<std::string>* get_EndcapC_HV_Names() const {return m_EndcapC_HV_CoolChanNames; } 
-  const std::vector<int>* get_Barrel_HV_Nums() const {return m_Barrel_HV_CoolChanNums; }
-  const std::vector<int>* get_EndcapA_HV_Nums() const {return m_EndcapA_HV_CoolChanNums; }
-  const std::vector<int>* get_EndcapC_HV_Nums() const {return m_EndcapC_HV_CoolChanNums; }
+  const std::vector<std::string>* get_Barrel_HV_Names() const {return m_Barrel_HV_CoolChanNames.get(); } 
+  const std::vector<std::string>* get_EndcapA_HV_Names() const {return m_EndcapA_HV_CoolChanNames.get(); } 
+  const std::vector<std::string>* get_EndcapC_HV_Names() const {return m_EndcapC_HV_CoolChanNames.get(); } 
+  const std::vector<int>* get_Barrel_HV_Nums() const {return m_Barrel_HV_CoolChanNums.get(); }
+  const std::vector<int>* get_EndcapA_HV_Nums() const {return m_EndcapA_HV_CoolChanNums.get(); }
+  const std::vector<int>* get_EndcapC_HV_Nums() const {return m_EndcapC_HV_CoolChanNums.get(); }
  
   void setBarrelName(int i, const std::string & name) {
     m_Barrel_HV_CoolChanNames->at(i)=name;
@@ -59,13 +60,14 @@ namespace TRTCond{
   }
      
   private:
-
-  std::vector<std::string>* m_Barrel_HV_CoolChanNames;
-  std::vector<std::string>* m_EndcapA_HV_CoolChanNames;
-  std::vector<std::string>* m_EndcapC_HV_CoolChanNames;
-  std::vector<int>* m_Barrel_HV_CoolChanNums;
-  std::vector<int>* m_EndcapA_HV_CoolChanNums;
-  std::vector<int>* m_EndcapC_HV_CoolChanNums;
+  using StringVecPtr = std::unique_ptr<std::vector<std::string>>;
+  using IntVecPtr = std::unique_ptr<std::vector<int>>;
+  StringVecPtr m_Barrel_HV_CoolChanNames;
+  StringVecPtr m_EndcapA_HV_CoolChanNames;
+  StringVecPtr m_EndcapC_HV_CoolChanNames;
+  IntVecPtr m_Barrel_HV_CoolChanNums;
+  IntVecPtr m_EndcapA_HV_CoolChanNums;
+  IntVecPtr m_EndcapC_HV_CoolChanNums;
 
   };
 }

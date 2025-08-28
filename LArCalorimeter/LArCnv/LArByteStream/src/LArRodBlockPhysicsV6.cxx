@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of a LArRODBlockStructure class
@@ -101,26 +101,26 @@ bool LArRodBlockPhysicsV6::setPointers()
       if (off1 && dim1+off1+off<m_FebBlockSize) {
 	off1 += off;
 	if (dim1>=8) 
-	  m_GainPointer=(const uint32_t*)(m_FebBlock+off1);
+	  m_GainPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+off1);
 	if (dim1>=12) 
-	  m_MaskTimeQualityPointer=(const uint32_t*)(m_FebBlock+off1+8);
+	  m_MaskTimeQualityPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+off1+8);
 	if (dim1>=16) 
-	  m_MaskDigitsPointer=(const uint32_t*)(m_FebBlock+off1+12);
+	  m_MaskDigitsPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+off1+12);
 	if (dim1>=16+radd) 
-	  m_RaddPointer=(const uint16_t*)(m_FebBlock+off1+16);
+	  m_RaddPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+off1+16);
 	if (dim1>=80+radd)
-	  m_EnergyPointer=(const uint16_t*) (m_FebBlock+off1+16+radd);
+	  m_EnergyPointer=reinterpret_cast<const uint16_t*> (m_FebBlock+off1+16+radd);
 	if (dim1>=84+radd) 
-	  m_SumPointer=(const int32_t*)(m_FebBlock+off1+80+radd);
+	  m_SumPointer=reinterpret_cast<const int32_t*>(m_FebBlock+off1+80+radd);
 	if (dim1>84+radd) 
-	  m_TimeQualityPointer=(const uint16_t*)(m_FebBlock+off1+84+radd);
+	  m_TimeQualityPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+off1+84+radd);
 	off1 -= off;
       }
       if (off2 && dim2+off2+off<m_FebBlockSize) {
-	m_DigitsPointer=(const uint16_t*)(m_FebBlock+off2+off);
+	m_DigitsPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+off2+off);
       }
       if (off3 && dim3+off3+off<m_FebBlockSize) {
-	m_RawDataPointer=(const uint16_t*)(m_FebBlock+off3+off);
+	m_RawDataPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+off3+off);
       }
 
       // Check for offsets problems
@@ -138,9 +138,9 @@ bool LArRodBlockPhysicsV6::setPointers()
 	off3_tmp = dim3_tmp = 0; 
       }
       else { 
-	m_RaddPointer=(const uint16_t*)(m_FebBlock+26);
-	m_MaskTimeQualityPointer=(const uint32_t*)(m_FebBlock+18);
-	m_MaskDigitsPointer=(const uint32_t*)(m_FebBlock+22);
+	m_RaddPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+26);
+	m_MaskTimeQualityPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+18);
+	m_MaskDigitsPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+22);
 	n1 = getNbSweetCells1();
 	n2 = getNbSweetCells2();
 	n1_tmp = getNbSweetCells1FromMask();
@@ -197,25 +197,25 @@ bool LArRodBlockPhysicsV6::setPointers()
 	  if (off1 && dim1+off1+off<m_FebBlockSize) {
 	    off1 += off;
 	    if (dim1>=8) 
-	      m_GainPointer=(const uint32_t*)(m_FebBlock+off1);
+	      m_GainPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+off1);
 	    if (dim1>=12) 
-	      m_MaskTimeQualityPointer=(const uint32_t*)(m_FebBlock+off1+8);
+	      m_MaskTimeQualityPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+off1+8);
 	    if (dim1>=16) 
-	      m_MaskDigitsPointer=(const uint32_t*)(m_FebBlock+off1+12);
+	      m_MaskDigitsPointer=reinterpret_cast<const uint32_t*>(m_FebBlock+off1+12);
 	    if (dim1>=16+radd) 
-	      m_RaddPointer=(const uint16_t*)(m_FebBlock+off1+16);
+	      m_RaddPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+off1+16);
 	    if (dim1>=80+radd)
-	      m_EnergyPointer=(const uint16_t*) (m_FebBlock+off1+16+radd);
+	      m_EnergyPointer=reinterpret_cast<const uint16_t*> (m_FebBlock+off1+16+radd);
 	    if (dim1>=84+radd) 
-	      m_SumPointer=(const int32_t*)(m_FebBlock+off1+80+radd);
+	      m_SumPointer=reinterpret_cast<const int32_t*>(m_FebBlock+off1+80+radd);
 	    if (dim1>84+radd) 
-	      m_TimeQualityPointer=(const uint16_t*)(m_FebBlock+off1+84+radd);
+	      m_TimeQualityPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+off1+84+radd);
 	  }
 	  if (off2 && dim2+off2+off<m_FebBlockSize) {
-	    m_DigitsPointer=(const uint16_t*)(m_FebBlock+off2+off);
+	    m_DigitsPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+off2+off);
 	  }
 	  if (off3 && dim3+off3+off<m_FebBlockSize) {
-	    m_RawDataPointer=(const uint16_t*)(m_FebBlock+off3+off);
+	    m_RawDataPointer=reinterpret_cast<const uint16_t*>(m_FebBlock+off3+off);
 	  }
 	}
       }

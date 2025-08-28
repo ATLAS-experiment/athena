@@ -4,10 +4,14 @@
 def GfexInputMonitoringConfig(flags):
     '''Function to configure LVL1 GfexInput algorithm in the monitoring system.'''
 
-    
     # get the component factory - used for getting the algorithms
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
+
+    # for input monitoring we will require the emulated gFexTowers (built from supercells)
+    from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
+    result.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
+
 
     # use L1Calo's special MonitoringCfgHelper
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -35,8 +39,8 @@ def GfexInputMonitoringConfig(flags):
                              )
 
 
-    helper.defineTree('LBNString,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEt,RefTowerEt,TowerSaturationflag,RefTowerSat;errors',
-                      "lbnString/string:error/string:eventNumber/l:id/i:eta/F:phi/F:et/I:ref_et/I:sat/B:ref_sat/B",
+    helper.defineTree('LBN,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEt,RefTowerEt,TowerSaturationflag,RefTowerSat;errors',
+                      "lbn/I:error/string:eventNumber/l:id/i:eta/F:phi/F:et/I:ref_et/I:sat/B:ref_sat/B",
                       title="errors tree;LBN;Error",fillGroup="errors")
 
     # histograms of gFex tower variables
@@ -70,12 +74,12 @@ def GfexInputMonitoringConfig(flags):
                            ybins=40*32,ymin=0.5,ymax=40*32+0.5,
                            opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
 
- #   helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_TowerHeatMapHotTowers', title='gFex Tower Average Et Distribution (gTowerEt > 2 GeV) ;#eta;#phi;averageEt (count x 50 MeV)',
- #                          fillGroup = "highEtgTowers",
- #                          type='TProfile2D',
- #                          path=trigPath,
- #                          hanConfig={"description":"The histogram is an average Et distrribution og the gTowers in the eta-phi space. The z-axis gives the average Et."},
- #                          **eta_phi_bins)
+    helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_HotTower_HeatMap', title='gFex Tower Average Et Distribution (gTowerEt > 2 GeV) ;#eta;#phi;averageEt (count x 50 MeV)',
+                           fillGroup = "highEtgTowers",
+                           type='TProfile2D',
+                           xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
+
+
 
 
     helper.defineHistogram('TowerEta,TowerPhi;h_ColdTower_EtaPhiMap', title='gFex Tower Eta vs Phi (gTower Et < - 2 GeV) ;#eta;#phi;Number of gTowers',
@@ -96,26 +100,23 @@ def GfexInputMonitoringConfig(flags):
                            ybins=40*32,ymin=0.5,ymax=40*32+0.5,
                            opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
 
-#    helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_TowerHeatMapColdTowers', title='gFex Tower Average Et Distribution (gTower Et < - 2 GeV) ;#eta;#phi;averageEt (count x 50 MeV)',
-#                           fillGroup = "lowEtgTowers",
-#                           type='TProfile2D',
-#                           path=trigPath,
-#                           hanConfig={"description":"The histogram is an average Et distrribution og the gTowers in the eta-phi space. This includes only those gTowers with Et < 10 GeV. The z-axis gives the average Et."},
-#                           **eta_phi_bins)                           
+    helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_ColdTower_HeatMap', title='gFex Tower Average Et Distribution (gTower Et < - 2 GeV) ;#eta;#phi;averageEt (count x 50 MeV)',
+                           fillGroup = "lowEtgTowers",
+                           type='TProfile2D',
+                           xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
+                         
 
     helper.defineHistogram('TowerEt;h_TowerEt', title='gFex Tower Et ; Et (count x 50 MeV)',
                         fillGroup = "gTowers",
                         type='TH1I',
-                        path='Developer/gFexInput',
-                        hanConfig={"description":""},
                         xbins= 100, xmin=-50.0, xmax=100.0)
     
 
-    helper.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='gFex Tower Saturation FLag',
-                            fillGroup = "gTowers",
-                            type='TH1F',
-                            path='Developer/gFexInput',
-                            xbins=3,xmin=0.0,xmax=3.0)
+    helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_SaturatedTower_HeatMap', title='gFex Tower Average Et Distribution for Saturated gTower ;#eta;#phi;averageEt (count x 50 MeV)',
+                           fillGroup = "SatgTowers",
+                           type='TProfile2D',
+                           xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
+
 
 
     acc = helper.result()

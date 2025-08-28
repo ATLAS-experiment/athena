@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TrigCostMonitor/TrigCostAuditor.h"
 #include "TrigCostSvc.h"
@@ -34,26 +32,28 @@ StatusCode TrigCostAuditor::finalize() {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-void TrigCostAuditor::before(StandardEventType evt, const std::string& caller) {
-  if (evt != StandardEventType::Execute) return; // I only care for execution time
+void TrigCostAuditor::before(const std::string& event, const std::string& caller,
+                             const EventContext& ctx) {
+  if (event != IAuditor::Execute) return; // I only care for execution time
   ATH_MSG_DEBUG("Before Execute: " << caller);
-  callService(caller, ITrigCostSvc::AuditType::Before);
+  callService(caller, ITrigCostSvc::AuditType::Before, ctx);
 
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-void TrigCostAuditor::after(StandardEventType evt, const std::string& caller, const StatusCode& sc) {
-  if (evt != StandardEventType::Execute) return; // I only care for execution time
+void TrigCostAuditor::after(const std::string& event, const std::string& caller,
+                            const EventContext& ctx, const StatusCode& sc) {
+  if (event != IAuditor::Execute) return; // I only care for execution time
   ATH_MSG_DEBUG("After Execute: " << caller << " " << sc);
-  callService(caller, ITrigCostSvc::AuditType::After);
+  callService(caller, ITrigCostSvc::AuditType::After, ctx);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-void TrigCostAuditor::callService(const std::string& caller, ITrigCostSvc::AuditType type) {
-  // Note: Using ThreadLocalContext.h, better would be for the auditor to be told the Context
-  if (m_trigCostSvcHandle->processAlg(Gaudi::Hive::currentContext(), caller, type).isFailure()) {
+void TrigCostAuditor::callService(const std::string& caller, ITrigCostSvc::AuditType type,
+                                  const EventContext& ctx) {
+  if (m_trigCostSvcHandle->processAlg(ctx, caller, type).isFailure()) {
     ATH_MSG_FATAL("Error in TrigCostSvc called by TrigCostAuditor, auditing algorithm: " << caller);
     throw std::runtime_error("TrigCostAuditor exception");
   }

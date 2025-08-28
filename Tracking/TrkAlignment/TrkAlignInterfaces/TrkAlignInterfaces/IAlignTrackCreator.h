@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_ALIGN_TRACK_CREATOR_IH
@@ -54,7 +54,7 @@ namespace Trk {
     bool m_doTRT;
     bool m_doMDT;
 
-    std::ostream * m_logStream; //!< logfile output stream
+    std::ostream * m_logStream = nullptr; //!< logfile output stream
     
   }; // end class definition
   

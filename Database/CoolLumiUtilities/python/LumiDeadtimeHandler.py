@@ -12,7 +12,6 @@
 #
 
 # Get our global DB handler object
-from __future__ import print_function
 from CoolLumiUtilities.CoolDataReader import CoolDataReader
 
 from CoolLumiUtilities.LumiBlobConversion import unpackLiveFraction

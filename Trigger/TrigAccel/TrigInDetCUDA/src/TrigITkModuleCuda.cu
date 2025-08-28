@@ -4,6 +4,8 @@
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cuda_fp16.h>
+
 #include <atomic>
 
 #include "device_context.h"
@@ -191,10 +193,10 @@ GbtsDeviceContext* TrigITkModuleCuda::createGbtsContext(int id, const TrigAccel:
 	
   ctx.m_useGPUseedExtraction = pData->m_useGPUseedExtraction;
 
-  ctx.m_nMaxEdges = pData->m_nMaxEdges;
   ctx.m_maxEtaBin = pData->m_maxEtaBin + 1;
   ctx.m_nNodes    = pData->m_nSpacepoints;
   ctx.m_nLayers   = pData->m_nLayers;
+  ctx.m_nMaxEdges = pData->m_nMaxEdges;
 
   ctx.m_minLevel  = pData->m_minLevel;
   //1. spacepoint params storage
@@ -207,10 +209,6 @@ GbtsDeviceContext* TrigITkModuleCuda::createGbtsContext(int id, const TrigAccel:
 
   ctx.d_size += data_size;
 	
-  data_size = pData->m_nSpacepoints*sizeof(unsigned char); //type
-	
-  ctx.d_size += data_size;	
-
   //2. layer information: spacepoint views and geometry
 	
   data_size = 4*pData->m_nLayers*sizeof(int);
@@ -332,12 +330,12 @@ GbtsDeviceContext* TrigITkModuleCuda::createGbtsContext(int id, const TrigAccel:
 
   ctx.d_size += data_size;
     
-  data_size = 4*ctx.m_nMaxEdges*sizeof(float);
+  data_size = 4*ctx.m_nMaxEdges*sizeof(__half);
   cudaMalloc((void **)&ctx.d_edge_params, data_size);
 
   ctx.d_size += data_size;
 
-  data_size = ctx.m_nNodes*sizeof(unsigned int);
+  data_size = (ctx.m_nNodes+1)*sizeof(unsigned int);
 
   cudaMalloc((void **)&ctx.d_num_incoming_edges, data_size);
   cudaMemset(ctx.d_num_incoming_edges, 0, data_size);
@@ -346,11 +344,6 @@ GbtsDeviceContext* TrigITkModuleCuda::createGbtsContext(int id, const TrigAccel:
   
   data_size = ctx.m_nNodes*sizeof(int);
     
-  cudaMalloc((void **)&ctx.d_link_counters, data_size);
-  cudaMemset(ctx.d_link_counters, 0, data_size);
-
-  ctx.d_size += data_size;
-  
   checkError(14);
 
   return p;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //class header
@@ -26,18 +26,9 @@
 
 
 PhantomBarrelTool::PhantomBarrelTool(const std::string& type, const std::string& name, const IInterface* parent)
-    : DetectorGeometryBase(type, name, parent),
-    m_zLength(0),
-    m_rMin(0),
-    m_rMax(0)
+    : DetectorGeometryBase(type, name, parent)
 {
-  ATH_MSG_DEBUG( "PhantomBarrelTool constructor for " << name );
-  declareProperty("ZLength", m_zLength, "");
-  declareProperty("RMin", m_rMin, "");
-  declareProperty("RMax", m_rMax, "");
 }
-
-PhantomBarrelTool::~PhantomBarrelTool() {}
 
 void PhantomBarrelTool::BuildGeometry() {
   ATH_MSG_VERBOSE( name() << " PhantomBarrelTool::BuildGeometry(): Starting" );

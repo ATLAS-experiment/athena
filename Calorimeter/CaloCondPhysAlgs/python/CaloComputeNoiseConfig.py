@@ -7,7 +7,7 @@ from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
 from AthenaCommon.Logging import logging
 
-def CaloComputeNoiseCfg(flagsIn,mu=60,dt=25,output='cellnoise_data.root'):
+def CaloComputeNoiseCfg(flagsIn,mu=60,nsamp=4,dt=25,output='cellnoise_data.root'):
 
     if (dt!=25):
         raise RuntimeError("At this point (early run 3), only a dt of 25ns is supported")
@@ -17,6 +17,7 @@ def CaloComputeNoiseCfg(flagsIn,mu=60,dt=25,output='cellnoise_data.root'):
     flags.Calo.Noise.fixedLumiForNoise=mu
     flags.LAr.doHVCorr = False #Avoid double-rescaling
     flags.LAr.ROD.NumberOfCollisions = mu # for OFC computation
+    flags.LAr.ROD.nSamples = nsamp # number of samples to use
     flags.lock()
 
     msg = logging.getLogger("CaloComputeNoiseCfg")
@@ -74,7 +75,7 @@ def CaloComputeNoiseCfg(flagsIn,mu=60,dt=25,output='cellnoise_data.root'):
     condInputLoader.Load.add(("CondAttrListCollection",dfolder))
     result.addCondAlgo(CompFactory.getComp("LArFlatConditionsAlg<LArPedestalFlat>")(ReadKey=dfolder,WriteKey="LArPedestal"))
 
-    result.addEventAlgo(CompFactory.CaloNoiseCompCondAlg(NMinBias=flags.Calo.Noise.fixedLumiForNoise,DiagnosticHG=True))
+    result.addEventAlgo(CompFactory.CaloNoiseCompCondAlg(NMinBias=flags.Calo.Noise.fixedLumiForNoise))
     
     result.addEventAlgo(CompFactory.CaloRescaleNoise(absScaling=True,
                                          ElecNoiseKey="elecNoise",PileupNoiseKey="pileupNoise"))
@@ -96,6 +97,7 @@ if __name__=="__main__":
     parser.add_argument('-t', '--globaltag', type=str, default="OFLCOND-MC21-SDR-RUN3-12",help="Global conditions tag ")
     parser.add_argument('-o', '--output',type=str,default="cellnoise_data.root",help="name stub for root and sqlite output files")
     parser.add_argument('-m', '--mu', type=int, default=60, help="Which mu to use ")
+    parser.add_argument('-n', '--nsamples', type=int, default=4, help="Number of samples for OFC/Autocorr ")
     parser.add_argument('--olevel', type=int, default=3, help="Output level to use ")
 
     args = parser.parse_args()
@@ -113,6 +115,8 @@ if __name__=="__main__":
     flags.Input.MCCampaign=Campaign.Unknown
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
+    flags.LAr.ROD.UseHighestGainAutoCorr = True
   
     if args.globaltag:
         flags.IOVDb.GlobalTag=args.globaltag
@@ -127,7 +131,10 @@ if __name__=="__main__":
                                  InitialTimeStamp  = 0,
                                  TimeStampInterval = 1))
 
-    cfg.merge(CaloComputeNoiseCfg(flags,output=args.output,mu=args.mu))
+    cfg.merge(CaloComputeNoiseCfg(flags,output=args.output,mu=args.mu,nsamp=args.nsamples))
+
+    # could not put into algo config
+    cfg.getCondAlgo("LArADC2MeVCondAlg").LArHVScaleCorrKey=""
 
     cfg.getService("DetectorStore").Dump=True
     cfg.getService("ConditionStore").Dump=True
@@ -135,6 +142,7 @@ if __name__=="__main__":
     cfg.getService("MessageSvc").OutputLevel=args.olevel
     if args.olevel < 3:
        cfg.getCondAlgo("LArAutoCorrTotalCondAlg").OutputLevel=3
+       cfg.getCondAlgo("LArOFCCondAlg").OutputLevel=3
     cfg.getService("MessageSvc").defaultLimit=999999999
 
     cfg.printConfig(withDetails=True)

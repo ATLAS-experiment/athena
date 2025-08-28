@@ -72,9 +72,9 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
   const float M_2PI = 2.0*M_PI;
   
-  const float cut_dphi_max      = m_LRTmode ? 0.07 : 0.012;
-  const float cut_dcurv_max     = m_LRTmode ? 0.015 : 0.001;
-  const float cut_tau_ratio_max = m_LRTmode ? 0.015 : 0.007;
+  const float cut_dphi_max      = m_LRTmode ? 0.07f : 0.012f;
+  const float cut_dcurv_max     = m_LRTmode ? 0.015f : 0.001f;
+  const float cut_tau_ratio_max = m_LRTmode ? 0.015f : static_cast<float>(m_tau_ratio_cut);
   const float min_z0            = m_LRTmode ? -600.0 : roi.zedMinus();
   const float max_z0            = m_LRTmode ? 600.0 : roi.zedPlus();
   const float min_deltaPhi      = m_LRTmode ? 0.01f : 0.001f;
@@ -87,11 +87,18 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   const float ptCoeff = 0.29997*1.9972/2.0;// ~0.3*B/2 - assuming nominal field of 2*T
 
   float tripletPtMin = 0.8*m_minPt;//correction due to limited pT resolution
+  const float pt_scale     = 900.0/m_minPt;//to re-scale original tunings done for the 900 MeV pT cut
   
   float maxCurv = ptCoeff/tripletPtMin;
  
-  const float maxKappa_high_eta          = m_LRTmode ? 1.0*maxCurv : std::sqrt(0.8)*maxCurv;
-  const float maxKappa_low_eta           = m_LRTmode ? 1.0*maxCurv : std::sqrt(0.6)*maxCurv;
+  float maxKappa_high_eta          = m_LRTmode ? 1.0*maxCurv : std::sqrt(0.8)*maxCurv;
+  float maxKappa_low_eta           = m_LRTmode ? 1.0*maxCurv : std::sqrt(0.6)*maxCurv;
+
+  if(!m_useOldTunings && !m_LRTmode) {//new settings for curvature cuts
+    maxKappa_high_eta          = 4.75e-4f*pt_scale;
+    maxKappa_low_eta           = 3.75e-4f*pt_scale;
+  }
+
   const float dphi_coeff                 = m_LRTmode ? 1.0*maxCurv : 0.68*maxCurv;
   
   const float minDeltaRadius = 2.0;
@@ -121,7 +128,17 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
       float rb2 = B2.getMaxBinRadius();
     
       if(m_useEtaBinning) {
-	deltaPhi = min_deltaPhi + dphi_coeff*std::fabs(rb2-rb1);	
+	float abs_dr = std::fabs(rb2-rb1);
+	if (m_useOldTunings) {
+	  deltaPhi = min_deltaPhi + dphi_coeff*abs_dr;
+	}
+	else {
+	  if(abs_dr < 60.0) {
+	    deltaPhi = 0.002f + 4.33e-4f*pt_scale*abs_dr;
+	  } else {
+	    deltaPhi = 0.015f + 2.2e-4f*pt_scale*abs_dr;
+	  }
+	}
       }
 
       unsigned int first_it = 0;
@@ -290,6 +307,10 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
       } //loop over n1 (inner) nodes
     } //loop over bins in Layer 2
   } //loop over bin groups
+
+  if(nEdges >= m_nMaxEdges) {
+    ATH_MSG_WARNING("Maximum number of graph edges exceeded - possible efficiency loss "<< nEdges);
+  }
 
   return std::make_pair(nEdges, nConnections);
 }

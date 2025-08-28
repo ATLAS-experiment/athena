@@ -2050,7 +2050,7 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
 
   while (offset < size && nfrag < MAX_ROD_FRAG) {
     //std::cout << "nfrag="<<(nfrag) << " offset="<<offset<<" data[offset]="<<data[offset]<<std::endl;
-    frag[nfrag] = (const T_RodDataFrag *) (data + offset);
+    frag[nfrag] = reinterpret_cast<const T_RodDataFrag *> (data + offset);
 
     if (frag[nfrag]->size < m_sizeOverhead
         || frag[nfrag]->size > size - offset + m_sizeOverhead - 2) {
@@ -2238,7 +2238,7 @@ void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
 
 
 
-          const uint16_t* sample = (const uint16_t *) (++data);
+          const uint16_t* sample = reinterpret_cast<const uint16_t *> (++data);
 
           size_t start_channel(miniDrawer * Tile::MAX_MINIDRAWER_CHAN);
           size_t end_channel(start_channel + Tile::MAX_MINIDRAWER_CHAN);

@@ -8,7 +8,7 @@
 
 class TestDriver {
 public:
-  TestDriver( const std::string& name,
+  explicit TestDriver( const std::string& name,
               const std::string& coll_type = "RootCollection",
               const std::string& connection = "" );
 

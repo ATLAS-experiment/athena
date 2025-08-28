@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGTOOLS_ANATOOLHANDLE_ICC
@@ -242,7 +242,7 @@ namespace asg
   {
     if (m_isInitialized.load())
     {
-      m_toolPtr = that.m_toolPtr;
+      m_toolPtr = that.m_toolPtr.load();
       m_mode = that.m_mode;
       m_extraInit = that.m_extraInit;
       m_cleanup = that.m_cleanup;
@@ -287,11 +287,17 @@ namespace asg
     {
       ToolHandle<T> tmp = *m_handleUser;
 #ifndef XAOD_STANDALONE
-      if (!tmp.empty())
-        tmp->release();
+      if (!tmp.empty()) {
+        try {
+          tmp->release();
+        }
+        catch (const GaudiException&) {
+          std::abort();
+        }
+      }
 #endif
       *m_handleUser = *that.m_handleUser;
-      *that.m_handleUser = tmp;
+      *that.m_handleUser = std::move(tmp);
     }
     m_originalTypeAndName.swap (that.m_originalTypeAndName);
     {
@@ -299,7 +305,11 @@ namespace asg
       m_isInitialized = that.m_isInitialized.load();
       that.m_isInitialized = tmp;
     }
-    std::swap (m_toolPtr, that.m_toolPtr);
+    {
+      const auto tmp = m_toolPtr.load();
+      m_toolPtr = that.m_toolPtr.load();
+      that.m_toolPtr = tmp;
+    }
     std::swap (m_mode, that.m_mode);
     std::swap (m_allowEmpty, that.m_allowEmpty);
 
@@ -441,7 +451,7 @@ namespace asg
 #ifndef XAOD_STANDALONE
       AsgToolConfig subToolConfig;
       ANA_CHECK (detail::readToolConfig (subToolConfig, value.parentName() + "." + value.name()));
-      ANA_CHECK (m_config.addPrivateTool (property, subToolConfig));
+      ANA_CHECK (m_config.addPrivateTool (property, std::move(subToolConfig)));
       return StatusCode::SUCCESS;
 #else
       return setProperty (property, value.name());
@@ -707,10 +717,12 @@ namespace asg
     if (m_isInitialized.load())
       return m_toolPtr;
 
-    std::lock_guard<std::recursive_mutex> lock (m_initializeMutex);
-    if (!m_isInitialized)
-      ANA_CHECK_THROW (initialize());
-    assert (m_isInitialized);
+    {
+      std::lock_guard<std::recursive_mutex> lock (m_initializeMutex);
+      if (!m_isInitialized)
+        ANA_CHECK_THROW (initialize());
+      assert (m_isInitialized);
+    }
     return m_toolPtr;
   }
 
@@ -770,13 +782,15 @@ namespace asg
 
   template <class T> bool
   AnaToolHandle<T> ::
-  isUserConfigured () const noexcept
+  isUserConfigured () const
   {
     using namespace msgToolHandle;
 #ifndef NDEBUG
     this->testInvariant ();
 #endif
 
+    // getMode can throw an exception (from dereferencing the ToolSvc handle),
+    // so this function is not noexcept.
     switch (getMode())
     {
     case detail::AnaToolHandleMode::EMPTY:

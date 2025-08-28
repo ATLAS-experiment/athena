@@ -14,7 +14,6 @@ namespace GlobalSim {
 
   StatusCode EMB1CellsFromCaloCells::initialize() {
     CHECK(m_caloCellsKey.initialize());
-
     return StatusCode::SUCCESS;
   }
   
@@ -23,8 +22,10 @@ namespace GlobalSim {
 				const EventContext& ctx) const {
     
     // Read in a container containing all CaloCells
-    
-    auto h_caloCells = SG::makeHandle(m_caloCellsKey, ctx);
+
+    SG::ReadHandle<CaloCellContainer> h_caloCells;    
+
+    h_caloCells = SG::makeHandle(m_caloCellsKey, ctx);
     CHECK(h_caloCells.isValid());
     
     const auto& allCaloCells = *h_caloCells;

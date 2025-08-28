@@ -2,7 +2,6 @@
 
 # Copyright (C) 2001-2019 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import absolute_import, print_function
 
 from xAODBase.xAODType import xAODType
 

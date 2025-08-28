@@ -26,15 +26,14 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
 
-#include "ActsCalibration/TrkMeasurementCalibrator.h"
-#include "ActsCalibration/TrkMeasSurfaceAccessor.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
 
 // STL
 #include <string>
@@ -104,51 +103,49 @@ public:
   //! Acts seed fit
   virtual
     std::unique_ptr< ActsTrk::MutableTrackContainer >
-    fit(const EventContext& ctx,
-	const ActsTrk::Seed &seed,
-	const Acts::BoundTrackParameters& initialParams,
-	const Acts::GeometryContext& tgContext,
-	const Acts::MagneticFieldContext& mfContext,
-	const Acts::CalibrationContext& calContext,
-	const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const override;
+    fit(const ActsTrk::Seed &seed,
+        const Acts::BoundTrackParameters& initialParams,
+        const Acts::GeometryContext& tgContext,
+        const Acts::MagneticFieldContext& mfContext,
+        const Acts::CalibrationContext& calContext,
+	const Acts::Surface& targetSurface) const override;
 
   virtual
   std::unique_ptr< ActsTrk::MutableTrackContainer >
-  fit(const EventContext& ctx,
-      const std::vector< ActsTrk::ATLASUncalibSourceLink> & clusterList,
+  fit(const std::vector< ActsTrk::ATLASUncalibSourceLink> & clusterList,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
-      const Acts::CalibrationContext& calContext,
-      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
+      const Acts::CalibrationContext& calContext,      
       const Acts::Surface* targetSurface) const override;
   
   virtual StatusCode fit(
     const EventContext& ctx,
-        const ActsTrk::TrackContainer::ConstTrackProxy& track,          
-    ActsTrk::MutableTrackContainer& trackContainer) const override;
+    const ActsTrk::TrackContainer::ConstTrackProxy& track,          
+    ActsTrk::MutableTrackContainer& trackContainer,
+    const Acts::PerigeeSurface& pSurface) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:
   ///////////////////////////////////////////////////////////////////
 private:
   Acts::GsfOptions<ActsTrk::MutableTrackStateBackend> prepareOptions(const Acts::GeometryContext& tgContext,
-									    const Acts::MagneticFieldContext& mfContext,
-									    const Acts::CalibrationContext& calContext,
-									    const Acts::PerigeeSurface& surface) const;
+                      const Acts::MagneticFieldContext& mfContext,
+                      const Acts::CalibrationContext& calContext,
+                      const Acts::PerigeeSurface& surface) const;
   
   std::unique_ptr<Trk::Track> performFit(const EventContext& ctx,
-					 const Acts::GeometryContext& tgContext,
-					 const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
-					 const std::vector<Acts::SourceLink>& trackSourceLinks,
-					 const Acts::BoundTrackParameters& initialParams) const;
+           const Acts::GeometryContext& tgContext,
+           const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
+           const std::vector<Acts::SourceLink>& trackSourceLinks,
+           const Acts::BoundTrackParameters& initialParams) const;
 
   std::unique_ptr<Trk::Track> performDirectFit(const EventContext& ctx,
-					       const Acts::GeometryContext& tgContext,
-					       const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
-					       const std::vector<Acts::SourceLink>& trackSourceLinks,
-					       const Acts::BoundTrackParameters& initialParams,
-					       const std::vector<const Acts::Surface*>& surfaces) const;
+                 const Acts::GeometryContext& tgContext,
+                 const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
+                 const std::vector<Acts::SourceLink>& trackSourceLinks,
+                 const Acts::BoundTrackParameters& initialParams,
+                 const std::vector<const Acts::Surface*>& surfaces) const;
 
   // Create a track from the fitter result
   std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
@@ -163,7 +160,7 @@ private:
 
  private:
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
   ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 
@@ -181,16 +178,16 @@ private:
       "Maximum number of components in GSF"};
 
   Gaudi::Property<bool> m_useDirectNavigation{this, "UseDirectNavigation", false,
-					      "GSF with direct navigation when refitting measurements"};
+                "GSF with direct navigation when refitting measurements"};
 
   Gaudi::Property<bool> m_refitOnly{this, "RefitOnly", false,
-				    "Do refit only. Track summary will not be added"};
+            "Do refit only. Track summary will not be added"};
 
   Gaudi::Property< double > m_weightCutOff {this, "WeightCutOff", 1.e-4,
-					    "component weight cut off"};
+              "component weight cut off"};
 
   Gaudi::Property<std::string> m_option_componentMergeMethod{this, "ComponentMergeMethod", "MaxWeight"
-						      , "method to merge components {Mean, MaxWeight}"};
+                  , "method to merge components {Mean, MaxWeight}"};
 
   Acts::ComponentMergeMethod m_componentMergeMethod;
 
@@ -203,8 +200,8 @@ private:
   std::unique_ptr<Fitter> m_fitter {nullptr};
 
   using DirectFitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator>,
-						Acts::AtlasBetheHeitlerApprox<6, 5>,
-						ActsTrk::MutableTrackStateBackend >;
+            Acts::AtlasBetheHeitlerApprox<6, 5>,
+            ActsTrk::MutableTrackStateBackend >;
   std::unique_ptr<DirectFitter> m_directFitter {nullptr};
 
 

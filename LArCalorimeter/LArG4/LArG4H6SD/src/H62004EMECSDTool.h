@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004SD_H62004EMECSDTOOL_H
@@ -40,9 +40,9 @@ namespace LArG4
     G4VSensitiveDetector* makeSD() const override final;
 
     /// Hit collection name
-    std::string m_hitCollName;
+    std::string m_hitCollName{"LArHitEMEC"};
 
-    ServiceHandle<ILArCalculatorSvc> m_calculator;
+    ServiceHandle<ILArCalculatorSvc> m_calculator{this, "Calculator", "EMECPosInnerWheel_ECOR_GADJCalculator"};
   }; // class H62004EMECSDTool
 
 } // namespace LArG4

@@ -7,6 +7,8 @@
 
 //using namespace CLHEP;
 
+#include "TruthUtils/ParticleConstants.h"
+
 namespace Analysis{
   
     //-------------------------------------------------------------------------
@@ -36,7 +38,7 @@ namespace Analysis{
     inline CLHEP::HepLorentzVector TauPi0Candidate::hlv() const
     {
       CLHEP::HepLorentzVector cand4Mom(0., 0., 0., 0.);
-      double mPi0 = 134.98*CLHEP::MeV;
+      double mPi0 = ParticleConstants::piZeroMassInMeV;
       if(this->nPi0Cluster() == 1){
 
         // Cluster E has been measured in Calo. Cluster Pt has been calculated using a 0 mass hypthesis.

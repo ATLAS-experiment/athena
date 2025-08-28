@@ -144,5 +144,7 @@ RunToTimestampDict = {
     460000: 1695700000, # MC23 for 2023 heavy-ion run
     470000: 1704000000, # MC23e/f 2024
     488000: 1730070000, # MC23 for 2024 5.36 TeV pp reference run
-    488600: 1730804400  # MC23 for 2024 heavy ion run
+    488600: 1730804400, # MC23 for 2024 heavy ion run
+    495000: 1747346400, # MC23g 2025
+    500700: 1751148000  # MC23 for 2025 pO runs
 }

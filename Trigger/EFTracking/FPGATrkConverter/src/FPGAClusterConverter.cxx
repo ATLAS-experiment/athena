@@ -305,8 +305,15 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, co
   Amg::MatrixX cov(2,2);
   cov.setZero();
 
-  cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
-  cov(1,1) = siWidth.z()*siWidth.z()/12;
+  if (m_broadErrors) {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
+    cov(1,1) = siWidth.z()*siWidth.z()/12;
+  }
+  else {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/(12*siWidth.colRow().x()*siWidth.colRow().x()); 
+    cov(1,1) = siWidth.z()*siWidth.z()/(12*siWidth.colRow().y()*siWidth.colRow().y());
+  }
+  
   float dummy_omegax = 0.5; 
   float dummy_omegay = 0.5;
   bool split = false;
@@ -322,11 +329,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   ATH_MSG_DEBUG("\tCreate xAOD::PixelCluster from FPGATrackSimHit");
 
   IdentifierHash hash = h.getIdentifierHash();
-  
-  float etaWidth = h.getEtaWidth();
-  float phiWidth = h.getPhiWidth();
-  int phiIndex = h.getPhiIndex();
-  int etaIndex = h.getEtaIndex();
 
   const InDetDD::SiDetectorElement* pDE = m_pixelManager->getDetectorElement(hash);
 
@@ -337,7 +339,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
  
   // *** Get cell from id
   Identifier wafer_id = m_pixelId->wafer_id(hash);
-  Identifier hit_id = m_pixelId->pixel_id(wafer_id, phiIndex, etaIndex); 
+  Identifier hit_id = m_pixelId->pixel_id(wafer_id, h.getPhiIndex(), h.getEtaIndex()); 
   InDetDD::SiCellId cell =  pDE->cellIdFromIdentifier(hit_id);
   if(!cell.isValid()) {
     ATH_MSG_DEBUG("\t\tcell not valid");
@@ -346,17 +348,37 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   const InDetDD::PixelModuleDesign* design (dynamic_cast<const InDetDD::PixelModuleDesign*>(&pDE->design()));
 
   // **** Get InDet::SiWidth
+  int rowmin = h.getMinPhiIndex();
+  int rowmax = h.getMaxPhiIndex();
+  int colmin = h.getMinEtaIndex();
+  int colmax = h.getMaxEtaIndex();
 
-  int colMin = static_cast<int>(etaIndex-0.5*etaWidth);
-  int colMax = colMin+etaWidth;
+  // Quick test to check that none of these 4 hit some number limits
+  // Check for uninitialized values (still at int min/max)
+  if (colmin == std::numeric_limits<int>::max() || colmax == std::numeric_limits<int>::min() ||
+    rowmin == std::numeric_limits<int>::max() || rowmax == std::numeric_limits<int>::min()) {
+    ATH_MSG_ERROR("Pixel cluster indices appear uninitialized: colmin=" << colmin << ", colmax=" << colmax
+          << ", rowmin=" << rowmin << ", rowmax=" << rowmax);
+    return StatusCode::FAILURE;
+  }
+  // Check for negative indices
+  if (colmin < 0 || colmax < 0 || rowmin < 0 || rowmax < 0) {
+    ATH_MSG_ERROR("Pixel cluster indices out of range: colmin=" << colmin << ", colmax=" << colmax
+          << ", rowmin=" << rowmin << ", rowmax=" << rowmax);
+    return StatusCode::FAILURE;
+  }
+  // Check for max < min
+  if (colmax < colmin || rowmax < rowmin) {
+    ATH_MSG_ERROR("Pixel cluster index max < min: colmin=" << colmin << ", colmax=" << colmax
+          << ", rowmin=" << rowmin << ", rowmax=" << rowmax);
+    return StatusCode::FAILURE;
+  }
 
-  int rowMin = static_cast<int>(phiIndex-0.5*phiWidth);
-  int rowMax = rowMin+phiWidth;
+  double zWidth = design->widthFromColumnRange(colmin, colmax);
+  double phiRWidth = design->widthFromRowRange(rowmin, rowmax);
+  
+  InDet::SiWidth siWidth(Amg::Vector2D(h.getPhiWidth(),h.getEtaWidth()), Amg::Vector2D(phiRWidth,zWidth));
 
-  double etaW = design->widthFromColumnRange(colMin, colMax-1); 
-  double phiW = design->widthFromRowRange(rowMin, rowMax-1); 
-
-  InDet::SiWidth siWidth(Amg::Vector2D(phiWidth,etaWidth),Amg::Vector2D(phiW,etaW));
 
   // **** Get SiLocalPosition from cell id and define Amg::Vector2D position
   InDetDD::SiLocalPosition silPos(pDE->rawLocalPositionOfCell(cell)); 
@@ -378,9 +400,15 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
 
   Amg::MatrixX cov(2,2); 
   cov.setZero();
-
-  cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
-  cov(1,1) = siWidth.z()*siWidth.z()/12; 
+  
+  if (m_broadErrors) {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/12;
+    cov(1,1) = siWidth.z()*siWidth.z()/12;
+  }
+  else {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/(12*siWidth.colRow().x()*siWidth.colRow().x());
+    cov(1,1) = siWidth.z()*siWidth.z()/(12*siWidth.colRow().y()*siWidth.colRow().y());
+  }
 
   bool split = false;
   float splitProb1 = 0;
@@ -644,15 +672,12 @@ StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixel
     const float & cov_r = p_cl->localCovariance<2>()(0,0);
     const float & cov_z = p_cl->localCovariance<2>()(1,0);
 
-    // measurement list
-    std::vector< const xAOD::UncalibratedMeasurement* > measurementLinks({ p_cl });
-
     pixelSPs.back()->setSpacePoint(
       p_cl->identifierHash(),
       globalPos,
       cov_r,
       cov_z,
-      measurementLinks
+      std::vector< const xAOD::UncalibratedMeasurement* >({ p_cl }) // measurement list
     );
   }
 
@@ -724,11 +749,11 @@ StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::S
 
   // Fill xAOD::SpacePoint
   sp.setSpacePoint(
-    idHashList, 
+    std::move(idHashList),
     globalPos, 
     cov_r, 
     cov_z, 
-    measurements,
+    std::move(measurements),
     topHalfStripLength,
     bottomHalfStripLength,
     topStripDirection.cast<float>(),

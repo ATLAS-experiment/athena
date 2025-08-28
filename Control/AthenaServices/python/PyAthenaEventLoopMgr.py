@@ -7,66 +7,6 @@
 import GaudiPython.Bindings as PyGaudi
 
 
-# The following method is setup at ApplicationMgr creation time; this works
-# because the event loop manager, which imports this module if it is the
-# python one at initialization time, will instantiate the event selector in
-# its base-class initialize(). Hence # the order is controlled, but all on
-# the C++ side of things.
-def enable_seeking(silent=False):
-   """ try to install seek-stuff on the EventSelector side.
-   if `silent` is True, only an attempt at installing the seeking is performed.
-   otherwise an exception is raised if the seeking could not be installed.
-   """
-
-   import sys
-   from AthenaCommon.Logging import log as msg
-   if 'AthenaPoolCnvSvc.ReadAthenaPool' not in sys.modules:
-      if silent:
-         _msg = msg.debug
-      else:
-         _msg = msg.info
-      # user did not import that module so we give up
-      _msg( "Cannot enable 'seeking' b/c module "
-            "[AthenaPoolCnvSvc.ReadAthenaPool] hasn't been imported..." )
-      _msg( "Modify your jobOptions to import that module "+ \
-            "(or just ignore this message)" )
-
-      if not silent:
-         raise RuntimeError("configuration-logic error")
-      
-      return
-
-   from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-   from AthenaCommon.Configurable import Configurable
-   collectionType = svcMgr.EventSelector.properties()["CollectionType"]
-
-   if collectionType in ( "ImplicitROOT", Configurable.propertyNoValue, ):
-      msg.info   ( "=> Seeking enabled." )
-
-   else:
-      msg.warning( "Input seeking is not compatible with collection type of %s",
-                   svcMgr.EventSelector.properties()["CollectionType"] )
-      msg.warning( "=> Seeking disabled." )
-      if not silent:
-         raise RuntimeError("could not install seeking")
-      
-   from AthenaCommon.AppMgr import theApp
-   if theApp.state() != theApp.State.OFFLINE:
-      # do not bring up the whole C++ kaboodle too early in the game
-      svcMgr.EventSelector.setup()
-   return
-
-def _setupEvtSelForSeekOps():
-   from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-   if isComponentAccumulatorCfg():
-      return
-   else:
-      return enable_seeking(silent=True)
-
-_setupEvtSelForSeekOps()
-del _setupEvtSelForSeekOps
-
-
 ## @class _PyAthenaEventLoopMgrClass
 #  @brief Python facade of PyAthenaEventLoopMgr.
 class PyAthenaEventLoopMgr( PyGaudi.iService ):

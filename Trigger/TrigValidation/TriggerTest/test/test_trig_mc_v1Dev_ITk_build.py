@@ -23,7 +23,6 @@ run.flags += [
     'Trigger.doRuntimeNaviVal=True',
     'ITk.doTruth=False',
     'Tracking.doTruth=False',
-    'Trigger.enableL1CaloPhase1=False',
 ]
 
 # The full test configuration

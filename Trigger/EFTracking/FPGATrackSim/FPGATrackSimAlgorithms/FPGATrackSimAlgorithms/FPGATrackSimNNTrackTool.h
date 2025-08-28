@@ -48,15 +48,24 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	virtual StatusCode initialize() override;
 	StatusCode getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
 	StatusCode getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
-        StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst);
+	StatusCode getTracks_GNN(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+        StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max);
 
 	static float getXScale() { return 1015.;};
 	static float getYScale() { return 1015.;};
 	static float getZScale() { return 3000.;};
-
+        static float getQoverPtScale() { return 0.001;};
+        static float getEtaScale() { return 5.0;};
+        static float getPhiScale() { return 3.15;};
+        static float getD0Scale() { return 2.0;};
+        static float getZ0Scale() { return 200.;};        
+        static float getRScale() {return 1015.;};
+  
 	// Flags
 	Gaudi::Property <unsigned int> m_minNumberOfRealHitsInATrack{ this, "MinNumberOfRealHitsInATrack", 4, "Minimum number of real hits in a track candidate to process" };
 	Gaudi::Property <bool> m_doGNNTracking{ this, "doGNNTracking", false, "Flag to turn on GNN Tracking configuration for road-to-track" };
+	Gaudi::Property <int> m_nInputsGNN{ this, "nInputsGNN", 9, "Number of Hit Inputs for NN for GNN configuration. Depends on which model is chosen."};
+        Gaudi::Property <bool> m_useCartesian { this, "useCartesian", true, "If true, NNs use Cartestian coordinates. If false,they use cylindrical coordiantes"};
 
   private:
 

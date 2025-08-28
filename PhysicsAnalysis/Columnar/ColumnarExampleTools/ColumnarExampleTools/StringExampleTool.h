@@ -30,6 +30,9 @@ namespace columnar
   {
   public:
 
+    // Create a proper constructor for Athena
+    ASG_TOOL_CLASS( StringExampleTool, asg::IAsgTool )
+
     StringExampleTool (const std::string& name);
 
     virtual StatusCode initialize () override;

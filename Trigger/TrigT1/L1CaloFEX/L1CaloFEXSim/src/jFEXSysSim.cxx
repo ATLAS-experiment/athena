@@ -10,8 +10,8 @@
 //  ***************************************************************************/
 
 
-#include "L1CaloFEXSim/jFEXSysSim.h"
-#include "L1CaloFEXSim/jFEXSim.h"
+#include "jFEXSysSim.h"
+#include "jFEXSim.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
@@ -958,7 +958,9 @@ namespace LVL1 {
     SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_xTob_jLJ(m_xTobOutKey_jLJ/*, ctx*/);
     ATH_MSG_DEBUG("  write: " << output_xTob_jLJ.key() << " = " << "..." );
     ATH_CHECK(output_xTob_jLJ.record(std::move(xtobContainer_jLJ),std::move(xtobAuxContainer_jLJ)));
-    
+
+    m_allLargeRJetTobs.clear(); // Aug2025: no longer filling the jLJ container, but will still produce the container to avoid EDM changes
+
     // iterate over all LRJEt Tobs and fill EDM with them
     for(auto const& [jfex, fpga] : m_allLargeRJetTobs ) {
         for(auto const& tobs: fpga) {

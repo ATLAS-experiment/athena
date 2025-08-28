@@ -4,7 +4,6 @@
 # Front-end script to run JobRunner jobs
 
 
-from __future__ import print_function
 
 __authors__  = ['Juerg Beringer', 'Carl Suster']
 __version__ = 'runJobs.py atlas/athena'

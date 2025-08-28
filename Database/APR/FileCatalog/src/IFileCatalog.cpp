@@ -11,13 +11,13 @@
 
 #include <algorithm>
 #include "POOLCore/SystemTools.h"
-#include "POOLCore/Exception.h"
 #include "FileCatalog/URIParser.h"
 #include "FileCatalog/IFileCatalog.h"
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "PersistentDataModel/Guid.h"
 
+#include <exception>
 
 using namespace pool;
 
@@ -80,7 +80,7 @@ void pool::IFileCatalog::
 registerPFN( const std::string& pfn, const std::string& ftype, std::string& fid )
 {
    if( existsPFN(pfn) ) {
-      throw pool::Exception(std::string("PFN '") + pfn + "' already registered", "registerPFN", "FileCatalog");
+      throw std::runtime_error("PFN '" + pfn + "' already registered (APR: \" registerPFN \" from \" FileCatalog \")");
    }
    if( fid.empty() ) fid = createFID();
    ATH_MSG_DEBUG("Registering PFN=" << pfn << " of type=" << ftype << " GUID=" << fid);
@@ -94,7 +94,7 @@ addReplicaPFN( const std::string& pfn, const std::string& replica_pfn )
 { 
    std::string fid = m_fc->lookupPFN(pfn);
    if( fid.empty() )
-      throw pool::Exception(std::string("PFN '") + pfn + "' not found", "addReplicaPFN", "FileCatalog");
+      throw std::runtime_error("PFN '" + pfn + "' not found (APR: \" addReplicaPFN \" from \" FileCatalog \")");
    // find the filetype for the PFN being replicated
    Files   pfns;
    getPFNs( fid, pfns );
@@ -111,7 +111,7 @@ void pool::IFileCatalog::
 addReplicaFID( const std::string& fid, const std::string& replica_pfn, const std::string& replica_tech )
 { 
    if( fid.empty() )
-      throw pool::Exception(std::string("FID not specified"), "addReplicaFID", "FileCatalog");
+      throw std::runtime_error("FID not specified (APR: \" addReplicaFID \" from \" FileCatalog \")");
    m_fc->registerPFN(fid, replica_pfn, replica_tech);
 }
 

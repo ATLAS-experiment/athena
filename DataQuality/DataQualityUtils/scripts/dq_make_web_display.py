@@ -8,7 +8,6 @@ Transate arbitrary root file into a han config file with the "GatherData" algori
 9 Oct 2008
 Adapted for fast physics monitoring 14 April 2011
 """
-from __future__ import print_function
 
 #HANDIR='/afs/cern.ch/user/a/atlasdqm/dqmdisk/han_results/fastphysmon/1'
 

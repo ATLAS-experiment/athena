@@ -15,7 +15,7 @@ import os, sys
 import argparse
 
 from DataQualityUtils import pathExtract         
-from six.moves import xmlrpc_client as xmlrpclib
+from xmlrpc import client as xmlrpclib
 
 from ROOT import TChain
 from ROOT import gStyle

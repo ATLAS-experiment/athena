@@ -17,7 +17,7 @@ def ActsGaussAdaptiveMultiFindingCfg(flags,
 
     if "TrackingGeometryTool" not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(
+        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(
             ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
 
     if "ExtrapolationTool" not in kwargs:
@@ -74,7 +74,7 @@ def ActsIterativeFindingCfg(flags,
 
     if "TrackingGeometryTool" not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(
+        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(
             ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
 
     if "ExtrapolationTool" not in kwargs:

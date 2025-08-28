@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -42,14 +42,8 @@
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 //
 #include <cmath>
-
-/// enables -ftree-vectorize in gcc prior to 12
-#include "CxxUtils/vectorize.h"
-ATH_ENABLE_VECTORIZATION;
-
+//
 #include "CxxUtils/inline_hints.h"
-
-
 
 namespace{
 
@@ -1415,7 +1409,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateM(
     const EventContext& ctx, const Trk::TrackParameters& trackParameters,
     std::vector<DestSurf>& targetSurfaces, Trk::PropDirection propagationDirection,
     const Trk::MagneticFieldProperties& magneticFieldProperties, ParticleHypothesis particle,
-    std::vector<unsigned int>& solutions, std::vector<const Trk::TrackStateOnSurface*>*& matstates,
+    std::vector<unsigned int>& solutions, std::vector<const Trk::TrackStateOnSurface*>* matstates,
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>* intersections, double& path,
     bool usePathLimit, bool returnCurv, const Trk::TrackingVolume* tVol,
     Trk::ExtrapolationCache* extrapCache) const {

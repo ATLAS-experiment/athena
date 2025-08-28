@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_DICT_H
 #define XAODMUONPREPDATA_DICT_H
@@ -14,10 +14,11 @@
 #include "xAODMuonPrepData/MdtTwinDriftCircleAuxContainer.h"
 #include "xAODMuonPrepData/MdtTwinDriftCircleContainer.h"
 
+#include "xAODMuonPrepData/RpcMeasurementContainer.h"
+
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/RpcStripAuxContainer.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
-
 #include "xAODMuonPrepData/RpcStrip2D.h"
 #include "xAODMuonPrepData/RpcStrip2DAuxContainer.h"
 #include "xAODMuonPrepData/RpcStrip2DContainer.h"
@@ -29,6 +30,8 @@
 #include "xAODMuonPrepData/MMClusterAuxContainer.h"
 #include "xAODMuonPrepData/MMClusterContainer.h"
 #include "xAODMuonPrepData/MMCluster.h"
+
+#include "xAODMuonPrepData/sTgcMeasContainer.h"
 
 #include "xAODMuonPrepData/sTgcStripAuxContainer.h"
 #include "xAODMuonPrepData/sTgcStripContainer.h"
@@ -50,12 +53,15 @@ struct GCCXML_DUMMY_INSTANTIATION_XAODMUONPRD {
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MdtDriftCircleContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MdtTwinDriftCircleContainer_v1);
 
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcMeasurementContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcStrip2DContainer_v1);
 
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, TgcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MMClusterContainer_v1);
 
+    
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcMeasContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcWireContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcPadContainer_v1);    

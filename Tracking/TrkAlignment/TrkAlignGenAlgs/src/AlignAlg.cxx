@@ -1,16 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/TrackCollection.h"
 
 #include "TrkAlignGenAlgs/AlignAlg.h"
-
-#include "TrkAlignInterfaces/IGeometryManagerTool.h"
-#include "TrkAlignInterfaces/IFillNtupleTool.h"
-#include "TrkAlignInterfaces/ITrkAlignDBTool.h"
-#include "TrkAlignInterfaces/IAlignTrackPreProcessor.h"
-#include "TrkAlignInterfaces/ITrackCollectionProvider.h"
 
 #include "TrkAlignEvent/AlignTrack.h"
 #include "TrkAlignEvent/AlignVertex.h"
@@ -18,69 +12,6 @@
 #include "TFile.h"
 
 namespace Trk {
-
-//___________________________________________________________________________
-AlignAlg::AlignAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm (name, pSvcLocator)
-  , m_trackCollectionProvider("Trk::TrackCollectionProvider",this)
-  , m_alignTrackPreProcessor("Trk::AlignTrackPreProcessor",this)
-  , m_alignTrackCreator("Trk::AlignTrackCreator",this)
-  , m_alignTrackDresser("Trk::AlignTrackDresser",this)
-  , m_alignTool("Trk::GlobalChi2AlignTool",this)
-  , m_geometryManagerTool("Muon::MuonGeometryManagerTool") // use as public tool
-  , m_trkAlignDBTool("Trk::TrkAlignDBTool", this)
-  , m_fillNtupleTool("",this)
-  , m_nDoF(-1)
-  , m_ntuple(nullptr)
-  , m_logStream(nullptr)
-  , m_nevents(0)
-  , m_ntracks(0)
-  , m_ntracksSel(0)
-  , m_ntracksProc(0)
-  , m_ntracksDress(0)
-  , m_ntracksAccum(0)
-{
-
-  // TrkGlobalChi2AlignTools
-  declareProperty("AlignDBTool",            m_trkAlignDBTool,         
-		  "tool for handling DB stuff ");
-
-  declareProperty("TrackCollectionProvider", m_trackCollectionProvider,
-		  "tool for getting track collection from StoreGate");
-
-  declareProperty("AlignTrackPreProcessor", m_alignTrackPreProcessor, 
-		  "tool for converting Trk::Track to AlignTrack after processing if necessary");
-
-  declareProperty("AlignTrackCreator",      m_alignTrackCreator,      
-		  "tool for creating AlignTSOSCollection to store on AlignTrack");
-
-  declareProperty("AlignTrackDresser",      m_alignTrackDresser,      
-		  "tool for dressing AlignTrack with residuals, derivatives, etc.");
-
-  declareProperty("AlignTool",              m_alignTool,              
-		  "alignment algorithm-specific tool");
-
-  declareProperty("GeometryManagerTool",    m_geometryManagerTool,    
-		  "tool for configuring geometry");
-
-  declareProperty("FillNtupleTool",         m_fillNtupleTool,         
-		  "tool for storing Trk::Track information into the ntuple");
-
-  // processing options
-  declareProperty("WriteNtuple",            m_writeNtuple  = true		);
-  declareProperty("FileName",               m_filename     = "Align.root"	);
-  declareProperty("FilePath",               m_filepath     = "./"		);
-
-  declareProperty("AlignSolveLevel",        m_alignSolveLevel = 3		);
-
-  declareProperty("SolveOnly",              m_solveOnly = false			);
-
-  declareProperty("WriteLogFile",           m_writeLogfile = true		);
-  declareProperty("LogFileName",            m_logfileName  = "alignlogfile.txt"	);
-
-  declareProperty("AlignTracksName",        m_alignTracksName = "AlignTracks"	);    
-
-}
 
 //___________________________________________________________________________
 AlignAlg::~AlignAlg() 
@@ -179,7 +110,7 @@ StatusCode AlignAlg::initialize()
   // open logfile
   if(m_writeLogfile) {
     std::ostream  * out   = &std::cout;
-    std::ofstream * ofile = new std::ofstream(m_logfileName.c_str());
+    std::ofstream * ofile = new std::ofstream(m_logfileName.value().c_str());
     if(!ofile->is_open()) {
       msg(MSG::ERROR)<<"Couldn't open logfile. Writing to standard output."<<endmsg;
       delete ofile;
@@ -212,7 +143,7 @@ StatusCode AlignAlg::start()
   ATH_MSG_DEBUG("AlignAlg::start()");
 
   if (m_writeNtuple) {
-      m_ntuple = new TFile((m_filepath+m_filename).c_str(),"RECREATE");
+      m_ntuple = new TFile((m_filepath.value()+m_filename.value()).c_str(),"RECREATE");
       // set the ntuple points of the tools
       m_geometryManagerTool->setNtuple(m_ntuple);
       m_trackCollectionProvider->setNtuple(m_ntuple);

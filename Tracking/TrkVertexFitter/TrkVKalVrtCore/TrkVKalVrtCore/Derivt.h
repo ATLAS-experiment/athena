@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _TrkVKalVrtCore_Derivt_H
@@ -20,7 +20,7 @@ namespace Trk {
 //
 
 class VKVertex;
-enum class VKContraintType { Mass, Phi, Theta, Point, Plane };
+enum class VKContraintType { Mass, Phi, Theta, Point, Plane, Radius };
 class VKConstraintBase {
  public:
   VKConstraintBase(const int, int, VKContraintType, VKVertex*);
@@ -121,6 +121,25 @@ class VKPlaneConstraint final : public VKConstraintBase {
  private:
   double m_A, m_B, m_C, m_D;
 };
+//
+//  Vertex at fixed radius constraint
+//
+class VKRadiusConstraint final : public VKConstraintBase {
+ public:
+  VKRadiusConstraint(int, double, double[2], VKVertex*);
+  ~VKRadiusConstraint();
+  friend std::ostream& operator<<(std::ostream& out, const VKRadiusConstraint&);
+  double getRC() const { return m_RC; }
+  double getRefX() const { return m_refP[0]; }
+  double getRefY() const { return m_refP[1]; }
+  virtual void applyConstraint() override;
+  virtual VKConstraintBase* clone() const override;
+
+ private:
+  double m_RC;
+  double m_refP[2];
+};
+
 
 inline VKConstraintBase::VKConstraintBase(const int NC, int NTRK,
                                           VKContraintType t, VKVertex* vrt)
@@ -187,6 +206,13 @@ inline VKPlaneConstraint::VKPlaneConstraint(int NTRK, double a, double b,
 
 inline VKPlaneConstraint::~VKPlaneConstraint() = default;
 
+//     Vertex at fixed radius
+inline VKRadiusConstraint::VKRadiusConstraint(int NTRK, double RC, double RefP[2], VKVertex* vk)
+    : VKConstraintBase(1, NTRK, VKContraintType::Radius, vk),
+      m_RC(RC) {m_refP[0]=RefP[0]; m_refP[1]=RefP[1];}
+inline VKRadiusConstraint::~VKRadiusConstraint() = default;
+
+
 inline VKConstraintBase* VKMassConstraint::clone() const {
   return new VKMassConstraint(*this);
 }
@@ -202,6 +228,10 @@ inline VKConstraintBase* VKPointConstraint::clone() const {
 inline VKConstraintBase* VKPlaneConstraint::clone() const {
   return new VKPlaneConstraint(*this);
 }
+inline VKConstraintBase* VKRadiusConstraint::clone() const {
+  return new VKRadiusConstraint(*this);
+}
+
 
 inline void VKMassConstraint::applyConstraint() {
   calcMassConstraint(this);
@@ -218,6 +248,10 @@ inline void VKPointConstraint::applyConstraint() {
 inline void VKPlaneConstraint::applyConstraint() {
   calcPlaneConstraint(this);
 }
+inline void VKRadiusConstraint::applyConstraint() {
+  calcRadiusConstraint(this);
+}
+
 
 }  // namespace Trk
 #endif

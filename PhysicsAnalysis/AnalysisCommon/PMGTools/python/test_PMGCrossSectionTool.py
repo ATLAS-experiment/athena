@@ -15,19 +15,21 @@ def main():
 
     tool.readInfosFromFiles(vv)
 
-    # take a ttbar sample as example ( users should get this from the EventInfo )
-    sample_id = 410000
+    # take a Ztautau sample as example ( users should get this from the EventInfo )
+    sample_id = 361108
+    e_tag = 3601
 
     print('%d sample loaded' % tool.getLoadedDSIDs().size())
     print()
     print('Sample dsid               = ', sample_id)
-    print('Sample name               = ', tool.getSampleName(sample_id))
-    print('xsection [pb]             = ', tool.getSampleXsection(sample_id))
-    print('filter eff                = ', tool.getFilterEff(sample_id))
-    print('k factor                  = ', tool.getKfactor(sample_id))
-    print('xsection uncertainty      = ', tool.getXsectionUncertainty(sample_id))
-    print('xsection uncertainty up   = ', tool.getXsectionUncertaintyUP(sample_id))
-    print('xsection uncertainty down = ', tool.getXsectionUncertaintyDOWN(sample_id))
+    print('Sample e-tag              = ', e_tag)
+    print('Sample name               = ', tool.getSampleName(sample_id, e_tag))
+    print('xsection [pb]             = ', tool.getSampleXsection(sample_id, e_tag))
+    print('filter eff                = ', tool.getFilterEff(sample_id, e_tag))
+    print('k factor                  = ', tool.getKfactor(sample_id, e_tag))
+    print('xsection uncertainty      = ', tool.getXsectionUncertainty(sample_id, e_tag))
+    print('xsection uncertainty up   = ', tool.getXsectionUncertaintyUP(sample_id, e_tag))
+    print('xsection uncertainty down = ', tool.getXsectionUncertaintyDOWN(sample_id, e_tag))
        
     print()
 

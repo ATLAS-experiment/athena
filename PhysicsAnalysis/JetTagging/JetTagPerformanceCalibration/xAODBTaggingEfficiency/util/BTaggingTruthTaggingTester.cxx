@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <vector>
 
-int main() {
+int main ATLAS_NOT_THREAD_SAFE () {
 
   asg::StandaloneToolHandle<IBTaggingTruthTaggingTool> tool("BTaggingTruthTaggingTool/BtagTT_Tool");
 

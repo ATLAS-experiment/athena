@@ -74,7 +74,6 @@ protected:
   Gaudi::Property<float> m_EkinMaxPhotons{this, "EkinMaxPhotons", std::numeric_limits<float>::max(), "Kinetic photon energy upper bound for FastCaloSim"};
   Gaudi::Property<float> m_EkinMinElectrons{this, "EkinMinElectrons", 0, "Kinetic electron energy lower bound for FastCaloSim"};
   Gaudi::Property<float> m_EkinMaxElectrons{this, "EkinMaxElectrons", std::numeric_limits<float>::max(), "Kinetic electron energy upper bound for FastCaloSim"};
-  Gaudi::Property<bool>  m_doEMECFCS{this, "doEMECFCS", false, "Run FCS in EMEC region while G4 in the rest region"};
   Gaudi::Property<bool>  m_doPunchThrough{this, "doPunchThrough", true, "Run punchthrough simulation for particle entering Calo-MS boundary"};
 };
 

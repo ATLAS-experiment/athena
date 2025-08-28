@@ -9,7 +9,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -29,17 +28,19 @@ namespace ActsTrk {
 
   private:
     std::vector<SiHit>
-    findAllHitsCompatibleWithCluster( const xAOD::PixelCluster& cluster,
+    findAllHitsCompatibleWithCluster( const std::vector< Identifier >& rdos,
 				      const InDetDD::SiDetectorElement&	element,
 				      const std::vector<const SiHit*>& sihits,
 				      const std::vector< std::vector< int > >& sdoTracks) const;
     
   private:
     SG::ReadHandleKey< xAOD::TrackMeasurementValidationContainer > m_inputMeasurementsKey {this, "Measurements", ""};
-    SG::ReadHandleKey< xAOD::PixelClusterContainer > m_inputClustersKey {this, "Clusters", ""};
     SG::ReadHandleKey< InDetSimDataCollection > m_SDOcontainer_key {this, "SDOs", ""};
     SG::ReadHandleKey< SiHitCollection > m_siHitsKey {this, "SiHits", ""};
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection"};
+
+    // detector decorator
+    SG::ReadDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_detectorElementID {this, "MeasurementDetectorElementID", m_inputMeasurementsKey, "detectorElementID"};
     
     // SDO decorations
     SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sdo_words {this, "SdoWords", m_inputMeasurementsKey, "sdo_words"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRYINTERFACES_IACTSSURFACEMAPPINGTOOL_H
@@ -12,7 +12,6 @@
 
 #include "Acts/Material/SurfaceMaterialMapper.hpp"
 
-class IActsTrackingGeometryTool;
 
 class IActsSurfaceMappingTool : virtual public IAlgTool {
   public:
@@ -28,9 +27,6 @@ class IActsSurfaceMappingTool : virtual public IAlgTool {
   Acts::SurfaceMaterialMapper::State
   mappingState() const = 0;
 
-  virtual
-  const IActsTrackingGeometryTool*
-  trackingGeometryTool() const = 0;
 
 };
 

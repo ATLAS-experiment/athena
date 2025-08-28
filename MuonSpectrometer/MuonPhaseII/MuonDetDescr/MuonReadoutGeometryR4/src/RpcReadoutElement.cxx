@@ -5,7 +5,6 @@
 
 
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
@@ -43,8 +42,9 @@ StatusCode RpcReadoutElement::initElement() {
        return StatusCode::FAILURE;
     }
 #ifndef SIMULATIONBASE
-    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.halfWidth, 
-                                                                                      m_pars.halfLength)));
+    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), 
+                m_pars.layerBounds->makeBounds<Acts::RectangleBounds>(m_pars.halfWidth, 
+                                                                      m_pars.halfLength)));
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -55,8 +55,9 @@ StatusCode RpcReadoutElement::initElement() {
       ATH_CHECK(insertTransform<RpcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
       const StripDesign& design{sensorLayout(layHash).design()};
-      ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(design.halfWidth(),
-                                                                             design.shortHalfHeight())));
+      ATH_CHECK(planeSurfaceFactory(layHash, 
+                    m_pars.layerBounds->makeBounds<Acts::RectangleBounds>(design.halfWidth(),
+                                                                          design.shortHalfHeight())));
 #endif
     }
     m_gasThickness = (chamberStripPos(createHash(1, 2, doubletPhi(), false)) - 
@@ -118,7 +119,7 @@ double RpcReadoutElement::distanceToEdge(const IdentifierHash& layerHash,
                                          const EdgeSide side) const {
     const StripDesign& design{measuresPhi(layerHash) ? *m_pars.phiDesign : *m_pars.etaDesign};
     /// For the moment define the readOut to be at negative y while the highVolt is at positive
-    const double refPoint{design.longHalfHeight() * (side == EdgeSide::readOut ? -1. : 1.)};
+    const double refPoint{design.longHalfHeight() * (side == EdgeSide::readOut ? -1. : 1.) * m_pars.readoutSide};
     return std::abs(refPoint - posInStripPlane.y());                                    
 }
 

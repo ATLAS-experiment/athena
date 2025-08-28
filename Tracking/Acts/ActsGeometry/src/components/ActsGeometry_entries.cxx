@@ -12,7 +12,6 @@
 #include "ActsGeometry/ActsMaterialMapping.h"
 #include "ActsGeometry/ActsMaterialStepConverterTool.h"
 #include "ActsGeometry/ActsMaterialTrackWriterSvc.h"
-#include "ActsGeometry/ActsMSTrackingVolumeBuilder.h"
 #include "ActsGeometry/ActsObjWriterTool.h"
 #include "ActsGeometry/ActsPropStepRootWriterSvc.h"
 #include "ActsGeometry/ActsSurfaceMappingTool.h"
@@ -24,6 +23,8 @@
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "../ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 #include "../SimpleCylinderDetBuilderTool.h"
+#include "../ItkBlueprintNodeBuilder.h"
+
 
 DECLARE_COMPONENT(ActsExtrapolationAlg)
 DECLARE_COMPONENT(ActsWriteTrackingGeometry)
@@ -34,7 +35,6 @@ DECLARE_COMPONENT(ActsExtrapolationTool)
 DECLARE_COMPONENT(ActsMaterialMapping)
 DECLARE_COMPONENT(ActsSurfaceMappingTool)
 DECLARE_COMPONENT(ActsVolumeMappingTool)
-DECLARE_COMPONENT(ActsMSTrackingVolumeBuilder)
 DECLARE_COMPONENT(ActsObjWriterTool)
 // DECLARE_COMPONENT( ActsExCellWriterSvc )
 DECLARE_COMPONENT(ActsMaterialTrackWriterSvc)
@@ -48,3 +48,6 @@ DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
 DECLARE_COMPONENT(ActsTrk::DetectorVolumeSvc)
 DECLARE_COMPONENT(ActsTrk::SimpleCylinderDetBuilderTool)
 DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)
+
+DECLARE_COMPONENT(ActsTrk::ItkBlueprintNodeBuilder)
+

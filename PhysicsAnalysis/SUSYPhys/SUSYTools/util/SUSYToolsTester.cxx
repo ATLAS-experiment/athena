@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -73,11 +73,6 @@
 #include "xAODCutFlow/CutBookkeeperContainer.h"
 
 #include "TrigDecisionTool/ChainGroup.h"
-
-// ConstAccessors
-const static SG::ConstAccessor<size_t> acc_TruthProng("TruthProng");
-const static SG::ConstAccessor<int> acc_TruthCharge("TruthCharge");
-const static SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
 
 const size_t Ncuts = 10;
 const char *cut_name[] =
@@ -236,8 +231,8 @@ int main( int argc, char* argv[] ) {
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data16_13TeV/20180129/physics_25ns_21.0.19.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data18_13TeV/20190219/physics_25ns_Triggerno17e33prim.xml"));
-    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20230116/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"));
-    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"));
+    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20250321/data22_13p6TeV.periodAllYear_DetStatus-v134-pro28-09_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"));
+    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data23_13p6TeV/20250321/data23_13p6TeV.periodAllYear_DetStatus-v133-pro31-11_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"));
     //myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20230116/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore_TRIGMUO_TRIGLAR.xml"));
     ANA_CHECK( m_grl.setProperty("GoodRunsListVec", myGRLs) );
     ANA_CHECK( m_grl.setProperty("PassThrough", false) );
@@ -296,10 +291,10 @@ int main( int argc, char* argv[] ) {
   std::string ilumi = "GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root";
   if ((fileName.Contains("mc23a") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) {
     mcCampaign = "mc23a";
-    ilumi = "GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root"; 
+    ilumi = "GoodRunsLists/data22_13p6TeV/20250321/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-004.root"; 
   } else if ((fileName.Contains("mc23d") || fileName.Contains("data23")) && fileName.Contains("13p6TeV")) {
     mcCampaign = "mc23d";
-    ilumi = "GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root";
+    ilumi = "GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root";
   } else if ((fileName.Contains("mc23e") || fileName.Contains("data24")) && fileName.Contains("13p6TeV")) {
     mcCampaign = "mc23e";
     ilumi = "GoodRunsLists/data24_13p6TeV/20241118/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-005.root";
@@ -961,12 +956,10 @@ int main( int argc, char* argv[] ) {
       if (slices["tau"] && (isNominal || (sysInfo.affectsKinematics && syst_affectsTaus))) {
         for(const auto& tau : *taus){
           if (!isData){
-            const xAOD::TruthParticle* truthTau = T2MT->getTruth(*tau) ;
-            if (acc_IsTruthMatched(*tau) || !truthTau){
-              ANA_MSG_DEBUG("Tau was matched to a truth tau, which has "
-                            << int(acc_TruthProng(*tau))
-                            << " prongs and a charge of "
-                            << acc_TruthCharge(*tau));
+            const xAOD::TruthParticle* truthTau = T2MT->getTruth(*tau);
+            if (truthTau){
+              ANA_MSG_DEBUG("Tau was matched to a truth particle, which has a charge of "
+                             << static_cast<int>(truthTau->charge()));  
             } else { ANA_MSG_DEBUG( "Tau was not matched to truth" ); }
           }
         }

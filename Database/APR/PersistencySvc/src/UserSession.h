@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_USERSESSION_H
@@ -28,7 +28,7 @@ namespace pool {
     {
     public:
       /// Constructor
-      UserSession( IFileCatalog& fileCatalog );
+      explicit UserSession( IFileCatalog& fileCatalog );
 
       /// Destructor
       virtual ~UserSession();
@@ -41,36 +41,39 @@ namespace pool {
       TechnologyDispatcher& technologyDispatcher();
 
       /// Sets the default policy when databases are opened/connected
-      void setDefaultConnectionPolicy( const DatabaseConnectionPolicy& policy );
+      virtual void setDefaultConnectionPolicy( const DatabaseConnectionPolicy& policy ) override final;
 
       /// Retrieves the default connection policy
-      const DatabaseConnectionPolicy& defaultConnectionPolicy() const;
+      virtual const DatabaseConnectionPolicy& defaultConnectionPolicy() const override final;
 
       /** Explicitly disconnects all the databases.
        *  If a transaction is active, then all the changes since the last commit are aborted.
        */
-      bool disconnectAll();
+      virtual bool disconnectAll() override final;
 
-      /// Returns the transaction object
-      ITransaction& transaction();
-      const ITransaction& transaction() const;
+       /// Returns the transaction object
+      virtual ITransaction& transaction() override final;
+      virtual const ITransaction& transaction() const override final;
 
       /// Returns a vector with the file identifiers of the presently open databases.
-      std::vector< std::string > connectedDatabases() const;
+      virtual std::vector< std::string > connectedDatabases() const override final;
       
-      /// Returns a pointer to a database object. The user acquires ownership of that object.
-      IDatabase* databaseHandle( const std::string& dbName,
-				 DatabaseSpecification::NameType dbNameType );
+      /// Creates and returns a new database handle object
+      virtual std::unique_ptr<IDatabase>
+      databaseHandle( const std::string& dbName, DatabaseSpecification::NameType dbNameType ) override final;
 
       /// Returns the file catalog in use
-      IFileCatalog& fileCatalog();
+      virtual IFileCatalog& fileCatalog() override final;
 
       /// Set the file catalog to be used
       void setFileCatalog(IFileCatalog& catalog);
 
       /// Returns the object holding the technology specific attributes for a given technology domain
-      const ITechnologySpecificAttributes& technologySpecificAttributes( long technology ) const;
-      ITechnologySpecificAttributes& technologySpecificAttributes( long technology );
+      virtual const ITechnologySpecificAttributes&
+      technologySpecificAttributes( long technology ) const override final;
+
+      virtual  ITechnologySpecificAttributes&
+      technologySpecificAttributes( long technology ) override final;
 
       /// Returns the global transaction object
       ITransaction& globalTransaction();

@@ -70,6 +70,7 @@ public:
   bool etaOrPhi(const FPGATrackSimHit& hit) const;
   bool sortIBLInput(const std::unique_ptr<FPGATrackSimHit>& i, const std::unique_ptr<FPGATrackSimHit>& j) const;
   bool sortPixelInput(const std::unique_ptr<FPGATrackSimHit>& i, const  std::unique_ptr<FPGATrackSimHit>& j) const;
+  void SetMinMaxIndicies(FPGATrackSimCluster &cluster) const;
 
 };
 

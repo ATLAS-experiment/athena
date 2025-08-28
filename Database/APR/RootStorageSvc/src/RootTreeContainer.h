@@ -178,11 +178,8 @@ namespace pool  {
       */
     virtual DbStatus setOption(const DbOption& opt) override;
 
-    /// Ask if a given shape is supported
-    virtual DbStatus isShapeSupported(const DbTypeInfo* typ) const override;
-
-    /// Define selection criteria
-    virtual DbStatus select(DbSelect& criteria) override;
+    /// Define selection
+    virtual DbStatus select(DbSelect& sel) override;
 
     /// Number of entries within the container
     virtual uint64_t size() override;

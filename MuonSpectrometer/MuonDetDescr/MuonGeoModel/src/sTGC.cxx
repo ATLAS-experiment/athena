@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/sTGC.h"
@@ -38,7 +38,7 @@ namespace MuonGM {
 
     // Get sTGC components for the trapezoidal shape of the quadruplet
     sTGC::sTGC(Component *ss) : DetectorElement(ss->name) {
-        sTGCComponent *s = (sTGCComponent *)ss;
+        sTGCComponent *s = static_cast<sTGCComponent *>(ss);
         m_component = s;
         width = s->dx1;
         longWidth = s->dx2;
@@ -65,7 +65,7 @@ namespace MuonGM {
         AGDDDetectorStore& ds = c->GetDetectorStore();
         sTGCDetectorDescription *stgc_descr = stgcHelper.Get_sTGCDetectorSubType(m_component->subType);
 
-        sTGC_Technology *t = (sTGC_Technology *)ds.GetTechnology(name);
+        sTGC_Technology *t = static_cast<sTGC_Technology *>(ds.GetTechnology(name));
         thickness = t->Thickness();
         double gasTck = t->gasThickness;
         // Defining PCB thickness based on quadruplet type

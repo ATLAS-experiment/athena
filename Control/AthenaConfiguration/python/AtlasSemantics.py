@@ -1,27 +1,9 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2.semantics
-from GaudiKernel.GaudiHandles import PrivateToolHandleArray, PublicToolHandle, ServiceHandle
 from GaudiKernel.DataHandle import DataHandle
 import re
-import copy
-from collections.abc import Sequence
 
-
-class AppendListSemantics(GaudiConfig2.semantics.SequenceSemantics):
-    '''
-    Extend the sequence-semantics with a merge-method that appends the lists
-    Use 'appendList<T>' as fifth parameter of the Gaudi::Property<T> constructor 
-    to invoke this merging method. The template parameter is important, also
-    in the string that forms the fifth argument. 
-    '''
-    __handled_types__ = (re.compile(r"^appendList<.*>$"),)
-    def __init__(self, cpp_type):
-        super(AppendListSemantics, self).__init__(cpp_type)
-
-    def merge(self,b,a):
-        a.extend(b)
-        return a
 
 class MapMergeNoReplaceSemantics(GaudiConfig2.semantics.MappingSemantics):
     '''
@@ -102,135 +84,9 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
         return aa
 
 
-class ToolHandleSemantics(GaudiConfig2.semantics.PropertySemantics):
-    '''
-    Private alg-tools need recusive merging (de-duplication):
-    ''' 
-    __handled_types__ = ("PrivateToolHandle",)
-    def __init__(self,cpp_type):
-        super(ToolHandleSemantics, self).__init__(cpp_type)
-        
-
-    def merge(self,b,a):
-        #Deal with 'None'
-        if a is None or a=='': return b
-        if b is None or b=='': return a
-        return a.merge(b)
-
-class PublicHandleSemantics(GaudiConfig2.semantics.PropertySemantics):
-    '''
-    ServiceHandles (and the deprecated PublicToolHandles) are assigned as strings
-    '''
-    __handled_types__ = ("PublicToolHandle","ServiceHandle")
-       
-    def __init__(self,cpp_type):
-        super(PublicHandleSemantics, self).__init__(cpp_type)
-        
-    def default(self,value):
-        return value.typeAndName
-
-    def store(self,value):
-        if isinstance(value,str): #Assume the string is correct and the tool/svc alreayd in the CA ... 
-            return value
-        
-        if value is None: 
-            return ""
-
-        if not hasattr(value,"__component_type__"):
-            raise TypeError("Got {}, expected Tool or Service in assignment to {}".format(type(value),self.name))
-
-        if value.__component_type__ not in ('Service','AlgTool'):
-            raise TypeError('{} expected, got {!r} in assignemnt to {}'.\
-                            format(value.__component_type__,value, self.name))
-
-        #It would be great if at this point we could verify that the service was
-        #ineed added to the ComponentAccumulator. Latest, do that when bootstapping
-        #the application
-
-        return "{}/{}".format(value.__cpp_type__,value.name)
-
-class PublicHandleArraySemantics(GaudiConfig2.semantics.PropertySemantics):
-    '''
-    Semantics for arrays of string-based pointers to components defined elsewhere
-    '''
-    __handled_types__ = ("PublicToolHandleArray","ServiceHandleArray")
-    def __init__(self,cpp_type):
-        super(PublicHandleArraySemantics, self).__init__(cpp_type)
-        
-    def store(self, value):
-        if not isinstance(value,Sequence) and not isinstance(value,set):
-            value=[value,]
-
-        newValue=[]
-        for v in value:
-            if isinstance(v,GaudiConfig2._configurables.Configurable):
-                if v.__component_type__ not in ('Service','AlgTool'):
-                    raise TypeError('{} expected, got {!r} in assignemnt to {}'.\
-                                    format(value.__component_type__,v, self.name))
-                else:
-                    newValue.append("{}/{}".format(v.__cpp_type__,v.name))
-
-            elif isinstance(v,(PublicToolHandle,ServiceHandle)):
-                newValue.append("{}/{}".format(v.getType(),v.getName()))
-
-            elif isinstance(v,str):
-                #Check if component is known ...
-                newValue.append(v)
-                pass
-            else:
-                raise TypeError('Configurable expected, got {!r} in assignment to {}'.\
-                                format(v,self.name))
-        return newValue
-            
-    def default(self, value):
-        return copy.copy(value)
-        
-
-    def merge(self,bb,aa):
-        for b in bb:
-            if b not in aa:
-                aa.append(b)
-        return aa
-        #union=set(a) | set(b)
-        #return union
-
-
-class ToolHandleArraySemantics(GaudiConfig2.semantics.PropertySemantics):
-    '''
-    Private alg-tools need recusive merging (de-duplication):
-    ''' 
-    __handled_types__ = ("PrivateToolHandleArray",)
-    def __init__(self,cpp_type):
-        super(ToolHandleArraySemantics, self).__init__(cpp_type)
-    
-    def default(self,value):
-        return copy.copy(value)
-
-    def store(self,value):
-        if not isinstance(value,PrivateToolHandleArray):
-            #try to convert the value to a PrivateToolHandleArray
-            value=PrivateToolHandleArray(value)
-        return value
-
-    def merge(self,b,a):
-        for bTool in b:
-            try:
-                #If a tool with that name exists in a, we'll merge it
-                a.__getitem__(bTool.getName()).merge(bTool)
-            except IndexError:
-                #Tool does not exists in a, append it
-                a.append(bTool)
-        return a
-
-
 from AthenaServices.ItemListSemantics import OutputStreamItemListSemantics
 
-GaudiConfig2.semantics.SEMANTICS.append(AppendListSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleKeySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleArraySematics)
-GaudiConfig2.semantics.SEMANTICS.append(ToolHandleSemantics)
-GaudiConfig2.semantics.SEMANTICS.append(ToolHandleArraySemantics)
-GaudiConfig2.semantics.SEMANTICS.append(PublicHandleSemantics)
-GaudiConfig2.semantics.SEMANTICS.append(PublicHandleArraySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(MapMergeNoReplaceSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(OutputStreamItemListSemantics)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -157,7 +157,7 @@ void RunInput::ExploreDirectory( TDirectoryFile * InputDirectory, vector<string>
 					if ( keyClassName == "TDirectoryFile" )
 					{
 						//Retrieve the subdirectory object
-						TDirectoryFile * subDirectory = ( TDirectoryFile* )keyObject;
+						TDirectoryFile * subDirectory = static_cast<TDirectoryFile* >(keyObject);
 
 						//Explore the subdirectory
 						ExploreDirectory( subDirectory, objectPath, PathDepth + 1 );
@@ -165,7 +165,7 @@ void RunInput::ExploreDirectory( TDirectoryFile * InputDirectory, vector<string>
 					else if ( keyObject->IsA()->InheritsFrom("TH1") && FullSearchCheck(objectPath) )
 					{
 						//Store the histogram
-						storedHistograms.push_back( ( TH1* )keyObject );
+						storedHistograms.push_back( static_cast< TH1* >(keyObject) );
 						storedPaths.push_back(objectPath);
 						storedTypes.push_back(keyClassName);
 					}

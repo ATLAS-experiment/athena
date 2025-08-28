@@ -70,7 +70,7 @@ class FPGATrackSimRegionMap
 
         void loadModuleIDLUT(std::string const & filepath);
 
-        void loadRadiiFile(std::string const& radii_file);
+        void loadRadiiFile(std::string const& radii_file, unsigned layer_offset, unsigned layer_max);
 
         ///////////////////////////////////////////////////////////////////////
         // Simple Getters/Setters

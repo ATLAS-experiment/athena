@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoH62004SteppingActionTool.h"
@@ -17,9 +17,6 @@ namespace G4UA
                                                                  const IInterface* parent)
     : UserActionToolBase<LArGeoH62004SteppingAction>(type, name, parent)
   {
-    declareProperty("yTable", m_config.yTable);
-    declareProperty("CheckPrim", m_config.checkprim);
-    declareProperty("PrintStep", m_config.printstep);
   }
 
 
@@ -29,10 +26,15 @@ namespace G4UA
     const LArGeoTB2004Options *largeoTB2004Options = nullptr;
     if(detStore()->retrieve(largeoTB2004Options, "LArGeoTB2004Options").isFailure()) {
       ATH_MSG_WARNING ( "Can't access LArGeoTB2004Options, using default values" );
+      m_config.yTable = m_yTable;
+      m_config.checkprim = m_checkprim;
+      m_config.printstep = m_printstep;
     }
-    m_config.yTable = largeoTB2004Options->TableYPosition();
-    m_config.checkprim = largeoTB2004Options->isCheckprim();
-    m_config.printstep = largeoTB2004Options->isPrintstep();
+    else {
+      m_config.yTable = largeoTB2004Options->TableYPosition();
+      m_config.checkprim = largeoTB2004Options->isCheckprim();
+      m_config.printstep = largeoTB2004Options->isPrintstep();
+    }
     return StatusCode::SUCCESS;
   }
 

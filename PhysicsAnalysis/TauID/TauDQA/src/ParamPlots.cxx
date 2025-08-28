@@ -11,11 +11,6 @@ namespace Tau{
 
 ParamPlots::ParamPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType)
    : PlotBase(pParent, sDir),
-     eta(nullptr),
-     phi(nullptr),
-     pt(nullptr),
-     eta_phi(nullptr),
-     eta_pt(nullptr),
      m_sParticleType(std::move(sParticleType))
 {
 }

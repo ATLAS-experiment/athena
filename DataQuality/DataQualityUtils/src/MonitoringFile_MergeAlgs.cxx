@@ -511,7 +511,8 @@ void MonitoringFile::merge_Rebinned( TH1& a, TH1& b )
   // be a multiple of the bin width.
 
   // if the axes were all extendable, try to match the number of bins between the histograms
-  if(a.CanExtendAllAxes() && b.CanExtendAllAxes() && a.GetDimension()==b.GetDimension()) {
+  // this is only needed for TProfile2D ... 
+  if(a.InheritsFrom("TProfile2D") && b.InheritsFrom("TProfile2D") && a.GetDimension()==b.GetDimension()) {
     auto binsFunc = [](TH1& h, int ax) {
       if(ax==0) return h.GetNbinsX();
       if(ax==1) return h.GetNbinsY();

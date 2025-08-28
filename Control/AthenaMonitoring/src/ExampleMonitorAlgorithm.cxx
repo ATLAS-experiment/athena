@@ -1,16 +1,8 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ExampleMonitorAlgorithm.h"
-
-ExampleMonitorAlgorithm::ExampleMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
-:AthMonitorAlgorithm(name,pSvcLocator)
-,m_doRandom(true)
-{}
-
-
-ExampleMonitorAlgorithm::~ExampleMonitorAlgorithm() {}
 
 
 StatusCode ExampleMonitorAlgorithm::initialize() {

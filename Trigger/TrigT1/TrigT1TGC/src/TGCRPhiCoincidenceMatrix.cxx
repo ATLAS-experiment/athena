@@ -1,17 +1,18 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCRPhiCoincidenceMatrix.h"
+#include "TrigT1TGC/TGCArguments.h"
 
-#include <iostream>
-#include <cstdlib>
 
 #include "TrigT1TGC/TGCRPhiCoincidenceOut.h"
 #include "TrigT1TGC/BigWheelCoincidenceLUT.h"
 #include "TrigT1TGC/TGCSectorLogic.h"
 
 #include "AthenaKernel/getMessageSvc.h"
+#include <iostream>
+#include <cstdlib>
 
 namespace LVL1TGCTrigger {
 
@@ -124,7 +125,7 @@ TGCRPhiCoincidenceOut* TGCRPhiCoincidenceMatrix::doCoincidence()
 }
 
 void TGCRPhiCoincidenceMatrix::setCoincidenceLUT(std::shared_ptr<const LVL1TGC::BigWheelCoincidenceLUT> lut) {
-  this->m_lut = lut;
+  this->m_lut = std::move(lut);
 }
 
 TGCRPhiCoincidenceMatrix::TGCRPhiCoincidenceMatrix(const TGCArguments* tgcargs,const TGCSectorLogic* sL)

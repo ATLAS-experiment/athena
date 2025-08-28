@@ -1,5 +1,5 @@
-/*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+/**
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRecTools/DiTauIDVarCalculator.h"
@@ -42,11 +42,11 @@ StatusCode DiTauIDVarCalculator::initialize()
 //                              Wrapper functions                             //
 ////////////////////////////////////////////////////////////////////////////////
 
-StatusCode DiTauIDVarCalculator::calculateIDVariables(const xAOD::DiTauJet& xDiTau){
+StatusCode DiTauIDVarCalculator::calculateIDVariables(const xAOD::DiTauJet& xDiTau) const{
   return execute(xDiTau);
 }
 
-StatusCode DiTauIDVarCalculator::execute(const xAOD::DiTauJet& xDiTau)
+StatusCode DiTauIDVarCalculator::execute(const xAOD::DiTauJet& xDiTau) const
 {
   
   ATH_MSG_DEBUG("Calculate DiTau ID variables");
@@ -264,7 +264,7 @@ float DiTauIDVarCalculator::R_max(const xAOD::DiTauJet& xDiTau, int iSubjet) con
   TLorentzVector tlvTrack;
   TLorentzVector tlvRmaxTrack;
   double Rmax = 0;
-  static const SG::ConstAccessor<float> R_subjetAcc("R_subjet");
+
   for (const auto &xTrack: xTracks) 
   {
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
@@ -272,7 +272,7 @@ float DiTauIDVarCalculator::R_max(const xAOD::DiTauJet& xDiTau, int iSubjet) con
                            (*xTrack)->phi(),
                            (*xTrack)->e() );
 
-    if ( tlvSubjet.DeltaR(tlvTrack) < R_subjetAcc(xDiTau) )
+    if ( tlvSubjet.DeltaR(tlvTrack) < m_Rsubjet )
     {
       if (tlvTrack.DeltaR(tlvSubjet) > Rmax) 
       {
@@ -419,7 +419,6 @@ float DiTauIDVarCalculator::R_core(const xAOD::DiTauJet& xDiTau, int iSubjet) co
     
   TLorentzVector tlvTrack;
 
-  static const SG::ConstAccessor<float> R_coreAcc("R_core");
   for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
@@ -427,7 +426,7 @@ float DiTauIDVarCalculator::R_core(const xAOD::DiTauJet& xDiTau, int iSubjet) co
                            (*xTrack)->phi(),
                            (*xTrack)->e() );
 
-    if ( tlvSubjet.DeltaR(tlvTrack) < R_coreAcc(xDiTau) )
+    if ( tlvSubjet.DeltaR(tlvTrack) < m_Rcore )
     {
       R_sum += tlvSubjet.DeltaR(tlvTrack)*tlvTrack.Pt();
       pt += tlvTrack.Pt();
@@ -472,14 +471,13 @@ float DiTauIDVarCalculator::R_track_core(const xAOD::DiTauJet& xDiTau) const
       
     TLorentzVector tlvTrack;
 
-    static const SG::ConstAccessor<float> R_coreAcc("R_core");
     for (const auto& xTrack: xTracks) 
     { 
       tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                              (*xTrack)->eta(),
                              (*xTrack)->phi(),
                              (*xTrack)->e() );
-      if ( tlvSubjet.DeltaR(tlvTrack) < R_coreAcc(xDiTau) )
+      if ( tlvSubjet.DeltaR(tlvTrack) < m_Rcore )
       {
         //ATH_MSG_DEBUG("smaller");
         R_sum += tlvSubjet.DeltaR(tlvTrack)*tlvTrack.Pt();
@@ -664,7 +662,6 @@ float DiTauIDVarCalculator::mass_track_core(const xAOD::DiTauJet& xDiTau) const
 
   TLorentzVector tlvallTracks;
 
-  static const SG::ConstAccessor<float> R_coreAcc("R_core");
   for (int i = 0; i<=1; i++)
   {
 
@@ -684,7 +681,7 @@ float DiTauIDVarCalculator::mass_track_core(const xAOD::DiTauJet& xDiTau) const
                              (*xTrack)->eta(),
                              (*xTrack)->phi(),
                              (*xTrack)->e() );
-      if ( tlvSubjet.DeltaR(tlvTrack) < R_coreAcc(xDiTau) )
+      if ( tlvSubjet.DeltaR(tlvTrack) < m_Rcore )
       {
         //ATH_MSG_DEBUG("smaller");
         tlvallTracks += tlvTrack;
@@ -727,14 +724,13 @@ float DiTauIDVarCalculator::mass_core(const xAOD::DiTauJet& xDiTau, int iSubjet)
   
   TLorentzVector tlvTrack;
 
-  static const SG::ConstAccessor<float> R_coreAcc("R_core");
   for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                            (*xTrack)->eta(),
                            (*xTrack)->phi(),
                            (*xTrack)->e() );
-    if ( tlvSubjet.DeltaR(tlvTrack) < R_coreAcc(xDiTau) )
+    if ( tlvSubjet.DeltaR(tlvTrack) < m_Rcore )
     {
       //ATH_MSG_DEBUG("smaller");
       tlvallTracks += tlvTrack;
@@ -942,7 +938,6 @@ float DiTauIDVarCalculator::d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubj
     
   TLorentzVector tlvTrack;
 
-  static const SG::ConstAccessor<float> R_coreAcc("R_core");
   for (auto &xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
@@ -950,7 +945,7 @@ float DiTauIDVarCalculator::d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubj
                            (*xTrack)->phi(),
                            (*xTrack)->e() );
 
-    if (tlvTrack.DeltaR(tlvSubjet) < R_coreAcc(xDiTau)) 
+    if (tlvTrack.DeltaR(tlvSubjet) < m_Rcore) 
     {
       if (tlvTrack.Pt() > pt_leadtrk)
       {
@@ -990,7 +985,7 @@ float DiTauIDVarCalculator::f_isotracks(const xAOD::DiTauJet& xDiTau) const
 }
 
 //______________________________________________________________________________;
-StatusCode DiTauIDVarCalculator::decorNtracks (const xAOD::DiTauJet& xDiTau)
+StatusCode DiTauIDVarCalculator::decorNtracks (const xAOD::DiTauJet& xDiTau) const
 {
   static const SG::ConstAccessor<TrackParticleLinks_t> trackLinksAcc("trackLinks");
   if (!trackLinksAcc.isAvailable(xDiTau) )
@@ -1002,8 +997,6 @@ StatusCode DiTauIDVarCalculator::decorNtracks (const xAOD::DiTauJet& xDiTau)
   static const SG::ConstAccessor<int> n_subjetsAcc("n_subjets");
   int nSubjets = n_subjetsAcc(xDiTau);
 
-  static const SG::ConstAccessor<float> R_subjetAcc("R_subjet");
-  float Rsubjet = R_subjetAcc(xDiTau);
   std::vector<int> nTracks(nSubjets, 0);
 
   TrackParticleLinks_t xTracks = xDiTau.trackLinks();
@@ -1022,7 +1015,7 @@ StatusCode DiTauIDVarCalculator::decorNtracks (const xAOD::DiTauJet& xDiTau)
       double dR = tlvSubjet.DeltaR((*xTrack)->p4());
 
 
-      if ((dR < Rsubjet) && (dR < dRmin))
+      if ((dR < m_Rsubjet) && (dR < dRmin))
       {
         dRmin = dR;
         itrmin = i;
@@ -1036,3 +1029,5 @@ StatusCode DiTauIDVarCalculator::decorNtracks (const xAOD::DiTauJet& xDiTau)
 
   return StatusCode::SUCCESS;
 }
+
+

@@ -39,6 +39,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // STL includes
 #include <cstdlib> // quick_exit
@@ -285,7 +286,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
 
   ISF::ISFParticle expected(expectedPos,
                             expectedMom,
-                            0.51099891/Gaudi::Units::MeV, // from particle
+                            ParticleConstants::electronMassInMeV, // from particle
                             -1., // charge
                             11, // pdg id
                             1, ///status

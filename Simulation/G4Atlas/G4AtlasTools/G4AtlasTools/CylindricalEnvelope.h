@@ -7,7 +7,6 @@
 
 // Base classes
 #include "G4AtlasTools/DetectorGeometryBase.h"
-#include "G4AtlasInterfaces/IDetectorGeometrySvc.h"
 
 // CLHEP includes
 #include "CLHEP/Units/SystemOfUnits.h"

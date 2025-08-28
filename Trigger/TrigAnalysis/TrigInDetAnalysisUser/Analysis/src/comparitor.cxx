@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 12 Oct 2012 13:39:05 BST 
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 // cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
@@ -2424,8 +2424,8 @@ int main(int argc, char** argv) {
 	  xpos = xpos_original;
 
 	  std::cout << "calculating resolutions : " << histo.name() << " " << htest->GetName() << std::endl;
-
-	  TF1* d95 = Resplot::FitNull95( (TH1D*)htest );
+    //dangerous cast, but FitNull95 takes a TH1D * argument
+	  TF1* d95 = Resplot::FitNull95( reinterpret_cast<TH1D*>(htest) );
 	
 	  double   mean_95 = d95->GetParameter(1);
 	  double  dmean_95 = d95->GetParError(1);
@@ -2479,7 +2479,8 @@ int main(int argc, char** argv) {
 	  }
 
 	  if ( href ) { 
-	    TF1* d95ref = Resplot::FitNull95( (TH1D*)href );
+	    //dangerous cast, but FitNull95 takes a TH1D * argument
+	    TF1* d95ref = Resplot::FitNull95( reinterpret_cast<TH1D*>(href) );
 	  
 	    double   mean_95ref = d95ref->GetParameter(1);
 	    double  dmean_95ref = d95ref->GetParError(1);

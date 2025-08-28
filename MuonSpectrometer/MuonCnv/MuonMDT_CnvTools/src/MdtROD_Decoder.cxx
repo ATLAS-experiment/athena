@@ -140,8 +140,8 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
         // Check that Lvl1d matches the one from the ROD header
         ATH_MSG_DEBUG("Level 1 Id : " << csmReadOut.lvl1Id());
     } else {
-        ATH_MSG_ERROR(" Beginning of block not found ! ");
-        ATH_MSG_ERROR(" Subdetector, ROD ID: 0x" << MSG::hex << cabling_data.subdetectorId << MSG::dec << ", 0x" << cabling_data.mrod
+        ATH_MSG_WARNING(" Beginning of block not found ! ");
+        ATH_MSG_WARNING(" Subdetector, ROD ID: 0x" << MSG::hex << cabling_data.subdetectorId << MSG::dec << ", 0x" << cabling_data.mrod
                                                  << MSG::dec);
     }
 

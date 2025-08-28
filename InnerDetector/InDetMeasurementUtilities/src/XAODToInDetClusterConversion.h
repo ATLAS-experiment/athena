@@ -68,7 +68,7 @@ class XAODToInDetClusterConversion
   const SCT_ID* m_stripID {};
   const HGTD_ID* m_hgtdID {};
   
-  ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retrieve Lorentz angle of SCT"};
+  ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "", "Tool to retrieve Lorentz angle of SCT"};
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
   SG::ReadHandleKey<xAOD::PixelClusterContainer> m_inputPixelClusterContainerKey {this, "InputPixelClustersName", "ITkPixelClusters", "name of the input xAOD pixel cluster container"};

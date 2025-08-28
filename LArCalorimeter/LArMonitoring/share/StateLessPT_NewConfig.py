@@ -349,11 +349,16 @@ if __name__=='__main__':
            bytestream_input.StreamType = "monitoring"
        if  STREAM=="calibration":
            bytestream_input.StreamType = "calibration"
-       if  STREAM=="LArPEBDigitalTrigger":
+       if  "LArPEBDigitalTrigger" in STREAM:
            bytestream_input.StreamType = "calibration"
            bytestream_input.StreamNames = ['LArPEBDigitalTrigger']
-
-
+           if "EMPTY" in STREAM:
+              bytestream_input.LVL1Names=["L1_RD0_EMPTY","L1_RD0_LAR_EMPTY","L1_RD0_FIRSTEMPTY"]
+           elif "FILLED" in STREAM:
+              bytestream_input.LVL1Names=["L1_RD0_FILLED"]
+           elif "PHYS" in STREAM:
+              bytestream_input.LVL1Names=["L1_jJ500_LAR","L1_LAR-ZEE-eEM"]
+           pass
            
        print("DEBUG: bytestream_input.StreamNames:",bytestream_input.StreamNames)
 
@@ -442,7 +447,7 @@ if __name__=='__main__':
    if RunType == 0 and CONFIG!="LArDTMon":
       acc.getEventAlgo("LArRawDataReadingAlg").LArRawChannelKey="" 
 
-   # example for blocking the folder not filled in time
+   # example for blocking the folder not filled during cosmics
    cil=acc.getCondAlgo('CondInputLoader')
    iovdbsvc=acc.getService('IOVDbSvc') 
    folder='/TRIGGER/LUMI/LBLB'

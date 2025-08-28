@@ -1,0 +1,121 @@
+#!/usr/bin/env python
+
+
+"""Run flavor tagging on an AOD
+
+We build the jets and do the tagging. The jet building stuff is using
+the standard wrappers from jetmet, since this is a flavor tagging
+example.
+
+"""
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+
+# needed to read files
+from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+# you can change this to WARNING, INFO, DEBUG, VERBOSE if you want to
+# see more output.
+from GaudiKernel.Configurable import INFO as OUTPUT_LEVEL
+
+# jet reconstruction imports
+from JetRecConfig.JetRecConfig import JetRecCfg
+from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
+
+# b-tagging imports
+from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+
+from argparse import ArgumentParser
+import sys
+from pathlib import Path
+
+DEFAULT_INPUT = (
+    '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/AOD/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_s3873_r13829/1000events.AOD.29787656._000153.pool.root.1'
+)
+
+# parse arguments (just need input files)
+def get_args():
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument(
+        'input_files', nargs='*',
+        default=[DEFAULT_INPUT]
+    )
+    parser.add_argument(
+        '-o', '--output-file',
+        type=Path,
+        default=Path('outjets.h5'),
+    )
+    parser.add_argument(
+        '-n', '--n-events',
+        type=int,
+    )
+    parser.add_argument(
+        '-f', '--fast',
+        action='store_true',
+    )
+    return parser.parse_args()
+
+
+# main routine
+def run():
+    args = get_args()
+
+    flags = initConfigFlags()
+    flags.Input.Files = args.input_files
+    flags.Exec.OutputLevel = OUTPUT_LEVEL
+    if args.n_events is not None:
+        flags.Exec.MaxEvents = args.n_events
+    flags.lock()
+
+    # set up all the "main" services
+    ca = MainServicesCfg(flags)
+    # by default we don't even read any files, without this we just
+    # loop infinitely over nothing.
+    ca.merge(PoolReadCfg(flags))
+
+    # add a jet collection
+    jetdef = AntiKt4EMPFlow
+    ca.merge(JetRecCfg(flags, jetdef))
+
+    # add b-tagging
+    ca.merge(FlavorTaggingCfg(flags, jetdef.fullname(), fast=args.fast))
+
+    # add output
+    ca.merge(OutputCfg(flags, args.output_file, jetdef))
+
+    return ca.run()
+
+
+def OutputCfg(flags, out_path, jetdef):
+    out_file = CompFactory.H5FileSvc(path=out_path.as_posix())
+    ca = ComponentAccumulator()
+    ca.addService(out_file)
+
+    # specify the outputs and types
+    types = {}
+    kinematics = ["ptGeV", "eta", "phi", "massGeV"]
+    types |= {x: "CUSTOM" for x in kinematics}
+    ftag = [f'GN2v01_p{x}' for x in list('cub') + ['tau']]
+    types |= {x: "HALF" for x in ftag}
+
+    # add the writer alg
+    ca.addEventAlgo(
+        CompFactory.IParticleWriterAlg(
+            "jetwriter",
+            primitives=(kinematics + ftag),
+            primitiveToType=types,
+            datasetName="jets",
+            arrayFormat="AWKWARD",
+            maximumSize=0,
+            container=jetdef.fullname(),
+            output=out_file,
+        )
+    )
+    return ca
+
+
+if __name__ == '__main__':
+    code = run()
+    sys.exit(0 if code.isSuccess() else 1)

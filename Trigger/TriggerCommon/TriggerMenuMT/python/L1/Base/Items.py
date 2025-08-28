@@ -1,7 +1,5 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from collections import OrderedDict as odict
-
 from AthenaCommon.Logging import logging
 
 from ..Config.MonitorDef import MonitorDef
@@ -20,7 +18,7 @@ class MenuItemsCollection(object):
         self.menuName = ''
         self.pssName = ''
         self.pssType = 'Physics'
-        self.items = odict()
+        self.items = {}
 
     def __iter__(self):
         return iter(self.items.values())
@@ -68,9 +66,7 @@ class MenuItemsCollection(object):
         return self.items.keys()
 
     def json(self):
-        confObj = odict()
-        for item in self:
-            confObj[item.name] = item.json()
+        confObj = {item.name: item.json() for item in self}
         return confObj
 
 
@@ -158,7 +154,7 @@ class MenuItem(object):
         return binstr(self.trigger_type, width=width)
 
     def json(self):
-        confObj = odict()
+        confObj = {}
         confObj["name"] = self.name
         if self.legacy:
             confObj["legacy"] = self.legacy

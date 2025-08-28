@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Run this file in order to print out the empty slots
 
@@ -83,6 +83,9 @@ def defineMenu():
         'L1_MU8F_cTAU20M_jXE70',
         'L1_eTAU60_2cTAU20M_jXE80',
 
+         # ATR-31097
+        'L1_TeAsymmetry-jTENoSort',
+        'L1_TeATIME-jTENoSort',
 
         # ATR-28761 Phase1 combined em - jet
         'L1_eEM22M_3jJ50',
@@ -96,10 +99,7 @@ def defineMenu():
         'L1_BTAG-MU3VFjJ40_2jJ40p0ETA25',
         'L1_BTAG-MU3VFjJ40_2jJ40p0ETA25_jJ50p0ETA25',
 
-        'L1_BTAG-MU5VFjJ40_2jJ30p0ETA25',
-        'L1_BTAG-MU5VFjJ40_2jJ30p0ETA25_jJ50p0ETA25',
-        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25',
-        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25_jJ50p0ETA25',
+        'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25',
 
         #ATR-13743 J,XE thershold change for ATR-19376 
         'L1_MU8F_2jJ50','L1_MU8F_3jJ50', 'L1_MU8F_2jJ40_jJ50',
@@ -150,8 +150,6 @@ def defineMenu():
         'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ80',  
         #Kept as Phase-1 ATR-28761 
   
-        # jLJ
-        'L1_jLJ80', 'L1_jLJ120', 'L1_jLJ140', 'L1_jLJ180',
 
         # jEM
         'L1_jEM25', 'L1_jEM20M',
@@ -246,7 +244,6 @@ def defineMenu():
         'L1_JPSI-1M5-eEM9',
         'L1_JPSI-1M5-eEM15',
         'L1_BPH-0M9-eEM9-eEM7', 'L1_BPH-0M9-eEM9-eEM7_MU5VF', 'L1_BPH-0M9-eEM9-eEM7_2MU3V',
-        'L1_BPH-0DR3-eEM9jJ40', 'L1_BPH-0DR3-eEM9jJ40_MU5VF', 'L1_BPH-0DR3-eEM9jJ40_2MU3V',
         'L1_LLP-RO-eEM', 'L1_LLP-NOMATCH-eEM',
         #'L1_DPHI-2eEM5', 
         'L1_HT150-jJ50s5pETA32_jMJJ-400-CF',
@@ -256,6 +253,9 @@ def defineMenu():
         #ATR-30618
         'L1_ADVAET',
         'L1_ADVAEL',
+        #ATR-31154 - BDT AD with muons
+        'L1_ADBDTT',
+        'L1_ADBDTL',
 
         # tau 
         'L1_cTAU30M_2cTAU20M',
@@ -317,11 +317,6 @@ def defineMenu():
         'L1_BPH-7M14-2MU3V', 
         'L1_BPH-7M14-2MU3VF',
 
-        # INVM + DPHI 
-        'L1_jMJJ-400-NFF-0DPHI22',
-        'L1_jMJJ-400-NFF-0DPHI24',
-        'L1_jMJJ-400-NFF-0DPHI26',
-
         'L1_LATE-MU8F_jXE70', 'L1_LATE-MU8F_jJ90',
 
         # INVM + DR, TLA 
@@ -343,10 +338,6 @@ def defineMenu():
         'L1_DPHI-M70-2eEM12M', 'L1_DPHI-M70-2eEM15M', #ATR-19302
         'L1_DPHI-M70-2eEM9', 'L1_DPHI-M70-2eEM9L', # ATR-21637 (no or loose shower shape cuts)
                 
-        #ATR-17320
-        'L1_CEP-CjJ100',
-        'L1_CEP-CjJ90',
-        'L1_AFP_A_AND_C_TOF_CEP-CjJ100','L1_AFP_A_AND_C_TOF_T0T1_CEP-CjJ100',
 
         #ATR-28563
         'L1_LLPDPHI-jXE40-jJ40',

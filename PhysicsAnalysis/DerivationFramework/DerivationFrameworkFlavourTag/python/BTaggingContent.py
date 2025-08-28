@@ -14,13 +14,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 # ---------------------------------------------------------------------
 def _getBtagging(jetcol):
     """Convenience function for getting btagging names"""
-    btaggingtmp = "BTagging_" + jetcol.split('Jets')[0]
-    if 'BTagging' in jetcol:
-         stamp = jetcol.split('BTagging')[1]
-         btaggingtmp += '_'+stamp
-    # deal with name mismatch between PV0TrackJets and BTagging_Track
-    btagging = btaggingtmp
-    return btagging
+    return "BTagging_" + jetcol.split('Jets')[0]
 
 def _isRun4(ConfigFlags):
     """Convenience function for checking if we are in Run4"""
@@ -95,9 +89,15 @@ BTaggingRun3Aux += _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['Simpl
 
 # Xbb taggers outputs 
 BTaggingLargeRAux = []
+# Note that GN2Xv01 is buggy and should only be used in very specialized cases, see
+# https://its.cern.ch/jira/browse/AFT-794 for the details of the only suppored uses
 BTaggingLargeRAux += _getVarsXbb("GN2Xv01")
+# Note that GN2Xv02 isn't supported, and is only kept around for the sake of one analysis
+# https://atlas-glance.cern.ch/atlas/analysis/analyses/details?ref_code=ANA-HIGP-2024-01
+# please contact the analsyis contacts before removing (but please remove at some point)
 BTaggingLargeRAux += _getVarsXbb("GN2Xv02")
 BTaggingLargeRAux += _getVarsXbb("GN2XTauV00", extra_flavours=['htautauhad'])
+BTaggingLargeRAux += [f'GN3XV00_p{x}' for x in ["htautauhad", "hbb", "hcc", "top", "qcdbb", "qcdbx", "qcdcx", "qcdll", "Wqq"]]
 
 # standard outputs for Run 4
 BTaggingRun4Aux = [
@@ -201,19 +201,38 @@ def BTaggingLargeRContent(jetcol, ConfigFlags = None):
     btagcontent = _getVariableList(jetcol, aux)
     return jetcontent + btagcontent
 
+def BTaggingVRContent(jetcol, ConfigFlags = None):
+    aux = JetStandardAux + [
+        "SV1_NGTinSvx", 
+        "SV1_masssvx",
+        "SV1_TrackParticleLinks"
+    ]
+    jetcontent = _getVariableList(jetcol, aux)
+    return jetcontent
+
+
+
 def BTagginglessContent(jetcol, ConfigFlags=None):
-    BTaggingRun3AuxVar = _getVars("GN2v01", extra_flavours=['tau'])
+    # GN2v01 was the recommended tagger as of 30-06-2025
+    BTaggingRun3AuxVar = _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['SimpleFlip'])
+    BTaggingRun3AuxVar += ["SV1_NGTinSvx", "SV1_masssvx",]
 
-    for gn3_dev in ['GN3V00', 'GN3PflowV00', 'GN3MuonsV00']:
-        BTaggingRun3AuxVar += _getVars(gn3_dev, extra_flavours=['tau',], flip_modes=['SimpleFlip']) 
+    # GN3 models were experimental as of 30-06-2025
+    # they are saved to phys for the sake of
+    # https://its.cern.ch/jira/browse/AFT-779
+    gn3v00_models = [
+        "GN3V00",
+        "GN3PflowV00",
+        "GN3MuonsV00",
+        "GN3PflowMuonsV00"
+    ]
+    for gn3_dev in gn3v00_models:
+        extra_flavours = ["tau",]
+        if gn3_dev in {"GN3PflowMuonsV00"}:
+            extra_flavours = ["tau", "ud", "g", "s", "quark"]
+            BTaggingRun3AuxVar += [f"{gn3_dev}_ptFromTruthDressedWZJet"]
+        BTaggingRun3AuxVar += _getVars(gn3_dev, extra_flavours=extra_flavours, flip_modes=["SimpleFlip"])
 
-    BTaggingRun3AuxVar += _getVars(
-        "GN3PflowMuonsV00", 
-        extra_flavours=['tau', 'ud', 'g', 's', 'quark'],
-        flip_modes=['SimpleFlip']
-    )
-    BTaggingRun3AuxVar += ['GN3PflowMuonsV00_ptFromTruthDressedWZJet']
-    
     isRun4 = _isRun4(ConfigFlags)
     aux = BTaggingRun3AuxVar if not isRun4 else []
     btagcontent = _getVariableList(jetcol, aux)

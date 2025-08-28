@@ -14,7 +14,7 @@ atlas_add_library( ActsEventLib
    ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES
    ${Boost_LIBRARIES}
-   ActsCore
+   Acts::Core
    ActsGeometryLib
    ActsGeometryInterfacesLib
    AthContainers
@@ -28,6 +28,9 @@ atlas_add_library( ActsEventLib
    xAODMeasurementBase
    xAODTracking
    xAODTruth
+   xAODAuxiliaryMeasurement
+   PRIVATE_LINK_LIBRARIES
+      ActsGeoUtils
 )
 
 atlas_add_dictionary( ActsEventDict
@@ -42,7 +45,7 @@ atlas_add_test( MultiTrajectoryBasic_test
 
 atlas_add_test( MultiTrajectorySE_test
 				SOURCES test/MultiTrajectorySE_test.cxx
-				LINK_LIBRARIES ActsEventLib
+				LINK_LIBRARIES ActsEventLib ActsGeoUtils
 				POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( MultiTrajectoryACTS_test

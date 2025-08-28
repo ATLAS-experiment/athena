@@ -156,7 +156,7 @@ namespace InDet
 	}
         if (msgLvl(MSG::VERBOSE)) msg() << " new overall number of tracks to fit : " << setOfVertices.size() << endmsg;
 	myJetCandidate->setVerticesOnJetAxis(setOfVertices);
-	m_initializationHelper->updateTrackNumbering(myJetCandidate);
+	Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);
 	doTheFit(myJetCandidate);
       }
     }
@@ -252,7 +252,7 @@ namespace InDet
 	}
         if (msgLvl(MSG::VERBOSE)) msg() << " new overall number of tracks to fit : " << setOfVertices.size() << endmsg;
 	myJetCandidate->setVerticesOnJetAxis(setOfVertices);
-	m_initializationHelper->updateTrackNumbering(myJetCandidate);
+	Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);
 	m_routines->initializeToMinDistancesToJetAxis(myJetCandidate);
 	doTheFit(myJetCandidate);
       }
@@ -353,7 +353,7 @@ namespace InDet
 						*pairOfVxVertexOnJetAxis.second,
 						*myJetCandidate);
 	  //now you need to update the numbering scheme
-	  m_initializationHelper->updateTrackNumbering(myJetCandidate);//maybe this should be moved to a lower level...
+	  Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);//maybe this should be moved to a lower level...
 
 	} else {
 	  noMoreVerticesToCluster=true;

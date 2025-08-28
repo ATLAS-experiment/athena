@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @class  AthCommonDataStore
@@ -141,8 +141,8 @@ public:
   //   style properties in AthAlgorithms
   //
 
-  template <class T>
-  Gaudi::Details::PropertyBase& declareProperty(Gaudi::Property<T> &t) {
+  template <class T, class V, class H>
+  Gaudi::Details::PropertyBase& declareProperty(Gaudi::Property<T,V,H> &t) {
     typedef typename SG::HandleClassifier<T>::type htype;
     return AthCommonDataStore<PBASE>::declareGaudiProperty(t, htype());
   }
@@ -152,8 +152,8 @@ public:
    * @brief specialization for handling Gaudi::Property<SG::VarHandleKey>
    *
    */
-  template <class T>
-  Gaudi::Details::PropertyBase& declareGaudiProperty(Gaudi::Property<T> &hndl,
+  template <class T, class V, class H>
+  Gaudi::Details::PropertyBase& declareGaudiProperty(Gaudi::Property<T,V,H> &hndl,
                                  const SG::VarHandleKeyType&)
   {
     return *AthCommonDataStore<PBASE>::declareProperty(hndl.name(),
@@ -166,8 +166,8 @@ public:
    * @brief specialization for handling Gaudi::Property<SG::VarHandleKeyArray>
    *
    */
-  template <class T>
-  Gaudi::Details::PropertyBase& declareGaudiProperty(Gaudi::Property<T> &hndl, 
+  template <class T, class V, class H>
+  Gaudi::Details::PropertyBase& declareGaudiProperty(Gaudi::Property<T,V,H> &hndl,
                                  const SG::VarHandleKeyArrayType&)
   {
     return *AthCommonDataStore<PBASE>::declareProperty(hndl.name(),
@@ -180,8 +180,8 @@ public:
    * @brief specialization for handling Gaudi::Property<SG::VarHandleBase>
    *
    */
-  template <class T>
-  Gaudi::Details::PropertyBase& declareGaudiProperty(Gaudi::Property<T> &hndl, 
+  template <class T, class V, class H>
+  Gaudi::Details::PropertyBase& declareGaudiProperty(Gaudi::Property<T,V,H> &hndl,
                                  const SG::VarHandleType&)
   {
     return *AthCommonDataStore<PBASE>::declareProperty(hndl.name(),
@@ -195,8 +195,8 @@ public:
    * Gaudi::Property<SG::VarHandleKey> or a <SG::VarHandleKeyArray>
    *
    */
-  template <class T>
-  Gaudi::Details::PropertyBase& declareGaudiProperty(Gaudi::Property<T> &t, const SG::NotHandleType&)
+  template <class T, class V, class H>
+  Gaudi::Details::PropertyBase& declareGaudiProperty(Gaudi::Property<T,V,H> &t, const SG::NotHandleType&)
   {
     return PBASE::declareProperty(t);
   }

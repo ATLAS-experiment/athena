@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -78,7 +78,7 @@ G4bool PhantomBarrelSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* ROhist
     G4cout << "PhantomBarrelSD:: ProcessHits" << G4endl;
   }
 
-  const G4TouchableHistory* theTouchable = (G4TouchableHistory*)(aStep->GetPreStepPoint()->GetTouchable());
+  const G4TouchableHistory* theTouchable = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
   const G4VPhysicalVolume* physVol = theTouchable->GetVolume();
   const G4LogicalVolume* logiVol = physVol->GetLogicalVolume();
   const G4String nameLogiVol = logiVol->GetName();

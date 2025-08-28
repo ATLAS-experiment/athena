@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkConstAccessor_test.cxx
@@ -45,8 +45,8 @@ class AuxVectorBase
 {
 public:
   AuxVectorBase (size_t sz = 10) : m_sz (sz) {}
-  virtual size_t size_v() const { return m_sz; }
-  virtual size_t capacity_v() const { return m_sz; }
+  virtual size_t size_v() const override { return m_sz; }
+  virtual size_t capacity_v() const override { return m_sz; }
 
   using SG::AuxVectorData::setStore;
   void set (SG::AuxElement& b, size_t index)
@@ -393,12 +393,11 @@ void test4()
 
 
 // To study generated code.
-int asmtest [[maybe_unused]] (const SG::AuxElement& e,
-                              SG::ConstAccessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
+unsigned int asmtest [[maybe_unused]] (const SG::AuxElement& e,
+                                       SG::ConstAccessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
 {
   using Cont = std::vector<int>;
-  using IdxType = std::result_of<decltype(&ElementLink<Cont>::index)(ElementLink<Cont>)>::type;
-  IdxType out = 0;
+  unsigned int out = 0;
   for (const ElementLink<Cont> el : acc(e)) {
     out += el.key() + el.index();
   }

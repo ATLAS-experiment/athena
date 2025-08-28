@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1LightPlugin )
@@ -26,5 +26,7 @@ atlas_add_library( ${pkgName} ${pkgName}/*.h src/*.cxx src/*.qrc
 )
 
 # Enable Qt support for cppcheck:
-set_property( TARGET ${pkgName}
-   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET ${pkgName}
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()

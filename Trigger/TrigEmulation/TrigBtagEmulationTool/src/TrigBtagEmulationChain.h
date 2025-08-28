@@ -35,6 +35,7 @@ class TrigBtagEmulationChain
   const std::vector<std::string>& tagger() const;
   const std::vector<std::string>& jet_presel() const;
   const std::string& dijetmass() const;
+  const std::vector<double>& gsc_pt() const;
   int shared_idx() const;
   
 private:
@@ -54,6 +55,7 @@ private:
   std::vector<std::string> m_jet_presel {};
   std::string m_dijetmass = "";
   int m_shared_idx = 0;
+  std::vector<double> m_gsc_pt {};
 };
 
  inline const std::string& TrigBtagEmulationChain::name() const { return m_name; }
@@ -69,7 +71,8 @@ private:
  inline const std::vector<std::string>& TrigBtagEmulationChain::jet_presel() const { return m_jet_presel; }
  inline const std::string& TrigBtagEmulationChain::dijetmass() const { return m_dijetmass; }
  inline int TrigBtagEmulationChain::shared_idx() const { return m_shared_idx; }
-  
+ inline const std::vector<double>& TrigBtagEmulationChain::gsc_pt() const { return m_gsc_pt; }
+
 } //namespace
 
 #endif

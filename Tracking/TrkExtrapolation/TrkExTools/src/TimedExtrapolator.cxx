@@ -55,89 +55,9 @@
 // constructor
 Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::string &n, const IInterface *p) :
   AthAlgTool(t, n, p),
-  m_propagators(),
-  m_stepPropagator("Trk::STEP_Propagator/AtlasSTEP_Propagator"),
-  m_navigator("Trk::Navigator/AtlasNavigator"),
-  m_updators(),
-  m_msupdators(),
-  m_elossupdater("Trk::EnergyLossUpdator/AtlasEnergyLossUpdator"),
-  // m_dynamicLayerCreator(),
   m_subPropagators(Trk::NumberOfSignatures),
-  m_subUpdators(Trk::NumberOfSignatures),
-  m_propNames(),
-  m_updatNames(),
-  m_meotpIndex(0),
-  m_configurationLevel(10),
-  m_includeMaterialEffects(true),
-  m_requireMaterialDestinationHit(false),
-  m_stopWithNavigationBreak(false),
-  m_stopWithUpdateZero(false),
-  m_skipInitialLayerUpdate(false),
-  m_referenceMaterial(false),
-  m_extendedLayerSearch(true),
-  m_initialLayerAttempts(3),
-  m_successiveLayerAttempts(1),
-  m_tolerance(0.002),
-  m_caloMsSecondary(false),
-  m_activeOverlap(false),
-  m_robustSampling(true),
-  m_useDenseVolumeDescription(true),
-  m_useMuonMatApprox(false),
-  m_resolveActive(false),
-  m_resolveMultilayers(true),
-  m_printHelpOutputAtInitialize(false),
-  m_printRzOutput(true),
-  m_navigationStatistics(false),
-  m_navigationBreakDetails(false),
-  m_materialEffectsOnTrackValidation(false),
-  //  m_cacheLastMatLayer(false),
-  m_maxNavigSurf{},
-  m_maxNavigVol{},
-  m_fastField(false) {
+  m_subUpdators(Trk::NumberOfSignatures) {
   declareInterface<ITimedExtrapolator>(this);
-
-  // extrapolation steering
-  declareProperty("StopWithNavigationBreak", m_stopWithNavigationBreak);
-  declareProperty("StopWithUpdateKill", m_stopWithUpdateZero);
-  declareProperty("SkipInitialPostUpdate", m_skipInitialLayerUpdate);
-  // propagation steering
-  declareProperty("Propagators", m_propagators);
-  declareProperty("SubPropagators", m_propNames);
-  declareProperty("STEP_Propagator", m_stepPropagator);
-  // material effects handling
-  declareProperty("ApplyMaterialEffects", m_includeMaterialEffects);
-  declareProperty("RequireMaterialDestinationHit", m_requireMaterialDestinationHit);
-  declareProperty("MaterialEffectsUpdators", m_updators);
-  declareProperty("MultipleScatteringUpdators", m_msupdators);
-  declareProperty("EnergyLossUpdater", m_elossupdater);
-  declareProperty("SubMEUpdators", m_updatNames);
-  //  declareProperty("CacheLastMaterialLayer", m_cacheLastMatLayer);
-  // general behavior navigation
-  declareProperty("Navigator", m_navigator);
-  declareProperty("UseDenseVolumeDescription", m_useDenseVolumeDescription);
-  // muon system specifics
-  declareProperty("UseMuonMatApproximation", m_useMuonMatApprox);
-  declareProperty("ResolveMuonStation", m_resolveActive);
-  declareProperty("ResolveMultilayers", m_resolveMultilayers);
-  declareProperty("ConsiderMuonStationOverlaps", m_activeOverlap);
-  // declareProperty("DynamicLayerCreator",          m_dynamicLayerCreator);
-  declareProperty("RobustSampling", m_robustSampling );
-  // material & navigation related steering
-  declareProperty("MaterialEffectsOnTrackProviderIndex", m_meotpIndex);
-  declareProperty("MaterialEffectsOnTrackValidation", m_materialEffectsOnTrackValidation);
-  declareProperty("ReferenceMaterial", m_referenceMaterial);
-  declareProperty("ExtendedLayerSearch", m_extendedLayerSearch);
-  declareProperty("InitialLayerAttempts", m_initialLayerAttempts);
-  declareProperty("SuccessiveLayerAttempts", m_successiveLayerAttempts);
-  // debug and validation
-  declareProperty("HelpOutput", m_printHelpOutputAtInitialize);
-  declareProperty("positionOutput", m_printRzOutput);
-  declareProperty("NavigationStatisticsOutput", m_navigationStatistics);
-  declareProperty("DetailedNavigationOutput", m_navigationBreakDetails);
-  declareProperty("Tolerance", m_tolerance);
-  declareProperty("CaloMsSecondary", m_caloMsSecondary);
-  // Magnetic field properties
-  declareProperty("MagneticFieldProperties", m_fastField);
 }
 
 // destructor
@@ -207,22 +127,22 @@ Trk::TimedExtrapolator::initialize() {
 
   if (m_propNames.empty() && !m_propagators.empty()) {
     ATH_MSG_DEBUG("Inconsistent setup of Extrapolator, no sub-propagators configured, doing it for you. ");
-    m_propNames.push_back(m_propagators[0]->name().substr(8, m_propagators[0]->name().size() - 8));
+    m_propNames.value().push_back(m_propagators[0]->name().substr(8, m_propagators[0]->name().size() - 8));
   }
 
   if (m_updatNames.empty() && !m_updators.empty()) {
     ATH_MSG_DEBUG("Inconsistent setup of Extrapolator, no sub-materialupdators configured, doing it for you. ");
-    m_updatNames.push_back(m_updators[0]->name().substr(8, m_updators[0]->name().size() - 8));
+    m_updatNames.value().push_back(m_updators[0]->name().substr(8, m_updators[0]->name().size() - 8));
   }
 
   // -----------------------------------------------------------
   // Sanity check 2
   // fill the number of propagator names and updator names up with first one
   while (int(m_propNames.size()) < int(Trk::NumberOfSignatures)) {
-    m_propNames.push_back(m_propNames[0]);
+    m_propNames.value().push_back(m_propNames[0]);
   }
   while (int(m_updatNames.size()) < int(Trk::NumberOfSignatures)) {
-    m_updatNames.push_back(m_updatNames[0]);
+    m_updatNames.value().push_back(m_updatNames[0]);
   }
   if (validprop && validmeuts) {
     // Per definition: if configured not found, take the lowest one
@@ -376,9 +296,6 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
     return parm.uniqueClone();
   }
 
-  // if (cache.m_lastMaterialLayer && !cache.m_lastMaterialLayer->isOnLayer(parm.position())) {
-  //   cache.m_lastMaterialLayer = nullptr;
-  // }
   if (!cache.m_highestVolume) {
     cache.m_highestVolume = m_navigator->highestVolume(ctx);
   }
@@ -967,12 +884,6 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         // nextLayer->isOnLayer(nextPar->position());
         bool matUp = nextLayer->fullUpdateMaterialProperties(*nextPar) && m_includeMaterialEffects &&
                      nextLayer->isOnLayer(nextPar->position());
-        // identical to last material layer ?
-        // if (matUp && nextLayer == cache.m_lastMaterialLayer &&
-        //     nextLayer->surfaceRepresentation().type() != Trk::Surface::Cylinder) {
-        //   matUp = false;
-        // }
-
         // material update
         const ITimedMatEffUpdator *currentUpdator = subMaterialEffectsUpdator(*cache.m_currentStatic);
         if (matUp) {
@@ -2056,16 +1967,6 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
       const Trk::Layer *nextLayer = cache.m_navigLays[index].second;
 
       bool matUp = nextLayer->layerMaterialProperties()->fullMaterial(nextPos) && m_includeMaterialEffects;
-
-      // if (!matUp && !nextLayer->layerMaterialProperties()->fullMaterial(nextPos) )
-      //  ATH_MSG_WARNING("layer without material:"<< nextLayer->layerIndex());
-
-      // identical to the last material layer ?
-
-      // if (matUp && nextLayer == cache.m_lastMaterialLayer &&
-      //     nextLayer->surfaceRepresentation().type() != Trk::Surface::Cylinder) {
-      //   matUp = false;
-      // }
 
       // material update
       if (matUp && m_includeMaterialEffects) {

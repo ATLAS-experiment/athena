@@ -25,9 +25,7 @@
 G4AtlasMTRunManager::G4AtlasMTRunManager()
   : G4MTRunManager()
   , AthMessaging("G4AtlasMTRunManager")
-  , m_detGeoSvc("DetectorGeometrySvc", "G4AtlasMTRunManager")
   , m_physListSvc("PhysicsListSvc", "G4AtlasMTRunManager")
-  , m_fastSimTool("FastSimulationMasterTool")
 {}
 
 
@@ -62,18 +60,8 @@ void G4AtlasMTRunManager::InitializeGeometry()
 {
   ATH_MSG_INFO("InitializeGeometry");
 
-  // Retrieve detector geo service
-  if (m_detGeoSvc.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Could not retrieve the DetectorGeometrySvc");
-    G4ExceptionDescription description;
-    description << "InitializeGeometry: Failed to retrieve IDetectorGeometrySvc.";
-    G4Exception("G4AtlasMTRunManager", "CouldNotRetrieveDetGeoSvc",
-                FatalException, description);
-    abort(); // to keep Coverity happy
-  }
-
   // Create/assign detector construction
-  SetUserInitialization(m_detGeoSvc->GetDetectorConstruction().release());
+  SetUserInitialization(m_detConstruction->GetDetectorConstruction().release());
   if (userDetector) {
     G4RunManager::InitializeGeometry();
   }
@@ -102,18 +90,6 @@ void G4AtlasMTRunManager::InitializePhysics()
     abort(); // to keep Coverity happy
   }
   m_physListSvc->SetPhysicsOptions();
-
-  // Setup the fast simulations
-  const std::string methodName = "G4AtlasMTRunManager::InitializePhysics";
-  if(m_fastSimTool.retrieve().isFailure()) {
-    throw GaudiException("Could not retrieve FastSims master tool",
-                         methodName, StatusCode::FAILURE);
-  }
-  if(m_fastSimTool->initializeFastSims().isFailure()) {
-    throw GaudiException("Failed to initialize FastSims for master thread",
-                         methodName, StatusCode::FAILURE);
-  }
-
   // TODO: parallel worlds stuff here
 }
 

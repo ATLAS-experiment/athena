@@ -95,10 +95,8 @@ InsertFileToCatalogApplication::execute()
 {
   // Do the job here
 
-  bool allOK = true;
-
   // Open the file catalog and insert the pfn/fid/technology
-  if ( allOK ) {
+  {
     pool::URIParser p( m_fcURL );
     p.parse();
     std::unique_ptr<pool::IFileCatalog> catalog( new pool::IFileCatalog );

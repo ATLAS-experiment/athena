@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -290,14 +290,19 @@ private:
 
   // --------------- Used Tools ----------------------------- //
 
-  ToolHandleArray<IPropagator> m_propagators;      //!<  Array of Propagators
-  ToolHandle<IPropagator> m_stepPropagator;        //!<  Array of Propagators
-  ToolHandle<INavigator> m_navigator;              //!<  Navigator for TrackingGeometry
-                                                   //!<  and magnetic fiels acces
-  ToolHandleArray<ITimedMatEffUpdator> m_updators; //!<  Array of Material Updators
-  ToolHandleArray<IMultipleScatteringUpdator>
-    m_msupdators;                                      //!<  Array of MultipleScattering Updators
-  ToolHandle<IEnergyLossUpdator> m_elossupdater; //!<  EnergyLoss Updater
+  ToolHandleArray<IPropagator> m_propagators{this,
+    "Propagators", {}, "Array of Propagators"};
+  ToolHandle<IPropagator> m_stepPropagator{this,
+    "STEP_Propagator", "Trk::STEP_Propagator/AtlasSTEP_Propagator"};
+  ToolHandle<INavigator> m_navigator{this,
+    "Navigator", "Trk::Navigator/AtlasNavigator",
+    "Navigator for TrackingGeometry and magnetic fiels access"};
+  ToolHandleArray<ITimedMatEffUpdator> m_updators{this,
+    "MaterialEffectsUpdators", {}, "Array of Material Updators"};
+  ToolHandleArray<IMultipleScatteringUpdator> m_msupdators{this,
+    "MultipleScatteringUpdators", {}, " Array of MultipleScattering Updators"};
+  ToolHandle<IEnergyLossUpdator> m_elossupdater{this,
+    "EnergyLossUpdater", "Trk::EnergyLossUpdator/AtlasEnergyLossUpdator"};
 
   // ---------------- For Extrapolation handling ------------ //
 
@@ -308,60 +313,65 @@ private:
 
   // ---------------- For Extrapolator configuration ------------ //
 
-  std::vector<std::string> m_propNames;  //!<  configuration of subPropagators
-  std::vector<std::string> m_updatNames; //!<  configuration of subUpdators
+  StringArrayProperty m_propNames{this, "SubPropagators", {},
+    "configuration of subPropagators"};
+  StringArrayProperty m_updatNames{this, "SubMEUpdators", {},
+    "configuration of subupdaters"};
 
   // --------------- General steering & Navigation -------------- //
 
-  unsigned int m_meotpIndex;              //!< if several meotps are available in a volume
-                                          //!< steer which one to use
-  unsigned int m_configurationLevel;      //!< see the supported levels of
+  UnsignedIntegerProperty m_meotpIndex{
+    this, "MaterialEffectsOnTrackProviderIndex", 0,
+    "if several meotps are available in a volume steer which one to use"};
+  unsigned int m_configurationLevel = 10; //!< see the supported levels of
                                           //!< configuration above
-  bool m_includeMaterialEffects;          //!< boolean to switch on/off material effects
-  bool m_requireMaterialDestinationHit;   //!< require the destination surface
-                                          //!< hit for material collection
-  bool m_stopWithNavigationBreak;         //!< return 0 if navigation breaks - for
-                                          //!< validation reasons
-  bool m_stopWithUpdateZero;              //!< return 0 if update kills the trajectory
-  bool m_skipInitialLayerUpdate;          //!< skip the initial post-Update at the
-                                          //!< layer [Fatras conversion mode]
-  bool m_referenceMaterial;               //!< use the reference material for the update
-  bool m_extendedLayerSearch;             //!< extended layer search
-  unsigned int m_initialLayerAttempts;    //!< allowed layer intersection
-                                          //!< attempts at the start of a volume
-  unsigned int m_successiveLayerAttempts; //!< layer intersection attemps after one
-                                          //!< layer has been hit sucessfully
+  BooleanProperty m_includeMaterialEffects{this, "ApplyMaterialEffects", true,
+    "boolean to switch on/off material effects"};
+  BooleanProperty m_stopWithNavigationBreak{this, "StopWithNavigationBreak", false,
+    "return 0 if navigation breaks - for validation reasons"};
+  BooleanProperty m_stopWithUpdateZero{this, "StopWithUpdateKill", false,
+    "return 0 if update kills the trajectory"};
+  BooleanProperty m_skipInitialLayerUpdate{this, "SkipInitialPostUpdate", false,
+    "skip the initial post-Update at the layer [Fatras conversion mode]"};
+  BooleanProperty m_referenceMaterial{this, "ReferenceMaterial", false,
+    "use the reference material for the update"};
+  UnsignedIntegerProperty m_initialLayerAttempts{this, "InitialLayerAttempts", 3,
+    "allowed layer intersection attempts at the start of a volume"};
+  UnsignedIntegerProperty m_successiveLayerAttempts{
+    this, "SuccessiveLayerAttempts", 1,
+    "layer intersection attemps after one layer has been hit sucessfully"};
 
-  double m_tolerance; //!< surfacen & volume tolerance
+  DoubleProperty m_tolerance{this, "Tolerance", 0.002, "surface & volume tolerance"};
 
-  bool m_caloMsSecondary; //!< handling of secondaries beyond ID
+  BooleanProperty m_caloMsSecondary{this, "CaloMsSecondary", false,
+    "handling of secondaries beyond ID"};
 
   // ------------------------------------------------------- //
 
-  bool m_activeOverlap; //!<  consider overlaps between active muon volumes
-  bool m_robustSampling;
-  bool m_useDenseVolumeDescription; //!<  use dense volume description when
-                                    //!<  available in ID/Calo
-  bool m_useMuonMatApprox;          //!<  use approximative MS inert material
-  bool m_resolveActive;
-  bool m_resolveMultilayers;
+  BooleanProperty m_robustSampling{this, "RobustSampling", true};
+  BooleanProperty m_useDenseVolumeDescription{
+    this, "UseDenseVolumeDescription", true,
+    "use dense volume description when available in ID/Calo"};
+  BooleanProperty m_useMuonMatApprox{this, "UseMuonMatApproximation", false,
+    "use approximative MS inert material"};
+  BooleanProperty m_resolveActive{this, "ResolveMuonStation", false};
+  BooleanProperty m_resolveMultilayers{this, "ResolveMultilayers", true};
 
   //-------------------------- SCREEN output steering
   //-------------------------------------------//
-  bool m_printHelpOutputAtInitialize;
-  bool m_printRzOutput;
+  BooleanProperty m_printHelpOutputAtInitialize{this, "HelpOutput", false};
+  BooleanProperty m_printRzOutput{this, "positionOutput", true};
   // ----------------------------- navigation validation section
   // -----------------------------------------------------------
 
-  bool m_navigationStatistics;   //!< steer the output for the navigaiton
-                                 //!< statistics
-  bool m_navigationBreakDetails; //!< steer the output for the navigation
-                                 //!< break details
-
-  bool m_materialEffectsOnTrackValidation; //!< mat effects on track validation
-  //   bool m_cacheLastMatLayer {};   // steering of the material layer cache
-  unsigned int m_maxNavigSurf;
-  unsigned int m_maxNavigVol;
+  BooleanProperty m_navigationStatistics{this, "NavigationStatisticsOutput", false,
+    "steer the output for the navigation statistics"};
+  BooleanProperty m_navigationBreakDetails{this, "DetailedNavigationOutput", false,
+    "steer the output for the navigation break details"};
+  BooleanProperty m_materialEffectsOnTrackValidation{this,
+    "MaterialEffectsOnTrackValidation", false, "mat effects on track validation"};
+  unsigned int m_maxNavigSurf{};
+  unsigned int m_maxNavigVol{};
 
   struct Cache
   {
@@ -422,7 +432,7 @@ private:
   };
 
   //------------ Magnetic field properties
-  bool m_fastField;
+  BooleanProperty m_fastField{this, "MagneticFieldProperties", false};
   Trk::MagneticFieldProperties m_fieldProperties;
 
 
@@ -465,17 +475,6 @@ TimedExtrapolator::throwIntoGarbageBin(Trk::TimedExtrapolator::Cache& cache,
     cache.m_garbageBin[pars] = true;
 }
 
-/*
-inline unsigned int TimedExtrapolator::geoIDToDetOrder(Trk::GeometrySignature
-geoid) const
-{
-  if ( geoid == Trk::ID ) return 0;
-  else if ( geoid == Trk::Calo ) return 1;
-  else if ( geoid == Trk::MS ) return 2;
-
-  return 0;
-}
-*/
 
 } // end of namespace
 

@@ -6,7 +6,6 @@
 # Written by Juerg Beringer in July 2008.
 
 
-from __future__ import print_function
 
 import sys
 import glob

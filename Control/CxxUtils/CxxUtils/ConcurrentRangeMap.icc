@@ -97,7 +97,7 @@ CONCURRENTRANGEMAP::ConcurrentRangeMap (Updater_t&& updater,
 
   : m_updater (std::move (updater)),
     m_compare (compare),
-    m_payloadDeleter (payloadDeleter),
+    m_payloadDeleter (std::move (payloadDeleter)),
     m_nInserts (0),
     m_maxSize (0)
 {
@@ -359,7 +359,7 @@ CONCURRENTRANGEMAP::emplace (const RANGE& range,
     if (ptr) {
       // Possible to get here if overlap() moved the start of the range
       // forward past all existing ranges.
-      new_end->first = newRange;
+      new_end->first = std::move(newRange);
       new_end->second = ptr.release();
       ++new_end;
     }

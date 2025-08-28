@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCnv/TBByteStreamCnvTool.h"
@@ -1099,7 +1099,7 @@ StatusCode TBByteStreamCnvTool::H6BuildObjects(int unrec_code)
 	  break;
 	}
 	int nline= nword / 16;
-	strw = (char*)&m_rodBlock[pos];
+	strw = reinterpret_cast<char*>(&m_rodBlock[pos]);
 	for(int i=0;i<nline;i++){
 	  //       strw = (char*) &m_rodBlock[pos+i*64];
 	  std::string sline="";

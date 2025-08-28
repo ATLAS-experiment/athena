@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "PixelClusteringTool.h"
 
 #include <Acts/Clusterization/Clusterization.hpp>
@@ -10,6 +9,8 @@
 #include <xAODInDetMeasurement/PixelClusterContainer.h>
 #include <xAODInDetMeasurement/PixelClusterAuxContainer.h>
 #include <xAODInDetMeasurement/Utilities.h>
+#include <InDetPrepRawData/SiWidth.h>
+#include <TrkSurfaces/Surface.h>
 
 #include <unordered_set>
 #include <stdexcept>
@@ -20,32 +21,34 @@ using CLHEP::micrometer;
 // Put these in the InDet namespace so that ACTS can find them
 // via ADL.
 //
-namespace InDet {
-  static inline int getCellRow(const InDet::UnpackedPixelRDO& cell) { return cell.ROW; }
-  static inline int getCellColumn(const InDet::UnpackedPixelRDO& cell) { return cell.COL; }
-  static inline int& getCellLabel(InDet::UnpackedPixelRDO& cell) { return cell.NCL; }
-}
-
 namespace ActsTrk {
-  
-static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
-		    const PixelClusteringTool::Cell& cell)
-{
-  cl.ids.push_back(cell.ID.get_compact());
-  cl.tots.push_back(cell.TOT);
-  if (cell.LVL1 < cl.lvl1min)
-    cl.lvl1min = cell.LVL1;
-}
+  static inline int getCellRow(const typename PixelClusteringTool::Cell& cell) { return cell.ROW; }
+  static inline int getCellColumn(const typename PixelClusteringTool::Cell& cell) { return cell.COL; }
+  static inline void clusterReserve(PixelClusteringTool::Cluster& cl,
+				    std::size_t n)
+  {
+    cl.ids.reserve(n);
+    cl.tots.reserve(n);
+  }  
+  static inline void clusterAddCell(PixelClusteringTool::Cluster& cl,
+				    const PixelClusteringTool::Cell& cell)
+  {
+    cl.ids.push_back(cell.ID);
+    cl.tots.push_back(cell.TOT);
+    if (cell.LVL1 < cl.lvl1min)
+      cl.lvl1min = cell.LVL1;
+  }
 
 StatusCode PixelClusteringTool::initialize()
 {
   ATH_MSG_DEBUG("Initializing " << name() << " ...");
-  ATH_CHECK(m_pixelRDOTool.retrieve());
   ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
-  if (not m_chargeDataKey.empty()) ATH_CHECK(m_pixelReadout.retrieve());
-  
+  ATH_CHECK(m_pixelReadout.retrieve());
+
   ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
 
+  ATH_CHECK( detStore()->retrieve(m_pixelID, "PixelID") );
+  
   ATH_MSG_DEBUG(name() << " successfully initialized");
   return StatusCode::SUCCESS;
 }
@@ -58,7 +61,6 @@ PixelClusteringTool::PixelClusteringTool(
 StatusCode
 PixelClusteringTool::makeCluster(const EventContext& ctx,
 				 PixelClusteringTool::Cluster &cluster,
-				 const PixelID& pixelID,
 				 const InDetDD::SiDetectorElement* element,
 				 const InDetDD::PixelModuleDesign& design,
 				 const PixelChargeCalibCondData *calibData,
@@ -66,26 +68,26 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 				 xAOD::PixelCluster& xaodcluster) const
 { 
 
-  InDetDD::SiLocalPosition pos_acc(0,0);
+  Amg::Vector2D pos_acc(0,0);
   int tot_acc = 0;
 
   std::vector<float> chargeList;
   if (calibData) chargeList.reserve(cluster.ids.size());
   
-  int colmax = std::numeric_limits<int>::min();
-  int rowmax = std::numeric_limits<int>::min();
-  int colmin = std::numeric_limits<int>::max();
-  int rowmin = std::numeric_limits<int>::max();
+  InDetDD::PixelDiodeTree::CellIndexType rowmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
+  InDetDD::PixelDiodeTree::CellIndexType colmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
+  InDetDD::PixelDiodeTree::CellIndexType rowmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  InDetDD::PixelDiodeTree::CellIndexType colmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmin_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmax_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition rowmin_diode{};
+  InDetDD::PixelDiodeTree::DiodeProxyWithPosition rowmax_diode{};
 
   // We temporary comment this since it is not used
   // bool hasGanged = false;
-  
-  Identifier moduleID = element->identify();
+
   IdentifierHash moduleHash = element->identifyHash();
 
-  // This could be moved outside the cluster loop
-  bool multiChip = design.numberOfCircuits() > 1;
-    
   for (size_t i = 0; i < cluster.ids.size(); i++) {
 
     //Construct the identifier class
@@ -100,19 +102,26 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 
     int tot = cluster.tots.at(i);
     float charge = tot;
-        
+
+    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(id),
+                                                m_pixelID->eta_index(id));
+    InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
+
     if (calibData) {
 
       if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
 	ATH_MSG_ERROR("Chip type is not recognized!");
 	return StatusCode::FAILURE;
       }
-      
-      // The calibration strategy is updated for each element 
+
+      // The calibration strategy is updated for each element
       // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
       // Single FE modules could have an optimized getCharge function where the calib constants are cached
-      int feValue = multiChip ? m_pixelReadout->getFE(id, moduleID, element) : 0;
-      charge = calibData->getCharge(m_pixelReadout->getDiodeType(id,element),
+      std::uint32_t feValue = design.getFE(si_param);
+      auto diode_type = design.getDiodeType(si_param);
+
+      charge = calibData->getCharge(diode_type,
 				    calibStrategy,
 				    moduleHash,
 				    feValue,
@@ -120,16 +129,24 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
       chargeList.push_back(charge);
     }
     
-    const int row = pixelID.phi_index(id);
-    rowmax = std::max(rowmax, row);
-    rowmin = std::min(rowmin, row);
-           
-    const int col = pixelID.eta_index(id);
-    colmax = std::max(colmax, col);
-    colmin = std::min(colmin, col);
-    
-    InDetDD::SiCellId si_cell = element->cellIdFromIdentifier(id);
-    InDetDD::SiLocalPosition pos = design.localPositionOfCell(si_cell);
+    const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];
+    const InDetDD::PixelDiodeTree::CellIndexType &col = diode_idx[1];
+    if (row>rowmax) {
+       rowmax=row;
+       rowmax_diode = si_param;
+    }
+    if (row<rowmin) {
+       rowmin=row;
+       rowmin_diode = si_param;
+    }
+    if (col>colmax) {
+       colmax=col;
+       colmax_diode = si_param;
+    }
+    if (col<colmin) {
+       colmin=col;
+       colmin_diode = si_param;
+    }
 
     // We compute the digital position as a sum of all RDO positions
     // all with the same weight of 1
@@ -137,10 +154,10 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     // we observe it to be worse than the digital position
     // ToT-weighted center of gravity must not be used
     if (m_useWeightedPos) {
-      pos_acc += charge * pos;
+      pos_acc += charge * si_param.position();
       tot_acc += charge;
     } else {
-      pos_acc += pos;
+      pos_acc += si_param.position();
       tot_acc += 1;
     }
     
@@ -152,9 +169,9 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   
   const int colWidth = colmax - colmin + 1;
   const int rowWidth = rowmax - rowmin + 1;
-  double etaWidth = design.widthFromColumnRange(colmin, colmax);
-  double phiWidth = design.widthFromRowRange(rowmin, rowmax);
-  InDet::SiWidth siWidth(Amg::Vector2D(rowWidth,colWidth), Amg::Vector2D(phiWidth,etaWidth));
+
+  double etaWidth = colmax_diode.xEtaMax() - colmin_diode.xEtaMin(); // design.widthFromColumnRange(colmin, colmax);
+  double phiWidth = rowmax_diode.xPhiMax() - rowmin_diode.xPhiMin(); // design.widthFromColumnRange(colmin, colmax);
 
   // ask for Lorentz correction, get global position
   double shift = m_pixelLorentzAngleTool->getLorentzShift(moduleHash, ctx);
@@ -173,12 +190,12 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   float width0, width1;
   if (m_broadErrors) {
       // Use cluster width
-      width0 = siWidth.phiR();
-      width1 = siWidth.z();
+      width0 = phiWidth;
+      width1 = etaWidth;
   } else {
       // Use average pixel width
-      width0 = siWidth.phiR() / siWidth.colRow().x();
-      width1 = siWidth.z() / siWidth.colRow().y();
+      width0 = phiWidth / rowWidth;
+      width1 = etaWidth / colWidth;
   }
 
   // Actually create the cluster (i.e. fill the values)
@@ -189,7 +206,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   localCovariance(1, 1) = width1 * width1 / 12.0;
   
   xaodcluster.setMeasurement<2>(moduleHash, localPosition, localCovariance);
-  xaodcluster.setIdentifier( element->identifierOfPosition(locpos).get_compact() );
+  xaodcluster.setIdentifier( cluster.ids.front() );
   xaodcluster.setRDOlist(std::move(cluster.ids));
   xaodcluster.globalPosition() = globalPos.cast<float>();
   xaodcluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(cluster.tots) );
@@ -197,81 +214,147 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   xaodcluster.setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(chargeList) );
   xaodcluster.setChargelist(std::move(chargeList));
   xaodcluster.setLVL1A(cluster.lvl1min);
-  xaodcluster.setChannelsInPhiEta(siWidth.colRow()[0],
-				  siWidth.colRow()[1]);
-  xaodcluster.setWidthInEta(static_cast<float>(siWidth.widthPhiRZ()[1]));
+  xaodcluster.setChannelsInPhiEta(rowWidth,colWidth);
+  xaodcluster.setWidthInEta(static_cast<float>(etaWidth));
   xaodcluster.setIsSplit(false);
   xaodcluster.setSplitProbabilities(0.0, 0.0);
     
   return StatusCode::SUCCESS;
 }
 
+StatusCode
+PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
+				const RawDataCollection& RDOs,
+				const InDet::SiDetectorElementStatus& pixelDetElStatus,
+				const InDetDD::SiDetectorElement& element,
+				std::vector<ClusterCollection>& collection) const
+{
+  IdentifierHash idHash = RDOs.identifyHash();
+  if ( not pixelDetElStatus.isGood(idHash) ) {
+    // the module being flagged as bad is not a failure
+    // An empty cluster collection needs to be added because the assumption
+    // is that there is one element per element RawDataCollection.
+    collection.emplace_back();
+    return StatusCode::SUCCESS;
+  }
+
+  // Retrieve the cells from the detector element
+  CellCollection cells = unpackRDOs(RDOs, pixelDetElStatus, element);
+  
+  ClusterCollection clusters =
+    Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
+    (cells, Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
+  collection.push_back( std::move(clusters) );
+  
+  return StatusCode::SUCCESS;
+}
+
 
 StatusCode
-PixelClusteringTool::clusterize(const RawDataCollection& RDOs,
-				const PixelID& pixelID,
-				const EventContext& ctx,
-				ClusterContainer& container) const
+PixelClusteringTool::makeClusters(const EventContext& ctx,
+				  typename IPixelClusteringTool::ClusterCollection& clusters,
+				  const InDetDD::SiDetectorElement& element,
+				  typename ClusterContainer::iterator itrContainer) const
 {
-
-    // Retrieve the detector element
-    const InDetDD::SiDetectorElement* element = m_pixelRDOTool->checkCollection(RDOs, ctx);
-    if (element == nullptr) {
-       // the RDO tool will return nullptr if the module is flagged bad, which is not a failure.
-       return StatusCode::SUCCESS;
-    }
-
-    // Retrieve the calibration data
-    const PixelChargeCalibCondData *calibData = nullptr;
-    if (not m_chargeDataKey.empty()) {
-      SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
-      calibData = calibDataHandle.cptr();
-      
-      if (!calibData) {
+  // We'd need a smarter move here!!!
+  
+  // Retrieve the calibration data
+  const PixelChargeCalibCondData *calibData = nullptr;
+  if (not m_chargeDataKey.empty()) {
+    SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle = SG::makeHandle( m_chargeDataKey, ctx );
+    calibData = calibDataHandle.cptr();
+    
+    if (!calibData) {
       ATH_MSG_ERROR("PixelChargeCalibCondData requested but couldn't be retrieved from " << m_chargeDataKey.key());
       return StatusCode::FAILURE;
+    }
+  }
+  
+  // Get the element design
+  const InDetDD::PixelModuleDesign& design = 
+    static_cast<const InDetDD::PixelModuleDesign&>(element.design());
+  
+  // Get the calibration strategy for this module. 
+  // Default to RD53 if the calibData is not available. That is fine because it won't be used anyway
+  auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element.identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
+  
+  for (typename IPixelClusteringTool::Cluster& cl : clusters) {
+    xAOD::PixelCluster* xaodCluster = *itrContainer;
+    ATH_CHECK(makeCluster(ctx,
+			  cl,
+			  &element,
+			  design,
+			  calibData,
+			  calibrationStrategy,
+			  *xaodCluster));
+    ++itrContainer;
+  }
+  
+  return StatusCode::SUCCESS;
+}
+
+typename IPixelClusteringTool::CellCollection
+PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
+				const InDet::SiDetectorElementStatus& pixelDetElStatus,
+				const InDetDD::SiDetectorElement& element) const
+{
+  // Get the element design
+  const InDetDD::PixelModuleDesign& design =
+    static_cast<const InDetDD::PixelModuleDesign&>(element.design());
+  CellCollection cells;
+  cells.reserve(300);
+  
+  const IdentifierHash& idHash = RDOs.identifyHash();
+  for (const auto *const rdo : RDOs) {
+    const Identifier& rdoID = rdo->identify();
+    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+      = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(rdoID),
+                                               m_pixelID->eta_index(rdoID));
+    InDetDD::PixelDiodeTree::DiodeProxy si_param ( design.diodeProxyFromIdx(diode_idx));
+    std::uint32_t fe = design.getFE(si_param);
+    
+    // check if good RDO
+    // the pixel RDO tool here says always good if m_useModuleMap is false
+    if (not pixelDetElStatus.isChipGood(idHash, fe)) {
+      continue;
+    }
+    
+    const int lvl1 = rdo->getLVL1A();
+    const int tot = rdo->getToT();
+    
+    cells.emplace_back(m_pixelID->phi_index(rdoID),
+                       m_pixelID->eta_index(rdoID),
+                       tot,
+                       lvl1,
+                       rdoID.get_compact());
+    
+    if ( m_checkGanged ) {
+      std::optional<Identifier> gangedID = isGanged(rdoID, element);
+      if (gangedID.has_value()) {
+        cells.emplace_back(m_pixelID->phi_index(*gangedID),
+                           m_pixelID->eta_index(*gangedID),
+                           tot,
+                           lvl1,
+                           gangedID->get_compact());
       }
     }
-
-    // Retrieve the cells from the detector element
-    std::vector<InDet::UnpackedPixelRDO> cells =
-	  m_pixelRDOTool->getUnpackedPixelRDOs(RDOs, pixelID, element, ctx);
-
-    // Get the calibration strategy for this module. 
-    // Default to RD53 if the calibData is not available. That is fine because it won't be used anyway
-    auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element->identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
-
-    // Get the element design
-    const InDetDD::PixelModuleDesign& design = 
-     static_cast<const InDetDD::PixelModuleDesign&>(element->design());
-        
-    ClusterCollection clusters =
-      Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
-      (cells, Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
-
-
-    std::size_t previousSizeContainer = container.size();
-    // Fast insertion trick
-    std::vector<xAOD::PixelCluster*> toAddCollection;
-    toAddCollection.reserve(clusters.size());
-    for (std::size_t i(0); i<clusters.size(); ++i)
-      toAddCollection.push_back(new xAOD::PixelCluster());
-    container.insert(container.end(), toAddCollection.begin(), toAddCollection.end());
     
-    for (std::size_t i(0); i<clusters.size(); ++i) {
-      Cluster& cluster = clusters[i];
-      
-      ATH_CHECK(makeCluster(ctx,
-			    cluster,
-			    pixelID,
-			    element,
-			    design,
-			    calibData,
-			    calibrationStrategy,
-			    *container[previousSizeContainer+i]));
-    }
+  }
 
-    return StatusCode::SUCCESS;
+  return cells;
+}
+
+inline std::optional<Identifier>
+PixelClusteringTool::isGanged(const Identifier& rdoID,
+			      const InDetDD::SiDetectorElement& element)
+{
+  // If the pixel is ganged, returns a new identifier for it
+  InDetDD::SiCellId cellID = element.cellIdFromIdentifier( rdoID );
+  if ( element.numberOfConnectedCells( cellID ) > 1 ) {
+    InDetDD::SiCellId gangedCellID = element.connectedCell( cellID, 1 );
+    return element.identifierFromCellId( gangedCellID );
+  } 
+  return std::nullopt;
 }
   
 } // namespace ActsTrk

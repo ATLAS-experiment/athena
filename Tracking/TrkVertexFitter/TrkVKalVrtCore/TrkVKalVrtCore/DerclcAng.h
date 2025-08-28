@@ -13,9 +13,11 @@ namespace Trk {
 class VKPhiConstraint;
 class VKThetaConstraint;
 class VKPlaneConstraint;
+class VKRadiusConstraint;
 void calcPhiConstraint( VKPhiConstraint * cnst);
 void calcThetaConstraint( VKThetaConstraint * cnst);
 void calcPlaneConstraint( VKPlaneConstraint * cnst);
+void calcRadiusConstraint( VKRadiusConstraint * cnst);
 }  // namespace Trk
 
 #endif

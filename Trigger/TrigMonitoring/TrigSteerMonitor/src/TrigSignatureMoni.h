@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGSTEERMONITOR_TRIGSIGNATUREMONI_H
 #define TRIGSTEERMONITOR_TRIGSIGNATUREMONI_H 1
@@ -8,22 +8,23 @@
 #include <mutex>
 #include <memory>
 #include <vector>
+#include <map>
+#include <unordered_map>
+
 #include <TH2.h>
 
+#include "DecisionCollectorTool.h"
+#include "TimeDivider.h"
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaKernel/AlgorithmTimer.h"
 #include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/LockedHandle.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODTrigger/versions/TrigComposite_v1.h"
-#include "DecisionCollectorTool.h"
 #include "TrigConfData/HLTMenu.h"
 #include "TrigConfData/L1Menu.h"
-#include "TrigConfData/DataStructure.h"
 
-#include "TimeDivider.h"
-#include "AthenaKernel/AlgorithmTimer.h"
 #include "CxxUtils/checker_macros.h"
 
 // Forward declarations
@@ -36,8 +37,7 @@ class IIncidentSvc;
 class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListener>
 { 
  public: 
-
-  TrigSignatureMoni( const std::string& name, ISvcLocator* pSvcLocator );
+  using base_class::base_class;
 
   virtual StatusCode  initialize() override;
   virtual StatusCode  start() override;
@@ -111,14 +111,15 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
   RateHistogram m_rateHistogram;
   RateHistogram m_sequenceHistogram;
 
-  std::map<unsigned int, int> m_chainIDToBinMap; //!< Chain id to histogram bin map
-  std::map<std::string, int> m_nameToBinMap; //!< Sequence/group/bunchgroup name to bin map
-  std::map<std::string, int> m_sequenceToBinMap; //!< Sequence to bin map for sequence histogram
-  std::map<unsigned int, std::set<std::string>> m_chainIDToBunchMap; //!< Chain ID to bunchgroup name map
+  // Unordered maps for fast lookup
+  std::unordered_map<unsigned int, int> m_chainIDToBinMap; //!< Chain id to histogram bin map
+  std::unordered_map<std::string, int> m_nameToBinMap; //!< Sequence/group/bunchgroup name to bin map
+  std::unordered_map<std::string, int> m_sequenceToBinMap; //!< Sequence to bin map for sequence histogram
+
+  // Regular maps for ordered iteration
   std::map<std::string, TrigCompositeUtils::DecisionIDContainer> m_groupToChainMap; //!< Group name to chain objects map
   std::map<std::string, TrigCompositeUtils::DecisionIDContainer> m_streamToChainMap; //!< Stream name to chain objects map, excluding express
   std::map<std::string, TrigCompositeUtils::DecisionIDContainer> m_expressChainMap; //!< Stream name to chain objects map, including only express
-
 
   // Returns number of chains + groups + sequencers based on the menu handle
   int nBinsX(SG::ReadHandle<TrigConf::HLTMenu>& ) const;
@@ -129,18 +130,8 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
   // Returns number of chains based on the menu handle
   int nChains(SG::ReadHandle<TrigConf::HLTMenu>& ) const;
 
-  // Returns number of BCIDs to monitor
-  int nBCIDs() const;
-
-  // Returns number of sequences
-  int nSequenceBins() const;
-
   // Returns number of steps
   int nSteps() const;
-
-  // Returns number of base steps: in, after ps, out steps
-  int nBaseSteps() const;
-
 
   // Init different types of histograms
   StatusCode initHist(LockedHandle<TH2>&, SG::ReadHandle<TrigConf::HLTMenu>&, bool = true);
@@ -152,7 +143,7 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
   StatusCode fillRate(const TrigCompositeUtils::DecisionIDContainer&, int) const;
   StatusCode fillHistogram(const TrigCompositeUtils::DecisionIDContainer&, int, LockedHandle<TH2>&) const;
   StatusCode fillSequences(const std::set<std::string>&) const;
-  StatusCode fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>&, const TrigCompositeUtils::DecisionIDContainer&) const;
+  StatusCode fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>&, const TrigCompositeUtils::DecisionIDContainer&, int) const;
 };
 
 #endif //> !TRIGSTEERMONITOR_TRIGSIGNATUREMONI_H

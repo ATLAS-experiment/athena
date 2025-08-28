@@ -1,20 +1,6 @@
 <lcgdict>
 
-  <class name="CP::ChargeSelectorAlg" />
-  <class name="CP::MissingETPlusTransverseMassSelectorAlg" />
-  <class name="CP::MissingETSelectorAlg" />
-  <class name="CP::DileptonInvariantMassSelectorAlg" />
-  <class name="CP::DileptonInvariantMassWindowSelectorAlg" />
-  <class name="CP::TransverseMassSelectorAlg" />
-  <class name="CP::SaveFilterAlg" />
-  <class name="CP::SignEnums" />
-  <class name="CP::NObjectPtSelectorAlg" />
-  <class name="CP::NObjectMassSelectorAlg" />
-  <class name="CP::NLargeRJetMassWindowSelectorAlg" />
-  <class name="CP::DileptonOSSFInvariantMassWindowSelectorAlg" />
-  <class name="CP::SumNLeptonPtSelectorAlg" />
-  <class name="CP::JetNGhostSelectorAlg" />
-  <class name="CP::RunNumberSelectorAlg" />
+  <enum name="CP::SignEnums" />
 
 </lcgdict>
 

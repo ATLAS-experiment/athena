@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CONTROL_STOREGATE_SEGMEMSVC_H
@@ -23,11 +23,9 @@
  * @param  No user settable jobOptions
  *      
  * @author Charles Leggett
- * $Id: $
  **/
 
-class SegMemSvc: public Service,
-                 public IIncidentListener {
+class SegMemSvc: public extends<Service, IIncidentListener> {
 
 public:
 
@@ -38,25 +36,9 @@ public:
     INCIDENT = 2
   };
   
-  ////////////////////////////////////////////////////////////////////////
-  /// \name Internals: Gaudi boilerplate
-  //@{
+  virtual StatusCode initialize() override;
+  virtual void handle(const Incident&) override;
 
-  virtual StatusCode initialize();
-  virtual StatusCode reinitialize();
-  virtual StatusCode finalize();
-  
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
-  static const InterfaceID& interfaceID() { 
-    static const InterfaceID IID("SegMemSvc", 1, 0);
-    return IID; 
-  }
-
-  virtual void handle(const Incident&);
-
-  //@}
-
-  
   ////////////////////////////////////////////////////////////////////////
   /// \name Client Interface: allocate and free memory
   //@{

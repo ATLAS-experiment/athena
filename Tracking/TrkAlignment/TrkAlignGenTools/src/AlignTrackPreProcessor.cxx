@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenTools/AlignTrackPreProcessor.h"
@@ -9,17 +9,7 @@
 
 //Need to update the code to TrackParticles? The track Parameters of the track particles will be calculated wrt the new Beam Spot position.
 
-//#include "xAODTracking/TrackParticle.h"
-//#include "xAODTracking/TrackParticleContainer.h"
-
 #include "TrkEventPrimitives/ParticleHypothesis.h"
-#include "TrkFitterInterfaces/IGlobalTrackFitter.h"
-
-//Old Interface
-//#include "TrkToolInterfaces/ITrackSelectorTool.h"
-
-
-
 
 #include "TrkAlignEvent/AlignTrack.h"
 #include "EventPrimitives/EventPrimitives.h"
@@ -31,41 +21,9 @@ namespace Trk {
                                                  const std::string & name,
                                                  const IInterface  * parent)
     : AthAlgTool(type,name,parent)
-    , m_trackFitterTool("Trk::GlobalChi2Fitter/InDetTrackFitter")
-    , m_SLTrackFitterTool("")
-    , m_trackSelectorTool("")
-    , m_runOutlierRemoval(false)
-    , m_particleHypothesis(Trk::nonInteracting)
-    , m_useSingleFitter(false)
-    , m_selectHits(false)
-    , m_fixMomentum(false)
   {
     declareInterface<IAlignTrackPreProcessor>(this);
-
-    declareProperty("RefitTracks", m_refitTracks = true);
-
-    declareProperty("TrackFitterTool",   m_trackFitterTool);
-    declareProperty("SLTrackFitterTool", m_SLTrackFitterTool);
-    declareProperty("UseSingleFitter",   m_useSingleFitter = false);
-
-    declareProperty("StoreFitMatricesAfterRefit", m_storeFitMatricesAfterRefit = true);
-
-    declareProperty("TrackSelectorTool", m_trackSelectorTool);
-    declareProperty("SelectTracks", m_selectTracks = false);
-
-    declareProperty("ParticleHypothesis", m_particleHypothesis);
-    declareProperty("RunOutlierRemoval",  m_runOutlierRemoval = false);
-
-    declareProperty("HitQualityTool", m_hitQualityTool);
-    declareProperty("SelectHits", m_selectHits);
-    declareProperty("FixMomentum", m_fixMomentum);
-
-    m_logStream = nullptr;
   }
-
-  //________________________________________________________________________
-  AlignTrackPreProcessor::~AlignTrackPreProcessor()
-  = default;
 
   //________________________________________________________________________
   StatusCode AlignTrackPreProcessor::initialize()
@@ -74,7 +32,7 @@ namespace Trk {
     if (m_trackFitterTool.retrieve().isSuccess())
       ATH_MSG_INFO("Retrieved " << m_trackFitterTool);
     else{
-      msg(MSG::FATAL) << "Could not get " << m_trackFitterTool << endmsg;
+      ATH_MSG_FATAL("Could not get " << m_trackFitterTool);
       return StatusCode::FAILURE;
     }
 
@@ -83,19 +41,19 @@ namespace Trk {
       if (m_SLTrackFitterTool.retrieve().isSuccess())
         ATH_MSG_INFO("Retrieved " << m_SLTrackFitterTool);
       else {
-        msg(MSG::FATAL) << "Could not get " << m_SLTrackFitterTool << endmsg;
+        ATH_MSG_FATAL("Could not get " << m_SLTrackFitterTool);
         return StatusCode::FAILURE;
       }
     }
 
     if(m_selectTracks) {
       if(m_trackSelectorTool.empty()) {
-        msg(MSG::FATAL) << "TrackSelectorTool not specified : " << m_trackSelectorTool << endmsg;
+        ATH_MSG_FATAL("TrackSelectorTool not specified : " << m_trackSelectorTool);
         return StatusCode::FAILURE;
       }
       else if(m_trackSelectorTool.retrieve().isFailure())
       {
-        msg(MSG::FATAL) << "Could not get " << m_trackSelectorTool << endmsg;
+        ATH_MSG_FATAL("Could not get " << m_trackSelectorTool);
         return StatusCode::FAILURE;
       }
       ATH_MSG_INFO("Retrieved " << m_trackSelectorTool);
@@ -103,14 +61,13 @@ namespace Trk {
 
     if (m_selectHits) {
       if(m_hitQualityTool.empty()) {
-  msg(MSG::FATAL) << "HitQualityTool not specified : " << m_hitQualityTool << endmsg;
-  return StatusCode::FAILURE;
+	ATH_MSG_FATAL("HitQualityTool not specified : " << m_hitQualityTool);
+	return StatusCode::FAILURE;
       }
-      else if(m_hitQualityTool.retrieve().isFailure())
-  {
-    msg(MSG::FATAL) << "Could not get " << m_trackSelectorTool << endmsg;
-    return StatusCode::FAILURE;
-  }
+      else if(m_hitQualityTool.retrieve().isFailure()){
+	ATH_MSG_FATAL("Could not get " << m_trackSelectorTool);
+	return StatusCode::FAILURE;
+      }
       ATH_MSG_INFO("Retrieved " << m_hitQualityTool);
     }
 
@@ -180,7 +137,8 @@ namespace Trk {
         // refit track
         if (m_refitTracks &!m_selectHits) {
 
-          newTrack=fitter->alignmentFit(alignCache,*origTrack,m_runOutlierRemoval,ParticleHypothesis(m_particleHypothesis));
+          newTrack=fitter->alignmentFit(alignCache,*origTrack,m_runOutlierRemoval,
+					static_cast<ParticleHypothesis>(m_particleHypothesis.value()));
           if (!newTrack) {
             ATH_MSG_DEBUG("Track refit yielded no track. Skipping the track.");
             continue;
@@ -195,12 +153,11 @@ namespace Trk {
 
         at = new AlignTrack(*newTrack);
 
-        if (msgLvl(MSG::DEBUG) && !msgLvl(MSG::VERBOSE)) {
-          msg(MSG::DEBUG)<<"before refit: "<<endmsg;
+        if (msgLvl(MSG::DEBUG)) {
+          ATH_MSG_DEBUG("before refit: ");
           AlignTrack::dumpLessTrackInfo(*origTrack,msg(MSG::DEBUG));
-          msg(MSG::DEBUG)<<"after refit: "<<endmsg;
+          ATH_MSG_DEBUG("after refit: ");
           AlignTrack::dumpLessTrackInfo(*newTrack,msg(MSG::DEBUG));
-          msg(MSG::DEBUG)<<endmsg;
         }
 
         // store fit matrices
@@ -218,10 +175,10 @@ namespace Trk {
       else { // in case no selection is performed, keep all tracks
         at=new AlignTrack(*newTrack);
       }
-  	if (m_fixMomentum)
- 	   {
-  	     at->AlignTrack::setRefitQovP(false);
- 	   }
+      if (m_fixMomentum)
+	{
+	  at->AlignTrack::setRefitQovP(false);
+	}
 
       newTracks->push_back(at);
     }
@@ -261,7 +218,8 @@ namespace Trk {
     newTrack = (fitter->fit(Gaudi::Hive::currentContext(),
                             selectedMeasurementSet,
                             *inputTrack->perigeeParameters(),
-                            m_runOutlierRemoval,ParticleHypothesis(m_particleHypothesis))).release();
+                            m_runOutlierRemoval,
+			    static_cast<ParticleHypothesis>(m_particleHypothesis.value()))).release();
 
     return newTrack;
   }

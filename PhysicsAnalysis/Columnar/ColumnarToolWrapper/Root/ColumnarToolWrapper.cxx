@@ -122,6 +122,18 @@ namespace columnar
   void ColumnarToolWrapperData ::
   setColumnVoid (const std::string& name, std::size_t size, const void *dataPtr, const std::type_info& type, bool isConst)
   {
+    // If dataPtr is null, we use a dummy value to avoid issues in which
+    // we check whether a column exists by checking for a null pointer,
+    // which would return false for columns that were set with a
+    // nullptr.
+    if (dataPtr == nullptr)
+    {
+      if (size != 0) [[unlikely]]
+        throw std::runtime_error ("dataPtr is null but size is not zero for column: " + name);
+      static const unsigned dummyValue = 0;
+      dataPtr = &dummyValue;
+    }
+
     auto column = m_wrapper->m_columns.find (name);
     if (column == m_wrapper->m_columns.end())
       throw std::runtime_error ("unknown column name: " + name);
@@ -232,7 +244,7 @@ namespace columnar
       expectedSize += 1u;
 
     if (m_dataSize[column.second.index] != expectedSize)
-      throw std::runtime_error ("column size doesn't match expected size: " + column.first + ", found " + std::to_string (m_dataSize[column.second.index]) + " vs " + std::to_string (expectedSize));
+      throw std::runtime_error ("column size doesn't match expected size: " + column.first + ", found " + std::to_string (m_dataSize[column.second.index]) + " vs exptected=" + std::to_string (expectedSize) + " isOffset=" + std::to_string (column.second.isOffset));
 
     if (column.second.isOffset)
     {

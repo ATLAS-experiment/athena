@@ -528,6 +528,7 @@ namespace ST {
     std::string m_jetUncertaintiesAnalysisFile;
     std::string m_jetUncertaintiesCalibArea;
     std::string m_jetUncertaintiesMCType;
+    std::string m_fatJetUncertaintiesMCType;
     bool m_jetUncertaintiesPDsmearing;
 
     bool m_useBtagging;

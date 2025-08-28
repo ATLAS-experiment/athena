@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //
 //  ReadFromXmlDom.cxx
@@ -101,7 +101,7 @@ ReadFromXmlDom::initialize() {
     xercesc::chLatin_L, xercesc::chLatin_S, xercesc::chNull
   };
   xercesc::DOMImplementation* impl = xercesc::DOMImplementationRegistry::getDOMImplementation(gLS);
-  xercesc::DOMLSParser* parser = ((xercesc::DOMImplementationLS*) impl)->createLSParser(
+  xercesc::DOMLSParser* parser = static_cast<xercesc::DOMImplementationLS*> (impl)->createLSParser(
     xercesc::DOMImplementationLS::MODE_SYNCHRONOUS, nullptr);
   xercesc::DOMConfiguration* config = parser->getDomConfig();
   if (config->canSetParameter(xercesc::XMLUni::fgXercesDoXInclude, true)) {
@@ -149,7 +149,7 @@ ReadFromXmlDom::parseXmlElement(const xercesc::DOMElement* element) {
   // Use this array to store the primary returned attribute values, which will be Xerces strings
   std::array<XercesString, NGROUPS> xercesValues;
   //
-  constexpr unsigned int NAXES = 3; // allow only two axes, could be extended later
+  constexpr unsigned int NAXES = 3; // allow only three axes, could be extended later
   const std::array<std::string, NAXES> allowedAxisNames = {
     "x", "y", "z"
   };
@@ -178,7 +178,7 @@ ReadFromXmlDom::parseXmlElement(const xercesc::DOMElement* element) {
   if (not axisDef0) return s;
   const xercesc::DOMElement* axisDef1 = axisDef0->getNextElementSibling();
   if (not axisDef1) return s; //no y axis, abort
-  // only allow two axes, but could be ordered x-y or y-x. The following assumes x, y, z ordering for now.
+  // but could be ordered x-y or y-x. The following assumes x, y, z ordering for now.
   std::string axisName0 = toNative(axisDef0->getTagName());
   std::string axisName1 = toNative(axisDef1->getTagName());
   const xercesc::DOMElement* axisDef2 = axisDef1->getNextElementSibling();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetAlignDBTool.cxx
@@ -59,31 +59,9 @@ NTuple::Item<float> nt_gamma;
 
 InDetAlignDBTool::InDetAlignDBTool(const std::string& type,
            const std::string& name, const IInterface* parent)
-  : AthAlgTool(type,name,parent),
-    m_pixid(nullptr),
-    m_sctid(nullptr),
-    m_pixman(nullptr),
-    m_sctman(nullptr),
-    m_attrListCollection(nullptr),
-    m_par_newdb(true),
-    m_par_scttwoside(false),
-    m_par_fake(0),
-    m_par_condstream("AthenaOutputStreamTool/AthenaOutputStreamTool", this),
-    m_par_dbroot( "/Indet/Align" ),
-    m_par_dbkey( "/Indet/Align" ),
-    m_par_oldTextFile(false),
-    m_dynamicDB(false),
-    m_forceUserDBConfig(false)
+  : AthAlgTool(type,name,parent)
 {
   declareInterface<IInDetAlignDBTool>(this);
-  declareProperty("NewDB",       m_par_newdb);     //Take out at some point; New is misleading!! Very old developments!
-  declareProperty("SCTTwoSide",  m_par_scttwoside);
-  declareProperty("FakeDB",      m_par_fake);
-  declareProperty("CondStream",  m_par_condstream);
-  declareProperty("DBRoot",      m_par_dbroot,"name of the root folder for constants");
-  declareProperty("DBKey",       m_par_dbkey,"base part of the key for loading AlignableTransforms");
-  declareProperty("OldTextFile", m_par_oldTextFile);
-  declareProperty("forceUserDBConfig",m_forceUserDBConfig, "Set to true to override any DB auto-configuration");
 }
 
 InDetAlignDBTool::~InDetAlignDBTool()
@@ -143,7 +121,7 @@ StatusCode InDetAlignDBTool::initialize()
       }
   }
 
-  m_par_dbkey = m_par_dbroot;
+  m_par_dbkey = m_par_dbroot.value();
 
   if(m_pixman && (detStore()->retrieve(m_pixid).isFailure())) {
     ATH_MSG_FATAL("No Pixel ID Found!");
@@ -450,6 +428,7 @@ std::string InDetAlignDBTool::dirkey(const int det,const int bec,const
                                      int layer, const int level, const int sector) const {
   // given SCT/pixel det/bec/layer/sector, and level (1,2 or 3) return
   // directory key name for associated alignment data
+  // re-write using std::format at some point...
   std::ostringstream result;
   if (m_dynamicDB){
     result << "/Indet/AlignL";
@@ -475,6 +454,7 @@ std::string InDetAlignDBTool::dirkey(const int det,const int bec,const
     }
   }
   return result.str();
+
 }
 
 std::string InDetAlignDBTool::DBMkey(const int det,const int bec,

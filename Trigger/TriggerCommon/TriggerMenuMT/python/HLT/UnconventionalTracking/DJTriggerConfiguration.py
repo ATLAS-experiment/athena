@@ -62,7 +62,7 @@ def DJDispFragment(flags):
     reco_seq = seqAND('UncTrkrecoSeqDJTrigDispRecoSeq')
     acc.addSequence(reco_seq)
 
-    flagsWithTrk = cloneFlagsToActiveConfig(flags, flags.Trigger.InDetTracking.DJetLRT.input_name)
+    flagsWithTrk = cloneFlagsToActiveConfig(flags, flags.Trigger.InDetTracking.DJetLRT.input_name,log)
 
     lrt_algs = trigInDetLRTCfg(flagsWithTrk,
                                flags.Tracking.ActiveConfig.trkTracks_FTF,

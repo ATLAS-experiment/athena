@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes:
@@ -116,14 +116,8 @@ int main( int argc, char* argv[] ) {
    
    // Not a realistic set of systematics - we just want to make sure they can all be applied without breaking the tools
    CP::SystematicSet systSet = {
-     // CP::SystematicVariation("TRK_RES_D0_MEAS"),
-     // CP::SystematicVariation("TRK_RES_Z0_MEAS"),
-     // CP::SystematicVariation("TRK_RES_D0_MEAS", 1), // these options are recommended for advanced users only
-     // CP::SystematicVariation("TRK_RES_Z0_MEAS", 1),
      CP::SystematicVariation("TRK_RES_D0_MEAS", -1),
      CP::SystematicVariation("TRK_RES_Z0_MEAS", -1),
-     CP::SystematicVariation("TRK_RES_D0_DEAD"),
-     CP::SystematicVariation("TRK_RES_Z0_DEAD"),
      CP::SystematicVariation("TRK_BIAS_D0_WM"),
      CP::SystematicVariation("TRK_BIAS_Z0_WM"),
      CP::SystematicVariation("TRK_BIAS_QOVERP_SAGITTA_WM"),

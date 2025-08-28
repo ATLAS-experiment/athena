@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.L1.Base.L1MenuFlags import L1MenuFlags
 import TriggerMenuMT.L1.Menu.Menu_Physics_pp_run3_v1 as physics_menu
@@ -48,24 +48,18 @@ def defineMenu():
         # ATR-22696
         'L1_eTAU60HL',
         'L1_eTAU80HL',
-
-        # ATR-27782 - test eEM M/DR Topo
-        'L1_2DR15-M70-2eEM9L',
-        'L1_2DR15-M70-2eEM12L',
-        'L1_2DR15-0M30-eEM12LeEM9L',
-        'L1_13DR25-25M70-eEM12LeEM9L',
         
-        # jLJ, Production thresholds, not used in commissioning
-        'L1_jLJ60', 'L1_jLJ100', 'L1_jLJ160', 'L1_jLJ200',
         #ATR28783
         'L1_6J15',
         # TOPO
-        'L1_BTAG-MU5VFjJ90',
-        'L1_BTAG-MU8FjJ40_2jJ40p0ETA25'      , 
-        'L1_BTAG-MU8FjJ30_2jJ30p0ETA25_jJ50p0ETA25', 
+        'L1_BTAG-MU5VFjJ40_2jJ30p0ETA25',
+        'L1_BTAG-MU5VFjJ40_2jJ30p0ETA25_jJ50p0ETA25',
+        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25',
+        'L1_BPH-0DR3-eEM9jJ40', 'L1_BPH-0DR3-eEM9jJ40_MU5VF', 'L1_BPH-0DR3-eEM9jJ40_2MU3V',
         'L1_BPH-0M9-EM7-EM5',
         'L1_BPH-0DR3-EM7J15',
-
+        'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25',
+        'L1_BTAG-MU3VFjJ20_2jJ40p0ETA25',
         #ATR-26902
         'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20',
         'L1_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12',
@@ -75,12 +69,9 @@ def defineMenu():
         'L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12',
         'L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12',
         #ATR-29439
-        'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ50',
-        'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40',
-        'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30',
         'L1_cTAU30M_2cTAU20M_3jJ30p0ETA25',
 
-        'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M', 'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M-jJ55',
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M',
         
         # ATR-29651 - Tau+X chains using eTAU20M seeds
         'L1_eEM18M_2eTAU20M_4jJ30', 'L1_eTAU60_2eTAU20M_jXE80', 'L1_eEM18M_2eTAU20M_jXE70', 
@@ -259,7 +250,6 @@ def defineMenu():
         'L1_jJ80p0ETA25':'',
         'L1_jJ85p0ETA21':'',
         'L1_jJ140':'',
-        'L1_jLJ180':'',
 
         # other non-primary
         'L1_jEM25':'',

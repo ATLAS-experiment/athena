@@ -41,6 +41,17 @@ StatusCode JetPFlowSelectionAlg::initialize() {
 StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG(" execute() ... ");
 
+  //Check for invalid combinations of flags
+  if (m_excludeChargedMuonFE && m_includeChargedMuonFE) {
+    ATH_MSG_ERROR("excludeChargedElectronFE and includeChargedMuonFE are mutually exclusive!");
+    return StatusCode::FAILURE;
+  }
+
+  if (m_excludeChargedElectronFE && m_includeChargedElectronFE) {
+    ATH_MSG_ERROR("excludeChargedElectronFE and includeChargedElectronFE are mutually exclusive!");
+    return StatusCode::FAILURE;
+  }
+
   SG::ReadHandle<xAOD::FlowElementContainer> ChargedPFlowObjects(m_ChargedPFlowContainerKey, ctx);
   if (! ChargedPFlowObjects.isValid()){
     ATH_MSG_ERROR("Can't retrieve input container "<< m_ChargedPFlowContainerKey);                  
@@ -94,8 +105,29 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   // Loop over Charged FE objects
   for ( const xAOD::FlowElement* fe : *ChargedPFlowObjects ) {
 
-    // Select FE object if not matched to an electron or muon via links
-    if ( !electronHelper.checkElectronLinks(chargedFE_ElectronLinks(*fe),m_electronID) && !muonHelper.checkMuonLinks(chargedFE_MuonLinks(*fe),m_muonID) ){
+    bool isMuonToExclude = muonHelper.checkMuonLinks(chargedFE_MuonLinks(*fe), m_muonIDToExclude);
+    bool isMuonToInclude = muonHelper.checkMuonLinks(chargedFE_MuonLinks(*fe), m_muonIDToInclude);
+    bool isElectronToInclude = electronHelper.checkElectronLinks(chargedFE_ElectronLinks(*fe), m_electronIDToInclude);
+    bool isElectronToExclude = electronHelper.checkElectronLinks(chargedFE_ElectronLinks(*fe), m_electronIDToExclude);
+
+    bool excludeChargedFE = false;
+
+    //If we have only an exclude list we only need to do:
+    if (m_excludeChargedElectronFE && isElectronToExclude) excludeChargedFE = true;
+    if (m_excludeChargedMuonFE && isMuonToExclude) excludeChargedFE = true;
+
+    //If we have an include list and the include ID is passed, we keep the FE object
+    //Whilst if it otherwise passes excludeID we exclude it
+    //e.g if we want medium  we should only include leptons that pass medium ID,
+    //whilst excluding those that pass loose and NOT medium.
+    if (m_includeChargedElectronFE && isElectronToInclude) excludeChargedFE = false;
+    else if (m_includeChargedElectronFE && isElectronToExclude) excludeChargedFE = true;
+
+    if (m_includeChargedMuonFE && isMuonToInclude) excludeChargedFE = false;
+    else if (m_includeChargedMuonFE && isMuonToExclude) excludeChargedFE = true;
+    
+    // Select FE object if not matched to an electron or muon, to exclude, via links
+    if ( !excludeChargedFE) {
       xAOD::FlowElement* selectedFE = new xAOD::FlowElement();
       selectedChargedPFlowObjects->push_back(selectedFE);
       *selectedFE = *fe; // copies auxdata
@@ -106,27 +138,44 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
 
   } // End loop over Charged FE Objects
 
-
   // Loop over Neutral FE objects
   for ( const xAOD::FlowElement* fe : *NeutralPFlowObjects ) {
 
-    //if links to an electron, then we veto entire neutral FE    
-    if (m_removeNeutralElectronFE){
-      if (electronHelper.checkElectronLinks(neutralFE_ElectronLinks(*fe),m_electronID)) continue;
-    }
+    bool isMuonToExclude = muonHelper.checkMuonLinks(neutralFE_MuonLinks(*fe), m_muonIDToExclude);
+    bool isMuonToInclude = muonHelper.checkMuonLinks(neutralFE_MuonLinks(*fe), m_muonIDToInclude);
+    bool isElectronToInclude = electronHelper.checkElectronLinks(neutralFE_ElectronLinks(*fe), m_electronIDToInclude);
+    bool isElectronToExclude = electronHelper.checkElectronLinks(neutralFE_ElectronLinks(*fe), m_electronIDToExclude);
+
+    //If we specify to exclude, then we exclude if exclude ID is passed
+    //If we specify to include, then we include if include ID is passed - in this case
+    //we might want to e.g include medium electrons, whilst excluding that poass loose ID
+    if (m_excludeNeutralElectronFE && isElectronToExclude) continue;
+    bool vetoElectron_IncludeMode = false;
+    if (m_includeNeutralElectronFE && isElectronToInclude) vetoElectron_IncludeMode = false;
+    else if (m_includeNeutralElectronFE && isElectronToExclude) vetoElectron_IncludeMode = true;
+    if (vetoElectron_IncludeMode) continue;
 
     xAOD::FlowElement* selectedFE = new xAOD::FlowElement();
     selectedNeutralPFlowObjects->push_back(selectedFE);
     *selectedFE = *fe;
 
-    //if links to a muon, then we need to subtract off the muon energy in 
-    //this calorimeter cluster
+    bool excludeNeutralMuon = false;
+    //Muons can have both exclude and include lists
+    //Exclude case is the same as electron exclude case
+    if (m_excludeNeutralMuonFE && isMuonToExclude) excludeNeutralMuon = true;
+    //Include case is more complex - if muon passes includeID we keep it
+    //Whilst if it otherwise passes excludeID we exclude it
+    //e.g if we want medium muons we should only include muons that pass medium ID,
+    //whilst excluding those that pass loose and NOT medium.
+    if (m_includeNeutralMuonFE && isMuonToInclude) excludeNeutralMuon = false;
+    else if (m_includeNeutralMuonFE && isMuonToExclude) excludeNeutralMuon = true;
 
-    if (m_removeNeutralMuonFE && muonHelper.checkMuonLinks(neutralFE_MuonLinks(*fe),m_muonID)){
-        SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector<double> > clusterMuonEnergyFracs(m_neutralFEMuons_efrac_match_DecorKey,ctx); 
-        selectedFE->setP4(muonHelper.adjustNeutralCaloEnergy(clusterMuonEnergyFracs(*fe),*fe));
+    if (excludeNeutralMuon) {
+      // If we are excluding muons, we need to adjust the energy of the neutral FE object
+      // by subtracting the muon energy in this calorimeter cluster
+      SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector<double> > clusterMuonEnergyFracs(m_neutralFEMuons_efrac_match_DecorKey,ctx); 
+      selectedFE->setP4(muonHelper.adjustNeutralCaloEnergy(clusterMuonEnergyFracs(*fe),*fe));
     }
-
 
   } // End loop over Neutral FE Objects
 
@@ -181,7 +230,7 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
 
         //check if charged cluster belongs to an electron, before we put it back as neutral        
         bool belongsToElectron = false;
-        if (m_removeNeutralElectronFE){
+        if (m_excludeNeutralElectronFE){
 
           //get container index of charged cluster and compare to indices of electron topoclusters
           unsigned int chargedClusterIndex = theCluster_charged->index();
@@ -205,15 +254,12 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
 
         if (belongsToElectron) continue;
 
-        bool belongsToMuon = false;
         double muonCaloEnergy = 0.0;
-        if (m_removeNeutralMuonFE){          
+        if (m_excludeNeutralMuonFE){          
           SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector<double> > chargedFE_energy_match_muonReadHandle(m_chargedFE_energy_match_muonReadHandleKey,ctx);
           std::vector<double> muonCaloEnergies = chargedFE_energy_match_muonReadHandle(*chargedFE);
           muonCaloEnergy = muonCaloEnergies[iCluster];
         }
-
-        if (belongsToMuon) continue;
 
         xAOD::FlowElement* newFE = new xAOD::FlowElement();
         selectedNeutralPFlowObjects->push_back(newFE);

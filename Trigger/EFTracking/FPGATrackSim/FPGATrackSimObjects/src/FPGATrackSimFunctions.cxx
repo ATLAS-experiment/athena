@@ -160,18 +160,68 @@ std::vector<float> computeIdealCoords(const FPGATrackSimHit &hit, const double h
 }
 // This is the magnetic field correction for the Hough transform tools
 // and related algorithms, parametrized by region number.
-double fieldCorrection(unsigned region, double qpt, double r)
+double fieldCorrection(unsigned region, double qoverpt, double r)
 {
-  r = r / 1000; // convert to meters
-  if (region == 3)
-    {
-      double cor = 0.1216 * r * r - 0.0533 * r + 0.0069;
-      return -cor * qpt;
-    }
-  else if (region == 4)
-    {
-      double cor = 0.4265 * r * r - 0.0662 * r + 0.0036;
-      return -cor * qpt;
-    }
-  else return 0;
+  double corr = 0;
+  if (region == 34) {
+    corr = 0.0248 + -0.0005727f*r + 0.000000781*r*r;
+  }
+  else if (region == 98) {
+    corr = 0.0465 + -0.0008291f*r + 0.000000951*r*r;
+  }
+  else if (region == 162) {
+    corr = -0.0106 + -0.0003101f*r + 0.000000253*r*r;
+  }
+  else if (region == 226) {
+    corr = -0.0283 + -0.0000953f*r + -0.000001034*r*r;
+  }
+  else if (region == 290) {
+    corr = -0.0308 + 0.0001405f*r + -0.000002490*r*r;
+  }
+  else if (region == 354) {
+    corr = -0.0458 + 0.0010403f*r + -0.000005134*r*r;
+  }
+  else if (region == 418) {
+    corr = -0.2827 + 0.0037327f*r + -0.000011028*r*r;
+  }
+  else if (region == 482) {
+    corr = -0.5366 + 0.0071298f*r + -0.000019784*r*r;
+  }
+  else if (region == 546) {
+    corr = -1.2843 + 0.0158170f*r + -0.000039258*r*r;
+  }
+  else if (region == 610) {
+    corr = -1.5723 + 0.0218720f*r + -0.000058057*r*r;
+  }
+  else if (region == 674) {
+    corr = -1.6054 + 0.0255374f*r + -0.000075211*r*r;
+  }
+  else if (region == 738) {
+    corr = -1.1620 + 0.0218955f*r + -0.000082656*r*r;
+  }
+  else if (region == 802) {
+    corr = -1.0069 + 0.0232949f*r + -0.000108384*r*r;
+  }
+  else if (region == 866) {
+    corr = -0.6938 + 0.0183421f*r + -0.000105477*r*r;
+  }
+  else if (region == 930) {
+    corr = -0.5990 + 0.0176694f*r + -0.000122848*r*r;
+  }
+  else if (region == 994) {
+    corr = -0.6198 + 0.0185393f*r + -0.000151144*r*r;
+  }
+  else if (region == 1058) {
+    corr = -0.6539 + 0.0218236f*r + -0.000196043*r*r;
+  }
+  else if (region == 1122) {
+    corr = -0.8929 + 0.0316982f*r + -0.000308742*r*r;
+  }
+  else if (region == 1186) {
+    corr = -0.7069 + 0.0283101f*r + -0.000328576*r*r;
+  }
+  else if (region == 1250) {
+    corr = -1.2240 + 0.0472546f*r + -0.000538216*r*r;
+  }
+  return -corr*qoverpt;
 }

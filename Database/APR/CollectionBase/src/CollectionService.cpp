@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionBase/CollectionService.h"
@@ -8,9 +8,9 @@
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/boost_tokenizer_headers.h"
 
-#include "POOLCore/Exception.h"
 #include "FileCatalog/IFileCatalog.h"
 
+#include <exception>
 #include <cstring>
 
 using namespace std;
@@ -36,24 +36,18 @@ pool::CollectionService::create( const pool::ICollectionDescription& description
 {
    if( description.name().empty() ) {
       std::string errorMsg = "Must specify name of collection in description input argument.";
-      throw pool::Exception( errorMsg,
-			     "CollectionService::create", 
-			     "CollectionService" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionService \")" );
    }
 
    if( description.type().empty() ) {
       std::string errorMsg = "Must specify type of collection in description input argument.";
-      throw pool::Exception( errorMsg,
-			     "CollectionService::create", 
-			     "CollectionService" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionService \")" );
    }
 
    if ( description.type() == "ImplicitCollection" )  {
       std::string errorMsg = 
          "Can only open a collection of type 'ImplicitCollection' for read transtions.";
-      throw pool::Exception( errorMsg,
-			     "CollectionService::create", 
-			     "CollectionService" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionService \")" );
    }
 
    pool::ICollection::OpenMode openMode = overwrite? pool::ICollection::CREATE_AND_OVERWRITE : pool::ICollection::CREATE;
@@ -64,27 +58,21 @@ pool::CollectionService::create( const pool::ICollectionDescription& description
 pool::ICollection*
 pool::CollectionService::createAndRegister( const pool::ICollectionDescription& description,
                                             bool overwrite,
-                                            std::string logicalName )
+                                            const std::string & logicalName )
 {
    if( description.name().empty() )  {
       std::string errorMsg = "Must specify name of collection in description input argument.";
-      throw pool::Exception( errorMsg,
-			     "CollectionService::createAndRegister", 
-			     "CollectionService" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::createAndRegister \" from \" CollectionService \")" );
    }
 
    if( description.type().empty() )  {
       std::string errorMsg = "Must specify type of collection in description input argument.";
-      throw pool::Exception( errorMsg,
-			     "CollectionService::createAndRegister", 
-			     "CollectionService" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::createAndRegister \" from \" CollectionService \")" );
    }
 
    if ( description.type() == "ImplicitCollection" )  {
       std::string errorMsg = "Cannot register a collection of type 'ImplicitCollection' in a collection catalog.";
-      throw pool::Exception( errorMsg,
-			     "CollectionService::createAndRegister", 
-			     "CollectionService" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::createAndRegister \" from \" CollectionService \")" );
    }
 
    return CollectionFactory::get()->createAndRegister( description,
@@ -95,30 +83,24 @@ pool::CollectionService::createAndRegister( const pool::ICollectionDescription& 
 
 
 bool
-pool::CollectionService::registerExisting( const std::string& name,
-                                           const std::string& type,
-                                           std::string connection,
-                                           std::string logicalName )
+pool::CollectionService::registerExisting( const std::string & name,
+                                           const std::string & type,
+                                           const std::string & connection,
+                                           const std::string & logicalName )
 {
    if( name.empty() )  {
     std::string errorMsg = "Must specify name of collection as input.";
-    throw pool::Exception( errorMsg,
-                           "CollectionService::registerExisting", 
-                           "CollectionService" );
+    throw std::runtime_error( errorMsg + " (APR: \" CollectionService::registerExisting \" from \" CollectionService \")" );
   }
 
    if( type.empty() ) {
     std::string errorMsg = "Must specify type of collection as input.";
-    throw pool::Exception( errorMsg,
-                           "CollectionService::registerExisting", 
-                           "CollectionService" );
+    throw std::runtime_error( errorMsg + " (APR: \" CollectionService::registerExisting \" from \" CollectionService \")" );
   }
 
   if( type == "ImplicitCollection" )  {
     std::string errorMsg = "Cannot register a collection of type 'ImplicitCollection' in a collection catalog.";
-    throw pool::Exception( errorMsg,
-                           "CollectionService::registerExisting",
-                           "CollectionService" );
+    throw std::runtime_error( errorMsg + " (APR: \" CollectionService::registerExisting \" from \" CollectionService \")" );
   }
 
   CollectionDescription description( name, type, connection );
@@ -133,7 +115,7 @@ pool::CollectionService::registerExisting( const std::string& name,
 bool
 pool::CollectionService::registerExisting( ICollection* collection,
 					   bool overwrite,
-                                           std::string logicalName )
+                                           const std::string & logicalName )
 {
   return CollectionFactory::get()->registerExisting( collection,
 						     overwrite,
@@ -145,15 +127,13 @@ pool::CollectionService::registerExisting( ICollection* collection,
 pool::ICollection* 
 pool::CollectionService::handle( const std::string& name,
                                  const std::string& type,
-                                 std::string connection,
+                                 const std::string & connection,
                                  bool readOnly,
                                  pool::ISession* session ) const
 {
    if( ( type == "ImplicitCollection ") && (! readOnly ) )  {
       std::string errorMsg = "Cannot open a collection of type 'ImplicitCollection' for updates.";
-      throw pool::Exception( errorMsg,
-                             "CollectionService::handle",
-                             "CollectionService" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::handle \" from \" CollectionService \")" );
    }
    pool::CollectionDescription description( name, type, connection );
    pool::ICollection::OpenMode openMode = readOnly? ICollection::READ : ICollection::UPDATE;

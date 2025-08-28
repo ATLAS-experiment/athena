@@ -51,6 +51,7 @@ public:
   //
   //--------------------------------------------------------------------------------------------------
   const IFPGATrackSimBinDesc* binDesc() const {return m_binDesc.get();}
+  IFPGATrackSimBinDesc* binDesc() {return m_binDesc.get();}
   const ToolHandleArray<FPGATrackSimBinStep>& steps() const { return m_steps;}
   FPGATrackSimBinStep* lastStep() { return (--m_steps.end())->get(); }
   const FPGATrackSimBinStep* lastStep() const { return (--m_steps.end())->get(); }

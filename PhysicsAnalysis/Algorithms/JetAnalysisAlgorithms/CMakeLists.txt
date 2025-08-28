@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( JetAnalysisAlgorithms )
@@ -15,17 +15,10 @@ atlas_add_library( JetAnalysisAlgorithmsLib
    JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib ${FASTJET_LIBRARIES}
    PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODMuon )
 
-atlas_add_dictionary( JetAnalysisAlgorithmsDict
-   JetAnalysisAlgorithms/JetAnalysisAlgorithmsDict.h
-   JetAnalysisAlgorithms/selection.xml
-   LINK_LIBRARIES JetAnalysisAlgorithmsLib )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( JetAnalysisAlgorithms
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AnaAlgorithmLib JetAnalysisInterfacesLib JetCPInterfaces JetCalibToolsLib
-      JetInterface SelectionHelpersLib SystematicsHandlesLib xAODJet JetAnalysisAlgorithmsLib )
-endif()
+atlas_add_component( JetAnalysisAlgorithms
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES AnaAlgorithmLib JetAnalysisInterfacesLib JetCPInterfaces JetCalibToolsLib
+   JetInterface SelectionHelpersLib SystematicsHandlesLib xAODJet JetAnalysisAlgorithmsLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )
@@ -33,12 +26,14 @@ atlas_install_data( data/* )
 atlas_add_test( TestCPRun2Jets
    SCRIPT CPRun.py  --text-config JetAnalysisAlgorithms/test_configuration_Run2_Jets.yaml -e 30 --input-list $ASG_TEST_FILE_MC
    POST_EXEC_SCRIPT nopost.sh
+   PRIVATE_WORKING_DIRECTORY
    PROPERTIES TIMEOUT 400 
 )
 
 atlas_add_test( TestCPRun3Jets
    SCRIPT CPRun.py  --text-config JetAnalysisAlgorithms/test_configuration_Run3_Jets.yaml -e 30 --input-list $ASG_TEST_FILE_RUN3_MC
    POST_EXEC_SCRIPT nopost.sh
+   PRIVATE_WORKING_DIRECTORY
    PROPERTIES TIMEOUT 400
 )
 

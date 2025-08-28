@@ -11,7 +11,7 @@
 
 # specify python test script 
 package="MuonReleaseTestsR4"
-file="test_muonHLTphase2"
+file="testMuonHLTphase2"
 
 # run in specified directory
 mkdir $file; cd $file

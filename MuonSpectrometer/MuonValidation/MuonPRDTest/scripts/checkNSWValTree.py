@@ -2,7 +2,6 @@
 
 # this script can be used to check the output ntuples of NSWPRDValAlg
 
-from __future__ import print_function
 import os, sys, ROOT, argparse
 
 if __name__ == "__main__":

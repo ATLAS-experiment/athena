@@ -1,15 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ATHENAKERNEL_IOVRANGE_H
- #include "AthenaKernel/IOVRange.h"
-#endif
-#ifndef GAUDIKERNEL_MSGSTREAM_H
- #include "GaudiKernel/MsgStream.h"
-#endif
-
+#include "AthenaKernel/IOVRange.h"
+#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/EventIDRange.h"
+
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
@@ -20,7 +16,6 @@
  *  IOVSvc
  *
  *  Author: Charles Leggett
- *  $Id: IOVRange.cxx,v 1.5 2008-05-08 15:57:15 leggett Exp $
  *
  *  Validity Range object. Holds two IOVTimes (start and stop)
  *

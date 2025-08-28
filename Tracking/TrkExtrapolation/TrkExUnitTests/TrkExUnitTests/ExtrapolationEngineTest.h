@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ namespace Trk {
   //    ^ ExtrapolationEngine itself is not thread-safe
   public:
     /** Standard Athena-Algorithm Constructor */
-    ExtrapolationEngineTest(const std::string& name, ISvcLocator* pSvcLocator);
+    using TrkExUnitTestBase::TrkExUnitTestBase;
 
     /* finalize */
     StatusCode finalize();
@@ -63,78 +63,76 @@ namespace Trk {
        template <class T, class P> StatusCode fillStepInformationT(ExtrapolationCell<T>& eCell, int fwbw, std::vector<const Trk::Surface*>& stepSurfaces);
          
        /** retrieve it */
-       ToolHandle<IExtrapolationEngine>             m_extrapolationEngine;     
+       ToolHandle<IExtrapolationEngine> m_extrapolationEngine{
+	 this, "ExtrapolationEngine", ""};
        
-       const AtlasDetectorID*                       m_idHelper;
-       const PixelID*                               m_pixel_ID;       //!< Handle to the ID helper
-       const SCT_ID*                                m_sct_ID;         //!< Handle to the ID helper
-       const HGTD_ID*                               m_hgtd_ID;       //!< Handle to the ID helper
-       bool                                         m_useHGTD;
+       const AtlasDetectorID*                       m_idHelper = nullptr;
+       const PixelID*                               m_pixel_ID = nullptr;
+       const SCT_ID*                                m_sct_ID = nullptr;
+       const HGTD_ID*                               m_hgtd_ID = nullptr;
+       BooleanProperty m_useHGTD{this, "UseHGTD", false};
               
-       bool                                         m_parametersMode; // 0 - neutral, 1 - charged, 2 - multi
-       int                                          m_particleHypothesis;
+       BooleanProperty m_parametersMode{this, "ParametersMode", 1,
+	 "0 - neutral, 1 - charged, 2 - multi"};
+       IntegerProperty m_particleHypothesis{this, "ParticleHypothesis", 2};
+
+       BooleanProperty m_smearProductionVertex{this, "SmearOrigin", false};
+       BooleanProperty m_smearFlatOriginT{this, "SmearFlatOriginD0", false};
+       BooleanProperty m_smearFlatOriginZ{this, "SmearFlatOriginZ0", false};
+       DoubleProperty m_sigmaOriginT{this, "SimgaOriginD0", 0.};
+       DoubleProperty m_sigmaOriginZ{this, "SimgaOriginZ0", 0.};
+       DoubleProperty m_d0Min{this, "D0Min", 0.};
+       DoubleProperty m_d0Max{this, "D0Max", 0.};
+       DoubleProperty m_z0Min{this, "Z0Min", 0.};
+       DoubleProperty m_z0Max{this, "Z0Max", 0.};
      
-       bool                                         m_smearProductionVertex;
-       bool                                         m_smearFlatOriginT;
-       bool                                         m_smearFlatOriginZ;
-       double                                       m_sigmaOriginT;
-       double                                       m_sigmaOriginZ;
-       double                                       m_d0Min;
-       double                                       m_d0Max;
-       double                                       m_z0Min;
-       double                                       m_z0Max;
-       std::vector<float>                           m_z0Values;
-     
-       double                                       m_etaMin;
-       double                                       m_etaMax;
-       double                                       m_phiMin;
-       double                                       m_phiMax; 
+       DoubleProperty m_etaMin{this, "EtaMin", -3.};
+       DoubleProperty m_etaMax{this, "EtaMax", 3.};
+       DoubleProperty m_phiMin{this, "PhiMin", -M_PI};
+       DoubleProperty m_phiMax{this, "PhiMax", M_PI};
+       DoubleProperty m_ptMin{this, "PtMin", 100.};
+       DoubleProperty m_ptMax{this, "PtMax", 100000.};
        
-       double                                       m_ptMin;
-       double                                       m_ptMax;
+       DoubleProperty m_pathLimit{this, "PathLimit", 10e10};
        
-       double                                       m_pathLimit;
+       BooleanProperty m_collectSensitive{this, "CollectSensitive", false};
+       BooleanProperty m_collectPassive{this, "CollectPassive", false};
+       BooleanProperty m_collectBoundary{this, "CollectBoundary", false};
+       BooleanProperty m_collectMaterial{this, "CollectMaterial", false};
        
-       bool                                         m_collectSensitive;
-       bool                                         m_collectPassive;
-       bool                                         m_collectBoundary;
-       bool                                         m_collectMaterial;
-       
-       bool                                         m_backExtrapolation;
-       bool                                         m_stepwiseExtrapolation;
-       
+       BooleanProperty m_backExtrapolation{this, "BackExtrapolation", false};
+       BooleanProperty m_stepwiseExtrapolation{this, "StepwiseExtrapolation", false};
        
        /** scanning parameters */
-       int                                          m_stepsPhi;
-       int                                          m_currentPhiStep;
-       std::vector< float >                         m_etaScans;
-       double                                       m_currentEta;
-       std::vector< float >                         m_phiScans;
-       double                                       m_currentPhi;
-       bool                                         m_splitCharge;
+       IntegerProperty m_stepsPhi{this, "PhiSteps", 1};
+       int m_currentPhiStep = 0;
+       FloatArrayProperty m_etaScans{this, "EtaScans", {}};
+       double m_currentEta = 0.;
+       FloatArrayProperty m_phiScans{this, "PhiScans", {}};
+       double m_currentPhi = 0.;
+       BooleanProperty m_splitCharge{this, "SplitCharge", false};
 
-       //!< the tree
-         
-       bool                                         m_writeTTree;
-       ToolHandle<IPositionMomentumWriter>          m_posmomWriter;
-       
-       std::string                                  m_treeName;
-       std::string                                  m_treeFolder;  
-       std::string                                  m_treeDescription;
+       BooleanProperty m_writeTTree{this, "WriteTTree", true};
+       ToolHandle<IPositionMomentumWriter> m_posmomWriter{
+	 this, "PositionMomentumWriter", ""};
+
+       StringProperty m_treeName{this, "TreeName", "ExtrapolationEngineTest"};
+       StringProperty m_treeFolder{this, "TreeFolder", "/val/"};
+       StringProperty m_treeDescription{this, "TreeDescription",
+	 "ExtrapolationEngine test setup"};
        TTree*                                       m_tree = nullptr;
-       TRandom                                      m_tRandom;        
-                                                    
+       TRandom                                      m_tRandom;
                                                     
        float                                        m_startPositionX = 0.0F;
        float                                        m_startPositionY = 0.0F;
        float                                        m_startPositionZ = 0.0F;
        float                                        m_startPositionR = 0.0F;
        float                                        m_startPhi = 0.0F;
-       float                                        m_startTheta = 0.0F;                                                    
-       float                                        m_startEta = 0.0F;                                                    
-       float                                        m_startP = 0.0F;                                                    
+       float                                        m_startTheta = 0.0F;
+       float                                        m_startEta = 0.0F;
+       float                                        m_startP = 0.0F;
        float                                        m_startPt = 0.0F;
-       float                                        m_charge;                                                    
+       float                                        m_charge = -1.;
         
        int                                          m_endSuccessful = 0;
        float                                        m_endPositionX = 0.0F;
@@ -153,11 +151,11 @@ namespace Trk {
        float                                        m_backPositionY = 0.0F;
        float                                        m_backPositionZ = 0.0F;
        float                                        m_backPositionR = 0.0F;
-       float                                        m_backPhi;
-       float                                        m_backTheta;                                                    
-       float                                        m_backEta;                                                    
-       float                                        m_backP;                                                    
-       float                                        m_backPt; 
+       float                                        m_backPhi = 0.;
+       float                                        m_backTheta = 0.;
+       float                                        m_backEta = 0.;
+       float                                        m_backP = 0.;
+       float                                        m_backPt = 0.;
        
        std::vector<TString>                         m_parameterNames;                                                  
        std::vector< std::vector< float >* >         m_pPositionX;
@@ -171,14 +169,14 @@ namespace Trk {
        std::vector< std::vector< float >* >         m_pPt;
 
        std::vector< int >*                          m_sensitiveSurfaceType = nullptr;
-       std::vector< int >*                          m_sensitiveLayerIndex;
-       std::vector< float >*                        m_sensitiveLocalPosX;
-       std::vector< float >*                        m_sensitiveLocalPosY;
-       std::vector< float >*                        m_sensitiveCenterPosX;
-       std::vector< float >*                        m_sensitiveCenterPosY;
-       std::vector< float >*                        m_sensitiveCenterPosZ;
-       std::vector< float >*                        m_sensitiveCenterPosR;
-       std::vector< float >*                        m_sensitiveCenterPosPhi;
+       std::vector< int >*                          m_sensitiveLayerIndex = nullptr;
+       std::vector< float >*                        m_sensitiveLocalPosX = nullptr;
+       std::vector< float >*                        m_sensitiveLocalPosY = nullptr;
+       std::vector< float >*                        m_sensitiveCenterPosX = nullptr;
+       std::vector< float >*                        m_sensitiveCenterPosY = nullptr;
+       std::vector< float >*                        m_sensitiveCenterPosZ = nullptr;
+       std::vector< float >*                        m_sensitiveCenterPosR = nullptr;
+       std::vector< float >*                        m_sensitiveCenterPosPhi = nullptr;
        std::vector< float >*                        m_sensitiveLocalPosR = nullptr;
        std::vector< float >*                        m_sensitiveLocalPosPhi = nullptr;
        std::vector< int >*                          m_sensitiveDetector = nullptr;
@@ -194,46 +192,46 @@ namespace Trk {
        std::vector< int >*                          m_sensitiveisInsideBound = nullptr;
        std::vector< float >*                        m_materialtInX0AccumulatedUpTo = nullptr;
        
-       float                                        m_materialThicknessInX0;
-       float                                        m_materialThicknessInL0;
-       float                                        m_materialThicknessZARho;
-       float                                        m_materialEmulatedIonizationLoss;
+       float                                        m_materialThicknessInX0 = 0.;
+       float                                        m_materialThicknessInL0 = 0.;
+       float                                        m_materialThicknessZARho = 0.;
+       float                                        m_materialEmulatedIonizationLoss = 0.;
 
-       float                                        m_materialThicknessInX0Bwd;
-       float                                        m_materialThicknessInL0Bwd;
+       float                                        m_materialThicknessInX0Bwd = 0.;
+       float                                        m_materialThicknessInL0Bwd = 0.;
 
-       float                                        m_materialThicknessInX0Sensitive;
-       float                                        m_materialThicknessInX0Passive;
-       float                                        m_materialThicknessInX0Boundary;
+       float                                        m_materialThicknessInX0Sensitive = 0.;
+       float                                        m_materialThicknessInX0Passive = 0.;
+       float                                        m_materialThicknessInX0Boundary = 0.;
        
-       float                                        m_materialThicknessInX0Cylinder;
-       float                                        m_materialThicknessInX0Disc;
-       float                                        m_materialThicknessInX0Plane;
+       float                                        m_materialThicknessInX0Cylinder = 0.;
+       float                                        m_materialThicknessInX0Disc = 0.;
+       float                                        m_materialThicknessInX0Plane = 0.;
        
-       std::vector< float >*                        m_materialThicknessInX0Accumulated;
-       std::vector< float >*                        m_materialThicknessInX0Steps;
-       std::vector< float >*                        m_materialThicknessInL0Steps;
-       std::vector< float >*                        m_materialPositionX;
-       std::vector< float >*                        m_materialPositionY;
-       std::vector< float >*                        m_materialPositionZ;
-       std::vector< float >*                        m_materialPositionR;
-       std::vector< float >*                        m_materialPositionP;
-       std::vector< float >*                        m_materialPositionPt;
-       std::vector< float >*                        m_materialScaling;
-       std::vector< int   >*                        m_stepDirection;
+       std::vector< float >*                        m_materialThicknessInX0Accumulated = nullptr;
+       std::vector< float >*                        m_materialThicknessInX0Steps = nullptr;
+       std::vector< float >*                        m_materialThicknessInL0Steps = nullptr;
+       std::vector< float >*                        m_materialPositionX = nullptr;
+       std::vector< float >*                        m_materialPositionY = nullptr;
+       std::vector< float >*                        m_materialPositionZ = nullptr;
+       std::vector< float >*                        m_materialPositionR = nullptr;
+       std::vector< float >*                        m_materialPositionP = nullptr;
+       std::vector< float >*                        m_materialPositionPt = nullptr;
+       std::vector< float >*                        m_materialScaling = nullptr;
+       std::vector< int   >*                        m_stepDirection = nullptr;
        
-       int                                          m_endStepSuccessful;
-       float                                        m_endStepPositionX;
-       float                                        m_endStepPositionY;
-       float                                        m_endStepPositionZ;
-       float                                        m_endStepPositionR;
-       float                                        m_endStepPhi;
-       float                                        m_endStepTheta;                                                    
-       float                                        m_endStepEta;                                                    
-       float                                        m_endStepP;                                                    
-       float                                        m_endStepPt;        
-       float                                        m_endStepPathLength;
-       float                                        m_endStepThicknessInX0;
+       int                                          m_endStepSuccessful = 0;
+       float                                        m_endStepPositionX = 0.;
+       float                                        m_endStepPositionY = 0.;
+       float                                        m_endStepPositionZ = 0.;
+       float                                        m_endStepPositionR = 0.;
+       float                                        m_endStepPhi = 0.;
+       float                                        m_endStepTheta = 0.;
+       float                                        m_endStepEta = 0.;
+       float                                        m_endStepP = 0.;
+       float                                        m_endStepPt = 0.;
+       float                                        m_endStepPathLength = 0.;
+       float                                        m_endStepThicknessInX0 = 0.;
 
    };
 }

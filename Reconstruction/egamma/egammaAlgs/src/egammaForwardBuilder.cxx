@@ -7,8 +7,6 @@
 #include "egammaCaloUtils/CookieCutterHelpers.h"
 #include "egammaUtils/EMFourMomBuilder.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
-#include "xAODCaloEvent/CaloClusterAuxContainer.h"
-#include "xAODCaloEvent/CaloClusterKineHelper.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -20,25 +18,12 @@
 #include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
 #include "PATCore/AcceptData.h"
 
-#include "FourMomUtils/P4Helpers.h"
-
 #include <algorithm>
 #include <cmath>
 
 namespace {
   constexpr float cellEtaSize = 0.1;
   constexpr float cellPhiSize = 0.1;
-
-  template <typename... T>
-  void copyMoments(const xAOD::CaloCluster& src,
-                   std::unique_ptr<xAOD::CaloCluster>& dest,
-                   T... momentIds) {
-    for (const auto& momentId : {momentIds...}) {
-      double moment {};
-      src.retrieveMoment(momentId, moment);
-      dest->insertMoment(momentId, moment);
-    }
-  }
 }
 
 egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
@@ -48,16 +33,18 @@ egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
 
 StatusCode egammaForwardBuilder::initialize()
 {
-  m_maxDelPhi = m_maxDelPhiCells * cellPhiSize * 0.5;
-  m_maxDelEta = m_maxDelEtaCells * cellEtaSize * 0.5;
-  m_maxDelR2 = m_maxDelR * m_maxDelR; // Square now to avoid a slow sqrt later.
+  m_CookieCutPars.maxDelEta = m_maxDelEtaCells * cellEtaSize * 0.5;
+  m_CookieCutPars.maxDelPhi = m_maxDelPhiCells * cellPhiSize * 0.5;
+  m_CookieCutPars.maxDelR2  = m_maxDelR * m_maxDelR; // Square now to avoid a slow sqrt later.
 
   // The data handle keys.
   ATH_CHECK(m_topoClusterKey.initialize());
   ATH_CHECK(m_caloDetDescrMgrKey.initialize());
   ATH_CHECK(m_electronOutputKey.initialize());
   ATH_CHECK(m_outClusterContainerKey.initialize());
-  m_outClusterContainerCellLinkKey = m_outClusterContainerKey.key() + "_links";
+  if (m_outClusterContainerCellLinkKey.key().empty()) {
+    m_outClusterContainerCellLinkKey = m_outClusterContainerKey.key() + "_links";
+  }
   ATH_CHECK(m_outClusterContainerCellLinkKey.initialize());
 
   // Retrieve object quality tool.
@@ -177,7 +164,8 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     // Create the new cluster.
     std::unique_ptr<xAOD::CaloCluster> newCluster =
       m_doCookieCutting ?
-        cookieCut(*cluster, *calodetdescrmgr, cellCont) :
+      egammaClusterCookieCut::cookieCut(*cluster, *calodetdescrmgr,
+					cellCont, m_CookieCutPars) :
         std::make_unique<xAOD::CaloCluster>(*cluster);
 
     if (!newCluster) {
@@ -305,65 +293,3 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
 
   return StatusCode::SUCCESS;
 }
-
-std::unique_ptr<xAOD::CaloCluster> egammaForwardBuilder::cookieCut(
-  const xAOD::CaloCluster& cluster,
-  const CaloDetDescrManager& mgr,
-  const DataLink<CaloCellContainer>& cellCont
-) const {
-  if (!cluster.hasSampling(CaloSampling::EME2) &&
-      !cluster.hasSampling(CaloSampling::FCAL0)) {
-    return nullptr;
-  }
-
-  CookieCutterHelpers::CentralPosition cp0({&cluster}, mgr);
-
-  const bool isEC = cp0.emaxEC >= cp0.emaxF;
-  const float eta = isEC ? cp0.etaEC : cp0.etaF;
-  const float phi = isEC ? cp0.phiEC : cp0.phiF;
-
-  auto newCluster = CaloClusterStoreHelper::makeCluster(cellCont);
-
-
-  if (!newCluster) {
-    ATH_MSG_ERROR("CaloClusterStoreHelper::makeCluster failed.");
-    return nullptr;
-  }
-
-  CaloClusterCellLink* newCellLinks = newCluster->getOwnCellLinks();
-  copyMoments(cluster,
-              newCluster,
-              xAOD::CaloCluster::SECOND_LAMBDA,
-              xAOD::CaloCluster::LATERAL,
-              xAOD::CaloCluster::LONGITUDINAL,
-              xAOD::CaloCluster::ENG_FRAC_MAX,
-              xAOD::CaloCluster::SECOND_R,
-              xAOD::CaloCluster::CENTER_LAMBDA,
-              xAOD::CaloCluster::SECOND_ENG_DENS,
-              xAOD::CaloCluster::SIGNIFICANCE);
-
-  const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
-  CaloClusterCellLink::const_iterator cellItr = cellLinks->begin();
-  CaloClusterCellLink::const_iterator cellEnd = cellLinks->end();
-
-  for (; cellItr != cellEnd; ++cellItr) {
-    const float deltaEta = std::abs(eta - cellItr->eta());
-    const float deltaPhi = std::abs(P4Helpers::deltaPhi(phi, cellItr->phi()));
-
-    const float deltaEta2 = deltaEta * deltaEta;
-    const float deltaPhi2 = deltaPhi * deltaPhi;
-
-    const bool excludeCell = isEC ?
-      (deltaEta >= m_maxDelEta || deltaPhi >= m_maxDelPhi) :
-      (deltaEta2 + deltaPhi2 >= m_maxDelR2);
-
-    if (!excludeCell) {
-      newCellLinks->addCell(cellItr.index(), cellItr.weight());
-    }
-  }
-
-  CaloClusterKineHelper::calculateKine(newCluster.get(), true, true);
-
-  return newCluster;
-}
-

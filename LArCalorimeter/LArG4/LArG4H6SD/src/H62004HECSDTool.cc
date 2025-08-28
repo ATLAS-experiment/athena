@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H62004HECSDTool.h"
@@ -16,12 +16,9 @@ namespace LArG4
   H62004HECSDTool::H62004HECSDTool(const std::string& type, const std::string& name,
                                      const IInterface *parent)
     : H62004SimpleSDTool(type, name, parent)
-    , m_hitCollName("LArHitHEC")
-    , m_calculator("LArH62004HECLocalCalculator", name)
   {
-    declareProperty("Calculator", m_calculator);
   }
-
+  
   StatusCode H62004HECSDTool::initializeCalculators()
   {
     ATH_CHECK(m_calculator.retrieve());

@@ -53,6 +53,19 @@ public:
       const EventContext &ctx) const;
 
   /**
+   * @brief Make the strip cluster container
+   * @param stripClusters raw input from the EDM output
+   * @param metadata Input metadata
+   * @param ctx 
+   * @return StatusCode
+   */
+  StatusCode makeStripClusterContainer(
+      const uint64_t* stripClusters,
+      const EFTrackingTransient::Metadata *metadata,
+      const EventContext &ctx) const;
+
+
+  /**
    * @brief Make the pixel cluster container
    * @param pxAux Input pixel cluster data
    * @param metadata Input metadata
@@ -63,6 +76,19 @@ public:
       const EFTrackingTransient::PixelClusterAuxInput &pxAux,
       const EFTrackingTransient::Metadata *metadata,
       const EventContext &ctx) const;
+
+/**
+   * @brief Make the pixel cluster container
+   * @param pixelClusters raw input from the EDM output
+   * @param metadata Input metadata
+   * @param ctx
+   * @return StatusCode
+   */
+  StatusCode makePixelClusterContainer(
+      const uint64_t* pixelClusters,
+      const EFTrackingTransient::Metadata *metadata,
+      const EventContext &ctx) const;
+
 
 private:
   /// Key for the pixel clusters container to be created

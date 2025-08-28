@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -38,23 +38,9 @@ const Trk::MagneticFieldProperties s_zeroMagneticField(Trk::NoField);
 
 // constructor
 Trk::Navigator::Navigator(const std::string &t, const std::string &n, const IInterface *p) :
-  AthAlgTool(t, n, p),
-  m_trackingGeometryName("AtlasTrackingGeometry"),
-  m_insideVolumeTolerance(1. * Gaudi::Units::mm),
-  m_isOnSurfaceTolerance(0.005 * Gaudi::Units::mm),
-  m_useStraightLineApproximation(false),
-  m_searchWithDistance(true),
-  m_fastField(false)
+  AthAlgTool(t, n, p)
   {
-  declareInterface<INavigator>(this);
-  // steering of algorithms
-  declareProperty("InsideVolumeTolerance", m_insideVolumeTolerance);
-  declareProperty("IsOnSurfaceTolerance", m_isOnSurfaceTolerance);
-  declareProperty("UseStraightLineApproximation", m_useStraightLineApproximation);
-  // closest parameter search with new Surface::distance method
-  declareProperty("SearchWithDistanceToSurface", m_searchWithDistance);
-  // Magnetic field properties
-  declareProperty("MagneticFieldProperties", m_fastField);
+    declareInterface<INavigator>(this);
   }
 
 

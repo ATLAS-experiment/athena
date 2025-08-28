@@ -18,15 +18,16 @@
 #include "MuonCondData/NswT0Data.h"
 #include "MuonCondData/mmCTPClusterCalibData.h"
 
+#include "xAODMuonPrepData/MMCluster.h"
+
 
 namespace Muon {
 
-  class NSWCalibTool : virtual public INSWCalibTool, public AthAlgTool {
+  class NSWCalibTool : public extends<AthAlgTool, INSWCalibTool> {
 
   public:
 
-    NSWCalibTool(const std::string&, const std::string&, const IInterface*);
-
+    using base_class::base_class;
     virtual ~NSWCalibTool() = default;
     
     using TimeCalibType = NswCalibDbTimeChargeData::CalibDataType;
@@ -34,6 +35,13 @@ namespace Muon {
     
     StatusCode calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const override;
     StatusCode distToTime(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, const std::vector<double>& driftDistances, std::vector<double>& driftTimes) const override;
+
+
+    StatusCode calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const override;
+
+
+
+
     StatusCode calibrateStrip(const EventContext& ctx, const Identifier& id, const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const override;
     StatusCode calibrateStrip(const EventContext& ctx, const Muon::MM_RawData* mmRawData, NSWCalib::CalibratedStrip& calibStrip) const override;
     StatusCode calibrateStrip(const EventContext& ctx, const Muon::STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const override;

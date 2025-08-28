@@ -32,11 +32,6 @@ if __name__ == '__main__':
   ## Initialize a new component accumulator
   cfg = MainServicesCfg(flags)
 
-  from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg
-  #add the algorithm
-  acc = DetectorGeometrySvcCfg(flags)
-  cfg.merge(acc)
-
   # Dump config
   #cfg.getService("StoreGateSvc").Dump = True
   #cfg.getService("ConditionStore").Dump = True

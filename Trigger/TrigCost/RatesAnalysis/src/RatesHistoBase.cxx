@@ -89,6 +89,9 @@ const std::string& RatesHistoBase::getExtrapolationFactorString(ExtrapStrat_t st
   return values.at(static_cast<size_t>(strat)); 
 }
 
+  void RatesHistoBase::setDataName(const std::string& newName){if (m_data) m_data->SetName(newName.c_str());}
+  void RatesHistoBase::setRateVsMuName(const std::string& newName){if (m_rateVsMu) m_rateVsMu->SetName(newName.c_str());}
+  void RatesHistoBase::setRateVsTrainName(const std::string& newName){if (m_rateVsTrain) m_rateVsTrain->SetName(newName.c_str());}
 
 double RatesHistoBase::getExtrapolationFactor(const WeightingValuesSummary_t& weights, const ExtrapStrat_t strat) const {
   switch (strat) {

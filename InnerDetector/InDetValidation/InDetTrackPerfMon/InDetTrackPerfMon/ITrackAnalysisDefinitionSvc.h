@@ -64,6 +64,7 @@ public:
 
   /// histogram properties
   virtual bool plotTrackParameters() const = 0;
+  virtual bool plotTrackParametersErrors() const = 0;
   virtual bool plotTrackMultiplicities() const = 0;
   virtual bool plotEfficiencies() const = 0;
   virtual bool plotTechnicalEfficiencies() const = 0;
@@ -78,6 +79,7 @@ public:
   virtual bool plotVertexParameters() const = 0;
   virtual bool useSelectedVertexTracks() const = 0;
   virtual bool plotOfflineElectrons() const = 0;
+  virtual bool plotTracksInJets() const = 0;
   virtual unsigned int resolutionMethod() const = 0;
   virtual bool isITk() const = 0;
   

@@ -14,6 +14,7 @@
 #include "L1TopoAlgorithms/InvariantMassDeltaPhiSumEtInclusive1.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 
 #include <cmath>
 
@@ -177,8 +178,8 @@ TCS::InvariantMassDeltaPhiSumEtInclusive1::processBitCorrect( const std::vector<
                 const unsigned int aeta2 = std::abs(eta2);
 		for(unsigned int i=0; i<numberOutputBits(); ++i) {
 		   bool accept = false;
-		   if( parType_t((*tob1)->Et()) + parType_t((*tob2)->Et()) <= p_SumEtMin[i] ) continue; // MinSumEt cut
-		   if( parType_t((*tob1)->Et()) + parType_t((*tob2)->Et()) >= p_SumEtMax[i] ) continue; // MaxSumEt cut
+		   if( parType_t((*tob1)->Et()) + parType_t((*tob2)->Et()) <= p_SumEtMin[i] ) continue; // MinSumEt cut (accepted range is *exclusive* of the threshold value) 
+		   if( parType_t((*tob1)->Et()) + parType_t((*tob2)->Et()) > p_SumEtMax[i] ) continue;  // MaxSumEt cut (accepted range is *inclusive* of the threshold value)
                    if( parType_t((*tob1)->Et()) <= p_MinET1[i]) continue; // ET cut
                    if( parType_t((*tob2)->Et()) <= p_MinET2[i]) continue; // ET cut
                    if(p_ApplyEtaCut &&
@@ -202,6 +203,11 @@ TCS::InvariantMassDeltaPhiSumEtInclusive1::processBitCorrect( const std::vector<
                    TRG_MSG_DEBUG("Decision " << i << ": " << (accept?"pass":"fail") << " invmass2 = " << invmass2);
                }
             }
+         }
+         for (unsigned int i=0; i < numberOutputBits(); ++i) {
+            bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading, p_MinET1[i])
+                                    || TSU::isAmbiguousTruncation(input[0], p_NumberLeading, p_MinET2[i]);
+            output[i]->setAmbiguityFlag(hasAmbiguousInputs);
          }
    } else {
 

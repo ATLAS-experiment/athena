@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PerfMonVTune )
@@ -18,7 +18,7 @@ if ( NOT ITT_LIBRARY OR NOT ITT_INCLUDE_DIR )
   message( FATAL_ERROR
     "\nYou must have VTune setup properly for compiling PerfMonVTune.\n"
     "From within CERN this can be accomplished by doing:\n"
-    "source /cvmfs/projects.cern.ch/intelsw/psxe/linux/all-setup.sh\n"
+    "source /cvmfs/projects.cern.ch/intelsw/oneAPI/linux/all-setup.sh\n"
     "*BEFORE* setting up Athena." )
 endif()
 ####

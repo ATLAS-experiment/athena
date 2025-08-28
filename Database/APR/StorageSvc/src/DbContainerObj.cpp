@@ -157,7 +157,7 @@ DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
       return sc;
     }
   }
-  else if ( m_isOpen && typ ) {
+  else if ( typ ) {
     return m_dbH.addShape(typ);
   }
   return Error;
@@ -252,16 +252,6 @@ DbStatus DbContainerObj::free(void* ptr, DbContainer& cntH)   {
   return hasAccess() ? m_info->free(ptr, cntH) : Error;
 }
 
-/// Add persistent type. Returns error if the type is not supported.
-DbStatus DbContainerObj::addShape(const DbTypeInfo* typ)  {
-  if ( hasAccess() )   {
-    if ( m_info->isShapeSupported(typ) )  {
-      return m_dbH.addShape(typ);
-    }
-  }
-  return Error;
-}
-
 /// Retrieve persistent type information
 const DbTypeInfo* DbContainerObj::objectShape(const Guid& guid) {
   return m_dbH.objectShape(guid);
@@ -341,24 +331,6 @@ DbStatus DbContainerObj::load( void** ptr, ShapeH shape,
     oid.first  = token()->oid().first;
     // Specific implementation may overwrite OID
     return m_info->load(ptr, shape, linkH, oid, any_next);
-  }
-  return Error;
-}
-
-/// Perform UPDATE select
-DbStatus DbContainerObj::update(DbSelect& sel)  {
-  if ( !isReadOnly() && hasAccess() )  {
-    m_dbH.setAge(0);
-    return m_info->update(sel);
-  }
-  return Error;
-}
-
-/// Perform DELETE statement
-DbStatus DbContainerObj::destroy(DbSelect& sel) {
-  if ( !isReadOnly() && hasAccess() )  {
-    m_dbH.setAge(0);
-    return m_info->destroy(sel);
   }
   return Error;
 }

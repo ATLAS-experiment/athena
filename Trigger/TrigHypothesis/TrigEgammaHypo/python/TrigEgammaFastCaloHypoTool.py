@@ -1,12 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-import collections.abc
 
 
 def same( val , tool):
@@ -343,20 +341,20 @@ def createTrigEgammaFastCaloElectronSelectors(flags, ConfigFilePath=None):
       ConfigFilePath = flags.Trigger.egamma.ringerVersion
 
   
-    SelectorNames = collections.OrderedDict({
+    SelectorNames = {
             'tight'    : 'AsgElectronFastCaloRingerTightSelectorTool',
             'medium'   : 'AsgElectronFastCaloRingerMediumSelectorTool',
             'loose'    : 'AsgElectronFastCaloRingerLooseSelectorTool',
             'vloose'   : 'AsgElectronFastCaloRingerVeryLooseSelectorTool',
-            })
+    }
         
 
-    ToolConfigFile = collections.OrderedDict({
+    ToolConfigFile = {
           'tight'   :['ElectronRingerTightTriggerConfig.conf'    ],
           'medium'  :['ElectronRingerMediumTriggerConfig.conf'   ],
           'loose'   :['ElectronRingerLooseTriggerConfig.conf'    ],
           'vloose'  :['ElectronRingerVeryLooseTriggerConfig.conf'],
-          })
+    }
     
     selectors = []    
 
@@ -374,18 +372,18 @@ def createTrigEgammaFastCaloPhotonSelectors(flags, ConfigFilePath=None):
       ConfigFilePath = flags.Trigger.egamma.photonRingerVersion
 
   
-    SelectorNames = collections.OrderedDict({
+    SelectorNames = {
             'tight'    : 'AsgPhotonFastCaloRingerTightSelectorTool',
             'medium'   : 'AsgPhotonFastCaloRingerMediumSelectorTool',
             'loose'    : 'AsgPhotonFastCaloRingerLooseSelectorTool',
-            })
+    }
         
 
-    ToolConfigFile = collections.OrderedDict({
+    ToolConfigFile = {
           'tight'   :['PhotonRingerTightTriggerConfig.conf'    ],
           'medium'  :['PhotonRingerMediumTriggerConfig.conf'   ],
           'loose'   :['PhotonRingerLooseTriggerConfig.conf'    ],
-          })
+    }
     
     selectors = []    
 

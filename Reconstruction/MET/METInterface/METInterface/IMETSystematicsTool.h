@@ -75,7 +75,7 @@ class IMETSystematicsTool : virtual public asg::IAsgTool,
   public:
   virtual ~IMETSystematicsTool() {}
 
-  virtual void setRandomSeed(int seed) const = 0;
+  virtual void setRandomSeed(unsigned long seed) const = 0;
 
   //we don't inherit from CorrectionTool directly, but we are something close to that
   virtual CP::CorrectionCode applyCorrection(xAOD::MissingET& met,

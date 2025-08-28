@@ -12,7 +12,7 @@
 
 #include <FTagAnalysisAlgorithms/BTaggingTriggerEfficiencyAlg.h>
 #include "TrigCompositeUtils/ChainNameParser.h"
-#include "TrigDecisionTool/FeatureRequestDescriptor.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 #include "xAODBTagging/BTagging.h"
 
 //
@@ -56,6 +56,7 @@ namespace CP
 
     ANA_CHECK (m_systematicsList.initialize());
     ANA_CHECK (m_outOfValidity.initialize());
+    ANA_CHECK(m_bjetInput.initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -73,6 +74,25 @@ namespace CP
       
       const xAOD::JetContainer *jets = nullptr;
       ANA_CHECK (m_jetHandle.retrieve (jets, sys));
+
+      m_matchedOfflineOnlineJets.clear(); 
+      SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput);
+
+      for (const xAOD::Jet* jet : *jets) {
+        if (m_preselection.getBool(*jet, sys)) {
+          float minDR = 0.4;
+          const xAOD::Jet* bestHLTJet = nullptr;
+          for (const xAOD::Jet* hlt_bjet : *hlt_bjets) {
+            float dR = jet->p4().DeltaR(hlt_bjet->p4());
+            if (dR < minDR) {
+                minDR = dR;
+                bestHLTJet = hlt_bjet;
+            }
+          }
+          m_matchedOfflineOnlineJets[jet] = bestHLTJet;
+        }
+      }
+
       for (const xAOD::Jet *jet : *jets)
       {
         if (m_preselection.getBool (*jet, sys))
@@ -104,25 +124,31 @@ namespace CP
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
 
             bool passTrigger = false;
-            ATH_CHECK(passTriggerBtag(jet, passTrigger));
+            bool matched = false;
+            ATH_CHECK(passTriggerBtag(jet, passTrigger, matched));
 
-            if(passTrigger){
-              sf = condEff_data * trigEff_data;
-              sf /= condEff_MC * trigEff_MC;
-            }
-            else{
-              float offlEff_MC = 0;
-              float offlEff_data = 0;
-              valid = m_offlineEfficiencyTool->getMCEfficiency(*jet, offlEff_MC);
-              ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-              valid = m_offlineEfficiencyTool->getScaleFactor(*jet, offlEff_data);
-              offlEff_data *= offlEff_MC;
-              ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
+            if(matched){
+              if(passTrigger){
+                sf = condEff_data * trigEff_data;
+                sf /= condEff_MC * trigEff_MC;
+              }
+              else{
+                float offlEff_MC = 0;
+                float offlEff_data = 0;
+                valid = m_offlineEfficiencyTool->getMCEfficiency(*jet, offlEff_MC);
+                ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
+                valid = m_offlineEfficiencyTool->getScaleFactor(*jet, offlEff_data);
+                offlEff_data *= offlEff_MC;
+                ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
 
-              float num = offlEff_data - condEff_data * trigEff_data;
-              float denom = offlEff_MC - condEff_MC * trigEff_MC;
-              if(num>0 && denom>0) sf = num / denom;
-              else sf = invalidScaleFactor();
+                float num = offlEff_data - condEff_data * trigEff_data;
+                float denom = offlEff_MC - condEff_MC * trigEff_MC;
+                if(num>0 && denom>0) sf = num / denom;
+                else sf = invalidScaleFactor();
+              }
+            } else {
+              valid = m_offlineEfficiencyTool->getScaleFactor(*jet, sf);
+              ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
             }
           }
 
@@ -138,8 +164,9 @@ namespace CP
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BTaggingTriggerEfficiencyAlg::passTriggerBtag(const xAOD::Jet* jet, bool& btag) const{
+  StatusCode BTaggingTriggerEfficiencyAlg::passTriggerBtag(const xAOD::Jet* jet, bool& btag, bool& matched) const{
     btag = false;
+    matched = false;
     if(!m_trigDecTool->isPassed(m_trigger)){
       // No further check, btag will be false
       return StatusCode::SUCCESS;
@@ -155,13 +182,20 @@ namespace CP
     for (const ChainNameParser::LegInfo& legInfo :
 	   ChainNameParser::HLTChainInfo(m_trigger)){
       if (legInfo.signature == "j"){
-	ATH_MSG_VERBOSE(" Leg" << ileg << ": "
-			<< " " << legInfo.legName() << " "
-			<< legInfo.type() << " " << legInfo.signature
-			<< " " << legInfo.threshold);
-
-	frd.setRestrictRequestToLeg(ileg);
-	auto hlt_jets = m_trigDecTool->features<xAOD::IParticleContainer>(frd);
+        ATH_MSG_VERBOSE(" Leg" << ileg << ": "
+          << " " << legInfo.legName() << " "
+          << legInfo.type() << " " << legInfo.signature
+          << " " << legInfo.threshold);
+          
+        frd.setRestrictRequestToLeg(ileg);
+        auto hlt_jets = m_trigDecTool->features<xAOD::IParticleContainer>(frd);
+        auto mapjet = m_matchedOfflineOnlineJets.find(jet);
+        if (mapjet != m_matchedOfflineOnlineJets.end() && mapjet->second){
+          auto hlt_bjet =  mapjet->second;
+          if (hlt_bjet->pt() > legInfo.threshold &&  abs( hlt_bjet->eta()) < m_etamax.value()){
+            matched = true;
+          }
+        }
 
 	for (const auto& hlt_jet_link : hlt_jets){
 	  const xAOD::IParticle *hlt_jet = *hlt_jet_link.link;
@@ -198,7 +232,6 @@ namespace CP
 
       ileg++;
     }
-
     return StatusCode::SUCCESS;
   }
 
@@ -236,5 +269,4 @@ namespace CP
     }
     return StatusCode::SUCCESS;
   }
-
 }

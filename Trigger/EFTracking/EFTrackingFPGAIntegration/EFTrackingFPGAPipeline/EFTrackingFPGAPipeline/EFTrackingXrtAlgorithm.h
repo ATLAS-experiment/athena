@@ -6,15 +6,15 @@
 #define EFTRACKING_XRT_ALGORITHM
 
 #include <memory>
-
-#include <nlohmann/json.hpp>
+#include <map>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaKernel/SlotSpecificObj.h"
 #include "AthXRTInterfaces/IDeviceMgmtSvc.h"
 #include "Gaudi/Property.h"
+#include "Gaudi/Parsers/Factory.h"
 
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/IChronoSvc.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/WriteHandleKeyArray.h"
 
@@ -22,35 +22,24 @@
 #include "xrt/xrt_device.h"
 #include "xrt/xrt_kernel.h"
 
-namespace EFTrackingFPGAIntegration{
-// Some kernels require the length of the input test vector. storeGateKey is 
-// used to get the std::vector which we will call size() on to get the 
-// test vector length.
-struct VSize {
-  int runIndex;
-  int argumentIndex;
-  SG::ReadHandleKey<std::vector<unsigned long>> storeGateKey;
-};
-}
-
 /**
  *  @class EFTrackingXrtAlgorithm
- *         Generic Athena algorithm for running xclbins (FPGA firmware). The 
- *         idea is to associate a set store gate
- *         handles with memory mapped kernel interfaces (kernels and interfaces 
- *         defined in the xclbin). 
+ *         Generic Athena algorithm for running xclbin kernels, creating a 
+ *         mapping between store gate keys and kernel interfaces
  *
- *         The objects behind these store gate handles are then written directly 
- *         to the FPGAs global memory. The kernels are then run. Finally outputs 
- *         from the FPGAs global memory are written back into storegate.
+ *         Three interface types are supported, inputs, vSizes and outputs.
+ *         Inputs and outputs are for memory mapped interfaces.
+ *         VSizes tell the kernel how long an input is (based on the `size()` of 
+ *         the associated `std::vector` (retrieved from store gate).
  */
 class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
 {
   /**
    * @brief Keys to access encoded 64bit words following the EFTracking specification.
    */
-  std::vector<SG::ReadHandleKey<std::vector<unsigned long>>> m_inputDataStreamKeys{};
-  std::vector<SG::WriteHandleKey<std::vector<unsigned long>>> m_outputDataStreamKeys{};
+  SG::ReadHandleKeyArray<std::vector<unsigned long>> m_inputDataStreamKeys{this, "inputDataStreamKeys", {}};
+  SG::ReadHandleKeyArray<std::vector<unsigned long>> m_vSizeDataStreamKeys{this, "vSizeDataStreamKeys", {}};
+  SG::WriteHandleKeyArray<std::vector<unsigned long>> m_outputDataStreamKeys{this, "outputDataStreamKeys", {}};
 
   ServiceHandle<AthXRT::IDeviceMgmtSvc> m_DeviceMgmtSvc{
     this, 
@@ -59,11 +48,32 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
     "The XRT device manager service to use"
   };
 
-  Gaudi::Property<std::string> m_kernelDefinitionsJsonString {
+  ServiceHandle<IChronoSvc> m_chronoSvc{
     this,
-    "kernelDefinitionsJsonString",
-    "{}",
-    "String representation of the json kernel definitions."
+    "ChronoStatSvc",
+    "ChronoStatSvc",
+    "Stop watch"
+  };
+
+  Gaudi::Property<std::vector<std::tuple<std::string, std::string, int>>> m_inputInterfaces {
+    this,
+    "inputInterfaces",
+    {},
+    ""
+  };
+
+  Gaudi::Property<std::vector<std::tuple<std::string, std::string, int>>> m_vSizeInterfaces {
+    this,
+    "vSizeInterfaces",
+    {},
+    ""
+  };
+
+  Gaudi::Property<std::vector<std::tuple<std::string, std::string, int>>> m_outputInterfaces {
+    this,
+    "outputInterfaces",
+    {},
+    ""
   };
 
   Gaudi::Property<std::size_t> m_bufferSize {
@@ -73,21 +83,12 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
     "Capacity of xrt buffers in terms of 64bit words."
   };
 
-  // Device pointer
-  std::shared_ptr<xrt::device> m_device{};
-
-  // Kernel objects
-  std::vector<std::unique_ptr<xrt::kernel>> m_kernels{};
-
-  // Kernel run objects
-  std::vector<std::unique_ptr<xrt::run>> m_runs{};
+  std::map<std::string, std::unique_ptr<xrt::kernel>> m_kernels{};
+  std::map<std::string, std::unique_ptr<xrt::run>> m_runs{};
 
   // Buffer objects
   mutable std::vector<xrt::bo> m_inputBuffers ATLAS_THREAD_SAFE {};
   mutable std::vector<xrt::bo> m_outputBuffers ATLAS_THREAD_SAFE {};
-
-  // VSize objects
-  std::vector<EFTrackingFPGAIntegration::VSize> m_vsizes{};
 
  public:
   EFTrackingXrtAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);

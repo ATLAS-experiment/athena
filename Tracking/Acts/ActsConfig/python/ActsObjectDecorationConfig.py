@@ -10,10 +10,15 @@ def ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault('TrackParticles', 'InDetTrackParticles')
-    kwargs.setdefault('PixelMeasurements', 'ITkPixelMeasurements')
-    kwargs.setdefault('StripMeasurements', 'ITkStripMeasurements')
     kwargs.setdefault('PixelMSOSs', 'ITkPixelMSOSs')
     kwargs.setdefault('StripMSOSs', 'ITkStripMSOSs')
+    kwargs.setdefault('ExtraInputs',[
+        ( 'xAOD::PixelClusterContainer' , 'StoreGateSvc+ITkPixelClusters.validationMeasurementLink' ),
+        ( 'xAOD::StripClusterContainer' , 'StoreGateSvc+ITkStripClusters.validationMeasurementLink' ),
+        ( 'xAOD::TrackMeasurementValidationContainer' , 'StoreGateSvc+ITkPixelMeasurements' ),
+        ( 'xAOD::TrackMeasurementValidationContainer' , 'StoreGateSvc+ITkStripMeasurements' )
+    ])
+    
     acc.addEventAlgo(CompFactory.ActsTrk.ActsTrackStateOnSurfaceDecoratorAlg(name, **kwargs))
 
     toAOD = []
@@ -40,7 +45,7 @@ def ActsMeasurementToTrackParticleDecorationAlgCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
     
     acc.addEventAlgo(CompFactory.ActsTrk.MeasurementToTrackParticleDecorationAlg(name, **kwargs))
@@ -49,12 +54,26 @@ def ActsMeasurementToTrackParticleDecorationAlgCfg(flags,
 
 def ActsPixelClusterTruthDecoratorAlgCfg(flags,
                                          name: str = "ActsPixelClusterTruthDecoratorAlg",
+                                         *,
+                                         TrackParticles: list[str] = None,
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("ClusterContainer","ITkPixelClusters")
     kwargs.setdefault("AssociationMapOut","ITkPixelClustersToTruthParticles")
     kwargs.setdefault("MeasurementContainer","ITkPixelMeasurements")
     kwargs.setdefault("UseTruthInfo", flags.Tracking.doTruth)
+    
+    if flags.Tracking.PRDInfo.KeepOnlyOnTrackMeasurements:
+        if TrackParticles is None:
+            raise ValueError("Requesting persistification of on-track clusters, but no track particle collection has been provided!")
+        
+        kwargs.setdefault("KeepOnlyOnTrackMeasurements", True)
+        kwargs.setdefault("TrackParticles", TrackParticles)
+
+        deps = []
+        for collection in TrackParticles:
+            deps += [( 'xAOD::TrackParticleContainer' , f'StoreGateSvc+{collection}.actsTrack' )]
+        kwargs.setdefault('ExtraInputs', deps)
 
     if "LorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
@@ -80,11 +99,26 @@ def ActsPixelClusterTruthDecoratorAlgCfg(flags,
 
 def ActsStripClusterTruthDecoratorAlgCfg(flags,
                                          name: str = "ActsStripClusterTruthDecoratorAlg",
+                                         *,
+                                         TrackParticles: list[str] = None,
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("ClusterContainer","ITkStripClusters")
     kwargs.setdefault("AssociationMapOut","ITkStripClustersToTruthParticles")
     kwargs.setdefault("MeasurementContainer","ITkStripMeasurements")
+
+    if flags.Tracking.PRDInfo.KeepOnlyOnTrackMeasurements:
+        if TrackParticles is None:
+            raise ValueError("Requesting persistification of on-track clusters, but no track particle collection has been provided!")
+
+        kwargs.setdefault("KeepOnlyOnTrackMeasurements", True)
+        kwargs.setdefault("TrackParticles", TrackParticles)
+
+        deps = []
+        for collection in TrackParticles:
+            deps += [( 'xAOD::TrackParticleContainer' , f'StoreGateSvc+{collection}.actsTrack' )]
+        kwargs.setdefault('ExtraInputs', deps)
+            
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterTruthDecoratorAlg(name,**kwargs))
 
     if flags.Acts.decoratePRD.sdoSiHit:
@@ -106,7 +140,6 @@ def ActsPixelClusterSiHitDecoratorAlgCfg(flags,
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('Measurements', 'ITkPixelMeasurements')
-    kwargs.setdefault('Clusters', 'ITkPixelClusters')
     kwargs.setdefault('SDOs', 'ITkPixelSDO_Map')
     kwargs.setdefault('SiHits', 'ITkPixelHits')
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterSiHitDecoratorAlg(name, **kwargs))
@@ -117,7 +150,6 @@ def ActsStripClusterSiHitDecoratorAlgCfg(flags,
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('Measurements', 'ITkStripMeasurements')
-    kwargs.setdefault('Clusters', 'ITkStripClusters')
     kwargs.setdefault('SDOs', 'ITkStripSDO_Map')
     kwargs.setdefault('SiHits', 'ITkStripHits')
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterSiHitDecoratorAlg(name, **kwargs))

@@ -337,7 +337,7 @@ def ITkTrigTrackSeedingToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccu
   kwargs.setdefault("UsePixelSpacePoints", (not flags.Tracking.ActiveConfig.isLRT))
   kwargs.setdefault("UseSctSpacePoints",flags.Tracking.ActiveConfig.isLRT)
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
-  kwargs.setdefault("MaxGraphEdges", 1500000)
+  kwargs.setdefault("MaxGraphEdges", 3000000)
   kwargs.setdefault("ConnectionFileName", "binTables_ITK_RUN4_LRT.txt" if flags.Tracking.ActiveConfig.isLRT else "binTables_ITK_RUN4.txt")
 
   from RegionSelector.RegSelToolConfig import (regSelTool_ITkStrip_Cfg, regSelTool_ITkPixel_Cfg)

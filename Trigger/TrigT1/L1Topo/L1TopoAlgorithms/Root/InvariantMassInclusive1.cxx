@@ -19,7 +19,7 @@
 #include "L1TopoAlgorithms/InvariantMassInclusive1.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
-
+#include "L1TopoSimulationUtils/Helpers.h"
 
 REGISTER_ALG_TCS(InvariantMassInclusive1)
 
@@ -157,6 +157,11 @@ TCS::InvariantMassInclusive1::processBitCorrect( const std::vector<TCS::TOBArray
                    TRG_MSG_DEBUG("Decision " << i << ": " << (accept?"pass":"fail") << " invmass2 = " << invmass2);
                }
             }
+         }
+         for (unsigned int i=0; i < numberOutputBits(); ++i) {
+            bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1[i])
+                                    || TSU::isAmbiguousTruncation(input[0], p_NumberLeading2, p_MinET2[i]);
+            output[i]->setAmbiguityFlag(hasAmbiguousInputs);
          }
    } else {
 

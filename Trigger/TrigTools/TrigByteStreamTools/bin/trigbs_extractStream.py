@@ -1,6 +1,6 @@
 #!/usr/bin/env tdaq_python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # select events for a given stream name from an input file and write them in an outfile
 # the output file obeys the conventions used by the SFO in P1
@@ -138,6 +138,11 @@ def peb_writer():
 
   # Loop over events
   for e in stream:
+
+    if kwargs['max-events'] > 0 and totalEvents_in >= kwargs['max-events']:
+      logging.info(' Maximum number of events reached : %d', kwargs['max-events'])
+      break
+
     totalEvents_in += 1
 
     # select events
@@ -145,10 +150,6 @@ def peb_writer():
       kwargs['start-event'] -= 1
       totalEvents_skipped += 1
       continue
-
-    if kwargs['max-events'] > 0 and totalEvents_in >= kwargs['max-events']:
-      logging.info(' Maximum number of events reached : %d', kwargs['max-events'])
-      break
 
     # find StreamTags and see if there is a match
     streamTags = e.stream_tag()

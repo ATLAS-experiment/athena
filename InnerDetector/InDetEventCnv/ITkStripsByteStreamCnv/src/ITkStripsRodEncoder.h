@@ -30,17 +30,13 @@ class
 ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{ 
  public:
  
-  /** Constructor */
-  ITkStripsRodEncoder(const std::string& type, const std::string& name, const IInterface* parent);
-
+  using base_class::base_class;
+  
   /** Destructor */
   virtual ~ITkStripsRodEncoder() = default;
 
   /** Initialize */
   virtual StatusCode initialize() override;
-
-  /** Finalize */
-  virtual StatusCode finalize() override;
 
   /**
    * @brief Main Convert method
@@ -169,4 +165,4 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   std::set<Identifier> m_swapModuleID{};
 };
 
-#endif // SCT_RAWDATABYTESTREAMCNV_SCT_RODENCODER_H
+#endif // ITKSTRIP_RAWDATABYTESTREAMCNV_ITKSTRIP_RODENCODER_H

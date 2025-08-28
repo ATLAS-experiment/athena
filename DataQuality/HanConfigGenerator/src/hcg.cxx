@@ -126,8 +126,8 @@ std::ostream& operator<<( std::ostream& s, const std::vector<T*>& v ) {
 template<class T>
 T* get( TKey* tobj ) { 
   TObject* a = tobj->ReadObj()->Clone();
-  ((TH1*)a)->SetDirectory(0);
-  return (T*)a;
+  (static_cast<TH1*>(a))->SetDirectory(0);
+  return static_cast<T*>(a);
 }
 
 
@@ -872,7 +872,7 @@ void search( TDirectory* td, const std::string& s, std::string cwd, node* n ) {
 
 	  /// keep the max number of entries updated
 	  if ( std::string(tobj->GetName())=="Chain" ) { 
-	    double N = ((TH1*)get<TObject>(tobj))->GetEntries();
+	    double N = static_cast<TH1*>(get<TObject>(tobj))->GetEntries();
 
 	    //	    std::cout << "entries " << np->name() << " " << " " << np->parent()->name() << " " << N << std::endl;
 	    //    std::cout << "\tentries " << np->parent()->name() << "/" << np->name() << "\t" << N << std::endl;

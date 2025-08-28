@@ -54,9 +54,13 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Track parameters plots
   if( m_trkAnaDefSvc->plotTrackParameters() ) {
     m_plots_trkParam_vsTest = std::make_unique< TrackParametersPlots >(
-        this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->testTag() );
+        this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->testTag(),
+        ( not m_trkAnaDefSvc->isTestTruth() ) and m_trkAnaDefSvc->plotTrackParametersErrors(),
+        m_trkAnaDefSvc->plotTracksInJets() );
     m_plots_trkParam_vsRef = std::make_unique< TrackParametersPlots >(
-        this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->referenceTag() );
+        this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->referenceTag(),
+        ( not m_trkAnaDefSvc->isReferenceTruth() ) and m_trkAnaDefSvc->plotTrackParametersErrors(),
+        m_trkAnaDefSvc->plotTracksInJets() );
   } 
 
   /// Track multiplicity plots
@@ -72,26 +76,26 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Efficiency plots
   if( m_trkAnaDefSvc->plotEfficiencies() ) {
     m_plots_eff_vsTest = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies/Purities", m_anaTag, m_trkAnaDefSvc->testTag() );
+        this, "Tracks/Efficiencies/Purities", m_anaTag, m_trkAnaDefSvc->testTag(), false );
     m_plots_eff_vsRef = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag(),
+        this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag(), false,
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
     if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
       m_plots_eff_vsTruth = std::make_unique< EfficiencyPlots >(
-          this, "Tracks/Efficiencies", m_anaTag, "truth" );
+          this, "Tracks/Efficiencies", m_anaTag, "truth", false );
     }
   }
 
   /// Technical efficiency plots
   if( m_trkAnaDefSvc->plotTechnicalEfficiencies()) {
     m_plots_tech_eff_vsTest = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies/Technical/Purities", m_anaTag, m_trkAnaDefSvc->testTag());
+        this, "Tracks/Efficiencies/Technical/Purities", m_anaTag, m_trkAnaDefSvc->testTag(), true );
     m_plots_tech_eff_vsRef = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->referenceTag(),
+        this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->referenceTag(), true,
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
     if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
       m_plots_tech_eff_vsTruth = std::make_unique< EfficiencyPlots >(
-          this, "Tracks/Efficiencies/Technical", m_anaTag, "truth" );
+          this, "Tracks/Efficiencies/Technical", m_anaTag, "truth", true );
     }
   }
 

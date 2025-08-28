@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJetAuxContainer_v3.cxx 725228 2016-02-19 22:59:42Z griffith $
@@ -69,19 +69,15 @@ namespace xAOD {
     AUX_VARIABLE( charge );
 
 
-    // AUX_VARIABLE( Likelihood );
-    // AUX_VARIABLE( SafeLikelihood );
     AUX_VARIABLE( BDTJetScore );
     AUX_VARIABLE( BDTEleScore );
     AUX_VARIABLE( EleMatchLikelihoodScore );
 
     //additional discriminant outputs
     AUX_VARIABLE( BDTJetScoreSigTrans );
-    // AUX_VARIABLE( BDTJetScoreBkgTrans );
 
 
 
-    //    AUX_VARIABLE( vetoFlags );//r21 cleanup
     AUX_VARIABLE( isTauFlags );
 
     AUX_VARIABLE( tauTrackLinks );
@@ -118,9 +114,6 @@ namespace xAOD {
     AUX_VARIABLE( massTrkSys );
     AUX_VARIABLE( trkWidth2 );
     AUX_VARIABLE( trFlightPathSig );
-    // AUX_VARIABLE( ele_E237E277 ); //r21 cleanup
-    // AUX_VARIABLE( ele_PresamplerFraction ); //r21 cleanup
-    // AUX_VARIABLE( ele_ECALFirstFraction ); //r21 cleanup
     AUX_VARIABLE( numCells );
     AUX_VARIABLE( numTopoClusters );
     AUX_VARIABLE( numEffTopoClusters );
@@ -136,13 +129,6 @@ namespace xAOD {
     AUX_VARIABLE( centFrac );
     AUX_VARIABLE( stripWidth2 );
     AUX_VARIABLE( nStrip );
-    
-    //need to discuss whether these can be dropped
-    //    AUX_VARIABLE( etEMCalib );//r21 cleanup
-    //    AUX_VARIABLE( etHadCalib );//r21 cleanup
-    // AUX_VARIABLE( seedCalo_eta );//r21 cleanup same as DetectorAxis eta
-    // AUX_VARIABLE( seedCalo_phi );//r21 cleanup same as DetectorAxis phi
-    
 
     AUX_VARIABLE( trkAvgDist );
     AUX_VARIABLE( trkRmsDist );
@@ -155,9 +141,6 @@ namespace xAOD {
     AUX_VARIABLE( secMaxStripEt );
     AUX_VARIABLE( sumEMCellEtOverLeadTrkPt );
     AUX_VARIABLE( hadLeakEt );
-
-    //AUX_VARIABLE( EM_TES_scale );//r21 cleanup
-    //AUX_VARIABLE( LC_TES_precalib );//r21 cleanup
 
     AUX_VARIABLE( TESOffset );
     AUX_VARIABLE( TESCalibConstant );
@@ -173,17 +156,7 @@ namespace xAOD {
     AUX_VARIABLE( TauJetVtxFraction );
     
     //generic substructure details
-    //    AUX_VARIABLE( nPi0 );//r21 cleanup
     AUX_VARIABLE( nCharged ); //used in PanTau/PanTauAlgs/src/Tool_DetailsArranger.cxx
-    //    AUX_VARIABLE( etEflow );//r21 cleanup
-    //    AUX_VARIABLE( mEflow );//r21 cleanup
-    //    AUX_VARIABLE( ptRatioEflow );//r21 cleanup
-
-    // AUX_VARIABLE( nPi0Topo );//r21 cleanup
-    //    AUX_VARIABLE( nChargedTopo );//r21 cleanup
-    //    AUX_VARIABLE( etEflowTopo );//r21 cleanup
-    //    AUX_VARIABLE( mEflowTopo );//r21 cleanup
-    //    AUX_VARIABLE( ptRatioEflowTopo );//r21 cleanup
 
     AUX_VARIABLE( mEflowApprox );
     AUX_VARIABLE( ptRatioEflowApprox );
@@ -239,29 +212,6 @@ namespace xAOD {
     AUX_VARIABLE( PanTau_BDTVar_Neutral_Shots_NPhotonsInSeed );
     AUX_VARIABLE( PanTau_BDTVar_Combined_DeltaR1stNeutralTo1stCharged );
     AUX_VARIABLE( PanTau_BDTVar_Charged_HLV_SumM );
-    
-    ////!PanTau variables when using eflowRec pfos
-    ////Flag whether this seed has pantau info
-    //AUX_VARIABLE( pantau_eflowRecInput_isPanTauCandidate );
-    ////decay modes (input mode [proto] and output mode )
-    //AUX_VARIABLE( pantau_eflowRecInput_DecayModeProto );
-    //AUX_VARIABLE( pantau_eflowRecInput_DecayMode );
-    ////BDT output distributions
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTValue_1p0n_vs_1p1n );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTValue_1p1n_vs_1pXn );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTValue_3p0n_vs_3pXn );
-    ////Variables used in BDTs
-    ////NOTE: They are different from the CellBased ones in general!
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Basic_NPi0NeutConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Basic_NNeutralConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Charged_HLV_SumPt );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Charged_Ratio_EtOverEtAllConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_HLV_SumM );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_PID_BDTValues_EtSort_1 );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_PID_BDTValues_BDTSort_2 );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_Ratio_EtOverEtAllConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Neutral_Mean_DRToLeading_WrtEtAllConsts );
-    //AUX_VARIABLE( pantau_eflowRecInput_BDTVar_Combined_DeltaR1stNeutralTo1stCharged );
 
     // RNN tau ID
     AUX_VARIABLE( RNNJetScore );

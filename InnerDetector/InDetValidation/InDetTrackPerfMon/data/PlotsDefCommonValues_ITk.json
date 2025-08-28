@@ -15,7 +15,7 @@
     "PTQOPTRESMAX" : [ "2.0",     "pTqOverpT range for resolution plots" ],
     "QOPRESMAX"    : [ "5.0",     "qOverp range for resolution plots" ],
     "THETARESMAX"  : [ "0.1",     "theta range for resolution plots" ],
-    "NMUBINS"      : [ "26",      "Number of pileup bins" ],
+    "NMUBINS"      : [ "52",      "Number of pileup bins" ],
     "EXPMUMAX"     : [ "260",     "Expected maximum pileup" ],
     "EXPNTRKMAX"   : [ "3000",    "Expected maximum number of tracks" ],
     "PixHITMAX"    : [ "20",      "Expected maximum number of pixel hits" ],

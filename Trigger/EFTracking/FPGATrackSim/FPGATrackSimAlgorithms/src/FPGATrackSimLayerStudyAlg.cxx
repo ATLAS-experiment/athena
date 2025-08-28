@@ -2,6 +2,8 @@
 
 #include "FPGATrackSimLayerStudyAlg.h"
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 #include "FPGATrackSimObjects/FPGATrackSimCluster.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimDataFlowInfo.h"
@@ -157,6 +159,7 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
 
     // Update truth information in output layer study tree.
     m_binMonitoring->parseTruthInfo(*FPGATruthTracks);
+    m_hitBinningTool->getBinTool().binDesc()->setTruthBin(m_binMonitoring->truthBin());
 
     // Make hit level plots
     for (auto &hit : phits) {
@@ -165,17 +168,22 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
 
     // Bin the hits, depending on m_stage we either use phits_1st, phits_2nd, or all the hits.
     ATH_CHECK(m_hitBinningTool->fill(phits));
-    m_binMonitoring->fillBinningSummary(phits);
 
     // scan over image building pairs for bins over threshold
     for (FPGATrackSimBinArray<FPGATrackSimBinnedHits::BinEntry>::ConstIterator &bin : m_hitBinningTool->lastStepBinnedHits()) {
         // Apply threshold, of course if threshold is 0 then use all bins
-        if (bin.data().hitCnt < m_threshold) continue;
+        if (bin.data().hitCnt < m_threshold) {
+            continue;
+        } else {
+            if (FPGATrackSimBinUtil::IdxSet(bin.idx())==m_binMonitoring->truthBin(m_hitBinningTool->getBinTool().lastStep()->stepNum())) {
+                ATH_MSG_DEBUG("Truth bin failed threshold " << bin.data().hitCnt << " thr=" << m_threshold << " " << bin.idx());}
+        }
         ATH_MSG_DEBUG("Bin passes threshold " << bin.data().hitCnt << " " << bin.idx());
 
         // Monitor contents of bins passing threshold
         m_binMonitoring->fillBinLevelOutput(bin.idx(), bin.data());
     }
+    m_binMonitoring->fillBinningSummary(phits);
 
 
     // Reset the hit binning tool.

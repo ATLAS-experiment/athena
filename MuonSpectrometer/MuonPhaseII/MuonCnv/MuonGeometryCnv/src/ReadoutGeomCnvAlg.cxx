@@ -402,10 +402,12 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
             double wirePitch{0.};
 
             for (unsigned int gasGap =1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
-                nWireGangs[gasGap -1] = copyMe->numWireGangs(gasGap);
-                nStrips[gasGap -1] = copyMe->numStrips(gasGap);
+                const IdentifierHash gangHash = copyMe->constructHash(0, gasGap, false);
+                const IdentifierHash stripHash = copyMe->constructHash(0, gasGap, true);
+                nWireGangs[gasGap -1] = copyMe->numWireGangs(gangHash);
+                nStrips[gasGap -1] = copyMe->numStrips(stripHash);
                 if (nWireGangs[gasGap -1]) {
-                    const MuonGMR4::WireGroupDesign& design{copyMe->wireGangLayout(gasGap)};
+                    const MuonGMR4::WireGroupDesign& design{copyMe->wireGangLayout(gangHash)};
                     wirePitch = design.stripPitch();
                     WiregangArray& fillMe{wires[gasGap-1]};
                     for (int gang = 1; gang <= design.numStrips(); ++gang) {
@@ -413,7 +415,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
                     }
                 }
                 if (nStrips[gasGap -1] && !stripSet) {
-                    const MuonGMR4::RadialStripDesign& design {copyMe->stripLayout(gasGap)};
+                    const MuonGMR4::RadialStripDesign& design{copyMe->stripLayout(stripHash)};
                     const int nCh = nStrips[gasGap -1];
                     for (int strip = 1; strip <= nCh; ++strip) {
                         botMountings[strip-1] = - design.stripLeftBottom(strip).x();
@@ -440,7 +442,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
         
         /// Define the local gasGap positions
         for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
-            const IdentifierHash layHash{ copyMe->constructHash(0, gasGap, false)};
+            const IdentifierHash layHash{copyMe->constructHash(0, gasGap, false)};
             /// In the sector frame, the gasGap is oriented along the x-axis
             const Amg::Vector3D translation{copyMe->globalToLocalTrans(gctx) * copyMe->center(gctx, layHash)};            
             newRE->setPlaneZ(translation.x(), gasGap);
@@ -959,8 +961,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                            <<" z-size: "<<testEle.getZsize()<<"/"<<testEle.getLongZsize());
  
     for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++gasGap) {
-        for (bool isStrip : {false, true}) {
+         for (bool isStrip : {false, true}) {
             const IdentifierHash layHash = refEle.constructHash(0, gasGap, isStrip);
+
             const Identifier layId = idHelper.channelID(refEle.identify(), gasGap, isStrip, 1);
             ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<" "<<refEle.numChannels(layHash)<<" "<<layHash);
             if (!refEle.numChannels(layHash)) continue;
@@ -1034,10 +1037,24 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
             const unsigned int numChannel = refEle.numChannels(layID);
             constexpr unsigned firstCh = 1;
             for (unsigned int channel = firstCh; channel < numChannel ; ++channel) {
-                const Identifier chID = idHelper.channelID(refEle.identify(),
-                                                           refEle.multilayer(),
-                                                           gasGap, chType, channel);
-            
+                Identifier chID;
+                bool isValid = false;
+                if(chType == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                    const int etaIndex = refEle.padDesign(layID).padNumber(channel).first;
+                    const int phiIndex = refEle.padDesign(layID).padNumber(channel).second;
+                    chID = idHelper.padID(refEle.identify(),
+                                            refEle.multilayer(),
+                                            gasGap, chType, etaIndex, phiIndex, isValid);
+                } else {
+                    chID = idHelper.channelID(refEle.identify(),
+                                            refEle.multilayer(),
+                                            gasGap, chType, channel, isValid);
+                }
+
+                if(!isValid) {
+                    ATH_MSG_WARNING("Invalid Identifier detected: " << m_idHelperSvc->toString(chID));
+                } 
+
                 const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, chID)};
                 const Amg::Transform3D& testTrans{testEle.transform(chID)};
                 if (channel == firstCh && (!Amg::doesNotDeform(testTrans.inverse()*refTrans)
@@ -1047,30 +1064,19 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                         <<" *** test: "<<GeoTrf::toString(testTrans, true));
                         return StatusCode::FAILURE;
                 }
-                if (chType == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                    /// R4 Geometry function accepts the channelID as input identifier, whereas, R3 geometry needs to be provided
-                    /// padID explicitly.
-                    bool isValid = false;
-                    const int padEta = refEle.padEta(chID);
-                    const int padPhi = refEle.padPhi(chID);
-                    const Identifier padID = idHelper.padID(refEle.identify(),
-                                                            refEle.multilayer(),
-                                                            gasGap, chType, padEta, padPhi, isValid);
-                    if(!isValid) {
-                        ATH_MSG_WARNING("The following pad ID is not valid: " << padID);
-                    }    
-                    const Amg::Transform3D& testPadTrans{testEle.transform(padID)};
+                if (chType == sTgcIdHelper::sTgcChannelTypes::Pad) {  
+                    const Amg::Transform3D& testPadTrans{testEle.transform(chID)};
                     const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
                     Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
-                    testEle.stripGlobalPosition(padID, testChannelPos);
+                    testEle.stripGlobalPosition(chID, testChannelPos);
                     
                     const std::array<Amg::Vector3D,4> refPadCorners = refEle.globalPadCorners(gctx, chID);
                     std::array<Amg::Vector3D,4> testPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
-                    testEle.padGlobalCorners(padID, testPadCorners);              
+                    testEle.padGlobalCorners(chID, testPadCorners);              
                     for (unsigned int cornerIdx = 0; cornerIdx < refPadCorners.size(); ++cornerIdx) {
                         const double padCornerDiff = (refPadCorners[cornerIdx] - testPadCorners[cornerIdx]).mag();
                         if (padCornerDiff - 25. > 1. * Gaudi::Units::micrometer){
-                            ATH_MSG_ERROR("Mismatch in pad Corner " << cornerIdx << ": " <<m_idHelperSvc->toString(padID)
+                            ATH_MSG_ERROR("Mismatch in pad Corner " << cornerIdx << ": " <<m_idHelperSvc->toString(chID)
                                     <<" ref: "<<Amg::toString(refPadCorners[cornerIdx])<<" test: "<<Amg::toString(testPadCorners[cornerIdx])
                                     <<" difference: " << padCornerDiff
                                     <<" local coordinates -- ref: "<<Amg::toString(refTrans.inverse()*refPadCorners[cornerIdx])
@@ -1080,14 +1086,14 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                     }
                     const double padChannelDiff = (refChannelPos - testChannelPos).mag();
                     if (padChannelDiff - 25. > 1. * Gaudi::Units::micrometer){
-                        ATH_MSG_ERROR("Mismatch in pad positions "<<m_idHelperSvc->toString(padID)
+                        ATH_MSG_ERROR("Mismatch in pad positions "<<m_idHelperSvc->toString(chID)
                                 <<" ref: "<<Amg::toString(refChannelPos)<<" test: "<<Amg::toString(testChannelPos)
                                 <<" difference: " << padChannelDiff
                                 <<" local coordinates -- ref: "<<Amg::toString(refTrans.inverse()*refChannelPos)
                                 <<" test: "<<Amg::toString(testPadTrans.inverse()*testChannelPos));
                         return StatusCode::FAILURE;
                     }
-                    ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(padID)
+                    ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
                                     <<" channel position "<<Amg::toString(refChannelPos));
                 }
                 else if (chType == sTgcIdHelper::sTgcChannelTypes::Strip){

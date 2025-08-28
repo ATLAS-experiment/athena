@@ -69,15 +69,15 @@ StatusCode PhysValTau::fillHistograms()
 
   // Retrieve tau container
   const xAOD::TauJetContainer* taus = nullptr;
-  ATH_CHECK( evtStore()->retrieve(taus, m_TauJetContainerName) ); 
+  if(evtStore()->contains<xAOD::TauJetContainer>(m_TauJetContainerName)){
+      ATH_CHECK( evtStore()->retrieve(taus, m_TauJetContainerName) ); 
+  } else {
+      ATH_MSG_INFO("Input collection " << m_TauJetContainerName << " not found. Skip the monitoring ..");
+      return StatusCode::SUCCESS;   
+  } 
 
   ATH_MSG_DEBUG("Number of taus: " << taus->size());
 
-  // Retrieve truth container
-  const xAOD::TruthParticleContainer* truthParticles = nullptr;
-  if ( m_isMC ) {
-    ATH_CHECK( evtStore()->retrieve(truthParticles, m_TruthParticleContainerName) );
-  }
   
   // Retrieve event info and beamSpotWeight
   const xAOD::EventInfo* eventInfo = nullptr;
@@ -181,7 +181,9 @@ StatusCode PhysValTau::fillHistograms()
         if ( nominal ) {
            m_oTauValidationPlots->m_oElMatchedParamPlotsNom.fill(*tau, weight);
            m_oTauValidationPlots->m_oElMatchedEVetoPlotsNom.fill(*tau, weight);
+	   if(recProng == 1) m_oTauValidationPlots->m_oElMatchedEff1PPlotsNom.fill(*tau, weight);
         }
+	
       } else if( MC::isSMQuark(trueTau) || MC::isGluon(trueTau) ){
         ATH_MSG_DEBUG("Tau is matched to a jet");
         m_oTauValidationPlots->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);

@@ -160,7 +160,7 @@ main(int argc, char* argv[])
     xAOD::ElectronContainer::iterator el_it = elsCorr->begin();
     xAOD::ElectronContainer::iterator el_it_last = elsCorr->end();
 
-    static const SG::ConstAccessor<float> sfAcc("SF");
+    static const SG::ConstAccessor<float> sfAcc("chargeIDEffiSF");
 
     unsigned int i = 0;
     double SF = 0;

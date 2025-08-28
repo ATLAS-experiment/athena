@@ -9,11 +9,11 @@
 ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthenaExternals"
 ATLAS_BUILDTYPE="Release"
-ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=107
-                        -DLCG_VERSION_POSTFIX="a_ATLAS_9"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v39r4.000/Gaudi-v39r4.000.tar.gz;URL_MD5;abe78ac62447548328d563201e0018d4"
-                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v41.0.0.tar.gz;URL_HASH;SHA256=9605c39285201d8f64a312a12ecc161ca965875627d975a76bda70abe7653e2a"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.11.1/GeoModel-6.11.1.tar.bz2;URL_MD5;5e95386417afd5df4069ca427b85c2c9"
+ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=108
+                        -DLCG_VERSION_POSTFIX="_ATLAS_1"
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r0.002/Gaudi-v40r0.002.tar.gz;URL_MD5;09dfaa50aaad6d1347363e008c3b405c"
+                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v43.1.0/acts-v43.1.0.tar.gz;URL_HASH;SHA256=21b7586dcda1bb3e6982fd7e1fe949f95c9545d4e557b4ab78d2fe511c9fd185"
+                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.18.0/GeoModel-6.18.0.tar.bz2;URL_MD5;dd91c3a0260bda5adfb9954a23bb58f9"
                         -DATLAS_GEANT4_USE_LTO=TRUE
                         -DATLAS_VECGEOM_USE_LTO=TRUE
                         -DATLAS_ONNXRUNTIME_USE_CUDA=TRUE

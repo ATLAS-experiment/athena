@@ -25,6 +25,17 @@ namespace Muon::MuonStationIndex{
       }
       return ChIndex::ChUnknown;
    }
+   inline bool isBarrel(const StIndex index) {
+      switch(index) {
+         case StIndex::BI:
+         case StIndex::BM:
+         case StIndex::BO:
+         case StIndex::BE:
+            return true;
+         default:
+            return false;
+      }
+   }
    inline bool isBarrel(const ChIndex index) {
       switch (index) {
          case ChIndex::BIS:

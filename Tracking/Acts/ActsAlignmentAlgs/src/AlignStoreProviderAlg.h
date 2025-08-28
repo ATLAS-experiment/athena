@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSGEOMETRY_ALIGNSTOREPROVIDERALG_H
 #define ACTSGEOMETRY_ALIGNSTOREPROVIDERALG_H
@@ -22,8 +22,8 @@ namespace ActsTrk{
   class AlignStoreProviderAlg : public AthReentrantAlgorithm {
   public:
       /// Standard constructor
-      AlignStoreProviderAlg(const std::string& name, ISvcLocator* pSvcLocator);
-
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
+ 
       virtual ~AlignStoreProviderAlg();
 
       StatusCode initialize() override final;

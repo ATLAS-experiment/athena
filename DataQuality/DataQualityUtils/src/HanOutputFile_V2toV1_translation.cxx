@@ -1,7 +1,9 @@
+/*
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ */
 #include <iostream>
 #include <nlohmann/json.hpp>  //to write JSON strings
 #include <typeinfo>           //to print the type of variable
-// #include </usr/local/Cellar/nlohmann-json/3.9.1_1/include/nlohmann/json.hpp>//work with some cern.root classes
 #include <TFile.h>
 #include <TH1.h>
 #include <TKey.h>
@@ -50,8 +52,8 @@ void conversion_back(TObject* obj_in, TObject* obj_to) {
   } else {
     is_file = false;
   }
-  TDirectory* obj_in_dir = (TDirectory*) obj_in;
-  TDirectory* obj_to_dir = (TDirectory*) obj_to;
+  TDirectory* obj_in_dir = static_cast<TDirectory*> (obj_in);
+  TDirectory* obj_to_dir = static_cast<TDirectory*> (obj_to);
   TString name = obj_in->GetName();
   TDirectory* copy_dir;
   if (is_file == false) {
@@ -150,7 +152,7 @@ void from_JSON_to_TDirectory(nlohmann::json str_content, TDirectory* place_to_sa
 }
 
 int dir_exists(TString dirname, TObject* obj_in) {
-  TDirectory* obj_in_dir = (TDirectory*) obj_in;
+  TDirectory* obj_in_dir = static_cast<TDirectory*> (obj_in);
   TList* keys = obj_in_dir->GetListOfKeys();
   TKey* k = (TKey*) keys->FindObject(dirname);
 

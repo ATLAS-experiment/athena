@@ -25,6 +25,10 @@ class ParticleLevelOverlapRemovalBlock(ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.label
+
     def makeAlgs(self, config):
         alg = config.createAlgorithm('CP::ParticleLevelOverlapRemovalAlg',
                                      'ParticleLevelOverlapRemoval',

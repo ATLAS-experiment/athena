@@ -1,19 +1,23 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef INSWCalibTool_h
-#define INSWCalibTool_h
+#ifndef NSWCalibTools_INSWCalibTool_h
+#define NSWCalibTools_INSWCalibTool_h
 
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/IInterface.h"
+
+
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "Identifier/Identifier.h"
+#include "xAODMuonPrepData/MMClusterFwd.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+
+
 
 #include <cmath>
 #include <vector>
-#include "float.h"
-
-
 
 namespace NSWCalib { 
 
@@ -26,7 +30,7 @@ namespace NSWCalib {
     double resLongDistDrift{0};
     double dx{0};      
     Amg::Vector2D locPos{Amg::Vector2D::Zero()};
-    Identifier identifier{0};
+    Identifier identifier{};
   };
 
   struct MicroMegaGas{
@@ -57,18 +61,20 @@ namespace Muon {
   class STGC_RawData;
 
   class INSWCalibTool : virtual public IAlgTool {
-    
-  public:  // static methods
-
-    static const InterfaceID& interfaceID()  {
-        static const InterfaceID IID_INSWCalibTool("Muon::INSWCalibTool",1,0);
-        return IID_INSWCalibTool;
-    }
 
   public:  // interface methods
+
+    DeclareInterfaceID(INSWCalibTool, 0, 1);
  
     virtual StatusCode calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepRawData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const = 0;
-    virtual StatusCode calibrateStrip(const EventContext& ctx, const Identifier& id,  const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip&calibStrip) const = 0;
+    
+    virtual StatusCode calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster* prepRawData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const = 0;
+
+    virtual StatusCode calibrateStrip(const EventContext& ctx ,const Identifier& id,  const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip&calibStrip) const = 0;
+
+
+
+    
     virtual StatusCode calibrateStrip(const EventContext& ctx, const Muon::MM_RawData* mmRawData, NSWCalib::CalibratedStrip& calibStrip) const = 0;
     virtual StatusCode calibrateStrip(const EventContext& ctx, const Muon::STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const = 0;
 

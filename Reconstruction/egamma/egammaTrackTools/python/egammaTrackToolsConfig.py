@@ -11,9 +11,8 @@ from TrackToCalo.TrackToCaloConfig import EMParticleCaloExtensionToolCfg
 
 
 def EMExtrapolationToolsCfg(flags, **kwargs):
-
-    mlog = logging.getLogger('EMExtrapolationTools')
-    mlog.debug('Start configuration')
+    mlog = logging.getLogger("EMExtrapolationTools")
+    mlog.debug("Start configuration")
 
     acc = ComponentAccumulator()
 
@@ -23,7 +22,8 @@ def EMExtrapolationToolsCfg(flags, **kwargs):
 
     if "CaloExtensionTool" not in kwargs:
         kwargs["CaloExtensionTool"] = acc.popToolsAndMerge(
-            EMParticleCaloExtensionToolCfg(flags))
+            EMParticleCaloExtensionToolCfg(flags)
+        )
 
     kwargs["EnableTRT"] = flags.Detector.GeometryTRT
 
@@ -32,44 +32,55 @@ def EMExtrapolationToolsCfg(flags, **kwargs):
     return acc
 
 
-def egammaTrkRefitterToolCfg(flags,
-                             name='GSFRefitterTool',
-                             **kwargs):
+def egammaTrkRefitterToolCfg(flags, name="GSFRefitterTool", **kwargs):
     acc = ComponentAccumulator()
     if "FitterTool" not in kwargs:
         if flags.Acts.GsfRefitLegacyTrk:
-            from ActsConfig.ActsGaussianSumFitterConfig import ActsGaussianSumFitterToolCfg
+            from ActsConfig.ActsGaussianSumFitterConfig import (
+                ActsGaussianSumFitterToolCfg,
+            )
+
             kwargs["FitterTool"] = acc.popToolsAndMerge(
-                ActsGaussianSumFitterToolCfg(flags, name="ActsGSFTrackFitter"))
+                ActsGaussianSumFitterToolCfg(flags, name="ActsGSFTrackFitter")
+            )
+        elif flags.Detector.GeometryITk:
+            from TrkConfig.TrkGaussianSumFilterConfig import ITkGaussianSumFitterCfg
+
+            kwargs["FitterTool"] = acc.popToolsAndMerge(
+                ITkGaussianSumFitterCfg(flags, name="GSFTrackFitter")
+            )
         else:
             from TrkConfig.TrkGaussianSumFilterConfig import GaussianSumFitterCfg
+
             kwargs["FitterTool"] = acc.popToolsAndMerge(
-                GaussianSumFitterCfg(flags, name="GSFTrackFitter"))
+                GaussianSumFitterCfg(flags, name="GSFTrackFitter")
+            )
 
     tool = CompFactory.egammaTrkRefitterTool(name, **kwargs)
     acc.setPrivateTools(tool)
     return acc
 
 
-def CaloCluster_OnTrackBuilderCfg(flags,
-                                  name='CaloCluster_OnTrackBuilder',
-                                  **kwargs):
+def CaloCluster_OnTrackBuilderCfg(flags, name="CaloCluster_OnTrackBuilder", **kwargs):
     acc = ComponentAccumulator()
     if "CaloSurfaceBuilder" not in kwargs:
         from CaloTrackingGeometry.CaloTrackingGeometryConfig import (
-            CaloSurfaceBuilderMiddleCfg)
+            CaloSurfaceBuilderMiddleCfg,
+        )
+
         kwargs["CaloSurfaceBuilder"] = acc.popToolsAndMerge(
-            CaloSurfaceBuilderMiddleCfg(flags))
+            CaloSurfaceBuilderMiddleCfg(flags)
+        )
     tool = CompFactory.CaloCluster_OnTrackBuilder(name, **kwargs)
     acc.setPrivateTools(tool)
     return acc
 
 
 if __name__ == "__main__":
-
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.TestDefaults import defaultTestFiles
+
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RDO_RUN2
     flags.fillFromArgs()
@@ -79,20 +90,26 @@ if __name__ == "__main__":
     cfg = ComponentAccumulator()
     mlog = logging.getLogger("egammaTrackToolsConfigTest")
     mlog.info("Configuring EMExtrapolationTools : ")
-    printProperties(mlog, cfg.popToolsAndMerge(
-        EMExtrapolationToolsCfg(flags)),
+    printProperties(
+        mlog,
+        cfg.popToolsAndMerge(EMExtrapolationToolsCfg(flags)),
         nestLevel=1,
-        printDefaults=True)
+        printDefaults=True,
+    )
     mlog.info("Configuring egammaTrkRefitterTool :")
-    printProperties(mlog, cfg.popToolsAndMerge(
-        egammaTrkRefitterToolCfg(flags)),
+    printProperties(
+        mlog,
+        cfg.popToolsAndMerge(egammaTrkRefitterToolCfg(flags)),
         nestLevel=1,
-        printDefaults=True)
+        printDefaults=True,
+    )
     mlog.info("Configuring CaloCluster_OnTrackBuilder :")
-    printProperties(mlog, cfg.popToolsAndMerge(
-        CaloCluster_OnTrackBuilderCfg(flags)),
+    printProperties(
+        mlog,
+        cfg.popToolsAndMerge(CaloCluster_OnTrackBuilderCfg(flags)),
         nestLevel=1,
-        printDefaults=True)
+        printDefaults=True,
+    )
 
     f = open("egtracktools.pkl", "wb")
     cfg.store(f)

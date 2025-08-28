@@ -55,23 +55,9 @@ def TrackRetrieverCfg(flags, name="TrackRetriever", **kwargs):
     from TrkConfig.TrkResidualPullCalculatorConfig import (ResidualPullCalculatorCfg)
     ResidualPullCalculator=result.addPublicTool(result.popToolsAndMerge(ResidualPullCalculatorCfg(flags)))
     kwargs.setdefault("ResidualPullCalculator", ResidualPullCalculator)
-
-    kwargs.setdefault("PriorityTrackCollection", "Tracks")
-    kwargs.setdefault(
-        "OtherTrackCollections",
-        [
-            "CombinedMuonTracks",
-            "MuonSpectrometerTracks",
-            "ConvertedStacoTracks",
-            "ConvertedMuIdCBTracks",
-            "CombinedInDetTracks",
-            "GSFTracks",
-        ],
-    )
-    ### The Event Filter track collections are not written to XML by default.
-    ### To write them out, you must uncomment the following line:
-    # kwargs.setdefault("DoWriteHLT", True)
-    ### switch residual data off:
+    if not flags.Input.isMC:
+        kwargs.setdefault("TruthCollections",[""])
+    kwargs.setdefault("isMC", flags.Input.isMC)
     kwargs.setdefault("DoWriteResiduals", False)
     the_tool = CompFactory.JiveXML.TrackRetriever(name, **kwargs)
     result.addPublicTool(the_tool, primary=True)

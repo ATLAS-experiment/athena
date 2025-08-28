@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Digitization/ALFA_PileUpTool.h"
@@ -676,20 +676,12 @@ StatusCode ALFA_PileUpTool::fill_OD_DigitCollection(CLHEP::HepRandomEngine* rndE
 StatusCode 
 ALFA_PileUpTool::XTalk() {	
   std::ifstream fXTalk;  
-  std::stringstream ss;
-  std::string fname;
 	for (unsigned int j=0; j<8; j++){
-		
-		ss.str("");
-			
-		fname = "Xtalk_station";
-		ss << j+1;
-		fname += ss.str();
-		fname += ".txt";
-		
+
+		const std::string fname = "ALFA_Digitization/Xtalk_station" + std::to_string(j+1) + ".txt";
 		ATH_MSG_DEBUG("file name " << fname);
 		
-		std::string filePath = PathResolver::find_file(fname,"DATAPATH", PathResolver::RecursiveSearch);
+		std::string filePath = PathResolverFindDataFile(fname);
 		
 		if(filePath.length() == 0)
 		{

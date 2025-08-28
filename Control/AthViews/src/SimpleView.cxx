@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <stdexcept>
@@ -159,10 +159,9 @@ StatusCode SimpleView::addToStore( CLID id, SG::DataProxy * proxy )
  *
  * The default implementation here always returns false.
  */
-bool SimpleView::tryELRemap( sgkey_t sgkey_in, size_t index_in, sgkey_t & sgkey_out, size_t & index_out )
+bool SimpleView::tryELRemap( sgkey_t /*sgkey_in*/, size_t /*index_in*/, sgkey_t & /*sgkey_out*/, size_t & /*index_out*/ )
 {
   throw std::runtime_error( "Not implemented: SimpleView::tryELRemap" );
-  return m_store->tryELRemap( sgkey_in, index_in, sgkey_out, index_out );
 }
 
 /**
@@ -211,15 +210,13 @@ IStringPool::sgkey_t SimpleView::stringToKey( const std::string& str, CLID clid 
 {
   return m_store->stringToKey( viewKey(str), clid );
 }
-const std::string* SimpleView::keyToString( IStringPool::sgkey_t key ) const
+const std::string* SimpleView::keyToString( IStringPool::sgkey_t /*key*/ ) const
 {
   throw std::runtime_error( "Not implemented: SimpleView::keyToString" );
-  return m_store->keyToString( key );
 }
-const std::string* SimpleView::keyToString( IStringPool::sgkey_t key, CLID& clid ) const
+const std::string* SimpleView::keyToString( IStringPool::sgkey_t /*key*/, CLID& /*clid*/ ) const
 {
   throw std::runtime_error( "Not implemented: SimpleView::keyToString" );
-  return m_store->keyToString( key, clid );
 }
 void SimpleView::registerKey( IStringPool::sgkey_t key, const std::string& str, CLID clid )
 {

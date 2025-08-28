@@ -454,7 +454,7 @@ def PprMonitoringConfig(inputFlags):
                            },
                            xbins=etabins_HAD_1D,
                            cutmask='mask_PedCorrOverflow', 
-                           opt='kAlwaysCreate')
+                           opt='')
 
     helper.defineHistogram('etaTT;ppm_had_1d_pedUnderflow_Eta',
                            fillGroup='groupErrors_HAD',
@@ -465,7 +465,7 @@ def PprMonitoringConfig(inputFlags):
                            },
                            xbins=etabins_HAD_1D, 
                            cutmask='mask_PedCorrUnderflow', 
-                           opt='kAlwaysCreate')
+                           opt='')
 
     # MCM error block (input G-Link frame)
     globalError_xlabels_mcmerr = [
@@ -492,9 +492,8 @@ def PprMonitoringConfig(inputFlags):
     ]
 
     # SubStatus Error histograms
-    # MW, Apr 2025: TODO check filling code (which seems not to reflect hardware)
-    helper.defineHistogram('bit_2D;ppm_1d_ErrorSummary',
-                           fillGroup='group1DErrorSummary',
+    helper.defineHistogram('bit_2D;ppm_1d_SubStatErrorSummary',
+                           fillGroup='group1DSubStatErrorSummary',
                            title='Summary of SubStatus Word Errors',
                            type='TH1F', path=histPath_exp,
                            hanConfig={
@@ -505,8 +504,8 @@ def PprMonitoringConfig(inputFlags):
                            xlabels=globalError_xlabels_substat,
                            opt='kAlwaysCreate')
     
-    helper.defineHistogram('eventMonitor,bit_2D;ppm_2d_ErrorEventNumbers',
-                           fillGroup='groupErrorEventNumbers',
+    helper.defineHistogram('eventMonitor,bit_2D;ppm_2d_SubStatErrorEventNumbers',
+                           fillGroup='groupSubStatErrorEventNumbers',
                            title='SubStatus Word Errors Event Numbers;Events with Error/Mismatch;;',
                            type='TH2I', path=histPath_det,
                            hanConfig={
@@ -514,10 +513,10 @@ def PprMonitoringConfig(inputFlags):
                            },
                            xbins=10, xmin=0, xmax=10, ybins=8, ymin=0, ymax=8,
                            ylabels=globalError_xlabels_substat,
-                           opt='kAlwaysCreate')
+                           opt='')
 
-    helper.defineHistogram('bit_2D,y_2D;ppm_2d_Status03',
-                           fillGroup='groupStatus03',
+    helper.defineHistogram('bit_2D,y_2D;ppm_2d_SubStatError03',
+                           fillGroup='groupSubStatError03',
                            title='SubStatus Word Errors (crates 0-3)',
                            type='TH2I', path=histPath_dev,
                            xbins=8, xmin=0, xmax=8, ybins=64, ymin=0, ymax=64,
@@ -525,8 +524,8 @@ def PprMonitoringConfig(inputFlags):
                            ylabels=BinErrors('cr0cr1cr2cr3'),
                            opt='')
 
-    helper.defineHistogram('bit_2D,y_2D;ppm_2d_Status47',
-                           fillGroup='groupStatus47',
+    helper.defineHistogram('bit_2D,y_2D;ppm_2d_SubStatError47',
+                           fillGroup='groupSubStatError47',
                            title='SubStatus Word Errors (crates 4-7)',
                            type='TH2I', path=histPath_det,
                            hanConfig={
@@ -536,12 +535,23 @@ def PprMonitoringConfig(inputFlags):
                            xbins=8, xmin=0, xmax=8, ybins=64, ymin=0, ymax=64,
                            xlabels=globalError_xlabels_substat,
                            ylabels=BinErrors('cr4cr5cr6cr7'),
-                           opt='kAlwaysCreate')
+                           opt='')
 
     # MCM Error Field histograms
-    # MW, Apr 2025: TODO check filling code (which seems not to reflect hardware), add summary plot
-    helper.defineHistogram('eventMonitor,bit_2D;ppm_2d_ASICErrorEventNumbers',
-                           fillGroup='groupASICErrorEventNumbers',
+    helper.defineHistogram('bit_2D;ppm_1d_MCMErrorSummary',
+                           fillGroup='group1DMCMErrorSummary',
+                           title='Summary of MCM Errors',
+                           type='TH1F', path=histPath_exp,
+                           hanConfig={
+                               "algorithm" : "Histogram_Empty",
+                               "description" : "Summary of MCM Errors."
+                           },
+                           xbins=8, xmin=0, xmax=8,
+                           xlabels=globalError_xlabels_mcmerr,
+                           opt='kAlwaysCreate')
+    
+    helper.defineHistogram('eventMonitor,bit_2D;ppm_2d_MCMErrorEventNumbers',
+                           fillGroup='groupMCMErrorEventNumbers',
                            title='MCM Error Field Event Numbers;Events with Error/Mismatch;;',
                            type='TH2I', path=histPath_det,
                            hanConfig={
@@ -549,10 +559,10 @@ def PprMonitoringConfig(inputFlags):
                            },
                            xbins=10, xmin=0, xmax=10, ybins=8, ymin=0, ymax=8,
                            ylabels=globalError_xlabels_mcmerr,
-                           opt='kAlwaysCreate')
+                           opt='')
        
-    helper.defineHistogram('bit_2D,y_2D;ppm_2d_ErrorField03',
-                           fillGroup='groupErrorField03',
+    helper.defineHistogram('bit_2D,y_2D;ppm_2d_MCMErrorField03',
+                           fillGroup='groupMCMErrorField03',
                            title='MCM Error Field (crates 0-3)',
                            type='TH2I', path=histPath_dev,
                            xbins=8, xmin=0, xmax=8, ybins=64, ymin=0, ymax=64,
@@ -560,8 +570,8 @@ def PprMonitoringConfig(inputFlags):
                            ylabels=BinErrors('cr0cr1cr2cr3'),
                            opt='')
         
-    helper.defineHistogram('bit_2D,y_2D;ppm_2d_ErrorField47',
-                           fillGroup='groupErrorField47',
+    helper.defineHistogram('bit_2D,y_2D;ppm_2d_MCMErrorField47',
+                           fillGroup='groupMCMErrorField47',
                            title='MCM Error Field (crates 4-7)',
                            type='TH2I', path=histPath_det,
                            hanConfig={
@@ -571,7 +581,7 @@ def PprMonitoringConfig(inputFlags):
                            xbins=8, xmin=0, xmax=8, ybins=64, ymin=0, ymax=64,
                            xlabels=globalError_xlabels_mcmerr,
                            ylabels=BinErrors('cr4cr5cr6cr7'),
-                           opt='kAlwaysCreate')
+                           opt='')
     
 
     # Finish up

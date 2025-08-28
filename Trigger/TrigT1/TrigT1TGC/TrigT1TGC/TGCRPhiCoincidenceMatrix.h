@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCRPhiCoincidenceMatrix_hh
 #define TGCRPhiCoincidenceMatrix_hh
 
-#include "TrigT1TGC/TGCSSCControllerOut.h"
-#include "TrigT1TGC/TGCArguments.h"
+
+#include <memory>
 
 namespace LVL1TGC {
 class BigWheelCoincidenceLUT;
@@ -16,6 +16,7 @@ namespace LVL1TGCTrigger {
 
 class TGCSectorLogic;
 class TGCRPhiCoincidenceOut;
+class TGCArguments;
 
 class TGCRPhiCoincidenceMatrix {
  public:

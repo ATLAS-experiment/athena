@@ -15,7 +15,6 @@
 #include "TF1.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "TH3.h"
 #include "TROOT.h"
 #include "TClass.h"
 #include <utility>
@@ -66,8 +65,6 @@ using namespace TauAnalysisTools;
   absolute tau eta. All this is done in:
     - void CommonEfficiencyTool::ReadInputs(TFile* fFile)
 
-  Other tools for scale factors may build up on this tool and overwrite or add
-  praticular functionality (one example is the TauEfficiencyTriggerTool).
 */
 
 //______________________________________________________________________________
@@ -145,7 +142,7 @@ StatusCode CommonEfficiencyTool::initialize()
 
 //______________________________________________________________________________
 CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::TauJet& xTau,
-    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/, unsigned int iMu)
+    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/)
 {
   // check which true state is requested
   if (!m_bSkipTruthMatchCheck and getTruthParticleType(xTau) != m_eCheckTruth)
@@ -185,11 +182,12 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
      sMode = ConvertProngToString(xTau.nTracks());
   }
 
-  std::string sMu = "";
-  std::string sMCCampaign = "";
-
-  if (m_bSplitMu) sMu = ConvertMuToString(iMu);
-  std::string sHistName = m_sSFHistName + sMode + sMu;
+  std::string sHistName;
+  if(m_doTauTrig){
+     sHistName = "sf_all_"+m_sWP+sMode;
+  } else {
+     sHistName = m_sSFHistName + sMode;
+  }
 
   // get standard scale factor
   CP::CorrectionCode tmpCorrectionCode = getValue(sHistName,
@@ -221,13 +219,21 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
     sHistName = it->second;
     if (dDirection>0.)  sHistName+="_up";
     else                sHistName+="_down";
+
+    if(m_doTauTrig){ sHistName+="_all"; }
+
     if (!m_sWP.empty()) sHistName+="_"+m_sWP;
-    sHistName += sMode + sMu + sMCCampaign;
+    sHistName += sMode;
+
 
     // filter unwanted combinations
     if( (sHistName.find("3P") != std::string::npos && sHistName.find("1p") != std::string::npos) ||
         (sHistName.find("1P") != std::string::npos && sHistName.find("3p") != std::string::npos)) 
         continue;
+
+    if( (sHistName.find("1520") != std::string::npos && sHistName.find("loose") != std::string::npos) ){
+        continue;
+    }
 
     // get the uncertainty from the histogram
     tmpCorrectionCode = getValue(sHistName,
@@ -265,7 +271,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
 */
 //______________________________________________________________________________
 CP::CorrectionCode CommonEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::TauJet& xTau,
-  unsigned int iRunNumber, unsigned int iMu)
+  unsigned int iRunNumber)
 {
   double dSf = 0.;
 
@@ -284,7 +290,7 @@ CP::CorrectionCode CommonEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::
     return CP::CorrectionCode::Ok;
 
   // retrieve scale factor
-  CP::CorrectionCode tmpCorrectionCode = getEfficiencyScaleFactor(xTau, dSf, iRunNumber, iMu);
+  CP::CorrectionCode tmpCorrectionCode = getEfficiencyScaleFactor(xTau, dSf, iRunNumber);
   // adding scale factor to tau as decoration
   decor(xTau) = dSf;
 
@@ -385,19 +391,6 @@ StatusCode CommonEfficiencyTool::applySystematicVariation ( const CP::Systematic
 std::string CommonEfficiencyTool::ConvertProngToString(const int fProngness) const
 {
   return fProngness == 1 ? "_1p" : "_3p";
-}
-
-/*
-  mu converter, returns "_highMu" for average number of vertices higher than 35 and
-  "_lowMu" for everything below
-*/
-//______________________________________________________________________________
-std::string CommonEfficiencyTool::ConvertMuToString(const int iMu) const
-{
-  if (iMu > 35 )
-    return "_highMu";
-
-  return "_lowMu";
 }
 
 /*
@@ -556,13 +549,7 @@ void CommonEfficiencyTool::addHistogramToSFMap(TKey* kKey, const std::string& sK
     (*m_mSF)[sKeyName] = tTupleObjectFunc(oObject,&getValueTH2);
     ATH_MSG_DEBUG("added histogram with name "<<sKeyName);
   }
-  else if (cClass->InheritsFrom("TH3"))
-  {
-    TH1* oObject = (TH1*)kKey->ReadObj();
-    oObject->SetDirectory(0);
-    (*m_mSF)[sKeyName] = tTupleObjectFunc(oObject,&getValueTH3);
-    ATH_MSG_DEBUG("added histogram with name "<<sKeyName);
-  }else if (cClass->InheritsFrom("TH1"))
+  else if (cClass->InheritsFrom("TH1"))
   {
     TH1* oObject = (TH1*)kKey->ReadObj();
     oObject->SetDirectory(0);
@@ -609,9 +596,6 @@ void CommonEfficiencyTool::generateSystematicSets()
   // set truth type to check for in truth matching
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
   else if (sTruthType=="TRUEELECTRON") m_eCheckTruth = TauAnalysisTools::TruthElectron;
-  else if (sTruthType=="TRUEMUON") m_eCheckTruth = TauAnalysisTools::TruthMuon;
-  else if (sTruthType=="TRUEJET") m_eCheckTruth = TauAnalysisTools::TruthJet;
-  else if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
   // 3p eVeto, still need this to be measurable in T&P
   if (sEfficiencyType=="ELERNN" || sEfficiencyType=="ELEOLR") m_bNoMultiprong = true;
 
@@ -746,41 +730,6 @@ CP::CorrectionCode CommonEfficiencyTool::getValueTH2(const TObject* oObject,
 
   // get bin from TH2 depending on x and y values; finally set the scale factor
   int iBin = hHist->FindFixBin(dPt,dEta);
-  dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
-  return CP::CorrectionCode::Ok;
-}
-
-/*
-  find the particular value in TH3 depending on x, y, z
-  Note: In case values are outside of bin ranges, the closest bin value is used
-*/
-//______________________________________________________________________________
-CP::CorrectionCode CommonEfficiencyTool::getValueTH3(const TObject* oObject,
-    double& dEfficiencyScaleFactor, double dVars[])
-{
-  double dX = dVars[0];
-  double dY = dVars[1];
-  double dZ = dVars[2];
-
-  const TH3* hHist = dynamic_cast<const TH3*>(oObject);
-
-  if (!hHist)
-  {
-    // ATH_MSG_ERROR("Problem with casting TObject of type "<<oObject->ClassName()<<" to TH2D");
-    return CP::CorrectionCode::Error;
-  }
-
-  // protect values from underflow bins
-  dX = std::max(dX,hHist->GetXaxis()->GetXmin());
-  dY = std::max(dY,hHist->GetYaxis()->GetXmin());
-  dZ = std::max(dZ,hHist->GetZaxis()->GetXmin());
-  // protect values from overflow bins (times .999 to keep it inside last bin)
-  dX = std::min(dX,hHist->GetXaxis()->GetXmax() * .999);
-  dY = std::min(dY,hHist->GetYaxis()->GetXmax() * .999);
-  dZ = std::min(dZ,hHist->GetZaxis()->GetXmax() * .999);
-
-  // get bin from TH2 depending on x and y values; finally set the scale factor
-  int iBin = hHist->FindFixBin(dX,dY,dZ);
   dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
   return CP::CorrectionCode::Ok;
 }

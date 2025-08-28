@@ -3,10 +3,7 @@
 */
 
 #include "TrkGaussianSumFilterUtils/KLGaussianMixtureReduction.h"
-#include "TrkGaussianSumFilterUtils/AlignedDynArray.h"
-#include "TrkGaussianSumFilterUtils/GsfConstants.h"
-//
-#include "TrkGaussianSumFilterUtils/GSFFindIndexOfMinimum.h"
+#include "TrkGaussianSumFilterUtils/GsfFindIndexOfMinimum.h"
 //
 #include "CxxUtils/restrict.h"
 #include "CxxUtils/vec.h"
@@ -26,19 +23,20 @@
  * Implementation of KLGaussianMixtureReduction
  */
 namespace KLReductionFMV {
-//clang FMV needs a namespace :/
-#if HAVE_FUNCTION_MULTIVERSIONING
-[[gnu::target("default")]]
+#ifdef __clang__  // trapping-math is incompatible with multiversioning with clang 20.1.5
+#pragma float_control(except, off)
 #endif
-int vIdxOfMin(const float* distancesIn, int n) {
-  return vAlgs::vIdxOfMin<128>(distancesIn, n);
-}
+//clang FMV needs a namespace :/
 #if HAVE_FUNCTION_MULTIVERSIONING
 [[gnu::target("avx2")]]
 int vIdxOfMin(const float* distancesIn, int n) {
   return vAlgs::vIdxOfMin<256>(distancesIn, n);
 }
+[[gnu::target("default")]]
 #endif
+int vIdxOfMin(const float* distancesIn, int n) {
+  return vAlgs::vIdxOfMin<128>(distancesIn, n);
+}
 }  // namespace KLReductionFMV
 
 namespace {
@@ -46,7 +44,6 @@ namespace {
 
 //We want to be using up to a 256 ISA, these cover also a narrower one
 constexpr size_t STRIDEForKL = vAlgs::strideOfNumSIMDVec<256,float>(4);
-constexpr size_t ALIGNMENTForKL = vAlgs::alignmentForArray<256>();
 using namespace GSFUtils;
 
 /**
@@ -107,8 +104,7 @@ numDistances(const int n, float* distancesIn)
 {
   const int npadded = vAlgs::numPadded<STRIDEForKL>(n);
   // Make sure the padded elements are set to max
-  std::fill(
-    distancesIn + n, distancesIn + npadded, std::numeric_limits<float>::max());
+  std::fill( distancesIn + n, distancesIn + npadded, std::numeric_limits<float>::max());
   return npadded;
 }
 
@@ -186,31 +182,19 @@ numDistances(const int n, float* distancesIn)
  */
 
 /**
- * @brief precalculate the offsets for the column
- */
-constexpr std::array<int, GSFConstants::maxComponentsAfterConvolution>
-    offset = []() {
-      constexpr int n = GSFConstants::maxComponentsAfterConvolution;
-      std::array<int, n> tmp = {};
-      for (int i = 0; i < n; ++i) {
-        tmp[i] = (i - 1) * i / 2;
-      }
-      return tmp;
-    }();
-
-/**
  * @brief Helper struct to map position in
  * triangular array to matrix(I, J) indices
  */
 struct triangularToIJ
 {
-  int8_t I = -1;
-  int8_t J = -1;
+  int  I = -1;
+  int  J = -1;
 };
 /**
  * @brief Helper method to convert
  * from index in triangular array
  * to matrix(I,J)
+ * see https://hal.archives-ouvertes.fr/hal-02047514/document
  */
 inline triangularToIJ
 convert(int idx)
@@ -218,25 +202,9 @@ convert(int idx)
   if (idx<0){
     throw std::out_of_range("KLGaussianMixtureReduction.cxx::convert : idx is negative");
   }
-  // We prefer to preMap the maximum 2556 elements.
-  // Alternatively one can use the following
-  // if pre-mapping becomes an issue
-  // (see https://hal.archives-ouvertes.fr/hal-02047514/document)
-  //  int8_t i = std::floor((std::sqrt(1 + 8 * idx) + 1) / 2);
-  //  int8_t j = idx - (i - 1) * i / 2;
-  static const std::vector<triangularToIJ> preMap = []() {
-    constexpr int n = GSFConstants::maxComponentsAfterConvolution;
-    constexpr size_t nn = n * (n - 1) / 2;
-    std::vector<triangularToIJ> indexMap(nn);
-    for (int8_t i = 1; i < n; ++i) {
-      const int indexConst = offset[i];
-      for (int8_t j = 0; j < i; ++j) {
-        indexMap[indexConst + j] = { i, j };
-      }
-    }
-    return indexMap;
-  }();
-  return preMap[idx];
+  int i = std::floor((std::sqrt(1 + 8 * idx) + 1) / 2);
+  int j = idx - (i - 1) * i / 2;
+  return {i, j};
 }
 
 /**
@@ -250,12 +218,10 @@ calculateAllDistances(const Component1D* componentsIn,
                       float* distancesIn,
                       const int n)
 {
-  const Component1D* components =
-    std::assume_aligned<GSFConstants::alignment>(componentsIn);
-  float* distances =
-    std::assume_aligned<GSFConstants::alignment>(distancesIn);
+  const Component1D* components = std::assume_aligned<GSFConstants::alignment>(componentsIn);
+  float* distances = std::assume_aligned<GSFConstants::alignment>(distancesIn);
   for (int i = 1; i < n; ++i) {
-    const int indexConst = offset[i];
+    const int indexConst = (i - 1) * i / 2;
     const Component1D componentI = components[i];
     for (int j = 0; j < i; ++j) {
       const Component1D componentJ = components[j];
@@ -276,22 +242,21 @@ calculateAllDistances(const Component1D* componentsIn,
 inline int
 updateDistances(
   Component1D* ATH_RESTRICT componentsIn,
-  std::array<int8_t, GSFConstants::maxComponentsAfterConvolution>& mergingIndex,
+  int* ATH_RESTRICT mergingIndexIn,
   float* ATH_RESTRICT distancesIn,
   int minFrom,
   int minTo,
   int n)
 {
-  float* distances =
-    std::assume_aligned<GSFConstants::alignment>(distancesIn);
-  Component1D* components =
-    std::assume_aligned<GSFConstants::alignment>(componentsIn);
+  float* distances = std::assume_aligned<GSFConstants::alignment>(distancesIn);
+  Component1D* components = std::assume_aligned<GSFConstants::alignment>(componentsIn);
+  int* mergingIndex = std::assume_aligned<GSFConstants::alignment>(mergingIndexIn);
   // We swap the last elements with the ones indexed by minFrom.
   // After this the remaining components we care about
   // are n-1 which we return
   const int last = (n - 1);
-  const int indexOffsetJ = offset[minFrom];
-  const int indexOffsetLast = offset[last];
+  const int indexOffsetJ = (minFrom - 1) * minFrom / 2;
+  const int indexOffsetLast = (last - 1) * last / 2;
   // we do no need to swap the last with itself
   if (minFrom != last) {
     // Rows in distance matrix
@@ -300,7 +265,7 @@ updateDistances(
     }
     // Columns in distance matrix
     for (int i = minFrom + 1; i < last; ++i) {
-      const int index = offset[i] + minFrom;
+      const int index = (i-1) * i/2 + minFrom;
       std::swap(distances[index], distances[indexOffsetLast + i]);
     }
     // swap the components
@@ -312,7 +277,7 @@ updateDistances(
   if (minTo == last) {
     minTo = minFrom;
   }
-  const int indexConst = offset[minTo];
+  const int indexConst = (minTo - 1) * minTo/2;
   // This is the component that has been updated
   const Component1D componentJ = components[minTo];
   // Rows in distance matrix
@@ -324,82 +289,66 @@ updateDistances(
   // Columns in distance matrix
   for (int i = minTo + 1; i < last; ++i) {
     const Component1D componentI = components[i];
-    const int index = offset[i] + minTo;
+    const int index = (i- 1) * i/2 + minTo;
     distances[index] = symmetricKL(componentI, componentJ);
   }
   return last;
 }
 
+} // anonymous namespace with implementation
+
+namespace GSFUtils {
 /**
  * Return which components need to be merged.
  */
 MergeArray
-findMergesImpl(const Component1DArray& componentsIn,
-               const int n,
-               const int8_t reducedSize)
+findMerges(Component1DArray&& componentsIn, const int reducedSize)
 {
-  // copy the array for internal use
-  Component1DArray copyComponents(componentsIn);
-  Component1D* components = std::assume_aligned<GSFConstants::alignment>(
-    copyComponents.components.data());
-  // Based on the inputSize n allocate enough space for the pairwise distances
+  const int n = componentsIn.size();
   int nn = n * (n - 1) / 2;
   int nnpadded = vAlgs::numPadded<STRIDEForKL>(nn);
-  AlignedDynArray<float, ALIGNMENTForKL> distances(
-    nnpadded, std::numeric_limits<float>::max());
+  Component1DArray components(std::move(componentsIn));
+  // Based on the inputSize n allocate enough space for the pairwise distances
+  AlignedDynArray<float, GSFConstants::alignment> distances(nnpadded, std::numeric_limits<float>::max());
   // initial distance calculation
-  calculateAllDistances(components, distances.buffer(), n);
+  calculateAllDistances(components.buffer(), distances.buffer(), n);
   // As we merge keep track where things moved
-  std::array<int8_t, GSFConstants::maxComponentsAfterConvolution>
-    mergingIndex{};
+  AlignedDynArray<int, GSFConstants::alignment> mergingIndex(n);
   std::iota(mergingIndex.begin(), mergingIndex.end(), 0);
   // Result to be returned
   MergeArray result{};
+  result.reserve(n);
   int numberOfComponentsLeft = n;
   // merge loop
   while (numberOfComponentsLeft > reducedSize) {
     // find pair with minimum distance
     const int minIndex = KLReductionFMV::vIdxOfMin(distances.buffer(), nnpadded);
     const triangularToIJ conversion = convert(minIndex);
-    int8_t minTo = conversion.I;
-    int8_t minFrom = conversion.J;
+    int  minTo = conversion.I;
+    int  minFrom = conversion.J;
     // This is the convention we had so retained.
     if (mergingIndex[minTo] < mergingIndex[minFrom]) {
       std::swap(minTo, minFrom);
     }
     // prepare what to return
-    const int8_t miniToreturn = mergingIndex[minTo];
-    const int8_t minjToreturn = mergingIndex[minFrom];
-    result.merges[result.numMerges] = { miniToreturn, minjToreturn };
-    ++result.numMerges;
+    const int  miniToreturn = mergingIndex[minTo];
+    const int  minjToreturn = mergingIndex[minFrom];
+    result.push_back({ miniToreturn, minjToreturn });
     // Combine
     combine(components[minTo], components[minFrom]);
     // update distances
-    numberOfComponentsLeft = updateDistances(components,
-                                             mergingIndex,
+    numberOfComponentsLeft = updateDistances(components.buffer(),
+                                             mergingIndex.buffer(),
                                              distances.buffer(),
                                              minFrom,
                                              minTo,
                                              numberOfComponentsLeft);
 
     // number of remaining distances padded
-    nn = offset[numberOfComponentsLeft];
+    nn = (numberOfComponentsLeft - 1) * numberOfComponentsLeft / 2;
     nnpadded = numDistances(nn, distances.buffer());
   } // end of merge while
   return result;
 }
 
-} // anonymous namespace with implementation
-
-namespace GSFUtils {
-MergeArray
-findMerges(const Component1DArray& componentsIn, const int8_t reducedSize)
-{
-  const int n = componentsIn.numComponents;
-  if (n < 0 || n > GSFConstants::maxComponentsAfterConvolution ||
-      reducedSize > n) {
-    throw std::runtime_error("findMerges :Invalid InputSize or reducedSize");
-  }
-  return findMergesImpl(componentsIn, n, reducedSize);
-}
 } // end namespace GSFUtils

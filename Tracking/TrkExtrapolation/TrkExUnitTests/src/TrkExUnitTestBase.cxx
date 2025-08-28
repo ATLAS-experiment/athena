@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,19 +9,8 @@
 // TrkExUnitTests
 #include <memory>
 
-
-
 #include "TrkExUnitTests/TrkExUnitTestBase.h"
 
-Trk::TrkExUnitTestBase::TrkExUnitTestBase(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_numTests(100),
-  m_scanMode(false) {
-  declareProperty("NumberOfTestsPerEvent", m_numTests);
-  declareProperty("EnableScanMode", m_scanMode);
-}
-
-Trk::TrkExUnitTestBase::~TrkExUnitTestBase() = default;
 
 StatusCode Trk::TrkExUnitTestBase::initialize() {
   ATH_MSG_INFO("Creating random number services, call bookTree() and initializeTest()");
@@ -48,11 +37,6 @@ StatusCode Trk::TrkExUnitTestBase::execute() {
   if (m_scanMode) return runScan();
 
   return runTest();
-}
-
-StatusCode Trk::TrkExUnitTestBase::finalize() {
-  ATH_MSG_INFO("finalize()");
-  return StatusCode::SUCCESS;
 }
 
 StatusCode Trk::TrkExUnitTestBase::bookTree() {return StatusCode::SUCCESS;}

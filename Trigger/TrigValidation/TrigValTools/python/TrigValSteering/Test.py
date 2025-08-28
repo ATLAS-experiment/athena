@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -10,7 +10,6 @@ import sys
 import os
 import json
 import subprocess
-from collections import OrderedDict
 
 from TrigValTools.TrigValSteering.Common import get_logger, art_result, clear_art_summary, package_prefix_dict
 from TrigValTools.TrigValSteering.Step import get_step_from_list, get_step_type_from_list
@@ -74,7 +73,7 @@ class Test(object):
         clear_art_summary()
 
         # Store the executed commands
-        commands = OrderedDict()
+        commands = {}
 
         # Pre-exec - a useful hook for some workarounds
         pre_exec_cmd = self.pre_exec()

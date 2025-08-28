@@ -27,7 +27,8 @@ EtaJES:
   OutputLevel: 3
   InScale: "JetPileupScaleMomentum" # do not include in analysis-facing YAML
   OutScale: "JetEtaJESScaleMomentum" # do not include in analysis-facing YAML
-  
+  prereqs:
+    default: []  
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # 2. Pile-up correction
@@ -73,7 +74,8 @@ Residual:
   
   InScale: "JetConstitScaleMomentum" # do not include in analysis-facing YAML
   OutScale: "JetPileupScaleMomentum" # do not include in analysis-facing YAML
-
+  prereqs:
+    default: []
   
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # 3. Global sequential calibration
@@ -96,6 +98,13 @@ GSC:
     histNameBase: "AntiKt4EMPFlow_trackWIDTH_interpolation_resp_eta"
   InScale: "JetEtaJESScaleMomentum" # do not include in analysis-facing YAML
   OutScale: "JetGSCScaleMomentum" # do not include in analysis-facing YAML
+  prereqs:
+    default:
+      - mod:CaloEnergies
+      - mod:TrackMoments
+      - ghost:MuonSegment
+    TrigRun2:
+      - mod:CaloEnergies
   
 # ----------------
 # 5. Time-Dependent Insitu Calibration
@@ -114,5 +123,7 @@ Insitu:
   CalibrateMC: True
   InScale: "JetGSCScaleMomentum" # do not include in analysis-facing YAML
   OutScale: "JetInsituScaleMomentum" # do not include in analysis-facing YAML
+  prereqs:
+    default: []
   # noRun: True
 # ----------------

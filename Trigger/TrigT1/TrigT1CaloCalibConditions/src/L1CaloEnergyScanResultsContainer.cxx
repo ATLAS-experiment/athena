@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloEnergyScanResultsContainer.h"
@@ -90,7 +90,7 @@ DataObject* L1CaloEnergyScanResultsContainer::makePersistent() const {
         attrListCollection->add(channelId, attrList);
     }
 
-    return (DataObject*) attrListCollection;
+    return attrListCollection;
 }
 
 void L1CaloEnergyScanResultsContainer::makeTransient(const std::map<std::string, const CondAttrListCollection*>& condAttrListCollectionMap) {

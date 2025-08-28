@@ -15,6 +15,7 @@
 #include "G4AtlasInterfaces/IDetectorGeometryTool.h"
 #include "G4AtlasInterfaces/IRegionCreator.h"
 #include "G4AtlasInterfaces/IParallelWorldTool.h"
+#include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
 #include "G4AtlasInterfaces/IFieldManagerTool.h"
 #include "G4AtlasInterfaces/IG4GeometryConfigurationTool.h"
 #include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
@@ -72,6 +73,7 @@ class G4AtlasDetectorConstructionTool final : public extends<AthAlgTool, IDetect
   ToolHandleArray<IParallelWorldTool> m_parallelWorlds{this, "ParallelWorlds", {} , "Tools to define G4 parallel worlds"};
   ToolHandleArray<IG4GeometryConfigurationTool> m_configurationTools{this, "GeometryConfigurationTools", {}, "Tools for geometry configuration"};
   PublicToolHandle<ISensitiveDetectorMasterTool> m_senDetTool{this, "SenDetMasterTool", "SensitiveDetectorMasterTool", ""};
+  PublicToolHandle<IFastSimulationMasterTool> m_fastSimTool{this, "FastSimMasterTool", "FastSimulationMasterTool", ""};
   ToolHandleArray<IFieldManagerTool> m_fieldManagers{this, "FieldManagers", {}, "field managers used"};
   PublicToolHandle<IG4CaloTransportTool> m_G4CaloTransportTool{this, "G4CaloTransportTool", "", "Tool handle of the Geant4 transport tool for the FastCaloSim in Geant4 implementation"};
   Gaudi::Property<bool> m_activateParallelWorlds{this, "ActivateParallelWorlds", false, "Toggle on/off the G4 parallel geometry system"};

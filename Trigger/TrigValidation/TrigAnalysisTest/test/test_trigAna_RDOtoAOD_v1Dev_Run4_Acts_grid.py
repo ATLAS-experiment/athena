@@ -4,6 +4,8 @@
 # art-description: Test of transform RDO->RDO_TRIG->AOD with threads=1 and Acts tracking
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
@@ -32,14 +34,15 @@ rdo2aod = ExecStep.ExecStep()
 rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar_pu200_Run4'
 rdo2aod.threads = 8
+rdo2aod.max_events = 100
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200" "RAWtoALL:ActsConfig.ActsCIFlags.actsValidateTracksFlags"'
 rdo2aod.args += ' --conditionsTag f"default:{defaultConditionsTags.RUN4_MC}"'
 rdo2aod.timeout = 5400 # default = 3600 s
-rdo2aod.flags = ['Trigger.enabledSignatures=[\'Muon\',\'Egamma\',\'Jet\',\'Bjet\']',  #need to skip Tau temporarily and disabled does not work
-                 'Trigger.useActsTracking=True',
+rdo2aod.flags = ['Trigger.enabledSignatures=[\'Muon\',\'Egamma\',\'Jet\',\'Bjet\',\'Tau\']',  
+                 'Trigger.useActsTracking=True','Acts.GsfRefitActs=True',
                  'Trigger.doRuntimeNaviVal=True',
                  'ITk.doTruth=False',
                  'Tracking.doTruth=False',

@@ -1,7 +1,6 @@
 #----------------------------------------------------------------------
 # Imports with Arg Parsing before ROOT import because of help conflict
 #----------------------------------------------------------------------
-from __future__ import print_function
 import argparse
 
 parser = argparse.ArgumentParser(description='Flattens Wrapper Files')

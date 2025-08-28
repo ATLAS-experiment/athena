@@ -683,9 +683,13 @@ class AthConfigFlags(object):
 
 
     # parser argument must be an ArgumentParser returned from getArgumentParser()
-    def fillFromArgs(self, listOfArgs=None, parser=None):
+    def fillFromArgs(self, listOfArgs=None, parser=None, return_unknown=False):
         """
         Used to set flags from command-line parameters, like flags.fillFromArgs(sys.argv[1:])
+
+        if return_unknown=False, returns: args 
+                       otherwise returns: args, uknown_args
+             where unknown_args is the list of arguments that did not correspond to one of the flags 
         """
         import sys
 
@@ -694,7 +698,7 @@ class AthConfigFlags(object):
         if parser is None:
             parser = self.parser()
         self._parser = parser # set our parser to given one
-        argList = listOfArgs or sys.argv[1:]
+        argList = listOfArgs if listOfArgs is not None else sys.argv[1:]
         do_help = False
         # We will now do a pre-parse of the command line arguments to propagate these to the flags
         # the reason for this is so that we can use the help messaging to display the values of all
@@ -782,8 +786,11 @@ class AthConfigFlags(object):
             # Save stats to file at exit
             atexit.register(functools.partial(dumpPythonProfile, args.profile_python))
 
+        if arg_set('mpi'):
+            self.Exec.MPI = args.mpi
 
         # All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
+        unknown_args = []
         for arg in leftover:
             if arg=='--':
                 argList += ["---"]
@@ -791,8 +798,13 @@ class AthConfigFlags(object):
             if do_help and '=' not in arg:
                 argList += arg.split(".") # put arg back back for help (but split by sub-categories)
                 continue
-
-            self.fillFromString(arg)
+            try:
+                self.fillFromString(arg)
+            except KeyError as e:
+                if return_unknown:
+                    unknown_args += [arg]
+                else:
+                    raise e
 
         if do_help:
             if parser.epilog is None: parser.epilog=""
@@ -834,7 +846,10 @@ class AthConfigFlags(object):
 
         self._args = args
 
-        return args
+        if return_unknown:
+            return args,unknown_args
+        else:
+            return args
 
 
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 # art-description: Nightly test to compare C-000 reference to latest C-000 (Full-scan) for EFTrack studies using Zmumu pu200 sample
 # art-type: grid
+# art-memory: 6144
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: main/Athena/x86_64-el9-gcc13-opt
 # art-include: main/Athena/x86_64-el9-clang19-opt
@@ -26,7 +27,7 @@ testLabel="C-000_latest"
 
 ## search in $DATAPATH for matching files
 IDTPMjsonConfig='EFTrack_muon_FS_noDoubleRatio_IDTPMconfig.json'
-dcubeXmlIDTPMconfig='dcube_config_EFTrack_base_FS_noDoubleRatio.xml'
+dcubeXmlIDTPMconfig='dcube_config_EFTrack_muon_FS_noDoubleRatio.xml'
 
 IDTPMjsonConfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $IDTPMjsonConfig -print -quit 2>/dev/null )
 dcubeXmlIDTPMconfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXmlIDTPMconfig -print -quit 2>/dev/null )

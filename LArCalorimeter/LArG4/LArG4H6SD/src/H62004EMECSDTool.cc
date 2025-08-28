@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H62004EMECSDTool.h"
@@ -16,12 +16,9 @@ namespace LArG4
   H62004EMECSDTool::H62004EMECSDTool(const std::string& type, const std::string& name,
                                      const IInterface *parent)
     : H62004SimpleSDTool(type, name, parent)
-    , m_hitCollName("LArHitEMEC")
-    , m_calculator("EMECPosInnerWheel_ECOR_GADJCalculator", name)
   {
-    declareProperty("Calculator", m_calculator);
   }
-
+  
   StatusCode H62004EMECSDTool::initializeCalculators()
   {
     ATH_CHECK(m_calculator.retrieve());

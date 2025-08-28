@@ -21,7 +21,8 @@ atlas_add_component( AthExXRT
    LINK_LIBRARIES AthenaBaseComps GaudiKernel LibXOCL AthXRTInterfacesLib )
 
 # Install extra files from the package.
-atlas_install_joboptions( test/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
 
 ## Test(s) in the package.
 ## Currently disabled, as no FPGA bitstream present in the repo and

@@ -16,7 +16,6 @@
 #include "EFTrackingFPGAUtility/IEFTrackingFPGAIntegrationTool.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
-#include "InDetIdentifier/PixelID.h"
 
 #include <string>
 #include <vector>
@@ -84,9 +83,6 @@ public:
      * @param encodedData The encoded data in the form of std::vector<uint64_t>
      */
     StatusCode encodeStripL2G(const xAOD::StripClusterContainer *stripClusters, std::vector<uint64_t> &encodedData) const;
-
-private:
-  const PixelID* m_pixelid {nullptr};
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION__TEST_VECTOR_TOOL_H

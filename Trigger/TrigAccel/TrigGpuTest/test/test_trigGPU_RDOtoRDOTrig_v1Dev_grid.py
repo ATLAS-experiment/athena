@@ -4,6 +4,8 @@
 # art-description: Test of the RDOtoRDOTrigger transform with Dev menu
 # art-type: grid
 # art-include: main/Athena
+# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42189392_00
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # art-output: *.txt
@@ -22,6 +24,7 @@
 # art-output: *.check*
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 preExec = ';'.join([
   'flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
@@ -40,7 +43,7 @@ ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 ex.args += ' --preInclude "all:Campaigns.MC23e"'
 ex.args += ' --CA'
-ex.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
+ex.args += f' --conditionsTag "default:{defaultConditionsTags.RUN3_MC}"'
 
 test = Test.Test()
 test.art_type = 'grid'

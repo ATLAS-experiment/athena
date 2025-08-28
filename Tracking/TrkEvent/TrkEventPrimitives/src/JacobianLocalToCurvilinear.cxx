@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ Trk::JacobianLocalToCurvilinear::JacobianLocalToCurvilinear( const Amg::Vector3D
    double nu  = n.dot(curvUVT.curvU());      // n * u
    double nv  = n.dot(curvUVT.curvV());      // n * v
 
-   double oneOverSinTheta = 1./sinTheta; // (helix.startParameters().sinTheta());
+   double oneOverSinTheta = (sinTheta != 0.)? 1./sinTheta: 1.e20; // (helix.startParameters().sinTheta());
 
    // fill the components
    (*this)(2,0) =  -alpha*Q*oneOverSinTheta*nu*tlx; // d(phi)/d(locX)

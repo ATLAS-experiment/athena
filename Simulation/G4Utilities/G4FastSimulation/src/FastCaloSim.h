@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4FASTSIMULATION_FASTCALOSIM_H
@@ -34,27 +34,27 @@ class FastCaloSim: public G4VFastSimulationModel
 {
  public:
 
-  FastCaloSim(const std::string& name, 
+  FastCaloSim(const std::string& name,
+              G4Region* region,
               const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
-              const Gaudi::Property<std::string>& randomEngineName,
+              const std::string& randomEngineName,
               const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,
               const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
               const PublicToolHandle<IG4CaloTransportTool>& G4CaloTransportTool,
               const PublicToolHandle<IPunchThroughSimWrapper>& PunchThroughSimWrapper,
               const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
-              const Gaudi::Property<std::string>& CaloCellContainerSDName,
-              const Gaudi::Property<bool>& doG4Transport,
-              const Gaudi::Property<bool>& doPhotons,
-              const Gaudi::Property<bool>& doElectrons,
-              const Gaudi::Property<bool>& doHadrons,
-              const Gaudi::Property<float>& AbsEtaMin,
-              const Gaudi::Property<float>& AbsEtaMax,
-              const Gaudi::Property<float>& EkinMinPhotons,
-              const Gaudi::Property<float>& EkinMaxPhotons,
-              const Gaudi::Property<float>& EkinMinElectrons,
-              const Gaudi::Property<float>& EkinMaxElectrons,
-              const Gaudi::Property<bool>& doEMECFCS,
-              const Gaudi::Property<bool>& doPunchThrough,
+              const std::string& CaloCellContainerSDName,
+              bool doG4Transport,
+              bool doPhotons,
+              bool doElectrons,
+              bool doHadrons,
+              float AbsEtaMin,
+              float AbsEtaMax,
+              float EkinMinPhotons,
+              float EkinMaxPhotons,
+              float EkinMinElectrons,
+              float EkinMaxElectrons,
+              bool doPunchThrough,
               FastCaloSimTool * FastCaloSimTool);
   ~FastCaloSim() {}
 
@@ -78,7 +78,7 @@ class FastCaloSim: public G4VFastSimulationModel
 
   // Random generator services
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc;
-  Gaudi::Property<std::string> m_randomEngineName;
+  std::string m_randomEngineName;
   ATHRNG::RNGWrapper* m_rngWrapper{};
 
   // FastCaloSimCaloTransportation tool to transport particles through the detector with the ATLAS tracking tools 
@@ -93,24 +93,23 @@ class FastCaloSim: public G4VFastSimulationModel
   // Main FastCaloSim service
   ServiceHandle<ISF::IFastCaloSimParamSvc> m_FastCaloSimSvc;
   // Name of associated CaloCellContainer sensitive detector
-  Gaudi::Property<std::string> m_CaloCellContainerSDName;
+  std::string m_CaloCellContainerSDName;
   // Boolean flag to enable Geant4 transportation
-  Gaudi::Property<bool> m_doG4Transport;
+  bool m_doG4Transport;
 
   // Boundaries to enable AF3 transportation
-  Gaudi::Property<bool> m_doPhotons;
-  Gaudi::Property<bool> m_doElectrons;
-  Gaudi::Property<bool> m_doHadrons;
-  Gaudi::Property<float> m_AbsEtaMin;
-  Gaudi::Property<float> m_AbsEtaMax;
-  Gaudi::Property<float> m_EkinMinPhotons;
-  Gaudi::Property<float> m_EkinMaxPhotons;
-  Gaudi::Property<float> m_EkinMinElectrons;
-  Gaudi::Property<float> m_EkinMaxElectrons;
-  Gaudi::Property<float> m_doEMECFCS;
+  bool m_doPhotons;
+  bool m_doElectrons;
+  bool m_doHadrons;
+  float m_AbsEtaMin;
+  float m_AbsEtaMax;
+  float m_EkinMinPhotons;
+  float m_EkinMaxPhotons;
+  float m_EkinMinElectrons;
+  float m_EkinMaxElectrons;
 
   //For PunchThrough
-  Gaudi::Property<bool> m_doPunchThrough;
+  bool m_doPunchThrough;
 
   // Fast simulation FastCaloSimTool 
   FastCaloSimTool * m_FastCaloSimTool;

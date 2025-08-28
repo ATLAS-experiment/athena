@@ -6,9 +6,9 @@
 #define PILEUPMT_ISKIPEVENTIDXSVC_H
 
 #include <GaudiKernel/IService.h>
-#include <fmt/format.h>
 
 #include <cstdint>
+#include <format>
 
 class ISkipEventIdxSvc : virtual public IService {
  public:
@@ -34,14 +34,12 @@ class ISkipEventIdxSvc : virtual public IService {
 };
 
 template <>
-struct fmt::formatter<ISkipEventIdxSvc::EvtId> : formatter<string_view> {
+struct std::formatter<ISkipEventIdxSvc::EvtId> : formatter<string_view> {
   template <typename FormatContext>
   auto format(const ISkipEventIdxSvc::EvtId& evtId, FormatContext& ctx) {
-    auto out = memory_buffer();
-    fmt::format_to(std::back_inserter(out), "[Run: {}, LB: {}, Evt: {} ({})]",
-              evtId.runNum, evtId.lbNum, evtId.evtNum, evtId.evtIdx);
-    const string_view str(out.data(), out.size());
-    return formatter<string_view>::format(str, ctx);
+    std::format_to(ctx.out, "[Run: {}, LB: {}, Evt: {} ({})]", evtId.runNum,
+                   evtId.lbNum, evtId.evtNum, evtId.evtIdx);
+    return ctx.out;
   }
 };
 #endif  // PILEUPMT_ISKIPEVENTIDXSVC_H

@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHECLocalCalculator.h"
 
-#include "LArG4HEC/LocalGeometry.h"
+#include "LocalGeometry.h"
 
 #include "G4ThreeVector.hh"
 #include "G4StepPoint.hh"
@@ -26,16 +26,9 @@ namespace Units = Athena::Units;
 
 #undef DEBUG_HITS
 
-
-
 LArHECLocalCalculator::LArHECLocalCalculator(const std::string& name,  ISvcLocator *pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
-  , m_Geometry("LocalHECGeometry", name)
-  , m_birksLaw(nullptr)
-  , m_isX(false)
 {
-  declareProperty("GeometryCalculator", m_Geometry);
-  declareProperty("IsX", m_isX);
 }
 
 StatusCode LArHECLocalCalculator::initialize()

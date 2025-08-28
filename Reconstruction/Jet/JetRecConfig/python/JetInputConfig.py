@@ -85,18 +85,38 @@ def buildPV0TrackSel(parentjetdef, spec):
 
 def buildPFlowSel(parentjetdef, spec):
     return  CompFactory.JetPFlowSelectionAlg( "pflowselalg",
-                                              electronID = "LHMedium",
+                                              electronIDToExclude = "LHMedium",
                                               ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
                                               NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
                                               ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects",
                                               NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects"
                                              )
 
+#This is to be used to seed tau jets which exclude electrons.
+#Therefore it is an inclusive selection, which means we have
+#to change the default settings and include all muons.
+#Then we also exclude charged + neutral FE linked to electrons
+#passing the relevant egamma PID WP.
+def buildPFlowSel_tauSeedEleRM(parentjetdef,spec):
+    return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_tauSeedEleRM",
+                                              electronIDToExclude = "LHMedium",
+                                              ElectronInputContainer="Electrons",
+                                              excludeNeutralElectronFE=True,
+                                              muonIDToInclude = "Loose",
+                                              excludeChargedMuonFE=False,
+                                              includeChargedMuonFE=True,
+                                              includeNeutralMuonFE=True,
+                                              ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
+                                              NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
+                                              ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_tauSeedEleRM",
+                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects_tauSeedEleRM"
+                                             )
+
 def buildPFlowSel_noElectrons(parentjetdef,spec):
     return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_noElectrons",
-                                              electronID = "LHMedium",
+                                              electronIDToExclude = "LHMedium",
                                               ElectronInputContainer="Electrons",
-                                              removeNeutralElectronFE=True,
+                                              excludeNeutralElectronFE=True,
                                               ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
                                               NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
                                               ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_noElectrons",
@@ -105,9 +125,9 @@ def buildPFlowSel_noElectrons(parentjetdef,spec):
 
 def buildPFlowSel_noMuons(parentjetdef,spec):
     return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_noMuons",
-                                              electronID = "LHMedium",                                              
-                                              muonID = "Medium",
-                                              removeNeutralMuonFE=True,
+                                              electronIDToExclude = "LHMedium",                                              
+                                              muonIDToExclude = "Medium",
+                                              excludeNeutralMuonFE=True,
                                               ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
                                               NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
                                               ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_noMuons",
@@ -116,11 +136,11 @@ def buildPFlowSel_noMuons(parentjetdef,spec):
 
 def buildPFlowSel_noLeptons(parentjetdef,spec):
     return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_noLeptons",
-                                              electronID = "LHMedium",   
+                                              electronIDToExclude = "LHMedium",
                                               ElectronInputContainer="Electrons",
-                                              removeNeutralElectronFE=True,                                           
-                                              muonID = "Medium",
-                                              removeNeutralMuonFE=True,
+                                              excludeNeutralElectronFE=True,
+                                              muonIDToExclude = "Medium",
+                                              excludeNeutralMuonFE=True,
                                               ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
                                               NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
                                               ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_noLeptons",

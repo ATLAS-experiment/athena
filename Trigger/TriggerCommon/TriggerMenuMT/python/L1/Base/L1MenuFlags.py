@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __doc__="Level 1 specific configuration for L1 Run 3"
 
 from .Limits import Limits
-from collections import OrderedDict
 from collections.abc import Iterable
 
 
@@ -42,8 +41,8 @@ class L1MenuFlagsCont(object):
         "BunchGroupPartitioning"  :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: y not in range(16), x)))==0 ),
         "BunchGroupNames"         :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: not isinstance(y, str), x)))==0),
         "items"                   :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: not isinstance(y, str), x)))==0),
-        "boards"                  :  FlagArgs( OrderedDict, OrderedDict() ),
-        "legacyBoards"            :  FlagArgs( OrderedDict, OrderedDict() ),
+        "boards"                  :  FlagArgs( dict, dict() ),
+        "legacyBoards"            :  FlagArgs( dict, dict() ),
         "prescales"               :  FlagArgs( dict, dict() ),
         "RemapThresholdsAsListed" :  FlagArgs( bool, False ),
         "CtpIdMap"                :  FlagArgs( dict, dict() ),

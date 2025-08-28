@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -306,8 +306,7 @@ namespace InDet {
       }
     }
 
-    return;
-  }
+     }
 
   //_______________________________________________________________________
   void InDetGeometryManagerTool::buildL0()
@@ -361,7 +360,7 @@ namespace InDet {
       // get the element via hash
       const SiDetectorElement * element2 = m_pixelDetManager->getDetectorElement(id);
       if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+        const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*>( element2);
 
         // get element location for debugging
         // HepGeom::Point3D<double> center = element->transform() * HepGeom::Point3D<double>();
@@ -409,7 +408,7 @@ namespace InDet {
       // get the element via hash
       const SiDetectorElement * element2 = m_sctDetManager->getDetectorElement(id);
       if (element2) {
-        const Trk::TrkDetElementBase * element = (const Trk::TrkDetElementBase*) element2;
+        const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
         // add element to respective AlignModule
 
@@ -620,7 +619,7 @@ namespace InDet {
   {
     ATH_MSG_DEBUG("in isOneDetOnly for detector type "<<dettype);
     const Trk::AlignModule::DetElementCollection * coll = mod->detElementCollection(dettype);
-    if(!coll || coll->size() == 0)
+    if(!coll || coll->empty())
       return false;
 
     int nelem(0);
@@ -645,7 +644,7 @@ namespace InDet {
     ATH_MSG_DEBUG("in isSiOnly");
     const Trk::AlignModule::DetElementCollection * collPix = mod->detElementCollection(Trk::AlignModule::Pixel);
     const Trk::AlignModule::DetElementCollection * collSCT = mod->detElementCollection(Trk::AlignModule::SCT);
-    if((!collPix || collPix->size()==0) && (!collSCT || collSCT->size()==0))
+    if((!collPix || collPix->empty()) && (!collSCT || collSCT->empty()))
       return false;
 
     int nelem(0);

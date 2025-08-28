@@ -7,7 +7,6 @@
 # python script for merging libs
 #
 
-from __future__ import print_function
 
 __version__ = '$Revision: 711210 $'
 __author__  = 'Radist Morse radist.morse@gmail.com'

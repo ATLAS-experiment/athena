@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestLeakyAlg.h 
@@ -30,22 +30,14 @@ class LeakyAlg : public AthAlgorithm
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
-
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  LeakyAlg( const std::string& name, ISvcLocator* pSvcLocator );
+  using AthAlgorithm::AthAlgorithm;
 
   /// Destructor: 
   virtual ~LeakyAlg(); 
 
-  // Assignment operator: 
-  //LeakyAlg &operator=(const LeakyAlg &alg); 
-
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
 
 
   /////////////////////////////////////////////////////////////////// 
@@ -53,18 +45,15 @@ class LeakyAlg : public AthAlgorithm
   /////////////////////////////////////////////////////////////////// 
  private: 
 
-  /// Default constructor: 
-  LeakyAlg();
-
   /// Property to setup the size of the leak
-  int m_leakSize;
+  Gaudi::Property<int> m_leakSize{this, "LeakSize", 10, "Size of 'Leak' objects to be leaked each event"};
 
   struct Leak {
     std::vector<int> m_data;
   };
 
   /// nbr of Leak objects
-  int m_nbrLeaks;
+  Gaudi::Property<int> m_nbrLeaks{this, "NbrLeaks", 1, "Number of 'Leak' objects to be leaked each event"};
 
   /// container to hold the leaked objects
   std::list<Leak*> m_leaks;

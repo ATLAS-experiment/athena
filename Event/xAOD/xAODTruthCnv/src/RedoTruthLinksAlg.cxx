@@ -8,6 +8,7 @@
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "RedoTruthLinksAlg.h"
 
@@ -47,7 +48,7 @@ namespace xAODMaker {
                 }
                 // Create link between HepMC and xAOD truth
                 /// @todo AB: Truth particle links should only be made to the signal event... hence the 0. Right?
-                truthLinkVec->push_back(std::make_unique<xAODTruthParticleLink>(HepMcParticleLink(HepMC::barcode(*par), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), par)); // FIXME is barcode-based - using barcodes until xAOD::TruthParticle::id() is available
+                truthLinkVec->push_back(std::make_unique<xAODTruthParticleLink>(HepMcParticleLink(HepMC::uniqueID(*par), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID), par));
             }
         }
             

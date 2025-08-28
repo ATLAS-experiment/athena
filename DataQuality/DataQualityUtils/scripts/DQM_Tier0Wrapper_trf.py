@@ -52,16 +52,12 @@
 ##    S. Kama (March 2011)
 #########################################################################
 
-from __future__ import print_function
 import sys, string, os.path, os, pickle, time, pprint
-from six.moves import xmlrpc_client as xmlrpclib
+from xmlrpc import client as xmlrpclib
 #sami
 import hashlib
 import six
-if six.PY2:
-  from commands import getstatusoutput
-else:
-  from subprocess import getstatusoutput
+from subprocess import getstatusoutput
 
 #########################################################################
 

@@ -13,6 +13,7 @@
 
 #include <array>
 #include "GaudiKernel/SystemOfUnits.h"
+#include "TruthUtils/ParticleConstants.h"
 
 namespace TrigVtx
 {
@@ -30,12 +31,12 @@ namespace TrigVtx
   {
     constexpr TrigParticleMasses() = default;
     std::array<double,6> mass{
-      0.5109989*Gaudi::Units::MeV, // electron mass
-      105.65837*Gaudi::Units::MeV, // muon mass
-      139.57019*Gaudi::Units::MeV, // charged pion mass
-      493.67700*Gaudi::Units::MeV, // charged kaon mass
-      938.27203*Gaudi::Units::MeV, // proton mass
-      0                            // photon mass
+      ParticleConstants::electronMassInMeV, // electron mass
+      ParticleConstants::muonMassInMeV, // muon mass
+      ParticleConstants::chargedPionMassInMeV, // charged pion mass
+      ParticleConstants::chargedKaonMassInMeV, // charged kaon mass
+      ParticleConstants::protonMassInMeV, // proton mass
+      ParticleConstants::photonMassInMeV // photon mass
     };
   };
 }

@@ -825,19 +825,19 @@ void TAGrowing::register_kernels(IGPUKernelSizeOptimizer & optimizer)
                        Helpers::int_ceil_div(NCaloCells, CellPairsBlockSize),
                        IGPUKernelSizeOptimizer::SpecialSizeHints::CooperativeLaunch,
                        Helpers::int_ceil_div(NMaxClusters, ClusterGrowingSeedCellAssignmentBlockSize),
-                       Helpers::int_ceil_div(NMaxPairs, ClusterGrowingPropagationBlockSize),
+                       Helpers::int_ceil_div(NExactPairs, ClusterGrowingPropagationBlockSize),
                        Helpers::int_ceil_div(NCaloCells, ClusterGrowingCopyAndCheckBlockSize),
-                       Helpers::int_ceil_div(NMaxPairs, ClusterGrowingTerminalPropagationBlockSize),
+                       Helpers::int_ceil_div(NExactPairs, ClusterGrowingTerminalPropagationBlockSize),
                        Helpers::int_ceil_div(NCaloCells, ClusterGrowingFinalizationBlockSize)
                      };
 
   int   maxsizes[] = { NCaloCells,
                        NCaloCells,
-                       std::max(NMaxPairs, NCaloCells),
+                       std::max(NExactPairs, NCaloCells),
                        NMaxClusters,
-                       NMaxPairs,
+                       NExactPairs,
                        NCaloCells,
-                       NMaxPairs,
+                       NExactPairs,
                        NCaloCells
                      };
 

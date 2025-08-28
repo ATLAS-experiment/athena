@@ -440,11 +440,9 @@ void CommonSmearingTool::generateSystematicSets()
   std::transform(sTruthType.begin(), sTruthType.end(), sTruthType.begin(), toupper);
   std::string sSystematicBaseString = "TAUS_" + sTruthType + "_SME_" + sEfficiencyType + "_";
 
-  // set truth type to check for in truth matching
+  // set truth type to check for in truth matching - only true hadronic tau is supported at the moment
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
-  if (sTruthType=="TRUEELECTRON") m_eCheckTruth = TauAnalysisTools::TruthElectron;
-  if (sTruthType=="TRUEMUON") m_eCheckTruth = TauAnalysisTools::TruthMuon;
-  if (sTruthType=="TRUEJET") m_eCheckTruth = TauAnalysisTools::TruthJet;
+  
 
   for (auto& mSF : m_mSF)
   {

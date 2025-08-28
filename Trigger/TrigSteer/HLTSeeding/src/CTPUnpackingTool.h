@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HLTSEEDING_CTPUNPACKINGTOOL_H
@@ -21,7 +21,7 @@ public:
                     const IInterface* parent );
 
   /// Fills the list of chains that should be activated in a given event (note HLT prescaling happens at a later stage)
-  virtual StatusCode decode(const ROIB::RoIBResult& roib, HLT::IDVec& enabledChains) const override;
+  virtual StatusCode decode(const EventContext& ctx, const ROIB::RoIBResult& roib, HLT::IDVec& enabledChains) const override;
 
   virtual StatusCode initialize() override;
 

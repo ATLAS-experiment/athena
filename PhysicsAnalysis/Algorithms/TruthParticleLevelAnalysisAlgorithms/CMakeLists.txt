@@ -13,16 +13,9 @@ atlas_add_library( TruthParticleLevelAnalysisAlgorithmsLib
   LINK_LIBRARIES AsgTools AsgMessagingLib xAODBase xAODEventInfo xAODJet xAODMissingET PATCoreLib AnaAlgorithmLib AsgDataHandlesLib MCTruthClassifierLib FourMomUtils SelectionHelpersLib
   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODTruth RootCoreUtils )
 
-atlas_add_dictionary( TruthParticleLevelAnalysisAlgorithmsDict
-  TruthParticleLevelAnalysisAlgorithms/TruthParticleLevelAnalysisAlgorithmsDict.h
-  TruthParticleLevelAnalysisAlgorithms/selection.xml
+atlas_add_component( TruthParticleLevelAnalysisAlgorithms
+  src/*.h src/*.cxx src/components/*.cxx
   LINK_LIBRARIES TruthParticleLevelAnalysisAlgorithmsLib )
-
-if( NOT XAOD_STANDALONE )
-  atlas_add_component( TruthParticleLevelAnalysisAlgorithms
-    src/*.h src/*.cxx src/components/*.cxx
-    LINK_LIBRARIES TruthParticleLevelAnalysisAlgorithmsLib )
-endif()
 
 atlas_install_python_modules( python/*.py )
 atlas_install_data( data/* )

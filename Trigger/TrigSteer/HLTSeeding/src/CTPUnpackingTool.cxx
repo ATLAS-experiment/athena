@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "CTPUnpackingTool.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
@@ -90,7 +90,7 @@ StatusCode CTPUnpackingTool::start() {
 }
 
 
-StatusCode CTPUnpackingTool::decode( const ROIB::RoIBResult& roib,  HLT::IDVec& enabledChains ) const {
+StatusCode CTPUnpackingTool::decode( const EventContext& /*ctx*/, const ROIB::RoIBResult& roib,  HLT::IDVec& enabledChains ) const {
   auto nItems = Monitored::Scalar( "Items", 0 );
   auto nChains = Monitored::Scalar( "Chains", 0 );
 

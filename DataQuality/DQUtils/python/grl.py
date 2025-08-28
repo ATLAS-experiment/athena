@@ -4,7 +4,7 @@
 
 from os import listdir
 from os.path import join as pjoin
-import xml.etree.cElementTree as cElementTree
+import xml.etree.ElementTree as ET
 
 from .events import process_iovs
 from .sugar import define_iov_type, IOVSet, RunLumi, RunLumiType
@@ -40,7 +40,7 @@ def load_grl(xml_file, IOVSet_class=IOVSet):
         return load_grl_string(fd.read(), IOVSet_class)
     
 def load_grl_string(data, IOVSet_class=IOVSet):
-    xml = cElementTree.fromstring(data)
+    xml = ET.fromstring(data)
     result = []
 
     for lbc in xml.iter('LumiBlockCollection'):

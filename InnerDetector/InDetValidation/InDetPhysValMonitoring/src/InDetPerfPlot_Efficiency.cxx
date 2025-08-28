@@ -72,6 +72,9 @@ InDetPerfPlot_Efficiency::initializePlots() {
     book(m_technical_efficiency_vs_z0, "technical_efficiency_vs_z0");
     book(m_technical_efficiency_vs_truthMu, "technical_efficiency_vs_truthMu");
     book(m_technical_efficiency_vs_actualMu, "technical_efficiency_vs_actualMu");
+    book(m_technical_efficiency_vs_R, "technical_efficiency_vs_R");
+    book(m_technical_efficiency_vs_prodR, "technical_efficiency_vs_prodR");
+    book(m_technical_efficiency_vs_prodR_extended, "technical_efficiency_vs_prodR_extended");
   }
 
   book(m_extended_efficiency_vs_d0, "extended_efficiency_vs_d0");
@@ -188,12 +191,22 @@ InDetPerfPlot_Efficiency::fillTechnicalEfficiency(const xAOD::TruthParticle& tru
 
   static const SG::ConstAccessor<float> d0Acc("d0");
   static const SG::ConstAccessor<float> z0Acc("z0");
+  static const SG::ConstAccessor<float> prodRAcc("prodR");
   double d0 = d0Acc(truth);
   double z0 = z0Acc(truth);
+  double R = prodRAcc(truth);
   fillHisto(m_technical_efficiency_vs_d0, d0, isGood, weight);
   fillHisto(m_technical_efficiency_vs_z0, z0, isGood, weight);
   fillHisto(m_technical_efficiency_vs_truthMu, truthMu, isGood, weight);
   fillHisto(m_technical_efficiency_vs_actualMu, actualMu, isGood, weight);
+  fillHisto(m_technical_efficiency_vs_R, R, isGood, weight);
+
+  if (truth.hasProdVtx()) {
+    const xAOD::TruthVertex* vtx = truth.prodVtx();
+    double prod_rad = vtx->perp();
+    fillHisto(m_technical_efficiency_vs_prodR, prod_rad, isGood, weight);
+    fillHisto(m_technical_efficiency_vs_prodR_extended, prod_rad, isGood, weight);
+  }
 }
 
 

@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold, ZeroBiasThresholdTopo
+from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold, ZeroBiasThresholdTopo
 from .L1CaloThresholdMapping import get_threshold_cut
 
 # Max thresholds for SPARE triggers, corresponding to maximum value in L1Topo
@@ -240,13 +240,6 @@ class ThresholdDef:
         for thrV in range(1,2):
             jJetThreshold('jJSPARE%i' % thrV, 'jJ').addThrValue(thrVal_SPARE)
 
-        # jLJET (default range)
-        for thrV in [60, 80, 100, 120, 140, 160, 180, 200]:
-            ThresholdDef.addJetVaryingThrValues( jLJetThreshold('jLJ%i' % thrV, 'jLJ'), pt=get_threshold_cut('jLJ', thrV), shift_set=0, rangemin=0, rangemax=32 )
-
-        # jLJET SPARES
-        for thrV in range(1,5):
-            jLJetThreshold('jLJSPARE%i' % thrV, 'jLJ').addThrValue(thrVal_SPARE)
 
         # gJET (default range)
         for thrV in [20, 50, 100, 400]:

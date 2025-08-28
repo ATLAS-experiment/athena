@@ -233,13 +233,9 @@ StatusCode PileUpStream::finalize() {
   StatusCode sc(StatusCode::SUCCESS);
   if (m_ownEvtIterator) delete p_iter;
   //we own and manage our cloned SG instance
-#ifdef GAUDIKERNEL_STATEMACHINE_H_
   if (m_ownStore && Gaudi::StateMachine::INITIALIZED == store().FSMState()) {
     sc = this->store().sysFinalize();
   }
-#else
-  if (m_ownStore && this->store().state() == IService::INITIALIZED) sc = this->store().sysFinalize();
-#endif
   this->store().release();
   return sc;
 }

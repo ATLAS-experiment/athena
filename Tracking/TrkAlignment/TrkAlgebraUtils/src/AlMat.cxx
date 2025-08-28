@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/StatusCode.h"
@@ -15,6 +15,14 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+
+namespace{
+char *
+charAddress(auto &val){
+  return reinterpret_cast<char *> (&val);
+}
+
+}
 
 namespace Trk {
 
@@ -367,25 +375,22 @@ StatusCode AlMat::ReadScalaPack(const std::string &filename){
     return StatusCode::FAILURE;
 
   int32_t mNrow = m_nrow;
-  inmat.read((char*)&mNrow, sizeof (mNrow));
+  inmat.read(charAddress(mNrow), sizeof (mNrow));
   int32_t mNcol = m_ncol;
-  inmat.read((char*)&mNcol, sizeof (mNcol));
+  inmat.read(charAddress(mNcol), sizeof (mNcol));
 
-  m_nrow=abs(mNrow);
-  m_ncol=abs(mNcol);
+  m_nrow=std::abs(mNrow);
+  m_ncol=std::abs(mNcol);
   m_nele=m_ncol*m_nrow;
   m_transpose = false;
 
-  // printf("ALMat::nrow: %d \n",m_nrow);
-  // printf("ALMat::ncol: %d \n",m_ncol);
-  // printf("ALMat::nele: %d \n",m_nele);
+
 
   double melem=0;
   for(int i=0; i<m_nrow; i++) {
     for(int j=0; j<m_ncol; j++) {
-      inmat.read((char*)&melem, sizeof (melem));
+      inmat.read(charAddress(melem), sizeof (melem));
       *(m_ptr_data+i*m_ncol+j) = melem;
-      // printf("(%d,%d) = %.16lf \n",i,j,melem);
     }
   }
 
@@ -416,9 +421,9 @@ StatusCode AlMat::Write(const std::string &filename, bool binary, unsigned int p
       return StatusCode::FAILURE;
 
     int32_t mNrow = m_nrow;
-    outmat.write((char*)&mNrow, sizeof (mNrow));
+    outmat.write(charAddress(mNrow), sizeof (mNrow));
     int32_t mNcol = m_ncol;
-    outmat.write((char*)&mNcol, sizeof (mNcol));
+    outmat.write(charAddress(mNcol), sizeof (mNcol));
   }
   else {
     outmat.open((m_pathtxt+filename).c_str());
@@ -436,7 +441,7 @@ StatusCode AlMat::Write(const std::string &filename, bool binary, unsigned int p
     for( int j=0; j<m_ncol; j++) {
       melem =  *(m_ptr_data+i*m_ncol+j);
       if(binary)
-        outmat.write((char*)&(melem), sizeof (melem));
+        outmat.write(charAddress(melem), sizeof (melem));
       else
         outmat << " " << std::setw(12) << melem;
     }

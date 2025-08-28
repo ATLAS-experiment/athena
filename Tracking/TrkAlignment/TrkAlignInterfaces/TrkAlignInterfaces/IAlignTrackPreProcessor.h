@@ -63,7 +63,7 @@ namespace Trk {
 
   protected:
     
-    std::ostream * m_logStream; //!< logfile output stream
+    std::ostream * m_logStream = nullptr; //!< logfile output stream
 
   };
 

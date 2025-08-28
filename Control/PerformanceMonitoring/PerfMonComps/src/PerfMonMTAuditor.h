@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERFMONCOMPS_PERFMONMTAUDITOR_H
@@ -9,20 +9,14 @@
 #include <string>
 
 // Framework includes
-#include "GaudiKernel/Auditor.h"
+#include "Gaudi/Auditor.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 // Forward declaration
-//class INamedInterface;
 class IPerfMonMTSvc;
 
-class PerfMonMTAuditor : public Auditor
+class PerfMonMTAuditor : public Gaudi::Auditor
 {
-  /*
-  using Auditor::before;
-  using Auditor::after;
-  */
-
   public:
 
     /// Constructor
@@ -32,17 +26,11 @@ class PerfMonMTAuditor : public Auditor
     virtual StatusCode initialize() override;
 
     /// Implement inherited methods from Auditor
-    void before( StandardEventType, INamedInterface* ) override;
-    void before( StandardEventType, const std::string& ) override;
+    virtual void before(const std::string& event, const std::string& name,
+                        const EventContext&) override;
 
-    void before( CustomEventTypeRef, INamedInterface* ) override;
-    void before( CustomEventTypeRef, const std::string& ) override;
-
-    void after( StandardEventType, INamedInterface*, const StatusCode& ) override;
-    void after( StandardEventType, const std::string&, const StatusCode& ) override;
-
-    void after( CustomEventTypeRef, INamedInterface*, const StatusCode& ) override;
-    void after( CustomEventTypeRef, const std::string&, const StatusCode& ) override;
+    virtual void after(const std::string& event, const std::string& name,
+                       const EventContext&, const StatusCode&) override;
 
   private:
 

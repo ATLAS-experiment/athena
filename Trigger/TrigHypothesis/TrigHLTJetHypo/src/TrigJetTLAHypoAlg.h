@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 */
 
@@ -8,14 +8,12 @@
 
 #include <string>
 
-#include "TrigJetTLAHypoAlg.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODJet/JetContainer.h"
 
 #include "DecisionHandling/HypoBase.h"
 
 #include "TrigJetTLAHypoTool.h"
-#include "TrigBtagTLATool.h"
 
 /**
  * @class TrigJetTLAHypoAlg
@@ -44,9 +42,6 @@ class TrigJetTLAHypoAlg : public ::HypoBase {
   SG::WriteHandleKey< xAOD::JetContainer > m_TLAjetsKey {
     this, "TLAOutputName", "TLAOutputName", "TLA jet container key"};  
 
-  Gaudi::Property<bool> m_attach_btag{this, "AttachBtag", true, "Use BtagJetTool to attach btag information to TLA jets."};
-  ToolHandle<TrigBtagTLATool> m_btag_record_tool { this, "BtagJetTool", "BtagJetTool", "Btag jet tool"};
-  
 }; 
 
 #endif

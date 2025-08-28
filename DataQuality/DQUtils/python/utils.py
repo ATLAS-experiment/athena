@@ -5,11 +5,10 @@
 Utility module for dataquality specific things
 """
 
-from __future__ import with_statement
 
 from sys import stdout
 
-BUILTIN_NAMES = set(("True", "False"))
+BUILTIN_NAMES = {"True", "False"}
 
 def worst_status(iovs, *dummy_args):
     """
@@ -130,11 +129,10 @@ def pprint_objects(objects, where=stdout):
     """
     Pretty print a list of IoV-results
     """
-    from six import print_
     for obj in objects:
         since, until = obj[:2]
         args = since, until, "(%s)" % ", ".join(map(str, map(make_floats_pretty, obj[2:])))
-        print_("[%r -> %r) : %s" % args, file=where)
+        print("[%r -> %r) : %s" % args, file=where)
         
 def describe_colour(colour):
     mapping = {

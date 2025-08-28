@@ -33,22 +33,11 @@ namespace FlavorTagInference {
     return StatusCode::SUCCESS;
   }
 
-  void GNNTool::decorate(const xAOD::BTagging& btag) const {
-    m_gnn->decorate(btag);
+  void GNNTool::decorate(const xAOD::IParticle& i_jet) const {
+    m_gnn->decorate(i_jet);
   }
-  void GNNTool::decorate(const xAOD::Jet& jet) const {
-    m_gnn->decorate(jet, jet);
-  }
-  void GNNTool::decorateWithDefaults(const SG::AuxElement& jet) const {
-    m_gnn->decorateWithDefaults(jet);
-  }
-  void GNNTool::decorateWithDefaults(const xAOD::BTagging& btag) const {
-    m_gnn->decorateWithDefaults(btag);
-  }
-
-  void GNNTool::decorate(const xAOD::Jet& jet, const SG::AuxElement& btag) const
-  {
-    m_gnn->decorate(jet, btag);
+  void GNNTool::decorateWithDefaults(const xAOD::IParticle& i_jet) const {
+    m_gnn->decorateWithDefaults(i_jet);
   }
 
   // Dependencies

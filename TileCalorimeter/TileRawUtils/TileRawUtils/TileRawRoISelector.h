@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERAWUTILS_TILERAWROISELECTOR_H
@@ -72,10 +72,10 @@ class TileRawRoISelector
 	  const_iterator( const VEC_ITPAIR* v ) ; 
 	  const_iterator( const VEC_ITPAIR* v, const ITPAIR_IT& it ) ; 
 
-	  const VEC_ITPAIR* m_vec_itpair; 
-	  ITPAIR_IT  m_pair_it; 
-	  OBJ_IT     m_obj_it    ;
-	  OBJ_IT     m_obj_it_end    ;
+	  const VEC_ITPAIR* m_vec_itpair{}; 
+	  ITPAIR_IT  m_pair_it{}; 
+	  OBJ_IT     m_obj_it{}    ;
+	  OBJ_IT     m_obj_it_end{}    ;
 
      };
 
@@ -96,10 +96,10 @@ class TileRawRoISelector
  private: 
    void initialize(); 
 
-   TileRoI_Map* m_roiMap; 
-   TileRawChannelContainer* m_container; 
+   TileRoI_Map* m_roiMap{}; 
+   TileRawChannelContainer* m_container{}; 
 
-   VEC_ITPAIR  m_vecItPair;
+   VEC_ITPAIR  m_vecItPair{};
    
 };
 

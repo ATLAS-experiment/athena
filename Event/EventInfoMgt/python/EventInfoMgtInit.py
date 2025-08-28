@@ -11,7 +11,6 @@
 #
 # Required libs:
 
-from __future__ import print_function
 
 def _loadBasicEventInfoMgt():
     """Loads the basic services for EventInfoMgt"""

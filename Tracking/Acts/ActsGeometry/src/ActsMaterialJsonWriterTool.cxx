@@ -7,6 +7,7 @@
 
 #include "ActsInterop/Logger.h"
 
+#include <Acts/Material/TrackingGeometryMaterial.hpp>
 #include <fstream>
 #include <ios>
 #include <iostream>
@@ -31,7 +32,7 @@ ActsMaterialJsonWriterTool::initialize()
 }
 
 void
-ActsMaterialJsonWriterTool::write(const ActsGeometryContext& gctx, const Acts::MaterialMapJsonConverter::DetectorMaterialMaps& detMaterial) const
+ActsMaterialJsonWriterTool::write(const ActsGeometryContext& gctx, const Acts::TrackingGeometryMaterial& detMaterial) const
 {
   // Setup the converter config
   Acts::MaterialMapJsonConverter::Config cfg;

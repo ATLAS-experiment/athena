@@ -8,7 +8,7 @@ find_package( GTest )
 
 set (extra_libs)
 if (XAOD_STANDALONE)
-  set (extra_libs ComponentFactoryPreloaderLib)
+  set (extra_libs )
 else()
   set (extra_libs POOLRootAccessLib)
 endif ()
@@ -18,5 +18,5 @@ atlas_add_library (ColumnarTestFixturesLib
 ColumnarTestFixtures/*.h Root/*.cxx
   PUBLIC_HEADERS ColumnarTestFixtures
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib PATInterfaces AsgTestingLib
-  PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib xAODCaloEvent)
+  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib PATInterfaces AsgTestingLib xAODJet xAODMissingET
+  PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib xAODCaloEvent xAODTracking)

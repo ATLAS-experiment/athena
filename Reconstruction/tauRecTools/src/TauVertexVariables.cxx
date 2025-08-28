@@ -48,7 +48,7 @@ StatusCode TauVertexVariables::executeVertexVariables(xAOD::TauJet& pTau, xAOD::
 
   ElementLink<xAOD::VertexContainer> empty;
   pTau.setSecondaryVertexLink(empty);
-  pTau.setDetail(xAOD::TauJetParameters::trFlightPathSig, (float)(-1111.));
+  pTau.setDetail(xAOD::TauJetParameters::trFlightPathSig, -1111.f);
   
   // try to find secondary vertex if more than 1 track and the tau vertex is available
   if ( pTau.nTracks() < 2 ||  pTau.vertex()==nullptr ) {
@@ -103,7 +103,7 @@ StatusCode TauVertexVariables::executeVertexVariables(xAOD::TauJet& pTau, xAOD::
 
   // get the transverse flight path significance
   double trFlightPS = trFlightPathSig(pTau, *xAODvertex);
-  pTau.setDetail(xAOD::TauJetParameters::trFlightPathSig, (float)(trFlightPS));
+  pTau.setDetail(xAOD::TauJetParameters::trFlightPathSig, static_cast<float>(trFlightPS));
   ATH_MSG_VERBOSE("transverse flight path significance="<<trFlightPS);
 
   // Note, we only attach the 2nd vertex if at offline, otherwise, break the trigger persistency

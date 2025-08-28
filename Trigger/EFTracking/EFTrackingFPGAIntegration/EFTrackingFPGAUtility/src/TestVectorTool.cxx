@@ -16,7 +16,6 @@
 StatusCode TestVectorTool::initialize()
 {
     ATH_MSG_INFO("Initializing TestVectorTool tool");
-    ATH_CHECK(detStore()->retrieve(m_pixelid, "PixelID"));
     
     return StatusCode::SUCCESS;
 }

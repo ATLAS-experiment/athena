@@ -6,13 +6,13 @@
   @file a test driver for FileCatalog.
   @author: Zhen Xie
 */
-#include<cppunit/extensions/HelperMacros.h>
+#include <cppunit/extensions/HelperMacros.h>
 
+#include <exception>
 #include <string>
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
-#include "POOLCore/Exception.h"
 #include "FileCatalog/IFileCatalog.h"
 
 using namespace pool;
@@ -26,11 +26,8 @@ class FCtest: public CppUnit::TestFixture
 
 public:
   IFileCatalog* mycatalog, *source, *dest;
-  std::string sourcecatalogtype;
   std::string sourcecatalogurl;
-  std::string destcatalogtype;
   std::string destcatalogurl;
-  std::string mycatalogtype;
   std::string mycatalogurl;
   
   std::vector<std::string> names;
@@ -130,80 +127,17 @@ public:
       std::cout<<"committed"<<std::endl;
       mycatalog->disconnect();
       std::cout<<"disconnect"<<std::endl;
-    }catch(const pool::Exception& er){
+    }catch(const std::runtime_error& er){
       std::cerr << er.what() << std::endl;
       throw er;
     }
   }
   
   void testimport() {
-/* MN: not supporting FC import with Gaudi FC     
-    try{
-      importsetUp(xml2xml);
-      std::cout<<"TEST --> testimport"<<std::endl;
-      dest->setWriteCatalog(destcatalogurl);
-      dest->connect();
-      source->setWriteCatalog(sourcecatalogurl);
-      source->connect();
-
-      source->start();
-      MetaDataEntry meta;
-      meta.addAttributeSpec("jobid", "int");
-      meta.addAttributeSpec("owner", "string");
-      FCAdmin a;
-      source->setAction(a);
-      try{
-        a.createMetaDataSpec(meta);
-      }catch(const pool::FCduplicatemetadataspecException& ){
-        std::cout<<"metadata schema already exists, drop it and create it again"<<std::endl;
-        a.dropMetaDataSpec();
-        a.createMetaDataSpec(meta);
-      }
-      source->commit();
-      
-      dest->start();
-      FCAdmin ad;
-      dest->setAction(ad);
-      try{
-        ad.createMetaDataSpec(meta);
-      }catch(const pool::FCduplicatemetadataspecException& ){
-        std::cout<<"metadata schema already exists, drop it and create it again"<<std::endl;
-        ad.dropMetaDataSpec();
-        ad.createMetaDataSpec(meta);
-      }
-      dest->commit();
-      
-      source->start();
-      meta.setAttributeValue("jobid", 10);
-      meta.setAttributeValue("owner",std::string("cmsprod"));
-      FCregister r;
-      source->setAction(r);
-      for(size_t i=0; i<names.size(); i++){
-        pfn=std::string("source::pfn:")+names[i];
-        r.registerPFN(pfn,"root/tree",fid);
-        r.registerLFN(pfn,std::string("source::lfn:")+names[i]);
-        r.addReplicaPFN(pfn,std::string("rep::pfn:")+names[i] );
-        r.registerMetaData(fid,meta);
-      }
-      source->commit(FileCatalog::ONHOLD);
-
-      source->start();
-      dest->start();
-      dest->importCatalog(source,"",1000);
-      dest->commit();
-      source->commit();
-
-      source->disconnect();
-      dest->disconnect();
-    }catch(const pool::Exception& er){
-      std::cerr << er.what() << std::endl;
-      exit(1);
-    }
-*/
   }
 
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(FCtest);
-#include<TestTools/CppUnit_testdriver.cxx>
+#include <TestTools/CppUnit_testdriver.cxx>
 

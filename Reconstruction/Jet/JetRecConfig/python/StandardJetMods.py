@@ -79,7 +79,7 @@ def isMC(flags):
     """A simple filter function for  testing if we're running in MC
     returns (bool, str) where the str contains an explanation of why the bool is False.
     (probably worth re-allocating somehere else)"""
-    return flags.Input.isMC, "Input file is not MC"
+    return flags.Input.isMC or flags.Overlay.DataOverlay, "Input file is not MC"
 
 
 def _constitContainername(jetdef,modspec):
@@ -219,7 +219,8 @@ from ParticleJetTools import ParticleJetToolsConfig
 stdJetModifiers.update(
     # Easy cases, no special config or prereqs, just default tool config
     PartonTruthLabel = JetModifier("Analysis::JetPartonTruthLabel","partontruthlabel",
-                                    prereqs=["ghost:Partons"]),
+                                    prereqs=["ghost:Partons"]
+                                   ),
 
     # More complex cases here
     JetDeltaRLabel =   JetModifier("ParticleJetDeltaRLabelTool","jetdrlabeler_jetptmin",
@@ -253,18 +254,23 @@ stdJetModifiers.update(
                                                    "ghost:TausFinal"]
                                    ),
 
+    JetQuarkChargeLabel =    JetModifier("JetQuarkChargeLabelingTool","jetquarkchargetool",
+                                         createfn=ParticleJetToolsConfig.getJetQuarkChargeTool,
+                                         prereqs=["mod:JetGhostInitialLabel","mod:JetGhostLabel","mod:PartonTruthLabel"]
+                                         ),
+
 
     JetTaggingTruthLabel = JetModifier("JetTaggingTruthLabel", "truthlabeler_{mods}",
                                        filterfn=isMC,
                                        createfn=ParticleJetToolsConfig.getJetTruthLabelTool,
-                                       prereqs=lambda modspec,jetdef: ParticleJetToolsConfig.getJetTruthLabelToolPrereqs(jetdef, modspec),
+                                       prereqs=lambda modspec,jetdef: ParticleJetToolsConfig.getJetTruthLabelToolPrereqs(jetdef, modspec)
                                       ),
 
     JetPileupLabel = JetModifier("JetPileupLabel", "pileuplabeler_{mods}",
                                  filterfn=isMC,
                                  createfn=ParticleJetToolsConfig.getJetPileupLabelTool,
                                  prereqs=["input:AntiKt4TruthDressedWZJets"]
-                                 ),
+                                 )
 )
 
 
@@ -304,12 +310,24 @@ stdJetModifiers.update(
     softdropobs = JetModifier("SoftDropObservablesTool", "softdropobs"),
 )
 
-# Substructure tagger tools 
+# Substructure tagger tools: q/g
 try :
     from JetMomentTools import JetMomentToolsConfig
     stdJetModifiers.update( 
         qgtransformer = JetModifier("BoostedJetTaggerTool", "qgtransformer",
-                            createfn=JetMomentToolsConfig.getBoostedJetTaggerTool,
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolQG,
+                            JetContainer = _jetname),
+    )
+except ModuleNotFoundError:
+    # In some releases (AthGeneration) JetMomentTools is not existing
+    pass
+
+# Substructure tagger tools: top
+try :
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update( 
+        toptransformer = JetModifier("BoostedJetTaggerTool", "toptransformer",
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolTop,
                             JetContainer = _jetname),
     )
 except ModuleNotFoundError:

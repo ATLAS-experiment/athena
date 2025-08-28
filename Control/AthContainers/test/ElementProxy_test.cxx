@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file ElementProxy_test.cxx
@@ -29,8 +29,8 @@ public:
   explicit test_err (const char* file,
                      int line,
                      const char* what);
-  virtual ~test_err() throw() {}
-  virtual const char* what() const throw() { return m_what.c_str(); }
+  virtual ~test_err() noexcept override {}
+  virtual const char* what() const noexcept override { return m_what.c_str(); }
 private:
   std::string m_what;
 };

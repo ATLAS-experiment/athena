@@ -10,6 +10,7 @@
 #include "xAODTau/TauJet.h"
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/PFODefs.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 PanTau::Tool_InputConverter::Tool_InputConverter( const std::string& name ) :
@@ -31,9 +32,6 @@ StatusCode PanTau::Tool_InputConverter::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_Int("TauConstituents_UsePionMass", m_Config_UsePionMass) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_Types_DeltaRCore", m_Config_TauConstituents_Types_DeltaRCore) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_PreselectionMinEnergy", m_Config_TauConstituents_PreselectionMinEnergy) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("CellBased_BinEdges_Eta", m_Config_CellBased_BinEdges_Eta) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("CellBased_EtaBinned_Pi0MVACut_1prong", m_Config_CellBased_EtaBinned_Pi0MVACut_1prong) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("CellBased_EtaBinned_Pi0MVACut_3prong", m_Config_CellBased_EtaBinned_Pi0MVACut_3prong) );  
 
   return StatusCode::SUCCESS;
 }
@@ -76,7 +74,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     
     // clusters: don't touch the measured energy. set mass to pion mass, so momentum will be altered
     if (!pfo->isCharged()) {
-      constituentMass = 134.98;
+      constituentMass = ParticleConstants::piZeroMassInMeV;
     }
   }
  
@@ -86,7 +84,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
   // get type (based on charge and DR to tau)
   std::vector<int> typeFlags = std::vector<int>((unsigned int)PanTau::TauConstituent::t_nTypes, 0);
   if (typeFlags.size() < (unsigned int)PanTau::TauConstituent::t_nTypes) std::abort(); // suppress cppcheck warning
-  typeFlags.at((int)PanTau::TauConstituent::t_NoType) = 1;
+  typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_NoType)) = 1;
     
   double mvaValue = PanTau::TauConstituent::DefaultBDTValue();
 
@@ -95,21 +93,17 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     
   if (deltaR_toTauJet > m_Config_TauConstituents_Types_DeltaRCore) {
     if (pfo->isCharged()) {
-      typeFlags.at((int)PanTau::TauConstituent::t_Charged) = 1;
-    }
-    else {
-      typeFlags.at((int)PanTau::TauConstituent::t_OutNeut) = 1;
-      mvaValue = pfo->bdtPi0Score();
+      typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_Charged)) = 1;
     }
   }//end if pfo is not in core
     
   if (deltaR_toTauJet <= m_Config_TauConstituents_Types_DeltaRCore) {
     
     if (pfo->isCharged()) {
-      typeFlags.at((int)PanTau::TauConstituent::t_Charged) = 1;
+      typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_Charged)) = 1;
     }
     else {
-      typeFlags.at((int)PanTau::TauConstituent::t_Neutral) = 1;
+      typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_Neutral)) = 1;
             
       //neutral PFO arranging --- check for pi0 tag
       mvaValue = pfo->bdtPi0Score();
@@ -119,7 +113,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
 	ATH_MSG_WARNING("WARNING: Could not retrieve nPi0Proto. Will set it to 1.");
 	nPi0sPerCluster = 1;
       }
-      if (nPi0sPerCluster > 0) typeFlags.at((int)PanTau::TauConstituent::t_Pi0Neut) = 1;
+      if (nPi0sPerCluster > 0) typeFlags.at(static_cast<int>(PanTau::TauConstituent::t_Pi0Neut)) = 1;
 
     }
   }//end if pfo is in core

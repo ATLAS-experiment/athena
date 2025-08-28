@@ -33,6 +33,7 @@ photonRequirements = " && ".join(
     ["(DFCommonPhotons_et >= 15*GeV)", "(abs(DFCommonPhotons_eta) < 2.5)"]
 )
 
+decorateCells = True
 
 def EGAM10SkimmingToolCfg(flags):
     """Configure the EGAM10 skimming tool"""
@@ -109,8 +110,9 @@ def EGAM10KernelCfg(flags, name="EGAM10Kernel", **kwargs):
     # Common calo decoration tools
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        CaloDecoratorKernelCfg)
+        CaloDecoratorKernelCfg, CaloCellDecoratorKernelCfg)
     acc.merge(CaloDecoratorKernelCfg(flags))
+    acc.merge(CaloCellDecoratorKernelCfg(flags))
 
     # thinning tools
     thinningTools = []
@@ -229,7 +231,9 @@ def EGAM10Cfg(flags):
     # -------------------------------------------
 
     # baseline
-    EGAM10SlimmingHelper.AllVariables = ["CaloCalTopoClusters"]
+    EGAM10SlimmingHelper.AllVariables = [
+        "CaloCalTopoClusters"
+    ]
 
     # and on MC we also add:
     if flags.Input.isMC:
@@ -285,7 +289,7 @@ def EGAM10Cfg(flags):
 
     # egamma clusters
     EGAM10SlimmingHelper.ExtraVariables += [
-        "egammaClusters.PHI2CALOFRAME.ETA2CALOFRAME.phi_sampl"
+        "egammaClusters.PHI2CALOFRAME.ETA2CALOFRAME.phi_sampl",
     ]
 
     # photons
@@ -333,6 +337,17 @@ def EGAM10Cfg(flags):
     clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(acc, "EGAM10Kernel")
     print("EGAM10 cluster energy decorations: ", clusterEnergyDecorations)
     EGAM10SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
+
+    # photons: cell decorations
+    if decorateCells:
+        EGAM10SlimmingHelper.ExtraVariables += [
+            "Photons.cells_E.cells_time.cells_onlId",
+            "Photons.cells_eta.cells_phi.cells_layer",
+            "Photons.cells_x.cells_y.cells_z",
+            "Photons.cells_gain",
+            "Photons.cells_quality",
+            "Photons.ncells",
+        ] 
 
     # energy density
     EGAM10SlimmingHelper.ExtraVariables += [

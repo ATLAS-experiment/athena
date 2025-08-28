@@ -18,6 +18,7 @@
 #include "ParticleJetTools/JetParticleOriginVertexAssociation.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 #include "ParticleJetTools/JetPileupLabelingTool.h"
+#include "ParticleJetTools/JetQuarkChargeLabelingTool.h"
 #include "ParticleJetTools/JetPartonTruthLabel.h"
 
 #endif

@@ -6,7 +6,6 @@
 
 #include "TrkSegment/Segment.h"
 #include "TrkSegment/TrackSegment.h"
-#include "TrkSegment/SegmentCollection.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 
 #include "JiveXML/DataType.h"
@@ -21,6 +20,13 @@ namespace JiveXML {
    **/
   SegmentRetriever::SegmentRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent){}
+
+
+  StatusCode SegmentRetriever::initialize(){
+    ATH_CHECK(m_keys.initialize());
+    return StatusCode::SUCCESS;
+  }
+
   
   /**
    * For each segement collections retrieve all data
@@ -33,10 +39,7 @@ namespace JiveXML {
     
     ATH_MSG_DEBUG("Retrieving " << dataTypeName()); 
 
-    std::vector< std::string > keys;
-    evtStore()->keys< Trk::SegmentCollection >( keys );
-
-    for( const std::string& key : keys ) {
+    for( const auto& key : m_keys ) {
       SG::ReadHandle<Trk::SegmentCollection > cont(key);
       if (cont.isValid()) {
 
@@ -108,7 +111,7 @@ namespace JiveXML {
 	}
     
 	//forward data to formating tool
-	if ( FormatTool->AddToEvent(dataTypeName(), key, &DataMap).isFailure())
+	if ( FormatTool->AddToEvent(dataTypeName(), key.key(), &DataMap).isFailure())
 	  return StatusCode::RECOVERABLE;
       
 	ATH_MSG_DEBUG(dataTypeName() << " collection " << key << " retrieved with " << NSegs << " entries");

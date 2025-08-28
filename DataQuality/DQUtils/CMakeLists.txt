@@ -10,7 +10,6 @@ find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( Oracle )
 find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( six )
 find_package( sqlalchemy )
 
 string(REPLACE "-Wl,--as-needed" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")

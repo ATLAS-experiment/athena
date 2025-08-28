@@ -52,15 +52,18 @@ def CPAlgorithmsCfg(flags):
 
     logPLCPAlgCfg.info('Do Muons')
 
-    subConfig = factory.makeConfig ('Muons', containerName='AnalysisMuons')
+    subConfig = factory.makeConfig ('Muons')
+    subConfig.setOptionValue ('.containerName', 'AnalysisMuons')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Muons.WorkingPoint', containerName='AnalysisMuons',
-                                    selectionName='loose')
+    subConfig = factory.makeConfig ('Muons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisMuons')
+    subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.quality', 'Loose')
     subConfig.setOptionValue ('.isolation', 'NonIso')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisMuons')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisMuons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -71,22 +74,25 @@ def CPAlgorithmsCfg(flags):
 
     logPLCPAlgCfg.info('Do Electrons')
 
-    subConfig = factory.makeConfig ('Electrons', containerName='AnalysisElectrons')
+    subConfig = factory.makeConfig ('Electrons')
+    subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
     subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateSamplingPattern', True)
     subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisElectrons',
-                                    selectionName='loose')
+    subConfig = factory.makeConfig ('Electrons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
+    subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.identificationWP', 'LooseLHElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.noEffSF', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisElectrons')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -94,14 +100,17 @@ def CPAlgorithmsCfg(flags):
     configSeq += subConfig
 
     # So SiHit electrons - should come after the standard selection in order to avoid keeping the same electrons twice
-    subConfig = factory.makeConfig ('Electrons', containerName='AnalysisSiHitElectrons')
+    subConfig = factory.makeConfig ('Electrons')
+    subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
     subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.postfix', 'SiHit')
     subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisSiHitElectrons', selectionName='SiHits')
+    subConfig = factory.makeConfig ('Electrons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
+    subConfig.setOptionValue ('.selectionName', 'SiHits')
     subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.identificationWP', 'SiHitElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
@@ -109,7 +118,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.noEffSF', True)
     subConfig.setOptionValue ('.postfix', 'SiHit')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisSiHitElectrons')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
     subConfig.setOptionValue ('.selectionName', 'SiHits')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -120,14 +130,16 @@ def CPAlgorithmsCfg(flags):
 
     logPLCPAlgCfg.info('Do Photons')
 
-    subConfig = factory.makeConfig ('Photons', containerName='AnalysisPhotons')
+    subConfig = factory.makeConfig ('Photons')
+    subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
     subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateEmva', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Photons.WorkingPoint', containerName='AnalysisPhotons',
-        selectionName='loose')
+    subConfig = factory.makeConfig ('Photons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
+    subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.qualityWP', 'Loose')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
@@ -135,7 +147,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.noEffSFForID', True)
     subConfig.setOptionValue ('.noEffSFForIso', True)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisPhotons')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -146,13 +159,16 @@ def CPAlgorithmsCfg(flags):
 
     # set up the tau analysis algorithm config:
     # Commented for now due to use of public tools
-    subConfig = factory.makeConfig ('TauJets', containerName='AnalysisTauJets')
+    subConfig = factory.makeConfig ('TauJets')
+    subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('TauJets.WorkingPoint', containerName='AnalysisTauJets',
-        selectionName='baseline')
+    subConfig = factory.makeConfig ('TauJets.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
+    subConfig.setOptionValue ('.selectionName', 'baseline')
     subConfig.setOptionValue ('.quality', 'Baseline')
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisTauJets')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
     subConfig.setOptionValue ('.selectionName', 'baseline')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
@@ -163,11 +179,11 @@ def CPAlgorithmsCfg(flags):
     jetContainer = 'AntiKt4EMPFlowJets'
     subConfig = factory.makeConfig ('Jets', containerName='AnalysisJets',
         jetCollection=jetContainer)
-    subConfig.setOptionValue ('.runFJvtUpdate', False)
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisJets')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisJets')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
@@ -180,11 +196,12 @@ def CPAlgorithmsCfg(flags):
     # Disable kinematic selections on large-R jets
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.maxPt', 0.)
-    subConfig.setOptionValue ('.maxEta', 0.)
+    subConfig.setOptionValue ('.maxRapidity', 0.)
     subConfig.setOptionValue ('.minMass', 0.)
     subConfig.setOptionValue ('.maxMass', 0.)
     configSeq += subConfig
-    subConfig = factory.makeConfig ('Thinning', containerName='AnalysisLargeRJets')
+    subConfig = factory.makeConfig ('Thinning')
+    subConfig.setOptionValue ('.containerName', 'AnalysisLargeRJets')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
@@ -421,7 +438,6 @@ def PHYSLITECfg(flags):
 
     # Save the extra variables which aren't included by other means
     btag_variables = [f'GN2v01_p{x}' for x in ['b', 'c', 'u', 'tau']]
-    btag_variables += [f'DL1dv01_p{x}' for x in ['b', 'c', 'u']]
     PHYSLITESlimmingHelper.ExtraVariables += [ 
         'AnalysisElectrons.trackParticleLinks.f1.pt.eta.phi.m.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsDNNLoose.DFCommonElectronsDNNMedium.DFCommonElectronsDNNTight.DFCommonElectronsDNNVeryLooseNoCF97.DFCommonElectronsDNNMediumNoCF.DFCommonElectronsDNNTightNoCF.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.topoetcone20ptCorrection.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.caloClusterLinks.ambiguityLink.TruthLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ.Eadded_Lr2.Eadded_Lr3.E_mva_only',
         'AnalysisSiHitElectrons.pt.eta.phi.m.charge.author.topoetcone20_CloseByCorr.DFCommonElectronsLHVeryLoose.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.OQ.truthOrigin.truthType.firstEgMotherTruthType.firstEgMotherTruthOrigin.z0stheta.d0Normalized.nInnerExpPix.clEta.clPhi.E_mva_only',
@@ -434,9 +450,8 @@ def PHYSLITECfg(flags):
         'ExtrapolatedMuonTrackParticles.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.truthOrigin.truthType.qOverP.theta.phi',
         'MuonSpectrometerTrackParticles.phi.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.vertexLink.theta.qOverP',
         'InDetForwardTrackParticles.vz.truthType.truthOrigin.numberDoF.numberOfTRTHits.numberOfSCTHoles.theta.numberOfTRTOutliers.numberOfPrecisionLayers.numberOfSCTDeadSensors.numberOfPixelHoles.numberOfSCTHits.numberOfPrecisionHoleLayers.numberOfPixelDeadSensors.phi.numberOfPixelHits.z0.d0.qOverP.chiSquared.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag',
-        'AnalysisTauJets.pt.eta.phi.m.ptFinalCalib.etaFinalCalib.ptTauEnergyScale.etaTauEnergyScale.charge.isTauFlags.PanTau_DecayMode.NNDecayMode.RNNJetScoreSigTrans.GNTauScoreSigTrans_v0prune.GNTauVL_v0prune.GNTauL_v0prune.GNTauM_v0prune.GNTauT_v0prune.RNNEleScoreSigTrans_v1.EleRNNLoose_v1.EleRNNMedium_v1.EleRNNTight_v1.passTATTauMuonOLR.tauTrackLinks.vertexLink.truthParticleLink.truthJetLink.IsTruthMatched.truthOrigin.truthType',
-        'AnalysisJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.DetectorEta.JVFCorr.NNJvtPass.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad.Timing.btagging.btaggingLink.GhostTrack.DFCommonJets_fJvt.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PSFrac.JetAccessorMap.EMFrac.Width.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.EnergyPerSampling.SumPtChargedPFOPt500.isJvtHS',
-        '.'.join(['BTagging_AntiKt4EMPFlow'] + btag_variables),
+        'AnalysisTauJets.pt.eta.phi.m.ptFinalCalib.etaFinalCalib.ptTauEnergyScale.etaTauEnergyScale.charge.isTauFlags.PanTau_DecayMode.NNDecayMode.RNNJetScoreSigTrans.GNTauScoreSigTrans_v0prune.GNTauVL_v0prune.GNTauL_v0prune.GNTauM_v0prune.GNTauT_v0prune.RNNEleScoreSigTrans_v1.EleRNNLoose_v1.EleRNNMedium_v1.EleRNNTight_v1.trackWidth.passTATTauMuonOLR.tauTrackLinks.vertexLink.truthParticleLink.truthJetLink.IsTruthMatched.truthOrigin.truthType',
+        'AnalysisJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.DetectorEta.JVFCorr.NNJvtPass.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad.Timing.btagging.btaggingLink.GhostTrack.DFCommonJets_fJvt.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PSFrac.JetAccessorMap.EMFrac.Width.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.EnergyPerSampling.SumPtChargedPFOPt500.isJvtHS.{btag_var_string}'.format(btag_var_string = ".".join(btag_variables)),
         'TruthPrimaryVertices.t.x.y.z',
         'MET_Core_AnalysisMET.name.mpx.mpy.sumet.source',
         'METAssoc_AnalysisMET.',

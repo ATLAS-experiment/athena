@@ -15,6 +15,7 @@
 #include "FPGATrackSimConfTools/FPGATrackSimRegionSlices.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
+#include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
 #include "TruthUtils/MagicNumbers.h"
 
 #include "TH1.h"
@@ -271,10 +272,10 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
         // In first stage mode we'll make the track fitter just generate combinations
         std::vector<FPGATrackSimTrack> tracks_1st;
         if (m_doSecondStage) {
-          ATH_CHECK(m_trackFitterTool_1st->getTracks(houghRoads, tracks_1st));
+	  ATH_CHECK(m_trackFitterTool_1st->getTracks(houghRoads, tracks_1st, m_EvtSel->getMin(), m_EvtSel->getMax()));
           ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(tracks_1st));
         } else {
-          roadsToTrack(houghRoads, tracks_1st, false);
+          roadsToTrack(houghRoads, tracks_1st, m_pmap_1st);
           ATH_MSG_DEBUG("We found " << tracks_1st.size() << " combinations");
         }
         for (const auto& track_comb : tracks_1st) {
@@ -287,11 +288,9 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
             FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
             std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
 
-            // Only pass hits that weren't already used
+            // Pass all hits-- it's not possible to only select second stage hits here...
             for (const auto& hit : sector_hits) {
-              if (m_FPGATrackSimMapping->RegionMap_1st()->getRegions(hit).size() == 0) {
-                phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
-              }
+              phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
             }
 
             // Use the track extension tool to actually produce a new set of roads.
@@ -305,7 +304,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
 
             // Now produce "track" candidates and loop over them.
             std::vector<FPGATrackSimTrack> tracks_2nd;
-            roadsToTrack(roads_2nd, tracks_2nd, true);
+            roadsToTrack(roads_2nd, tracks_2nd, m_pmap_2nd);
             for (const FPGATrackSimTrack& track_2nd : tracks_2nd) {
               std::vector<FPGATrackSimHit> track_hits_2nd = track_2nd.getFPGATrackSimHits();
               std::vector<module_t> modules(m_nLayers_2nd);
@@ -369,75 +368,6 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
   return StatusCode::SUCCESS;
 }
 
-// Adapted from TrackFitter, but TrackFitter *depends* on fit constants and this algorithm
-void FPGATrackSimMatrixGenAlgo::roadsToTrack(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& houghRoads, std::vector<FPGATrackSimTrack>& track_cands, bool isSecond)
-{
-
-    const FPGATrackSimPlaneMap* pmap = (isSecond) ?  m_FPGATrackSimMapping->PlaneMap_2nd(0) : m_FPGATrackSimMapping->PlaneMap_1st(0);
-
-    for (const std::shared_ptr<const FPGATrackSimRoad>& road : houghRoads) {
-
-      FPGATrackSimTrack temp;
-      temp.setNLayers(pmap->getNLogiLayers());
-      temp.setBankID(-1);
-      temp.setPatternID(road->getPID());
-      temp.setHoughX(road->getX());
-      temp.setHoughY(road->getY());
-      temp.setQOverPt(road->getY());
-
-      temp.setSubRegion(road->getSubRegion());
-      temp.setHoughXBin(road->getXBin());
-      temp.setHoughYBin(road->getYBin());
-
-      // This comes from FPGATrackSimFunctions
-      std::vector<std::vector<int>> combs = getComboIndices(road->getNHits_layer());
-      unsigned existing_size = track_cands.size();
-      track_cands.resize(existing_size + combs.size(), temp);
-
-      //get the WC hits:
-      layer_bitmask_t wcbits= road->getWCLayers();
-      // Add the hits from each combination to the track, and set ID
-      for (size_t icomb = 0; icomb < combs.size(); icomb++)
-      {
-        if ((existing_size + icomb) >= track_cands.size()) continue;
-        track_cands[existing_size + icomb].setNLayers(pmap->getNLogiLayers());
-        std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
-        for (unsigned layer = 0; layer < pmap->getNLogiLayers(); layer++)
-        {
-            if (hit_indices[layer] < 0) // Set a dummy hit if road has no hits in this layer
-            {
-                FPGATrackSimHit newhit=FPGATrackSimHit();
-                newhit.setLayer(layer);
-                newhit.setSection(0);
-                if (pmap->getDim(layer) == 2) newhit.setDetType(SiliconTech::pixel);
-                    else newhit.setDetType(SiliconTech::strip);
-
-                if (wcbits & (1 << layer ) ) {
-                    newhit.setHitType(HitType::wildcard);
-                    newhit.setLayer(layer);
-                }
-
-                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, newhit);
-            }
-            else
-            {
-                const std::shared_ptr<const FPGATrackSimHit> hit = road->getHits(layer)[hit_indices[layer]];
-                // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
-                // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
-                // That require another field on the track object, but it avoids having to change the sizes
-                // of arrays computed above.
-                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1 && (layer>0)) {
-                    const FPGATrackSimHit inner_hit = track_cands[existing_size + icomb].getFPGATrackSimHits().at(layer - 1);
-                    if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
-                        track_cands[existing_size + icomb].setValidCand(false);
-                    }
-                }
-                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, *hit);
-            }
-        }
-      }
-    }
-}
 
 // Converts raw hits from header into logical hits, and filters those in FPGATrackSim layers
 // Could replace this with the RawToLogical tool (but probably won't)

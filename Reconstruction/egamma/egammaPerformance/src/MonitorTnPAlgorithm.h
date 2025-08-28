@@ -16,6 +16,7 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include <string>
 
@@ -36,7 +37,7 @@ private:
   Gaudi::Property<std::string> m_RecoName {this,"RecoName","LHLoose","Name of particle flavor in egamma reco"};
   Gaudi::Property<std::string> m_TnPType {this,"TnPType","Z","Variable to describe what is the TnP resonance name"};
 
-  Gaudi::Property<Float_t> m_MassPeak {this, "MassPeak", 91188, "Resonance peak position"};
+  Gaudi::Property<Float_t> m_MassPeak {this, "MassPeak", ParticleConstants::ZMassInMeV, "Resonance peak position"};
   Gaudi::Property<Float_t> m_ElectronEtCut {this, "ElectronEtCut", 15000, "Et cut for electron"};
   Gaudi::Property<Float_t> m_MassLowerCut {this, "MassLowerCut", 70000, "Lower Mass cut"};
   Gaudi::Property<Float_t> m_MassUpperCut {this, "MassUpperCut", 110000, "Upper Mass Cut"};

@@ -15,4 +15,4 @@ atlas_add_library( TrigInDetAnalysisUtils
    muonEvent egammaEvent tauEvent xAODMuon xAODEgamma xAODTau xAODTruth xAODTracking
    TrkParameters TrkTrack TrkToolInterfaces TrkTrackSummary TrigDecisionToolLib
    TrigInDetAnalysis TrigInDetEvent TrigSteeringEvent TrigInDetTruthEvent
-   AtlasHepMCLib )
+   AtlasHepMCLib TruthUtils )

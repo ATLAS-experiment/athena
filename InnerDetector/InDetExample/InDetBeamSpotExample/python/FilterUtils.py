@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 This library defines different classes for filtering events in athena.

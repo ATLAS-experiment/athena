@@ -45,8 +45,7 @@ namespace FlavorTagInference {
     }
 
     std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> HitsLoader::getData(
-      const xAOD::Jet& jet, 
-      [[maybe_unused]] const SG::AuxElement& btag) const {
+      const xAOD::Jet& jet) const {
         Hits sorted_hits = getHitsFromJet(jet);
         std::vector<const xAOD::IParticle*> dummy;
         return std::make_tuple(m_config.output_name, m_seqGetter.getFeats(jet, sorted_hits), dummy);

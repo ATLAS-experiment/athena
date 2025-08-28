@@ -6,13 +6,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # standard b-tagging
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-from BTagging.BTagConfig import BTagAlgsCfg
+from BTagging.BTagLegacyConfig import BTagAlgsCfg
 
 # fast btagging
 from FlavorTagInference.FlavorTagNNConfig import getStaticTrackVars
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
+def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks,
                        inputMuons = ""):
 
     # because Cfg functions internally re-append the 'Jets' string
@@ -47,7 +47,6 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
         trackCollection=inputTracks,
         muons=inputMuons,
         primaryVertices=inputVertex,
-        BTagCollection=BTagName,
         AddedJetSuffix='Jets',
         SecVertexers = [],
     ))
@@ -64,21 +63,33 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     # first add the track augmentation
     jet_name = inputJets
     if isPFlow:
-        ca.merge(
-            BTagTrackAugmenterAlgCfg(
-                flags,
-                TrackCollection=inputTracks,
-                PrimaryVertexCollectionName=inputVertex,
+        if doXbbtagLargeRJet:
+            ca.merge(OnlineBeamspotAugmenterCfg(flags))
+
+            ca.merge(
+                OnlineIpAugmenterCfg(
+                    flags,
+                    tracks = inputTracks,
+                    vertices = inputVertex,
+                    trackIpPrefix='XbbIp_'
+                ))
+
+        else:
+            ca.merge(
+                BTagTrackAugmenterAlgCfg(
+                    flags,
+                    TrackCollection=inputTracks,
+                    PrimaryVertexCollectionName=inputVertex,
+                )
             )
-        )
     else:
         trackIpPrefix='simpleIp_'
         ca.merge(
-            OnlineBeamspotIpAugmenterCfg(
+            OnlineIpAugmenterCfg(
             flags,
             tracks=inputTracks,
             vertices=inputVertex,
-            trackIpPrefix=trackIpPrefix,
+            trackIpPrefix=trackIpPrefix
             )
         )
         if inputVertex:
@@ -92,18 +103,21 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
 
     # now we associate the tracks to the jet
     ## JetParticleAssociationAlgCfg uses a shrinking cone.
-    tracksOnJetDecoratorName = "TracksForMinimalJetTag"
-    pass_flag = f'{tracksOnJetDecoratorName}_isValid'
-    ca.merge(
-        JetParticleAssociationAlgCfg(
-            flags,
-            JetCollection=jet_name,
-            InputParticleCollection=inputTracks,
-            OutputParticleDecoration=tracksOnJetDecoratorName,
-            MinimumJetPt=fastDipsMinimumPt,
-            MinimumJetPtFlag=pass_flag
+    if doXbbtagLargeRJet:
+        tracksOnJetDecoratorName = "GhostTrack_ftf"
+    else:
+        tracksOnJetDecoratorName = "TracksForMinimalJetTag"
+        pass_flag = f'{tracksOnJetDecoratorName}_isValid'
+        ca.merge(
+            JetParticleAssociationAlgCfg(
+                flags,
+                JetCollection=jet_name,
+                InputParticleCollection=inputTracks,
+                OutputParticleDecoration=tracksOnJetDecoratorName,
+                MinimumJetPt=fastDipsMinimumPt,
+                MinimumJetPtFlag=pass_flag
+            )
         )
-    )
 
     # Now we have to add an algorithm that tags the jets with dips
     # The input and output remapping is handled via a map in DL2.
@@ -117,6 +131,14 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     'BTagging/20230705/gn2xv01/antikt10ufo/network.onnx',
                     {
                         'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                        'btagIp_': 'XbbIp_',
+                    }
+                ],
+                [
+                    'BTagging/20250702trig/GN2XTrig/antikt10empflow/network.onnx',
+                    {
+                        'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                        'btagIp_': 'XbbIp_',
                     }
                 ],
             ]
@@ -198,6 +220,15 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     , 'GN2_ptau' : 'fastGNTau20240216_ptau'
                     , 'GN2_pu' : 'fastGNTau20240216_pu'
                     }
+                ],
+
+                [ 'BTagging/20250813trig/uht1/antikt4emtopo/UHT1.onnx',
+                    { 'BTagTrackToJetAssociator': tracksOnJetDecoratorName
+                    , 'FastGNTau_ptau' : 'fastUHT120250605_ptau'
+                    , 'FastGNTau_pu'   : 'fastUHT120250605_pu'
+                    , 'FastGNTau_pc'   : 'fastUHT120250605_pc'
+                    , 'FastGNTau_pb'   : 'fastUHT120250605_pb'
+                    }
                 ]   
             ]
 
@@ -214,7 +245,10 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
             "json": CompFactory.FlavorTagDiscriminants.DL2Tool,
             "onnx": CompFactory.FlavorTagInference.GNNTool
         }
-        tag_flags = {pass_flag}
+        if not doXbbtagLargeRJet:
+            tag_flags = {pass_flag}
+        else:
+            tag_flags = {}
 
         if nnAlgoext == 'onnx':
             defaults = _triggerDefaultsFromPath(nnFile)
@@ -254,58 +288,53 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
         )
     return ca
 
-def OnlineBeamspotIpAugmenterCfg(cfgFlags, tracks, vertices='',
-                                 trackIpPrefix='simpleIp_'):
+def OnlineBeamspotAugmenterCfg(flags,pfx='online'):
     ca = ComponentAccumulator()
 
-    pfx = 'online'
-    i = 'EventInfo'
-    x = f'{i}.{pfx}BeamPosX'
-    y = f'{i}.{pfx}BeamPosY'
-    z = f'{i}.{pfx}BeamPosZ'
-    sig_x = f'{i}.{pfx}BeamPosSigmaX'
-    sig_y = f'{i}.{pfx}BeamPosSigmaY'
-    sig_z = f'{i}.{pfx}BeamPosSigmaZ'
-    cov_xy = f'{i}.{pfx}BeamPosSigmaXY'
-    tilt_XZ = f'{i}.{pfx}BeamTiltXZ'
-    tilt_YZ = f'{i}.{pfx}BeamTiltYZ'
-    status = f'{i}.{pfx}BeamStatus'
-
-    ca.merge(BeamSpotCondAlgCfg(cfgFlags))
+    ca.merge(BeamSpotCondAlgCfg(flags))
+    decnames = {
+        f'{n}Key':n.replace('beam',f'EventInfo.{pfx}Beam')
+        for n in [
+            'beamPosX','beamPosY','beamPosZ',
+            'beamPosSigmaX','beamPosSigmaY','beamPosSigmaZ','beamPosSigmaXY',
+            'beamTiltXZ','beamTiltYZ',
+            'beamStatus'
+            ]
+    }
     ca.addEventAlgo(CompFactory.xAODMaker.EventInfoBeamSpotDecoratorAlg(
-        name='_'.join([
-                'EventInfoBeamSpotDecorator',
-                tracks,
-                vertices,
-                trackIpPrefix,
-            ]).replace('__','_').rstrip('_'),
-        beamPosXKey=x,
-        beamPosYKey=y,
-        beamPosZKey=z,
-        beamPosSigmaXKey=sig_x,
-        beamPosSigmaYKey=sig_y,
-        beamPosSigmaZKey=sig_z,
-        beamPosSigmaXYKey=cov_xy,
-        beamTiltXZKey=tilt_XZ,
-        beamTiltYZKey=tilt_YZ,
-        beamStatusKey=status,
-    ))
+        'EventInfoOnlineBeamSpotDecorator',
+        **decnames
+        )
+    )
 
+    return ca
+
+def OnlineIpAugmenterCfg(
+        flags, tracks, vertices='',
+        beamSpotPrefix='online',
+        trackIpPrefix='simpleIp_'):
+    ca = ComponentAccumulator()
+
+    decnames = {
+        n:n.replace('beam',f'EventInfo.{beamSpotPrefix}Beam').replace('spotSigma','Pos').replace('spotCovariance','PosSigma')
+        for n in [
+            'beamspotSigmaX','beamspotSigmaY','beamspotSigmaZ','beamspotCovarianceXY',
+        ]
+    }
+    
     ca.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.PoorMansIpAugmenterAlg(
             name='_'.join([
                 'SimpleTrackAugmenter',
                 tracks,
                 vertices,
+                beamSpotPrefix,
                 trackIpPrefix,
             ]).replace('__','_').rstrip('_'),
             trackContainer=tracks,
             primaryVertexContainer=vertices,
             prefix=trackIpPrefix,
-            beamspotSigmaX=sig_x,
-            beamspotSigmaY=sig_y,
-            beamspotSigmaZ=sig_z,
-            beamspotCovarianceXY=cov_xy
+            **decnames
         )
     )
     return ca

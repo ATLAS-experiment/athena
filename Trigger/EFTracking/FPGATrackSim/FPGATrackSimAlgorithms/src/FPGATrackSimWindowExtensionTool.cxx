@@ -21,10 +21,11 @@
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 
+#include "FourMomUtils/P4Helpers.h"
+
 #include <sstream>
 #include <cmath>
 #include <algorithm>
-
 
 StatusCode FPGATrackSimWindowExtensionTool::initialize() {
 
@@ -34,7 +35,7 @@ StatusCode FPGATrackSimWindowExtensionTool::initialize() {
     m_nLayers_1stStage = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
     m_nLayers_2ndStage = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers() - m_nLayers_1stStage;
 
-    m_maxMiss = (m_nLayers_1stStage + m_nLayers_2ndStage) - m_threshold;
+    m_threshold = (m_nLayers_1stStage + m_nLayers_2ndStage) - m_maxMiss;
 
     // This now needs to be done once for each slice.
     for (size_t j=0; j<m_FPGATrackSimMapping->GetPlaneMap_2ndSliceSize(); j++){
@@ -104,7 +105,7 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
     // on the binning tool to match first stage tracks to second stage bins.
     std::vector<std::shared_ptr<const FPGATrackSimHit>> allMappedHits;
     if (m_doBinning && m_FPGATrackSimMapping->GetPlaneMap_2ndSliceSize() == 1) {
-        for (unsigned layer = m_nLayers_1stStage; layer < m_nLayers_2ndStage + m_nLayers_1stStage; layer++) {
+        for (unsigned layer = 0; layer < m_nLayers_2ndStage + m_nLayers_1stStage; layer++) {
             allMappedHits.insert(allMappedHits.end(), m_phits_atLayer[0][layer].begin(), m_phits_atLayer[0][layer].end());
         }
         ATH_MSG_VERBOSE("Attempting to bin nhits = " << allMappedHits.size());
@@ -128,7 +129,7 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> road_hits;
         road_hits.resize(m_nLayers_1stStage + m_nLayers_2ndStage);
         layer_bitmask_t hitLayers = 0;
-        int nhit = 0;
+        unsigned nhit = 0;
         // We can't just use the the iterator since hit.getLayer() isn't guaranteed to be right.
         for (unsigned layer = 0; layer < track->getFPGATrackSimHits().size(); layer++) {
             const FPGATrackSimHit& hit = track->getFPGATrackSimHits().at(layer);
@@ -152,8 +153,8 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         }
 
         // If we have enough hits, create a new road.
+        ATH_MSG_DEBUG("Found potential new road with " << nhit << " hits relative to threshold of " << m_threshold);
         if (nhit >= m_threshold) {
-            ATH_MSG_DEBUG("Found new road with " << nhit << " hits relative to " << m_threshold);
             m_roads.emplace_back();
             FPGATrackSimRoad & road = m_roads.back();
             road.setRoadID(roads.size() - 1);
@@ -229,8 +230,8 @@ bool FPGATrackSimWindowExtensionTool::extendTrackSliced(std::shared_ptr<const FP
             double diffz = abs(hitz-pred_hitz);
 
             // Apply the actual layer check, only accept hits that fall into a track's window.
-            ATH_MSG_DEBUG("Hit in region, comparing phi: " << diffphi << " to " << m_windows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
-            if (diffphi < m_windows[layer] && diffz < m_zwindows[layer]) {
+            ATH_MSG_DEBUG("Hit in region, comparing phi: " << diffphi << " to " << m_phiwindows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
+            if (diffphi < m_phiwindows[layer] && diffz < m_zwindows[layer]) {
                 numHits[layer]++;
                 road_hits[layer].push_back(hit);
                 hitLayers |= 1 << hit->getLayer();
@@ -265,14 +266,17 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
     FPGATrackSimBinUtil::ParSet parSet = binDesc->trackParsToParSet(trackPars);
     if (!m_hitBinningTool->getBinTool().inRange(parSet)) {
         ATH_MSG_DEBUG("Track doesn't pass binning tool track parameter cuts");
-        return false;
     }
-    ATH_MSG_DEBUG("Found inside out parameters as " << parSet);
+    ATH_MSG_DEBUG("Found inside out parameters as " << parSet);    
+
     FPGATrackSimBinUtil::IdxSet binPars = binStep->binIdx(parSet);
     ATH_MSG_DEBUG("Attempting to look up bin entry using binpars = " << binPars);
     FPGATrackSimBinnedHits::BinEntry entry = (m_hitBinningTool->lastStepBinnedHits())[binPars];
 
     ATH_MSG_DEBUG("Matched track to new bin containing " << entry.lyrCnt() << " layers with " << entry.hitCnt << " hits total");
+
+    std::vector<std::vector<std::tuple<float, float, std::shared_ptr<const FPGATrackSimHit>>>> road_hits_sortable;
+    road_hits_sortable.resize(m_nLayers_1stStage + m_nLayers_2ndStage);
 
     for (FPGATrackSimBinUtil::StoredHit& storedHit : entry.hits) {
         // These may need more adjustment if we try to bin deduplicated SPs in the future.
@@ -296,12 +300,85 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
         double diffz = abs(hitz-pred_hitz);
 
         // Apply the actual layer check, only accept hits that fall into a track's window.
-        ATH_MSG_DEBUG("Hit in region, comparing phi: " << diffphi << " to " << m_windows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
-        if (diffphi < m_windows[layer] && diffz < m_zwindows[layer]) {
-            numHits[layer]++;
-            road_hits[layer].push_back(hit);
-            hitLayers |= 1 << hit->getLayer();
+        ATH_MSG_DEBUG("Hit in region -- standard window comparison: comparing phi " << diffphi << " to " << m_phiwindows[layer] << " and z " << diffz << " to " << m_zwindows[layer]);
+        if (m_addAllHits) {
+          numHits[layer]++;
+          road_hits_sortable[layer].push_back({diffphi, diffz, hit});
+          hitLayers |= 1 << layer;
         }
+        else if (m_detectorZoneWindows) {
+            if (hit->isBarrel()) { // Barrel
+              ATH_MSG_DEBUG("Hit in region -- detector zone window comparison comparing phi: " << diffphi << " to " << m_phiwindows_barrel[layer] << " and z " << diffz << " to " << m_zwindows_barrel[layer]);
+              if (m_phiwindows_barrel[layer] == -1 || m_zwindows_barrel[layer] == -1) {
+                  ATH_MSG_WARNING("There is a hit in layer: " << layer << " with track eta " << tracketa << " in the barrel!");
+              }
+              if (diffphi < m_phiwindows_barrel[layer] && diffz < m_zwindows_barrel[layer]) {
+                  numHits[layer]++;
+                  road_hits[layer].push_back(hit);
+                  hitLayers |= 1 << layer;
+              }
+            }
+            else { // Endcap
+                  ATH_MSG_DEBUG("Hit in region -- detector zone window comparison comparing phi: " << diffphi << " to " << m_phiwindows_endcap[layer] << " and z " << diffz << " to " << m_zwindows_endcap[layer]);
+                  if (m_phiwindows_endcap[layer] == -1 || m_zwindows_endcap[layer] == -1) {
+                      ATH_MSG_WARNING("There is a hit in layer: " << layer << " with track eta " << tracketa << " in the endcap!");
+                  }
+                  if (diffphi < m_phiwindows_endcap[layer] && diffz < m_zwindows_endcap[layer]) {
+                      numHits[layer]++;
+                      road_hits[layer].push_back(hit);
+                      hitLayers |= 1 << layer;
+                  }
+              }
+        }
+        else if (diffphi < m_phiwindows[layer] && diffz < m_zwindows[layer]) {
+            numHits[layer]++;
+            road_hits_sortable[layer].push_back({diffphi, diffz, hit});
+            hitLayers |= 1 << layer;
+        }
+    }
+
+    // Post-processing. sort the hits by distance. NOTE: should also prioritize SPs here.
+    double zScale = m_zScale.value();
+    double phiScale = m_phiScale.value();
+    for (unsigned layer = 0; layer < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); layer++) {
+        if (road_hits_sortable.at(layer).size() >= 2) {
+            ATH_MSG_DEBUG("Sorting hits in layer " << layer);
+            std::ranges::sort(road_hits_sortable.at(layer), [zScale, phiScale](auto& a, auto& b){
+
+                // Prioritize SP vs non-SP
+                if (std::get<2>(a)->getHitType() == HitType::spacepoint && std::get<2>(b)->getHitType() != HitType::spacepoint) return true;
+                else if (std::get<2>(b)->getHitType() == HitType::spacepoint && std::get<2>(a)->getHitType() != HitType::spacepoint) return false;
+
+                // HitA
+                double dphi = std::get<0>(a);
+                double dz = std::get<1>(a);
+
+                // scaled distance because z and phi are not in same units
+                // these scales are the same as what the pathfinder uses for the time being,
+                // I don't't really know if that makes sense.
+                float distance_a = dphi*dphi/(phiScale*phiScale) + dz*dz/(zScale*zScale);
+
+                // HitB
+                dphi = std::get<0>(b);
+                dz = std::get<1>(b);
+
+                // scaled distance because z and phi are not in same units
+                float distance_b = dphi*dphi/(phiScale*phiScale) + dz*dz/(zScale*zScale);
+
+                return distance_a < distance_b;
+            });
+        }
+
+        // Remove any hits over the cutoff, whatever that is.
+        int cutoff = road_hits_sortable.at(layer).size();
+        if (m_maxHits.value().size() > layer && m_maxHits.value().at(layer) > 0) {
+            cutoff = std::min(cutoff, m_maxHits.value().at(layer));
+        }
+        for (int ihit = 0; ihit < cutoff; ihit++) {
+            auto& road_hit = std::get<2>(road_hits_sortable.at(layer).at(ihit));
+            road_hits.at(layer).push_back(road_hit);
+        }
+
     }
 
     return true;

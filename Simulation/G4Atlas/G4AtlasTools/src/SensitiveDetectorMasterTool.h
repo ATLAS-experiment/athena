@@ -37,9 +37,9 @@ class SensitiveDetectorMasterTool : public extends<AthAlgTool, ISensitiveDetecto
   /// Calls initializeSD on each SD tool to create the SDs for the current worker thread.
   StatusCode initializeSDs() override final;
   /// Calls SetupEvent on each SD tool
-  StatusCode BeginOfAthenaEvent() override final;
+  StatusCode BeginOfAthenaEvent(HitCollectionMap&) override final;
   /// Calls Gather on each SD tool
-  StatusCode EndOfAthenaEvent() override final;
+  StatusCode EndOfAthenaEvent(HitCollectionMap&) override final;
 
  private:
   /// Private array of tool handles pointing to all SD tools.

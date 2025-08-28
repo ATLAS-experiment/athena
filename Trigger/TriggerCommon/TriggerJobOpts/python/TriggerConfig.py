@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import re
 import GaudiConfig2
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format, MetadataCategory
@@ -52,7 +52,7 @@ def collectHypos( steps ):
                 else:
                     __log.verbose("Not a hypo %s", alg.getName())
 
-    return OrderedDict(hypos)
+    return hypos
 
 def __decisionsFromHypo( hypo ):
     """ return all chains served by this hypo and the keys of produced decision object """
@@ -176,8 +176,7 @@ def triggerSummaryCfg(flags, hypos):
     acc = ComponentAccumulator()
     from TrigOutputHandling.TrigOutputHandlingConfig import DecisionSummaryMakerAlgCfg
     decisionSummaryAlg = DecisionSummaryMakerAlgCfg(flags)
-    chainToLastCollection = OrderedDict() # keys are chain names, values are lists of collections
-
+    chainToLastCollection = {} # keys are chain names, values are lists of collections
 
     # sort steps according to the step number i.e. strings Step1 Step2 ... Step10 Step11 rather than
     # alphabetic order Step10 Step11 Step1 Step2
@@ -190,7 +189,7 @@ def triggerSummaryCfg(flags, hypos):
         # (TODO, review this whn config is symmetrised by addition of ComboHypos always)
         orderedStepHypos = sorted(stepHypos, key=lambda hypo: not __isCombo(hypo))
 
-        chainToCollectionInStep = OrderedDict()
+        chainToCollectionInStep = {}
         for hypo in orderedStepHypos:
             hypoChains, hypoOutputKeys = __decisionsFromHypo( hypo )
             for chain in hypoChains:
@@ -254,8 +253,8 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
             else:
                 stepFeatureDecisionKeys.extend( hypoOutputKeys )
 
-        dcEventTool = DecisionCollectorTool( "EventDecisionCollector" + stepName, Decisions=list(OrderedDict.fromkeys(stepDecisionKeys)))
-        dcFeatureTool = DecisionCollectorTool( "FeatureDecisionCollector" + stepName, Decisions=list(OrderedDict.fromkeys(stepFeatureDecisionKeys)))
+        dcEventTool = DecisionCollectorTool( "EventDecisionCollector" + stepName, Decisions=list(dict.fromkeys(stepDecisionKeys)))
+        dcFeatureTool = DecisionCollectorTool( "FeatureDecisionCollector" + stepName, Decisions=list(dict.fromkeys(stepFeatureDecisionKeys)))
         __log.debug( "The step monitoring decisions in %s %s", dcEventTool.getName(), dcEventTool.Decisions)
         __log.debug( "The step monitoring decisions in %s %s", dcFeatureTool.getName(), dcFeatureTool.Decisions)
         mon.DecisionCollectorTools += [ dcEventTool ]
@@ -277,8 +276,11 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
 
     mon.L1Decisions  = hltSeeding.HLTSeedingSummaryKey
 
-    from DecisionHandling.DecisionHandlingConfig import setupFilterMonitoring
-    [ [ setupFilterMonitoring( flags, alg ) for alg in algs ]  for algs in list(filters.values()) ]
+    if flags.Trigger.doValidationMonitoring:
+        from DecisionHandling.DecisionHandlingConfig import setupFilterMonitoring
+        for algs in filters.values():
+            for alg in algs:
+                setupFilterMonitoring( flags, alg )
 
     return acc, mon
 
@@ -672,6 +674,10 @@ def triggerRunCfg( flags, menu=None ):
         hltSeedingAcc = emulateHLTSeedingCfg(flags)
     else:
         acc.merge( triggerIDCCacheCreatorsCfg( flags, seqName="AthAlgSeq" ), sequenceName="HLTBeginSeq" )
+
+        if flags.Trigger.doRuntimeNaviVal: # Validate we can parse the menu with the standalone chain parser
+            acc.addEventAlgo( CompFactory.TrigChainNameParserChecker(), sequenceName="HLTBeginSeq" )
+
         from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
         hltSeedingAcc = HLTSeedingCfg( flags )
         
@@ -862,7 +868,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Trigger.forceEnableAllChains = True
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1",]
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1_50evt",]
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.lock()

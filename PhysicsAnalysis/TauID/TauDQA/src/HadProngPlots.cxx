@@ -12,23 +12,6 @@ HadProngPlots::HadProngPlots(PlotBase* pParent, const std::string& sDir,
 			       const std::string& sTauJetContainerName):
    PlotBase(pParent, sDir),
    m_oGeneralTauPlots(this, "", sTauJetContainerName),
-   m_tauNWideTracks(nullptr),
-   m_tauCoreFrac(nullptr),
-   m_tauEoverPTrk(nullptr),
-   m_tauTrkAvgDist(nullptr),
-   m_tauIpSig(nullptr),
-   m_tauDRMax(nullptr),
-   m_tauMtrks(nullptr),
-   m_SumPtTrkFrac(nullptr),
-   m_innerTrkAvgDist(nullptr),
-   m_ptRatioEflowApprox(nullptr),
-   m_mEflowApprox(nullptr),
-   m_ChPiEMEOverCaloEME(nullptr),
-   m_EMPOverTrkSysP(nullptr),
-   m_HadRadius(nullptr),
-   m_EMRadius(nullptr),
-   m_IsoFrac(nullptr),
-   m_tauSflight(nullptr),
    m_sTauJetContainerName(sTauJetContainerName)
 {
 }
@@ -52,8 +35,6 @@ void HadProngPlots::initializePlots(){
    m_mEflowApprox       = Book1D("mEflowApprox",m_sTauJetContainerName + "Tau mEflowApprox; mEflowApprox; #Taus",30,0.0,3000.0);   
    m_ChPiEMEOverCaloEME = Book1D("ChPiEMEOverCaloEME",m_sTauJetContainerName + "Tau ChPiEMEOverCaloEME; ChPiEMEOverCaloEME; # of Taus", 30, -15, 15);
    m_EMPOverTrkSysP     = Book1D("EMPOverTrkSysP",m_sTauJetContainerName + "Tau EMPOverTrkSysP; EMPOverTrkSysP; # of Taus", 21, -1, 20);   
-   m_HadRadius = Book1D("HadRadius",m_sTauJetContainerName + " Had Radius; HadRadius; # Part",20,0,2.);
-   m_EMRadius  = Book1D("EMRadius",m_sTauJetContainerName + " EM Radius; EMRadius; # Part",20,0,2.);
    m_IsoFrac   = Book1D("IsoFrac",m_sTauJetContainerName + " Iso Frac; Iso Frac; # Part",20,0,1.);
    m_tauSflight    = Book1D("Sflight",m_sTauJetContainerName + " Tau flight sign. ; Sflight; # Taus",100,-10.,20.);
 }
@@ -100,12 +81,6 @@ void HadProngPlots::fill(const xAOD::TauJet& tau, float weight) {
 
   test = tau.detail(xAOD::TauJetParameters::EMPOverTrkSysP, avariable);
   if(test) m_EMPOverTrkSysP->Fill(avariable, weight);
-
-  test = tau.detail(xAOD::TauJetParameters::hadRadius, avariable);
-  if(test) m_HadRadius->Fill(avariable, weight);
-
-  test = tau.detail(xAOD::TauJetParameters::EMRadius, avariable);
-  if(test) m_EMRadius->Fill(avariable, weight);
 
   test = tau.detail(xAOD::TauJetParameters::isolFrac, avariable);
   if (test) m_IsoFrac->Fill(avariable, weight);

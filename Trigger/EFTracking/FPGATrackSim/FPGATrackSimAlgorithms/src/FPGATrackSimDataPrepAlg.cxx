@@ -151,20 +151,19 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
             std::unordered_map<HepMcParticleLink::barcode_type, std::pair<const xAOD::TruthParticle*, size_t>> truthParticlesMap;
             size_t truthParticleIndex = 0;
             for (const xAOD::TruthParticle* truthParticle : *truthParticleContainer) {
-                truthParticlesMap.insert(std::make_pair(HepMC::barcode(truthParticle), std::make_pair(truthParticle,truthParticleIndex)));
+                truthParticlesMap.insert(std::make_pair(HepMC::uniqueID(truthParticle), std::make_pair(truthParticle,truthParticleIndex)));
                 truthParticleIndex++;
             }
-            
             const FPGATrackSimTruthTrackCollection& fpgaTruthTracks = m_eventHeader.optional().getTruthTracks();
             truthLinkVec->reserve(fpgaTruthTracks.size());
             ATH_MSG_DEBUG("begin truth matching for " << fpgaTruthTracks.size() << " FPGA truth tracks");
             for (const FPGATrackSimTruthTrack& fpgaTruthTrack : fpgaTruthTracks) {
-                auto it = truthParticlesMap.find(fpgaTruthTrack.getBarcode());
+                auto it = truthParticlesMap.find(fpgaTruthTrack.getUniqueID()); // TODO FIXME need to check FPGATrackSimTruthTrack uniqueIDs are properly filled
                 if (it != truthParticlesMap.end()) {
                     ElementLink<xAOD::TruthParticleContainer> truthParticleLink(*truthParticleContainer, it->second.second);
-                    // TODO: check if we can avoid using the previously-created map and look directly for the barcode in the link vector container
-                    truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(HepMC::barcode(it->second.first), 0,
-                        HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), truthParticleLink));
+                    // TODO: check if we can avoid using the previously-created map and look directly for the unique ID in the link vector container
+                    truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(HepMC::uniqueID(it->second.first), 0,
+                        HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID), truthParticleLink));
                     ATH_MSG_DEBUG("Truth link added");
                 }
             }

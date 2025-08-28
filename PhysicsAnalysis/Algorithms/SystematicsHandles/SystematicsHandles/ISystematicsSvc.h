@@ -9,8 +9,9 @@
 #define SYSTEMATICS_HANDLES__I_SYSTEMATICS_SVC_H
 
 #include <AsgServices/IAsgService.h>
-
 #include <SystematicsHandles/SysListType.h>
+
+class StatusCode;
 
 namespace CP
 {

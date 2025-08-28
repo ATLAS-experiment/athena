@@ -146,7 +146,7 @@ class EvgenExecutor(athenaExecutor):
              split_args=str(sys.argv[1:]).split("ecmEnergy",1)[1]
              split_args=split_args.lstrip("\',=")
              ener_GeV=split_args.split(",")[0].strip(" ,\']")
-             energy=str(float(ener_GeV)/1000.0).replace('.','p').strip("=0\p']")
+             energy=str(float(ener_GeV)/1000.0).replace('.','p').strip(r"=0\p']")
              msg.info("Should be used gridpack for energy "+energy)
           else:
              msg.info("no ecm energy given, assuming 13.6 TeV ")

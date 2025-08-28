@@ -158,10 +158,6 @@ namespace pool  {
       * interface.
       */
     //@{ 
-    /// Perform DELETE statement
-    DbStatus destroy(DbSelect& sel);
-    /// Perform UPDATE statement
-    DbStatus update(DbSelect& sel);
     /// Perform selection. The statement belongs to the container afterwards.
     DbStatus select(DbSelect& sel);
     /// Fetch next object address of the selection to set token

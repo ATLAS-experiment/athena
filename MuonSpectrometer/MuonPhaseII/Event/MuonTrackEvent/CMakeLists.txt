@@ -9,5 +9,5 @@ find_package( Acts COMPONENTS Core )
 atlas_add_library(  MuonTrackEvent
                    src/*.cxx 
                    PUBLIC_HEADERS  MuonTrackEvent
-                   LINK_LIBRARIES ActsCore Identifier MuonReadoutGeometryR4 MuonPatternEvent
+                   LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternEvent
                                   xAODMuon MuonSpacePoint MuonStationIndexLib )

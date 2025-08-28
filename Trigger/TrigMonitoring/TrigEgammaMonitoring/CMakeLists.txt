@@ -14,7 +14,7 @@ atlas_add_component( TrigEgammaMonitoring
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES ${Boost_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib
                      EgammaAnalysisInterfacesLib GaudiKernel PATCoreLib StoreGateLib 
-                     TrigDecisionToolLib TrigEgammaMatchingToolLib
+                     TrigDecisionToolLib TrigAnalysisHelpersLib TrigEgammaMatchingToolLib
                      TrigEgammaEmulationToolLib xAODBase xAODEgamma xAODEventInfo xAODJet
                      xAODMissingET xAODTracking xAODTrigCalo xAODTrigEgamma xAODTrigger 
                      xAODTruth egammaRecEvent LArRecEvent)

@@ -10,7 +10,7 @@
 #include "StoreGate/ReadHandleKey.h"
 
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 
@@ -21,6 +21,7 @@
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
+#include <vector>
 namespace ActsTrk {
 
   class SeedsToTrackParamsAlg final : public AthReentrantAlgorithm {
@@ -32,7 +33,7 @@ namespace ActsTrk {
 
   private:
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::ITrackParamsEstimationTool> m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
 
@@ -40,6 +41,12 @@ namespace ActsTrk {
 
     SG::ReadHandleKey<ActsTrk::SeedContainer> m_inputSeedContainerKey{this, "InputSeedContainerKey", "", "Name of the input seed container"};
     SG::WriteHandleKey<ActsTrk::BoundTrackParametersContainer> m_outputTrackParamsCollectionKey{this, "OutputTrackParamsCollectionKey","", "Name of the output track parameters collection"};
+
+    Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), automatically determined by the param estimation tool"};
+    Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/Z boundary for using the top space point in the track parameter estimation"};
+
+    bool shouldReverseSearch(const ActsTrk::Seed& seed) const;
+
   };
 
 }

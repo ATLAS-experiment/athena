@@ -66,7 +66,7 @@ DbDomainObj::DbDomainObj(DbSession& sessionH,
 /// Destructor
 DbDomainObj::~DbDomainObj()  {
   DbPrint log( name() );
-  string dbtyp(db() ? db()->name() : string("UNKNOWN"));
+
   clearEntries();
   if ( m_session.isValid() )    {
     m_session.remove (this);

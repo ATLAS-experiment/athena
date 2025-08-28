@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRUTH_VERSIONS_TRUTHVERTEX_V1_H
@@ -43,25 +43,15 @@ namespace xAOD {
       /// @name Functions identifying the vertex in the MC record
       /// @{
 
-      /// Obsolete function
-      /// Set vertex ID code HepMC2 id == HepMC3 status, i.e. physical status.  
-      void setId( int value );
-      /// Obsolete function
-      /// Vertex ID code HepMC2 id == HepMC3 status, i.e. physical status.  
-      int id() const;
+      /// Get the vertex status
+      int status() const;
+      /// Set the vertex status
+      void setStatus( int value );
 
-      /// New function
-      /// Vertex status HepMC2 id == HepMC3 status, i.e. physical status.  
-      int status() const { return id(); }
-
-      /// New function
-      /// Set vertex status HepMC2 id == HepMC3 status, i.e. physical status.  
-      void setStatus( int value ) { setId(value); }
-
-      /// Set barcode
-      void setBarcode( int value );
-      /// Barcode
-      int barcode() const;
+      /// Get the vertex unique ID
+      int uid() const;
+      /// Set the vertex unique ID
+      void setUid( int value );
 
       /// @}
 
@@ -158,8 +148,8 @@ namespace xAOD {
    }; // class TruthVertex_v1
   inline std::ostream& operator<<(std::ostream& os, const TruthVertex_v1* v) {
     if (!v) { os << "Vtx: Empty vertex" << std::endl; return os;}
-    os << "Vtx: id=";
-    os << v->id() << " status=";
+    os << "Vtx: uid=";
+    os << v->uid() << " status=";
     os << v->status();
     os << " (x,y,z,t)=" << v->x() << "," << v->y() << "," << v->z() << "," << v->t();
     /* os << std::endl; AV:Not clear if we need a new line here */

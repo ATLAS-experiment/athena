@@ -29,7 +29,8 @@
 #include "Acts/TrackFinding/TrackStateCreator.hpp"
 
 // ActsTrk
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
@@ -67,6 +68,7 @@ namespace ActsTrk{
     ATH_CHECK(m_truthParticlesKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
     ATH_CHECK(m_actsFitter.retrieve());
+    ATH_CHECK(m_beamSpotKey.initialize());
     m_logger = makeActsAthenaLogger(this, name());
 
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
@@ -108,30 +110,44 @@ namespace ActsTrk{
 
 
   StatusCode TrackExtensionAlg::execute(const EventContext& context) const {
-    SG::ReadHandle<ActsTrk::ProtoTrackCollection> protoTracksHandle(m_protoTrackCollectionKey, context);
+    SG::ReadHandle<ActsTrk::ProtoTrackCollection> protoTracksHandle = SG::makeHandle(m_protoTrackCollectionKey, context);
+    ATH_CHECK(protoTracksHandle.isValid());
+
+    Acts::VectorTrackContainer tback;
+    Acts::VectorMultiTrajectory tsBack;
+    detail::RecoTrackContainer trackContainer(tback, tsBack);
 
     // track finding goes here
-    ActsTrk::MutableTrackContainer trackContainer;
     Acts::VectorTrackContainer trackBackend;
     Acts::VectorMultiTrajectory trackStateBackend;
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
-    std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
+
+    // Get Beam pos and make pSurface
+    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, context );
+    ATH_CHECK( beamSpotHandle.isValid() );
+    const InDet::BeamSpotData* beamSpotData = beamSpotHandle.cptr();
+    
+    // Beam Spot Position
+    Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
+                           beamSpotData->beamPos().y() * Acts::UnitConstants::mm,
+                           0 );
+    
+    // Construct a perigee surface as the target surface
+    std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(beamPos);
 
     const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
     const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
     const Acts::CalibrationContext calContext{getCalibrationContext(context)};
-
-    const auto* detectorElementToGeometryIdMap = m_trackingGeometryTool->surfaceIdMap();
- 
-    const Acts::TrackingGeometry *
-       acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
    
-    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
+    detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometryTool.get()};
+
+    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle = SG::makeHandle(m_pixelClusters, context);
     ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
     // potential TODO: filtering only certain layers
     detail::TrackFindingMeasurements measurements(1ul /* number of measurement containers*/);
-    measurements.addMeasurements(0, *pixelClustersHandle, *detectorElementToGeometryIdMap);
+    measurements.addMeasurements(0, *pixelClustersHandle, *m_trackingGeometryTool->surfaceIdMap());
     std::optional<detail::MeasurementIndex> measurementIndex;
+
     if (m_trackStatePrinter.isSet()) {
       measurementIndex.emplace(1ul);
       measurementIndex->addMeasurements(*pixelClustersHandle);
@@ -159,11 +175,11 @@ namespace ActsTrk{
     options.targetSurface = perigeeSurface.get();                  
 
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
-       *acts_tracking_geometry,
-       *detectorElementToGeometryIdMap,
+       m_trackingGeometryTool.get(),
        m_pixelCalibTool,
        m_stripCalibTool,
        m_hgtdCalibTool);
+    
     DefaultTrackStateCreator defaultTrackStateCreator{};
     defaultTrackStateCreator.sourceLinkAccessor = slAccessorDelegate;
     defaultTrackStateCreator.calibrator.template connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
@@ -171,25 +187,22 @@ namespace ActsTrk{
     options.extensions.createTrackStates.template connect<
        &DefaultTrackStateCreator
        ::createTrackStates>(&defaultTrackStateCreator);
+
     if ( not m_truthParticlesKey.empty() ) {
       auto truthHandle = SG::ReadHandle(m_truthParticlesKey, context);
       for ( auto truthParticle: *truthHandle ) {
         ATH_MSG_DEBUG("truth: eta: " << truthParticle->eta() << " phi: " << truthParticle->phi() << " pt: " << truthParticle->pt());
       }
     }
+   
     ATH_MSG_DEBUG("Size of proto tracks collection " << protoTracksHandle->size());
     for (const ActsTrk::ProtoTrack& protoTrack : *protoTracksHandle) {
       if(protoTrack.measurements.empty()) continue;
 
-      const Acts::Surface* refSurface = ActsTrk::getSurfaceOfMeasurement(*acts_tracking_geometry, *detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
-//        ActsTrk::getSurfaceOfMeasurement( *m_trackingGeometryTool->trackingGeometry(), **detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
+      const Acts::Surface* refSurface = surfAcc.get(protoTrack.measurements[0]);
 
-      auto res = m_actsFitter->fit(context, protoTrack.measurements,*protoTrack.parameters,
-                                  m_trackingGeometryTool->getGeometryContext(context).context(),
-                                  m_extrapolationTool->getMagneticFieldContext(context),
-                                  calContext,
-                                  *detectorElementToGeometryIdMap, 
-                                  refSurface);
+      auto res = m_actsFitter->fit(protoTrack.measurements, *protoTrack.parameters,
+                                   tgContext, mfContext, calContext, refSurface);
       if(!res) continue;
       if (res->size() == 0 ) continue;
       ATH_MSG_DEBUG(".......Done fit of track with "<< protoTrack.measurements.size() << " measurements");
@@ -198,6 +211,7 @@ namespace ActsTrk{
         ATH_MSG_INFO("There is not reference surface for this track");
         continue;
       }
+
       Acts::BoundTrackParameters parametersAtRefSurface( trackProxy.referenceSurface().getSharedPtr(), 
                                                           trackProxy.parameters(), 
                                                           trackProxy.covariance(),
@@ -213,7 +227,7 @@ namespace ActsTrk{
 
       ATH_MSG_DEBUG("Built " << tracksContainerTemp.size() << " tracks from it");
       for (detail::RecoTrackContainer::TrackProxy tempTrackProxy : tracksContainerTemp) {
-        ActsTrk::MutableTrackContainer::TrackProxy destTrackProxy = trackContainer.makeTrack();
+        auto destTrackProxy = trackContainer.makeTrack();
         ATH_MSG_DEBUG("Reco MTJ size " << trackStateBackend.size() );
         for ( size_t stateIndex=0; stateIndex < trackStateBackend.size(); ++stateIndex) {
           auto state = trackStateBackend.getTrackState(stateIndex);
@@ -226,13 +240,15 @@ namespace ActsTrk{
       }
     }
 
-    std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer =
-        m_tracksBackendHandlesHelper.moveToConst(
-            std::move(trackContainer),
-            m_trackingGeometryTool->getGeometryContext(context).context(),
-            context);
-    SG::WriteHandle<ActsTrk::TrackContainer> trackContainerHandle(m_trackContainerKey, context);
-    ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
+
+
+    // convert to const version
+    Acts::ConstVectorTrackContainer ctback( std::move(tback) );
+    Acts::ConstVectorMultiTrajectory ctsBack( std::move(tsBack) );
+    std::unique_ptr< ActsTrk::TrackContainer > ctrackContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(ctback), std::move(ctsBack) );
+    
+    SG::WriteHandle<ActsTrk::TrackContainer> trackContainerHandle = SG::makeHandle( m_trackContainerKey, context );
+    ATH_CHECK(trackContainerHandle.record(std::move(ctrackContainer)));
 
     return StatusCode::SUCCESS;
   }

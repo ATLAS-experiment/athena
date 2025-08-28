@@ -267,6 +267,8 @@ def egammaCaloExtrapolatorCfg(flags, name='egammaCaloExtrapolator'):
     egammaExtrapolator.SubPropagators = egammaSubPropagators
     # egamma STEP with no eloss for calo intersections
     egammaExtrapolator.STEP_Propagator = NoMatSTEP_Propagator
+    # No material effects at large
+    egammaExtrapolator.ApplyMaterialEffects = False
 
     result.setPrivateTools(egammaExtrapolator)
     return result
@@ -305,6 +307,8 @@ def MCTruthClassifierExtrapolatorCfg(flags,
 
     MCTruthExtrapolator.MaterialEffectsUpdators = MCTruthUpdators
     MCTruthExtrapolator.SubMEUpdators = MCTruthSubUpdators
+    # No material effects at large
+    MCTruthExtrapolator.ApplyMaterialEffects = False
 
     result.setPrivateTools(MCTruthExtrapolator)
     return result

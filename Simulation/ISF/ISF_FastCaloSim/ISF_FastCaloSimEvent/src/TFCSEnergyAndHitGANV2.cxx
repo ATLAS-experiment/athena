@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
@@ -8,6 +8,7 @@
 #include "CLHEP/Random/RandGauss.h"
 #include "HepPDT/ParticleData.hh"
 #include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/ParticleConstants.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitBase.h"
@@ -262,7 +263,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
           if (chain()[ichain]->InheritsFrom(
                   TFCSLateralShapeParametrizationHitBase::Class())) {
             TFCSLateralShapeParametrizationHitBase *sim =
-                (TFCSLateralShapeParametrizationHitBase *)(chain()[ichain]);
+                static_cast<TFCSLateralShapeParametrizationHitBase *>(chain()[ichain]);
             if (sim->simulate_hit(hit, simulstate, truth, extrapol) !=
                 FCSSuccess) {
               ATH_MSG_ERROR("error for "
@@ -476,8 +477,8 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
                   if (chain()[ichain]->InheritsFrom(
                           TFCSLateralShapeParametrizationHitBase::Class())) {
                     TFCSLateralShapeParametrizationHitBase *sim =
-                        (TFCSLateralShapeParametrizationHitBase
-                             *)(chain()[ichain]);
+                        static_cast<TFCSLateralShapeParametrizationHitBase
+                             *>(chain()[ichain]);
                     if (sim->simulate_hit(hit, simulstate, truth, extrapol) !=
                         FCSSuccess) {
                       ATH_MSG_ERROR(
@@ -618,7 +619,7 @@ void TFCSEnergyAndHitGANV2::test_path(const std::string &path,
   if (!truth) {
     ATH_MSG_NOCLASS(logger, "New particle");
     TFCSTruthState *t = new TFCSTruthState();
-    t->SetPtEtaPhiM(65536, 0, 0, 139.6);
+    t->SetPtEtaPhiM(65536, 0, 0, ParticleConstants::chargedPionMassInMeV);
     t->set_pdgid(pid);
     truth = t;
   }

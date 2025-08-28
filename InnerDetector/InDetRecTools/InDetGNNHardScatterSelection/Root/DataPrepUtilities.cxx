@@ -20,8 +20,8 @@ namespace {
   // We define a few structures to map variable names to type, default
   // value, etc. These are only used by the high level interface.
   //
-  typedef std::vector<std::pair<std::regex, EDMType> > TypeRegexes;
-  typedef std::vector<std::pair<std::regex, std::string> > StringRegexes;
+  using TypeRegexes = std::vector<std::pair<std::regex, EDMType>>;
+  using StringRegexes = std::vector<std::pair<std::regex, std::string>>;
 
   // Function to map the regular expressions + the list of inputs to a
   // list of variable configurations.
@@ -70,7 +70,7 @@ namespace InDetGNNHardScatterSelection {
       // factory for functions that get variables out of the vertex object
       VarFromVertex varFromVertex(const std::string& name, EDMType type,
                             const std::string& default_flag) {
-        if(default_flag.size() == 0 || name==default_flag)
+        if(default_flag.empty() || name==default_flag)
         {
           switch (type) {
             case EDMType::INT: return VertexVarGetterNoDefault<int>(name);
@@ -123,19 +123,20 @@ namespace InDetGNNHardScatterSelection {
       // type and default value-finding regexes are hardcoded for now
       TypeRegexes type_regexes = {
         {".*_isDefaults"_r, EDMType::CHAR},
-        {"sumPt2|sumPt|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, EDMType::FLOAT},
+        {"sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, EDMType::FLOAT},
         {"ntrk"_r, EDMType::INT},
-        {"(log_)?pt|abs_eta|eta|phi|energy|mass"_r, EDMType::CUSTOM_GETTER},
+        {"(log_)?pt|abs_eta|eta|phi|energy|mass|sumPt"_r, EDMType::CUSTOM_GETTER},
       };
 
       StringRegexes default_flag_regexes{
-        {"ntrk|sumPt2|sumPt|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, ""},
-        {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}}; // no default for custom cases
+        {"ntrk|sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, ""},
+        {"((log_)?pt|abs_eta|eta|phi|energy|mass|sumPt)"_r, ""}}; // no default for custom cases
 
       std::vector<HSGNNInputConfig> input_config;
       for (auto& node: config.inputs){
         std::vector<std::string> input_names;
-        for (const auto& var: node.variables) {
+        input_names.reserve(node.variables.size());
+for (const auto& var: node.variables) {
           input_names.push_back(var.name);
         }
         input_config = get_input_config(input_names, type_regexes, default_flag_regexes);
@@ -146,14 +147,16 @@ namespace InDetGNNHardScatterSelection {
       for (auto& node: config.input_sequences) {
 
         std::vector<std::string> names;
-        for (const auto& var: node.variables) {
+        names.reserve(node.variables.size());
+for (const auto& var: node.variables) {
           names.push_back(var.name);
         }
         constituent_names.emplace_back(node.name, names);
       }
 
       std::vector<ConstituentsInputConfig> constituent_configs;
-      for (auto el: constituent_names){
+      constituent_configs.reserve(constituent_names.size());
+for (const auto& el: constituent_names){
         constituent_configs.push_back(
           createConstituentsLoaderConfig(el.first, el.second));
       }

@@ -94,10 +94,7 @@ void FPGATrackSimGNNRoadMakerTool::addRoads(const std::vector<std::shared_ptr<co
     }
     
     for (const auto& hit_list : m_road_hit_list) {
-        // Temporarily do not make a road if it has more than 20 hits, there is an issue with some big roads which we do not want to work with right now.
-        if (hit_list.size() < 20) {
-            addRoad(hits, hit_list);
-        }
+        addRoad(hits, hit_list);
     }
 
     roads.reserve(m_roads.size());

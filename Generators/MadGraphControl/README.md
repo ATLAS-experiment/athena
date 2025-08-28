@@ -727,6 +727,30 @@ The bias module allows to introduce a bias function that affects the
 distribution of generated events. It is described
 [here](https://cp3.irmp.ucl.ac.be/projects/madgraph/wiki/LOEventGenerationBias).
 
+
+Recent versions of MadGraph let you point to a Fortran function file via the `custom_fcts` parameter in the run card. The same capability is now integrated into the **Athena** pipeline:
+
+1. **Place your function file** (e.g. `dummy_fct.f`) in the `jobConfig` directory of your job.
+2. **Add** the `custom_fcts` entry to the `settings` dictionary in your JobOptions (JO) and set `event_norm` to `bias`.
+
+   * Works for both **LO** and **NLO** runs.
+
+Example (JobOptions):
+
+```python
+settings = {
+    'event_norm': 'bias',
+    'custom_fcts': 'dummy_fct.f',   # Fortran function file
+}
+
+modify_run_card(process_dir=process_dir,
+                runArgs=runArgs,
+                settings=settings)
+```
+
+With these settings, `MadGraphControl` automatically resolves the absolute path and ensures MadGraph uses your custom function during event generation.
+
+
 ### Adding lifetimes
 
 If you need to add lifetimes to some of the particles in your LHE file,

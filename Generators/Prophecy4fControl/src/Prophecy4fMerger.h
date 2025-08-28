@@ -26,6 +26,7 @@
 /* ROOT */
 #include <TLorentzVector.h>
 #include "TRandom3.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 class Prophecy4fMerger{
@@ -108,8 +109,8 @@ protected:
     bool m_debug;
     TRandom3 m_rand;
     static constexpr double m_deltaM       = 3.;
-    static constexpr double m_muonMass     = 0.10566;
-    static constexpr double m_electronMass = 0.00051;
+    static constexpr double m_muonMass     = ParticleConstants::muonMassInMeV/1000.; // Convert MeV to GeV
+    static constexpr double m_electronMass = ParticleConstants::electronMassInMeV/1000.; // Convert MeV to GeV
     static constexpr double m_tauMass      = 1.777;
     static const long m_electronID      = 11;
     static const long m_muonID          = 13;

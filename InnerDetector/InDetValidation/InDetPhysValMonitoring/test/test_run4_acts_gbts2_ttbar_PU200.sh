@@ -2,14 +2,15 @@
 # art-description: Run 4 configuration, ITK only recontruction with ACTS and GBTS seeding, PU 200
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: acts-*.root
+# art-output: idpvm*.root
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_gbts_last
 # art-athena-mt: 8
 
 lastref_dir=last_results
-dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
+dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
 n_events=-1
 rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 
@@ -36,16 +37,20 @@ run () {
     return $rc
 }
 
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,Acts.+FindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+SurfaceError:1,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
-
 export ATHENA_CORE_NUMBER=4
 
 # Run Athena with ACTS fast tracking and GBTSv2 seeding
 run "Reconstruction-gbts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-    --preExec 'flags.Acts.doMonitoring=True;from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2;' \
-    --ignorePatterns "${ignore_pattern}" \
+    --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2; \
+               flags.Tracking.writeExtendedSi_PRDInfo=True; \
+               flags.Acts.doMonitoring=True; \
+               flags.Acts.doAnalysis=True; \
+               flags.Acts.doAnalysisNtuples=False; \
+               flags.DQ.useTrigger=False; \
+               flags.Output.HISTFileName='acts-analysis.gbts.root'" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.gbts.root \
     --perfmon fullmonmt \
@@ -54,7 +59,7 @@ run "Reconstruction-gbts" \
 
 reco_rc=$?
 
-mv log.RAWtoALL log.RAWtoALL.ACTS
+mv log.RAWtoALL log.RAWtoALL.GBTS
 mv acts-expert-monitoring.root acts-expert-monitoring.gbts.root
 
 if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
@@ -65,8 +70,9 @@ run "IDPVM-gbts" \
     runIDPVM.py \
     --filesInput AOD.gbts.root \
     --outputFile idpvm.gbts.root \
-    --doTightPrimary \
     --doHitLevelPlots \
+    --HSFlag All \
+    --doTechnicalEfficiency \
     --doExpertPlots \
     --OnlyTrackingPreInclude
 
@@ -79,7 +85,12 @@ fi
 run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-    --preExec 'flags.Acts.doMonitoring=True;' \
+    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
+               flags.Acts.doMonitoring=True; \
+               flags.Acts.doAnalysis=True; \
+               flags.Acts.doAnalysisNtuples=False; \
+               flags.DQ.useTrigger=False; \
+               flags.Output.HISTFileName='acts-analysis.acts.root'" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
@@ -99,6 +110,8 @@ if [ $reco_rc = 0 -o $reco_rc = 68 ]; then
       --outputFile idpvm.acts.root \
       --doTightPrimary \
       --doHitLevelPlots \
+      --HSFlag All \
+      --doTechnicalEfficiency \
       --doExpertPlots \
       --OnlyTrackingPreInclude
 fi

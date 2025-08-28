@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import with_statement, print_function
 
 from os import listdir, makedirs
 from os.path import basename, exists, join as pjoin

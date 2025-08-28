@@ -266,7 +266,7 @@ class TopoAlgoDef:
         # No additional parameters
         algoList = [
             {"otype" : "jJ",   "ocut" : 50, "olist" : "ab", "etamin" : 0,  "etamax" : 32}, # jJab
-            {"otype" : "CjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
+            {"otype" : "CjJ",  "ocut" : 20, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
             {"otype" : "SCjJ", "ocut" : 10, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # SCjJab
             {"otype" : "FjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 30, "etamax" : 49}, # FjJab
         ]
@@ -367,6 +367,12 @@ class TopoAlgoDef:
         alg.addgeneric('OutputWidth', HW.metOutputWidth)
         tm.registerTopoAlgo(alg)
 
+        # jTE - use the same widths as XE as single TE TOB
+        alg = AlgConf.jTENoSort( name = 'jTENoSort_1BC', inputs = 'jTETobs', outputs = 'jTENoSort_1BC' )
+        alg.addgeneric('InputWidth', HW.jSumEtTotalInputWidth)
+        alg.addgeneric('OutputWidth', 1)
+        alg.addgeneric('NumRegisters', 1)
+        tm.registerTopoAlgo(alg)
 
         # Decision algorithms
 
@@ -1074,13 +1080,12 @@ class TopoAlgoDef:
            
         # added for muon-jet:
         algoList = [
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU8Fab" , "otype2" : "CjJ", "ocut2": 30, "olist2" : "ab"}, #0DR04-MU8Fab-CjJ30ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ40ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU8Fab" , "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU8Fab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU3Vab" , "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU3Vab-CjJ40ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 80, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ80ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 90, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ90ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ40ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU3VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU3VFab_CjJ20ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU5VFab_CjJ20ab
         ]
         for x in algoList:
             class d:
@@ -1256,7 +1261,7 @@ class TopoAlgoDef:
         tm.registerTopoAlgo(alg)        
 
         # TODO: to be updated with phase1 met, jets
-        xemap = [{"etcut": 0, "Threlist": [ 40, 50, 55, 60, 65, 75 ]}]
+        xemap = [{"etcut": 0, "Threlist": [55, 60, 65, 75 ]}]
         for x in xemap:                
             class d:
                 pass
@@ -1692,7 +1697,7 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
         # ATR-30401
-        # topoitems will be the follwoing:
+        # topoitems will be the following:
         # 0DPHI10_jXE40delay_jJ40s
         # 0DPHI99_jXE40delay_jJ40s
         DPHI_jXE40delay_jJ40s_map = [
@@ -1728,6 +1733,9 @@ class TopoAlgoDef:
             alg.addgeneric('MaxTob1', d.MaxTob1)
             alg.addgeneric('MaxTob2', d.MaxTob2)
             alg.addgeneric('NumResultBits', len(toponames) )
+            alg.addgeneric('Delay1', d.Delay1)
+            alg.addgeneric('Delay2', d.Delay2)
+
 
             for bitId in range(len(toponames)):
                 alg.addvariable('MinET1', d.MinET1, bitId)
@@ -1735,6 +1743,77 @@ class TopoAlgoDef:
                 alg.addvariable('MinDeltaPhi', d.MinDeltaPhi, bitId)
                 alg.addvariable('MaxDeltaPhi', d.phi_thresholds[bitId]*_phi_conversion, bitId)
             tm.registerTopoAlgo(alg)
+
+        # ATR-31097
+        TeAsymmetry_map = [
+        {  
+            "algoname"  : "TeAsymmetry-jTENoSort",
+            "deltaAbsMin" : [0,10,0,0],
+            "asymFactor" : [0,0,0.2,0],
+            "asymOffset" : [0,0,0,0],
+            "maxTeProduct": [5000,10000,999999,999999],
+        }
+        ]
+
+        for x in TeAsymmetry_map:
+            class d:
+                pass
+            for k in x:
+                setattr(d,k,x[k])
+            inputList = ['jTENoSort_1BC']
+            # To update with correct names
+            toponames = []
+            for bitId in range(len(d.deltaAbsMin)):
+                toponames.append("TeAsymmetry_jTENoSort_ParamSet%d"  % (bitId))
+            
+            alg = AlgConf.TeAsymmetry( name = d.algoname, inputs = inputList, outputs =  toponames )
+            alg.addgeneric('InputWidth', 1)
+            alg.addgeneric('NumResultBits', len(toponames))
+            alg.addgeneric("Delay", 1)
+
+            for bitId in range(len(toponames)):
+                #Update with the correct algo parameters
+                alg.addvariable('deltaAbsMin', d.deltaAbsMin[bitId]*_et_conversion, bitId)  #Units of 100MeV
+                alg.addvariable('asymFactor', d.asymFactor[bitId], bitId)
+                alg.addvariable('asymOffset', d.asymOffset[bitId]*_et_conversion, bitId)   #Units of 100MeV
+                alg.addvariable('maxTeProduct', d.maxTeProduct[bitId]*_et_conversion*_et_conversion, bitId)  #Units of (100MeV)^2
+            tm.registerTopoAlgo(alg)
+        
+        #TeATIME
+        TeATIME_map = [
+        {  
+            "algoname"     : "TeATIME-jTENoSort",
+            "teFlavor"     : [1,1,1,3], # 0 = off, 1 = full jTE, 2 = central jTE, 3 = forward jTE (A+C side)
+            "combination"  : [0,1,2,1], # 0 = require both, 1 = require factor, 2 = require offset, 3 = require any of the two criteria
+            "nextBcOffset" : [10,10,10,10], # offset added to upcoming BC's jTE (in GeV, fractional values down to 100 MeV are possible). 
+                                            # The 'offset' criterion is considered as passed if this sum exceeds the current BC's jTE value,
+                                            # i.e., to require a minimum *increase* in jTE in the next BC this should be a *negative* value!
+            "nextBcFactor" : [2.5,2.5,2.5,2.5] # factor by which upcoming BC's jTE must be larger than current BC's jTE value
+        }
+        ]
+
+        for x in TeATIME_map:
+            class d:
+                pass
+            for k in x:
+                setattr(d,k,x[k])
+            inputList = ['jTENoSort_1BC']
+            # To update with correct names
+            toponames = []
+            for bitId in range(4):
+                toponames.append("TeATIME_jTENoSort_ParamSet%d"  % (bitId))
+            
+            
+            alg = AlgConf.TeATIME( name = d.algoname, inputs = inputList, outputs =  toponames )
+            alg.addgeneric('InputWidth', 1)
+            alg.addgeneric('NumResultBits', len(toponames))
+            for bitId in range(len(d.teFlavor)):
+                alg.addvariable('algoLogic', d.teFlavor[bitId] + ( d.combination[bitId] << 2 ) , bitId)  #two bit fields (of 2 bits each) merged into on FW register
+                alg.addvariable('nextBcFactor', round(d.nextBcFactor[bitId] * pow(2,8)), bitId) #integer representation of factor corresponding to 8 fractional bits
+                alg.addvariable('nextBcOffset', round(d.nextBcOffset[bitId] * _et_conversion), bitId) #converted to units of 100MeV
+            tm.registerTopoAlgo(alg)
+
+
 
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
         algolist=[
@@ -1771,6 +1850,40 @@ class TopoAlgoDef:
             alg.addvariable('DisambDRSqr', d.disamb*d.disamb*_dr_conversion*_dr_conversion, 0)
             tm.registerTopoAlgo(alg)
 
+        # AnomalyDetectionBDT muon-only anomaly trigger
+        algo = {
+            "algoname": "ADBDT-MU0s",
+            "otype1": "MU", "olist1": "s", "inputwidth1": 6, "nleading1": 3,
+            "WPList": ["Tight", "Loose"],
+            "MinET1": 0,#min muon1 threshold in GeV, the 0 sets the muon to the min TOB threshold avaiable in Topo 
+            "MinET2": 0,#min muon2 threshold in Gev 
+            "ScoreThreshold": [40, 25]
+        }
+        
+        class d:
+            pass
+        
+        for k in algo:
+            setattr(d, k, algo[k])
+            
+        toponames = [f"ADBDT-{d.nleading1}{d.otype1}0{d.olist1}-{wp}" for wp in d.WPList]
+            
+        alg = AlgConf.AnomalyDetectionBDT(
+            name=d.algoname,
+            inputs=[d.otype1 + d.olist1],
+            outputs=toponames
+        )
+        alg.addgeneric('NumResultBits', 2)
+        alg.addgeneric('MaxTob',d.nleading1) #Set the number of Tobs to 3 (leading pT 3 muons)
+
+        alg.addvariable('MinET1',d.MinET1*_et_conversion)
+        alg.addvariable('MinET2',d.MinET2*_et_conversion)
+        for bitId in range(len(toponames)):
+            alg.addvariable('ScoreThreshold', d.ScoreThreshold[bitId], bitId)
+
+        tm.registerTopoAlgo(alg)
+
+            
         #VAE-based anomaly trigger
         # output lines: 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight', 
         #               'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose'
@@ -1790,6 +1903,9 @@ class TopoAlgoDef:
               "MinET2" : 0, # eTaus
               "MinET3" : 0, # muons
               "MinET4" : 0, # jXE
+              "ScaleSqr1" : [128, 128], #corresponds to Tight and Loose WPs
+              "ScaleSqr2" : [128, 128], #corresponds to Tight and Loose WPs
+              "ScaleSqr3" : [128, 128], #corresponds to Tight and Loose WPs
               "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
         }
         class d:
@@ -1820,6 +1936,9 @@ class TopoAlgoDef:
         alg.addvariable('MinET3', d.MinET3 * _et_conversion)
         alg.addvariable('MinET4', d.MinET4 * _et_conversion)
         for bitId in range(len(toponames)):
+            alg.addvariable('ScaleSqr1', d.ScaleSqr1[bitId], bitId)
+            alg.addvariable('ScaleSqr2', d.ScaleSqr2[bitId], bitId)
+            alg.addvariable('ScaleSqr3', d.ScaleSqr3[bitId], bitId)
             alg.addvariable('AnomalyScoreThresh', d.AnomalyScoreThresh[bitId], bitId)
         tm.registerTopoAlgo(alg)
 
@@ -1875,39 +1994,6 @@ class TopoAlgoDef:
                                                                  d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
                                                                  d.otype2, str(d.ocut2) , d.olist2, str(d.nleading2) if d.olist2=="s" else ""))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'jINVM_DPHI', inputs = inputList, outputs = toponames)
-            alg.addgeneric('InputWidth1', d.inputwidth)
-            alg.addgeneric('InputWidth2', d.inputwidth)
-            alg.addgeneric('MaxTob1', d.nleading1)
-            alg.addgeneric('MaxTob2', d.nleading2)
-            alg.addgeneric('NumResultBits',  len(toponames))
-            for bitid,maxDphi in enumerate(d.maxDphiList):
-                alg.addvariable('MinET1',      get_threshold_cut(d.otype1, d.ocut1)*_et_conversion , bitid)
-                alg.addvariable('MinET2',      get_threshold_cut(d.otype2, d.ocut2)*_et_conversion , bitid)
-                alg.addvariable('MinMSqr',     d.minInvm*d.minInvm *_et_conversion*_et_conversion , bitid)
-                alg.addvariable('MaxMSqr',     _no_m_upper_threshold , bitid)  # no upper threshold
-                alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion , bitid)
-                alg.addvariable('MaxDeltaPhi', maxDphi*_phi_conversion, bitid)
-            tm.registerTopoAlgo(alg)
-
-
-        # jINVM_NFF + DPHI
-        NFFDphimap = [
-            { "itemNameMinInvm": 400, "minInvm": 640 , "minDphi": 0, "maxDphiList": [26, 24, 22, 20],
-                         "otype1" : "jJ", "ocut1" : 60, "olist1" : "s", "nleading1" : 6, "inputwidth": HW.jJetOutputWidthSort,
-                         "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
-        ]
-        for x in NFFDphimap:
-            class d:
-                pass
-            for k in x:
-                setattr (d, k, x[k])
-            inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
-            toponames=[]
-            for maxDphi in d.maxDphiList:
-                toponames.append ("%iINVM-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.itemNameMinInvm, d.minDphi, maxDphi,
-                                                                 d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
-                                                                 d.otype2, str(d.ocut2) , d.olist2, str(d.nleading2) if d.olist2=="s" else ""))
-            alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'jINVM_DPHI_NFF', inputs = inputList, outputs = toponames)
             alg.addgeneric('InputWidth1', d.inputwidth)
             alg.addgeneric('InputWidth2', d.inputwidth)
             alg.addgeneric('MaxTob1', d.nleading1)
@@ -2404,31 +2490,6 @@ class TopoAlgoDef:
             alg.addvariable('DeltaRMax', d.maxDr*d.maxDr*_dr_conversion*_dr_conversion)
             tm.registerTopoAlgo(alg)
 
- 
-        # CEP_CjJ
-        CEPmap = [
-            {"algoname": 'CEP_CjJ', "minETlist": [90, 100]}
-        ]
-        for x in CEPmap:
-            class d:
-                pass
-            for k in x:
-                setattr (d, k, x[k])
-            inputList = ['CjJs']
-            toponames=[]
-            for minET in d.minETlist:  # noqa: F821
-                toponames.append ("CEP-CjJ%is6" % (minET))     # noqa: F821 
-            alg = AlgConf.ExclusiveJets( name = d.algoname, inputs = inputList, outputs = toponames) # noqa: F821
-            alg.addgeneric('InputWidth', HW.jJetOutputWidthSort) # noqa: F821
-            alg.addgeneric('MaxTob', HW.jJetOutputWidthSort)       # noqa: F821
-            alg.addgeneric('NumResultBits',  len(toponames)) # noqa: F821
-            alg.addvariable('PtScale', 1.4*10) # noqa: F821
-            alg.addvariable('PtShift', 20*_et_conversion) # noqa: F821
-            for bitid,minET in enumerate(d.minETlist):  # noqa: F821
-                alg.addvariable('MinET1', get_threshold_cut('CjJ', minET)*_et_conversion, bitid)# noqa: F821
-                alg.addvariable('MinXi', 13600.0*_et_conversion*0.02, bitid) # noqa: F821
-                alg.addvariable('MaxXi', 13600.0*_et_conversion*0.05, bitid) # noqa: F821
-            tm.registerTopoAlgo(alg)
 
         # dphi with s+s #ATR-29784
         # Parameter ordering:

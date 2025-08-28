@@ -100,14 +100,16 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (decorateTruth=True)
     config.setOptions (decorateCaloClusterEta=True)
     config.setOptions (writeTrackD0Z0=True)
+    config.setOptions (minPt=10000.0)
     # Electrons.WorkingPoint
     config.addBlock ('Electrons.WorkingPoint')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (selectionName='loose')
     config.setOptions (forceFullSimConfig=True)
-    config.setOptions (noEffSF=True)
     config.setOptions (identificationWP='LooseBLayerLH')
-    config.setOptions (isolationWP='Loose_VarRad')
+    config.setOptions (isolationWP='Tight_VarRad')
+    config.setOptions (chargeIDSelectionRun2=True)
+    config.setOptions (addChargeMisIDSF=True)
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
@@ -172,7 +174,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
         2015: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
         2016: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
         2017: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
-        2018: ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
+        2018: ['HLT_tau25_medium1_tracktwoEF', 'HLT_tau35_medium1_tracktwoEF'],
+        2022: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
+        2023: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
     }
     config.addBlock ('TauJets.TriggerSF')
     config.setOptions (containerName='AnaTauJets')

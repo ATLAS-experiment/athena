@@ -6,6 +6,7 @@ from ActsConfig.ActsConfigFlags import SeedingStrategy
 from ActsConfig.ActsUtilities import extractChildKwargs
 from ActsInterop import UnitConstants
 from AthenaCommon.Utils.unixtools import find_datafile
+import AthenaCommon.SystemOfUnits as Units
 
 def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -20,10 +21,8 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
 
   isLRT=flags.Tracking.ActiveConfig.extension == "LargeD0"
   
-  kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
-  kwargs.setdefault("MaxGraphEdges", 1500000)   # do we want ITkTrigTrackSeedingToolStandaloneCfg definition: if flags.Acts.GbtsConnectionTableVersion == 0 else 1800000)
-  if flags.Acts.GbtsConnectionTableVersion == 0:
-    kwargs.setdefault("MatchBeforeCreate", True)
+  kwargs.setdefault("pTmin", 0.9 * Units.GeV)
+  kwargs.setdefault("MaxGraphEdges", 3000000)
   kwargs.setdefault("ConnectionFileName",
                     "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
 
@@ -59,38 +58,74 @@ def ActsPixelSeedingToolCfg(flags,
         [40, 260],
         [140, 260],
         [0, 0]])
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
+    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+        acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
+    else:
+        acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
 def ActsFastPixelSeedingToolCfg(flags,
                                 name: str = "ActsFastPixelSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
     ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
+    kwargs.setdefault("minPt", 900 * UnitConstants.MeV)
+    kwargs.setdefault("sigmaScattering", 2.)
+    kwargs.setdefault("maxPtScattering", float("inf"))
+    kwargs.setdefault("maxSeedsPerSpM", 3)
     kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
     kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
     kwargs.setdefault("maxPhiBins", 200)
     kwargs.setdefault("gridRMax", 250 * UnitConstants.mm)
     kwargs.setdefault("deltaRMax", 200 * UnitConstants.mm)
-    kwargs.setdefault("zBinsCustomLooping" , [3, 11, 4, 10, 7, 5, 9, 6, 8])
+    kwargs.setdefault("zBinsCustomLooping" , [2, 10, 3, 9, 6, 4, 8, 5, 7])
     kwargs.setdefault("rRangeMiddleSP", [
-             [40.0, 80.0],
-             [40.0, 80.0],
-             [40.0, 200.0],
-             [70.0, 200.0],
-             [70.0, 200.0],
-             [70.0, 250.0],
-             [70.0, 250.0],
-             [70.0, 250.0],
-             [70.0, 200.0],
-             [70.0, 200.0],
-             [40.0, 200.0],        
-             [40.0, 80.0],
-             [40.0, 80.0]])
+             [0.0, 0.0],
+             [60.0, 165.0],
+             [60.0, 200.0],
+             [60.0, 200.0],
+             [60.0, 260.0],
+             [60.0, 260.0],
+             [60.0, 260.0],
+             [60.0, 200.0],
+             [60.0, 200.0],
+             [60.0, 165.0],
+             [0.0, 0.0]])
+
+    kwargs.setdefault("zBinNeighborsTop", [
+      [0, 0], # -3000, -2000  
+      [-1, 0], # -2000, -1400  
+      [-1, 0], # -1400, -910
+      [-1, 0], # -910, -500 
+      [-1, 0], # -500, -250 
+      [-1, 1], # -250, 250
+      [0, 1], # 250, 500 
+      [0, 1], # 500, 910
+      [0, 1], # 910, 1400
+      [0, 1], # 1400, 2000
+      [0, 0] # 2000, 3000
+    ])
+    kwargs.setdefault("zBinNeighborsBottom", [
+      [0, 0], # -3000, -2000
+      [1, 1], # -2000, -1400      
+      [0, 1], # -1400, -910
+      [0, 1], # -910, -500
+      [0, 1], # -500, -250
+      [0, 0], # -250, 250
+      [-1, 0], # 250, 500
+      [-1, 0], # 500, 910
+      [-1, 0], # 910, 1400
+      [-1, -1], # 1400, 2000
+      [0, 0] # 2000, 3000
+    ])
+    
+    kwargs.setdefault("zBinEdges", [-3000., -2000, -1400., -910., -500., -250.,  250., 500., 910., 1400., 2000, 3000.])
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
     kwargs.setdefault("rMax", 320 * UnitConstants.mm)
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
+
+    kwargs.setdefault("deltaRMaxTopSP", 220 * UnitConstants.mm)
+    kwargs.setdefault("deltaRMaxBottomSP", 145 * UnitConstants.mm)
 
     return ActsPixelSeedingToolCfg(flags, name, **kwargs)
 
@@ -131,8 +166,11 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("zBinNeighborsBottom" , [(0,0),(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0),(0,0)])
     # Any other
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
-        
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
+
+    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+        acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
+    else:
+        acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
 def ActsPixelOrthogonalSeedingToolCfg(flags,
@@ -150,7 +188,7 @@ def ActsFastPixelOrthogonalSeedingToolCfg(flags,
     ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
 
     ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
+    kwargs.setdefault("minPt", 900 * UnitConstants.MeV)
     kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
     kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
     kwargs.setdefault("useExperimentCuts", True)
@@ -324,7 +362,10 @@ def ActsPixelSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelSeedingMonitoringToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
+    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+        acc.addEventAlgo(CompFactory.ActsTrk.GridTripletSeedingAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 
@@ -357,7 +398,10 @@ def ActsStripSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkStripSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripSeedingMonitoringToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
+    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+        acc.addEventAlgo(CompFactory.ActsTrk.GridTripletSeedingAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 
@@ -643,7 +687,7 @@ def ActsSeedToTrackCnvAlgCfg(flags,
 
   if 'TrackingGeometryTool' not in kwargs:
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
   acc.addEventAlgo(CompFactory.ActsTrk.SeedToTrackCnvAlg(name, **kwargs))
   return acc

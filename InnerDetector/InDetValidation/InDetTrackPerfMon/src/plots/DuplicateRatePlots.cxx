@@ -43,6 +43,7 @@ StatusCode IDTPM::DuplicateRatePlots::bookPlots()
 
   ATH_CHECK( retrieveAndBook( m_duplrate_vs_incl, "duplrate_vs_"+m_trackType+"_inclusive" ) );
   ATH_CHECK( retrieveAndBook( m_duplrate_vs_pt,   "duplrate_vs_"+m_trackType+"_pt" ) );
+  ATH_CHECK( retrieveAndBook( m_duplrate_vs_logPt,"duplrate_vs_"+m_trackType+"_logPt" ) );
   ATH_CHECK( retrieveAndBook( m_duplrate_vs_eta,  "duplrate_vs_"+m_trackType+"_eta" ) );
   ATH_CHECK( retrieveAndBook( m_duplrate_vs_phi,  "duplrate_vs_"+m_trackType+"_phi" ) );
   ATH_CHECK( retrieveAndBook( m_duplrate_vs_d0,   "duplrate_vs_"+m_trackType+"_d0" ) );
@@ -97,6 +98,7 @@ StatusCode IDTPM::DuplicateRatePlots::fillPlots(
   /// Fill the histograms
   ATH_CHECK( fill( m_duplrate_vs_incl,  1,  (nMatched>1), weight ) );
   ATH_CHECK( fill( m_duplrate_vs_pt,  ppt,  (nMatched>1), weight ) );
+  ATH_CHECK( fill( m_duplrate_vs_logPt,  ppt,  (nMatched>1), weight ) );
   ATH_CHECK( fill( m_duplrate_vs_eta, peta, (nMatched>1), weight ) );
   ATH_CHECK( fill( m_duplrate_vs_phi, pphi, (nMatched>1), weight ) );
   ATH_CHECK( fill( m_duplrate_vs_d0,  pd0,  (nMatched>1), weight ) );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArFCALH62004CalibCalculatorBase_H
@@ -21,7 +21,7 @@ class LArFCALH62004CalibCalculatorBase : public LArCalibCalculatorSvcImp {
 public:
   LArFCALH62004CalibCalculatorBase(const std::string& name, ISvcLocator * pSvcLocator);
   virtual StatusCode initialize() override final;
-  virtual ~LArFCALH62004CalibCalculatorBase();
+  virtual ~LArFCALH62004CalibCalculatorBase() = default;
 
   virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
                           std::vector<G4double> & energies,
@@ -29,21 +29,19 @@ public:
 
 protected:
 
-  G4double m_deltaX;
-  G4double m_deltaY;
+  Gaudi::Property<G4double> m_deltaX{this, "deltaX", 0.0};
+  Gaudi::Property<G4double> m_deltaY{this, "deltaY", 0.0};
 
-  G4int m_FCalSampling;
+  Gaudi::Property<G4int> m_FCalSampling{this, "FCalSampling", 0};
 
 private:
-
   // Energy calculator
   CaloG4::SimulationEnergies m_energyCalculator;
 
-  FCAL_ChannelMap   *m_ChannelMap;
+  FCAL_ChannelMap   *m_ChannelMap{nullptr};
 
   IRDBRecordset_ptr m_fcalMod;
-  float m_Zshift;
-
+  float m_Zshift{0.f};
 };
 
 

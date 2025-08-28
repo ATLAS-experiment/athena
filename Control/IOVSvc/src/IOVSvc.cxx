@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -859,7 +859,7 @@ IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id,
   
   std::unique_ptr<IOpaqueAddress> ioa;
   if (getRangeFromDB(id.clid(), sgKey, t, range, tag, ioa).isFailure()) {
-    ATH_MSG_ERROR( "unable to get range from db for " 
+    ATH_MSG_ERROR( "unable to get range from db for time "  << t << " clid "
                    << id.clid() << " " << sgKey );
     return StatusCode::FAILURE;
   }

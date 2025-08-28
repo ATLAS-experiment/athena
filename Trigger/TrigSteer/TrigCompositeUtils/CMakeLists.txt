@@ -17,6 +17,11 @@ atlas_add_library( TrigCompositeUtilsLib
   LINK_LIBRARIES TrigConfHLTUtilsLib CxxUtils AsgMessagingLib AsgDataHandlesLib AsgTools TrigDecisionInterface xAODBase xAODTrigger TrigConfHLTData ${extra_libs}
   PRIVATE_LINK_LIBRARIES TrigSteeringEvent )
 
+atlas_add_dictionary( ChainNameParserDict 
+   TrigCompositeUtils/ChainNameParserDict.h
+   TrigCompositeUtils/selection.xml
+   LINK_LIBRARIES TrigCompositeUtilsLib ${ROOT_LIBRARIES} )
+
 if( NOT XAOD_STANDALONE )
   atlas_add_component( TrigCompositeUtils
     TrigCompositeUtils/components/*.cxx

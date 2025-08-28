@@ -4,6 +4,7 @@
 #ifndef MUONREADOUTGEOMETRYR4_SPECTROMETERSECTOR_H
 #define MUONREADOUTGEOMETRYR4_SPECTROMETERSECTOR_H
 
+#include "AthenaBaseComps/AthMessaging.h"
 #ifndef SIMULATIONBASE
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
@@ -11,11 +12,9 @@
 #include <ActsGeometryInterfaces/GeometryDefs.h>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 
-
-#include <set>
-
 namespace Acts {
     class Volume;
+    class PlaneSurface;
 }
 namespace MuonGMR4{
     class SpectrometerSector;
@@ -38,7 +37,7 @@ namespace MuonGMR4 {
      *
      *  The spectrometer contains pointer to all chambers & readout elements that are enclosed by it. */
 
-    class SpectrometerSector {
+    class SpectrometerSector : public AthMessaging {   
         public:
             using ChamberPtr = GeoModel::TransientConstSharedPtr<Chamber>;
             using ChamberSet = std::vector<ChamberPtr>;
@@ -109,9 +108,9 @@ namespace MuonGMR4 {
                 ChamberSet chambers{};
                 /** @brief Surrouding box chamber bounds */
                 std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds{};
-                /// Transformation to the chamber volume
-                Amg::Transform3D locToGlobTrf{Amg::Transform3D::Identity()};
-
+                /// Surface in the centre of the chamber plane
+                std::shared_ptr<const Acts::PlaneSurface> surface{};
+                
                 std::vector<chamberLocation> detectorLocs{}; 
             };
 
@@ -120,6 +119,8 @@ namespace MuonGMR4 {
             /** @brief Delete the copy constructor and copy assignment */
             SpectrometerSector(const SpectrometerSector& other) = delete;
             SpectrometerSector& operator=(const SpectrometerSector& other) = delete;
+
+            ~SpectrometerSector() = default;
 
             bool operator<(const SpectrometerSector& other) const;
 
@@ -142,6 +143,8 @@ namespace MuonGMR4 {
             const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& gctx) const;
             /** @brief Returns the global -> local transformation from the ATLAS global */
             Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& gctx) const;
+            /** @brief Returns the associated surface */
+            const Acts::PlaneSurface& surface() const;
             /** @brief Returns the associated chambers with this sector */
             const ChamberSet& chambers() const;
             /** @brief Long-extend of the chamber in the x-direction at positive Y */
@@ -163,10 +166,20 @@ namespace MuonGMR4 {
             Chamber::ReadoutSet readoutEles() const;
             /// returns the list of all MDT chambers in the sector for fast navigation
             const std::vector<chamberLocation> & chamberLocations() const; 
-
+            /** @brief Returns the logic layer numbering of a given Readout Element */
+            const std::vector<unsigned int>& logicalLayerIdx(const MuonReadoutElement* reEle) const;
 
         private:
-           defineArgs m_args{};
+            defineArgs m_args{};
+
+            /** @brief Function filling the map mapping the readout elements to layer numbers */
+            std::unordered_map<const MuonReadoutElement*, std::vector<unsigned int>> fillDetLayIdCache() const;
+            /** @brief Map mapping each Readout Element to the layer numbering in the sector frame*/ 
+            const std::unordered_map<const MuonReadoutElement*, std::vector<unsigned int>> m_detLayIdCache{fillDetLayIdCache()};
+            /** @brief Helper function calculating the logic layer Id and the physical layer id */
+            Identifier computeDetLayerId(const MuonReadoutElement* rele) const;
+            /** @brief Helper function giving the number of measurement layers in a given readout ele */
+            unsigned int nLayerPerReadout (const MuonReadoutElement* rele) const;
     };
     
     std::ostream& operator<<(std::ostream& ostr,
@@ -176,7 +189,6 @@ namespace MuonGMR4 {
                              const SpectrometerSector& chamber);
 
 }
-
 
 #endif
 #endif

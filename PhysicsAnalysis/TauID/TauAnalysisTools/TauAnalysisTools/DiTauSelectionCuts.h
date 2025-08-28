@@ -112,6 +112,21 @@ private:
   virtual void fillHistogram(const xAOD::DiTauJet& xTau, TH1F& hHist) const override;
 };
 
+// class to perform ditau ID selection
+class DiTauSelectionCutOmniScore
+  : public DiTauSelectionCut
+{
+public:
+  DiTauSelectionCutOmniScore(DiTauSelectionTool* tDTST);
+  // method to add message about cut setup 
+  virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
+  // method to check if ditau passes the cut and return decision 
+  virtual bool accept(const xAOD::DiTauJet& xTau,
+                      asg::AcceptData& accept) override;
+private:
+  // method to fill control histograms
+  virtual void fillHistogram(const xAOD::DiTauJet& xTau, TH1F& hHist) const override;
+};
 
 }
 

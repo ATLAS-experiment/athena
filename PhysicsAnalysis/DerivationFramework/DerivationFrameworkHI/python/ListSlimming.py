@@ -238,7 +238,7 @@ def HION4ExtraVariablesEventShape():
 #################################################################################
 #HION5
 
-def HION5Extravariables():
+def HION5ExtraVariables():
     variables  = []
     variables += [
         ".".join(["InDetTrackParticles", field]) for field in [
@@ -331,7 +331,21 @@ def HION5AllVariables():
     variables += ["ZdcSums"]
     variables += ["ZdcTriggerTowers"]
     variables += ["PeripheralCaloCalTopoClusters"]
-    
+    variables += ["MET_Track1000", "MET_Track2000", "MET_Track3000", "MET_Track4000", "MET_Track5000"]
+
+    return variables
+
+def HION5AllTruthVariables():
+    variables  = []
+    variables += ["TruthEvents"]
+    variables += ["TruthParticles"]
+    variables += ["TruthVertices"]
+    variables += ["egammaTruthParticles"]
+    variables += ["MuonTruthParticles"]
+    variables += ["AntiKt2TruthJets"]
+    variables += ["AntiKt4TruthJets"]
+    variables += ["TruthElectrons"]
+    variables += ["TruthMuons"]
     return variables
 
 def HION5SmartCollections():
@@ -352,6 +366,41 @@ def HION5ExtraContainersTrigger():
                   "HLT_egamma_Electrons",
                   "HLT_egamma_ElectronsAux."]
     return variables    
+
+#################################################################################
+#HION7
+
+def HION7SmartCollections():
+    variables  = []
+    variables += ["EventInfo"]
+    variables += ["Electrons"]
+    variables += ["Photons"]
+    variables += ["Muons"]
+    variables += ["InDetTrackParticles"]
+
+    return variables
+
+def HION7AllVarContent():
+    variables  = []
+    variables += ["AntiKt2HIJets"]
+    variables += ["AntiKt4HIJets"]
+    variables += ["CaloSums"]
+    variables += ["ZdcModules"]
+    variables += ["PrimaryVertices"]
+    variables += ["EventInfo"]
+
+    return variables
+
+def HION7AllVarTruthContent():
+    variables  = []
+    variables += ["AntiKt2TruthJets"]
+    variables += ["AntiKt4TruthJets"]
+    variables += ["TruthEvents"]
+    variables += ["TruthParticles"]
+    variables += ["TruthVertices"]
+
+    return variables
+
 
 #################################################################################
 #HION12
@@ -622,7 +671,8 @@ def HION14TruthVariablesGeneral():
 def HION14ContentTruthParticles():
     variables = []
     variables += ["TruthParticles.pdgId"]
-    variables += ["TruthParticles.barcode"] # FIXME barcode-based
+    variables += ["TruthParticles.uid"]
+    variables += ["TruthParticles.status"]
     variables += ["TruthParticles.m"]
     variables += ["TruthParticles.e"]
     variables += ["TruthParticles.py"]

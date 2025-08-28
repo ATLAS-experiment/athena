@@ -1,3 +1,5 @@
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
 #include "../AthenaEventLoopMgr.h"
 #include "../PyAthenaEventLoopMgr.h"
 #include "../AthenaOutputStream.h"
@@ -30,6 +32,9 @@
 #include "../DecisionAlg.h"
 #include "../AthReadAlg.h"
 #include "../../test/MetaDataToolStub.h"
+#include "../MPIHiveEventLoopMgr.h"
+#include "../MPIClusterSvc.h"
+#include "../ROOTMessageFilterSvc.h"
 
 DECLARE_COMPONENT( AthenaOutputStream )
 DECLARE_COMPONENT( AthenaConditionStream )
@@ -39,6 +44,8 @@ DECLARE_COMPONENT( AthenaEventLoopMgr )
 DECLARE_COMPONENT( AthenaHiveEventLoopMgr )
 DECLARE_COMPONENT( AthenaMtesEventLoopMgr )
 DECLARE_COMPONENT( PyAthenaEventLoopMgr )
+DECLARE_COMPONENT( MPIHiveEventLoopMgr )
+DECLARE_COMPONENT( MPIClusterSvc )
 DECLARE_COMPONENT( MixingEventSelector )
 DECLARE_COMPONENT( FPEControlSvc )
 DECLARE_COMPONENT( JobIDSvc )
@@ -62,3 +69,4 @@ DECLARE_COMPONENT( Athena::DelayedConditionsCleanerSvc )
 DECLARE_COMPONENT( DecisionAlg )
 DECLARE_COMPONENT( AthReadAlg )
 DECLARE_COMPONENT( MetaDataToolStub )
+DECLARE_COMPONENT( Athena::ROOTMessageFilterSvc )

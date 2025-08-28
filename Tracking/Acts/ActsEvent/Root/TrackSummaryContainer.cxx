@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "xAODTracking/TrackSummary.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
+#include "ActsGeoUtils/SurfaceEncoding.h"
 
 // this is list of xAOD container variable names that are "hardcoded" in TrackSummary_v1
 // their compatibility is maintain ed by the unit tests: AllStaticxAODVaraiblesAreKnown
@@ -121,9 +122,10 @@ std::vector<Acts::HashedString> ActsTrk::TrackSummaryContainer::dynamicKeys_impl
   return result;
 }
 
-void ActsTrk::TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceContainer* src, const Acts::GeometryContext& geoContext) {
+void ActsTrk::TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceContainer* src) {
+  m_surfaces.reserve(src->size());
   for ( auto xAODSurfacePtr: *src) {
-    m_surfaces.push_back( decodeSurface(xAODSurfacePtr, geoContext));
+    m_surfaces.push_back( decodeSurface(xAODSurfacePtr));
   }
 }
 
@@ -169,9 +171,9 @@ ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::op
   m_decorations = std::move(other.m_decorations);
 
   //restore decorations
-  // restoreDecorations may throw a GaudiException or SG::ExcBadVarName 
+  // restoreDecorations may throw a GaudiException or SG::ExcBadVarName
   // resulting in a call to terminate() because the function is marked 'noexcept'
-  restoreDecorations(); 
+  restoreDecorations();
 
   // invalidate vector type components of 'other'
   other.m_surfaces.clear();
@@ -192,9 +194,13 @@ ActsTrk::IndexType ActsTrk::MutableTrackSummaryContainer::addTrack_impl() {
 void ActsTrk::MutableTrackSummaryContainer::removeTrack_impl(
     ActsTrk::IndexType itrack) {
   if (itrack >= m_mutableTrackBackend->size()) {
-    throw std::out_of_range("removeTrack_impl");
+    throw std::out_of_range("removeTrack_impl track backend");
+  }
+  if (itrack >= m_surfaces.size()) {
+    throw std::out_of_range("removeTrack_impl surfaces");
   }
   m_mutableTrackBackend->erase(m_mutableTrackBackend->begin() + itrack);
+  m_surfaces.erase(m_surfaces.begin() + itrack);
 }
 
 // this in fact may be a copy from other MutableTrackSymmaryContainer

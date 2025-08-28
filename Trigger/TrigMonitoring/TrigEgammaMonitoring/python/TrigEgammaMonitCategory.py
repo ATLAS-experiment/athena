@@ -16,7 +16,7 @@ def mongroupsCfg(moniAccess, data_type):
         monitoringTP_electron = list(filter(lambda x: ('L1eEM28' not in x), shifter_tp))
         
         monitoring_ph = list(filter(lambda x: ('HLT_g' in x and 'noringer' not in x), shifter_eg))
-        monitoring_photon = monitoring_ph + ['HLT_g140_loose_noringer_L1eEM26M']
+        monitoring_photon = monitoring_ph + ['HLT_g140_loose_L1eEM26M']
         monitoring_bootstrap = {
                 'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
                 'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
@@ -49,13 +49,6 @@ def mongroupsCfg(moniAccess, data_type):
                 mongroups['validation_jpsi']            = validation_jpsi
                 mongroups['validationTP_jpsiee']        = validationTP_jpsiee
                 mongroups['validationTP_electron_DNN']  = validationTP_electron_DNN
-
-
-        elif data_type is DQDataType.HeavyIon:
-                mongroups['monitoring_electron_hi'] = ['HLT_e15_etcut_ion_L1eEM15','HLT_e30_etcut_ion_L1eEM26','HLT_e15_lhloose_nogsf_ion_L1eEM15','HLT_e15_loose_nogsf_ion_L1eEM15']
-                mongroups['monitoring_electron_TP_hi'] = ['HLT_e20_lhloose_nogsf_ion_L1eEM18','HLT_e20_loose_nogsf_ion_L1eEM18']
-                mongroups['monitoring_photon_hi'] = ['HLT_g15_loose_ion_L1eEM12','HLT_g20_etcut_ion_L1eEM15','HLT_g50_loose_ion_L1eEM26']
-                mongroups['monitoring_bootstrap_hi']    = {'HLT_g18_etcut_ion_L1eEM12' : 'HLT_g18_etcut_ion_L1eEM12'}
 
         elif data_type is DQDataType.Cosmics:
                 monitoring_electron_cosmic=['HLT_e5_etcut_L1eEM5']

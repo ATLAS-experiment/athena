@@ -3,7 +3,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 import re,sys,os
-import six
 
 from future import standard_library
 standard_library.install_aliases()
@@ -67,7 +66,7 @@ if __name__=='__main__':
     for taskname in taskNames:
         matrix[taskname]=dict()
 
-    for name,outDef in six.iteritems (outDict):
+    for name,outDef in outDict.items():
         if 'ifMatch' in outDef:
             print ("\n"+name+" ["+ outDef['ifMatch'] +"]")
             for taskname in taskNames:
@@ -80,10 +79,10 @@ if __name__=='__main__':
 
  
     print ("Inverse Matrix:")
-    for tn,ops in six.iteritems (matrix):
+    for tn,ops in matrix.items():
         print (tn[:-9]+": ", end='')
         #print (" %30s :" % tn[:-9], end='')
-        for nm,s in six.iteritems (ops):
+        for nm,s in ops.items():
             if s:
                 print (nm[6:-4]+" ", end='')
                 #print ("%8s " % nm[6:-4], end='')

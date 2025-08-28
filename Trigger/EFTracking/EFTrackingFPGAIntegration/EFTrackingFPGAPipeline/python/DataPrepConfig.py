@@ -22,6 +22,12 @@ def FPGATrackSimReportingCfg(flags, name='FPGATrackSimReportingAlg',**kwargs):
 
     return acc
 
+def FPGADataFormatToolCfg(flags, name='FPGADataFormatTool', **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault('name', name)
+    acc.setPrivateTools(CompFactory.FPGADataFormatTool(**kwargs))
+    return acc
+
 def xAODClusterMakerCfg(flags, name = 'xAODClusterMaker', **kwarg):
     """Configure the xAODClusterMaker tool"""
     
@@ -94,11 +100,9 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
     return acc
 
 if __name__=="__main__":
-    from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     
     flags = initConfigFlags()
-    flags = addFPGADataPrepFlags(flags)
     
     # useful for testing -> /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root
 

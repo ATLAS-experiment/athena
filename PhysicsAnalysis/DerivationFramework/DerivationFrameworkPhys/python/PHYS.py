@@ -38,6 +38,7 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
         'MuonTPThinningToolName'              : nametag+"MuonTPThinningTool",
         'TauJetThinningToolName'              : nametag+"TauJetThinningTool",
         'TauJets_MuonRMThinningToolName'      : nametag+"TauJets_MuonRMThinningTool",
+        'DiTauThinningToolName'               : nametag+"DiTauThinningTool",
         'DiTauTPThinningToolName'             : nametag+"DiTauTPThinningTool",
         'DiTauLowPtThinningToolName'          : nametag+"DiTauLowPtThinningTool",
         'DiTauLowPtTPThinningToolName'        : nametag+"DiTauLowPtTPThinningTool",
@@ -59,7 +60,7 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
     return acc
 
 
-def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None):
+def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None, addExtraVariables=None):
     
     if TriggerListsHelper is None:
         from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
@@ -70,10 +71,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     ## Higgs augmentations - create 4l vertex
     from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
     acc.merge(HiggsAugmentationAlgsCfg(flags))
-
-    ## FTAG augmentations - run b-tagging on PFlow jets
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
 
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
@@ -141,12 +138,19 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+
+    if addExtraVariables:
+        PHYSSlimmingHelper.ExtraVariables += addExtraVariables
+
     if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
     # IFF extra content
     from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
     PHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
+
+    # boosted jet taggers
+    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore"]
 
     # Truth extra content
     if flags.Input.isMC:
@@ -157,7 +161,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
         PHYSSlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
                                               "Muons.TruthLink",
                                               "Photons.TruthLink",
-                                              "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt"]
+                                              "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.HFHadronOriginID"]
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))

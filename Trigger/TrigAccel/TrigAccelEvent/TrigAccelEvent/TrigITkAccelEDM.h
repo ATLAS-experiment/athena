@@ -105,7 +105,7 @@ namespace ITk {
     float m_pT[MAX_NUMBER_OUTPUT_SEEDS];
   } OUTPUT_SEED_STORAGE;
 
-    //B: Graph-based track seeding algorithm implementation on GPU
+  //B: Graph-based track seeding algorithm implementation on GPU
   
   static constexpr unsigned int GBTS_MAX_NUMBER_SPACEPOINTS  = 350000;
   static constexpr unsigned int GBTS_MAX_SILICON_LAYERS      = 216;
@@ -115,14 +115,14 @@ namespace ITk {
   static constexpr unsigned int GBTS_NODE_BUFFER_LENGTH      = 250;
   static constexpr unsigned int GBTS_MAX_NUM_NEIGHBOURS      = 10;
   static constexpr unsigned int GBTS_MAX_CCA_ITERATIONS      = 20;
-  static constexpr unsigned int GBTS_MAX_SHARED_STATES       = 448;
+  static constexpr unsigned int GBTS_MAX_SHARED_STATES       = 544; //544 for 96kb of shared
  
   //offsets for d_output_graph array
 	static constexpr unsigned char node1 = 0;
 	static constexpr unsigned char node2 = 1;
 	static constexpr unsigned char nNei = 2;
 	static constexpr unsigned char nei_idx_start = 3;
- 
+
   typedef struct GraphMakingInputData {
   public:
     

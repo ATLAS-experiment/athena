@@ -109,6 +109,15 @@ StatusCode SUSYObjDef_xAOD::FillPhoton(xAOD::Photon& input, float ptcut, float e
   if ( !(input.author() & (xAOD::EgammaParameters::AuthorPhoton + xAOD::EgammaParameters::AuthorAmbiguous)) )
     return StatusCode::SUCCESS;
 
+  // calibrate the photon 4-vector here only if within eta window
+  if (std::abs(input.caloCluster()->etaBE(2)) >= etacut) return StatusCode::SUCCESS;
+
+  if (m_photonBaselineCrackVeto){
+    if  ( std::abs( input.caloCluster()->etaBE(2) ) >1.37 &&  std::abs( input.caloCluster()->etaBE(2) ) <1.52) {
+      return StatusCode::SUCCESS;
+    }
+  }
+
   if (m_egammaCalibTool->applyCorrection(input)  != CP::CorrectionCode::Ok)
     ATH_MSG_ERROR("FillPhoton: EgammaCalibTool applyCorrection failed");
 
@@ -117,13 +126,7 @@ StatusCode SUSYObjDef_xAOD::FillPhoton(xAOD::Photon& input, float ptcut, float e
 
   ATH_MSG_VERBOSE( "FillPhoton: post-calibration pt=" << input.pt() );
 
-  if (input.pt() < ptcut || std::abs(input.caloCluster()->etaBE(2)) >= etacut) return StatusCode::SUCCESS;
-
-  if (m_photonBaselineCrackVeto){
-    if  ( std::abs( input.caloCluster()->etaBE(2) ) >1.37 &&  std::abs( input.caloCluster()->etaBE(2) ) <1.52) {
-      return StatusCode::SUCCESS; 
-    }
-  }
+  if (input.pt() < ptcut) return StatusCode::SUCCESS;
 
   //Object quality cut as described at https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EGammaIdentificationRun2#Object_quality_cut
   if (!input.isGoodOQ(xAOD::EgammaParameters::BADCLUSPHOTON))

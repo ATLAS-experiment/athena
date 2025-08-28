@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # This is a standalone implementation of the xAOD checking script. It just needs
 # a functional ROOT installation to work.
@@ -141,12 +141,12 @@ def printFileInfo( fileName, categoryStrings ):
         # "Decode" the name of the branch:
         brName = branch.GetName()
         # Check if this is a static auxiliary branch:
-        m = re.match( "(.*)Aux\..*", branch.GetName() )
+        m = re.match( r"(.*)Aux\..*", branch.GetName() )
         if m:
             brName = m.group( 1 )
             pass
         # Check if this is a dynamic auxiliary branch:
-        m = re.match( "(.*)AuxDyn\..*", branch.GetName() )
+        m = re.match( r"(.*)AuxDyn\..*", branch.GetName() )
         if m:
             brName = m.group( 1 )
             pass

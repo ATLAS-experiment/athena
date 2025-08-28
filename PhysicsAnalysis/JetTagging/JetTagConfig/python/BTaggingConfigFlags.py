@@ -59,7 +59,7 @@ def calibrationTag(flags):
 
 
 def saveSv1(prevFlags):
-    return prevFlags.Common.ProductionStep is ProductionStep.Derivation or prevFlags.GeoModel.Run >= LHCPeriod.Run4
+    return prevFlags.GeoModel.Run >= LHCPeriod.Run4
 
 
 def runOldSecVrtSecIncl(prevFlags):
@@ -89,16 +89,19 @@ def getNNs(flags):
     # But this *should* be cleaned up at some point
     # Note also, reco tests failing due to leptonID missing, so for now don't run taggers unless derivation
     # https://gitlab.cern.ch/atlas/athena/-/merge_requests/77764#note_9063625
-    gn3_paths = [
+    gn3v00_paths = [
         "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
         "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
         "BTagging/20250213/GN3MuonsV00/antikt4empflow/network.onnx", # Tracks+Muons
         "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
-    ] if isRun3Derivation(flags) else [   
-        "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
-        "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
-     ]
-
+    ] if isRun3Derivation(flags) else []
+    gn3v01_paths = [
+        "BTagging/20250527/GN3PflowMuonsChargeV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow+Charge
+        "BTagging/20250527/GN3PflowMuonsElectronsHybridV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow+Electrons+Hybrid
+        "BTagging/20250527/GN3V01/antikt4empflow/network.onnx", # Tracks+PFlow+Muons+Charge+Electrons+Hybrid
+    ] if isRun3Derivation(flags) else []
+    # Combine the paths for GN3v00 and GN3v01 models
+    gn3_paths = gn3v00_paths + gn3v01_paths
     return {
         'AntiKt4EMPFlowJets': [
             {
@@ -180,13 +183,12 @@ def createBTaggingConfigFlags():
     btagcf.addFlag("BTagging.GNNVertexFitter", False)
 
     # a flag to enable legacy BTagging
-    btagcf.addFlag("BTagging.EnableLegacyBTagging", True)
+    btagcf.addFlag("BTagging.EnableLegacyBTagging", False)
 
     # (multifold) NN trainings, each jet collection maps to a list of
     # dicts. The dict has several keys:
     #  - folds: list of NNs to run
     #  - remapping (optional): any variable remapping
     btagcf.addFlag("BTagging.NNs", getNNs)
-    
 
     return btagcf

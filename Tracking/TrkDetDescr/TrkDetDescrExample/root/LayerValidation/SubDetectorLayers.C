@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LayerValidationTree.h"
@@ -63,36 +63,37 @@ void SubDetectorLayers(TString& fileName,
 
 
 
-   TFile* oneFile = TFile::Open(fileName);
-   if (oneFile){
-       std::cout << " [m] File loading successful ! " << std::endl;
-        
-           TIter next(oneFile->GetListOfKeys());
-           TKey* key = 0;
-           while (key=(TKey*)next()){
-              TString treeName  = key->GetName();
-              TString treeTitle = key->GetTitle();
-              // only go on if it is a layer validation Tree
-              if (treeTitle.Contains(subdet) && treeName.Contains("Layer")){
-                  // screen output
-                  std::cout << " [m] Got the Tree : " << treeName << " | " << treeTitle << std::endl;
-                  // get the TTree
-                  TTree* currentTree = (TTree*)oneFile->Get(treeName);
-                  if (currentTree){
-                      subdetTrees[numSubdetTrees] = currentTree;
-                      numSubdetTrees++;
-                }
-              }
-            }
-      
+  TFile* oneFile = TFile::Open(fileName);
+  if (oneFile){
+    std::cout << " [m] File loading successful ! " << std::endl;
+    TIter next(oneFile->GetListOfKeys());
+    TKey* key = 0;
+    while (key=(TKey*)next()){
+      TString treeName  = key->GetName();
+      TString treeTitle = key->GetTitle();
+      // only go on if it is a layer validation Tree
+      if (treeTitle.Contains(subdet) && treeName.Contains("Layer")){
+        // screen output
+        std::cout << " [m] Got the Tree : " << treeName << " | " << treeTitle << std::endl;
+        // get the TTree
+        TTree* currentTree = (TTree*)oneFile->Get(treeName);
+        if (currentTree){
+          subdetTrees[numSubdetTrees] = currentTree;
+          numSubdetTrees++;
+        }
       }
+    }
+  } else {
+    std::cout << " [m] File loading FAILED ! " << std::endl;
+    exit(1);
+  }
 
 
    // get two or three rows depending on the number of trees
    int dividerOne = numSubdetTrees/9 + 2;
        dividerOne = singlePlot ? 1 : dividerOne;
    
-
+   // cppcheck-suppress zeroDiv
    int dividedPlusOne = numSubdetTrees/dividerOne+1;
        dividedPlusOne = singlePlot ? 2 : dividedPlusOne;   
 

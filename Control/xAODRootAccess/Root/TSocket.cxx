@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -81,7 +81,7 @@ namespace xAOD {
       server.sin_port = sport;
 
       // Connect to the address:
-      if( ::connect( m_socket, ( struct sockaddr* ) &server,
+      if( ::connect( m_socket, reinterpret_cast<const sockaddr*>( &server),
                      sizeof( server ) ) < 0 ) {
          m_socket = -1;
          return StatusCode::FAILURE;

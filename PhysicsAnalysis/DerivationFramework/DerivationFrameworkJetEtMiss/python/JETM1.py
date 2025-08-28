@@ -253,7 +253,7 @@ def JETM1Cfg(flags):
         JETM1SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
         JETM1SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
-        JETM1SlimmingHelper.ExtraVariables += ["TruthVertices.barcode.z"]
+        JETM1SlimmingHelper.ExtraVariables += ["TruthVertices.uid.z"]
 
     JETM1SlimmingHelper.AppendToDictionary.update({'Kt4UFOCSSKEventShape':'xAOD::EventShape',
                                                    'Kt4UFOCSSKEventShapeAux':'xAOD::EventShapeAuxInfo',

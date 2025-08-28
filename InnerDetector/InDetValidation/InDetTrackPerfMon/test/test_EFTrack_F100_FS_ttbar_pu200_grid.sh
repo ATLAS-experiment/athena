@@ -1,6 +1,7 @@
 #!/bin/bash
 # art-description: Nightly test to compare C-100 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
+# art-memory: 9126
 # art-include: main/Athena
 # art-output: IDTPM.*.root
 # art-output: *.json
@@ -15,7 +16,7 @@
 pipelineName='F100'
 SampleName='ttbar_pu200'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
 OutSampleName="${pipelineName}_FS.${SampleName}"
-TrkCollName='FPGATrackParticles'
+TrkCollName='InDetTrackParticles'
 referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/'
 referenceName="C000_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"

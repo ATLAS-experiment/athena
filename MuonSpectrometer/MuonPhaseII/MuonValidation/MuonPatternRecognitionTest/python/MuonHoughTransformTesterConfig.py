@@ -8,6 +8,8 @@ if __name__=="__main__":
                                             action='store_true')
     parser.add_argument("--writeSpacePoints", help="If set to true, the spacepoints in the bucket are saved to disk",
                                               default=False, action='store_true')
+    parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
+                                              default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(noSTGC=True)
  
@@ -21,7 +23,9 @@ if __name__=="__main__":
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.PerfMon.doFullMonMT = True
+    flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
+
     flags.Muon.doFastMMDigitization = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
   

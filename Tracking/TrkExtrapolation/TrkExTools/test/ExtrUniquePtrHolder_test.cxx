@@ -28,15 +28,16 @@ int main() {
     auto uniq0 = std::make_unique<int>(0);
     // Try to get what is there
     auto nothere = cache.m_ptr.move(uniq0.get());
-    std::cout << "ptr not in the cache so nullptr  : " << nothere.get()
-              << std::endl;
+    std::cout << "ptr not in the cache so == nullptr : "
+              << (nothere.get() == nullptr) << std::endl;
     // Now  properly pushed
     Trk::CacheOwnedPtr<int> ptr1 = cache.m_ptr.push(std::move(uniq0));
     // Alias
     cache.m_anotherPtr = ptr1;
     // some time later things can be set to nullptr
     ptr1 = nullptr;
-    std::cout << "Cache contrains :" << *cache.m_anotherPtr << std::endl;
+    std::cout << "Cache contains ptr to int with value : "
+              << *cache.m_anotherPtr << std::endl;
     cache.m_anotherPtr = nullptr;
     // And then point to something else
     auto uniq1 = std::make_unique<int>(1);
@@ -47,19 +48,21 @@ int main() {
     Trk::CacheOwnedPtr<int> ptr2 = cache.m_ptr.push(std::move(uniq2));
 
     // The values we got back
-    std::cout << "Cache contrains ptr with value " << *ptr1 << std::endl;
-    std::cout << "Cache contrains ptr with valus " << *ptr2 << std::endl;
+    std::cout << "Cache contains ptr to int with value : " << *ptr1
+              << std::endl;
+    std::cout << "Cache contains ptr to int with value : " << *ptr2
+              << std::endl;
 
     // Let's try to release some meaningless things
     int value = 4;
     auto meaningless1 = cache.m_ptr.move(&value);
-    std::cout << "ptr not in the cache so nullptr  : " << meaningless1.get()
-              << std::endl;
+    std::cout << "ptr not in the cache so == nullptr : "
+              << (meaningless1.get() == nullptr) << std::endl;
 
     auto randomUnique = std::make_unique<int>(1);
     auto meaningless2 = cache.m_ptr.move(randomUnique.get());
-    std::cout << "ptr not in the cache so nullptr  : " << meaningless2.get()
-              << std::endl;
+    std::cout << "ptr not in the cache so == nullptr : "
+              << (meaningless2.get() == nullptr) << std::endl;
 
     std::cout << "print what the vector holds : [ ";
     for (const auto& i : cache.m_ptr.m_elements) {
@@ -73,8 +76,8 @@ int main() {
 
     // We should not re-find this  as got released
     auto alreadycleaned = cache.m_ptr.move(ptr1);
-    std::cout << "Not there since is moved out so nullptr : "
-              << alreadycleaned.get() << std::endl;
+    std::cout << "Not there since moved out so == nullptr : "
+              << (alreadycleaned.get() == nullptr) << std::endl;
   }
   // The cache is out of scope
   std::cout << "Client gets : " << *clientPtr1 << std::endl;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -46,29 +46,9 @@ ofstream outfile2("status.txt");
 
 MixingEventSelector::MixingEventSelector(const string& name, ISvcLocator* svc) :
   base_class(name,svc),
-  m_helperTools(this),
-  m_trigList(), m_pCurrentTrigger(m_trigList.end()),
-  m_eventPos(0), 
-  m_pEventStore( "StoreGateSvc", name ),
-  m_atRndmSvc("AtRndmGenSvc", name),
-  m_randomStreamName("MixingEventSelectorStream"),
-  m_chooseRangeRand(nullptr)
+  m_pCurrentTrigger(m_trigList.end()),
+  m_pEventStore( "StoreGateSvc", name )
 {
-  declareProperty("TriggerList", m_triggerListProp,
-		  "list of triggers (streams) to be used. Format is SelectorType/SelectorName:firstEventToUse:lastEventToUse. One assumes events are consecutively numbered.");
-  m_triggerListProp.declareUpdateHandler(&MixingEventSelector::setUpTriggerList, this);
-  declareProperty("OutputRunNumber", m_outputRunNumber=123456789);
-  declareProperty("EventNumbers", m_eventNumbers, 
-		  "list of event numbers to be used for output stream. If list empty or not long enough, event numbers are assigned consucutively after last one in list");
-  declareProperty("StreamStatusFileName", m_statusFileName=string(),
-		  "Name of the file recording the last event used and how many were available for each stream. Default is to produce no file." ); //no out
-  declareProperty("MergedEventInfoKey", 
-		  m_mergedEventInfoKey=string("MergedEventInfo"),
-		  "StoreGate key for output (merged) event info object. Default is MergedEventInfo ");
-  declareProperty("RndmGenSvc", m_atRndmSvc, "IAtRndmGenSvc controlling the order with which events are takes from streams");
-  declareProperty("RndmStreamName", m_randomStreamName, "IAtRndmGenSvc stream used as engine for our random distributions");   
-  declareProperty("HelperTools", m_helperTools, "a collection of selector tools");
-
 }
 
 MixingEventSelector::~MixingEventSelector() { 
@@ -89,24 +69,23 @@ MixingEventSelector::initialize() {
     return StatusCode::FAILURE;
   }
   //flat distribution in [0,1] range
-  m_chooseRangeRand = new CLHEP::RandFlat(*(collEng), 0.0, 1.0);
+  m_chooseRangeRand = std::make_unique<CLHEP::RandFlat>(*(collEng), 0.0, 1.0);
 
-  StatusCode sc= m_helperTools.retrieve();
-  std::vector<ToolHandle<IAthenaSelectorTool> >::iterator 
-    i(m_helperTools.begin()), iE(m_helperTools.end());
-  while (sc.isSuccess() && (i != iE)) sc = (*i++)->postInitialize();
+  ATH_CHECK( m_helperTools.retrieve() );
+  for (ToolHandle<IAthenaSelectorTool>& tool : m_helperTools) {
+    ATH_CHECK( tool->postInitialize() );
+  }
 
-  return sc;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode
 MixingEventSelector::finalize() {
   ATH_MSG_DEBUG ("Finalizing " << name());
 
-  StatusCode sc(StatusCode::SUCCESS);
-  std::vector<ToolHandle<IAthenaSelectorTool> >::iterator 
-    i(m_helperTools.begin()), iE(m_helperTools.end());
-  while (i != iE) ((*i++)->preFinalize()).ignore();
+  for (ToolHandle<IAthenaSelectorTool>& tool : m_helperTools) {
+    tool->preFinalize().ignore();
+  }
 
   const std::string& fname(m_statusFileName.value());
   ofstream outfile(fname.c_str());
@@ -118,10 +97,7 @@ MixingEventSelector::finalize() {
     ATH_MSG_WARNING("unable to open trigger list status file " << fname);
   }
 
-  m_helperTools.release().ignore();
-
-  return sc;
-
+  return StatusCode::SUCCESS;
 }
 
 

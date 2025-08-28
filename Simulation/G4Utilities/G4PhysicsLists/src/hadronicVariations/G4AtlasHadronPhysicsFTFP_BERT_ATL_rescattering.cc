@@ -230,7 +230,7 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_rescattering::ConstructProcess()
   tpdata->theAntiBaryon->Build();
 
   // --- Neutrons ---
-    tpdata->xsNeutronInelasticXS = (G4NeutronInelasticXS*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronInelasticXS::Default_Name());
+  tpdata->xsNeutronInelasticXS = static_cast<G4NeutronInelasticXS*>(G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronInelasticXS::Default_Name()));
   G4PhysListUtil::FindInelasticProcess(G4Neutron::Neutron())->AddDataSet(tpdata->xsNeutronInelasticXS);
 
   G4HadronicProcess* capture = 0;
@@ -249,7 +249,7 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_rescattering::ConstructProcess()
 #endif
     pmanager->AddDiscreteProcess(capture);
   }
-  tpdata->xsNeutronCaptureXS = (G4NeutronCaptureXS*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronCaptureXS::Default_Name());
+  tpdata->xsNeutronCaptureXS = static_cast<G4NeutronCaptureXS*>(G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronCaptureXS::Default_Name()));
   capture->AddDataSet(tpdata->xsNeutronCaptureXS);
   capture->RegisterMe(new G4NeutronRadCapture());
 }

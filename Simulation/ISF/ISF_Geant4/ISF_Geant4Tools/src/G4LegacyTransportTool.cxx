@@ -6,11 +6,12 @@
 #include "G4LegacyTransportTool.h"
 
 //package includes
-#include "G4AtlasAlg/G4AtlasRunManager.h"
-#include "G4AtlasAlg/G4AtlasActionInitialization.h"
-#include "ISFFluxRecorder.h"
-
 #include "AthenaKernel/RNGWrapper.h"
+#include "CxxUtils/checker_macros.h"
+#include "G4AtlasAlg/G4AtlasRunManager.h"
+#include "G4AtlasTools/G4AtlasActionInitialization.h"
+#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
+#include "ISFFluxRecorder.h"
 
 // ISF classes
 #include "ISF_Event/ISFParticle.h"
@@ -19,6 +20,7 @@
 // Athena classes
 #include "AtlasDetDescr/AtlasRegionHelper.h"
 #include "GeneratorObjects/McEventCollection.h"
+#include "HitManagement/HitCollectionMap.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/PrimaryParticleInformation.h"
 
@@ -54,7 +56,7 @@ static std::once_flag finalizeOnceFlag;
 iGeant4::G4LegacyTransportTool::G4LegacyTransportTool(const std::string& type,
                                           const std::string& name,
                                           const IInterface*  parent )
-  : ISF::BaseSimulatorTool(type, name, parent)
+  : ISF::BaseSimulatorG4Tool(type, name, parent)
 {
   //declareProperty("KillAllNeutrinos",      m_KillAllNeutrinos=true);
   //declareProperty("KillLowEPhotons",       m_KillLowEPhotons=-1.);
@@ -116,16 +118,20 @@ void iGeant4::G4LegacyTransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
     throw std::runtime_error("Could not initialize ATLAS PhysicsListSvc!");
   }
   m_physListSvc->SetPhysicsList();
+  ATH_MSG_INFO( "retireving the Detector Construction tool" );
+  if(m_detConstruction.retrieve().isFailure()) {
+    throw std::runtime_error("Could not initialize ATLAS DetectorConstruction!");
+  }
 
   m_pRunMgr->SetRecordFlux( m_recordFlux, std::make_unique<ISFFluxRecorder>() );
   m_pRunMgr->SetLogLevel( int(msg().level()) ); // Synch log levels
-  m_pRunMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
-  m_pRunMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
+  m_pRunMgr->SetDetConstructionTool( m_detConstruction.get() );
   m_pRunMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
   m_pRunMgr->SetQuietMode( m_quietMode );
   std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
     std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
   m_pRunMgr->SetUserInitialization(actionInitialization.release());
+  m_pRunMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
 
   G4UImanager *ui = G4UImanager::GetUIpointer();
 
@@ -167,9 +173,11 @@ void iGeant4::G4LegacyTransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
     rm->RunInitialization();
   }
 
-  ATH_MSG_INFO( "retireving the Detector Geometry Service" );
-  if(m_detGeoSvc.retrieve().isFailure()) {
-    throw std::runtime_error("Could not initialize ATLAS DetectorGeometrySvc!");
+  ATH_MSG_INFO("Initializing " << m_physicsInitializationTools.size() << " physics initialization tools");
+  for(auto& physicsTool : m_physicsInitializationTools) {
+    if (physicsTool->initializePhysics().isFailure()) {
+      throw std::runtime_error("Failed to initialize physics with tool " + physicsTool.name());
+    }
   }
 
   if(m_userLimitsSvc.retrieve().isFailure()) {
@@ -182,7 +190,7 @@ void iGeant4::G4LegacyTransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
       throw std::runtime_error("Failed dynamic_cast!! this is not a G4VModularPhysicsList!");
     }
 #if G4VERSION_NUMBER >= 1010
-    std::vector<std::string>& parallelWorldNames=m_detGeoSvc->GetParallelWorldNames();
+    std::vector<std::string>& parallelWorldNames=m_detConstruction->GetParallelWorldNames();
     for (auto& it: parallelWorldNames) {
       thePhysicsList->RegisterPhysics(new G4ParallelWorldPhysics(it,true));
     }
@@ -236,7 +244,10 @@ void iGeant4::G4LegacyTransportTool::finalizeOnce()
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::simulate(const EventContext& ctx, ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
+StatusCode iGeant4::G4LegacyTransportTool::simulate(
+    const EventContext& ctx, ISF::ISFParticle& isp,
+    ISF::ISFParticleContainer& secondaries,
+    McEventCollection* mcEventCollection, std::shared_ptr<HitCollectionMap> hitCollections) {
 
   // give a screen output that you entered Geant4SimSvc
   ATH_MSG_VERBOSE( "Particle " << isp << " received for simulation." );
@@ -245,7 +256,8 @@ StatusCode iGeant4::G4LegacyTransportTool::simulate(const EventContext& ctx, ISF
   // wrap the given ISFParticle into a STL vector of ISFParticles with length 1
   // (minimizing code duplication)
   const ISF::ISFParticleVector ispVector(1, &isp);
-  StatusCode success = this->simulateVector(ctx, ispVector, secondaries, mcEventCollection);
+  StatusCode success = this->simulateVector(ctx, ispVector, secondaries,
+                                            mcEventCollection, hitCollections);
   ATH_MSG_VERBOSE( "Simulation done" );
 
   // Geant4 call done
@@ -253,16 +265,28 @@ StatusCode iGeant4::G4LegacyTransportTool::simulate(const EventContext& ctx, ISF
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::simulateVector(const EventContext& ctx, const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection*) {
+StatusCode iGeant4::G4LegacyTransportTool::simulateVector(
+    const EventContext& ctx, const ISF::ISFParticleVector& particles,
+    ISF::ISFParticleContainer& secondaries,
+    McEventCollection* mcEventCollection, std::shared_ptr<HitCollectionMap> hitCollections,
+    McEventCollection*) {
 
   ATH_MSG_DEBUG (name() << ".simulateVector(...) : Received a vector of " << particles.size() << " particles for simulation.");
   /** Process ParticleState from particle stack */
-  auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());
-  m_inputConverter->ISF_to_G4Event(*inputEvent, particles,
-                                   genEvent(mcEventCollection));
+  // Lambda prevents using the unique_ptr 
+  bool abort = [&] ATLAS_NOT_THREAD_SAFE {
+    auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+    eventInfo->SetHitCollectionMap(hitCollections);
 
-  ATH_MSG_DEBUG("Calling ISF_Geant4 ProcessEvent");
-  bool abort = m_pRunMgr->ProcessEvent(inputEvent.release());
+    auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());
+    inputEvent->SetUserInformation(eventInfo.release());
+
+    m_inputConverter->ISF_to_G4Event(*inputEvent, particles,
+                                    genEvent(mcEventCollection));
+
+    ATH_MSG_DEBUG("Calling ISF_Geant4 ProcessEvent");
+    return m_pRunMgr->ProcessEvent(inputEvent.release());
+  }();
 
   if (abort) {
     ATH_MSG_WARNING("Event was aborted !! ");
@@ -306,8 +330,8 @@ StatusCode iGeant4::G4LegacyTransportTool::simulateVector(const EventContext& ct
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::setupEvent(const EventContext& ctx)
-{
+StatusCode iGeant4::G4LegacyTransportTool::setupEvent(
+    const EventContext& ctx, HitCollectionMap& hitCollections) {
   ATH_MSG_DEBUG ( "setup Event" );
 
   // Set the RNG to use for this event. We need to reset it for MT jobs
@@ -315,8 +339,7 @@ StatusCode iGeant4::G4LegacyTransportTool::setupEvent(const EventContext& ctx)
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName, ctx );
   G4Random::setTheEngine(rngWrapper->getEngine(ctx));
-
-  ATH_CHECK(m_senDetTool->BeginOfAthenaEvent());
+  ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(hitCollections));
 
   m_nrOfEntries++;
   if (m_doTiming) m_eventTimer->Start();
@@ -328,8 +351,8 @@ StatusCode iGeant4::G4LegacyTransportTool::setupEvent(const EventContext& ctx)
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::releaseEvent(const EventContext& ctx)
-{
+StatusCode iGeant4::G4LegacyTransportTool::releaseEvent(
+    const EventContext& ctx, HitCollectionMap& hitCollections) {
   ATH_MSG_DEBUG ( "release Event" );
   /** @todo : strip hits of the tracks ... */
 
@@ -367,7 +390,7 @@ StatusCode iGeant4::G4LegacyTransportTool::releaseEvent(const EventContext& ctx)
                  avgTimePerEvent<<" +- "<<std::setprecision(4) << sigma);
   }
 
-  ATH_CHECK(m_senDetTool->EndOfAthenaEvent());
+  ATH_CHECK(m_senDetTool->EndOfAthenaEvent(hitCollections));
   ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
 
   return StatusCode::SUCCESS;

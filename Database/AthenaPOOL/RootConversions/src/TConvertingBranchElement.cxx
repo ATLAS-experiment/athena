@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -940,12 +940,12 @@ Int_t TConvertingBranchElement::GetEntry(Long64_t entry, Int_t getall)
       Int_t bufbegin = buffer->Length();
 
       // Suppress false positive seen with gcc.
-#if __GNUC__ >= 11 && __GNUC__ <= 13
+#if __GNUC__ >= 11 && __GNUC__ <= 14
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
       (this->*fReadLeaves) (*buffer);
-#if __GNUC__ >= 11 && __GNUC__ <= 13
+#if __GNUC__ >= 11 && __GNUC__ <= 14
 # pragma GCC diagnostic pop
 #endif
 
@@ -1001,7 +1001,7 @@ void TConvertingBranchElement::ReadLeavesCollectionConverting(TBuffer& b)
    }
    fNdata = n;
 
-   R__PushCache onfileObject(((TBufferFile&)b),fOnfileObject,n);   
+   R__PushCache onfileObject((static_cast<TBufferFile&>(b)),fOnfileObject,n);
 
    if (!fObject) {
       return;
@@ -1082,7 +1082,7 @@ void TConvertingBranchElement::ReadLeavesMemberBranchCountConverting(TBuffer& b)
       return;
    }
 
-   R__PushCache onfileObject(((TBufferFile&)b),fOnfileObject,1);
+   R__PushCache onfileObject((static_cast<TBufferFile&>(b)),fOnfileObject,1);
    // If not a TClonesArray or STL container master branch
    // or sub-branch and branch inherits from tobject,
    // then register with the buffer so that pointers are

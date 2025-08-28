@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/Root/AuxElement.h
@@ -30,8 +30,8 @@ class AuxElementData
   : public AuxVectorData
 {
 public:
-  virtual size_t size_v() const { return 1; }
-  virtual size_t capacity_v() const { return 1; }
+  virtual size_t size_v() const override { return 1; }
+  virtual size_t capacity_v() const override { return 1; }
 };
 
 
@@ -580,14 +580,7 @@ void AuxElement::makePrivateStore1 (const AuxElement* other,
 void AuxElement::clearAux()
 {
   if (!m_container) return;
-  if (!m_container->hasStore()) return;
-  if (!m_container->hasNonConstStore())
-    throw SG::ExcConstAuxData ("clearAux", SG::null_auxid);
-
-  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
-  for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {
-    r.clear (auxid, *container(), index(), 1);
-  }
+  clearAuxHelper (*container(), index());
 }
 
 
@@ -605,55 +598,10 @@ void AuxElement::clearAux()
  * aux data items for this object are cleared.)
  */
 void AuxElement::copyAux (const ConstAuxElement& other,
-                          [[maybe_unused]] bool warnUnlocked /*= false*/)
+                          bool warnUnlocked /*= false*/)
 {
   if (!m_container) return;
-  if (!m_container->hasStore()) return;
-  if (!m_container->hasNonConstStore())
-    throw SG::ExcConstAuxData ("copyAux");
-
-  const SG::AuxVectorData* ocont = other.container();
-
-  if (!ocont || !ocont->hasStore()) {
-    this->clearAux();
-    return;
-  }
-
-  size_t oindex = other.index();
-  SG::auxid_set_t other_ids = ocont->getAuxIDs();
-#ifndef XAOD_STANDALONE
-  SG::auxid_set_t other_decors = ocont->getDecorIDs();
-#endif
-
-  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
-
-  SG::AuxVectorData& cont = *container();
-  for (SG::auxid_t auxid : other_ids) {
-#ifndef XAOD_STANDALONE
-    if (other_decors.test (auxid)) {
-      // Don't copy decorations --- another thread may be modifying them.
-      other_ids.reset (auxid);
-      // Warn if we skip a decoration (except for mcEventWeights,
-      // for which this is expected).
-      if (warnUnlocked && r.getName(auxid) != "mcEventWeights") {
-        std::ostringstream ss;
-        ss << "skipped unlocked decoration " << r.getName(auxid)
-           << " (" << auxid << ")";
-        ATHCONTAINERS_WARNING("copyAux", ss.str());
-      }
-    }
-    else
-#endif
-    if (!r.isLinked (auxid)) {
-      r.copy (auxid, cont, index(), *ocont, oindex, 1);
-    }
-  }
-
-  for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {
-    if (!other_ids.test (auxid)) {
-      r.clear (auxid, cont, index(), 1);
-    }
-  }
+  copyAuxHelper (*container(), index(), other, warnUnlocked);
 }
 
 
@@ -672,29 +620,74 @@ void AuxElement::copyAux (const ConstAuxElement& other,
  * aux data items for this object are cleared.)
  */
 void AuxElement::copyAux (const AuxElement& other,
-                          [[maybe_unused]] bool warnUnlocked /*= false*/)
+                          bool warnUnlocked /*= false*/)
 {
   if (!m_container) return;
-  if (!m_container->hasStore()) return;
-  if (!m_container->hasNonConstStore())
+  copyAuxHelper (*container(), index(), other, warnUnlocked);
+}
+#endif
+
+
+
+/**
+ * @brief Clear all aux data associated with an element.
+ * @param container Container of the element.
+ * @param index Index of this element within the container.
+ *
+ * If the associated aux data is const, this throws @c ExcConstAuxData.
+ */
+void AuxElement::clearAuxHelper (AuxVectorData& container, size_t index)
+{
+  if (!container.hasStore()) return;
+  if (!container.hasNonConstStore()) {
+    throw SG::ExcConstAuxData ("clearAux", SG::null_auxid);
+  }
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  for (SG::auxid_t auxid : container.getWritableAuxIDs()) {
+    r.clear (auxid, container, index, 1);
+  }
+}
+
+
+/**
+ * @brief Copy aux data from another object.
+ * @param container Container of the element.
+ * @param index Index of this element within the container.
+ * @param other The object from which to copy.
+ * @param warnUnlocked If true, then warn when we skip unlocked decorations.
+ *
+ * If the associated aux data is const, this throws @c ExcConstAuxData.
+ *
+ * All aux data items from @c other are copied to this object.
+ * Any aux data items associated with this object that are not present
+ * in @c other are cleared.  (If @c other has no aux data, then all
+ * aux data items for this object are cleared.)
+ */
+void AuxElement::copyAuxHelper (AuxVectorData& container,
+                                size_t index,
+                                const ConstAuxElement& other,
+                                [[maybe_unused]] bool warnUnlocked)
+{
+  if (!container.hasStore()) return;
+  if (!container.hasNonConstStore())
     throw SG::ExcConstAuxData ("copyAux");
 
   const SG::AuxVectorData* ocont = other.container();
 
   if (!ocont || !ocont->hasStore()) {
-    this->clearAux();
+    AuxElement::clearAuxHelper (container, index);
     return;
   }
 
-  size_t oindex = other.index();
-  SG::auxid_set_t other_ids = ocont->getAuxIDs();
 #ifndef XAOD_STANDALONE
-  SG::auxid_set_t other_decors = ocont->getDecorIDs();
+  const SG::auxid_set_t& other_decors = ocont->getDecorIDs();
 #endif
+  SG::auxid_set_t other_ids = ocont->getAuxIDs();
 
+  size_t oindex = other.index();
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
-  AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
 #ifndef XAOD_STANDALONE
     if (other_decors.test (auxid)) {
@@ -712,13 +705,81 @@ void AuxElement::copyAux (const AuxElement& other,
     else
 #endif
     if (!r.isLinked (auxid)) {
-      r.copy (auxid, cont, index(), *ocont, oindex, 1);
+      r.copy (auxid, container, index, *ocont, oindex, 1);
     }
   }
 
-  for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {
+  for (SG::auxid_t auxid : container.getWritableAuxIDs()) {
     if (!other_ids.test (auxid)) {
-      r.clear (auxid, cont, index(), 1);
+      r.clear (auxid, container, index, 1);
+    }
+  }
+}
+
+
+#ifdef ATHCONTAINERS_R21_COMPAT
+/**
+ * @brief Copy aux data from another object.
+ * @param container Container of the element.
+ * @param index Index of this element within the container.
+ * @param other The object from which to copy.
+ * @param warnUnlocked If true, then warn when we skip unlocked decorations.
+ *
+ * If the associated aux data is const, this throws @c ExcConstAuxData.
+ *
+ * All aux data items from @c other are copied to this object.
+ * Any aux data items associated with this object that are not present
+ * in @c other are cleared.  (If @c other has no aux data, then all
+ * aux data items for this object are cleared.)
+ */
+void AuxElement::copyAuxHelper (AuxVectorData& container,
+                                size_t index,
+                                const AuxElement& other,
+                                [[maybe_unused]] bool warnUnlocked)
+{
+  if (!container.hasStore()) return;
+  if (!container.hasNonConstStore())
+    throw SG::ExcConstAuxData ("copyAux");
+
+  const SG::AuxVectorData* ocont = other.container();
+
+  if (!ocont || !ocont->hasStore()) {
+    AuxElement::clearAuxHelper (container, index);
+    return;
+  }
+
+#ifndef XAOD_STANDALONE
+  const SG::auxid_set_t& other_decors = ocont->getDecorIDs();
+#endif
+  SG::auxid_set_t other_ids = ocont->getAuxIDs();
+
+  size_t oindex = other.index();
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+
+  for (SG::auxid_t auxid : other_ids) {
+#ifndef XAOD_STANDALONE
+    if (other_decors.test (auxid)) {
+      // Don't copy decorations --- another thread may be modifying them.
+      other_ids.reset (auxid);
+      // Warn if we skip a decoration (except for mcEventWeights,
+      // for which this is expected).
+      if (warnUnlocked && r.getName(auxid) != "mcEventWeights") {
+        std::ostringstream ss;
+        ss << "skipped unlocked decoration " << r.getName(auxid)
+           << " (" << auxid << ")";
+        ATHCONTAINERS_WARNING("copyAux", ss.str());
+      }
+    }
+    else
+#endif
+    if (!r.isLinked (auxid)) {
+      r.copy (auxid, container, index, *ocont, oindex, 1);
+    }
+  }
+
+  for (SG::auxid_t auxid : container.getWritableAuxIDs()) {
+    if (!other_ids.test (auxid)) {
+      r.clear (auxid, container, index, 1);
     }
   }
 }

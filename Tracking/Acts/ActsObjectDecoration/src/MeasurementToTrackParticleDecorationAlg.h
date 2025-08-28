@@ -21,7 +21,7 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "Acts/Definitions/Units.hpp"
 #include "ActsEvent/TrackContainer.h"
@@ -60,7 +60,7 @@ namespace ActsTrk {
       
     private:
       
-      ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+      PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
       
       SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticlesKey {
 	this, "TrackParticleKey", "", "Input track particle collection"};

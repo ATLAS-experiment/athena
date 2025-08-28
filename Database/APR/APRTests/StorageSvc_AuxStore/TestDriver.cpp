@@ -38,7 +38,7 @@ static const int nObjects = 10;
 
 class TestClassNoDict {
 public:
-  TestClassNoDict(int v=12345) { _val=v; };
+  explicit TestClassNoDict(int v=12345) { _val=v; };
   int _val;
 };
 
@@ -228,7 +228,7 @@ TestDriver::testReading(const string& testTypeID)
   }
 
   // Fetch the objects in the container.
-  pool::DbSelect selectionObject("");
+  pool::DbSelect selectionObject;
   sc = storageExplorer->select( *fd, containerToken->contID(), selectionObject );
   int iObject = 0;
   if ( sc.isSuccess() ) {

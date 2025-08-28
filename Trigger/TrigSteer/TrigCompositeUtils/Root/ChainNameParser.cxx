@@ -63,12 +63,14 @@ namespace ChainNameParser {
             else
                 return xAODType::Photon;
         }
-        else if (signature == "j")
+        else if (signature == "j" or signature == "dispjet")
             return xAODType::Jet;
         else if (signature == "mu")
             return xAODType::Muon;
         else if (signature == "tau")
             return xAODType::Tau;
+        else if (signature == "isotrk")
+            return xAODType::TrackParticle;
         else
             return xAODType::Other;
     }
@@ -162,6 +164,7 @@ namespace ChainNameParser {
         }
         else if (next == m_end)
         {
+            m_current.legParts.emplace_back(m_itr, next);
             // Setting the iterator to the end
             m_itr = m_end;
             return true;
@@ -188,30 +191,57 @@ namespace ChainNameParser {
     const std::vector<std::string> &allSignatures()
     {
         const static std::vector<std::string> signatures{
-            "e", "g", "j", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb",
-            "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp"
+            "e", "g", "j", "dispjet", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb", "hi", "eb",
+            "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp", "distrk", 
+            "hitdvjet", "isotrk", "dedxtrk", "l1topoPh1debug", "caloclustermon", "fslrt",
+            "beamspot", "cosmic", "timeburner", "mistimemonj400", "larsupercellmon", "larnoiseburst",
+            "acceptedevts", "larpsall", "larpsallem", "idcalib", "metcalo", "mettrk", 
         };
         return signatures;
     }
 
+    const std::vector<std::string> &allSignaturePostfixQualifiers()
+    {
+        const static std::vector<std::string> postfixQualifiers{
+            "noL1", "vtx", "c", "C", "f", "a"
+        };
+        return postfixQualifiers;
+    }
+
+    const std::set<std::string> &singleLegIdentifiers()
+    {
+        const static std::set<std::string> singleLegIDs{
+            "noalg", "acceptedevts"
+        };
+        return singleLegIDs;
+    }
+
     std::string legHeadPattern()
     {
-        return "(\\d*)("+join(allSignatures(), "|")+")(\\d*)"+"(noL1|c|f|a)?";
+        // Pattern looks like an expanded version of "(\d*)(e|g|j|mu|tau|xe)(\d*)(noL1|vtx|c|f|a)?";
+        // i.e. between 0-inf digits, followed by a signature, followed by another 0-inf digits, optionally followed by 0-1 a postfix qualifiers
+        return "(\\d*)("+join(allSignatures(), "|")+")(\\d*)"+"("+join(allSignaturePostfixQualifiers(), "|")+")?";
     }
 
     std::vector<int> multiplicities(const std::string &chain)
     {
         std::vector<int> multiplicities;
-        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
+        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr) {
             multiplicities.push_back(itr->multiplicity);
+            if (singleLegIdentifiers().count(itr->signature) == 1)
+                return multiplicities;
+        }
         return multiplicities;
     }
 
     std::vector<std::string> signatures(const std::string &chain)
     {
         std::vector<std::string> signatures;
-        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
+        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr) {
             signatures.push_back(itr->signature);
+            if (singleLegIdentifiers().count(itr->signature) == 1)
+                return signatures;
+        }
         return signatures;
     }
 

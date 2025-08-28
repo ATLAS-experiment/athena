@@ -23,7 +23,7 @@ namespace columnar
     /// class.
 
 
-    template<ContainerId CI = ContainerId::eventInfo,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::eventInfo,typename CM=ColumnarModeDefault>
     class EventTypeAccessor final
     {
       ColumnAccessor<CI,uint32_t,CM> m_eventTypeBitmaskAcc;

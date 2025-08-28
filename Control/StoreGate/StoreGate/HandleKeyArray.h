@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_HANDLEKEYARRAY_H
@@ -91,7 +91,7 @@ namespace SG {
     /**
      * @brief return the type (Read/Write/Update) of handle
      */
-    Gaudi::DataHandle::Mode mode() const { return MODE; }
+    virtual Gaudi::DataHandle::Mode mode() const override { return MODE; }
 
     /**
      * @brief create a vector of Handles from the HandleKeys

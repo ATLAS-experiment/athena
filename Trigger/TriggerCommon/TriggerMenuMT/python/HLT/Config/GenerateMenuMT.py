@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from typing import Optional
 import importlib, re, string
@@ -83,6 +83,7 @@ class GenerateMenuMT(metaclass=Singleton):
         self.sigDicts = {}
 
         self.chainDefModule = {}   # Generate[SIG]ChainDefs module for each SIGnature
+        self.defaultFlagsForSignature = {}
 
 
     # Define which signatures (folders) are required for each slice
@@ -403,10 +404,24 @@ class GenerateMenuMT(metaclass=Singleton):
             if currentSig in self.availableSignatures:
                 try:
                     log.debug("[__generateChainConfigs] Trying to get chain config for %s", currentSig)
-                    if currentSig in ['Electron', 'Photon', 'Muon', 'Tau', 'Bphysics'] :
-                        chainPartConfig, perSig_lengthOfChainConfigs = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict, perSig_lengthOfChainConfigs)
+                    if currentSig in self.defaultFlagsForSignature:
+                        sigFlags = self.defaultFlagsForSignature[currentSig]
                     else:
-                        chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict)
+                        try:
+                            sigFlags = self.chainDefModule[currentSig].prepareDefaultSignatureFlags(flags)
+                        except AttributeError:
+                            log.debug("prepareDefaultSignatureFlags not present")
+                            sigFlags = flags
+                        except Exception as e:
+                            log.error(f"Unexpected error invoking prepareDefaultSignatureFlags {e}")
+                            sigFlags = flags
+                            
+                        self.defaultFlagsForSignature[currentSig] = sigFlags
+                    
+                    if currentSig in ['Electron', 'Photon', 'Muon', 'Tau', 'Bphysics'] :
+                        chainPartConfig, perSig_lengthOfChainConfigs = self.chainDefModule[currentSig].generateChainConfigs(sigFlags, chainPartDict, perSig_lengthOfChainConfigs)
+                    else:
+                        chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(sigFlags, chainPartDict)
                         if currentSig == 'Test' and isinstance(chainPartConfig, tuple):
                             chainPartConfig = chainPartConfig[0]
                 except Exception:
@@ -478,9 +493,10 @@ class GenerateMenuMT(metaclass=Singleton):
 
         # Configure event building strategy
         eventBuildType = mainChainDict['eventBuildType']
+        TLAEventBuildTypes = ('PhysicsTLA', 'FTagPEBTLA', 'EgammaPEBTLA', 'DarkJetPEBTLA')
         if eventBuildType:
             try:
-                if 'PhysicsTLA' in eventBuildType:
+                if any(ebtype in eventBuildType for ebtype in TLAEventBuildTypes):
                     log.debug("Adding TLA Step for chain %s", mainChainDict['chainName'])
                     TLABuildingSequences.addTLAStep(flags, theChainConfig, mainChainDict)
                 log.debug('Configuring event building sequence %s for chain %s', eventBuildType, mainChainDict['chainName'])
@@ -580,8 +596,13 @@ def generateMenuMT(flags):
 
     # Generate all chains configuration
     finalListOfChainConfigs = menu.generateAllChainConfigs(flags)
-
+    
+    checkNumberOfLegs = [chain.checkNumberOfLegs() for chain in finalListOfChainConfigs]
+    if 0 in checkNumberOfLegs:
+        log.error('There is a chain with unexpected number of legs. Revisit your configuration')
+    
     log.info('Number of configured chains: %d', len(finalListOfChainConfigs))
+
     from TriggerMenuMT.HLT.Config import MenuComponents
     if len(MenuComponents._CustomComboHypoAllowed)> _maxAllowedCustomCH:
         log.error(f'Found {len(MenuComponents._CustomComboHypoAllowed)} ComboHypo algorithms  violating the one-CH-per-step rule, only {_maxAllowedCustomCH} are allowed (which are BLS ComboHypos). This is the list of current violations: {MenuComponents._CustomComboHypoAllowed}. Please consolidate your choice of ComboHypo, by checking that it is able to handle decisions internally; if yes eventually increase the limit set by _maxAllowedCustomCH, after discussing with experts')
@@ -614,6 +635,9 @@ def generateMenuMT(flags):
     from TriggerMenuMT.HLT.Config.Validation.CheckCPSGroups import checkCPSGroups
     checkCPSGroups(HLTMenuConfig.dictsList())
 
+    log.info("Checking that all chains streamed in express have a signature or detctor monGroup")
+    from TriggerMenuMT.HLT.Config.Validation.CheckMonGroups import checkMonGroups
+    checkMonGroups(HLTMenuConfig.dictsList())
 
     # Cleanup menu singletons to allow garbage collection (ATR-28855)
     GenerateMenuMT.clear()
@@ -668,7 +692,4 @@ def makeHLTTree(flags, chainConfigs):
     from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
     generateDefaultMonitoringJSON(flags, HLTMenuConfig.dictsList())
 
-
-    from AthenaCommon.CFElements import checkSequenceConsistency 
-    checkSequenceConsistency(steps)
     return acc, CFseq_list

@@ -57,6 +57,9 @@ public:
   float getCalibModuleSum(int side);
   float getCalibModuleSumErr(int side);
 
+  float getNLCalibModuleSum(int side);
+  float getNLCalibModuleSumErr(int side);
+
   float getUncalibModuleSum(int side);
   float getUncalibModuleSumErr(int side);
 
@@ -115,8 +118,12 @@ private:
   std::unique_ptr<ZDCDataAnalyzer> initializePbPb2023();
   std::unique_ptr<ZDCDataAnalyzer> initializepp2024();
   std::unique_ptr<ZDCDataAnalyzer> initializePbPb2024();
+  std::unique_ptr<ZDCDataAnalyzer> initializeOONeNe2025();
+  std::unique_ptr<ZDCDataAnalyzer> initializepO2025();
+  std::unique_ptr<ZDCDataAnalyzer> initializepO2025B();
   std::unique_ptr<ZDCDataAnalyzer> initializeInjectorpp2024();
   std::unique_ptr<ZDCDataAnalyzer> initializeInjectorPbPb2024();
+  std::unique_ptr<ZDCDataAnalyzer> initializeInjectorpOOONeNe2025();
   std::unique_ptr<ZDCDataAnalyzer> initializeMonteCarloPbPb2023();
 
   StatusCode configureNewRun(unsigned int runNumber);
@@ -199,6 +206,7 @@ private:
   // ZDC
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmplitude{this, "ZdcModuleAmplitude", "", "ZDC module amplitude"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibEnergy{this, "ZdcModuleCalibEnergy", "", "ZDC module calibrated energy"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleNLCalibEnergy{this, "ZdcModuleNLCalibEnergy", "", "ZDC module NL calibrated energy"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibTime{this, "ZdcModuleCalibTime", "", "ZDC module calibrated time"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleStatus{this, "ZdcModuleStatus", "", "ZDC module fit status"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleTime{this, "ZdcModuleTime", "", "ZDC module time"};
@@ -229,7 +237,10 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumUncalibSumErr{this, "ZdcSumUncalibSumErr", "", "ZDC side uncalibrated sum error"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumCalibEnergy{this, "ZdcSumCalibEnergy", "", "ZDC side calibrated energy"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumCalibEnergyErr{this, "ZdcSumCalibEnergyErr", "", "ZDC side calibrated energy error"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumNLCalibEnergy{this, "ZdcSumNLCalibEnergy", "", "ZDC side NL calibrated energy"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumNLCalibEnergyErr{this, "ZdcSumNLCalibEnergyErr", "", "ZDC side NL calibrated energy error"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumFinalEnergy{this, "ZdcSumFinalEnergy", "", "ZDC side final energy"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumFinalEnergyErr{this, "ZdcSumFinalEnergyErr", "", "ZDC side final energy error"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumAverageTime{this, "ZdcSumAverageTime", "", "ZDC side average time"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumStatus{this, "ZdcSumStatus", "", "ZDC side status"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumModuleMask{this, "ZdcSumModuleMask", "", "ZDC side module mask"};

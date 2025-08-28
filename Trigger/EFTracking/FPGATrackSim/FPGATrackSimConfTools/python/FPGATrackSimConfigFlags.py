@@ -14,6 +14,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
     cf.addFlag('doMultiTruth', True)
+    cf.addFlag('SetTruthParametersForTracks', -1)
     cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
     cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
@@ -30,6 +31,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('oldRegionDefs', False)
     cf.addFlag('phiShift', 0.0)
     cf.addFlag('minSpacePlusPixel', 3)
+    cf.addFlag('dropUnpairedIfSP', False)
     cf.addFlag('baseName', '')
     cf.addFlag('CheckGood2ndStage', True)
     cf.addFlag('Is2ndStage', False)
@@ -39,8 +41,9 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('secondTracking', True)
     cf.addFlag('layerStudyStage', 0)
     cf.addFlag('doOverlapRemoval', True)
+    cf.addFlag('doOverlapRemovalBetweenRegions', True)    
     cf.addFlag('clustering', 1)
-    cf.addFlag('LorentzAngleShift', -1)
+    cf.addFlag('LorentzAngleShift', 2)
     cf.addFlag('bankDir', '')
     cf.addFlag('slicesFile', 'eventSelectionSlices/v1.0/slices.txt')
     cf.addFlag('spacePoints', True)
@@ -49,23 +52,30 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('loglevel', AthenaCommon.Constants.INFO)
     cf.addFlag('msgLimit',-1)
     cf.addFlag('singleTrackSample',  True)
-    cf.addFlag('FakeNNonnxFile1st', 'banks_9L/v0.20/ClassificationHT_v5.onnx')
-    cf.addFlag('FakeNNonnxFile2nd', 'banks_9L/v0.20/ClassificationHT_v5.onnx')
-    cf.addFlag('ExtensionNNVolonnxFile', 'banks_9L/v0.20/HT_detector_v6_3.onnx')
-    cf.addFlag('ExtensionNNHitonnxFile', 'banks_9L/v0.20/Ath_Extrap_v51_6_superBig_0_outsideIN.onnx')
-    cf.addFlag('ParamNNonnxFile1st', 'banks_9L/v0.20/ParamEstimationHT_v5.onnx')
-    cf.addFlag('ParamNNonnxFile2nd', 'banks_9L/v0.20/ParamEstimationHT_v5.onnx')
+    cf.addFlag('FakeNNonnxFile1st', 'NN/1stStage/v0.11/Class_5Hits_V007')
+    cf.addFlag('FakeNNonnxFile2nd', 'NN/2ndStage/v0.11/Class_13Hits_V007')
+    cf.addFlag('ExtensionNNVolonnxFile', 'NN/2ndStage/v0.11/NNPathfinderVol_4Hits_V011')
+    cf.addFlag('ExtensionNNHitonnxFile', 'NN/2ndStage/v0.11/NNPathfinderHit_4Hits_V011')
+    cf.addFlag('ParamNNonnxFile1st', 'NN/1stStage/v0.11/Param_5Hits_V004')
+    cf.addFlag('ParamNNonnxFile2nd', 'NN/2ndStage/v0.11/Param_13Hits_V007') 
     cf.addFlag('doNNPathFinder', False)
-    cf.addFlag('windowR', [20])
-    cf.addFlag('windowZ', [20])
+    cf.addFlag('NNCartesianCoordinates', False)
+    cf.addFlag('windowRScaling', 1.0)
+    cf.addFlag('windowPhiScaling', 1.0)
+    cf.addFlag('windowZScaling', 1.0)
     cf.addFlag('lowPtvalueR', -1)
+    cf.addFlag('lowPtvaluePhi', -1)    
     cf.addFlag('lowPtvalueZ', -1)
     cf.addFlag('lowPtWindowRScaling', 1.0)
+    cf.addFlag('lowPtWindowPhiScaling', 1.0)    
     cf.addFlag('lowPtWindowZScaling', 1.0)
     cf.addFlag('missedHitRScaling', -1.0)
+    cf.addFlag('missedHitPhiScaling', -1.0)    
     cf.addFlag('missedHitZScaling', -1.0)
-    cf.addFlag('maxBranches', -1)
-    cf.addFlag('hitThreshold', 10)
+    cf.addFlag('maxBranches', [2])
+    cf.addFlag('hitThreshold', 2)
+    cf.addFlag('varyingThreshold', True)
+    cf.addFlag('varyingHitThresholds', [])
 
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -84,6 +94,18 @@ def createFPGATrackSimConfigFlags():
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createGenScanFPGATrackSimConfigFlags
         return createGenScanFPGATrackSimConfigFlags()
     cf.addFlagsCategory("GenScan", __httGenScanFlags, prefix=True )
+    
+    def __httSecondStageFlags():
+        """Additional function delays import"""
+        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createSecondStageFPGATrackSimConfigFlags
+        return createSecondStageFPGATrackSimConfigFlags()
+    cf.addFlagsCategory("SecondStage", __httSecondStageFlags, prefix=True )
+
+    def __httSecondStageFlags():
+        """Additional function delays import"""
+        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createSecondStageFPGATrackSimConfigFlags
+        return createSecondStageFPGATrackSimConfigFlags()
+    cf.addFlagsCategory("SecondStage", __httSecondStageFlags, prefix=True )
 
     def __httDev21_02_15Flags():
         """Additional function delays import"""
@@ -101,14 +123,17 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('doEDMConversion', False)
     cf.addFlag('convertUnmappedHits', False)
     cf.addFlag('writeToAOD', False)
+    cf.addFlag('writeClustersToAOD', False)
     cf.addFlag('writeOfflPRDInfo', False)
-
+    cf.addFlag('broadErrors', False)
 
     # Monitoring
     cf.addFlag('writeAdditionalOutputData', True)
+    cf.addFlag('writeOutputEventLimit', -1)
+    cf.addFlag('readOfflineObjects', True)
 
     # ACTS Tracking
-    cf.addFlag('runCKF',True)
+    cf.addFlag('runCKF',False)
     cf.addFlag('useFPGATruthTrackMatching',False)
     return cf
 
@@ -164,6 +189,8 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('localMaxWindowSize', 0)
     cf.addFlag('roadSliceOR', False)
     cf.addFlag('fieldCorrection', True)
+    cf.addFlag('addAllHits',False)
+    cf.addFlag('detectorZoneWindows', False)
     cf.addFlag('phiMin', 0.0)
     cf.addFlag('phiMax', 0.0)
     cf.addFlag('xBins', 216)
@@ -178,7 +205,6 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('hitExtendX', [])
 
     cf.addFlag('doMajority', 1)
-
     cf.addFlag('doTracking', False)
     cf.addFlag('outputHitTxt', False)
 
@@ -208,11 +234,11 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doDeltaGPhis', False)
     cf.addFlag('chi2cut', 9)
     cf.addFlag('useVaryingChi2Cut', False)
+    cf.addFlag('fitFromRoad', True)
 
     # second stage fitting
     cf.addFlag('secondStage', False)
     cf.addFlag('secondChi2Cut', 36)
-    cf.addFlag('useVaryingWindow', False) #can be removed once we optimize windows
 
     # fast monitoring
     cf.addFlag('fastMon', False)
@@ -337,6 +363,10 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('layerMapFile','')
     cf.addFlag('noCuts',False)
 
+    cf.addFlag('filterInBin', False)
+    cf.addFlag('phiChi2Weight', 1.0)
+    cf.addFlag('etaChi2Weight', 1.0)
+
     # These are used by the layer study, to avoid the need for Cuts_step0.
     # They are only used in the layer study if initialLayerStudy is set to True
     cf.addFlag('initialLayerStudy', False)
@@ -348,6 +378,13 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
 
+    return cf
+
+def createSecondStageFPGATrackSimConfigFlags():
+    cf = createBasicFPGATrackSimConfigFlags()
+    cf.name = 'SecondStage'
+    cf.addFlag('CutFile', "Cuts_step1_2ndStage")
+    cf.addFlag('LayerMapFile', "")
     return cf
 
 class graphTool(FlagEnum):
@@ -373,14 +410,15 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("moduleMapTol",0.0000000001) # 1e-10
     cf.addFlag("moduleMapPath",'')
     cf.addFlag("metricLearningR",0.1)
-    cf.addFlag("metricLearningMaxN", 50)
+    cf.addFlag("metricLearningMaxN", 512)
     cf.addFlag("MLModelPath",'')
     cf.addFlag("GNNModelPath",'')
     cf.addFlag("roadMakerTool", roadMakerTool.ConnectedComponents, type=roadMakerTool)
     cf.addFlag("edgeScoreCut",0.8)
     cf.addFlag("doGNNRootOutput",False)
     cf.addFlag("doGNNTracking",False)
-
+    cf.addFlag("nInputsGNN",9)
+    
     return cf
 
 #####################################################################

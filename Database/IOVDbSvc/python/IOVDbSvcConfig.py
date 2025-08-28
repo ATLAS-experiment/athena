@@ -57,9 +57,14 @@ def IOVDbSvcCfg(flags, **kwargs):
     result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)
 
     # Set up POOLSvc with appropriate catalogs
-    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg, AthenaPoolCnvSvcCfg
+    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg
     result.merge(PoolSvcCfg(flags, withCatalogs=True))
-    result.merge(AthenaPoolCnvSvcCfg(flags))
+    if flags.MP.UseSharedReader or flags.MP.UseSharedWriter:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+        result.merge(AthenaPoolSharedIOCnvSvcCfg(flags))
+    else:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        result.merge(AthenaPoolCnvSvcCfg(flags))
     result.addService(CompFactory.CondSvc())
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 
@@ -230,12 +235,12 @@ _dblist = {
 }
 
 
-def addOverride(flags, folder, tag, db=None):
-    """Add a tag override for the specified folder"""
+def addOverride(flags, folder, tag, tagType="tag", db=None):
+    """Add xml override for the specified folder (folder-level tag, forceRunNumber, ...)"""
     suffix = ''
     if db:
         suffix = f' <db>{db}</db>'
-    return IOVDbSvcCfg(flags, overrideTags=(f'<prefix>{folder}</prefix> <tag>{tag}</tag>{suffix}',))
+    return IOVDbSvcCfg(flags, overrideTags=(f'<prefix>{folder}</prefix> <{tagType}>{tag}</{tagType}>{suffix}',))
 
 
 def _extractFolder(folderString):

@@ -27,7 +27,9 @@ tauTriggerChainsSF = {
     2015: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
     2016: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
     2017: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
-    2018: ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
+    2018: ['HLT_tau25_medium1_tracktwoEF', 'HLT_tau35_medium1_tracktwoEF'],
+    2022: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
+    2023: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
 }
 
 # Example cuts used for event selection algorithm test
@@ -59,7 +61,8 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                         geometry=None, autoconfigFromFlags=None, noSystematics=None,
                         onlyNominalOR=False,  forceEGammaFullSimConfig=False,
                         returnConfigSeq=False,
-                        bleedingEdge=False) :
+                        bleedingEdge=False # Enabled for CI tests running on new derivations from derivation CI output
+                        ) :
 
     largeRJets = True
 
@@ -122,8 +125,8 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
     configSeq.setOptionValue ('.recalibratePhyslite', False)
 
-    configSeq += config.makeConfig( 'Jets.JVT',
-        containerName='AnaJets' )
+    configSeq += config.makeConfig( 'Jets.JVT' )
+    configSeq.setOptionValue ('.containerName', 'AnaJets')
 
     # disabling flavor tagging for Run 4, as the configuration just
     # refuses to work on that
@@ -131,15 +134,15 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
         btagger = "GN2v01"
         btagWP = "FixedCutBEff_65"
-        configSeq += config.makeConfig( 'Jets.FlavourTagging',
-                                        containerName='AnaJets',
-                                        selectionName='ftag' )
+        configSeq += config.makeConfig( 'Jets.FlavourTagging' )
+        configSeq.setOptionValue ('.containerName', 'AnaJets')
+        configSeq.setOptionValue ('.selectionName', 'ftag')
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)
         configSeq.setOptionValue ('.saveScores', 'All')
 
-        configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
-                                        containerName='AnaJets.baselineJvt')
+        configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF' )
+        configSeq.setOptionValue ('.containerName', 'AnaJets.baselineJvt')
         configSeq.setOptionValue ('.btagger', btagger)
 
     if largeRJets :
@@ -152,72 +155,75 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
     # Include, and then set up the electron analysis algorithm sequence:
     likelihood = True
-    configSeq += config.makeConfig ('Electrons',
-        containerName='AnaElectrons' )
+    configSeq += config.makeConfig ('Electrons')
+    configSeq.setOptionValue ('.containerName', 'AnaElectrons')
     configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.decorateCaloClusterEta', True)
     configSeq.setOptionValue ('.writeTrackD0Z0', True)
     configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += config.makeConfig ('Electrons.WorkingPoint',
-        containerName='AnaElectrons',
-        selectionName='loose')
+    configSeq.setOptionValue ('.minPt', electronMinPt)
+    configSeq += config.makeConfig ('Electrons.WorkingPoint')
+    configSeq.setOptionValue ('.containerName', 'AnaElectrons')
+    configSeq.setOptionValue ('.selectionName', 'loose')
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
-    configSeq.setOptionValue ('.noEffSF', geometry is LHCPeriod.Run2)
     if likelihood:
         configSeq.setOptionValue ('.identificationWP', 'LooseBLayerLH')
     else:
         configSeq.setOptionValue ('.identificationWP', 'LooseDNN')
-    configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
+    configSeq.setOptionValue ('.isolationWP', 'Tight_VarRad')
+    configSeq.setOptionValue ('.chargeIDSelectionRun2', True)
+    configSeq.setOptionValue ('.addChargeMisIDSF', geometry is LHCPeriod.Run2)
 
-    configSeq += config.makeConfig ('Electrons.IFFClassification',
-        containerName='AnaElectrons')
-    configSeq += config.makeConfig ('Electrons.MCTCClassification',
-        containerName='AnaElectrons')
+    configSeq += config.makeConfig ('Electrons.IFFClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaElectrons')
+    configSeq += config.makeConfig ('Electrons.MCTCClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaElectrons')
     configSeq.setOptionValue ('.prefix', 'truth_')
 
-    configSeq += config.makeConfig ('Electrons.PtEtaSelection',
-        containerName='AnaElectrons')
+    configSeq += config.makeConfig ('Electrons.PtEtaSelection')
+    configSeq.setOptionValue ('.containerName', 'AnaElectrons')
     configSeq.setOptionValue ('.minPt', electronMinPt)
 
 
     # Include, and then set up the photon analysis algorithm sequence:
-    configSeq += config.makeConfig ('Photons',
-        containerName='AnaPhotons' )
+    configSeq += config.makeConfig ('Photons')
+    configSeq.setOptionValue ('.containerName', 'AnaPhotons')
     configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recomputeIsEM', False)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += config.makeConfig ('Photons.WorkingPoint',
-        containerName='AnaPhotons',
-        selectionName='tight')
+    configSeq += config.makeConfig ('Photons.WorkingPoint')
+    configSeq.setOptionValue ('.containerName', 'AnaPhotons')
+    configSeq.setOptionValue ('.selectionName', 'tight')
     configSeq.setOptionValue ('.forceFullSimConfigForID', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.qualityWP', 'Tight')
     configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
     configSeq.setOptionValue ('.recomputeIsEM', False)
 
-    configSeq += config.makeConfig ('Photons.PtEtaSelection',
-        containerName='AnaPhotons')
+    configSeq += config.makeConfig ('Photons.PtEtaSelection')
+    configSeq.setOptionValue ('.containerName', 'AnaPhotons')
     configSeq.setOptionValue ('.minPt', photonMinPt)
 
 
     # set up the muon analysis algorithm sequence:
-    configSeq += config.makeConfig ('Muons',
-        containerName='AnaMuons')
+    configSeq += config.makeConfig ('Muons')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
     configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.writeTrackD0Z0', True)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += config.makeConfig ('Muons.WorkingPoint',
-        containerName='AnaMuons',
-        selectionName='medium')
+
+    configSeq += config.makeConfig ('Muons.WorkingPoint')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq.setOptionValue ('.selectionName', 'medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
 
-    configSeq += config.makeConfig ('Muons.IFFClassification',
-        containerName='AnaMuons')
-    configSeq += config.makeConfig ('Muons.MCTCClassification',
-        containerName='AnaMuons')
+    configSeq += config.makeConfig ('Muons.IFFClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq += config.makeConfig ('Muons.MCTCClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
     configSeq.setOptionValue ('.prefix', 'truth_')
 
 
@@ -227,12 +233,12 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     # configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
 
     # Include, and then set up the tau analysis algorithm sequence:
-    configSeq += config.makeConfig ('TauJets',
-        containerName='AnaTauJets')
+    configSeq += config.makeConfig ('TauJets')
+    configSeq.setOptionValue ('.containerName', 'AnaTauJets')
     configSeq.setOptionValue ('.decorateTruth', True)
-    configSeq += config.makeConfig ('TauJets.WorkingPoint',
-        containerName='AnaTauJets',
-        selectionName='tight')
+    configSeq += config.makeConfig ('TauJets.WorkingPoint')
+    configSeq.setOptionValue ('.containerName', 'AnaTauJets')
+    configSeq.setOptionValue ('.selectionName', 'tight')
     configSeq.setOptionValue ('.quality', 'Tight')
 
     configSeq += config.makeConfig('TauJets.TriggerSF')
@@ -240,40 +246,46 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue('.tauID', 'Tight')
     configSeq.setOptionValue('.triggerChainsPerYear', tauTriggerChainsSF)
 
-    configSeq += config.makeConfig ('TauJets.MCTCClassification',
-        containerName='AnaTauJets')
+    configSeq += config.makeConfig ('TauJets.MCTCClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaTauJets')
     configSeq.setOptionValue ('.prefix', 'truth_')
 
 
     # Add systematic object links
-    configSeq += config.makeConfig('SystObjectLink', containerName='AnaJets')
+    configSeq += config.makeConfig('SystObjectLink')
+    configSeq.setOptionValue ('.containerName', 'AnaJets')
     if largeRJets:
-        configSeq += config.makeConfig('SystObjectLink', containerName='AnaLargeRJets')
-    configSeq += config.makeConfig('SystObjectLink', containerName='AnaElectrons')
-    configSeq += config.makeConfig('SystObjectLink', containerName='AnaPhotons')
-    configSeq += config.makeConfig('SystObjectLink', containerName='AnaMuons')
-    configSeq += config.makeConfig('SystObjectLink', containerName='AnaTauJets')
+        configSeq += config.makeConfig('SystObjectLink')
+        configSeq.setOptionValue ('.containerName', 'AnaLargeRJets')
+    configSeq += config.makeConfig('SystObjectLink')
+    configSeq.setOptionValue ('.containerName', 'AnaElectrons')
+    configSeq += config.makeConfig('SystObjectLink')
+    configSeq.setOptionValue ('.containerName', 'AnaPhotons')
+    configSeq += config.makeConfig('SystObjectLink')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq += config.makeConfig('SystObjectLink')
+    configSeq.setOptionValue ('.containerName', 'AnaTauJets')
 
 
     # Particle-level objects
-    configSeq += config.makeConfig ('PL_Electrons',
-        containerName='TruthElectrons')
-    configSeq += config.makeConfig ('PL_Electrons.MCTCClassification',
-        containerName='TruthElectrons')
+    configSeq += config.makeConfig ('PL_Electrons')
+    configSeq.setOptionValue ('.containerName', 'TruthElectrons')
+    configSeq += config.makeConfig ('PL_Electrons.MCTCClassification')
+    configSeq.setOptionValue ('.containerName', 'TruthElectrons')
     configSeq.setOptionValue ('.prefix', '')
-    configSeq += config.makeConfig ('PL_Electrons.PtEtaSelection',
-        containerName='TruthElectrons')
+    configSeq += config.makeConfig ('PL_Electrons.PtEtaSelection')
+    configSeq.setOptionValue ('.containerName', 'TruthElectrons')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.useDressedProperties', True)
     configSeq.setOptionValue ('.minPt', 20e3)
 
-    configSeq += config.makeConfig ('PL_Muons',
-        containerName='TruthMuons')
-    configSeq += config.makeConfig ('PL_Muons.MCTCClassification',
-        containerName='TruthMuons')
+    configSeq += config.makeConfig ('PL_Muons')
+    configSeq.setOptionValue ('.containerName', 'TruthMuons')
+    configSeq += config.makeConfig ('PL_Muons.MCTCClassification')
+    configSeq.setOptionValue ('.containerName', 'TruthMuons')
     configSeq.setOptionValue ('.prefix', '')
-    configSeq += config.makeConfig ('PL_Muons.PtEtaSelection',
-        containerName='TruthMuons')
+    configSeq += config.makeConfig ('PL_Muons.PtEtaSelection')
+    configSeq.setOptionValue ('.containerName', 'TruthMuons')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.useDressedProperties', True)
     configSeq.setOptionValue ('.minPt', 20e3)
@@ -281,27 +293,27 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('PL_Neutrinos')
     configSeq.setOptionValue ('.skipOnData', True)
 
-    configSeq += config.makeConfig ('PL_Jets',
-        containerName='AntiKt4TruthDressedWZJets')
-    configSeq += config.makeConfig ('PL_Jets.PtEtaSelection',
-        containerName='AntiKt4TruthDressedWZJets')
+    configSeq += config.makeConfig ('PL_Jets')
+    configSeq.setOptionValue ('.containerName', 'AntiKt4TruthDressedWZJets')
+    configSeq += config.makeConfig ('PL_Jets.PtEtaSelection')
+    configSeq.setOptionValue ('.containerName', 'AntiKt4TruthDressedWZJets')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.minPt', 20e3)
 
-    configSeq += config.makeConfig ('PL_Taus',
-        containerName='TruthTaus')
-    configSeq += config.makeConfig ('PL_Taus.MCTCClassification',
-        containerName='TruthTaus')
+    configSeq += config.makeConfig ('PL_Taus')
+    configSeq.setOptionValue ('.containerName', 'TruthTaus')
+    configSeq += config.makeConfig ('PL_Taus.MCTCClassification')
+    configSeq.setOptionValue ('.containerName', 'TruthTaus')
     configSeq.setOptionValue ('.prefix', '')
-    configSeq += config.makeConfig ('PL_Taus.PtEtaSelection',
-        containerName='TruthTaus')
+    configSeq += config.makeConfig ('PL_Taus.PtEtaSelection')
+    configSeq.setOptionValue ('.containerName', 'TruthTaus')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.minPt', 20e3)
 
-    configSeq += config.makeConfig ('PL_Photons',
-        containerName='TruthPhotons')
-    configSeq += config.makeConfig ('PL_Photons.PtEtaSelection',
-        containerName='TruthPhotons')
+    configSeq += config.makeConfig ('PL_Photons')
+    configSeq.setOptionValue ('.containerName', 'TruthPhotons')
+    configSeq += config.makeConfig ('PL_Photons.PtEtaSelection')
+    configSeq.setOptionValue ('.containerName', 'TruthPhotons')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.minPt', 20e3)
 
@@ -323,8 +335,8 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
 
     # Include, and then set up the met analysis algorithm config:
-    configSeq += config.makeConfig ('MissingET',
-        containerName='AnaMET')
+    configSeq += config.makeConfig ('MissingET')
+    configSeq.setOptionValue ('.containerName', 'AnaMET')
     configSeq.setOptionValue ('.jets', 'AnaJets')
     configSeq.setOptionValue ('.taus', 'AnaTauJets.tight')
     configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
@@ -355,22 +367,21 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
 
     # ObjectCutFlow blocks
-    configSeq += config.makeConfig ('ObjectCutFlow',
-        containerName='AnaJets',
-        selectionName='jvt')
-    configSeq += config.makeConfig ('ObjectCutFlow',
-        containerName='AnaElectrons',
-        selectionName='loose')
-    configSeq += config.makeConfig ('ObjectCutFlow',
-        containerName='AnaPhotons',
-        selectionName='tight')
-    configSeq += config.makeConfig ('ObjectCutFlow',
-        containerName='AnaMuons',
-        selectionName='medium')
-    configSeq += config.makeConfig ('ObjectCutFlow',
-        containerName='AnaTauJets',
-        selectionName='tight')
-
+    configSeq += config.makeConfig ('ObjectCutFlow')
+    configSeq.setOptionValue ('.containerName', 'AnaJets')
+    configSeq.setOptionValue ('.selectionName', 'jvt')
+    configSeq += config.makeConfig ('ObjectCutFlow')
+    configSeq.setOptionValue ('.containerName', 'AnaElectrons')
+    configSeq.setOptionValue ('.selectionName', 'loose')
+    configSeq += config.makeConfig ('ObjectCutFlow')
+    configSeq.setOptionValue ('.containerName', 'AnaPhotons')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq += config.makeConfig ('ObjectCutFlow')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq.setOptionValue ('.selectionName', 'medium')
+    configSeq += config.makeConfig ('ObjectCutFlow')
+    configSeq.setOptionValue ('.containerName', 'AnaTauJets')
+    configSeq.setOptionValue ('.selectionName', 'tight')
 
     # Include and set up a basic run of the event selection algorithm config:
     if geometry is not LHCPeriod.Run4:
@@ -399,47 +410,48 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.lepton_postfix', 'nominal')
 
     # Thinning blocks
-    configSeq += config.makeConfig ('Thinning',
-        containerName='AnaElectrons')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'AnaElectrons')
     configSeq.setOptionValue ('.selectionName', 'loose')
     configSeq.setOptionValue ('.outputName', 'OutElectrons')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='AnaPhotons')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'AnaPhotons')
     configSeq.setOptionValue ('.selectionName', 'tight')
     configSeq.setOptionValue ('.outputName', 'OutPhotons')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='AnaMuons')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
     configSeq.setOptionValue ('.selectionName', 'medium')
     configSeq.setOptionValue ('.outputName', 'OutMuons')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='AnaTauJets')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'AnaTauJets')
     configSeq.setOptionValue ('.selectionName', 'tight')
     configSeq.setOptionValue ('.outputName', 'OutTauJets')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='AnaJets')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'AnaJets')
     configSeq.setOptionValue ('.outputName', 'OutJets')
     if largeRJets :
-        configSeq += config.makeConfig ('Thinning',
-            containerName='AnaLargeRJets')
+        configSeq += config.makeConfig ('Thinning')
+        configSeq.setOptionValue ('.containerName', 'AnaLargeRJets')
         configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='TruthElectrons')
+
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'TruthElectrons')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.outputName', 'OutTruthElectrons')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='TruthPhotons')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'TruthPhotons')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.outputName', 'OutTruthPhotons')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='TruthMuons')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'TruthMuons')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.outputName', 'OutTruthMuons')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='TruthTaus')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'TruthTaus')
     configSeq.setOptionValue ('.skipOnData', True)
     configSeq.setOptionValue ('.outputName', 'OutTruthTaus')
-    configSeq += config.makeConfig ('Thinning',
-        containerName='AntiKt4TruthDressedWZJets')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'AntiKt4TruthDressedWZJets')
     configSeq.setOptionValue ('.outputName', 'OutTruthJets')
     configSeq.setOptionValue ('.skipOnData', True)
 

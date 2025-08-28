@@ -14,40 +14,51 @@
 
 namespace columnar
 {
-  template<ContainerId CI> requires (CI == ContainerId::track0 || CI == ContainerId::track1 || CI == ContainerId::track2)
-  struct ContainerIdTraits<CI> final
+  namespace ContainerId
   {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+    struct track : regularCIBase<xAOD::TrackParticle,xAOD::TrackParticleContainer>
+    {
+      static constexpr std::string_view idName = "track0";
+    };
+    using track0 = track;
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::TrackParticle;
+    struct track1 : track
+    {
+      static constexpr std::string_view idName = "track1";
+    };
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::TrackParticleContainer;
+    struct track2 : track
+    {
+      static constexpr std::string_view idName = "track2";
+    };
 
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::TrackParticleContainer;
-  };
+    struct vertex : regularCIBase<xAOD::Vertex,xAOD::VertexContainer>
+    {
+      static constexpr std::string_view idName = "vertex";
+    };
+  }
 
-  template<> struct ContainerIdTraits<ContainerId::vertex> final
-  {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+  using TrackId = ObjectId<ContainerId::track>;
+  using OptTrackId = OptObjectId<ContainerId::track>;
+  template<typename CT,typename CM=ColumnarModeDefault> using TrackAccessor  = AccessorTemplate<ContainerId::track,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using TrackDecorator = AccessorTemplate<ContainerId::track,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::Vertex;
+  using OptTrack0Id = OptObjectId<ContainerId::track0>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Track0Accessor  = AccessorTemplate<ContainerId::track0,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Track0Decorator = AccessorTemplate<ContainerId::track0,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::VertexContainer;
+  using OptTrack1Id = OptObjectId<ContainerId::track1>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Track1Accessor  = AccessorTemplate<ContainerId::track1,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Track1Decorator = AccessorTemplate<ContainerId::track1,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::VertexContainer;
-  };
+  using OptTrack2Id = OptObjectId<ContainerId::track2>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Track2Accessor  = AccessorTemplate<ContainerId::track2,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Track2Decorator = AccessorTemplate<ContainerId::track2,CT,ColumnAccessMode::output,CM>;
+
+  using VertexId = ObjectId<ContainerId::vertex>;
+  using OptVertexId = OptObjectId<ContainerId::vertex>;
+  template<typename CT,typename CM=ColumnarModeDefault> using VertexAccessor  = AccessorTemplate<ContainerId::vertex,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using VertexDecorator = AccessorTemplate<ContainerId::vertex,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

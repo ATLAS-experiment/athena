@@ -32,8 +32,10 @@ namespace ActsTrk::detail {
       if (iseed < m_nextSeed || m_isDuplicateSeed[iseed])
         continue;
 
-      if (++m_nUsedMeasurements[iseed] >= m_nSeedMeasurements[iseed]) {
-        assert(m_nUsedMeasurements[iseed] == m_nSeedMeasurements[iseed]);  // shouldn't ever find more
+
+      // Here is to decide how many hits need to be on the seed to mark it as duplicate
+      if (++m_nUsedMeasurements[iseed] >= std::max(1ul, m_nSeedMeasurements[iseed] - m_measOffset)) {
+	assert(m_nUsedMeasurements[iseed] <= m_nSeedMeasurements[iseed]);  // shouldn't ever find more
         m_isDuplicateSeed[iseed] = true;
       }
       ++m_foundSeeds;

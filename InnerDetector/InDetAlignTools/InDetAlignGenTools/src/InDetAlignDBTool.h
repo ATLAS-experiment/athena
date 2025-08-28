@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGENTOOLS_ALIGNDBTOOL_H
@@ -178,42 +178,38 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
   
  private:
 
-  const PixelID* m_pixid;
-  const SCT_ID* m_sctid;
-  const InDetDD::PixelDetectorManager* m_pixman;
-  const InDetDD::SCT_DetectorManager* m_sctman;
+  const PixelID* m_pixid{};
+  const SCT_ID* m_sctid{};
+  const InDetDD::PixelDetectorManager* m_pixman{};
+  const InDetDD::SCT_DetectorManager* m_sctman{};
+  bool m_dynamicDB{false};
   std::vector<const InDetDD::SiDetectorManager *> m_managers;
 
   std::vector<std::string> m_alignobjs;
   std::vector<int> m_alignchans;
 
-  CondAttrListCollection* m_attrListCollection;
+  CondAttrListCollection* m_attrListCollection{};
 
-  bool m_par_newdb; // create database using new (collection) format
-  bool m_par_scttwoside; // create structures with separated SCT module sides
-  int m_par_fake; // set to 1 to fake full ATLAS geom, 2 to fake CTB geom
-  ToolHandle<IAthenaOutputStreamTool> m_par_condstream;
+  std::string m_par_dbkey;
+
+  Gaudi::Property<bool> m_par_newdb{this, "NewDB", true, "create database using new (collection) format"};  // FIXME: "New" is misleading
+  Gaudi::Property<bool> m_par_scttwoside{this, "SCTTwoSide", false, "create structures with separated SCT module sides"};
+  Gaudi::Property<int> m_par_fake{this, "FakeDB", 0, "set to 1 to fake full ATLAS geom, 2 to fake CTB geom"};
+  ToolHandle<IAthenaOutputStreamTool> m_par_condstream{this, "CondStream", "AthenaOutputStreamTool/AthenaOutputStreamTool"};
   /** name of the root folder for constants, which can be set via 
       the <key> syntax. Default: /Indet/Align. */
-  Gaudi::Property<std::string> m_par_dbroot{ this, "AlignmentRootFolder", "/Indet/Align", "Root folder for alignment" };
-  /** the base part of the key for loading AlignableTransform objects
-      from the Transient Data Store. Default: /Indet/Align */
-  std::string m_par_dbkey;
-  bool m_par_oldTextFile;  // Input text file using old format
+  Gaudi::Property<std::string> m_par_dbroot{ this, "DBRoot", "/Indet/Align", "Root folder for alignment" };
+  Gaudi::Property<bool> m_par_oldTextFile{this, "OldTextFile", false, "Input text file using old format"};
+  Gaudi::Property<bool> m_forceUserDBConfig{this, "forceUserDBConfig", false, "Set to true to override any DB auto-configuration"};
+  Gaudi::Property<std::string> m_pixmanName{this, "PixelManager", "Pixel", "Pixel manager name" };
+  Gaudi::Property<std::string> m_sctmanName{this, "SCT_Manager", "SCT", "SCT manager name" };
+  Gaudi::Property<bool> m_doPix{this, "AlignPixel", true, "Include Pixel" };
+  Gaudi::Property<bool> m_doStrip{this, "AlignStrip", true, "Include SCT/ITkStrip" };
 
   AlignableTransform* getTransPtr(const std::string& key) const;
   const AlignableTransform* cgetTransPtr(const std::string& key) const;
   void fakeGeom(const int nbpix, const int necpix, 
 		const int nbsct, const int necsct);
-
-  bool m_dynamicDB;
-  bool m_forceUserDBConfig;
-  
-  Gaudi::Property<std::string> m_pixmanName{this, "PixelManager", "Pixel", "Pixel manager name" };
-  Gaudi::Property<std::string> m_sctmanName{this, "SCT_Manager", "SCT", "SCT manager name" };
-  Gaudi::Property<bool> m_doPix{this, "AlignPixel", true, "Include Pixel" };
-  Gaudi::Property<bool> m_doStrip{this, "AlignStrip", true, "Include SCT/ITkStrip" }; 
-
 };
 
 #endif // INDETALIGNGENTOOLS_ALIGNDBTOOL_H

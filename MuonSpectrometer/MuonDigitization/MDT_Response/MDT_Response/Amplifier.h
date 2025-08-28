@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_RESPONSE_AMPLIFIER_H
 #define MDT_RESPONSE_AMPLIFIER_H
 
 #include <vector>
-#include <iostream>
 
 class Amplifier {
  private:
@@ -65,10 +64,10 @@ class Amplifier {
   double   m_adcResponse;
 
   // iterators
-  cluster_vec_it          m_signal_th;       // iterator pointing to the first bin over threshold
-  cluster_vec_it          m_signal_stop;     
-  cluster_vec_const_it    m_cluster_stop;    
-  cluster_vec_const_it    m_cluster_begin;
+  cluster_vec_it          m_signal_th{};       // iterator pointing to the first bin over threshold
+  cluster_vec_it          m_signal_stop{};     
+  cluster_vec_const_it    m_cluster_stop{};    
+  cluster_vec_const_it    m_cluster_begin{};
 
   /* non linear response: 
      R = m_adcOffset + m_adcFactor*(log(Q)/log(m_adcFraction)-1) */
@@ -97,7 +96,6 @@ inline double Amplifier::Charge() const {
 inline void  Amplifier::SetTriggerElectron(double el) {
   m_triggerElectron = el;
   m_threshold = el*m_responseMax; 
-  //std::cout << "Amplifier: Changing threshold: now triggering on " << el << "th electron "	    << "new threshold " << m_threshold << std::endl;
 }
 inline void  Amplifier::SetIntegrationWindow(double win) { 
   m_integrationWindow = (int)(win/m_binsize)-1; 

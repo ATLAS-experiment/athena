@@ -27,7 +27,7 @@
 #include "TrigDecisionTool/CacheGlobalMemory.h"
 #include "TrigDecisionTool/FeatureContainer.h"
 #include "TrigDecisionTool/Logger.h"
-#include "TrigDecisionTool/FeatureRequestDescriptor.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 #include "TrigSteeringEvent/Enums.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 

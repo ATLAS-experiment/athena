@@ -92,10 +92,10 @@ namespace xAODMaker {
 	  // p4
           if (eg->trackParticle()) {
             double clE = eg->cluster()->e();
-            double pt  =  sqrt(clE*clE - 0.511*0.511)/cosh(eg->trackParticle()->eta());
+            double pt  =  sqrt(clE*clE - ParticleConstants::electronMassInMeV*ParticleConstants::electronMassInMeV)/cosh(eg->trackParticle()->eta());
             double eta = eg->trackParticle()->eta();
             double phi = eg->trackParticle()->phi();
-            electron->setP4(pt, eta, phi, 0.511);
+            electron->setP4(pt, eta, phi, ParticleConstants::electronMassInMeV);
           }
           else
             electron->setP4(eg->pt(),eg->eta(),eg->phi(), eg->m());

@@ -27,9 +27,9 @@ StatusCode FPGAStripClustering::execute(const EventContext &ctx) const {
         ATH_MSG_ERROR("Failed to retrieve input data.");
         return StatusCode::FAILURE;
     }
-
+    std::vector<IdentifierHash> listOfIds;
     std::vector<uint64_t> outputData;
-    if (!m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, outputData, ctx)) {
+    if (!m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, outputData, listOfIds, ctx)) {
         ATH_MSG_ERROR("Failed to convert input data to FPGA-compatible format.");
         return StatusCode::FAILURE;
     }
@@ -207,17 +207,17 @@ StatusCode FPGAStripClustering::execute(const EventContext &ctx) const {
              rdoCounter++;
          }
          row = 6; // local x
-         scAux.localPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+         scAux.localPosition.push_back(std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
 
          ATH_MSG_DEBUG("Strip [" << std::dec << "] "<<row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8 << " " << std::hex << stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
          row = 8; // local covariance xx
-         scAux.localCovariance.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+         scAux.localCovariance.push_back(std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
          row = 9; // global x
-         scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+         scAux.globalPosition.push_back(std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
          row = 10; // global y
-         scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+         scAux.globalPosition.push_back(std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
          row = 11; // global z
-         scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
+         scAux.globalPosition.push_back(std::bit_cast<double>(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]));
          row = 12; // channels in phi
          scAux.channelsInPhi.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
 

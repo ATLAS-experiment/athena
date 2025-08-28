@@ -82,7 +82,7 @@ private:
 // INCLUDE HEADER FILES //
 //////////////////////////
 
-#include "MuonCalibMath/DataPoint.ixx"
+#include "MuonCalibMath/DataPoint.icc"
 
 }
 

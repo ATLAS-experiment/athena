@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -201,8 +201,13 @@ ClassIDSvc::dump() const
   ATH_MSG_INFO( "dump: in memory" );
 
   for (CLID clid : sortedIDs()) {
-    const std::string& typeName = m_clidMap.find (clid)->second.first;
-    ATH_MSG_INFO( "CLID: "<< clid << " - type name: " << typeName );
+    auto it = m_clidMap.find (clid);
+    if (it == m_clidMap.end()) {
+      ATH_MSG_INFO( "CLID: "<< clid << " - type name: NOT FOUND" );
+    }
+    else {
+      ATH_MSG_INFO( "CLID: "<< clid << " - type name: " << it->second.first );
+    }
   }
   ATH_MSG_INFO( "------------------------------" );
 }

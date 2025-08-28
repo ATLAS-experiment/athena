@@ -14,7 +14,7 @@
 #include "ActsToolInterfaces/IProtoTrackCreatorTool.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
@@ -44,7 +44,7 @@ namespace ActsTrk{
       // the track fitter to use for the refit 
       ToolHandle<ActsTrk::IFitterTool> m_actsFitter{this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};
       // tracking geometry - used to translate ATLAS to ACTS geometry
-      ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+      PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
       // ACTS extrapolation tool - provides the magnetic field 
       ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
       // output location to write to 
@@ -54,7 +54,7 @@ namespace ActsTrk{
       SG::WriteHandleKey<ActsTrk::ProtoTrackCollection> m_protoTrackCollectionKey{this, "ProtoTracksLocation", "", "Output proto tracks as well"};
       Gaudi::Property<bool> m_copyParametersFromFit{this, "copyParametersFromFit", true, "If enabled proto tracks will have the same parameters as fitted tracks"};
       // acts helper for the output
-      ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+      ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
 
 

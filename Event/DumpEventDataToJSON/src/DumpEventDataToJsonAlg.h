@@ -22,7 +22,6 @@
 #include "TrkTrack/TrackCollection.h"
 //Tools
 #include "TrkExInterfaces/IExtrapolationEngine.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 // PRDs
 #include "MuonPrepRawData/CscPrepDataContainer.h"
 #include "MuonPrepRawData/MdtPrepDataContainer.h"
@@ -73,8 +72,8 @@ protected:
   template <class TYPE>
   nlohmann::json getData(const TYPE &object);
 
-  nlohmann::json getActsData(const Acts::TrackProxy<ActsTrk::TrackSummaryContainer, ActsTrk::MultiTrajectory, ActsTrk::DataLinkHolder, true> &track, 
-                         const Acts::GeometryContext& gctx);
+  nlohmann::json getActsData(const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
+                             const Acts::GeometryContext& gctx);
 
 
   template <class TYPE>

@@ -189,6 +189,10 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   WeightingValuesSummary_t m_weightingValues; //!< Possible weighting & lumi extrapolation values for the current event
   double m_ratesDenominator; //!< How much walltime is seen by the algorithm. This is what we need to normalise to.  
   Gaudi::Property<bool> m_doHistograms{this, "DoHistograms", true, "Switch on histogram output of rate vs. mu and position in train."};
+  Gaudi::Property<bool> m_doMultiSliceDiJet{this, "DoMultiSliceDiJet", false, "Enable the HS-softer-than-PU (HSTP) filter; reweight the Slices according to Jet/ETMiss procedure; recommended by PMG for di-jet slices."};
+  StatusCode pass_HstpFilter(bool &pass); //!< Boolean indicating if the event passes the HS-softer-than-PU (HSTP) filter
+  virtual StatusCode initialize_extra_content(); //!< Initialization of additional payload for inherited classes
+
 
  private: 
 
@@ -268,6 +272,10 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   ToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool"};
   ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", "TrigConf::xAODConfigSvc"};
 
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfo", "EventInfo", "EventInfo name"}; 
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthHS_jets_RHKey{this, "TruthHSJetsKey", "AntiKt4TruthJets", "Key for the hard scatter truth jet collection"};
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthPU_jets_RHKey{this, "truthPUJetsKey", "InTimeAntiKt4TruthJets", "Key for the pileup jet collection"};
+
   Gaudi::Property<double> m_expoScalingFactor{this, "ExpoScalingFactor", 0.1, "Optional. Exponential factor if using exponential-mu rates scaling."};
   Gaudi::Property<double> m_inelasticCrossSection{this, "InelasticCrossSection", 8e-26, "Inelastic cross section in units cm^2. Default 80 mb at 13 TeV."};
   Gaudi::Property<bool> m_doUniqueRates{this, "DoUniqueRates", false, "Calculate unique rates for all chains (slow). Requires DoGlobalGroups=True too."}; 
@@ -279,7 +287,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   Gaudi::Property<bool> m_enableLumiExtrapolation{this, "EnableLumiExtrapolation", true, "If false then no extrapolation in L, N_bunch or <mu> will be performed.."};
   Gaudi::Property<uint32_t> m_vetoStartOfTrain{this, "VetoStartOfTrain", 0, "How many BCID to veto at the start of a bunch train."};
   Gaudi::Property<std::map<std::string, std::map<std::string, double>>> m_prescalesJSON{this, "PrescalesJSON", {},  "Optional JSON of prescales from the TrigMenuRuleBook to apply."};
-
+  Gaudi::Property<std::string> m_histogramSuffix{this, "histogramSuffix", "", "Optional suffix to add to the name of the rate denominator histogram."};
 
   double m_targetMu; //!< What pileup level the prediction is targeting
   double m_targetBunches; //!< How many bunches the prediction is targeting

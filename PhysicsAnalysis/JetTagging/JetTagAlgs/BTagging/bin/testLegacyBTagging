@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+
+
+"""Run flavor tagging on an AOD
+
+We build the jets and do the tagging. The jet building stuff is using
+the standard wrappers from jetmet, since this is a flavor tagging
+example.
+
+"""
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+
+# needed to read files
+from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+# you can change this to WARNING, INFO, DEBUG, VERBOSE if you want to
+# see more output.
+from GaudiKernel.Configurable import INFO as OUTPUT_LEVEL
+
+# jet reconstruction imports
+from JetRecConfig.JetRecConfig import JetRecCfg
+from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
+
+# b-tagging imports
+from BTagging.BTagLegacyConfig import BTagAlgsCfg
+from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
+from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
+
+from argparse import ArgumentParser
+import sys
+from pathlib import Path
+
+DEFAULT_INPUT = (
+    '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/AOD/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_s3873_r13829/1000events.AOD.29787656._000153.pool.root.1'
+)
+
+# parse arguments (just need input files)
+def get_args():
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument(
+        'input_files', nargs='*',
+        default=[DEFAULT_INPUT]
+    )
+    parser.add_argument(
+        '-n', '--n-events',
+        type=int,
+    )
+    return parser.parse_args()
+
+
+# main routine
+def run():
+    args = get_args()
+
+    flags = initConfigFlags()
+    flags.Input.Files = args.input_files
+    flags.Exec.OutputLevel = OUTPUT_LEVEL
+    if args.n_events is not None:
+        flags.Exec.MaxEvents = args.n_events
+    flags.lock()
+
+    # set up all the "main" services
+    ca = MainServicesCfg(flags)
+    # by default we don't even read any files, without this we just
+    # loop infinitely over nothing.
+    ca.merge(PoolReadCfg(flags))
+
+    # add a jet collection
+    jetdef = AntiKt4EMPFlow
+    ca.merge(JetRecCfg(flags, jetdef))
+    ca.merge(JetTagCalibCfg(flags))    
+    ca.merge(BTagTrackAugmenterAlgCfg(flags))
+
+    #add legacy b-tagging algorithms SV1+JetFitter
+    ca.merge(
+        BTagAlgsCfg(
+            flags, 
+            JetCollection="AntiKt4EMPFlow", 
+            muons='', 
+            AddedJetSuffix='Jets',
+            nnList=[],
+            )
+        )
+
+    return ca.run()
+
+
+if __name__ == '__main__':
+    code = run()
+    sys.exit(0 if code.isSuccess() else 1)

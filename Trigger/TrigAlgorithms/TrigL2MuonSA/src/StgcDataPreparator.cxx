@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StgcDataPreparator.h"
@@ -58,7 +58,7 @@ StatusCode TrigL2MuonSA::StgcDataPreparator::prepareData(const TrigRoiDescriptor
     // ATH_MSG_ERROR("RoI based data access is not available yet");
 
     ATH_MSG_DEBUG("Use RoI based data access");
-    const IRoiDescriptor* iroi = (IRoiDescriptor*) p_roids;
+    const IRoiDescriptor* iroi = static_cast<const IRoiDescriptor*> (p_roids);
     if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, stgcHashList);
     else {
       TrigRoiDescriptor fullscan_roi( true );

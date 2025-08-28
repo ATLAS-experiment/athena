@@ -48,6 +48,7 @@
 - Event/xAOD/.*Cnv
 - Event/xAOD/xAODInDetMeasurement
 - Event/xAOD/xAODMuonRDO
+- Event/xAOD/xAODAuxiliaryMeasurement
 + Event/xAOD/.*
 + ForwardDetectors/ZDC/ZdcAnalysis
 + ForwardDetectors/ZDC/ZdcUtils
@@ -88,7 +89,6 @@
 + PhysicsAnalysis/MCTruthClassifier
 + PhysicsAnalysis/MuonID/MuonIDAnalysis/.*
 + PhysicsAnalysis/MuonID/MuonSelectorTools
-+ PhysicsAnalysis/SUSYPhys/SUSYTools
 + PhysicsAnalysis/TauID/DiTauMassTools
 + PhysicsAnalysis/TauID/TauAnalysisTools
 + PhysicsAnalysis/TrackingID/.*
@@ -125,6 +125,7 @@
 + Trigger/TrigAnalysis/TrigAnalysisInterfaces
 + Trigger/TrigAnalysis/TrigBunchCrossingTool
 + Trigger/TrigAnalysis/TrigDecisionTool
++ Trigger/TrigAnalysis/TrigAnalysisHelpers
 + Trigger/TrigAnalysis/TrigGlobalEfficiencyCorrection
 + Trigger/TrigAnalysis/TriggerMatchingTool
 + Trigger/TrigConfiguration/TrigConfBase

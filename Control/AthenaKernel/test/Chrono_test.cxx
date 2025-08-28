@@ -32,15 +32,15 @@ class ChronoSvcTest
   : public implements<IChronoSvc>
 {
 public:
-  virtual       ChronoEntity* chronoStart   ( const std::string& /*t*/ )
+  virtual       ChronoEntity* chronoStart   ( const std::string& /*t*/ ) override
   {++count; return 0;}
-  virtual       ChronoEntity* chronoStop   ( const std::string& /*t*/ )
+  virtual       ChronoEntity* chronoStop   ( const std::string& /*t*/ ) override
   {--count; return 0;}
 
-  virtual ChronoTime  chronoDelta   ( const ChronoTag& , ChronoType ) { std::abort(); }
-  virtual void  chronoPrint   ( const ChronoTag& ) { std::abort(); }
-  virtual ChronoStatus  chronoStatus ( const ChronoTag& ) { std::abort(); }
-  virtual const ChronoEntity* chrono ( const ChronoTag& ) const { std::abort(); }
+  virtual ChronoTime  chronoDelta   ( const ChronoTag& , ChronoType ) override { std::abort(); }
+  virtual void  chronoPrint   ( const ChronoTag& ) override { std::abort(); }
+  virtual ChronoStatus  chronoStatus ( const ChronoTag& ) override { std::abort(); }
+  virtual const ChronoEntity* chrono ( const ChronoTag& ) const override { std::abort(); }
 };
 
 

@@ -47,5 +47,10 @@ def TrackTimeDefAndQualityAlgCfg(flags, name = "TrackTimeDefAndQualityAlg", **kw
     """Schedules an extension algorithm from ITk to HGTD """
     acc = ComponentAccumulator()
 
+    kwargs.setdefault('doActs', flags.HGTD.doActs)
+    if flags.HGTD.doActs:
+        kwargs.setdefault('ExtraInputs',
+                          [('xAOD::TrackParticleContainer', 'StoreGateSvc+InDetTrackParticles.actsTrack')])
+    
     acc.addEventAlgo(CompFactory.HGTD.TrackTimeDefAndQualityAlg(name, **kwargs))
     return acc

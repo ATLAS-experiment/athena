@@ -14,7 +14,6 @@ namespace Gep{
     
     Cluster() {}
     Cluster(const TLorentzVector& tlv):vec{tlv} {}
-    ~Cluster() {}
 
     bool isEmptyCluster() const {return ncells == 0;}
     float et() const {return vec.Et();}

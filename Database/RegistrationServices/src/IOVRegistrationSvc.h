@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -20,6 +20,7 @@
 
 #include "RegistrationServices/IIOVRegistrationSvc.h"
 #include "AthenaBaseComps/AthService.h"
+#include "AthenaKernel/IOVTime.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ClassID.h"
 #include "CoolKernel/StorageType.h"
@@ -180,29 +181,26 @@ private:
 			    std::string& address_header,
 			    std::string& address_data) const;
 
-
-
-
-    BooleanProperty         m_recreateFolders;
-    UnsignedIntegerProperty m_beginRun;
-    UnsignedIntegerProperty m_endRun;
-    UnsignedIntegerProperty m_beginLB;
-    UnsignedIntegerProperty m_endLB;
+    Gaudi::Property<bool>         m_recreateFolders{this, "RecreateFolders", false};
+    Gaudi::Property<unsigned int> m_beginRun{this, "BeginRun", IOVTime::MINRUN};
+    Gaudi::Property<unsigned int> m_endRun{this, "EndRun", IOVTime::MAXRUN};
+    Gaudi::Property<unsigned int> m_beginLB{this, "BeginLB", IOVTime::MINEVENT};
+    Gaudi::Property<unsigned int> m_endLB{this, "EndLB", IOVTime::MAXEVENT};
     
-    UnsignedLongProperty m_beginTime;
-    UnsignedLongProperty m_endTime;
+    Gaudi::Property<unsigned long> m_beginTime{this, "BeginTime", IOVTime::MINTIMESTAMP};
+    Gaudi::Property<unsigned long> m_endTime{this, "EndTime", IOVTime::MAXEVENT}; // as the time parameter is only 32bit
 
-    StringProperty          m_tag;
-    BooleanProperty         m_timeStamp;
-    StringProperty          m_tagDescription;
-    BooleanProperty         m_writeKeyInfo;
-    BooleanProperty         m_userTags;
-    BooleanProperty         m_userTagsUH;
-    BooleanProperty         m_svFolder;
-    BooleanProperty         m_payloadTable;
-    BooleanProperty         m_forceGlobalIOV;
-    std::vector<std::string> m_overrideName;
-    std::vector<std::string> m_overrideType;
+    Gaudi::Property<std::string>   m_tag{this, "IOVDbTag", ""};
+    Gaudi::Property<bool>          m_timeStamp{this, "IOVDbTimeStamp", false};
+    Gaudi::Property<std::string>   m_tagDescription{this, "TagDescription", "Athena IOVRegistrationSvc"};
+    Gaudi::Property<bool>          m_writeKeyInfo{this, "writeKeyInfo", true};
+    Gaudi::Property<bool>          m_userTags{this, "userTags", true};
+    Gaudi::Property<bool>          m_userTagsUH{this, "userTagsUpdateHead", false};
+    Gaudi::Property<bool>          m_svFolder{this, "SVFolder", false};
+    Gaudi::Property<bool>          m_payloadTable{this, "PayloadTable", false};
+    Gaudi::Property<bool>          m_forceGlobalIOV{this, "UseGlobalIOVForCollections", false};
+    Gaudi::Property<std::vector<std::string>> m_overrideName{this, "OverrideNames", {}};
+    Gaudi::Property<std::vector<std::string>> m_overrideType{this, "OverrideTypes", {}};
 
     ServiceHandle<IIOVCondDbSvc> m_iov_db;
     ServiceHandle<StoreGateSvc>    m_detStore;

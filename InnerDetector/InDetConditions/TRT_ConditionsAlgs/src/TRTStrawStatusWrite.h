@@ -24,42 +24,36 @@
 class TRTStrawStatusWrite : public AthAlgorithm
 {
 
- public:
+public:
+    TRTStrawStatusWrite(const std::string &name, ISvcLocator *pSvcLocator);
+    virtual ~TRTStrawStatusWrite() = default;
+    typedef TRTCond::StrawStatusMultChanContainer StrawStatusContainer;
 
-  TRTStrawStatusWrite( const std::string &name, ISvcLocator *pSvcLocator);
-  virtual ~TRTStrawStatusWrite()=default;
-  typedef TRTCond::StrawStatusMultChanContainer StrawStatusContainer ;
+    // Gaudi
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
 
-  // Gaudi
-  virtual StatusCode initialize( ) override;
-  virtual StatusCode execute( ) override;
-  virtual StatusCode finalize( ) override;
+    // special bits
+    virtual void set_status_temp(StrawStatusContainer *ssc, Identifier offlineID, bool set);
+    virtual void set_status_permanent(StrawStatusContainer *ssc, Identifier offlineID, bool set);
 
+    // read text files
+    virtual StatusCode readStatFromTextFile(const std::string &filename);
+    virtual StatusCode readStatPermFromTextFile(const std::string &filename);
+    virtual StatusCode readStatHTFromTextFile(const std::string &filename);
 
-  //special bits
-  virtual void set_status_temp(StrawStatusContainer* ssc, Identifier offlineID, bool set);
-  virtual void set_status_permanent(StrawStatusContainer* ssc, Identifier offlineID, bool set);
+private:
+    Gaudi::Property<std::string> m_par_strawstatuscontainerkey{this, "StrawStatusKey", "/TRT/Cond/Status", ""};
+    Gaudi::Property<std::string> m_par_strawstatuspermanentcontainerkey{this, "StrawStatusPermanentKey", "/TRT/Cond/StatusPermanent", ""};
+    Gaudi::Property<std::string> m_par_strawstatusHTcontainerkey{this, "StrawStatusHTKey", "/TRT/Cond/StatusHT", ""};
 
-  //read text files
-  virtual StatusCode readStatFromTextFile(const std::string& filename);
-  virtual StatusCode readStatPermFromTextFile(const std::string& filename);
-  virtual StatusCode readStatHTFromTextFile(const std::string& filename);
+    Gaudi::Property<std::string> m_par_stattextfile{this, "StatusInputFile", "", "input text file"};
+    Gaudi::Property<std::string> m_par_stattextfilepermanent{this, "StatusInputFilePermanent", "", "input text file: permanent"};
+    Gaudi::Property<std::string> m_par_stattextfileHT{this, "StatusInputFileHT", "", "input text file: HT"};
 
- private:
-
-
-  ServiceHandle<StoreGateSvc> m_detStore;
-  std::string m_par_strawstatuscontainerkey;
-  std::string m_par_strawstatuspermanentcontainerkey;
-  std::string m_par_strawstatusHTcontainerkey;
-  std::string m_par_stattextfile;           //input text file
-  std::string m_par_stattextfilepermanent;  //input text file: permanent
-  std::string m_par_stattextfileHT;         //input text file: HT
-
-
-  const TRT_ID* m_trtid;                    //TRT id helper
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_status;
+    const TRT_ID *m_trtid{}; // TRT id helper
+    ToolHandle<ITRT_StrawStatusSummaryTool> m_status{this, "SummaryTool", "TRT_StrawStatusSummaryTool"};
 };
-
 
 #endif

@@ -19,11 +19,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 source FPGATrackSim_CommonEnv.sh "${FWRD_ARGS[@]}"
-
-run_F610(){
+run_F610(){    
     python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
-        --evtMax=${RDO_EVT_ANALYSIS} \
-        --filesInput=${RDO_ANALYSIS} \
+           --evtMax=${RDO_EVT_ANALYSIS}\
+	   --filesInput=${RDO_ANALYSIS} \
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \
@@ -31,9 +30,9 @@ run_F610(){
         Trigger.FPGATrackSim.pipeline='F-610' \
         Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
         Trigger.FPGATrackSim.doEDMConversion=True \
-        Trigger.FPGATrackSim.doOverlapRemoval=True \
-        Trigger.FPGATrackSim.Hough.secondStage=False \
+        Trigger.FPGATrackSim.Hough.secondStage=True \
         Trigger.FPGATrackSim.writeToAOD=True \
+        Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE \
         Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM \
@@ -42,7 +41,8 @@ run_F610(){
         Trigger.FPGATrackSim.ExtensionNNVolonnxFile=$ONNX_INPUT_VOL \
         Trigger.FPGATrackSim.ExtensionNNHitonnxFile=$ONNX_INPUT_HIT \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
-        Output.AODFileName=$xAODOutput
+        Trigger.FPGATrackSim.writeOfflPRDInfo=True \
+        Output.AODFileName=$xAODOutput 
 }
 
 echo "... Running ${TEST_LABEL} analysis"
@@ -71,6 +71,6 @@ EOF
     root -b -q monitoring.root checkHist.C
     echo "... analysis output verification, this part is done ..."
     ls -l
-    echo "... Inside-Out on RDO, this part is done now checking the xAOD"
+    echo "... F-610 on RDO, this part is done now checking the xAOD"
     checkxAOD.py $xAODOutput
 fi

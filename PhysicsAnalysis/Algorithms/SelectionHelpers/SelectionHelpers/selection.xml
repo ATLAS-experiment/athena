@@ -4,7 +4,6 @@
    <class name="CP::ISelectionReadAccessor" />
    <class name="CP::ISelectionWriteAccessor" />
    <class name="CP::OutOfValidityAction" />
-   <class name="CP::SelectionNameSvc" />
 
    <class name="std::tuple<CP::ISelectionWriteAccessor*,std::default_delete<CP::ISelectionWriteAccessor> >" />
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -26,19 +26,32 @@ IMessageSvc* Athena::getMessageSvc( const Options::CreateOptions opt, bool quiet
   // purpose should be thread-safe:
   static ServiceHandle<IMessageSvc> msgSvc ATLAS_THREAD_SAFE ("MessageSvc", "getMessageSvc");
 
-  if (msgSvc.get()) {
-    msgSvc->addRef();  // even if cached, maintain correct ref-count
-  }
-  else {
+  IMessageSvc* svc = nullptr;
+  try {
+    svc = msgSvc.get();
+    if (svc) {
+      svc->addRef();  // even if cached, maintain correct ref-count
+      return svc;
+    }
+
     const bool warn = !(quiet || Athena::getMessageSvcQuiet);
     if ( ((opt==Athena::Options::Lazy && !Gaudi::svcLocator()->existsService("MessageSvc")) ||
           msgSvc.retrieve().isFailure()) && warn ) {
       std::cerr << "Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout" << std::endl;
     }
+    svc = msgSvc.get();
+  }
+  catch (const GaudiException& e)
+  {
+    std::cerr << "Athena::getMessageSvc: WARNING Got Gaudi exception " << e
+              << "; will use std::out" << std::endl;
+    return nullptr;
   }
 
-  return msgSvc.get();
+
+  return svc;
 }
+
 
 void Athena::reportMessage (IMessageSvc* ims, const std::string &source, int type, const std::string &message) {
   if (ims) ims->reportMessage(source, type, message);

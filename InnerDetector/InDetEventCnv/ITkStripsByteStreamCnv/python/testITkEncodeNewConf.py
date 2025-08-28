@@ -66,4 +66,4 @@ if __name__ == "__main__":
                                  inputKey="McEventInfo",
                                  outputKey="EventInfo"))
     
-    acc.run(maxEvents=100)
+    acc.run(maxEvents=2)

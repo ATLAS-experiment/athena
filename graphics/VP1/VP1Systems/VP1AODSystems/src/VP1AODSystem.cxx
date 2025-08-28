@@ -342,7 +342,7 @@ QByteArray VP1AODSystem::saveState()
   serialise.save(m_d->common->controller()->saveSettings());
 
   messageDebug("saving the collectionWidget...");
-  serialise.save((VP1CollectionWidget*)m_d->common->controller()->collWidget());
+  serialise.save(static_cast<VP1CollectionWidget*>(m_d->common->controller()->collWidget()));
 
 
 
@@ -373,7 +373,7 @@ void VP1AODSystem::restoreFromState(QByteArray ba)
 
   m_d->common->controller()->restoreSettings(state.restoreByteArray());
 
-  state.restore((VP1CollectionWidget*)m_d->common->controller()->collWidget());
+  state.restore(static_cast<VP1CollectionWidget*>(m_d->common->controller()->collWidget()));
 
   state.disableUnrestoredChecks();//We do the testing in the controller
 }

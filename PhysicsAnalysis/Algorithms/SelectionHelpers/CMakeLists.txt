@@ -16,11 +16,9 @@ atlas_add_dictionary( SelectionHelpersDict
    SelectionHelpers/selection.xml
    LINK_LIBRARIES SelectionHelpersLib )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( SelectionHelpers
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel SelectionHelpersLib )
-endif()
+atlas_add_component( SelectionHelpers
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES SelectionHelpersLib )
 
 find_package( GTest )
 

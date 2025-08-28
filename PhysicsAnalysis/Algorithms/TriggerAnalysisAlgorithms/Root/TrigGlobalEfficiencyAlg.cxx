@@ -92,13 +92,15 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
 
   // collect the combined electron and photon trigger keys supported by Egamma
   std::map<std::string,std::string> electronLegsPerKey, photonLegsPerKey;
-  if (m_isRun3Geo) {
-    ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2025/rel22.2/2025_Precision2023_Recommendation", electronLegsPerKey));
+  if (!m_doMatchingOnly) {
+    if (m_isRun3Geo) {
+      ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2025/rel22.2/2025_Precision2023_Recommendation", electronLegsPerKey));
+    }
+    else {
+      ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2018/rel21.2/Precision_Summer2020_v1", electronLegsPerKey));
+    }
+    ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestPhotonMapKeys(triggerCombination, "2015_2018/rel21.2/Summer2020_Rec_v1", photonLegsPerKey));
   }
-  else {
-    ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2018/rel21.2/Precision_Summer2020_v1", electronLegsPerKey));
-  }
-  ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestPhotonMapKeys(triggerCombination, "2015_2018/rel21.2/Summer2020_Rec_v1", photonLegsPerKey));
 
   std::map<std::string, std::string> legsPerTool;
   auto nameForDefaultSF = ITrigGlobalEfficiencyCorrectionTool::toolnameForDefaultScaleFactor();
@@ -199,6 +201,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   ANA_CHECK(m_tgecTool.setProperty("ListOfLegsPerTool", legsPerTool));
   ANA_CHECK(m_tgecTool.setProperty("TriggerCombination", triggerCombination));
   ANA_CHECK(m_tgecTool.setProperty("TriggerMatchingTool", m_trigMatchingTool));
+  ANA_CHECK(m_tgecTool.setProperty("NumberOfToys", m_numToys));
   ANA_CHECK(m_tgecTool.setProperty("OutputLevel", MSG::ERROR));
   ANA_CHECK(m_tgecTool.initialize());
 

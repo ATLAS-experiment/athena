@@ -13,7 +13,9 @@ namespace CP {
     class IsolationConditionCombined : public IsolationCondition {
     public:
         IsolationConditionCombined(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoType,
-                                   std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, const std::string& isoDecSuffix = "");
+                                   std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, const std::string& isoDecSuffix = "", bool invertCut = false);
+        IsolationConditionCombined(const std::string& name, const std::vector<std::string>& isoType,
+                                   std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, const std::string& isoDecSuffix = "", bool invertCut = false);
         virtual ~IsolationConditionCombined() = default;
 
         bool accept(const xAOD::IParticle& x) const override;
@@ -22,6 +24,7 @@ namespace CP {
     private:
         std::unique_ptr<TF1> m_cutFunction;
         std::unique_ptr<TF1> m_isoFunction;
+        bool m_invertCut{false};
     };
 }  // namespace CP
 #endif

@@ -39,6 +39,7 @@ namespace MuonR4{
              * @param gctx: Geometry context to calculate the relative alignment between chamber & measurement
              * @param meas: Uncalibrated muon measurement */
             template<class MeasType> Amg::Transform3D toChamberTransform(const ActsGeometryContext& gctx, 
+                                                                         const Amg::Transform3D& sectorTrans,
                                                                          const MeasType* meas) const;
             /** @brief Returns the position of the uncalibrated muon measurement in the sector frame
              * @param meas: Uncalibrated muon measurement
@@ -177,24 +178,42 @@ namespace MuonR4{
              *         Muon space points and then consumes the phi hits.
              * @param ctx: Event context of the current event
              * @param hitsPerChamber: List of all premade space points which have to be sorted
-             * @param finalContainer: Output SpacePoint bucket container.
-             *  */
-            void distributePointsAndStore(
-                                          SpacePointsPerChamber&& hitsPerChamber,
+             * @param finalContainer: Output SpacePoint bucket container. */
+            void distributePointsAndStore(SpacePointsPerChamber&& hitsPerChamber,
                                           SpacePointContainer& finalContainer) const;
+            /** @brief Distributes the vector of primary eta or eta + phi space points and fills them into the
+             *         buckets. The buckets are dynamically created based on the distance of the new space point
+             *         to sort to the previous or the first space point in the bucket.
+             *  @param spacePoints: Vector of space points to sort into the buckets
+             *  @param splittedContainer: Output vector containing all defined bucket */
+            void distributePrimaryPoints(std::vector<SpacePoint>&& spacePoints,
+                                         SpacePointBucketVec& splittedContainer) const;
+            /** @brief Distributs the vector phi space points into the buckets. In contrast to the primary distribution
+             *         no new buckets are created and the points are distributed into the existing ones instead.
+             *  @param spacePoint: Vecotr of phi space points to sort into the buckets
+             *  @param splittedContainer: Output vector containing all defined bucket */
+            void distributePhiPoints(std::vector<SpacePoint>&& spacePoints,
+                                     SpacePointBucketVec& splittedContainer) const;
 
-            void distributePointsAndStore(
-                                          std::vector<SpacePoint>&& spacePoints,
-                                          SpacePointBucketVec& splittedContainer) const;
-
+            /** @brief Returns whether the space point is beyond the bucket boundary.
+             *  @param spacePoint: Space point candidate to add to the bucket
+             *  @param sortedPoints: Container of all defined buckets in the chamber */
+            bool splitBucket(const SpacePoint& spacePoint,
+                             const double firstSpPos,
+                             const SpacePointBucketVec& sortedPoints) const;
+            /** @brief Closes the current processed bucket and creates a new one. Space points of the previous bucket
+             *         within the overlap region to the first space point of the new bucket are copied over
+             * @param refSp: First new space point which will be added to the new bucket.
+             * @param sortedPoints: List of all processed buckets in the chamber. The list is augmented by 1 element */
+            void newBucket(const SpacePoint& refSp,
+                           SpacePointBucketVec& sortedPoints) const;
             /** @brief: Check whether the occupancy cuts of hits in a gasGap are surpassed.
              *          The method is specified for each of the 3 strip technologies, 
              *          Rpc, Tgc, sTgc and applies a technology-dependent upper bound on the 
              *          number of phi & eta hits. If the threshold is surpassed, only 1D space
              *          points are built intsead of 2D ones
              * @param etaHits: List of all presorted eta measurements in a gas gap
-             * @param phiHits: List of all presorted phi measurements in a gas gap  
-             */
+             * @param phiHits: List of all presorted phi measurements in a gas gap */
             template <class PrdType>
                 bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
                                      const std::vector<const PrdType*>& phiHits) const;
@@ -230,7 +249,7 @@ namespace MuonR4{
                                                         "Hits that are within <spacePointOverlap> of the bucket margin. "
                                                         "Are copied to the next bucket"};
     
-            Gaudi::Property<bool> m_doStat{this, "doStats", true, 
+            Gaudi::Property<bool> m_doStat{this, "doStats", false, 
                                            "If enabled the algorithm keeps track how many hits have been made" };
             
             Gaudi::Property<unsigned int> m_capacityBucket{this,"CapacityBucket" , 50};

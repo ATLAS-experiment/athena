@@ -27,6 +27,7 @@ def LLJ1KernelCfg(flags, name='LLJ1Kernel', **kwargs):
         'MuonTPThinningToolName'              : "LLJ1MuonTPThinningTool",
         'TauJetThinningToolName'              : "LLJ1TauJetThinningTool",
         'TauJets_MuonRMThinningToolName'      : "LLJ1TauJets_MuonRMThinningTool",
+        'DiTauThinningToolName'               : "LLJ1DiTauThinningTool",
         'DiTauTPThinningToolName'             : "LLJ1DiTauTPThinningTool",
         'DiTauLowPtThinningToolName'          : "LLJ1DiTauLowPtThinningTool",
         'DiTauLowPtTPThinningToolName'        : "LLJ1DiTauLowPtTPThinningTool",

@@ -12,15 +12,17 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
+from TileConditions.TileSamplingFractionConfig import TileSamplingFractionCondAlgCfg
+from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+from LArGeoAlgsNV.LArGMConfig import LArGMCfg
 
 # Adding algorithm
 def LarEMSamplingFractionCfg(flags, name="LarEMSamplingFraction", **kwargs):
     acc = ComponentAccumulator()
 
-    acc.addService(CompFactory.THistSvc(name="THistSvc", Output=[ f"{name} DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'" ]))
+    acc.addService(CompFactory.THistSvc(name="THistSvc", Output=[ f"MYSTREAM DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'" ]))
 
-    kwargs.setdefault('HistPath', f"/{name}/")
     kwargs.setdefault('DoCells', 0)
 
     kwargs.setdefault('CalibrationHitContainerNames', [
@@ -30,6 +32,12 @@ def LarEMSamplingFractionCfg(flags, name="LarEMSamplingFraction", **kwargs):
         "TileCalibHitActiveCell",
     ] )
 
+    acc.merge( TileCablingSvcCfg(flags) )
+    acc.merge( TileSamplingFractionCondAlgCfg(flags) )
+    acc.getCondAlgo('TileSamplingFractionCondAlg').G4Version=-1
+    requiredConditons=["Shape","AutoCorr","Noise","Pedestal","fSampl","MinBias"]
+    acc.merge(LArElecCalibDBCfg(flags,requiredConditons))
+    acc.merge(LArGMCfg(flags))
     acc.addEventAlgo(CompFactory.LarEMSamplingFraction(name, **kwargs))
 
     return acc
@@ -37,7 +45,7 @@ def LarEMSamplingFractionCfg(flags, name="LarEMSamplingFraction", **kwargs):
 
 # Setting flags
 flags = initConfigFlags()
-flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
+flags.IOVDb.GlobalTag = 'OFLCOND-MC23-SDR-RUN3-04'
 flags.Input.Files = ['test.root']
 flags.Output.HISTFileName = 'LArEM_SF.root'
 flags.Exec.MaxEvents = -1
@@ -47,10 +55,9 @@ flags.lock()
 
 # Main CA and basic services
 acc = MainServicesCfg(flags)
-acc.merge(LarEMSamplingFractionCfg(flags))
 acc.merge(PoolReadCfg(flags))
+acc.merge(LarEMSamplingFractionCfg(flags))
+acc.printConfig(withDetails=True)
 
 # Finalize
-acc.run()
-
 sys.exit( acc.run().isFailure() )

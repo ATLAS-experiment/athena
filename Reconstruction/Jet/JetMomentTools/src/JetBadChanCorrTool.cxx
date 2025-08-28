@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -94,7 +94,7 @@ StatusCode JetBadChanCorrTool::initialize()
           ATH_MSG( ERROR ) << "failed to get histo " << location << endmsg;
           return StatusCode::FAILURE;
         }
-        m_profileDatas[sample].emplace_back((TH1D*)th,sample,ptMin,ptMax,etaMin,etaMax,phiMin,phiMax);
+        m_profileDatas[sample].emplace_back(th,sample,ptMin,ptMax,etaMin,etaMax,phiMin,phiMax);
         ATH_MSG( DEBUG ) << "read hist=" << th->GetName() 
                          << " tag=" << tag << " sample=" << sample 
                          << " ptMin=" << ptMin << " ptMax=" << ptMax 

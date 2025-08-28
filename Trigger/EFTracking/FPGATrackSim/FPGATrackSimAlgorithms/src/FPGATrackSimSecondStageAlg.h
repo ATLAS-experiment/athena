@@ -60,9 +60,6 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         // Handles
         ToolHandle<IFPGATrackSimTrackExtensionTool>      m_trackExtensionTool {this, "TrackExtensionTool", "FPGATrackSimTrackExtensionTool", "Track extensoin tool"};
 
-        // We definitely need this one, in case we do Elliot's inside in -> extrapolate to spacepoints.
-        ToolHandle<IFPGATrackSimRoadFilterTool>          m_spRoadFilterTool {this, "SPRoadFilterTool", "FPGATrackSimSpacepointRoadFilterTool", "Spacepoint Road Filter Tool"};
-
         // Hough ROOT output.
         ToolHandle<FPGATrackSimHoughRootOutputTool>      m_houghRootOutputTool {this, "HoughRootOutputTool", "FPGATrackSimHoughRootOutputTool/FPGATrackSimHoughRootOutputTool", "Hough ROOT Output Tool"};
 
@@ -79,6 +76,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
         // Flags
+        Gaudi::Property<int> m_SetTruthParametersForTracks {this, "SetTruthParametersForTracks", -1, "flag to override track parameters and set them to the truth values"};
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};

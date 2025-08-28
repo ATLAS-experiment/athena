@@ -901,7 +901,7 @@ if(name_flag==1) {
 
   resultList->SetOwner(true);
  
-  result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resultList);
+  result->object_ =  (boost::shared_ptr<TObject>)static_cast<TObject*>(resultList);
   
 
   if( doChiSquaredTest ) {

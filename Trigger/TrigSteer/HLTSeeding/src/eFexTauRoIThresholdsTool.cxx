@@ -1,9 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "eFexTauRoIThresholdsTool.h"
+#include "utilities.h"
 
-uint64_t eFexTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& roi,
+using namespace HLTSeedingNs;
+
+uint64_t eFexTauRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
+                                              const xAOD::eFexTauRoI& roi,
                                               const RoIThresholdsTool::ThrVec& menuThresholds,
                                               const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
   // Get RoI properties (once, rather than for every threshold in the menu)
@@ -20,7 +24,7 @@ uint64_t eFexTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& roi,
 
     // Test ET threshold and core and hadronic ratio codes, set bit in threshold word if conditions met
     if (et > thr->thrValueCounts(ieta) && rcore >= static_cast<unsigned int>(thr->rCore()) && rhad >= static_cast<unsigned int>(thr->rHad()) ) {
-      thresholdMask |= (1<<thr->mapping());
+      thresholdMask |= (1_u64<<thr->mapping());
     }
   }
   return thresholdMask;

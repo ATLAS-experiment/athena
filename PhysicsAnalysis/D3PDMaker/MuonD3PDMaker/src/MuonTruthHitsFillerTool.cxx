@@ -94,7 +94,7 @@ StatusCode MuonTruthHitsFillerTool::book() {
  */
 StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
 {
-  ATH_CHECK( fillHitCounts (HepMC::barcode(trackRecord)) );  // FIXME barcode-based
+  ATH_CHECK( fillHitCounts (HepMC::uniqueID(trackRecord)) );
   return StatusCode::SUCCESS;
 }
 
@@ -104,12 +104,13 @@ StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
  */
 StatusCode MuonTruthHitsFillerTool::fill (const xAOD::TruthParticle& p)
 {
-  ATH_CHECK( fillHitCounts (HepMC::barcode(p)) );
+  ATH_CHECK( fillHitCounts (HepMC::uniqueID(p)) );
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode) {
+StatusCode MuonTruthHitsFillerTool::fillHitCounts (int uniqueID)
+{
 
   bool found = false;
   for (const std::string& key : m_PRD_TruthNames) {
@@ -125,7 +126,7 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode) {
       // identifier, so we can use HepMC::uniqueID once TrackRecord
       // and xAOD::TruthParticle and PRD_MultiTruthCollection support
       // it.
-      if ( !HepMC::is_same_particle(mc.second,barcode)) continue;
+      if ( !HepMC::is_same_particle(mc.second,uniqueID)) continue;
       found = true;
       const Identifier& id = mc.first;
       ATH_MSG_VERBOSE("found matching hit " << m_idHelperSvc->toString(id) );

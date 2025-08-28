@@ -13,9 +13,11 @@
 #include "SctSensor_CTB.h"
 
 // athena includes
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 // Geant4 includes
+#include <G4EventManager.hh>
 #include "G4Step.hh"
 #include "G4ThreeVector.hh"
 #include "G4SDManager.hh"
@@ -25,14 +27,11 @@
 // CLHEP transform
 #include "CLHEP/Geometry/Transform3D.h"
 
-// For make unique
-#include <memory>
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 SctSensor_CTB::SctSensor_CTB(const std::string& name, const std::string& hitCollectionName)
   : G4VSensitiveDetector(name)
-  , m_HitColl(hitCollectionName)
+  , m_HitCollName(hitCollectionName)
 {
 }
 
@@ -40,7 +39,12 @@ SctSensor_CTB::SctSensor_CTB(const std::string& name, const std::string& hitColl
 
 void SctSensor_CTB::Initialize(G4HCofThisEvent *)
 {
-  if (!m_HitColl.isValid()) m_HitColl = std::make_unique<SiHitCollection>();
+  // ISF calls G4SDManager::PrepareNewEvent() before the Geant4 event loop starts...
+  if(auto* eventManger = G4EventManager::GetEventManager()){
+    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
+      m_HitColl = eventInfo->GetHitCollectionMap()->Find<SiHitCollection>(m_HitCollName);
+    }
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

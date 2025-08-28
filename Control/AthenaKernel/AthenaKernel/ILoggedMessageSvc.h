@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_ILOGGEDMESSAGESVC_H
@@ -34,8 +34,8 @@ public:
   };
     
 
-  virtual const std::vector<std::pair<std::string, std::string> >& getMessages( MSG::Level ) const = 0;
-  virtual const std::vector< LoggedMessage >& getKeyMessages() const = 0;
+  virtual std::vector<std::pair<std::string, std::string> > getMessages( MSG::Level ) const = 0;
+  virtual std::vector< LoggedMessage > getKeyMessages() const = 0;
 
   virtual ~ILoggedMessageSvc();
 

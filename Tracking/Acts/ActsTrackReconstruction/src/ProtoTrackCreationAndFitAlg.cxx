@@ -4,8 +4,9 @@
 
 #include "ProtoTrackCreationAndFitAlg.h"
 
-#include "ActsCalibration/CalibrationContext.h"
+#include "ActsCalibBase/CalibrationContext.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "src/detail/Definitions.h"
 #include <stdlib.h>
 
 
@@ -61,24 +62,20 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   /// The block is borrowed from the ACTS TrackFindingAlg and 
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
-
-  const auto* detectorElementToGeometryIdMap =  m_trackingGeometryTool->surfaceIdMap();  
-
   const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
   const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
   
   /// ----------------------------------------------------------
-  /// and we are back to EF tracking! 
-  ActsTrk::MutableTrackContainer trackContainer;
+  /// and we are back to EF tracking!
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::detail::RecoTrackContainer trackContainer( trackBackend, trackStateBackend );
 
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
-    auto res = m_actsFitter->fit(ctx, proto.measurements,*proto.parameters,
-                                 m_trackingGeometryTool->getGeometryContext(ctx).context(),
-                                 m_extrapolationTool->getMagneticFieldContext(ctx),
-                                 calContext,
-                                 *detectorElementToGeometryIdMap);
+    auto res = m_actsFitter->fit(proto.measurements,*proto.parameters,
+                                 tgContext, mfContext, calContext);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;
@@ -102,8 +99,11 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     }
 
   }
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), 
-    m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);  
+
+  ActsTrk::TrackBackend constTrackBackend( std::move(trackBackend) );
+  ActsTrk::TrackStateBackend constTrackStateBackend( std::move(trackStateBackend) );
+  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = std::make_unique<ActsTrk::TrackContainer>( std::move(constTrackBackend),
+                                                                                                             std::move(constTrackStateBackend) );
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
   if (not m_protoTrackCollectionKey.empty()) {

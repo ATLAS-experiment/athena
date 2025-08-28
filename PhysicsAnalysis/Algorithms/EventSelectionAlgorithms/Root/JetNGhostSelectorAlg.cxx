@@ -53,7 +53,7 @@ namespace CP {
       int count = 0;
       for (const xAOD::Jet *jet : *jets){
         if (!m_jetSelection || m_jetSelection.getBool(*jet, sys)){
-          if (jet->pt() > m_ptmin){
+          if (jet->pt() >= m_ptmin){
             if (!m_ghostAcc->isAvailable(*jet)) {
               ANA_MSG_ERROR ("Ghost decoration " << m_ghost.value() << " is not available on this jet!");
               return StatusCode::FAILURE;

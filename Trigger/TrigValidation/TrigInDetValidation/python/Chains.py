@@ -142,11 +142,12 @@ class Chains:
 
         d["minbiaspix"] = {
             "chains": [
-                'HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10',
+                'HLT_mb_pixsptrk_nototpix20_q2_L1VjTE10',
 
             ],
             "signature": ["MinBias"],
-            "menu": 'PhysicsP1_HI_run3_v1'
+            "menu": 'Dev_HI_run3_v1'
+#           "menu": 'PhysicsP1_HI_run3_v1'
         }
 
         d["cosmic"] = {

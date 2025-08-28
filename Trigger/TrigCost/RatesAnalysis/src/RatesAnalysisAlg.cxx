@@ -366,6 +366,10 @@ StatusCode RatesAnalysisAlg::setTriggerDesicison(const std::string& name, const 
   return StatusCode::SUCCESS;
 }
 
+StatusCode RatesAnalysisAlg::initialize_extra_content() {
+  return StatusCode::SUCCESS;
+}
+
 StatusCode RatesAnalysisAlg::initialize() {
   ATH_MSG_INFO ("Initializing " << name() << "...");
  
@@ -379,11 +383,16 @@ StatusCode RatesAnalysisAlg::initialize() {
 
   ATH_CHECK( m_enhancedBiasRatesTool.retrieve() ); 
 
+  ATH_CHECK( m_eventInfoKey.initialize());
+  ATH_CHECK( m_truthHS_jets_RHKey.initialize( m_enhancedBiasRatesTool->isMC() && m_doMultiSliceDiJet));
+  ATH_CHECK( m_truthPU_jets_RHKey.initialize( m_enhancedBiasRatesTool->isMC() && m_doMultiSliceDiJet));
+
   if (m_doUniqueRates && !m_doGlobalGroups) {
     ATH_MSG_ERROR("DoUniqueRates=True requires DoGlobalGroups=True");
     return StatusCode::FAILURE;
   }
 
+  ATH_CHECK( initialize_extra_content() ); 
   return StatusCode::SUCCESS;
 }
 
@@ -519,8 +528,8 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
   }
   if (m_doHistograms) {
     ATH_MSG_DEBUG("################## Registering normalisation histogram:");
-    m_scalingHist = new TH1D("normalisation",";;",3,0.,3.);
-    ATH_CHECK( histSvc()->regHist("/RATESTREAM/normalisation", m_scalingHist) );
+    m_scalingHist = new TH1D(std::format("normalisation{}",m_histogramSuffix.value()).c_str(),";;",3,0.,3.);
+    ATH_CHECK( histSvc()->regHist("/RATESTREAM/normalisation" + m_histogramSuffix, m_scalingHist) );
     m_bcidHist = new TH1D("bcid",";BCID;Events",3565,-.5,3564.5);
     ATH_CHECK( histSvc()->regHist("/RATESTREAM/bcid", m_bcidHist) );
     ATH_MSG_DEBUG("################## Registering metadata tree histogram:");
@@ -536,16 +545,21 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
         } else if (trigger.second->getName().find("HLT") == 0) {
           lvlSubdir = "Rate_ChainHLT_HLT/";
         }
+        trigger.second->setDataName("data"+m_histogramSuffix);
         ATH_CHECK( trigger.second->giveDataHist(histSvc(), std::string("/RATESTREAM/All/" + lvlSubdir + trigger.first + "/data")) );
+        trigger.second->setRateVsMuName("rateVsMu"+m_histogramSuffix);
         ATH_CHECK( trigger.second->giveMuHist(histSvc(), std::string("/RATESTREAM/All/" + lvlSubdir + trigger.first + "/rateVsMu")) );
-        if (m_useBunchCrossingData) ATH_CHECK( trigger.second->giveTrainHist(histSvc(), std::string("/RATESTREAM/All/" + lvlSubdir + trigger.first + "/rateVsTrain")) );
-        else trigger.second->clearTrainHist();
+        if (m_useBunchCrossingData) {
+          trigger.second->setRateVsTrainName("rateVsTrain"+m_histogramSuffix);
+          ATH_CHECK( trigger.second->giveTrainHist(histSvc(), std::string("/RATESTREAM/All/" + lvlSubdir + trigger.first + "/rateVsTrain")) );
+        } else trigger.second->clearTrainHist();
       }
     }
     if (m_scanTriggers.size()) {
     ATH_MSG_DEBUG("################## Registering scan trigger histograms:");
       for (const auto& trigger : m_scanTriggers) {
-        ATH_CHECK( trigger.second->giveThresholdHist(histSvc(), std::string("/RATESTREAM/ScanTriggers/" + trigger.first + "/rateVsThreshold")) );
+        trigger.second->setHistoName("rateVsThreshold"+m_histogramSuffix);
+        ATH_CHECK( trigger.second->giveThresholdHist(histSvc(), std::string("/RATESTREAM/ScanTriggers/" + trigger.first + "/rateVsThreshold" + m_histogramSuffix)) );
       }
     }
     if (m_groups.size()) {
@@ -554,20 +568,28 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
         if (!group.second->doHistograms()) continue;
         std::string groupName = group.first;
         std::replace( groupName.begin(), groupName.end(), ':', '_');
+        group.second->setDataName("data"+m_histogramSuffix);
         ATH_CHECK( group.second->giveDataHist(histSvc(), std::string("/RATESTREAM/All/Rate_Group_HLT/" + groupName + "/data")) );
+        group.second->setRateVsMuName("rateVsMu"+m_histogramSuffix);
         ATH_CHECK( group.second->giveMuHist(histSvc(), std::string("/RATESTREAM/All/Rate_Group_HLT/" + groupName + "/rateVsMu")) );
-        if (m_useBunchCrossingData) ATH_CHECK( group.second->giveTrainHist(histSvc(), std::string("/RATESTREAM/All/Rate_Group_HLT/" + groupName + "/rateVsTrain")) );
-        else group.second->clearTrainHist();
+        if (m_useBunchCrossingData) {
+          group.second->setRateVsTrainName("rateVsTrain"+m_histogramSuffix);
+          ATH_CHECK( group.second->giveTrainHist(histSvc(), std::string("/RATESTREAM/All/Rate_Group_HLT/" + groupName + "/rateVsTrain")) );
+        } else group.second->clearTrainHist();
       }
     }
     if (m_globalGroups.size()) {
       ATH_MSG_DEBUG("################## Registering global group histograms:");
       for (const auto& group : m_globalGroups) {
         if (!group.second->doHistograms()) continue;
+        group.second->setDataName("data"+m_histogramSuffix);
         ATH_CHECK( group.second->giveDataHist(histSvc(), std::string("/RATESTREAM/All/Rate_Group_HLT/RATE_GLOBAL_" + group.first + "/data")) );
+        group.second->setRateVsMuName("rateVsMu"+m_histogramSuffix);
         ATH_CHECK( group.second->giveMuHist(histSvc(), std::string("/RATESTREAM/All/Rate_Group_HLT/RATE_GLOBAL_" + group.first + "/rateVsMu")) );
-        if (m_useBunchCrossingData) ATH_CHECK( group.second->giveTrainHist(histSvc(), std::string("/RATESTREAM/All/Rate_Group_HLT/RATE_GLOBAL_" + group.first + "/rateVsTrain")) );
-        else group.second->clearTrainHist();
+        if (m_useBunchCrossingData){
+        group.second->setRateVsTrainName("rateVsTrain"+m_histogramSuffix);
+        ATH_CHECK( group.second->giveTrainHist(histSvc(), std::string("/RATESTREAM/All/Rate_Group_HLT/RATE_GLOBAL_" + group.first + "/rateVsTrain")) );
+        } else group.second->clearTrainHist();
       }
     }
   }
@@ -583,26 +605,48 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
   return StatusCode::SUCCESS;
 }
 
+// HSTP filter from Jet/EtMiss
+StatusCode RatesAnalysisAlg::pass_HstpFilter(bool &pass){
+
+  if (!m_doMultiSliceDiJet) {
+    return StatusCode::SUCCESS;
+  };
+
+  SG::ReadHandle<xAOD::JetContainer> truthHS_jets(m_truthHS_jets_RHKey);
+  ATH_CHECK( truthHS_jets.isValid() );
+  SG::ReadHandle<xAOD::JetContainer> truthPU_jets(m_truthPU_jets_RHKey);
+  ATH_CHECK( truthPU_jets.isValid() );  
+
+  // Extract the pT of the leading jet that defines the hardness. The jet containers should always be pT sorted
+  const double pT_j1_truthPU = truthPU_jets->size() ? truthPU_jets->front()->pt() : 0; // Hardest PU truth jet
+  const double pT_j1_truthHS = truthHS_jets->size() ? truthHS_jets->front()->pt() : 5000; // In the rare case of no HS truth jets in the event, assume it is close to the 5 GeV threshold
+  
+  // Now see if we pass the filter.
+  pass = pT_j1_truthHS > pT_j1_truthPU;
+  ATH_MSG_DEBUG("Hard Scatter (" << pT_j1_truthHS/1000. << " GeV) Harder Than Pileup (" << pT_j1_truthPU/1000. << " GeV) filter " << (pass ? "PASSES" : "FAILS"));
+  return StatusCode::SUCCESS;
+}
+
 StatusCode RatesAnalysisAlg::execute() {  
-  ATH_MSG_DEBUG("Executing " << name() << " on event " << m_eventCounter << "...");
+  ATH_MSG_VERBOSE("Executing " << name() << " on event " << m_eventCounter << "...");
   if (m_eventCounter++ == 0) { // First time in execute loop - cannot access TDT before this.
     ATH_CHECK( populateTriggers() );
   }
 
   // Get event characteristics
-  const xAOD::EventInfo* eventInfo(nullptr);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+  ATH_CHECK( eventInfo.isValid() );
   uint32_t distance = 0;
-  ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
-  ATH_CHECK( m_enhancedBiasRatesTool->getDistanceIntoTrain(eventInfo, distance) );
+  ATH_CHECK( m_enhancedBiasRatesTool->getDistanceIntoTrain(eventInfo.get(), distance) );
+  const bool isMC = m_enhancedBiasRatesTool->isMC();
 
   // Get the weighting & scaling characteristics
-  m_weightingValues.m_enhancedBiasWeight = m_enhancedBiasRatesTool->getEBWeight(eventInfo);
+  m_weightingValues.m_enhancedBiasWeight = m_enhancedBiasRatesTool->getEBWeight(eventInfo.get());
   m_weightingValues.m_eventMu = std::ceil(eventInfo->actualInteractionsPerCrossing()); // This always seems to be a half integer
-  m_weightingValues.m_eventLumi = m_enhancedBiasRatesTool->getLBLumi(eventInfo);
-  m_weightingValues.m_isUnbiased = m_enhancedBiasRatesTool->isUnbiasedEvent(eventInfo);
+  m_weightingValues.m_eventLumi = m_enhancedBiasRatesTool->getLBLumi(eventInfo.get());
+  m_weightingValues.m_isUnbiased = m_enhancedBiasRatesTool->isUnbiasedEvent(eventInfo.get());
   m_weightingValues.m_distanceInTrain = distance;
-  m_weightingValues.m_eventLiveTime = m_enhancedBiasRatesTool->getEBLiveTime(eventInfo); 
-
+  m_weightingValues.m_eventLiveTime = m_enhancedBiasRatesTool->getEBLiveTime(eventInfo.get()); 
   if (m_useBunchCrossingData && m_vetoStartOfTrain > 0 && m_weightingValues.m_distanceInTrain < m_vetoStartOfTrain) return StatusCode::SUCCESS;
 
   // Bunch factor doesn't change as a fn. of the run. Reminder: m_bunchFactor = m_targetBunches / (double)ebPairedBunches;
@@ -611,7 +655,34 @@ StatusCode RatesAnalysisAlg::execute() {
   m_weightingValues.m_expoMuFactor = m_weightingValues.m_bunchFactor * exp( m_expoScalingFactor * (m_targetMu - m_weightingValues.m_eventMu) );
 
   // Ignore zero weighted events. Typically these come from bad LB
-  if (RatesHistoBase::isZero(m_weightingValues.m_enhancedBiasWeight)) return StatusCode::SUCCESS;
+  if (RatesHistoBase::isZero(m_weightingValues.m_enhancedBiasWeight)) {
+    return StatusCode::SUCCESS;
+  }
+
+  const double weightedEvents = (isMC ? eventInfo->mcEventWeight() : m_weightingValues.m_enhancedBiasWeight);
+  m_weightedEventCounter += weightedEvents;
+
+  double ratesDenominator = 0.0;
+  if (m_doMultiSliceDiJet) {
+    ratesDenominator = eventInfo->mcEventWeight(); // In multi-slice mode we only normalize to the weighted number of events
+  } else {
+    ratesDenominator = m_weightingValues.m_eventLiveTime * (isMC ? eventInfo->mcEventWeight() : 1.0); // Otherwise, we need to keep track of elapsed walltime as well
+  }
+  m_ratesDenominator += ratesDenominator;
+
+  if (m_doHistograms) {
+    m_bcidHist->Fill(eventInfo->bcid(), m_weightingValues.m_enhancedBiasWeight);
+    m_scalingHist->Fill(0.5, ratesDenominator); // Walltime
+    m_scalingHist->Fill(1.5, 1.); // Total events
+    m_scalingHist->Fill(2.5, weightedEvents ); // Total weighted events
+  }
+
+  // HSTP filter check
+  if (isMC) {
+    bool filterPass = true;
+    ATH_CHECK( pass_HstpFilter(filterPass) );
+    if (!filterPass) {return StatusCode::SUCCESS;}
+  }
 
   // Do automated triggers 
   ATH_CHECK( executeTriggerEmulation() );
@@ -629,17 +700,6 @@ StatusCode RatesAnalysisAlg::execute() {
   // Reset triggers
   for (const auto& trigger : m_activatedTriggers) trigger->reset();
   m_activatedTriggers.clear();
-
-  // Keep track of elapsed walltime
-  m_ratesDenominator += m_weightingValues.m_eventLiveTime;
-  m_weightedEventCounter += m_weightingValues.m_enhancedBiasWeight;
-
-  if (m_doHistograms) {
-    m_bcidHist->Fill(eventInfo->bcid(), m_weightingValues.m_enhancedBiasWeight);
-    m_scalingHist->Fill(0.5, m_weightingValues.m_eventLiveTime); // Walltime
-    m_scalingHist->Fill(1.5, 1.); // Total events
-    m_scalingHist->Fill(2.5, m_weightingValues.m_enhancedBiasWeight); // Total events weighted
-  }
 
   // Some debug info
   if (m_eventCounter % 1000 == 0) {
@@ -675,27 +735,29 @@ StatusCode RatesAnalysisAlg::finalize() {
   ATH_MSG_INFO ("Finalizing " << name() << "...");
 
   ATH_CHECK( ratesFinalize() );
-  if (m_scanTriggers.size()) {
-    ATH_MSG_INFO("################## Computed Rate Scans for Threshold-Scan Items:");
-    for (const auto& trigger : m_scanTriggers) ATH_MSG_INFO(trigger.second->printRate(m_ratesDenominator));
-  }
-  if (m_triggers.size()) {
-    ATH_MSG_INFO("################## Computed Rate Estimations for Single Items:");
-    std::set<std::string> keys; // Used an unordered map for speed, but now we'd like the items in order
-    for (const auto& trigger : m_triggers) keys.insert(trigger.first);
-    for (const std::string& key : keys) ATH_MSG_INFO(m_triggers.at(key)->printRate(m_ratesDenominator));
-  }
-  if (m_expressTriggers.size()) {
-    ATH_MSG_INFO("################## Computed Express Rate Estimations for Single Items:");
-    for (const auto& trigger : m_expressTriggers) ATH_MSG_INFO(trigger->printExpressRate(m_ratesDenominator));
-  }
-  if (m_groups.size()) {
-    ATH_MSG_INFO("################## Computed Rate Estimations for Groups:");
-    for (const auto& group : m_groups) ATH_MSG_INFO(group.second->printRate(m_ratesDenominator));
-  }
-  if (m_globalGroups.size()) {
-    ATH_MSG_INFO("################## Computed Rate Estimations for Global Groups:");
-    for (const auto& group : m_globalGroups) ATH_MSG_INFO(group.second->printRate(m_ratesDenominator));
+  if (!m_doMultiSliceDiJet) { // Cannot estimate multi-slice rates before the merging stage
+    if (m_scanTriggers.size()) {
+      ATH_MSG_INFO("################## Computed Rate Scans for Threshold-Scan Items:");
+      for (const auto& trigger : m_scanTriggers) ATH_MSG_INFO(trigger.second->printRate(m_ratesDenominator));
+    }
+    if (m_triggers.size()) {
+      ATH_MSG_INFO("################## Computed Rate Estimations for Single Items:");
+      std::set<std::string> keys; // Used an unordered map for speed, but now we'd like the items in order
+      for (const auto& trigger : m_triggers) keys.insert(trigger.first);
+      for (const std::string& key : keys) ATH_MSG_INFO(m_triggers.at(key)->printRate(m_ratesDenominator));
+    }
+    if (m_expressTriggers.size()) {
+      ATH_MSG_INFO("################## Computed Express Rate Estimations for Single Items:");
+      for (const auto& trigger : m_expressTriggers) ATH_MSG_INFO(trigger->printExpressRate(m_ratesDenominator));
+    }
+    if (m_groups.size()) {
+      ATH_MSG_INFO("################## Computed Rate Estimations for Groups:");
+      for (const auto& group : m_groups) ATH_MSG_INFO(group.second->printRate(m_ratesDenominator));
+    }
+    if (m_globalGroups.size()) {
+      ATH_MSG_INFO("################## Computed Rate Estimations for Global Groups:");
+      for (const auto& group : m_globalGroups) ATH_MSG_INFO(group.second->printRate(m_ratesDenominator));
+    }
   }
   ATH_MSG_INFO("################## LHC Conditions and weighting information:");
   printInputSummary();
@@ -810,10 +872,14 @@ void RatesAnalysisAlg::writeMetadata() {
   }
   m_runNumber = m_enhancedBiasRatesTool->getRunNumber();
   m_metadataTree->Branch("runNumber", &m_runNumber);
-  
   m_metadataTree->Branch("targetMu", &m_targetMu);
   m_metadataTree->Branch("targetBunches", &m_targetBunches);
   m_metadataTree->Branch("targetLumi", &m_targetLumi);
+  double bunchCrossingRate = m_enhancedBiasRatesTool->getBunchCrossingRate();
+  m_metadataTree->Branch("bunchCrossingRate", &bunchCrossingRate);
+  int doMultiSliceDiJet = m_doMultiSliceDiJet;
+  m_metadataTree->Branch("multiSliceDiJet", &doMultiSliceDiJet);
+
   std::vector<std::string> triggers;
   std::vector<std::string> lowers;
   std::vector<double> prescales;

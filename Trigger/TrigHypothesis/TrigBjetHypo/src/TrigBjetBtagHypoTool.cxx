@@ -15,8 +15,8 @@
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "TrigBjetBtagHypoTool.h"
-#include "xAODBTagging/BTagging.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TrigBjetHypo/safeLogRatio.h"
 
 TrigBjetBtagHypoTool::TrigBjetBtagHypoTool( const std::string& type,
     const std::string& name,
@@ -96,12 +96,12 @@ StatusCode TrigBjetBtagHypoTool::decide( std::vector< TrigBjetBtagHypoToolInfo >
       pass = false;
       stage = "no primary vertex";
     } else {
-      const xAOD::BTagging *btagging = *(bTagInfo.btaggingEL);
+      const xAOD::Jet *jet = *(bTagInfo.jetEL);
 
       // monitor floats
       std::vector<Monitored::Scalar<float>> mons;
       for (const auto& monpair: m_monPairs) {
-        mons.emplace_back(monpair.second, monpair.first(*btagging));
+        mons.emplace_back(monpair.second, monpair.first(*jet));
       }
 
       std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> mons_wrappers(
@@ -109,7 +109,7 @@ StatusCode TrigBjetBtagHypoTool::decide( std::vector< TrigBjetBtagHypoToolInfo >
       Monitored::Group(m_monTool, mons_wrappers);
 
       for (const auto& check: m_checks) {
-        if (!check->passThreshold(*btagging)) {
+        if (!check->passThreshold(*jet)) {
           pass = false;
           stage = "fail";
           break;

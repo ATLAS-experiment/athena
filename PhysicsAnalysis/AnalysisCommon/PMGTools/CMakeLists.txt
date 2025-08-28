@@ -26,11 +26,9 @@ atlas_add_library( PMGToolsLib
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools PATCoreLib PATInterfaces PMGAnalysisInterfacesLib xAODTruth
    PRIVATE_LINK_LIBRARIES FourMomUtils PathResolver TruthUtils xAODEventInfo xAODJet xAODMetaData ${extra_private_libs})
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( PMGTools
-      src/components/*.cxx
-      LINK_LIBRARIES PMGToolsLib )
-endif()
+atlas_add_component( PMGTools
+   src/components/*.cxx
+   LINK_LIBRARIES PMGToolsLib )
 
 atlas_add_dictionary( PMGToolsDict
    PMGTools/PMGToolsDict.h

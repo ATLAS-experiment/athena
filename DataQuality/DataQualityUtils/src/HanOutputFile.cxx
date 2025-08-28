@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -171,7 +171,7 @@ namespace dqutils
 
     if (objName != "") { // Not a file
       if (obj_type == "TDirectoryFile" || obj_type == "TDirectory" || obj_type == "TFile") {
-        dir = (TDirectory*) obj;
+        dir = static_cast<TDirectory*> (obj);
         std::string name(dir->GetName());
         if (name == "Config" || name == "Results") {
           delete dir;
@@ -195,7 +195,7 @@ namespace dqutils
     }
 
     if (obj_type == "TDirectoryFile" || obj_type == "TDirectory" || obj_type == "TFile") {
-      dir = (TDirectory*) obj;
+      dir = static_cast<TDirectory*> (obj);
       dir->cd();
       TIter next(dir->GetListOfKeys());
       TKey* key;

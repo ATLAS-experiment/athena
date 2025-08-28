@@ -173,7 +173,12 @@ StatusCode FPGAActsTrkConverter::matchTrackMeasurements(const EventContext& ctx,
                                                         std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
                                                         const DataVector<XAOD_CLUSTER>& clusterContainer) const
 {
-  std::vector<Identifier> rdoIDs = getRdoIdList(trackHit);
+  std::vector<Identifier> rdoIDs;
+  if (trackHit.getHitType() ==  HitType::spacepoint)
+    rdoIDs = getRdoIdList(trackHit.getOriginalHit());
+  else
+    rdoIDs = getRdoIdList(trackHit);
+
   const auto& rdoList = cluster.rdoList();
   if (rdoIDs.size() != rdoList.size()) return StatusCode::SUCCESS;
   size_t matchedCounter = 0;
@@ -237,12 +242,20 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   std::shared_ptr<const Acts::Surface> actsSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3(0., 0., 0.));
   Acts::BoundVector params;
 
-  constexpr double GeVToMeV = 1000;
+  constexpr double GeVToMeV = 1000.;
   double d0=track.getD0();
   double z0=track.getZ0();
   double phi=track.getPhi();
+  double eta=track.getEta();
   double theta=track.getTheta();
-  double qop=track.getQOverPt();
+  double qopt=track.getQOverPt()*GeVToMeV;
+  double pt=track.getPt()/GeVToMeV;
+  double px=pt*std::cos(phi);
+  double py=pt*std::sin(phi);
+  double pz=pt*std::sinh(eta);
+  double p=std::sqrt(px*px+py*py+pz*pz);
+  double qop=((p > 1e-10) ? (1/p) : 1e10);
+  if (qopt < 0) qop *= -1;  
   double t=0.;
 
   params << d0, z0, phi, theta, qop, t;  
@@ -250,8 +263,15 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
 
   // Covariance - let's be honest and say we have no clue ;-) 
   Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
-  cov *= (GeVToMeV*GeVToMeV); 
+  
+  (cov)(0,0) *= 0.16; // d0: 0.4 **2 (conservative)
+  (cov)(1,1) *= 25; // z0: 5**2 = 25 (conservative)
+  (cov)(2,2) *= 0.0008; // phi: 0.02**2 = 0.0004, increase a bit = double
+  (cov)(3,3) *= 0.0008; // width in eta is nearly 0.2, but width in theta = 2*atan(e^-eta) will vary. Take biggest one, which is at eta of 0 when width is 0.02, so get 0.02**2 = 0.0004, increase a bit = double
+  (cov)(4,4) *= 0.36; // qop also varies with eta. Error on q/pt conservatively = 0.0003 in mev ^-1, or 0.3 in gev ^-1, double to start giving us 0.6. then square that to get 0.36
 
+
+    
   // some ACTS paperwork 
   Trk::ParticleHypothesis hypothesis = Trk::pion;
   float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;

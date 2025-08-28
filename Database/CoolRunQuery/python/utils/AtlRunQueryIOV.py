@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 
-from __future__ import print_function
 from functools import total_ordering
 from PyCool import cool
 import time

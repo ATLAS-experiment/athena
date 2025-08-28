@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DiTauJet_v1.h 631921 2015-09-23 23:30:59Z dkirchme $
@@ -96,23 +96,6 @@ namespace xAOD {
     void setVertex( const xAOD::VertexContainer *cont, const xAOD::Vertex *vertex ); 
 
     const Vertex* vertex() const;
-
-
-    // // secondary vertices
-    // // typedef ElementLink< xAOD::VertexContainer > VertexLink_t;
-    // typedef std::vector< ElementLink< xAOD::VertexContainer > >  SecVertexLinks_t;
-
-    // const SecVertexLinks_t& secVertexLinks() const;
-    // void setSecVertexLinks( const SecVertexLinks_t& secondayVertices );
-    // // Get the pointer to a given secondary vertex associated with this subjet
-    // const Vertex* secVertex( size_t i ) const;
-    // // Get the number of secondary vertex associated with this subjet
-    // size_t nSecVertex() const;
-    // // add a secondary vertex associated with a subjet
-    // void addSecVertex( const xAOD::VertexContainer*, const xAOD::Vertex*);
-    // // Remove all vertices
-    // void clearSecVertexLinks();
-
 
     // tracks
     typedef std::vector< ElementLink< xAOD::TrackParticleContainer > >  TrackParticleLinks_t;

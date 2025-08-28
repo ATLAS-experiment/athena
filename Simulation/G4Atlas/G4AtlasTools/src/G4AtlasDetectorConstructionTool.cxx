@@ -5,6 +5,10 @@
 // Include files
 #include <type_traits>
 
+#include "G4LogicalVolumeStore.hh"
+#include "G4PhysicalVolumeStore.hh"
+#include "G4Version.hh"
+
 // local
 #include "G4AtlasTools/G4AtlasDetectorConstructionTool.h"
 
@@ -41,6 +45,9 @@ StatusCode G4AtlasDetectorConstructionTool::initialize( )
 
   ATH_MSG_DEBUG( "Initializing sensitive detectors in " << name() );
   ATH_CHECK( m_senDetTool.retrieve() );
+
+  ATH_MSG_DEBUG( "Initializing fastsim in " << name() );
+  ATH_CHECK( m_fastSimTool.retrieve() );
 
   ATH_MSG_DEBUG( "Setting up G4 physics regions" );
   for (auto& it: m_regionCreators)
@@ -111,7 +118,18 @@ G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::Construct() {
     }
   }
 
-  return m_detConstructionTool->m_detTool->GetWorldVolume();
+  // Build world volume and rebuild LV/PV stores if Geant4 is 11 or newer
+  // - Rebuild necessary because Athena may install LV/PV notifiers that change
+  //   volume names, which invalidates store maps.
+  G4VPhysicalVolume* wv = m_detConstructionTool->m_detTool->GetWorldVolume();
+#if G4VERSION_NUMBER > 1079
+  G4LogicalVolumeStore::GetInstance()->SetMapValid(false);
+  G4LogicalVolumeStore::GetInstance()->UpdateMap();
+  G4PhysicalVolumeStore::GetInstance()->SetMapValid(false);
+  G4PhysicalVolumeStore::GetInstance()->UpdateMap();
+#endif
+
+  return wv;
 }
 
 void G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
@@ -119,6 +137,11 @@ void G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
   ATH_MSG_DEBUG( "Setting up sensitive detectors" );
   if (m_detConstructionTool->m_senDetTool->initializeSDs().isFailure()) {
     ATH_MSG_FATAL("Failed to initialize SDs for worker thread");
+  }
+
+  if(!m_detConstructionTool->m_fastSimTool->initializeFastSims().isSuccess()) {
+    ATH_MSG_FATAL("Failed to initialize Fast Simulation Tool for worker thread");
+    return;
   }
 
   ATH_MSG_DEBUG( "Setting up field managers" );

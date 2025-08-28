@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -152,8 +152,8 @@ InputDialog::InputDialog(const char *prompt, const char *defval, char *retstr)
    int      ax, ay;
 
    gVirtualX->TranslateCoordinates(main->GetId(), main->GetId(),
-                          (((TGFrame *) main)->GetWidth() - width) >> 1,
-                          (((TGFrame *) main)->GetHeight() - height) >> 1,
+                          ((static_cast<TGFrame *> (main))->GetWidth() - width) >> 1,
+                          ((static_cast<TGFrame *> (main))->GetHeight() - height) >> 1,
                           ax, ay, wdum);
    fDialog->Move(ax, ay);
    fDialog->SetWMPosition(ax, ay);

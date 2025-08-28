@@ -4,6 +4,8 @@ def isPrimaryPass(flags) -> bool:
     return f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass" not in flags.Tracking
 
 def isFastPrimaryPass(flags) -> bool:
+    if flags.Tracking.ActiveConfig.extension == "ActsValidateF100" and flags.Tracking.doITkFastTracking:
+        return True
     return flags.Tracking.doITkFastTracking and isPrimaryPass(flags)
 
 def isValidationPass(flags) -> bool:
@@ -40,7 +42,16 @@ def extractTrackingPasses(flags) -> list:
     else:
         if flags.Tracking.doITkFastTracking:
             raise ValueError(f"Main pass is NOT set to Fast Tracking but Tracking.doITkFastTracking is set to {flags.Tracking.doITkFastTracking}")
-        
+
+    # Check the ambiguity resolution strategy
+    if flags.Acts.doAmbiguityResolution:
+        from ActsConfig.ActsConfigFlags import AmbiguitySolverMode
+        # If ambiguity resolution is requested, it means we want to schedule the ambiguity resolution algorithm
+        # this means that we must have AmbiguitySolverMode.OUTSIDE_TF
+        if flags.Acts.AmbiguitySolverMode is not AmbiguitySolverMode.OUTSIDE_TF:
+            raise ValueError(f"Conflicting reco configuration: Acts.doAmbiguityResolution has been requested and this will schedule the ACTS ambiguity solver algorithm, yet the ambiguity mode (set to {flags.Acts.AmbiguitySolverMode}) is not compatible with this.")
+
+
     # Primary pass
     trackingPasses += [flags.cloneAndReplace(
         "Tracking.ActiveConfig",
@@ -73,3 +84,44 @@ def extractTrackingPasses(flags) -> list:
         
     return trackingPasses
 
+def getListOfGeneratedTrackParticles(flags) -> list[str]:
+    generateTrackCollections = ["InDetTrackParticles"]
+
+    # loop on tracking passes
+    scheduledTrackingPasses: list = extractTrackingPasses(flags)
+    for currentFlags in scheduledTrackingPasses:
+        # Add the seed tracks
+        if currentFlags.Tracking.ActiveConfig.storeTrackSeeds:
+            # pixel seeds
+            generatePixelSegments = currentFlags.Detector.EnableITkPixel
+            generateStripSegments = currentFlags.Detector.EnableITkStrip
+            
+            # For conversion pass we do not process pixels
+            if currentFlags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
+                generatePixelSegments = False
+                # For main pass disable strips if fast tracking configuration
+            elif isFastPrimaryPass(currentFlags):
+                generateStripSegments = False
+
+            if generatePixelSegments:
+                generateTrackCollections += [f'SiSPSeedSegments{currentFlags.Tracking.ActiveConfig.extension}PixelTrackParticles']
+            if generateStripSegments:
+                generateTrackCollections += [f'SiSPSeedSegments{currentFlags.Tracking.ActiveConfig.extension}StripTrackParticles']
+            if generatePixelSegments and generateStripSegments:
+                generateTrackCollections += [f'SiSPSeedSegments{currentFlags.Tracking.ActiveConfig.extension}TrackParticles']
+            
+            # Add CKF tracks
+            if currentFlags.Tracking.ActiveConfig.storeSiSPSeededTracks:
+                generateTrackCollections += [f'SiSPSeededTracks{currentFlags.Tracking.ActiveConfig.extension}TrackParticles']
+            
+            # Add tracks after ambi
+            # this is necessary only if ambiguity resolution is run and we
+            # store track particles in a separate container w.r.t InDetTrackParticles
+            if currentFlags.Acts.doAmbiguityResolution and currentFlags.Tracking.ActiveConfig.storeSeparateContainer:
+                generateTrackCollections += [f'InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles']
+
+    print('Here is the list of generated track particle collections:')
+    for collection in generateTrackCollections:
+        print(f'- {collection}')
+        
+    return generateTrackCollections

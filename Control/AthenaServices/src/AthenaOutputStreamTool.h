@@ -9,6 +9,7 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
+#include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
@@ -20,7 +21,6 @@
 
 class IClassIDSvc;
 class IDecisionSvc;
-class IConversionSvc;
 class StoreGateSvc;
 class DataHeader;
 namespace SG {
@@ -103,7 +103,7 @@ private:
 
    ServiceHandle<StoreGateSvc>   m_store{ this, "Store", "StoreGateSvc/DetectorStore", "Pointer to the data store"};
    /// Keep reference to the data conversion service
-   ServiceHandle<IConversionSvc> m_conversionSvc;
+   ServiceHandle<IConversionSvc> m_conversionSvc{ this, "ConversionService", "AthenaPoolCnvSvc" };
    /// Ref to ClassIDSvc to convert type name to clid
    ServiceHandle<IClassIDSvc>    m_clidSvc;
    /// Ref to DecisionSvc

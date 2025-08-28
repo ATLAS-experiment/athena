@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/DataVectorWithAlloc.icc
@@ -7,6 +7,9 @@
  * @date Aug, 2021
  * @brief DataVector using a custom allocator for the elements.
  */
+
+
+#include "AthAllocators/exceptions.h"
 
 
 //=== Smart pointer.
@@ -262,7 +265,13 @@ template <class DV, class ALLOC>
 DataVectorWithAlloc<DV, ALLOC>::~DataVectorWithAlloc()
 {
   // If the heap memory was protected, unprotect it now.
-  SG::maybeUnprotect (*m_heap);
+  try {
+    SG::maybeUnprotect (*m_heap);
+  }
+  catch (const SG::ExcProtection&) {
+    // Got an error from mprotect...
+    std::abort();
+  }
 }
 
 

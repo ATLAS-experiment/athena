@@ -120,7 +120,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                                         infix = "CustomVtx",
                                         context = jetContextName,
                                         ghostdefs = ghostCustomVtx,
-                                        modifiers = modsCustomVtx+("JetPtAssociation","QGTaggingCustomVtx","fJVTCustomVtx","NNJVTCustomVtx","CaloEnergiesClus","JetPileupLabel"),
+                                        modifiers = modsCustomVtx+("JetPtAssociation","QGTaggingCustomVtx","BoostedQGTaggingCustomVtx","fJVTCustomVtx","NNJVTCustomVtx","CaloEnergiesClus","JetPileupLabel"),
                                         ptmin = 10000,
     )
 
@@ -212,6 +212,15 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                                              ["input:JetTrackVtxAssocCustomVtx","mod:TrackMomentsCustomVtx"] +
                                              (["mod:JetPtAssociation"] if not jdef._cflags.Input.isMC else []),
                                         JetContainer = CustomPFJetContainerName),
+
+        BoostedQGTaggingCustomVtx =       JetModifier("BoostedJetTaggerTool", "boostedqgtaggingCustomVtx",
+                                        createfn=lambda jdef,_ :JetMomentToolsConfig.getBoostedJetTaggerToolQG(jdef,"CustomVtx"),
+                                        modspec = "CustomVtx",
+                                        prereqs = lambda _,jdef :
+                                             ["input:JetTrackVtxAssocCustomVtx","mod:TrackMomentsCustomVtx"] +
+                                             (["mod:JetPtAssociation"] if not jdef._cflags.Input.isMC else []),
+                                        JetContainer = CustomPFJetContainerName),
+
 
       fJVTCustomVtx =            JetModifier("JetForwardPFlowJvtTool", "fJVTCustomVtx",
                                         createfn=lambda jdef,_ :JetMomentToolsConfig.getPFlowfJVTTool(jdef,"CustomVtx"),

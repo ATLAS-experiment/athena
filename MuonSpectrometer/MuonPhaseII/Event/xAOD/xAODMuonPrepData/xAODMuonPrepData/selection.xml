@@ -1,7 +1,10 @@
 <!-- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
     <!-- Mdt Drift Circle -->
-    <class name="xAOD::MdtDriftCircle_v1" />
+    <class name="xAOD::MdtDriftCircle_v1" >
+        <field name="m_readoutEle" transient="true" />
+        <field name="m_identifier" transient="true" />
+    </class>
     <class name="xAOD::MdtDriftCircleContainer_v1"
            id="A1A37753-0334-4D86-AB45-06DE59AF694E" />
     <typedef name="xAOD::MdtDriftCircle" />
@@ -12,7 +15,11 @@
     <typedef name = "xAOD::MdtDriftCircleAuxContainer" />
 
     <!-- Mdt Twin Drift Circle-->
-    <class name="xAOD::MdtTwinDriftCircle_v1" />
+    <class name="xAOD::MdtTwinDriftCircle_v1" >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+    </class>
+
     <class name="xAOD::MdtTwinDriftCircleContainer_v1"
            id="FA91DA59-CE02-48C9-B1DF-994D5F9E1F0C" />
     <typedef name="xAOD::MdtTwinDriftCircle" />
@@ -23,7 +30,19 @@
     <typedef name = "xAOD::MdtTwinDriftCircleAuxContainer" />
 
     <!-- Rpc Strip -->
-    <class name="xAOD::RpcStrip_v1" />
+    <class name="xAOD::RpcMeasurement_v1" >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+    </class>
+    <typedef name="xAOD::RpcMeasurement" />
+    <class name="xAOD::RpcMeasurementContainer_v1"
+           id="1F62DD5E-7DBC-4D85-8DED-F2313FFB60C5" />
+    <typedef name="xAOD::RpcMeasurementContainer" />
+    
+    <class name="xAOD::RpcStrip_v1" >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+    </class>
     <class name="xAOD::RpcStripContainer_v1"
            id="BE381AB2-0A2A-46EC-B3FF-C254BBEB7912" />
     <typedef name="xAOD::RpcStrip" />
@@ -33,7 +52,11 @@
            id="BF3DD4C7-A81D-44B1-91FB-1FE5C06908D2" />
     <typedef name = "xAOD::RpcStripAuxContainer" />
 
-  <class name="xAOD::RpcStrip2D_v1" />
+    <class name="xAOD::RpcStrip2D_v1" >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+    </class>
+
     <class name="xAOD::RpcStrip2DContainer_v1"
            id="4DC6DF3F-36C5-4486-A6DE-06DAF13AB5EA" />
     <typedef name="xAOD::RpcStrip2D" />
@@ -46,7 +69,11 @@
    
 
     <!-- Tgc Strip -->
-    <class name="xAOD::TgcStrip_v1" />
+    <class name="xAOD::TgcStrip_v1" >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+    </class>
+
     <class name="xAOD::TgcStripContainer_v1"
            id="B5AC3FAC-DA4B-4F18-BC47-13B7731016E8" />
     <typedef name="xAOD::TgcStrip" />
@@ -57,7 +84,10 @@
     <typedef name = "xAOD::TgcStripAuxContainer" />
 
      <!-- MM Cluster -->
-    <class name="xAOD::MMCluster_v1" />
+    <class name="xAOD::MMCluster_v1"  >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+    </class>
     <class name="xAOD::MMClusterContainer_v1"
            id="C8ED2C42-FE97-4C67-BFBC-69A272A9A6D6" />
     <typedef name="xAOD::MMCluster" />
@@ -66,7 +96,18 @@
            id="E7DDF5FA-9999-4497-A1F1-DAFC7D4D7A32" />
     <typedef name = "xAOD::MMClusterAuxContainer" />
     <!-- Stgc strip-->
-    <class name="xAOD::sTgcStripCluster_v1" />
+    <class name="xAOD::sTgcMeasurement_v1" >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+    </class>
+    <typedef name="xAOD::sTgcMeasurement" >
+    <class name="xAOD::sTgcMeasContainer_v1"
+            id="4541E289-E233-4711-A12C-11958CAE5C3F" />
+    <typedef name="xAOD::sTgcMeasContainer" />    
+    <class name="xAOD::sTgcStripCluster_v1"  >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+    </class>
     <class name="xAOD::sTgcStripContainer_v1"
             id="B6801F5D-1E96-4B6D-A36E-3EEC436AFAFF" />
      <typedef name="xAOD::sTgcStripCluster" />
@@ -75,7 +116,10 @@
             id="FD61C981-1F7B-4C29-92CA-0AB756A38E61" />
      <typedef name="xAOD::sTgcStripAuxContainer" />
      <!-- Stgc wire -->
-     <class name="xAOD::sTgcWireHit_v1" />
+     <class name="xAOD::sTgcWireHit_v1" >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+     </class>
      <class name="xAOD::sTgcWireContainer_v1" 
               id="22668EAD-FFC5-4DB0-8A30-DBE64EF1C1E7" />
       <typedef name="xAOD::sTgcWireHit" />
@@ -84,7 +128,10 @@
               id="B464162B-971D-4D0E-A439-D14FFC14A85C" />
       <typedef name="xAOD::sTgcWireAuxContainer" />
       <!-- Stgc pad -->
-     <class name="xAOD::sTgcPadHit_v1" />
+     <class name="xAOD::sTgcPadHit_v1"  >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+     </class>
      <class name="xAOD::sTgcPadContainer_v1" 
               id="2691143C-4EA0-4B28-AB01-2E62B3D09DB3" />
       <typedef name="xAOD::sTgcPadHit" />
@@ -92,6 +139,4 @@
       <class name="xAOD::sTgcPadAuxContainer_v1"
               id="7F62C588-0EF3-4E4B-BEC5-4881D7E24D72" />
       <typedef name="xAOD::sTgcPadAuxContainer" />
-      
-
 </lcgdict>

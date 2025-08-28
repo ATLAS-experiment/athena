@@ -11,47 +11,10 @@ if __name__ == '__main__':
     logger.setLevel(DEBUG)
 
     
-    import argparse
-    from argparse import RawTextHelpFormatter
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    parser = flags.getArgumentParser()
 
-    
-    parser = argparse.ArgumentParser(
-        "Running GlobalSim Egamma1BDT_only",
-        formatter_class=RawTextHelpFormatter)
-
-
-    
-    parser.add_argument(
-        "-i",
-        "--inputs",
-        nargs='*',
-        action="store",
-        dest="inputFiles",
-        help="files to process",
-        required=True)
-    
-
-    parser.add_argument(
-        "-n",
-        "--nevent",
-        type=int,
-        action="store",
-        dest="nevent",
-        help="Maximum number of events will be executed.",
-        default=0,
-        required=False)
-
-    parser.add_argument(
-        "-s",
-        "--skipEvents",
-        type=int,
-        action="store",
-        dest="skipEvents",
-        help="Number of  events to skip.",
-        default=0,
-        required=False)
-
-    
     parser.add_argument(
         "-ifex",
         "--doCaloInput",
@@ -61,46 +24,28 @@ if __name__ == '__main__':
         default=False,
         required=False)
 
-
-    args = parser.parse_args()
-
-    logger.debug('args:')
-
-    logger.debug(args)
-    
+    args, _ = parser.parse_known_args()    
  
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-       
-    if(args.nevent > 0):
-        flags.Exec.MaxEvents = args.nevent
-        
-    if args.inputFiles:
-        flags.Input.Files = args.inputFiles
-    else:
-        flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/RAW/data23_13p6TeV.00452463.physics_Main.daq.RAW/540events.data23_13p6TeV.00452463.physics_Main.daq.RAW._lb0514._SFO-16._0004.data']
-        
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags, defaultConditionsTags
+    # Default to the current data test file for Run-3
+    if not args.filesInput:
+        flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA24
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA24
      
     flags.Output.AODFileName = 'AOD.pool.root'
-    flags.Common.isOnline = not flags.Input.isMC
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
     flags.Trigger.doLVL1 = True
-
-  
-    flags.Concurrency.NumThreads = 1
-    flags.Concurrency.NumConcurrentEvents = 1
-
-    flags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-01-00"
 
     flags.Scheduler.ShowDataDeps = True
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataFlow = True
     flags.Trigger.EDMVersion = 3
-    flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
 
-
+    flags.fillFromArgs(parser=parser)
+    
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 
@@ -112,7 +57,6 @@ if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
 
- 
     # Generate run3 L1 menu
     from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg, generateL1Menu
     acc.merge(L1ConfigSvcCfg(flags))

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ActsGeantFollowerHelper_H
@@ -16,7 +16,9 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Propagator/SurfaceCollector.hpp"
-
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "TrkExInterfaces/IExtrapolationEngine.h"
 // FIXME: header-global macro for an array size constant!
 #ifndef MAXPROBES
 #define MAXPROBES 50000
@@ -24,21 +26,17 @@
 
 class TTree;
 
-namespace Trk
-{
+namespace Trk {
   class IExtrapolator;
-  class IExtrapolationEngine;
 } // namespace Trk
 
-class IActsExtrapolationTool;
 
-class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHelper>
-{
+class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHelper> {
 
   public:
     // constructor, destructor
     ActsGeantFollowerHelper(const std::string&,const std::string&,const IInterface*);
-    virtual ~ActsGeantFollowerHelper ();
+    virtual ~ActsGeantFollowerHelper() = default;
 
     // Athena hooks
     virtual StatusCode initialize() override;
@@ -54,30 +52,32 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
 
   private:
 
-    // ToolHandle<Trk::IExtrapolator>       m_extrapolator;
-    ToolHandle<Trk::IExtrapolationEngine>     m_extrapolationEngine;
-    ToolHandle<IActsExtrapolationTool>   m_actsExtrapolator;
-    bool                                 m_extrapolateDirectly;
-    bool                                 m_extrapolateIncrementally;
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
-    Trk::TrackParameters* m_parameterCache;
-    std::optional<Acts::BoundTrackParameters> m_actsParameterCache;
-    std::unique_ptr<std::vector<Acts::SurfaceHit>> m_actsSurfaceCache;
-    std::vector<Acts::SurfaceHit>::iterator m_actsSurfaceIterator;
+
+    ToolHandle<Trk::IExtrapolationEngine>     m_extrapolationEngine{this, "ExtrapolationEngine", ""};
+    ToolHandle<IActsExtrapolationTool>   m_actsExtrapolator{this, "ActsExtrapolator", ""};
+    Gaudi::Property<bool> m_extrapolateDirectly{this, "ExtrapolateDirectly", true};
+    Gaudi::Property<bool> m_extrapolateIncrementally{this, "ExtrapolateIncrementally", true};
+
+    Trk::TrackParameters* m_parameterCache{nullptr};
+    std::optional<Acts::BoundTrackParameters> m_actsParameterCache{std::nullopt};
+    std::unique_ptr<std::vector<Acts::SurfaceHit>> m_actsSurfaceCache{};
+    std::vector<Acts::SurfaceHit>::iterator m_actsSurfaceIterator{};
     // Hypothesis to pdg converter
     Trk::PdgToParticleHypothesis m_pdgToParticleHypothesis;
-    float m_tX0Cache;
-    float m_tX0NonSensitiveCache;
-    float m_tNonSensitiveCache;
-    float m_tX0CacheActs;
-    float m_tX0CacheATLAS;
+    float m_tX0Cache{0.f};
+    float m_tX0NonSensitiveCache{0.f};
+    float m_tNonSensitiveCache{0.f};
+    float m_tX0CacheActs{0.f};
+    float m_tX0CacheATLAS{0.f};
 
     // put some validation code is
     std::string                    m_validationTreeName;        //!< validation tree name - to be acessed by this from root
     std::string                    m_validationTreeDescription; //!< validation tree description - second argument in TTree
     std::string                    m_validationTreeFolder;      //!< stream/folder to for the TTree to be written out
 
-    TTree*                         m_validationTree;            //!< Root Validation Tree
+    TTree*                         m_validationTree{nullptr};            //!< Root Validation Tree
     /** Ntuple variables : initial parameters
         Split this out into a separate, dynamically-allocated block.
         Otherwise, the CaloCellNoiseAlg is so large that it violates

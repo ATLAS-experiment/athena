@@ -14,7 +14,8 @@ atlas_add_library( xAODTau
    PUBLIC_HEADERS xAODTau
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks xAODBase xAODCore
-   xAODJet xAODPFlow xAODTracking xAODTruth )
+   xAODJet xAODPFlow xAODTracking xAODTruth
+   PRIVATE_LINK_LIBRARIES TruthUtils)
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODTau/selection.xml
