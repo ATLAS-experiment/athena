@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-__doc__ = "To compute corrected layer energies"
+
+""" To compute corrected layer energies """
 
 from glob import glob
 import os.path

@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = "Convert XGBoost model to TTree to be used with MVAUtils."
+""" Convert XGBoost model to TTree to be used with MVAUtils. """
+
 __author__ = "Yuan-Tang Chou"
 
 

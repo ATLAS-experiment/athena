@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = """ Configure egammaLargeClusterMaker,
-               which chooses cells to store in the AOD"""
+""" Configure egammaLargeClusterMaker which chooses cells to store in the AOD"""
+
 __author__ = "Jovan Mitrevski"
 
 from AthenaCommon.Logging import logging
