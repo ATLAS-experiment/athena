@@ -26,6 +26,7 @@
 #include "CollectionBase/ICollectionCursor.h"
 
 #include <vector>
+#include <list>
 
 //________________________________________________________________________________
 CondProxyProvider::CondProxyProvider(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -93,11 +94,13 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
             // Create PoolCollectionConverter for input file
             poolCollectionConverter = getCollectionCnv();
             if (poolCollectionConverter == 0) {
+               delete poolCollectionConverter;
                return(StatusCode::FAILURE);
             }
             // Get DataHeader iterator
             headerIterator = &poolCollectionConverter->selectAll();
             if (!headerIterator->next()) {
+               delete poolCollectionConverter;
                return(StatusCode::FAILURE);
             }
          } else {
@@ -109,6 +112,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
       token->fromString(headerIterator->eventRef().toString());
       TokenAddress* tokenAddr = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", myVersKey, m_contextId, std::move(token));
       if (!detectorStoreSvc->recordAddress(tokenAddr).isSuccess()) {
+         delete tokenAddr;
          ATH_MSG_ERROR("Cannot record DataHeader.");
          return(StatusCode::FAILURE);
       }
