@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_JETSECVERTEXINGALG_H
@@ -63,7 +63,7 @@ namespace Analysis
         SG::ReadHandleKey<xAOD::VertexContainer> m_VertexCollectionName {this, "vxPrimaryCollectionName", "", "Input primary vertex container"};
         SG::ReadHandleKey<Trk::VxSecVertexInfoContainer> m_VxSecVertexInfoName {this, "BTagVxSecVertexInfoName", "", "Input VxSecVertexInfo container"};
         SG::WriteHandleKey<xAOD::VertexContainer> m_BTagSVCollectionName {this, "BTagSVCollectionName", "", "Output BTagging secondary vertex container"};
-        Gaudi::Property<SG::WriteDecorHandleKey<xAOD::JetContainer>> m_jetSVLinkName{ this, "JetSecVtxLinkName", "", "Element Link vector from jet to Vertex container"};
+        SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetSVLinkName{ this, "JetSecVtxLinkName", "", "Element Link vector from jet to Vertex container"};
         SG::WriteHandleKey<xAOD::BTagVertexContainer> m_BTagJFVtxCollectionName {this, "BTagJFVtxCollectionName", "", "Output BTagging Jet Fitter container"};
 
   }; // End class

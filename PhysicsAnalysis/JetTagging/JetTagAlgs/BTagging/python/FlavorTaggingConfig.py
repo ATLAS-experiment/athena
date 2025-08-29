@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -265,8 +265,6 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
 
     secVtxFinderxAODBaseNameList = []
 
-    OutputFilesJFVxname = "JFVtx"
-    OutputFilesJFVxFlipname = "JFVtxFlip"
     OutputFilesSVname = "SecVtx"
     OutputFilesSVFlipname = 'SecVtxFlip'
 
@@ -308,14 +306,12 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
     options.setdefault('vxPrimaryCollectionName', pv_col)
     options.setdefault('JetFitterVariableFactory', jetFitterVF)
     options['JetSecVtxLinkName'] = jet + '.' + OutputFilesSVname
-    options['JetJFVtxLinkName'] = jet + '.' + OutputFilesJFVxname
     options['JetCollectionName'] = jet
     options['BTagVxSecVertexInfoNames'] = []
     for sv in SecVertexers:
         options['BTagVxSecVertexInfoNames'].append(sv + 'VxSecVertexInfo_' + jetcol_no_suffix)
 
     if flags.BTagging.RunFlipTaggers:
-        options['JetJFFlipVtxLinkName'] = jet + '.' + OutputFilesJFVxFlipname
         options['JetSecVtxFlipLinkName'] = jet + '.' + OutputFilesSVFlipname
 
 
