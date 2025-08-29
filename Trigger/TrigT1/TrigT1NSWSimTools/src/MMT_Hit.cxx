@@ -39,7 +39,7 @@ MMT_Hit::MMT_Hit(const Identifier &id, const std::string_view stName, const int 
   m_MMFE_VMM = region; // index of the MMFE8 board on the layer
   m_VMM_chip = int(1. *istrip /64.); // index of the VMM chip on the layer
   // art asic id
-  if(!int(m_plane/2.)%2){
+  if(!(int(m_plane/2.)%2)){
     if (mmfe8s[m_plane][region]==1){ //Right
       m_ART_ASIC = 1-int(region/8);
     }else{
@@ -53,7 +53,7 @@ MMT_Hit::MMT_Hit(const Identifier &id, const std::string_view stName, const int 
     }
   }
  
-  // if Right side add 2 to the ART Asic Index
+  // if Left side add 2 to the ART Asic Index
   if(mmfe8s[m_plane][region]==0){
     m_ART_ASIC+=2;
   }
