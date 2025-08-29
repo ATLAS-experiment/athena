@@ -32,3 +32,6 @@ if( NOT XAOD_STANDALONE )
    
 endif()
 
+atlas_add_executable( muon_id_test
+                      test/muon_id_test.cxx
+                      LINK_LIBRARIES MuonIdHelpersLib IdDictParser )

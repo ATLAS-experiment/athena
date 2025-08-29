@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -38,7 +38,6 @@ int check_hash_retrieval(MuonIdHelper* idhelp) {
 // for the CSCs, also test the geometrical hash to real hash conversion
 int check_CSC_hash_conversion(CscIdHelper* idhelp) {
     IdentifierHash hash;
-    IdentifierHash geo_hash;
     Identifier id;
     // check detectorElement Identifiers
     IdContext context = idhelp->detectorElement_context();
@@ -47,12 +46,8 @@ int check_CSC_hash_conversion(CscIdHelper* idhelp) {
             std::cout << "ERROR: Failed to retrieve identifier from hash=" << i << std::endl;
             return 1;
         }
-        if (idhelp->get_geo_detectorElement_hash(id, geo_hash)) {
-            std::cout << "ERROR: Failed to retrieve geometrical identifier hash from identifier=" << id.get_compact() << std::endl;
-            return 1;
-        }
-        if (idhelp->get_hash_fromGeoHash(geo_hash, hash, &context)) {
-            std::cout << "ERROR: Failed to retrieve real identifier hash from geometrical identifier hash=" << geo_hash << std::endl;
+        if (idhelp->get_detectorElement_hash(id, hash)) {
+            std::cout << "ERROR: Failed to retrieve identifier hash from identifier=" << id.get_compact() << std::endl;
             return 1;
         }
         if (hash != i) {
@@ -68,12 +63,8 @@ int check_CSC_hash_conversion(CscIdHelper* idhelp) {
             std::cout << "ERROR: Failed to retrieve identifier from hash=" << i << std::endl;
             return 1;
         }
-        if (idhelp->get_geo_module_hash(id, geo_hash)) {
+        if (idhelp->get_module_hash(id, hash)) {
             std::cout << "ERROR: Failed to retrieve geometrical identifier hash from identifier=" << id.get_compact() << std::endl;
-            return 1;
-        }
-        if (idhelp->get_hash_fromGeoHash(geo_hash, hash, &context)) {
-            std::cout << "ERROR: Failed to retrieve real identifier hash from geometrical identifier hash=" << geo_hash << std::endl;
             return 1;
         }
         if (hash != i) {
@@ -89,12 +80,8 @@ int check_CSC_hash_conversion(CscIdHelper* idhelp) {
             std::cout << "ERROR: Failed to retrieve identifier from hash=" << i << std::endl;
             return 1;
         }
-        if (idhelp->get_geo_channel_hash(id, geo_hash)) {
+        if (idhelp->get_channel_hash(id, hash)) {
             std::cout << "ERROR: Failed to retrieve geometrical identifier hash from identifier=" << id.get_compact() << std::endl;
-            return 1;
-        }
-        if (idhelp->get_hash_fromGeoHash(geo_hash, hash, &context)) {
-            std::cout << "ERROR: Failed to retrieve real identifier hash from geometrical identifier hash=" << geo_hash << std::endl;
             return 1;
         }
         if (hash != i) {
