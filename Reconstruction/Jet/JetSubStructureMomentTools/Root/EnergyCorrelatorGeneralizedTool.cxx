@@ -6,6 +6,7 @@
 #include "JetSubStructureUtils/EnergyCorrelatorGeneralized.h"
 #include "JetSubStructureUtils/EnergyCorrelator.h"
 #include "AthContainers/ConstAccessor.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 EnergyCorrelatorGeneralizedTool::EnergyCorrelatorGeneralizedTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
@@ -19,6 +20,10 @@ EnergyCorrelatorGeneralizedTool::EnergyCorrelatorGeneralizedTool(const std::stri
 }
 
 StatusCode EnergyCorrelatorGeneralizedTool::initialize() {
+  if(m_jetContainerName.empty()){
+    ATH_MSG_ERROR("EnergyCorrelatorGeneralizedTool needs to have its input jet container name configured!");
+    return StatusCode::FAILURE;
+  }
 
   /// Call base class initialize to fix up m_prefix
   ATH_CHECK( JetSubStructureMomentToolsBase::initialize() );
@@ -61,206 +66,227 @@ StatusCode EnergyCorrelatorGeneralizedTool::initialize() {
   }
 
   /// Initialize decorators for L-series
-  m_dec_ECFG_2_1_2 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"ECFG_2_1_2");
-  m_dec_ECFG_3_1_1 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"ECFG_3_1_1");
-  m_dec_ECFG_3_2_1 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"ECFG_3_2_1");
-  m_dec_ECFG_3_2_2 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"ECFG_3_2_2");
-  m_dec_ECFG_3_3_1 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"ECFG_3_3_1");
-  m_dec_ECFG_4_2_2 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"ECFG_4_2_2");
-  m_dec_ECFG_4_4_1 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"ECFG_4_4_1");
+  m_ECFG_2_1_2_Key = m_jetContainerName + "." + m_ECFG_2_1_2_Key.key();
+  m_ECFG_3_1_1_Key = m_jetContainerName + "." + m_ECFG_3_1_1_Key.key();
+  m_ECFG_3_2_1_Key = m_jetContainerName + "." + m_ECFG_3_2_1_Key.key();
+  m_ECFG_3_2_2_Key = m_jetContainerName + "." + m_ECFG_3_2_2_Key.key();
+  m_ECFG_3_3_1_Key = m_jetContainerName + "." + m_ECFG_3_3_1_Key.key();
+  m_ECFG_4_2_2_Key = m_jetContainerName + "." + m_ECFG_4_2_2_Key.key();
+  m_ECFG_4_4_1_Key = m_jetContainerName + "." + m_ECFG_4_4_1_Key.key();
+
+  ATH_CHECK(m_ECFG_2_1_2_Key.initialize());
+  ATH_CHECK(m_ECFG_3_1_1_Key.initialize());
+  ATH_CHECK(m_ECFG_3_2_1_Key.initialize());
+  ATH_CHECK(m_ECFG_3_2_2_Key.initialize());
+  ATH_CHECK(m_ECFG_3_3_1_Key.initialize());
+  ATH_CHECK(m_ECFG_4_2_2_Key.initialize());
+  ATH_CHECK(m_ECFG_4_4_1_Key.initialize());
 
   /// Added for MDT studies, might remove later
-  m_dec_ECFG_3_3_2 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"ECFG_3_3_2");
+  m_ECFG_3_3_2_Key = m_jetContainerName + "." + m_ECFG_3_3_2_Key.key();
+  ATH_CHECK(m_ECFG_3_3_2_Key.initialize());
 
   return StatusCode::SUCCESS;
 
 }
 
-int EnergyCorrelatorGeneralizedTool::modifyJet(xAOD::Jet &injet) const {
+StatusCode EnergyCorrelatorGeneralizedTool::modify(xAOD::JetContainer& jets) const {
 
-  fastjet::PseudoJet jet;
-  fastjet::PseudoJet jet_ungroomed;
+  SG::WriteDecorHandle<xAOD::JetContainer, float> wdh_ECFG_2_1_2(m_ECFG_2_1_2_Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> wdh_ECFG_3_1_1(m_ECFG_3_1_1_Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> wdh_ECFG_3_2_1(m_ECFG_3_2_1_Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> wdh_ECFG_3_2_2(m_ECFG_3_2_2_Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> wdh_ECFG_3_3_1(m_ECFG_3_3_1_Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> wdh_ECFG_4_2_2(m_ECFG_4_2_2_Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> wdh_ECFG_4_4_1(m_ECFG_4_4_1_Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> wdh_ECFG_3_3_2(m_ECFG_3_3_2_Key);
 
-  /// Bool to decide whether calculation should be performed
-  bool calculate = SetupDecoration(jet,injet);
+  for(const xAOD::Jet* injet : jets){
 
-  /// Bool to decide if ungroomed jet moments should be calculated
-  bool calculate_ungroomed = false;
+    fastjet::PseudoJet jet;
+    fastjet::PseudoJet jet_ungroomed;
 
-  if( m_doDichroic ) {
+    /// Bool to decide whether calculation should be performed
+    bool calculate = SetupDecoration(jet,*injet);
 
-    /// Get parent jet
-    static const SG::ConstAccessor<ElementLink<xAOD::JetContainer> > ParentAcc ("Parent");
-    ElementLink<xAOD::JetContainer> parentLink = ParentAcc (injet);
+    /// Bool to decide if ungroomed jet moments should be calculated
+    bool calculate_ungroomed = false;
 
-    /// Return error is parent element link is broken
-    if( !parentLink.isValid() ) {
-      ATH_MSG_ERROR( "Parent element link is not valid. Aborting" );
-      return 1;
+    if( m_doDichroic ) {
+
+      /// Get parent jet
+      static const SG::ConstAccessor<ElementLink<xAOD::JetContainer> > ParentAcc ("Parent");
+      ElementLink<xAOD::JetContainer> parentLink = ParentAcc (*injet);
+
+      /// Return error is parent element link is broken
+      if( !parentLink.isValid() ) {
+	ATH_MSG_ERROR( "Parent element link is not valid. Aborting" );
+	return StatusCode::FAILURE;
+      }
+
+      const xAOD::Jet* parentJet = *(parentLink);
+      calculate_ungroomed = SetupDecoration(jet_ungroomed,*parentJet);
+
     }
 
-    const xAOD::Jet* parentJet = *(parentLink);
-    calculate_ungroomed = SetupDecoration(jet_ungroomed,*parentJet);
+    /// Loop over all of the moments
+    for( auto const& moment : m_moments ) {
 
-  }
+      float beta = moment.first;
 
-  /// Loop over all of the moments
-  for( auto const& moment : m_moments ) {
+      /// Note that the indexing for these follows the 
+      /// convention of ECFG_angles_n
 
-    float beta = moment.first;
-
-    /// Note that the indexing for these follows the 
-    /// convention of ECFG_angles_n
-
-    /// These are used for M2 and N2
-    float ECFG_2_1_value = -999.0;
-    float ECFG_3_2_value = -999.0;
+      /// These are used for M2 and N2
+      float ECFG_2_1_value = -999.0;
+      float ECFG_3_2_value = -999.0;
     
-    /// These are used for dichroic M2 and N2
-    float ECFG_2_1_ungroomed_value = -999.0;
-    float ECFG_3_1_ungroomed_value = -999.0;
-    float ECFG_3_2_ungroomed_value = -999.0;
+      /// These are used for dichroic M2 and N2
+      float ECFG_2_1_ungroomed_value = -999.0;
+      float ECFG_3_1_ungroomed_value = -999.0;
+      float ECFG_3_2_ungroomed_value = -999.0;
 
-    /// These are used for M3 and N3
-    float ECFG_3_1_value = -999.0;
-    float ECFG_4_1_value = -999.0;
-    float ECFG_4_2_value = -999.0;
+      /// These are used for M3 and N3
+      float ECFG_3_1_value = -999.0;
+      float ECFG_4_1_value = -999.0;
+      float ECFG_4_2_value = -999.0;
 
-    if( calculate ) {
+      if( calculate ) {
 
-      /// These are used for N2 and M2
-      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_2_1(1, 2, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
-      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_1(1, 3, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
-      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_2(2, 3, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	/// These are used for N2 and M2
+	JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_2_1(1, 2, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_1(1, 3, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_2(2, 3, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
 
-      ECFG_2_1_value = ECFG_2_1.result(jet);
-      ECFG_3_1_value = ECFG_3_1.result(jet);
-      ECFG_3_2_value = ECFG_3_2.result(jet);
+	ECFG_2_1_value = ECFG_2_1.result(jet);
+	ECFG_3_1_value = ECFG_3_1.result(jet);
+	ECFG_3_2_value = ECFG_3_2.result(jet);
 
-      /// These are used for dichroic N2 and M2
-      if( calculate_ungroomed ) {
-        ECFG_2_1_ungroomed_value = ECFG_2_1.result(jet_ungroomed);
-        ECFG_3_1_ungroomed_value = ECFG_3_1.result(jet_ungroomed);
-        ECFG_3_2_ungroomed_value = ECFG_3_2.result(jet_ungroomed);
+	/// These are used for dichroic N2 and M2
+	if( calculate_ungroomed ) {
+	  ECFG_2_1_ungroomed_value = ECFG_2_1.result(jet_ungroomed);
+	  ECFG_3_1_ungroomed_value = ECFG_3_1.result(jet_ungroomed);
+	  ECFG_3_2_ungroomed_value = ECFG_3_2.result(jet_ungroomed);
+	}
+
+	/// This is used for M3
+	if( m_doM3 ) {
+	  JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_4_1(1, 4, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	  ECFG_4_1_value = ECFG_4_1.result(jet);
+	}
+
+	/// This is used for N3
+	if( m_doN3 ) {
+	  JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_4_2(2, 4, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	  ECFG_4_2_value = ECFG_4_2.result(jet);
+	}
+
       }
 
-      /// This is used for M3
-      if( m_doM3 ) {
-        JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_4_1(1, 4, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
-        ECFG_4_1_value = ECFG_4_1.result(jet);
-      }
+      (*moment.second.dec_ECFG_2_1)(*injet) = ECFG_2_1_value;
+      (*moment.second.dec_ECFG_3_1)(*injet) = ECFG_3_1_value;
+      (*moment.second.dec_ECFG_3_2)(*injet) = ECFG_3_2_value;
+      (*moment.second.dec_ECFG_4_1)(*injet) = ECFG_4_1_value;
+      (*moment.second.dec_ECFG_4_2)(*injet) = ECFG_4_2_value;
 
-      /// This is used for N3
-      if( m_doN3 ) {
-        JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_4_2(2, 4, beta, JetSubStructureUtils::EnergyCorrelator::pt_R);
-        ECFG_4_2_value = ECFG_4_2.result(jet);
-      }
+      (*moment.second.dec_ECFG_2_1_ungroomed)(*injet) = ECFG_2_1_ungroomed_value;
+      (*moment.second.dec_ECFG_3_1_ungroomed)(*injet) = ECFG_3_1_ungroomed_value;
+      (*moment.second.dec_ECFG_3_2_ungroomed)(*injet) = ECFG_3_2_ungroomed_value;
 
     }
 
-    (*moment.second.dec_ECFG_2_1)(injet) = ECFG_2_1_value;
-    (*moment.second.dec_ECFG_3_1)(injet) = ECFG_3_1_value;
-    (*moment.second.dec_ECFG_3_2)(injet) = ECFG_3_2_value;
-    (*moment.second.dec_ECFG_4_1)(injet) = ECFG_4_1_value;
-    (*moment.second.dec_ECFG_4_2)(injet) = ECFG_4_2_value;
+    /// ECFGs for L-series ratios that are for t/H discrimination
+    float ECFG_2_1_2_value = -999;
+    float ECFG_3_1_1_value = -999;
+    float ECFG_3_2_1_value = -999;
+    float ECFG_3_2_2_value = -999;
+    float ECFG_3_3_1_value = -999;
+    float ECFG_4_2_2_value = -999;
+    float ECFG_4_4_1_value = -999;
 
-    (*moment.second.dec_ECFG_2_1_ungroomed)(injet) = ECFG_2_1_ungroomed_value;
-    (*moment.second.dec_ECFG_3_1_ungroomed)(injet) = ECFG_3_1_ungroomed_value;
-    (*moment.second.dec_ECFG_3_2_ungroomed)(injet) = ECFG_3_2_ungroomed_value;
-
-  }
-
-  /// ECFGs for L-series ratios that are for t/H discrimination
-  float ECFG_2_1_2_value = -999;
-  float ECFG_3_1_1_value = -999;
-  float ECFG_3_2_1_value = -999;
-  float ECFG_3_2_2_value = -999;
-  float ECFG_3_3_1_value = -999;
-  float ECFG_4_2_2_value = -999;
-  float ECFG_4_4_1_value = -999;
-
-  /// Added for MDT studies, might remove later
-  float ECFG_3_3_2_value = -999;
-
-  /// N.B. ECFG_angles_n_beta !!
-
-  if( calculate && m_doLSeries ) {
-
-    /**
-     * ------------------------------------------------------
-     * Some of the ECFGs for the L-series ratios may already have been calculated
-     * depending on which beta values are included. Checks are put in place for
-     * each one and if it has already been calculated the value is simply copied.
-     * This is meant to prevent duplicating CPU intensive calculations that have
-     * already been performed.
-     * ------------------------------------------------------
-     */
-
-    /// 212
-    if( m_moments.count(2.0) ) {
-      ECFG_2_1_2_value = (*m_moments.at(2.0).dec_ECFG_2_1)(injet);
-    }
-    else {
-      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_2_1_2(1, 2, 2, JetSubStructureUtils::EnergyCorrelator::pt_R);
-      ECFG_2_1_2_value = ECFG_2_1_2.result(jet);
-    }
-
-    /// 311
-    if( m_doN3 ) {
-      ECFG_3_1_1_value = (*m_moments.at(1.0).dec_ECFG_3_1)(injet);
-    }
-    else {
-      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_1_1(1, 3, 1, JetSubStructureUtils::EnergyCorrelator::pt_R);
-      ECFG_3_1_1_value = ECFG_3_1_1.result(jet);
-    }
-
-    /// 321
-    ECFG_3_2_1_value = (*m_moments.at(1.0).dec_ECFG_3_2)(injet);
-
-    /// 322
-    if( m_moments.count(2.0) ) {
-      ECFG_3_2_2_value = (*m_moments.at(2.0).dec_ECFG_3_2)(injet);
-    }
-    else {
-      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_2_2(2, 3, 2, JetSubStructureUtils::EnergyCorrelator::pt_R);
-      ECFG_3_2_2_value = ECFG_3_2_2.result(jet);
-    }
-
-    /// 331
-    JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_3_1(3, 3, 1, JetSubStructureUtils::EnergyCorrelator::pt_R);
-    ECFG_3_3_1_value = ECFG_3_3_1.result(jet);
-
-    /// 422
-    if( m_doN3 && m_moments.count(2.0) ) {
-      ECFG_4_2_2_value = (*m_moments.at(2.0).dec_ECFG_4_2)(injet);
-    }
-    else {
-      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_4_2_2(2, 4, 2, JetSubStructureUtils::EnergyCorrelator::pt_R);
-      ECFG_4_2_2_value = ECFG_4_2_2.result(jet);
-    }
-
-    /// 441
-    JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_4_4_1(4, 4, 1, JetSubStructureUtils::EnergyCorrelator::pt_R);
-    ECFG_4_4_1_value = ECFG_4_4_1.result(jet);
-
-    /// 332
     /// Added for MDT studies, might remove later
-    JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_3_2(3, 3, 2, JetSubStructureUtils::EnergyCorrelator::pt_R);
-    ECFG_3_3_2_value = ECFG_3_3_2.result(jet);
+    float ECFG_3_3_2_value = -999;
+
+    /// N.B. ECFG_angles_n_beta !!
+
+    if( calculate && m_doLSeries ) {
+
+      /**
+       * ------------------------------------------------------
+       * Some of the ECFGs for the L-series ratios may already have been calculated
+       * depending on which beta values are included. Checks are put in place for
+       * each one and if it has already been calculated the value is simply copied.
+       * This is meant to prevent duplicating CPU intensive calculations that have
+       * already been performed.
+       * ------------------------------------------------------
+       */
+
+      /// 212
+      if( m_moments.count(2.0) ) {
+	ECFG_2_1_2_value = (*m_moments.at(2.0).dec_ECFG_2_1)(*injet);
+      }
+      else {
+	JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_2_1_2(1, 2, 2, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	ECFG_2_1_2_value = ECFG_2_1_2.result(jet);
+      }
+
+      /// 311
+      if( m_doN3 ) {
+	ECFG_3_1_1_value = (*m_moments.at(1.0).dec_ECFG_3_1)(*injet);
+      }
+      else {
+	JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_1_1(1, 3, 1, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	ECFG_3_1_1_value = ECFG_3_1_1.result(jet);
+      }
+
+      /// 321
+      ECFG_3_2_1_value = (*m_moments.at(1.0).dec_ECFG_3_2)(*injet);
+
+      /// 322
+      if( m_moments.count(2.0) ) {
+	ECFG_3_2_2_value = (*m_moments.at(2.0).dec_ECFG_3_2)(*injet);
+      }
+      else {
+	JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_2_2(2, 3, 2, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	ECFG_3_2_2_value = ECFG_3_2_2.result(jet);
+      }
+
+      /// 331
+      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_3_1(3, 3, 1, JetSubStructureUtils::EnergyCorrelator::pt_R);
+      ECFG_3_3_1_value = ECFG_3_3_1.result(jet);
+
+      /// 422
+      if( m_doN3 && m_moments.count(2.0) ) {
+	ECFG_4_2_2_value = (*m_moments.at(2.0).dec_ECFG_4_2)(*injet);
+      }
+      else {
+	JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_4_2_2(2, 4, 2, JetSubStructureUtils::EnergyCorrelator::pt_R);
+	ECFG_4_2_2_value = ECFG_4_2_2.result(jet);
+      }
+
+      /// 441
+      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_4_4_1(4, 4, 1, JetSubStructureUtils::EnergyCorrelator::pt_R);
+      ECFG_4_4_1_value = ECFG_4_4_1.result(jet);
+
+      /// 332
+      /// Added for MDT studies, might remove later
+      JetSubStructureUtils::EnergyCorrelatorGeneralized ECFG_3_3_2(3, 3, 2, JetSubStructureUtils::EnergyCorrelator::pt_R);
+      ECFG_3_3_2_value = ECFG_3_3_2.result(jet);
+
+    }
+
+    wdh_ECFG_2_1_2(*injet) = ECFG_2_1_2_value;
+    wdh_ECFG_3_1_1(*injet) = ECFG_3_1_1_value;
+    wdh_ECFG_3_2_1(*injet) = ECFG_3_2_1_value;
+    wdh_ECFG_3_2_2(*injet) = ECFG_3_2_2_value;
+    wdh_ECFG_3_3_1(*injet) = ECFG_3_3_1_value;
+    wdh_ECFG_4_2_2(*injet) = ECFG_4_2_2_value;
+    wdh_ECFG_4_4_1(*injet) = ECFG_4_4_1_value;
+
+    /// Added for MDT studies, might remove later
+    wdh_ECFG_3_3_2(*injet) = ECFG_3_3_2_value;
 
   }
 
-  (*m_dec_ECFG_2_1_2)(injet) = ECFG_2_1_2_value;
-  (*m_dec_ECFG_3_1_1)(injet) = ECFG_3_1_1_value;
-  (*m_dec_ECFG_3_2_1)(injet) = ECFG_3_2_1_value;
-  (*m_dec_ECFG_3_2_2)(injet) = ECFG_3_2_2_value;
-  (*m_dec_ECFG_3_3_1)(injet) = ECFG_3_3_1_value;
-  (*m_dec_ECFG_4_2_2)(injet) = ECFG_4_2_2_value;
-  (*m_dec_ECFG_4_4_1)(injet) = ECFG_4_4_1_value;
-
-  /// Added for MDT studies, might remove later
-  (*m_dec_ECFG_3_3_2)(injet) = ECFG_3_3_2_value;
-
-  return 0;
-
+  return StatusCode::SUCCESS;
 }

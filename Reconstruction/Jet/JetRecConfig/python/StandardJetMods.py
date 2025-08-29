@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 This module defines the standard JetModifier tools used in jet reco
 
@@ -296,7 +296,7 @@ stdJetModifiers.update(
     ecorr      = JetModifier( "EnergyCorrelatorTool", "ecorr", Beta = 1.0),
     ecorrR     = JetModifier( "EnergyCorrelatorRatiosTool", "ecorrR", ),
 
-    ecorrgeneral = JetModifier( "EnergyCorrelatorGeneralizedTool", "ecorrgeneral", DoLSeries = True),
+    ecorrgeneral = JetModifier( "EnergyCorrelatorGeneralizedTool", "ecorrgeneral", DoLSeries = True, JetContainer = _jetname),
     ecorrgeneralratios = JetModifier( "EnergyCorrelatorGeneralizedRatiosTool", "ecorrgeneralratios",  DoLSeries = True),
 
     comshapes = JetModifier( "CenterOfMassShapesTool","comshapes"),
