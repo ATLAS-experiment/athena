@@ -8,9 +8,11 @@ import os
 import sys
 import importlib
 import pathlib
+import warnings
 
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
+from AnalysisAlgorithmsConfig.ConfigAccumulator import deprecationWarningCategory
 
 from AnaAlgorithm.Logging import logging
 logCPAlgTextCfg = logging.getLogger('CPAlgTextCfg')
@@ -313,10 +315,21 @@ class TextConfig(ConfigFactory):
         return configSeq
 
 
-def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlags=None,
-                 isPhyslite=False, noPhysliteBroken=False, noSystematics=None):
+def makeSequence(configPath, *, flags=None, algSeq=None, noSystematics=None, dataType=None, geometry=None, autoconfigFromFlags=None, isPhyslite=None, noPhysliteBroken=False):
     """
     """
+
+    # Historically we have used the identifier
+    # `autoconfigFromFlags`, but in the rest of the code base
+    # `flags` is used. So for now we allow either, and can hopefully
+    # at some point remove the former (21 Aug 25).
+    if autoconfigFromFlags is not None:
+        if flags is not None:
+            raise ValueError("Cannot pass both flags and autoconfigFromFlags arguments")
+        flags = autoconfigFromFlags
+        warnings.warn ('Using autoconfigFromFlags parameter is deprecated, use flags instead', category=deprecationWarningCategory, stacklevel=2)
+    elif flags is None:
+        warnings.warn ('it is deprecated to configure meta-data for analysis configuration manually, please read the configuration flags via the meta-data reader', category=deprecationWarningCategory, stacklevel=2)
 
     from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
 
@@ -336,7 +349,7 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
     config.printConfig()
 
     # compile
-    configAccumulator = ConfigAccumulator(algSeq, dataType, isPhyslite=isPhyslite, geometry=geometry, autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
+    configAccumulator = ConfigAccumulator(algSeq=algSeq, dataType=dataType, isPhyslite=isPhyslite, geometry=geometry, autoconfigFromFlags=autoconfigFromFlags, flags=flags, noSystematics=noSystematics)
     configSeq.fullConfigure(configAccumulator)
 
     # blocks can be reordered during configSeq.fullConfigure

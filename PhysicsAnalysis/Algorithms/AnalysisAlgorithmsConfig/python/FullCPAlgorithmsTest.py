@@ -479,7 +479,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     if returnConfigSeq:
         return configSeq
 
-    configAccumulator = ConfigAccumulator (algSeq, dataType, isPhyslite, geometry, autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
+    configAccumulator = ConfigAccumulator (algSeq=algSeq, flags=autoconfigFromFlags, noSystematics=noSystematics)
     configSeq.fullConfigure (configAccumulator)
 
     # order can change during fullConfigure
@@ -529,9 +529,7 @@ def makeSequence (dataType, noSystematics,
                                  bleedingEdge=bleedingEdge)
     else:
         from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText
-        ca = makeSequenceText(yamlPath, dataType, algSeq, geometry=geometry,
-                              isPhyslite=isPhyslite,
-                              autoconfigFromFlags=autoconfigFromFlags,
+        ca = makeSequenceText(yamlPath, algSeq=algSeq, flags=autoconfigFromFlags,
                               noSystematics=noSystematics)
 
     if ca is not None:

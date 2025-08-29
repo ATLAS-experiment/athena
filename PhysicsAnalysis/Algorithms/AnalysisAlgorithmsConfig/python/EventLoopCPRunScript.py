@@ -31,7 +31,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         self.logger.info("Configuring algorithms based on YAML file")
         configSeq =  self.config.configure()
         self.logger.info("Configuring common services")
-        configAccumulator = ConfigAccumulator(autoconfigFromFlags=self.flags,
+        configAccumulator = ConfigAccumulator(flags=self.flags,
                                               algSeq=algSeq,
                                               noSystematics=self.args.no_systematics)
         self.logger.info("Configuring algorithms")
