@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,6 +22,10 @@
 #include "JetSubStructureMomentTools/JetSubStructureMomentToolsBase.h"
 #include "JetSubStructureMomentTools/ECFHelper.h"
 
+#include "AsgTools/PropertyWrapper.h"
+#include "AsgDataHandles/WriteDecorHandleKeyArray.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
+
 class EnergyCorrelatorTool :
   public JetSubStructureMomentToolsBase {
     ASG_TOOL_CLASS(EnergyCorrelatorTool, IJetModifier)
@@ -33,12 +37,36 @@ class EnergyCorrelatorTool :
      
       virtual StatusCode initialize() override;
 
-      int modifyJet(xAOD::Jet &injet) const override;
+      StatusCode modify(xAOD::JetContainer& jets) const override;
 
     private:
+      Gaudi::Property<std::string> m_jetContainerName{
+	this, "JetContainer", "", "SG key for the input jet container"};
+
+      /**
+       * --------------------------------------------------------------------------------
+       * Structure to hold all of the necessary moment information for a single set of
+       * EnergyCorrelator calculations. This includes the prefix and suffix, and beta.
+       * --------------------------------------------------------------------------------
+       **/
 
       /// ECF moments structure
-      struct moments_t;
+      struct moments_t {
+
+	/// Prefix for decorations
+	std::string prefix;
+
+	/// Suffix for decorations
+	std::string suffix;
+
+	/// Beta value for calculations
+	float beta;
+
+	moments_t (float Beta, const std::string& Prefix)
+	  : prefix (Prefix),
+	    suffix (GetBetaSuffix(Beta)),
+	    beta (Beta) {}
+      };
 
       /// Configurable as properties
       float m_Beta;
@@ -48,57 +76,25 @@ class EnergyCorrelatorTool :
       bool m_doDichroic;
       
       /// Map of moment calculators and decorators using beta as the key
-      std::map< float, moments_t > m_moments;
+      std::vector<std::pair< float, moments_t >> m_moments;
 
-  };
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_ECF1_Keys{
+	this, "ECF1_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_ECF2_Keys{
+	this, "ECF2_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_ECF3_Keys{
+	this, "ECF3_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_ECF4_Keys{
+	this, "ECF4_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_ECF5_Keys{
+	this, "ECF5_Keys", {}};
 
-/**
- * --------------------------------------------------------------------------------
- * Structure to hold all of the necessary moment information for a single set of
- * EnergyCorrelator calculations. This includes the prefix and suffix, beta, and
- * the necessary decorators.
- * --------------------------------------------------------------------------------
- **/
-
-struct EnergyCorrelatorTool::moments_t {
-
-  /// Prefix for decorations
-  std::string prefix;
-
-  /// Suffix for decorations
-  std::string suffix;
-
-  /// Beta value for calculations
-  float beta;
-
-  /// ECF decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF1;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF2;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF3;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF4;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF5;
-
-  /// ECF ungroomed decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF1_ungroomed;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF2_ungroomed;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECF3_ungroomed;
-
-  moments_t (float Beta, const std::string& Prefix)
-    : prefix (Prefix),
-      suffix (GetBetaSuffix(Beta)),
-      beta (Beta),
-
-      dec_ECF1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF1"+suffix)),
-      dec_ECF2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF2"+suffix)),
-      dec_ECF3 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF3"+suffix)),
-      dec_ECF4 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF4"+suffix)),
-      dec_ECF5 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF5"+suffix)),
-
-      dec_ECF1_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF1_ungroomed"+suffix)),
-      dec_ECF2_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF2_ungroomed"+suffix)),
-      dec_ECF3_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECF3_ungroomed"+suffix))
-  {
-  }
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_ECF1_ungroomed_Keys{
+	this, "ECF1_ungroomed_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_ECF2_ungroomed_Keys{
+	this, "ECF2_ungroomed_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_ECF3_ungroomed_Keys{
+	this, "ECF3_ungroomed_Keys", {}};
 
 };
 
