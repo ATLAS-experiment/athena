@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
+#include "RatesAnalysis/RatesTrigger.h"
 #include "L1TopoRatesCalculator.h"
 #include <xAODEgamma/ElectronContainer.h>
 #include "TrigConfData/L1Connector.h"
@@ -208,8 +208,11 @@ StatusCode L1TopoRatesCalculator::ratesInitialize() {
   if (m_doHistograms){
     ATH_MSG_DEBUG("################## Registering rates matrix:");
     m_ratesMatrixHist = new TH2D("rates_matrix","L1item Rates matrix",150,-3,3,150,-3,3);
+    m_countsMatrixHist = new TH2D("counts_matrix","L1item Counts matrix",150,-3,3,150,-3,3);
+    m_L1TopoScoreMatrixHist = new TH2D("L1TopoScore_matrix","L1TopoScore matrix",150,-3,3,150,-3,3);
     ATH_CHECK( histSvc()->regHist("/RATESTREAM/rates_matrix", m_ratesMatrixHist) );
-
+    ATH_CHECK( histSvc()->regHist("/RATESTREAM/counts_matrix", m_countsMatrixHist) );
+    ATH_CHECK( histSvc()->regHist("/RATESTREAM/L1TopoScore_matrix", m_L1TopoScoreMatrixHist) );
   } 
   // Here we assume a full-ring, other functions are available to change this assumption.
   // @see setTargetLumiMu(const double lumi, const double mu);
@@ -231,6 +234,11 @@ StatusCode L1TopoRatesCalculator::ratesInitialize() {
   for (size_t i = 0; i < m_L1_items.size(); ++i){
           m_rates_matrix.push_back(vector_zeros);
           m_rates_matrix2.push_back(vector_zeros);
+	  m_rates_matrix_TDT.push_back(vector_zeros);
+          m_rates_matrix2_TDT.push_back(vector_zeros);
+	  m_count_matrix.push_back(vector_zeros);
+	  m_L1TopoScore_matrix.push_back(vector_zeros);
+	  m_L1TopoScore_errors.push_back(vector_zeros);
 
   }
   // Set labels of Rates matrix 
@@ -239,6 +247,10 @@ StatusCode L1TopoRatesCalculator::ratesInitialize() {
         int j = i-1;
         m_ratesMatrixHist ->GetXaxis()->SetBinLabel(i, m_L1_items[j].c_str());
         m_ratesMatrixHist ->GetYaxis()->SetBinLabel(i, m_L1_items[j].c_str());
+	m_countsMatrixHist ->GetXaxis()->SetBinLabel(i, m_L1_items[j].c_str());
+        m_countsMatrixHist ->GetYaxis()->SetBinLabel(i, m_L1_items[j].c_str());
+	m_L1TopoScoreMatrixHist ->GetXaxis()->SetBinLabel(i, m_L1_items[j].c_str());
+        m_L1TopoScoreMatrixHist ->GetYaxis()->SetBinLabel(i, m_L1_items[j].c_str());
   }  
   //-----------------------------------------------------------------------------------------
   ATH_MSG_ALWAYS("Add Existing");
@@ -389,8 +401,11 @@ StatusCode L1TopoRatesCalculator::ratesExecute() { //EXECUTE
   }
   for (size_t i = 0; i < m_beforeCTP_triggers.size(); ++i) {
 	  
+	  resultValue[i] = L1TopoSimResultsContainer_decoder(m_definitions[i],cont);
+	  ATH_MSG_DEBUG("Trigger item: " << m_beforeCTP_triggers[i]); 
+          ATH_MSG_DEBUG("Decision from the decoder first (L1TopoResultsContainer): " << resultValue[i]);
+	   
 	  //Decision of the trigger item
-          resultValue[i] = L1TopoSimResultsContainer_decoder(m_definitions[i],cont);
           
 	  ATH_MSG_DEBUG("Trigger item: " << m_beforeCTP_triggers[i]); 
 	  ATH_MSG_DEBUG("Decision from the decoder (L1TopoResultsContainer): " << resultValue[i]);
@@ -420,55 +435,148 @@ StatusCode L1TopoRatesCalculator::ratesExecute() { //EXECUTE
 	  }
   }
 
-
-  //-------------------------
   // Applying L1items operations-------
 
   std::map<std::string, bool> L1_result_Map;
   std::vector<bool> isPassed_L1item;
-
+  
   for (const auto& pair : m_triggerMap) {
+    const std::string& key = pair.first;
+    const TriggerInfo& info = pair.second;
+    if (info.triggers.empty()) continue;
 
-   	const std::string& key = pair.first;
-        const TriggerInfo& info = pair.second;
-	if (info.triggers.empty()) continue;
+    std::vector<bool> triggerResults;
+    std::vector<std::string> newTriggers;  
 
-	bool result = beforeCTP_result_Map[info.triggers[0]];
+    std::vector<std::string> muTriggers;
+    std::vector<size_t> muIndices;
 
-	for (size_t i = 1; i < info.triggers.size(); ++i) {
-		const std::string& currentTrigger = info.triggers[i];
-                const std::string& currentOp = info.operations[i - 1];
-		if (currentOp == "&") {
-                	result &= beforeCTP_result_Map[currentTrigger];
-            	} else if (currentOp == "|") {
-                	result |= beforeCTP_result_Map[currentTrigger];
-            	}
-	}
-	L1_result_Map[key] = result;
-	isPassed_L1item.push_back(result);
+    for (size_t i = 0; i < info.triggers.size(); ++i) {
+        if (info.triggers[i].find("MU") != std::string::npos && info.triggers[i].find("TOPO") == std::string::npos) {
+            muTriggers.push_back(info.triggers[i]);
+            muIndices.push_back(i);
+        }
+    }
+
+    std::map<size_t, bool> customResults;
+
+    if (!muTriggers.empty()) {
+        std::string muCombinedName = "L1";
+        for (const auto& trig : muTriggers) {
+            size_t start = 0;
+            while (start < trig.size() && std::isdigit(trig[start])) ++start;
+            std::string mult = trig.substr(0, start);
+            std::string name = trig.substr(start);
+            if (mult.empty() || mult == "1") {
+                muCombinedName += "_" + name;
+            } else {
+                muCombinedName += "_" + mult + name;
+            }
+        }
+
+        auto it = getTriggerMap().find(muCombinedName);
+	if (it != getTriggerMap().end()) {
+	    double weight = it->second->getTotalPrescaleWeight();
+            for (size_t idx : muIndices) {
+                customResults[idx] = static_cast<bool>(weight);
+            }
+        } else {
+            std::cerr << "  [Warning] Combined MU not found: " << muCombinedName << std::endl;
+            for (size_t idx : muIndices) {
+                customResults[idx] = false;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < info.triggers.size(); ++i) {
+        bool result = false;
+        const std::string& trig = info.triggers[i];
+
+        if (customResults.count(i)) {
+            result = customResults[i];
+            newTriggers.push_back("<<MU>>");
+        } else {
+            auto it = beforeCTP_result_Map.find(trig);
+            if (it != beforeCTP_result_Map.end()) {
+                result = it->second;
+            } else {
+                std::cerr << "  [Warning] Trigger not found in beforeCTP_result_Map: " << trig << std::endl;
+                result = false;
+            }
+            newTriggers.push_back(trig);
+        }
+        triggerResults.push_back(result);
+    }
+
+    bool finalResult = triggerResults[0];
+    for (size_t i = 1; i < triggerResults.size(); ++i) {
+        const std::string& op = info.operations[i - 1];
+        if (op == "&") {
+            finalResult &= triggerResults[i];
+        } else if (op == "|") {
+            finalResult |= triggerResults[i];
+        } else {
+            std::cerr << "  [Warning] Unknown operation: " << op << std::endl;
+        }
+    }
+
+    L1_result_Map[key] = finalResult;
+    isPassed_L1item.push_back(finalResult);
   }
 
-  // ----------------------
   //Rates Matrix-------------------------------------------
- 
+
   int bin = 1;
   for (const auto& pair : L1_result_Map) {
         const std::string& label = pair.first;
         m_ratesMatrixHist->GetXaxis()->SetBinLabel(bin, label.c_str());
         m_ratesMatrixHist->GetYaxis()->SetBinLabel(bin, label.c_str());
-        ++bin;
+	m_countsMatrixHist->GetXaxis()->SetBinLabel(bin, label.c_str());
+        m_countsMatrixHist->GetYaxis()->SetBinLabel(bin, label.c_str());
+        m_L1TopoScoreMatrixHist->GetXaxis()->SetBinLabel(bin, label.c_str());
+        m_L1TopoScoreMatrixHist->GetYaxis()->SetBinLabel(bin, label.c_str());
+	++bin;
   }
 
   m_denominator.push_back(m_ratesDenominator);
   double weight=0;
+  double count=0;
   m_weighted_sum += m_weightingValues.m_enhancedBiasWeight;
+  m_EB_weight.push_back(m_weightingValues.m_enhancedBiasWeight);
   for (size_t i = 0; i < m_rates_matrix.size(); ++i){
 	  for (size_t j = 0; j < m_rates_matrix.size(); ++j){
+		bool flag = (isPassed_L1item[i] && isPassed_L1item[j]); 
 		weight=static_cast<double>((isPassed_L1item[i] && isPassed_L1item[j])*(m_weightingValues.m_enhancedBiasWeight)*(m_weightingValues.m_linearLumiFactor));
+		if (flag) {
+			count = 1;
+		}else{
+			count = 0;
+		}
+		(m_count_matrix[i])[j] += count;
 		(m_rates_matrix[i])[j] += weight;
 		(m_rates_matrix2[i])[j] += weight*weight;
 	  }
   }
+  //------------------------------------------------------ 
+  
+  std::vector<std::string> triggerNames;
+  for (const auto& [key, trigger] : getTriggerMap()) {
+    triggerNames.push_back(key);
+  }
+
+  const size_t nTriggers = triggerNames.size();
+
+  for (size_t i = 0; i < nTriggers; ++i) {
+        for (size_t j = 0; j < nTriggers; ++j) {
+            double w_i = getTriggerMap().at(triggerNames[i])->getTotalPrescaleWeight();
+	    double w_j = getTriggerMap().at(triggerNames[j])->getTotalPrescaleWeight();
+	    double weight_result_tdt = w_i * w_j;
+            double weight_TDT = weight_result_tdt*(m_weightingValues.m_enhancedBiasWeight)*(m_weightingValues.m_linearLumiFactor);
+            m_rates_matrix_TDT[i][j] += weight_TDT;
+            m_rates_matrix2_TDT[i][j] += weight_TDT*weight_TDT;
+        }
+  }
+
 
   //-------------------------------------------------------  
   
@@ -477,14 +585,127 @@ StatusCode L1TopoRatesCalculator::ratesExecute() { //EXECUTE
 
 StatusCode L1TopoRatesCalculator::ratesFinalize() {
   ATH_MSG_DEBUG("In ratesFinalize()");
+  
+  //Fill rates from TDT-----------------
+  
+  std::vector<std::string> triggerNames;
+  for (const auto& [key, trigger] : getTriggerMap()) {
+    triggerNames.push_back(key);
+  }
+  
+  const size_t nTriggers = triggerNames.size();
+  for (size_t i = 0; i < m_rates_matrix_TDT.size(); ++i) {
+        for (size_t j = 0; j < m_rates_matrix_TDT.size(); ++j) {
+		m_rates_matrix_TDT[i][j] = ((m_rates_matrix_TDT[i])[j])/(m_ratesDenominator);
+		m_rates_matrix2_TDT[i][j] = std::sqrt(((m_rates_matrix2_TDT[i])[j]))/(m_ratesDenominator);
+	}
+  }
+  
+  ATH_MSG_DEBUG("\nTDT Rates matrix:\n");
+  for (size_t i = 0; i < nTriggers; ++i) {
+    for (size_t j = 0; j < nTriggers; ++j) {
+        ATH_MSG_DEBUG("Triggers (" << triggerNames[i] << ", " << triggerNames[j] << ") -> Value: " << m_rates_matrix_TDT[i][j] <<" +- " << m_rates_matrix2_TDT[i][j]);
+    }
+  }
+  
+  for (const auto& pair : m_triggerMap) {
+          const std::string& label = pair.first;
+	  m_RCM_nameOrder.push_back(label.c_str());
+  }
+
+  //-----------------
+  
+  //Compare the trigger rates btw TDT and Rates Correlation matrix (RCM). The RCM do not include MU multiplicities so for those triggers we'll use the TDT results.
+  
+  // m_RCM_nameOrder: names in order of m_rates_matrix
+  // triggerNames: names in order of  m_rates_matrix_TDT
+
+  for (size_t i = 0; i < m_rates_matrix.size(); ++i) {
+        for (size_t j = 0; j < m_rates_matrix.size(); ++j) {
+		(m_rates_matrix[i])[j] = ((m_rates_matrix[i])[j])/(m_ratesDenominator);
+		(m_rates_matrix2[i])[j] = std::sqrt((m_rates_matrix2[i])[j])/(m_ratesDenominator);
+	}
+  }
+
+  for (size_t i = 0; i < m_RCM_nameOrder.size(); ++i) {
+  	const std::string& name = m_RCM_nameOrder[i];
+
+  	auto it = std::find(triggerNames.begin(), triggerNames.end(), name);
+  	if (it == triggerNames.end()) {
+    		std::cerr << "Trigger not found in TDT: " << name << std::endl;
+    		continue;
+  	}
+  	size_t idxTDT = std::distance(triggerNames.begin(), it);
+
+  	double original = (m_rates_matrix[i][i]);
+  	double tdt = m_rates_matrix_TDT[idxTDT][idxTDT];
+  	if (original != tdt) {
+
+    		for (size_t j = 0; j < m_RCM_nameOrder.size(); ++j) {
+      			
+      			auto jt = std::find(triggerNames.begin(), triggerNames.end(), m_RCM_nameOrder[j]);
+			if (jt == triggerNames.end()) continue;
+      			size_t jTDT = std::distance(triggerNames.begin(), jt);
+      			m_rates_matrix[i][j] = m_rates_matrix_TDT[idxTDT][jTDT];
+      			m_rates_matrix[j][i] = m_rates_matrix_TDT[jTDT][idxTDT];
+			m_rates_matrix2[i][j] = m_rates_matrix2_TDT[idxTDT][jTDT];
+                        m_rates_matrix2[j][i] = m_rates_matrix2_TDT[jTDT][idxTDT];
+    	
+		}
+		ATH_MSG_DEBUG("Trigger rates replaced from TDT: " << name << ", TDT rate: " <<  tdt << ", RCM rate: " << original);
+  	}
+  }
+
+  for (size_t i = 0; i < m_L1TopoScore_matrix.size(); ++i) {
+    for (size_t j = 0; j < m_L1TopoScore_matrix.size(); ++j) {
+        if (i == j) {
+            m_L1TopoScore_matrix[i][j] = 1.0;
+            m_L1TopoScore_errors[i][j] = 0.0;
+        } else {
+            double A  = m_rates_matrix[i][i];
+            double B  = m_rates_matrix[j][j];
+            double AB = m_rates_matrix[i][j];
+
+            double sigma_A  = m_rates_matrix2[i][i];
+            double sigma_B  = m_rates_matrix2[j][j];
+            double sigma_AB = m_rates_matrix2[i][j];
+
+            double denom = AB * (A + B - AB);
+            if (AB == 0 || (A + B - AB) == 0 || denom == 0) {
+                m_L1TopoScore_matrix[i][j] = 0.0;
+                m_L1TopoScore_errors[i][j] = 0.0;
+                continue;
+            }
+
+            double topoScore = (A * B) / denom;
+            m_L1TopoScore_matrix[i][j] = topoScore;
+
+            double dfdA  = (B * (A + B - AB) - A * B) / (AB * pow(A + B - AB, 2));
+            double dfdB  = (A * (A + B - AB) - A * B) / (AB * pow(A + B - AB, 2));
+            double dfdAB = -A * B * (A + B) / (pow(AB, 2) * pow(A + B - AB, 2));
+
+            double sigma2 = pow(dfdA * sigma_A, 2)
+                          + pow(dfdB * sigma_B, 2)
+                          + pow(dfdAB * sigma_AB, 2);
+
+            m_L1TopoScore_errors[i][j] = std::sqrt(sigma2);
+
+	}
+    }
+  }
+
   //Fill rates matrix----------
   
   for (size_t i = 0; i < m_rates_matrix.size(); ++i) {
         for (size_t j = 0; j < m_rates_matrix.size(); ++j) {
-            m_ratesMatrixHist->SetBinContent(j+1, i+1, ((m_rates_matrix[i])[j])/(m_ratesDenominator));
-            m_ratesMatrixHist->SetBinError(j+1, i+1,std::sqrt(((m_rates_matrix2[i])[j]))/(m_ratesDenominator));
+	    m_ratesMatrixHist->SetBinContent(j+1, i+1, ((m_rates_matrix[i])[j]));
+            m_ratesMatrixHist->SetBinError(j+1, i+1,((m_rates_matrix2[i])[j]));
+	    m_countsMatrixHist->SetBinContent(j+1, i+1, ((m_count_matrix[i])[j]));
+	    m_L1TopoScoreMatrixHist->SetBinContent(j+1, i+1, ((m_L1TopoScore_matrix[i])[j]));
+	    m_L1TopoScoreMatrixHist->SetBinError(j+1, i+1,((m_L1TopoScore_errors[i])[j]));
 	}
   }
+
   //--------------------------
   return StatusCode::SUCCESS;
 }
