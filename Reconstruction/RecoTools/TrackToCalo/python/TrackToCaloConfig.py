@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = "Tool configuration for the track to calo tools."
+""" Tool configuration for the track to calo tools. """
 
 # ---------------------------------------
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

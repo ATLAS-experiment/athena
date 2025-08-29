@@ -1,8 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = """
-          Instantiate the isolation
-          """
+""" Instantiate the isolation """
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
