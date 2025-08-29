@@ -38,7 +38,7 @@ StatusCode PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO(
     
     for (const auto& thisPair : newUniqueIDTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with uniqueID " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());
     
-    pfoWriteDecorHandle(*thisFE) = newUniqueIDTruthPairs;
+    pfoWriteDecorHandle(*thisFE) = std::move(newUniqueIDTruthPairs);
   }
   return StatusCode::SUCCESS;
 }
