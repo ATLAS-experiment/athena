@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -222,6 +222,7 @@ StatusCode TileTBAANtuple::initialize() {
   ATH_CHECK( m_flxOptRawChannelContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_laserObjectKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_hitContainerKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_hitVectorKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_cellContainerKey.initialize(!m_cellContainerKey.empty() && m_completeNtuple && m_TBperiod < 2015) );
 
   ATH_CHECK( m_tileToolEmscale.retrieve() );
