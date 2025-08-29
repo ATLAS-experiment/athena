@@ -108,6 +108,12 @@ namespace columnar
       /// identify this as a container id definition
       static constexpr bool isContainerId = true;
 
+      /// whether to use the regular ObjectId/ObjectRange
+      static constexpr bool regularObjectId = true;
+
+      /// whether to use a regular column accessor in array mode
+      static constexpr bool regularColumnAccessorArray = true;
+
       /// whether this is a non-const container
       static constexpr bool isMutable = false;
 
@@ -135,7 +141,7 @@ namespace columnar
     /// id, and this template allows to define one with a simple `using`
     /// statement.
     template<typename CI>
-      requires (CI::isContainerId)
+      requires (CI::isContainerId && CI::regularObjectId)
     struct mutableCI : public CI
     {
       static constexpr bool isMutable = true;
@@ -169,6 +175,7 @@ namespace columnar
   template<ContainerIdConcept CI,typename CM = ColumnarModeDefault> class ObjectRange;
   template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class ObjectId;
   template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class OptObjectId;
+  template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class ObjectLink;
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM = ColumnarModeDefault> class AccessorTemplate;
 
 

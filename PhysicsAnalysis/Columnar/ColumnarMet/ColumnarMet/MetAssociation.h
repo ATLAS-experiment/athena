@@ -12,7 +12,7 @@
 #include <ColumnarEgamma/EgammaDef.h>
 #include <ColumnarJet/JetDef.h>
 #include <ColumnarMuon/MuonDef.h>
-#include <ColumnarCore/VariantLinkColumn.h>
+#include <ColumnarVariant/VariantLinkColumn.h>
 #include <ColumnarCore/VectorVectorColumn.h>
 #include <ColumnarMet/MetInput.h>
 #include <METUtilities/METHelpers.h>
@@ -157,8 +157,8 @@ namespace columnar
     ColumnAccessor<ContainerId::metAssociation,float,CM> jettrke;
     ColumnAccessor<ContainerId::metAssociation,float,CM> jettrksumpt;
 
-    using ObjectLinkCI = VariantContainerId<ContainerId::particle,ContainerId::jet,ContainerId::electron,ContainerId::photon,ContainerId::muon>;
-    using ObjectLinkType = VariantObjectLink<ObjectLinkCI,CM>;
+    using ObjectLinkCI = VariantContainerId<ContainerId::particle,ContainerId::particle,ContainerId::jet,ContainerId::electron,ContainerId::photon,ContainerId::muon>;
+    using ObjectLinkType = ObjectLink<ObjectLinkCI,CM>;
     ColumnAccessor<ContainerId::metAssociation,std::vector<ObjectLinkType>,CM> objectLinks;
 
     ColumnAccessor<ContainerId::metAssociation,LinkCastColumn<ContainerId::jet,xAOD::JetContainer>,CM> jetLink;

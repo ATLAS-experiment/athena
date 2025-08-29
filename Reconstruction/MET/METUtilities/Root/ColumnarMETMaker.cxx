@@ -803,7 +803,7 @@ namespace met {
       for(const auto obj : m_assocAcc.objects(*assoc)) {
         if(!obj) continue;
         if(!m_useGhostMuons && obj.isContainer<columnar::ContainerId::muon>()) {
-          auto mu_test = obj.tryGetObject<columnar::ContainerId::muon>().value();
+          auto mu_test = obj.tryGetVariant<columnar::ContainerId::muon>().value();
           ATH_MSG_VERBOSE("Muon " << mu_test << " found in jet " << jet);
           if((m_doRemoveMuonJets || m_doSetMuonJetEMScale)) {
             if constexpr (columnar::ColumnarModeDefault::isXAOD) {
@@ -815,7 +815,7 @@ namespace met {
             }
           }
         } else if(m_doRemoveElecTrks && obj.isContainer<columnar::ContainerId::electron>()) {
-          auto el_test = obj.tryGetObject<columnar::ContainerId::electron>().value();
+          auto el_test = obj.tryGetVariant<columnar::ContainerId::electron>().value();
           ATH_MSG_VERBOSE("Electron " << el_test << " found in jet " << jet);
           if constexpr (columnar::ColumnarModeDefault::isXAOD) {
             if(acc_originalObject.isAvailable(el_test.getXAODObject())) el_test = *static_cast<const xAOD::Electron*>(*acc_originalObject(el_test.getXAODObject()));
