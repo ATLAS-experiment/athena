@@ -69,7 +69,7 @@ class PropSetterProxy(object):
                if comp.getName() == "":
                    return
                for name, value in comp._descriptors.items():
-                   if isinstance( value.cpp_type, ConfigurableAlgTool ) or isinstance( value.cpp_type, PrivateToolHandle ):
+                   if isinstance(value.cpp_type, (ConfigurableAlgTool, PrivateToolHandle)):
                        __add( startpath+"/"+name+"/"+value.getFullJobOptName(), value )
                        __nestAlg( startpath+"/"+name+"/"+value.getName(), value )
                    if isinstance( value.cpp_type, PrivateToolHandleArray):

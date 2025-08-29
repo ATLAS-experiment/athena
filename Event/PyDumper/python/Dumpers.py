@@ -235,10 +235,8 @@ def dump_Fourvec (v, f, parens=1):
 
     #vmom = v.momentumBase() if hasattr(v, 'momentumBase') else None
     vmom = None
-    if isinstance (v,    PyAthena.P4EEtaPhiMBase) or \
-       isinstance (v,    ParticleImpl_EEtaPhiM) or \
-       isinstance (vmom, PyAthena.P4BaseEEtaPhiM) or \
-       isinstance (v, PyAthena.xAOD.IParticle):
+    if isinstance(v, (PyAthena.P4EEtaPhiMBase, ParticleImpl_EEtaPhiM, PyAthena.xAOD.IParticle)) or \
+       isinstance(vmom, PyAthena.P4BaseEEtaPhiM):
         m = v.m()
         eta = v.eta()
         if m > v.e():
