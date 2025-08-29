@@ -1,12 +1,12 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 */
 
 #ifndef TRIGBTAGEMULATIONCHAIN_H
 #define TRIGBTAGEMULATIONCHAIN_H
 
-#include "AthenaBaseComps/AthMessaging.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "AsgTools/ToolHandle.h"
+#include "AsgMessaging/AsgMessaging.h"
 #include "src/JetManagerTool.h"
 
 #include <string>
@@ -15,7 +15,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 namespace Trig {
 
 class TrigBtagEmulationChain
-  : public AthMessaging {
+  : public asg::AsgMessaging {
  public:
   /// Constructors and Destructor
   TrigBtagEmulationChain(const std::string& name,

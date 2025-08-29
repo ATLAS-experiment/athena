@@ -1,14 +1,14 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 */
 
 #ifndef TrigBtagEmulationTool_H
 #define TrigBtagEmulationTool_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AsgTools/AsgTool.h"
+#include "AsgTools/ToolHandle.h"
 #include "TrigBtagEmulationTool/ITrigBtagEmulationTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
-#include "GaudiKernel/ToolHandle.h"
 
 #include "src/JetManagerTool.h"
 #include "src/TrigBtagEmulationChain.h"
@@ -25,11 +25,10 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 namespace Trig {
 
 class TrigBtagEmulationTool : 
-  public extends<AthAlgTool, Trig::ITrigBtagEmulationTool> {
+  public extends<asg::AsgTool, Trig::ITrigBtagEmulationTool> {
+    ASG_TOOL_CLASS0(TrigBtagEmulationTool)
 public:
-  TrigBtagEmulationTool(const std::string& type, 
-			const std::string& name, 
-			const IInterface* parent);
+  TrigBtagEmulationTool(const std::string& name);
   virtual ~TrigBtagEmulationTool() = default;
 	
   virtual StatusCode initialize() override;
@@ -87,7 +86,11 @@ private:
   StatusCode indexRun2TriggerObjects(EmulContext&) const;
 
 private:
+#ifndef XAOD_STANDALONE
   PublicToolHandle<Trig::TrigDecisionTool> m_trigDec {this, "TrigDecisionTool", "",""};
+#else
+  ToolHandle<Trig::TrigDecisionTool> m_trigDec {this, "TrigDecisionTool", "",""};
+#endif
   
   // jet Managers
   ToolHandle< Trig::JetManagerTool > m_manager_PFlow_cnt {this, "JM_PFlow_CNT", "",""};

@@ -1,17 +1,16 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "src/JetManagerTool.h"
+#include "AsgDataHandles/ReadHandle.h"
 
 namespace Trig {
 
 //**********************************************************************
 
-JetManagerTool::JetManagerTool(const std::string& type,	
-			       const std::string& name, 
-			       const IInterface* parent) 
-  : AthAlgTool(type, name, parent)
+JetManagerTool::JetManagerTool(const std::string& name) 
+  : asg::AsgTool(name)
 {}
   
 StatusCode JetManagerTool::initialize() {

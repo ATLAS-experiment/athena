@@ -9,6 +9,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *      Florencia Daneri <maria.florencia.daneri@cern.ch>
  *      Gino Marceca <gino.marceca@cern.ch>
  *      Lars Beemster <lars.beemster@cern.ch>
+ *      Liaoshan Shi <liaoshan.shi@cern.ch>
  *
  * Description:
  *      Base tool class for bjet trigger emulation
@@ -18,10 +19,8 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 namespace Trig {  
 
-TrigBtagEmulationTool::TrigBtagEmulationTool(const std::string& type, 
-					     const std::string& name, 
-					     const IInterface* parent)
-  : base_class(type, name, parent) 
+TrigBtagEmulationTool::TrigBtagEmulationTool(const std::string& name)
+  : base_class(name) 
 {}
 
 
@@ -678,7 +677,9 @@ StatusCode TrigBtagEmulationTool::addEmulatedChain(const std::string& triggerNam
     return StatusCode::FAILURE;
   }
   auto chain = std::make_unique<TrigBtagEmulationChain>( triggerName, definition );
+  #ifndef XAOD_STANDALONE
   chain->setLevel(msgLevel());  
+  #endif
   m_emulatedChains.insert( std::make_pair(triggerName, std::move(chain)) );
   
   return StatusCode::SUCCESS;
@@ -690,7 +691,7 @@ bool TrigBtagEmulationTool::isPassedBTagger(const TrigBtagEmulationJet& jet,
   if (btagger.empty()) return false;
   if (btagger == "offperf") return true;
 
-  const auto& itr = m_tagger_wp.find(btagger);
+  const auto& itr = m_tagger_wp.value().find(btagger);
   if (itr == m_tagger_wp.end()) return false;
 
   double workingPoint = itr->second;

@@ -152,7 +152,7 @@
 + Trigger/TrigEvent/TrigSteeringEvent
 + Trigger/TrigSteer/TrigCompositeUtils
 + Trigger/TrigT1/TrigT1MuctpiBits
-#+ Trigger/TriggerSimulation/TrigBtagEmulationTool
++ Trigger/TrigEmulation/TrigBtagEmulationTool
 #+ Reconstruction/RecoTools/IsolationTool
 + Reconstruction/RecoTools/RecoToolInterfaces
 + MuonSpectrometer/MuonValidation/MuonTesterTree
