@@ -22,11 +22,19 @@
 #include <sstream>
 #include <cmath>
 #include <algorithm>
+#include <limits>
 
 
 #include <nlohmann/json.hpp>
 
 #include "TH1.h"
+
+namespace {
+  bool
+  nearZero(const double & v){
+    return std::abs(v)<=std::numeric_limits<double>::min();
+  }
+}
 
 
 
@@ -775,7 +783,11 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
   double r2_t0 = (-N*sum_R2 + sum_R*sum_R);
 
   // all three phi var expresions use the same demoninator
-  double denom_phi = N * r6_t0 + sum_R * r5_t0 + sum_R2 * r4_t0;
+  const double denom_phi = N * r6_t0 + sum_R * r5_t0 + sum_R2 * r4_t0;
+  if (nearZero(denom_phi)){
+    ATH_MSG_ERROR("Divide by zero (phi) trapped in FPGATrackSimGenScanTool::fitRoad");
+    return false;
+  }
 
   // phivar expresions from analytic chi2 minimization
   std::vector<double> phivars(3);
@@ -785,7 +797,11 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
 
   // eta vars
   // same as phi but with not curvature (r^2) term
-  double denom_eta = N*sum_R2 - sum_R*sum_R;
+  const double denom_eta = N*sum_R2 - sum_R*sum_R;
+  if (nearZero(denom_eta)){
+    ATH_MSG_ERROR("Divide by zero (eta) trapped in FPGATrackSimGenScanTool::fitRoad");
+    return false;
+  }
 
   std::vector<double> etavars(2);
   etavars[0] = (-sum_R*sum_EtaR + sum_R2*sum_Eta)/denom_eta;
