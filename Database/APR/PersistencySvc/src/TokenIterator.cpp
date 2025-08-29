@@ -36,18 +36,16 @@ pool::PersistencySvc::TokenIterator::next()
 }
 
 
-bool
-pool::PersistencySvc::TokenIterator::seek (long long int position)
-{
-  m_selection->link().second = int(position);
-  return true;
-}
-
-
-int
-pool::PersistencySvc::TokenIterator::size ()
+std::size_t
+pool::PersistencySvc::TokenIterator::size()
 {
   return m_selection->container().size();
 }
 
 
+bool
+pool::PersistencySvc::TokenIterator::seek(std::size_t position)
+{
+  m_selection->link().second = int(position);
+  return true;
+}

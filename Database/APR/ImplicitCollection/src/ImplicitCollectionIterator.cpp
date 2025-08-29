@@ -67,22 +67,16 @@ pool::ImplicitCollectionIterator::currentRow() const
 
 
 bool
-pool::ImplicitCollectionIterator::seek (long long int position)
+pool::ImplicitCollectionIterator::seek(std::size_t position)
 {
-  IPositionSeek* ies = dynamic_cast<IPositionSeek*> (m_tokenIterator);
-  if (!ies)
-    return false;
   // We'll have to do a next() to read the event.
   // So subtract one here to compensate for that.
-  return ies->seek (position - 1);
+  return m_tokenIterator->seek(position - 1);
 }
 
 
-int
-pool::ImplicitCollectionIterator::size ()
+std::size_t
+pool::ImplicitCollectionIterator::size()
 {
-  ICollectionSize* ics = dynamic_cast<ICollectionSize*> (m_tokenIterator);
-  if (!ics)
-    return 0;
-  return ics->size();
+  return m_tokenIterator->size();
 }

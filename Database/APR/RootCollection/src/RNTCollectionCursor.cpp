@@ -63,20 +63,7 @@ bool RNTCollectionCursor::next()
    for( auto& elem : m_tokens ) {
       elem.first->fromString( elem.second );
    }
-
-/*
-  // Get iterator over current row.
-  coral::AttributeList::const_iterator iData = m_cursor.currentRow().begin();
-  cout << " * Cursor next(), values: " << endl;
-  for( ; iData != m_cursor.currentRow().end(); ++iData ) {
-      std::cout << "[";
-      iData->toOutputStream( std::cout );
-      std::cout << "] ";
-  }
-  cout << endl;  
-*/
-  
-  return true;
+   return true;
 }
 
 
@@ -87,19 +74,19 @@ RNTCollectionCursor::currentRow() const
 }
 
 
-bool RNTCollectionCursor::seek(long long int position)
+std::size_t RNTCollectionCursor::size()
+{
+  return m_RNTReader->GetNEntries();
+}
+
+
+bool RNTCollectionCursor::seek(std::size_t position)
 {
    if( position >= size() ) {
       return false;
    }
    m_idx = position-1;
    return true;
-}
-
-
-int RNTCollectionCursor::size()
-{
-  return m_RNTReader->GetNEntries();
 }
 
 

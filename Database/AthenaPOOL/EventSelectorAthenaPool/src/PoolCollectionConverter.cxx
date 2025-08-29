@@ -39,12 +39,6 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
 	m_poolCollection(nullptr),
 	m_collectionQuery(nullptr),
 	m_inputContainer() {
-   /*
-   std::string::size_type p_slash = m_inputContainer.find('/');
-   if (p_slash != std::string::npos) {
-      m_inputContainer.resize(p_slash);
-   }
-   */
 }
 //______________________________________________________________________________
 PoolCollectionConverter::~PoolCollectionConverter() {
@@ -113,7 +107,6 @@ StatusCode PoolCollectionConverter::isValid() const {
 }
 //______________________________________________________________________________
 pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
-   assert(m_poolCollection);
    delete m_collectionQuery; m_collectionQuery = nullptr;
    m_collectionQuery = m_poolCollection->newQuery();
    m_collectionQuery->selectAll();
