@@ -10,7 +10,7 @@ import argparse
 pd.set_option('display.max_rows', None)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--year', type=str, help='15,16,17,18,22,23,24 or run2,run3')
+parser.add_argument('--year', type=str, help='15,16,17,18,22,23,24,25 or run2,run3 or year1_year2_...')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu or Zll')
 parser.add_argument('--comp', action='store_true', help='Compare Zee and Zmumu?')
 parser.add_argument('--indir', type=str, help='Input CSV file directory')
@@ -40,7 +40,7 @@ elif year == "18":
 elif year == "22":
     xmin = 0.5
     bins = np.concatenate((np.array([0, 20]), np.linspace(21, 53, 33), np.array([54, 70])))
-elif year == "run3":
+elif year == "run3" or len(year.split("_")) > 1:
     xmin = 0.5
     bins = np.concatenate((np.array([0, 20]), np.linspace(21, 61, 41), np.array([62, 80])))
 else:
@@ -48,21 +48,28 @@ else:
     bins = np.concatenate((np.array([0, 26]), np.linspace(27, 61, 35), np.array([62, 80])))
 
 if year == "run2":
-    date_string = "Run 2, #sqrt{s} = 13 TeV"
+    date_string = "Run 2,#kern[-0.5]{ }#sqrt{s} = 13 TeV"
     grl = pt.get_grl("15")
     grl.extend(pt.get_grl("16"))
     grl.extend(pt.get_grl("17"))
     grl.extend(pt.get_grl("18"))
     out_tag = "run2"
 elif year == "run3":  
-    date_string = "Run 3, #sqrt{s} = 13.6 TeV"
+    date_string = "Run 3,#kern[-0.5]{ }#sqrt{s} = 13.6 TeV"
     grl = pt.get_grl("22")
     grl.extend(pt.get_grl("23"))
     grl.extend(pt.get_grl("24"))
+    grl.extend(pt.get_grl("25"))
     out_tag = "run3"
+elif len(year.split("_")) > 1: 
+    date_string = "Run 3,#kern[-0.5]{ }#sqrt{s} = 13.6 TeV"
+    grl = pt.get_grl(year.split("_")[0])
+    for i in year.split("_")[1:]:
+        grl.extend(pt.get_grl(i))
+    out_tag = "data"+year
 else:
     out_tag = "data"+year
-    date_string = "Data 20"+year+", #sqrt{s} = 13 TeV"
+    date_string = "Data 20"+year+",#kern[-0.5]{ }#sqrt{s} = 13 TeV"
     grl = pt.get_grl(year)
     if int(year) >= 22: date_string = date_string.replace("13 TeV", "13.6 TeV")
 
@@ -88,7 +95,7 @@ def main():
    
     df = pd.concat(dflist)
     df['OffMu'] = df['OffMu'].round(0)
-    df = df.groupby(pd.cut(df.OffMu, bins, right=False)).sum()
+    df = df.groupby(pd.cut(df.OffMu, bins, right=False), observed=False).sum()
     df.reset_index(drop=True, inplace=True)
     if comp:
         df['ZeeLumiErr'] = np.sqrt(df['ZeeLumiErr'])
@@ -139,8 +146,8 @@ def main():
         h_total.GetYaxis().SetRangeUser(ymin, ymax)
         leg = R.TLegend(0.54, 0.72, 0.805, 0.92)
         leg.SetTextSize(18)
-        leg.AddEntry(h_total, "L_{Z #rightarrow ee}/L_{Z #rightarrow #mu#mu}", "ep")
-        leg.AddEntry(line, f"Median = {median:.3f} #pm {stdev:.3f}", "l")
+        leg.AddEntry(h_total, pt.Leemumuratiolabel, "ep")
+        leg.AddEntry(line, f"Median = {median:.3f}#pm{stdev:.3f}", "l")
     else: 
         h_total.GetYaxis().SetRangeUser(0.95, 1.05)
         leg = R.TLegend(0.20, 0.18, 0.45, 0.35)
@@ -155,7 +162,7 @@ def main():
     leg.SetBorderSize(0)
     leg.SetTextSize(0.05)
     if comp: 
-        h_total.GetYaxis().SetTitle("L_{Z #rightarrow ee} / L_{Z #rightarrow #mu#mu}")
+        h_total.GetYaxis().SetTitle(pt.Leemumuratiolabel)
         zstring = ""
     else:
         h_total.GetYaxis().SetTitle("L_{"+pt.plotlabel[channel]+"} / L_{ATLAS}")
@@ -170,9 +177,9 @@ def main():
         pt.drawAtlasLabel(xmin, 0.88, "Internal")
         pt.drawText(xmin, 0.83, date_string, size=22)
         pt.drawText(xmin, 0.78, zstring, size=22)
-        pt.drawText(xmin, 0.71, "OflLumi-Run3-005", size=22)
+        pt.drawText(xmin, 0.71, "OflLumi-Run3-006", size=22)
         
-    leg.AddEntry(line1, "68% band", "f")
+    leg.AddEntry(line1, "68% band (#pm" + str(round(stdev, 3)) + ")", "f")
     leg.Draw()
 
     if comp:

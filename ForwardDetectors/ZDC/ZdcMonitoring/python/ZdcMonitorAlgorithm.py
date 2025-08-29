@@ -82,6 +82,9 @@ def create_lg_fit_amp_inj_bins():
 
 def ZdcMonitoringConfig(inputFlags):
 
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'ZdcAthMonitorCfg')
 
@@ -100,6 +103,10 @@ def ZdcMonitoringConfig(inputFlags):
     zdcMonAlg.IsInjectedPulse = inputFlags.Input.TriggerStream == 'calibration_ZDCInjCalib' or inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
     zdcMonAlg.IsStandalone = inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
     
+    if zdcMonAlg.IsInjectedPulse:
+        from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
+        zdcMonAlg.FilterTools.append(result.popToolsAndMerge(AtlasReadyFilterCfg(inputFlags))) # assumes that your ComponentAccumulator is "cfg"
+
     zdcMonAlg.IsPEBStream = 'calibration_' in inputFlags.Input.TriggerStream
     zdcMonAlg.IsPPMode = 'pp' in config
     zdcMonAlg.IspOMode = 'pO' in config
@@ -1228,15 +1235,11 @@ def ZdcMonitoringConfig(inputFlags):
 
     ### STEP 6 ###
     # Finalize. The return value should be a tuple of the ComponentAccumulator
-    # and the sequence containing the created algorithms. If we haven't called
-    # any configuration other than the AthMonitorCfgHelper here, then we can 
-    # just return directly (and not create "result" above)
-    return helper.result()
-    
-    # # Otherwise, merge with result object and return
-    # acc = helper.result()
-    # result.merge(acc)
-    # return result
+    # and the sequence containing the created algorithms
+    # Merge with result object and return
+    acc = helper.result()
+    result.merge(acc)
+    return result
 
 if __name__=='__main__':
     # Setup logs

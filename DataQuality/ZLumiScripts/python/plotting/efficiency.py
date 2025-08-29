@@ -42,13 +42,13 @@ def plot_channel(channel):
         return
 
     if channel == "Zee": 
-        channel_string = "Z #rightarrow ee"
+        channel_string = "Z#kern[-0.5]{ }#rightarrow#kern[-0.5]{ }ee"
         lep = "e"
         leg = R.TLegend(0.7, 0.7, 0.85, 0.9)
         ymin = 0.75
         ylabel = 0.88
     elif channel == "Zmumu": 
-        channel_string = "Z #rightarrow #mu#mu"
+        channel_string = "Z#kern[-0.5]{ }#rightarrow#kern[-0.5]{ }#mu#mu"
         lep = "#mu"
         ymin = 0.55
         ylabel = 0.7
@@ -131,11 +131,7 @@ def plot_channel(channel):
     reco_graph.Draw("p")
         
     pt.drawAtlasLabel(0.2, ylabel, "Internal")
-    if run_number < 427394:
-        yearsqrtstxt = "Data 20" + pt.get_year(run_number) + ", #sqrt{s} = 13 TeV"
-    else:
-        yearsqrtstxt = "Data 20" + pt.get_year(run_number) + ", #sqrt{s} = 13.6 TeV"
-    pt.drawText(0.2, ylabel-0.05, yearsqrtstxt, size=22)
+    pt.drawText(0.2, ylabel-0.05, pt.get_yearsqrtstxt(run_number), size=22)
     pt.drawText(0.2, ylabel-0.1, "LHC Fill " + str(lhc_fill), size=22)
     pt.drawText(0.2, ylabel-0.15, channel_string + " counting", size=22)
     leg.Draw()
