@@ -335,9 +335,19 @@ bool GridTripletSeedingTool::spacePointSelectionFunction(
 }
 
 bool GridTripletSeedingTool::doubletSelectionFunction(
-    const Acts::Experimental::ConstSpacePointProxy2& /*middle*/,
+    const Acts::Experimental::ConstSpacePointProxy2& middle,
     const Acts::Experimental::ConstSpacePointProxy2& other, float cotTheta,
     bool isBottomCandidate) const {
+  // We remove some doublets that have the middle space point in some specific areas
+  // This should eventually be moved inside ACTS and allow a veto mechanism according
+  // to the user desire.
+  // As of now we cannot really do this since we define a range of validity of the middle
+  // candidate, and if we want to veto some sub-regions inside it, we need to do it here.
+  if (std::abs(middle.zr()[0]) > 1500 and
+      middle.zr()[1] > 100 and middle.zr()[1] < 150) {
+    return false;
+  }
+  
   // We remove here some seeds, in case the bottom space point radius is
   // too small (i.e. < fastTrackingRMin)
 
