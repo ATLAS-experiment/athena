@@ -68,7 +68,7 @@ def ditauRecoCfg(flags, inputJets: str, inputVertex: str, inputFSTracks: str,  i
         inputVertex=inputVertex,
     )) 
     tools = [
-        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=inputJets)),
+        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, jetCollection=inputJets)),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags)),
         acc.popToolsAndMerge(VertexFinderCfg(
             flags,
