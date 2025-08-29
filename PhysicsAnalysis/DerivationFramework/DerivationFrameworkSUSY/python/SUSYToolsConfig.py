@@ -31,6 +31,7 @@ def SUSY20EventCleaningToolCfg(flags, cleaningLevel = "TightBad"):
     cleaningLevel = cleaningLevel
   ))
   EventCleaningTool.JetCleanPrefix  = "DFCommonJets_"
+  EventCleaningTool.OrDecorator     = "passOR_EMTopo"
   EventCleaningTool.JetContainer    = "AntiKt4EMTopoJets"
   EventCleaningTool.JetCleaningTool = JetCleaningTool
   EventCleaningTool.DoDecorations   = True
