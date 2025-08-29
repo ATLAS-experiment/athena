@@ -3,21 +3,20 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def SeedJetBuilderCfg(flags, name="DiTauRec_SeedJetBuilder", **kwargs):
+def SeedJetBuilderCfg(flags, name="DiTauRec_SeedJetBuilder", jetCollection=""):
     """Configure the seed jet builder"""
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.SeedJetBuilder(name, **kwargs))
+    acc.setPrivateTools(CompFactory.SeedJetBuilder(name, 
+                                                   JetCollection = jetCollection if jetCollection != "" else flags.DiTau.SeedJetCollection[0]))
     return acc
 
 
-def SubjetBuilderCfg(flags, name="DiTauRec_SubjetBuilder", **kwargs):
+def SubjetBuilderCfg(flags, name="DiTauRec_SubjetBuilder"):
     """Configure the subjet builder"""
     acc = ComponentAccumulator()
-
-    kwargs.setdefault("Rsubjet", 0.2)
-    kwargs.setdefault("ptminsubjet", 10000)
-
-    acc.setPrivateTools(CompFactory.SubjetBuilder(name, **kwargs))
+    acc.setPrivateTools(CompFactory.SubjetBuilder(name, 
+                                                  Rsubjet = flags.DiTau.Rsubjet,
+                                                  ptminsubjet = flags.DiTau.PtMinSubjet))
     return acc
 
 def TVAToolCfg(flags, name="TVATool_forDiTaus", **kwargs):
@@ -74,13 +73,12 @@ def DiTauTrackFinderCfg(flags, name="DiTauRec_DiTauTrackFinder", **kwargs):
     acc.setPrivateTools(CompFactory.DiTauTrackFinder(name, **kwargs))
     return acc
 
-def CellFinderCfg(flags, name="DiTauRec_CellFinder", **kwargs):
+def CellFinderCfg(flags, name="DiTauRec_CellFinder"):
     """Configure the cell finder"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("Rsubjet", 0.2)
-
-    CellFinder = CompFactory.CellFinder(name, **kwargs)
+    CellFinder = CompFactory.CellFinder(name,
+                                        Rsubjet = flags.DiTau.Rsubjet,)
     acc.setPrivateTools(CellFinder)
     return acc
 
