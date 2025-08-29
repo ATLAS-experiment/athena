@@ -37,7 +37,7 @@ public:
   virtual const EmulContext& populateJetManagersTriggerObjects() const override;  
   virtual bool isPassed(const std::string& chain) const override;
   virtual bool isPassed(const std::string& chain, const EmulContext&) const override;
-  virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(std::string) const;
+  virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(std::string) const override;
 
 private:
   bool isPassed(const std::string&, const TrigBtagEmulationChain&, const EmulContext&) const;
