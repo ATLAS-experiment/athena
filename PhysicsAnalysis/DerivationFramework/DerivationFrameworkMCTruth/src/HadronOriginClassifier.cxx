@@ -292,28 +292,26 @@ namespace DerivationFramework{
         // The category is determined looking for the parents.
         if(isbquark){
           // In this case, the parton is a b-quark.
-          // Create a boolean that indicates when to stop to look for parents.
-          bool islooping = isLooping(part);
           // Check the category of the b-quark.
-          if(isDirectlyFromWTop(part, islooping)){
+          if(isDirectlyFromWTop(part)){
             partonsOrigin[ part ] = b_from_W; 
           }
-          else if(isDirectlyFromTop(part, islooping)){
+          else if(isDirectlyFromTop(part)){
             partonsOrigin[ part ] = b_from_top;
           }
-          else if((IsHerwigPP()||IsSherpa())&&isDirectlyFSR(part,islooping)){
+          else if((IsHerwigPP()||IsSherpa())&&isDirectlyFSR(part)){
             partonsOrigin[ part ] = b_FSR;
           }
-          else if(IsPythia8()&&isDirectlyFSRPythia8(part,islooping)){
+          else if(IsPythia8()&&isDirectlyFSRPythia8(part)){
             partonsOrigin[ part ] = b_FSR;
           }
-          else if(IsPythia6()&&isDirectlyFSRPythia6(part,islooping)){
+          else if(IsPythia6()&&isDirectlyFSRPythia6(part)){
             partonsOrigin[ part ] = b_FSR;
           }
-          else if(IsPythia6()&&isDirectlyMPIPythia6(part, islooping)){
+          else if(IsPythia6()&&isDirectlyMPIPythia6(part)){
             partonsOrigin[ part ] = b_MPI;
           }
-          else if(IsPythia8()&&isDirectlyMPIPythia8(part, islooping)){
+          else if(IsPythia8()&&isDirectlyMPIPythia8(part)){
             partonsOrigin[ part ] = b_MPI;
           }
           else if(IsSherpa()&&isDirectlyMPISherpa(part)){
@@ -322,28 +320,26 @@ namespace DerivationFramework{
         }
         if(iscquark){
           // In this case, the parton is a c-quark.
-          // Create a boolean that indicates when to stop to look for parents.
-          bool islooping = isLooping(part);
           // Check the category of the b-quark.
-          if(isDirectlyFromWTop(part, islooping)){
+          if(isDirectlyFromWTop(part)){
             partonsOrigin[ part ] = c_from_W;
           }
-          else if(isDirectlyFromTop(part, islooping)){
+          else if(isDirectlyFromTop(part)){
             partonsOrigin[ part ] = c_from_top;
           }
-          else if((IsHerwigPP()&&IsSherpa())&&isDirectlyFSR(part,islooping)){
+          else if((IsHerwigPP()&&IsSherpa())&&isDirectlyFSR(part)){
             partonsOrigin[ part ] = c_FSR;
           }
-          else if(IsPythia8()&&isDirectlyFSRPythia8(part,islooping)){
+          else if(IsPythia8()&&isDirectlyFSRPythia8(part)){
             partonsOrigin[ part ] = c_FSR;
           }
-          else if(IsPythia6()&&isDirectlyFSRPythia6(part,islooping)){
+          else if(IsPythia6()&&isDirectlyFSRPythia6(part)){
             partonsOrigin[ part ] = c_FSR;
           }
-          else if(IsPythia6()&&isDirectlyMPIPythia6(part, islooping)){
+          else if(IsPythia6()&&isDirectlyMPIPythia6(part)){
             partonsOrigin[ part ] = c_MPI;
           }
-          else if(IsPythia8()&&isDirectlyMPIPythia8(part, islooping)){
+          else if(IsPythia8()&&isDirectlyMPIPythia8(part)){
             partonsOrigin[ part ] = c_MPI;
           }
           else if(IsSherpa()&&isDirectlyMPISherpa(part)){
@@ -436,15 +432,15 @@ namespace DerivationFramework{
 
   // Define the function isFromTop that indicates if a particle comes from top.
 
-  bool HadronOriginClassifier::isFromTop(const xAOD::TruthParticle* part, bool looping) const{
+  bool HadronOriginClassifier::isFromTop(const xAOD::TruthParticle* part) const{
     // Find the first parent of the considered particle that is different from the particle.
-    const xAOD::TruthParticle* initpart = findInitial(part, looping);
+    const xAOD::TruthParticle* initpart = findInitial(part);
     // Check if this parent comes from the top with function isDirectlyFromTop.
-    return isDirectlyFromTop(initpart, looping);
+    return isDirectlyFromTop(initpart);
   }
 
   // Define the function isDirectlyFromTop that indicates if a particle comes from the direct decay of top.
-  bool HadronOriginClassifier::isDirectlyFromTop(const xAOD::TruthParticle* part, bool looping) {
+  bool HadronOriginClassifier::isDirectlyFromTop(const xAOD::TruthParticle* part) {
     // First, make sure the consdired particle has a non-null pointer and it has parents.
     // Otherwise, return false.
     if(!part || !part->nParents()) return false;
@@ -453,7 +449,6 @@ namespace DerivationFramework{
       // Extract the i-th parent.
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if(looping) continue;
       // If the i-th parent is a top, then return true
       if( MC::isTop(parent) ) return true;
     }
@@ -463,14 +458,14 @@ namespace DerivationFramework{
 
   // Define the function isFromWTop that indicates if a particle comes from the decay chain t->Wb.
 
-  bool HadronOriginClassifier::isFromWTop(const xAOD::TruthParticle* part, bool looping) const{
+  bool HadronOriginClassifier::isFromWTop(const xAOD::TruthParticle* part) const{
     // Find the first parent of the considered particle that is different from the particle.
-    const xAOD::TruthParticle* initpart = findInitial(part, looping);
-    return isDirectlyFromWTop(initpart, looping);
+    const xAOD::TruthParticle* initpart = findInitial(part);
+    return isDirectlyFromWTop(initpart);
   }
 
   // Define the function isDirectlyFromWTop that indicates if a particle comes from the direct decay of a W from a top.
-  bool HadronOriginClassifier::isDirectlyFromWTop(const xAOD::TruthParticle * part, bool looping) const{
+  bool HadronOriginClassifier::isDirectlyFromWTop(const xAOD::TruthParticle * part) const{
     // First, make sure the consdired particle has a non-null pointer and it has parents.
     // Otherwise, return false.
     if(!part || !part->nParents()) return false;
@@ -479,9 +474,8 @@ namespace DerivationFramework{
       // Get the i-th parent.
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if(looping) continue;
       if( MC::isW(parent)){
-        if( isFromTop(parent, looping) ) return true;
+        if( isFromTop(parent) ) return true;
       }
     }
     // In this case, none of the parents of the particle is a W from top.
@@ -489,67 +483,62 @@ namespace DerivationFramework{
     return false;
   }
 
-  bool HadronOriginClassifier::isDirectlyFromGluonQuark(const xAOD::TruthParticle* part, bool looping) {
+  bool HadronOriginClassifier::isDirectlyFromGluonQuark(const xAOD::TruthParticle* part) {
     if(!part->nParents()) return false;
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if( looping ) continue;
       if( MC::isPhoton(parent) || abs(parent->pdgId())<MC::BQUARK ) return true;
     }
     return false;
   }
 
-  bool HadronOriginClassifier::isFromGluonQuark(const xAOD::TruthParticle* part, bool looping) const{
-    const xAOD::TruthParticle* initpart = findInitial(part, looping);
-    return isDirectlyFromGluonQuark(initpart, looping);
+  bool HadronOriginClassifier::isFromGluonQuark(const xAOD::TruthParticle* part) const{
+    const xAOD::TruthParticle* initpart = findInitial(part);
+    return isDirectlyFromGluonQuark(initpart);
   }
 
-  bool HadronOriginClassifier::isDirectlyFSRPythia6(const xAOD::TruthParticle * part, bool looping) const{
+  bool HadronOriginClassifier::isDirectlyFSRPythia6(const xAOD::TruthParticle * part) const{
     if(!part->nParents()) return false;
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if(looping ) continue;
       if(!MC::isW(parent)) continue;
       if(MC::isCharm(part)){
         //trick to get at least 50% of PowhegPythia c from FSR
         if(part->pdgId()==-(parent->pdgId())/6){
-          if( isFromGluonQuark(parent, looping) ) return true;
+          if( isFromGluonQuark(parent) ) return true;
         }
       }
       else{
-        if( isFromGluonQuark(parent, looping) ) return true;
+        if( isFromGluonQuark(parent) ) return true;
       }
     }
     return false;
   }
 
-  bool HadronOriginClassifier::isDirectlyFSR(const xAOD::TruthParticle * part, bool looping) const{
+  bool HadronOriginClassifier::isDirectlyFSR(const xAOD::TruthParticle * part) const{
     if(!part->nParents()) return false;
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if( looping ) continue;
       if( MC::isPhoton(parent) || MC::isGluon(parent) ){
-        if( isFromQuarkTop( parent,looping ) ) return true;
+        if( isFromQuarkTop( parent ) ) return true;
       }
     }
     return false;
   }
 
-  bool HadronOriginClassifier::isDirectlyFromQuarkTop(const xAOD::TruthParticle* part, bool looping) const{
+  bool HadronOriginClassifier::isDirectlyFromQuarkTop(const xAOD::TruthParticle* part) const{
     if(!part->nParents()) return false;
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if( looping ) continue;
       if( abs(parent->pdgId())<MC::TQUARK ) {
-
-        if(isFromTop(parent,looping)){
+        if(isFromTop(parent)){
           return true;
         }
-        else if(isFromWTop(parent,looping)){
+        else if(isFromWTop(parent)){
           return true;
         }
       }
@@ -558,14 +547,14 @@ namespace DerivationFramework{
     return false;
   }
 
-  bool HadronOriginClassifier::isFromQuarkTop(const xAOD::TruthParticle* part, bool looping) const{
-    const xAOD::TruthParticle* initpart = findInitial(part, looping);
-    return isDirectlyFromQuarkTop(initpart, looping);
+  bool HadronOriginClassifier::isFromQuarkTop(const xAOD::TruthParticle* part) const{
+    const xAOD::TruthParticle* initpart = findInitial(part);
+    return isDirectlyFromQuarkTop(initpart);
   }
 
   // Define the function isDirectlyFSRPythia8 that indicates if a particle comes from Final State Radiation in samples generated with Pythia8.
 
-  bool HadronOriginClassifier::isDirectlyFSRPythia8(const xAOD::TruthParticle * part, bool looping) const{
+  bool HadronOriginClassifier::isDirectlyFSRPythia8(const xAOD::TruthParticle * part) const{
     // First, check if the particle has parents and return false if it does not.
     if(!part->nParents()) return false;
     // Use a for to go through the parents.
@@ -575,9 +564,8 @@ namespace DerivationFramework{
 
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if( looping ) continue;
       if( MC::isPhoton(parent) || MC::isGluon(parent) ){
-        if( isFromQuarkTopPythia8( parent,looping ) ) return true;
+        if( isFromQuarkTopPythia8( parent ) ) return true;
       }
     }
     // In this case, no parent from the particle is a gluon or a photon coming from a top
@@ -586,7 +574,7 @@ namespace DerivationFramework{
   }
 
   // Define the function isDirectlyFromQuarkTopPythia8 that indicates if a particle comes from direct decay of the top in samples generated with Pythia8.
-  bool HadronOriginClassifier::isDirectlyFromQuarkTopPythia8(const xAOD::TruthParticle* part, bool looping) const{
+  bool HadronOriginClassifier::isDirectlyFromQuarkTopPythia8(const xAOD::TruthParticle* part) const{
     // First, make sure the consdired particle has a non-null pointer and it has parents.
     // Otherwise, return false.
     if(!part->nParents()) return false;
@@ -595,13 +583,12 @@ namespace DerivationFramework{
       // Extract the i-th parent.
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if(looping ) continue;
       // Check if the parent is a quark different from the top.
       if( abs(parent->pdgId())<MC::TQUARK ) {
         // In this case, the parent is a quark different from top.
         // Check if it comes from the decay chain of the t->Wb.
         // If it is the case, return true.
-        if(isFromWTop(parent,looping)){
+        if(isFromWTop(parent)){
           return true;
         }
       }
@@ -612,26 +599,25 @@ namespace DerivationFramework{
   }
 
   // Define the function isFromQuarkTopPythia8 that indicates if a particle comes from top in samples generated with Pythia8.
-  bool HadronOriginClassifier::isFromQuarkTopPythia8(const xAOD::TruthParticle* part, bool looping) const{
+  bool HadronOriginClassifier::isFromQuarkTopPythia8(const xAOD::TruthParticle* part) const{
     // Find the first parent of the considered particle that is different from the particle.
-    const xAOD::TruthParticle* initpart = findInitial(part, looping);
+    const xAOD::TruthParticle* initpart = findInitial(part);
     // Check if this parent comes from the top with function isDirectlyFromQuarkTopPythia8.
-    return isDirectlyFromQuarkTopPythia8(initpart, looping);
+    return isDirectlyFromQuarkTopPythia8(initpart);
   }
 
-  bool HadronOriginClassifier::isDirectlyMPIPythia6(const xAOD::TruthParticle * part, bool looping) {
+  bool HadronOriginClassifier::isDirectlyMPIPythia6(const xAOD::TruthParticle * part) {
     if(!part->nParents()) return false;
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if( looping ) continue;
       if( abs(parent->pdgId()) == MC::PROTON && MC::isPhysical(part) ) return true;
     }
     return false;
   }
 
-  bool HadronOriginClassifier::isDirectlyMPIPythia8(const xAOD::TruthParticle * part, bool looping) const{
-    const xAOD::TruthParticle* initpart = findInitial(part, looping);
+  bool HadronOriginClassifier::isDirectlyMPIPythia8(const xAOD::TruthParticle * part) const{
+    const xAOD::TruthParticle* initpart = findInitial(part);
     return MC::Pythia8::isConditionC(initpart);
   }
 
@@ -647,31 +633,8 @@ namespace DerivationFramework{
   --------------------------------------------------------------------------------------------------------------------------------------
   */
 
-  // Define the function isLooping that determines when to stop to look at the parents of a particle.
-  bool HadronOriginClassifier::isLooping(const xAOD::TruthParticle* part, std::shared_ptr<std::set<const xAOD::TruthParticle*>> init_part) const{
-    // First, check if the particle has parents and return false if it does not.
-    if(!part->nParents()) return false;
-    // In this case, the particle has parents.
-    // Store the particle in the container init_part.
-    if (!init_part) init_part = std::make_shared<std::set<const xAOD::TruthParticle*>>();
-    init_part->insert(part);
-    // Use a for to go through the parents.
-    for(unsigned int i=0; i<part->nParents(); ++i){
-      // Get the i-th parent and check if it is in the container init_part.
-      // If it is not, return true because the parent need to be checked.
-      // Otherwise, check the parent of the parent and keep going until there is a parent to check or all parents are checked.
-      const xAOD::TruthParticle* parent = part->parent(i);
-      if(!parent) continue;
-      if( init_part->count(parent)) return true;
-      if( isLooping(parent, init_part) ) return true;
-    }
-    // If this point is reached, then it means that no parent needs to be checked.
-    // Hence, return false.
-    return false;
-  }
-
   // Define the function findInitial which finds the first parent of a particle that is not the particle itself.
-  const xAOD::TruthParticle*  HadronOriginClassifier::findInitial(const xAOD::TruthParticle* part, bool looping,  std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked ) const{
+  const xAOD::TruthParticle*  HadronOriginClassifier::findInitial(const xAOD::TruthParticle* part,  std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked ) const{
     // If the particle has no parent, return the particle.
     if(!part->nParents()) return part;
     if (!checked) checked = std::make_shared<std::set<const xAOD::TruthParticle*>>();
@@ -680,7 +643,7 @@ namespace DerivationFramework{
       // Extract the i-th parent.
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if(checked->count(parent) && looping) continue;
+      if(checked->count(parent)) continue;
       checked->insert(parent);
       // If the parent has the same pdgId as the particle, then it means that the parent is the same as the considered particle.
       // This happens if the particle irradiates for example.
@@ -688,7 +651,7 @@ namespace DerivationFramework{
       // Repeat the process until you find a particle different from the considred one or that has no parent.
 
       if( part->pdgId() == parent->pdgId() ){
-        return findInitial(parent, looping, checked);
+        return findInitial(parent, checked);
       }
     }
     // In this case, no parent different from the considered particle has been found.
