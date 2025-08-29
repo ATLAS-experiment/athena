@@ -63,6 +63,7 @@ def FPGAOutputValidationCfg(flags, **kwargs):
             name = f"{key0} - {key1}"
             monitoringTool.defineHistogram("nmatched_strip_clusters_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1I", title = f"{name}: number of matched clusters", xbins = 100, xmin=0, xmax = 100)
             monitoringTool.defineHistogram("diff_strip_locx_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:locx;Local position x;", xbins = 200, xmin = -0.2, xmax = 0.2)
+            monitoringTool.defineHistogram("diff_strip_locxZoom_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:locx;Local position x;", xbins = 200, xmin = -0.002, xmax = 0.002)
             monitoringTool.defineHistogram("diff_strip_covxx_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:covxx;Local covariance xx;", xbins = 100, xmin = -0.1, xmax = 0.1)
             monitoringTool.defineHistogram("diff_strip_globalx_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:globalx;Global position x;", xbins = 200, xmin = -0.1, xmax = 0.1)
             monitoringTool.defineHistogram("diff_strip_globaly_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{name}:globaly;Global position y;", xbins = 200, xmin = -0.1, xmax = 0.1)
@@ -105,6 +106,7 @@ def FPGAOutputValidationCfg(flags, **kwargs):
             monitoringTool.defineHistogram(f"{key}_UNMATCHED_GLOBALPOSITION_Z_{histName},{key}_UNMATCHED_GLOBALPOSITION_R_{histName};{key}_UNMATCHED_CLUSTERS_RZ", path= "FPGAOutputValidation/"+histName, type = "TH2F", title = f"{key}:Unmatched cluster position;Z [mm];R [mm]", xbins = 300, xmin = -3000, xmax = 3000, ybins = 100, ymin = 0, ymax = 1200)
 
         for key in kwargs["stripKeys"]:
+            monitoringTool.defineHistogram(f"{key}_LOCALPOSITIONZOOM_X_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_LOCALPOSITION_X;Local position x;", xbins =  200, xmin =  -1, xmax =  1)             
             monitoringTool.defineHistogram(f"{key}_LOCALPOSITION_X_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_LOCALPOSITION_X;Local position x;", xbins =  200, xmin =  -100, xmax =  100)             
             monitoringTool.defineHistogram(f"{key}_LOCALCOVARIANCE_XX_" + histName, path= "FPGAOutputValidation/"+histName, type = "TH1F", title = f"{key}_LOCALCOVARIANCE_XX;Local covariance xx;", xbins =  100, xmin =  0, xmax =  1) 
             
