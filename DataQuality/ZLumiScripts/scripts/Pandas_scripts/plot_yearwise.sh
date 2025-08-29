@@ -8,13 +8,15 @@
 indir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/"
 baseoutdir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/Plots/"
 
-yearlist=(24 run3)
+yearlist=(25 22_23_24 run3)
 if [[ $# -ge 1 ]]; then
     yearlist=($@)
 fi
 
 for year in ${yearlist[@]}; do
     if [[ $year == "run3" ]]; then
+	outdir=${baseoutdir}
+    elif [[ $year =~ "_" ]]; then
 	outdir=${baseoutdir}
     else
 	outdir=${baseoutdir}/data${year}_13p6TeV/
