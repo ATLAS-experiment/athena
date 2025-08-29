@@ -95,7 +95,7 @@ StatusCode PMGHFProductionFractionTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PMGHFProductionFractionTool::readProductionFractionsFile(std::string filename, std::map<CP::SystematicVariation, std::map<unsigned int, float>> *weights) {
+StatusCode PMGHFProductionFractionTool::readProductionFractionsFile(const std::string & filename,  std::map<CP::SystematicVariation, std::map<unsigned int, float>> &weights) {
   /* Example file structure:
       # Charm production fraction from literature (Eur. Phys. J. C (2016) 76:397)
       411 421 431 4000
@@ -127,7 +127,7 @@ StatusCode PMGHFProductionFractionTool::readProductionFractionsFile(std::string 
       if (sys == "NOSYS") {
         sys = "";
       }
-      weights->insert({CP::SystematicVariation(sys), {{pdg1, f1}, {pdg2, f2}, {pdg3, f3}, {pdg4, f4}}});
+      weights.insert({CP::SystematicVariation(sys), {{pdg1, f1}, {pdg2, f2}, {pdg3, f3}, {pdg4, f4}}});
     }
   }
 
@@ -164,11 +164,11 @@ StatusCode PMGHFProductionFractionTool::setupProductionFractions() {
       ATH_MSG_ERROR("Invalid formatting: " << line);
       return StatusCode::FAILURE;
     } if (id == "4") {
-      m_charmFilename = name;
+      m_charmFilename = std::move(name);
     } else if (id == "5") {
-      m_bottomFilename = name;
+      m_bottomFilename = std::move(name);
     } else {
-      m_showerGeneratorMap[id] = name;
+      m_showerGeneratorMap[id] = std::move(name);
     }
   }
 
@@ -205,8 +205,8 @@ StatusCode PMGHFProductionFractionTool::setupProductionFractions() {
   ATH_MSG_INFO("Found input file " << bottomFilename);
 
   // Configure the production fractions from files
-  ATH_CHECK(readProductionFractionsFile(charmFilename, &m_charmProdFractionWeights));
-  ATH_CHECK(readProductionFractionsFile(bottomFilename, &m_bottomProdFractionWeights));
+  ATH_CHECK(readProductionFractionsFile(charmFilename, m_charmProdFractionWeights));
+  ATH_CHECK(readProductionFractionsFile(bottomFilename, m_bottomProdFractionWeights));
 
   // Step 2: read HF production fractions for a given MC shower
   // ________________________________________________________________
@@ -259,7 +259,7 @@ StatusCode PMGHFProductionFractionTool::setupProductionFractions() {
   // Close file
   infile.close();
 
-  // Step 3: calcualte the weight as `w = f(literature) / f(MC)'
+  // Step 3: calculate the weight as `w = f(literature) / f(MC)'
   // ________________________________________________________________
 
   // charm weights
@@ -439,8 +439,8 @@ StatusCode PMGHFProductionFractionTool::setSystematicVariation(const CP::Systema
   }
 
   // set the ParameterSet (weights set) for use in weight calculation
-  param.charmWeights = charmWeights;
-  param.bottomWeights = bottomWeights;
+  param.charmWeights = std::move(charmWeights);
+  param.bottomWeights = std::move(bottomWeights);
 
   return StatusCode::SUCCESS;
 }
