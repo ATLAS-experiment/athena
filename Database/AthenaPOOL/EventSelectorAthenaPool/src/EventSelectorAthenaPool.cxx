@@ -20,8 +20,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
-#include "AthenaKernel/ICollectionSize.h"
-
 // Framework
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/FileIncident.h"
@@ -33,7 +31,6 @@
 #include "AthenaKernel/IDataShare.h"
 
 // Pool
-#include "PersistencySvc/IPositionSeek.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/CollectionRowBuffer.h"
 #include "CollectionBase/TokenList.h"
@@ -838,12 +835,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
       }
    }
 
-   pool::IPositionSeek* is = dynamic_cast<pool::IPositionSeek*>(m_headerIterator);
-   if (is == nullptr) {
-      ATH_MSG_ERROR("Container does not allow seeking.");
-      return(StatusCode::FAILURE);
-   }
-   if (is->seek(evtNum - m_firstEvt[m_curCollection]) == 0) {
+   if (m_headerIterator->seek(evtNum - m_firstEvt[m_curCollection]) == 0) {
       m_headerIterator = nullptr;
       ATH_MSG_ERROR("Did not find event, evtNum = " << evtNum);
       return(StatusCode::FAILURE);
@@ -874,11 +866,7 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
          int collection_size = 0;
          if (pcc.isValid()) {
             pool::ICollectionCursor* hi = &pcc.selectAll();
-            ICollectionSize* cs = dynamic_cast<ICollectionSize*>(hi);
-            if (cs == nullptr) {
-               break;
-            }
-            collection_size = cs->size();
+            collection_size = hi->size();
          }
          if (i > 0) {
             m_firstEvt[i] = m_firstEvt[i - 1] + m_numEvt[i - 1];

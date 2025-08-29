@@ -6,6 +6,9 @@
 
 #include "CoralBase/Attribute.h"
 
+#include "TTree.h"
+#include "TEventList.h"
+
 #include <exception>
 
 pool::RootCollection::RootCollectionCursor::
@@ -77,7 +80,7 @@ pool::RootCollection::RootCollectionCursor::close()
 bool
 pool::RootCollection::RootCollectionCursor::next()
 {
-   if( ++m_idx >= m_entries ) {
+   if( ++m_idx >= size() ) {
       return false;
    }
 
@@ -111,23 +114,22 @@ pool::RootCollection::RootCollectionCursor::currentRow() const
 }
 
 
-bool
-pool::RootCollection::RootCollectionCursor::seek(long long int position)
+std::size_t
+pool::RootCollection::RootCollectionCursor::size()
 {
-   if( position >= m_entries ) {
+  return m_entries;
+}
+
+
+bool
+pool::RootCollection::RootCollectionCursor::seek(std::size_t position)
+{
+   if( position >= size() ) {
       return false;
    }
 
    m_idx = position-1;
-
-  return true;
-}
-
-
-int
-pool::RootCollection::RootCollectionCursor::size()
-{
-  return m_entries;
+   return true;
 }
 
 

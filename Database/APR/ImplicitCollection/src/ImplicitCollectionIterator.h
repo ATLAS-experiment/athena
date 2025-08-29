@@ -5,14 +5,10 @@
 #ifndef IMPLICITCOLLECTION_COLLECTIONITERATOR_H
 #define IMPLICITCOLLECTION_COLLECTIONITERATOR_H
 
-//#include "CollectionBase/ICollectionDescription.h"
 #include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
-
 #include "CollectionBase/CollectionRowBuffer.h"
 
-#include "PersistencySvc/IPositionSeek.h"
-#include "AthenaKernel/ICollectionSize.h"
 #include "CxxUtils/checker_macros.h"
 
 class Token;
@@ -35,9 +31,7 @@ namespace pool {
     * to simplify backward compatibility
     */
    class ATLAS_NOT_THREAD_SAFE ImplicitCollectionIterator : public ICollectionQuery,
-                                                            public ICollectionCursor,
-                                                            virtual public IPositionSeek,
-                                                            virtual public implements<ICollectionSize>
+                                                            public ICollectionCursor
    {
   public:
      /// Constructor
@@ -70,12 +64,12 @@ namespace pool {
       * @param position  The position to which to seek.
       * @returns True if successful, false otherwise.
       */
-     virtual bool seek (long long int position);
+     virtual bool seek(std::size_t position);
 
      /**
       * @brief Return the size of the collection.
       */
-     virtual int size ();
+     virtual std::size_t size();
 
      
      //------------------------------------------
