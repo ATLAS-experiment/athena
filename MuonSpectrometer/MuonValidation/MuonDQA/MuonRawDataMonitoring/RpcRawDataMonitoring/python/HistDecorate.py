@@ -158,11 +158,11 @@ list_boxes_layers = {
 
 # -----------------------------------------------------------------------
 def classifyInstance(hist):
-    if isinstance(hist, ROOT.TH1D) or isinstance(hist, ROOT.TH1I) or isinstance(hist, ROOT.TProfile) or isinstance(hist, ROOT.TH1F):
+    if isinstance(hist, (ROOT.TH1D, ROOT.TH1I, ROOT.TProfile, ROOT.TH1F)):
       instance = "TH1"
-    elif isinstance(hist, ROOT.TH2D) or isinstance(hist, ROOT.TH2I) or isinstance(hist, ROOT.TH2F) or isinstance(hist, ROOT.TProfile2D):
+    elif isinstance(hist, (ROOT.TH2D, ROOT.TH2I, ROOT.TH2F, ROOT.TProfile2D)):
       instance = "TH2"
-    elif isinstance(hist, ROOT.TGraph) or isinstance(hist, ROOT.TGraphErrors):
+    elif isinstance(hist, (ROOT.TGraph, ROOT.TGraphErrors)):
       instance = "TGraph"
     elif isinstance(hist, ROOT.TEfficiency):
       instance = "TEfficiency"

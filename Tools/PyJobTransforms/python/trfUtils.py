@@ -663,7 +663,7 @@ def printHR(the_object):
         for key, value in sorted(the_object.items()):
             print(u'{key}: {value}'.format(key = key, value = value))
     # list or tuple
-    elif isinstance(the_object, list) or isinstance(the_object, tuple):
+    elif isinstance(the_object, (list, tuple)):
         for element in the_object:
             print(element)
     # other
