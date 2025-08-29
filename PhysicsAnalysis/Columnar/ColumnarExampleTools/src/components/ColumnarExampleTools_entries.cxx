@@ -12,6 +12,7 @@
 #include <ColumnarExampleTools/OptionalColumnExampleTool.h>
 #include <ColumnarExampleTools/SimpleSelectorExampleTool.h>
 #include <ColumnarExampleTools/StringExampleTool.h>
+#include <ColumnarExampleTools/VariantExampleTool.h>
 #include <ColumnarExampleTools/VectorExampleTool.h>
 
 // Project include(s).
@@ -24,4 +25,5 @@ DECLARE_COMPONENT (columnar::MomentumAccessorExampleTool)
 DECLARE_COMPONENT (columnar::OptionalColumnExampleTool)
 DECLARE_COMPONENT (columnar::SimpleSelectorExampleTool)
 DECLARE_COMPONENT (columnar::StringExampleTool)
+DECLARE_COMPONENT (columnar::VariantExampleTool)
 DECLARE_COMPONENT (columnar::VectorExampleTool)

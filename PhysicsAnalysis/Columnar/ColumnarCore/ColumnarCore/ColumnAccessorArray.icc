@@ -11,7 +11,7 @@ namespace columnar
 {
   // the external mode specialization for native types
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM>
-    requires (ColumnTypeTraits<CT,ColumnarModeArray>::isNativeType)
+    requires (CI::regularColumnAccessorArray && ColumnTypeTraits<CT,ColumnarModeArray>::isNativeType)
   class AccessorTemplate<CI,CT,CAM,ColumnarModeArray> final
   {
     /// Common Public Members

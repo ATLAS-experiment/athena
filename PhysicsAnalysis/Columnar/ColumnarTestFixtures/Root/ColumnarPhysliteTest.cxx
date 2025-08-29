@@ -1361,6 +1361,8 @@ namespace columnar
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer>> ("GSFConversionVerticesAuxDyn.trackParticleLinks"));
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisElectrons.ptOut", 0));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisElectrons.ptRank", 0));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisElectrons.etaRank", 0));
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisElectrons.sfOut", 0));
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisElectrons.validOut", 0));
@@ -1374,6 +1376,7 @@ namespace columnar
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisMuons.objectType", xAOD::Type::Muon));
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.m", 0));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisMuons.ptRank", 0));
 
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.ptOut", 0));
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.chargeOut", 0));
