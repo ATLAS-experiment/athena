@@ -356,7 +356,7 @@ namespace xAOD {
   				     trackLinks,
   				     setTrackLinks )
   
-  static const SG::AuxElement::Accessor< TauJet_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
+  static const SG::Accessor< TauJet_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
   
   const TrackParticle* TauJet_v1::track( size_t i ) const {
    return ( *trackAcc( *this )[ i ] );
@@ -454,7 +454,7 @@ namespace xAOD {
   				     conversionTrackLinks,
   				     setConversionTrackLinks )
   
-  static const SG::AuxElement::Accessor< TauJet_v1::TrackParticleLinks_t > convTrackAcc( "conversionTrackLinks" );
+  static const SG::Accessor< TauJet_v1::TrackParticleLinks_t > convTrackAcc( "conversionTrackLinks" );
   
   const TrackParticle* TauJet_v1::conversionTrack( size_t i ) const {
    return ( *convTrackAcc( *this )[ i ] );
@@ -481,7 +481,7 @@ namespace xAOD {
   				     wideTrackLinks,
   				     setWideTrackLinks )
   
-  static const SG::AuxElement::Accessor< TauJet_v1::TrackParticleLinks_t > wideTrackAcc( "wideTrackLinks" );
+  static const SG::Accessor< TauJet_v1::TrackParticleLinks_t > wideTrackAcc( "wideTrackLinks" );
   
   const TrackParticle* TauJet_v1::wideTrack( size_t i ) const {
    return ( *wideTrackAcc( *this )[ i ] );
@@ -508,7 +508,7 @@ namespace xAOD {
   				     otherTrackLinks,
   				     setOtherTrackLinks )
   
-  static const SG::AuxElement::Accessor< TauJet_v1::TrackParticleLinks_t > otherTrackAcc( "otherTrackLinks" );
+  static const SG::Accessor< TauJet_v1::TrackParticleLinks_t > otherTrackAcc( "otherTrackLinks" );
   
   const TrackParticle* TauJet_v1::otherTrack( size_t i ) const {
    return ( *otherTrackAcc( *this )[ i ] );
@@ -535,7 +535,7 @@ namespace xAOD {
   				     jetLink,
   				     setJetLink )
 
-  static const SG::AuxElement::Accessor< TauJet_v1::JetLink_t > jetAcc( "jetLink" );
+  static const SG::Accessor< TauJet_v1::JetLink_t > jetAcc( "jetLink" );
 
   const Jet* TauJet_v1::jet() const {
    return ( *jetAcc( *this ) );
@@ -556,7 +556,7 @@ namespace xAOD {
   				     vertexLink,
   				     setVertexLink )
 
-  static const SG::AuxElement::Accessor< TauJet_v1::VertexLink_t > vertexAcc( "vertexLink" );
+  static const SG::Accessor< TauJet_v1::VertexLink_t > vertexAcc( "vertexLink" );
 
   const Vertex* TauJet_v1::vertex() const {
    return ( *vertexAcc( *this ) );
@@ -577,7 +577,7 @@ namespace xAOD {
   				     secondaryVertexLink,
   				     setSecondaryVertexLink )
 
-  static const SG::AuxElement::Accessor< TauJet_v1::VertexLink_t > secondaryVertexAcc( "secondaryVertexLink" );
+  static const SG::Accessor< TauJet_v1::VertexLink_t > secondaryVertexAcc( "secondaryVertexLink" );
 
   const Vertex* TauJet_v1::secondaryVertex() const {
    return ( *secondaryVertexAcc( *this ) );
@@ -602,7 +602,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > hadronic_PFOAcc( "hadronic_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > hadronic_PFOAcc( "hadronic_PFOLinks" );
   
   const PFO* TauJet_v1::hadronic_PFO( size_t i ) const {
    return ( *hadronic_PFOAcc( *this )[ i ] );
@@ -631,7 +631,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > shot_PFOAcc( "shot_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > shot_PFOAcc( "shot_PFOLinks" );
   
   const PFO* TauJet_v1::shot_PFO( size_t i ) const {
    return ( *shot_PFOAcc( *this )[ i ] );
@@ -661,7 +661,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > charged_PFOAcc( "charged_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > charged_PFOAcc( "charged_PFOLinks" );
   
   const PFO* TauJet_v1::charged_PFO( size_t i ) const {
    return ( *charged_PFOAcc( *this )[ i ] );
@@ -692,7 +692,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > neutral_PFOAcc( "neutral_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > neutral_PFOAcc( "neutral_PFOLinks" );
   
   const PFO* TauJet_v1::neutral_PFO( size_t i ) const {
    return ( *neutral_PFOAcc( *this )[ i ] );
@@ -723,7 +723,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > pi0_PFOAcc( "pi0_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > pi0_PFOAcc( "pi0_PFOLinks" );
   
   const PFO* TauJet_v1::pi0_PFO( size_t i ) const {
    return ( *pi0_PFOAcc( *this )[ i ] );
@@ -757,7 +757,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > cellBased_Charged_PFOAcc( "cellBased_Charged_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > cellBased_Charged_PFOAcc( "cellBased_Charged_PFOLinks" );
   
   const PFO* TauJet_v1::cellBased_Charged_PFO( size_t i ) const {
    return ( *cellBased_Charged_PFOAcc( *this )[ i ] );
@@ -787,7 +787,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > cellBased_Neutral_PFOAcc( "cellBased_Neutral_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > cellBased_Neutral_PFOAcc( "cellBased_Neutral_PFOLinks" );
   
   const PFO* TauJet_v1::cellBased_Neutral_PFO( size_t i ) const {
    return ( *cellBased_Neutral_PFOAcc( *this )[ i ] );
@@ -818,7 +818,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > cellBased_Pi0_PFOAcc( "cellBased_Pi0_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > cellBased_Pi0_PFOAcc( "cellBased_Pi0_PFOLinks" );
   
   const PFO* TauJet_v1::cellBased_Pi0_PFO( size_t i ) const {
    return ( *cellBased_Pi0_PFOAcc( *this )[ i ] );
@@ -853,7 +853,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > eflowRec_Charged_PFOAcc( "eflowRec_Charged_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > eflowRec_Charged_PFOAcc( "eflowRec_Charged_PFOLinks" );
   
   const PFO* TauJet_v1::eflowRec_Charged_PFO( size_t i ) const {
    return ( *eflowRec_Charged_PFOAcc( *this )[ i ] );
@@ -883,7 +883,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > eflowRec_Neutral_PFOAcc( "eflowRec_Neutral_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > eflowRec_Neutral_PFOAcc( "eflowRec_Neutral_PFOLinks" );
   
   const PFO* TauJet_v1::eflowRec_Neutral_PFO( size_t i ) const {
    return ( *eflowRec_Neutral_PFOAcc( *this )[ i ] );
@@ -914,7 +914,7 @@ namespace xAOD {
   
 
 
-  static const SG::AuxElement::Accessor< TauJet_v1::PFOLinks_t > eflowRec_Pi0_PFOAcc( "eflowRec_Pi0_PFOLinks" );
+  static const SG::Accessor< TauJet_v1::PFOLinks_t > eflowRec_Pi0_PFOAcc( "eflowRec_Pi0_PFOLinks" );
   
   const PFO* TauJet_v1::eflowRec_Pi0_PFO( size_t i ) const {
    return ( *eflowRec_Pi0_PFOAcc( *this )[ i ] );
