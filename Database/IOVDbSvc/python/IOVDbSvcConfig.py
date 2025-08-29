@@ -300,6 +300,28 @@ def getSqliteContent(sqliteInput,takeFolders,databaseInstance):
     return sqliteFolders
 
 
+#post-exec-style helper method to remove a folder from IOVDbSvc.Folders and CondInputLoader.Load
+#To be used in calibration-processing jobs that read the condions from anohter source or produce it in the same job
+def blockFolder(ca,folder):
+        "Block use of specified conditions DB folder so data can be read from elsewhere"
+        msg.info("Trying to remove folder [%s] from IOVDbSvc.Folders",folder)
+        iovdbsvc=ca.getService("IOVDbSvc")
+        oldLen=len(iovdbsvc.Folders)
+        iovdbsvc.Folders=[x for x in iovdbsvc.Folders if x.find(folder)==-1]
+        newLen=len(iovdbsvc.Folders)
+        if (oldLen==newLen):
+            msg.warning("Folder [%s] not found in IOVDbSvc.Folder",folder)
+            return
+        elif (oldLen-newLen>1):
+            msg.warning("Folder string [%s] matched more than one folder, removed %i folders",folder,oldLen-newLen)
+
+
+        condInputLoader=ca.getCondAlgo("CondInputLoader")
+        condInputLoader.Load=set([x for x in condInputLoader.Load if x[1].find(folder)==-1])
+        return
+
+
+
 if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles

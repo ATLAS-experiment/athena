@@ -15,21 +15,6 @@ from InDetAlignGenTools.InDetAlignGenToolsConfig import ITkAlignDBTool
 import sys
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def blockFolder(ca,folder):
-        "Block use of specified conditions DB folder so data can be read from elsewhere"
-        from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-        ca.merge(IOVDbSvcCfg(flags))
-        iovdbsvc=ca.getService("IOVDbSvc")
-        # check existing list of folders and remove it if found
-        for i in range(0,len(iovdbsvc.Folders)):
-            if (iovdbsvc.Folders[i].find(folder)>=0):
-                del iovdbsvc.Folders[i]
-                break
-        condInputLoader=ca.getCondAlgo("CondInputLoader")        
-        for i in range(0, len(condInputLoader.Load)):
-            if (folder in condInputLoader.Load[i][-1] ):
-                del condInputLoader.Load[i]
-                break
 
 
 def getFlags(**kwargs):
