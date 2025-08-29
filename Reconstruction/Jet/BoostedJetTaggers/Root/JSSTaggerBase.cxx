@@ -77,6 +77,7 @@ StatusCode JSSTaggerBase::initialize() {
     ATH_MSG_ERROR( "ContainerName has not been set. Exiting" );
     return StatusCode::FAILURE;
   }
+  m_isSmallRJet = m_containerName.find("AntiKt4")!=std::string::npos;
 
   /// Initialize warning counters
   m_nWarnVar = 0;
@@ -121,9 +122,11 @@ StatusCode JSSTaggerBase::initialize() {
   m_readQwKey = m_containerName + "." + m_readQwKey.key();
   m_readThrustMajKey = m_containerName + "." + m_readThrustMajKey.key();
   m_readSphericityKey = m_containerName + "." + m_readSphericityKey.key();
-  m_readECFG331Key = m_containerName + "." + m_readECFG331Key.key();
-  m_readECFG311Key = m_containerName + "." + m_readECFG311Key.key();
-  m_readECFG212Key = m_containerName + "." + m_readECFG212Key.key();
+  if(!m_isSmallRJet){
+    m_readECFG331Key = m_containerName + "." + m_readECFG331Key.key();
+    m_readECFG311Key = m_containerName + "." + m_readECFG311Key.key();
+    m_readECFG212Key = m_containerName + "." + m_readECFG212Key.key();
+  }
 
   ATH_CHECK( m_decTau21WTAKey.initialize() );
   ATH_CHECK( m_decTau32WTAKey.initialize() );
@@ -146,9 +149,9 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readQwKey.initialize() );
   ATH_CHECK( m_readThrustMajKey.initialize() );
   ATH_CHECK( m_readSphericityKey.initialize() );
-  ATH_CHECK( m_readECFG331Key.initialize() );
-  ATH_CHECK( m_readECFG311Key.initialize() );
-  ATH_CHECK( m_readECFG212Key.initialize() );
+  ATH_CHECK( m_readECFG331Key.initialize(!m_isSmallRJet) );
+  ATH_CHECK( m_readECFG311Key.initialize(!m_isSmallRJet) );
+  ATH_CHECK( m_readECFG212Key.initialize(!m_isSmallRJet) );
 
   m_readParentKey = m_containerName + "." + m_readParentKey.key();
   ATH_CHECK( m_readParentKey.initialize() );
@@ -416,10 +419,6 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECF2(m_readECF2Key);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECF3(m_readECF3Key);
 
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG331(m_readECFG331Key);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG311(m_readECFG311Key);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG212(m_readECFG212Key);
-
 
   /// WTA N-subjettiness ratios
   float tau21_wta = -999.0;
@@ -476,27 +475,31 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
   float L2 = -999.0;
   float L3 = -999.0;
 
-  static const SG::AuxElement::ConstAccessor<float> accL2("L2");
-  if(!accL2.isAvailable(jet)){
+  if(!m_isSmallRJet){
+    SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG331(m_readECFG331Key);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG311(m_readECFG311Key);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG212(m_readECFG212Key);
+
     if(readECFG331.isAvailable() && readECFG212.isAvailable()){
       if(readECFG212(jet) > 1e-8){
-	L2 = readECFG331(jet) / pow(readECFG212(jet), (3.0/2.0));
+        L2 = readECFG331(jet) / std::pow(readECFG212(jet), 1.5);
       }
       else result = 1;
     }
-    decL2(jet) = L2;
-  }
 
-  static const SG::AuxElement::ConstAccessor<float> accL3("L3");
-  if(!accL3.isAvailable(jet)){
     if(readECFG331.isAvailable() && readECFG311.isAvailable()){
       if(readECFG331(jet) > 1e-8){
-	L3 = readECFG311(jet) / pow(readECFG331(jet), (1.0/3.0));
+        L3 = readECFG311(jet) / std::pow(readECFG331(jet), 1./3.);
       }
       else result = 1;
     }
-    decL3(jet) = L3;
   }
+
+  static const SG::AuxElement::ConstAccessor<float> accL2("L2");
+  if(!accL2.isAvailable(jet)) decL2(jet) = L2;
+
+  static const SG::AuxElement::ConstAccessor<float> accL3("L3");
+  if(!accL3.isAvailable(jet)) decL3(jet) = L3;
 
   // TODO: Add ECFG for ANN tagger whenever it is defined
 
@@ -530,9 +533,15 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECF2(m_readECF2Key);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECF3(m_readECF3Key);
 
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG331(m_readECFG331Key);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG311(m_readECFG311Key);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG212(m_readECFG212Key);
+  // Use pointers here so we can create only the ones we're configured for
+  std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECFG331;
+  std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECFG311;
+  std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECFG212;
+  if(!m_isSmallRJet){
+    readECFG331 = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readECFG331Key);
+    readECFG311 = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readECFG311Key);
+    readECFG212 = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readECFG212Key);
+  }
 
   for(const xAOD::Jet* jet : jets){
 
@@ -588,25 +597,25 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
     float L2 = -999.0;
     float L3 = -999.0;
 
-    static const SG::AuxElement::ConstAccessor<float> accL2("L2");
-    if(!accL2.isAvailable(*jet)){
-      if(readECFG331.isAvailable() && readECFG212.isAvailable()){
-	if(readECFG212(*jet) > 1e-8){
-	  L2 = readECFG331(*jet) / pow(readECFG212(*jet), (3.0/2.0));
-	}
+    if(!m_isSmallRJet){
+      if((*readECFG331).isAvailable() && (*readECFG212).isAvailable()){
+        if((*readECFG212)(*jet) > 1e-8){
+          L2 = (*readECFG331)(*jet) / std::pow((*readECFG212)(*jet), 1.5);
+        }
       }
-      decL2(*jet) = L2;
+
+      if((*readECFG331).isAvailable() && (*readECFG311).isAvailable()){
+        if((*readECFG331)(*jet) > 1e-8){
+          L3 = (*readECFG311)(*jet) / std::pow((*readECFG331)(*jet), 1./3.);
+        }
+      }
     }
 
+    static const SG::AuxElement::ConstAccessor<float> accL2("L2");
+    if(!accL2.isAvailable(*jet)) decL2(*jet) = L2;
+
     static const SG::AuxElement::ConstAccessor<float> accL3("L3");
-    if(!accL3.isAvailable(*jet)){
-      if(readECFG331.isAvailable() && readECFG311.isAvailable()){
-	if(readECFG331(*jet) > 1e-8){
-	  L3 = readECFG311(*jet) / pow(readECFG331(*jet), (1.0/3.0));
-	}
-      }
-      decL3(*jet) = L3;
-    }
+    if(!accL3.isAvailable(*jet)) decL3(*jet) = L3;
 
     // TODO: Add ECFG for ANN tagger whenever it is defined
 
