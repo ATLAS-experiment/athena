@@ -22,6 +22,7 @@
  */
 #include "TrigConfData/L1Connector.h"
 #include "TrigConfData/L1Menu.h"
+#include "RatesAnalysis/RatesTrigger.h"
 #include "AthenaBaseComps/AthCommonDataStore.h"
 #include <vector>
 #include <cstdint>
@@ -38,9 +39,13 @@ class L1TopoRatesCalculator: public ::RatesAnalysisAlg {
   virtual StatusCode  ratesInitialize() override;
   virtual StatusCode  ratesExecute() override;
   virtual StatusCode  ratesFinalize() override;
-  
+ protected:
+  std::vector<double> m_EB_weight; 
+  std::vector<std::string> m_RCM_nameOrder;
  private:  
   TH2D* m_ratesMatrixHist{}; // Rates Matrix
+  TH2D* m_countsMatrixHist{}; // Counts Matrix
+  TH2D* m_L1TopoScoreMatrixHist{}; // L1TopoScore Matrix
   struct ResultDefinition {
       unsigned int conID{};
       unsigned int flatindex{};
@@ -62,6 +67,11 @@ class L1TopoRatesCalculator: public ::RatesAnalysisAlg {
   std::vector<ResultDefinition> m_definitions;
   std::vector<std::vector<double>> m_rates_matrix;
   std::vector<std::vector<double>> m_rates_matrix2;
+  std::vector<std::vector<double>> m_rates_matrix_TDT;
+  std::vector<std::vector<double>> m_rates_matrix2_TDT;
+  std::vector<std::vector<double>> m_count_matrix;
+  std::vector<std::vector<double>> m_L1TopoScore_matrix;
+  std::vector<std::vector<double>> m_L1TopoScore_errors;
   std::vector<double> m_denominator;
   double m_weighted_sum{};
   struct TriggerInfo {

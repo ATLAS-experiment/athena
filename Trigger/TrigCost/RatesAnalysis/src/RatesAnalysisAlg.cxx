@@ -191,6 +191,10 @@ StatusCode RatesAnalysisAlg::addAllExisting() {
   return addExisting(".*");
 }
 
+const std::unordered_map<std::string, std::unique_ptr<RatesTrigger>>& RatesAnalysisAlg::getTriggerMap() const {
+    return m_triggers;
+}
+
 StatusCode RatesAnalysisAlg::addExisting(const std::string& pattern) {
   // Check we have the TDT
   ATH_CHECK(checkGotTDT());
@@ -875,10 +879,6 @@ void RatesAnalysisAlg::writeMetadata() {
   m_metadataTree->Branch("targetMu", &m_targetMu);
   m_metadataTree->Branch("targetBunches", &m_targetBunches);
   m_metadataTree->Branch("targetLumi", &m_targetLumi);
-  double bunchCrossingRate = m_enhancedBiasRatesTool->getBunchCrossingRate();
-  m_metadataTree->Branch("bunchCrossingRate", &bunchCrossingRate);
-  int doMultiSliceDiJet = m_doMultiSliceDiJet;
-  m_metadataTree->Branch("multiSliceDiJet", &doMultiSliceDiJet);
 
   std::vector<std::string> triggers;
   std::vector<std::string> lowers;
