@@ -268,7 +268,7 @@ StatusCode RunKLFitterAlg::initialize() {
     ANA_MSG_ERROR("KLFitter cannot run using Continuous b-tag working point!");
     return StatusCode::FAILURE;
   }
-  m_bTagDecoAcc = std::make_unique<SG::AuxElement::ConstAccessor<char>>(
+  m_bTagDecoAcc = std::make_unique<SG::ConstAccessor<char>>(
       m_bTagDecoration.value());
 
   if (m_bTaggingMethodEnum ==

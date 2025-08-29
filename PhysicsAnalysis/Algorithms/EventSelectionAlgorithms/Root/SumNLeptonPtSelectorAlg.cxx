@@ -32,7 +32,7 @@ namespace CP {
 
   StatusCode SumNLeptonPtSelectorAlg::execute() {
     // accessors
-    static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
+    static const SG::ConstAccessor<float> acc_pt_dressed("pt_dressed");
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo

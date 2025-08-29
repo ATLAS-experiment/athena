@@ -23,26 +23,26 @@ StatusCode PDFinfoAlg::execute(const EventContext &ctx) const {
   ANA_CHECK(evtStore()->retrieve(evtInfo, "EventInfo"));
 
   // accessors
-  static const SG::AuxElement::ConstAccessor<int> acc_pdfid1("PDFID1");
-  static const SG::AuxElement::ConstAccessor<int> acc_pdfid2("PDFID2");
-  static const SG::AuxElement::ConstAccessor<int> acc_pdgid1("PDGID1");
-  static const SG::AuxElement::ConstAccessor<int> acc_pdgid2("PDGID2");
-  static const SG::AuxElement::ConstAccessor<float> acc_Q("Q");
-  static const SG::AuxElement::ConstAccessor<float> acc_X1("X1");
-  static const SG::AuxElement::ConstAccessor<float> acc_X2("X2");
-  static const SG::AuxElement::ConstAccessor<float> acc_XF1("XF1");
-  static const SG::AuxElement::ConstAccessor<float> acc_XF2("XF2");
+  static const SG::ConstAccessor<int> acc_pdfid1("PDFID1");
+  static const SG::ConstAccessor<int> acc_pdfid2("PDFID2");
+  static const SG::ConstAccessor<int> acc_pdgid1("PDGID1");
+  static const SG::ConstAccessor<int> acc_pdgid2("PDGID2");
+  static const SG::ConstAccessor<float> acc_Q("Q");
+  static const SG::ConstAccessor<float> acc_X1("X1");
+  static const SG::ConstAccessor<float> acc_X2("X2");
+  static const SG::ConstAccessor<float> acc_XF1("XF1");
+  static const SG::ConstAccessor<float> acc_XF2("XF2");
 
   // decorators
-  static const SG::AuxElement::Decorator<int> dec_pdfid1("PDFID1");
-  static const SG::AuxElement::Decorator<int> dec_pdfid2("PDFID2");
-  static const SG::AuxElement::Decorator<int> dec_pdgid1("PDGID1");
-  static const SG::AuxElement::Decorator<int> dec_pdgid2("PDGID2");
-  static const SG::AuxElement::Decorator<float> dec_Q("Q");
-  static const SG::AuxElement::Decorator<float> dec_X1("X1");
-  static const SG::AuxElement::Decorator<float> dec_X2("X2");
-  static const SG::AuxElement::Decorator<float> dec_XF1("XF1");
-  static const SG::AuxElement::Decorator<float> dec_XF2("XF2");
+  static const SG::Decorator<int> dec_pdfid1("PDFID1");
+  static const SG::Decorator<int> dec_pdfid2("PDFID2");
+  static const SG::Decorator<int> dec_pdgid1("PDGID1");
+  static const SG::Decorator<int> dec_pdgid2("PDGID2");
+  static const SG::Decorator<float> dec_Q("Q");
+  static const SG::Decorator<float> dec_X1("X1");
+  static const SG::Decorator<float> dec_X2("X2");
+  static const SG::Decorator<float> dec_XF1("XF1");
+  static const SG::Decorator<float> dec_XF2("XF2");
 
   // for now we only look at the 0th element - do we need any others?
   for (const auto* truthEvent : *truthEvents) {

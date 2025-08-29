@@ -52,7 +52,7 @@ namespace CP
     }
 
     // Construct the decoration accessor for the desired type
-    m_accessor = std::make_unique<SG::AuxElement::ConstAccessor<T>>(m_name);
+    m_accessor = std::make_unique<SG::ConstAccessor<T>>(m_name);
 
     return StatusCode::SUCCESS;
   }

@@ -39,8 +39,8 @@ namespace CP {
 
     // pair input and output variables via accessors and decorators
     std::vector< std::pair<
-		   SG::AuxElement::ConstAccessor<float>,
-		   SG::AuxElement::Decorator<float>
+		   SG::ConstAccessor<float>,
+		   SG::Decorator<float>
 		   > > m_accdecs;
 
   };

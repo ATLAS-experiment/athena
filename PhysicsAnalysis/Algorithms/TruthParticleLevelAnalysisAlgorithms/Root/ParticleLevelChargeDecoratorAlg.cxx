@@ -20,7 +20,7 @@ StatusCode ParticleLevelChargeDecoratorAlg::execute(const EventContext &ctx) con
   SG::ReadHandle<xAOD::TruthParticleContainer> particles(m_particlesKey, ctx);
 
   // decorators
-  static const SG::AuxElement::Decorator<float> dec_charge("charge");
+  static const SG::Decorator<float> dec_charge("charge");
 
   for (const auto* particle : *particles) {
 

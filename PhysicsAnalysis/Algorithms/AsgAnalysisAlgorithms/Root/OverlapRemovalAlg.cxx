@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -27,7 +27,7 @@ namespace CP
       return StatusCode::FAILURE;
     }
 
-    m_overlapRemovalAccessor = std::make_unique<SG::AuxElement::Accessor<char> > (m_overlapRemovalDecoration);
+    m_overlapRemovalAccessor = std::make_unique<SG::Accessor<char> > (m_overlapRemovalDecoration);
 
     ANA_CHECK (m_overlapTool.retrieve());
     ANA_CHECK (m_electronsHandle.initialize (m_systematicsList, SG::AllowEmpty));

@@ -57,7 +57,7 @@ namespace CP
     int m_minCutIndex{ -1 };
     int m_maxCutIndex{ -1 };
 
-    std::unique_ptr<SG::AuxElement::ConstAccessor<T>> m_accessor;
+    std::unique_ptr<SG::ConstAccessor<T>> m_accessor;
 
     asg::AcceptInfo m_accept;
   };

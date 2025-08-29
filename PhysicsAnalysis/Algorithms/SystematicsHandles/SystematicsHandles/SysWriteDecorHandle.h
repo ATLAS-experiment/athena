@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -136,7 +136,7 @@ namespace CP
 
     /// \brief the cache of names we use
   private:
-    std::unordered_map<CP::SystematicSet,std::tuple<std::string,SG::AuxElement::Decorator<T> > > m_dataCache;
+    std::unordered_map<CP::SystematicSet,std::tuple<std::string,SG::Decorator<T> > > m_dataCache;
 
     /// \brief get the data for the given systematics
   private:

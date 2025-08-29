@@ -14,13 +14,13 @@ StatusCode ParticleLevelIsolationAlg::initialize() {
 
   // decorators
   m_dec_isolated =
-      std::make_unique<SG::AuxElement::Decorator<char>>(m_isolated.value());
+      std::make_unique<SG::Decorator<char>>(m_isolated.value());
   m_dec_notTauOrigin =
-      std::make_unique<SG::AuxElement::Decorator<char>>(m_notTauOrigin.value());
+      std::make_unique<SG::Decorator<char>>(m_notTauOrigin.value());
 
   // accessors
   if (m_isolationVariable.value() != "") {
-    m_acc_isoVar = std::make_unique<SG::AuxElement::ConstAccessor<float>>(
+    m_acc_isoVar = std::make_unique<SG::ConstAccessor<float>>(
         m_isolationVariable.value());
   }
 
@@ -48,13 +48,13 @@ StatusCode ParticleLevelIsolationAlg::execute(const EventContext &ctx) const {
   SG::ReadHandle<xAOD::TruthParticleContainer> particles(m_particlesKey, ctx);
 
   // accessors
-  static const SG::AuxElement::ConstAccessor<unsigned int> acc_type(
+  static const SG::ConstAccessor<unsigned int> acc_type(
       "classifierParticleType");
-  static const SG::AuxElement::ConstAccessor<unsigned int> acc_orig(
+  static const SG::ConstAccessor<unsigned int> acc_orig(
       "classifierParticleOrigin");
 
   // decorators
-  static const SG::AuxElement::Decorator<float> dec_charge("charge");
+  static const SG::Decorator<float> dec_charge("charge");
 
   for (const auto* particle : *particles) {
 

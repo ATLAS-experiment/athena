@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak <tadej@cern.ch>
@@ -31,7 +31,7 @@ StatusCode AsgPriorityDecorationAlg::initialize()
     return StatusCode::FAILURE;
   }
 
-  m_priorityDecorator = std::make_unique<SG::AuxElement::Decorator<char> > (m_priorityDecoration);
+  m_priorityDecorator = std::make_unique<SG::Decorator<char> > (m_priorityDecoration);
 
   ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));
   ANA_CHECK (m_preselections.initialize (m_systematicsList, m_particlesHandle));

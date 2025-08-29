@@ -22,13 +22,13 @@ StatusCode ParticleLevelJetsAlg::execute(const EventContext &ctx) const {
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
 
   // accessors
-  static const SG::AuxElement::ConstAccessor<int> acc_flav(
+  static const SG::ConstAccessor<int> acc_flav(
       "HadronConeExclTruthLabelID");
 
   // decorators
-  static const SG::AuxElement::Decorator<int> dec_nBJets(
+  static const SG::Decorator<int> dec_nBJets(
       "num_truth_bjets_nocuts");
-  static const SG::AuxElement::Decorator<int> dec_nCJets(
+  static const SG::Decorator<int> dec_nCJets(
       "num_truth_cjets_nocuts");
 
   // the number of b- and c-jets without any event cuts applied

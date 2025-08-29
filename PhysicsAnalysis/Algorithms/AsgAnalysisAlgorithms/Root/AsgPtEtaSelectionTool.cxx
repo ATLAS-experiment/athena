@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -102,8 +102,8 @@ namespace CP
     if (m_useDressedProperties) {
        ATH_MSG_DEBUG( "Performing pt and eta cuts on the dressed properties" );
        m_dressedPropertiesIndex = m_accept.addCut ("dressedProperties", "has dressed properties");
-       m_dressedPtAccessor = std::make_unique<SG::AuxElement::ConstAccessor<float>> ("pt_dressed");
-       m_dressedEtaAccessor = std::make_unique<SG::AuxElement::ConstAccessor<float>> ("eta_dressed");
+       m_dressedPtAccessor = std::make_unique<SG::ConstAccessor<float>> ("pt_dressed");
+       m_dressedEtaAccessor = std::make_unique<SG::ConstAccessor<float>> ("eta_dressed");
     }
     if (m_minPt > 0) {
        ATH_MSG_DEBUG( "Performing pt >= " << m_minPt << " MeV selection" );

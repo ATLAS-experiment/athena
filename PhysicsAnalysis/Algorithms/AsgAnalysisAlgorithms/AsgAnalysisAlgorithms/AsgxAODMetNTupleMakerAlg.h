@@ -174,7 +174,7 @@ namespace CP {
             /// Name of the branch being written
             std::string m_branchName;
             /// Object accessing the variable in question
-            std::unique_ptr< SG::AuxElement::TypelessConstAccessor > m_acc;
+            std::unique_ptr< SG::TypelessConstAccessor > m_acc;
             /// Pointer to the helper object that handles this variable
             const SG::IAuxTypeVectorFactory* m_factory = nullptr;
             /// The object managing the memory of the written variable

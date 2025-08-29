@@ -38,7 +38,7 @@ namespace CP
         ATH_CHECK(m_egammaContKey.initialize(m_systematicsList));
         ATH_CHECK(m_muonContKey.initialize(m_systematicsList));
         ANA_CHECK (m_systematicsList.initialize());
-        m_wpDec = std::make_unique<SG::AuxElement::Decorator<char> > (m_selectionName.value());
+        m_wpDec = std::make_unique<SG::Decorator<char> > (m_selectionName.value());
 
         if (!m_vetoFSR) {
             ATH_MSG_INFO("Reading container " << m_egammaContKey.getNamePattern() << " for FSR search for muons from " <<  m_muonContKey.getNamePattern() << ". Those passing " << m_selectionName.value() << " are also accepted.");
@@ -56,9 +56,9 @@ namespace CP
     StatusCode EgammaFSRForMuonsCollectorAlg::execute()
     {
 
-        auto selDec   = std::make_unique<SG::AuxElement::Decorator<uint32_t> > ("selectEta");
-        auto oqDec    = std::make_unique<SG::AuxElement::Decorator<uint32_t> > ("goodOQ");
-        auto cleanDec = std::make_unique<SG::AuxElement::Decorator<uint32_t> > ("isClean");
+        auto selDec   = std::make_unique<SG::Decorator<uint32_t> > ("selectEta");
+        auto oqDec    = std::make_unique<SG::Decorator<uint32_t> > ("goodOQ");
+        auto cleanDec = std::make_unique<SG::Decorator<uint32_t> > ("isClean");
 
         // Loop over systematics
         for (const auto& sys : m_systematicsList.systematicsVector()) {
