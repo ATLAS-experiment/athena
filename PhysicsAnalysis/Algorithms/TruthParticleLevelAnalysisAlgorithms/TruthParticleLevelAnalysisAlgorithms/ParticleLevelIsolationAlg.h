@@ -42,9 +42,9 @@ class ParticleLevelIsolationAlg : public EL::AnaReentrantAlgorithm {
       this, "isoCut", -1,
       "threshold to use in isolation cuts of the form 'var/pT < cut'"};
   MCTruthPartClassifier::ParticleType m_checkType;
-  std::unique_ptr<const SG::AuxElement::Decorator<char>> m_dec_isolated{};
-  std::unique_ptr<const SG::AuxElement::Decorator<char>> m_dec_notTauOrigin{};
-  std::unique_ptr<const SG::AuxElement::ConstAccessor<float>> m_acc_isoVar{};
+  std::unique_ptr<const SG::Decorator<char>> m_dec_isolated{};
+  std::unique_ptr<const SG::Decorator<char>> m_dec_notTauOrigin{};
+  std::unique_ptr<const SG::ConstAccessor<float>> m_acc_isoVar{};
 };
 
 }  // namespace CP

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -21,7 +21,7 @@ namespace CP {
 
   StatusCode RunNumberSelectorAlg::execute() {
 
-    static const SG::AuxElement::Accessor<unsigned int> acc_random("RandomRunNumber");
+    static const SG::Accessor<unsigned int> acc_random("RandomRunNumber");
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo

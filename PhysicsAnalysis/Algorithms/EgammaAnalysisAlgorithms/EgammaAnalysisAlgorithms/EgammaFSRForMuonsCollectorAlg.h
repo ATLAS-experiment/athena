@@ -52,7 +52,7 @@ namespace CP
         Gaudi::Property<bool> m_vetoFSR {this, "vetoFSR", false, "boolean to revert FSR logic to rather veto FSR electrons or photons"};
 
         /// Decorator for electron or photon working point - used to add additional el/ph
-        std::unique_ptr<SG::AuxElement::Decorator<char> > m_wpDec;
+        std::unique_ptr<SG::Decorator<char> > m_wpDec;
 
     };
 }

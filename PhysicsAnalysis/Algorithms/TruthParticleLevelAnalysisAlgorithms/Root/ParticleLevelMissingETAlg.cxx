@@ -20,8 +20,8 @@ StatusCode ParticleLevelMissingETAlg::execute(const EventContext &ctx) const {
   SG::ReadHandle<xAOD::MissingETContainer> met(m_metKey, ctx);
 
   // decorators
-  static const SG::AuxElement::Decorator<float> dec_phi("phi");
-  static const SG::AuxElement::Decorator<float> dec_met("met");
+  static const SG::Decorator<float> dec_phi("phi");
+  static const SG::Decorator<float> dec_met("met");
 
   for (const auto* etmiss : *met) {
     dec_met(*etmiss) = etmiss->met();

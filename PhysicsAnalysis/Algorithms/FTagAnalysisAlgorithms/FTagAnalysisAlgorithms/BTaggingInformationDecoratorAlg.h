@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -58,7 +58,7 @@ namespace CP
 
     /// \brief the decorator for \ref m_taggerWeightDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::Decorator<float> > m_taggerWeightDecorator {};
+    std::unique_ptr<const SG::Decorator<float> > m_taggerWeightDecorator {};
 
     /// \brief the decoration for the b-tagging quantiles
   private:
@@ -66,7 +66,7 @@ namespace CP
 
     /// \brief the decorator for \ref m_quantileDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::Decorator<int> > m_quantileDecorator {};
+    std::unique_ptr<const SG::Decorator<int> > m_quantileDecorator {};
   };
 }
 

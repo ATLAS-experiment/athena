@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -88,8 +88,8 @@ namespace CP {
       };
 
       /// \brief the ghost and ghost-veto accessors
-      std::unique_ptr<SG::AuxElement::ConstAccessor<int>> m_ghostAcc{};
-      std::unique_ptr<SG::AuxElement::ConstAccessor<int>> m_vetoAcc{};
+      std::unique_ptr<SG::ConstAccessor<int>> m_ghostAcc{};
+      std::unique_ptr<SG::ConstAccessor<int>> m_vetoAcc{};
       bool m_doVeto{false};
   }; // class
 } // namespace CP

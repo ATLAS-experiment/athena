@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -31,23 +31,23 @@ namespace CP
       return StatusCode::FAILURE;
     }
 
-    m_classificationAccessor = std::make_unique<SG::AuxElement::ConstAccessor<unsigned int> > (m_classificationDecoration);
+    m_classificationAccessor = std::make_unique<SG::ConstAccessor<unsigned int> > (m_classificationDecoration);
 
     if (!m_isPromptDecoration.empty())
     {
-      m_isPromptDecorator = std::make_unique<SG::AuxElement::Decorator<int> > (m_isPromptDecoration);
+      m_isPromptDecorator = std::make_unique<SG::Decorator<int> > (m_isPromptDecoration);
     }
     if (!m_fromHadronDecoration.empty())
     {
-      m_fromHadronDecorator = std::make_unique<SG::AuxElement::Decorator<int> > (m_fromHadronDecoration);
+      m_fromHadronDecorator = std::make_unique<SG::Decorator<int> > (m_fromHadronDecoration);
     }
     if (!m_fromBSMDecoration.empty())
     {
-      m_fromBSMDecorator = std::make_unique<SG::AuxElement::Decorator<int> > (m_fromBSMDecoration);
+      m_fromBSMDecorator = std::make_unique<SG::Decorator<int> > (m_fromBSMDecoration);
     }
     if (!m_fromTauDecoration.empty())
     {
-      m_fromTauDecorator = std::make_unique<SG::AuxElement::Decorator<int> > (m_fromTauDecoration);
+      m_fromTauDecorator = std::make_unique<SG::Decorator<int> > (m_fromTauDecoration);
     }
 
     ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -142,8 +142,8 @@ namespace CP
 
     /// \brief dressed pt and eta accessors
   private:
-    std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_dressedPtAccessor{};
-    std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_dressedEtaAccessor{};
+    std::unique_ptr<SG::ConstAccessor<float>> m_dressedPtAccessor{};
+    std::unique_ptr<SG::ConstAccessor<float>> m_dressedEtaAccessor{};
   };
 }
 

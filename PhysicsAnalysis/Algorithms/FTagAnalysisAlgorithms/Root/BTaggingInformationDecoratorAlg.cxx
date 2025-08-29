@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -30,11 +30,11 @@ namespace CP
 
     if (!m_taggerWeightDecoration.empty())
     {
-      m_taggerWeightDecorator = std::make_unique<SG::AuxElement::Decorator<float> > (m_taggerWeightDecoration);
+      m_taggerWeightDecorator = std::make_unique<SG::Decorator<float> > (m_taggerWeightDecoration);
     }
     if (!m_quantileDecoration.empty())
     {
-      m_quantileDecorator = std::make_unique<SG::AuxElement::Decorator<int> > (m_quantileDecoration);
+      m_quantileDecorator = std::make_unique<SG::Decorator<int> > (m_quantileDecoration);
     }
 
     ANA_CHECK (m_selectionTool.retrieve());

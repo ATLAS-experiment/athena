@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -64,7 +64,7 @@ namespace CP
       const xAOD::EventInfo *eventInfo = nullptr;
       ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys));
 
-      static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
+      static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
       unsigned int randomRunNumber = acc_rnd(*eventInfo);
       bool validEvent = m_minRunNumber <= randomRunNumber && m_maxRunNumber >= randomRunNumber;
 
