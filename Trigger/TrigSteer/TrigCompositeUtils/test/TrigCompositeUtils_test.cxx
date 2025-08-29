@@ -225,7 +225,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   VALUE ( getIndexFromLeg(id) ) EXPECTED ( 2 );
   VALUE ( getIndexFromLeg("HLT_mu50_L1MU20") ) EXPECTED ( 0 );
-  VALUE ( getIndexFromLeg("foo") ) EXPECTED ( -1 );
+  EXPECT_EXCEPTION( std::runtime_error, getIndexFromLeg("foo") );
 
   const auto& [name, index] = getNameAndIndexFromLeg("leg002_HLT_mu50_L1MU20");
   VALUE ( name ) EXPECTED ( "HLT_mu50_L1MU20" );
