@@ -64,7 +64,7 @@ private:
   StatusCode setupProductionFractions();
 
   /// Read production fractions from input file
-  StatusCode readProductionFractionsFile(std::string, std::map<CP::SystematicVariation, std::map<unsigned int, float>> *);
+  StatusCode readProductionFractionsFile(const std::string&, std::map<CP::SystematicVariation, std::map<unsigned int, float>> &);
 
   /// Checks if a particle originates from a bottom decay
   bool fromBdecay(const xAOD::TruthParticle *particle) const;
