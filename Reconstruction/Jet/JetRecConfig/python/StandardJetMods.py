@@ -293,7 +293,7 @@ stdJetModifiers.update(
 
     ktmassdrop = JetModifier( "KtMassDropTool", "ktmassdrop"),
 
-    ecorr      = JetModifier( "EnergyCorrelatorTool", "ecorr", Beta = 1.0),
+    ecorr      = JetModifier( "EnergyCorrelatorTool", "ecorr", Beta = 1.0, JetContainer = _jetname),
     ecorrR     = JetModifier( "EnergyCorrelatorRatiosTool", "ecorrR", ),
 
     ecorrgeneral = JetModifier( "EnergyCorrelatorGeneralizedTool", "ecorrgeneral", DoLSeries = True, JetContainer = _jetname),
