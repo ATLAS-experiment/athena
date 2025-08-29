@@ -102,6 +102,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     /// Jet container name
     std::string m_containerName;
+    bool m_isSmallRJet = false;
 
     /// Path to the SF configuration root file
     std::string m_weightConfigPath;
