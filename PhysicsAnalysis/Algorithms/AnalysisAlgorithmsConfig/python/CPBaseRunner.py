@@ -87,7 +87,7 @@ class CPBaseRunner(ABC):
         baseGroup.add_argument('--no-systematics', dest='no_systematics',
                             action='store_true', help='Disable systematics')
         baseGroup.add_argument('--skip-n-events', dest='skip_n_events', type=int, default=0,
-                            help='Skip the first N events in the run, not first N events for each file. Does not work on EventLoop exec-driver yet')
+                            help='Skip the first N events in the run, not first N events for each file. This is meant for debugging only. \nIn Eventloop, this option disable the cutbookkeeper algorithms due to technical reasons, and can only be ran in direct-driver.')
         return parser
 
     def _readYamlConfig(self):
