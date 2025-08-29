@@ -10,7 +10,6 @@
 #+ ForwardDetectors/ZDC/ZdcNtuple
 #+ PhysicsAnalysis/BPhys/BPhysTools
 #+ PhysicsAnalysis/DerivationFramework/DerivationFrameworkAnalysisTests
-#+ Trigger/TriggerSimulation/TrigBtagEmulationTool
 
 
 
@@ -142,6 +141,7 @@
 + Trigger/TrigEvent/TrigSteeringEvent
 + Trigger/TrigSteer/TrigCompositeUtils
 + Trigger/TrigT1/TrigT1MuctpiBits
++ Trigger/TrigEmulation/TrigBtagEmulationTool
 #+ Trigger/TrigValidation/TrigAnalysisTest
 
 #

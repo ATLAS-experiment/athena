@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
@@ -243,8 +243,7 @@ def TrigBtagValidationTestCfg(flags,
     acc.addService(histSvc)
 
     options = {}
-    from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
-    options['EmulatedChains'] = [chain.name if isinstance(chain, ChainProp) else chain for chain in kwargs['toBeEmulatedTriggers']]
+    options['EmulatedChains'] = [chain if isinstance(chain, str) else chain.name for chain in kwargs['toBeEmulatedTriggers']]
     options['TrigBtagEmulationTool'] = acc.popToolsAndMerge( TrigBtagEmulationToolCfg(flags,
                                                                                       **kwargs))
 
