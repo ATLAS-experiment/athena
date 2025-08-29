@@ -134,7 +134,22 @@ namespace PixelDigitization{
         row += 8;
       } // jump over ganged pixels - rowsPerCircuit == 320 above
 
-      InDetDD::SiReadoutCellId roCell(row, nColumns * circuit + column);
+      InDetDD::SiReadoutCellId roCell =
+        (nColumns > 1)
+          ? InDetDD::SiReadoutCellId(nRows + row, (nColumns - 2) * circuit + column)
+          : InDetDD::SiReadoutCellId(row, nColumns * circuit + column);
+
+      // InDetDD::SiReadoutCellId roCell = nullptr;
+      // 
+      // if(nColumns>1){
+      //   roCell = InDetDD::SiReadoutCellId(nRows+row, (nColumns-2)*circuit + column);
+      // }
+
+      // else{
+      //   roCell = InDetDD::SiReadoutCellId(row, nColumns * circuit + column); 
+      // }
+      
+      //InDetDD::SiReadoutCellId roCell(row, nColumns * circuit + column);
       Identifier noisyID = chargedDiodes.element()->identifierFromCellId(roCell);
 
       if (roCell.isValid()) {
