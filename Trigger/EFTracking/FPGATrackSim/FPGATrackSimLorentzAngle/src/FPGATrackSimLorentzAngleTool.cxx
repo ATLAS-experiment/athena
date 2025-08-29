@@ -6,6 +6,7 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
+#include <TrkSurfaces/Surface.h>
 
 FPGATrackSim::LorentzAngleTool::LorentzAngleTool(const std::string& algname,
     const std::string& name, const IInterface* ifc)
@@ -35,8 +36,8 @@ StatusCode FPGATrackSim::LorentzAngleTool::updateHitPosition(FPGATrackSimHit & h
 
      float shift = 0.0;
     const IdentifierHash& hash = hit.getIdentifierHash();
-    Amg::Vector2D localPos(hit.getPhiCoord(), hit.getEtaCoord());
     if(hit.isPixel()){
+        Amg::Vector2D localPos(hit.getPhiCoord(), hit.getEtaCoord());
         // Get the shift value
         if (m_useAthenaLorentzAngleTools) {
             shift = m_lorentzAngleToolPixel->getLorentzShift(hash, Gaudi::Hive::currentContext());
@@ -55,13 +56,9 @@ StatusCode FPGATrackSim::LorentzAngleTool::updateHitPosition(FPGATrackSimHit & h
                 ATH_MSG_DEBUG("Pixel cell not valid for hitID " << hit_id);
                 return StatusCode::FAILURE;
             }
-            // Get the position of the cell
-            InDetDD::SiLocalPosition silPos(siDE->rawLocalPositionOfCell(cell));
-            // Amg::Vector2D localPos(silPos);
 
             localPos[Trk::locX] += shift; // apply the Lorentz angle shift
             InDetDD::SiCellId newCell = siDE->cellIdOfPosition(localPos); // find the new cell corresponding to the shifted position
-            // InDetDD::SiLocalPosition newSilPos(siDE->rawLocalPositionOfCell(newCell)); 
             Amg::Vector3D newGlobalPos = siDE->globalPosition(localPos); // get the new global position
             if (newCell.phiIndex() < 0) {
                 ATH_MSG_ERROR("Pixel new cell not valid for hitID " << hit_id << " with shift " << shift << " and localPosX " << localPos[Trk::locX] << " and localPosY " << localPos[Trk::locY] << " and stripIndex " << newCell.phiIndex() << ". Setting hit to module's edge.");
@@ -77,40 +74,29 @@ StatusCode FPGATrackSim::LorentzAngleTool::updateHitPosition(FPGATrackSimHit & h
         hit.setPhiCoord(hit.getPhiCoord()+shift);
     }
     else{
+        Amg::Vector2D localPos(hit.getPhiCoord(), hit.getEtaCoord());
+
+
         // Get the shift value
         if (m_useAthenaLorentzAngleTools) {
             shift = m_lorentzAngleToolStrip->getLorentzShift(hash, Gaudi::Hive::currentContext());
         }
         else {
-  	    shift = getLorentzAngleShift(hit, correctionType);
+            shift = getLorentzAngleShift(hit, correctionType);
         }
 
         if (m_shiftGlobalPosition) { // TODO: more tests, debugging and validation needed for this in case we actually want it
             // Get the Strip detector element
             const InDetDD::SiDetectorElement* siDE = m_SCTManager->getDetectorElement(hash);
-            Identifier wafer_id = m_SCTId->wafer_id(hash);
-            Identifier hit_id = m_SCTId->strip_id(wafer_id, static_cast<int>(hit.getPhiIndex()));
-            // Get the cell from the ID
-            InDetDD::SiCellId cell = siDE->cellIdFromIdentifier(hit_id);
-            if (!cell.isValid()) {
-                ATH_MSG_DEBUG("SCT cell not valid for hitID " << hit_id);
-                return StatusCode::FAILURE;
-            }
-            // Get the position of the cell
-            InDetDD::SiLocalPosition silPos(siDE->rawLocalPositionOfCell(cell));
-            // Amg::Vector2D localPos(silPos);
+
             localPos[Trk::locX] += shift; // apply the Lorentz angle shift
 
-            if (!hit.isBarrel()) {
-                const InDetDD::StripStereoAnnulusDesign* design = (static_cast<const InDetDD::StripStereoAnnulusDesign*>(&siDE->design()));
-                localPos = design->localPositionOfCellPC(siDE->cellIdOfPosition(localPos));
-            }
-
             // Update the hit's global position
-            Amg::Vector3D newGlobalPos = siDE->globalPosition(localPos);
+            Amg::Vector3D newGlobalPos = siDE->surface().localToGlobal(localPos);
             hit.setX(newGlobalPos[Amg::x]);
             hit.setY(newGlobalPos[Amg::y]);
             hit.setZ(newGlobalPos[Amg::z]);
+
         }
         // update the hit's local position
         hit.setPhiCoord(hit.getPhiCoord()+shift);

@@ -358,6 +358,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
         Monitored::Group(
           m_monitoringTool,
           Monitored::Scalar<float>("diff_strip_locx_" + region, cluster0->localPosition<1>()[0] - cluster1->localPosition<1>()[0]),
+          Monitored::Scalar<float>("diff_strip_locxZoom_" + region, cluster0->localPosition<1>()[0] - cluster1->localPosition<1>()[0]),
           Monitored::Scalar<float>("diff_strip_covxx_" + region, cluster0->localCovariance<1>()(0, 0) - cluster1->localCovariance<1>()(0, 0)),
           Monitored::Scalar<float>("diff_strip_globalx_" + region, cluster0->globalPosition()[0] - cluster1->globalPosition()[0]),
           Monitored::Scalar<float>("diff_strip_globaly_" + region, cluster0->globalPosition()[1] - cluster1->globalPosition()[1]),
@@ -374,6 +375,8 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
           Monitored::Group(
             m_monitoringTool,
               Monitored::Scalar<float>("diff_strip_locx_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
+              cluster0->localPosition<1>()[0] - cluster1->localPosition<1>()[0]),
+              Monitored::Scalar<float>("diff_strip_locxZoom_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
               cluster0->localPosition<1>()[0] - cluster1->localPosition<1>()[0]),
               Monitored::Scalar<float>("diff_strip_covxx_"+region+"Layer" + std::to_string(m_stripid->layer_disk(m_pixelid->wafer_id(cluster0->identifierHash()))),
               cluster0->localCovariance<1>()(0, 0) - cluster1->localCovariance<1>()(0, 0)),
@@ -438,6 +441,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       {
         Monitored::Group(
           m_monitoringTool,
+          Monitored::Scalar<float>(key.key() + "_LOCALPOSITIONZOOM_X_" + region, cluster->localPosition<1>()(0,0)),
           Monitored::Scalar<float>(key.key() + "_LOCALPOSITION_X_" + region, cluster->localPosition<1>()(0,0)),
           Monitored::Scalar<float>(key.key() + "_LOCALCOVARIANCE_XX_" + region, cluster->localCovariance<1>()(0, 0)),
           Monitored::Scalar<float>(key.key() + "_GLOBALPOSITION_X_" + region, cluster->globalPosition()[0]),

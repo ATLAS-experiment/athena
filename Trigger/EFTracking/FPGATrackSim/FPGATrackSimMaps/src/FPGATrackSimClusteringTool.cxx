@@ -685,6 +685,7 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
         //Phi width of an incoming strip is the width of the cluster
         int newN = incomingHit.getPhiWidth();
         //Now as above, N+newN
+        clusterEquiv.setPhiCoord((xPhiOld*N + xPhiNew*newN) / (N+newN));
         clusterEquiv.setX((xOld*N + xNew*newN) / (N+newN));
         clusterEquiv.setY((yOld*N + yNew*newN) / (N+newN));
         clusterEquiv.setZ((zOld*N + zNew*newN) / (N+newN));
