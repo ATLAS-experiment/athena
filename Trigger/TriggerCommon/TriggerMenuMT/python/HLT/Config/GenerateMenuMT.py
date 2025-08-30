@@ -36,17 +36,19 @@ def allSignatures():
 class FilterChainsToGenerate(object):
     """Standard chain filter"""
     def __init__(self, flags):
-        self.enabledSignatures  = flags.Trigger.enabledSignatures  if flags.hasFlag("Trigger.enabledSignatures") else []
-        self.disabledSignatures = flags.Trigger.disabledSignatures if flags.hasFlag("Trigger.disabledSignatures") else []
-        self.selectChains       = flags.Trigger.selectChains       if flags.hasFlag("Trigger.selectChains") else []
-        self.disableChains      = flags.Trigger.disableChains      if flags.hasFlag("Trigger.disableChains") else []          
+        for f in ("enabledSignatures", "disabledSignatures", "selectChains", "disableChains"):
+            # Ensure flag values have correct type
+            value = getattr(flags.Trigger, f)
+            assert isinstance(value, list), f"Flag Trigger.{f}={value!r} is not of type list"
+            # Store flag
+            setattr(self, f, value)
 
     def __call__(self, signame, chain):            
         return ((signame in self.enabledSignatures and signame not in self.disabledSignatures) and \
             (not self.selectChains or chain in self.selectChains) and chain not in self.disableChains)
 
     def __str__(self) -> str:
-        return f'FilterChainsToGenerate(enabledSignatures={self.enabledSignatures}, disabledSignatures={self.disabledSignatures}, selectChains={self.selectChains}, disableChains={self.disableChains})'
+        return f'FilterChainsToGenerate(enabledSignatures={self.enabledSignatures!r}, disabledSignatures={self.disabledSignatures!r}, selectChains={self.selectChains!r}, disableChains={self.disableChains!r})'
   
 
 class Singleton(type):

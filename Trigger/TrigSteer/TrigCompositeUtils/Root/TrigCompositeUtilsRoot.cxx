@@ -198,7 +198,7 @@ namespace TrigCompositeUtils {
     } else if (isLegId(name)) {
       std::from_chars(name.data()+3, name.data()+6, id);
     } else {
-      id = -1;
+      throw std::runtime_error("TrigCompositeUtils::getIndexFromLeg legIdentifier '"+name+"' does not start with 'HLT_' or 'leg' ");
     }
     return id;
   }

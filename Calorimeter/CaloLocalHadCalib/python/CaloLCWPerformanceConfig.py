@@ -6,19 +6,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def blockFolder(ca,folder):
-        "Block use of specified conditions DB folder so data can be read from elsewhere"
-        iovdbsvc=ca.getService("IOVDbSvc")
-        # check existing list of folders and remove it if found
-        for i in range(0,len(iovdbsvc.Folders)):
-            if (iovdbsvc.Folders[i].find(folder)>=0):
-                del iovdbsvc.Folders[i]
-                break
-        condInputLoader=ca.getCondAlgo("CondInputLoader")        
-        for i in range(0, len(condInputLoader.Load)):
-            if (folder in condInputLoader.Load[i][-1] ):
-                del condInputLoader.Load[i]
-                break
+
 
 def GetLCWPerfCfg(flags):
 
@@ -128,6 +116,7 @@ if __name__=="__main__":
                                disableEventTag=True, takeItemsFromInput=False))
 
     # remove the default folders
+    from IOVDbSvc.IOVDbSvcConfig import blockFolder
     blockFolder(cfg,"/CALO/Ofl/HadCalibration2/CaloEMFrac")
     blockFolder(cfg,"/CALO/Ofl/HadCalibration2/H1ClusterCellWeights")
     blockFolder(cfg,"/CALO/Ofl/HadCalibration2/CaloOutOfCluster")

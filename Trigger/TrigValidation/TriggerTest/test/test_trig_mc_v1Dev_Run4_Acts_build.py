@@ -17,7 +17,7 @@ run.input = 'ttbar_pu200_Run4'
 run.job_options = 'TriggerJobOpts/runHLT.py'
 
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
-run.flags = ['Trigger.enabledSignatures=["Muon","Egamma","Jet","Bjet","Tau"]',  #list signatures temporarily 
+run.flags = ['Trigger.enabledSignatures=[\\\"Muon\\\",\\\"Egamma\\\",\\\"Jet\\\",\\\"Bjet\\\",\\\"Tau\\\"]',  #list signatures temporarily
              'Trigger.useActsTracking=True','Acts.GsfRefitActs=True',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
