@@ -197,7 +197,8 @@ def main(args):
         if isinstance(obj, root.TTree):
             return _tree_info(obj, args)
         elif isinstance(obj, RNTupleReader):
-            return _reader_info(obj, args)
+            with H.ShutUp(filters=[r'.+RuntimeWarning: class "[\w:]+" has no virtual destructor']):
+                return _reader_info(obj, args)
         else:
             raise NotImplementedError(f"'obj_info' not implemented for object of {type(obj)=}")
 
@@ -549,7 +550,9 @@ def main(args):
 
         if args.order_trees:
             smin, smax = get_event_range(itr_entries)
+            msg.debug("Indices/Event Numbers of old events ...")
             idx_old = ordered_indices(fold.obj)[smin:smax]
+            msg.debug("Indices/Event Numbers of new events ...")
             idx_new = ordered_indices(fnew.obj)[smin:smax]
             itr_entries_old, event_numbers_old = list(map(list,zip(*idx_old)))
             itr_entries_new, event_numbers_new = list(map(list,zip(*idx_new)))

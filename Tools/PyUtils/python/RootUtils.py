@@ -249,8 +249,7 @@ class RootFileDumper(object):
         RNTupleNames = PoolOpts.RNTupleNames
 
         if obj_name is None:
-            for id in ((TTreeNames.EventData, ROOT.TTree), (RNTupleNames.EventData, ROOT.RNTuple)):
-                name, klass = id
+            for name, klass in ((TTreeNames.EventData, ROOT.TTree), (RNTupleNames.EventData, ROOT.RNTuple)):
                 if (obj := self.root_file.Get(name)) and isinstance(obj, klass):
                     self.obj_name = name
                     break
@@ -383,8 +382,7 @@ class RootFileDumper(object):
                             _vals += [ ([br_name], _getLeaf (l)) ]
                         else:
                             _vals += [ ([br_name, l.GetName()], _getLeaf (l)) ]
-                for _val in _vals:
-                    py_name, val = _val
+                for py_name, val in _vals:
                     if val is None: continue
                     try:
                         vals = _pythonize(val, py_name, True, retvecs)
@@ -463,7 +461,7 @@ class RootFileDumper(object):
             entry = reader.CreateEntry()
         except AttributeError:
             entry = reader.GetModel().CreateEntry()
-        # entry = self.reader.CreateEntry()
+
         for ientry in itr_entries:
             try:
                 reader.LoadEntry(ientry, entry)
