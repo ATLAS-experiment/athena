@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/TTOnlineID.h"
@@ -20,7 +20,8 @@
 using CxxUtils::strformat;
 
 
-TTOnlineID::TTOnlineID(void) :
+TTOnlineID::TTOnlineID() :
+  AtlasDetectorID("TTOnlineID", "PPM_Modules"),
   m_calo_index(999),
   m_detzside_index(999),
   m_l1online_regions_index(999),
@@ -41,25 +42,25 @@ TTOnlineID::TTOnlineID(void) :
 TTOnlineID:: ~TTOnlineID()= default;
 
 
-IdContext TTOnlineID::crateContext(void) const
+IdContext TTOnlineID::crateContext() const
 {
   ExpandedIdentifier id;
   return {id, 0, m_crate_index};
 }
 
-IdContext TTOnlineID::moduleContext(void) const
+IdContext TTOnlineID::moduleContext() const
 {
   ExpandedIdentifier id;
   return {id, 0, m_module_index};
 }
 
-IdContext TTOnlineID::submoduleContext(void) const
+IdContext TTOnlineID::submoduleContext() const
 {
   ExpandedIdentifier id;
   return {id, 0, m_submodule_index};
 }
 
-IdContext TTOnlineID::channelContext(void) const
+IdContext TTOnlineID::channelContext() const
 {
   ExpandedIdentifier id;
   return {id, 0, m_channel_index};
@@ -356,7 +357,7 @@ void TTOnlineID::crate_Id_checks( int crate ) const
 
 
 //=========================================================
-int TTOnlineID::initLevelsFromDict(void)
+int TTOnlineID::initLevelsFromDict()
 //=========================================================
 {
   MsgStream log(m_msgSvc, "TTOnlineID" );
@@ -505,7 +506,7 @@ int TTOnlineID::initLevelsFromDict(void)
 
 
 //=====================================================
-int  TTOnlineID::init_hashes(void)
+int  TTOnlineID::init_hashes()
 //=====================================================
 {
   MsgStream log(m_msgSvc, "TTOnlineID" );

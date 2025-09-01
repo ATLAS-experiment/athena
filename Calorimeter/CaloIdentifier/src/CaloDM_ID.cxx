@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloDM_ID.h"
@@ -21,8 +21,9 @@
 using CxxUtils::strformat;
 
 
-CaloDM_ID::CaloDM_ID(void) : 
-    m_calodm_region_index(0) 
+CaloDM_ID::CaloDM_ID() :
+    AtlasDetectorID("CaloDM_ID", "DM_Reg")
+  , m_calodm_region_index(0)
   , m_CALO_INDEX(999) 
   , m_DETZSIDE_INDEX(999)
   , m_DMAT_INDEX(999) 
@@ -526,14 +527,14 @@ int  CaloDM_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 }
 
 IdContext       
-CaloDM_ID::region_context             (void) const
+CaloDM_ID::region_context             () const
 {
     ExpandedIdentifier id;
     return {id, 0, m_REGION_INDEX};
 }
 
 IdContext       
-CaloDM_ID::zone_context              (void) const
+CaloDM_ID::zone_context              () const
 {
     ExpandedIdentifier id;
     return {id, 0, m_PHI_INDEX};
@@ -629,7 +630,7 @@ void CaloDM_ID::zone_id_checks   ( const Identifier& regionId,
 
 
 /*=======================================*/
-int   CaloDM_ID::initLevelsFromDict(void) 
+int   CaloDM_ID::initLevelsFromDict()
 /*=======================================*/
 {
   // Msg Service
@@ -879,7 +880,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
 }
 
 /*=======================================*/
-int   CaloDM_ID::init_lar_hashes(void) 
+int   CaloDM_ID::init_lar_hashes()
 /*=======================================*/
 {
   // Msg Service
@@ -1022,7 +1023,7 @@ int   CaloDM_ID::init_lar_hashes(void)
 }
 
 /*=====================================*/
-int   CaloDM_ID::init_tile_hashes(void) 
+int   CaloDM_ID::init_tile_hashes()
 /*=====================================*/
 {
   // Msg Service

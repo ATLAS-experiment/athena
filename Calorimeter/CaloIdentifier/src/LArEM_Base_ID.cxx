@@ -19,8 +19,10 @@
 using CxxUtils::strformat;
 
 
-LArEM_Base_ID::LArEM_Base_ID (const std::string& name, bool supercell)
-  : CaloIDHelper (name),
+LArEM_Base_ID::LArEM_Base_ID (const std::string& name,
+                              const std::string& group,
+                              bool supercell)
+  : CaloIDHelper (name, group),
     m_slar (supercell ? 1 : 0)
 {
 }

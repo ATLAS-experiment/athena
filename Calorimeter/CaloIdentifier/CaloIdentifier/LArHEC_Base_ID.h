@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/LArHEC_Base_ID.h
  * @author scott snyder <snyder@bnl.gov>
@@ -45,7 +42,9 @@ class LArHEC_Base_ID : public CaloIDHelper
 public:        
 
   /** Constructor.  If SUPERCELL is true, this helper is for supercells. */
-  LArHEC_Base_ID (const std::string& name, bool supercell);
+  LArHEC_Base_ID (const std::string& name,
+                  const std::string& group,
+                  bool supercell);
 
   ~LArHEC_Base_ID();
 
@@ -103,16 +102,16 @@ public:
   IdentifierHash channel_hash_binary_search (Identifier channelId) const;
 
   /** begin iterator over set of region Identifiers */
-  id_iterator reg_begin    (void) const;
+  id_iterator reg_begin    () const;
   /** end iterator over set of region Identifiers */
-  id_iterator reg_end      (void) const;
+  id_iterator reg_end      () const;
   /** Range over set of Region Identifiers. */
   id_range reg_range () const;
 
   /** begin iterator over full set of Hec Identifiers for channels */
-  id_iterator hec_begin    (void) const;
+  id_iterator hec_begin    () const;
   /** end iterator over full set of Hec Identifiers for channels */
-  id_iterator hec_end      (void) const;
+  id_iterator hec_end      () const;
   /** Range over full set of HEC Identifiers. */
   id_range hec_range () const;
 
@@ -219,7 +218,7 @@ private:
 
   int         initLevelsFromDict (const std::string& group_name) ;
 
-  int         init_hashes(void) ;
+  int         init_hashes();
 
   static int   get_prevInPhi(const LArHEC_region* hecRegion, const unsigned int& index, const short int& nPhi, const unsigned int& minHash, 
 		      int& neighbourIndex, IdentifierHash* neighbList) ;
@@ -242,7 +241,7 @@ private:
 		       int& neighbourIndex, IdentifierHash* neighbList) const;
 
 
-  int         init_neighbors(void) ;
+  int         init_neighbors();
 
 
   unsigned                      m_slar;

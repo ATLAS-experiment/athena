@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/src/LArHEC_Base_ID.cxx
@@ -27,8 +27,10 @@
 using CxxUtils::strformat;
 
 
-LArHEC_Base_ID::LArHEC_Base_ID (const std::string& name, bool supercell) :
-    CaloIDHelper (name)
+LArHEC_Base_ID::LArHEC_Base_ID (const std::string& name,
+                                const std::string& group,
+                                bool supercell) :
+    CaloIDHelper (name, group)
   , m_slar (supercell ? 1 : 0)
   , m_hec_region_index(0) 
   , m_LAR_INDEX(999) 
@@ -43,7 +45,7 @@ LArHEC_Base_ID::LArHEC_Base_ID (const std::string& name, bool supercell) :
 {
 }
 
-LArHEC_Base_ID::~LArHEC_Base_ID(void) 
+LArHEC_Base_ID::~LArHEC_Base_ID()
 {
   std::vector<LArHEC_region*>::iterator first = m_vecOfRegions.begin();
   std::vector<LArHEC_region*>::iterator last  = m_vecOfRegions.end();
@@ -1132,7 +1134,7 @@ int   LArHEC_Base_ID::get_nextInSamp(const LArHEC_region* hecRegion, const unsig
 }
 
 
-int LArHEC_Base_ID::init_neighbors(void) 
+int LArHEC_Base_ID::init_neighbors()
 {
   MsgStream log(m_msgSvc, "LArHEC_Base_ID" );
 

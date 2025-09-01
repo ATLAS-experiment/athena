@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/Tile_Base_ID.h
  * @author scott snyder <snyder@bnl.gov>
@@ -43,7 +40,9 @@ class Tile_Base_ID : public CaloIDHelper {
 public:
 
     /** Constructor.  If SUPERCELL is true, this helper is for supercells. */
-    Tile_Base_ID (const std::string& name, bool supercell);
+    Tile_Base_ID (const std::string& name,
+                  const std::string& group,
+                  bool supercell);
 
     enum SECTION { ONLINE = 0, BARREL = 1, EXTBAR = 2, GAPDET = 3, AUXDET = 4 ,
                    SBARREL = 5, SEXTBAR = 6,
@@ -169,22 +168,22 @@ public:
 
   /** access to IdContext's which define which levels of fields are contained in the id */
   /** id for regions */
-  IdContext    region_context   (void) const;
+  IdContext    region_context   () const;
 
   /** id for modules */
-  IdContext    module_context   (void) const;
+  IdContext    module_context   () const;
 
   /** id for towers */
-  IdContext    tower_context    (void) const;
+  IdContext    tower_context    () const;
 
   /** id for cells */
-  IdContext    cell_context     (void) const;
+  IdContext    cell_context     () const;
 
   /** id for PMTs */
-  IdContext    pmt_context      (void) const;
+  IdContext    pmt_context      () const;
 
   /** id for ADCs */
-  IdContext    adc_context      (void) const;
+  IdContext    adc_context      () const;
 
 
     /** create compact id from hash id (return == 0 for OK)*/
@@ -198,12 +197,12 @@ public:
                                         const std::string& group_name);
 
   /**  hash tables max size */
-  size_type     region_hash_max (void) const;
-  size_type     module_hash_max (void) const;
-  size_type     tower_hash_max  (void) const;
-  size_type     cell_hash_max   (void) const;
-  size_type     pmt_hash_max    (void) const;
-  size_type     adc_hash_max    (void) const;
+  size_type     region_hash_max () const;
+  size_type     module_hash_max () const;
+  size_type     tower_hash_max  () const;
+  size_type     cell_hash_max   () const;
+  size_type     pmt_hash_max    () const;
+  size_type     adc_hash_max    () const;
 
   /** Type for iterators over identifiers. */
   typedef std::vector<Identifier>::const_iterator id_iterator;
@@ -328,9 +327,9 @@ private:
   int                   get_field               ( const Identifier & id,
                                                   size_type index )             const;
 
-  int         initLevelsFromDict (const std::string& group_name) ;
+  int         initLevelsFromDict (const std::string& group_name);
 
-  int         init_hashes(void) ;
+  int         init_hashes();
 
   int eta_min(const Identifier& id, const IdContext& context) const;
   int eta_max(const Identifier& id, const IdContext& context) const;

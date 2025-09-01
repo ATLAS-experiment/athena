@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOLVL1_ID_H
@@ -69,7 +69,7 @@ public:
   typedef Identifier::size_type  size_type ;
 
 
-  CaloLVL1_ID(void);    
+  CaloLVL1_ID();
 
   virtual ~CaloLVL1_ID();
 
@@ -110,15 +110,15 @@ public:
 
   /** access to IdContext's which define which levels of fields are contained in the id */
   /** id for towers ("reduced" id) */
-  IdContext    region_context   (void) const;
+  IdContext    region_context   () const;
 
   /** access to IdContext's which define which levels of fields are contained in the id */
   /** id for towers ("normal" id) */
-  IdContext    tower_context   (void) const;
+  IdContext    tower_context   () const;
 
   /** access to IdContext's which define which levels of fields are contained in the id */
   /** id for towers with layers ("extended" id) */
-  IdContext    layer_context   (void) const;
+  IdContext    layer_context   () const;
 
   /** create compact id from hash id (return == 0 for OK)*/
   virtual int  get_id    (const IdentifierHash& hash_id, Identifier& id, const IdContext* context = 0 ) const;
@@ -141,11 +141,11 @@ public:
   virtual int  initialize_from_dictionary (const IdDictMgr& dict_mgr);
 
   /**  tower hash table max size */
-  size_type     tower_hash_max (void) const;
+  size_type     tower_hash_max () const;
   /**  layer hash table max size */
-  size_type     layer_hash_max (void) const;
+  size_type     layer_hash_max () const;
   /**  region hash table max size */
-  size_type     region_hash_max (void) const;
+  size_type     region_hash_max () const;
 
 
   /** Type for iterators over identifiers. */
@@ -336,11 +336,11 @@ private:
  		          int layer ) const;
 
 
-  int         initLevelsFromDict(void) ;
+  int         initLevelsFromDict();
 
-  int         init_hashes(void) ;
+  int         init_hashes();
 
-  int         init_neighbors(void) ;
+  int         init_neighbors();
 
 
   size_type                     m_lvl1_region_index;
@@ -557,32 +557,32 @@ inline Identifier CaloLVL1_ID::layer_id   ( const Identifier towerId,
 }
 
 //----------------------------------------------------------------------------
-inline CaloLVL1_ID::size_type   CaloLVL1_ID::tower_hash_max (void) const
+inline CaloLVL1_ID::size_type   CaloLVL1_ID::tower_hash_max () const
 {
   return m_tower_hash_max;
 }
 
 //----------------------------------------------------------------------------
-inline CaloLVL1_ID::size_type   CaloLVL1_ID::layer_hash_max (void) const
+inline CaloLVL1_ID::size_type   CaloLVL1_ID::layer_hash_max () const
 {
   return m_layer_hash_max;
 }
 
 //----------------------------------------------------------------------------
-inline CaloLVL1_ID::size_type   CaloLVL1_ID::region_hash_max (void) const
+inline CaloLVL1_ID::size_type   CaloLVL1_ID::region_hash_max () const
 {
   return m_region_hash_max;
 }
 
 
 //----------------------------------------------------------------------------
-inline CaloLVL1_ID::id_iterator CaloLVL1_ID::region_begin    (void) const
+inline CaloLVL1_ID::id_iterator CaloLVL1_ID::region_begin    () const
 {
   return(m_region_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline CaloLVL1_ID::id_iterator CaloLVL1_ID::region_end      (void) const
+inline CaloLVL1_ID::id_iterator CaloLVL1_ID::region_end      () const
 {
   return(m_region_vec.end());
 }
@@ -594,13 +594,13 @@ inline CaloLVL1_ID::id_range CaloLVL1_ID::region_range    () const
 }
 
 //----------------------------------------------------------------------------
-inline CaloLVL1_ID::id_iterator CaloLVL1_ID::tower_begin    (void) const
+inline CaloLVL1_ID::id_iterator CaloLVL1_ID::tower_begin    () const
 {
   return(m_tower_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline CaloLVL1_ID::id_iterator CaloLVL1_ID::tower_end      (void) const
+inline CaloLVL1_ID::id_iterator CaloLVL1_ID::tower_end      () const
 {
   return(m_tower_vec.end());
 }
@@ -613,13 +613,13 @@ inline CaloLVL1_ID::id_range CaloLVL1_ID::tower_range    () const
 
 //----------------------------------------------------------------------------  
 
-inline CaloLVL1_ID::id_iterator CaloLVL1_ID::layer_begin    (void) const
+inline CaloLVL1_ID::id_iterator CaloLVL1_ID::layer_begin    () const
 {
   return(m_layer_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline CaloLVL1_ID::id_iterator CaloLVL1_ID::layer_end      (void) const
+inline CaloLVL1_ID::id_iterator CaloLVL1_ID::layer_end      () const
 {
   return(m_layer_vec.end());
 }
@@ -744,27 +744,3 @@ inline IdentifierHash CaloLVL1_ID::tower_hash_binary_search  (Identifier towerId
 
 
 #endif // CALOLVL1_ID_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

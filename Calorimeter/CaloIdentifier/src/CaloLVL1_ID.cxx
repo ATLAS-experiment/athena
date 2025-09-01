@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloLVL1_ID.h"
@@ -21,8 +21,9 @@
 using CxxUtils::strformat;
 
 
-CaloLVL1_ID::CaloLVL1_ID(void) : 
-    m_lvl1_region_index(0) 
+CaloLVL1_ID::CaloLVL1_ID() :
+    AtlasDetectorID("CaloLVL1_ID", "Reg_Lvl1")
+  , m_lvl1_region_index(0)
   , m_CALO_INDEX(999) 
   , m_DETZSIDE_INDEX(999) 
   , m_SAMPLING_INDEX(999) 
@@ -44,21 +45,21 @@ CaloLVL1_ID:: ~CaloLVL1_ID()= default;
 
 
 IdContext	
-CaloLVL1_ID::region_context 		(void) const
+CaloLVL1_ID::region_context 		() const
 {
     ExpandedIdentifier id;
     return {id, 0, m_REGION_INDEX};
 }
 
 IdContext	
-CaloLVL1_ID::tower_context 		(void) const
+CaloLVL1_ID::tower_context 		() const
 {
     ExpandedIdentifier id;
     return {id, 0, m_PHI_INDEX};
 }
 
 IdContext	
-CaloLVL1_ID::layer_context 		(void) const
+CaloLVL1_ID::layer_context 		() const
 {
     ExpandedIdentifier id;
     return {id, 0, m_LAYER_INDEX};
@@ -286,9 +287,9 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     reg_id.add(caloValue);
     reg_id.add(lvl1CaloValue); 
     Range prefix;
-    m_full_region_range = m_dict->build_multirange(reg_id, "Reg_Lvl1", prefix, "region");
-    m_full_tower_range = m_dict->build_multirange(reg_id, "Reg_Lvl1", prefix, "phi");
-    m_full_layer_range = m_dict->build_multirange(reg_id, "Reg_Lvl1", prefix);
+    m_full_region_range = m_dict->build_multirange(reg_id, group(), prefix, "region");
+    m_full_tower_range = m_dict->build_multirange(reg_id, group(), prefix, "phi");
+    m_full_layer_range = m_dict->build_multirange(reg_id, group(), prefix);
 
     // Setup the hash tables
     if(init_hashes()) return (1);
@@ -690,7 +691,7 @@ void CaloLVL1_ID::layer_id_checks   ( const Identifier towerId,
 }
 
 
-int   CaloLVL1_ID::initLevelsFromDict(void) 
+int   CaloLVL1_ID::initLevelsFromDict()
 {
   MsgStream log(m_msgSvc, "CaloLVL1_ID" );
   std::stringstream strm;
@@ -936,7 +937,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
 }
 
 
-int   CaloLVL1_ID::init_hashes(void) 
+int   CaloLVL1_ID::init_hashes()
 {
   MsgStream log(m_msgSvc, "CaloLVL1_ID" );
   std::stringstream strm;
@@ -1144,7 +1145,7 @@ int   CaloLVL1_ID::init_hashes(void)
 
 
 
-int   CaloLVL1_ID::init_neighbors(void) 
+int   CaloLVL1_ID::init_neighbors()
 {
   MsgStream log(m_msgSvc, "CaloLVL1_ID" );
   //  std::cout << " CaloLVL1_ID::init_neighbors " << std::endl;

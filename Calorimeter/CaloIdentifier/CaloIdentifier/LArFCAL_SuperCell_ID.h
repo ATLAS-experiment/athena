@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOIDENTIFIER_LARFCAL_SUPERCELL_ID_H
@@ -47,8 +47,8 @@
 class LArFCAL_SuperCell_ID : public LArFCAL_Base_ID
 {
 public:        
-  LArFCAL_SuperCell_ID(void);    
-  ~LArFCAL_SuperCell_ID(void);
+  LArFCAL_SuperCell_ID();
+  ~LArFCAL_SuperCell_ID();
 
   /** initialization from the identifier dictionary*/
   virtual int  initialize_from_dictionary (const IdDictMgr& dict_mgr);

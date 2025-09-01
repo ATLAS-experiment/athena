@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,8 +7,6 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: TileTBID.cxx,v 1.1 2009-03-30 11:19:28 tsulaia Exp $
-//<version>	$Name: not supported by cvs2svn $
 
 #include "CaloIdentifier/TileTBID.h"
 #include "IdDict/IdDictDefs.h"
@@ -25,8 +23,9 @@
 using CxxUtils::strformat;
 
 
-TileTBID::TileTBID( void ) 
-  : m_tile_region_index(0)
+TileTBID::TileTBID( )
+  : AtlasDetectorID("TileTBID", "tile")
+    , m_tile_region_index(0)
     , m_SYSTEM_INDEX(999)
     , m_SECTION_INDEX(999)
     , m_TYPE_INDEX(999)
@@ -39,8 +38,7 @@ TileTBID::TileTBID( void )
 {
 }
 
-TileTBID::~TileTBID(void) 
-= default;
+TileTBID::~TileTBID() = default;
 
 //
 // TileTBID methods
@@ -298,21 +296,21 @@ bool TileTBID::channel_id       ( const Identifier& module_id,
 }
 
 IdContext	
-TileTBID::type_context  (void)  const
+TileTBID::type_context  ()  const
 {
     ExpandedIdentifier id;
     return {id, 0, m_TYPE_INDEX};
 }
 
 IdContext	
-TileTBID::module_context  (void)  const
+TileTBID::module_context  ()  const
 {
     ExpandedIdentifier id;
     return {id, 0, m_MODULE_INDEX};
 }
 
 IdContext	
-TileTBID::channel_context     (void)  const
+TileTBID::channel_context     ()  const
 {
     ExpandedIdentifier id;
     return {id, 0, m_CHANNEL_INDEX};
@@ -498,7 +496,7 @@ int TileTBID::get_expanded_id  (const Identifier& id, ExpandedIdentifier& exp_id
   return result;
 }
 
-int TileTBID::initLevelsFromDict(void) 
+int TileTBID::initLevelsFromDict()
 {
   MsgStream log(m_msgSvc, "TileTBID" );
 
@@ -601,7 +599,7 @@ int TileTBID::initLevelsFromDict(void)
   return(0) ;
 }
 
-int TileTBID::init_hashes(void) 
+int TileTBID::init_hashes()
 {
   MsgStream log(m_msgSvc, "TileTBID" );
 

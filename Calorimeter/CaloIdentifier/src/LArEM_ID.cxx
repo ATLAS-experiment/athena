@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/LArEM_ID.h"
@@ -16,13 +16,12 @@
 
 
 
-LArEM_ID::LArEM_ID(void) :
-  LArEM_Base_ID("LArEM_ID", 0)
+LArEM_ID::LArEM_ID() :
+  LArEM_Base_ID("LArEM_ID", "lar_em", 0)
 {
 }
 
-LArEM_ID::~LArEM_ID(void) 
-= default;
+LArEM_ID::~LArEM_ID() = default;
 
 int  LArEM_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /*=================================================================*/
@@ -41,8 +40,7 @@ int  LArEM_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   }
 
   // init base object
-  if (LArEM_Base_ID::initialize_base_from_dictionary(dict_mgr,
-                                                     "lar_em"))
+  if (LArEM_Base_ID::initialize_base_from_dictionary(dict_mgr, group()))
     return (1);
 
 

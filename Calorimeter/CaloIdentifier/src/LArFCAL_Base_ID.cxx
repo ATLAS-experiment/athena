@@ -15,8 +15,10 @@ using CxxUtils::strformat;
 #define MAX_BUFFER_LEN 1024
 
 
-LArFCAL_Base_ID::LArFCAL_Base_ID(const std::string& name, bool supercell) 
-  : CaloIDHelper (name),
+LArFCAL_Base_ID::LArFCAL_Base_ID(const std::string& name,
+                                 const std::string& group,
+                                 bool supercell)
+  : CaloIDHelper (name, group),
     m_slar (supercell ? 1 : 0)
 {
 }
@@ -122,7 +124,7 @@ int LArFCAL_Base_ID::phi_max(const Identifier modId) const
 }
 
 IdContext	
-LArFCAL_Base_ID::module_context 		(void) const
+LArFCAL_Base_ID::module_context 		() const
 {
   return region_context();
 }
@@ -509,7 +511,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
   return(0) ;
 }
 
-int         LArFCAL_Base_ID::init_hashes(void) 
+int         LArFCAL_Base_ID::init_hashes()
 {
   if (channels().init (*this, "channels",
                        m_full_channel_range,

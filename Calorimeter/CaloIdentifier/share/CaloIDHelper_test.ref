@@ -3,7 +3,7 @@ test_hashgroup
 CaloIDHelper::H...  ERROR helperinit_hashes  duplicated id for channel id. nids= 9 compact Id  Unable to decode id
 CaloIDHelper        ERROR helper. set size 9 not equal to hash max 10
 test_helper
-AtlasDetectorID     ERROR register_dict_tag:203 No dictionary found
+helper              ERROR register_dict_tag:203 No dictionary found
 100 0 0 0.025 0.0981748
 110 0.003125 0 0.003125 0.0981748
 120 0 0 0.025 0.0245437
