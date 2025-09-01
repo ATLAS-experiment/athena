@@ -97,9 +97,9 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     }
   
     ATH_MSG_VERBOSE(" Dumping of hit "<<m_detMgr->idHelperSvc()->toString(HitID)
-                  <<", barcode: "<<genParticleLink(currentTrack).barcode()
-                  <<", "<<(*currentTrack) <<", driftCircle: "<<Amg::toString(driftHit, 4)
-                  <<", direction "<<Amg::toString(trackLocDir, 4) <<" to SimHit container ahead. ");
+                    <<", uniqueID: "<<HepMC::uniqueID(genParticleLink(currentTrack))
+                    <<", "<<(*currentTrack) <<", driftCircle: "<<Amg::toString(driftHit, 4)
+                    <<", direction "<<Amg::toString(trackLocDir, 4) <<" to SimHit container ahead. ");
     saveHit(HitID, driftHit, trackLocDir, globalTime, aStep);
     return true;
 }

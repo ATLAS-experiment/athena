@@ -7,6 +7,7 @@
 #include <StoreGate/WriteHandle.h>
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
+#include <TruthUtils/MagicNumbers.h>
 #include <AthContainers/ConstDataVector.h>
 #include <GaudiKernel/SystemOfUnits.h>
 namespace {
@@ -52,30 +53,30 @@ StatusCode MuonSimHitSortingAlg::execute(const EventContext& ctx) const {
                         if (std::abs(a->pdgId()) != std::abs(b->pdgId())){
                             return a->pdgId() > b->pdgId();
                         }
-                        /// If Geant has undertaken multiple steps in the sensitive volume sort them
-                        /// by barcode
-                        return a->genParticleLink().barcode() < b->genParticleLink().barcode();
+                        /// If Geant4 has undertaken multiple steps in
+                        /// the sensitive volume sort them by uniqueID
+                        return HepMC::uniqueID(a->genParticleLink()) < HepMC::uniqueID(b->genParticleLink());
                     });
     if (m_removeDuplicates) {
         std::vector<const xAOD::MuonSimHit*> dupFreeHits{};
         dupFreeHits.reserve(allSimHits.size());
         std::ranges::copy_if(allSimHits, std::back_inserter(dupFreeHits), 
             [&dupFreeHits, this] (const xAOD::MuonSimHit* hit) {
-                const int barcode = hit->genParticleLink().id();
+                const int uniqueID = HepMC::uniqueID(hit->genParticleLink());
                 const Identifier hitId = hit->identify();
                 const Amg::Vector3D lPos{xAOD::toEigen(hit->localPosition())};
                 const Amg::Vector3D lDir{xAOD::toEigen(hit->localDirection())};
-                ATH_MSG_VERBOSE("Check sim hit "<<m_idHelperSvc->toString(hitId)<<", pdgId: "<<hit->pdgId()
+                ATH_MSG_VERBOSE("Check sim hit "<<m_idHelperSvc->toString(hitId)<<", pdgId:"<<hit->pdgId()
                                 <<", link: "<<hit->genParticleLink()
-                                <<" at "<<Amg::toString(lPos, 2)<<", direction: "<<Amg::toString(lDir, 2));
+                                <<" at "<<Amg::toString(lPos, 2)<<"direction: "<<Amg::toString(lDir, 2));
                 return std::ranges::find_if(dupFreeHits, 
                                     [&](const xAOD::MuonSimHit* selHit) {
                             if (selHit->identify() != hitId || 
-                                barcode != selHit->genParticleLink().id()) {
-                                    return false;
+                                uniqueID != HepMC::uniqueID(selHit->genParticleLink())) {
+                              return false;
                             }
-                            if (barcode) {
-                                return true;
+                            if (uniqueID) {
+                              return true;
                             }
                             const Amg::Vector3D dPos = lPos - xAOD::toEigen(selHit->localPosition());
                             const Amg::Vector3D dDir = lDir - xAOD::toEigen(selHit->localDirection());
