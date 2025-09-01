@@ -82,6 +82,10 @@ namespace CP
   private:
     SysWriteDecorHandle<float> m_scaleFactorDecoration {
       this, "scaleFactorDecoration", "", "the decoration for the b-tagging efficiency scale factor"};
+    SysWriteDecorHandle<char> m_matchingDecoration {
+      this, "matchingDecoration", "", "the decoration for offline jet matched to HLT"};
+    SysWriteDecorHandle<char> m_bTagMatchingDecoration {
+      this, "bTagMatchingDecoration", "", "the decoration for offline jet  matched to HLT b-tag"};
 
     /// \brief the decoration for the b-tagging selection
   private:

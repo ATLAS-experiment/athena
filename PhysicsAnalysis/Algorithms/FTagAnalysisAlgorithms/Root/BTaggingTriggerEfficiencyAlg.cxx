@@ -95,10 +95,15 @@ namespace CP
 
       for (const xAOD::Jet *jet : *jets)
       {
+        bool matched = false;
+        bool passTrigger = false;
+
         if (m_preselection.getBool (*jet, sys))
         {
           float sf = 1.;
           CP::CorrectionCode valid;
+
+          ATH_CHECK(passTriggerBtag(jet, passTrigger, matched));
 
           // For non-bjet, just get offline scale factor
           if(m_truthFlav.get(*jet, sys)!=5){
@@ -122,10 +127,6 @@ namespace CP
             valid = m_conditionalEfficiencyTool->getScaleFactor(*jet, condEff_data);
             condEff_data *= condEff_MC;
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-
-            bool passTrigger = false;
-            bool matched = false;
-            ATH_CHECK(passTriggerBtag(jet, passTrigger, matched));
 
             if(matched){
               if(passTrigger){
@@ -159,6 +160,9 @@ namespace CP
         } else {
           m_scaleFactorDecoration.set (*jet, invalidScaleFactor(), sys);
         }
+        
+        m_matchingDecoration.set (*jet, matched, sys);
+        m_bTagMatchingDecoration.set (*jet, passTrigger, sys);
       }
     }
     return StatusCode::SUCCESS;

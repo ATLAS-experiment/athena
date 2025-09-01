@@ -254,6 +254,8 @@ class FTagJetSFBlock(ConfigBlock):
                 #alg.btagThreshold = getBTagThreshold(chain)
 
                 alg.scaleFactorDecoration = 'ftag_effSF_' + selectionName + '_' + chain_out + '_%SYS%'
+                alg.matchingDecoration = 'ftag_matching_' + chain_out + '_%SYS%' # Need for matching taus to jets ?
+                alg.bTagMatchingDecoration = 'ftag_bTagMatching_' + chain_out + '_%SYS%'
                 alg.selectionDecoration = 'ftag_select_' + selectionName + '_' + chain_out + ',as_char'
                 alg.outOfValidity = 2  # continue silently, but decorate jet with outOfValidityDeco
                 alg.outOfValidityDeco = 'no_ftag_' + selectionName + '_' + chain_out + ',as_char'
