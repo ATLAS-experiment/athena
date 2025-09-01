@@ -45,11 +45,11 @@ namespace TauAnalysisTools
     CutNTrack       = 1<<3, // 000000001000
     CutAbsCharge    = 1<<4, // 000000010000
     CutJetIDWP      = 1<<5, // 000000100000
-    CutEleRNNScore  = 1<<6, // 000001000000
-    CutEleIDWP      = 1<<7, // 000010000000
-    CutMuonOLR      = 1<<8,        // 000100000000
-    CutJetRNNScoreSigTrans = 1<<9, // 001000000000
-    CutGNTauScoreSigTrans = 1<<10 // 010000000000	    
+    CutEleRNNScoreSigTrans  = 1<<6, // 000001000000
+    CutEleIDWP              = 1<<7, // 000010000000
+    CutMuonOLR              = 1<<8,        // 000100000000
+    CutJetRNNScoreSigTrans  = 1<<9, // 001000000000
+    CutGNTauScoreSigTrans   = 1<<10 // 010000000000	    
   };
 
   enum DiTauSelectionCuts 
