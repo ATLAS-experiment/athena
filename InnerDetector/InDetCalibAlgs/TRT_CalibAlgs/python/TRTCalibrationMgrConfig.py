@@ -41,10 +41,13 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='', Hit
             # This changes the name of the input file used for the calibrator tool
             kwargs.setdefault("TRTCalibrator",[acc.addPublicTool(acc.popToolsAndMerge(TRTCalibratorCfg(flags, Hittuple=Hittuple, calTag=caltag)))])
         
-        
-    
     # if a text file is in the arguments, use the constants in that instead of the DB
     if calibconstants:
+
+        # Renaming the keys stored by the CondInputLoader, since we will write the new constants using TRTCondWrite Alg.
+        from IOVDbSvc.IOVDbSvcConfig import addOverride
+        acc.merge(addOverride( flags, "/TRT/Calib/T0", "unused_condDBT0", "key" ))
+        acc.merge(addOverride( flags, "/TRT/Calib/RT", "unused_condDBRT", "key" ))
 
         from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTCondWriteCfg
         acc.merge(TRTCondWriteCfg(flags,CalibInputFile=calibconstants))
@@ -105,9 +108,6 @@ def CalibConfig(flags):
     flags.Tracking.doBackTracking=False
     
     
-
-    
-    
 if __name__ == '__main__':
     
     import glob, argparse
@@ -119,12 +119,13 @@ if __name__ == '__main__':
     parser.add_argument('--filesInput'  , nargs='+', default=[],help="Input files. RAW data")
     parser.add_argument('--fileOutput'  , default="basic.root" ,help="Output file name. Flat Ntuple")
     parser.add_argument('--doCalibrator',action='store_true' ,help="Run the calibrator to obtain the constants")
+    parser.add_argument('--dbconst', default="" ,help="Input file constants for writer")
     args = parser.parse_args()
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles, defaultConditionsTags
     if not args.filesInput:
         flags.Input.Files = defaultTestFiles.RAW_RUN3
     else:
@@ -134,9 +135,12 @@ if __name__ == '__main__':
     flags.Exec.MaxEvents = args.evtMax
     
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2024-03"     
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA  
     
-    CalibConfig(flags)    
+    CalibConfig(flags)  
+
+    # For debug output INFO=3
+    flags.Exec.OutputLevel = 3 
     
     # Reason why we need to clone and replace: https://gitlab.cern.ch/atlas/athena/-/merge_requests/68616#note_7614858
     flags = flags.cloneAndReplace(
@@ -144,9 +148,9 @@ if __name__ == '__main__':
         f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass",
         # Keep original flags as some of the subsequent passes use
         # lambda functions relying on them
-        keepOriginal=True)   
+        keepOriginal=True)  
+     
     flags.lock()
-    
     flags.dump()
     
     # Set up the main service "acc"
@@ -158,13 +162,13 @@ if __name__ == '__main__':
     
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
     acc.merge(InDetTrackRecoCfg(flags))
-    
-    # Algorithm to create the basic.root ntuple file 
-    acc.merge(TRT_CalibrationMgrCfg(flags, DoCalibrate=args.doCalibrator))
-    
+
     # Algorithm to generate the straw masking file
-    acc.merge(TRT_StrawStatusCfg(flags))
-    
+    acc.merge(TRT_StrawStatusCfg(flags)) 
+
+    # Algorithm to create the basic.root ntuple file 
+    acc.merge(TRT_CalibrationMgrCfg(flags,calibconstants=args.dbconst ,DoCalibrate=args.doCalibrator))
+
     with open("TRTCalibConfigCA.pkl", "wb") as f:
         acc.store(f)
         f.close()

@@ -10,13 +10,15 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def TRTCondWriterCfg(flags, constantsFile, rtTag, t0Tag, **kwargs):
+def TRTCondWriterCfg(flags, name="TRTCondStoreText", rtTag="Textrt", t0Tag="Textt0", **kwargs):
 
     acc = ComponentAccumulator()
-    _db_ = "sqlite://;schema=mycool.db;dbname=OFLP200" if flags.Input.isMC else "sqlite://;schema=mycool.db;dbname=CONDBR2"
 
+    if "CalibInputFile" not in kwargs:
+        kwargs.setdefault('CalibInputFile', "dbconst.txt")
+    
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-    acc.merge(IOVDbSvcCfg(flags, dbConnection=_db_ ))
+    acc.merge(IOVDbSvcCfg(flags))
 
     # Define OutputConditionsAlg
     objectList = [
@@ -45,32 +47,31 @@ def TRTCondWriterCfg(flags, constantsFile, rtTag, t0Tag, **kwargs):
     acc.merge(PoolWriteCfg(flags))
 
     # TRT Conditions text reader
-    TRTCondStoreText = CompFactory.TRTCondStoreText(name="TRTCondStoreText", CalibInputFile=constantsFile,  **kwargs)
+    TRTCondStoreText = CompFactory.TRTCondStoreText(name=name, **kwargs)
     acc.addCondAlgo(TRTCondStoreText)
 
     return acc
 
-def TRTCondReaderCfg(flags, sqlite_db, rtTag, t0Tag, outputFile, ReadCOOL, **kwargs):
+def TRTCondReaderCfg(flags, name="TRTCondRead", rtTag="Textrt", t0Tag="Textt0", ReadCOOL=True, **kwargs):
     acc = ComponentAccumulator()
 
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    
-    if ReadCOOL:
-        acc.merge(addFolders( flags, "/TRT/Calib/T0", "TRT_OFL", className="TRTCond::StrawT0MultChanContainer"   ))    
-        acc.merge(addFolders( flags, "/TRT/Calib/RT", "TRT_OFL", className="TRTCond::RtRelationMultChanContainer"))
+    if "CalibOutputFile" not in kwargs:
+        kwargs.setdefault('CalibOutputFile', "caliboutput.txt")
 
-    else:
-        # TRT folders from local SQLite
-        folderBase = f"sqlite://;schema={sqlite_db};dbname=" + "OFLP200" if flags.Input.isMC else "CONDBR2"
-        acc.merge(addFolders( flags, "/TRT/Calib/T0", db=f"{folderBase}", tag=t0Tag, className="TRTCond::StrawT0MultChanContainer"   ))    
-        acc.merge(addFolders( flags, "/TRT/Calib/RT", db=f"{folderBase}", tag=rtTag, className="TRTCond::RtRelationMultChanContainer"))
+    from IOVDbSvc.IOVDbSvcConfig import addOverride
     
+    #Folder for COOL db are added in the TRTCalDbTool tool, in case of local DB overwrite with the local tag!
+    if not ReadCOOL:
+        # TRT folders from local SQLite
+        acc.merge(addOverride( flags, "/TRT/Calib/T0", tag=t0Tag, db=flags.IOVDb.DBConnection))    
+        acc.merge(addOverride( flags, "/TRT/Calib/RT", tag=rtTag, db=flags.IOVDb.DBConnection))
+
     if "TRTCalDbTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
         kwargs.setdefault("TRTCalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
-
+    
     # TRT CondRead Algorithm
-    TRTCondRead = CompFactory.TRTCondRead(name="TRTCondRead", CalibOutputFile=outputFile,  **kwargs)
+    TRTCondRead = CompFactory.TRTCondRead(name=name, **kwargs)
     acc.addEventAlgo(TRTCondRead)
 
     return acc
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     parser.add_argument('--tagT0', default="Textt0" ,help="Tag for T0 folder")
     parser.add_argument('--dbname', default="mycool.db" ,help="DB folder name for reader")
     parser.add_argument('--dbconst', default="dbconst.txt" ,help="Input file constants for writer")
-    parser.add_argument('--outputtxt', default="caliboutput.txt" ,help="Output file for the TRTC")
+    parser.add_argument('--outputtxt', default="" ,help="Output file for the TRT")
     parser.add_argument('--condRunNumber', type=int, default=-1, help=" choose the IoV covering this run number")
     args = parser.parse_args()
 
@@ -104,12 +105,15 @@ if __name__ == "__main__":
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
 
     ReadCOOL = False
-    textOutput = "caliboutput.txt"
+    textOutput = args.outputtxt if args.outputtxt else "caliboutput.txt"
     if args.condRunNumber > 0:
         flags.Input.RunNumbers = [args.condRunNumber]
         flags.Input.OverrideRunNumber=True
         ReadCOOL = True
-        textOutput = f"caliboutput_{args.condRunNumber}.txt"
+        textOutput = args.outputtxt if args.outputtxt else f"caliboutput_{args.condRunNumber}.txt"
+    else:
+        flags.IOVDb.DBConnection = f"sqlite://;schema={args.dbname};dbname=" + ("OFLP200" if args.isMC else "CONDBR2")
+
 
     flags.Detector.GeometryTRT = True
     flags.Detector.EnableTRT = True
@@ -128,9 +132,9 @@ if __name__ == "__main__":
 
     if not args.read:
         # Add TRT conditions writing
-        acc.merge(TRTCondWriterCfg(flags, args.dbconst, args.tagRT, args.tagT0))
+        acc.merge(TRTCondWriterCfg(flags, rtTag=args.tagRT, t0Tag=args.tagT0, CalibInputFile=args.dbconst))
     else:
-        acc.merge(TRTCondReaderCfg(flags, args.dbname, args.tagRT, args.tagT0, textOutput, ReadCOOL))
+        acc.merge(TRTCondReaderCfg(flags, rtTag=args.tagRT, t0Tag=args.tagT0, ReadCOOL=ReadCOOL, CalibOutputFile=textOutput))
 
     # Run the configuration
     with open("TRT_PoolGenerator.pkl", "wb") as f:

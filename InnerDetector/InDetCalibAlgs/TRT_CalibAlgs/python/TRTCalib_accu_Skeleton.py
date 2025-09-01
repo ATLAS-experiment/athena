@@ -62,10 +62,10 @@ def fromRunArgs(runArgs):
     cfg.merge(ByteStreamReadCfg(flags))
     
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-    cfg.merge(InDetTrackRecoCfg(flags))    
-    
-    cfg.merge(TRT_CalibrationMgrCfg(flags,calibconstants=runArgs.calibconstants))
+    cfg.merge(InDetTrackRecoCfg(flags))  
+
     cfg.merge(TRT_StrawStatusCfg(flags))
+    cfg.merge(TRT_CalibrationMgrCfg(flags, calibconstants=runArgs.dbconst ,DoCalibrate=runArgs.calibrate))
 
     processPostInclude(runArgs, flags, cfg)
     processPostExec(runArgs, flags, cfg)

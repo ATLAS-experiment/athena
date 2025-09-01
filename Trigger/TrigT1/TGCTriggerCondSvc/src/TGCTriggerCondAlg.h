@@ -1,25 +1,26 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCTRIGGERCONDALG_H
 #define TGCTRIGGERCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "TGCTriggerCondSvc/TGCTriggerLUTs.h"
 #include "TGCTriggerCondSvc/TGCTriggerBWCWReader.h"
 
-  class TGCTriggerCondAlg: public AthAlgorithm {
+  class TGCTriggerCondAlg: public AthReentrantAlgorithm {
 
   public:
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-    TGCTriggerCondAlg (const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~TGCTriggerCondAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
+    // avoids running CondAlg multiple times for the same input (ATEAM-617)
+    virtual bool isReEntrant() const override final { return false; }
 
   private:
 

@@ -454,6 +454,8 @@ HLT_g50_loose_ion_L1eEM26:
     3: 4
 HLT_hi_uccTh1_L1jTE8300:
   eventCount: 0
+HLT_hi_uccTh1_L1jTEFWD8300:
+  eventCount: 0
 HLT_hi_uccTh2_L1jTE10000:
   eventCount: 0
 HLT_hi_uccTh2_L1jTE12000:

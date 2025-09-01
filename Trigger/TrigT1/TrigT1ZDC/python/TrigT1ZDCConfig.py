@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ## @brief this function sets up the L1 simulation sequence with the ZDC
 ## it covers the case of rerunning the L1 on run2 HI data
 
@@ -7,25 +7,17 @@ def L1ZDCSimCfg(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
-    from ZdcRec.ZdcRecConfig import ZdcRecRun2Cfg, ZdcRecRun3Cfg,ZdcRecOutputCfg
+    from ZdcRec.ZdcRecConfig import ZdcRecRun3Cfg, ZdcRecOutputCfg
     from AthenaConfiguration.ComponentFactory import CompFactory
     
-
-    pn = flags.Input.ProjectName
-    year = int(pn.split('_')[0].split('data')[1])
-    if (year < 20):
-        acc.merge(ZdcRecRun2Cfg(flags))
-        acc.addEventAlgo(CompFactory.LVL1.TrigT1ZDC(filepath_LUT = flags.Trigger.ZdcLUT,
-                                                EnergyADCScale = 0.4))
-    else:
-        acc.merge(ZdcRecRun3Cfg(flags))
-        acc.addEventAlgo(CompFactory.LVL1.TrigT1Run3ZDC(filepath_LUT = 'TrigT1ZDC/zdc_json_PbPb5.36TeV_2024_TriggerSim.json',
-                                                MinSampleAna = 7,
-                                                MaxSampleAna = 15,
-                                                NegHG2ndDerivThresh = 45,
-                                                NegLG2ndDerivThresh = 15,
-                                                BaselineDelta = 3
-                                                )) #all EB runs > 462494 --> all use this LUT
+    acc.merge(ZdcRecRun3Cfg(flags))
+    acc.addEventAlgo(CompFactory.LVL1.TrigT1Run3ZDC(filepath_LUT = 'TrigT1ZDC/zdc_json_PbPb5.36TeV_2024_TriggerSim.json',
+                                            MinSampleAna = 7,
+                                            MaxSampleAna = 15,
+                                            NegHG2ndDerivThresh = 45,
+                                            NegLG2ndDerivThresh = 15,
+                                            BaselineDelta = 3
+                                            )) #all EB runs > 462494 --> all use this LUT
     
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         acc.merge(ZdcRecOutputCfg(flags))
@@ -69,10 +61,6 @@ if __name__ == '__main__':
 
     from TriggerJobOpts.Lvl1SimulationConfig import Lvl1SimulationCfg
     acc.merge(Lvl1SimulationCfg(flags))
-    from AthenaCommon.Constants import DEBUG, INFO
-    acc.getEventAlgo("CTPSimulation").OutputLevel=INFO  # noqa: ATL900
-    acc.getEventAlgo("LVL1::TrigT1ZDC").OutputLevel=DEBUG
-
 
     acc.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
     with open("L1Sim.pkl", "wb") as p:

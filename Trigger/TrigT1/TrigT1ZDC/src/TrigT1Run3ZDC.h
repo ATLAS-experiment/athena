@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrigT1Run3ZDC/TrigT1Run3ZDC.h
@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "AthContainers/DataVector.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "PathResolver/PathResolver.h"
@@ -42,16 +42,15 @@
 
 namespace LVL1 {
 /** @brief level 1 ZDC trigger simulation */
-class TrigT1Run3ZDC : public AthAlgorithm {
+class TrigT1Run3ZDC : public AthReentrantAlgorithm {
 
  public:
   // This is a standard algorithm constructor
-  TrigT1Run3ZDC(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   // These are the functions inherited from Algorithm
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
-  virtual bool isClonable() const override final { return true; }
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
   /* Input handles */
