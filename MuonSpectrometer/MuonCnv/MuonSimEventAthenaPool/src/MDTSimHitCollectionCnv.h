@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSIMEVENTATHENAPOOL_MDTSIMHITCOLLECTIONCNV_H
@@ -14,7 +14,7 @@
 #include "MuonSimEventTPCnv/MDTSimHitCollectionCnv_p4.h"
 
 // the latest persistent representation type of DataCollection:
-typedef  Muon::MDTSimHitCollection_p3  MDTSimHitCollection_PERS;
+typedef  Muon::MDTSimHitCollection_p4  MDTSimHitCollection_PERS;
 typedef  T_AthenaPoolCustomCnv<MDTSimHitCollection, MDTSimHitCollection_PERS >  MDTSimHitCollectionCnvBase;
 
 /**

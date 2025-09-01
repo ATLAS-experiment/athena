@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MMSimHitCollectionCnv.h"
@@ -28,7 +28,7 @@ MMSimHitCollectionCnv::~MMSimHitCollectionCnv() = default;
 MMSimHitCollection_PERS*    MMSimHitCollectionCnv::createPersistent (MMSimHitCollection* transCont) {
     MsgStream log(msgSvc(), "MMSimHitCollectionCnv" );
     ATH_MSG_DEBUG("createPersistent(): main converter");
-    MMSimHitCollection_PERS *pixdc_p= m_TPConverter_p2.createPersistent( transCont, log );
+    MMSimHitCollection_PERS *pixdc_p= m_TPConverter_p3.createPersistent( transCont, log );
     return pixdc_p;
 }
 

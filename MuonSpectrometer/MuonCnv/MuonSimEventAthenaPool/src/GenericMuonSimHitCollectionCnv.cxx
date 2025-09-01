@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GenericMuonSimHitCollectionCnv.h"
@@ -28,7 +28,7 @@ GenericMuonSimHitCollectionCnv::~GenericMuonSimHitCollectionCnv() = default;
 GenericMuonSimHitCollection_PERS*    GenericMuonSimHitCollectionCnv::createPersistent (GenericMuonSimHitCollection* transCont) {
     MsgStream log(msgSvc(), "GenericMuonSimHitCollectionCnv" );
     ATH_MSG_DEBUG("createPersistent(): main converter");
-    GenericMuonSimHitCollection_PERS *pixdc_p= m_TPConverter_p2.createPersistent( transCont, log );
+    GenericMuonSimHitCollection_PERS *pixdc_p= m_TPConverter_p3.createPersistent( transCont, log );
     return pixdc_p;
 }
 
