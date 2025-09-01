@@ -88,7 +88,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     std::cout << "   -h     this help message" << std::endl;
     std::cout << "   -d     run http-based download tests" << std::endl;
     std::cout << "If no arguments are given, the default test suite is run." << std::endl;
-    return 0;
+    return 1;
   }
 
   // Manual test
