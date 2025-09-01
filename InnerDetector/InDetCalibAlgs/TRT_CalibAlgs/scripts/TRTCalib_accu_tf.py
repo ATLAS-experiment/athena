@@ -35,7 +35,10 @@ if __name__ == '__main__':
                             type=trfArgClasses.argFactory(trfArgClasses.argBZ2File, io='output'),
                             help='Output TRT calib file name.', group='TRTCalib_tf')
     
-    trf.parser.add_argument('--calibconstants', type=trfArgClasses.argFactory(trfArgClasses.argString), 
+    trf.parser.add_argument('--calibrate', type=trfArgClasses.argFactory(trfArgClasses.argBool), 
+                            help='Calibration constants file.',default=trfArgClasses.argBool(False) ,group='TRTCalib_tf')
+    
+    trf.parser.add_argument('--dbconst', type=trfArgClasses.argFactory(trfArgClasses.argString), 
                             help='Calibration constants file.',default=trfArgClasses.argString('') ,group='TRTCalib_tf')
     
     trf.parseCmdLineArgs(sys.argv[1:])
