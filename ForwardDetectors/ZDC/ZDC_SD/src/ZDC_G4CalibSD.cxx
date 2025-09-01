@@ -94,10 +94,10 @@ G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>&
                                                   energies[1],
                                                   energies[2],
                                                   energies[3],
-                                                  particleID,
-                                                  particleUID);
+                                                  particleUID,
+                                                  particleID);
   m_HitColl->MergeHit(std::move(hit));
-  
+
   return true;
 }
 

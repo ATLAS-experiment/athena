@@ -47,32 +47,30 @@ class CaloCalibrationHit
     @param[in] id  Cell identifier (calorimeter cell or dead material
     identifier)
     @param[in] energyEM  energy loss by EM processes
-    @param[in] energyNonEM  visible energy loss by non EM processes (pion dEdx
-    for instance)
-    @param[in] energyInvisible  invisible energy loss (usually nuclear binding
-    energy)
-    @param[in] energyEscaped   energy which escaped from this cell because of
-    production of neutrino (or escaping muon energy)
-    @param[in] particleID barcode of primary particle which caused given hit
+    @param[in] energyNonEM  visible energy loss by non EM processes (pion dEdx for instance)
+    @param[in] energyInvisible  invisible energy loss (usually nuclear binding energy)
+    @param[in] energyEscaped   energy which escaped from this cell because of production of neutrino (or escaping muon energy)
+    @param[in] uniqueID unique ID of primary particle which caused given hit
+    @param[in] barcode barcode of primary particle which caused given hit (legacy inputs only)
   */
-  CaloCalibrationHit(Identifier id, double energyEM, double energyNonEM,
-                     double energyInvisible, double energyEscaped, int barcode,
-                     int uniqueID = HepMC::INVALID_PARTICLE_ID)
-      : m_ID(id),
-        m_energy0(energyEM),
-        m_energy1(energyNonEM),
-        m_energy2(energyInvisible),
-        m_energy3(energyEscaped),
-        m_barcode(barcode),
-        m_uniqueID(uniqueID) {
-    if (m_barcode == HepMC::UNDEFINED_ID) {
-      m_uniqueID = HepMC::UNDEFINED_ID;
-    }  // No link to a truth particle
-    else if (m_uniqueID == HepMC::INVALID_PARTICLE_ID &&
-             m_barcode != HepMC::INVALID_PARTICLE_ID) {
-      m_partLink = std::make_unique<HepMcParticleLink>(
-          m_barcode, 0, HepMcParticleLink::IS_POSITION,
-          HepMcParticleLink::IS_BARCODE);  // FIXME is barcode-based
+  CaloCalibrationHit(Identifier id,
+                     double energyEM,
+                     double energyNonEM,
+                     double energyInvisible,
+                     double energyEscaped,
+                     int uniqueID,
+                     int barcode = HepMC::INVALID_PARTICLE_ID):
+  m_ID(id),
+  m_energy0(energyEM),
+  m_energy1(energyNonEM),
+  m_energy2(energyInvisible),
+  m_energy3(energyEscaped),
+  m_barcode(barcode),
+  m_uniqueID(uniqueID)
+  {
+    if (m_barcode == HepMC::UNDEFINED_ID) { m_uniqueID = HepMC::UNDEFINED_ID; } // No link to a truth particle
+    else if (m_uniqueID == HepMC::INVALID_PARTICLE_ID && m_barcode != HepMC::INVALID_PARTICLE_ID) {
+      m_partLink = std::make_unique<HepMcParticleLink>(m_barcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE); // FIXME is barcode-based
     }
   }
 

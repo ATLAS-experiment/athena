@@ -4206,7 +4206,7 @@ def dump_CaloTopoTowerContainer (t, f):
 
 
 def dump_CaloCalibrationHit (t, f):
-    fprint (f, t.cellID().getString(), t.particleID(),
+    fprint (f, t.cellID().getString(), t.particleID(), t.particleUID(),
             [t.energy(i) for i in range(4)])
     return
 
@@ -4224,7 +4224,7 @@ def dump_TileHit (t, f):
 
 
 def dump_HepMcParticleLink (p, f):
-    fprint (f, p.barcode(), p.eventIndex())
+    fprint (f, p.barcode(), p.eventIndex()) # FIXME barcode-based
     return
 
 
@@ -4232,13 +4232,13 @@ def dump_SiHit (t, f):
     fprint (f, t.identify())
     dump_Threevec (t.localStartPosition(), f)
     dump_Threevec (t.localEndPosition(), f)
-    fprint (f, t.energyLoss(), t.meanTime(), t.truthBarcode())
+    fprint (f, t.energyLoss(), t.meanTime(), t.truthBarcode()) # FIXME barcode-based
     dump_HepMcParticleLink (t.particleLink(), f)
     return
 
 
 def dump_TRTUncompressedHit (t, f):
-    fprint (f, t.GetHitID(), t.truthBarcode(), t.GetParticleEncoding(),
+    fprint (f, t.GetHitID(), t.truthBarcode(), t.GetParticleEncoding(), # FIXME barcode-based
             t.GetKineticEnergy(), t.GetEnergyDeposit(),
             t.GetPreStepX(),  t.GetPreStepY(),  t.GetPreStepZ(),
             t.GetPostStepX(), t.GetPostStepY(), t.GetPostStepZ(),
