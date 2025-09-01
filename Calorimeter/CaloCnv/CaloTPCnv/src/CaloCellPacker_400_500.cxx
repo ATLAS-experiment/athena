@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: CaloCellPacker_400_500.cxx,v 1.5 2009-03-31 19:04:04 ssnyder Exp $
 /**
  * @file CaloTPCnv/src/CaloCellPacker_400_500.cxx
  * @author scott snyder, from earlier code by Ilija Vukotic and Sven Menke
@@ -527,12 +526,10 @@ void CaloCellPacker_400_500::pack (const CaloCellContainer& cells,
     pars.m_status |= header::STATUS_IS_SUPERCELL;
 
   // Loop over input cells.
-  size_t icell = static_cast<size_t>(-1);;
-  for (const CaloCell* cell : cells)
+  for (size_t icell = 0; const CaloCell* cell : cells)
   {
     // Check for thinning.
-    ++icell;
-    if (dec && dec->thinned (icell)) {
+    if (dec && dec->thinned (icell++)) {
       continue;
     }
 
@@ -1028,7 +1025,7 @@ void CaloCellPacker_400_500::unpack
   CaloCell_ID::SUBCALO prevcalo = CaloCell_ID::NOT_VALID;
 
   // Loop over sequences.
-  while (nseqs--) {
+  for (; nseqs > 0; --nseqs) {
     
     // Check for overrun.
     if (it.base() >= pend) {
