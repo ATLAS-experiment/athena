@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <map>
@@ -87,7 +87,7 @@ StatusCode GenericMonitoringTool::book() {
             filler->touch(); // create now and be done with it
           }
         }
-      	m_fillers.push_back(filler);
+      	m_fillers.push_back(std::move(filler));
       } else {
         ATH_MSG_WARNING( "The histogram filler cannot be instantiated for: " << def.name );
       }
@@ -232,7 +232,7 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
           filler->fill( tl_vars );
         }
         if (makeCache) { 
-          matchedFillerList->push_back(filler); 
+          matchedFillerList->push_back(std::move(filler));
         }
       } else if ( ATH_UNLIKELY( matchesCount != 0 ) ) { // something has matched, but not all, worth informing user
         invokeFillersDebug(filler, monitoredVariables);

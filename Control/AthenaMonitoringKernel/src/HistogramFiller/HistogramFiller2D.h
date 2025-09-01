@@ -69,7 +69,7 @@ namespace Monitored {
         }
         // Need to fill here while weightVector is still in scope
         if (not vars.cut) return HistogramFiller::fill<H>(weightAccessor, detail::noCut, *vars.var[0], *vars.var[1]);
-        else                  return HistogramFiller::fill<H>(weightAccessor, cutMaskAccessor, *vars.var[0], *vars.var[1]);
+        else                  return HistogramFiller::fill<H>(weightAccessor, std::move(cutMaskAccessor), *vars.var[0], *vars.var[1]);
       }
 
       if (not vars.cut) return HistogramFiller::fill<H>(detail::noWeight, detail::noCut, *vars.var[0], *vars.var[1]);
