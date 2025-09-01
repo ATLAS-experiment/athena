@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_SimHitCollectionCnv.h"
@@ -14,7 +14,7 @@
 LUCID_SimHitCollection_PERS* LUCID_SimHitCollectionCnv::createPersistent(LUCID_SimHitCollection* transCont) {
   MsgStream mlog(msgSvc(), "LUCID_SimHitCollectionCnv");
   mlog << MSG::DEBUG << "In LUCID_SimHitCollectionCnv::createPersistent " << endmsg;
-  LUCID_SimHitCollectionCnv_p2 converter;
+  LUCID_SimHitCollectionCnv_p3 converter;
   LUCID_SimHitCollection_PERS* persObj = converter.createPersistent(transCont, mlog);
   return persObj;
 }

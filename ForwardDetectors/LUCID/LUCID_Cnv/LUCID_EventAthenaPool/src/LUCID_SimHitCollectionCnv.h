@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_SimHitCollectionCnv_H
 #define LUCID_SimHitCollectionCnv_H
 
 #include "LUCID_SimEvent/LUCID_SimHitCollection.h"
-#include "LUCID_EventTPCnv/LUCID_SimHitCollection_p2.h"
-#include "LUCID_EventTPCnv/LUCID_SimHitCollectionCnv_p2.h"
+#include "LUCID_EventTPCnv/LUCID_SimHitCollection_p3.h"
+#include "LUCID_EventTPCnv/LUCID_SimHitCollectionCnv_p3.h"
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 
 #include "GaudiKernel/MsgStream.h"
 // typedef to the latest persistent vesion
-typedef LUCID_SimHitCollection_p2 LUCID_SimHitCollection_PERS;
-typedef LUCID_SimHitCollectionCnv_p2 LUCID_SimHitCollectionCnv_PERS;
+typedef LUCID_SimHitCollection_p3 LUCID_SimHitCollection_PERS;
+typedef LUCID_SimHitCollectionCnv_p3 LUCID_SimHitCollectionCnv_PERS;
 
 typedef T_AthenaPoolCustomCnv < LUCID_SimHitCollection, LUCID_SimHitCollection_PERS > LUCID_SimHitCollectionCnvBase;
 
