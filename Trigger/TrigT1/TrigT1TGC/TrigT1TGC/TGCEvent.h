@@ -55,7 +55,7 @@ class TGCEvent {
 
   const std::vector<TGCASDOut*>& GetASDOutVector() const
   {
-    return static_cast< const std::vector<TGCASDOut*>&> (m_vecASDOut);
+    return m_vecASDOut;
   }
 
   // operations
