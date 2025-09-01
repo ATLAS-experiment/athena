@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimAlgorithms/FPGATrackSimTrackFitterTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
@@ -83,7 +83,7 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode FPGATrackSimTrackFitterTool::getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max) {
+StatusCode FPGATrackSimTrackFitterTool::getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks, const FPGATrackSimTrackPars& min, const FPGATrackSimTrackPars& max) {
     // elaborate the next event
     ATH_CHECK(setRoadSectors(roads));
     int status = m_tfpobj->fitTracks(roads,tracks);

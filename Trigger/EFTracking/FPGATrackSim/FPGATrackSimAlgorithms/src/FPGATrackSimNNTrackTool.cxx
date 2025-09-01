@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 /**
  * @file FPGATrackSimNNTrackTool.cxx
@@ -63,7 +63,7 @@ StatusCode FPGATrackSimNNTrackTool::initialize() {
 }
 
 
-StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max) {
+StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, const FPGATrackSimTrackPars& min, const FPGATrackSimTrackPars& max) {
 
     ATH_MSG_DEBUG("Running NN-based track parameter estimation!");
     std::vector<float> paramNNoutputs;

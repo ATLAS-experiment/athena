@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimTRACKFITTERTOOL_H
@@ -33,7 +33,7 @@ public:
 
   StatusCode initialize() override;
 
-  StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads, std::vector<FPGATrackSimTrack> & tracks, FPGATrackSimTrackPars min, FPGATrackSimTrackPars max);
+  StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads, std::vector<FPGATrackSimTrack> & tracks, const FPGATrackSimTrackPars& min, const FPGATrackSimTrackPars& max);
   StatusCode getMissingHitsCheckTracks(std::vector<FPGATrackSimTrack> & tracks_guessed);
 
   StatusCode getNFits(int & n)            { n = m_tfpobj->getNFits();             return StatusCode::SUCCESS; }

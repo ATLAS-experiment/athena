@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTLAMONITORING_TRIGTLAMONITORALGORITHM_H
@@ -42,7 +42,7 @@ class TrigTLAMonitorAlgorithm : public AthMonitorAlgorithm {
    * \param ctx: Event Context
    */ 
   template <typename T>
-  StatusCode readContainer(SG::ReadHandle<T> & container, SG::ReadHandleKey<T> key, const EventContext& ctx) const;
+  StatusCode readContainer(SG::ReadHandle<T> & container, const SG::ReadHandleKey<T>& key, const EventContext& ctx) const;
 
   //! Fill an event info variable to a 1D histogram
   /**
@@ -51,7 +51,7 @@ class TrigTLAMonitorAlgorithm : public AthMonitorAlgorithm {
    * \param prefix: string appended as prefix to histogram name
   */
   template <typename T>
-  StatusCode fillEventInfoHistogram(SG::ReadHandle<DataVector<xAOD::TrigComposite_v1> > tcEventInfo, const std::string& varname, const std::string& prefix) const;
+  StatusCode fillEventInfoHistogram(SG::ReadHandle<DataVector<xAOD::TrigComposite_v1> >& tcEventInfo, const std::string& varname, const std::string& prefix) const;
 
   //! Fill kinematic histograms for a given particle of type `T`
   /**
@@ -78,7 +78,7 @@ class TrigTLAMonitorAlgorithm : public AthMonitorAlgorithm {
    * \param default_val: value filled in case variable cannot be retrieved. Defaults to -1.
    */
   template<class C, typename T>
-  StatusCode fillObjectVariableHistogram(SG::ReadHandle<DataVector<C>> container, const std::string& varname, const std::string& prefix , const std::string& trigName, T default_val=-1) const;
+  StatusCode fillObjectVariableHistogram(SG::ReadHandle<DataVector<C>>& container, const std::string& varname, const std::string& prefix , const std::string& trigName, T default_val=-1) const;
 
   //! Fill jet track variable to 1D histograms. Jet track variables are vectors where each element corresponds to the association of a different primary vertex.
   //  The first element (corresponding to the hard scatter vertex) is filled.
@@ -90,7 +90,7 @@ class TrigTLAMonitorAlgorithm : public AthMonitorAlgorithm {
    * \param default_val: value filled in case variable cannot be retrieved. Defaults to -1.
   */
   template <typename T>
-  StatusCode fillJetTrackVariableHistogram(SG::ReadHandle<xAOD::JetContainer> jets,  const std::string& varname,  const std::string& prefix,  const std::string& trigName, T default_val=-1) const;
+  StatusCode fillJetTrackVariableHistogram(SG::ReadHandle<xAOD::JetContainer>& jets,  const std::string& varname,  const std::string& prefix,  const std::string& trigName, T default_val=-1) const;
   
   //! A generic function to fill 2D histogram
   /**
@@ -110,7 +110,7 @@ class TrigTLAMonitorAlgorithm : public AthMonitorAlgorithm {
    * \param prefix: string appended as prefix to histogram name
    * \param trigName: Name of trigger that event is required to have fired
   */
-  StatusCode fillJetPtCalibStatesHistograms(SG::ReadHandle<xAOD::JetContainer> jets, const std::string& calibState, const std::string& prefix,  const std::string& trigName) const;
+  StatusCode fillJetPtCalibStatesHistograms(SG::ReadHandle<xAOD::JetContainer>& jets, const std::string& calibState, const std::string& prefix,  const std::string& trigName) const;
 
   //! Fill kinematic histograms for a given particle of type `T`
   /**
@@ -131,7 +131,7 @@ class TrigTLAMonitorAlgorithm : public AthMonitorAlgorithm {
 **************************************************/
 
 template <typename T>
-StatusCode TrigTLAMonitorAlgorithm::readContainer(SG::ReadHandle<T> & container, SG::ReadHandleKey<T> key, const EventContext& ctx) const{
+StatusCode TrigTLAMonitorAlgorithm::readContainer(SG::ReadHandle<T> & container, const SG::ReadHandleKey<T>& key, const EventContext& ctx) const{
 
   container = SG::makeHandle( key, ctx );
   if (! container.isValid() ) {
@@ -144,7 +144,7 @@ StatusCode TrigTLAMonitorAlgorithm::readContainer(SG::ReadHandle<T> & container,
 
 
 template <typename T>
-StatusCode TrigTLAMonitorAlgorithm::fillEventInfoHistogram(SG::ReadHandle<DataVector<xAOD::TrigComposite_v1> > tcEventInfo, const std::string& varname, const std::string& prefix) const {
+StatusCode TrigTLAMonitorAlgorithm::fillEventInfoHistogram(SG::ReadHandle<DataVector<xAOD::TrigComposite_v1> >& tcEventInfo, const std::string& varname, const std::string& prefix) const {
 
   Monitored::Scalar<T> variable (prefix+"_"+varname, -1);
 
@@ -203,7 +203,7 @@ StatusCode TrigTLAMonitorAlgorithm::fillParticleHistograms(SG::ReadHandle<DataVe
 
 
 template<class C,typename T>
-StatusCode TrigTLAMonitorAlgorithm::fillObjectVariableHistogram(SG::ReadHandle<DataVector<C>> container, const std::string& varname, const std::string& prefix , const std::string& trigName, T default_val) const {
+StatusCode TrigTLAMonitorAlgorithm::fillObjectVariableHistogram(SG::ReadHandle<DataVector<C>>& container, const std::string& varname, const std::string& prefix , const std::string& trigName, T default_val) const {
   
   // change var name to avoid confilcts with Monitoring standards ("var_trigname")
   std::string hname = varname;
@@ -224,7 +224,7 @@ StatusCode TrigTLAMonitorAlgorithm::fillObjectVariableHistogram(SG::ReadHandle<D
 
 
 template <typename T>
-StatusCode TrigTLAMonitorAlgorithm::fillJetTrackVariableHistogram(SG::ReadHandle<xAOD::JetContainer> jets,  const std::string& varname,  const std::string& prefix,  const std::string& trigName, T default_val) const {
+StatusCode TrigTLAMonitorAlgorithm::fillJetTrackVariableHistogram(SG::ReadHandle<xAOD::JetContainer>& jets,  const std::string& varname,  const std::string& prefix,  const std::string& trigName, T default_val) const {
 
   std::vector<T> variable_vec;
   Monitored::Scalar<T> variable  (prefix+varname+"_"+trigName,default_val);
