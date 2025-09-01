@@ -393,11 +393,11 @@ void test4()
 
 
 // To study generated code.
-unsigned int asmtest [[maybe_unused]] (const SG::AuxElement& e,
-                                       SG::ConstAccessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
+size_t asmtest [[maybe_unused]] (const SG::AuxElement& e,
+                                 SG::ConstAccessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
 {
   using Cont = std::vector<int>;
-  unsigned int out = 0;
+  size_t out = 0;
   for (const ElementLink<Cont> el : acc(e)) {
     out += el.key() + el.index();
   }

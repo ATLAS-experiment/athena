@@ -979,7 +979,7 @@ public:
    *
    * Any auxiliary data will be moved along with the container contents.
    */
-  DataVector& operator= (DataVector&& rhs) noexcept;
+  DataVector& operator= (DataVector&& rhs);
 
 
   /**
