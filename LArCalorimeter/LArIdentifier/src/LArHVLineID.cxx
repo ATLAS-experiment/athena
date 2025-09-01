@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArHVLineID.h"
@@ -16,7 +16,8 @@
 #include <string>
 
 
-LArHVLineID::LArHVLineID(void) : 
+LArHVLineID::LArHVLineID() :
+  AtlasDetectorID("LArHVLineID", "LArHV"),
   m_larhvRegion_index(999),
   m_atlas_index(999),
   m_configuration_index(999),
@@ -33,14 +34,14 @@ LArHVLineID::LArHVLineID(void) :
 LArHVLineID:: ~LArHVLineID()= default;
 
 
-IdContext LArHVLineID::hvlineContext(void) const
+IdContext LArHVLineID::hvlineContext() const
 {
   ExpandedIdentifier id;
   return (IdContext(id, 0, m_hvline_index));
 }
 
 /*
-IdContext LArHVLineID::canlineContext(void) const
+IdContext LArHVLineID::canlineContext() const
 {
   ExpandedIdentifier id;
   return (IdContext(id, 0, m_canline_index));
@@ -194,7 +195,7 @@ int LArHVLineID::get_expanded_id  (const HWIdentifier& id,
 
 
 //=============================================================================
-int LArHVLineID::initLevelsFromDict(void) 
+int LArHVLineID::initLevelsFromDict()
 //=============================================================================
 {
   MsgStream log(m_msgSvc, "LArHVLineID" );
@@ -348,7 +349,7 @@ int LArHVLineID::initLevelsFromDict(void)
 
 
 //=====================================================
-int  LArHVLineID::init_hashes(void) 
+int  LArHVLineID::init_hashes()
 //=====================================================
 {
   MsgStream log(m_msgSvc, "LArHVLineID" );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARIDENTIFIER_LARELECTRODEID_H
@@ -108,11 +108,11 @@ class LArElectrodeID : public AtlasDetectorID {
   /**
    * @brief Default constructor
    */
-  LArElectrodeID(void);
+  LArElectrodeID();
   /**
    * @brief Default destructor
    */
-  ~LArElectrodeID(void); 
+  ~LArElectrodeID();
   
   /**
   * @brief Create an Electrode identifier from fields 
@@ -130,13 +130,13 @@ class LArElectrodeID : public AtlasDetectorID {
   /**
    * @brief Return an iterator pointing to a collection of electrode identifiers
    */
-  std::vector<HWIdentifier>::const_iterator electrode_begin(void) const;
-  std::vector<HWIdentifier>::const_iterator electrode_end(void) const; 
+  std::vector<HWIdentifier>::const_iterator electrode_begin() const;
+  std::vector<HWIdentifier>::const_iterator electrode_end() const;
 
   /**
    * @brief Define  hash tables max size 
    */
-  size_type  electrodeHashMax (void) const;
+  size_type  electrodeHashMax () const;
 
   /**
    * @brief Initialization from the identifier dictionary
@@ -236,7 +236,7 @@ class LArElectrodeID : public AtlasDetectorID {
   /**
    * @brief Define feedthrough Context 
    */
-  IdContext    electrodeContext(void) const;
+  IdContext    electrodeContext() const;
   
   
  private:
@@ -254,8 +254,8 @@ class LArElectrodeID : public AtlasDetectorID {
 			const IdContext* context) const;
   
   /* init() hashes */
-  int  initLevelsFromDict(void) ;
-  int  init_hashes(void);
+  int  initLevelsFromDict();
+  int  init_hashes();
 
   /* Member Data index */
   size_type m_larElectrodeRegion_index;
@@ -338,20 +338,20 @@ inline IdentifierHash LArElectrodeID::electrodeHash (HWIdentifier hvId) const
     return (0);
 }
 
-inline LArElectrodeID::size_type LArElectrodeID::electrodeHashMax (void) const
+inline LArElectrodeID::size_type LArElectrodeID::electrodeHashMax () const
 /*====================================================================*/
 {
   return m_electrodeHashMax;
 }
 
 
-inline std::vector<HWIdentifier>::const_iterator LArElectrodeID::electrode_begin(void) const
+inline std::vector<HWIdentifier>::const_iterator LArElectrodeID::electrode_begin() const
 /*====================================================================*/
 {
   return(m_electrode_vec.begin());
 }
 
-inline std::vector<HWIdentifier>::const_iterator LArElectrodeID::electrode_end(void) const
+inline std::vector<HWIdentifier>::const_iterator LArElectrodeID::electrode_end() const
 /*==================================================================*/
 {
   return(m_electrode_vec.end());
