@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -13,7 +13,8 @@
 #include <iostream>
 
 // Constructor
-HGTD_ID::HGTD_ID(void):
+HGTD_ID::HGTD_ID():
+    AtlasDetectorID("HGTD_ID", "hgtd"),
     m_hgtd_region_index(0),
     m_INDET_INDEX(0),
     m_HGTD_INDEX(1),
@@ -30,7 +31,7 @@ HGTD_ID::HGTD_ID(void):
 }
 
 // Destructor
-HGTD_ID::~HGTD_ID(void)
+HGTD_ID::~HGTD_ID()
 {}
 
 void
@@ -314,7 +315,7 @@ HGTD_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
 }
 
 int
-HGTD_ID::init_hashes(void)
+HGTD_ID::init_hashes()
 {
 
     //
@@ -435,7 +436,7 @@ HGTD_ID::get_next_in_eta(const IdentifierHash& id, IdentifierHash& next) const
 }
 
 int
-HGTD_ID::init_neighbors(void)
+HGTD_ID::init_neighbors()
 {
     //
     // create a vector(s) to retrieve the hashes for compact ids for
@@ -599,7 +600,7 @@ bool HGTD_ID::get_useNewIdentifierScheme() const
 }
 
 int
-HGTD_ID::initLevelsFromDict(void)
+HGTD_ID::initLevelsFromDict()
 {
 
     MsgStream log(m_msgSvc, "HGTD_ID");
@@ -829,33 +830,33 @@ HGTD_ID::initLevelsFromDict(void)
 }
 
 HGTD_ID::size_type
-HGTD_ID::wafer_hash_max (void) const
+HGTD_ID::wafer_hash_max () const
 {
     return m_wafer_hash_max;
 }
 
 HGTD_ID::size_type
-HGTD_ID::pixel_hash_max (void) const
+HGTD_ID::pixel_hash_max () const
 {
     return m_pixel_hash_max;
 }
 
-HGTD_ID::const_id_iterator      HGTD_ID::wafer_begin            (void) const
+HGTD_ID::const_id_iterator      HGTD_ID::wafer_begin            () const
 {
     return (m_wafer_vec.begin());
 }
 
-HGTD_ID::const_id_iterator      HGTD_ID::wafer_end              (void) const
+HGTD_ID::const_id_iterator      HGTD_ID::wafer_end              () const
 {
     return (m_wafer_vec.end());
 }
 
-HGTD_ID::const_expanded_id_iterator     HGTD_ID::pixel_begin    (void) const
+HGTD_ID::const_expanded_id_iterator     HGTD_ID::pixel_begin    () const
 {
     return (m_full_pixel_range.factory_begin());
 }
 
-HGTD_ID::const_expanded_id_iterator     HGTD_ID::pixel_end      (void) const
+HGTD_ID::const_expanded_id_iterator     HGTD_ID::pixel_end      () const
 {
     return (m_full_pixel_range.factory_end());
 }
@@ -941,7 +942,7 @@ HGTD_ID::get_hash       (const Identifier& id,
 }
 
 void
-HGTD_ID::test_wafer_packing     (void) const
+HGTD_ID::test_wafer_packing     () const
 {
     
     MsgStream log(m_msgSvc, "HGTD_ID");

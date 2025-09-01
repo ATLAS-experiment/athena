@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -16,10 +16,11 @@
 
 
 //______________________________________________________
-LUCID_ID::LUCID_ID(void) {
-
+LUCID_ID::LUCID_ID()
+  : AtlasDetectorID ("LUCID_ID", "")
+{
 } 
 //______________________________________________________
-LUCID_ID::~LUCID_ID(void){
+LUCID_ID::~LUCID_ID(){
 
 }

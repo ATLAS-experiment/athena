@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_HARDWAREID_H
@@ -19,13 +19,10 @@ class LUCID_HardwareID : public AtlasDetectorID {
 
 
   // default constructor
-  LUCID_HardwareID(void);
+  LUCID_HardwareID();
 
   // default destructor
   virtual ~LUCID_HardwareID();
-
- private:
-
 };
 
 CLASS_DEF( LUCID_HardwareID , 17902 , 1 )
