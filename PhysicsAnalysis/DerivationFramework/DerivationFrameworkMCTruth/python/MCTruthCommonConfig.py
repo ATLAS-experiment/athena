@@ -416,7 +416,7 @@ def AddTruthEnergyDensityCfg(flags):
     # Now add the tool to do the decoration
     DFCommonTruthEDDecorator = CompFactory.DerivationFramework.TruthEDDecorator("DFCommonTruthEDDecorator",
                                                                                 EventInfoName="EventInfo",
-                                                                                EnergyDensityKeys=["TruthIsoCentralEventShape","TruthIsoForwardEventShape"],
+                                                                                EventShapeKeys=["TruthIsoCentralEventShape","TruthIsoForwardEventShape"],
                                                                                 DecorationSuffix="_rho"
                                                                                )
     acc.addPublicTool(DFCommonTruthEDDecorator)

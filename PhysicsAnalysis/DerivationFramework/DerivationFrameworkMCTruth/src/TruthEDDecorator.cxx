@@ -1,25 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header file
 #include "TruthEDDecorator.h"
 
-// EDM includes
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODEventShape/EventShape.h"
-
 namespace DerivationFramework {
-
-  static const SG::AuxElement::Accessor<float> acc_Density("Density");
 
   TruthEDDecorator::TruthEDDecorator(const std::string& t, const std::string& n, const IInterface* p)
     : base_class(t,n,p)
   {
-    
-    declareProperty("EventInfoName",m_eventInfoName="EventInfo");
-    declareProperty("EnergyDensityKeys",m_edKeys={"TruthIsoCentralEventShape","TruthIsoForwardEventShape"});
-    declareProperty("DecorationSuffix",m_ed_suffix="_rho");
   }
 
 
@@ -27,9 +17,14 @@ namespace DerivationFramework {
 
 
   StatusCode TruthEDDecorator::initialize(){
-    for (size_t i=0;i<m_edKeys.size();++i){
-      m_dec_eventShape.emplace_back(m_edKeys[i]+m_ed_suffix );
+
+    ATH_CHECK(m_eventInfoKey.initialize());
+    ATH_CHECK(m_eventShapeKeys.initialize());
+    for (size_t i=0;i<m_eventShapeKeys.size();++i){
+      m_eventDensityDecorKeys.emplace_back(m_eventInfoKey.key()+"."+m_eventShapeKeys[i].key()+m_ed_suffix );
     }
+    ATH_CHECK(m_eventDensityDecorKeys.initialize());
+
     return StatusCode::SUCCESS;
   }
 
@@ -37,19 +32,25 @@ namespace DerivationFramework {
   StatusCode TruthEDDecorator::addBranches() const{
     ATH_MSG_VERBOSE("addBranches()");
 
-    // Get the event info that we will decorate onto
-    const xAOD::EventInfo* eventInfo(nullptr);
-    if (evtStore()->retrieve(eventInfo,m_eventInfoName).isFailure()) {
-      ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoName);
-      return StatusCode::FAILURE;
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
+    if (!eventInfo.isValid()) {
+        ATH_MSG_ERROR("Couldn't retrieve " << m_eventInfoKey);
+        return StatusCode::FAILURE;
     }
 
-    const xAOD::EventShape* eventShape(nullptr);
-    for (size_t i=0;i<m_edKeys.size();++i){
+    for (size_t i=0;i<m_eventShapeKeys.size();++i){
       // Get the event shapes from which we'll get the densities
-      ATH_CHECK( evtStore()->retrieve(eventShape,m_edKeys[i]) );
+      SG::ReadHandle<xAOD::EventShape> eventShape(m_eventShapeKeys[i], ctx);
+      if (!eventShape.isValid()) {
+	ATH_MSG_ERROR ("Could not retrieve " << m_eventShapeKeys[i]);
+	return StatusCode::FAILURE;
+      }
+
       // Decorate the densities onto the event info
-      m_dec_eventShape[i](*eventInfo) = acc_Density(*eventShape);
+      SG::WriteDecorHandle<xAOD::EventInfo, double> dec_eventDensity(m_eventDensityDecorKeys[i], ctx);
+      dec_eventDensity(*eventInfo) = eventShape->getDensity(xAOD::EventShape::Density);
     }
 
     return StatusCode::SUCCESS;
