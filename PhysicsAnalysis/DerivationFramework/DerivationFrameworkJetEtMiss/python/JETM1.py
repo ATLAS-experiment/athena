@@ -275,6 +275,11 @@ def JETM1Cfg(flags):
         triggerNames = ["a4tcemsubjesFS", "a4tcemsubjesISFS", "a10tclcwsubjesFS", "a10tclcwsubFS", "a10ttclcwjesFS", "GSCJet"]
         for trigger in triggerNames:
             JETM1SlimmingHelper.FinalItemList.append('xAOD::AuxContainerBase!#HLT_xAOD__JetContainer_'+trigger+'Aux.pt.eta.phi.m')
+    
+    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+    if getDataYear(flags) >= 2024:
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper
+        AddjFexRoIsToSlimmingHelper(SlimmingHelper = JETM1SlimmingHelper)
 
     jetOutputList = ["AntiKt4PV0TrackJets", "AntiKt4UFOCSSKJets"]
     if flags.Input.isMC:
