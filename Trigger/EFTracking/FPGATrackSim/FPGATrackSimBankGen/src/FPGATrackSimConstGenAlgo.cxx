@@ -753,17 +753,17 @@ StatusCode FPGATrackSimConstGenAlgo::finalize()
 
     std::string filename = "corrgen_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + ".gcon";
 
-    DumpConstants(m_geo_consts, filename);
+    ATH_CHECK(DumpConstants(m_geo_consts, filename));
 
     if (m_dumpMissingHitsConstants) {
       for (int missing = 0; missing < m_nLayers; missing++) {
 	filename = "corrgen_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + "_skipPlane" + std::to_string(missing) + ".gcon";
 	// pick up only the ones for this missing plane
-	DumpConstants(m_geo_consts_with_missinghit[missing], filename);
+	ATH_CHECK(DumpConstants(m_geo_consts_with_missinghit[missing], filename));
       }
     }
 
-    writeSectors();
+    ATH_CHECK(writeSectors());
 
     ATH_CHECK(m_tHistSvc->finalize());
     m_mafile->Close();
@@ -772,7 +772,7 @@ StatusCode FPGATrackSimConstGenAlgo::finalize()
 }
 
 
-void FPGATrackSimConstGenAlgo::writeSectors()
+StatusCode FPGATrackSimConstGenAlgo::writeSectors()
 {
     // Create FPGATrackSimSectorSlice
     FPGATrackSimTrackPars copymin = m_sliceMin;
@@ -783,16 +783,17 @@ void FPGATrackSimConstGenAlgo::writeSectors()
     std::string sector_filename = "sectors_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + ".patt";
     std::string sectorHW_filename = "sectorsHW_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + ".patt";
     FILE *sector_file = fopen(sector_filename.c_str(),"w");
-    if (not sector_file){
-      throw std::runtime_error(std::format("Failed to open file {}", sector_filename));
+    if (!sector_file) {
+      ATH_MSG_ERROR("Cannot open output file " << sector_filename);
+      return StatusCode::FAILURE;
     }
-    //
     FILE *sectorHW_file = fopen(sectorHW_filename.c_str(),"w");
-    if (not sectorHW_file){
-      fclose(sector_file);
-      throw std::runtime_error(std::format("Failed to open file {}", sectorHW_filename));
+    if (!sectorHW_file) {
+      ATH_MSG_ERROR("Cannot open output file " << sectorHW_filename);
+      fclose (sector_file);
+      return StatusCode::FAILURE;
     }
-    
+
     fprintf(sector_file,"%zu %d\n",m_geo_consts.size(),m_nLayers);
     fprintf(sectorHW_file,"%zu %d\n",m_geo_consts.size(),m_nLayers);
 
@@ -823,15 +824,18 @@ void FPGATrackSimConstGenAlgo::writeSectors()
     fclose(sectorHW_file);
     std::string slice_filename = "slices_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + ".root";
     slice.saveSlices(slice_filename);
+
+    return StatusCode::SUCCESS;
 }
 
 
 // ASCII file writeout
-void FPGATrackSimConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_consts, std::string & filename)
+StatusCode FPGATrackSimConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_consts, std::string & filename)
 {
     FILE *const_file = fopen(filename.c_str(),"w");
-    if (not const_file){
-      throw std::runtime_error(std::format("Failed to open file {}", filename));
+    if (!const_file) {
+      ATH_MSG_ERROR("Cannot open output file " << filename);
+      return StatusCode::FAILURE;
     }
 
     fprintf(const_file,"! ***           RECONSTRUCTION GEOMETRY CONSTANTS               ***\n");
@@ -909,5 +913,6 @@ void FPGATrackSimConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_con
 
     fclose(const_file);
 
+    return StatusCode::SUCCESS;
 }
 
