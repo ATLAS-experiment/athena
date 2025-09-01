@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARIDENTIFIER_LARHVLINEID_H
@@ -51,8 +51,8 @@ class LArHVLineID : public AtlasDetectorID {
   typedef Identifier::size_type  size_type;
   
   /** only allowed constructor */
-  LArHVLineID(void);
-  ~LArHVLineID(void); 
+  LArHVLineID();
+  ~LArHVLineID();
 
   /**
    * @brief Create an HighVoltage line identifier from fields
@@ -69,16 +69,16 @@ class LArHVLineID : public AtlasDetectorID {
   /**
    * @brief Return an iterator pointing to a collection of high voltage line identifier
    */
-  std::vector<HWIdentifier>::const_iterator hvline_begin(void) const;
+  std::vector<HWIdentifier>::const_iterator hvline_begin() const;
   /**
    * @brief Return an iterator pointing to a collection of high voltage line identifier
    */
-  std::vector<HWIdentifier>::const_iterator hvline_end(void) const; 
+  std::vector<HWIdentifier>::const_iterator hvline_end() const;
 
   /** 
    * @brief Define hash tables max size 
    */
-  size_type  hvlineHashMax (void) const;
+  size_type  hvlineHashMax () const;
   /**
    * @brief Initialization from the identifier dictionary
    */
@@ -144,9 +144,9 @@ class LArHVLineID : public AtlasDetectorID {
   */
 
   /* context for feedthroughs, feb  & channels */
-  IdContext    hvlineContext(void) const;
+  IdContext    hvlineContext() const;
   /* Now Obsolete */
-  //IdContext    canlineContext(void) const;
+  //IdContext    canlineContext() const;
 
 
 
@@ -166,8 +166,8 @@ class LArHVLineID : public AtlasDetectorID {
 			const IdContext* context) const;
 
   /* init() hashes */
-  int  initLevelsFromDict(void) ;
-  int  init_hashes(void);
+  int  initLevelsFromDict();
+  int  init_hashes();
 
   /* Member Data index */
   size_type m_larhvRegion_index;
@@ -244,20 +244,20 @@ inline IdentifierHash LArHVLineID::hvlineHash (HWIdentifier hvId) const
     return (0);
 }
 
-inline LArHVLineID::size_type LArHVLineID::hvlineHashMax (void) const
+inline LArHVLineID::size_type LArHVLineID::hvlineHashMax () const
 /*====================================================================*/
 {
   return m_hvlineHashMax;
 }
 
 
-inline std::vector<HWIdentifier>::const_iterator LArHVLineID::hvline_begin(void) const
+inline std::vector<HWIdentifier>::const_iterator LArHVLineID::hvline_begin() const
 /*====================================================================*/
 {
   return(m_hvline_vec.begin());
 }
 
-inline std::vector<HWIdentifier>::const_iterator LArHVLineID::hvline_end(void) const
+inline std::vector<HWIdentifier>::const_iterator LArHVLineID::hvline_end() const
 /*==================================================================*/
 {
   return(m_hvline_vec.end());

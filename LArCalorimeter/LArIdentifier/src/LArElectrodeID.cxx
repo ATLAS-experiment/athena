@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArElectrodeID.h"
@@ -16,7 +16,8 @@
 #include <string>
 
 
-LArElectrodeID::LArElectrodeID(void) : 
+LArElectrodeID::LArElectrodeID() :
+  AtlasDetectorID("LArElectrodeID", "LArElec"),
   m_larElectrodeRegion_index(999),
   m_larelectrode_index(999),
   m_atlas_index(999),
@@ -37,7 +38,7 @@ LArElectrodeID::LArElectrodeID(void) :
 LArElectrodeID:: ~LArElectrodeID()= default;
 
 
-IdContext LArElectrodeID::electrodeContext(void) const
+IdContext LArElectrodeID::electrodeContext() const
 {
   ExpandedIdentifier id;
   return (IdContext(id, 0, m_electrode_index));
@@ -192,7 +193,7 @@ int LArElectrodeID::get_expanded_id  (const HWIdentifier& id,
 
 
 //=============================================================================
-int LArElectrodeID::initLevelsFromDict(void) 
+int LArElectrodeID::initLevelsFromDict()
 //=============================================================================
 {
   MsgStream log(m_msgSvc, "LArElectrodeID" );
@@ -391,7 +392,7 @@ int LArElectrodeID::initLevelsFromDict(void)
 
 
 //=====================================================
-int  LArElectrodeID::init_hashes(void) 
+int  LArElectrodeID::init_hashes()
 //=====================================================
 {
   MsgStream log(m_msgSvc, "LArElectrodeID" );

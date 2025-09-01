@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARONLINEID_BASE_H
@@ -115,11 +115,13 @@ class LArOnlineID_Base : public AtlasDetectorID
   /** 
    * @brief Default constructor
    */
-  LArOnlineID_Base(void);    
+  LArOnlineID_Base(const std::string& name,
+                   const std::string& group,
+                   bool is_slar);
   /** 
    * @brief Default destructor
    */
-  ~LArOnlineID_Base(void);
+  ~LArOnlineID_Base();
   
   /**
    * @brief Create a feedthrough identifier from fields 
@@ -239,15 +241,15 @@ class LArOnlineID_Base : public AtlasDetectorID
   /**
    * @brief Define feedthrough hash tables max size 
    */
-  size_type  feedthroughHashMax (void) const;
+  size_type  feedthroughHashMax () const;
   /**
    *  @brief define feb hash tables max size 
    */
-  size_type  febHashMax (void) const;
+  size_type  febHashMax () const;
   /**
    *  @brief Define channel hash tables max size 
    */
-  size_type  channelHashMax (void) const;
+  size_type  channelHashMax () const;
 
   /**
    * @brief Build calibration module identifier from fields
@@ -315,12 +317,12 @@ class LArOnlineID_Base : public AtlasDetectorID
   /**
    *  @brief Define calibration module hash tables max size 
    */
-  size_type  calibModuleHashMax (void) const;
+  size_type  calibModuleHashMax () const;
 
   /**
    *  @brief Define calibration channel hash tables max size 
    */
-  size_type  calibChannelHashMax (void) const;
+  size_type  calibChannelHashMax () const;
 
 
   /** 
@@ -422,19 +424,19 @@ class LArOnlineID_Base : public AtlasDetectorID
   /** 
    * @brief Define context for cryostat (obsolete)
    */
-  IdContext    cryostatEndContext(void) const;
+  IdContext    cryostatEndContext() const;
   /** 
    * @brief Define context for feedthroughs
    */
-  IdContext    feedthroughContext(void) const;
+  IdContext    feedthroughContext() const;
   /** 
    * @brief Define context for feb
    */
-  IdContext    febContext(void) const;
+  IdContext    febContext() const;
   /** 
    * @brief Define context for channel
    */
-  IdContext    channelContext(void) const;
+  IdContext    channelContext() const;
 
 protected:    
 /*==== */
@@ -472,8 +474,8 @@ protected:
 			       ExpandedIdentifier& exp_id, 
 			       const IdContext* context) const;
   int  initLevelsFromDict(const std::string& group_name) ;
-  int  init_hashes(void) ;
-  int  init_calib_hashes(void) ;
+  int  init_hashes();
+  int  init_calib_hashes();
 
   size_type m_laronlineRegion_index;   // LArOnline_region
   size_type m_lar_index;               // LAr
@@ -676,12 +678,12 @@ inline IdentifierHash LArOnlineID_Base::calib_channel_Hash (HWIdentifier channel
 }
 
 /* Calib */
-inline LArOnlineID_Base::size_type LArOnlineID_Base::calibModuleHashMax (void) const
+inline LArOnlineID_Base::size_type LArOnlineID_Base::calibModuleHashMax () const
 /*=======================================================================*/
 {
   return m_calibModuleHashMax;
 }
-inline LArOnlineID_Base::size_type LArOnlineID_Base::calibChannelHashMax (void) const
+inline LArOnlineID_Base::size_type LArOnlineID_Base::calibChannelHashMax () const
 /*====================================================================*/
 {
   return m_calibChannelHashMax;
