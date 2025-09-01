@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EFMuonMon.h"
@@ -7,6 +7,7 @@
 #include "xAODTrigMuon/TrigMuonDefs.h"
 #include "MuonMatchingTool.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 
 EFMuonMon :: EFMuonMon(const std::string& name, ISvcLocator* pSvcLocator )
   : TrigMuonMonitorAlgorithm(name, pSvcLocator)
