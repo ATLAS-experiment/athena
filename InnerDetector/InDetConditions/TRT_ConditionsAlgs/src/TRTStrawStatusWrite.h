@@ -53,8 +53,6 @@ private:
     Gaudi::Property<std::string> m_par_stattextfileHT{this, "StatusInputFileHT", "", "input text file: HT"};
 
     const TRT_ID *m_trtid{}; // TRT id helper
-    const InDetDD::TRT_DetectorManager* m_trtmanager;
-
 };
 
 #endif
