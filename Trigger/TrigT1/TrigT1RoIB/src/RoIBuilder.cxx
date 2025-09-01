@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,25 +18,11 @@
 // TrigT1 includes:
 #include "TrigT1Interfaces/TrigT1CTPDefs.h"
 
-
-
-
-
 // Local includes:
 #include "RoIBuilder.h"
 #include "RoIBDefs.h"
 
 namespace ROIB {
-
-   //--------------
-   // Constructor
-   //--------------
-   RoIBuilder::RoIBuilder( const std::string& name, ISvcLocator* pSvcLocator )
-      : AthAlgorithm( name, pSvcLocator ) {
-
-      // Property setting general behaviour:
-
-   }
 
    //---------------------------------
    // initialize()
@@ -83,7 +69,7 @@ namespace ROIB {
    //----------------------------------------------
    // execute() method called once per event
    //----------------------------------------------
-   StatusCode RoIBuilder::execute( ) {
+   StatusCode RoIBuilder::execute(const EventContext& ctx) const {
 
       // Exec message
       ATH_MSG_DEBUG( "============================" );
@@ -94,7 +80,7 @@ namespace ROIB {
       // Get the official event ID:
       //
 
-      auto eventInfoHandle = SG::makeHandle( m_eventInfoKey );
+      auto eventInfoHandle = SG::makeHandle( m_eventInfoKey, ctx );
       CHECK( eventInfoHandle.isValid() );
       const xAOD::EventInfo* thisEvent = eventInfoHandle.cptr();
       // Note we are loosing precision here as we cast from 64 to 32 bits integer
@@ -120,7 +106,7 @@ namespace ROIB {
       std::vector< unsigned int > ctp_rdo_data;
 
       bool ctp_simulation_error = false;
-      auto ctpSlinkHandle = SG::makeHandle( m_ctpSLinkLocation );      
+      auto ctpSlinkHandle = SG::makeHandle( m_ctpSLinkLocation, ctx );
       CHECK( ctpSlinkHandle.isValid() );
       const LVL1CTP::CTPSLink* ctp_slink = ctpSlinkHandle.cptr();
 
@@ -210,7 +196,7 @@ namespace ROIB {
 
          if( m_doCalo ) {
             ATH_MSG_VERBOSE("Reading " <<  m_caloEMTauLocation[slink].key() );
-            auto handle = SG::makeHandle( m_caloEMTauLocation[slink] );
+            auto handle = SG::makeHandle( m_caloEMTauLocation[slink], ctx );
             CHECK( handle.isValid() );
             emtau_slink  = handle.cptr();	   
 
@@ -270,7 +256,7 @@ namespace ROIB {
          const DataVector< LVL1CTP::SlinkWord >* jetenergy_slink = 0;
 
          if( m_doCalo ) {
-            auto handle = SG::makeHandle( m_caloJetEnergyLocation[slink] );
+            auto handle = SG::makeHandle( m_caloJetEnergyLocation[slink], ctx );
             CHECK( handle.isValid() );
             jetenergy_slink = handle.cptr();
             
@@ -330,7 +316,7 @@ namespace ROIB {
       const L1MUINT::MuCTPIToRoIBSLink* muctpi_slink = 0;
 
       if( m_doMuon ) {
-         auto handle = SG::makeHandle( m_muctpiSLinkLocation );
+         auto handle = SG::makeHandle( m_muctpiSLinkLocation, ctx );
          CHECK( handle.isValid() );
          muctpi_slink = handle.cptr();
          ATH_MSG_VERBOSE( "Retrieved MuCTPI result from TES with key: "
@@ -389,7 +375,7 @@ namespace ROIB {
       //
       // Put RoIB RDO object into SG:
       //
-      auto roibHandle = SG::makeHandle( m_roibRDOLocation );
+      auto roibHandle = SG::makeHandle( m_roibRDOLocation, ctx );
       CHECK( roibHandle.record( std::move( roib_rdo_result ) ) );
       // no owerwrite possible with DataHandles
 
