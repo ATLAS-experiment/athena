@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DETECTORDESCRIPTION_MUONIDHELPER_H
@@ -81,7 +81,7 @@ class MuonIdHelper : public AtlasDetectorID {
 public:
     // Constructor
 
-    MuonIdHelper(const std::string& logName);
+    MuonIdHelper(const std::string& logName, const std::string& group);
 
     // Destructor
 

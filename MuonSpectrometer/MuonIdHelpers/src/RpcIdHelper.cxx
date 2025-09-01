@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include "MuonIdHelpers/RpcIdHelper.h"
 #include "Identifier/RangeIterator.h"
-RpcIdHelper::RpcIdHelper() : MuonIdHelper("RpcIdHelper") {}
+RpcIdHelper::RpcIdHelper() : MuonIdHelper("RpcIdHelper", "rpc") {}
 
 // Initialize dictionary
 int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
@@ -750,7 +750,7 @@ bool RpcIdHelper::validPad(const Identifier& id, int stationName, int stationEta
     return true;
 }
 
-int RpcIdHelper::init_detectorElement_hashes(void) {
+int RpcIdHelper::init_detectorElement_hashes() {
     //
     // create a vector(s) to retrieve the hashes for compact ids. For
     // the moment, we implement a hash for detector channels

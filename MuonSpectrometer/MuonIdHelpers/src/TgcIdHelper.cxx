@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/TgcIdHelper.h"
 #include "Identifier/RangeIterator.h"
 
-TgcIdHelper::TgcIdHelper() : MuonIdHelper("TgcIdHelper") {
+TgcIdHelper::TgcIdHelper() : MuonIdHelper("TgcIdHelper", "tgc") {
     m_module_hashes.fill(-1);
 }
 

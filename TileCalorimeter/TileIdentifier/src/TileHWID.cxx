@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,8 +7,6 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: TileHWID.cxx,v 1.8 2008-02-15 18:16:33 solodkov Exp $
-//<version>	$Name: not supported by cvs2svn $
 
 #include "TileIdentifier/TileHWID.h"
 #include "IdDict/IdDictDefs.h"
@@ -23,8 +21,9 @@
 
 
 
-TileHWID::TileHWID( void ) 
-  : m_tile_region_index(0)
+TileHWID::TileHWID()
+  : AtlasDetectorID("TileHWID", "tile")
+    , m_tile_region_index(0)
     , m_SYSTEM_INDEX(999)
     , m_SECTION_INDEX(999)
     , m_ROS_INDEX(999)
@@ -39,7 +38,7 @@ TileHWID::TileHWID( void )
 {
 }
 
-TileHWID::~TileHWID(void) 
+TileHWID::~TileHWID()
 {
 }
 
@@ -461,28 +460,28 @@ bool TileHWID::adc_id     ( const HWIdentifier& channel_id,
 }
 
 IdContext	
-TileHWID::ros_context  (void)  const
+TileHWID::ros_context  ()  const
 {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_ROS_INDEX));
 }
 
 IdContext	
-TileHWID::drawer_context  (void)  const
+TileHWID::drawer_context  ()  const
 {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_DRAWER_INDEX));
 }
 
 IdContext	
-TileHWID::channel_context     (void)  const
+TileHWID::channel_context     ()  const
 {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_CHANNEL_INDEX));
 }
 
 IdContext	
-TileHWID::adc_context     (void)  const
+TileHWID::adc_context     ()  const
 {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_ADC_INDEX));
@@ -700,7 +699,7 @@ int TileHWID::get_expanded_id  (const HWIdentifier& id, ExpandedIdentifier& exp_
   return result;
 }
 
-int TileHWID::initLevelsFromDict(void) 
+int TileHWID::initLevelsFromDict()
 {
   MsgStream log(m_msgSvc, "TileHWID" );
 
@@ -814,7 +813,7 @@ int TileHWID::initLevelsFromDict(void)
   return(0) ;
 }
 
-int TileHWID::init_hashes(void) 
+int TileHWID::init_hashes()
 {
   MsgStream log(m_msgSvc, "TileHWID" );
 

@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/CscIdHelper.h"
 #include "Identifier/RangeIterator.h"
 
-CscIdHelper::CscIdHelper() : MuonIdHelper("CscIdHelper") {
+CscIdHelper::CscIdHelper() : MuonIdHelper("CscIdHelper", "csc") {
     m_module_hashes.fill(-1);
     m_detectorElement_hashes.fill(-1);
 }
