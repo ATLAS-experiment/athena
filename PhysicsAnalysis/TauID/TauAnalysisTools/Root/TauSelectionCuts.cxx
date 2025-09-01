@@ -451,15 +451,15 @@ bool TauSelectionCutJetIDWP::accept(const xAOD::TauJet& xTau,
 
 //___________________________SelectionCutRNNEleScore____________________________
 //______________________________________________________________________________
-TauSelectionCutRNNEleScore::TauSelectionCutRNNEleScore(TauSelectionTool* tTST)
-  : TauSelectionCut("CutEleRNNScore", tTST)
+TauSelectionCutRNNEleScoreSigTrans::TauSelectionCutRNNEleScoreSigTrans(TauSelectionTool* tTST)
+  : TauSelectionCut("CutEleRNNScoreSigTrans", tTST)
 {
-  m_hHistCutPre = CreateControlPlot("hEleRNN_pre","EleRNN_pre;RNNEleScore; events",100,0,1);
-  m_hHistCut = CreateControlPlot("hEleRNN_cut","EleRNN_cut;RNNEleScore; events",100,0,1);
+  m_hHistCutPre = CreateControlPlot("hEleRNNSigTrans_pre","EleRNNSigTrans_pre;RNNEleScoreSigTrans; events",100,0,1);
+  m_hHistCut = CreateControlPlot("hEleRNNSigTrans_cut","EleRNNSigTrans_cut;RNNEleScoreSigTrans; events",100,0,1);
 }
 
 //______________________________________________________________________________
-void TauSelectionCutRNNEleScore::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
+void TauSelectionCutRNNEleScoreSigTrans::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
    SG::ConstAccessor<float> acc ("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
    if(m_tTST->m_iEleIDVersion!=0){  
@@ -470,32 +470,32 @@ void TauSelectionCutRNNEleScore::fillHistogram(const xAOD::TauJet& xTau, TH1F& h
 }
 
 //______________________________________________________________________________
-void TauSelectionCutRNNEleScore::setAcceptInfo(asg::AcceptInfo& info) const
+void TauSelectionCutRNNEleScoreSigTrans::setAcceptInfo(asg::AcceptInfo& info) const
 {
-  info.addCut( "EleRNNScore",
-               "Selection of taus according to their EleRNNScore" );
+  info.addCut( "EleRNNScoreSigTrans",
+               "Selection of taus according to their EleRNNScoreSigTrans" );
 }
 //______________________________________________________________________________
-bool TauSelectionCutRNNEleScore::accept(const xAOD::TauJet& xTau,
+bool TauSelectionCutRNNEleScoreSigTrans::accept(const xAOD::TauJet& xTau,
                                      asg::AcceptData& acceptData)
 {
   SG::ConstAccessor<float> acc ("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
-  float fEleRNNScore = 0.;
+  float fEleRNNScoreSigTrans = 0.;
   if(m_tTST->m_iEleIDVersion!=0){
-    fEleRNNScore = acc(xTau);
+    fEleRNNScoreSigTrans = acc(xTau);
   }else{
-    fEleRNNScore = xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans);
+    fEleRNNScoreSigTrans = xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans);
   }
-  unsigned int iNumEleRNNRegion = m_tTST->m_vEleRNNRegion.size()/2;
-  for( unsigned int iEleRNNRegion = 0; iEleRNNRegion < iNumEleRNNRegion; iEleRNNRegion++ )
+  unsigned int iNumEleRNNSigTransRegion = m_tTST->m_vEleRNNSigTransRegion.size()/2;
+  for( unsigned int iEleRNNSigTransRegion = 0; iEleRNNSigTransRegion < iNumEleRNNSigTransRegion; iEleRNNSigTransRegion++ )
   {
-    if ( fEleRNNScore >= m_tTST->m_vEleRNNRegion.at(iEleRNNRegion*2) and fEleRNNScore <= m_tTST->m_vEleRNNRegion.at(iEleRNNRegion*2+1))
+    if ( fEleRNNScoreSigTrans >= m_tTST->m_vEleRNNSigTransRegion.at(iEleRNNSigTransRegion*2) and fEleRNNScoreSigTrans <= m_tTST->m_vEleRNNSigTransRegion.at(iEleRNNSigTransRegion*2+1))
     {
-      acceptData.setCutResult("EleRNNScore", true );
+      acceptData.setCutResult("EleRNNScoreSigTrans", true );
       return true;
     }
   }
-  m_tTST->msg() << MSG::VERBOSE << "Tau failed EleRNNScore requirement, tau EleRNNScore: " << fEleRNNScore << endmsg;
+  m_tTST->msg() << MSG::VERBOSE << "Tau failed EleRNNScoreSigTrans requirement, tau EleRNNScoreSigTrans: " << fEleRNNScoreSigTrans << endmsg;
   return false;
 }
 
