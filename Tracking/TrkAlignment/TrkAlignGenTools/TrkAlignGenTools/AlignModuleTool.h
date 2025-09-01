@@ -54,16 +54,16 @@ namespace Trk {
     //
 
     /** sets alignModuleLists and idHash maps for a set of AlignModules.  AlignModuleList should be of type Combined, containing detector elements of different types. */
-    void setAlignModules(AlignModuleList* alignmods,
-			 std::vector<AlignModuleList*>* idHashMaps) override;
+    virtual void setAlignModules(AlignModuleList* alignmods,
+                                 std::vector<AlignModuleList*>* idHashMaps) override;
     
     /** Sets the AlignParLists using boost::multi_array.  Lists are owned by GeometryManagerTool. */
-    void setAlignParLists(AlignPar2DVec* fullAlignParList, 
-			  AlignPar2DVec* alignParList=0) override;
+    virtual void setAlignParLists(AlignPar2DVec* fullAlignParList, 
+                                  AlignPar2DVec* alignParList=0) override;
 
     /** set and retrieve flag whether or not the sub-TrkDetElementBase structures are aligned for a given detector type */
-    void setSubDetElement(AlignModule::DetectorType detType, bool status) override { m_subDetElement[detType]=status; }
-    bool subDetElement(AlignModule::DetectorType detType) const override { return m_subDetElement[detType]; }
+    virtual void setSubDetElement(AlignModule::DetectorType detType, bool status) override { m_subDetElement[detType]=status; }
+    virtual bool subDetElement(AlignModule::DetectorType detType) const override { return m_subDetElement[detType]; }
 
     //
     // AlignTrackCreator methods
@@ -82,13 +82,13 @@ namespace Trk {
     //
 
     /** Returns total number of alignment parameters. */
-    int nAlignParameters() const override { return m_alignParList1D.size(); }
+    virtual int nAlignParameters() const override { return m_alignParList1D.size(); }
     
     /** Returns 1-D vector of all AlignModules containing all detector types. */
-    const AlignModuleList* alignModules1D() override { return &m_alignModules1D; }
+    virtual const AlignModuleList* alignModules1D() override { return &m_alignModules1D; }
     
     /** Returns 1-D vector of all AlignPars for all detector types. */
-    AlignParVec* alignParList1D() override { return &m_alignParList1D; }
+    virtual AlignParVec* alignParList1D() override { return &m_alignParList1D; }
     
     
     //
@@ -96,7 +96,7 @@ namespace Trk {
     //
 
     /** returns vector of AlignPars for an AlignModule */
-    AlignParVec* getAlignPars(const AlignModule* alignModule) const override;
+    virtual AlignParVec* getAlignPars(const AlignModule* alignModule) const override;
     
     /** methods used for numerical derivative to shift module before 
 	refitting track and restore to normal position, to be inherited by 
