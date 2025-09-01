@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 	
 // System include(s):
 #include <stdexcept>
@@ -128,9 +126,11 @@ persToTrans(  const xAOD::TrackParticleAuxContainer_v1* oldObj,
     if( definingParametersCovMatrixAcc.isAvailable( *( oldInt[ i ] ) ) ) {
 
       covMatrixVec = definingParametersCovMatrixAcc( *( oldInt[ i ] ) );
-      xAOD::ParametersCovMatrix_t cov;
-      Amg::expand( covMatrixVec.begin(), covMatrixVec.end(),cov );
-      newInt[ i ]->setDefiningParametersCovMatrix(cov);
+      if (!covMatrixVec.empty()) {
+        xAOD::ParametersCovMatrix_t cov;
+        Amg::expand( covMatrixVec.begin(), covMatrixVec.end(),cov );
+        newInt[ i ]->setDefiningParametersCovMatrix(cov);
+      }
 
     }
 
