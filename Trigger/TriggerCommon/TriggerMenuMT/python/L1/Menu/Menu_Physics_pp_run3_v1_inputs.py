@@ -259,11 +259,9 @@ def defineInputsMenu():
             # additional heavy ion jTE items
             ('jTE3',1), ('jTE4',1), ('jTE10',1), ('jTE5',1), ('jTE20',1), ('jTE50',1),
             ('jTE100',1) , ('jTE600',1), ('jTE1500',1), ('jTE4000',1), ('jTE6500',1), ('jTE8300',1), ('jTE9000',1), ('jTE10000',1),('jTE12000',1),
-            ('jTEFWDA1',1), ('jTEFWDC1',1), ('jTEFWDA5',1), ('jTEFWDC5',1),
+            ('jTEFWDA1',1), ('jTEFWDC1',1), ('jTEFWDA5',1), ('jTEFWDC5',1), ('jTEFWD8300',1),
            
             # spare energy thresholds for commissioning
-            ('jXESPARE1',1),
-
         ]
     })
 

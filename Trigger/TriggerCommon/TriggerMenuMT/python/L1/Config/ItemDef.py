@@ -1055,6 +1055,8 @@ class ItemDef:
         MenuItem('L1_VjTE600'    ).setLogic( Not(d.jTE600)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE50_VjTE600'    ).setLogic(  d.jTE50  & Not(d.jTE600)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE50_VjTE200').setLogic(  d.jTE50  & Not(d.jTE200)  & physcond).setTriggerType(TT.calo)
+        # jTEFWD UCC seeds: ATR-30726
+        MenuItem('L1_jTEFWD8300').setLogic(d.jTEFWD8300 & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_XE10').setLogic( d.XE10 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_XE20').setLogic( d.XE20 & physcond).setTriggerType(TT.calo)
