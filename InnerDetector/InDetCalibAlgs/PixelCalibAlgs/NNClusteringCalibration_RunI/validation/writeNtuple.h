@@ -267,9 +267,9 @@ writeNtuple::writeNtuple(TTree *tree)
 
 
    tree2 = new TChain("Validation/PixelRIOs");
-   TIter next( (static_cast<TChain*>(tree)->GetListOfFiles());
+   TIter next(static_cast<TChain*>(tree)->GetListOfFiles());
    TObject *obj;
-   while( (obj = static_cast<TChainElement*>( next() ))  ) {
+   while( ( obj = static_cast<TChainElement*> (next()) ) ) {
      tree2->Add(obj->GetTitle());
    }
    

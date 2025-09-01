@@ -148,7 +148,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
   // --------------------------------------------------------------------------
   std::cout << "CaloHadDMCoeffFit::process() -> Info. Getting averages..." << std::endl;
   for(int i_ev=0; m_data->GetEntry(i_ev)>0;i_ev++) {
-    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " '" << (static_cast<TChain *>(m_data->fChain))->GetFile()->GetName() << "'" << std::endl;
+    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " '" << static_cast<TChain *>(m_data->fChain)->GetFile()->GetName() << "'" << std::endl;
 
     // checking event quality
     if(isSingleParticle) {
@@ -268,7 +268,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
   // --------------------------------------------------------------------------
   std::cout << "CaloHadDMCoeffFit::process() -> Info. Filling histograms..." << std::endl;
   for(int i_ev=0; m_data->GetEntry(i_ev)>0;i_ev++) {
-    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " '" << (static_cast<TChain *>(m_data->fChain))->GetFile()->GetName() << "'" << std::endl;
+    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " '" << static_cast<TChain *>(m_data->fChain)->GetFile()->GetName() << "'" << std::endl;
 
     if(isSingleParticle) {
       // checking event quality

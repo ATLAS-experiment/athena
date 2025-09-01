@@ -151,8 +151,8 @@ void TRootCompare::processKey(TDirectory& dir, TKey& key)
   }
 
   if (obj->IsA()->InheritsFrom("TH1")) {
-    TH1& h = *(static_cast<TH1*>(obj.get()));
-    TH1& href = *(static_cast<TH1*>(refObj));
+    TH1& h = *static_cast<TH1*>(obj.get());
+    TH1& href = *static_cast<TH1*>(refObj);
 
     // For alphanumeric axes, sort and deflate
     if (m_sortLabels) {
@@ -307,7 +307,7 @@ void TRootCompare::processKey(TDirectory& dir, TKey& key)
   }
   else if (obj->IsA()->InheritsFrom("TEfficiency")) {
     auto h = static_cast<TEfficiency*>(obj.get());
-    auto href =static_cast<TEfficiency*>(refObj);
+    auto href = static_cast<TEfficiency*>(refObj);
     Bool_t match = compareHist(*h->GetTotalHistogram(),*href->GetTotalHistogram()) &&
       compareHist(*h->GetPassedHistogram(),*href->GetPassedHistogram());
     m_histTotal++;
