@@ -193,8 +193,7 @@ regHist( TH1* h )
 {
    if( m_tool != 0 ) {
       std::string hName( h->GetName() );
-      HistMap_t::value_type valToInsert( hName, h );
-      m_map.insert( valToInsert );
+      m_map.emplace( hName, h );
       return m_tool->regHist( h, *this );
    }
 
@@ -960,8 +959,7 @@ registerMetadata(const std::string& streamName, const std::string& hName,
       if (! metadata) return StatusCode::FAILURE;
       StatusCode scmd = m_THistSvc->regTree( mdStreamName, metadata );
       if (scmd == StatusCode::FAILURE) return StatusCode::FAILURE;
-      MDMap_t::value_type valToInsert( mdStreamName, new OutputMetadata(metadata) );
-      i = m_metadataMap.insert( valToInsert ).first;
+      i = m_metadataMap.emplace( mdStreamName, new OutputMetadata(metadata) ).first;
     }
     
     i->second->fill( hName,  group.interval(), group.chain(), group.merge() );

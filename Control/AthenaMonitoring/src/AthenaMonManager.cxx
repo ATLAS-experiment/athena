@@ -654,8 +654,7 @@ void
 AthenaMonManager::
 passOwnership( TObject* h, const std::string& key )
 {
-    Imp::ObjMap_t::value_type valToInsert( key, h );
-    m_d->m_objMap.insert( valToInsert );
+    m_d->m_objMap.emplace( key, h );
 }
 
 
