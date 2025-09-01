@@ -477,13 +477,13 @@ void test4()
   assert (span.back().front().key() == 123);
   assert (span.back().front().index() == 13);
 
-  std::vector<unsigned> idx;
+  std::vector<size_t> idx;
   for (auto s : span) {
     for (ElementLink<Cont> el : s) {
       idx.push_back (el.isDefault() ? 0 : el.index());
     }
   }
-  assert (idx == (std::vector<unsigned> {10, 0, 11, 12, 0, 13, 14}));
+  assert (idx == (std::vector<size_t> {10, 0, 11, 12, 0, 13, 14}));
 
   span[0][1] = ElementLink<Cont> (125, 21);
 
@@ -506,11 +506,11 @@ void test4()
 
 
 // To study generated code.
-unsigned int asmtest [[maybe_unused]] (SG::AuxElement& e,
-                                       SG::Accessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
+size_t asmtest [[maybe_unused]] (SG::AuxElement& e,
+                                 SG::Accessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
 {
   using Cont = std::vector<int>;
-  unsigned int out = 0;
+  size_t out = 0;
   for (const ElementLink<Cont> el : acc(e)) {
     out += el.key() + el.index();
   }

@@ -548,10 +548,12 @@ DataVector<T, BASE>& DataVector<T, BASE>::operator= (const DataVector& rhs)
  * @param rhs The container from which to move.
  *
  * Any auxiliary data will be moved along with the container contents.
+ *
+ * (Can't be noexcept because testInsert() can throw.)
  */
 template <class T, class BASE>
 DataVector<T, BASE>&
-DataVector<T, BASE>::operator= (DataVector<T, BASE>&& rhs) noexcept
+DataVector<T, BASE>::operator= (DataVector<T, BASE>&& rhs)
 {
   if (this != &rhs) {
     // Ensure we're not being called via a base class.
