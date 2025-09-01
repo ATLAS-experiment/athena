@@ -3,8 +3,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/LArEM_Base_ID.h
  * @author scott snyder <snyder@bnl.gov>
@@ -40,9 +38,11 @@ public:
   typedef Identifier::size_type  size_type ;
 
   /** Constructor.  If SUPERCELL is true, this helper is for supercells. */
-  LArEM_Base_ID (const std::string& name, bool supercell);
+  LArEM_Base_ID (const std::string& name,
+                 const std::string& group,
+                 bool supercell);
 
-  ~LArEM_Base_ID(void);
+  ~LArEM_Base_ID();
 
   /** Build a cell identifier from an expanded identifier. */
   Identifier region_id (const ExpandedIdentifier& exp_id) const;
@@ -83,16 +83,16 @@ public:
   
 
   /** begin iterator over set of Region Identifiers */
-  id_iterator reg_begin    (void) const;
+  id_iterator reg_begin    () const;
   /** end iterator over set of Region Identifiers */
-  id_iterator reg_end      (void) const;
+  id_iterator reg_end      () const;
   /** Range over set of Region Identifiers. */
   id_range reg_range () const;
 
   /** begin iterator over full set of EM Identifiers */
-  id_iterator em_begin    (void) const;
+  id_iterator em_begin    () const;
   /** end iterator over full set of EM Identifiers */
-  id_iterator em_end      (void) const;
+  id_iterator em_end      () const;
   /** Range over full set of EM Identifiers. */
   id_range em_range () const;
 
@@ -362,7 +362,7 @@ private:
   int phi_min_init(const Identifier regId) const;
 
   int         initLevelsFromDict (const std::string& group_name);
-  int         init_hashes(void) ;
+  int         init_hashes();
 
   static int   get_prevInPhi(const LArEM_region* emRegion, const unsigned int& index, const short int& nPhi, const unsigned int& minHash, 
 		      int& neighbourIndex, IdentifierHash* neighbList) ;
@@ -394,7 +394,7 @@ private:
 
 
 
-  int         init_neighbors(void) ;
+  int         init_neighbors();
 
 
 private:

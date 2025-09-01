@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/JTower_ID.h"
@@ -16,13 +16,12 @@
 
 
 
-JTower_ID::JTower_ID(void) :
-  JGTowerBase_ID()
+JTower_ID::JTower_ID() :
+  JGTowerBase_ID("JTowerID", "Reg_JTower")
 {
 }
 
-JTower_ID::~JTower_ID(void) 
-= default;
+JTower_ID::~JTower_ID() = default;
 
 int  JTower_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /*=================================================================*/

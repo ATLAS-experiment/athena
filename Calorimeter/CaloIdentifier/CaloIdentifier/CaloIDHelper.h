@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/CaloIDHelper.h
@@ -163,7 +163,7 @@ public:
    *        and optionally @c fill_vec_of_dict_regions.
    * @param name Name of this helper (for error reporting).
    */
-  CaloIDHelper (const std::string& name);
+  CaloIDHelper (const std::string& name, const std::string& group);
 
 
   /// Return the @c HashGroup for channels (cells).

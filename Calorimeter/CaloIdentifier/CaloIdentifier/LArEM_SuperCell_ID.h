@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/LArEM_SuperCell_ID.h
  * @author scott snyder <snyder@bnl.gov>
@@ -121,8 +118,8 @@
 class LArEM_SuperCell_ID : public LArEM_Base_ID
 {
 public:        
-  LArEM_SuperCell_ID(void);    
-  ~LArEM_SuperCell_ID(void);
+  LArEM_SuperCell_ID();
+  ~LArEM_SuperCell_ID();
 
   /** initialization from the identifier dictionary*/
   virtual int  initialize_from_dictionary (const IdDictMgr& dict_mgr);

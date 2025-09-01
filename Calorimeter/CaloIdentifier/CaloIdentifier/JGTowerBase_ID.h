@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/JGTowerBase_ID.h
  * @author scott snyder <whopkins@uoregon.edu>
@@ -36,7 +34,7 @@ public:
 
 	typedef Identifier::size_type  size_type ;
 
-	JGTowerBase_ID(void);    
+	JGTowerBase_ID(const std::string& name, const std::string& group);
 
 	virtual ~JGTowerBase_ID();
 
@@ -58,11 +56,11 @@ public:
 
 	/** access to IdContext's which define which levels of fields are contained in the id */
 	/** id for towers ("reduced" id) */
-	IdContext    region_context   (void) const;
+	IdContext    region_context   () const;
 
 	/** access to IdContext's which define which levels of fields are contained in the id */
 	/** id for towers ("normal" id) */
-	IdContext    tower_context   (void) const;
+	IdContext    tower_context   () const;
 
 	/** create compact id from hash id (return == 0 for OK)*/
 	virtual int  get_id    (const IdentifierHash& hash_id, Identifier& id, const IdContext* context = 0 ) const;
@@ -89,10 +87,10 @@ public:
 	virtual int  initialize_base_from_dictionary (const IdDictMgr& dict_mgr, const std::string& t_pre);
 
 	/**  tower hash table max size */
-	size_type     tower_hash_max (void) const;
+	size_type     tower_hash_max () const;
   
 	/**  region hash table max size */
-	size_type     calo_region_hash_max (void) const;
+	size_type     calo_region_hash_max () const;
 
 
 	/** Type for iterators over identifiers. */
@@ -299,9 +297,9 @@ private:
 
 	int         initLevelsFromDict(const std::string& t_pre) ;
 
-	int         init_hashes(void) ;
+	int         init_hashes();
 
-	int         init_neighbors(void) ;
+	int         init_neighbors();
 
 
 	size_type                     m_jgtower_region_index;
@@ -417,26 +415,26 @@ inline Identifier JGTowerBase_ID::tower_id   ( const Identifier regionId,
 
 
 //----------------------------------------------------------------------------
-inline JGTowerBase_ID::size_type   JGTowerBase_ID::tower_hash_max (void) const
+inline JGTowerBase_ID::size_type   JGTowerBase_ID::tower_hash_max () const
 {
 	return m_tower_hash_max;
 }
 
 //----------------------------------------------------------------------------
-inline JGTowerBase_ID::size_type   JGTowerBase_ID::calo_region_hash_max (void) const
+inline JGTowerBase_ID::size_type   JGTowerBase_ID::calo_region_hash_max () const
 {
 	return m_calo_region_hash_max;
 }
 
 
 //----------------------------------------------------------------------------
-inline JGTowerBase_ID::id_iterator JGTowerBase_ID::region_begin    (void) const
+inline JGTowerBase_ID::id_iterator JGTowerBase_ID::region_begin    () const
 {
 	return(m_region_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline JGTowerBase_ID::id_iterator JGTowerBase_ID::region_end      (void) const
+inline JGTowerBase_ID::id_iterator JGTowerBase_ID::region_end      () const
 {
 	return(m_region_vec.end());
 }
@@ -448,13 +446,13 @@ inline JGTowerBase_ID::id_range JGTowerBase_ID::reg_range    () const
 }
 
 //----------------------------------------------------------------------------
-inline JGTowerBase_ID::id_iterator JGTowerBase_ID::tower_begin    (void) const
+inline JGTowerBase_ID::id_iterator JGTowerBase_ID::tower_begin    () const
 {
 	return(m_tower_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline JGTowerBase_ID::id_iterator JGTowerBase_ID::tower_end      (void) const
+inline JGTowerBase_ID::id_iterator JGTowerBase_ID::tower_end      () const
 {
 	return(m_tower_vec.end());
 }

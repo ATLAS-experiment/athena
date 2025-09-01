@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/src/Tile_Base_ID.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -30,8 +28,10 @@ using namespace LArNeighbours;
 
 
 
-Tile_Base_ID::Tile_Base_ID (const std::string& name, bool supercell)
-  : CaloIDHelper (name)
+Tile_Base_ID::Tile_Base_ID (const std::string& name,
+                            const std::string& group,
+                            bool supercell)
+  : CaloIDHelper (name, group)
     , m_supercell (supercell ? 1 : 0)
     , m_tile_region_index(0)
     , m_SYSTEM_INDEX(999)
@@ -1038,37 +1038,37 @@ IdentifierHash  Tile_Base_ID::cell_hash  (const Identifier& id) const
 }
 
 IdContext	
-Tile_Base_ID::region_context  (void)  const
+Tile_Base_ID::region_context  ()  const
 {
     return {0, m_SIDE_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::module_context  (void)  const
+Tile_Base_ID::module_context  ()  const
 {
     return {0, m_MODULE_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::tower_context   (void)  const
+Tile_Base_ID::tower_context   ()  const
 {
     return {0, m_TOWER_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::cell_context    (void)  const
+Tile_Base_ID::cell_context    ()  const
 {
     return {0, m_SAMPLE_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::pmt_context     (void)  const
+Tile_Base_ID::pmt_context     ()  const
 {
     return {0, m_PMT_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::adc_context     (void)  const
+Tile_Base_ID::adc_context     ()  const
 {
     return {0, m_ADC_INDEX};
 }
@@ -1295,42 +1295,42 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   return 0;
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::region_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::region_hash_max () const
 {
   return regions().hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::module_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::module_hash_max () const
 {
   return m_modules.hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::tower_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::tower_hash_max () const
 {
   return m_towers.hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::cell_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::cell_hash_max () const
 {
   return channels().hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::pmt_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::pmt_hash_max () const
 {
   return m_pmts.hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::adc_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::adc_hash_max () const
 {
   return m_adcs.hash_max();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::reg_begin       (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::reg_begin       () const
 {
   return regions().begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::reg_end         (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::reg_end         () const
 {
   return regions().end();
 }
@@ -1340,12 +1340,12 @@ Tile_Base_ID::id_range Tile_Base_ID::reg_range() const
   return regions().range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::module_begin    (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::module_begin    () const
 {
   return m_modules.begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::module_end      (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::module_end      () const
 {
   return m_modules.end();
 }
@@ -1355,12 +1355,12 @@ Tile_Base_ID::id_range Tile_Base_ID::module_range() const
   return m_modules.range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::tower_begin     (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::tower_begin     () const
 {
   return m_towers.begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::tower_end       (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::tower_end       () const
 {
   return m_towers.end();
 }
@@ -1370,12 +1370,12 @@ Tile_Base_ID::id_range Tile_Base_ID::tower_range() const
   return m_towers.range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::cell_begin      (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::cell_begin      () const
 {
   return channels().begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::cell_end        (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::cell_end        () const
 {
   return channels().end();
 }
@@ -1385,12 +1385,12 @@ Tile_Base_ID::id_range Tile_Base_ID::cell_range() const
   return channels().range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::pmt_begin       (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::pmt_begin       () const
 {
   return m_pmts.begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::pmt_end         (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::pmt_end         () const
 {
   return m_pmts.end();
 }
@@ -1400,12 +1400,12 @@ Tile_Base_ID::id_range Tile_Base_ID::pmt_range() const
   return m_pmts.range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::adc_begin       (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::adc_begin       () const
 {
   return m_adcs.begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::adc_end         (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::adc_end         () const
 {
   return m_adcs.end();
 }
@@ -1747,7 +1747,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
   return(0) ;
 }
 
-int Tile_Base_ID::init_hashes(void) 
+int Tile_Base_ID::init_hashes()
 {
   if (regions().init (*this, "regions", m_full_region_range,
                        &Tile_Base_ID::region_id,

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/CaloIDHelper.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -96,8 +94,10 @@ IdContext CaloIDHelper::HashGroup::context() const
  *        followed by @c init_channels and @c init_regions.
  * @param name Name of this helper (for error reporting).
  */
-CaloIDHelper::CaloIDHelper (const std::string& name)
-  : m_name (name),
+CaloIDHelper::CaloIDHelper (const std::string& name,
+                            const std::string& group)
+  : AtlasDetectorID (name, group),
+    m_name (name),
     m_dict(nullptr)
 {
 }

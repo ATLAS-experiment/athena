@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/JGTowerBase_ID.h"
@@ -20,8 +20,10 @@
 using CxxUtils::strformat;
 
 
-JGTowerBase_ID::JGTowerBase_ID(void) : 
-  m_jgtower_region_index(0) 
+JGTowerBase_ID::JGTowerBase_ID(const std::string& name,
+                               const std::string& group) :
+    AtlasDetectorID(name, group)
+  , m_jgtower_region_index(0)
   , m_CALO_INDEX(999) 
   , m_DETZSIDE_INDEX(999)
   , m_SAMPLING_INDEX(999) 
@@ -41,14 +43,14 @@ JGTowerBase_ID:: ~JGTowerBase_ID()= default;
 
 
 IdContext	
-JGTowerBase_ID::region_context 		(void) const
+JGTowerBase_ID::region_context 		() const
 {
   ExpandedIdentifier id;
   return {id, 0, m_REGION_INDEX};
 }
 
 IdContext	
-JGTowerBase_ID::tower_context 		(void) const
+JGTowerBase_ID::tower_context 		() const
 {
   ExpandedIdentifier id;
   return {id, 0, m_PHI_INDEX};
@@ -847,7 +849,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
 }
 
 
-int   JGTowerBase_ID::init_hashes(void) 
+int   JGTowerBase_ID::init_hashes()
 {
   MsgStream log(m_msgSvc, "JGTowerBase_ID" );
   std::stringstream strm;
@@ -986,7 +988,7 @@ int   JGTowerBase_ID::init_hashes(void)
 
 
 
-int   JGTowerBase_ID::init_neighbors(void) 
+int   JGTowerBase_ID::init_neighbors()
 {
   MsgStream log(m_msgSvc, "JGTowerBase_ID" );
   //  std::cout << " JGTowerBase_ID::init_neighbors " << std::endl;

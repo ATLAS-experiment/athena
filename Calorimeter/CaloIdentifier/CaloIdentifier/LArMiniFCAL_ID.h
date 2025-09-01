@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMiniFCAL_ID_H
@@ -59,9 +59,9 @@ public:
         
   typedef Identifier::size_type  size_type ;
 
-  LArMiniFCAL_ID(void);
+  LArMiniFCAL_ID();
         
-  ~LArMiniFCAL_ID(void);
+  ~LArMiniFCAL_ID();
 
   /** check whether LArMiniFCAL ID helper has been initialized - 
       returns false if description is not available    */
@@ -106,7 +106,7 @@ public:
   IdentifierHash channel_hash_binary_search (Identifier channelId) const;
 
   /**  region hash table max size */
-  size_type     module_hash_max (void) const;
+  size_type     module_hash_max () const;
 
   /** Type for iterators over identifiers. */
   typedef std::vector<Identifier>::const_iterator id_iterator;
@@ -166,7 +166,7 @@ public:
 
   /** context for modules --  method kept for backward compatibility. NOT optimised <br>
       access to IdContext's which define which levels of fields are contained in the id */
-  IdContext    module_context   (void) const;
+  IdContext    module_context   () const;
 
   /** initialization from the identifier dictionary*/
   virtual int  initialize_from_dictionary (const IdDictMgr& dict_mgr);
@@ -218,9 +218,9 @@ private:
   /** create expanded Identifier from Identifier (return == 0 for OK) */
   virtual int  get_expanded_id  (const Identifier& id, ExpandedIdentifier& exp_id, const IdContext* context) const;
 
-  int         initLevelsFromDict(void) ;
+  int         initLevelsFromDict();
 
-  int         init_hashes(void) ;
+  int         init_hashes();
 
   int         init_neighbors_from_file(const std::string& filename, std::vector<std::set<IdentifierHash> > &vec);
 
@@ -433,19 +433,19 @@ inline IdentifierHash LArMiniFCAL_ID::channel_hash_binary_search  (Identifier ch
 }
 
 //----------------------------------------------------------------------------
-inline LArMiniFCAL_ID::size_type     LArMiniFCAL_ID::module_hash_max (void) const
+inline LArMiniFCAL_ID::size_type     LArMiniFCAL_ID::module_hash_max () const
 {
   return region_hash_max();
 }
 
 //----------------------------------------------------------------------------
-inline LArMiniFCAL_ID::id_iterator LArMiniFCAL_ID::mod_begin    (void) const
+inline LArMiniFCAL_ID::id_iterator LArMiniFCAL_ID::mod_begin    () const
 {
   return regions().begin();
 }
 
 //----------------------------------------------------------------------------
-inline LArMiniFCAL_ID::id_iterator LArMiniFCAL_ID::mod_end      (void) const
+inline LArMiniFCAL_ID::id_iterator LArMiniFCAL_ID::mod_end      () const
 {
   return regions().end();
 }
@@ -457,13 +457,13 @@ inline LArMiniFCAL_ID::id_range LArMiniFCAL_ID::mod_range() const
 }
 
 //----------------------------------------------------------------------------
-inline LArMiniFCAL_ID::id_iterator LArMiniFCAL_ID::minifcal_begin    (void) const
+inline LArMiniFCAL_ID::id_iterator LArMiniFCAL_ID::minifcal_begin    () const
 {
   return channels().begin();
 }
 
 //----------------------------------------------------------------------------
-inline LArMiniFCAL_ID::id_iterator LArMiniFCAL_ID::minifcal_end      (void) const
+inline LArMiniFCAL_ID::id_iterator LArMiniFCAL_ID::minifcal_end      () const
 {
   return channels().end();
 }

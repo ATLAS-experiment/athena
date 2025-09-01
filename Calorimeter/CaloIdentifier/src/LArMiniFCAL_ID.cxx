@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/LArMiniFCAL_ID.h"
@@ -23,9 +23,9 @@
 using CxxUtils::strformat;
 
 
-LArMiniFCAL_ID::LArMiniFCAL_ID(void) 
+LArMiniFCAL_ID::LArMiniFCAL_ID()
         : 
-        CaloIDHelper ("LArMiniFCAL_ID"),
+        CaloIDHelper ("LArMiniFCAL_ID", "lar_mini_fcal"),
         m_is_initialized(false),
         m_fcal_region_index(0),
         m_minifcal_region_index(0),
@@ -39,8 +39,7 @@ LArMiniFCAL_ID::LArMiniFCAL_ID(void)
         m_two_sym_sides(1)
 {}
 
-LArMiniFCAL_ID::~LArMiniFCAL_ID(void) 
-= default;
+LArMiniFCAL_ID::~LArMiniFCAL_ID() = default;
 
 int LArMiniFCAL_ID::eta_min(const Identifier modId) const
 {
@@ -205,7 +204,7 @@ int   LArMiniFCAL_ID::get_neighbours(const IdentifierHash id, const LArNeighbour
 }
 
 IdContext	
-LArMiniFCAL_ID::module_context 		(void) const
+LArMiniFCAL_ID::module_context 		() const
 {
   return region_context();
 }
@@ -424,7 +423,7 @@ int  LArMiniFCAL_ID::get_expanded_id  (const Identifier& id, ExpandedIdentifier&
     return 0;
 }
 
-int         LArMiniFCAL_ID::initLevelsFromDict(void) 
+int         LArMiniFCAL_ID::initLevelsFromDict()
 {
   MsgStream log(m_msgSvc, "LArMiniFCAL_ID" );
 
@@ -632,7 +631,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
   return(0) ;
 }
 
-int         LArMiniFCAL_ID::init_hashes(void) 
+int         LArMiniFCAL_ID::init_hashes()
 {
   if (channels().init (*this, "channels",
                        m_full_channel_range,

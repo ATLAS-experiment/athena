@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/LArHEC_ID.h"
@@ -16,13 +16,12 @@
 #include <string>
 
 
-LArHEC_ID::LArHEC_ID(void) :
-  LArHEC_Base_ID ("LArHEC_ID", false)
+LArHEC_ID::LArHEC_ID() :
+  LArHEC_Base_ID ("LArHEC_ID", "lar_hec", false)
 {
 }
 
-LArHEC_ID::~LArHEC_ID(void) 
-= default;
+LArHEC_ID::~LArHEC_ID() = default;
 
 int  LArHEC_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /*===================================================================*/
@@ -42,7 +41,7 @@ int  LArHEC_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   }
 
   // init base object
-  if (LArHEC_Base_ID::initialize_base_from_dictionary(dict_mgr, "lar_hec"))
+  if (LArHEC_Base_ID::initialize_base_from_dictionary(dict_mgr, group()))
     return (1);
 
     
