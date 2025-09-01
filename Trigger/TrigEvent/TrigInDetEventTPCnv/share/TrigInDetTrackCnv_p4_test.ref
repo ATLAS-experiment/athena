@@ -1,29 +1,14 @@
 
 
-Initializing Gaudi ApplicationMgr using job opts ../share/TrigInDetEventTPCnv_test.txt
-JobOptionsSvc        INFO # =======> /home/sss/nobackup/atlas/build/../tests/../share/TrigInDetEventTPCnv_test.txt
-JobOptionsSvc        INFO # (1,1): ApplicationMgr.Dlls += ["StoreGate", "CLIDComps"]
-JobOptionsSvc        INFO # (2,1): ApplicationMgr.ExtSvc += ["StoreGateSvc", "StoreGateSvc/DetectorStore"]
-JobOptionsSvc        INFO Job options successfully read in from ../share/TrigInDetEventTPCnv_test.txt
-ApplicationMgr    SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v999r999)
-                                          running on karma on Thu Feb  4 15:30:53 2016
-====================================================================================================================================
-ApplicationMgr       INFO Successfully loaded modules : StoreGate, CLIDComps
 ApplicationMgr       INFO Application Manager Configured successfully
-StoreGateSvc         INFO Initializing StoreGateSvc - package version StoreGate-00-00-00
-ClassIDSvc           INFO Initializing ClassIDSvc - package version CLIDComps-00-00-00
-ClassIDSvc           INFO  getRegistryEntries: read 6593 CLIDRegistry entries for module ALL
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version SGComps-00-00-00
-DetectorStore        INFO Initializing DetectorStore - package version StoreGate-00-00-00
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
-HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 PixelID              INFO Initialize from dictionary
 PixelID             DEBUG (Re)initialize
+PixelID             DEBUG initLevelsFromDict - unable to find 'STGC' label
+PixelID             DEBUG initLevelsFromDict - unable to find 'MM' label
+PixelID             DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+PixelID             DEBUG initialize_from_dictionary - OK
 PixelID             DEBUG decode index and bit fields for each level: 
 PixelID             DEBUG indet          decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
 PixelID             DEBUG pixel          decode 1 vals 1:3             mask/zero mask/shift/bits/offset 3   e7ffffffffffffff 59 2  3  indexes                     mode  both_bounded  
@@ -60,11 +45,11 @@ phi_module    4
 eta_module    5
 phi_index     6
 eta_index     7
-PixelID             DEBUG PixelID::initialize_from_dict Set barrel field values: 0
-PixelID             DEBUG PixelID::initialize_from_dict Set dbm field values: -999,999
-PixelID             DEBUG PixelID::initialize_from_dict Found field values: InDet/Pixel 2/1
+PixelID             DEBUG  PixelID::initialize_from_dict Set barrel field values: 0
+PixelID             DEBUG  PixelID::initialize_from_dict Set dbm field values: -999,999
+PixelID             DEBUG  PixelID::initialize_from_dict Found field values: InDet/Pixel 2/1
 PixelID             DEBUG PixelID::init_neighbors 
-PixelID             DEBUG PixelID::initialize_from_dict 
+PixelID             DEBUG  PixelID::initialize_from_dict 
 PixelID             DEBUG Wafer range -> 2/1/0/0/0:21/-6:6 | 2/1/0/1/0:37/-6:6 | 2/1/0/2/0:51/-6:6 | 2/1/-2,2/0:2/0:47/0
 PixelID             DEBUG Pixel range -> 2/1/0/0/0:21/-6:6/0:327/0:191 | 2/1/0/1/0:37/-6:6/0:327/0:143 | 2/1/0/2/0:51/-6:6/0:327/0:143 | 2/1/-2,2/0:2/0:47/0/0:327/0:143
 test1

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_PIXELID_H
@@ -124,19 +124,19 @@ public:
 
   /// @name Hash table maximum sizes
   //@{
-  size_type wafer_hash_max(void) const;
-  size_type pixel_hash_max(void) const;
+  size_type wafer_hash_max() const;
+  size_type pixel_hash_max() const;
   //@}
 
   /// @name Access to all ids
   //@{
   /// Iterators over full set of ids. Wafer iterator is sorted
-  const_id_iterator wafer_begin(void) const;
-  const_id_iterator wafer_end(void) const;
+  const_id_iterator wafer_begin() const;
+  const_id_iterator wafer_end() const;
   /// For pixel ids, only expanded id iterators are available. Use
   /// following "pixel_id" method to obtain a compact identifier
-  const_expanded_id_iterator pixel_begin(void) const;
-  const_expanded_id_iterator pixel_end(void) const;
+  const_expanded_id_iterator pixel_begin() const;
+  const_expanded_id_iterator pixel_end() const;
   //@}
 
 
@@ -193,8 +193,8 @@ public:
 
   /// @name contexts to distinguish wafer id from pixel id
   //@{
-  IdContext wafer_context(void) const;
-  IdContext pixel_context(void) const;
+  IdContext wafer_context() const;
+  IdContext pixel_context() const;
   //@}
 
   /// @name methods from abstract interface - slower than opt version
@@ -225,7 +225,7 @@ public:
   Identifier pixel_id_from_shortened(Identifier32::value_type val) const;
 
   /// Return the lowest bit position used in the channel id.
-  int base_bit(void) const;
+  int base_bit() const;
 
   /// Calculate a channel offset between the two identifiers.
   Identifier::diff_type calc_offset(const Identifier& base,
@@ -251,7 +251,7 @@ public:
   virtual int initialize_from_dictionary(const IdDictMgr& dict_mgr) override;
 
   /// Tests of packing
-  void test_wafer_packing(void) const;
+  void test_wafer_packing() const;
   //@}
 
 protected:
@@ -277,11 +277,11 @@ protected:
                        int phi_index,
                        int eta_index) const;
 
-  int initLevelsFromDict(void);
+  int initLevelsFromDict();
 
-  int init_hashes(void);
+  int init_hashes();
 
-  int init_neighbors(void);
+  int init_neighbors();
 
   Identifier m_baseIdentifier{};
   ExpandedIdentifier m_baseExpandedIdentifier{};
@@ -327,10 +327,6 @@ protected:
 };
 
 
-
-/////////////////////////////////////////////////////////////////////////////
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-/////////////////////////////////////////////////////////////////////////////
 
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
@@ -577,7 +573,7 @@ PixelID::pixel_id_offset(const Identifier& base,
 
 //----------------------------------------------------------------------------
 inline int
-PixelID::base_bit(void) const {
+PixelID::base_bit() const {
   int base = static_cast<int>(m_eta_index_impl.shift()); // lowest field base
 
   return (base > 32) ? 32 : base;
@@ -587,7 +583,7 @@ PixelID::base_bit(void) const {
 
 //----------------------------------------------------------------------------
 inline IdContext
-PixelID::wafer_context(void) const {
+PixelID::wafer_context() const {
   ExpandedIdentifier id;
 
   return(IdContext(id, 0, m_ETA_MODULE_INDEX));
@@ -595,7 +591,7 @@ PixelID::wafer_context(void) const {
 
 //----------------------------------------------------------------------------
 inline IdContext
-PixelID::pixel_context(void) const {
+PixelID::pixel_context() const {
   // For pixel only, the prefix is the first two levels
   return(IdContext(m_baseExpandedIdentifier, m_BARREL_EC_INDEX, m_ETA_INDEX_INDEX));
 }

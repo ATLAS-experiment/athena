@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -8,7 +8,6 @@
 ***************************************************************************/
 
 
-//<<<<<< INCLUDES                                                       >>>>>>
 #include "GaudiKernel/MsgStream.h"
 
 #include "InDetIdentifier/TRT_ID.h"
@@ -23,8 +22,9 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-TRT_ID::TRT_ID(void)
+TRT_ID::TRT_ID()
   :
+  AtlasDetectorID("TRT_ID", "trt"),
   m_is_valid(true),
   m_trt_region_index(0),
   m_INDET_INDEX(0),
@@ -258,7 +258,7 @@ TRT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 }
 
 void
-TRT_ID::init_hashes(void) {
+TRT_ID::init_hashes() {
   //
   // create two vecs (module and straw layer) to retrieve the hashes
   // for compact ids
@@ -500,12 +500,12 @@ TRT_ID::init_hashes(void) {
 }
 
 void
-TRT_ID::reset_straw_hash_vector(void) {
+TRT_ID::reset_straw_hash_vector() {
   m_straw_vec.clear();
 }
 
 void
-TRT_ID::init_straw_hash_vector(void) {
+TRT_ID::init_straw_hash_vector() {
   // We init straw hashes separately to be able to reset the vector
   // afterwards
 
@@ -819,7 +819,7 @@ TRT_ID::straw_max(const Identifier& id) const {
 }
 
 void
-TRT_ID::test_trt_ids(void) {
+TRT_ID::test_trt_ids() {
   MsgStream log(m_msgSvc, "TRT_ID");
   int nids = 0;
   int nidsFailed = 0;

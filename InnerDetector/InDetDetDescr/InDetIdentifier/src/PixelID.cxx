@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -19,7 +19,9 @@
 #include <iostream>
 
 
-PixelID::PixelID(){
+PixelID::PixelID()
+  : AtlasDetectorID("PixelID", "pixel")
+{
   m_barrel_field.add_value(0);
   m_dbm_field.add_value(0); //DBM
 }
@@ -351,7 +353,7 @@ PixelID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 }
 
 int
-PixelID::init_hashes(void) {
+PixelID::init_hashes() {
   //
   // create a vector(s) to retrieve the hashes for compact ids. For
   // the moment, we implement a hash for wafers but NOT for pixels
@@ -461,7 +463,7 @@ PixelID::get_next_in_eta(const IdentifierHash& id, IdentifierHash& next) const {
 }
 
 int
-PixelID::init_neighbors(void) {
+PixelID::init_neighbors() {
   //
   // create a vector(s) to retrieve the hashes for compact ids for
   // wafer neighbors.
@@ -593,7 +595,7 @@ PixelID::init_neighbors(void) {
 }
 
 int
-PixelID::initLevelsFromDict(void) {
+PixelID::initLevelsFromDict() {
   MsgStream log(m_msgSvc, "PixelID");
 
   if (!m_dict) {
@@ -828,28 +830,28 @@ PixelID::initLevelsFromDict(void) {
 }
 
 PixelID::size_type
-PixelID::wafer_hash_max(void) const {
+PixelID::wafer_hash_max() const {
   return m_wafer_hash_max;
 }
 
 PixelID::size_type
-PixelID::pixel_hash_max(void) const {
+PixelID::pixel_hash_max() const {
   return m_pixel_hash_max;
 }
 
-PixelID::const_id_iterator PixelID::wafer_begin(void) const {
+PixelID::const_id_iterator PixelID::wafer_begin() const {
   return(m_wafer_vec.begin());
 }
 
-PixelID::const_id_iterator PixelID::wafer_end(void) const {
+PixelID::const_id_iterator PixelID::wafer_end() const {
   return(m_wafer_vec.end());
 }
 
-PixelID::const_expanded_id_iterator PixelID::pixel_begin(void) const {
+PixelID::const_expanded_id_iterator PixelID::pixel_begin() const {
   return(m_full_pixel_range.factory_begin());
 }
 
-PixelID::const_expanded_id_iterator PixelID::pixel_end(void) const {
+PixelID::const_expanded_id_iterator PixelID::pixel_end() const {
   return(m_full_pixel_range.factory_end());
 }
 
@@ -926,7 +928,7 @@ PixelID::get_hash(const Identifier& id,
 }
 
 void
-PixelID::test_wafer_packing(void) const {
+PixelID::test_wafer_packing() const {
   MsgStream log(m_msgSvc, "PixelID");
 
   if (m_dict) {
