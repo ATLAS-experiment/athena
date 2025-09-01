@@ -16,9 +16,7 @@ void TauShotCnv_p1::persToTrans(const TauShot_p1 *persObj, Analysis::TauShot *tr
   m_seedCellCnv.persToTrans( &persObj->m_seedCell, &transObj->seedCellLink(), log );
 
   // 4momentum
-  P4EEtaPhiM mom;
-  m_P4EEtaPhiMCnv.persToTrans(&persObj->m_P4EEtaPhiM,&mom,log);
-  transObj->set4Mom (mom);
+  m_P4EEtaPhiMCnv.persToTrans(&persObj->m_P4EEtaPhiM,transObj,log);
   /// simple standard member data
  
   // floats or ints
@@ -51,8 +49,7 @@ void TauShotCnv_p1::transToPers(const Analysis::TauShot *transObj, TauShot_p1 *p
   m_seedCellCnv.transToPers( &transObj->seedCellLink(), &persObj->m_seedCell, log );
 
   // 4momentum
-  //!! Dangerous cast: was another class intended?
-  m_P4EEtaPhiMCnv.transToPers(reinterpret_cast<const P4EEtaPhiM*>(transObj),&persObj->m_P4EEtaPhiM,log); 
+  m_P4EEtaPhiMCnv.transToPers(transObj,&persObj->m_P4EEtaPhiM,log);
   /// simple standard member data
  
   // floats or ints
