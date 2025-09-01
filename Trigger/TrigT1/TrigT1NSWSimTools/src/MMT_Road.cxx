@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigT1NSWSimTools/MMT_Road.h"
@@ -63,8 +63,9 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
     }
 
     if (has_hit) continue;
-    m_road_hits.emplace_back(std::make_unique<MMT_Hit>(hit_i.get()));
-    m_road_hits.back()->setAge(0);
+    auto hit = std::make_unique<MMT_Hit>(*hit_i.get());
+    hit->setAge(0);
+    m_road_hits.push_back(std::move(hit));
   }
 }
 
