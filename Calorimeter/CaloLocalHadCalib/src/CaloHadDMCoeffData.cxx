@@ -109,9 +109,9 @@ Int_t CaloHadDMCoeffData::GetEntry(Long64_t entry)
     // read only m_MaxEventsPerFile
     if(entry==0) offset = 0;
     Int_t nbytes = fChain->GetEntry(offset++);
-    TTree *loc = (static_cast<TChain *>(fChain))->GetTree();
+    TTree *loc = static_cast<TChain *>(fChain)->GetTree();
     if( loc->GetReadEntry() >= m_MaxEventsPerFile) {
-      offset = (static_cast<TChain *>(fChain))->GetTreeOffset()[ fChain->GetTreeNumber()] + loc->GetEntries();
+      offset = static_cast<TChain *>(fChain)->GetTreeOffset()[ fChain->GetTreeNumber()] + loc->GetEntries();
       nbytes = fChain->GetEntry(offset++);
     }
    return nbytes;

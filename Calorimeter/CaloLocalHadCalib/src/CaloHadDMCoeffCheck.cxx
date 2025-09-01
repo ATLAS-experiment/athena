@@ -153,7 +153,7 @@ int CaloHadDMCoeffCheck::process(CaloHadDMCoeffData *myData, CaloLocalHadCoeff *
   ********************************************* */
   std::cout << "CaloHadDMCoeffCheck::process() -> Info. First loop to find histogram limits " << std::endl;
   for(int i_ev=0; m_data->GetEntry(i_ev)>0;i_ev++) {
-    if(i_ev%10000==0) std::cout << "    i_ev: " << i_ev << " '" << (static_cast<TChain *>(m_data->fChain))->GetFile()->GetName() << "'" << std::endl;
+    if(i_ev%10000==0) std::cout << "    i_ev: " << i_ev << " '" << static_cast<TChain *>(m_data->fChain)->GetFile()->GetName() << "'" << std::endl;
     if(m_data->m_mc_ener <= 0.0) {
       std::cout << "CaloHadDMCoeffCheck::process() -> Warning! Unknown particle energy " << m_data->m_mc_ener << std::endl;
       continue;
@@ -278,7 +278,7 @@ int CaloHadDMCoeffCheck::process(CaloHadDMCoeffData *myData, CaloLocalHadCoeff *
   ******************************************** */
   std::cout << "CaloHadDMCoeffCheck::process() -> Info. Second loop to fill histogram " << std::endl;
   for(int i_ev=0; m_data->GetEntry(i_ev)>0;i_ev++) {
-    if(i_ev%10000==0) std::cout << "    i_ev: " << i_ev << " '" << (static_cast<TChain *>(m_data->fChain))->GetFile()->GetName() << "'" << std::endl;
+    if(i_ev%10000==0) std::cout << "    i_ev: " << i_ev << " '" << static_cast<TChain *>(m_data->fChain)->GetFile()->GetName() << "'" << std::endl;
 
     int mc_enerbin = int( (log10(m_data->m_mc_ener) - m_logenermin)/m_dlogener);
     int mc_etabin = int((fabs(m_data->m_mc_eta)-m_etamin)/m_deta);
