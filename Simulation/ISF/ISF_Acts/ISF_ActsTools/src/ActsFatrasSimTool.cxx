@@ -5,6 +5,7 @@
 #include <random>
 
 #include "ActsFatrasSimTool.h"
+#include "Acts/ActsVersion.hpp"
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandomEngine.h"
@@ -23,7 +24,9 @@ ISF::ActsFatrasSimTool::~ActsFatrasSimTool() {}
 
 StatusCode ISF::ActsFatrasSimTool::initialize() {
   ATH_CHECK(BaseSimulatorTool::initialize());
-  ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS 37.0.0");
+  ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS version: v"
+    << Acts::VersionMajor << "." << Acts::VersionMinor << "."
+    << Acts::VersionPatch << " [" << Acts::CommitHash << "]");
   // Retrieve particle filter
   if (!m_particleFilter.empty()) ATH_CHECK(m_particleFilter.retrieve());
 
@@ -91,10 +94,10 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
   auto bField = std::make_shared<ATLASMagneticFieldWrapper>();
   auto chargedStepper = ChargedStepper(std::move(bField));
   auto neutralStepper = NeutralStepper();
-  auto chargedPropagator = ChargedPropagator(chargedStepper, navigator, m_logger->clone(Acts::Logging::Level::FATAL));
-  auto neutralPropagator = NeutralPropagator(neutralStepper, navigator, m_logger->clone(Acts::Logging::Level::FATAL));
-  ChargedSimulation simulatorCharged(std::move(chargedPropagator), m_logger->clone());
-  NeutralSimulation simulatorNeutral(std::move(neutralPropagator), m_logger->clone());
+  auto chargedPropagator = ChargedPropagator(chargedStepper, navigator, m_logger);
+  auto neutralPropagator = NeutralPropagator(neutralStepper, navigator, m_logger);
+  ChargedSimulation simulatorCharged(std::move(chargedPropagator), m_logger);
+  NeutralSimulation simulatorNeutral(std::move(neutralPropagator), m_logger);
   Simulation simulator=Simulation(std::move(simulatorCharged),std::move(simulatorNeutral));
   ATH_MSG_VERBOSE(name() << " Min pT for interaction " << m_interact_minPt * Acts::UnitConstants::MeV << " GeV");
   // Acts propagater options
