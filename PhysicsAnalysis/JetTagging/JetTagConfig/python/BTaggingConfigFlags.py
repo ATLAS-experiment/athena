@@ -79,6 +79,7 @@ def getNNs(flags):
     '''
     Gets the paths of models to run via MultiFoldTagger.
     '''
+
     # dummy for now
     caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
     pf_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
@@ -91,17 +92,22 @@ def getNNs(flags):
     # https://gitlab.cern.ch/atlas/athena/-/merge_requests/77764#note_9063625
     gn3v00_paths = [
         "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
-        "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
-        "BTagging/20250213/GN3MuonsV00/antikt4empflow/network.onnx", # Tracks+Muons
         "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
     ] if isRun3Derivation(flags) else []
     gn3v01_paths = [
-        "BTagging/20250527/GN3PflowMuonsChargeV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow+Charge
-        "BTagging/20250527/GN3PflowMuonsElectronsHybridV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow+Electrons+Hybrid
         "BTagging/20250527/GN3V01/antikt4empflow/network.onnx", # Tracks+PFlow+Muons+Charge+Electrons+Hybrid
     ] if isRun3Derivation(flags) else []
     # Combine the paths for GN3v00 and GN3v01 models
     gn3_paths = gn3v00_paths + gn3v01_paths
+
+    lrj_paths = [
+             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
+             "BTagging/20250310/antikt10ufo/GN2XTauV00.onnx",
+             "BTagging/20250522/GN3XV00/antikt10ufo/network.onnx",
+             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
+             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
+    ]
+
     return {
         'AntiKt4EMPFlowJets': [
             {
@@ -125,6 +131,9 @@ def getNNs(flags):
                 'hash': 'jetFoldHash',
                 'cone_association': True
             }
+        ],
+        'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': [
+            {'folds' : [nn_path]} for nn_path in lrj_paths
         ]
     }
 
