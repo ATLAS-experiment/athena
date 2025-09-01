@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETSIMEVENTATHENAPOOL_TRT_HITCOLLECTIONCNV_H
@@ -21,16 +21,8 @@
 #include "GaudiKernel/MsgStream.h"
 
 // typedef to the latest persistent version
-//typedef TRT_HitCollection_p1     TRT_HitCollection_PERS;
-//typedef TRT_HitCollectionCnv_p1  TRT_HitCollectionCnv_PERS;
-//typedef TRT_HitCollection_p2     TRT_HitCollection_PERS;
-//typedef TRT_HitCollectionCnv_p2  TRT_HitCollectionCnv_PERS;
-//typedef TRT_HitCollection_p3     TRT_HitCollection_PERS;
-//typedef TRT_HitCollectionCnv_p3  TRT_HitCollectionCnv_PERS;
-typedef TRT_HitCollection_p4     TRT_HitCollection_PERS;
-typedef TRT_HitCollectionCnv_p4  TRT_HitCollectionCnv_PERS;
-//typedef TRT_HitCollection_p5     TRT_HitCollection_PERS;
-//typedef TRT_HitCollectionCnv_p5  TRT_HitCollectionCnv_PERS;
+typedef TRT_HitCollection_p5  TRT_HitCollection_PERS;
+typedef TRT_HitCollectionCnv_p5  TRT_HitCollectionCnv_PERS;
 
 class TRTUncompressedHitCollectionCnv  : public T_AthenaPoolCustomCnv<TRTUncompressedHitCollection, TRT_HitCollection_PERS > {
   friend class CnvFactory<TRTUncompressedHitCollectionCnv>;
