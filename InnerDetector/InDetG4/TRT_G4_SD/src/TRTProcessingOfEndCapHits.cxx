@@ -88,7 +88,6 @@ void TRTProcessingOfEndCapHits::Initialize()
 bool TRTProcessingOfEndCapHits::ProcessHit(G4Step* pStep)
 {
   G4Track* pTrack = pStep->GetTrack();
-  // get the HepMC barcode using the track helper
   TrackHelper trHelp(pTrack);
 
   G4StepPoint* pPreStepPoint = pStep->GetPreStepPoint();

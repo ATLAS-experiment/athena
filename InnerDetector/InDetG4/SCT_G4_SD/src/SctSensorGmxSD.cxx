@@ -8,7 +8,7 @@
 // GeoModelXml introduced this way of doing things.
 //
 // The Geant 4 Hits are processed here. For every hit: get the local start and end points, 
-// energy deposit, hit time, barcode, and identifier;  put these in a list to be persistified.
+// energy deposit, hit time, uniqueID, and identifier;  put these in a list to be persistified.
 //
 
 // class headers
