@@ -122,7 +122,7 @@ namespace Monitored {
           type = "IGNORE";
         }
         m_branchDefs.emplace_back(branch, type);
-        m_fillerFunctions.push_back(fillerFunc);
+        m_fillerFunctions.push_back(std::move(fillerFunc));
       }
     }
 
