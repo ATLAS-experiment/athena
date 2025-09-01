@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDigitRetriever.h"
@@ -468,7 +468,7 @@ namespace JiveXML {
     DataMap["cellPedestal"] = std::move(cellPedestal);
     DataMap["adc2Mev"] = std::move(adc2Mev);
 
-    DataMap[LArSampleIndexStr] = LArSampleIndexVec; // adcCounts
+    DataMap[LArSampleIndexStr] = std::move(LArSampleIndexVec); // adcCounts
 
     //Be verbose
     ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << nEntries<< " entries" );
