@@ -278,7 +278,7 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   HitID RPCid_phi = m_muonHelper->BuildRpcHitId(stationName, stationPhi, stationEta,
                                               mydbZ, doubletR, gasGap, mydbP,1);
 
-  // retrieve track barcode
+  // retrieve HepMcParticleLink for track
   TrackHelper trHelp(aStep->GetTrack());
 
   //construct new rpc hit

@@ -73,7 +73,7 @@ TEST_F ( TGCSensitiveDetectortest, ProcessHits )
   sd2.m_myTGCHitColl = hitColl.get();//initialize the hit collection m_myTGCHitColl
   sd2.ProcessHits(&sp, &th );//invoke the tested member function
 
-  int barcode = 0;
+  int barcode = HepMC::UNDEFINED_ID;
   HepMcParticleLink plink(barcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
   TGCSimHitCollection* a = sd2.m_myTGCHitColl;

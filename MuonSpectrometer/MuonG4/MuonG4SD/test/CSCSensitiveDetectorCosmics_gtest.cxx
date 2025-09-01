@@ -73,7 +73,7 @@ TEST_F ( CSCSensitiveDetectorCosmicstest, ProcessHits )
   sd2.m_myCSCHitColl = hitColl.get();//initialize the hit collection m_myCSCHitColl
   sd2.ProcessHits(&sp, &th );//invoke the tested member function
 
-  int barcode = 0;
+  int barcode = HepMC::UNDEFINED_ID;
   HepMcParticleLink plink(barcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
   CSCSimHitCollection* a = sd2.m_myCSCHitColl;

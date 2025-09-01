@@ -162,7 +162,7 @@ TEST_F( MicromegasSensitiveDetectortest, ProcessHits )
   sd2.m_MMSimHitCollection = hitColl.get();
   sd2.ProcessHits(&sp, &th );//invoke the tested member function
 
-  int barcode = 0;
+  int barcode = HepMC::UNDEFINED_ID;
   HepMcParticleLink plink(barcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
   MMSimHitCollection* a = sd2.m_MMSimHitCollection;

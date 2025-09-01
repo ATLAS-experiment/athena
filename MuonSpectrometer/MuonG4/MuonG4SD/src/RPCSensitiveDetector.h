@@ -76,7 +76,7 @@ We describe here how each field of the identifier is determined.
    associated to the hit.
 
 7) the RPCHit object contains: the SimID, the globalTime, the hit local position
-   and the track barcode.
+   and the track uniqueID.
 
 
 */
