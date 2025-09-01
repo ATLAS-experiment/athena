@@ -13,7 +13,7 @@
 # RUN2 setup
 geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
-
+ignore_pattern="ActsFatras.+ERROR.+No.+start.+volume.+resolved.+Nothing.+left.+to.+do."
 export ATHENA_CORE_NUMBER=8
 Sim_tf.py \
     --CA \
@@ -25,6 +25,7 @@ Sim_tf.py \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationNoIoV' \
     --preExec "flags.Acts.TrackingGeometry.MaterialCalibrationFolder='ACTS/MaterialMaps/ID'; flags.Acts.TrackingGeometry.MaterialSource='material-maps-ATLAS-R2-2016-00-00-00.json'" \
+    --ignorePatterns "${ignore_pattern}" \
     --DataRunNumber 284500 \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.MT.CA.HITS.pool.root" \
