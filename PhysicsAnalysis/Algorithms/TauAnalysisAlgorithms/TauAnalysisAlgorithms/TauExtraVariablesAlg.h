@@ -23,7 +23,7 @@ namespace CP {
 
   private:
     SG::ReadHandleKey<xAOD::TauJetContainer> m_tausKey { this, "taus", "", "the input tau jet container" };
-    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_nTracksKey { this, "nTracks", "nTracks", "decoration name for tau number of tracks" };
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_nTracksChargedKey { this, "nTracksCharged", "nTracksCharged", "decoration name for tau number of tracks" };
   };
 
 } // namespace

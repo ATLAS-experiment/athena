@@ -14,12 +14,12 @@ namespace CP {
 
   StatusCode TauExtraVariablesAlg::initialize() {
 
-    if (m_nTracksKey.contHandleKey().key() == m_nTracksKey.key()) {
-      m_nTracksKey = m_tausKey.key() + "." + m_nTracksKey.key();
+    if (m_nTracksChargedKey.contHandleKey().key() == m_nTracksChargedKey.key()) {
+      m_nTracksChargedKey = m_tausKey.key() + "." + m_nTracksChargedKey.key();
     }
 
     ANA_CHECK(m_tausKey.initialize());
-    ANA_CHECK(m_nTracksKey.initialize());
+    ANA_CHECK(m_nTracksChargedKey.initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -28,9 +28,9 @@ namespace CP {
 
     SG::ReadHandle<xAOD::TauJetContainer> taus(m_tausKey, ctx);
 
-    SG::WriteDecorHandle<xAOD::TauJetContainer, int> nTracksHandle(m_nTracksKey, ctx);
+    SG::WriteDecorHandle<xAOD::TauJetContainer, int> nTracksChargedHandle(m_nTracksChargedKey, ctx);
     for (const xAOD::TauJet *tau : *taus) {
-      nTracksHandle(*tau) = tau->nTracks();
+      nTracksChargedHandle(*tau) = tau->nTracksCharged();
     }
 
     return StatusCode::SUCCESS;
