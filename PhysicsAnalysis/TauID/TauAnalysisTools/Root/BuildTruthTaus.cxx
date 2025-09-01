@@ -6,6 +6,8 @@
 #include "TauAnalysisTools/BuildTruthTaus.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/WriteHandle.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 // Core include(s):
 #include "AthLinks/ElementLink.h"
@@ -17,16 +19,12 @@
 
 #include "TruthUtils/MagicNumbers.h"
 
-// Tool include(s)
-#include "MCTruthClassifier/MCTruthClassifier.h"
-
 using namespace TauAnalysisTools;
 
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________
 BuildTruthTaus::BuildTruthTaus( const std::string& name )
   : AsgMetadataTool(name)
-  , m_tMCTruthClassifier("MCTruthClassifier", this)
 {
 }
 
@@ -63,14 +61,17 @@ StatusCode BuildTruthTaus::initialize()
   // output container
   ATH_CHECK( m_truthTauOutputContainer.initialize(!m_truthMatchingMode) );
 
-  // The following properties are only available in athena
-#ifndef XAOD_ANALYSIS
-  ATH_CHECK(m_tMCTruthClassifier.setProperty("ParticleCaloExtensionTool", ""));
-  ATH_CHECK(m_tMCTruthClassifier.setProperty("TruthInConeTool", ""));
-#endif
-  
-  ATH_CHECK(ASG_MAKE_ANA_TOOL(m_tMCTruthClassifier, MCTruthClassifier));
-  ATH_CHECK(m_tMCTruthClassifier.initialize());
+  // input decorations
+  ATH_CHECK( m_originReadDecorKey.initialize(!m_truthMatchingMode) );
+  ATH_CHECK( m_typeReadDecorKey.initialize(!m_truthMatchingMode) );
+  ATH_CHECK( m_outcomeReadDecorKey.initialize(!m_truthMatchingMode) );
+  ATH_CHECK( m_classificationReadDecorKey.initialize(!m_truthMatchingMode) );
+  // output decorations
+  ATH_CHECK( m_linkDecoratorKey.initialize(!m_truthMatchingMode) );
+  ATH_CHECK( m_originDecoratorKey.initialize(!m_truthMatchingMode) );
+  ATH_CHECK( m_typeDecoratorKey.initialize(!m_truthMatchingMode) );
+  ATH_CHECK( m_outcomeDecoratorKey.initialize(!m_truthMatchingMode) );
+  ATH_CHECK( m_classificationDecoratorKey.initialize(!m_truthMatchingMode) );
 
   // drop at earliest occasion
   m_bTruthTauAvailable = !m_truthTauInputContainer.empty();
@@ -145,10 +146,10 @@ StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent) con
     truthTausOutput->setStore(truthTausOutputAux.get());
     truthTausEvent.m_xTruthTauContainer = truthTausOutput.get();
 
-    ATH_CHECK( buildTruthTausFromTruthParticles(truthTausEvent) );
-
     auto writeHandle = SG::makeHandle(m_truthTauOutputContainer, ctx);
     ATH_CHECK(writeHandle.record(std::move(truthTausOutput), std::move(truthTausOutputAux)));
+
+    ATH_CHECK( buildTruthTausFromTruthParticles(truthTausEvent, ctx) );
   }
 
   return StatusCode::SUCCESS;
@@ -158,11 +159,18 @@ StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent) con
 //______________________________________________________________________________
 //______________________________________________________________________________
 StatusCode
-BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent) const
+BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent, const EventContext& ctx) const
 {
-  static const SG::Accessor<char> dressedPhotonAcc ("dressedPhoton");
+  SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > originReadDecor(m_originReadDecorKey, ctx);
+  SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeReadDecor(m_typeReadDecorKey, ctx);
+  SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeReadDecor(m_outcomeReadDecorKey, ctx);
+  SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationReadDecor(m_classificationReadDecorKey, ctx);
 
-  bool copyDressedPhotons = false;
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::TruthParticleContainer> > linkDecorator(m_linkDecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey, ctx);
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
 
   for (auto xTruthParticle : *truthTausEvent.m_xTruthParticleContainer)
   {
@@ -176,37 +184,19 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent)
         continue;
       }
 
-      // The dressedPhoton decoration will likely be unlocked and thus will
-      // not be copied by the above.  Copy it explicitly in that case.
-      // See ATLASRECTS-8008.
-      // First time through the loop we check to see if the decoration
-      // needs to be copied and remember for subsequent iterations
-      // (during which the destination decoration will have already
-      // been created).
-      if (truthTausEvent.m_xTruthTauContainer->empty() &&
-          dressedPhotonAcc.isAvailable ( *xTruthParticle ) &&
-          !dressedPhotonAcc.isAvailable ( *xTruthTau ))
-      {
-        copyDressedPhotons = true;
-      }
-      if (copyDressedPhotons)
-      {
-        dressedPhotonAcc( *xTruthTau ) = dressedPhotonAcc( *xTruthParticle );
-      }
+      // adding decorations onto the truth tau requires that it is in the final Aux store
+      truthTausEvent.m_xTruthTauContainer->push_back(std::move(xTruthTau));
+      xAOD::TruthParticle* truthTau = truthTausEvent.m_xTruthTauContainer->back();
 
-      // Run classification
-      auto pClassification = m_tMCTruthClassifier->particleTruthClassifier(xTruthTau.get());
-      static const SG::Accessor<unsigned int> decClassifierParticleType("classifierParticleType");
-      static const SG::Accessor<unsigned int> decClassifierParticleOrigin("classifierParticleOrigin");
-      decClassifierParticleType(*xTruthTau) = pClassification.first;
-      decClassifierParticleOrigin(*xTruthTau) = pClassification.second;
+      // propagate MCTruthClassifier decorations
+      typeDecorator(*truthTau) = typeReadDecor(*xTruthParticle);
+      originDecorator(*truthTau) = originReadDecor(*xTruthParticle);
+      outcomeDecorator(*truthTau) = outcomeReadDecor(*xTruthParticle);
+      classificationDecorator(*truthTau) = classificationReadDecor(*xTruthParticle);
 
       // create link to the original TruthParticle
       ElementLink < xAOD::TruthParticleContainer > lTruthParticleLink(xTruthParticle, *truthTausEvent.m_xTruthParticleContainer);
-      static const SG::Accessor<ElementLink< xAOD::TruthParticleContainer > > accOriginalTruthParticle("originalTruthParticle");
-      accOriginalTruthParticle(*xTruthTau) = lTruthParticleLink;
-
-      truthTausEvent.m_xTruthTauContainer->push_back(std::move(xTruthTau));
+      linkDecorator(*truthTau) = lTruthParticleLink;
     }
   }
   return StatusCode::SUCCESS;
