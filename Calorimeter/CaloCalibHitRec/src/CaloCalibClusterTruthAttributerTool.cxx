@@ -57,9 +57,9 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
       //and also a weight due to pflow reweighting of a cell energy
       if (m_useCellWeights) thisCalHitTruthEnergy *= cellWeight;
 
-      auto iterator = truthIDTruePtMap.find(truthID);
-      if (iterator != truthIDTruePtMap.end()) truthIDTruePtMap[truthID] += thisCalHitTruthEnergy;
-      else truthIDTruePtMap[truthID] = thisCalHitTruthEnergy;
+      if (truthID > HepMC::UNDEFINED_ID) {
+        truthIDTruePtMap[truthID] += thisCalHitTruthEnergy;
+      }
       
     }//calibration hit loop
     
