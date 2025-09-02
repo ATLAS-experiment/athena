@@ -139,17 +139,7 @@ namespace PixelDigitization{
         (circuit > 1)
           ? InDetDD::SiReadoutCellId(nRows + row, nColumns * (circuit - 2) + column)
           : InDetDD::SiReadoutCellId(row, nColumns * circuit + column);
-
-      // InDetDD::SiReadoutCellId roCell = nullptr;
-      // 
-      // if(nColumns>1){
-      //   roCell = InDetDD::SiReadoutCellId(nRows+row, (nColumns-2)*circuit + column);
-      // }
-
-      // else{
-      //   roCell = InDetDD::SiReadoutCellId(row, nColumns * circuit + column); 
-      // }
-      
+     
       //InDetDD::SiReadoutCellId roCell(row, nColumns * circuit + column);
       Identifier noisyID = chargedDiodes.element()->identifierFromCellId(roCell);
       
