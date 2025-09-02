@@ -113,6 +113,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
       TokenAddress* tokenAddr = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", myVersKey, m_contextId, std::move(token));
       if (!detectorStoreSvc->recordAddress(tokenAddr).isSuccess()) {
          delete tokenAddr;
+         delete poolCollectionConverter;
          ATH_MSG_ERROR("Cannot record DataHeader.");
          return(StatusCode::FAILURE);
       }
