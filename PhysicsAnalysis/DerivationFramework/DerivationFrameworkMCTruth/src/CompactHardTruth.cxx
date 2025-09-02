@@ -30,9 +30,6 @@
 #include "AtlasHepMC/SimpleVector.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-// ROOT includes
-#include "TH1F.h"
-
 namespace DerivationFramework {
 
 ///////////////////////////////////////////////////////////////////

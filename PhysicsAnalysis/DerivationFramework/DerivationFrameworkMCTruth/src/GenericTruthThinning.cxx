@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -36,7 +36,6 @@ m_preserveGeneratorDescendants(false),
 m_preserveAncestors(false),
 m_tauHandling(true)
 {
-    declareProperty("EventsKey", m_eventsKey);
     declareProperty("ParticleSelectionString", m_partString);
     //declareProperty("VertexSelectionString", m_vtxString);
     declareProperty("PreserveDescendants", m_preserveDescendants);
@@ -93,14 +92,6 @@ StatusCode DerivationFramework::GenericTruthThinning::doThinning() const
     SG::ThinningHandle<xAOD::TruthVertexContainer> importedTruthVertices
       (m_verticesKey, ctx);
 
-    const xAOD::TruthEventContainer* importedTruthEvents;
-    if (evtStore()->retrieve(importedTruthEvents,m_eventsKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthEventContainer with name " << m_eventsKey << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
-
-
-    
     // Set up a mask with the same entries as the full collections
     unsigned int nParticles = importedTruthParticles->size();
     unsigned int nVertices = importedTruthVertices->size();
@@ -135,7 +126,7 @@ StatusCode DerivationFramework::GenericTruthThinning::doThinning() const
                 std::unordered_set<int> tauDecayEncounteredUniqueIDs; // loop checking
                 tauDecayHelper.descendants(particle,tauDecayProducts,tauDecayEncounteredUniqueIDs); // recursive
                 for (unsigned int tauDecIt=0; tauDecIt<tauDecayProducts.size(); ++tauDecIt) {
-                    if (abs(tauDecayProducts[tauDecIt])==15) { // any taus in the decay products?
+		    if (std::abs(tauDecayProducts[tauDecIt])==15) { // any taus in the decay products?
                         last = false;
                         break;
                     }

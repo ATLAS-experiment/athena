@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHMETADATAWRITER_H
@@ -11,12 +11,14 @@
 
 // Handles to services
 #include "GaudiKernel/ServiceHandle.h"
+#include "StoreGate/ReadHandleKey.h"
 
 // Service for the metadata (tag info)
 #include "EventInfoMgt/ITagInfoMgr.h"
 
 // EDM classes - typedefs, so have to #include them
 #include "xAODTruth/TruthMetaDataContainer.h"
+#include "xAODEventInfo/EventInfo.h"
 
 // Standard library includes
 #include <string>
@@ -49,6 +51,8 @@ namespace DerivationFramework {
       /// TagInfoMgr to get information out of /TagInfo
       ServiceHandle< ITagInfoMgr > m_tagInfoMgr{
         "TagInfoMgr", name()};
+      // ReadHandle key for EventInfo
+      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EventInfoKey", "EventInfo", "EventInfo key"};
 
   }; 
 }

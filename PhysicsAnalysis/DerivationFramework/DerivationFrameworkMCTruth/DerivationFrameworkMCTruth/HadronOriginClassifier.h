@@ -14,6 +14,7 @@
 #define  DerivationFrameworkMCTruth_HadronOriginClassifier_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -83,7 +84,7 @@ namespace DerivationFramework{
     inline bool IsPythia6() const {return m_GenUsed==GEN_id::Pythia6;};
     inline bool IsSherpa() const {return m_GenUsed==GEN_id::Sherpa;};
 
-    Gaudi::Property<std::string> m_mcName{this, "MCCollectionName", "TruthEvents"};
+    SG::ReadHandleKey<xAOD::TruthEventContainer> m_mcName {this, "MCCollectionName", "TruthEvents", "TruthEventContainer key"};
     Gaudi::Property<double> m_HadronPtMinCut{this, "HadronpTMinCut", 5000.}; /// MeV
     Gaudi::Property<double> m_HadronEtaMaxCut{this, "HadronetaMaxCut", 2.5};
     Gaudi::Property<int> m_DSID{this, "DSID", 410000};
