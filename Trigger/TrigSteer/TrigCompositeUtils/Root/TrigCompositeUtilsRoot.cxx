@@ -273,6 +273,7 @@ namespace TrigCompositeUtils {
   }
 
   std::vector<const Decision*> getRejectedDecisionNodes(const asg::EventStoreType* eventStore,
+    const EventContext& ctx,
     const std::string& summaryCollectionKey,
     const DecisionIDContainer& ids,
     const std::set<std::string>& keysToIgnore) {
@@ -333,7 +334,7 @@ namespace TrigCompositeUtils {
       if (keysToIgnore.count(key) == 1) {
         continue; // Have been asked to not explore this SG container
       }
-      SG::ReadHandle<DecisionContainer> containerRH(key);
+      SG::ReadHandle<DecisionContainer> containerRH(key, ctx);
       if (!containerRH.isValid()) {
         throw std::runtime_error("Unable to retrieve " + key + " from event store.");
       }

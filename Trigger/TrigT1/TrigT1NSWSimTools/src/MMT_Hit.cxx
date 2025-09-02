@@ -4,24 +4,42 @@
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
 
-MMT_Hit::MMT_Hit(const Identifier &id, const std::string_view stName, const int stEta, const int stPhi, const int sectorPhi, const int multiplet, const int gasGap, const int channel, const float stripTime, const int BC, const MuonGM::MuonDetectorManager* detManager)
-  : m_station_name(stName), m_station_eta(stEta), m_station_phi(stPhi), m_sector_phi(sectorPhi), m_multiplet(multiplet), m_gasgap(gasGap), m_strip(channel),
-    m_BC_time(BC), m_age(BC), m_time(stripTime)
+MMT_Hit::MMT_Hit(const Identifier &id, const std::string& stationName,
+                 const int stEta, const int stPhi, const int sectorPhi,
+                 const int multiplet, const int gasGap, const int channel,
+                 const float stripTime, const int BC,
+                 const MuonGM::MuonDetectorManager* detManager)
+  : m_time(stripTime),
+    m_station_eta(stEta), m_station_phi(stPhi), m_sector_phi(sectorPhi),
+    m_strip(channel),
+    m_BC_time(BC), m_age(BC),
+    m_sector(stationName[2])
  {
-  m_sector = stName[2];
   m_plane = (multiplet-1)*4 + gasGap-1;
-  m_Z = -1.;
-  m_R = -1.;
-  m_Rp = -1.;
-  m_isNoise = false;
-  m_RZslope = -1.;
-  m_PitchOverZ = -1.;
-  m_shift = -1.;
 
-  int istrip = (std::abs(m_station_eta)-1) * (64*8*10) + m_strip; //here needed the absolute index of the strip on the sector layer (m_strip is only up to 5119)
+  switch (m_plane) {
+  case 0:
+  case 1:
+  case 6:
+  case 7:
+    m_isX = true;
+    break;
+  case 2:
+  case 4:
+    m_isU = true;
+    break;
+  case 3:
+  case 5:
+    m_isV = true;
+    break;
+  }
 
-  // region represent the index of the mmfe8 in the plane
-  int region = int(float(istrip)/(64*8));
+  // here needed the absolute index of the strip on the sector layer (m_strip is only up to 5119)
+  const int istrip = (std::abs(m_station_eta)-1) * (64*8*10) + m_strip;
+
+  // region represent the index of the MMFE8 board in the plane
+  const int region = int(float(istrip)/(64*8));
+
   // map of mmfe8s layer,radius(MMFE8 index on sector)
   unsigned int mmfe8s[8][16];
   // loop on layers
@@ -36,7 +54,6 @@ MMT_Hit::MMT_Hit(const Identifier &id, const std::string_view stName, const int 
     }
   }
 
-  m_MMFE_VMM = region; // index of the MMFE8 board on the layer
   m_VMM_chip = int(1. *istrip /64.); // index of the VMM chip on the layer
   // art asic id
   if(!(int(m_plane/2.)%2)){
@@ -67,10 +84,10 @@ MMT_Hit::MMT_Hit(const Identifier &id, const std::string_view stName, const int 
     m_RZslope = m_R / m_Z;
     const double distanceFromZAxis = readout->absTransform().translation().perp() - 0.5*readout->getRsize();
 
-    Identifier tmpId = detManager->mmIdHelper()->channelID(m_station_name, 1, 1, 1, 1, 1);
+    Identifier tmpId = detManager->mmIdHelper()->channelID(stationName, 1, 1, 1, 1, 1);
     const MuonGM::MMReadoutElement* roEl = detManager->getMMReadoutElement(tmpId);
     int tmpStrip = (roEl->getDesign(tmpId))->nMissedBottomEta + 1;
-    tmpId = detManager->mmIdHelper()->channelID(m_station_name, 1, 1, 1, 1, tmpStrip);
+    tmpId = detManager->mmIdHelper()->channelID(stationName, 1, 1, 1, 1, tmpStrip);
     globalPos = Amg::Vector3D::Zero();
     if(roEl->stripGlobalPosition(tmpId, globalPos)) {
       double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
@@ -78,46 +95,4 @@ MMT_Hit::MMT_Hit(const Identifier &id, const std::string_view stName, const int 
       m_shift = m_Rp / m_Z;
     }
   }
-}
-
-MMT_Hit::MMT_Hit(const MMT_Hit* hit)
-  : m_sector (hit->m_sector),
-    m_station_name (hit->m_station_name),
-    m_VMM_chip (hit->m_VMM_chip),
-    m_MMFE_VMM (hit->m_MMFE_VMM),
-    m_ART_ASIC (hit->m_ART_ASIC),
-    m_plane (hit->m_plane),
-    m_station_eta (hit->m_station_eta),
-    m_station_phi (hit->m_station_phi),
-    m_sector_phi (hit->m_sector_phi),
-    m_multiplet (hit->m_multiplet),
-    m_gasgap (hit->m_gasgap),
-    m_strip (hit->m_strip),
-    m_RZslope (hit->m_RZslope),
-    m_BC_time (hit->m_BC_time),
-    m_age (hit->m_age),
-    m_Z (hit->m_Z),
-    m_PitchOverZ (hit->m_PitchOverZ),
-    m_R (hit->m_R),
-    m_Rp (hit->m_Rp),
-    m_isNoise (hit->m_isNoise),
-    m_time (hit->m_time),
-    m_shift (hit->m_shift)
-{
-}
-
-bool MMT_Hit::isX() const {
-  return (m_plane == 0 || m_plane == 1 || m_plane == 6 || m_plane == 7);
-}
-
-bool MMT_Hit::isU() const {
-  return (m_plane == 2 || m_plane == 4);
-}
-
-bool MMT_Hit::isV() const {
-  return (m_plane == 3 || m_plane == 5);
-}
-
-bool MMT_Hit::infSlope() const {
-  return std::isinf(m_RZslope);
 }

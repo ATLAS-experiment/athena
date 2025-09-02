@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGCTriggerCondAlg.h"
@@ -7,11 +7,6 @@
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteCondHandle.h"
 
-
-TGCTriggerCondAlg::TGCTriggerCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator)
-{
-}
 
 StatusCode TGCTriggerCondAlg::initialize(){
 
@@ -23,11 +18,11 @@ StatusCode TGCTriggerCondAlg::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode TGCTriggerCondAlg::execute(){
+StatusCode TGCTriggerCondAlg::execute(const EventContext& ctx) const {
  
   ATH_MSG_DEBUG( "start execute " << name() ); 
     
-  SG::WriteCondHandle<TGCTriggerLUTs> writeHandle{m_writeKey};
+  SG::WriteCondHandle<TGCTriggerLUTs> writeHandle{m_writeKey, ctx};
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                   << ". In theory this should not be called, but may happen"
@@ -38,7 +33,7 @@ StatusCode TGCTriggerCondAlg::execute(){
   auto writeCdo = std::make_unique<TGCTriggerLUTs>();
 
   // Big wheel for Run3
-  SG::ReadCondHandle<CondAttrListCollection> readHandle_bw(m_readKey_bw);
+  SG::ReadCondHandle<CondAttrListCollection> readHandle_bw(m_readKey_bw, ctx);
   const CondAttrListCollection* readCdo_bw(*readHandle_bw);
 
   
@@ -65,9 +60,6 @@ StatusCode TGCTriggerCondAlg::execute(){
     return StatusCode::FAILURE;
   }        
 
-
-
-   
   return StatusCode::SUCCESS;
 }
 

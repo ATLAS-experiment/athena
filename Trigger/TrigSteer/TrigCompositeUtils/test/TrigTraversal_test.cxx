@@ -383,11 +383,11 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   std::cout << " ---------- Now Include Failing Features " << std::endl;
 
-  std::vector<const Decision*> extraStart_HLT_mufast_chain = getRejectedDecisionNodes(pSG, decisionContainerKey.key(), {HLT_mufast_chain});
-  std::vector<const Decision*> extraStart_HLT_mu_chain = getRejectedDecisionNodes(pSG, decisionContainerKey.key(), {HLT_mu_chain});
-  std::vector<const Decision*> extraStart_HLT_mu_em_chain = getRejectedDecisionNodes(pSG, decisionContainerKey.key(), {HLT_mu_em_chain});
-  std::vector<const Decision*> extraStart_HLT_em_chain = getRejectedDecisionNodes(pSG, decisionContainerKey.key(), {HLT_em_chain});
-  std::vector<const Decision*> extraStart_HLT_all = getRejectedDecisionNodes(pSG, decisionContainerKey.key(), {});
+  std::vector<const Decision*> extraStart_HLT_mufast_chain = getRejectedDecisionNodes(pSG, ctx1, decisionContainerKey.key(), {HLT_mufast_chain});
+  std::vector<const Decision*> extraStart_HLT_mu_chain = getRejectedDecisionNodes(pSG, ctx1, decisionContainerKey.key(), {HLT_mu_chain});
+  std::vector<const Decision*> extraStart_HLT_mu_em_chain = getRejectedDecisionNodes(pSG, ctx1, decisionContainerKey.key(), {HLT_mu_em_chain});
+  std::vector<const Decision*> extraStart_HLT_em_chain = getRejectedDecisionNodes(pSG, ctx1, decisionContainerKey.key(), {HLT_em_chain});
+  std::vector<const Decision*> extraStart_HLT_all = getRejectedDecisionNodes(pSG, ctx1, decisionContainerKey.key(), {});
 
   for (const Decision* d : extraStart_HLT_mufast_chain) {
     recursiveGetDecisions(d, graph_HLT_mufast_chain, {HLT_mufast_chain}, false);

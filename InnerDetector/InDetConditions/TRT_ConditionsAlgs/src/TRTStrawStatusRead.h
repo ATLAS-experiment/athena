@@ -43,12 +43,13 @@ private:
     const TRT_ID *m_trtid{}; //!< trt id helper
     ToolHandle<ITRT_StrawStatusSummaryTool> m_status{this, "TRT_StrawStatusSummaryTool", "InDetTRTStrawStatusSummaryTool", ""};
     //  ReadHandle  keys
-    SG::ReadCondHandleKey<StrawStatusContainer> m_statReadKey{this, "StatReadKeyName", "/TRT/Cond/Status ", "StrawStatus in-key"};
+    SG::ReadCondHandleKey<StrawStatusContainer> m_statReadKey{this, "StatReadKeyName", "/TRT/Cond/Status", "StrawStatus in-key"};
     SG::ReadCondHandleKey<StrawStatusContainer> m_permReadKey{this, "PermReadKeyName", "/TRT/Cond/StatusPermanent", "StrawStatusPermanent in-key"};
     SG::ReadCondHandleKey<StrawStatusContainer> m_statHTReadKey{this, "StatHTReadKeyName", "/TRT/Cond/StatusHT", "StrawStatusHT in-key"};
 
     // Which folder to print
-    Gaudi::Property<std::string> m_printfolder{this, "FolderToPrint", "Status"};
+    Gaudi::Property<std::string> m_printfolder{this, "FolderToPrint", ""};
+    Gaudi::Property<std::string> m_outputfile{this, "OutputFile", "StrawStatusDump_Writer.txt"};
 };
 
 #endif
