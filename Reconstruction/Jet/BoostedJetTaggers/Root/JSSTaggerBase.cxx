@@ -113,7 +113,6 @@ StatusCode JSSTaggerBase::initialize() {
   m_readTau2WTAKey = m_containerName + "." + m_readTau2WTAKey.key();
   m_readTau3WTAKey = m_containerName + "." + m_readTau3WTAKey.key();
   m_readTau4WTAKey = m_containerName + "." + m_readTau4WTAKey.key();
-  m_readQwKey = m_containerName + "." + m_readQwKey.key();
   m_readThrustMajKey = m_containerName + "." + m_readThrustMajKey.key();
   m_readSphericityKey = m_containerName + "." + m_readSphericityKey.key();
 
@@ -126,6 +125,7 @@ StatusCode JSSTaggerBase::initialize() {
     m_readECFG331Key = m_containerName + "." + m_readECFG331Key.key();
     m_readECFG311Key = m_containerName + "." + m_readECFG311Key.key();
     m_readECFG212Key = m_containerName + "." + m_readECFG212Key.key();
+    m_readQwKey = m_containerName + "." + m_readQwKey.key();
   }
 
   ATH_CHECK( m_decTau21WTAKey.initialize() );
@@ -141,7 +141,6 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readTau2WTAKey.initialize() );
   ATH_CHECK( m_readTau3WTAKey.initialize() );
   ATH_CHECK( m_readTau4WTAKey.initialize() );
-  ATH_CHECK( m_readQwKey.initialize() );
   ATH_CHECK( m_readThrustMajKey.initialize() );
   ATH_CHECK( m_readSphericityKey.initialize() );
 
@@ -153,6 +152,7 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readECFG331Key.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readECFG311Key.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readECFG212Key.initialize(!m_isSmallRJet) );
+  ATH_CHECK( m_readQwKey.initialize(!m_isSmallRJet) );
 
   m_readParentKey = m_containerName + "." + m_readParentKey.key();
   ATH_CHECK( m_readParentKey.initialize() );
@@ -217,6 +217,7 @@ StatusCode JSSTaggerBase::initialize() {
 
 #ifndef XAOD_STANDALONE
   if (m_suppressInputDependence) {
+    renounce(m_readQwKey);
     renounce(m_readECF1Key);
     renounce(m_readECF2Key);
     renounce(m_readECF3Key);
