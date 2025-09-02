@@ -8,7 +8,16 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 ##----- Setup of Tools for Trk::AlignAlg -----##
     
-def ConstrainedTrackProviderCfg(flags, name="ConstrainedTrackProvider", **kwargs):
+def TrackCollectionProviderCfg(flags, name = "TrackCollectionProvider", **kwargs):
+    cfg = ComponentAccumulator()
+    
+    kwargs.setdefault("InputTrkCol", flags.InDet.Align.inputTracksCollection)
+    kwargs.setdefault("MaxRetrievalErrors", 10)
+    
+    cfg.setPrivateTools(CompFactory.Trk.TrackCollectionProvider(name, **kwargs))
+    return cfg
+    
+def ConstrainedTrackProviderCfg(flags, name = "ConstrainedTrackProvider", **kwargs):
     cfg = ComponentAccumulator()
 
     if "TrackFitter" not in kwargs:
@@ -31,9 +40,8 @@ def ConstrainedTrackProviderCfg(flags, name="ConstrainedTrackProvider", **kwargs
     kwargs.setdefault("d0ConstraintHistName", "d0CorrectionVsEtaPhi")
     kwargs.setdefault("UseConstraintError", False)
     kwargs.setdefault("UseConstrainedTrkOnly", True)
-    kwargs.setdefault("InputTracksCollection", flags.ConstrainedTrackProvider.InputTracksCollection)
-                
-                
+    kwargs.setdefault("InputTracksCollection", flags.InDet.Align.inputTracksCollection)
+      
     cfg.setPrivateTools(CompFactory.Trk.ConstrainedTrackProvider(name, **kwargs))
     return cfg
 
@@ -86,20 +94,20 @@ def AlignAlgCfg(flags, name="AlignAlgAccumulate", **kwargs):
     cfg = ComponentAccumulator()
 
     if "GeometryManagerTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import GeometryManagerToolCfg
+        from InDetAlignConfig.IDAlignToolsConfig import InDetGeometryManagerToolCfg
         kwargs.setdefault("GeometryManagerTool", cfg.addPublicTool(cfg.popToolsAndMerge(
-            GeometryManagerToolCfg(flags))))
+            InDetGeometryManagerToolCfg(flags))))
 
     if "AlignTool" not in kwargs:
         from InDetAlignConfig.IDAlignToolsConfig import GlobalChi2AlignToolCfg
         kwargs.setdefault("AlignTool", cfg.popToolsAndMerge(GlobalChi2AlignToolCfg(flags)))
 
     if "AlignDBTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import AlignDBToolCfg
-        kwargs.setdefault("AlignDBTool", cfg.popToolsAndMerge(AlignDBToolCfg(flags)))
+        from InDetAlignConfig.IDAlignToolsConfig import InDetTrkAlignDBToolCfg
+        kwargs.setdefault("AlignDBTool", cfg.popToolsAndMerge(InDetTrkAlignDBToolCfg(flags)))
 
     kwargs.setdefault("TrackCollectionProvider", cfg.popToolsAndMerge(
-        ConstrainedTrackProviderCfg(flags)))
+        TrackCollectionProviderCfg(flags)))
 
     if "AlignTrackCreator" not in kwargs:
         from InDetAlignConfig.IDAlignToolsConfig import AlignTrackCreatorCfg
@@ -114,28 +122,23 @@ def AlignAlgCfg(flags, name="AlignAlgAccumulate", **kwargs):
             BeamspotVertexPreProcessorCfg(flags)))
 
     kwargs.setdefault("WriteNtuple", flags.InDet.Align.writeAlignNtuple)
-    if kwargs["WriteNtuple"]:
+    
+    if flags.InDet.Align.writeAlignNtuple:
         kwargs.setdefault("FillNtupleTool", cfg.popToolsAndMerge(SimpleIDNtupleToolCfg(flags)))
         kwargs.setdefault("FilePath", "{flags.InDet.Align.baseDir}/Accumulate")
         kwargs.setdefault("FileName", "newIDalign.root")
 
     cfg.addEventAlgo(CompFactory.Trk.AlignAlg(name, **kwargs))
+    
     return cfg
-
-
-def AlignTrackCollSplitterCfg(flags, name="AlignTrackCollSplitter", **kwargs):
-    cfg = ComponentAccumulator()
-    cfg.addEventAlgo(CompFactory.Trk.AlignTrackCollSplitter(name, **kwargs))
-    return cfg
-
-
-def AccumulateCfg(flags, **kwargs):
+    
+def AccumulateCfg(flags):
     cfg = AlignAlgCfg(flags)
-    cfg.merge(AlignTrackCollSplitterCfg(flags))
     
     if flags.InDet.Align.doMonitoring:
         from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import (
             InDetAlignmentMonitoringRun3Config)
-        cfg.merge(InDetAlignmentMonitoringRun3Config(flags))
+            
+        cfg.merge(InDetAlignmentMonitoringRun3Config(flags, TrackCollectionName = flags.InDet.Align.inputTracksCollection))
     
     return cfg

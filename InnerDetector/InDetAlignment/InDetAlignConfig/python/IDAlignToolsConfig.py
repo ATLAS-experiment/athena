@@ -15,17 +15,37 @@ def InDetAlignModuleToolCfg(flags, name="InDetAlignModuleTool", **kwargs):
     return cfg
 
 
-def PixelGeometryManagerToolCfg(
-        flags, name="PixelGeometryManagerTool", **kwargs):
+def PixelGeometryManagerToolCfg(flags, name="PixelGeometryManagerTool", **kwargs):
     cfg = ComponentAccumulator()
 
     kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(
         cfg.popToolsAndMerge(InDetAlignModuleToolCfg(flags))))
 
-    ## TODO: Figure out proper alignment levels (many leads to errors)
-    kwargs.setdefault("AlignmentLevel", 1)
-   # kwargs.setdefault("AlignmentLevelBarrel", 12)
-   # kwargs.setdefault("AlignmentLevelEndcaps", 12)
+    kwargs.setdefault("AlignmentLevel", flags.InDet.Align.pixelAlignmentLevel)
+    kwargs.setdefault("AlignmentLevelBarrel", flags.InDet.Align.pixelAlignmentLevelBarrel)
+    kwargs.setdefault("AlignmentLevelEndcaps", flags.InDet.Align.pixelAlignmentLevelEndcaps)
+    
+    kwargs.setdefault("AlignBarrelBowX", True)
+    kwargs.setdefault("AlignEndcapRotX", False)
+    kwargs.setdefault("AlignEndcapRotY", False)
+    kwargs.setdefault("AlignEndcapZ", False)
+
+    if kwargs["AlignmentLevel"] == 16:
+        kwargs.setdefault("AlignBarrelRotX", False)
+        kwargs.setdefault("AlignBarrelRotY", False)
+        kwargs.setdefault("AlignBarrelRotZ", False)
+        kwargs.setdefault("AlignBarrelX", False)
+        kwargs.setdefault("AlignBarrelY", False)
+        kwargs.setdefault("AlignBarrelZ", False)
+        kwargs.setdefault("AlignEndcaps", False)
+    
+    else:
+        kwargs.setdefault("SetSoftCutEndcapX", 0.02)
+        kwargs.setdefault("SetSoftCutEndcapY", 0.02)
+        kwargs.setdefault("SetSoftCutEndcapZ", 0.02)
+        kwargs.setdefault("SetSoftCutEndcapRotX", 0.05)
+        kwargs.setdefault("SetSoftCutEndcapRotY", 0.05)
+        kwargs.setdefault("SetSoftCutEndcapRotZ", 0.05)
 
     kwargs.setdefault("SetSoftCutBarrelX", 0.02)
     kwargs.setdefault("SetSoftCutBarrelY", 0.02)
@@ -33,12 +53,6 @@ def PixelGeometryManagerToolCfg(
     kwargs.setdefault("SetSoftCutBarrelRotX", 0.05)
     kwargs.setdefault("SetSoftCutBarrelRotY", 0.05)
     kwargs.setdefault("SetSoftCutBarrelRotZ", 0.05)
-    kwargs.setdefault("SetSoftCutEndcapX", 0.02)
-    kwargs.setdefault("SetSoftCutEndcapY", 0.02)
-    kwargs.setdefault("SetSoftCutEndcapZ", 0.02)
-    kwargs.setdefault("SetSoftCutEndcapRotX", 0.05)
-    kwargs.setdefault("SetSoftCutEndcapRotY", 0.05)
-    kwargs.setdefault("SetSoftCutEndcapRotZ", 0.05)
             
     cfg.setPrivateTools(
         CompFactory.InDet.PixelGeometryManagerTool(name, **kwargs)) 
@@ -51,11 +65,18 @@ def SCTGeometryManagerToolCfg(flags, name="SCTGeometryManagerTool", **kwargs):
     kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(
         cfg.popToolsAndMerge(InDetAlignModuleToolCfg(flags))))
 
-    ## TODO: Figure out proper alignment levels (many leads to errors)
-    kwargs.setdefault("AlignmentLevel", 0)
-   # kwargs.setdefault("AlignmentLevelBarrel", 2)
-   # kwargs.setdefault("AlignmentLevelEndcaps", 2)
-
+    kwargs.setdefault("AlignmentLevel", flags.InDet.Align.SCTAlignmentLevel)
+    kwargs.setdefault("AlignmentLevelBarrel", flags.InDet.Align.SCTAlignmentLevelBarrel)
+    kwargs.setdefault("AlignmentLevelEndcaps", flags.InDet.Align.SCTAlignmentLevelEndcaps)
+    
+    kwargs.setdefault("AlignBarrelRotX", False)
+    kwargs.setdefault("AlignBarrelRotY", False)
+    kwargs.setdefault("AlignBarrelRotZ", False)
+    kwargs.setdefault("AlignBarrelX", False)
+    kwargs.setdefault("AlignBarrelY", False)
+    kwargs.setdefault("AlignBarrelZ", False)
+    kwargs.setdefault("AlignEndcapZ", False)
+    
     kwargs.setdefault("SetSoftCutBarrelX", 0.05)
     kwargs.setdefault("SetSoftCutBarrelY", 0.05)
     kwargs.setdefault("SetSoftCutBarrelZ", 0.05)
@@ -82,7 +103,7 @@ def SiGeometryManagerToolCfg(flags, name="SiGeometryManagerTool", **kwargs):
         
     kwargs.setdefault("AlignPixel", flags.InDet.Align.alignPixel)
     kwargs.setdefault("AlignSCT", flags.InDet.Align.alignSCT)
-    kwargs.setdefault("AlignmentLevel", -1) ## TODO: Figure out proper alignment levels (many leads to errors)
+    kwargs.setdefault("AlignmentLevel", -1)
     kwargs.setdefault("ModuleSelection", [])
     
     kwargs.setdefault("PixelGeometryManager", cfg.addPublicTool(
@@ -101,11 +122,11 @@ def TRTGeometryManagerToolCfg(flags, name="TRTGeometryManagerTool", **kwargs):
     kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(
         cfg.popToolsAndMerge(InDetAlignModuleToolCfg(flags))))
 
-    ## TODO: Figure out proper alignment levels (many leads to errors)
-   # kwargs.setdefault("AlignmentLevel", 1)
-   # kwargs.setdefault("AlignmentLevelBarrel", 2)
-   # kwargs.setdefault("AlignmentLevelEndcaps", 2)
- #   kwargs.setdefault("AlignBarrelZ", True)
+    kwargs.setdefault("AlignmentLevel", flags.InDet.Align.TRTAlignmentLevel)
+    kwargs.setdefault("AlignmentLevelBarrel", flags.InDet.Align.TRTAlignmentLevelBarrel)
+    kwargs.setdefault("AlignmentLevelEndcaps", flags.InDet.Align.TRTAlignmentLevelEndcaps)
+
+    kwargs.setdefault("AlignEndcapZ", False)
 
     kwargs.setdefault("SetSoftCutBarrelX", 0.1)
     kwargs.setdefault("SetSoftCutBarrelY", 0.1)
@@ -132,9 +153,9 @@ def InDetGeometryManagerToolCfg(
     kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(
         cfg.popToolsAndMerge(InDetAlignModuleToolCfg(flags))))
 
-    kwargs.setdefault("AlignSilicon", flags.InDet.Align.alignSilicon)
+    kwargs.setdefault("AlignSilicon", flags.InDet.Align.alignPixel or flags.InDet.Align.alignSCT)
     kwargs.setdefault("AlignTRT", flags.InDet.Align.alignTRT)
-    kwargs.setdefault("AlignmentLevel", 2)
+    kwargs.setdefault("AlignmentLevel", -1)
 
     kwargs.setdefault("SiGeometryManager", cfg.addPublicTool(
         cfg.popToolsAndMerge(SiGeometryManagerToolCfg(flags))))
@@ -158,7 +179,7 @@ def SiTrkAlignDBToolCfg(flags, name="SiTrkAlignDBTool", **kwargs):
         
     kwargs.setdefault("SiGeometryManager", cfg.addPublicTool(
         cfg.popToolsAndMerge(SiGeometryManagerToolCfg(flags))))
-            
+    
     kwargs.setdefault("PixelGeometryManager", cfg.addPublicTool(
         cfg.popToolsAndMerge(PixelGeometryManagerToolCfg(flags))))
 
@@ -177,7 +198,7 @@ def SiTrkAlignDBToolCfg(flags, name="SiTrkAlignDBTool", **kwargs):
 def TRTTrkAlignDBToolCfg(flags, name="TRTTrkAlignDBTool", **kwargs):
     cfg = ComponentAccumulator()
 
-    kwargs.setdefault("TrtAlignDbSvc", cfg.addService(CompFactory.TRT_AlignDbSvc(name, **kwargs)))
+    kwargs.setdefault("TrtAlignDbSvc", cfg.addService(CompFactory.TRT_AlignDbSvc(name)))
     kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(
         cfg.popToolsAndMerge(InDetAlignModuleToolCfg(flags))))
 
@@ -201,7 +222,6 @@ def InDetTrkAlignDBToolCfg(flags, name="InDetTrkAlignDBTool", **kwargs):
 
     cfg.setPrivateTools(CompFactory.InDet.InDetTrkAlignDBTool(name, **kwargs))
     return cfg
-
 
 def GeometryManagerToolCfg(flags, **kwargs):
     ## Select geometry manager to be used in the alignment
@@ -241,16 +261,19 @@ def MatrixToolCfg(flags, name="MatrixTool", **kwargs):
 
     kwargs.setdefault("PathBinName", f"{flags.InDet.Align.baseDir}/Accumulate/")
     kwargs.setdefault("PathTxtName", f"{flags.InDet.Align.baseDir}/Accumulate/")
-    kwargs.setdefault("InputTFiles", [f"{flags.InDet.Align.baseDir}/Accumulate/{flags.InDet.Align.inputTFiles}"])
-    kwargs.setdefault("SolveOption", 3)
+    kwargs.setdefault("InputTFiles", flags.InDet.Align.inputTFiles)
+    kwargs.setdefault("SolveOption", 0 if flags.InDet.Align.accumulate else 1)
     kwargs.setdefault("MinNumHitsPerModule", 10)
-
-    kwargs.setdefault("WriteTFile", flags.InDet.Align.accumulate)
+    kwargs.setdefault("AlignIBLbutNotPixel", flags.InDet.Align.pixelAlignmentLevel == 16)
+    kwargs.setdefault("Remove_IBL_Rz", flags.InDet.Align.pixelAlignmentLevel == 11)
+    kwargs.setdefault("RunLocalMethod", False)
     kwargs.setdefault("ReadTFile", not flags.InDet.Align.accumulate)
     kwargs.setdefault("ScaleMatrix", True)
     kwargs.setdefault("WriteEigenMat", False)
     kwargs.setdefault("WriteEigenMatTxt", False)
-           
+    kwargs.setdefault("WriteMat", False)
+    kwargs.setdefault("WriteTFile", True)
+    
     cfg.setPrivateTools(CompFactory.Trk.MatrixTool(name, **kwargs))
     return cfg
 
@@ -262,8 +285,6 @@ def GlobalChi2AlignToolCfg(flags, name="GlobalChi2AlignTool", **kwargs):
         cfg.popToolsAndMerge(InDetAlignModuleToolCfg(flags))))
 
     kwargs.setdefault("MatrixTool", cfg.popToolsAndMerge(MatrixToolCfg(flags)))
-
-    kwargs.setdefault("StoreLocalDerivOnly", flags.InDet.Align.solveLocal)
     kwargs.setdefault("SecondDerivativeCut", 0)
         
     cfg.setPrivateTools(CompFactory.Trk.GlobalChi2AlignTool(name, **kwargs))
@@ -333,16 +354,23 @@ def BeamspotVertexPreProcessorCfg(
             Align_InDetTrackSelectionToolCfg)
         kwargs.setdefault("BSConstraintTrackSelector", cfg.popToolsAndMerge(
             Align_InDetTrackSelectionToolCfg(flags)))
-
+            
+    if "TrackSelector" not in kwargs:
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            Align_InDetTrackSelectionToolCfg)
+        kwargs.setdefault("TrackSelector", cfg.popToolsAndMerge(
+            Align_InDetTrackSelectionToolCfg(flags)))
+            
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
         kwargs.setdefault("Extrapolator", cfg.popToolsAndMerge(
             InDetExtrapolatorCfg(flags)))
 
     kwargs.setdefault("UseSingleFitter", True)
-    kwargs.setdefault("RunOutlierRemoval", False)
+    kwargs.setdefault("RunOutlierRemoval", True)
     kwargs.setdefault("DoBSConstraint", False)
     kwargs.setdefault("DoAssociatedToPVSelection", False)
+    kwargs.setdefault("RunOutlierRemoval", True)
                 
     cfg.setPrivateTools(
         CompFactory.Trk.BeamspotVertexPreProcessor(name, **kwargs))
