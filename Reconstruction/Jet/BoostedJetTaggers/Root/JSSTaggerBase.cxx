@@ -214,9 +214,6 @@ StatusCode JSSTaggerBase::initialize() {
   m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
   ATH_CHECK( m_readTruthLabelKey.initialize() );
 
-  m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
-  ATH_CHECK( m_readNtrk500Key.initialize() );
-
 #ifndef XAOD_STANDALONE
   if (m_suppressOutputDependence) {
     renounce(m_decValidPtRangeHighKey);

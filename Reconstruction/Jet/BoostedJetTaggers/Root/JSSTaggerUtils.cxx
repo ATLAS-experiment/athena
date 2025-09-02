@@ -488,15 +488,9 @@ std::map<std::string, double> JSSTaggerUtils::GetJSSVars(const xAOD::Jet& jet) c
 
   // retrieve ungroomed tracks multiplicity
   int nUngrTracks (-1);
-  SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
-  if(readNtrk500.isAvailable()){
-    nUngrTracks = readNtrk500(jet);
-  }
-  else{
-    int pv_location = findPV();
-    if(pv_location != -1)
-      nUngrTracks = GetUnGroomTracks(jet, pv_location);
-  }
+  int pv_location = findPV();
+  if(pv_location != -1)
+    nUngrTracks = GetUnGroomTracks(jet, pv_location);
 
   // store input variables
   JSSVars["pT"] = jet.pt();
