@@ -277,7 +277,8 @@ stdJetModifiers.update(
 
 # Substructure tools 
 stdJetModifiers.update( 
-    nsubjettiness = JetModifier( "NSubjettinessTool", "nsubjettiness",Alpha = 1.0),
+    nsubjettiness = JetModifier( "NSubjettinessTool", "nsubjettiness", Alpha = 1.0,
+                                 JetContainer = _jetname),
     nsubjettinessR = JetModifier( "NSubjettinessRatiosTool", "nsubjettinessR",),
 
     
