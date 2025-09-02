@@ -5,14 +5,16 @@
 #ifndef _TrkVKalVrtCore_Derivt_H
 #define _TrkVKalVrtCore_Derivt_H
 
-#include <vector>
 
-#include "TrkVKalVrtCore/CommonPars.h"
-#include "TrkVKalVrtCore/Derclc1.h"
-#include "TrkVKalVrtCore/Derclc2.h"
-#include "TrkVKalVrtCore/DerclcAng.h"
-#include "TrkVKalVrtCore/TrkVKalUtils.h"
+
+#include "TrkVKalVrtCore/Derclc1.h" //calcMassConstraint
+#include "TrkVKalVrtCore/Derclc2.h" //calcPointConstraint
+#include "TrkVKalVrtCore/DerclcAng.h" //calcPhiConstraint
+#include "TrkVKalVrtCore/TrkVKalUtils.h" //Vect3DF
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
+#include <vector>
+#include <iosfwd>
+
 namespace Trk {
 
 // Base class for any constraint
@@ -20,15 +22,15 @@ namespace Trk {
 //
 
 class VKVertex;
-enum class VKContraintType { Mass, Phi, Theta, Point, Plane, Radius };
+enum class VKConstraintType { Mass, Phi, Theta, Point, Plane, Radius };
 class VKConstraintBase {
  public:
-  VKConstraintBase(const int, int, VKContraintType, VKVertex*);
+  VKConstraintBase(const int, int, VKConstraintType, VKVertex*);
   virtual ~VKConstraintBase();
 
  public:
   const VKVertex* getOriginVertex() const { return m_originVertex; }
-  VKContraintType getType() const { return m_type; }
+  VKConstraintType getType() const { return m_type; }
   virtual VKConstraintBase* clone() const = 0;
   virtual void applyConstraint() = 0;
   int NCDim;                               // constraint dimension
@@ -38,7 +40,7 @@ class VKConstraintBase {
   std::vector<Vect3DF> h0t;                // Constraint space derivatives
  protected:
   VKVertex* m_originVertex;
-  const VKContraintType m_type;
+  const VKConstraintType m_type;
 };
 //
 //  Mass constraint
@@ -142,7 +144,7 @@ class VKRadiusConstraint final : public VKConstraintBase {
 
 
 inline VKConstraintBase::VKConstraintBase(const int NC, int NTRK,
-                                          VKContraintType t, VKVertex* vrt)
+                                          VKConstraintType t, VKVertex* vrt)
     : NCDim(NC),
       NTrk(NTRK),
       aa(NC, 0.),
@@ -153,7 +155,7 @@ inline VKConstraintBase::VKConstraintBase(const int NC, int NTRK,
 inline VKConstraintBase::~VKConstraintBase() = default;
 // MASS constraint
 inline VKMassConstraint::VKMassConstraint(int NTRK, double mass, VKVertex* vk)
-    : VKConstraintBase(1, NTRK, VKContraintType::Mass, vk),
+    : VKConstraintBase(1, NTRK, VKConstraintType::Mass, vk),
       m_usedParticles(NTRK, 0),
       m_targetMass(mass) {
   for (int i = 0; i < NTrk; i++)
@@ -163,7 +165,7 @@ inline VKMassConstraint::VKMassConstraint(int NTRK, double mass, VKVertex* vk)
 inline VKMassConstraint::VKMassConstraint(int NTRK, double mass,
                                           std::vector<int> listTrk,
                                           VKVertex* vk)
-    : VKConstraintBase(1, NTRK, VKContraintType::Mass, vk),
+    : VKConstraintBase(1, NTRK, VKConstraintType::Mass, vk),
       m_usedParticles(std::move(listTrk)),
       m_targetMass(mass) {
   m_originVertex = vk;
@@ -172,13 +174,13 @@ inline VKMassConstraint::~VKMassConstraint() = default;
 
 //                   Angular constraints
 inline VKPhiConstraint::VKPhiConstraint(int NTRK, VKVertex* vk)
-    : VKConstraintBase(1, NTRK, VKContraintType::Phi, vk) {
+    : VKConstraintBase(1, NTRK, VKConstraintType::Phi, vk) {
   m_originVertex = vk;
 }
 inline VKPhiConstraint::~VKPhiConstraint() = default;
 
 inline VKThetaConstraint::VKThetaConstraint(int NTRK, VKVertex* vk)
-    : VKConstraintBase(1, NTRK, VKContraintType::Theta, vk) {
+    : VKConstraintBase(1, NTRK, VKConstraintType::Theta, vk) {
   m_originVertex = vk;
 }
 inline VKThetaConstraint::~VKThetaConstraint() = default;
@@ -186,7 +188,7 @@ inline VKThetaConstraint::~VKThetaConstraint() = default;
 //                   Pointing constraint
 inline VKPointConstraint::VKPointConstraint(int NTRK, const double vrt[3],
                                             VKVertex* vk, bool onlyZ = false)
-    : VKConstraintBase(2, NTRK, VKContraintType::Point, vk), m_onlyZ(onlyZ) {
+    : VKConstraintBase(2, NTRK, VKConstraintType::Point, vk), m_onlyZ(onlyZ) {
   m_originVertex = vk;
   m_targetVertex[0] = vrt[0];
   m_targetVertex[1] = vrt[1];
@@ -198,7 +200,7 @@ inline VKPointConstraint::~VKPointConstraint() = default;
 //                   Vertex in plane constraint
 inline VKPlaneConstraint::VKPlaneConstraint(int NTRK, double a, double b,
                                             double c, double d, VKVertex* vk)
-    : VKConstraintBase(1, NTRK, VKContraintType::Plane, vk),
+    : VKConstraintBase(1, NTRK, VKConstraintType::Plane, vk),
       m_A(a),
       m_B(b),
       m_C(c),
@@ -208,7 +210,7 @@ inline VKPlaneConstraint::~VKPlaneConstraint() = default;
 
 //     Vertex at fixed radius
 inline VKRadiusConstraint::VKRadiusConstraint(int NTRK, double RC, double RefP[2], VKVertex* vk)
-    : VKConstraintBase(1, NTRK, VKContraintType::Radius, vk),
+    : VKConstraintBase(1, NTRK, VKConstraintType::Radius, vk),
       m_RC(RC) {m_refP[0]=RefP[0]; m_refP[1]=RefP[1];}
 inline VKRadiusConstraint::~VKRadiusConstraint() = default;
 

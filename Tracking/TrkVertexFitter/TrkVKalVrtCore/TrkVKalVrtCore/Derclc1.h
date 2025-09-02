@@ -7,7 +7,7 @@
  */
 #ifndef TRKVKALVRTCORE_DERCLC1_H
 #define TRKVKALVRTCORE_DERCLC1_H
-#include <array>
+
 
 namespace Trk {
 class VKMassConstraint;
