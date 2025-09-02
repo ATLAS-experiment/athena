@@ -2191,7 +2191,7 @@ class TopoAlgoDef:
             
             alg.addgeneric('InputWidth1', HW.eEmOutputWidthSelect)
             alg.addgeneric('InputWidth2', HW.muonOutputWidthSelect)
-            alg.addgeneric('MaxTob1', HW.eEmOutputWidthSort)
+            alg.addgeneric('MaxTob1', HW.eEmOutputWidthSelect)
             alg.addgeneric('MaxTob2', HW.muonOutputWidthSelect)
             alg.addgeneric('ApplyEtaCut',  1)
 
