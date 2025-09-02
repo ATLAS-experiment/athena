@@ -172,19 +172,19 @@ StatusCode AthenaOutputStream::initialize() {
 
    // Check compression settings and print some information about the configuration
    // Both should be between [5, 23] and high compression should be < low compression
-   if(m_compressionBitsHigh < 5 || m_compressionBitsHigh > 23) {
+   if(m_compressionBitsHigh < 5u || m_compressionBitsHigh > 23u) {
      ATH_MSG_INFO(std::format("Float compression mantissa bits for high compression "
                               "({}) is outside the allowed range of [5, 23].",
                               m_compressionBitsHigh.toString()));
      ATH_MSG_INFO("Setting it to the appropriate limit.");
-     m_compressionBitsHigh = m_compressionBitsHigh < 5 ? 5 : 23;
+     m_compressionBitsHigh = m_compressionBitsHigh < 5u ? 5 : 23;
    }
-   if(m_compressionBitsLow < 5 || m_compressionBitsLow > 23) {
+   if(m_compressionBitsLow < 5u || m_compressionBitsLow > 23u) {
      ATH_MSG_INFO(std::format("Float compression mantissa bits for low compression "
                               "({}) is outside the allowed range of [5, 23].",
                               m_compressionBitsLow.toString()));
      ATH_MSG_INFO("Setting it to the appropriate limit.");
-     m_compressionBitsLow = m_compressionBitsLow < 5 ? 5 : 23;
+     m_compressionBitsLow = m_compressionBitsLow < 5u ? 5 : 23;
    }
    if(m_compressionBitsLow <= m_compressionBitsHigh) {
      ATH_MSG_ERROR(std::format("Float compression mantissa bits for low compression "
