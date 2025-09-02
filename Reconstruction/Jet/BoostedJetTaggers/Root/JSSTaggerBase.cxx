@@ -109,16 +109,16 @@ StatusCode JSSTaggerBase::initialize() {
   m_decL2Key = m_containerName + "." + m_decL2Key.key();
   m_decL3Key = m_containerName + "." + m_decL3Key.key();
 
-  m_readTau1WTAKey = m_containerName + "." + m_readTau1WTAKey.key();
-  m_readTau2WTAKey = m_containerName + "." + m_readTau2WTAKey.key();
-  m_readTau3WTAKey = m_containerName + "." + m_readTau3WTAKey.key();
-  m_readTau4WTAKey = m_containerName + "." + m_readTau4WTAKey.key();
   m_readThrustMajKey = m_containerName + "." + m_readThrustMajKey.key();
   m_readSphericityKey = m_containerName + "." + m_readSphericityKey.key();
 
   if(!m_isSmallRJet){
     m_readSplit12Key = m_containerName + "." + m_readSplit12Key.key();
     m_readSplit23Key = m_containerName + "." + m_readSplit23Key.key();
+    m_readTau1WTAKey = m_containerName + "." + m_readTau1WTAKey.key();
+    m_readTau2WTAKey = m_containerName + "." + m_readTau2WTAKey.key();
+    m_readTau3WTAKey = m_containerName + "." + m_readTau3WTAKey.key();
+    m_readTau4WTAKey = m_containerName + "." + m_readTau4WTAKey.key();
     m_readECF1Key = m_containerName + "." + m_readECF1Key.key();
     m_readECF2Key = m_containerName + "." + m_readECF2Key.key();
     m_readECF3Key = m_containerName + "." + m_readECF3Key.key();
@@ -137,10 +137,10 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_decL2Key.initialize() );
   ATH_CHECK( m_decL3Key.initialize() );
 
-  ATH_CHECK( m_readTau1WTAKey.initialize() );
-  ATH_CHECK( m_readTau2WTAKey.initialize() );
-  ATH_CHECK( m_readTau3WTAKey.initialize() );
-  ATH_CHECK( m_readTau4WTAKey.initialize() );
+  ATH_CHECK( m_readTau1WTAKey.initialize(!m_isSmallRJet) );
+  ATH_CHECK( m_readTau2WTAKey.initialize(!m_isSmallRJet) );
+  ATH_CHECK( m_readTau3WTAKey.initialize(!m_isSmallRJet) );
+  ATH_CHECK( m_readTau4WTAKey.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readThrustMajKey.initialize() );
   ATH_CHECK( m_readSphericityKey.initialize() );
 
@@ -218,6 +218,10 @@ StatusCode JSSTaggerBase::initialize() {
 #ifndef XAOD_STANDALONE
   if (m_suppressInputDependence) {
     renounce(m_readQwKey);
+    renounce(m_readTau1WTAKey);
+    renounce(m_readTau2WTAKey);
+    renounce(m_readTau3WTAKey);
+    renounce(m_readTau4WTAKey);
     renounce(m_readECF1Key);
     renounce(m_readECF2Key);
     renounce(m_readECF3Key);
@@ -418,37 +422,33 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
   SG::WriteDecorHandle<xAOD::JetContainer, float> decL2(m_decL2Key);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decL3(m_decL3Key);
 
-  /// Create read decor handles
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau1WTA(m_readTau1WTAKey);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau2WTA(m_readTau2WTAKey);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau3WTA(m_readTau3WTAKey);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau4WTA(m_readTau4WTAKey);
-
   /// WTA N-subjettiness ratios
   float tau21_wta = -999.0;
   float tau32_wta = -999.0;
   float tau42_wta = -999.0;
 
-  float tau1_wta = readTau1WTA(jet);
-  float tau2_wta = readTau2WTA(jet);
-  float tau3_wta = readTau3WTA(jet);
-  float tau4_wta = -999.0;
-  if(readTau4WTA.isAvailable()){
-    tau4_wta = readTau4WTA(jet);
-  }
+  if(!m_isSmallRJet){
+    SG::ReadDecorHandle<xAOD::JetContainer, float> readTau1WTA(m_readTau1WTAKey);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> readTau2WTA(m_readTau2WTAKey);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> readTau3WTA(m_readTau3WTAKey);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> readTau4WTA(m_readTau4WTAKey);
 
-  if ( tau1_wta > 1e-8 ) {
-    tau21_wta = tau2_wta / tau1_wta;
-  }
-  else result = 1;
+    float tau1_wta = readTau1WTA(jet);
+    float tau2_wta = readTau2WTA(jet);
+    float tau3_wta = readTau3WTA(jet);
+    float tau4_wta = readTau4WTA(jet);
 
-  if ( tau2_wta > 1e-8 ) {
-    tau32_wta = tau3_wta / tau2_wta;
-    if(readTau4WTA.isAvailable()){
+    if ( tau1_wta > 1e-8 ) {
+      tau21_wta = tau2_wta / tau1_wta;
+    }
+    else result = 1;
+
+    if ( tau2_wta > 1e-8 ) {
+      tau32_wta = tau3_wta / tau2_wta;
       tau42_wta = tau4_wta / tau2_wta;
     }
+    else result = 1;
   }
-  else result = 1;
 
   decTau21WTA(jet) = tau21_wta;
   decTau32WTA(jet) = tau32_wta;
@@ -531,13 +531,12 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
   SG::WriteDecorHandle<xAOD::JetContainer, float> decL2(m_decL2Key);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decL3(m_decL3Key);
 
-  /// Create read decor handles
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau1WTA(m_readTau1WTAKey);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau2WTA(m_readTau2WTAKey);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau3WTA(m_readTau3WTAKey);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau4WTA(m_readTau4WTAKey);
-
   // Use pointers here so we can create only the ones we're configured for
+  std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readTau1WTA;
+  std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readTau2WTA;
+  std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readTau3WTA;
+  std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readTau4WTA;
+
   std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECF1;
   std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECF2;
   std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECF3;
@@ -547,6 +546,11 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
   std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECFG212;
 
   if(!m_isSmallRJet){
+    readTau1WTA = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readTau1WTAKey);
+    readTau2WTA = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readTau2WTAKey);
+    readTau3WTA = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readTau3WTAKey);
+    readTau4WTA = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readTau4WTAKey);
+
     readECF1 = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readECF1Key);
     readECF2 = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readECF2Key);
     readECF3 = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readECF3Key);
@@ -558,33 +562,9 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
 
   for(const xAOD::Jet* jet : jets){
 
-    /// WTA N-subjettiness ratios
     float tau21_wta = -999.0;
     float tau32_wta = -999.0;
     float tau42_wta = -999.0;
-
-    float tau1_wta = readTau1WTA(*jet);
-    float tau2_wta = readTau2WTA(*jet);
-    float tau3_wta = readTau3WTA(*jet);
-    float tau4_wta = -999.0;
-    if(readTau4WTA.isAvailable()){
-      tau4_wta = readTau4WTA(*jet);
-    }
-
-    if ( tau1_wta > 1e-8 ) {
-      tau21_wta = tau2_wta / tau1_wta;
-    }
-
-    if ( tau2_wta > 1e-8 ) {
-      tau32_wta = tau3_wta / tau2_wta;
-      if(readTau4WTA.isAvailable()){
-	tau42_wta = tau4_wta / tau2_wta;
-      }
-    }
-
-    decTau21WTA(*jet) = tau21_wta;
-    decTau32WTA(*jet) = tau32_wta;
-    decTau42WTA(*jet) = tau42_wta;
 
     float C2 = -999.0;
     float D2 = -999.0;
@@ -594,6 +574,22 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
     float L3 = -999.0;
 
     if(!m_isSmallRJet){
+
+      /// WTA N-subjettiness ratios
+      float tau1_wta = (*readTau1WTA)(*jet);
+      float tau2_wta = (*readTau2WTA)(*jet);
+      float tau3_wta = (*readTau3WTA)(*jet);
+      float tau4_wta = (*readTau4WTA)(*jet);
+
+      if ( tau1_wta > 1e-8 ) {
+	tau21_wta = tau2_wta / tau1_wta;
+      }
+
+      if ( tau2_wta > 1e-8 ) {
+	tau32_wta = tau3_wta / tau2_wta;
+	tau42_wta = tau4_wta / tau2_wta;
+      }
+
       /// ECF ratios
       float ECF1 = (*readECF1)(*jet);
       float ECF2 = (*readECF2)(*jet);
@@ -619,6 +615,10 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
         }
       }
     }
+
+    decTau21WTA(*jet) = tau21_wta;
+    decTau32WTA(*jet) = tau32_wta;
+    decTau42WTA(*jet) = tau42_wta;
 
     decC2(*jet) = C2;
     decD2(*jet) = D2;
