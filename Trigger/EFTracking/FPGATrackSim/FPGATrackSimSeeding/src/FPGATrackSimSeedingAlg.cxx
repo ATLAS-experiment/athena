@@ -47,12 +47,12 @@ namespace FPGATrackSim {
             std::vector<const xAOD::SpacePoint*> spacePointsToStoreInSeed;
             for (const FPGATrackSimHit& hit : track.getFPGATrackSimHits()) {
                 if (hit.isReal() && hit.isPixel()) {
-                    ATH_MSG_DEBUG("Hit coordinates: (" << hit.getPhiCoord() << ", " << hit.getEtaCoord() << ")");
+                    ATH_MSG_DEBUG("Hit coordinates in module " << hit.getIdentifierHash() << ": (" << hit.getPhiCoord() << ", " << hit.getEtaCoord() << ")");
                     // find in the multimap the SP that matches this globalPosition
                     auto range = spacePointMap.equal_range(hit.getIdentifierHash());
                     for (auto it = range.first; it != range.second; ++it) {
                         constexpr float kEpsilon = std::numeric_limits<float>::epsilon();
-                        if (std::abs(hit.getPhiCoord() - it->second->measurements().at(0)->localPosition<2>()[0]) < 1E-1 && // TODO: check why the phi coordinate doesn't fully agree between the converted cluster and the FPGA cluster
+                        if (std::abs(hit.getPhiCoord() - it->second->measurements().at(0)->localPosition<2>()[0]) < kEpsilon &&
                             std::abs(hit.getEtaCoord() - it->second->measurements().at(0)->localPosition<2>()[1]) < kEpsilon) {
                             spacePointsToStoreInSeed.push_back(it->second);
                             if (spacePointsToStoreInSeed.size() == m_maxSpacePointsPerSeed) break; // stop if max reached
