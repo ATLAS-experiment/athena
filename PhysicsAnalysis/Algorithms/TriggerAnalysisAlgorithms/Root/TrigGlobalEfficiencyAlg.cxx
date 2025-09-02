@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -191,6 +191,18 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
     ANA_CHECK(m_systematicsList.addSystematics( *m_muonTool ));
   }
 
+  // create the individual trigger-matching decorators
+  for(const std::string& trig : m_separateMatchingTriggers) {
+    std::string s = trig;
+    std::replace(s.begin(), s.end(), '-', '_');
+    std::replace(s.begin(), s.end(), '.', 'p');
+
+    m_separateMatchingDecorators.emplace(trig, SysWriteDecorHandle<bool>("triggerMatch_"+s+m_separateMatchingDecorSuffix+"_%SYS%", this));
+    ANA_CHECK(m_separateMatchingDecorators.at(trig).initialize(m_systematicsList, m_eventInfoHandle));
+
+    m_separateMatchingFlags[trig] = false;
+  }
+
   // finally, set up the global trigger tool
   m_tgecTool = asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool>("TrigGlobalEfficiencyCorrectionTool/TrigGlobal_" + this->name() );
   ANA_CHECK(m_tgecTool.setProperty("ElectronEfficiencyTools", electronEffTools));
@@ -257,19 +269,28 @@ StatusCode CP::TrigGlobalEfficiencyAlg::execute()
 					   sf).ignore();
     }
 
-    // check if we have trigger matching
+    // Retrieve EventInfo
+    const xAOD::EventInfo *evtInfo {nullptr};
+    ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, syst));
+
+    // Check if we have trigger matching
     bool matched = false;
     if (!(selectedElectrons.empty() && selectedMuons.empty() && selectedPhotons.empty())) {
-      ANA_CHECK(m_tgecTool->checkTriggerMatching(matched, selectedElectrons, selectedMuons, selectedPhotons));
+      if(m_separateMatchingTriggers.value().empty()) {
+        ANA_CHECK(m_tgecTool->checkTriggerMatching(matched, selectedElectrons, selectedMuons, selectedPhotons));
+      } else {
+        ANA_CHECK(m_tgecTool->checkTriggerMatching(m_separateMatchingFlags, selectedElectrons, selectedMuons, selectedPhotons));
+        for(const auto& [trig, flag] : m_separateMatchingFlags) {
+          if(flag) matched = true;
+          m_separateMatchingDecorators.at(trig).set(*evtInfo, flag, syst);
+        }
+      }
     }
     if (matched) filter.setPassed(true);
 
-    // decorate them onto the EventInfo
-    const xAOD::EventInfo *evtInfo {nullptr};
-    ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, syst));
+    // Decorate global outputs onto the EventInfo
     m_scaleFactorDecoration.set(*evtInfo, sf, syst);
     m_matchingDecoration.set(*evtInfo, matched, syst);
-
   }
 
   return StatusCode::SUCCESS;

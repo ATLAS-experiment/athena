@@ -27,8 +27,9 @@ public:
 
 	virtual CP::CorrectionCode getEfficiencyScaleFactor(const std::vector<const xAOD::IParticle*>& particles, double& efficiencyScaleFactor) = 0;
 	virtual CP::CorrectionCode getEfficiency(const std::vector<const xAOD::IParticle*>& particles, double& efficiencyData, double& efficiencyMc) = 0;
-	virtual CP::CorrectionCode checkTriggerMatching(bool& matched, const std::vector<const xAOD::IParticle*>& particles) = 0;
-	
+    virtual CP::CorrectionCode checkTriggerMatching(bool& matched, const std::vector<const xAOD::IParticle*>& particles) = 0;
+    virtual CP::CorrectionCode checkTriggerMatching(std::unordered_map<std::string, bool>& matched_per_trigger, const std::vector<const xAOD::IParticle*>& particles) = 0;
+
 	/// Alternatively, the list of particles can be supplied via one or several vectors of xAOD::Electron*/Muon*/Photon*
 	/// The generic signature is getEfficiencyScaleFactor((const) vector<(const)Type1*>&, ..., (const) vector<(const)TypeN*>&, double& efficiencyScaleFactor)
 	/// e.g. getEfficiencyScaleFactor(electrons, muons, sf);
@@ -39,8 +40,8 @@ public:
 	auto getEfficiencyScaleFactor(Args&... args) -> std::enable_if_t<validArgs<Args...>(1), CP::CorrectionCode>;
 	template<typename... Args>
 	auto getEfficiency(Args&... args) -> std::enable_if_t<validArgs<Args...>(2), CP::CorrectionCode>;
-	template<typename... Args>
-	auto checkTriggerMatching(bool& matched, Args&... args) -> std::enable_if_t<validArgs<Args...>(0), CP::CorrectionCode>;
+	template<typename BoolOrMap, typename... Args>
+    auto checkTriggerMatching(BoolOrMap& matched, Args&... args) -> std::enable_if_t<validArgs<Args...>(0), CP::CorrectionCode>;
 	
 	/// This will fill the 'triggers' argument with the names of the triggers relevant for the current run number, among those specified in the tool configuration
 	virtual CP::CorrectionCode getRelevantTriggers(std::vector<std::string>& triggers) = 0;
@@ -106,13 +107,13 @@ auto ITrigGlobalEfficiencyCorrectionTool::getEfficiency(Args&... args)
 	return getEfficiency(particles, *eff[sizeof...(Args)-1], *eff[sizeof...(Args)]);
 }
 
-template<typename... Args>
-auto ITrigGlobalEfficiencyCorrectionTool::checkTriggerMatching(bool& matched, Args&... args)
+template<typename BoolOrMap, typename... Args>
+auto ITrigGlobalEfficiencyCorrectionTool::checkTriggerMatching(BoolOrMap& matched, Args&... args)
 	-> std::enable_if_t<validArgs<Args...>(0), CP::CorrectionCode>
 {
 	std::vector<const xAOD::IParticle*> particles;
 	double* eff[] __attribute__((unused)) = { nullptr, handleArg(args, particles)... };
-	return checkTriggerMatching(matched, particles);
+    return checkTriggerMatching(matched, particles);
 }
 
 #endif //> !TRIGGERANALYSISINTERFACES_ITRIGGLOBALEFFICIENCYCORRECTIONTOOL_H

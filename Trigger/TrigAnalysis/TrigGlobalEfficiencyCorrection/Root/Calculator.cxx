@@ -143,8 +143,13 @@ bool Calculator::compute(TrigGlobalEfficiencyCorrectionTool& parent,
 
 bool Calculator::checkTriggerMatching(
     TrigGlobalEfficiencyCorrectionTool& parent, bool& matched,
+    std::unordered_map<std::string, bool>* matched_per_trigger,
     const LeptonList& leptons, unsigned runNumber) {
   matched = false;
+  if(matched_per_trigger) {
+    for(auto& [key, flag] : *matched_per_trigger) flag = false;
+  }
+
   m_parent = &parent;
   auto period = getPeriod(runNumber);
   if (!period)
@@ -200,25 +205,31 @@ bool Calculator::checkTriggerMatching(
                                          /// fired by that lepton
       trigLeptons[0] = leptons[i0].particle();
       if (nLegs == 1) {
-        if (canTriggerBeFired(
-                trig, firedLegs)  /// enough lepton(s) on trigger plateau?
-            && trigMatchTool->match(trigLeptons, chain))
-          return (matched = true);
+        // Check we have enough lepton(s) on trigger plateau and test the trigger matching
+        if(canTriggerBeFired(trig, firedLegs) && trigMatchTool->match(trigLeptons, chain)) {
+          matched = true;
+          if(!matched_per_trigger) return true;
+          if(matched_per_trigger->count(chain)) matched_per_trigger->at(chain) = true;
+        }
       } else
         for (unsigned i1 = i0 + 1; i1 < nLep; ++i1) {
           firedLegs[1].swap(validLegs[i1]);
           trigLeptons[1] = leptons[i1].particle();
           if (nLegs == 2) {
-            if (canTriggerBeFired(trig, firedLegs) &&
-                trigMatchTool->match(trigLeptons, chain))
-              return (matched = true);
+            if(canTriggerBeFired(trig, firedLegs) && trigMatchTool->match(trigLeptons, chain)) {
+              matched = true;
+              if(!matched_per_trigger) return true;
+              if(matched_per_trigger->count(chain)) matched_per_trigger->at(chain) = true;
+            }
           } else
             for (unsigned i2 = i1 + 1; i2 < nLep; ++i2) {
               firedLegs[2].swap(validLegs[i2]);
               trigLeptons[2] = leptons[i2].particle();
-              if (canTriggerBeFired(trig, firedLegs) &&
-                  trigMatchTool->match(trigLeptons, chain))
-                return (matched = true);
+              if(canTriggerBeFired(trig, firedLegs) && trigMatchTool->match(trigLeptons, chain)) {
+                matched = true;
+                if(!matched_per_trigger) return true;
+                if(matched_per_trigger->count(chain)) matched_per_trigger->at(chain) = true;
+              }
               firedLegs[2].swap(validLegs[i2]);
             }
           firedLegs[1].swap(validLegs[i1]);
