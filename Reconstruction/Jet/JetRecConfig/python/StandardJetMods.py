@@ -283,7 +283,7 @@ stdJetModifiers.update(
     
     ktdr       = JetModifier("KtDeltaRTool", "ktdr", JetRadius = 0.4),
 
-    ktsplitter = JetModifier( "KTSplittingScaleTool", "ktsplitter"),
+    ktsplitter = JetModifier( "KTSplittingScaleTool", "ktsplitter", JetContainer = _jetname),
     
     angularity = JetModifier( "AngularityTool", "angularity"),
     
@@ -315,8 +315,9 @@ try :
     from JetMomentTools import JetMomentToolsConfig
     stdJetModifiers.update( 
         qgtransformer = JetModifier("BoostedJetTaggerTool", "qgtransformer",
-                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolQG,
-                            JetContainer = _jetname),
+                                    createfn=JetMomentToolsConfig.getBoostedJetTaggerToolQG,
+                                    JetContainer = _jetname,
+                                    SuppressInputDependence = True),
     )
 except ModuleNotFoundError:
     # In some releases (AthGeneration) JetMomentTools is not existing
@@ -327,8 +328,9 @@ try :
     from JetMomentTools import JetMomentToolsConfig
     stdJetModifiers.update( 
         toptransformer = JetModifier("BoostedJetTaggerTool", "toptransformer",
-                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolTop,
-                            JetContainer = _jetname),
+                                     createfn=JetMomentToolsConfig.getBoostedJetTaggerToolTop,
+                                     JetContainer = _jetname,
+                                     SuppressInputDependence = True),
     )
 except ModuleNotFoundError:
     # In some releases (AthGeneration) JetMomentTools is not existing
