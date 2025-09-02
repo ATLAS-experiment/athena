@@ -133,10 +133,11 @@ namespace PixelDigitization{
       if (row > 159 && technology == InDetDD::PixelReadoutTechnology::FEI3) {
         row += 8;
       } // jump over ganged pixels - rowsPerCircuit == 320 above
+      
 
       InDetDD::SiReadoutCellId roCell =
-        (nColumns > 1)
-          ? InDetDD::SiReadoutCellId(nRows + row, (nColumns - 2) * circuit + column)
+        (circuit > 1)
+          ? InDetDD::SiReadoutCellId(nRows + row, nColumns * (circuit - 2) + column)
           : InDetDD::SiReadoutCellId(row, nColumns * circuit + column);
 
       // InDetDD::SiReadoutCellId roCell = nullptr;
@@ -151,7 +152,7 @@ namespace PixelDigitization{
       
       //InDetDD::SiReadoutCellId roCell(row, nColumns * circuit + column);
       Identifier noisyID = chargedDiodes.element()->identifierFromCellId(roCell);
-
+      
       if (roCell.isValid()) {
         InDetDD::SiCellId diodeNoise = roCell;
         float x = static_cast<float>(CLHEP::RandFlat::shoot(rndmEngine, 0., 1.));  // returns double
@@ -164,6 +165,7 @@ namespace PixelDigitization{
         }
         float noiseToTm = bin + 1.5f;
         float noiseToT = CLHEP::RandGaussZiggurat::shoot(rndmEngine, noiseToTm, 1.f);
+
         if (noiseToT < 1.f) { continue; }  // throw away unphysical noise
         noiseToT = std::min(noiseToT, overflowToT);
         InDetDD::PixelDiodeType type = pixelReadout->getDiodeType(noisyID);
