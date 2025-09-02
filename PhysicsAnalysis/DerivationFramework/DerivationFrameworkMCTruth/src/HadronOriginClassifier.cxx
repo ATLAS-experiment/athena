@@ -3,7 +3,7 @@
 */
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
 #include "TruthUtils/HepMCHelpers.h"
-
+#include "StoreGate/ReadHandle.h"
 
 namespace {
   /// Helper class to store sample properties
@@ -37,6 +37,8 @@ namespace DerivationFramework{
     ATH_MSG_INFO("Initialize " );
     ATH_MSG_INFO("DSID " << m_DSID );
 
+    ATH_CHECK(m_mcName.initialize());
+    
     static const std::vector<Sample> samples = {
       // all Herwig++/Herwig7 showered samples
       {346346, 346348, GEN_id::HerwigPP},
@@ -218,8 +220,8 @@ namespace DerivationFramework{
         for(std::map<const xAOD::TruthParticle*, int>::iterator it = mainHadronMap.begin(); it!=mainHadronMap.end(); ++it){
           // Check if the hadron has already been matched to a parton.
           if(std::find(matched_hadrons.begin(), matched_hadrons.end(), (*it).first) != matched_hadrons.end()) continue;
-          // Check if the hadron's flavour mathces the one of the parton.
-          if((*it).second != abs((*itr).first->pdgId()) ) continue;
+          // Check if the hadron's flavour matches the one of the parton.
+          if((*it).second != (*itr).first->absPdgId()) continue;
           // Extract the pt of the hadron.
           vtmp.SetPtEtaPhi((*it).first->pt(),(*it).first->eta(),(*it).first->phi());
           // Compute Delta R between hadron and parton and store in dR if it is smaller than the current value.
@@ -256,10 +258,12 @@ namespace DerivationFramework{
   // Define the function buildPartonsHadronsMaps that determines the flavour of the hadrons and the origin of the partons.
   void HadronOriginClassifier::buildPartonsHadronsMaps(std::map<const xAOD::TruthParticle*,int>& mainHadronMap, std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const {
     // Extract the TruthParticles container.
-    const xAOD::TruthEventContainer* xTruthEventContainer = nullptr;
-    if (evtStore()->retrieve(xTruthEventContainer,m_mcName).isFailure()) {
-      ATH_MSG_WARNING("could not retrieve TruthEventContainer " <<m_mcName);
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer(m_mcName, ctx);
+    if (!xTruthEventContainer.isValid()) {
+      ATH_MSG_WARNING("Could not retrieve " <<m_mcName);
     }
+
     // Create a container with TruthParticles to store the hadrons that has already been saved.
     std::set<const xAOD::TruthParticle*> usedHadron;
     for ( const auto* truthevent : *xTruthEventContainer ) {
@@ -275,7 +279,7 @@ namespace DerivationFramework{
         bool iscquark   = false; // The particle is a c-quark.
         bool isHFhadron = false; // The particle is a HF hadron.
         // Extract the pdgid of the particle and use it to determine the type of particle.
-        int pdgid = abs(part->pdgId());
+        int pdgid = part->absPdgId();
         if( MC::isBottom(pdgid) ){
           isbquark=true;
         }
@@ -488,7 +492,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if( MC::isPhoton(parent) || abs(parent->pdgId())<MC::BQUARK ) return true;
+      if( MC::isPhoton(parent) || parent->absPdgId()<MC::BQUARK ) return true;
     }
     return false;
   }
@@ -534,7 +538,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if( abs(parent->pdgId())<MC::TQUARK ) {
+      if( parent->absPdgId()<MC::TQUARK ) {
         if(isFromTop(parent)){
           return true;
         }
@@ -584,7 +588,7 @@ namespace DerivationFramework{
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
       // Check if the parent is a quark different from the top.
-      if( abs(parent->pdgId())<MC::TQUARK ) {
+      if( parent->absPdgId()<MC::TQUARK ) {
         // In this case, the parent is a quark different from top.
         // Check if it comes from the decay chain of the t->Wb.
         // If it is the case, return true.
@@ -611,7 +615,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if(!parent) continue;
-      if( abs(parent->pdgId()) == MC::PROTON && MC::isPhysical(part) ) return true;
+      if( parent->absPdgId() == MC::PROTON && MC::isPhysical(part) ) return true;
     }
     return false;
   }

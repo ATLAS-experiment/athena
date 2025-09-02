@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -14,8 +14,6 @@
 // DOES NOT PRESERVE GRAPH INTEGRITY
 
 #include "DerivationFrameworkMCTruth/MenuTruthThinning.h"
-//#include "DerivationFrameworkMCTruth/xPlotterUtils.h"
-#include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
 #include "AthenaKernel/errorcheck.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -33,15 +31,10 @@ DerivationFramework::MenuTruthThinning::MenuTruthThinning(const std::string& t,
                                                           const std::string& n,
                                                           const IInterface* p ) :
 base_class(t,n,p),
-m_eventsKey("TruthEvents"),
 m_writeFirstN(-1),
 m_totpart(0),
 m_removedpart(0)
 {
-    declareProperty ("EventsKey",
-                     m_eventsKey = "TruthEvents",
-                     "TruthEvent container name");
-    
     declareProperty ("WritePartons",
                      m_writePartons = true,
                      "Keep partons?");
@@ -201,12 +194,6 @@ StatusCode DerivationFramework::MenuTruthThinning::doThinning() const
     SG::ThinningHandle<xAOD::TruthVertexContainer> importedTruthVertices
       (m_verticesKey, ctx);
 
-    const xAOD::TruthEventContainer* importedTruthEvents;
-    if (evtStore()->retrieve(importedTruthEvents,m_eventsKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthEventContainer with name " << m_eventsKey << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
-    
     // Print events
     //if( m_eventCount < 20 ){
     //    printxAODTruth(m_eventCount, importedTruthParticles);
@@ -281,7 +268,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
 {
     bool ok = false;
     
-    int pdg_id = std::abs(p->pdgId());
+    int pdg_id = p->absPdgId();
 
     // All explicitly requested PDG IDs of long lived particles, this is needed
     // because their childrens uniqueIDs can be above the cut off m_geantOffset
@@ -415,7 +402,7 @@ bool DerivationFramework::MenuTruthThinning::isOrphanIncTau(const xAOD::TruthPar
     
     int pdgId = part->pdgId();
     
-    if (!(part->hasProdVtx())) return true;
+    if (!part->hasProdVtx()) return true;
     
     const xAOD::TruthVertex* prodVtx = part->prodVtx();
     unsigned int nIncoming = prodVtx->nIncomingParticles();
@@ -458,7 +445,7 @@ bool DerivationFramework::MenuTruthThinning::matchGenParticle(const xAOD::TruthP
     // Iterators for the target pdg or the intermediate pdg ids
     std::vector<int>::const_iterator itrPdgId, itrPdgIdEnd;
     
-    if (!(part->hasProdVtx())) return false;
+    if (!part->hasProdVtx()) return false;
     
     // Loop over the parents
     const xAOD::TruthVertex* prodVtx = part->prodVtx();
@@ -481,7 +468,7 @@ bool DerivationFramework::MenuTruthThinning::matchGenParticle(const xAOD::TruthP
             }
         }
         else {
-            int absPdgId = abs(incomingParticle->pdgId());
+            int absPdgId = incomingParticle->absPdgId();
             
             // If the parent is within the range given in the target pdg list
             if(targetPdgIds.size() == 1) {

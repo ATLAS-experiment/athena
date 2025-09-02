@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -57,8 +57,6 @@ namespace DerivationFramework {
         SG::ThinningHandleKey<xAOD::TruthVertexContainer> m_verticesKey
           { this, "VerticesKey", "TruthVertices", "TruthVertex container name" };
 
-        std::string m_eventsKey;
-        
         /// Parameter: Keep partons?
         bool m_writePartons;
         

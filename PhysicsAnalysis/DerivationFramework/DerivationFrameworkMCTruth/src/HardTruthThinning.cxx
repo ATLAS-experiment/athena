@@ -14,12 +14,8 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "DerivationFrameworkMCTruth/HardTruthThinning.h"
-#include "DerivationFrameworkMCTruth/DecayGraphHelper.h"
-#include "xAODTruth/TruthEventContainer.h"
-#include "xAODTruth/TruthVertexContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODBase/IParticle.h"
-#include "xAODBase/IParticleContainer.h"
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/ThinningHandle.h"
@@ -53,12 +49,6 @@ DerivationFramework::HardTruthThinning::HardTruthThinning(
   m_isolPtCut(0),  
   m_maxCount(0)
 {
-  declareProperty("HardParticles", m_hardParticleName,
-                  "hard particle container name");
-
-  declareProperty("JetName", m_jetName,
-                  "truth jet container name");
-
   declareProperty("JetPtCut", m_jetPtCut,
                   "truth jet minumum pt");
 
@@ -100,9 +90,11 @@ DerivationFramework::HardTruthThinning::~HardTruthThinning() {
 
 StatusCode DerivationFramework::HardTruthThinning::initialize()
 {
-  ATH_CHECK( m_evt.initialize() );
-  ATH_CHECK (m_truthParticleName.initialize (m_streamName) );
-  ATH_CHECK (m_truthVertexName.initialize (m_streamName) );
+  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_hardParticleKey.initialize() );
+  ATH_CHECK( m_truthJetsKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_truthParticleName.initialize (m_streamName) );
+  ATH_CHECK( m_truthVertexName.initialize (m_streamName) );
 
   m_evtCount = -1;
   m_errCount = 0;
@@ -137,30 +129,16 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
 
   ++m_evtCount;
   bool doPrint = m_evtCount < m_maxCount;
-  //bool doExtra = false;
-
-
-  SG::ReadHandle<xAOD::EventInfo> evt(m_evt, ctx);
-  if(!evt.isValid()) {
-    ATH_MSG_ERROR("Failed to retrieve EventInfo");
-    return StatusCode::FAILURE;
-  }
-  long long int evtNum = evt->eventNumber();
 
   // Retrieve truth particles and vertices
-
-  xAOD::TruthParticleContainer::const_iterator pItr;
-  xAOD::TruthParticleContainer::const_iterator pItrE;
-
   SG::ThinningHandle<xAOD::TruthParticleContainer> inTruthParts
     (m_truthParticleName, ctx);
   SG::ThinningHandle<xAOD::TruthVertexContainer> inTruthVerts
     (m_truthVertexName, ctx);
 
-  const xAOD::TruthParticleContainer* inHardParts = nullptr;
-  if( evtStore()->retrieve(inHardParts, m_hardParticleName).isFailure() ){
-    ATH_MSG_ERROR("No TruthParticleContainer found with name "
-                  <<m_hardParticleName);
+  SG::ReadHandle<xAOD::TruthParticleContainer> inHardParts(m_hardParticleKey, ctx);
+  if (!inHardParts.isValid()) {
+    ATH_MSG_ERROR("Cannot retrieve TruthParticleContainer " << m_hardParticleKey);
     return StatusCode::FAILURE;
   }
 
@@ -172,23 +150,28 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
   std::vector<const xAOD::TruthParticle*> hardPart;
   std::vector<TLorentzVector> pLepGam;
 
-  pItr = inHardParts->begin();
-  pItrE = inHardParts->end();
-  for(; pItr!=pItrE; ++pItr){
-    if( MC::isStable(*pItr) ){
-      hardPart.push_back(*pItr);
+  for (const auto* pItr : *inHardParts) {
+    if( MC::isStable(pItr) ){
+      hardPart.push_back(pItr);
       if( m_isolR > 0 ){
-        int ida = abs( (*pItr)->pdgId() );
+        int ida = pItr->absPdgId();
         if( MC::isElectron(ida) || MC::isMuon(ida) || MC::isTau(ida) || MC::isPhoton(ida) ){
-          pLepGam.push_back( (*pItr)->p4() );
+          pLepGam.push_back( pItr->p4() );
         }
       }
     }
   }
 
-
   // Print full input event
+  long long int evtNum{};
   if( doPrint ){
+    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfoKey, ctx);
+    if(!evt.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve EventInfo");
+      return StatusCode::FAILURE;
+    }
+    evtNum = evt->eventNumber();
+
     printxAODTruth(evtNum, inTruthParts.cptr());
   }
 
@@ -212,21 +195,18 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
   // There could be overlap, e.g. for taus. 
   // Expect no pdgId mismatches.
 
-  pItr = inTruthParts->begin();
-  pItrE = inTruthParts->end();
   std::vector<const xAOD::TruthParticle*> kids;
 
-  for(; pItr!=pItrE; ++pItr){
-
+  for (const auto* pItr : *inTruthParts) {
     // Stable hard particle matches
-    int uid = HepMC::uniqueID(*pItr);
+    int uid = HepMC::uniqueID(pItr);
     bool isHard = false;
     for(unsigned int i=0; i<hardPart.size(); ++i){
       if( uid == HepMC::uniqueID(hardPart[i]) ){
         isHard = true;
-        if( (*pItr)->pdgId() != (hardPart[i])->pdgId() ){
+        if( pItr->pdgId() != (hardPart[i])->pdgId() ){
           ATH_MSG_WARNING("pdgID mismatch, TruthParticle uid/pdgid "
-                          <<HepMC::uniqueID(*pItr) <<" " <<(*pItr)->pdgId()
+                          <<HepMC::uniqueID(pItr) <<" " <<pItr->pdgId()
                           <<"   Hard uid/pdgid "  <<HepMC::uniqueID(hardPart[i])
                           <<" " <<(hardPart[i])->pdgId());
           ++m_errCount;
@@ -236,11 +216,11 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
     }
     if( isHard ){
       if( doPrint ) ATH_MSG_DEBUG("ParticleMask isHard " <<uid);
-      partMask[ (*pItr)->index() ] = true;
+      partMask[ pItr->index() ] = true;
     }
 
     // Keep particles
-    int ida = abs((*pItr)->pdgId());
+    int ida = pItr->absPdgId();
     bool isKeep = false;
     for(unsigned int i=0; i<m_keepIds.size(); ++i){
       if( ida == m_keepIds[i] ){
@@ -250,9 +230,8 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
     }
     if( isKeep ){
       if( doPrint ) ATH_MSG_DEBUG("ParticleMask isKeep " <<uid);
-      partMask[(*pItr)->index()] = true;
-      const xAOD::TruthParticle* ppItr = (*pItr);
-      int nkids =  getDescendants( ppItr, kids );
+      partMask[pItr->index()] = true;
+      int nkids =  getDescendants( pItr, kids );
       for(int i=0; i<nkids; ++i){
         if( doPrint ) ATH_MSG_DEBUG("ParticleMask isKeep kid " 
                                     <<uid <<" " <<HepMC::uniqueID(kids[i]));
@@ -263,37 +242,34 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
     }
 
     // Delta(R) matches to hard truth leptons/photons
-    if( !pLepGam.empty() && (*pItr)->pt() > m_isolPtCut ){
-      TLorentzVector pp4 = (*pItr)->p4();
+    if( !pLepGam.empty() && pItr->pt() > m_isolPtCut ){
+      TLorentzVector pp4 = pItr->p4();
       for(unsigned int lep=0; lep<pLepGam.size(); ++lep){
         double r = pp4.DeltaR( pLepGam[lep] );
         if( r < m_isolR ){
           if( doPrint ) ATH_MSG_DEBUG("ParticleMask isol " <<uid);
-          partMask[ (*pItr)->index() ] = true;
+          partMask[ pItr->index() ] = true;
         }
       }
     }
   }
 
 
-
-
   // Retrieve optional jets
   // Add particles that are constituents of selected jets using unique IDs.
   // Is index() for JetConstituentVector or TruthParticleContainer or??
 
-  if( !m_jetName.empty() ){
+  if( !m_truthJetsKey.empty() ){
 
-    const xAOD::JetContainer* inJets = nullptr;
-    if( evtStore()->retrieve(inJets, m_jetName).isFailure() ){
-      ATH_MSG_ERROR("No JetContainer found with name " <<m_jetName);
+    SG::ReadHandle<xAOD::JetContainer> inJets(m_truthJetsKey, ctx);
+    if (!inJets.isValid()) {
+      ATH_MSG_ERROR("Cannot retrieve JetContainer " << m_truthJetsKey);
       return StatusCode::FAILURE;
     }
 
     std::vector<int> uidJetConst;
 
-    for(unsigned int j=0; j<inJets->size(); ++j){
-      const xAOD::Jet* ajet = (*inJets)[j];
+    for(const auto* ajet : *inJets){
       if( ajet->pt() < m_jetPtCut ) continue;
       if( std::abs(ajet->eta()) > m_jetEtaCut ) continue;
 
@@ -313,15 +289,13 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
             uidJetConst.push_back( HepMC::uniqueID(pp) );
           }
         } else {
-          ATH_MSG_WARNING("Bad cast for particle in jet " <<j);
+          ATH_MSG_WARNING("Bad cast for particle in jet " <<ajet->index());
         }
       }
     }
 
-    pItr = inTruthParts->begin();
-    pItrE = inTruthParts->end();
-    for(; pItr!=pItrE; ++pItr){
-      int uid = HepMC::uniqueID(*pItr);
+    for (const auto* pItr : *inTruthParts) {
+      int uid = HepMC::uniqueID(pItr);
       bool isJet = false;
       for(unsigned int i=0; i<uidJetConst.size(); ++i){
         if( uid == uidJetConst[i] ){
@@ -331,7 +305,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
       }
       if( isJet ){
         if( doPrint ) ATH_MSG_DEBUG("ParticleMask isJet " <<uid);
-        partMask[ (*pItr)->index() ] = true;
+        partMask[ pItr->index() ] = true;
       }
     }
 
@@ -442,8 +416,6 @@ int DerivationFramework::HardTruthThinning::getDescendants(
 void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
                           const xAOD::TruthParticleContainer* truths) {
 
-  xAOD::TruthParticleContainer::const_iterator tpItr = truths->begin();
-  xAOD::TruthParticleContainer::const_iterator tpItrE = truths->end();
   std::vector<int> uidPars;
   std::vector<int> uidKids;
 
@@ -452,20 +424,20 @@ void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
   std::cout <<"   Unique ID    PDG Id  Status   px(GeV)   py(GeV)   pz(GeV)    E(GeV)   Parent: Decay" <<std::endl;
   std::cout <<"   -----------------------------------------------------------------------------------" <<std::endl;
 
-  for(; tpItr != tpItrE; ++tpItr ) {
-    if (HepMC::is_simulation_particle(*tpItr)) continue;
-    int uid = HepMC::uniqueID(*tpItr);
-    int id = (*tpItr)->pdgId();
-    int stat = (*tpItr)->status();
-    float px = (*tpItr)->px()/1000.;
-    float py = (*tpItr)->py()/1000.;
-    float pz = (*tpItr)->pz()/1000.;
-    float e = (*tpItr)->e()/1000.;
+  for (const auto* tpItr : *truths) {
+    if (HepMC::is_simulation_particle(tpItr)) continue;
+    int uid = HepMC::uniqueID(tpItr);
+    int id = tpItr->pdgId();
+    int stat = tpItr->status();
+    float px = tpItr->px()/GeV;
+    float py = tpItr->py()/GeV;
+    float pz = tpItr->pz()/GeV;
+    float e = tpItr->e()/GeV;
     uidPars.clear();
     uidKids.clear();
 
-    if( (*tpItr)->hasProdVtx() ){
-      const xAOD::TruthVertex* pvtx = (*tpItr)->prodVtx();
+    if( tpItr->hasProdVtx() ){
+      const xAOD::TruthVertex* pvtx = tpItr->prodVtx();
       if( pvtx ){
         const std::vector< ElementLink< xAOD::TruthParticleContainer > >& pars =
         pvtx->incomingParticleLinks();
@@ -476,8 +448,8 @@ void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
         }
       }
     }
-    if( (*tpItr)->hasDecayVtx() ){
-      const xAOD::TruthVertex* dvtx = (*tpItr)->decayVtx();
+    if( tpItr->hasDecayVtx() ){
+      const xAOD::TruthVertex* dvtx = tpItr->decayVtx();
       if( dvtx ){
         const std::vector< ElementLink< xAOD::TruthParticleContainer > >& kids =
         dvtx->outgoingParticleLinks();

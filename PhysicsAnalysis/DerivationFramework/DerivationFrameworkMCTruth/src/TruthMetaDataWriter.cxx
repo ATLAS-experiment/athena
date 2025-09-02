@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,7 +12,8 @@
 // EDM Objects that we need
 #include "xAODTruth/TruthMetaData.h"
 #include "xAODTruth/TruthMetaDataAuxContainer.h"
-#include "xAODEventInfo/EventInfo.h"
+
+#include "StoreGate/ReadHandle.h"
 
 // For accessing the tagInfo
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -40,6 +41,9 @@ DerivationFramework::TruthMetaDataWriter::~TruthMetaDataWriter() {
 StatusCode DerivationFramework::TruthMetaDataWriter::initialize()
 {
     ATH_MSG_VERBOSE("initialize() ...");
+
+    ATH_CHECK( m_eventInfoKey.initialize() );
+
     // Initialize the service handles
     CHECK( m_metaStore.retrieve() );
     CHECK( m_weightSvc.retrieve() );
@@ -59,14 +63,14 @@ StatusCode DerivationFramework::TruthMetaDataWriter::initialize()
 // Selection and collection creation
 StatusCode DerivationFramework::TruthMetaDataWriter::addBranches() const
 {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //The mcChannelNumber is used as a unique identifier for which truth meta data belongs to
     uint32_t mcChannelNumber = 0;
     // If this fails, we are running on a datatype with no EventInfo.  Such data types should
     //  definitely not be mixing MC samples, so this should be safe (will fall back to 0 above)
-    if (evtStore()->contains<xAOD::EventInfo>("EventInfo")){
-      const xAOD::EventInfo* eventInfo = nullptr;
-      CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
+    if (eventInfo.isPresent()) {
       mcChannelNumber = eventInfo->mcChannelNumber();
     }
 
