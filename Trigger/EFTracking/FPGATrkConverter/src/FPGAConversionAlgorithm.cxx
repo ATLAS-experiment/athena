@@ -21,7 +21,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     ATH_CHECK(m_FPGAClusterKey.initialize(m_doClusters or m_doSP));
     ATH_CHECK(m_FPGASPKey.initialize(m_doSP));
     ATH_CHECK(m_FPGAHitKey.initialize(m_doHits));
-    ATH_CHECK(m_FPGARoadKey.initialize(m_doActsTrk));
+    ATH_CHECK(m_FPGARoadKey.initialize(m_doActsTrk && m_useRoads));
     ATH_CHECK(m_FPGAHitInRoadsKey.initialize(m_doActsTrk));
     ATH_CHECK(m_FPGATrackKey.initialize(m_doActsTrk && !m_useRoads));
     ATH_CHECK(m_xAODPixelClusterFromFPGAClusterKey.initialize(m_doClusters));
@@ -30,7 +30,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     ATH_CHECK(m_xAODStripClusterFromFPGAHitKey.initialize(m_doHits));
     ATH_CHECK(m_xAODStripSpacePointFromFPGAKey.initialize(m_doSP));  
     ATH_CHECK(m_xAODPixelSpacePointFromFPGAKey.initialize(m_doSP));      
-    ATH_CHECK(m_ActsProtoTrackFromFPGARoadKey.initialize(m_doActsTrk));
+    ATH_CHECK(m_ActsProtoTrackFromFPGARoadKey.initialize(m_doActsTrk && m_useRoads));
     ATH_CHECK(m_ActsProtoTrackFromFPGATrackKey.initialize(m_doActsTrk));
     ATH_CHECK(m_outputStripClusterContainerKey.initialize(m_doClusters));
     ATH_CHECK(m_outputPixelClusterContainerKey.initialize(m_doClusters));
@@ -119,7 +119,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
             const FPGATrackSimTrackCollection* FPGATrackColl = FPGATracksHandle.cptr();
 
             if constexpr (enableBenchmark) m_chrono->chronoStart("FPGAConversion: Prototrack formation (from tracks)");
-	    ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
+	          ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
             if constexpr (enableBenchmark) m_chrono->chronoStop("FPGAConversion: Prototrack formation (from tracks)");
           }
         }
@@ -144,10 +144,12 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       ATH_CHECK( xAODStripClusterFromFPGAClusterHandle.record (std::move(SCTContFromClusters), std::move(SCTAuxContFromClusters)));
       if(m_doActsTrk)
       {
-        SG::WriteHandle<ActsTrk::ProtoTrackCollection> ActsProtoTrackFromFPGARoadHandle (m_ActsProtoTrackFromFPGARoadKey, ctx);
         SG::WriteHandle<ActsTrk::ProtoTrackCollection> ActsProtoTrackFromFPGATrackHandle (m_ActsProtoTrackFromFPGATrackKey, ctx);
-        ATH_CHECK( ActsProtoTrackFromFPGARoadHandle.record (std::move(ProtoTracksFromRoads)));
         ATH_CHECK( ActsProtoTrackFromFPGATrackHandle.record (std::move(ProtoTracksFromTracks)));
+        if(m_useRoads) {
+          SG::WriteHandle<ActsTrk::ProtoTrackCollection> ActsProtoTrackFromFPGARoadHandle (m_ActsProtoTrackFromFPGARoadKey, ctx);
+          ATH_CHECK( ActsProtoTrackFromFPGARoadHandle.record (std::move(ProtoTracksFromRoads)));
+      }
       }
       if (m_doSP) 
       {

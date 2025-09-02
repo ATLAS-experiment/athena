@@ -222,6 +222,7 @@ def createITkTrackingPassFlags():
     # ---flag for FPGA tracking
     icf.addFlag("doFPGASpacePoint", False)
     icf.addFlag("doFPGACluster", False)
+    icf.addFlag("doFPGASeed", False)
     icf.addFlag("doFPGATrackSim", False)
 
     # --- Flags for detailed information. 

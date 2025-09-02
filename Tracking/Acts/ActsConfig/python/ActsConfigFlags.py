@@ -9,6 +9,7 @@ class SeedingStrategy(FlagEnum):
     Gbts = "Gbts"
     Gbts2 = "Gbts2"
     GridTriplet = "GridTriplet"
+    F150 = "F150"
 
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"

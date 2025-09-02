@@ -4,7 +4,7 @@ def isPrimaryPass(flags) -> bool:
     return f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass" not in flags.Tracking
 
 def isFastPrimaryPass(flags) -> bool:
-    if flags.Tracking.ActiveConfig.extension == "ActsValidateF100" and flags.Tracking.doITkFastTracking:
+    if "ActiveConfig" in flags.Tracking and flags.Tracking.ActiveConfig.extension in ["ActsValidateF100", "ActsValidateF150"] and flags.Tracking.doITkFastTracking:
         return True
     return flags.Tracking.doITkFastTracking and isPrimaryPass(flags)
 

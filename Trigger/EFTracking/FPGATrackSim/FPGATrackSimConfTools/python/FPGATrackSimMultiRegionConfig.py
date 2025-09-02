@@ -66,7 +66,7 @@ def FPGATrackSimRegionMergeringAlgCfg(flagsIn,name="FPGATrackSimRegionMergingAlg
     regionMerging.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions
 
 
-    regionMerging.useRoads = not flags.Trigger.FPGATrackSim.tracking
+    regionMerging.useRoads = False # not flags.Trigger.FPGATrackSim.tracking (maybe we'll never actually use roads at this point)
 
     if stage == "2nd":
         from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import FPGATrackSimOverlapRemovalToolCfg

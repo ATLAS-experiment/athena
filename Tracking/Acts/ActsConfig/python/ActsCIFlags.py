@@ -113,3 +113,9 @@ def actsValidateF100Flags(flags) -> None:
     actsWorkflowFlags(flags)
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateF100]
     flags.Acts.doAmbiguityResolution = True
+    
+def actsValidateF150Flags(flags) -> None:
+    actsValidateF100Flags(flags)
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateF150]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.F150

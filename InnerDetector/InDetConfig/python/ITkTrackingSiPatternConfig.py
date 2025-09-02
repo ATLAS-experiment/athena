@@ -72,6 +72,11 @@ def ITkTrackingSiPatternCfg(flags,
                 flags,
                 TracksLocation=SiSPSeededTrackCollectionKey))
 
+        # FPGA seed
+        if flags.Tracking.ActiveConfig.doFPGASeed:
+            from FPGATrackSimConfTools import FPGATrackSimAnalysisConfig
+            acc.merge(FPGATrackSimAnalysisConfig.FPGATrackSimSeedingCfg(flags)) 
+        
         # ACTS seed
         if flags.Tracking.ActiveConfig.doActsSeed:
 

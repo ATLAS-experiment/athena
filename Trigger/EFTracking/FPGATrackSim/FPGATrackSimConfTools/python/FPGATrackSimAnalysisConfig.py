@@ -710,6 +710,41 @@ def ConfigureMultiRegionFlags(flags):
         flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
     print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
 
+
+def FPGATrackSimF150FlagCfg(flags):
+    flags.Scheduler.ShowDataDeps=True
+    flags.Scheduler.CheckDependencies=True
+    
+    flags.Concurrency.NumThreads=4
+    flags.Concurrency.NumConcurrentEvents=1
+    flags.Concurrency.NumProcs=0
+    
+    flags.Trigger.FPGATrackSim.readOfflineObjects=False
+    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False
+    flags.Trigger.FPGATrackSim.doMultiTruth=False
+    
+    FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg(flags)
+    flags.Trigger.FPGATrackSim.tracking = False
+    flags.Trigger.FPGATrackSim.Hough.genScan = True
+    flags.Trigger.FPGATrackSim.convertSPs = True
+    flags.Trigger.FPGATrackSim.Hough.secondStage = False
+    flags.Trigger.FPGATrackSim.regionList="34,98,162,226,290,354,418,482,546,610,674,738,802,866,930,994,1058,1122,1186,1250"
+    ConfigureMultiRegionFlags(flags)
+    
+    return flags
+
+def FPGATrackSimSeedingCfg(flags):
+    acc=ComponentAccumulator()
+    acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimClusteringCfg(flags))
+
+    from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
+    acc.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
+    
+    from FPGATrackSimSeeding.FPGATrackSimSeedingConfig import FPGATrackSimSeedingCfg
+    acc.merge(FPGATrackSimSeedingCfg(flags))
+    
+    return acc
+
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -864,12 +899,10 @@ if __name__ == "__main__":
             acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = f"FPGAConversionAlg{stage}",
                                                                         stage = f"{stage}",
                                                                         doActsTrk=True,
-                                                                        doSP=False,
-                                                                        useRoads=not flags.Trigger.FPGATrackSim.tracking))
+                                                                        doSP=flags.Trigger.FPGATrackSim.convertSPs))
 
             from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
-            acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}",
-                                            useRoads=not flags.Trigger.FPGATrackSim.tracking)) # Run ACTS KF
+            acc.merge(FPGAProtoTrackFitCfg(flags,stage=f"{stage}")) # Run ACTS KF
             acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey)) # Run Truth Matching/Decoration chain
             if flags.Trigger.FPGATrackSim.runCKF:
                 from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg

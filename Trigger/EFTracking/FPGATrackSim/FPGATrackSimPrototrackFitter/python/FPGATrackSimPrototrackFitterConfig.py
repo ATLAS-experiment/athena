@@ -39,10 +39,10 @@ def FPGAPrototrackFitAlgCfg(flags,
                      primary=True)
     return acc
 
-def FPGAProtoTrackFitCfg(flags,  name="FPGAPrototrackFitterConfig", stage = '', useRoads=False, **kwargs):
+def FPGAProtoTrackFitCfg(flags,  name="FPGAPrototrackFitterConfig", stage = '', **kwargs):
 
     ACTSProtoTrackChainTrackKey = "ACTSProtoTrackChainTestTracks"
-    FPGAPrototracks = f"ActsProtoTracks{stage}FromFPGARoad" if useRoads else f"ActsProtoTracks{stage}FromFPGATrack"
+    FPGAPrototracks = f"ActsProtoTracks{stage}FromFPGATrack"
     acc = ComponentAccumulator()
     from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
     acc.merge(ITkTrackRecoCfg(flags))
