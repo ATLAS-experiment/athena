@@ -93,7 +93,11 @@ def MistimeMonSequenceCfg(flags):
         recoAlg = L1CorrelationAlgCfg(flags, "MistimeMonj400", ItemList=['L1_J400','L1_gJ400p0ETA25'],
                                       TrigCompositeWriteHandleKey=outputName, trigCompPassKey=outputName+".pass",
                                       l1AKey=outputName+".l1a_type", otherTypeKey=outputName+".other_type",
-                                      beforeAfterKey=outputName+".beforeafterflag")
+                                      beforeAfterKey=outputName+".beforeafterflag",
+                                      otherTypeBeforeKey=outputName+".other_type_before",
+                                      otherTypeAfterKey=outputName+".other_type_after",
+                                      beforeOffsetKey=outputName+".offset_before",
+                                      afterOffsetKey=outputName+".offset_after")
         reco.addRecoAlgo(recoAlg)
         selAcc =  SelectionCA("MistimeMonSequence")
         selAcc.mergeReco(reco)
