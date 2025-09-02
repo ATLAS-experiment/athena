@@ -15,14 +15,15 @@
 // STL includes
 #include <sstream>
 #include <stdio.h>
-// to get the printing format specifiers (e.g. PRId64)
-#define __STDC_FORMAT_MACROS
+#include <stdexcept>
+
 #include <inttypes.h>
 
 // linux i/o includes
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <format>
 
 // FrameWork includes
 #include "Gaudi/Property.h"
@@ -106,84 +107,78 @@ StatusCode RootAsciiDumperAlgHandle::execute()
     collName.erase (0, pos+1);
   }
 
-  {
-    char* buf = 0;
-    int buf_sz = asprintf
-      (&buf,
-       "%03" PRId64 ".%s = %s\n"
-       "%03" PRId64 ".%s = %s\n"
-       "%03" PRId64 ".%s = %u\n"
-       "%03" PRId64 ".%s = %u\n"
-       "%03" PRId64 ".%s = %i\n",
-       nevts,
-       "collectionName",
-       collName.c_str(),
-       nevts,
-       "tupleName",
-       tupleName(*ei).c_str(),
-       nevts,
-       "RunNumber",
-       *runnbr,
-       nevts,
-       "EventNumber",
-       *evtnbr,
-       nevts,
-       "el_n",
-       *el_n);
-    write(m_ofd, buf, buf_sz);
-    free(buf);
-  }
+  std::string buf = std::format(
+        "{:03}.{} = {}\n"
+        "{:03}.{} = {}\n"
+        "{:03}.{} = {}\n"
+        "{:03}.{} = {}\n"
+        "{:03}.{} = {}\n",
+        nevts, "collectionName", collName,
+        nevts, "tupleName", tupleName(*ei),
+        nevts, "RunNumber", *runnbr,
+        nevts, "EventNumber", *evtnbr,
+        nevts, "el_n", *el_n
+  );
+
+    if (buf.empty()) {
+        throw std::runtime_error("Empty buffer in RootAsciiDumperAlgHandle::execute");
+    }
+
+    if (write(m_ofd, buf.data(), buf.size()) == -1) {
+        throw std::runtime_error("Failed to write buffer to file descriptor");
+    }
+  
 
   if (*el_n > 0) {
     SG::ReadHandle<std::vector<float> > el_eta (m_el_eta, ctx);
     SG::ReadHandle<std::vector<std::vector<float> > > el_jetcone_dr (m_el_jetcone_dr, ctx);
     
-    {
-      std::stringstream bufv;
-      for (int32_t ii = 0; ii < *el_n; ++ii) {
+    std::ostringstream bufv;
+    for (int32_t ii = 0; ii < *el_n; ++ii) {
         bufv << (*el_eta)[ii];
-        if (ii != (*el_n)-1) {
-          bufv << ", ";
+        if (ii != (*el_n) - 1) {
+            bufv << ", ";
         }
-      }
-      char* buf = 0;
-      int buf_sz = asprintf
-        (&buf,
-         "%03" PRId64 ".%s = [%s]\n",
-         nevts,
-         "el_eta",
-         bufv.str().c_str());
-      write(m_ofd, buf, buf_sz);
-      free(buf);
     }
 
+    buf = std::format(
+        "{:03}.{} = [{}]\n",
+        nevts,
+        "el_eta",
+        bufv.str()
+    );
 
-    {
-      std::stringstream bufv;
-      for (int32_t ii = 0; ii < *el_n; ++ii) {
+    if (buf.empty()) {
+        throw std::runtime_error("Empty buffer in RootAsciiDumperAlgHandle::execute");
+    }
+
+    if (write(m_ofd, buf.data(), buf.size()) == -1) {
+        throw std::runtime_error("Failed to write buffer to file descriptor");
+    }
+    bufv.str("");//clear
+    for (int32_t ii = 0; ii < *el_n; ++ii) {
         bufv << "[";
-        for (std::size_t jj = 0, jjmax = (*el_jetcone_dr)[ii].size();
-             jj < jjmax;
-             ++jj) {
-          bufv << (*el_jetcone_dr)[ii][jj];
-          if (jj != jjmax-1) {
-            bufv << ", ";
-          }
+        for (std::size_t jj = 0; jj < (*el_jetcone_dr)[ii].size(); ++jj) {
+            bufv << (*el_jetcone_dr)[ii][jj];
+            if (jj + 1 < (*el_jetcone_dr)[ii].size()) {
+                bufv << ", ";
+            }
         }
         bufv << "]";
-        if (ii != (*el_n)-1) {
-          bufv << ", ";
+        if (ii + 1 < *el_n) {
+            bufv << ", ";
         }
-      }
-      char* buf = 0;
-      int buf_sz = asprintf
-        (&buf,
-         "%03" PRId64 ".%s = [%s]\n",
-         nevts,
-         "el_jetcone_dr",
-         bufv.str().c_str());
-      write(m_ofd, buf, buf_sz);
-      free(buf);
+    }
+
+    buf = std::format(
+        "{:03}.{} = [{}]\n",
+        nevts,
+        "el_jetcone_dr",
+        bufv.str()
+    );
+
+    if (write(m_ofd, buf.data(), buf.size()) == -1) {
+        throw std::runtime_error("Failed to write buffer to file descriptor");
     }
   }
 
