@@ -100,7 +100,7 @@
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
     </class>
-    <typedef name="xAOD::sTgcMeasurement" >
+    <typedef name="xAOD::sTgcMeasurement" />
     <class name="xAOD::sTgcMeasContainer_v1"
             id="4541E289-E233-4711-A12C-11958CAE5C3F" />
     <typedef name="xAOD::sTgcMeasContainer" />    
