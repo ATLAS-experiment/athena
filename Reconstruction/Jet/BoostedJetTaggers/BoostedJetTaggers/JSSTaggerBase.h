@@ -7,6 +7,7 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "JetInterface/IJetDecorator.h"
 
@@ -173,7 +174,8 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readParentKey{this, "ParentName", "Parent", "SG key for Parent"};
 
-    bool m_suppressOutputDependence{};
+    Gaudi::Property<bool> m_suppressInputDependence{this, "SuppressInputDependence", false};
+    Gaudi::Property<bool> m_suppressOutputDependence{this, "SuppressOutputDependence", false};
 
     /// Strings for cut functions
     std::string m_strMassCutLow;

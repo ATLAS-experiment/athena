@@ -67,7 +67,6 @@ JSSTaggerBase::JSSTaggerBase(const std::string &name) :
 		   "Name of efficiency histograms in the ROOT file" );
   declareProperty( "WeightFlavors",             m_weightFlavors = "",
 		   "List of jet flavours for which the SF is available. Divided by comma" );
-  declareProperty( "SuppressOutputDependence", m_suppressOutputDependence = false );
 }
 
 StatusCode JSSTaggerBase::initialize() {
@@ -218,6 +217,16 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readNtrk500Key.initialize() );
 
 #ifndef XAOD_STANDALONE
+  if (m_suppressInputDependence) {
+    renounce(m_readECF1Key);
+    renounce(m_readECF2Key);
+    renounce(m_readECF3Key);
+    renounce(m_readSplit12Key);
+    renounce(m_readSplit23Key);
+    renounce(m_readECFG331Key);
+    renounce(m_readECFG311Key);
+    renounce(m_readECFG212Key);
+  }
   if (m_suppressOutputDependence) {
     renounce(m_decValidPtRangeHighKey);
     renounce(m_decValidPtRangeLowKey);
