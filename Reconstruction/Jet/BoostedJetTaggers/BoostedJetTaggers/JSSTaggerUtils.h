@@ -61,8 +61,9 @@ class JSSTaggerUtils :
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNConstituentsKey{this, "nConstituentsName", "nConstituents", "SG key for constituents multiplicity"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNTopoTowersKey{this, "nTopoTowersName", "nTopoTowers", "SG key for towers multiplicity"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreKey{this, "ConstScoreNameDec", "ConstScore", "SG key for ConstScore"};
-      SG::ReadDecorHandleKey<xAOD::JetContainer> m_readConstScoreKey{this, "ConstScoreNameRead", "ConstScore", "SG key for ConstScore"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decHLScoreKey{this, "HLScoreName", "HLScore", "SG key for HLScore"};
+
+      std::unique_ptr<SG::ConstAccessor<float>> m_constScoreAcc = nullptr;
 
   };
 
