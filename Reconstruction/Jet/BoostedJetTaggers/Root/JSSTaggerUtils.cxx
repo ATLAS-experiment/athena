@@ -150,8 +150,7 @@ StatusCode JSSTaggerUtils::initialize(){
   m_decConstScoreKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreKey.key();
   ATH_CHECK( m_decConstScoreKey.initialize() );
 
-  m_readConstScoreKey = m_containerName + "." + m_decorationName + "_" + m_readConstScoreKey.key();
-  ATH_CHECK( m_readConstScoreKey.initialize() );
+  m_constScoreAcc = std::make_unique<SG::ConstAccessor<float>>(m_decorationName + "_ConstScore");
 
   m_decHLScoreKey = m_containerName + "." + m_decorationName + "_" + m_decHLScoreKey.key();
   ATH_CHECK( m_decHLScoreKey.initialize() );
@@ -495,9 +494,7 @@ std::map<std::string, double> JSSTaggerUtils::GetJSSVars(const xAOD::Jet& jet) c
   // store input variables
   JSSVars["pT"] = jet.pt();
   JSSVars["nTracks"] = nUngrTracks;
-
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readConstScore(m_readConstScoreKey);
-  JSSVars["CNN"] = readConstScore(jet);
+  JSSVars["CNN"] = (*m_constScoreAcc)(jet);
 
   // define the decorator readers
   SG::ReadDecorHandle<xAOD::JetContainer, float> readSplit12(m_readSplit12Key);
