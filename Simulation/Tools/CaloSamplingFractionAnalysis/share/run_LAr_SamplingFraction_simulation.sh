@@ -1,6 +1,9 @@
 #!/bin/bash
 
-#export ATHENA_CORE_NUMBER=16
+if test -z "$ATHENA_CORE_NUMBER"
+then
+  export ATHENA_CORE_NUMBER=8
+fi
 
 inputEVNT=$1
 outputHITS=$2
@@ -21,21 +24,30 @@ echo outputHITS=$outfile_job, rundir=$rundir
 mkdir -p $rundir
 cd $rundir
 
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+echo "Run simulation with geometry: $geometry , conditions: $conditions"
+
 Sim_tf.py \
 --CA \
 --multithreaded \
---conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-04' \
+--conditionsTag "default:${conditions}" \
+--geometryVersion "default:${geometry}" \
 --physicsList "$physlist" \
 --simulator 'FullG4MT_QS' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits,SimulationConfig.disablePhotonRussianRoulette,SimulationConfig.disableNeutronRussianRoulette,SimulationConfig.disableFrozenShowersFCalOnly' \
---geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
 --inputEVNTFile "$inputEVNT" \
 --outputHITSFile "$outfile_job" \
 --maxEvents $nevents \
 --skipEvent $skip \
 --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
 --imf False
+
+echo  "art-result: $? Simulation"
+
+#--preExec "flags.dump('GeoModel');flags.GeoModel.EMECStandard=True;flags.dump('GeoModel')" \
+
 
 cd ..
 

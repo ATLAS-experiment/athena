@@ -48,12 +48,18 @@ void LarEMSamplingFraction_barrel(std::string filebarrel="LArEM_SF_barrel.root")
   pt->SetBorderSize(1);
   pt->AddText("Energy fractions LAr EM barrel");
 
+  TFile* f=TFile::Open("SF_LAr.root","UPDATE");
+
   for(int i=0;i<res->GetSize();++i) if(res->At(i)->InheritsFrom(TF1::Class())) {
     TF1* func=(TF1*)res->At(i);
     TString text=Form("%4.2f < #eta < %4.2f = %7.5f +- %7.5f",func->GetXmin(),func->GetXmax(),func->GetParameter(0),func->GetParError(0));
     //cout<<"i="<<i<<" "<<res->At(i)->ClassName()<<" : "<<res->At(i)->GetName()<<endl;
     std::cout<<"Energy fraction : "<<text<<std::endl;
     pt->AddText(text);
+
+    f->cd();
+    func->SetName(Form("EF_LArEM_eta_%4.2f_%4.2f",func->GetXmin(),func->GetXmax()));
+    func->Write();
   }
   
   pt->Draw();
@@ -123,8 +129,14 @@ void LarEMSamplingFraction_barrel(std::string filebarrel="LArEM_SF_barrel.root")
     std::cout<<"Sampling fraction : "<<text<<std::endl;
     pt->AddText(text);
     outtxt<<text<<"\n";
+
+    f->cd();
+    func->SetName(Form("SF_LArEM_eta_%4.2f_%4.2f",func->GetXmin(),func->GetXmax()));
+    func->Write();    
   }
 
+  f->Close();
+  delete f;
   outtxt.close();
   
   pt->Draw();
@@ -174,13 +186,17 @@ void LarEMSamplingFraction_endcap(std::string fileendcap="LArEM_SF_endcap.root")
   pt->SetBorderSize(1);
   pt->AddText("Energy fractions LAr EM endcap");
 
+  TFile* f=TFile::Open("SF_LAr.root","UPDATE");
+
   for(int i=0;i<res->GetSize();++i) if(res->At(i)->InheritsFrom(TF1::Class())) {
     TF1* func=(TF1*)res->At(i);
     TString text=Form("%4.2f < #eta < %4.2f = %+7.5f +- %7.5f + (|#eta|-%5.3f)*( %7.5f +- %7.5f )",func->GetXmin(),func->GetXmax(),func->GetParameter(0),func->GetParError(0),0.5*(func->GetXmin()+func->GetXmax()),func->GetParameter(1),func->GetParError(1));
     std::cout<<"Energy fraction : "<<text<<std::endl;
     pt->AddText(text);
-    if(func->GetFormula()) {
-    }
+
+    f->cd();
+    func->SetName(Form("EF_LArEM_eta_%4.2f_%4.2f",func->GetXmin(),func->GetXmax()));
+    func->Write();
   }
   
   pt->Draw();
@@ -238,8 +254,14 @@ void LarEMSamplingFraction_endcap(std::string fileendcap="LArEM_SF_endcap.root")
     std::cout<<"Sampling fraction : "<<text<<std::endl;
     pt->AddText(text);
     outtxt<<text<<"\n";
+
+    f->cd();
+    func->SetName(Form("SF_LArEM_eta_%4.2f_%4.2f",func->GetXmin(),func->GetXmax()));
+    func->Write();
   }
   
+  f->Close();
+  delete f;
   outtxt.close();
 
   pt->Draw();
