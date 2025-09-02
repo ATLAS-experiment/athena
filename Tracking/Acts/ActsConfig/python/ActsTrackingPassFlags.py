@@ -227,3 +227,15 @@ def createEFValidateF100TrackingPassFlags():
     icf.doActsSeed = True
     icf.doActsTrack = True
     return icf
+
+def createEFValidateF150TrackingPassFlags():
+    icf = createActsTrackingPassFlags()
+    icf.extension = "ActsValidateF150"
+    icf.doActsCluster = False
+    icf.doFPGACluster = True
+    icf.doFPGASeed = True
+    icf.doFPGATrackSim = True
+    icf.doActsSpacePoint = False
+    icf.doActsSeed = False
+    icf.doActsTrack = True
+    return icf

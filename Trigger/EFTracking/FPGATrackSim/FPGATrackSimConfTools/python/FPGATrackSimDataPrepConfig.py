@@ -545,10 +545,12 @@ def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
     acc=ComponentAccumulator()
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
     acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
+        'FPGATrackSimSPKey': 'FPGAClusters_1st',
         'xAODPixelClusterFromFPGAClusterKey': 'FPGAPixelClusters',
         'xAODStripClusterFromFPGAClusterKey': 'FPGAStripClusters',
+        'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
         'doActsTrk': False,
-        'doSP': False,
+        'doSP': flags.Trigger.FPGATrackSim.convertSPs,
     }))
     
     from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg

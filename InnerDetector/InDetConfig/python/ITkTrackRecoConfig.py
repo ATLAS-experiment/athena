@@ -7,7 +7,7 @@ from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
-_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100'] # Possible Acts Alone Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags):
@@ -28,6 +28,7 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
         TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
         TrackingComponent.ActsValidateF100 : "ActsValidateF100",
+        TrackingComponent.ActsValidateF150 : "ActsValidateF150",
     }
     
     # Athena Pass

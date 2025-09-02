@@ -121,6 +121,7 @@ def createFPGATrackSimConfigFlags():
 
     # EDM conversion
     cf.addFlag('doEDMConversion', False)
+    cf.addFlag('convertSPs', False)
     cf.addFlag('convertUnmappedHits', False)
     cf.addFlag('writeToAOD', False)
     cf.addFlag('writeClustersToAOD', False)
