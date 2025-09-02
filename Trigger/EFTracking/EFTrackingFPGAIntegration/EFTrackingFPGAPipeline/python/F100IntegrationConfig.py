@@ -110,7 +110,7 @@ def F100FlagsCfg(flags):
     return flags
 
 
-def FPGADataPreparation(flags): # thsi is used to run the F100 through Reco_tf
+def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F100 through Reco_tf
     kwargs = {}
     kwargs.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     acc = ComponentAccumulator()
@@ -122,30 +122,31 @@ def FPGADataPreparation(flags): # thsi is used to run the F100 through Reco_tf
         acc.merge(F110IntegrationCfg(flags, "F110IntegrationAlg", **kwargs))
 
     acc.merge(F100EDMConversionCfg(flags))
-    acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'ITkPixelClusters',
-                                             'sortedxAODStripClusterContainer': 'ITkStripClusters'}))
-    
-    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
-    acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
-    
-    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
-    acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+    acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone else 'ITkPixelClusters',
+                                             'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
 
-    if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
-        toAOD = []
-
-        pixel_cluster_shortlist = ['-pixelClusterLink']
-        strip_cluster_shortlist = ['-sctClusterLink']
+    if(not runStandalone):
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
+        acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
         
-        pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
-        strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+        from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
+        acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
 
-        toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
-                  'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
-                  'xAOD::StripClusterContainer#ITkStripClusters',
-                  'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
+        if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
+            toAOD = []
+
+            pixel_cluster_shortlist = ['-pixelClusterLink']
+            strip_cluster_shortlist = ['-sctClusterLink']
+            
+            pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
+            strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+
+            toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
+                    'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
+                    'xAOD::StripClusterContainer#ITkStripClusters',
+                    'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
+            from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+            acc.merge(addToAOD(flags, toAOD))
     return acc
     
     
@@ -185,10 +186,6 @@ if __name__ == "__main__":
 
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
-
-    kwarg = {}
-
-    kwarg.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
@@ -213,10 +210,8 @@ if __name__ == "__main__":
         from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
         cfg.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
 
+    cfg.merge(FPGADataPreparation(flags,runStandalone=True))
 
-    acc = F100IntegrationCfg(flags, **kwarg)
-    cfg.merge(acc)
-    
     OutputItemList = []
     # # Connection to ACTS
     if flags.FPGADataPrep.DoActs:
@@ -224,9 +219,6 @@ if __name__ == "__main__":
         # convert xAOD Clusters to SPs
         from EFTrackingFPGAUtility.DataPrepToActsConfig import UseActsSpacePointFormationCfg
         cfg.merge(UseActsSpacePointFormationCfg(flags))
-                
-        # Sort FPGAClusters
-        cfg.merge(FPGAClusterSortingCfg(flags))
     
 
         # Run the ACTS Fast Tracking on FPGA clusters
