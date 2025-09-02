@@ -12,7 +12,7 @@ def DiTauDQANominalDiTauSelectionToolCfg(flags, **kwargs):
     selectioncuts = TauAnalysisTools.DiTauSelectionCuts
     kwargs.setdefault("SelectionCuts", int(selectioncuts.DiTauCutPt | selectioncuts.DiTauCutAbsCharge))
     kwargs.setdefault("PtMin", 50.0)
-    kwargs.setdefault("AbsCharge", 1)
+    kwargs.setdefault("AbsCharge", 0)
     from TauAnalysisTools.DiTauAnalysisToolsConfig import DiTauSelectionToolCfg
     nominalseltool = acc.popToolsAndMerge(DiTauSelectionToolCfg(flags, "NominalDiTauSelectionTool", **kwargs))
 

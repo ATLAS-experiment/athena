@@ -37,10 +37,12 @@ namespace DiTau{
     lead_subjet_pt  = Book1D("lead_subjet_pt", "DiTau leading subjet pt; DiTau Leading Subjet Transverse Momentum [GeV];Entries / 1 GeV",20,0.,100);
     lead_subjet_eta = Book1D("lead_subjet_eta", "DiTau leading subjet eta; DiTau Leading Subjet Pseudo-Rapidity;Entries / 0.05", 32, -3.2, 3.2);
     lead_subjet_phi = Book1D("lead_subjet_phi", "DiTau leading subjet phi; DiTau Leading Subjet Azimuthal Angle;Entries / 0.05", 32, -3.2, 3.2);
+    lead_subjet_ntracks = Book1D("lead_subjet_ntracks", "DiTau leading subjet ntracks; DiTau Leading Subjet Number of Tracks; Entries", 8,0,8);  
 
     sublead_subjet_pt  = Book1D("sublead_subjet_pt", "DiTau subleading subjet pt; DiTau Subleading Subjet Transverse Momentum [GeV];Entries / 1 GeV",10,0.,50);
     sublead_subjet_eta = Book1D("sublead_subjet_eta", "DiTau subleading subjet eta; DiTau Subleading Subjet Pseudo-Rapidity;Entries / 0.05", 32, -3.2, 3.2);
     sublead_subjet_phi = Book1D("sublead_subjet_phi", "DiTau subleading subjet phi; DiTau Subleading Subjet Azimuthal Angle;Entries / 0.05", 32, -3.2, 3.2);
+    sublead_subjet_ntracks = Book1D("sublead_subjet_ntracks", "DiTau subleading subjet ntracks; DiTau Subleading Subjet Number of Tracks; Entries", 8,0,8);  
 
     omni_score = Book1D("OmniScore", "OmniScore;OmniScore; # DiTau", 50,0.,1.);    
   }
@@ -57,6 +59,8 @@ namespace DiTau{
      eta_phi->Fill(ditau.eta(), ditau.phi(), weight);
 
      int ditau_charge = 0;
+     int lead_ntracks = 0;
+     int subl_ntracks = 0;
      for (const auto& xTrack : ditau.trackLinks()) {
         if (!xTrack.isValid())
            continue;
@@ -69,6 +73,11 @@ namespace DiTau{
               double dR = tlvSubjet.DeltaR((*xTrack)->p4());
               if (dR < 0.1) {
                  ditau_charge += (*xTrack)->charge();
+		 if( i == 0){
+	           lead_ntracks++;		 
+		 } else{
+	           subl_ntracks++; 		 
+		 }
                  break; //prevents double counting of tracks
               }
            }  // loop over subjets
@@ -81,10 +90,12 @@ namespace DiTau{
      lead_subjet_pt->Fill(ditau.subjetPt(0)/Athena::Units::GeV,weight);
      lead_subjet_eta->Fill(ditau.subjetEta(0),weight);
      lead_subjet_phi->Fill(ditau.subjetPhi(0),weight);
+     lead_subjet_ntracks->Fill(lead_ntracks);
 
      sublead_subjet_pt->Fill(ditau.subjetPt(1)/Athena::Units::GeV,weight);
      sublead_subjet_eta->Fill(ditau.subjetEta(1),weight);
      sublead_subjet_phi->Fill(ditau.subjetPhi(1),weight);
+     sublead_subjet_ntracks->Fill(subl_ntracks);
 
      // omni score
      static const SG::ConstAccessor<float> acc_OmniScore("omni_score");
