@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -65,7 +65,10 @@ class TrigGlobalEfficiencyCorrectionTool
       const CP::SystematicSet& systConfig) override;
 
   virtual CP::CorrectionCode checkTriggerMatching(
-      bool& matched,
+      bool& matched, 
+      const std::vector<const xAOD::IParticle*>& particles) override;
+  virtual CP::CorrectionCode checkTriggerMatching(
+      std::unordered_map<std::string, bool>& matched_per_trigger, 
       const std::vector<const xAOD::IParticle*>& particles) override;
   virtual CP::CorrectionCode getRelevantTriggers(
       std::vector<std::string>& triggers) override;

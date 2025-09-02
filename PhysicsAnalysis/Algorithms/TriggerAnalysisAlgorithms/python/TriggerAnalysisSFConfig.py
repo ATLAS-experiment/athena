@@ -118,6 +118,8 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="disables the global trigger efficiency tool (including "
             "matching), which is only suited for electron/muon/photon "
             "trigger legs. The default is False.")
+        self.addOption ('separateChainMatching', False, type=bool,
+            info="Store the matching status for each trigger separately")
         self.addOption ('triggerMatchingChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. The default is {} (empty dictionary).")
@@ -168,6 +170,14 @@ class TriggerAnalysisSFBlock(ConfigBlock):
                 if not alg.triggers_2018:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2018!')
 
+        triggerMatchingChains = set()
+        if self.separateChainMatching:
+            for year in get_input_years(config):
+                for trig in get_year_data(self.triggerChainsPerYear, year):
+                    triggerMatchingChains.update(trig.replace(' || ', '_OR_').split('_OR_'))
+        alg.separateMatchingTriggers = list(triggerMatchingChains)
+        alg.separateMatchingDecorationSuffix = triggerSuffix + self.postfix
+
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
         alg.numberOfToys = self.numberOfToys
@@ -192,6 +202,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         if config.dataType() is not DataType.Data and not alg.doMatchingOnly:
             config.addOutputVar('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF' + triggerSuffix + self.postfix)
         config.addOutputVar('EventInfo', alg.matchingDecoration, 'globalTriggerMatch' + triggerSuffix + self.postfix, noSys=False)
+
+        for trig in triggerMatchingChains:
+            var = f'triggerMatch_{trig.replace("-", "_").replace(".", "p")}{alg.separateMatchingDecorationSuffix}'
+            config.addOutputVar('EventInfo', f'{var}_%SYS%', var, noSys=False)
 
         return
 
