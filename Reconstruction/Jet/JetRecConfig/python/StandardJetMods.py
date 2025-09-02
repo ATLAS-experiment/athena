@@ -305,7 +305,7 @@ stdJetModifiers.update(
 
     charge    = JetModifier( "JetChargeTool", "charge", K=1.0),
 
-    qw = JetModifier( "QwTool", "qw"),
+    qw = JetModifier( "QwTool", "qw", JetContainer = _jetname),
 
     softdropobs = JetModifier("SoftDropObservablesTool", "softdropobs"),
 )

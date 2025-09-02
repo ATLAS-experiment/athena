@@ -1,7 +1,7 @@
 // This file is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETSUBSTRUCTURE_QWTOOL_H
@@ -17,6 +17,9 @@
 //////////////////////////////////////////////////////////
 #include "JetSubStructureMomentTools/JetSubStructureMomentToolsBase.h"
 
+#include "AsgTools/PropertyWrapper.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
+
 class QwTool :
   public JetSubStructureMomentToolsBase {
     ASG_TOOL_CLASS(QwTool, IJetModifier)
@@ -25,9 +28,15 @@ class QwTool :
     // Ctor.
     QwTool(const std::string& t);
 
-    // Add moment to a jet.
-    int modifyJet(xAOD::Jet& injet) const;
+    virtual StatusCode initialize() override;
 
+    StatusCode modify(xAOD::JetContainer& jets) const override;
+
+  private:
+    Gaudi::Property<std::string> m_jetContainerName{
+      this, "JetContainer", "", "SG key for the input jet container"};
+
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_Qw_Key{this, "Qw_Key", "Qw"};
 };
 
 #endif
