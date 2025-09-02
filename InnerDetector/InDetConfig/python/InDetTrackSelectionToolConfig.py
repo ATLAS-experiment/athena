@@ -79,17 +79,6 @@ def PFTrackSelectionToolCfg(flags, name="PFTrackSelectionTool", **kwargs):
     kwargs.setdefault("minPt", 500.0)
     return InDetTrackSelectionTool_TightPrimary_Cfg(flags, name, **kwargs)
 
-def IDAlignMonTrackSelectionToolCfg(
-        flags, name="IDAlignMonTrackSelectionTool", **kwargs):
-    kwargs.setdefault("TrackSummaryTool", None)
-    kwargs.setdefault("maxNPixelHoles"             , 1)
-    kwargs.setdefault("minNBothInnermostLayersHits", 0)
-    kwargs.setdefault("minNInnermostLayerHits"     , 1)
-    kwargs.setdefault("minPt"                      , 5000)
-    kwargs.setdefault("maxD0"                      , 100000)
-    kwargs.setdefault("maxZ0SinTheta"              , 150)
-    return InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(flags, name, **kwargs)
-
 ###############################################
 #####  Configs not based on any CutLevel  #####
 ###############################################
@@ -216,6 +205,10 @@ def Align_InDetTrackSelectionToolCfg(flags, name="Align_InDetTrackSelectionTool"
         kwargs.setdefault("minNSiHitsModBottom", 2)
 
     else:
+        kwargs.setdefault("minPt", 3000.)
+        kwargs.setdefault("maxEtaForTrtHitCuts", 1.9)
+        kwargs.setdefault("maxTrtEtaAcceptance", 0)
+        kwargs.setdefault("minNTrtHits", 0)
         kwargs.setdefault("maxD0", 500.)
         kwargs.setdefault("maxZ0", 500.)
         kwargs.setdefault("minNPixelHitsPhysical", 2)
