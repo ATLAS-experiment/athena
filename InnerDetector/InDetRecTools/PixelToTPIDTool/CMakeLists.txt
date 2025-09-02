@@ -4,7 +4,6 @@
 atlas_subdir( PixelToTPIDTool )
 
 # External dependencies:
-#find_package( CLHEP )
 
 # Component(s) in the package:
 atlas_add_component( PixelToTPIDTool
@@ -17,4 +16,3 @@ atlas_add_component( PixelToTPIDTool
   TrkRIO_OnTrack TrkTrack TrkToolInterfaces PixelGeoModelLib PixelConditionsData TrackingAnalysisAlgorithmsLib)
 
 # Install files from the package:
-#atlas_install_runtime( share/*.txt )
