@@ -91,6 +91,13 @@ if __name__ == '__main__':
                                writeMuxOutputBitstreamToFile = True,
                                OutputLevel=DEBUG))
 
+    # Algorithm to build cell towers
+    from  GlobalSimulation.GlobalCellTowerAlgToolCfg import GlobalCellTowerAlgToolCfg
+    acc.merge(GlobalCellTowerAlgToolCfg(flags,
+                               gblLArCellsKey = gblLArCellContainerKey,
+                               gblCellTowersKey = "GlobalCellTowers",
+                               OutputLevel=DEBUG))
+
     if acc.run().isFailure():
         import sys
         sys.exit(1)        
