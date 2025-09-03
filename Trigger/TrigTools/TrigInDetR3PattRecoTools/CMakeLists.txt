@@ -6,7 +6,6 @@ atlas_subdir( TrigInDetR3PattRecoTools )
 # library in the package:
 atlas_add_library( TrigInDetR3PattRecoToolsLib
                    src/TrigInDetR3Utils.cxx
-		   src/TrigTrackSeedGenerator.cxx
                    PUBLIC_HEADERS TrigInDetR3PattRecoTools
                    LINK_LIBRARIES TrigInDetPattRecoEvent
                    PRIVATE_LINK_LIBRARIES IRegionSelector TrigInDetEvent InDetPrepRawData BeamSpotConditionsData)
