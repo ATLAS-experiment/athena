@@ -136,7 +136,6 @@ namespace iFatras {
        mutable float                 m_hadIntPointR;               //!< ntuple variable : hadronic interaction point r distance
        mutable float                 m_hadIntPointZ;               //!< ntuple variable : hadronic interaction point z coordinate
        mutable int                   m_hadIntMotherPdg;            //!< ntuple variable : hadronic interaction mother Pdg
-       mutable int                   m_hadIntMotherBarcode;         //!< ntuple variable : hadronic interaction mother barcode
        mutable float                 m_hadIntMotherP;         //!< ntuple variable : hadronic interaction mother momentum
        mutable float                 m_hadIntMotherPt;         //!< ntuple variable : hadronic interaction mother momentum
        mutable float                 m_hadIntMotherPhi;            //!< ntuple variable : hadronic interaction mother phi

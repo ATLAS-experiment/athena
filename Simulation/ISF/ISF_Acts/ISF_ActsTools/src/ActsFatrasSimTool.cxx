@@ -388,7 +388,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       } // end of generation loop
     } // end of !simulatedFinal.empty()
     ATH_MSG_VERBOSE(name() << " No. of secondaries: " << secondaries.size());
-    ATH_MSG_DEBUG(name() << " End of particle " << isfp->id());
+    ATH_MSG_DEBUG(name() << " End of particle " << HepMC::uniqueID(isfp));
 
     std::vector<ActsFatras::Particle>().swap(input);
     std::vector<ActsFatras::Particle>().swap(simulatedInitial);
