@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ISFEVENT_ISFTRUTHINCIDENT_H
@@ -64,15 +64,17 @@ namespace ISF {
         (usually only called for particles that will enter the HepMC truth event) */
     HepMC::GenParticlePtr      parentParticle() override final;
     int      parentStatus() override final;
-    /** Return the barcode of the parent particle */
-    int  parentBarcode() override final; // TODO Remove this method
     /** Return the unique ID of the parent particle */
     int  parentUniqueID() override final;
     /** Return a boolean whether or not the parent particle survives the incident */
     bool                      parentSurvivesIncident() const override final;
     /** Return the parent particle after the TruthIncident vertex (and give
-        it a new barcode) */
+        it a new barcode - HEPMC2) */
+    #ifdef HEPMC3
+    HepMC::GenParticlePtr     parentParticleAfterIncident() override final;
+    #else
     HepMC::GenParticlePtr     parentParticleAfterIncident(int newBC) override final;
+    #endif
 
     /** Return p^2 of the i-th child particle */
     double                    childP2(unsigned short index) const override final;
@@ -82,8 +84,10 @@ namespace ISF {
     double                    childEkin(unsigned short index) const override final;
     /** Return the PDG Code of the i-th child particle */
     int                       childPdgCode(unsigned short index) const override final;
+#ifndef HEPMC3
     /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
     int  childBarcode(unsigned short) const override final;
+#endif
     /** Return the i-th child as a HepMC particle type and assign the given
         Barcode to the simulator particle (usually only called for particles that
         will enter the HepMC truth event) */

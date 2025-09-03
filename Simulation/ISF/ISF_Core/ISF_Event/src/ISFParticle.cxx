@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_Event/ISFParticle.h"
@@ -16,7 +16,6 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const ISFParticle &parent,
                               int id,
-                             int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position(pos),
@@ -27,7 +26,6 @@ ISF::ISFParticle::ISFParticle(
   m_status(status),
   m_tstamp(time),
   m_history(parent.history()),
-  m_barcode(barcode), // TODO drop this soon
   m_uid(id),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
@@ -47,7 +45,6 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const ISFParticle &parent,
                               int id,
-                              int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position( pos.x(), pos.y(), pos.z()),
@@ -58,7 +55,6 @@ ISF::ISFParticle::ISFParticle(
   m_status(status),
   m_tstamp(time),
   m_history(parent.history()),
-  m_barcode(barcode), // TODO drop this soon
   m_uid(id),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
@@ -78,7 +74,6 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const DetRegionSvcIDPair &origin,
                               int id,
-                              int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position(pos),
@@ -89,7 +84,6 @@ ISF::ISFParticle::ISFParticle(
   m_status(status),
   m_tstamp(time),
   m_history(1, origin),
-  m_barcode(barcode), // TODO drop this soon
   m_uid(id),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
@@ -108,7 +102,6 @@ ISF::ISFParticle::ISFParticle(const ISFParticle& isfp):
   m_status(isfp.status()),
   m_tstamp(isfp.timeStamp()),
   m_history(isfp.history()),
-  m_barcode(isfp.barcode()), // TODO drop this soon
   m_uid(isfp.id()),
   m_truth(nullptr),
   m_order(ISF::DefaultParticleOrder),
@@ -130,7 +123,6 @@ ISF::ISFParticle::ISFParticle(ISFParticle&& isfp):
   m_status(isfp.status()),
   m_tstamp(isfp.timeStamp()),
   m_history(isfp.history()),
-  m_barcode(isfp.barcode()), // TODO drop this soon
   m_uid(isfp.id()),
   m_truth(isfp.getTruthBinding()),
   m_order(isfp.getOrder()),
@@ -158,7 +150,6 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(const ISF::ISFParticle& rhs)
     m_status       = rhs.status();
     m_tstamp       = rhs.timeStamp();
     m_history      = rhs.history();
-    m_barcode      = rhs.barcode(); // TODO drop this soon
     m_uid           = rhs.id();
 
     delete m_truth;
@@ -188,7 +179,6 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(ISF::ISFParticle&& rhs)
   m_status       = rhs.status();
   m_tstamp       = rhs.timeStamp();
   m_history      = rhs.history();
-  m_barcode      = rhs.barcode(); // TODO drop this soon
   m_uid           = rhs.id();
   delete m_truth;
   m_truth        = rhs.getTruthBinding();
@@ -218,7 +208,6 @@ bool ISF::ISFParticle::isEqual(const ISF::ISFParticle& rhs) const
   pass &= m_status == rhs.status();
   pass &= std::fabs(m_tstamp-rhs.timeStamp()) < epsilon;
   pass &= m_history == rhs.history();
-  pass &= m_barcode == rhs.barcode(); // TODO drop this soon
   pass &= m_uid == rhs.id();
   {
     const auto rhsTruthPtr = rhs.getTruthBinding();
@@ -260,7 +249,6 @@ bool ISF::ISFParticle::isIdent(const ISF::ISFParticle& rhs) const
   pass &= m_status == rhs.status();
   pass &= m_tstamp == rhs.timeStamp();
   pass &= m_history == rhs.history();
-  pass &= m_barcode == rhs.barcode(); // TODO drop this soon
   pass &= m_uid == rhs.id();
   pass &= m_truth && rhs.getTruthBinding();
   pass &= m_userInfo == rhs.getUserInformation();
