@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -73,9 +73,6 @@ InDetPhysHitDecoratorAlg::initialize() {
     assert( m_intDecor.size() == kNIntDecorators);
     assert( m_uint64Decor.size() == kNUInt64Decorators);
     assert( m_floatDecor.size() == kNFloatDecorators);
-
-    // ID Helper
-    m_idHelper = new AtlasDetectorID;
 
     // Get the dictionary manager from the detector store
     ATH_CHECK(detStore()->retrieve(m_idHelper, "AtlasID"));
