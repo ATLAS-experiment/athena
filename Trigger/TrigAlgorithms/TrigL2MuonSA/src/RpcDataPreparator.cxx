@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcDataPreparator.h"
@@ -52,7 +52,8 @@ void TrigL2MuonSA::RpcDataPreparator::setRoIBasedDataAccess(bool use_RoIBasedDat
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*    p_roids,
+StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const EventContext& ctx,
+                                                        const TrigRoiDescriptor*    p_roids,
                                                         TrigL2MuonSA::RpcHits&      rpcHits,
                                                         TrigL2MuonSA::RpcLayerHits& rpcLayerHits,
                                                         const ToolHandle<RpcPatFinder>*   rpcPatFinder,
@@ -70,10 +71,10 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
 
         ATH_MSG_DEBUG("Use RoI based data access");
         
-        if (p_roids) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*p_roids, rpcHashList);
+        if (p_roids) m_regionSelector->lookup(ctx)->HashIDList(*p_roids, rpcHashList);
         else {
         TrigRoiDescriptor fullscan_roi( true );
-        m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
+        m_regionSelector->lookup(ctx)->HashIDList(fullscan_roi, rpcHashList);
         }
         ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
 
@@ -82,14 +83,14 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
         ATH_MSG_DEBUG("Use full data access");
         
         TrigRoiDescriptor fullscan_roi( true );
-        m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
+        m_regionSelector->lookup(ctx)->HashIDList(fullscan_roi, rpcHashList);
         ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());     
     }
    
     if (!rpcHashList.empty()) {
         
         // Get RPC container
-        auto rpcPrepContainerHandle = SG::makeHandle(m_rpcPrepContainerKey);
+        auto rpcPrepContainerHandle = SG::makeHandle(m_rpcPrepContainerKey, ctx);
         const Muon::RpcPrepDataContainer* rpcPrds = rpcPrepContainerHandle.cptr();
 
         if (!rpcPrepContainerHandle.isValid()) {
@@ -221,7 +222,8 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*         p_roids,
+StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const EventContext& ctx,
+                                                        const TrigRoiDescriptor*         p_roids,
                                                         TrigL2MuonSA::RpcLayerClusters&  rpcLayerClusters,
                                                         const ToolHandle<ClusterPatFinder>*    clusterPatFinder,
                                                         const bool dynamicDeltaRpc) const
@@ -239,10 +241,10 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
 
      ATH_MSG_DEBUG("Use RoI based data access");
      
-     if (p_roids) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*p_roids, rpcHashList);
+     if (p_roids) m_regionSelector->lookup(ctx)->HashIDList(*p_roids, rpcHashList);
      else {
        TrigRoiDescriptor fullscan_roi( true );
-       m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
+       m_regionSelector->lookup(ctx)->HashIDList(fullscan_roi, rpcHashList);
      }
      ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
      
@@ -251,7 +253,7 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
      ATH_MSG_DEBUG("Use full data access");
      
      TrigRoiDescriptor fullscan_roi( true );
-     m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, rpcHashList);
+     m_regionSelector->lookup(ctx)->HashIDList(fullscan_roi, rpcHashList);
      ATH_MSG_DEBUG("rpcHashList.size()=" << rpcHashList.size());
      
    }
@@ -260,7 +262,7 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
      
      // Get RPC container
      const Muon::RpcPrepDataContainer* rpcPrds;
-     auto rpcPrepContainerHandle = SG::makeHandle(m_rpcPrepContainerKey);
+     auto rpcPrepContainerHandle = SG::makeHandle(m_rpcPrepContainerKey, ctx);
      rpcPrds = rpcPrepContainerHandle.cptr();
      if (!rpcPrepContainerHandle.isValid()) {
        ATH_MSG_ERROR("Cannot retrieve RPC PRD Container key: " << m_rpcPrepContainerKey.key());

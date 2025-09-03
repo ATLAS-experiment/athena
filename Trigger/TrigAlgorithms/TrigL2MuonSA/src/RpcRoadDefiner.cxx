@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -26,7 +26,8 @@ StatusCode TrigL2MuonSA::RpcRoadDefiner::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::RpcRoadDefiner::defineRoad(const xAOD::MuonRoI* p_roi,
+StatusCode TrigL2MuonSA::RpcRoadDefiner::defineRoad(const EventContext& ctx,
+				const xAOD::MuonRoI* p_roi,
 				const bool                          insideOut,
 				TrigL2MuonSA::MuonRoad&             muonRoad,
                 const TrigL2MuonSA::RpcLayerHits&   rpcLayerHits,
@@ -129,10 +130,10 @@ StatusCode TrigL2MuonSA::RpcRoadDefiner::defineRoad(const xAOD::MuonRoI* p_roi,
 
     auto roi = std::make_unique<TrigRoiDescriptor>( p_roi->eta(), etaMin, etaMax, muonRoad.phiMiddle, phiMin, phiMax );
 
-    if (roi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList( *roi, mdtHashList);
+    if (roi) m_regionSelector->lookup(ctx)->HashIDList( *roi, mdtHashList);
     else {
         TrigRoiDescriptor fullscan_roi( true );
-        m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, mdtHashList);
+        m_regionSelector->lookup(ctx)->HashIDList(fullscan_roi, mdtHashList);
     }
 
     int &sector_trigger {muonRoad.MDT_sector_trigger}, &sector_overlap {muonRoad.MDT_sector_overlap};
