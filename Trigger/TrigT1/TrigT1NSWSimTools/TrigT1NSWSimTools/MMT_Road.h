@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MMT_ROAD_H
@@ -18,8 +18,9 @@ class MMT_Road {
     void addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits);
     double avgSofX() const;
     double avgSofUV(const int uv1, const int uv2) const;
-    double avgZofUV(const int uv1, const int uv2) const;
-    bool checkCoincidences(const int bcwind) const;
+    bool checkCoincidences(const int bcwind) const {
+      return horizontalCheck() && stereoCheck() && matureCheck(bcwind);
+    }
     unsigned int countHits() const { return m_road_hits.size(); }
     unsigned int countRealHits() const;
     unsigned int countUVHits(bool flag) const;
@@ -28,11 +29,6 @@ class MMT_Road {
     bool horizontalCheck() const;
     void incrementAge(const int bcwind);
     const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
-    int getRoadSize() const { return m_roadSize; }
-    int getRoadSizeUpX() const { return m_roadSizeUpX; }
-    int getRoadSizeDownX() const { return m_roadSizeDownX; }
-    int getRoadSizeUpUV() const { return m_roadSizeUpUV; }
-    int getRoadSizeDownUV() const { return m_roadSizeDownUV; }
     char getSector() const { return m_sector; }
     int getXthreshold() const { return m_xthr; }
     int getUVthreshold() const { return m_uvthr; }
@@ -45,12 +41,10 @@ class MMT_Road {
     bool stereoCheck() const;
 
   private:
-    int m_iroadx;
-    int m_iroadu;
-    int m_iroadv;
-    char m_sector;
-    int m_xthr, m_uvthr;
-    int m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV;
     std::vector<std::unique_ptr<MMT_Hit> > m_road_hits;
+    double m_slopeXlow, m_slopeXhigh, m_slopeUlow, m_slopeUhigh, m_slopeVlow, m_slopeVhigh;
+    int m_iroadx, m_iroadu, m_iroadv;
+    int m_xthr, m_uvthr;
+    char m_sector;
 };
 #endif

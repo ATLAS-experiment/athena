@@ -35,16 +35,201 @@ def TrigEventInfoRecorderAlgCfg(flags, name, trigEventInfoKey, decoratePFlowInfo
     acc.addEventAlgo(alg, primary=True)
     return acc
 
-def L1CorrelationMonitoringCfg(flags, name):
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool(flags, 'MonTool')
-    monTool.defineHistogram('EF_L1Corr_beforeafterflag', path='EXPERT', type='TH1F', title='beforeafterflag', xbins=4, xmin=-1.5, xmax=2.5)
-    monTool.defineHistogram('EF_L1Corr_l1a_type, EF_L1Corr_other_type', path='EXPERT', type='TH2F', title="typeMatrix ; L1A; Other", xbins=8, xmin=-0.5, xmax=7.5, ybins=8, ymin=-0.5, ymax=7.5)
-    return monTool
 
-def L1CorrelationAlgCfg(flags, name, **kwargs):
-    kwargs.setdefault("MonTool",L1CorrelationMonitoringCfg(flags, "L1CorrelationAlg"))
-    return CompFactory.L1CorrelationAlg(name, **kwargs)
+def L1CorrelationMonitoringCfg(flags):
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    mon = GenericMonitoringTool(flags, 'MonTool')
+
+    maxBC = 6              # fixed plotting half-range ±6 (CTP limit is 15)
+    nbin = 2*maxBC + 1
+    # 1-D delta BC histogram
+    mon.defineHistogram(
+        'BeforeAfterFlag',        # ← variable list, positional
+        path  = 'EXPERT',
+        type  = 'TH1F',
+        title = 'L1 correlation; delta BC (relative to L1A); Events',
+        xbins = nbin,
+        xmin  = -maxBC-0.5,
+        xmax  =  maxBC+0.5)
+    
+    mon.defineHistogram(
+        'BeforeAfterFlag,otherType',
+        path  = 'EXPERT',
+        type  = 'TH2F',
+        title = 'delta BC vs Other-BC type; delta BC (relative to L1A); Other-BC type',
+        xbins = nbin, xmin = -maxBC-0.5, xmax = maxBC+0.5,
+        ybins = 8,    ymin = -0.5,      ymax = 7.5)
+
+    # 2-D type matrix (same as before – just remove var=)
+    mon.defineHistogram(
+        'l1Accept,otherType',
+        path  = 'EXPERT',
+        type  = 'TH2F',
+        title = 'Type matrix ; L1A type ; Other-BC type',
+        xbins = 8, xmin = -0.5, xmax = 7.5,
+        ybins = 8, ymin = -0.5, ymax = 7.5)
+    
+    mon.defineHistogram(
+        'BeforeAfterFlag,l1Accept',
+        path  = 'EXPERT',
+        type  = 'TH2F',
+        title = 'delta BC vs L1A type; delta BC (relative); L1A type',
+        xbins = nbin, xmin = -maxBC-0.5, xmax = maxBC+0.5,
+        ybins = 8,    ymin = -0.5,      ymax = 7.5)
+    
+    # BeforeOffset:	Distance in BCs to the first earlier fired BC
+    mon.defineHistogram(
+        'BeforeOffset',
+        path  = 'EXPERT',
+        type  = 'TH1F',
+        title = 'Offset of earlier BC trigger relative to L1A; delta BC before; Events',
+        xbins = maxBC,
+        xmin  = -0.5,
+        xmax  = maxBC + 0.5
+    )
+
+    # AfterOffset:	Distance in BCs to the first later fired BC
+    mon.defineHistogram(
+        'AfterOffset',
+        path  = 'EXPERT',
+        type  = 'TH1F',
+        title = 'Offset of later BC trigger relative to L1A; delta BC after; Events',
+        xbins = maxBC,
+        xmin  = -0.5,
+        xmax  = maxBC + 0.5
+    )
+
+    # OtherTypeBefore:	Trigger type (1–7) of the earlier BC
+    mon.defineHistogram(
+        'OtherTypeBefore',
+        path  = 'EXPERT',
+        type  = 'TH1F',
+        title = 'Trigger type of the earlier neighbor BC; Type code; Events',
+        xbins = 8,
+        xmin  = -0.5,
+        xmax  = 7.5
+    )
+
+    # OtherTypeAfter:	Trigger type (1–7) of the later BC
+    mon.defineHistogram(
+        'OtherTypeAfter',
+        path  = 'EXPERT',
+        type  = 'TH1F',
+        title = 'Trigger type of the later neighbor BC; Type code; Events',
+        xbins = 8,
+        xmin  = -0.5,
+        xmax  = 7.5
+    )
+
+    # Correlation between early/late BC types
+    mon.defineHistogram(
+        'OtherTypeBefore,OtherTypeAfter',
+        path  = 'EXPERT',
+        type  = 'TH2F',
+        title = 'Trigger type before vs after; Earlier BC type; Later BC type',
+        xbins = 8, xmin = -0.5, xmax = 7.5,
+        ybins = 8, ymin = -0.5, ymax = 7.5
+    )
+
+    # Time structure of symmetric/asymmetric cases
+    mon.defineHistogram(
+        'BeforeOffset,AfterOffset',
+        path  = 'EXPERT',
+        type  = 'TH2F',
+        title = 'Offset before vs after; delta BC before; delta BC after',
+        xbins = maxBC, xmin = -0.5, xmax = maxBC + 0.5,
+        ybins = maxBC, ymin = -0.5, ymax = maxBC + 0.5
+    )
+
+    # delta BC × CTPID occupancy maps (TBP)
+    mon.defineHistogram(
+        'DeltaBCAll,CTPIDAll;MistimeMap_TBP',
+        path='EXPERT', type='TH2I',
+        title='TBP occupancy vs delta BC and CTPID;delta BC (relative to L1A);CTPID',
+        xbins=2*maxBC+1, xmin=-maxBC-0.5, xmax=maxBC+0.5,
+        ybins=512,      ymin=-0.5,        ymax=511.5
+    )
+
+    # TAP
+    mon.defineHistogram(
+        'DeltaBCAll_TAP,CTPIDAll_TAP;MistimeMap_TAP',
+        path='EXPERT', type='TH2I',
+        title='TAP occupancy vs delta BC and CTPID;delta BC (relative to L1A);CTPID',
+        xbins=2*maxBC+1, xmin=-maxBC-0.5, xmax=maxBC+0.5,
+        ybins=512,      ymin=-0.5,        ymax=511.5
+    )
+
+    # 512×512 pair maps: CTPID(delta BC=0) vs CTPID(delta BC=±1, ±2)
+    mon.defineHistogram(
+        'CTPID0tbp_m2,CTPIDtbp_m2;PairMap_TBP_DeltaBCm2',
+        path='EXPERT', type='TH2I',
+        title='TBP: CTPID(delta BC=0) vs CTPID(delta BC=-2);CTPID at delta BC=0;CTPID at delta BC=-2',
+        xbins=512, xmin=-0.5, xmax=511.5,
+        ybins=512, ymin=-0.5, ymax=511.5
+    )
+    mon.defineHistogram(
+        'CTPID0tbp_m1,CTPIDtbp_m1;PairMap_TBP_DeltaBCm1',
+        path='EXPERT', type='TH2I',
+        title='TBP: CTPID(delta BC=0) vs CTPID(delta BC=-1);CTPID at delta BC=0;CTPID at delta BC=-1',
+        xbins=512, xmin=-0.5, xmax=511.5,
+        ybins=512, ymin=-0.5, ymax=511.5
+    )
+    mon.defineHistogram(
+        'CTPID0tbp_p1,CTPIDtbp_p1;PairMap_TBP_DeltaBCp1',
+        path='EXPERT', type='TH2I',
+        title='TBP: CTPID(delta BC=0) vs CTPID(delta BC=+1);CTPID at delta BC=0;CTPID at delta BC=+1',
+        xbins=512, xmin=-0.5, xmax=511.5,
+        ybins=512, ymin=-0.5, ymax=511.5
+    )
+    mon.defineHistogram(
+        'CTPID0tbp_p2,CTPIDtbp_p2;PairMap_TBP_DeltaBCp2',
+        path='EXPERT', type='TH2I',
+        title='TBP: CTPID(delta BC=0) vs CTPID(delta BC=+2);CTPID at delta BC=0;CTPID at delta BC=+2',
+        xbins=512, xmin=-0.5, xmax=511.5,
+        ybins=512, ymin=-0.5, ymax=511.5
+    )
+    # 512×512 TAP pair maps
+    mon.defineHistogram(
+        'CTPID0tap_m2,CTPIDtap_m2;PairMap_TAP_DeltaBCm2',
+        path='EXPERT', type='TH2I',
+        title='TAP: CTPID(delta BC=0) vs CTPID(delta BC=-2);CTPID at delta BC=0;CTPID at delta BC=-2',
+        xbins=512, xmin=-0.5, xmax=511.5, ybins=512, ymin=-0.5, ymax=511.5
+    )
+    mon.defineHistogram(
+        'CTPID0tap_m1,CTPIDtap_m1;PairMap_TAP_DeltaBCm1',
+        path='EXPERT', type='TH2I',
+        title='TAP: CTPID(delta BC=0) vs CTPID(delta BC=-1);CTPID at delta BC=0;CTPID at delta BC=-1',
+        xbins=512, xmin=-0.5, xmax=511.5, ybins=512, ymin=-0.5, ymax=511.5
+    )
+    mon.defineHistogram(
+        'CTPID0tap_p1,CTPIDtap_p1;PairMap_TAP_DeltaBCp1',
+        path='EXPERT', type='TH2I',
+        title='TAP: CTPID(delta BC=0) vs CTPID(delta BC=+1);CTPID at delta BC=0;CTPID at delta BC=+1',
+        xbins=512, xmin=-0.5, xmax=511.5, ybins=512, ymin=-0.5, ymax=511.5
+    )
+    mon.defineHistogram(
+        'CTPID0tap_p2,CTPIDtap_p2;PairMap_TAP_DeltaBCp2',
+        path='EXPERT', type='TH2I',
+        title='TAP: CTPID(delta BC=0) vs CTPID(delta BC=+2);CTPID at delta BC=0;CTPID at delta BC=+2',
+        xbins=512, xmin=-0.5, xmax=511.5, ybins=512, ymin=-0.5, ymax=511.5
+    )
+
+
+    return mon
+
+def L1CorrelationAlgCfg(flags, name='L1CorrelationAlg', **kw):
+    """
+    Factory for L1CorrelationAlg.
+
+    The C++ algorithm scans the full recorded window per event (from l1a_idx).
+    We book monitoring histograms with a fixed range (no job option).
+    """
+
+    # Build and attach the monitoring tool
+    kw.setdefault('MonTool', L1CorrelationMonitoringCfg(flags))
+    
+    return CompFactory.L1CorrelationAlg(name, **kw)
+
 
 def ROBPrefetchingAlgCfg(flags, name, regSelDets=[], **kwargs):
     acc = ComponentAccumulator()

@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBjetMonitorAlgorithm.h"
 
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODBTagging/BTaggingContainer.h"
+
 
 TrigBjetMonitorAlgorithm::TrigBjetMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
     : AthMonitorAlgorithm(name,pSvcLocator)
