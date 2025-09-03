@@ -15,7 +15,7 @@ BKGFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFil
 
 Reco_tf.py --CA "default:True" "RDOtoRDOTrigger:False" \
            --multithreaded --maxEvents=300 \
-	   --asetup "RDOtoRDOTrigger:Athena,23.0.20.7" \
+	   --asetup "RDOtoRDOTrigger:Athena,23.0.20.8" \
 	   --steering "doOverlay" "doRDO_TRIG" "doTRIGtoALL" \
 	   --inputHITSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \
 	   --inputRDO_BKGFile="${BKGFILE}" \
