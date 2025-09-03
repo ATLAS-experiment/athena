@@ -67,7 +67,7 @@ namespace GlobalSim {
     
     std::ofstream out;
     if (m_writeMuxInputBitstreamToFile) {
-        std::string filename = fmt::format("MuxInputBitstream/{}_MuxInput_{}_{}.dat", name(), eventInfo.runNumber(), eventInfo.eventNumber());
+        std::string filename = fmt::format("{}_MuxInput_{}_{}.dat", name(), eventInfo.runNumber(), eventInfo.eventNumber());
         out.open(filename);
         if (!out) {
             ATH_MSG_ERROR("Failed to open file: " << filename);
@@ -176,7 +176,7 @@ namespace GlobalSim {
         return StatusCode::SUCCESS;
     }
 
-    std::string filename = fmt::format("MuxOutputBitstream/{}_MuxOutput_AllMuxes_{}_{}.dat", name(), eventInfo.runNumber(), eventInfo.eventNumber());
+    std::string filename = fmt::format("{}_MuxOutput_{}_{}.dat", name(), eventInfo.runNumber(), eventInfo.eventNumber());
     std::ofstream out(filename);
     if (!out) {
         ATH_MSG_ERROR("Failed to open file: " << filename);
