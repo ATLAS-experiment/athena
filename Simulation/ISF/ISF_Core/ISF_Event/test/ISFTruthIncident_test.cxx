@@ -172,8 +172,10 @@ namespace MCTesting {
       int    pdgCode = 675;
       int status     =  200045;
       double time    = 923.;
+      // int partBC = 1;
       int partID = 1;
       ISF::TruthBinding *truth = 0;
+      // int part2BC = 2;
       int part2ID = 2;
       m_isp1 = std::make_unique<ISF::ISFParticle>(
                                                   pos,
@@ -185,6 +187,7 @@ namespace MCTesting {
                                                   time,
                                                   test::origin,
                                                   partID,
+                                                  // partBC,
                                                   truth );
       m_isp2 = std::make_unique<ISF::ISFParticle>(
                                                   pos,
@@ -196,6 +199,7 @@ namespace MCTesting {
                                                   time,
                                                   *(m_isp1.get()), // parent
                                                   part2ID,
+                                                  // part2BC,
                                                   truth );
 
       m_pvec_children = std::make_unique<ISF::ISFParticleVector>();
@@ -301,10 +305,12 @@ namespace MCTesting {
     // do gP properties match original child, apart from barcode?
     ASSERT_TRUE(test::eps >= std::fabs(gPP->momentum().perp2() - originalChildPt2));
     ASSERT_EQ(gPP->pdg_id(), originalChildPdgCode);
+    // ASSERT_EQ(HepMC::barcode(gPP), childBarcode);
 
     // truthIncident: no change to properties, apart from BC?
     ASSERT_EQ(m_truthIncident->childPt2(0), originalChildPt2);
     ASSERT_EQ(m_truthIncident->childPdgCode(0), originalChildPdgCode);
+    // ASSERT_EQ(m_truthIncident->childBarcode(0), childBarcode);
 
   }
 

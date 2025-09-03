@@ -36,6 +36,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle(double x, double y, double
                                                       int status,
                                                       double pTime,
                                                       const ISFParticle &parent,
+                                                      // int bc,
                                                       int id,
                                                       TruthBinding* tBinding,
                                                       const HepMcParticleLink * partLink) const {
@@ -47,6 +48,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle(double x, double y, double
                                status,
                                pTime,
                                parent,
+                               // bc,
                                id,
                                tBinding,
                                partLink);
@@ -62,6 +64,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const Amg::Vector3D& x,
                                                        int status,
                                                        double pTime,
                                                        const ISFParticle &parent,
+                                                       // int bc,
                                                        int id,
                                                        TruthBinding* tBinding,
                                                        const HepMcParticleLink * partLink) const {
@@ -74,6 +77,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const Amg::Vector3D& x,
                                pTime,
                                parent,
                                id,
+                               // bc,
                                tBinding,
                                partLink);
 }
@@ -87,6 +91,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const HepGeom::Point3D<do
                                                        int status,
                                                        double pTime,
                                                        const ISFParticle &parent,
+                                                       // int bc,
                                                        int id,
                                                        TruthBinding* tBinding,
                                                        const HepMcParticleLink * partLink) const {
@@ -99,6 +104,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const HepGeom::Point3D<do
                          pTime,
                          parent,
                          id,
+                         // bc,
                          tBinding,
                          partLink);
 }
@@ -118,6 +124,7 @@ ISF::ISFParticle* ISF::ParticleHelper::updatedParticle(const ISFParticle& origIs
                                origIsp.timeStamp()+deltaTime,
                                origIsp,
                                HepMC::uniqueID(origIsp),
+                               // HepMC::barcode(origIsp),
                                origIsp.getTruthBinding() ? new TruthBinding(*origIsp.getTruthBinding()) : nullptr,
                                origIsp.getParticleLink() ? new HepMcParticleLink(*origIsp.getParticleLink()) : nullptr);
 }
@@ -137,6 +144,7 @@ ISF::ISFParticle* ISF::ParticleHelper::updatedParticle(const ISFParticle& origIs
                                origIsp.timeStamp()+deltaTime,
                                origIsp,
                                HepMC::uniqueID(origIsp),
+                               // HepMC::barcode(origIsp),
                                origIsp.getTruthBinding() ? new TruthBinding(*origIsp.getTruthBinding()) : nullptr,
                                origIsp.getParticleLink() ? new HepMcParticleLink(*origIsp.getParticleLink()) : nullptr);
 }

@@ -187,6 +187,7 @@ ISF::EntryLayer ISF::EntryLayerTool::registerParticle(const ISF::ISFParticle& pa
     // Use barcode assigend to ISFParticle only if no generation zero particle is present.
     auto                truthBinding = particle.getTruthBinding();
     auto generationZeroGenParticle = truthBinding ? truthBinding->getGenerationZeroGenParticle() : nullptr;
+    //const int barcode = generationZeroGenParticle ? HepMC::barcode(generationZeroGenParticle) : HepMC::barcode(particle); // FIXME barcode-based
     const int id = generationZeroGenParticle ? HepMC::uniqueID(generationZeroGenParticle) : particle.id();
     const int status = generationZeroGenParticle ? generationZeroGenParticle->status() : particle.status();
 
@@ -196,7 +197,7 @@ ISF::EntryLayer ISF::EntryLayerTool::registerParticle(const ISF::ISFParticle& pa
                                     hepMom,
                                     hepPos,
                                     particle.timeStamp(),
-                                    HepMC::INVALID_PARTICLE_ID,
+                                    HepMC::INVALID_PARTICLE_ID, //barcode, // FIXME barcode-based
                                     id,
                                     m_volumeName[layerHit] );
   }

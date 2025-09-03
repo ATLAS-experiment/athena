@@ -133,6 +133,8 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
         // ITruthSvc::registerTruthIncident call above
         auto currentGenPart = trackInfo->GetCurrentGenParticle();
         baseIsp->getTruthBinding()->setCurrentGenParticle( currentGenPart );
+        // int newBarcode = HepMC::barcode(currentGenPart); // FIXME barcode-based
+        // baseIsp->setBarcode( newBarcode ); // FIXME barcode-based
         baseIsp->setStatus( currentGenPart->status() );
         int id = HepMC::uniqueID(currentGenPart);
         baseIsp->setId( id );

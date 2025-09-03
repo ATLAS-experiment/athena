@@ -509,6 +509,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                       isp->timeStamp(),
                                                       *m_isp,
                                                       HepMC::uniqueID(isp),
+                                                      // HepMC::barcode(isp), // FIXME barcode-based
                                                       regTruthBinding,
                                                       regHMPL
                                                       );
@@ -717,6 +718,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                     isp->timeStamp(),
                                                     *m_isp,
                                                     HepMC::uniqueID(isp),
+                                                    // HepMC::barcode(isp), // FIXME barcode-based
                                                     regTruthBinding,
                                                     regHMPL
                                                     );

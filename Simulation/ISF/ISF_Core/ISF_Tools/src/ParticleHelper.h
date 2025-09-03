@@ -45,6 +45,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
+                                         // int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;
@@ -58,6 +59,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
+                                         // int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;
@@ -71,6 +73,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
+                                         // int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;

@@ -112,6 +112,7 @@ namespace G4UA
 
     // Create the TimedTrackRecord
     TrackHelper trHelp(aStep->GetTrack());
+    // const int barcode = trHelp.GetBarcode(); // FIXME barcode based
     const int id = trHelp.GetUniqueID();
     const int status = trHelp.GetStatus();
     m_trackRecordCollection->Emplace(
@@ -121,7 +122,7 @@ namespace G4UA
                                      mom,
                                      pos,
                                      time,
-                                     HepMC::INVALID_PARTICLE_ID,
+                                     HepMC::INVALID_PARTICLE_ID, //barcode,
                                      id,
                                      preVol->GetName());
   }

@@ -64,6 +64,8 @@ namespace ISF {
         (usually only called for particles that will enter the HepMC truth event) */
     HepMC::GenParticlePtr      parentParticle() override final;
     int      parentStatus() override final;
+    // /** Return the barcode of the parent particle */
+    // int  parentBarcode() override final; // TODO Remove this method
     /** Return the unique ID of the parent particle */
     int  parentUniqueID() override final;
     /** Return a boolean whether or not the parent particle survives the incident */

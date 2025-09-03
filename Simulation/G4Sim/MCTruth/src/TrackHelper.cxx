@@ -54,6 +54,11 @@ bool TrackHelper::IsSecondary() const
   if (m_trackInfo==0) return true;
   return m_trackInfo->GetClassification()==VTrackInformation::Secondary;
 }
+// int TrackHelper::GetBarcode() const  // TODO Drop this once UniqueID and Status are used instead
+// {
+//   if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetCurrentGenParticle()==0) return 0;
+//   return m_trackInfo->GetParticleBarcode();
+// }
 
 int TrackHelper::GetUniqueID() const
 {

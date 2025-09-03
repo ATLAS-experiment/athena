@@ -129,6 +129,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
   ASSERT_TRUE( m_svc->setProperty("UseGeneratedParticleMass", "True").isSuccess() );
   ASSERT_TRUE( m_svc->initialize().isSuccess() );
 
+  // const int particleBarcode(546);
   HepMC::FourVector mom(12.3, 45.6, 78.9, 0.12);
   // dynamic allocation necessary as particle ownership is
   // handed over to a HepMC::GenVertex later
@@ -152,6 +153,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
   HepMC::GenEvent& ge = *(inputTestDataHandle->at(0));
   ge.add_vertex( prodVtx );
   //AV: we set barcode here because only here the particle in HepMC3 enters event and can have a meaningful barcode.
+  // HepMC::suggest_barcode(genPart,particleBarcode);
   HepMC::fillBarcodesAttribute(&ge);
   HepMcParticleLink* trackLink = new HepMcParticleLink(genPart->id(), event_number, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
 
@@ -169,6 +171,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
                             HepMC::uniqueID(genPart), // id
+                            // particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink);
 
@@ -225,6 +228,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
                             HepMC::uniqueID(genPart), // id
+                            // particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink
                             );
@@ -281,6 +285,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
                             HepMC::uniqueID(genPart), // id
+                            // particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink
                             );

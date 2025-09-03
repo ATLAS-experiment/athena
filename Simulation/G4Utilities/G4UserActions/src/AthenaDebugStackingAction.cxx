@@ -133,9 +133,13 @@ namespace G4UA
             track->SetUserInformation(ti.release());
           }
           // What does this condition mean?
-          else if(primaryPartInfo->GetParticleUniqueID() >= 0) {
+          else if(primaryPartInfo->GetParticleUniqueID() >= 0
+                  // && primaryPartInfo->GetParticleBarcode() >= 0
+                  ) {
             // PrimaryParticleInformation should at least provide a barcode
-            std::unique_ptr<TrackBarcodeInfo> bi = std::make_unique<TrackBarcodeInfo>(primaryPartInfo->GetParticleUniqueID());
+            std::unique_ptr<TrackBarcodeInfo> bi = std::make_unique<TrackBarcodeInfo>(primaryPartInfo->GetParticleUniqueID()
+                                                                                      //, primaryPartInfo->GetParticleBarcode()
+                                                                                      );
             /// Pass ownership to track. The G4VUserTrackInformation*
             /// fpUserInformation member variable set by this method
             /// is mutable. G4Tracks are thread-local.

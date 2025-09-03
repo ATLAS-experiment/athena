@@ -148,6 +148,8 @@ namespace G4UA{
           tmpISP->setNextGeoID(nextGeoID);
           tmpISP->setNextSimID(ISF::fUndefinedSimID);
 
+          // auto generationZeroBarcode = tHelp.GetBarcode(); // FIXME barcode-based
+          // tmpISP->setBarcode(generationZeroBarcode); // FIXME barcode-based
           auto generationZeroID = tHelp.GetUniqueID();
           tmpISP->setId(generationZeroID);
 

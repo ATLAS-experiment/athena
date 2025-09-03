@@ -28,6 +28,7 @@ namespace ISF {
 class TrackBarcodeInfo: public VTrackInformation {
 public:
   TrackBarcodeInfo(int uid,
+                   //int bc,
                    ISF::ISFParticle* baseIsp=nullptr);
 
   /**
@@ -56,10 +57,12 @@ public:
    */
   virtual void SetReturnedToISF(bool returned) override;
 
+  // virtual int GetParticleBarcode() const override {return m_barcode;}  // TODO Drop this once UniqueID and Status are used instead
   virtual int GetParticleUniqueID() const override {return m_uniqueID;}
   virtual int GetParticleStatus() const override {return m_status;}
 private:
   ISF::ISFParticle *m_theBaseISFParticle{};
+  // int m_barcode;  // TODO Drop this once UniqueID and Status are used instead
   int m_uniqueID;
   int m_status{0}; //FIXME
   bool m_returnedToISF;

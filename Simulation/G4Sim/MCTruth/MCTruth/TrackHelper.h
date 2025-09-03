@@ -33,6 +33,7 @@ public:
    * falling back to the current particle for older TrackInformation objects.
    * "Barcode-only" track info keeps using its stored id/status values.
    */
+  // int GetBarcode() const ; // TODO Drop this once UniqueID and Status are used instead
   int GetUniqueID() const;
   int GetStatus() const ;
   /**

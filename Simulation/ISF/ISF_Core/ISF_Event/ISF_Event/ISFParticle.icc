@@ -34,6 +34,8 @@ namespace ISF {
 
   // barcode methods
   //
+  //inline int ISFParticle::barcode() const { return m_barcode; } // FIXME barcode-based
+  //inline void            ISFParticle::setBarcode(int bc) { m_barcode = bc; } // FIXME-barcode-based
 
   // id methods
   //
@@ -70,6 +72,7 @@ namespace ISF {
         << " xyz=(" << m_position.x() << "," <<  m_position.y() << "," <<  m_position.z() << ")"
         << " r=" << m_position.perp() << " eta=" << m_position.eta() << " phi=" << m_position.phi()
         << " status="<< m_status << " id=" << m_uid
+      //<< " barcode=" << m_barcode
         << " mass=" << m_mass << " order=" << m_order;
     if (m_partLink)
       out << " (" << *m_partLink << ")";
@@ -82,6 +85,7 @@ namespace ISF {
         << " xyz=(" << m_position.x() << "," <<  m_position.y() << "," <<  m_position.z() << ")"
         << " r=" << m_position.perp() << " eta=" << m_position.eta() << " phi=" << m_position.phi()
         << " status="<< m_status << " id=" << m_uid
+      //<< " barcode=" << m_barcode
         << " mass=" << m_mass << " order=" << m_order;
     if (m_partLink)
       out << " (" << *m_partLink << ")";

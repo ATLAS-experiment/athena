@@ -55,6 +55,7 @@ namespace ISF {
                 double time,
                 const ISFParticle &parent,
                 int id,
+                // int barcode = HepMC::UNDEFINED_ID,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
 
@@ -68,6 +69,7 @@ namespace ISF {
                 double time,
                 const ISFParticle &parent,
                 int id,
+                // int barcode = HepMC::UNDEFINED_ID,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
 
@@ -81,6 +83,7 @@ namespace ISF {
                 double time,
                 const DetRegionSvcIDPair &origin,
                 int id,
+                // int barcode = HepMC::UNDEFINED_ID,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
 
@@ -150,6 +153,10 @@ namespace ISF {
     /** register the next SimSvcID */
     void                        setNextSimID(SimSvcID simID);
 
+    // /** the barcode */
+    // int barcode() const; // FIXME barcode-based
+    // /** set a new barcode */
+    // void setBarcode(int bc); // FIXME barcode-based
 
     /** unique ID */
     int id() const;
@@ -190,6 +197,7 @@ namespace ISF {
     int                          m_status;
     double                       m_tstamp;
     ParticleHistory              m_history;
+    //int     m_barcode; //!< barcode TODO remove in favour of m_status + m_uid
     int m_uid; //! < unique ID
     TruthBinding*                m_truth;
     ParticleOrder                m_order;                 //!< particle simulation order

@@ -95,6 +95,9 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
     return getHepMCTruthParticle(m_parent);
 }
 
+// int ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
+//   return HepMC::barcode(m_parent); // FIXME barcode-based
+// }
 
 int ISF::ISFTruthIncident::parentUniqueID() {
   return m_parent.id();

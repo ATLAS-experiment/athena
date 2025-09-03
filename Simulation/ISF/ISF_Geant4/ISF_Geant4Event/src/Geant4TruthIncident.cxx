@@ -114,12 +114,6 @@ int iGeant4::Geant4TruthIncident::parentPdgCode() const {
   return  m_step->GetTrack()->GetDefinition()->GetPDGEncoding();
 }
 
-int iGeant4::Geant4TruthIncident::parentBarcode() { // TODO Remove this method
-  auto parent = parentParticle();
-
-  return (parent) ? HepMC::barcode(parent) : HepMC::UNDEFINED_ID;
-}
-
 int iGeant4::Geant4TruthIncident::parentUniqueID() {
   auto parent = parentParticle();
 
@@ -149,7 +143,7 @@ bool iGeant4::Geant4TruthIncident::parentSurvivesIncident() const {
   }
 }
 
-HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(int newBarcode) {
+HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident() {
   const G4Track *track = m_step->GetTrack();
 
   // check if particle is a alive in G4 or in ISF
@@ -162,8 +156,8 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(
   if ( !m_parentParticleAfterIncident ) {
     // create new HepMC particle, using momentum and energy
     // from G4DynamicParticle (which should be equivalent to postStep)
-    m_parentParticleAfterIncident = convert(track, newBarcode, false);
-    
+    m_parentParticleAfterIncident = convert(track, false);
+
     // store (new) hepmc particle in track's UserInformation
     TrackHelper       tHelper(track);
     TrackInformation *tInfo = tHelper.GetTrackInformation();
@@ -207,23 +201,6 @@ int iGeant4::Geant4TruthIncident::childPdgCode(unsigned short i) const {
   return m_children[i]->GetDefinition()->GetPDGEncoding();
 }
 
-int  iGeant4::Geant4TruthIncident::childBarcode(unsigned short index) const {
-  // the G4Track instance for the current child particle
-  const G4Track* track = m_children[index];
-  // This should be a *secondary* track.  If it has a primary, it was a decay and
-  //  we are running with quasi-stable particle simulation.  Note that if the primary
-  //  track is passed in as a secondary that survived the interaction, then this was
-  //  *not* a decay and we should not treat it in this way
-  if (track->GetDynamicParticle() &&
-      track->GetDynamicParticle()->GetPrimaryParticle() &&
-      track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation()){
-    // Then the new particle should use the same barcode as the old one!!
-    PrimaryParticleInformation* primaryPartInfo = dynamic_cast<PrimaryParticleInformation*>( track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation() );
-    return primaryPartInfo->GetParticleBarcode();
-  }
-  return 0;
-}
-
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short i,
                                                                   int newBarcode) {
   // the G4Track instance for the current child particle
@@ -233,7 +210,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short
   //     secondary could decay right away and create further particles which pass the
   //     truth strategies.
 
-  HepMC::GenParticlePtr hepParticle = convert( thisChildTrack, newBarcode, true );
+  HepMC::GenParticlePtr hepParticle = convert( thisChildTrack, true );
   TrackHelper tHelper(thisChildTrack);
   TrackInformation *trackInfo = tHelper.GetTrackInformation();
 
@@ -273,7 +250,7 @@ bool iGeant4::Geant4TruthIncident::particleAlive(const G4Track *track) const {
   return true;
 }
 
-HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const int, const bool secondary) const {
+HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const bool secondary) const {
 
   const G4ThreeVector & mom =  track->GetMomentum();
   const double energy =  track->GetTotalEnergy();

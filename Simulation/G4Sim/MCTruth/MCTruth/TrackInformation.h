@@ -110,12 +110,14 @@ public:
    */
   void SetRegenerationNr(int i) {m_regenerationNr=i;}
 
+  //virtual int GetParticleBarcode() const override; // TODO Drop this once UniqueID and Status are used instead
   virtual int GetParticleUniqueID() const override;
   virtual int GetParticleStatus() const override;
 private:
   int m_regenerationNr{0};
   HepMC::GenParticlePtr m_currentGenParticle{};
   HepMC::GenParticlePtr m_generationZeroGenParticle{};
+  // mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE; // TODO Drop this once UniqueID and Status are used instead
   mutable int m_uniqueID ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
   ISF::ISFParticle *m_theBaseISFParticle{};
   bool m_returnedToISF{false};

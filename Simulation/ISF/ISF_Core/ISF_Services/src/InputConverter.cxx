@@ -280,6 +280,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
   const double pTime = pVertex->position().t() / Gaudi::Units::c_light;
   /// particle origin (TODO: add proper GeoID, collision/cosmics)
   DetRegionSvcIDPair origin(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
+  // const auto pBarcode = HepMC::barcode(genPartPtr);
   const auto particleID = HepMC::uniqueID(genPartPtr);
   auto tBinding = std::make_unique<ISF::TruthBinding>(genPartPtr);
 
@@ -294,6 +295,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
                                                        pTime,
                                                        origin,
                                                        particleID,
+                                                       // pBarcode,
                                                        tBinding.release(),
                                                        hmpl.release() );
   return sParticle.release();
@@ -823,6 +825,9 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   /// we may have particles which have already interacted, so we
   /// should set the regeneration number accordingly.
   const int regenerationNr = HepMC::StatusBased::generations(&isp);
+  // if (HepMC::BarcodeBased::generations(&isp) != regenerationNr) {
+  //   ATH_MSG_WARNING ("StatusBased::generations() = " << regenerationNr << ", BarcodeBased::generations()  = " << HepMC::BarcodeBased::generations(&isp) << ", isp: " << isp);
+  // }
   primaryPartInfo->SetRegenerationNr(regenerationNr);
 
   if ( currentGenPart ) {

@@ -110,6 +110,7 @@ public:
    */
   virtual void SetReturnedToISF(bool) ;
 
+  // virtual int GetParticleBarcode() const = 0;  // TODO Drop this once UniqueID and Status are used instead
   virtual int GetParticleUniqueID() const = 0;
   virtual int GetParticleStatus() const = 0;
 

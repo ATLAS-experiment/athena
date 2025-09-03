@@ -67,6 +67,7 @@ public:
   ISF::ISFParticle* GetISFParticle() { return m_theISFParticle; }
   void SetISFParticle(ISF::ISFParticle* isp);
 
+  // int GetParticleBarcode() const;
   int GetParticleUniqueID() const;
   void Print() const {}
 private:
@@ -74,6 +75,7 @@ private:
   ISF::ISFParticle* m_theISFParticle{};
 
   int m_regenerationNr{0};
+  // mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
   mutable int m_uniqueID ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_ID;
 };
 

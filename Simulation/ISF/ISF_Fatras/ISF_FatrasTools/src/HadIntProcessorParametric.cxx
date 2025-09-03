@@ -63,6 +63,7 @@ iFatras::HadIntProcessorParametric::HadIntProcessorParametric(const std::string&
   m_hadIntPointR(0.),
   m_hadIntPointZ(0.),
   m_hadIntMotherPdg(0),
+  // m_hadIntMotherBarcode(0),
   m_hadIntMotherP(0.),
   m_hadIntMotherPt(0.),
   m_hadIntMotherPhi(0.),
@@ -146,6 +147,7 @@ StatusCode iFatras::HadIntProcessorParametric::initialize()
       m_hadIntValidationTree->Branch("HadIntPointR"    ,  &m_hadIntPointR, "hintR/F");
       m_hadIntValidationTree->Branch("HadIntPointZ"    ,  &m_hadIntPointZ, "hintZ/F");
       m_hadIntValidationTree->Branch("HadIntMotherPdg"    ,  &m_hadIntMotherPdg,       "hintMotherPdg/I");
+      // m_hadIntValidationTree->Branch("HadIntMotherBarcode"    ,  &m_hadIntMotherBarcode, "hintMotherBarcode/I");
       m_hadIntValidationTree->Branch("HadIntMotherP" ,  &m_hadIntMotherP,    "hintMotherP/F");
       m_hadIntValidationTree->Branch("HadIntMotherPt" ,  &m_hadIntMotherPt,    "hintMotherPt/F");
       m_hadIntValidationTree->Branch("HadIntMotherPhi"    ,  &m_hadIntMotherPhi,       "hintMotherPhi/F");
@@ -312,6 +314,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
     m_hadIntPointZ        = vertex.z();
     m_hadIntPointR        = vertex.perp();
     m_hadIntMotherPdg     = parent->pdgCode();
+    // m_hadIntMotherBarcode = HepMC::barcode(parent); // FIXME barcode-based
     m_hadIntMotherP       = p;
     m_hadIntMotherPt      = p*particleDir.perp();
     m_hadIntMotherPhi     = particleDir.phi();
@@ -323,7 +326,9 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
   ATH_MSG_VERBOSE( "[ had ] incoming particle energy | mass | momentum "
 		   << E << " | " << m << " | " << p << " | " );
 
-  if (m_cutChain && ( HepMC::generations(parent) > 0 || (HepMC::uniqueID(parent) == HepMC::UNDEFINED_ID) ) ) {
+  if (m_cutChain && ( HepMC::generations(parent) > 0 || (
+                                                         //HepMC::barcode(parent) ==HepMC::UNDEFINED_ID &&
+                                                         HepMC::uniqueID(parent) == HepMC::UNDEFINED_ID) ) ) {
     if (m_hadIntValidationTree) m_hadIntValidationTree->Fill();
     ATH_MSG_VERBOSE( "[ had ] interaction initiated by a secondary particle, no children saved " );
     return chDef;

@@ -58,6 +58,7 @@ namespace ISF {
                                         int status,
                                         double pTime,
                                         const ISFParticle &parent,
+                                        // int bc = HepMC::UNDEFINED_ID,
                                         int id = 0,
                                         TruthBinding* tBinding = nullptr,
                                         const HepMcParticleLink * partLink = nullptr) const = 0;
@@ -71,6 +72,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
+                                         // int bc = HepMC::UNDEFINED_ID,
                                          int id = 0,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const = 0;
@@ -84,6 +86,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
+                                         // int bc = HepMC::UNDEFINED_ID,
                                          int id = 0,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const = 0;

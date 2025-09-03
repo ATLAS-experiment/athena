@@ -15,6 +15,15 @@ PrimaryParticleInformation::PrimaryParticleInformation(HepMC::GenParticlePtr p, 
 {
 }
 
+// int PrimaryParticleInformation::GetParticleBarcode() const
+// {
+//   if (m_barcode !=  HepMC::INVALID_PARTICLE_BARCODE) return m_barcode;
+//   if (m_theParticle) {
+//       m_barcode = HepMC::barcode(m_theParticle);
+//       return m_barcode;
+//   }
+//   return 0;
+// }
 
 int PrimaryParticleInformation::GetParticleUniqueID() const
 {
