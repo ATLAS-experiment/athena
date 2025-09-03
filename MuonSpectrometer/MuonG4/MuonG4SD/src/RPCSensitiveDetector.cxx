@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPCSensitiveDetector.h"
@@ -15,12 +15,13 @@
 #include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 // construction/destruction
 RPCSensitiveDetector::RPCSensitiveDetector(const std::string& name, const std::string& hitCollectionName, unsigned int nGasGaps)
   : G4VSensitiveDetector( name )
   , m_myRPCHitColl( hitCollectionName )
-  , m_isGeoModel(true)
 {
   m_muonHelper = RpcHitIdHelper::GetHelper(nGasGaps);
 }
@@ -31,14 +32,7 @@ void RPCSensitiveDetector::Initialize(G4HCofThisEvent*)
   //FIXME probably only need to call this bit at start of the event
   //loop rather than the start of each G4Event.
   if (verboseLevel>5) G4cout << "Initializing SD"  << G4endl;
-/*  DetectorGeometryHelper DGHelp;
-  if(  DGHelp.GeometryType("Muon") == GeoModel ){
-    m_isGeoModel = true;
-    if (verboseLevel>5) G4cout << "Muon Geometry is from GeoModel" << G4endl;
-  } else {
-    m_isGeoModel = false;
-    if (verboseLevel>5) G4cout << "Muon Geometry is from pure G4" << G4endl;
-  } */
+
 }
 
 G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
@@ -81,6 +75,11 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   Amg::Vector3D localPosition = Amg::Hep3VectorToEigen( trans.TransformPoint(position) );
   Amg::Vector3D localPostPosition = Amg::Hep3VectorToEigen( trans.TransformPoint(postPosition) );
 
+  /// Reject hits that are parallel through the gas gap 
+  if (std::abs(std::abs(Amg::angle(localPostPosition - localPosition, Amg::Vector3D::UnitX())) 
+              - 90.*Gaudi::Units::deg) < 0.0001* Gaudi::Units::deg) {
+    return true;
+  }
   int mydbZ=0;
   int mydbPMod=0;
   int mydbP=0;
@@ -245,21 +244,8 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
     // strip numbering: if the station is rotated both eta and phi directions get inversed.
     // commented out for geomodel!
-
-    if(!m_isGeoModel){
-      localPosition.z() = -localPosition.z();
-      localPosition.y() = -localPosition.y();
-      localPostPosition.z() = -localPostPosition.z();
-      localPostPosition.y() = -localPostPosition.y();
-    }
   }
 
-  // further correction on the eta direction due to rpc component rotation
-  // commented for geomodel!
-  if(!rpcIsRotated&&!m_isGeoModel) {
-    localPosition.z() = -localPosition.z();
-    localPostPosition.z() = -localPostPosition.z();
-  }
   /////////////////////////////////////
 
   // now we have the position in the gas gap, with correct axis orientation, and the offlineIDs *of the strip panel*
