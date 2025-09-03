@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloCellGroup.h"
@@ -73,8 +73,10 @@ bool CaloCellGroup::setDefinition(const CaloCell_Base_ID* caloCellId, const std:
     pos2=subCaloStr.find(',',pos1);
     if (pos2==std::string::npos)
       len=subCaloStr.size();
-    else
+    else {
       len=pos2-pos1;
+      pos1=pos2+1;
+    }
     if (subCaloStr.compare(pos1,len,"EMB")==0)
       m_emb=true;
     else if(subCaloStr.compare(pos1,len,"EMECIW")==0)
@@ -90,7 +92,6 @@ bool CaloCellGroup::setDefinition(const CaloCell_Base_ID* caloCellId, const std:
 	     << "Allowed values are EMB, EMECIW, EMECOW, HEC and FCAL" << endmsg;
       return false;
     }
-    pos1=pos2+1;
   }
   while(pos2!=std::string::npos);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloIdentifier/utils/caloCellLookup.cxx
@@ -10,14 +10,23 @@
 
 
 #include "CaloIdentifier/CaloHelpersTest.h"
+#include "CxxUtils/checker_macros.h"
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 
-int main (int argc, char** argv)
+int main ATLAS_NOT_THREAD_SAFE (int argc, char** argv)
 {
-  CaloHelpersTest helpers;
-  const CaloCell_ID& caloID = helpers.caloID();
+  std::unique_ptr<CaloHelpersTest> helpers;
+  try {
+    helpers = std::make_unique<CaloHelpersTest>();
+  }
+  catch (const LArID_Exception& e) {
+    std::cerr << "Caught exception: " << std::string(e) << "\n";
+    exit(1);
+  }
+  const CaloCell_ID& caloID = helpers->caloID();
 
   for (int i=1; i < argc; i++) {
     int hash = atoi (argv[i]);
@@ -27,48 +36,48 @@ int main (int argc, char** argv)
     switch (subcalo) {
     case CaloCell_ID::LAREM:
       std::cout << "LAREM " <<
-        "BEC: " << helpers.emID().barrel_ec(id) << " "
-        "Samp: "  << helpers.emID().sampling(id) << " "
-        "Reg: "  << helpers.emID().region(id) << " "
-        "Eta: "  << helpers.emID().eta(id) << " "
-        "Phi: "  << helpers.emID().phi(id) << " "
-        "SC: "  << helpers.emID().is_supercell(id) << std::endl;
+        "BEC: " << helpers->emID().barrel_ec(id) << " "
+        "Samp: "  << helpers->emID().sampling(id) << " "
+        "Reg: "  << helpers->emID().region(id) << " "
+        "Eta: "  << helpers->emID().eta(id) << " "
+        "Phi: "  << helpers->emID().phi(id) << " "
+        "SC: "  << helpers->emID().is_supercell(id) << std::endl;
       break;
     case CaloCell_ID::LARHEC:
       std::cout << "LARHEC " <<
-        "P/N: " << helpers.hecID().pos_neg(id) << " "
-        "Samp: "  << helpers.hecID().sampling(id) << " "
-        "Reg: "  << helpers.hecID().region(id) << " "
-        "Eta: "  << helpers.hecID().eta(id) << " "
-        "Phi: "  << helpers.hecID().phi(id) << " "
-        "SC: "  << helpers.hecID().is_supercell(id) << std::endl;
+        "P/N: " << helpers->hecID().pos_neg(id) << " "
+        "Samp: "  << helpers->hecID().sampling(id) << " "
+        "Reg: "  << helpers->hecID().region(id) << " "
+        "Eta: "  << helpers->hecID().eta(id) << " "
+        "Phi: "  << helpers->hecID().phi(id) << " "
+        "SC: "  << helpers->hecID().is_supercell(id) << std::endl;
       break;
     case CaloCell_ID::LARFCAL:
       std::cout << "LARFCAL " <<
-        "P/N: " << helpers.fcalID().pos_neg(id) << " "
-        "Mod: "  << helpers.fcalID().module(id) << " "
-        "Eta: "  << helpers.fcalID().eta(id) << " "
-        "Phi: "  << helpers.fcalID().phi(id) << " "
-        "SC: "  << helpers.fcalID().is_supercell(id) << std::endl;
+        "P/N: " << helpers->fcalID().pos_neg(id) << " "
+        "Mod: "  << helpers->fcalID().module(id) << " "
+        "Eta: "  << helpers->fcalID().eta(id) << " "
+        "Phi: "  << helpers->fcalID().phi(id) << " "
+        "SC: "  << helpers->fcalID().is_supercell(id) << std::endl;
       break;
     case CaloCell_ID::TILE:
       std::cout << "TILE " <<
-        "Reg: " << helpers.tileID().region(id) << " "
-        "Syst: " << helpers.tileID().system(id) << " "
-        "Sect: " << helpers.tileID().section(id) << " "
-        "Side: "  << helpers.tileID().side(id) << " "
-        "Mod: "  << helpers.tileID().module(id) << " "
-        "Tow: "  << helpers.tileID().tower(id) << " "
-        "Samp: "  << helpers.tileID().sample(id) << " "
-        "PMT: "  << helpers.tileID().pmt(id) << std::endl;
+        "Reg: " << helpers->tileID().region(id) << " "
+        "Syst: " << helpers->tileID().system(id) << " "
+        "Sect: " << helpers->tileID().section(id) << " "
+        "Side: "  << helpers->tileID().side(id) << " "
+        "Mod: "  << helpers->tileID().module(id) << " "
+        "Tow: "  << helpers->tileID().tower(id) << " "
+        "Samp: "  << helpers->tileID().sample(id) << " "
+        "PMT: "  << helpers->tileID().pmt(id) << std::endl;
       break;
     case CaloCell_ID::LARMINIFCAL:
       std::cout << "LARMINIFCAL "
-        "P/N: " << helpers.minifcalID().pos_neg(id) << " "
-        "Mod: "  << helpers.minifcalID().module(id) << " "
-        "Dep: "  << helpers.minifcalID().depth(id) << " "
-        "Eta: "  << helpers.minifcalID().eta(id) << " "
-        "Phi: "  << helpers.minifcalID().phi(id) << std::endl;
+        "P/N: " << helpers->minifcalID().pos_neg(id) << " "
+        "Mod: "  << helpers->minifcalID().module(id) << " "
+        "Dep: "  << helpers->minifcalID().depth(id) << " "
+        "Eta: "  << helpers->minifcalID().eta(id) << " "
+        "Phi: "  << helpers->minifcalID().phi(id) << std::endl;
       break;
     default:
       std::cout << "UNKNOWN ";
