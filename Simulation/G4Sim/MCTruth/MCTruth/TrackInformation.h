@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTH_TRACKINFORMATION_H
@@ -29,12 +29,12 @@ namespace ISF {
  * the ISFParticle corresponding to the current G4Track,
  * m_returnedToISF - a flag indicating whether the ISFParticle
  * corresponding to the current G4Track scheduled to be returned to
-   * the ISF, m_regenerationNr - the number of times the particle
-   * represented by the G4Track has undergone a non-destructive
-   * interaction that was recorded in the HepMC::GenEvent,
-   * m_generationZeroGenParticle - the truth particle before any such
-   * regeneration, m_barcode and m_uniqueID - convenience variables
-   * corresponding to the barcode and id of m_currentGenParticle.
+ * the ISF, m_regenerationNr - the number of times the particle
+ * represented by the G4Track has undergone a non-destructive
+ * interaction that was recorded in the HepMC::GenEvent,
+ * m_generationZeroGenParticle - the truth particle before any such
+ * regeneration, m_uniqueID - convenience variable
+ * corresponding to the id of m_currentGenParticle.
  * The member variables are m_classify: a classification of the
  * current G4Track (Primary, Regenerated Primary, Registered
  * Secondary, Secondary) and m_primaryGenParticle: a pointer to the
@@ -110,14 +110,12 @@ public:
    */
   void SetRegenerationNr(int i) {m_regenerationNr=i;}
 
-  virtual int GetParticleBarcode() const override; // TODO Drop this once UniqueID and Status are used instead
   virtual int GetParticleUniqueID() const override;
   virtual int GetParticleStatus() const override;
 private:
   int m_regenerationNr{0};
   HepMC::GenParticlePtr m_currentGenParticle{};
   HepMC::GenParticlePtr m_generationZeroGenParticle{};
-  mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE; // TODO Drop this once UniqueID and Status are used instead
   mutable int m_uniqueID ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
   ISF::ISFParticle *m_theBaseISFParticle{};
   bool m_returnedToISF{false};

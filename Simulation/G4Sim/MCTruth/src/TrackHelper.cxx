@@ -54,14 +54,6 @@ bool TrackHelper::IsSecondary() const
   if (m_trackInfo==0) return true;
   return m_trackInfo->GetClassification()==VTrackInformation::Secondary;
 }
-int TrackHelper::GetBarcode() const  // TODO Drop this once UniqueID and Status are used instead
-{
-  if (const TrackInformation* concreteInfo = dynamic_cast<const TrackInformation*>(m_trackInfo)) {
-    HepMC::ConstGenParticlePtr particle = outputAttributionParticle(concreteInfo);
-    return particle ? HepMC::barcode(particle) : 0;
-  }
-  return m_trackInfo ? m_trackInfo->GetParticleBarcode() : 0;
-}
 
 int TrackHelper::GetUniqueID() const
 {

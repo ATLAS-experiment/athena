@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTH_PRIMARYPARTICLEINFORMATION_H
@@ -67,7 +67,6 @@ public:
   ISF::ISFParticle* GetISFParticle() { return m_theISFParticle; }
   void SetISFParticle(ISF::ISFParticle* isp);
 
-  int GetParticleBarcode() const;
   int GetParticleUniqueID() const;
   void Print() const {}
 private:
@@ -75,8 +74,7 @@ private:
   ISF::ISFParticle* m_theISFParticle{};
 
   int m_regenerationNr{0};
-  mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
-  mutable int m_uniqueID ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
+  mutable int m_uniqueID ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_ID;
 };
 
 #endif // MCTRUTH_PRIMARYPARTICLEINFORMATION_H

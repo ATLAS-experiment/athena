@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruth/TrackBarcodeInfo.h"
 
-TrackBarcodeInfo::TrackBarcodeInfo(int uid, int bc, ISF::ISFParticle* baseIsp)
+TrackBarcodeInfo::TrackBarcodeInfo(int uid,
+                                   ISF::ISFParticle* baseIsp)
   : VTrackInformation(BarcodeOnly)
   , m_theBaseISFParticle(baseIsp)
-  , m_barcode(bc)
   , m_uniqueID(uid)
   , m_returnedToISF(false)
 {

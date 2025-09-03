@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTH_VTRACKINFORMATION_H
@@ -110,7 +110,6 @@ public:
    */
   virtual void SetReturnedToISF(bool) ;
 
-  virtual int GetParticleBarcode() const = 0;  // TODO Drop this once UniqueID and Status are used instead
   virtual int GetParticleUniqueID() const = 0;
   virtual int GetParticleStatus() const = 0;
 
