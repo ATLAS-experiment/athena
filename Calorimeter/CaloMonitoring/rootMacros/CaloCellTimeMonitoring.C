@@ -405,7 +405,7 @@ void CaloCellTimeMon::DrawLayers()
       fCanvas->Clear();
       fCanvas->Divide(2, nLayerPerCanvas/2);
     }
-    tEntry = static_cast<TGTextLBEntry*>(TGListBox*)fComboLayer->GetListBox()->GetEntry(i);
+    tEntry = static_cast<TGTextLBEntry*>(fComboLayer->GetListBox()->GetEntry(i));
     TString lay = tEntry->GetText()->GetString();
     TString histoName1 = m_histoNameBase1  + lay;
     int padIndex = (i%nLayerPerCanvas) + 1;
