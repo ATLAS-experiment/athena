@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -247,8 +247,8 @@ CaloCluster::CaloCluster(const CaloCluster& rCluster)
  */
 CaloCluster::~CaloCluster()
 {
-  //if ( m_ownDataStore && *m_dataLink !=  0 ) delete *m_dataLink;
-  if ( m_ownDataStore && m_dataLink.isValid() ) delete *m_dataLink;
+  // If we own the store, the link holds the pointer directly.
+  if ( m_ownDataStore ) delete m_dataLink.cachedElement();
 }
 
 

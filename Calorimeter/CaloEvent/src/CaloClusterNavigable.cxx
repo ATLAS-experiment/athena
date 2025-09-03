@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -33,7 +33,8 @@ CaloClusterNavigable::CaloClusterNavigable(CaloCellLink* pLink)
 
 CaloClusterNavigable::~CaloClusterNavigable()
 { 
-  if ( m_ownLinkStore && *m_cellLink != nullptr ) delete *m_cellLink;
+  // If we own the store, the link holds the pointer directly.
+  if ( m_ownLinkStore ) delete m_cellLink.cachedElement();
 }
 
 CaloCellLink* CaloClusterNavigable::getCellLink()

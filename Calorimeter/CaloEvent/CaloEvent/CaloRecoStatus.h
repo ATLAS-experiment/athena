@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALORECOSTATUS_H
@@ -49,6 +49,12 @@ class CaloRecoStatus
   CaloRecoStatus(store_type store);
   /*! \brief Destructor */
   virtual ~CaloRecoStatus();
+
+  CaloRecoStatus (const CaloRecoStatus&) = default;
+  CaloRecoStatus (CaloRecoStatus&&) = default;
+
+  CaloRecoStatus& operator= (const CaloRecoStatus&) = default;
+  CaloRecoStatus& operator= (CaloRecoStatus&&) = default;
 
   /*! \brief Set status 
    *
