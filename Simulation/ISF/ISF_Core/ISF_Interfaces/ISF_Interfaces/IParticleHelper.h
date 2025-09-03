@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_INTERFACES_IPARTICLEHELPER_H
@@ -58,7 +58,6 @@ namespace ISF {
                                         int status,
                                         double pTime,
                                         const ISFParticle &parent,
-                                        int bc = HepMC::UNDEFINED_ID,
                                         int id = 0,
                                         TruthBinding* tBinding = nullptr,
                                         const HepMcParticleLink * partLink = nullptr) const = 0;
@@ -72,7 +71,6 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         int bc = HepMC::UNDEFINED_ID,
                                          int id = 0,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const = 0;
@@ -86,7 +84,6 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         int bc = HepMC::UNDEFINED_ID,
                                          int id = 0,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_TOOLS_PARTICLEHELPER_H
@@ -45,7 +45,6 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;
@@ -59,7 +58,6 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;
@@ -73,7 +71,6 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;
