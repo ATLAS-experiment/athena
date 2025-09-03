@@ -1,5 +1,5 @@
 /*
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEFIdtpInvMassHypoTool.h"
@@ -50,7 +50,7 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination) const
+bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& /*ctx*/) const
 {
    ATH_MSG_VERBOSE("in executeAlg");
    bool result = false;

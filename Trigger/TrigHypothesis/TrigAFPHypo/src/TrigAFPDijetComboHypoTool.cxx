@@ -76,7 +76,8 @@ struct DescendingEt {
   }
 };
 
-bool TrigAFPDijetComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination) const {
+bool TrigAFPDijetComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination,
+                                           const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("TrigAFPDijetComboHypoTool::executeAlg Executing algorithm");
   
@@ -153,7 +154,7 @@ bool TrigAFPDijetComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>
   Monitored::fill(m_monTool, sideC_predictY);
 
   // Retrieve AFP track container
-  SG::ReadHandle<xAOD::AFPTrackContainer> tracksAFP(m_AFPtrackCollectionReadKey);
+  SG::ReadHandle<xAOD::AFPTrackContainer> tracksAFP(m_AFPtrackCollectionReadKey, ctx);
 
   double sideA_minDist = 9e9;
   double sideC_minDist = 9e9;

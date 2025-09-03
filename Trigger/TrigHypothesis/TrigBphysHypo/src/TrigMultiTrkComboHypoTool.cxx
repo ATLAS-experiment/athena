@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -236,7 +236,7 @@ int TrigMultiTrkComboHypoTool::totalCharge(const xAOD::TrigBphys* trigBphys) con
 }
 
 
-bool TrigMultiTrkComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>&) const {
+bool TrigMultiTrkComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>&, const EventContext&) const {
   ATH_MSG_ERROR( "executeAlg() is not supported by TrigMultiTrkComboHypoTool" );
   return true;
 }
