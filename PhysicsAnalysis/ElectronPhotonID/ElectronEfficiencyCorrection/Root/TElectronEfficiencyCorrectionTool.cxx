@@ -395,9 +395,9 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
  */
 std::vector<TH2*>
 Root::TElectronEfficiencyCorrectionTool::buildSingleToyMC(
-  const TH2* sf,
-  const TH2* stat,
-  const TH2* uncorr,
+  const TH1* sf,
+  const TH1* stat,
+  const TH1* uncorr,
   const std::vector<TH1*>& corr,
   int& randomCounter)
 {
@@ -435,9 +435,9 @@ Root::TElectronEfficiencyCorrectionTool::buildSingleToyMC(
  */
 TH2*
 Root::TElectronEfficiencyCorrectionTool::buildSingleCombToyMC(
-  const TH2* sf,
-  const TH2* stat,
-  const TH2* uncorr,
+  const TH1* sf,
+  const TH1* stat,
+  const TH1* uncorr,
   const std::vector<TH1*>& corr,
   const int nSys,
   int& randomCounter)
@@ -501,16 +501,16 @@ Root::TElectronEfficiencyCorrectionTool::buildToyMCTable(
       HistArray tmpArray;
       for (int i = 0; i < stat_entries; ++i) {
         if (!eig.empty() && !uncorr.empty()) {
-          nSys = (static_cast<TH1*>(eig.at(i)))->GetNbinsX() - 1;
-          tmpArray.emplace_back(buildSingleCombToyMC(static_cast<TH2*>(sf.at(i)),
-                                                     static_cast<TH2*>(stat.at(i)),
-                                                     static_cast<TH2*>(uncorr.at(i)),
+          nSys = (eig.at(i))->GetNbinsX() - 1;
+          tmpArray.emplace_back(buildSingleCombToyMC(sf.at(i),
+                                                     stat.at(i),
+                                                     uncorr.at(i),
                                                      corr.at(i),
                                                      nSys,
                                                      randomCounter));
         } else {
-          tmpArray.emplace_back(buildSingleCombToyMC(static_cast<TH2*>(sf.at(i)),
-                                                     static_cast<TH2*>(stat.at(i)),
+          tmpArray.emplace_back(buildSingleCombToyMC(sf.at(i),
+                                                     stat.at(i),
                                                      nullptr,
                                                      corr.at(i),
                                                      nSys,
@@ -522,10 +522,10 @@ Root::TElectronEfficiencyCorrectionTool::buildToyMCTable(
   } else {
     std::vector<std::vector<TH2*>> tmpVec2;
     for (int i = 0; i < stat_entries; ++i) {
-      nSys = (static_cast<TH1*>(eig.at(i)))->GetNbinsX() - 1;
-      tmpVec2.push_back(buildSingleToyMC(static_cast<TH2*>(sf.at(i)),
-                                         static_cast<TH2*>(stat.at(i)),
-                                         static_cast<TH2*>(uncorr.at(i)),
+      nSys = (eig.at(i))->GetNbinsX() - 1;
+      tmpVec2.push_back(buildSingleToyMC(sf.at(i),
+                                         stat.at(i),
+                                         uncorr.at(i),
                                          corr.at(i),
                                          randomCounter));
     }
