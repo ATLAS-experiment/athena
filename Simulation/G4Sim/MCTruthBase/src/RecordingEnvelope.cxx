@@ -70,7 +70,6 @@ void RecordingEnvelope::AddTrackRecord(const G4Step* aStep)
   const std::string pname = aStep->GetTrack()->GetDefinition()->GetParticleName();
   const int pdgcode = (pname=="geantino") ? 999 : aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
   TrackHelper trHelp(aStep->GetTrack());
-  const int barcode = trHelp.GetBarcode();
   const int status = trHelp.GetStatus();
   const int id = trHelp.GetUniqueID();
 
@@ -83,5 +82,5 @@ void RecordingEnvelope::AddTrackRecord(const G4Step* aStep)
   G4StepPoint *preStep=aStep->GetPreStepPoint();
   G4VPhysicalVolume *preVol=preStep->GetPhysicalVolume();
 
-  m_trackRecordCollection->Emplace(pdgcode,status,ener,mom,pos,time,barcode,id,preVol->GetName());
+  m_trackRecordCollection->Emplace(pdgcode,status,ener,mom,pos,time,HepMC::INVALID_PARTICLE_ID,id,preVol->GetName());
 }
