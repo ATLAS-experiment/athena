@@ -109,9 +109,6 @@ StatusCode JSSTaggerBase::initialize() {
   m_decL2Key = m_containerName + "." + m_decL2Key.key();
   m_decL3Key = m_containerName + "." + m_decL3Key.key();
 
-  m_readThrustMajKey = m_containerName + "." + m_readThrustMajKey.key();
-  m_readSphericityKey = m_containerName + "." + m_readSphericityKey.key();
-
   if(!m_isSmallRJet){
     m_readSplit12Key = m_containerName + "." + m_readSplit12Key.key();
     m_readSplit23Key = m_containerName + "." + m_readSplit23Key.key();
@@ -119,6 +116,8 @@ StatusCode JSSTaggerBase::initialize() {
     m_readTau2WTAKey = m_containerName + "." + m_readTau2WTAKey.key();
     m_readTau3WTAKey = m_containerName + "." + m_readTau3WTAKey.key();
     m_readTau4WTAKey = m_containerName + "." + m_readTau4WTAKey.key();
+    m_readThrustMajKey = m_containerName + "." + m_readThrustMajKey.key();
+    m_readSphericityKey = m_containerName + "." + m_readSphericityKey.key();
     m_readECF1Key = m_containerName + "." + m_readECF1Key.key();
     m_readECF2Key = m_containerName + "." + m_readECF2Key.key();
     m_readECF3Key = m_containerName + "." + m_readECF3Key.key();
@@ -141,11 +140,11 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readTau2WTAKey.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readTau3WTAKey.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readTau4WTAKey.initialize(!m_isSmallRJet) );
-  ATH_CHECK( m_readThrustMajKey.initialize() );
-  ATH_CHECK( m_readSphericityKey.initialize() );
 
   ATH_CHECK( m_readSplit12Key.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readSplit23Key.initialize(!m_isSmallRJet) );
+  ATH_CHECK( m_readThrustMajKey.initialize(!m_isSmallRJet) );
+  ATH_CHECK( m_readSphericityKey.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readECF1Key.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readECF2Key.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readECF3Key.initialize(!m_isSmallRJet) );
@@ -222,6 +221,8 @@ StatusCode JSSTaggerBase::initialize() {
     renounce(m_readTau2WTAKey);
     renounce(m_readTau3WTAKey);
     renounce(m_readTau4WTAKey);
+    renounce(m_readThrustMajKey);
+    renounce(m_readSphericityKey);
     renounce(m_readECF1Key);
     renounce(m_readECF2Key);
     renounce(m_readECF3Key);

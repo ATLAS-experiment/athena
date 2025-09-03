@@ -300,7 +300,7 @@ stdJetModifiers.update(
     ecorrgeneral = JetModifier( "EnergyCorrelatorGeneralizedTool", "ecorrgeneral", DoLSeries = True, JetContainer = _jetname),
     ecorrgeneralratios = JetModifier( "EnergyCorrelatorGeneralizedRatiosTool", "ecorrgeneralratios",  DoLSeries = True),
 
-    comshapes = JetModifier( "CenterOfMassShapesTool","comshapes"),
+    comshapes = JetModifier( "CenterOfMassShapesTool", "comshapes", JetContainer = _jetname),
 
     pull      = JetModifier("JetPullTool", "pull",  UseEtaInsteadOfY = False, IncludeTensorMoments = True ),
 
