@@ -411,25 +411,24 @@ namespace TrigCompositeUtils {
     const std::vector<std::string>& nodesToDrop);
 
 
-
   /// @name Constant string literals used within the HLT
   /// @{
-  const std::string& initialRoIString();
-  const std::string& initialRecRoIString();
-  const std::string& roiString();
-  const std::string& viewString();
-  const std::string& featureString();
-  const std::string& seedString();
+  inline const std::string& initialRoIString() { return Decision::s_initialRoIString; }
+  inline const std::string& initialRecRoIString() { return Decision::s_initialRecRoIString; }
+  inline const std::string& roiString() { return Decision::s_roiString; }
+  inline const std::string& viewString() { return Decision::s_viewString; }
+  inline const std::string& featureString() { return Decision::s_featureString; }
+  inline const std::string& seedString() { return Decision::s_seedString; }
 
-  const std::string& hltSeedingNodeName();
-  const std::string& filterNodeName();
-  const std::string& inputMakerNodeName();
-  const std::string& hypoAlgNodeName();
-  const std::string& comboHypoAlgNodeName();
-  const std::string& summaryFilterNodeName();
-  const std::string& summaryPassNodeName();
-  const std::string& summaryPassExpressNodeName();
-  const std::string& summaryPrescaledNodeName();
+  inline const std::string& hltSeedingNodeName() { return Decision::s_hltSeedingNodeNameString; }
+  inline const std::string& filterNodeName() { return Decision::s_filterNodeNameString; }
+  inline const std::string& inputMakerNodeName() { return Decision::s_inputMakerNodeNameString; }
+  inline const std::string& hypoAlgNodeName() { return Decision::s_hypoAlgNodeNameString; }
+  inline const std::string& comboHypoAlgNodeName() { return Decision::s_comboHypoAlgNodeNameString; }
+  inline const std::string& summaryFilterNodeName() { return Decision::s_summaryFilterNodeNameString; }
+  inline const std::string& summaryPassNodeName() { return Decision::s_summaryPassNodeNameString; }
+  inline const std::string& summaryPassExpressNodeName() { return Decision::s_summaryPassExpressNodeNameString; }
+  inline const std::string& summaryPrescaledNodeName() { return Decision::s_summaryPrescaledNodeNameString; }
   /// @}
 
   /**
