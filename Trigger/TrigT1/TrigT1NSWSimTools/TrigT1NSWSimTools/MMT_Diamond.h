@@ -43,8 +43,8 @@ class MMT_Diamond : public AthMessaging {
                 const int olapEtaUp, const int olapEtaDown, const int olapStereoUp, const int olapStereoDown);
     ~MMT_Diamond() = default;
 
-    void createRoads(std::vector<std::shared_ptr<MMT_Road> >& roads, const bool isLarge) const;
-    void findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, const std::vector<std::shared_ptr<MMT_Road> >& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const;
+    void createRoads(std::vector<MMT_Road>& roads, const bool isLarge) const;
+    void findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std::vector<MMT_Road>& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const;
     double phiShift(const int n, const double phi, const char side) const;
 
     int getRoadSize() const { return m_roadSize; }

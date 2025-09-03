@@ -27,7 +27,7 @@ MMT_Diamond::MMT_Diamond(const int diamXthreshold, const bool uv, const int diam
     m_roadSizeDownUV = olapStereoDown;
 }
 
-void MMT_Diamond::createRoads(std::vector<std::shared_ptr<MMT_Road> >& roads, const bool isLarge) const {
+void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge) const {
   const char sec = (isLarge) ? 'L' : 'S';
   /*
    * This computation is done as follows: 1024 X roads
@@ -38,7 +38,7 @@ void MMT_Diamond::createRoads(std::vector<std::shared_ptr<MMT_Road> >& roads, co
   roads.reserve(vecRoads);
   int nroad = 8192/this->getRoadSize();
   for (int i = 0; i < nroad; ++i) {
-    roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i));
+    roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i);
 
     /*
      * The computation of "nuv" is:
@@ -50,19 +50,18 @@ void MMT_Diamond::createRoads(std::vector<std::shared_ptr<MMT_Road> >& roads, co
       const int nuv = (isLarge) ? 9 : 7;
       for (int uv = 1; uv <= nuv; uv++) {
         if (i-uv < 0) continue;
-
-        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv, i-uv));
-        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv, i+uv));
-        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv-1, i-uv));
-        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv, i+uv-1));
-        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv+1, i+uv));
-        roads.emplace_back(std::make_shared<MMT_Road>(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv, i-uv+1));
+        roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv, i-uv);
+        roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv, i+uv);
+        roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv-1, i-uv);
+        roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv, i+uv-1);
+        roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i-uv+1, i+uv);
+        roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i, i+uv, i-uv+1);
       }
     }
   }
 }
 
-void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, const std::vector<std::shared_ptr<MMT_Road> >& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const {
+void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std::vector<MMT_Road>& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const {
 
   // Comparison with lambda function (easier to implement)
   std::sort(hits.begin(), hits.end(), [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
@@ -141,19 +140,19 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, con
 
     for (auto &road : roads) {
 
-      if (!road->getHitVector().empty()) road->incrementAge(bc_wind);
-      if (!hits_now.empty()) road->addHits(hits_now);
+      if (!road.getHitVector().empty()) road.incrementAge(bc_wind);
+      if (!hits_now.empty()) road.addHits(hits_now);
 
-      if (road->checkCoincidences(bc_wind) && bc >= (bc_start - 1)) {
+      if (road.checkCoincidences(bc_wind) && bc >= (bc_start - 1)) {
 
         ATH_MSG_DEBUG("------------------------------------------------------------------");
         ATH_MSG_DEBUG("Coincidence FOUND @BC: " << bc);
-        ATH_MSG_DEBUG("Road (x, u, v, count): (" << road->iRoadx() << ", " << road->iRoadu() << ", " << road->iRoadv() << ", " << road->countHits() << ")");
+        ATH_MSG_DEBUG("Road (x, u, v, count): (" << road.iRoadx() << ", " << road.iRoadu() << ", " << road.iRoadv() << ", " << road.countHits() << ")");
         ATH_MSG_DEBUG("------------------------------------------------------------------");
 
         std::vector<int> bcidVec;
-        for (const auto &hit: road->getHitVector()) {
-          bcidVec.push_back(hit->getBC());
+        for (const auto &hit: road.getHitVector()) {
+          bcidVec.push_back(hit.getBC());
         }
         std::sort(bcidVec.begin(), bcidVec.end());
 
@@ -175,20 +174,20 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, con
 
         slope_t slope;
         slope.BC = bcidMode;
-        slope.totalCount = road->countHits();
-        slope.realCount = road->countRealHits();
-        slope.iRoad = road->iRoadx();
-        slope.iRoadu = road->iRoadu();
-        slope.iRoadv = road->iRoadv();
-        slope.uvbkg = road->countUVHits(true); // the bool in the following 4 functions refers to background/noise hits
-        slope.xbkg = road->countXHits(true);
-        slope.uvmuon = road->countUVHits(false);
-        slope.xmuon = road->countXHits(false);
+        slope.totalCount = road.countHits();
+        slope.realCount = road.countRealHits();
+        slope.iRoad = road.iRoadx();
+        slope.iRoadu = road.iRoadu();
+        slope.iRoadv = road.iRoadv();
+        slope.uvbkg = road.countUVHits(true); // the bool in the following 4 functions refers to background/noise hits
+        slope.xbkg = road.countXHits(true);
+        slope.uvmuon = road.countUVHits(false);
+        slope.xmuon = road.countXHits(false);
         slope.age = slope.BC - bc_start;
-        slope.mxl = road->mxl();
-        slope.my = road->avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
-        slope.uavg = road->avgSofUV(2,4);
-        slope.vavg = road->avgSofUV(3,5);
+        slope.mxl = road.mxl();
+        slope.my = road.avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
+        slope.uavg = road.avgSofUV(2,4);
+        slope.vavg = road.avgSofUV(3,5);
         slope.mx = (slope.uavg-slope.vavg)/(2.*tan_stereo_angle);
         const double theta = std::atan(std::sqrt(std::pow(slope.mx,2) + std::pow(slope.my,2)));
         slope.theta = (slope.my > 0.) ? theta : M_PI - theta;
@@ -197,7 +196,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, con
         slope.side = (slope.my > 0.) ? 'A' : 'C';
         slope.phi = std::atan(slope.mx/slope.my);
         slope.phiShf = phiShift(sectorPhi, slope.phi, slope.side);
-        slope.lowRes = road->evaluateLowRes();
+        slope.lowRes = road.evaluateLowRes();
 
         diamondSlopes.push_back(slope);
       }

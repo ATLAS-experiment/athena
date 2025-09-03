@@ -28,7 +28,7 @@ class MMT_Road {
     bool evaluateLowRes() const;
     bool horizontalCheck() const;
     void incrementAge(const int bcwind);
-    const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
+    const std::vector<MMT_Hit>& getHitVector() const { return m_road_hits; }
     char getSector() const { return m_sector; }
     int getXthreshold() const { return m_xthr; }
     int getUVthreshold() const { return m_uvthr; }
@@ -41,7 +41,7 @@ class MMT_Road {
     bool stereoCheck() const;
 
   private:
-    std::vector<std::unique_ptr<MMT_Hit> > m_road_hits;
+    std::vector<MMT_Hit> m_road_hits;
     double m_slopeXlow, m_slopeXhigh, m_slopeUlow, m_slopeUhigh, m_slopeVlow, m_slopeVhigh;
     int m_iroadx, m_iroadu, m_iroadv;
     int m_xthr, m_uvthr;
