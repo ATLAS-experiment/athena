@@ -97,6 +97,8 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   clusterCollection.reserve(elements->size());
 
   std::vector<Cache_IDCLock> idclocks;
+
+  Acts::Ccl::ClusteringData data;
   
   // loop on ROIs
   std::size_t nClusters = 0ul;
@@ -147,6 +149,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 					      *rdos,
 					      *detEleStatus,
 					      *element,
+                data,
 					      clusterCollection) );
       processedElements.push_back( element );
       nClusters += clusterCollection.back().size();

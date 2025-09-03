@@ -87,7 +87,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
       continue;
     }
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
-    destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
+    destProxy.copyFrom(trackProxy);
     if ( m_copyParametersFromFit ) {
       ATH_MSG_VERBOSE("original " << proto.parameters->parameters());
       proto.parameters = 

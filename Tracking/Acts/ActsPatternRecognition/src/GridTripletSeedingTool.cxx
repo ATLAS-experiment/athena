@@ -465,12 +465,23 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       newSp.varianceZ() = static_cast<float>(sp->varianceZ());
       newSp.varianceR() = static_cast<float>(sp->varianceR());
       if (m_useDetailedDoubleMeasurementInfo) {
-        newSp.topStripVector() =
+        Eigen::Vector3f topStripVector =
             sp->topHalfStripLength() * sp->topStripDirection();
-        newSp.bottomStripVector() =
+        Eigen::Vector3f bottomStripVector =
             sp->bottomHalfStripLength() * sp->bottomStripDirection();
-        newSp.stripCenterDistance() = sp->stripCenterDistance();
-        newSp.topStripCenter() = sp->topStripCenter();
+        Eigen::Vector3f stripCenterDistance = sp->stripCenterDistance();
+        Eigen::Vector3f topStripCenter = sp->topStripCenter();
+
+        newSp.topStripVector() = std::array<float, 3>{
+            topStripVector.x(), topStripVector.y(), topStripVector.z()};
+        newSp.bottomStripVector() =
+            std::array<float, 3>{bottomStripVector.x(), bottomStripVector.y(),
+                                 bottomStripVector.z()};
+        newSp.stripCenterDistance() = std::array<float, 3>{
+            stripCenterDistance.x(), stripCenterDistance.y(),
+            stripCenterDistance.z()};
+        newSp.topStripCenter() = std::array<float, 3>{
+            topStripCenter.x(), topStripCenter.y(), topStripCenter.z()};
       }
 
       copyFromIndices.push_back(spIndex);

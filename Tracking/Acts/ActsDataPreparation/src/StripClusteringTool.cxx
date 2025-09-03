@@ -89,6 +89,7 @@ StripClusteringTool::clusterize(const EventContext& ctx,
 				const RawDataCollection& RDOs,
 				const InDet::SiDetectorElementStatus& stripDetElStatus,
 				const InDetDD::SiDetectorElement& element,
+        Acts::Ccl::ClusteringData& data,
 				std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const
 {
     IdentifierHash idHash = RDOs.identifyHash();
@@ -132,10 +133,8 @@ StripClusteringTool::clusterize(const EventContext& ctx,
     // Bad strips on a module invalidates the hitsInThirdTimeBin word.
     // Therefore set it to 0 if that's the case.
     // We are currently not using this, but keeping it here should we need it in the future
-    
-    ClusterCollection clusters =
-	Acts::Ccl::createClusters<CellCollection, typename IStripClusteringTool::ClusterCollection, 1>(cells);
-    collection.back() = std::move(clusters);
+
+    Acts::Ccl::createClusters<CellCollection, typename IStripClusteringTool::ClusterCollection, 1>(data, cells, collection.back());
 
     return StatusCode::SUCCESS;
 }

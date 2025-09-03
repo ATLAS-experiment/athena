@@ -227,24 +227,23 @@ PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
 				const RawDataCollection& RDOs,
 				const InDet::SiDetectorElementStatus& pixelDetElStatus,
 				const InDetDD::SiDetectorElement& element,
+        Acts::Ccl::ClusteringData& data,
 				std::vector<ClusterCollection>& collection) const
 {
   IdentifierHash idHash = RDOs.identifyHash();
+  collection.emplace_back();
   if ( not pixelDetElStatus.isGood(idHash) ) {
     // the module being flagged as bad is not a failure
     // An empty cluster collection needs to be added because the assumption
     // is that there is one element per element RawDataCollection.
-    collection.emplace_back();
     return StatusCode::SUCCESS;
   }
 
   // Retrieve the cells from the detector element
   CellCollection cells = unpackRDOs(RDOs, pixelDetElStatus, element);
-  
-  ClusterCollection clusters =
-    Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
-    (cells, Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
-  collection.push_back( std::move(clusters) );
+
+  Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
+    (data, cells, collection.back(), Acts::Ccl::DefaultConnect<Cell, 2>(m_addCorners));
   
   return StatusCode::SUCCESS;
 }

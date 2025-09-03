@@ -49,6 +49,7 @@ public:
 	     const RawDataCollection& RDOs,
 	     const InDet::SiDetectorElementStatus& stripDetElStatus,
 	     const InDetDD::SiDetectorElement& element,
+       Acts::Ccl::ClusteringData& data,
 	     std::vector<ClusterCollection>& collection) const = 0;
   
   virtual StatusCode

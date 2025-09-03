@@ -131,7 +131,7 @@ namespace MuonR4{
             return;
         }
         auto destProxy = outContainer.getTrack(outContainer.addTrack());
-        destProxy.copyFrom(fitTraject->getTrack(0), true); // make sure we copy track states!
+        destProxy.copyFrom(fitTraject->getTrack(0));
         ATH_MSG_DEBUG("Good track fit...");
         for (const auto state : destProxy.trackStates()) {
             if (!state.hasUncalibratedSourceLink()){

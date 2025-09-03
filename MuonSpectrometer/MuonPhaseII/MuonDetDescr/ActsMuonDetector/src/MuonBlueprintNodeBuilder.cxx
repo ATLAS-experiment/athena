@@ -120,7 +120,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(
       Acts::GeometryIdentifier chId = id.withLayer(chamberId++);
       vol->assignGeometryId(chId);
 
-      std::pair<std::vector<volumePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*context, *chamber, chId, boundsFactory);
+      std::pair<std::vector<staticNodePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*context, *chamber, chId, boundsFactory);
 
       for(auto& surface: innerStructure.second){
         vol->addSurface(surface);
@@ -150,9 +150,10 @@ MuonBlueprintNodeBuilder::buildMuonNode(
       }
 
       auto node = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
-      for(auto& readoutVol : innerStructure.first){
-         node->addStaticVolume(std::move(readoutVol));
-       }
+      for(auto& childNode : innerStructure.first){
+        node->addChild(std::move(childNode));
+      }
+
 
       
       nodes.emplace_back(std::move(node));
@@ -180,14 +181,14 @@ MuonBlueprintNodeBuilder::buildMuonNode(
   }
 
 
-std::pair<std::vector<volumePtr>, std::vector<surfacePtr>>
+std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>>
 MuonBlueprintNodeBuilder::getSensitiveElements(
     const ActsGeometryContext& gctx,
     const MuonGMR4::Chamber& chamber,
     const Acts::GeometryIdentifier& chId,
     Acts::VolumeBoundFactory& boundsFactory) const {
 
-  std::vector<volumePtr> readoutVolumes;
+  std::vector<staticNodePtr> readoutVolumes;
   std::vector<surfacePtr> readoutSurfaces;
   Acts::GeometryIdentifier::Value mdtId{1};
 
@@ -223,10 +224,14 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
                               mdtBounds->get(BoundsV::eHalfLengthZ),
                               static_cast<std::size_t>(std::lround(2 * mdtBounds->get(BoundsV::eHalfLengthZ) / parameters.tubePitch))}, 1u}};
           Acts::Experimental::MultiWireVolumeBuilder mdtBuilder{mwCfg};
-          std::unique_ptr<Acts::TrackingVolume> mdtVolume = mdtBuilder.buildVolume(gctx.context());
+          std::unique_ptr<Acts::TrackingVolume> mdtVolume = mdtBuilder.buildVolume();
 
           mdtVolume->assignGeometryId(chId.withExtra(mdtId++));
-          readoutVolumes.push_back(std::move(mdtVolume));
+          //create the blueprint node for the mdt multilayers
+          std::shared_ptr<Acts::Experimental::StaticBlueprintNode> mdtNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(mdtVolume));
+          mdtNode->setNavigationPolicyFactory(mdtBuilder.createNavigationPolicyFactory());
+          readoutVolumes.push_back(std::move(mdtNode));
+
           break;
 
         } case DetectorType::Rpc: 

@@ -73,7 +73,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
       continue;
     }
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
-    destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
+    destProxy.copyFrom(trackProxy);
   }
   if constexpr (enableBenchmark) m_chrono->chronoStop("FPGATrackSimPrototrackFitterAlg: ACTS KF");
 

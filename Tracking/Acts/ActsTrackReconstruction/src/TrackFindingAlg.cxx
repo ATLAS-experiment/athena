@@ -996,7 +996,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     }
 
     auto actsDestProxy   = actsTracksContainer.makeTrack();
-    actsDestProxy.copyFrom(track, true);  // make sure we copy track states!
+    actsDestProxy.copyFrom(track);  // make sure we copy track states!
 
     detail::ExpectedLayerPatternHelper::set(actsDestProxy, expectedLayerPattern);
 
