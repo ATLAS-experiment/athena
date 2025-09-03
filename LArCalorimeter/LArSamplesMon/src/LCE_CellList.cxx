@@ -238,9 +238,9 @@ bool LCE_CellList::applySelection(const LCE_CellList::thrCounter_t& counter) con
 
 void  LCE_CellList::writeList(const char* textfilename, const std::vector<LCE_CellList::thrCounter_t>& cellList) const {
   FILE* pFile = fopen (textfilename , "w");
-  if (not pFile) {
-    std::cout << "File " <<textfilename<<" could not be opened" <<std::endl;
-    throw std::runtime_error("File not opened");
+  if (!pFile) {
+    std::cerr << "Cannot open output file " << textfilename << "\n";
+    exit(1);
   }
   //               0          1        2      3       4         5                 6             7               8         9       10  
   fprintf(pFile,"onlid // partition // FT // Slot // channel // nAboveSigNoise // nAboveAbsE // MeanE [GeV] // fracQ4k // nLBs // Algoflag\n");
