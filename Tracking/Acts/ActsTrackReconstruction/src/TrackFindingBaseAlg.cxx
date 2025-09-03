@@ -245,7 +245,7 @@ namespace ActsTrk {
     }
 
     auto rootBranch = tracksContainerTemp.makeTrack();
-    rootBranch.copyFrom(trackProxy, false);  // #3534
+    rootBranch.copyFromWithoutStates(trackProxy);  // #3534
     if (m_addPixelStripCounts) {
       copyPixelStripCounts(rootBranch, trackProxy);
     }

@@ -39,6 +39,7 @@ public:
 	       const InDetRawDataCollection<StripRDORawData>& RDOs,
 	       const InDet::SiDetectorElementStatus& stripDetElStatus,
 	       const InDetDD::SiDetectorElement& element,
+         Acts::Ccl::ClusteringData& data,
 	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
     virtual StatusCode

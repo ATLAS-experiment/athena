@@ -30,6 +30,7 @@ public:
                const RawDataCollection& RDOs,
                const InDet::SiDetectorElementStatus& pixelDetElStatus,
                const InDetDD::SiDetectorElement& element,
+               Acts::Ccl::ClusteringData& data,
                std::vector<ClusterCollection>& collection) const override;
   
     virtual StatusCode

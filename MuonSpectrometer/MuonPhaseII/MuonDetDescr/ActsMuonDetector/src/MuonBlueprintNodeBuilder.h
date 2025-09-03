@@ -37,7 +37,7 @@ namespace Acts {
 
 namespace ActsTrk {
 
-  using volumePtr= std::unique_ptr<Acts::TrackingVolume>;
+  using staticNodePtr = std::shared_ptr<Acts::Experimental::StaticBlueprintNode>;
   using surfacePtr = std::shared_ptr<Acts::Surface>;
   using MuonChamberSet = MuonGMR4::MuonDetectorManager::MuonChamberSet;
   using StIdx = Muon::MuonStationIndex::StIndex;
@@ -86,7 +86,7 @@ private:
     *  @param chId The geometry identifier of the chamber
     *  @param boundsFactory The factory for volume bounds
     *  This function constructs and returns the sensitive elements (volumes and surfaces) of the chamber. */
-  std::pair<std::vector<volumePtr>, std::vector<surfacePtr>> getSensitiveElements( const ActsGeometryContext& gctx,
+  std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>> getSensitiveElements( const ActsGeometryContext& gctx,
                                                                                   const MuonGMR4::Chamber& chamber,
                                                                                   const Acts::GeometryIdentifier& chId,
                                                                                   Acts::VolumeBoundFactory& boundsFactory) const;

@@ -64,9 +64,10 @@ namespace ActsTrk {
     }
 
     ATH_MSG_DEBUG("Clustering on " << RDOs.size() << " RDOs using time information");
-    ClusterCollection clusters =
-      Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
-      (cells, Acts::Ccl::TimedConnect<Cell, 2ul>(m_timeTollerance.value(), m_addCorners.value()));
+    Acts::Ccl::ClusteringData data;
+    ClusterCollection clusters;
+    Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
+      (data, cells, clusters, Acts::Ccl::TimedConnect<Cell, 2ul>(m_timeTollerance.value(), m_addCorners.value()));
     ATH_MSG_DEBUG("   \\_ " << clusters.size() << " clusters reconstructed");
 
     // Fast insertion trick
