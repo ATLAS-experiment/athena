@@ -45,7 +45,8 @@ def WriteConstCfg(flags, name = "WriteConst", **kwargs):
         "AlignableTransformContainer#/Indet/AlignL3",
         "CondAttrListCollection#/TRT/AlignL1/TRT",
         "AlignableTransformContainer#/TRT/AlignL2",
-        "TRTCond::StrawDxContainer#/TRT/Calib/DX",
+        # Disable TRT L3 until ATLIDTRKCP-745 is solved
+        #"TRTCond::StrawDxContainer#/TRT/Calib/DX",
         "CondAttrListCollection#/Indet/IBLDist"
     ]
     
@@ -56,7 +57,8 @@ def WriteConstCfg(flags, name = "WriteConst", **kwargs):
         "InDetAlignL3-T0-Alignment",
         "InDetAlignL1TRT-T0-Alignment", 
         "InDetAlignL2TRT-T0-Alignment",
-        "InDetAlignL3TRT-T0-Alignment",
+        # Disable TRT L3 until ATLIDTRKCP-745 is solved
+        #"InDetAlignL3TRT-T0-Alignment",
         "InDetAlignIBLDIST-T0-Alignment"
     ]
 
