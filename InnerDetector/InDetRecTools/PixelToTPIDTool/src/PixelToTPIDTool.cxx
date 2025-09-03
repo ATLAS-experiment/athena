@@ -18,8 +18,15 @@ StatusCode InDet::PixelToTPIDTool::initialize() {
 
   ATH_CHECK(AthAlgTool::initialize());
 
+  /// Equalize the cluster-level dE/dx measurements before taking the truncated mean.
+  /// Not yet implemented.  See ATLIDTRKCP-579 for progress.
+  /// Will eventually read run- and module-specific SFs from the conditions database.
+  /// SFs account for radiation damage & varying operation conditions (bias voltages, thresholds, etc.).
+  /// See PixelDEdxEqualizationAlg for applying these SFs to special (D)xAODs with pixel clusters & MSOSs. 
   if(m_equalizeClusterMeasurements) {
-    ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and return the truncated mean.");
+    //ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and return the truncated mean.");
+    ATH_MSG_WARNING("Equalization feature is not yet implemented.  See ATLIDTRKCP-579 for progress.");
+    ATH_MSG_WARNING("Proceeding without applying any equalization scale factors.");
   }
   
   ATH_CHECK(detStore()->retrieve(m_pixelid,"PixelID"));
@@ -46,7 +53,8 @@ StatusCode InDet::PixelToTPIDTool::finalize()
 
 //============================================================================================
 
-/// Will return the dE/dx, and will update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
+/// Will return the truncated mean dE/dx.
+/// Will also update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
 /// Whether this is the raw or equalized dE/dx will be determined by the tool properties.
 float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                             const Trk::Track& track,
@@ -60,9 +68,6 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
     
   /// Get pixel clusters in this simple struct to abstract away the two EDMs.
   std::vector<PixelDEdx::PixelClusterStruct> clusters;
-
-  /// Second value keeps track if the cluster is in IBL and has at least an overflow hit
-  std::multimap<float,int> dEdxMap;
 
   // Check for track states:
   const Trk::TrackStates* recoTrackStates = track.trackStateOnSurfaces();
@@ -120,7 +125,7 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
             cluster.iblOverflow = iblOverflow;
           }
 
-          /// If good measurement, update cluster raw cluster dE/dx, passdEdxCutsLoose, and passdEdxCutsTight.
+          /// If good measurement, update raw cluster dE/dx, passdEdxCutsLoose, and passdEdxCutsTight.
           /// Also, increment nUsedIBLOverflowHits
           /// If bad measurement, keep default negative value for dE/dx, don't increment.
           getClusterdEdx(cluster, nUsedIBLOverflowHits);
@@ -132,8 +137,9 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           /// Read conditions database.
           if(m_equalizeClusterMeasurements){
 
-            /// Insert code from Rebeccas Hicks' QT task here (ATLIDTRKCP-579).
-            /// Pulls dE/dx equalization SF from conditons database.
+            /// Placeholder of pixel dE/dx equalization during reconstruction.
+            /// Will pull equalization SFs from the conditons database.
+            /// See Rebecca Hicks' QT task: ATLIDTRKCP-579.
             float SF = 1.;
 
             /// Apply scale factor and store

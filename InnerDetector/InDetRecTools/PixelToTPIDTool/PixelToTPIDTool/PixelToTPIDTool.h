@@ -59,8 +59,11 @@ namespace InDet {
       SG::ReadCondHandleKey<PixelChargeCalibCondData> m_moduleDataKey
       {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};
 
-      /// Equalize the cluster-level dE/dx measurements before the taking the truncated mean.
-      /// For ESD EDM, always have access to pixel clusters.
+      /// Equalize the cluster-level dE/dx measurements before taking the truncated mean.
+      /// Not yet implemented.  See ATLIDTRKCP-579 for progress.
+      /// Will eventually read run- and module-specific SFs from the conditions database.
+      /// SFs account for radiation damage & varying operation conditions (bias voltages, thresholds, etc.).
+      /// See PixelDEdxEqualizationAlg for applying these SFs to special (D)xAODs with pixel clusters & MSOSs. 
       Gaudi::Property<bool> m_equalizeClusterMeasurements
       { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
 
