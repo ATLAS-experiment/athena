@@ -87,15 +87,13 @@ namespace ISFTesting {
     /** Return the parent particle as a HepMC particle type
         (only called for particles that will enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr      parentParticle() override {return nullptr;};
-    /** Return the barcode of the parent particle */
-    virtual int  parentBarcode() override {return 1;};
     /** Return the unique ID of the parent particle */
     virtual int  parentUniqueID() override {return 1;}
     /** Return a boolean whether or not the parent particle survives the incident */
     virtual bool                      parentSurvivesIncident() const override {return false;};
     /** Return the parent particle after the TruthIncident vertex (and assign
         a new barcode to it) */
-    virtual HepMC::GenParticlePtr        parentParticleAfterIncident(int) override {return nullptr;};
+    virtual HepMC::GenParticlePtr        parentParticleAfterIncident() override {return nullptr;};
 
     /** Return p^2 of the i-th child particle */
     virtual double                    childP2(unsigned short) const override {return 1.0;};
@@ -105,8 +103,6 @@ namespace ISFTesting {
     virtual double                    childEkin(unsigned short) const override {return 1.0;};
     /** Return the PDG Code of the i-th child particle */
     virtual int                       childPdgCode(unsigned short) const override {return 1;};
-    /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
-    int  childBarcode(unsigned short) const override final {return 0;};
     /** Return the i-th child as a HepMC particle type and assign the given
         Barcode to the simulator particle (only called for particles that will
         enter the HepMC truth event) */
@@ -127,8 +123,7 @@ namespace ISFTesting {
     MOCK_CONST_METHOD0(physicsProcessCode, int());
     MOCK_CONST_METHOD0(parentParticle, HepMC::ConstGenParticlePtr ());
     MOCK_METHOD0(parentParticle, HepMC::GenParticlePtr ());
-    MOCK_METHOD0(parentBarcode, int());
-    MOCK_METHOD1(parentParticleAfterIncident, HepMC::GenParticlePtr (int));
+    MOCK_METHOD0(parentParticleAfterIncident, HepMC::GenParticlePtr ());
     MOCK_METHOD1(setPassWholeVertices, void(bool));
     MOCK_CONST_METHOD0(numberOfChildren, unsigned short());
   };
@@ -212,9 +207,6 @@ namespace ISFTesting {
     EXPECT_CALL(ti, physicsProcessCode())
       .Times(1)
       .WillOnce(::testing::Return(21));
-    EXPECT_CALL(ti, parentBarcode())
-      .Times(1)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
       .Times(1)
       .WillOnce(::testing::Return(inParticle3));
@@ -223,7 +215,7 @@ namespace ISFTesting {
     ASSERT_NE( nullptr, generated);
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
-    ASSERT_EQ( -200001, HepMC::barcode(generated) );
+    ASSERT_EQ( -2, HepMC::uniqueID(generated) );
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( 0u, generated->particles_out().size());
@@ -265,24 +257,20 @@ namespace ISFTesting {
     EXPECT_CALL(ti, physicsProcessCode())
       .Times(1)
       .WillOnce(::testing::Return(21));
-    EXPECT_CALL(ti, parentBarcode())
-      .Times(2)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
       .Times(2)
       .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3));
-    EXPECT_CALL(ti, parentParticleAfterIncident(1000003))
+    EXPECT_CALL(ti, parentParticleAfterIncident())
       .Times(1)
       .WillOnce(::testing::Return(nullptr));
 
     recordIncidentToMCTruth(ti,false);
-    HepMC::GenVertexPtr  generated = HepMC::barcode_to_vertex(anEvent.get(),-200001); //Find a nicer way to get this.
+    HepMC::GenVertexPtr  generated = anEvent->vertices().at(1); //Find a nicer way to get this.
     ASSERT_NE( nullptr, generated);
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
-    ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
+    ASSERT_EQ( -2, HepMC::uniqueID(generated) ); // by construction at the moment
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( 0u, generated->particles_out().size());
@@ -321,7 +309,7 @@ namespace ISFTesting {
 
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
     registerTruthIncident(ti);
-    HepMC::GenVertexPtr  generated = HepMC::barcode_to_vertex(anEvent.get(),-200001); //Find a nicer way to get this.
+    HepMC::GenVertexPtr  generated = (anEvent->vertices().size()>1) ? anEvent->vertices().at(1) : nullptr; //Find a nicer way to get this.
     HepMC::GenVertexPtr  expectedVtx(nullptr);
     ASSERT_EQ( expectedVtx, generated);
   }
@@ -363,19 +351,16 @@ namespace ISFTesting {
     EXPECT_CALL(ti, physicsProcessCode())
       .Times(1)
       .WillOnce(::testing::Return(21));
-    EXPECT_CALL(ti, parentBarcode())
-      .Times(1)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
       .Times(1)
       .WillOnce(::testing::Return(inParticle3));
 
     registerTruthIncident(ti);
-    HepMC::GenVertexPtr  generated = HepMC::barcode_to_vertex(anEvent.get(),-200001); //Find a nicer way to get this.
+    HepMC::GenVertexPtr  generated = anEvent->vertices().at(1); //Find a nicer way to get this.
     ASSERT_NE( nullptr, generated);
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
-    ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
+    ASSERT_EQ( -2, HepMC::uniqueID(generated) ); // by construction at the moment
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( 0u, generated->particles_out().size());
@@ -430,9 +415,6 @@ namespace ISFTesting {
     EXPECT_CALL(ti, physicsProcessCode())
       .Times(1)
       .WillOnce(::testing::Return(21));
-    EXPECT_CALL(ti, parentBarcode())
-      .Times(1)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
       .Times(1)
       .WillOnce(::testing::Return(inParticle3));
@@ -444,11 +426,11 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(false));
 
     registerTruthIncident(ti);
-    HepMC::GenVertexPtr  generated = HepMC::barcode_to_vertex(anEvent.get(),-200001); //Find a nicer way to get this.
+    HepMC::GenVertexPtr  generated = anEvent->vertices().at(1); //Find a nicer way to get this.
     ASSERT_NE( nullptr, generated);
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
-    ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
+    ASSERT_EQ( -2, HepMC::uniqueID(generated) ); // by construction at the moment
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( 0u, generated->particles_out().size());
@@ -501,15 +483,11 @@ namespace ISFTesting {
     EXPECT_CALL(ti, physicsProcessCode())
       .Times(1)
       .WillOnce(::testing::Return(21));
-    EXPECT_CALL(ti, parentBarcode())
-      .Times(2)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
       .Times(2)
       .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3));
-    EXPECT_CALL(ti, parentParticleAfterIncident(1000003))
+    EXPECT_CALL(ti, parentParticleAfterIncident())
       .Times(1)
       .WillOnce(::testing::Return(inParticle5));
     // _ is a matcher where the argument can be any value of the
@@ -520,11 +498,11 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(true));
 
     registerTruthIncident(ti);
-    HepMC::GenVertexPtr  generated = HepMC::barcode_to_vertex(anEvent.get(),-200001); //Find a nicer way to get this.
+    HepMC::GenVertexPtr  generated = anEvent->vertices().at(1); //Find a nicer way to get this.
     ASSERT_NE( nullptr, generated);
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
-    ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
+    ASSERT_EQ( -2, HepMC::uniqueID(generated) ); // by construction at the moment
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
