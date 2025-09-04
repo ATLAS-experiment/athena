@@ -25,6 +25,7 @@ flags.Detector.GeometryITkPixel = True
 flags.Detector.GeometryITkStrip = True
 flags.Detector.GeometryBpipe = True
 flags.Detector.GeometryCalo = False
+flags.Detector.GeometryMuon = False
 
 flags.Concurrency.NumThreads = 64
 flags.Concurrency.NumConcurrentEvents = 64
