@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -56,10 +56,10 @@ class PerfMonMTSvc : public extends<AthService, IPerfMonMTSvc, IIncidentListener
   virtual StatusCode finalize() override;
 
   /// Start Auditing
-  virtual void startAud(const std::string& stepName, const std::string& compName) override;
+  virtual void startAud(const std::string& stepName, const std::string& compName, const EventContext& ctx) override;
 
   /// Stop Auditing
-  virtual void stopAud(const std::string& stepName, const std::string& compName) override;
+  virtual void stopAud(const std::string& stepName, const std::string& compName, const EventContext& ctx) override;
 
   /// Snapshot Auditing: Take snapshots at the beginning and at the end of each step
   void startSnapshotAud(const std::string& stepName, const std::string& compName);
