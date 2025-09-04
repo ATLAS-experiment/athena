@@ -31,9 +31,9 @@ public:
   /**
    * @brief retrieves the decisions associated to this decId, make their combinations and apply the algorithm
    * @param[in]  LegDecisionsMap that lists all the passing decisions, to be updated by the tool depending on the outcome of executeAlg 
-   * @param[in]  Event Context, currently unused
+   * @param[in]  Event Context
    **/  
-  virtual StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*ctx*/) const override;
+  virtual StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& ctx) const override;
     
   /**
    * @brief retrieves this ComboHypoTool's chain's decision ID
@@ -79,7 +79,7 @@ public:
   * param[in] combination A single combination of objects to be discriminated against. Vector contains the required number of objects over
   * all legs. Use the pair.first to tell which leg a given pair.second decision object belongs to in the current combination.
   **/
-  virtual bool executeAlg(const std::vector<Combo::LegDecision>& combination) const;
+  virtual bool executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& ctx) const;
 
   /**
   * @brief Creates the per-leg vectors of Decision objects starting from the initial LegDecision map, storing only those concerning this HypoTool's chain

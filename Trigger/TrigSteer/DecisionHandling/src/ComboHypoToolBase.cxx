@@ -45,7 +45,7 @@ StatusCode ComboHypoToolBase::setLegMultiplicity(const Combo::MultiplicityReqMap
   return StatusCode::SUCCESS;
 }
 
-StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*context*/) const {
+StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& ctx) const {
   if (m_legMultiplicities.size() == 0) {
     ATH_MSG_ERROR("ComboHypoTool for " << m_decisionId << " has not been properly configured. setLegMultiplicity should be called by the parent alg in initalize");
     return StatusCode::FAILURE;
@@ -104,7 +104,7 @@ StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const 
     ++iterations;
 
     try {
-      if (executeAlg(combinationToCheck)) {
+      if (executeAlg(combinationToCheck, ctx)) {
         ATH_MSG_DEBUG("Combination " << (iterations - 1) << " decided to be passing");
         passingCombinations.push_back(combinationToCheck);
         if (m_modeOR == true and m_enableOverride) {
@@ -275,7 +275,7 @@ void ComboHypoToolBase::printDebugInformation(const Combo::LegDecisionsMap& pass
 }
 
 
-bool ComboHypoToolBase::executeAlg(const std::vector<Combo::LegDecision>& /*combination*/) const {
+bool ComboHypoToolBase::executeAlg(const std::vector<Combo::LegDecision>& /*combination*/, const EventContext& /*ctx*/) const {
   ATH_MSG_ERROR("Do not use ComboHypoToolBase on its own, inherit this class and override executeAlg.");
   return false;
 }
