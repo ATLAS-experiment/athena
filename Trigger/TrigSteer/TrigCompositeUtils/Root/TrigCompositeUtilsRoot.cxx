@@ -367,7 +367,7 @@ namespace TrigCompositeUtils {
             std::set_intersection(activeChainsIntoThisDecision.begin(), activeChainsIntoThisDecision.end(),
               moreActiveChains.begin(), moreActiveChains.end(),
               std::inserter(intersection, intersection.begin()));
-            activeChainsIntoThisDecision = intersection; // Update the output to only be the intersection and continue to any other seeds
+            activeChainsIntoThisDecision = std::move(intersection); // Update the output to only be the intersection and continue to any other seeds
           }
         }
         // We now know what chains were active coming into this Decision (d) from ALL seeds
