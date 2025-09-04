@@ -11,7 +11,6 @@
 
 // Framework includes
 #include "GaudiKernel/IIncidentSvc.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // PerfMonComps includes
 #include "PerfMonMTSvc.h"
@@ -177,18 +176,16 @@ void PerfMonMTSvc::handle(const Incident& inc) {
 /*
  * Start Auditing
  */
-void PerfMonMTSvc::startAud(const std::string& stepName, const std::string& compName) {
+void PerfMonMTSvc::startAud(const std::string& stepName, const std::string& compName, const EventContext& ctx) {
   // Snapshots, i.e. Initialize, Event Loop, etc.
   startSnapshotAud(stepName, compName);
 
   /*
    * Perform component monitoring only if the user asked for it.
    * By default we don't monitor a set of common components.
-   * Once we adopt C++20, we can switch this from count to contains.
    */
-  if (m_doComponentLevelMonitoring && !m_exclusionSet.count(compName)) {
+  if (m_doComponentLevelMonitoring && !m_exclusionSet.contains(compName)) {
     // Start component auditing
-    auto const &ctx = Gaudi::Hive::currentContext();
     startCompAud(stepName, compName, ctx);
   }
 }
@@ -196,14 +193,13 @@ void PerfMonMTSvc::startAud(const std::string& stepName, const std::string& comp
 /*
  * Stop Auditing
  */
-void PerfMonMTSvc::stopAud(const std::string& stepName, const std::string& compName) {
+void PerfMonMTSvc::stopAud(const std::string& stepName, const std::string& compName, const EventContext& ctx) {
   // Snapshots, i.e. Initialize, Event Loop, etc.
   stopSnapshotAud(stepName, compName);
 
   // Check if we should monitor this component
-  if (m_doComponentLevelMonitoring && !m_exclusionSet.count(compName)) {
+  if (m_doComponentLevelMonitoring && !m_exclusionSet.contains(compName)) {
     // Stop component auditing
-    auto const &ctx = Gaudi::Hive::currentContext();
     stopCompAud(stepName, compName, ctx);
   }
 }
