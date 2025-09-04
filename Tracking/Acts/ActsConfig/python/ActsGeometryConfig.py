@@ -250,12 +250,6 @@ def ActsWriteTrackingGeometryCfg(flags,
     if flags.Detector.GeometryHGTD:
       subDetectors += ["HGTD"]
 
-    if 'ObjWriterTool' not in kwargs: 
-      kwargs.setdefault("ObjWriterTool",
-                        acc.getPrimaryAndMerge(ActsObjWriterToolCfg(flags,
-                                                                    OutputDirectory = "obj",
-                                                                    SubDetectors = subDetectors) ))
-
     acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometry(name, **kwargs))
     return acc
 

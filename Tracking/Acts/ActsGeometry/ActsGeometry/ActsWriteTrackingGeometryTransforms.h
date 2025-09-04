@@ -16,7 +16,6 @@
 
 
 // PACKAGE
-#include "ActsGeometry/ActsObjWriterTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // STL

@@ -301,6 +301,9 @@ atlas_add_citest( ActsExtendedTruth
 atlas_add_citest( ACTS_Propagation_ITk
    SCRIPT ActsITkTest.py )
 
+atlas_add_citest( ACTS_Propagation_ITk_Gen3
+   SCRIPT ActsITkTest.py --gen3)
+
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
