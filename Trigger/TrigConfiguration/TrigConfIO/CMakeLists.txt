@@ -9,7 +9,7 @@ find_package( Oracle )     # Oracle client libraries for DB access
 find_package( cx_Oracle )  # Oracle python client
 find_package( nlohmann_json )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( CrestApiLib COMPONENTS CrestApi )
+find_package( CrestApi COMPONENTS CrestApi )
 
 # Component(s) in the package:
 atlas_add_library( TrigConfIO
@@ -18,17 +18,17 @@ atlas_add_library( TrigConfIO
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${CrestApiLib_INCLUDE_DIRS}
   LINK_LIBRARIES TrigConfData TrigConfBase
-  PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} nlohmann_json::nlohmann_json CrestApiLib::CrestApiLib -lstdc++fs
+  PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} nlohmann_json::nlohmann_json ${CrestApi_LIBRARIES} -lstdc++fs
   )
 
 atlas_add_executable( TestTriggerMenuAccess utils/TestTriggerMenuAccess.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} TrigConfData TrigConfIO CrestApiLib::CrestApiLib
+  LINK_LIBRARIES ${Boost_LIBRARIES} TrigConfData TrigConfIO ${CrestApi_LIBRARIES}
   )
 
 atlas_add_executable( TriggerMenuRW utils/TriggerMenuRW.cxx 
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} TrigConfIO CrestApiLib::CrestApiLib
+  LINK_LIBRARIES ${Boost_LIBRARIES} TrigConfIO ${CrestApi_LIBRARIES}
   )
 
 # Install files from the package.
