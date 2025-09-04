@@ -62,7 +62,7 @@ class FPEAuditor : public AthCommonMsg<Gaudi::Auditor>
 
   /** report fpes which happened during step 'step' on behalf of 'caller'
    */
-  void report_fpe(const std::string& step, const std::string& caller);
+  void report_fpe(const std::string& step, const std::string& caller, const EventContext& ctx);
 
   /** add an fpe node
    */

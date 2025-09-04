@@ -16,7 +16,6 @@
 // FrameWork includes
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "FPEAuditor.h"
 
@@ -177,9 +176,9 @@ void FPEAuditor::before(const std::string& event, const std::string& /*name*/,
 }
 
 void FPEAuditor::after(const std::string& event, const std::string& name,
-                       const EventContext&, const StatusCode&)
+                       const EventContext& ctx, const StatusCode&)
 {
-  report_fpe(event, name);
+  report_fpe(event, name, ctx);
   pop_fpe_node();
 
   if ( event==IAuditor::Initialize ) {
@@ -197,14 +196,13 @@ void FPEAuditor::after(const std::string& event, const std::string& name,
  */
 void
 FPEAuditor::report_fpe(const std::string& step,
-		       const std::string& caller)
+                       const std::string& caller,
+                       const EventContext& ctx)
 {
   // store current list of FPE flags which were raised before
   int raised = fetestexcept(FE_OVERFLOW | FE_INVALID | FE_DIVBYZERO);
   if (raised) {
-    // FIXME: Gaudi should pass context to the auditors.
     std::stringstream evStr;
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     if (ctx.valid()) {
       evStr << " on event " << ctx.eventID().event_number();
     }
