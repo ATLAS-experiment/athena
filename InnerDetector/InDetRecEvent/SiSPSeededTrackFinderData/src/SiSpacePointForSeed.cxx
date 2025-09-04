@@ -16,15 +16,15 @@
 namespace InDet {
 
   SiSpacePointForSeed::SiSpacePointForSeed
-  (const Trk::SpacePoint*const& sp,const float* r) 
+  (const Trk::SpacePoint* sp, std::span<float const, 3> r) 
   {
-    set(sp,r); m_param = 0.;  
+    set(sp,r); m_param = 0.;
   }
 
   SiSpacePointForSeed::SiSpacePointForSeed
-  (const Trk::SpacePoint*const& sp,const float* r,const float* sc) 
+  (const Trk::SpacePoint* sp, std::span<float const, 3> r, std::span<float const, 4> sc) 
   {
-    set(sp,r,sc); m_param = 0.; 
+    set(sp,r,sc); m_param = 0.;
   }
 
 
@@ -33,7 +33,7 @@ namespace InDet {
   /////////////////////////////////////////////////////////////////////////////////
 
   void SiSpacePointForSeed::set
-  (const Trk::SpacePoint*const& sp,const float* r)
+  (const Trk::SpacePoint* sp,std::span<float const, 3> r)
   {
     spacepoint = sp  ;
     m_x        = r[0];
@@ -75,7 +75,7 @@ namespace InDet {
   /////////////////////////////////////////////////////////////////////////////////
 
   void SiSpacePointForSeed::set
-  (const Trk::SpacePoint*const& sp,const float* r,const float* sc)
+  (const Trk::SpacePoint* sp,std::span<float const, 3> r,std::span<float const, 4> sc)
   {
     spacepoint = sp  ;
     m_x        = r[0];
@@ -107,35 +107,4 @@ namespace InDet {
     }
     m_su = &sp->clusterList().first->detectorElement()->surface();
   }
-
-  void SiSpacePointForSeed::setParam(const float& p)
-  {
-    m_param = p;
-  }
-
-  void SiSpacePointForSeed::setD0(const float& d0)
-  {
-    m_d0 = d0;
-  } 
-
-  void SiSpacePointForSeed::setEta(const float& eta)
-  {
-    m_eta = eta;
-  }
-
-  void  SiSpacePointForSeed::setQuality(float q)
-  {
-    if(q <= m_q) m_q = q;
-  }
-
-  void  SiSpacePointForSeed::setDZDR(const float& dzdr)
-  {
-    m_dzdr = dzdr;
-  }
-
-  void  SiSpacePointForSeed::setPt(const float& pt)
-  {
-    m_pt = pt;
-  }
- 
 } // end of name space

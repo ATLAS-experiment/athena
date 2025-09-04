@@ -26,6 +26,7 @@
 
 #include "TrkEventUtils/PRDtoTrackMap.h"
 #include "TrkSpacePoint/SpacePoint.h" //used in an inline function in the header
+#include <span>
 //for validation
 
 
@@ -146,13 +147,13 @@ namespace ActsTrk {
 			    InDet::SiSpacePointsSeedMakerEventData& data) const;
     void
       newSpacePoint(InDet::SiSpacePointsSeedMakerEventData& data,
-		    const xAOD::SpacePoint* const& sp) const;
+		    const xAOD::SpacePoint* sp) const;
     
-    static void pixInform(const Trk::SpacePoint* const& sp,
+    static void pixInform(const Trk::SpacePoint* sp,
 			  float* r) ;
     static void stripInform(InDet::SiSpacePointsSeedMakerEventData& data,
-			    const Trk::SpacePoint* const& sp,
-			    float* r) ;
+			    const Trk::SpacePoint* sp,
+			    std::span<float,15> r) ;
 
     bool convertPixelSeed(const EventContext& ctx,
 			  InDet::SiSpacePointsSeedMakerEventData& data,
