@@ -144,7 +144,7 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   for (unsigned int i=0; i<calibHitContainers.size(); i++) {
     for( const auto *const calibhit: *(calibHitContainers[i])) {
       //care only for deposits of the given truth particle
-      if (!MC::isSingleParticle(HepMC::barcode(calibhit))) continue; // FIXME barcode-based
+      if (!MC::isGenStable(HepMC::barcode(calibhit))) continue; // FIXME barcode-based
 
       double Etot   = calibhit->energyTotal();
       double Eem    = calibhit->energy(0);
