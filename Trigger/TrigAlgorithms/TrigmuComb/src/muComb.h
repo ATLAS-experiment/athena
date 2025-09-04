@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -107,7 +107,7 @@ class muComb : public AthReentrantAlgorithm
                  double, double, double, double, double, double, double,
 		 double&, double&, double&, double&, double&, int&) const;
 
-  ExtrapolationResult getExtrapolatedMuon(const xAOD::L2StandAloneMuon* feature) const;
+  ExtrapolationResult getExtrapolatedMuon(const EventContext& ctx, const xAOD::L2StandAloneMuon* feature) const;
 
  private:
 
