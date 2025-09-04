@@ -418,7 +418,8 @@ TriggerHLTListRun3 = [
 
     #L1 mistime monitoring
     ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400', 'BS ESD AODFULL', 'L1'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_TrigCompositeMistimeJ400Aux.pass.other_type.beforeafterflag.l1a_type', 'BS ESD AODFULL', 'L1'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_TrigCompositeMistimeJ400Aux.pass.other_type.beforeafterflag.l1a_type.other_type_before.other_type_after.offset_before.offset_after', 'BS ESD AODFULL', 'L1'),
+
 
     # LArPS
     ('xAOD::TrigEMClusterContainer#HLT_LArPS_AllCaloEMClusters',           'BS ESD', 'Egamma', [InViews('LArPS_AllEM_Views')]),

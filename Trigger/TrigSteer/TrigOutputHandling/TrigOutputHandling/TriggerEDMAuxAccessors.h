@@ -53,6 +53,8 @@ auto intAccessors = initAccessors<int>(
   "dEdxTrk_n_hits_innermost","dEdxTrk_n_hits_inner","dEdxTrk_n_hits_pix","dEdxTrk_n_hits_sct",
   "dEdxHit_trkid","dEdxHit_iblovfl","dEdxHit_loc","dEdxHit_layer","NumPV", "nRoIs",
   "l1a_type", "other_type", "beforeafterflag","pass",
+  "other_type_before", "other_type_after",
+  "offset_before", "offset_after",  
   "n_isotrack",
   "n_track",
   "n_tracks_lead",

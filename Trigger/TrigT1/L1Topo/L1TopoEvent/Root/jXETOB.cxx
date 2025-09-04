@@ -9,7 +9,7 @@ TCS::jXETOB::jXETOB() : BaseTOB(0,"jXETOB")
 {}
 
 // constructor with initial values
-TCS::jXETOB::jXETOB(int ex, int ey, unsigned int et, inputTOBType_t tobType) : BaseTOB(0,"jXETOB")
+TCS::jXETOB::jXETOB(int ex, int ey, unsigned long long et, inputTOBType_t tobType) : BaseTOB(0,"jXETOB")
    , m_Ex( ex )
    , m_Ey( ey )
    , m_Et( et )

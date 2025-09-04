@@ -319,10 +319,10 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
   unsigned long long central_EyTopoLong = static_cast<unsigned long long>(central_EyTopo);
 
   unsigned long long Et2Topo = global_ExTopoLong*global_ExTopoLong + global_EyTopoLong*global_EyTopoLong;
-  unsigned int EtTopo =  std::sqrt( Et2Topo );
+  unsigned long long EtTopo =  std::sqrt( Et2Topo );
   unsigned long long Et2Topo_central = central_ExTopoLong*central_ExTopoLong + central_EyTopoLong*central_EyTopoLong;
-  unsigned int EtTopo_central =  std::sqrt( Et2Topo_central );
-
+  unsigned long long EtTopo_central =  std::sqrt( Et2Topo_central );
+  
   TCS::jXETOB jxe( global_ExTopo, global_EyTopo, EtTopo, TCS::JXE );
   TCS::jXETOB jxec( central_ExTopo, central_EyTopo, EtTopo_central, TCS::JXEC );
 
