@@ -28,30 +28,15 @@ bool
 TrigConf::TrigDBHLTPrescalesSetLoader::loadHLTPrescales ( unsigned int psk, TrigConf::HLTPrescalesSet & pss,
                                                           const std::string & outFileName ) const
 {
+   // load data into ptree
    boost::property_tree::ptree pt;
-   {
-      auto session = createDBSession();
-      session->transaction().start( /*bool readonly=*/ true);
-      const size_t sv = schemaVersion(session.get());
-      QueryDefinition qdef = getQueryDefinition(sv, m_queries);
-      try {
-         qdef.setBoundValue<int>("key", psk);
-         auto q = qdef.createQuery( session.get() );
-         auto & cursor = q->execute();
-         if ( ! cursor.next() ) {
-            TRG_MSG_ERROR("Tried reading HLT prescales, but HLT prescale key " << psk << " is not available" );
-            throw TrigConf::NoHLTPSKException("TrigDBHLTPrescalesSetLoader: HLT PSK " + std::to_string(psk) + " not available");
-         }
-         const coral::AttributeList& row = cursor.currentRow();
-         const coral::Blob& dataBlob = row[qdef.dataName()].data<coral::Blob>();
-         writeRawFile( dataBlob, outFileName );
-         blobToPtree( dataBlob, pt );
-      }
-      catch(coral::QueryException & ex) {
-         TRG_MSG_ERROR("When reading HLT prescales for HLT PSK " << psk << " a coral::QueryException was caught ( " << ex.what() <<" )" );
-         throw TrigConf::QueryException("TrigDBHLTPrescalesSetLoader: " + std::string(ex.what()));
-      }
+   if(useCrest()) {
+      loadFromCrest(psk, pt, outFileName, "HLT prescales", "HLTPS");
+   } else {
+      loadFromOracle(psk, pt, outFileName, "HLT prescales", m_queries);
    }
+    
+   // fill HLTPrescaleSet with data
    try {
       pss.setData(std::move(pt));
       pss.setPSK(psk);

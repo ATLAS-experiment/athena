@@ -27,7 +27,7 @@ struct Config {
 public:
 
    std::vector<std::string> knownParameters { 
-      "file", "f", "smk", "l1psk", "hltpsk", "bgsk", "db", "write", "w", 
+      "file", "f", "smk", "l1psk", "hltpsk", "bgsk", "db", "crest-db", "crest-server", "crest-api", "write", "w", 
       "Write", "W", "help", "h", "detail", "d", "ctp", "c"
       };
 
@@ -39,6 +39,10 @@ public:
    unsigned int hltpsk { 0 };
    unsigned int bgsk { 0 };
    std::string  dbalias { "TRIGGERDB_RUN3" };
+   std::string crestDb { "" };
+   const std::string crestServerDefault{ "http://crest-04.cern.ch/" };
+   std::string  crestServer { crestServerDefault };
+   std::string crestApi { "" };
    bool doCtp { false }; // flag to read CTP files
 
    // output
@@ -49,6 +53,7 @@ public:
    // other
    bool         help { false };
    bool         detail { false };
+
    // to keep track of configuration errors
    vector<string> error;
 
@@ -72,7 +77,11 @@ void Config::usage() {
    cout << "  --l1psk               l1psk                         ... the L1 prescale key \n";
    cout << "  --hltpsk              hltpsk                        ... the HLT prescale key \n";
    cout << "  --bgsk                bgsk                          ... the bunchgroup key \n";
-   cout << "  --db                  dbalias                       ... dbalias (default " << dbalias << ") \n";
+   cout << "  --db                  dbalias                       ... dbalias for oracle/frontier access (default " << dbalias << ") \n";
+   cout << "  --crest-db            crestdb                       ... crest_db for Crest access, if specified Crest will be used (default '') \n";
+   cout << "                                                          possible values: CONF_DATA_RUN3, CONF_MC_RUN3, CONF_REPR_RUN3\n";
+   cout << "  --crest-server        server                        ... crest server (default " << crestServerDefault << ")\n";
+   cout << "  --crest-api           version                       ... crest api version (default taken from CrestApi)";
    cout << "  -c|--ctp                                            ... if provided together with the SMK and DB then will read only CTP files from the DB and not the rest of the menu\n";
    cout << "[Output options]\n";
    cout << "  -w|--write            [base]                        ... to write out json files, e.g. L1menu[_<base>].json. base is optional.\n";
@@ -147,7 +156,18 @@ Config::parseProgramOptions(int argc, char* argv[]) {
          dbalias = currentWord;
          continue; 
       }
-
+      if(currentParameter == "crest-db") { 
+         crestDb = currentWord;
+         continue; 
+      }
+      if(currentParameter == "crest-server") { 
+         crestServer = currentWord;
+         continue; 
+      }
+      if(currentParameter == "crest-api") { 
+         crestApi = currentWord;
+         continue; 
+      }
       // output
       if(currentParameter == "write" || currentParameter == "w" || currentParameter == "Write" || currentParameter == "W") {
          base = currentWord;
@@ -290,52 +310,61 @@ int main(int argc, char** argv) {
 
    if( cfg.smk != 0 && !cfg.doCtp ) {
       // load config from DB
-
-      // db menu loader
-      TrigConf::TrigDBMenuLoader dbloader(cfg.dbalias);
-      
-      // L1 menu
       {
-         TrigConf::L1Menu l1menu;
-         try {
-            dbloader.loadL1Menu( cfg.smk, l1menu, outputFileName("L1Menu", cfg) );
+         // db menu loader
+         TrigConf::TrigDBMenuLoader dbloader(cfg.dbalias);
+         if(!cfg.crestDb.empty()) {
+            dbloader.setCrestTrigDB(cfg.crestDb);
+            dbloader.setCrestConnection(cfg.crestServer, cfg.crestApi);
          }
-         catch(TrigConf::IOException & ex) {
-            cout << "Could not load L1 menu. An exception occurred: " << ex.what() << endl;
-         }
-         if(l1menu) {
-            cout << "Loaded L1 menu " << l1menu.name() << " with " << l1menu.size() << " items from " << cfg.dbalias << " with SMK " << cfg.smk << endl;
-            if( cfg.detail ) {
-               l1menu.printMenu(true);
+         
+         // L1 menu
+         {
+            TrigConf::L1Menu l1menu;
+            try {
+               dbloader.loadL1Menu( cfg.smk, l1menu, outputFileName("L1Menu", cfg) );
             }
+            catch(TrigConf::IOException & ex) {
+               cout << "Could not load L1 menu. An exception occurred: " << ex.what() << endl;
+            }
+            if(l1menu) {
+               cout << "Loaded L1 menu " << l1menu.name() << " with " << l1menu.size() << " items from " << cfg.dbalias << " with SMK " << cfg.smk << endl;
+               if( cfg.detail ) {
+                  l1menu.printMenu(true);
+               }
+            }
+            cout << endl;
          }
-         cout << endl;
-      }
 
-      // HLT menu
-      {
-         TrigConf::HLTMenu hltmenu;
-         try {
-            dbloader.loadHLTMenu( cfg.smk, hltmenu, outputFileName("HLTMenu", cfg));
-         }
-         catch(TrigConf::IOException & ex) {
-            cout << "Could not load HLT menu. An exception occurred: " << ex.what() << endl;
-         }
-         if (hltmenu) {
-            cout << "Loaded HLT menu " << hltmenu.name() << " with " << hltmenu.size() << " chains from " << cfg.dbalias << " with SMK " << cfg.smk << endl;
-            if( cfg.detail ) {
-               hltmenu.printMenu(true);
+         // HLT menu
+         {
+            TrigConf::HLTMenu hltmenu;
+            try {
+               dbloader.loadHLTMenu( cfg.smk, hltmenu, outputFileName("HLTMenu", cfg));
             }
+            catch(TrigConf::IOException & ex) {
+               cout << "Could not load HLT menu. An exception occurred: " << ex.what() << endl;
+            }
+            if (hltmenu) {
+               cout << "Loaded HLT menu " << hltmenu.name() << " with " << hltmenu.size() << " chains from " << cfg.dbalias << " with SMK " << cfg.smk << endl;
+               if( cfg.detail ) {
+                  hltmenu.printMenu(true);
+               }
+            }
+            cout << endl;
          }
-         cout << endl;
       }
 
       // Job options
       {
-         TrigConf::TrigDBJobOptionsLoader jodbloader(cfg.dbalias);
+         TrigConf::TrigDBJobOptionsLoader dbloader(cfg.dbalias);
+         if(!cfg.crestDb.empty()) {
+            dbloader.setCrestTrigDB(cfg.crestDb);
+            dbloader.setCrestConnection(cfg.crestServer, cfg.crestApi);
+         }
          TrigConf::DataStructure jo;
          try {
-            jodbloader.loadJobOptions( cfg.smk, jo, outputFileName("HLTJobOptions", cfg) );
+            dbloader.loadJobOptions( cfg.smk, jo, outputFileName("HLTJobOptions", cfg) );
          }
          catch(TrigConf::IOException & ex) {
             cout << "Could not load HLT job options. An exception occurred: " << ex.what() << endl;
@@ -357,10 +386,14 @@ int main(int argc, char** argv) {
 
       // HLT monitoring groups
       {
-         TrigConf::TrigDBMonitoringLoader mgdbloader(cfg.dbalias);
+         TrigConf::TrigDBMonitoringLoader dbloader(cfg.dbalias);
+         if(!cfg.crestDb.empty()) {
+            dbloader.setCrestTrigDB(cfg.crestDb);
+            dbloader.setCrestConnection(cfg.crestServer, cfg.crestApi);
+         }
          TrigConf::HLTMonitoring hltmon;
          try {
-            mgdbloader.loadHLTMonitoring( cfg.smk, hltmon, outputFileName("HLTMonitoring", cfg));
+            dbloader.loadHLTMonitoring( cfg.smk, hltmon, outputFileName("HLTMonitoring", cfg));
          }
          catch(TrigConf::IOException & ex) {
             cout << "Could not load HLT monitoring. An exception occurred: " << ex.what() << endl;
@@ -386,6 +419,10 @@ int main(int argc, char** argv) {
    if( cfg.l1psk != 0 ) {
       // load L1 prescales set from DB
       TrigConf::TrigDBL1PrescalesSetLoader dbloader(cfg.dbalias);
+      if(!cfg.crestDb.empty()) {
+         dbloader.setCrestTrigDB(cfg.crestDb);
+         dbloader.setCrestConnection(cfg.crestServer, cfg.crestApi);
+      }
       TrigConf::L1PrescalesSet l1pss;
       try {
          dbloader.loadL1Prescales( cfg.l1psk, l1pss, outputFileName("L1PrescalesSet", cfg) );
@@ -401,6 +438,10 @@ int main(int argc, char** argv) {
    if( cfg.hltpsk != 0 ) {
       // load L1 prescales set from DB
       TrigConf::TrigDBHLTPrescalesSetLoader dbloader(cfg.dbalias);
+      if(!cfg.crestDb.empty()) {
+         dbloader.setCrestTrigDB(cfg.crestDb);
+         dbloader.setCrestConnection(cfg.crestServer, cfg.crestApi);
+      }
       TrigConf::HLTPrescalesSet hltpss;    
       try {
          dbloader.loadHLTPrescales( cfg.hltpsk, hltpss, outputFileName("HLTPrescalesSet", cfg) );
@@ -416,6 +457,10 @@ int main(int argc, char** argv) {
    if( cfg.bgsk != 0 ) {
       // load L1 prescales set from DB
       TrigConf::TrigDBL1BunchGroupSetLoader dbloader(cfg.dbalias);
+      if(!cfg.crestDb.empty()) {
+         dbloader.setCrestTrigDB(cfg.crestDb);
+         dbloader.setCrestConnection(cfg.crestServer, cfg.crestApi);
+      }
       TrigConf::L1BunchGroupSet bgs;
       try {
          dbloader.loadBunchGroupSet( cfg.bgsk, bgs, outputFileName("BunchGroupSet", cfg) );

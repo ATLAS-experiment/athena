@@ -34,7 +34,8 @@ namespace TrigConf {
        * @brief Load content from the Trigger DB into an L1PrescalesSet for a given L1PrescaleKey (L1PSK)
        * @param l1psk [in] the L1PSK that should be loaded
        * @param l1pss [out] the loaded L1PrescalesSet
-       * @param outFileName [in] if set, an outputfile with the raw data blob is written
+       * @param outFileName [in] name of file to write out the loaded data (optional, by default no file will be written)
+       * @return true if loading (and optional writing) was successfull
        */
       bool loadBunchGroupSet ( unsigned int bgsk,
                                L1BunchGroupSet & bgs,

@@ -15,9 +15,9 @@ TrigConf::TrigDBMenuLoader::TrigDBMenuLoader(const std::string & connection) :
       q.addToTableList ( "SUPER_MASTER_TABLE", "SMT" );
       q.addToTableList ( "L1_MASTER_TABLE", "L1MT" );
       // bind vars
-      q.extendBinding<int>("smk");
+      q.extendBinding<int>("key");
       // conditions
-      q.extendCondition("SMT.SMT_ID = :smk");
+      q.extendCondition("SMT.SMT_ID = :key");
       q.extendCondition(" AND SMT.SMT_L1_MASTER_TABLE_ID = L1MT.L1MT_ID");
       // attributes
       q.extendOutput<std::string>( "SMT.SMT_NAME" );
@@ -32,9 +32,9 @@ TrigConf::TrigDBMenuLoader::TrigDBMenuLoader(const std::string & connection) :
       q.addToTableList ( "SUPER_MASTER_TABLE", "SMT" );
       q.addToTableList ( "L1_MENU", "L1TM" );
       // bind vars
-      q.extendBinding<int>("smk");
+      q.extendBinding<int>("key");
       // conditions
-      q.extendCondition("SMT.SMT_ID = :smk");
+      q.extendCondition("SMT.SMT_ID = :key");
       q.extendCondition(" AND SMT.SMT_L1_MENU_ID = L1TM.L1TM_ID");
       // attributes
       q.extendOutput<std::string>( "SMT.SMT_NAME" );
@@ -54,9 +54,9 @@ TrigConf::TrigDBMenuLoader::TrigDBMenuLoader(const std::string & connection) :
       q.addToTableList ( "SUPER_MASTER_TABLE", "SMT" );
       q.addToTableList ( "HLT_MASTER_TABLE", "HMT" );
       // bind vars
-      q.extendBinding<int>("smk");
+      q.extendBinding<int>("key");
       // conditions
-      q.extendCondition("SMT.SMT_ID = :smk");
+      q.extendCondition("SMT.SMT_ID = :key");
       q.extendCondition(" AND SMT.SMT_HLT_MASTER_TABLE_ID = HMT.HMT_ID");
       // attributes
       q.extendOutput<std::string>( "SMT.SMT_NAME" );
@@ -71,9 +71,9 @@ TrigConf::TrigDBMenuLoader::TrigDBMenuLoader(const std::string & connection) :
       q.addToTableList ( "SUPER_MASTER_TABLE", "SMT" );
       q.addToTableList ( "HLT_MENU", "HTM" );
       // bind vars
-      q.extendBinding<int>("smk");
+      q.extendBinding<int>("key");
       // conditions
-      q.extendCondition("SMT.SMT_ID = :smk");
+      q.extendCondition("SMT.SMT_ID = :key");
       q.extendCondition(" AND SMT.SMT_HLT_MENU_ID = HTM.HTM_ID");
       // attributes
       q.extendOutput<std::string>( "SMT.SMT_NAME" );
@@ -90,64 +90,30 @@ TrigConf::TrigDBMenuLoader::TrigDBMenuLoader(const std::string & connection) :
 TrigConf::TrigDBMenuLoader::~TrigDBMenuLoader() = default;
 
 bool
-TrigConf::TrigDBMenuLoader::loadL1Menu ( unsigned int smk,
-                                         boost::property_tree::ptree & l1menu,
-                                         const std::string & outFileName ) const
+TrigConf::TrigDBMenuLoader::loadL1Menu( unsigned int smk,
+                                        boost::property_tree::ptree & l1menu,
+                                        const std::string & outFileName ) const
 {
-   auto session = createDBSession();
-   session->transaction().start( /*bool readonly=*/ true);
-   const size_t sv = schemaVersion(session.get());
-   QueryDefinition qdef = getQueryDefinition(sv, m_l1queries);
-   try {
-      qdef.setBoundValue<int>("smk", smk);
-      auto q = qdef.createQuery( session.get() );
-      auto & cursor = q->execute();
-      if ( ! cursor.next() ) {
-         TRG_MSG_ERROR("Tried reading L1 menu, but SuperMasterKey " << smk << " is not available" );
-         throw TrigConf::NoSMKException("TrigDBMenuLoader (L1Menu): SMK " + std::to_string(smk) + " not available");
-      }
-      const coral::AttributeList& row = cursor.currentRow();
-      const coral::Blob& dataBlob = row[qdef.dataName()].data<coral::Blob>();
-      writeRawFile( dataBlob, outFileName );
-      blobToPtree( dataBlob, l1menu );
-   }
-   catch(coral::QueryException & ex) {
-      TRG_MSG_ERROR("When reading L1 menu for SMK " << smk << " a coral::QueryException was caught ( " << ex.what() <<" )" );
-      throw TrigConf::QueryException("TrigDBMenuLoader (L1Menu): " + std::string(ex.what()));
+   if(useCrest()) {
+      loadFromCrest(smk, l1menu, outFileName, "L1 Menu", "L1M");
+   } else {
+      loadFromOracle(smk, l1menu, outFileName, "L1 menu", m_l1queries);
    }
    return true;
 }
-
 
 bool
-TrigConf::TrigDBMenuLoader::loadHLTMenu ( unsigned int smk,
-                                          boost::property_tree::ptree & hltmenu,
-                                          const std::string & outFileName ) const
+TrigConf::TrigDBMenuLoader::loadHLTMenu( unsigned int smk,
+                                         boost::property_tree::ptree & hltmenu,
+                                         const std::string & outFileName ) const
 {
-   auto session = createDBSession();
-   session->transaction().start( /*bool readonly=*/ true);
-   const size_t sv = schemaVersion(session.get());
-   QueryDefinition qdef = getQueryDefinition(sv, m_hltqueries);
-   try {
-      qdef.setBoundValue<int>("smk", smk);
-      auto q = qdef.createQuery( session.get() );
-      auto & cursor = q->execute();
-      if ( ! cursor.next() ) {
-         TRG_MSG_ERROR("Tried reading HLT menu, but SuperMasterKey " << smk << " is not available" );
-         throw TrigConf::NoSMKException("TrigDBMenuLoader (HLTMenu): SMK " + std::to_string(smk) + " not available");
-      }
-      const coral::AttributeList& row = cursor.currentRow();
-      const coral::Blob& dataBlob = row[qdef.dataName()].data<coral::Blob>();
-      writeRawFile( dataBlob, outFileName );
-      blobToPtree( dataBlob, hltmenu );
-   }
-   catch(coral::QueryException & ex) {
-      TRG_MSG_ERROR("When reading HLT menu for SMK " << smk << " a coral::QueryException was caught ( " << ex.what() <<" )" );
-      throw TrigConf::QueryException("TrigDBMenuLoader (HLTMenu): " + std::string(ex.what()));
+   if(useCrest()) {
+      loadFromCrest(smk, hltmenu, outFileName, "HLT Menu", "HLTM");
+   } else {
+      loadFromOracle(smk, hltmenu, outFileName, "HLT menu", m_hltqueries);
    }
    return true;
 }
-
 
 bool
 TrigConf::TrigDBMenuLoader::loadL1Menu( unsigned int smk, L1Menu & l1menu,
