@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -570,7 +570,7 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
       for (IdentifierHash nId : theNeighbors) {
         CaloCell_ID::SUBCALO otherSubDet =
           (CaloCell_ID::SUBCALO)m_calo_id->sub_calo(nId);
-	if ( m_subcaloUsed[otherSubDet] ) {
+	if ( otherSubDet != CaloCell_ID::NSUBCALO && m_subcaloUsed[otherSubDet] ) {
 	  HashCell neighborCell = hashCells[nId];
 	  if ( neighborCell.getCaloTopoTmpClusterCell() ) {
 	    CaloTopoTmpClusterCell* pNCell =
