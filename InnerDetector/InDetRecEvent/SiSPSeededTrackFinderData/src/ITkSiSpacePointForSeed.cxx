@@ -12,18 +12,18 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "TrkSpacePoint/SpacePoint.h"
 #include "TrkSurfaces/Surface.h"
-
+#include "CxxUtils/restrict.h"
 namespace ITk
 {
 
   SiSpacePointForSeed::SiSpacePointForSeed
-  (const Trk::SpacePoint*const& sp,const float* r) 
+  (const Trk::SpacePoint* sp,std::span<float const, 15> r) 
   {
     set(sp,r); m_param = 0.;
   }
 
   SiSpacePointForSeed::SiSpacePointForSeed
-  (const Trk::SpacePoint*const& sp,const float* r,const float* sc) 
+  (const Trk::SpacePoint* sp,std::span<float const, 15> r,std::span<float const, 15> sc) 
   {
     set(sp,r,sc); m_param = 0.;
   }
@@ -33,7 +33,7 @@ namespace ITk
   /////////////////////////////////////////////////////////////////////////////////
 
   void SiSpacePointForSeed::set
-  (const Trk::SpacePoint*const& sp,const float* r)
+  (const Trk::SpacePoint* sp,std::span<float const, 15> r)
   {
     spacepoint = sp  ;
     m_x        = r[0];
@@ -72,32 +72,6 @@ namespace ITk
   } 
 
 
-  void SiSpacePointForSeed::setDR(const float& dr)
-  {
-    m_dR = dr;
-  }
-
-  void SiSpacePointForSeed::setEta(const float& eta)
-  {
-    m_eta = eta;
-  }
-   
-  void SiSpacePointForSeed::setDZDR(const float& dzdr)
-  {
-    m_dzdr = dzdr;
-  }
- 
-  void SiSpacePointForSeed::setPt(const float& pt)
-  {
-    m_pt = pt;
-  }
-
-  void SiSpacePointForSeed::setScorePenalty(const float& score)
-  {
-    m_scorePenalty = score;
-  }
-
-
   /////////////////////////////////////////////////////////////////////////////////
   // Set with error correction 
   // sc[0] - barrel pixels error correction
@@ -107,7 +81,7 @@ namespace ITk
   /////////////////////////////////////////////////////////////////////////////////
 
   void SiSpacePointForSeed::set
-  (const Trk::SpacePoint*const& sp,const float* r,const float* sc)
+  (const Trk::SpacePoint* sp,std::span<float const, 15> r, std::span<float const, 15> sc)
   {
     m_sn = nullptr;
     spacepoint = sp  ;
@@ -138,10 +112,6 @@ namespace ITk
     m_su = &sp->clusterList().first->detectorElement()->surface();
   }
 
-  void SiSpacePointForSeed::setParam(const float& p)
-  {
-    m_param = p;
-  }
   void  SiSpacePointForSeed::setQuality(float q)
   {
     if(q <= m_q) m_q = q;
@@ -154,7 +124,7 @@ namespace ITk
   // true if cross point is inside detector elements 
   /////////////////////////////////////////////////////////////////////////////////
 
-  bool SiSpacePointForSeed::coordinates(const float* d,float* r)
+  bool SiSpacePointForSeed::coordinates(const float* d,float* ATH_RESTRICT r)
   {
     float d1[3] = {m_b0[1]*d[2]-m_b0[2]*d[1],m_b0[2]*d[0]-m_b0[0]*d[2],m_b0[0]*d[1]-m_b0[1]*d[0]};
     float bd    =  m_b1[0]*d1[0]+m_b1[1]*d1[1]+m_b1[2]*d1[2];     

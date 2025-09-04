@@ -1189,7 +1189,7 @@ void SiSpacePointsSeedMaker::buildBeamFrameWork(EventData &data) const
 ///////////////////////////////////////////////////////////////////
 // Initiate beam frame work for seed generator
 ///////////////////////////////////////////////////////////////////
-void SiSpacePointsSeedMaker::convertToBeamFrameWork(EventData &data, const Trk::SpacePoint *const &sp, float *r) 
+void SiSpacePointsSeedMaker::convertToBeamFrameWork(EventData &data, const Trk::SpacePoint * sp, float * ATH_RESTRICT r) 
 {
   r[0] = static_cast<float>(sp->globalPosition().x()) - data.xbeam[0];
   r[1] = static_cast<float>(sp->globalPosition().y()) - data.ybeam[0];
@@ -1360,7 +1360,7 @@ void SiSpacePointsSeedMaker::pixInform(const Trk::SpacePoint *sp, float *r)
 // Strip information
 ///////////////////////////////////////////////////////////////////
 
-void SiSpacePointsSeedMaker::stripInform(EventData &data, const Trk::SpacePoint *sp, float *r)
+void SiSpacePointsSeedMaker::stripInform(EventData &data, const Trk::SpacePoint *sp, float * ATH_RESTRICT r)
 {
   const InDet::SiCluster *c0 = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
   const InDet::SiCluster *c1 = static_cast<const InDet::SiCluster *>(sp->clusterList().second);
@@ -2861,18 +2861,18 @@ bool SiSpacePointsSeedMaker::isZCompatible(EventData &data,
 
 SiSpacePointForSeed *SiSpacePointsSeedMaker::newSpacePoint(EventData &data, const Trk::SpacePoint *const &sp) const
 {
-  float r[15];
+  std::array<float, 15> r;
   return newSpacePoint(data, sp, r, true);
 }
 
-SiSpacePointForSeed *SiSpacePointsSeedMaker::newSpacePoint(EventData &data, const Trk::SpacePoint *const &sp, float *r, bool usePixStripInform) const
+SiSpacePointForSeed *SiSpacePointsSeedMaker::newSpacePoint(EventData &data, const Trk::SpacePoint *const &sp, std::span<float, 15> r, bool usePixStripInform) const
 {
 
   SiSpacePointForSeed *sps = nullptr;
 
   /// r will store the coordinates of the space point relative
   /// to the beam spot
-  convertToBeamFrameWork(data, sp, r);
+  convertToBeamFrameWork(data, sp, r.data());
 
   /// if needed, apply eta criterion
   if (data.checketa)
@@ -2897,9 +2897,9 @@ SiSpacePointForSeed *SiSpacePointsSeedMaker::newSpacePoint(EventData &data, cons
   if (usePixStripInform)
   {
     if (!sp->clusterList().second)
-      pixInform(sp, r);
+      pixInform(sp, r.data());
     else
-      stripInform(data, sp, r);
+      stripInform(data, sp, r.data());
   }
 
   /// If we have previously populated the list and just reset
@@ -2916,7 +2916,7 @@ SiSpacePointForSeed *SiSpacePointsSeedMaker::newSpacePoint(EventData &data, cons
   else
   {
     /// otherwise, the list needs to grow
-    data.l_ITkSpacePointForSeed.emplace_back(sp, &(r[0]));
+    data.l_ITkSpacePointForSeed.emplace_back(sp, r);
     /// set our return pointer
     sps = &(data.l_ITkSpacePointForSeed.back());
     /// and make sure to update the iterator

@@ -194,7 +194,7 @@ namespace InDet {
     static SiSpacePointForSeed* newSpacePoint
     (EventData& data, const Trk::SpacePoint*const&) ;
     static SiSpacePointForSeed* newSpacePoint
-    (EventData& data, const Trk::SpacePoint*const&, const float*) ;
+    (EventData& data, const Trk::SpacePoint*const&, std::span<float const, 4>) ;
     void newSeed
     (EventData& data,
      const Trk::SpacePoint*&,const Trk::SpacePoint*&,

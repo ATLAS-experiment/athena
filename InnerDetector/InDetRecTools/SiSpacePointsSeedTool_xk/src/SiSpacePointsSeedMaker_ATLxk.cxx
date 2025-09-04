@@ -2565,10 +2565,10 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_ATLxk::newSpacePoint
     sps = &(*data.i_spforseed++);
     /// and then update the existing entry with the new SP and location.
     /// Unfortunately, set still relies on C-arrays... 
-    sps->set(sp,&(r[0]));
+    sps->set(sp,r);
   } else {
     /// otherwise, the list needs to grow
-    data.l_spforseed.emplace_back(sp, &(r[0]));
+    data.l_spforseed.emplace_back(sp, r);
     /// set our return pointer 
     sps = &(data.l_spforseed.back());
     /// and make sure to update the iterator 
