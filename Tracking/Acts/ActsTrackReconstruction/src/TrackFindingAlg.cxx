@@ -953,7 +953,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     }
 
     // Before trimming, inspect encountered surfaces from all track states
-    for(const auto& ts : track.trackStatesReversed()) {
+    for(const auto ts : track.trackStatesReversed()) {
       const auto& surface = ts.referenceSurface();
       if(surface.associatedDetectorElement() != nullptr) {
         const auto* detElem = dynamic_cast<const ActsDetectorElement*>(surface.associatedDetectorElement());
