@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for customs jet reconstruction + decorations
@@ -255,7 +255,7 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
     acc.addSequence(CompFactory.AthSequencer('EventCleanLockSeq', Sequential=True))
 
-    outputLabel = 'DFCommonJets_passOR'
+    outputLabel = 'DFCommonJets_passOR_EMPFlowCustomVtx'
     bJetLabel = '' #default
     tauLabel = 'DFTauRNNLoose'
     orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags, outputLabel=outputLabel, bJetLabel=bJetLabel))
@@ -303,6 +303,7 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
             EventCleaningToolCfg(ConfigFlags, "EventCleaningCustomVtxTool_" + wp, cleaningLevel)
         )
         ecTool.JetCleanPrefix = "DFCommonJets_"
+        ecTool.OrDecorator = "passOR_EMPFlowCustomVtx"
         ecTool.JetContainer = "AntiKt4EMPFlowCustomVtxJets"
         ecTool.JetCleaningTool = jetCleaningTool
         acc.addPublicTool(ecTool)
