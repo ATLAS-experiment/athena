@@ -84,17 +84,15 @@ StatusCode ComTimeRec::execute()
     CHECK( evtStore()->retrieve(coll, m_TTRKey) );
     int    nMuons           = 0;
     double earliestMuonTime = -1.;
-    // TimedTrackRecord* earliestMuon=NULL;
-    TrackRecord *earliestMuon=nullptr;
+    const TrackRecord *earliestMuon=nullptr;
 
-    for(auto it : *coll) {
+    for(const TrackRecord& r : *coll) {
 
-      if(abs(it.GetPDGCode()) == 13 ) {
+      if(abs(r.GetPDGCode()) == 13 ) {
         nMuons++;
-        if( (nMuons==1) or (it.GetTime() < earliestMuonTime) ) {
-          // earliestMuon = const_cast<TimedTrackRecord*>(*it);
-          earliestMuon = &it;
-          earliestMuonTime = it.GetTime();
+        if( (nMuons==1) or (r.GetTime() < earliestMuonTime) ) {
+          earliestMuon = &r;
+          earliestMuonTime = r.GetTime();
         }
       }
     }
