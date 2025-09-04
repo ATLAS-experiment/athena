@@ -231,7 +231,7 @@ namespace NSWL1 {
         }
 
         // Setup roads
-        std::vector<std::shared_ptr<MMT_Road> > ev_roads;
+        std::vector<MMT_Road> ev_roads;
         m_diamond->createRoads(ev_roads, isLarge);
 
         // Evaluate coincidences
