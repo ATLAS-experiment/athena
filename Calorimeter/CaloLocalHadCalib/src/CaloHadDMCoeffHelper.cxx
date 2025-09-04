@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -140,7 +140,7 @@ CaloHadDMCoeff2 *CaloHadDMCoeffHelper::InitDataFromFile(std::string &filename)
         std::cout << "CaloHadDMCoeffHelper::initDataFromFile() ->Error! Could not parse line '" << sLine << "' at p2a." << std::endl;
         delete data; return nullptr;
       }
-      v_dims.push_back(dim);
+      v_dims.push_back(std::move(dim));
     }
     // calculation offset for this area
     int ndim = (int) v_dims.size();
@@ -225,7 +225,7 @@ int CaloHadDMCoeffHelper::parse_dim(std::string &sLine, CaloHadDMCoeff2::HadDMDi
   std::istringstream ist(sLine.c_str());
 
   if( !(ist >> dim.m_title >> dim.m_nbins >> dim.m_vMin >> dim.m_vMax >> stype)||
-      dim.m_nbins < 0 ||
+      dim.m_nbins <= 0 ||
       dim.m_nbins > 1000)
   {
     std::cout << "CaloHadDMCoeffHelper::parse_dim() -> Error! Could not parse line '" << sLine << "' at pp1." << std::endl;

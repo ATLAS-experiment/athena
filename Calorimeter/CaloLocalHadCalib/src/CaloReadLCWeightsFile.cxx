@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloLocalHadCalib/CaloReadLCWeightsFile.h"
@@ -36,7 +36,7 @@ StatusCode CaloReadLCWeightsFile::initDataFromFile(const std::string& theLCWeigh
   std::vector<CaloLocalHadCoeff::LocalHadArea> theAreas;
   for (unsigned int iArea=0;iArea<CaloSampling::Unknown;iArea++) {
     CaloLocalHadCoeff::LocalHadArea theArea(CaloSamplingHelper::getSamplingName((CaloSampling::CaloSample)iArea).c_str(),0,3);
-    theAreas.push_back(theArea);
+    theAreas.push_back(std::move(theArea));
   }
 
   for (int iread=0;iread<2;iread++) {
@@ -145,7 +145,12 @@ StatusCode CaloReadLCWeightsFile::initDataFromFile(const std::string& theLCWeigh
 		  for(unsigned int ii=0;ii<ibin.size();ii++)
 		    msg() << ibin[ii] << " ";
 		  msg() << endmsg;
-		  data.setCoeff(data.getBin(isampmap[isamp],ibin),theData);
+                  int bin = data.getBin(isampmap[isamp],ibin);
+                  if (bin < 0) {
+                    ATH_MSG_ERROR("Bad return from getBin");
+                    return StatusCode::FAILURE;
+                  }
+                  data.setCoeff(bin,theData);
 		}
 	      }
 	    }
