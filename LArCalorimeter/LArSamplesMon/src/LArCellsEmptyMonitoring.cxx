@@ -1625,16 +1625,18 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
     unsigned int ndigits = hist->nData();
     if(ndigits==0){ nskipped++; continue; }
 
-    // index for partition
+    // index for partition; this can return a negative value in case of error
     index = m_LarIdTranslator->GetPartitionLayerIndex(cellInfo->calo(),cellInfo->layer());
-    // onlid = m_LarIdTranslator->onlid;
+    if (index<0){
+      std::cout<<"GetPartitionLayerIndex returned -1 in LArCellsEmptyMonitoring::DoEtaPhiMonitoring"<<std::endl;
+      continue;
+    }
     onlid = cellInfo->onlid();
     if(onlid<=0) printf("%u: Bad Cell Onlid = 0x%x (%+.2f,%+.2f)\n",ichan,(unsigned int)onlid,cellInfo->eta(),cellInfo->phi());
 
     // loop on the events for each cells
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
-      //const LArSamples::EventData* Evdata = data->eventData();
       
       // all stats
       hmap_counts_all[index]->Fill(m_LarIdTranslator->eta,m_LarIdTranslator->phi);
