@@ -433,7 +433,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromBeamspot(const Tr
   beamSpotCov(0,0) = beamSigmaX * beamSigmaX;
   beamSpotCov(1,1) = beamSigmaY * beamSigmaY;
 
-  if(m_constraintMode == 0) {
+  if(m_constraintMode == 0u) {
 
     const Amg::Vector3D&  globPos(BSC);
     surface.emplace(globPos);
