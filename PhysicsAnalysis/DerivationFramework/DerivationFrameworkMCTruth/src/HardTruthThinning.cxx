@@ -24,6 +24,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include <vector>
 #include <string>
+#include <format>
 
 using Gaudi::Units::GeV;
 
@@ -419,10 +420,10 @@ void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
   std::vector<int> uidPars;
   std::vector<int> uidKids;
 
-  std::cout <<"======================================================================================" <<std::endl;
-  std::cout <<"xAODTruth Event " <<evnum <<std::endl;
-  std::cout <<"   Unique ID    PDG Id  Status   px(GeV)   py(GeV)   pz(GeV)    E(GeV)   Parent: Decay" <<std::endl;
-  std::cout <<"   -----------------------------------------------------------------------------------" <<std::endl;
+  std::cout <<"======================================================================================\n" ;
+  std::cout <<"xAODTruth Event " <<evnum <<"\n";
+  std::cout <<"   Unique ID    PDG Id  Status   px(GeV)   py(GeV)   pz(GeV)    E(GeV)   Parent: Decay\n" ;
+  std::cout <<"   -----------------------------------------------------------------------------------\n" ;
 
   for (const auto* tpItr : *truths) {
     if (HepMC::is_simulation_particle(tpItr)) continue;
@@ -461,12 +462,8 @@ void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
       }
     }
 
-    std::cout <<std::setw(10)<<uid <<std::setw(12)<<id
-              <<std::setw(8)<<stat
-              <<std::setprecision(2)<<std::fixed
-              <<std::setw(10)<<px <<std::setw(10)<<py
-              <<std::setw(10)<<pz <<std::setw(10)<<e <<"   ";
-    std::cout <<"P: ";
+    std::cout << std::format("{:>10}{:>12}{:>8}{:>10.2f}{:>10.2f}{:>10.2f}{:>10.2f}   P: ",
+                         uid, id, stat, px, py, pz, e);
     for(unsigned int k=0; k<uidPars.size(); ++k){
       std::cout <<uidPars[k] <<" ";
     }
@@ -474,7 +471,7 @@ void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
     for(unsigned int k=0; k<uidKids.size(); ++k){
       std::cout <<uidKids[k] <<" ";
     }
-    std::cout <<std::endl;
+    std::cout <<"\n";
   }
   std::cout <<"======================================================================================" <<std::endl;
 }
