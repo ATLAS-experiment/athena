@@ -655,7 +655,7 @@ namespace DerivationFramework{
       // Repeat the process until you find a particle different from the considred one or that has no parent.
 
       if( part->pdgId() == parent->pdgId() ){
-        return findInitial(parent, checked);
+        return findInitial(parent, std::move(checked));
       }
     }
     // In this case, no parent different from the considered particle has been found.
