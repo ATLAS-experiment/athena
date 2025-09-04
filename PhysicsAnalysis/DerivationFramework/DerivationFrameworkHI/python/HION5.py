@@ -112,7 +112,7 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     # Use modified OR that does not check overlaps with taus
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
 
-    outputLabel = "DFCommonJets_passOR"
+    outputLabel = "DFCommonJets_passOR_HI"
     bJetLabel = ""  # default
     tauLabel = ""  # workaround for missing taus
     tauKey = ""  # workaround for missing taus

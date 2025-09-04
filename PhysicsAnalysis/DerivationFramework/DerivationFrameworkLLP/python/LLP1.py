@@ -507,6 +507,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                            "LLP1EventCleanSuperLLP",
                                                                            jet_clean_level))
     LLP1EventCleanSuperLLPTool.JetCleanPrefix = jet_clean_prefix
+    LLP1EventCleanSuperLLPTool.OrDecorator = "passOR_EMTopo"
     LLP1EventCleanSuperLLPTool.JetContainer = jet_clean_container
     LLP1EventCleanSuperLLPTool.JetCleaningTool = LLP1JetCleanSuperLLPTool
     acc.addPublicTool(LLP1EventCleanSuperLLPTool)
