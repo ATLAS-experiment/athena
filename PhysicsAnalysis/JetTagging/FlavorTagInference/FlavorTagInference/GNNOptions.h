@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GNN_OPTIONS_H
 #define GNN_OPTIONS_H
 
 #include "FlavorTagInference/FlipTagEnums.h"
-#include "FlavorTagInference/AssociationEnums.h"
 
 #include <map>
 #include <string>
@@ -16,7 +15,6 @@ namespace FlavorTagInference {
   struct GNNOptions {
     FlipTagConfig flip_config = FlipTagConfig::STANDARD;
     std::map<std::string, std::string> variable_remapping = {};
-    TrackLinkType track_link_type = TrackLinkType::TRACK_PARTICLE;
     float default_output_value = NAN;
     std::map<std::string, float> default_output_values;
     bool default_zero_tracks = false;

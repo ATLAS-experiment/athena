@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DL2_H
@@ -25,20 +25,18 @@ namespace FlavorTagDiscriminants {
         const std::vector<FTagInputConfig>&,
         const std::vector<ConstituentsInputConfig>& = {},
         const FTagOptions& = FTagOptions());
-    void decorate(const xAOD::BTagging& btag) const;
     void decorate(const xAOD::IParticle& i_jet) const;
     void decorateWithDefaults(const SG::AuxElement&) const;
-    void decorate(const xAOD::Jet& jet, const SG::AuxElement& decorated) const;
+
 
     // functions to report data dependencies
     const FTagDataDependencyNames& getDataDependencyNames() const;
 
   private:
-    SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
+    void decorate(const xAOD::Jet& jet) const;
     std::string m_input_node_name;
     std::unique_ptr<lwt::LightweightGraph> m_graph;
     std::unique_ptr<lwt::NanReplacer> m_variable_cleaner;
-    std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
     std::vector<std::shared_ptr<TracksLoader>> m_tracksLoaders;
     std::map<std::string, internal::OutNodeFloat> m_decorators;

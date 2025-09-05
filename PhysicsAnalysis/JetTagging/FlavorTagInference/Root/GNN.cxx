@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/GNN.h"
-#include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/GNNOptions.h"
 #include "FlavorTagInference/StringUtils.h"
@@ -86,9 +85,8 @@ namespace FlavorTagInference {
   GNN::GNN(const std::string& file,
            const FlipTagConfig& flip,
            const std::map<std::string, std::string>& remap,
-           const TrackLinkType link_type,
            float def_out_val):
-    GNN( file, GNNOptions { flip, remap, link_type, def_out_val, {}, false} )
+    GNN( file, GNNOptions { flip, remap, def_out_val, {}, false} )
   {}
 
   GNN::GNN(GNN&&) = default;

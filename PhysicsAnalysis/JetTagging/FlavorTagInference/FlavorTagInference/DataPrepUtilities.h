@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DATA_PREP_UTILITIES_H
@@ -7,7 +7,6 @@
 
 // local includes
 #include "FlavorTagInference/FlipTagEnums.h"
-#include "FlavorTagInference/AssociationEnums.h"
 #include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/ConstituentsLoader.h"
@@ -15,7 +14,7 @@
 
 // EDM includes
 #include "xAODJet/Jet.h"
-#include "xAODBTagging/BTagging.h"
+#include "xAODTracking/TrackParticle.h"
 
 // external libraries, can be removed once we retire DL2
 #include "lwtnn/lightweight_network_config.hh"
@@ -49,7 +48,6 @@ namespace FlavorTagInference {
     FlipTagConfig flip;
     std::string track_link_name;
     std::map<std::string,std::string> remap_scalar;
-    TrackLinkType track_link_type;
     float default_output_value;
     std::string invalid_ip_key;
     std::string electron_link_name;
@@ -63,7 +61,6 @@ namespace FlavorTagInference {
     // typedefs
     typedef std::pair<std::string, double> NamedVar;
     typedef xAOD::Jet Jet;
-    typedef xAOD::BTagging BTagging;
     typedef std::vector<const xAOD::TrackParticle*> Tracks;
 
     // getter functions
@@ -159,8 +156,7 @@ namespace FlavorTagInference {
     FTagOptions>
     createGetterConfig( GraphConfig& graph_config,
       FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar,
-      TrackLinkType track_link_type);
+      std::map<std::string, std::string> remap_scalar);
 
     // return the scalar getter functions for NNs
     std::tuple<

@@ -1,11 +1,10 @@
 /*
-+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/MultifoldGNN.h"
 #include "FlavorTagInference/GNN.h"
 
-#include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
 
 using namespace FlavorTagInference;

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/DataPrepUtilities.h"
@@ -7,8 +7,6 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagInference/CustomGetterUtils.h"
 #include "FlavorTagInference/StringUtils.h"
 #include "FlavorTagInference/SaltModelGraphConfig.h"
-
-#include "xAODBTagging/BTaggingUtilities.h"
 
 namespace {
   using namespace FlavorTagInference;
@@ -137,7 +135,6 @@ namespace FlavorTagInference {
     : track_prefix ("btagIp_"),
       flip (FlipTagConfig::STANDARD),
       track_link_name ("BTagTrackToJetAssociator"),
-      track_link_type (TrackLinkType::TRACK_PARTICLE),
       default_output_value (NAN),
       invalid_ip_key ("invalidIp"),
       electron_link_name("FTagElectrons")
@@ -240,8 +237,7 @@ namespace FlavorTagInference {
       FTagOptions>
     createGetterConfig( GraphConfig& config,
       FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar,
-      TrackLinkType track_link_type
+      std::map<std::string, std::string> remap_scalar
     ){
 
       // we rewrite the inputs if we're using flip taggers
@@ -343,7 +339,6 @@ namespace FlavorTagInference {
       }
       options.flip = flip_config;
       options.remap_scalar = remap_scalar;
-      options.track_link_type = track_link_type;
       return std::make_tuple(input_config, constituent_configs, options);
     }
 
@@ -492,8 +487,7 @@ namespace FlavorTagInference {
   createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>( 
     lwt::GraphConfig& config,
     FlipTagConfig flip_config,
-    std::map<std::string, std::string> remap_scalar,
-    TrackLinkType track_link_type
+    std::map<std::string, std::string> remap_scalar
   );
 
   template
@@ -504,8 +498,7 @@ namespace FlavorTagInference {
   createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>( 
     SaltModelGraphConfig::GraphConfig& config,
     FlipTagConfig flip_config,
-    std::map<std::string, std::string> remap_scalar,
-    TrackLinkType track_link_type
+    std::map<std::string, std::string> remap_scalar
   );
 
   template
