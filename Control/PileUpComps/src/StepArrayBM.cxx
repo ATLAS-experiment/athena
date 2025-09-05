@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include<algorithm> /*count_if,max_element*/
@@ -82,7 +82,9 @@ StatusCode StepArrayBM::initialize()
 
   // Will be used to convert values in the m_intensityPattern
   // from having max value 1.0 to having mean value 1.0
-  m_largestElementInPattern = (maxElement/denominator);
+  if (denominator != 0) {
+    m_largestElementInPattern = (maxElement/denominator);
+  }
 
   //FIXME add a check that entry 0 is zero? In data, BCID=1 is always the first filled bunch.
 
