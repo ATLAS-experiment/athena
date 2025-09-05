@@ -30,8 +30,9 @@ def _addDepsByTaggername(cfgFlags, tagger: str) -> ComponentAccumulator:
         An accumulator containing the additional algorithms based on the dirname.
     """
     acc = ComponentAccumulator()
-    if "GN2Xv02" in tagger:
-        acc.merge(TrackLeptonDecorationCfg(cfgFlags))
+    for gnn in ["GN2Xv02", "GN2XTauV00"]:
+        if gnn in tagger:
+            acc.merge(TrackLeptonDecorationCfg(cfgFlags))
     return acc
 
 
