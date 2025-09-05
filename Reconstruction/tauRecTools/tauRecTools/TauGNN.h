@@ -58,11 +58,11 @@ public:
                   const std::vector<xAOD::CaloVertexedTopoCluster> &clusters) const;
 
     // Compute all input variables and store them in the maps that are passed by reference
-    bool calculateInputVariables(const xAOD::TauJet &tau,
-                  const std::vector<const xAOD::TauTrack *> &tracks,
-                  const std::vector<xAOD::CaloVertexedTopoCluster> &clusters,
-                  std::map<std::string, std::map<std::string, double>>& scalarInputs,
-                  std::map<std::string, std::map<std::string, std::vector<double>>>& vectorInputs) const;
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> calculateInputVariables(
+        const xAOD::TauJet &tau,
+        const std::vector<const xAOD::TauTrack *> &tracks,
+        const std::vector<xAOD::CaloVertexedTopoCluster> &clusters
+    ) const;
 
     // Getter for the variable calculator
     const TauGNNUtils::GNNVarCalc* variable_calculator() const {
@@ -95,6 +95,15 @@ private:
 
     // Variable calculator to calculate input variables on the fly
     std::unique_ptr<TauGNNUtils::GNNVarCalc> m_var_calc;
+    std::vector<float> flatten(const std::vector<std::vector<float>>& mat) const {
+        std::vector<float> flat;
+        for (size_t col = 0; col < mat[0].size(); col++){
+            for (size_t row = 0; row < mat.size(); row++){
+                flat.push_back(mat[row][col]);
+            }
+        }
+        return flat;
+    };
 };
 
 #endif // TAURECTOOLS_TAUGNN_H

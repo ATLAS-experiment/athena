@@ -91,7 +91,7 @@ TauGNN::TauGNN(const std::string &nnFile, const Config &config):
         }
     }
     // Load the variable calculator
-    m_var_calc = TauGNNUtils::get_calculator(m_scalarCalc_inputs, m_trackCalc_inputs, m_clusterCalc_inputs);
+    m_var_calc = std::make_unique<TauGNNUtils::GNNVarCalc>();
     ATH_MSG_INFO("TauGNN object initialized successfully!");
 }
 
@@ -104,58 +104,22 @@ std::tuple<
 TauGNN::compute(const xAOD::TauJet &tau,
 		const std::vector<const xAOD::TauTrack *> &tracks,
 		const std::vector<xAOD::CaloVertexedTopoCluster> &clusters) const {
-    InputMap scalarInputs;
-    InputSequenceMap vectorInputs;
     std::map<std::string, Inputs> gnn_input;
     ATH_MSG_DEBUG("Starting compute...");
     //Prepare input variables
-    if (!calculateInputVariables(tau, tracks, clusters, scalarInputs, vectorInputs)) {
-        ATH_MSG_FATAL("Failed calculateInputVariables");
-        throw StatusCode::FAILURE;
-    }
+    auto [tau_feats, trk_feats, cls_feats] = calculateInputVariables(tau, tracks, clusters);
 
-    // Add TauJet-level features to the input
-    std::vector<float> tau_feats;
-    for (const auto &varname : m_scalarCalc_inputs) {
-        tau_feats.push_back(static_cast<float>(scalarInputs[m_config.input_layer_scalar][varname]));
-    }
-    std::vector<int64_t> tau_feats_dim = {1, static_cast<int64_t>(tau_feats.size())};
+    std::vector<int64_t> tau_feats_dim = {static_cast<int64_t>(1),               static_cast<int64_t>(tau_feats.size())};
+    std::vector<int64_t> trk_feats_dim = {static_cast<int64_t>(tracks.size()),   static_cast<int64_t>(m_trackCalc_inputs.size())};
+    std::vector<int64_t> cls_feats_dim = {static_cast<int64_t>(clusters.size()), static_cast<int64_t>(m_clusterCalc_inputs.size())};
+
     Inputs tau_info (tau_feats, tau_feats_dim);
-    gnn_input.insert({"tau_vars", tau_info});
-
-    //Add track-level features to the input
-    std::vector<float> trk_feats;
-    int num_nodes=static_cast<int>(vectorInputs[m_config.input_layer_tracks][m_trackCalc_inputs.at(0)].size());
-    int num_node_vars=static_cast<int>(m_trackCalc_inputs.size());
-    trk_feats.resize(num_nodes * num_node_vars);
-    int var_idx=0;
-    for (const auto &varname : m_trackCalc_inputs) {
-        for (int node_idx=0; node_idx<num_nodes; node_idx++){    
-            trk_feats.at(node_idx*num_node_vars + var_idx)
-              = static_cast<float>(vectorInputs[m_config.input_layer_tracks][varname].at(node_idx));
-        }
-        var_idx++;
-    }
-    std::vector<int64_t> trk_feats_dim = {num_nodes, num_node_vars};
     Inputs trk_info (trk_feats, trk_feats_dim);
-    gnn_input.insert({"track_vars", trk_info});
-    
-    //Add cluster-level features to the input
-    std::vector<float> cls_feats;
-    num_nodes=static_cast<int>(vectorInputs[m_config.input_layer_clusters][m_clusterCalc_inputs.at(0)].size());
-    num_node_vars=static_cast<int>(m_clusterCalc_inputs.size());
-    cls_feats.resize(num_nodes * num_node_vars);
-    var_idx=0;
-    for (const auto &varname : m_clusterCalc_inputs) {
-        for (int node_idx=0; node_idx<num_nodes; node_idx++){    
-            cls_feats.at(node_idx*num_node_vars + var_idx)
-              = static_cast<float>(vectorInputs[m_config.input_layer_clusters][varname].at(node_idx));
-        }
-        var_idx++;
-    }
-    std::vector<int64_t> cls_feats_dim = {num_nodes, num_node_vars};
     Inputs cls_info (cls_feats, cls_feats_dim);
-    gnn_input.insert({"cluster_vars", cls_info});    
+
+    gnn_input.insert({"tau_vars", tau_info});
+    gnn_input.insert({"track_vars", trk_info});
+    gnn_input.insert({"cluster_vars", cls_info}); 
 
     //RUN THE INFERENCE!!!
     ATH_MSG_DEBUG("Prepared inputs, running inference...");
@@ -164,39 +128,26 @@ TauGNN::compute(const xAOD::TauJet &tau,
     return std::make_tuple(out_f, out_vc, out_vf);
 }
 
-bool TauGNN::calculateInputVariables(const xAOD::TauJet &tau,
-                  const std::vector<const xAOD::TauTrack *> &tracks,
-                  const std::vector<xAOD::CaloVertexedTopoCluster> &clusters,
-                  std::map<std::string, std::map<std::string, double>>& scalarInputs,
-                  std::map<std::string, std::map<std::string, std::vector<double>>>& vectorInputs) const {
-    scalarInputs.clear();
-    vectorInputs.clear();
+std::tuple<std::vector<float>, std::vector<float>, std::vector<float>>
+    TauGNN::calculateInputVariables(
+        const xAOD::TauJet &tau,
+        const std::vector<const xAOD::TauTrack *> &tracks,
+        const std::vector<xAOD::CaloVertexedTopoCluster> &clusters
+    ) const {
     // Populate input (sequence) map with input variables
+    std::vector<float> tau_feats;
+    std::vector<std::vector<float>> track_feats_2d, cluster_feats_2d;
     for (const auto &varname : m_scalarCalc_inputs) {
-        if (!m_var_calc->compute(varname, tau,
-                                 scalarInputs[m_config.input_layer_scalar][varname])) {
-            ATH_MSG_WARNING("Error computing '" << varname
-                            << "' returning default");
-            return false;
-        }
+        tau_feats.push_back(m_var_calc->compute(varname, tau));
     }
-
     for (const auto &varname : m_trackCalc_inputs) {
-        if (!m_var_calc->compute(varname, tau, tracks,
-                                 vectorInputs[m_config.input_layer_tracks][varname])) {
-            ATH_MSG_WARNING("Error computing '" << varname
-                            << "' returning default");
-            return false;
-        }
+        track_feats_2d.push_back(m_var_calc->compute(varname, tau, tracks));
     }
-
     for (const auto &varname : m_clusterCalc_inputs) {
-        if (!m_var_calc->compute(varname, tau, clusters,
-                                 vectorInputs[m_config.input_layer_clusters][varname])) {
-            ATH_MSG_WARNING("Error computing '" << varname
-                            << "' returning default");
-            return false;
-        }
+        cluster_feats_2d.push_back(m_var_calc->compute(varname, tau, clusters));
     }
-    return true;
+    //transposing the 2d feature arrays
+    std::vector<float> track_feats   = flatten(track_feats_2d);
+    std::vector<float> cluster_feats = flatten(cluster_feats_2d);
+    return std::make_tuple(tau_feats, track_feats, cluster_feats);
 }
