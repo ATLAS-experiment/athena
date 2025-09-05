@@ -344,7 +344,7 @@ StatusCode L1CorrelationAlg::execute(const EventContext& ctx) const {
     const int kN = mid + deltaSel;
     if (kN < 0 || kN >= nBC) return;
 
-    const auto idsN = useTAP ? collect_ids_from_words(tapWords[kN])
+    const auto &idsN = useTAP ? collect_ids_from_words(tapWords[kN])
                              : collect_ids_from_words(tbpWords[kN]);
     const auto& ids0 = useTAP ? ids0_tap : ids0_tbp;
 
