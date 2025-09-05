@@ -127,9 +127,6 @@ public:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleHepMCTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleHepMCTruthClassifier(HepMC::ConstGenParticlePtr,MCTruthPartClassifier::Info* info = nullptr) const override final;
-
 #endif
 
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
