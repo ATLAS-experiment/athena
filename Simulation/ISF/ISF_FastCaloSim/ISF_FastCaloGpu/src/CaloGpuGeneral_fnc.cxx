@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "ISF_FastCaloGpu/GeoRegion.h"
 #include "ISF_FastCaloGpu/GeoGpu_structs.h"
 #include "ISF_FastCaloGpu/Hit.h"
@@ -25,9 +28,9 @@ namespace CaloGpuGeneral_fnc {
     int          sample_size  = SampleIdx[sampling].size;
     unsigned int sample_index = SampleIdx[sampling].index;
 
-    GeoRegion* gr = (GeoRegion*)regions_g;
+    GeoRegion* gr = regions_g;
     if ( sample_size == 0 ) return -1;
-    float     dist;
+    float     dist{};
     long long bestDDE = -1;
     if ( !distance ) distance = &dist;
     *distance = +10000000;
