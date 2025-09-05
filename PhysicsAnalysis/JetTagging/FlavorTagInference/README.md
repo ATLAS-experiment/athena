@@ -32,6 +32,6 @@ There are several user-level tools here:
 ### Other Files ###
 There are also several tools that you _probably_ don't have to touch:
 
-  - `CustomGetterUtils`: DL2 relies on some information that isn't stored in
+  - `CustomGetterUtils`: Models rely on some information that isn't stored in
     accessors that we can get with a string (i.e. `pt`, `eta`,
     ...). These are defined in `CustomGetterUtils`.

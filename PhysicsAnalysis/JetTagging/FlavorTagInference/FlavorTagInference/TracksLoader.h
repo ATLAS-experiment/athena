@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   This is a subclass of IConstituentsLoader. It is used to load the tracks from the jet 
   and extract their features for the NN evaluation.
@@ -10,7 +10,6 @@
 
 // local includes
 #include "FlavorTagInference/FlipTagEnums.h"
-#include "FlavorTagInference/AssociationEnums.h"
 
 #include "FlavorTagInference/ConstituentsLoader.h"
 #include "FlavorTagInference/DataPrepUtilities.h"
@@ -19,7 +18,6 @@
 
 // EDM includes
 #include "xAODJet/Jet.h"
-#include "xAODBTagging/BTagging.h"
 
 // external libraries
 #include "lwtnn/lightweight_network_config.hh"
@@ -50,7 +48,6 @@ namespace FlavorTagInference {
           const xAOD::Jet& jet ) const override;
         std::tuple<char, std::map<std::string, std::vector<double>>>  getDL2Data(
           const xAOD::Jet& jet, 
-          const SG::AuxElement& btag, 
           std::function<char(const Tracks&)> ip_checker) const;
         const FTagDataDependencyNames& getDependencies() const override;
         const std::set<std::string>& getUsedRemap() const override;
@@ -81,7 +78,6 @@ namespace FlavorTagInference {
           const FTagOptions&);
         
         Tracks getTracksFromJet(const Jet& jet) const;
-        Tracks getTracksFromJetDL2(const Jet& jet, const AE& btag) const;
 
         TrackSortVar m_trackSortVar;
         TrackFilter m_trackFilter;

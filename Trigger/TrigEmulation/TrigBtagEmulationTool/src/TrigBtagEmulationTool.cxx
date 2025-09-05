@@ -685,7 +685,7 @@ StatusCode TrigBtagEmulationTool::addEmulatedChain(const std::string& triggerNam
   return StatusCode::SUCCESS;
 }
 
-bool TrigBtagEmulationTool::isPassedBTagger(const TrigBtagEmulationJet& jet,
+bool TrigBtagEmulationTool::isPassedBTagger(const TrigBtagEmulationJet& emujet,
 					    const std::string& btagger) const
 {
   if (btagger.empty()) return false;
@@ -698,16 +698,16 @@ bool TrigBtagEmulationTool::isPassedBTagger(const TrigBtagEmulationJet& jet,
   bool res = false;
 
   if( btagger.substr(0, 4) == "dl1r" ) { // 4 -> strlen("dl1r")
-    res = jet.satisfy("DL1r", workingPoint);
+    res = emujet.satisfy("DL1r", workingPoint);
   } else if( btagger.substr(0, 4) == "dl1d" ) { // 4 -> strlen("dl1d")
-    res = jet.satisfy("DL1d20211216", workingPoint);
+    res = emujet.satisfy("DL1d20211216", workingPoint);
   } else if( btagger == "newTagger" ) {
-    const xAOD::BTagging *btag = jet.btag();
-    if (not btag) return false;
-    m_dl2->decorate(*btag);
-    res = jet.satisfy("DL1dEMUL", workingPoint);
+    const xAOD::Jet *jet = emujet.jet();
+    if (not jet) return false;
+    m_dl2->decorate(*jet);
+    res = emujet.satisfy("DL1dEMUL", workingPoint);
   } else if (btagger.substr(0, 4) == "mv2c") {
-    res = jet.satisfy(btagger, workingPoint);
+    res = emujet.satisfy(btagger, workingPoint);
   } else {
     ATH_MSG_WARNING( "Tagger " << btagger << " not supported." );
   }

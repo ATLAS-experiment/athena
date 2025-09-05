@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   This is a virtual class to represent loader of any type of constituents.
   It defines the interface for loading constituents from a jet 
@@ -11,14 +11,12 @@
 
 // local includes
 #include "FlavorTagInference/FlipTagEnums.h"
-#include "FlavorTagInference/AssociationEnums.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "FlavorTagInference/StringUtils.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
-#include "xAODBTagging/BTagging.h"
 
 // STL includes
 #include <string>

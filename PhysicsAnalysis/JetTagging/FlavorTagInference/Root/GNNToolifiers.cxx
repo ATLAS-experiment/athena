@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/GNNToolifiers.h"
@@ -27,9 +27,6 @@ namespace FlavorTagInference {
       opts.flip_config = flipTagConfigFromString(props.flipTagConfig);
     }
     opts.variable_remapping = props.variableRemapping;
-    if (props.trackLinkType.size() > 0) {
-      opts.track_link_type = trackLinkTypeFromString(props.trackLinkType);
-    }
     opts.default_output_value = props.default_output_value;
     {
       const auto& d = props.default_output_values;

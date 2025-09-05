@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/GNNDataLoader.h"
@@ -10,8 +10,15 @@ FlavorTagInference::GNNDataLoader::GNNDataLoader(std::shared_ptr<const SaltModel
   m_gnn_options(gnn_options)
   {
     // Create configuration objects for data preprocessing.
-    auto [inputs, constituents_configs, fo] = dataprep::createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>(
-        graph_config, m_gnn_options.flip_config, m_gnn_options.variable_remapping, m_gnn_options.track_link_type);
+    auto [inputs, constituents_configs, fo] = 
+        dataprep::createGetterConfig<
+            SaltModelGraphConfig::GraphConfig, 
+            SaltModelGraphConfig::OutputNodeConfig
+        > (
+            graph_config, 
+            m_gnn_options.flip_config, 
+            m_gnn_options.variable_remapping
+        );
 
     for (auto config : constituents_configs){
       switch (config.type){
