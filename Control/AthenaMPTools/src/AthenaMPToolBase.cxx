@@ -180,7 +180,7 @@ AthenaMP::AllWorkerOutputs_ptr AthenaMPToolBase::generateOutputReport()
           newOutput.access_mode = entries[3];
           newOutput.shared = (line.find("SHARED")!=std::string::npos);
 
-          (*jobOutputs)[basename.string()].push_back(newOutput);
+          (*jobOutputs)[basename.string()].emplace_back(std::move(newOutput));
         }
       }
     }
