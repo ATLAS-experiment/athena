@@ -62,6 +62,8 @@ if(MisalignMode!=-1):
     tag="InDetSi_MisalignmentMode_random misalignment"
   elif(MisalignMode==3):
     tag="InDetSi_MisalignmentMode_IBL-stave temperature dependent bowing"
+  elif(MisalignMode==7):
+    tag="InDetSi_MisalignmentMode_misalignment according to module indices"
   elif(MisalignMode==11):
     tag="InDetSi_MisalignmentMode_R deltaR (radial expansion)"
   elif(MisalignMode==21):
