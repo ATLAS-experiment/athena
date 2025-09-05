@@ -50,7 +50,7 @@ namespace ITk
       const Amg::MatrixX& v =  c->localCovariance();
       float f22 = float(v(1,1) );
       float wid = float(c->width().z());
-      float cov = wid*wid*.08333; if(cov < f22) cov = f22;
+      float cov = wid*wid*.08333f; if(cov < f22) cov = f22;
       m_sn = nullptr;
       cov*=6.;
       m_covz = cov*(r[3]*r[3]+r[4]*r[4]); 
@@ -60,8 +60,8 @@ namespace ITk
 
       const Amg::MatrixX& v = sp->localCovariance();
       float f22 = float(v(1,1));
-      if(de->isBarrel()) {m_covz = 8.*f22; m_covr = .1;} 
-      else               {m_covr = 8.*f22; m_covz = .1;} 
+      if(de->isBarrel()) {m_covz = 8.f*f22; m_covr = .1f;} 
+      else               {m_covr = 8.f*f22; m_covz = .1f;} 
       m_sn =  &sp->clusterList().second->detectorElement()->surface();
     
       for(int i=0; i!=3; ++i) {
@@ -98,15 +98,15 @@ namespace ITk
       const Amg::MatrixX& v =  c->localCovariance();
       float f22 = float(v(1,1));
       float wid = float(c->width().z());
-      float cov = wid*wid*.08333; if(cov < f22) cov = f22;
+      float cov = wid*wid*.08333f; if(cov < f22) cov = f22;
       cov*=6.;
       m_covz = cov*(r[3]*r[3]+r[4]*r[4]); 
       m_covr = cov*(r[5]*r[5]);
     } else {
       const Amg::MatrixX& v = sp->localCovariance();
       float f22 = float(v(1,1));
-      if(de->isBarrel()) {m_covz = 8.*f22*sc[2]; m_covr = .1;} 
-      else               {m_covr = 8.*f22*sc[3]; m_covz = .1;} 
+      if(de->isBarrel()) {m_covz = 8.f*f22*sc[2]; m_covr = .1f;} 
+      else               {m_covr = 8.f*f22*sc[3]; m_covz = .1f;} 
       for(int i=0; i!=3; ++i) {m_b0[i]=r[3 +i]; m_b1[i]=r[6 +i]; m_dr[i]=r[9 +i]; m_r0[i]=r[12+i];}
     }
     m_su = &sp->clusterList().first->detectorElement()->surface();

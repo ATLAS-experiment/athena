@@ -50,17 +50,17 @@ namespace InDet {
       const Amg::MatrixX& v =  c->localCovariance();
       float f22 = float(v(1,1) );
       float wid = float(c->width().z());
-      float cov = wid*wid*.08333; if(cov < f22) cov = f22;
-      if(de->isBarrel()) {m_covz = 9.*cov; m_covr = .06;}
-      else               {m_covr = 9.*cov; m_covz = .06;}
+      float cov = wid*wid*.08333f; if(cov < f22) cov = f22;
+      if(de->isBarrel()) {m_covz = 9.f*cov; m_covr = .06f;}
+      else               {m_covr = 9.f*cov; m_covz = .06f;}
       m_sn = nullptr;
     }
     else                {
 
       const Amg::MatrixX& v = sp->localCovariance();
       float f22 = float(v(1,1));
-      if(de->isBarrel()) {m_covz = 8.*f22; m_covr = .1;} 
-      else               {m_covr = 8.*f22; m_covz = .1;} 
+      if(de->isBarrel()) {m_covz = 8.f*f22; m_covr = .1f;} 
+      else               {m_covr = 8.f*f22; m_covz = .1f;} 
       m_sn =  &sp->clusterList().second->detectorElement()->surface();
     }
     m_su = &sp->clusterList().first->detectorElement()->surface();
@@ -92,17 +92,17 @@ namespace InDet {
       const Amg::MatrixX& v =  c->localCovariance();
       float f22 = float(v(1,1));
       float wid = float(c->width().z());
-      float cov = wid*wid*.08333; if(cov < f22) cov = f22;
-      if(de->isBarrel()) {m_covz = 9.*cov*sc[0]; m_covr = .06;}
-      else               {m_covr = 9.*cov*sc[1]; m_covz = .06;}
+      float cov = wid*wid*.08333f; if(cov < f22) cov = f22;
+      if(de->isBarrel()) {m_covz = 9.f*cov*sc[0]; m_covr = .06f;}
+      else               {m_covr = 9.f*cov*sc[1]; m_covz = .06f;}
       m_sn = nullptr;
     }
     else                {
 
       const Amg::MatrixX& v = sp->localCovariance();
       float f22 = float(v(1,1));
-      if(de->isBarrel()) {m_covz = 8.*f22*sc[2]; m_covr = .1;} 
-      else               {m_covr = 8.*f22*sc[3]; m_covz = .1;} 
+      if(de->isBarrel()) {m_covz = 8.f*f22*sc[2]; m_covr = .1f;} 
+      else               {m_covr = 8.f*f22*sc[3]; m_covz = .1f;} 
       m_sn =  &sp->clusterList().second->detectorElement()->surface();
     }
     m_su = &sp->clusterList().first->detectorElement()->surface();
