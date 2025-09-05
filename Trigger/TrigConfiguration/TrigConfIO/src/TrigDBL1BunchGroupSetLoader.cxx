@@ -29,30 +29,15 @@ TrigConf::TrigDBL1BunchGroupSetLoader::loadBunchGroupSet ( unsigned int bgsk,
                                                            TrigConf::L1BunchGroupSet & bgs,
                                                            const std::string & outFileName ) const
 {
+   // load data into ptree
    boost::property_tree::ptree pt;
-   {
-      auto session = createDBSession();
-      session->transaction().start( /*bool readonly=*/ true);
-      const size_t sv = schemaVersion(session.get());
-      QueryDefinition qdef = getQueryDefinition(sv, m_queries);
-      try {
-         qdef.setBoundValue<int>("key", bgsk);
-         auto q = qdef.createQuery( session.get() );
-         auto & cursor = q->execute();
-         if ( ! cursor.next() ) {
-            TRG_MSG_ERROR("Tried reading L1 bunchgroup set, but L1 bunchgroup key " << bgsk << " is not available" );
-            throw TrigConf::NoBGSKException("TrigDBL1BunchGroupSetLoader: L1 bunchgroup key " + std::to_string(bgsk) + " not available");
-         }
-         const coral::AttributeList& row = cursor.currentRow();
-         const coral::Blob& dataBlob = row[qdef.dataName()].data<coral::Blob>();
-         writeRawFile( dataBlob, outFileName );
-         blobToPtree( dataBlob, pt );
-      }
-      catch(coral::QueryException & ex) {
-         TRG_MSG_ERROR("When reading L1 bunchgroup set for L1 bunchgroup key " << bgsk << " a coral::QueryException was caught ( " << ex.what() <<" )" );
-         throw TrigConf::QueryException("TrigDBL1BunchGroupSetLoader: " + std::string(ex.what()));
-      }
+   if(useCrest()) {
+      loadFromCrest(bgsk, pt, outFileName, "L1 bunchgroups", "BGS");
+   } else {
+      loadFromOracle(bgsk, pt, outFileName, "L1 bunchgroups", m_queries);
    }
+    
+   // fill L1BunchGroupSet with data
    try {
       bgs.setData(std::move(pt));
       bgs.setBGSK(bgsk);

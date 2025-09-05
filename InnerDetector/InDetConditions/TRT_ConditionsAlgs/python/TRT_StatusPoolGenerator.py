@@ -9,7 +9,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-def TRTStrawStatusWriteCfg(flags, name="TRTCondWriteAlg", tagList=[], objectList=[], **kwargs):
+def TRTStrawStatusWriteCfg(flags, name="TRTStrawStatusWriteAlg", tagList=[], objectList=[], **kwargs):
     acc = ComponentAccumulator()
 
     if "StatusInputFile" not in kwargs:
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     parser.add_argument('-f','--inputFile', default="straws.txt" ,help="DB folder name for reader")
     parser.add_argument('-c','--condRunNumber', type=int, default=-1, help=" choose the IoV covering this run number")
     parser.add_argument('--dbname', default="mycool.db" ,help="DB folder name for reader")
-    parser.add_argument('--outputtxt', default="caliboutput.txt" ,help="Output file for the TRT")
+    parser.add_argument('--outputtxt', default="" ,help="Output file for the TRT")
     
     args = parser.parse_args()
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     flags.Exec.MaxEvents = 1
 
     # For debug output INFO=3
-    flags.Exec.OutputLevel = 2
+    flags.Exec.OutputLevel = 3
 
     flags.lock()
     flags.dump()

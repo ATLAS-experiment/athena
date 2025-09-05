@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcDataPreparator.h"
@@ -22,8 +22,9 @@ StatusCode TrigL2MuonSA::TgcDataPreparator::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::TgcDataPreparator::prepareData(const xAOD::MuonRoI*    p_roi,
-							TrigL2MuonSA::TgcHits&  tgcHits) const
+StatusCode TrigL2MuonSA::TgcDataPreparator::prepareData(const EventContext& ctx,
+                                                        const xAOD::MuonRoI*    p_roi,
+                                                        TrigL2MuonSA::TgcHits&  tgcHits) const
 {
    float roi_eta = p_roi->eta();
    float roi_phi = p_roi->phi();
@@ -44,7 +45,7 @@ StatusCode TrigL2MuonSA::TgcDataPreparator::prepareData(const xAOD::MuonRoI*    
    const double mid_phi_test = m_options.roadParameters().deltaPhiAtMiddle();
    const double inn_phi_test = m_options.roadParameters().deltaPhiAtInner();
 
-   auto tgcContainerHandle = SG::makeHandle(m_tgcContainerKey);
+   auto tgcContainerHandle = SG::makeHandle(m_tgcContainerKey, ctx);
    tgcPrepContainer = tgcContainerHandle.cptr();
    if (!tgcContainerHandle.isValid()) {
      ATH_MSG_ERROR("Could not retrieve PrepDataContainer key:" << m_tgcContainerKey.key());

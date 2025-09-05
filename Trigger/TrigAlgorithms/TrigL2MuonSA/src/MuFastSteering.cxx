@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastSteering.h"
@@ -449,7 +449,8 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
                     m_scaleRoadBarrelOuter);
 
             // Data preparation
-            sc = m_dataPreparator->prepareData(*p_roi,
+            sc = m_dataPreparator->prepareData(ctx,
+                                                *p_roi,
                                                 *p_roids,
                                                 m_insideOut,
                                                 rpcHits,
@@ -473,7 +474,8 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 
             // Pattern finding
             patternTimer.start();
-            sc = m_patternFinder->findPatterns(muonRoad,
+            sc = m_patternFinder->findPatterns(ctx,
+                                             muonRoad,
                                              mdtHits,
                                              trackPatterns);
             if (!sc.isSuccess()) {
@@ -526,7 +528,8 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 
             prepTimer.start();
             // Data preparation
-            sc = m_dataPreparator->prepareData(*p_roi,
+            sc = m_dataPreparator->prepareData(ctx,
+                                                *p_roi,
                                                 *p_roids,
                                                 m_insideOut,
                                                 tgcHits,
@@ -552,11 +555,12 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 
             // Pattern finding
             patternTimer.start();
-            sc = m_patternFinder->findPatterns(muonRoad,
-                                                mdtHits,
-                            stgcHits,
-                            mmHits,
-                                                trackPatterns);
+            sc = m_patternFinder->findPatterns(ctx,
+                                               muonRoad,
+                                               mdtHits,
+                                               stgcHits,
+                                               mmHits,
+                                               trackPatterns);
 
             if (!sc.isSuccess()) {
                 ATH_MSG_WARNING("Pattern finder failed");
@@ -787,7 +791,7 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
       mmHits.clear();
       trackPatterns.clear();
 
-      sc = m_ftfRoadDefiner->defineRoad(idtrack, muonRoad);
+      sc = m_ftfRoadDefiner->defineRoad(ctx, idtrack, muonRoad);
       if (!sc.isSuccess()) {
 	ATH_MSG_WARNING("FtfRoadDefiner failed");
 	continue;
@@ -811,7 +815,8 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
 			   m_scaleRoadBarrelOuter);
 
 	// Data preparation
-	sc = m_dataPreparator->prepareData(p_roi,
+	sc = m_dataPreparator->prepareData(ctx,
+                       p_roi,
 					   *p_roids,
 					   m_insideOut,
 					   rpcHits,
@@ -830,9 +835,10 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
 
 	// Pattern finding
 	patternTimer.start();
-	sc = m_patternFinder->findPatterns(muonRoad,
-					   mdtHits,
-					   trackPatterns);
+	sc = m_patternFinder->findPatterns(ctx,
+                                       muonRoad,
+                                       mdtHits,
+                                       trackPatterns);
 	if (!sc.isSuccess()) {
 	  ATH_MSG_WARNING("Pattern finder failed");
 	  continue;
@@ -867,7 +873,8 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
 
 	prepTimer.start();
 	// Data preparation
-	sc = m_dataPreparator->prepareData(p_roi,
+	sc = m_dataPreparator->prepareData(ctx,
+                       p_roi,
 					   *p_roids,
 					   m_insideOut,
 					   tgcHits,
@@ -888,11 +895,12 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
 
 	// Pattern finding
 	patternTimer.start();
-	sc = m_patternFinder->findPatterns(muonRoad,
-					   mdtHits,
-					   stgcHits,
-					   mmHits,
-					   trackPatterns);
+	sc = m_patternFinder->findPatterns(ctx,
+                                       muonRoad,
+                                       mdtHits,
+                                       stgcHits,
+                                       mmHits,
+                                       trackPatterns);
 	if (!sc.isSuccess()) {
 	  ATH_MSG_WARNING("Pattern finder failed");
 	  continue;
@@ -1091,7 +1099,8 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
 			 m_scaleRoadBarrelOuter);
 
       // Data preparation
-      sc = m_dataPreparator->prepareData(*p_roi,
+      sc = m_dataPreparator->prepareData(ctx,
+                                         *p_roi,
                                          *p_roids,
                                          clusterRoad,
                                          clusterFitResults,
@@ -1112,7 +1121,8 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
         std::vector<TrigL2MuonSA::TrackPattern> tmp_trkPats; tmp_trkPats.clear();
 
         patternTimer.start();
-        sc = m_patternFinder->findPatterns(clusterRoad.at(i_road),
+        sc = m_patternFinder->findPatterns(ctx,
+                                           clusterRoad.at(i_road),
                                            mdtHits_cluster_normal.at(i_road),
                                            tmp_trkPats);
         if (!sc.isSuccess()) {
@@ -1200,7 +1210,8 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
       } else {
         prepTimer.start();
         // Data preparation
-        sc = m_dataPreparator->prepareData(*p_roi,
+        sc = m_dataPreparator->prepareData(ctx,
+                                           *p_roi,
                                            *p_roids,
                                            m_insideOut,
                                            tgcHits,
@@ -1225,7 +1236,8 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
 
         // Pattern finding
         patternTimer.start();
-        sc = m_patternFinder->findPatterns(muonRoad,
+        sc = m_patternFinder->findPatterns(ctx,
+                                           muonRoad,
                                            mdtHits,
                                            stgcHits,
                                            mmHits,

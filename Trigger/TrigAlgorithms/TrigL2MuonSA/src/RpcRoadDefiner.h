@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_RPCROADDEFINER_H
@@ -35,10 +35,11 @@ class RpcRoadDefiner: public AthAlgTool
   virtual StatusCode initialize() override;
 
  public:
-  StatusCode defineRoad(const xAOD::MuonRoI*    p_roi,
+  StatusCode defineRoad(const EventContext& ctx,
+			const xAOD::MuonRoI*    p_roi,
 			const bool                          insideOut,
 			TrigL2MuonSA::MuonRoad&             muonRoad,
-      const TrigL2MuonSA::RpcLayerHits&   rpcLayerHits,
+			const TrigL2MuonSA::RpcLayerHits&   rpcLayerHits,
 			const ToolHandle<RpcPatFinder>*     rpcPatFinder,
 			TrigL2MuonSA::RpcFitResult&         rpcFitResult,
 			const double                        roiEtaMinLow,

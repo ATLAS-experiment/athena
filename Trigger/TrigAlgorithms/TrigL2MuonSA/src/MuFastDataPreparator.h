@@ -49,7 +49,8 @@ class MuFastDataPreparator: public AthAlgTool {
 
  public:
 
-  StatusCode prepareData(const xAOD::MuonRoI*        p_roi,
+  StatusCode prepareData(const EventContext& ctx,
+			 const xAOD::MuonRoI*        p_roi,
 			 const TrigRoiDescriptor*    p_roids,
 			 const bool                  insideOut,
 			 TrigL2MuonSA::RpcHits&      rpcHits,
@@ -59,7 +60,8 @@ class MuFastDataPreparator: public AthAlgTool {
 			 TrigL2MuonSA::MdtHits&      mdtHits,
 			 const bool                  dynamicDeltaRpc) const;
 
-  StatusCode prepareData(const xAOD::MuonRoI*        p_roi,
+  StatusCode prepareData(const EventContext& ctx,
+			 const xAOD::MuonRoI*        p_roi,
 			 const TrigRoiDescriptor*    p_roids,
 			 const bool                  insideOut,
 			 TrigL2MuonSA::TgcHits&      tgcHits,
@@ -72,8 +74,9 @@ class MuFastDataPreparator: public AthAlgTool {
 			 TrigL2MuonSA::MmHits&       mmHits) const;
 
   //for multi-track mode
-  StatusCode prepareData(const xAOD::MuonRoI*                 p_roi,
-			 const TrigRoiDescriptor*             p_roids,
+  StatusCode prepareData(const EventContext& ctx,
+                         const xAOD::MuonRoI*                 p_roi,
+                         const TrigRoiDescriptor*             p_roids,
                          std::vector<TrigL2MuonSA::MuonRoad>& clusterRoad,
                          std::vector<TrigL2MuonSA::RpcFitResult>&  clusterFitResults,
                          TrigL2MuonSA::MdtHits&               mdtHits,

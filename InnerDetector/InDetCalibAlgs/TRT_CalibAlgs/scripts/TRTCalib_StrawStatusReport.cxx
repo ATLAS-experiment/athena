@@ -19,6 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "TSystem.h"
 #include "TRT_StrawMap.h"
 
 using namespace std;
@@ -47,6 +48,8 @@ int main(int argc, char **argv)
 
     std::string filename = "straws." + std::to_string(run) + ".txt";
     std::cout << filename << std::endl;
+    std::cout << "Created output/ folder.\n";
+    gSystem->mkdir("output/",1);
 
     // options for which straws to mask
     for (int i = 2; i < argc; ++i)
@@ -92,12 +95,13 @@ int main(int argc, char **argv)
         }
     }
 
-    std::cout << " checkNoisy_HT = " << checkNoisy_HT
-              << "\n checkNoisy_LT = " << checkNoisy_LT
-              << "\n checkLoEff_HT = " << checkLoEff_HT
-              << "\n checkLoEff_LT = " << checkLoEff_LT
-              << "\n checkDead_LT  = " << checkDead_LT
-              << "\n StatusPermanent  = " << onlyMaskBoards
+    std::cout << "\nOption selection:"
+              << "\n - checkNoisy_HT = " << checkNoisy_HT
+              << "\n - checkNoisy_LT = " << checkNoisy_LT
+              << "\n - checkLoEff_HT = " << checkLoEff_HT
+              << "\n - checkLoEff_LT = " << checkLoEff_LT
+              << "\n - checkDead_LT  = " << checkDead_LT
+              << "\n - StatusPermanent  = " << onlyMaskBoards
               << std::endl;
 
     simpleAnalysis(filename);

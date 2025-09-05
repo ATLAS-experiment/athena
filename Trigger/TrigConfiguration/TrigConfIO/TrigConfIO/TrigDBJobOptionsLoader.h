@@ -35,23 +35,28 @@ namespace TrigConf {
       virtual ~TrigDBJobOptionsLoader() override;
 
       /**
-       * @brief Load content from the Trigger DB into two ptrees for a given SuperMasterKey (SMK)
+       * @brief Load job options from the Trigger DB into a ptree for a given SuperMasterKey (SMK)
        * @param smk [in] the SMK that should be loaded
        * @param jobOptions [out] the loaded job options
+       * @param outFileName [in] name of file to write out the loaded data (optional, by default no file will be written)
+       * @return true if loading (and optional writing) was successfull
        */
       bool loadJobOptions ( unsigned int smk,
                             boost::property_tree::ptree & jobOptions,
                             const std::string & outFileName = "") const;
 
       /**
-       * @brief Load content from the Trigger DB into an L1Menu and an HLTMenu for a given SuperMasterKey (SMK)
+       * @brief Load job options from the Trigger DB into a ptree for a given SuperMasterKey (SMK)
        * @param smk [in] the SMK that should be loaded
        * @param jobOptions [out] the loaded job options
+       * @param outFileName [in] name of file to write out the loaded data (optional, by default no file will be written)
+       * @return true if loading (and optional writing) was successfull
        */
       bool loadJobOptions ( unsigned int smk,
                             DataStructure & jobOptions,
                             const std::string & outFileName = "") const;
    private:
+
       std::map<size_t, QueryDefinition> m_queries;
    };
 

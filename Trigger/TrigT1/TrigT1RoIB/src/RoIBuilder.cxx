@@ -234,7 +234,7 @@ namespace ROIB {
          EMTauResult emtau_rdo_result( std::move(emtau_rdo_header), std::move(emtau_rdo_trailer),
                                        std::move(emtau_rdo_data) );
 
-         emtau_rdo_result_vector.push_back( emtau_rdo_result );
+         emtau_rdo_result_vector.push_back( std::move(emtau_rdo_result) );
       }
 
       /////////////////////////////////////////////////////////////////////////////
@@ -298,7 +298,7 @@ namespace ROIB {
                                                std::move(jetenergy_rdo_trailer),
                                                std::move(jetenergy_rdo_data) );
 
-         jetenergy_rdo_result_vector.push_back( jetenergy_rdo_result );
+         jetenergy_rdo_result_vector.push_back( std::move(jetenergy_rdo_result) );
       }
 
       /////////////////////////////////////////////////////////////////////////////
