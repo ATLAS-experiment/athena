@@ -25,6 +25,7 @@
 #include <boost/regex.hpp>
 #pragma GCC diagnostic pop
 
+#include <regex>
 #include <string>
 
 class TString;
@@ -45,6 +46,8 @@ namespace RCU
   /// guarantee: strong
   /// failures: out of memory II
   bool match_expr (const boost::regex& expr, const std::string& str);
+
+  bool match_expr (const std::regex& expr, const std::string& str);
 
 
   /// returns: a string that is the regular expression equivalent of
