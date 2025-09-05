@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentToValMap_test.cxx
@@ -92,6 +92,7 @@ public:
 
   void swap (TestUpdater& other)
   {
+    std::lock_guard<std::mutex> g (m_mutex);
     auto swap_atomic = [] (std::atomic<T*>& a, std::atomic<T*>& b)
     {
       T* tmp = a.load (std::memory_order_relaxed);
