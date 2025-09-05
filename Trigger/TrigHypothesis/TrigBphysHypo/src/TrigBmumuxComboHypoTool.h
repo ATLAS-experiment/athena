@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_TrigBmumuxComboHypoTool_H
@@ -32,7 +32,7 @@ class TrigBmumuxComboHypoTool: public ComboHypoToolBase {
 
  private:
   bool passed(const xAOD::TrigBphys*) const;
-  virtual bool executeAlg(const std::vector<Combo::LegDecision>&) const override;
+  virtual bool executeAlg(const std::vector<Combo::LegDecision>&, const EventContext& ctx) const override;
 
   Gaudi::Property<int> m_decay {this, "Decay", 9999, "decay as enumerated in xAOD::TrigBphys::pType"};
   Gaudi::Property<bool> m_isBmux {this, "isBmux", false, "B+ -> mu+ nu_mu X decay (bBmux)"};

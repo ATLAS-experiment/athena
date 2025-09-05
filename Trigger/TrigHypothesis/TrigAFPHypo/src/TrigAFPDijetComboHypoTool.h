@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGAFPHYPO_TRIGAFPDIJETCOMBOHYPOTOOL_H
@@ -29,7 +29,7 @@ class TrigAFPDijetComboHypoTool : public ComboHypoToolBase {
 
 private:
 
-  virtual bool executeAlg(const std::vector<Combo::LegDecision>& combination) const override;
+  virtual bool executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& ctx) const override;
 
   ///Boolean corresponding to the decision to record the event based on the selection being met.
   //HLT::Identifier m_decisionId;

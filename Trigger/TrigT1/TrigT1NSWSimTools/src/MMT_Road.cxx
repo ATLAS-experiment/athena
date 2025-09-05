@@ -52,19 +52,18 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
 
     has_hit = false;
     const int bo = hit_i->getPlane();
-    auto it = std::find_if(m_road_hits.begin(), m_road_hits.end(), [&bo](const auto &hit) { return (hit->getPlane() == bo); });
+    auto it = std::find_if(m_road_hits.begin(), m_road_hits.end(), [&bo](const auto &hit) { return (hit.getPlane() == bo); });
     if (it != m_road_hits.end()) {
       has_hit = true;
-      if (!hit_i->isNoise() && (*it)->isNoise()) {
+      if (!hit_i->isNoise() && it->isNoise()) {
         m_road_hits.erase(it);
         has_hit = false;
       }
     }
 
     if (has_hit) continue;
-    auto hit = std::make_unique<MMT_Hit>(*hit_i.get());
-    hit->setAge(0);
-    m_road_hits.push_back(std::move(hit));
+    m_road_hits.emplace_back(*hit_i.get());
+    m_road_hits.back().setAge(0);
   }
 }
 
@@ -72,8 +71,8 @@ double MMT_Road::avgSofX() const {
   double sum = 0;
   int N = 0;
   for (const auto &hit : m_road_hits) {
-    if (hit->isX()) {
-      sum += hit->getRZSlope();
+    if (hit.isX()) {
+      sum += hit.getRZSlope();
       ++N;
     }
   }
@@ -84,9 +83,9 @@ double MMT_Road::avgSofUV(const int uv1, const int uv2) const {
   double sum = 0;
   int N = 0;
   for (const auto &hit : m_road_hits) {
-    const int bo = hit->getPlane();
+    const int bo = hit.getPlane();
     if (bo == uv1 || bo == uv2) {
-      sum += hit->getRZSlope();
+      sum += hit.getRZSlope();
       ++N;
     }
   }
@@ -95,24 +94,24 @@ double MMT_Road::avgSofUV(const int uv1, const int uv2) const {
 
 unsigned int MMT_Road::countRealHits() const {
   return std::count_if(m_road_hits.begin(), m_road_hits.end(),
-                       [&](auto& hit) { return hit->isNoise()==false; });
+                       [&](auto& hit) { return hit.isNoise()==false; });
 }
 
 unsigned int MMT_Road::countUVHits(bool flag) const {
   return std::count_if(m_road_hits.begin(), m_road_hits.end(),
-                       [&](auto& hit) { return (hit->isU() || hit->isV()) && hit->isNoise()==flag; });
+                       [&](auto& hit) { return (hit.isU() || hit.isV()) && hit.isNoise()==flag; });
 }
 
 unsigned int MMT_Road::countXHits(bool flag) const {
   return std::count_if(m_road_hits.begin(), m_road_hits.end(),
-                       [&](auto& hit) { return hit->isX() && hit->isNoise()==flag; });
+                       [&](auto& hit) { return hit.isX() && hit.isNoise()==flag; });
 }
 
 bool MMT_Road::evaluateLowRes() const {
   unsigned int nhits1 = 0, nhits2 = 0;
   for (const auto &hit : m_road_hits) {
-    nhits1 += hit->getPlane() < 4 && !hit->isNoise();
-    nhits2 += hit->getPlane() > 3 && !hit->isNoise();
+    nhits1 += hit.getPlane() < 4 && !hit.isNoise();
+    nhits2 += hit.getPlane() > 3 && !hit.isNoise();
   }
   return (nhits1 < 4 || nhits2 < 4);
 }
@@ -120,8 +119,8 @@ bool MMT_Road::evaluateLowRes() const {
 bool MMT_Road::horizontalCheck() const {
   int nx1 = 0, nx2 = 0;
   for (const auto &hit : m_road_hits) {
-    nx1 += hit->getPlane() >-1 && hit->getPlane() < 2;
-    nx2 += hit->getPlane() > 5 && hit->getPlane() < 8;
+    nx1 += hit.getPlane() >-1 && hit.getPlane() < 2;
+    nx2 += hit.getPlane() > 5 && hit.getPlane() < 8;
 
     if (nx1 > 0 && nx2 > 0 && (nx1+nx2) >= m_xthr) return true;
   }
@@ -131,15 +130,15 @@ bool MMT_Road::horizontalCheck() const {
 void MMT_Road::incrementAge(const int bcwind) {
   std::vector<unsigned int> old_ihits;
   for (unsigned int j = 0; j < m_road_hits.size(); j++) {
-    m_road_hits[j]->setAge(m_road_hits[j]->getAge() +1);
-    if (m_road_hits[j]->getAge() > (bcwind-1)) old_ihits.push_back(j);
+    m_road_hits[j].setAge(m_road_hits[j].getAge() +1);
+    if (m_road_hits[j].getAge() > (bcwind-1)) old_ihits.push_back(j);
   }
   for (int j = old_ihits.size()-1; j > -1; j--) m_road_hits.erase(m_road_hits.begin()+j);
 }
 
 bool MMT_Road::matureCheck(const int bcwind) const {
   for (const auto &hit : m_road_hits) {
-    if (hit->getAge() == (bcwind - 1)) return true;
+    if (hit.getAge() == (bcwind - 1)) return true;
   }
   return false;
 }
@@ -147,9 +146,9 @@ bool MMT_Road::matureCheck(const int bcwind) const {
 double MMT_Road::mxl() const {
   std::vector<double> ys, zs;
   for (const auto &hit : m_road_hits) {
-    if (hit->isX()) {
-      ys.push_back(hit->getR());
-      zs.push_back(hit->getZ());
+    if (hit.isX()) {
+      ys.push_back(hit.getR());
+      zs.push_back(hit.getZ());
     }
   }
   double mxl = 0;
@@ -170,8 +169,8 @@ bool MMT_Road::stereoCheck() const {
 
   int nu = 0, nv = 0;
   for (const auto &hit : m_road_hits) {
-    nu += hit->isU();
-    nv += hit->isV();
+    nu += hit.isU();
+    nv += hit.isV();
 
     if (nu > 0 && nv > 0 && (nu+nv) >= m_uvthr) return true;
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -39,7 +39,7 @@ class TrigMultiTrkComboHypoTool: public ComboHypoToolBase {
 
  private:
   bool passed(const xAOD::TrigBphys*) const;
-  virtual bool executeAlg(const std::vector<Combo::LegDecision>&) const override;
+  virtual bool executeAlg(const std::vector<Combo::LegDecision>&, const EventContext&) const override;
   bool checkPreviousDecisionIDs(const std::vector<const TrigCompositeUtils::DecisionIDContainer*>&) const;
   int totalCharge(const xAOD::TrigBphys*) const;
   bool isInMassRange(double mass) const;
