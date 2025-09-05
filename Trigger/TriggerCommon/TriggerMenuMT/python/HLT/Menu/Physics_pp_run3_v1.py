@@ -826,19 +826,19 @@ def setupMenu():
     chains['MET'] += [
 
         #ATR-28679
-        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1jXE110', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1jXE110', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe65_cell_xe100_pfopufit_L1jXE110', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe75_cell_xe100_pfopufit_L1jXE110', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
         #
-        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe65_cell_xe100_pfopufit_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe75_cell_xe100_pfopufit_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
 
-        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1jXE100', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1jXE100', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
 
         #ATR-28679
         ChainProp(name='HLT_xe65_cell_xe90_nn_L1jXE110', l1SeedThresholds=['FSNOSEED']*2, groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:shifter']),
-        ChainProp(name='HLT_xe65_cell_xe105_nn_L1jXE110', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        ChainProp(name='HLT_xe65_cell_xe105_nn_L1jXE110', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
 
         ChainProp(name='HLT_xe75_cell_xe65_tcpufit_xe90_trkmht_L1jXE110', l1SeedThresholds=['FSNOSEED']*3, groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe60_cell_xe95_pfsum_cssk_L1jXE110', l1SeedThresholds=['FSNOSEED']*2, groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
@@ -851,7 +851,7 @@ def setupMenu():
         ChainProp(name='HLT_xe80_cell_xe115_tcpufit_L1jXE110',l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
         #
         ChainProp(name='HLT_xe65_cell_xe90_nn_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*2, groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:shifter']),
-        ChainProp(name='HLT_xe65_cell_xe105_nn_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        ChainProp(name='HLT_xe65_cell_xe105_nn_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
 
         ChainProp(name='HLT_xe75_cell_xe65_tcpufit_xe90_trkmht_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*3, groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe60_cell_xe95_pfsum_cssk_L1gXEJWOJ110', l1SeedThresholds=['FSNOSEED']*2, groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
@@ -901,7 +901,7 @@ def setupMenu():
         ChainProp(name='HLT_xe65_cell_xe110_tcpufit_L1gXEJWOJ100',l1SeedThresholds=['FSNOSEED']*2, groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ100'], monGroups=['metMon:t0']), #ATR-28838
         ChainProp(name='HLT_xe80_cell_xe115_tcpufit_L1jXE100',l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
 
-        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
         #ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1gXERHO100', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1gXENC100', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
 
@@ -914,8 +914,8 @@ def setupMenu():
         ChainProp(name='HLT_xe80_cell_xe115_tcpufit_L1gXENC100',l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:t0']),
 
         ChainProp(name='HLT_xe55_cell_xe70_tcpufit_L1jXE100',l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream, 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE100'], monGroups=['metMon:shifter']),
-        ChainProp(name='HLT_xe55_cell_xe70_tcpufit_L1jXE110',l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream, 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']), #ATR-28679
-        ChainProp(name='HLT_xe55_cell_xe70_tcpufit_L1gXEJWOJ110',l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream, 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']), #ATR-28679
+        ChainProp(name='HLT_xe55_cell_xe70_tcpufit_L1jXE110',l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']), #ATR-28679
+        ChainProp(name='HLT_xe55_cell_xe70_tcpufit_L1gXEJWOJ110',l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']), #ATR-28679
         ChainProp(name='HLT_xe55_cell_xe70_tcpufit_L1gXEJWOJ100',l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream, 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ100'], monGroups=['metMon:t0']), #ATR-28838
         
         #ATR-28679
@@ -944,27 +944,27 @@ def setupMenu():
         ChainProp(name='HLT_xe0_nn_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
 
         #ATR-28679
-        ChainProp(name='HLT_xe0_cell_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_tcpufit_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_trkmht_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_pfopufit_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_pfsum_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_pfsum_cssk_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_pfsum_vssk_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_mhtpufit_em_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_mhtpufit_pf_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_nn_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_cell_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_tcpufit_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_trkmht_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_pfopufit_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_pfsum_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_pfsum_cssk_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_pfsum_vssk_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_mhtpufit_em_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_mhtpufit_pf_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_nn_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
 
-        ChainProp(name='HLT_xe0_cell_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_tcpufit_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_trkmht_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_pfopufit_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_pfsum_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_pfsum_cssk_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_pfsum_vssk_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_mhtpufit_em_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_mhtpufit_pf_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
-        ChainProp(name='HLT_xe0_nn_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_cell_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_tcpufit_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_trkmht_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_pfopufit_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_pfsum_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_pfsum_cssk_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_pfsum_vssk_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_mhtpufit_em_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_mhtpufit_pf_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe0_nn_L1gXEJWOJ110',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup+['RATE:CPS_gXEJWOJ110'], monGroups=['metMon:t0']),
         # ATR-28838
         ChainProp(name='HLT_xe0_cell_L1jXE100',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE100'], monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe0_tcpufit_L1jXE100',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE100'], monGroups=['metMon:t0']),
