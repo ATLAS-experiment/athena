@@ -3,7 +3,7 @@
 */
 
 #include <sstream>
-#include <boost/regex.hpp>
+#include <regex>
 #include <tbb/concurrent_unordered_map.h>
 
 #include "TrigNavigation/TypeMaps.h"
@@ -116,7 +116,7 @@ MsgStream& HLTNavDetails::operator<< ( MsgStream& m, const HLTNavDetails::IHolde
 
 // only construct the regex once
 namespace HLTNavDetails {  
-  const boost::regex rx1("_v[0-9]+$");
+  const std::regex rx1(R"(_v[0-9]+$)");
 }
 
 std::string HLTNavDetails::formatSGkey(const std::string& prefix, const std::string& containername, const std::string& label){
@@ -128,7 +128,7 @@ std::string HLTNavDetails::formatSGkey(const std::string& prefix, const std::str
   if (itr!=memo.end()) return itr->second;
 
   // Remove version
-  std::string ret = boost::regex_replace(containername,rx1,std::string(""));
+  std::string ret = std::regex_replace(containername,rx1,std::string(""));
   
   // Replace :: with __
   size_t pos = ret.find("::");
