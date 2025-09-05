@@ -161,6 +161,12 @@ def createActsValidateConversionSeedsTrackingPassFlags():
     icf.isSecondaryPass = False
     return icf
 
+def createActsValidateLargeRadiusStandaloneTrackingPassFlags():
+    icf = createActsLargeRadiusTrackingPassFlags()
+    icf.extension = "ActsValidateLargeRadiusStandalone"
+    icf.isSecondaryPass = False
+    return icf
+
 def createActsValidateLargeRadiusSeedsTrackingPassFlags():
     icf = createActsLargeRadiusTrackingPassFlags()
     icf.extension = "ActsValidateLargeRadiusSeeds"

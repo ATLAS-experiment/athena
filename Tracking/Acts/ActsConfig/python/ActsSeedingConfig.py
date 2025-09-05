@@ -43,6 +43,7 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("maxPtScattering", float("inf"))
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("rMax", 320. * UnitConstants.mm)
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed)
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
     kwargs.setdefault("rRangeMiddleSP", [
         [0,0],
@@ -133,15 +134,22 @@ def ActsStripSeedingToolCfg(flags,
                             name: str = "ActsStripSeedingTool",
                             **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+
+    impactMax = 20. * UnitConstants.mm
+    collisionRegionAbsMax = 200. * UnitConstants.mm
+    if flags.Tracking.ActiveConfig.extension in ["ActsLargeRadius", "ActsValidateLargeRadiusSeeds", "ActsValidateLargeRadiusStandalone"]:
+        impactMax = 300. * UnitConstants.mm
+        collisionRegionAbsMax = 500. * UnitConstants.mm
+
     
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
     kwargs.setdefault("doSeedQualitySelection", False)
     # For SpacePointGridConfig
     kwargs.setdefault("gridRMax" , 1000. * UnitConstants.mm)
     kwargs.setdefault("deltaRMax" , 600. * UnitConstants.mm)
-    kwargs.setdefault("impactMax" , 20. * UnitConstants.mm)
+    kwargs.setdefault("impactMax" , impactMax)
     # For SeedfinderConfig
-    kwargs.setdefault("rMax" , 1200. * UnitConstants.mm)
+    kwargs.setdefault("rMax" , flags.Tracking.ActiveConfig.radMax)
     kwargs.setdefault("deltaRMinTopSP" , 20. * UnitConstants.mm)
     kwargs.setdefault("deltaRMaxTopSP" , 300. * UnitConstants.mm)
     kwargs.setdefault("deltaRMinBottomSP" , 20. * UnitConstants.mm)
@@ -166,6 +174,8 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("zBinNeighborsBottom" , [(0,0),(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0),(0,0)])
     # Any other
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
+    kwargs.setdefault("collisionRegionMin", -1. * collisionRegionAbsMax)
+    kwargs.setdefault("collisionRegionMax", collisionRegionAbsMax)
 
     if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
         acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
@@ -302,8 +312,7 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
             seedTool_strip = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
         else:
-            seedTool_strip = acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
-                                                                          rMax=flags.Tracking.ActiveConfig.radMax))
+            seedTool_strip = acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags))
 
     kwargs.setdefault('SeedToolPixel', seedTool_pixel)
     kwargs.setdefault('SeedToolStrip', seedTool_strip)
@@ -450,7 +459,7 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
 
     # For conversion pass we do not process pixels
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
+    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius", "ActsValidateLargeRadiusStandalone"]:
         processPixels = False
     # For main pass disable strips if fast tracking configuration
     elif isFastPrimaryPass(flags):
@@ -463,12 +472,10 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
     # TO-DO: refactor this seeding tool configuration
     if flags.Tracking.ActiveConfig.extension == "ActsHeavyIon" and processPixels:
         kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags,
-                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool',
-                                                                                                   minPt=flags.Tracking.ActiveConfig.minPTSeed)))
+                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool')))
     if processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.Default:
         kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
-                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool',
-                                                                                                   rMax=flags.Tracking.ActiveConfig.radMax)))
+                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
         
     if processPixels:
         # Seeding algo

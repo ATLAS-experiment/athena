@@ -26,6 +26,12 @@ def actsHeavyIonFlags(flags) -> None:
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
 
+def actsValidateLargeRadiusStandaloneFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: use legacy primary pass and Acts LRT pass"""
+    flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
+                                TrackingComponent.ActsValidateLargeRadiusStandalone]
+    flags.Tracking.writeSeedValNtuple = True
+
 
 # Validation workflows
 

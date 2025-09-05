@@ -56,6 +56,7 @@ class TrackingComponent(FlagEnum):
     ActsValidateSeeds = "ActsValidateSeeds"
     ActsValidateConversionSeeds = "ActsValidateConversionSeeds"
     ActsValidateLargeRadiusSeeds = "ActsValidateLargeRadiusSeeds"
+    ActsValidateLargeRadiusStandalone = "ActsValidateLargeRadiusStandalone"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
         
@@ -590,6 +591,7 @@ def createTrackingConfigFlags():
         createActsValidateSeedsTrackingPassFlags,
         createActsValidateConversionSeedsTrackingPassFlags,
         createActsValidateLargeRadiusSeedsTrackingPassFlags,
+        createActsValidateLargeRadiusStandaloneTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags,
@@ -617,6 +619,8 @@ def createTrackingConfigFlags():
                           createActsValidateConversionSeedsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusSeedsPass",
                           createActsValidateLargeRadiusSeedsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusStandalonePass",
+                          createActsValidateLargeRadiusStandaloneTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",
                           createActsValidateTracksTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
