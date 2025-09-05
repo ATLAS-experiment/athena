@@ -2026,7 +2026,6 @@ int MissingMassCalculator::TailCleanUp(const PtEtaPhiMVector &vis1,
   {
 
     if (m_mmcCalibrationSet == MMCCalibrationSet::MMC2015HIGHMASS ||
-	m_mmcCalibrationSet == MMCCalibrationSet::MMC2016MC15C ||
         m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
 	m_mmcCalibrationSet == MMCCalibrationSet::MMC2024 ||
         m_mmcCalibrationSet == MMCCalibrationSet::UPGRADE)
@@ -3011,8 +3010,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
    
       // T. Davidek: hack for lep-lep -- subtract lepton pT both for muon and
       //  electron
-    if ((m_mmcCalibrationSet == MMCCalibrationSet::MMC2016MC15C ||
-	 m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
+    if ((m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
 	 m_mmcCalibrationSet == MMCCalibrationSet::MMC2024) &&
         preparedInput.m_vistau1.M() < 0.12 && preparedInput.m_vistau2.M() < 0.12) { // lep-lep channel
       if (preparedInput.m_SumEt > preparedInput.m_vistau1.Pt())
