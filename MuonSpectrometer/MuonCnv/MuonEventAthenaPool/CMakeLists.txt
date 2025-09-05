@@ -4,15 +4,14 @@
 atlas_subdir( MuonEventAthenaPool )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core )
 
 # Component(s) in the package:
 atlas_add_tpcnv_library( MuonEventAthenaPoolLib
    MuonEventAthenaPool/*.h src/*Cnv_p*.h src/*Cnv_p*.cxx
    PUBLIC_HEADERS MuonEventAthenaPool
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaPoolUtilities
    MuonRDO MuonRIO_OnTrack MuonSegment AthAllocators
    AthContainers AthenaKernel StoreGateLib AthenaPoolCnvSvcLib
    Identifier GaudiKernel CscCalibEvent MuonEventTPCnv RPC_CondCablingLib
