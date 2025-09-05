@@ -486,6 +486,7 @@ def getJetRecGroomAlg(groomdef,monTool=None,extraOutputs=[]):
         "jetrecalg_"+jetname,
         Provider = groomer,
         Modifiers = mods,
+        ParentDecor = "Parent",
         OutputContainer = jetname)
 
     if not isAnalysisRelease():

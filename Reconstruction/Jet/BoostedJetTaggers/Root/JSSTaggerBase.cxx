@@ -125,6 +125,7 @@ StatusCode JSSTaggerBase::initialize() {
     m_readECFG311Key = m_containerName + "." + m_readECFG311Key.key();
     m_readECFG212Key = m_containerName + "." + m_readECFG212Key.key();
     m_readQwKey = m_containerName + "." + m_readQwKey.key();
+    m_readParentKey = m_containerName + "." + m_readParentKey.key();
   }
 
   ATH_CHECK( m_decTau21WTAKey.initialize() );
@@ -153,8 +154,7 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readECFG212Key.initialize(!m_isSmallRJet) );
   ATH_CHECK( m_readQwKey.initialize(!m_isSmallRJet) );
 
-  m_readParentKey = m_containerName + "." + m_readParentKey.key();
-  ATH_CHECK( m_readParentKey.initialize() );
+  ATH_CHECK( m_readParentKey.initialize(!m_isSmallRJet) );
 
   ATH_CHECK( m_decTaggedKey.initialize() );
   ATH_CHECK( m_decValidPtRangeHighKey.initialize() );
@@ -231,6 +231,7 @@ StatusCode JSSTaggerBase::initialize() {
     renounce(m_readECFG331Key);
     renounce(m_readECFG311Key);
     renounce(m_readECFG212Key);
+    renounce(m_readParentKey);
   }
   if (m_suppressOutputDependence) {
     renounce(m_decValidPtRangeHighKey);
