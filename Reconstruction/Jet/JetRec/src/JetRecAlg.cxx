@@ -1,6 +1,5 @@
-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetRecAlg.cxx
@@ -9,6 +8,8 @@
 #include "JetRec/JetRecAlg.h"
 #include "JetInterface/IJetExecuteTool.h"
 #include "xAODJet/JetAuxContainer.h"
+
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 #if !defined (GENERATIONBASE) && !defined (XAOD_ANALYSIS)
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -22,6 +23,9 @@ using std::string;
 StatusCode JetRecAlg::initialize() {
 
   ATH_CHECK(m_output.initialize());
+
+  if(!m_parentKey.empty()) m_parentKey = m_output.key() + "." + m_parentKey.key();
+  ATH_CHECK(m_parentKey.initialize(!m_parentKey.empty()));
 
   ATH_CHECK(m_jetprovider.retrieve());
   // Some providers (e.g. copy) need the output WriteHandle
@@ -65,6 +69,7 @@ StatusCode JetRecAlg::execute(const EventContext& ctx) const {
 #endif
 
   SG::WriteHandle<xAOD::JetContainer> jetContHandle(m_output,ctx);
+  static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer> > parentELacc("Parent_TEMP");
 
   // Define a scope to ease monitoring of the JetProvider action
   {
@@ -73,6 +78,12 @@ StatusCode JetRecAlg::execute(const EventContext& ctx) const {
 #endif
     ATH_CHECK( m_jetprovider->getAndRecordJets(jetContHandle) );
     ATH_MSG_DEBUG("Created jet container of size "<< (*jetContHandle).size() << "  | writing to "<< m_output.key() );
+
+    if(!m_parentKey.empty()){
+      SG::WriteDecorHandle<xAOD::JetContainer, ElementLink<xAOD::JetContainer>> parentDecorHandle(m_parentKey,ctx);
+      for (xAOD::Jet* jet : *jetContHandle)
+	parentDecorHandle(*jet) = parentELacc(*jet);
+    }
   }
 
   // Define a scope to ease monitoring of the JetModifier action
