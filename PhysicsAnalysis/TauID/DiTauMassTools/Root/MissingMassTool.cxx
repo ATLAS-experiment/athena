@@ -34,8 +34,6 @@ StatusCode MissingMassTool::initialize()
     aset = MMCCalibrationSet::UPGRADE;
   } else if (m_calib_set == "LFV") {
     aset = MMCCalibrationSet::LFVMMC2012;
-  } else if (m_calib_set == "2016MC15C") {
-    aset = MMCCalibrationSet::MMC2016MC15C;
   } else if (m_calib_set == "2019") {
     aset = MMCCalibrationSet::MMC2019;
   } else if (m_calib_set == "2024") {
