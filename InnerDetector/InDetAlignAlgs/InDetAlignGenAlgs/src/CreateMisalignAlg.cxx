@@ -44,6 +44,8 @@
 
 
 
+
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 
@@ -109,8 +111,8 @@ namespace InDetAlignment
 		declareProperty("MisalignMode"                  ,     m_MisalignmentMode);
 		declareProperty("Translation"                   ,     m_translation);
 		declareProperty("Rotation"                      ,     m_rotation);
-		declareProperty("Local_Translation"                   ,     m_local_translation);
-                declareProperty("Local_Rotation"                      ,     m_local_rotation);
+		declareProperty("Local_Translation"             ,     m_local_translation);
+        declareProperty("Local_Rotation"                ,     m_local_rotation);
 		declareProperty("Index"                         ,     m_index);
 		declareProperty("MaxShift"                      ,     m_Misalign_maxShift);
         declareProperty("MaxShiftInner"                 ,     m_Misalign_maxShift_Inner);
@@ -710,7 +712,7 @@ namespace InDetAlignment
                    // Handle rotation
                    CLHEP::HepRotation rot = CLHEP::HepRotationX(0) * CLHEP::HepRotationY(0) * CLHEP::HepRotationZ(0);
                    if (!m_local_rotation.empty()) {
-                     rot = CLHEP::HepRotationX(m_local_rotation[0]) * CLHEP::HepRotationX(m_local_rotation[1]) * CLHEP::HepRotationX(m_local_rotation[2]);
+                     rot = CLHEP::HepRotationX(m_local_rotation[0]) * CLHEP::HepRotationY(m_local_rotation[1]) * CLHEP::HepRotationZ(m_local_rotation[2]);
                    }
                    
                    // Assign transformation
