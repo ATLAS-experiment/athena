@@ -323,12 +323,6 @@ atlas_add_citest( ACTS_Workflow_HeavyIons
 atlas_add_citest( ACTS_ValidateClusters
    SCRIPT ActsValidateClusters.sh )
 
-atlas_add_citest( ACTS_ValidateActsCoreSpacePoints
-   SCRIPT ActsValidateActsCoreSpacePoints.sh )
-
-atlas_add_citest( ACTS_ValidateActsTrkSpacePoints
-   SCRIPT ActsValidateActsSpacePoints.sh )
-
 atlas_add_citest( ACTS_ValidateSeeds
    SCRIPT ActsValidateSeeds.sh )
 
