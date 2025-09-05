@@ -11,7 +11,6 @@ endif()
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( Boost )
 find_package( GTest )
 
 # Component(s) in the package:
@@ -19,11 +18,10 @@ atlas_add_library( ElectronPhotonFourMomentumCorrectionLib
    ElectronPhotonFourMomentumCorrection/*.h Root/*.cxx
    PUBLIC_HEADERS ElectronPhotonFourMomentumCorrection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgServicesLib AsgTools AsgTestingLib AsgMessagingLib ColumnarClusterLib ColumnarEgammaLib ColumnarCoreLib
    xAODEventInfo PATInterfaces EgammaAnalysisInterfacesLib egammaUtils PATCoreAcceptLib
    xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib 
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AthLinks xAODMetaData egammaLayerRecalibTool
+   PRIVATE_LINK_LIBRARIES  AthLinks xAODMetaData egammaLayerRecalibTool
    PathResolver ${extra_libs} )
 
 if( NOT XAOD_STANDALONE )
