@@ -87,7 +87,7 @@ if __name__ == "__main__":
     parser.add_argument('--tagRT', default="Textrt" ,help="Tag for RT folder")
     parser.add_argument('--tagT0', default="Textt0" ,help="Tag for T0 folder")
     parser.add_argument('--dbname', default="mycool.db" ,help="DB folder name for reader")
-    parser.add_argument('--dbconst', default="dbconst.txt" ,help="Input file constants for writer")
+    parser.add_argument('-f','--inputFile', default="dbconst.txt" ,help="Input file constants for writer")
     parser.add_argument('--outputtxt', default="" ,help="Output file for the TRT")
     parser.add_argument('--condRunNumber', type=int, default=-1, help=" choose the IoV covering this run number")
     args = parser.parse_args()
@@ -119,6 +119,9 @@ if __name__ == "__main__":
     flags.Detector.EnableTRT = True
     flags.Output.ESDFileName = "trtcalibout.pool.root"
 
+    # For debug output INFO=3
+    flags.Exec.OutputLevel = 3
+
     flags.Exec.MaxEvents = 1
     flags.lock()
     flags.dump()
@@ -132,7 +135,7 @@ if __name__ == "__main__":
 
     if not args.read:
         # Add TRT conditions writing
-        acc.merge(TRTCondWriterCfg(flags, rtTag=args.tagRT, t0Tag=args.tagT0, CalibInputFile=args.dbconst))
+        acc.merge(TRTCondWriterCfg(flags, rtTag=args.tagRT, t0Tag=args.tagT0, CalibInputFile=args.inputFile))
     else:
         acc.merge(TRTCondReaderCfg(flags, rtTag=args.tagRT, t0Tag=args.tagT0, ReadCOOL=ReadCOOL, CalibOutputFile=textOutput))
 
