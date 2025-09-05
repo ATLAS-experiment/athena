@@ -3,7 +3,7 @@
 */
 
 #include "TrigNavStructure/TypedHolder.h"
-#include <boost/regex.hpp>
+#include <regex>
 
 std::string HLTNavDetails::formatSGkey(const std::string& prefix, const std::string& containername, const std::string& label){
   // format is prefix_containername_label
@@ -11,9 +11,9 @@ std::string HLTNavDetails::formatSGkey(const std::string& prefix, const std::str
   // are replaced by underscores
 
   std::string cleaned = containername;
-  boost::regex rx1("_v[0-9]+$");
-  cleaned = boost::regex_replace(cleaned,rx1,std::string(""));
-  boost::regex rx2("::");
-  cleaned = boost::regex_replace(cleaned,rx2,std::string("__"));
+  std::regex rx1("_v[0-9]+$");
+  cleaned = std::regex_replace(cleaned,rx1,std::string(""));
+  std::regex rx2("::");
+  cleaned = std::regex_replace(cleaned,rx2,std::string("__"));
   return prefix+"_"+cleaned+(label.size() ? "_"+label : "");
 }
