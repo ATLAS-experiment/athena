@@ -969,6 +969,7 @@ double AsgElectronSelectorTool::transformMLOutput( float score ) const
   constexpr double fEpsilon = 1.0e-30; // to avoid zero division
   if (score >= 1.0) score = 1.0 - 1.0e-15; // this number comes from TMVA
   else if (score <= fEpsilon) score = fEpsilon;
+  //cppcheck-suppress invalidFunctionArg
   score = -std::log(1.0 / score - 1.0) * oneOverTau;
   ATH_MSG_DEBUG("score is " << score);
   return score;
