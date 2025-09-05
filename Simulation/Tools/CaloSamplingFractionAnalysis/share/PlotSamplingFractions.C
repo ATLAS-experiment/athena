@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 // root -b 'PlotSamplingFractions.C("G4_11.3","SF_LAr.root","G4_11.3 new EMEC","../25.0_G4_11.3_newEMEC/SF_LAr.root")' 
 // root -b 'PlotSamplingFractions.C("G4_10.6","SF_LAr_G4_10_3_ref.root","G4_11.3","SF_LAr.root")' 
 
@@ -60,19 +63,19 @@ Energy fraction : 2.85 < #eta < 3.14 = +0.08900 +- 0.00001 + (|#eta|-2.995)*( 0.
 
 */
 
-void Create_Run3_G4_10_6_ref(std::string infile)
+void Create_Run3_G4_10_6_ref(const std::string & infile)
 {
   std::map<std::string,TF1*> ref;
   TFile* fin=TFile::Open(infile.c_str());
   for(TObject* obj : *(fin->GetListOfKeys())) {
     if(obj->IsA()!=TKey::Class()) continue;
-    TKey* key=(TKey*)obj;
+    TKey* key=static_cast<TKey*>(obj);
     if(std::string("TF1")!=key->GetClassName()) continue;
 
-    TF1* f=(TF1*)fin->Get(key->GetName());
+    TF1* f=static_cast<TF1*>(fin->Get(key->GetName()));
     std::string name=f->GetName();
 
-    cout<<"SetParams(ref[\""<<name<<"\"],,);"<<endl;
+    std::cout<<"SetParams(ref[\""<<name<<"\"],,);"<<std::endl;
     
     ref[name]=f;
   }
@@ -115,12 +118,12 @@ void Create_Run3_G4_10_6_ref(std::string infile)
   delete fout;
 }
 
-void PlotOneFile(std::vector<TF1*>& ret, std::string infile, TCanvas* cLArEM, TCanvas* cLArOther,TCanvas* cEFLArEM, int col,int style)
+void PlotOneFile(std::vector<TF1*>& ret, const std::string & infile, TCanvas* cLArEM, TCanvas* cLArOther,TCanvas* cEFLArEM, int col,int style)
 {
   TFile* fin=TFile::Open(infile.c_str());
   for(TObject* obj : *(fin->GetListOfKeys())) {
     if(obj->IsA()!=TKey::Class()) continue;
-    TKey* key=(TKey*)obj;
+    TKey* key=static_cast<TKey*>(obj);
     if(std::string("TF1")!=key->GetClassName()) continue;
 
     TF1* f=(TF1*)fin->Get(key->GetName());
@@ -145,7 +148,7 @@ void PlotOneFile(std::vector<TF1*>& ret, std::string infile, TCanvas* cLArEM, TC
   fin->Close();
 }
 
-void PlotSamplingFractions(std::string intitle1, std::string infile1, std::string intitle2="", std::string infile2="")
+void PlotSamplingFractions(const std::string & intitle1, const std::string & infile1, const std::string & intitle2="", const std::string & infile2="")
 {
   //if(intitle2!="") Create_Run3_G4_10_6_ref(infile2);
   
