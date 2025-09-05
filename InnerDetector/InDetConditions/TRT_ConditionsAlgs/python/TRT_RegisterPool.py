@@ -25,14 +25,13 @@ if __name__ == "__main__":
     python -m TRT_ConditionsAlgs.TRT_RegisterPool --prod           -> for data production
     python -m TRT_ConditionsAlgs.TRT_RegisterPool --prod --isMC    -> for MC production''')
     
-    parser.add_argument('--prod',action='store_true' ,help="Meant for production only")
-    parser.add_argument('--isMC',action='store_true' ,help="Set for MC")
-    parser.add_argument('--email', default="sergi.rodriguez@cern.ch" ,help="Email to be notify")
-    parser.add_argument('--poolfile', default="pooloutputfile.root" ,help="POOL file to be registered")
+    parser.add_argument('--prod',action='store_true', help="Meant for production only")
+    parser.add_argument('--isMC',action='store_true', help="Set for MC")
+    parser.add_argument('--email', required=True, help="Email to be notify")
+    parser.add_argument('--poolfile', default="pooloutputfile.root", help="POOL file to be registered")
     args = parser.parse_args()
 
     # Registering the constants
-    # genCOND = "cond09_test.gen.COND" if not args.prod else "cond09_mc.gen.COND" if args.isMC else "condR2_data.gen.COND"
     genCOND = "cond09_mc.gen.COND" if args.isMC else "condR2_data.gen.COND" if args.prod else "cond09_test.gen.COND"
     run_command_test(f"/afs/cern.ch/user/a/atlcond/utils22/registerFiles2 --wait --email={args.email} {genCOND} {args.poolfile}")
 
