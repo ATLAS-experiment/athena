@@ -6,7 +6,6 @@ from .bbH import bbH
 from .bblvlv import bblvlv
 from .bblvlv_modified import bblvlv_modified 
 from .bblvlv_Beta import bblvlv_Beta
-from .bblvlv_Beta_modified import bblvlv_Beta_modified 
 from .chi0chi0 import chi0chi0
 from .chi0chi1 import chi0chi1
 from .chi1chi1 import chi1chi1

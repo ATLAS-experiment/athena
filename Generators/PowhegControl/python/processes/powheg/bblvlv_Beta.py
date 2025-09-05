@@ -24,6 +24,9 @@ class bblvlv_Beta(PowhegBeta):
         """
         super(bblvlv_Beta, self).__init__(base_directory, "b_bbar_4l", **kwargs)
 
+        # make sure some warnings end up being displayed as such
+        self.warning_output = ["inverseMappingFSR: warning", "inverseMappingISR: warning"]
+
         # Add parameter validation functions
         self.validation_functions.append("validate_decays")
 
