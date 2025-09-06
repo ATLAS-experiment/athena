@@ -2853,6 +2853,9 @@ def setupMenu():
         ChainProp(name='HLT_g24_tight_icaloloose_j50c_j30c_j24c_03dRAB30_03dRAC30_15dRBC45_50invmBC130_pf_ftf_L1eEM26M', groups=PrimaryPhIGroup+EgammaJetGroup, l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
         ChainProp(name='HLT_g20_tight_icaloloose_j40_j35a_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300', groups=PrimaryPhIGroup+EgammaJetGroup+Topo2Group, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
         ChainProp(name='HLT_g20_tight_icaloloose_j40_j35a_j25a_j25_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300', groups=PrimaryPhIGroup+EgammaJetGroup+Topo2Group, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
+        ChainProp(name='HLT_g24_tight_j50c_j30c_j24c_03dRAB30_03dRAC30_15dRBC45_50invmBC130_pf_ftf_L1eEM26M', groups=SupportPhIGroup+EgammaJetGroup, l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
+        ChainProp(name='HLT_g20_tight_j40_j35a_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300', groups=SupportPhIGroup+EgammaJetGroup+Topo2Group, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
+        ChainProp(name='HLT_g20_tight_j40_j35a_j25a_j25_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300', groups=SupportPhIGroup+EgammaJetGroup+Topo2Group, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
 
         # fastGN2 + GN2
         # Photon+VBF
