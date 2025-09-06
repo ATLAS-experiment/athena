@@ -426,7 +426,7 @@ namespace xAOD {
                static constexpr Bool_t SILENT = kTRUE;
                ::TClass* cl = ::TClass::GetClass(className, LOAD, SILENT);
                if ((cl != nullptr) && cl->InheritsFrom(::TTree::Class())){
-                  lOtherMetaTreeNames.insert(keyName);
+                  lOtherMetaTreeNames.insert(std::move(keyName));
                }
             }
          }
@@ -1575,7 +1575,7 @@ namespace xAOD {
                ::Info("xAOD::REvent::getNames",
                      "Matched %s to key %s",
                      targetClassName.c_str(), key.c_str());
-               keys.insert(key);
+               keys.insert(std::move(key));
             }
          }
       }
@@ -3124,7 +3124,7 @@ namespace xAOD {
       std::string auxKey;
       if( isAuxStore( *mgr.holder() ) ) {
          auxMgr = &mgr;
-         auxKey = key;
+         auxKey = std::move(key);
       } else {
          auto itr = objects.find( key + "Aux." );
          if( itr == objects.end() ) {
@@ -3302,7 +3302,7 @@ namespace xAOD {
       std::string auxKey;
       if( isAuxStore( *mgr.holder() ) ) {
          auxMgr = &mgr;
-         auxKey = key;
+         auxKey = std::move(key);
       } else {
          auto itr = objects.find( key + "Aux." );
          if( itr == objects.end() ) {

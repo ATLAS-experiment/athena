@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -46,7 +46,7 @@ public:
          return StatusCode::FAILURE;
       }
       // Loop over the objects of the file:
-      for( auto ef_itr : *ef ) {
+      for( const auto& ef_itr : *ef ) {
          // A helper object:
          const xAOD::EventFormatElement& efe = ef_itr.second;
          // Skip auxiliary objects:
