@@ -6,7 +6,7 @@
 #define TRT_GEOMODEL_TRTDETECTORTOOL_H
 
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
+#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 
 #include "GeoModelUtilities/GeoModelTool.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
@@ -52,7 +52,10 @@ private:
 
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};
   ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc"};
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool{"TRT_StrawStatusSummaryTool", this}; // added for Argon
+
+  Gaudi::Property<bool> m_dumpStrawStatus{this, "DumpStrawStatus", false};
+  Gaudi::Property<std::string> m_strawStatusFile{this, "StrawStatusFile", ""};
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool{this, "SummaryTool", ""}; // added for Argon
 
   const InDetDD::TRT_DetectorManager* m_manager{nullptr};
   InDetDD::AthenaComps m_athenaComps{"TRT_GeoModel"};

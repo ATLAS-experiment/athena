@@ -12,14 +12,15 @@
 #define TRT_GEOMODEL_TRTDETECTORFACTORY_LITE_H
 
 #include "TRTParameterInterface.h"
+#include "TRTStrawStatusAccessor.h"
 
 #include "InDetGeoModelUtils/InDetDetectorFactoryBase.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h" //covariant return type
 
+#include <memory>
 
 class GeoPhysVol;
 class GeoFullPhysVol;
-class ITRT_StrawStatusSummaryTool;
 
 namespace GeoModelIO {
   class ReadGeoModel;
@@ -33,7 +34,7 @@ class TRTDetectorFactory_Lite : public InDetDD::DetectorFactoryBase  {
   // Constructor:
   TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqliteReader,
 			  InDetDD::AthenaComps * athenaComps,
-			  const ITRT_StrawStatusSummaryTool * sumTool,
+			  std::unique_ptr<const TRTStrawStatusAccessor> statusAccessor,
 			  bool useOldActiveGasMixture,
 			  bool DC2CompatibleBarrelCoordinates,
 			  bool alignable,
@@ -68,11 +69,11 @@ private:
   GeoModelIO::ReadGeoModel                      *m_sqliteReader{};
   InDetDD::TRT_DetectorManager                  *m_detectorManager = nullptr; // ownership handed to calleer.
   std::unique_ptr<TRTParameterInterface>        m_data;
+  std::unique_ptr<const TRTStrawStatusAccessor> m_statusAccessor;
 
   bool m_useOldActiveGasMixture{};
   bool m_DC2CompatibleBarrelCoordinates{};
   bool m_alignable{};
-  const ITRT_StrawStatusSummaryTool* m_sumTool{}; // added for Argon
   bool m_strawsvcavailable{};
   bool m_useDynamicAlignFolders{};
 
