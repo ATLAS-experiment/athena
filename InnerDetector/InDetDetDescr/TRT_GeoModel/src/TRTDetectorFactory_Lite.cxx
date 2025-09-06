@@ -4,11 +4,13 @@
 
 #include "TRTDetectorFactory_Lite.h"
 #include "TRT_DetDescrDB_ParameterInterface.h"
+
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelDescriptor.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapDescriptor.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
+#include "TRT_ConditionsData/StrawStatus.h"
 #include "InDetReadoutGeometry/Version.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 #include "InDetIdentifier/TRT_ID.h"
@@ -31,7 +33,6 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
 
 #include <vector>
 #include <cmath>
@@ -45,17 +46,17 @@ using namespace GeoXF;
 //
 TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqliteReader, 
 						 InDetDD::AthenaComps * athenaComps,
-						 const ITRT_StrawStatusSummaryTool* sumTool, // added for Argon. Will be used in later revisions
+						 std::unique_ptr<const TRTStrawStatusAccessor> statusAccessor,
 						 bool useOldActiveGasMixture,
 						 bool DC2CompatibleBarrelCoordinates,
 						 bool alignable,
 						 bool useDynamicAlignmentFolders)
   : InDetDD::DetectorFactoryBase(athenaComps), 
     m_sqliteReader (sqliteReader),
+    m_statusAccessor(std::move(statusAccessor)),
     m_useOldActiveGasMixture(useOldActiveGasMixture),
     m_DC2CompatibleBarrelCoordinates(DC2CompatibleBarrelCoordinates),
     m_alignable(alignable),
-    m_sumTool(sumTool),
     m_useDynamicAlignFolders(useDynamicAlignmentFolders)
 { 
 }
@@ -86,7 +87,6 @@ const InDetDD::TRT_DetectorManager * TRTDetectorFactory_Lite::getDetectorManager
 //
 void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 {
-
   // Here we build materials by hand.  This awaits updates to GeoModelIO which would allow to retreive materials from
   // the database. At that point we can remove the manual creation of materials.
   
@@ -184,10 +184,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
   }
 
   //---------------------- Check if the folder TRT/Cond/StatusHT is in place ------------------------//
-  m_strawsvcavailable =
-    detStore()->contains<TRTCond::StrawStatusMultChanContainer>("/TRT/Cond/StatusHT")
-    &&
-    m_sumTool->getStrawStatusHTContainer() != nullptr;
+  m_strawsvcavailable = true;
 
   //---------------------- Initialize ID Helper ------------------------------------//
   const TRT_ID *idHelper = nullptr;
@@ -571,7 +568,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 
 	Identifier TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
 	int strawStatusHT = TRTCond::StrawStatus::Good;
-	if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+	if (m_strawsvcavailable) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 	refreshGasBarrel(strawStatusHT,pShell);
 	
 	//-------------------------------------------------------------------//
@@ -807,7 +804,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+		if (m_strawsvcavailable) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 		
 		
 		childPlane = mapFPV["TRTWheelA-StrawPlane-"
@@ -936,7 +933,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+		if (m_strawsvcavailable) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 		
 		childPlane = mapFPV["TRTWheelB-StrawPlane-"
 				    +std::to_string(iiSide)+"-"
