@@ -124,6 +124,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "BTagging_AntiKt4EMTopoJFVtx",
             "BTagging_AntiKt4EMTopoSecVtx",
             "AntiKt4TruthJets",
+            "ITkPixelMeasurements",
+            "ITkStripMeasurements"
             ]
 
 
