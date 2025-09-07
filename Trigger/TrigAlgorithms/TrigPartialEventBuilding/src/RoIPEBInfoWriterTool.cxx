@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RoIPEBInfoWriterTool.h"
@@ -30,7 +30,7 @@ StatusCode RoIPEBInfoWriterTool::initialize() {
 
 // =============================================================================
 
-PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const PEBInfoWriterToolBase::Input& input) const {
+PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const EventContext& ctx, const PEBInfoWriterToolBase::Input& input) const {
   // Create output PEBInfo starting from the static extra PEBInfo
   PEBInfo pebi = m_extraPebInfo;
 
@@ -68,7 +68,7 @@ PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const PEBInfo
 
   for (const auto& tool : m_regionSelectorTools) {
     std::vector<uint32_t> detROBs;
-    tool->lookup(Gaudi::Hive::currentContext())->ROBIDList(roiForPEB, detROBs);
+    tool->lookup(ctx)->ROBIDList(roiForPEB, detROBs);
     pebi.robs.insert(detROBs.begin(),detROBs.end());
   }
 

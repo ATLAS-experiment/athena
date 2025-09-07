@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StaticPEBInfoWriterTool.h"
@@ -24,7 +24,7 @@ StatusCode StaticPEBInfoWriterTool::initialize() {
 
 // =============================================================================
 
-PEBInfoWriterToolBase::PEBInfo StaticPEBInfoWriterTool::createPEBInfo(const PEBInfoWriterToolBase::Input& /*input*/) const {
+PEBInfoWriterToolBase::PEBInfo StaticPEBInfoWriterTool::createPEBInfo(const EventContext& /*ctx*/, const PEBInfoWriterToolBase::Input& /*input*/) const {
   ATH_MSG_DEBUG("Returning static PEBInfo configured in initialize()");
   return m_pebi;
 }
