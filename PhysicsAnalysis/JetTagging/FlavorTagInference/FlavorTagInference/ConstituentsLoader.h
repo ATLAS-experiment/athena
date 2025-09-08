@@ -31,7 +31,8 @@ namespace FlavorTagInference {
         ABS_D0_SIGNIFICANCE_DESCENDING,
         D0_SIGNIFICANCE_DESCENDING,
         PT_DESCENDING,
-        ABS_D0_DESCENDING
+        ABS_D0_DESCENDING,
+        UNDEFINED
     };
     enum class ConstituentsSelection {
         ALL,
@@ -47,7 +48,8 @@ namespace FlavorTagInference {
         FLOW_ELEMENT,
         TRACK,
         HIT,
-        ELECTRON
+        ELECTRON,
+        UNKNOWN
     };
 
     struct InputVariableConfig {
@@ -59,8 +61,8 @@ namespace FlavorTagInference {
     struct ConstituentsInputConfig {
         std::string name;
         std::string output_name;
-        ConstituentsType type;
-        ConstituentsSortOrder order;
+        ConstituentsType type{ConstituentsType::UNKNOWN};
+        ConstituentsSortOrder order{ConstituentsSortOrder::UNDEFINED};
         ConstituentsSelection selection = ConstituentsSelection::ALL;
         std::vector<InputVariableConfig> inputs;
     };
