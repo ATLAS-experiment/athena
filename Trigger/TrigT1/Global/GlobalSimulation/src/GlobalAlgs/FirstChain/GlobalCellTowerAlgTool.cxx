@@ -4,7 +4,7 @@
 
 #include "GlobalCellTowerAlgTool.h"
 #include "GlobalLArCell.h"
-#include "GlobalLArCellContainer.h"
+
 
 namespace GlobalSim {
   
@@ -38,8 +38,8 @@ namespace GlobalSim {
     static constexpr int nEta{98};
     static constexpr int nPhi{64};
 
-    std::array<std::array<float, nPhi>, nEta> towerEnergies{};
-
+    auto pTowerEnergies = std::make_unique<std::array<std::array<float, nPhi>, nEta>>();
+    auto & towerEnergies = *pTowerEnergies;
     for (const auto& cell : gblLArCells) {
 
         // Compute eta and phi indices (binning in steps of 0.1)
