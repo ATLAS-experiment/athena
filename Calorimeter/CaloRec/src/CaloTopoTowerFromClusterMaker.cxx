@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
@@ -316,7 +316,7 @@ CaloTopoTowerFromClusterMaker::uint_t CaloTopoTowerFromClusterMaker::buildEMTopo
 	if ( cidx < cellTags.size() ) {
 	  if ( !cellTags.at(cidx) ) { cellTags[cidx] = this->addCellToProtoCluster(towerGeo,*fCell,pProtoCont); }  
 	} else {
-	  ATH_MSG_ERROR( CaloRec::Helpers::fmtMsg("Invalid cell hash index %6zu >= maximum index %6zu for cell in %s at (eta,phi) = (%6.3,%f6.3)",
+	  ATH_MSG_ERROR( CaloRec::Helpers::fmtMsg("Invalid cell hash index %6zu >= maximum index %6zu for cell in %s at (eta,phi) = (%6.3f,%6.3f)",
 						  cidx,cellTags.size(),CaloSampling::getSamplingName((*fCell)->caloDDE()->getSampling()).c_str(),(*fCell)->eta(),(*fCell)->phi()) );
 	  return m_errorValueUINT;
 	}
@@ -485,7 +485,7 @@ int CaloTopoTowerFromClusterMaker::cleanupCells(const CaloTowerGeometry* towerGe
     auto nc(clk->getCellContainer()->size());
     const CaloCell* aCell = fcell.index() < nc ? clk->getCellContainer()->at(fcell.index()) : (const CaloCell*)nullptr;
     if ( pCell == nullptr ) {
-      ATH_MSG_WARNING( CaloRec::Helpers::fmtMsg("CaloCellContainer[%6zu/%6zu] - tower %5zu at (%6.3f,%6.3f) - cell pointer invalid (%p/%p) [removed %3i of %3zu cells]",
+      ATH_MSG_WARNING( CaloRec::Helpers::fmtMsg("CaloCellContainer[%6u/%6zu] - tower %5zu at (%6.3f,%6.3f) - cell pointer invalid (%p/%p) [removed %3i of %3zu cells]",
 						fcell.index(),nc-1,nclus,towerGeo->towerEta(nclus),towerGeo->towerPhi(nclus),
 						(void*)pCell,(void*)aCell,++nrc,clk->size()) );
       fcell = clk->removeCell(fcell);
@@ -558,7 +558,9 @@ bool CaloTopoTowerFromClusterMaker::checkCellIndices(const CaloTowerGeometry* to
   /////////////////////////
 
   // prepare tag store
-  size_t ifc(0); std::bitset<200000> chkflg; chkflg.reset();
+  size_t ifc(0);
+  auto chkflg = std::make_unique<std::bitset<200000> >();
+  chkflg->reset();
   for ( size_t i(0); i<pCellCont->size(); ++i ) { 
     if ( pCellCont->at(i) != nullptr ) { 
       size_t chash((size_t)pCellCont->at(i)->caloDDE()->calo_hash());
@@ -583,7 +585,7 @@ bool CaloTopoTowerFromClusterMaker::checkCellIndices(const CaloTowerGeometry* to
 	logstream << CaloRec::Helpers::fmtMsg("[%06zu] Cell %6zu [%12.12s %5.3f %5.3f] non-matching id %6zu [%12.12s %5.3f %5.3f] findCell() index %6zu",
 					      ++ifc,i,cni.c_str(),etai,phii,chash,cnc.c_str(),etac,phic,cidx) << std::endl; 
       }
-      chkflg.set(chash);
+      chkflg->set(chash);
     }
   }
   logstream << "<end list>----------------------------------------------------------------" << std::endl;
@@ -599,7 +601,7 @@ bool CaloTopoTowerFromClusterMaker::checkCellIndices(const CaloTowerGeometry* to
   }
   // list of non-matched hashes
   std::vector<size_t> chl; chl.reserve(towerGeo->totalNumberCells());
-  for ( size_t i(0); i<chl.size(); ++i ) { if ( !chkflg.test(i) ) { chl.push_back(i); } }
+  for ( size_t i(0); i<chl.size(); ++i ) { if ( !chkflg->test(i) ) { chl.push_back(i); } }
   if ( !chl.empty() ) { 
     for ( auto h : chl ) { ATH_MSG_DEBUG( CaloRec::Helpers::fmtMsg("Cell hash %6zu not in CaloCellContainer",h) ); }
   }

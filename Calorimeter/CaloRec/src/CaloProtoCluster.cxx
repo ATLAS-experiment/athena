@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloProtoCluster.h"
@@ -51,30 +51,21 @@ void CaloProtoCluster::getKine() {
 
     const CaloCell* cell=*it;
     double cellEta=cell->eta();
-    //double cellSinTh=cell->sinTh();
     double cellE=cell->e();
     double cellW=it.weight();
     double absEW=cellW*std::fabs(cellE);
-    
-
 
     m_e+=cellE*cellW;
     absEnergySum+=absEW;
     etaSum += absEW * cellEta;
-    //sinThSum+= absEW * cellSinTh;
-
-
   }
-  double eta=etaSum/absEnergySum;
-  //double sinTh=sinThSum/absEnergySum;
 
-  //Check difference (numerical precision)
-  //std::cout << "eta=" << eta << ", sinTh=" << sinTh << ", 1/std::cosh(std::fabs(eta))=" << 1/std::cosh(std::fabs(eta))
-  //	    << ", diff=" << sinTh- 1/std::cosh(std::fabs(eta)) <<  std::endl; 
+  if (absEnergySum != 0) {
+    double eta=etaSum/absEnergySum;
 
-  double sinTh = 1.0 / std::cosh( eta );
-  //m_et=m_e/std::cosh(std::fabs(eta));
-  m_et=m_e*sinTh;
-  m_haveKine=true;
+    double sinTh = 1.0 / std::cosh( eta );
+    m_et=m_e*sinTh;
+    m_haveKine=true;
+  }
 }
 
