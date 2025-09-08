@@ -600,10 +600,10 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
     
 
     // Fill the data structure with results
-    data.hasClusterVec = {hasHitInLayer[0], hasHitInLayer[1], hasHitInLayer[2], hasHitInLayer[3]};
-    data.chi2Vec = {chi2PerLayer[0], chi2PerLayer[1], chi2PerLayer[2], chi2PerLayer[3]};
-    data.timeVec = {timePerLayer[0], timePerLayer[1], timePerLayer[2], timePerLayer[3]};
-    data.rawTimeVec = {rawTimePerLayer[0], rawTimePerLayer[1], rawTimePerLayer[2], rawTimePerLayer[3]};
+    data.hasClusterVec = std::move(hasHitInLayer);
+    data.chi2Vec    = std::move(chi2PerLayer);
+    data.timeVec    = std::move(timePerLayer);
+    data.rawTimeVec = std::move(rawTimePerLayer);
     data.extrapX = extrapX;
     data.extrapY = extrapY;
     data.extrapZ = extrapZ;

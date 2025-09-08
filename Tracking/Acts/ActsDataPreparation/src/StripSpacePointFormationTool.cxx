@@ -479,10 +479,10 @@ namespace ActsTrk {
 
         // evaluation of the local covariance
         // Lines taken from SCT_SpacePoint::setupLocalCovarianceSCT()
-        float deltaY = 0.0004; // roughly pitch of SCT (80 mu) / sqrt(12)
-        float covTerm = 1600.*deltaY;
+        constexpr float deltaY = 0.0004; // roughly pitch of SCT (80 mu) / sqrt(12)
+        constexpr float covTerm = 1600.*deltaY;
 
-        Eigen::Matrix<float, 2, 1> variance(0.1, 8.*covTerm);
+        Eigen::Matrix<float, 2, 1> variance(0.1f, 8.f*covTerm);
         // Swap r/z covariance terms for endcap clusters
         if ( isEndcap )
             std::swap( variance(0, 0), variance(1, 0) );

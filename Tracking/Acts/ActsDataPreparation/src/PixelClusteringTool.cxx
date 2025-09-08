@@ -202,8 +202,8 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   
   Eigen::Matrix<float,2,1> localPosition(locpos.x(), locpos.y());
   Eigen::Matrix<float,2,2> localCovariance = Eigen::Matrix<float,2,2>::Zero();
-  localCovariance(0, 0) = width0 * width0 / 12.0; 
-  localCovariance(1, 1) = width1 * width1 / 12.0;
+  localCovariance(0, 0) = width0 * width0 / 12.0f; 
+  localCovariance(1, 1) = width1 * width1 / 12.0f;
   
   xaodcluster.setMeasurement<2>(moduleHash, localPosition, localCovariance);
   xaodcluster.setIdentifier( cluster.ids.front() );
