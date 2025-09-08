@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
-// File and Version Information:
-// $Id: CaloNeighbours.cxx,v 1.2 2006-04-28 12:08:07 menke Exp $
 //
 // Description: see CaloNeighbours.h
 // 
@@ -225,10 +223,10 @@ int CaloNeighbourRegion::setNeighbours(ExpandedIdentifier& id1,
 	theTargetHashIDs.push_back(myTargetHash);
       }
       if ( id1[SIDE]*side > 0 ) {
-	neighbourMapPlus[myHash] = theTargetHashIDs;
+	neighbourMapPlus[myHash] = std::move(theTargetHashIDs);
       }
       else {
-	neighbourMapMinus[myHash] = theTargetHashIDs;
+	neighbourMapMinus[myHash] = std::move(theTargetHashIDs);
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /build/atlas/cvs/atlas/offline/Calorimeter/CaloIdentifier/test/test_lar_id.cxx,v 1.25 2007-02-19 15:56:25 fledroit Exp $ 
@@ -1769,7 +1769,7 @@ static void check_lar_neighbour(IdDictMgr& idd)
     IdentifierHash hash_min3 = 999999 ;
     IdentifierHash hash_max3 = 0 ;
     for (unsigned int iCell = 0 ; iCell < fcal_id.channel_hash_max(); ++iCell){
-      /*Identifier cellId =*/ fcal_id.channel_id(iCell);
+      [[maybe_unused]] Identifier cellId = fcal_id.channel_id(iCell);
 
       fcal_id.get_neighbours(iCell, LArNeighbours::all3D, neighbourList3);
 
