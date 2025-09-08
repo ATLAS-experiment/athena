@@ -172,7 +172,8 @@ StatusCode MuSAVtxFitter::fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>
             sumP4_electron += p4wrtSV_electron;
             sumP4_selected += p4wrtSV_muon;
 
-            xAOD::TrackParticle* containerTrack = MuSAExtrapolatedTracksContainer->at(i);
+            size_t trackIndex = MuSAVertex->trackParticleLinks()[i].index();
+            xAOD::TrackParticle* containerTrack = MuSAExtrapolatedTracksContainer->at(trackIndex);
 
             std::unique_ptr<Trk::Perigee> sv_perigee = m_trackToVertexTool->perigeeAtVertex(ctx, *containerTrack, workVertex.pos);
             if (!sv_perigee) {
