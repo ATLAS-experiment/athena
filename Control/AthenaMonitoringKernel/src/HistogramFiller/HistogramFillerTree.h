@@ -27,15 +27,19 @@ namespace Monitored {
     }
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars ) const override {
-      // handling of the cutmask      
-      auto cutMaskValuePair = getCutMaskFunc(vars.cut);
-      if (cutMaskValuePair.first == 0) { return 0; }
-      if (ATH_UNLIKELY(cutMaskValuePair.first > 1)) {
-        MsgStream log(Athena::getMessageSvc(), "HistogramFillerTree");
-        log << MSG::WARNING << "HistogramFillerTree (" << m_histDef->alias 
-                            << ") does not support more than a single entry being filled at a time\n"
-                            << "so a cut mask with > 1 entry doesn't make sense. Using first entry only." << endmsg;
-        if (! cutMaskValuePair.second(0)) { return 0; }
+
+      if (vars.cut) {
+        const size_t maskSize = vars.cut->size();
+        // Abort if no cut entries or first (and only) entry is false
+        if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
+
+        if (ATH_UNLIKELY(maskSize > 1)) {
+          MsgStream log(Athena::getMessageSvc(), "HistogramFillerTree");
+          log << MSG::WARNING << "HistogramFillerTree (" << m_histDef->alias
+              << ") does not support more than a single entry being filled at a time\n"
+              << "so a cut mask with > 1 entry doesn't make sense. Using first entry only." << endmsg;
+          if (!vars.cut->get(0)) { return 0; }
+        }
       }
 
       if (ATH_UNLIKELY(vars.size() != m_branchDefs.size())) {

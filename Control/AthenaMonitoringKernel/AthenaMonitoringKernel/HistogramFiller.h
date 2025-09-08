@@ -152,25 +152,6 @@ namespace Monitored {
       return static_cast<H*>(m_histogramProvider->histogram());
     }
 
-    // convenience function to provide a function that interprets the cutmask
-    std::pair<size_t, std::function<bool(size_t)>> getCutMaskFunc(const Monitored::IMonitoredVariable* mask ) const {
-      std::function<bool(size_t)> cutMaskValue = [] (size_t){ return true; }; // default is true
-      size_t maskSize = 1;
-      if ( mask != nullptr ) {
-        maskSize = mask->size();
-        if (maskSize == 1) {
-          if (!mask->get(0)) {
-            // globally fails cut; zero first argument is a signal that one can abort
-            return std::make_pair(0, [](size_t){ return false; });
-            // otherwise, default cutMaskValue is sufficient
-          }
-        } else {
-          return std::make_pair(maskSize, [mask](size_t i){ return static_cast<bool>(mask->get(i)); });
-        }
-      }
-      return std::make_pair(maskSize, cutMaskValue);
-    }
-
     /**
      * Fill histogram from IMonitoredVariable.
      *
