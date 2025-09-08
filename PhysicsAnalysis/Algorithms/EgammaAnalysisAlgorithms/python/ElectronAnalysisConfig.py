@@ -819,8 +819,8 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             # currently recommended versions
             version_Run2 = "2015_2018/rel21.2/Precision_Summer2020_v1"
             map_Run2 = f"{version_Run2}/map4.txt"
-            version_Run3 = "2015_2025/rel22.2/2025_Precision2023_Recommendation"
-            map_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt"
+            version_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4"
+            map_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt"
 
             version = version_Run2 if config.geometry() is LHCPeriod.Run2 else version_Run3
             # Dictionary from TrigGlobalEfficiencyCorrection/MapKeys.cfg

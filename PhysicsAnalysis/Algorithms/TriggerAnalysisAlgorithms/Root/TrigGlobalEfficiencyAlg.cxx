@@ -94,7 +94,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   std::map<std::string,std::string> electronLegsPerKey, photonLegsPerKey;
   if (!m_doMatchingOnly) {
     if (m_isRun3Geo) {
-      ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2025/rel22.2/2025_Precision2023_Recommendation", electronLegsPerKey));
+      ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4", electronLegsPerKey));
     }
     else {
       ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2018/rel21.2/Precision_Summer2020_v1", electronLegsPerKey));
