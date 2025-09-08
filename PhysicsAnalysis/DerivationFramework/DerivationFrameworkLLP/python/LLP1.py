@@ -526,6 +526,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     acc.addEventAlgo(LLP1EventCleanAlg, 'EventCleanSeq')
 
 
+
     from DerivationFrameworkLLP.LLPToolsConfig import AugmentationToolLeadingJetsCfg
     augmentationToolLeadingJets = acc.getPrimaryAndMerge(AugmentationToolLeadingJetsCfg(flags))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, AugmentationTools = [augmentationToolLeadingJets]))
@@ -974,6 +975,8 @@ def LLP1Cfg(flags):
         StaticContent += ["xAOD::VertexAuxContainer#JPsiMuSAVerticesAux."]
         StaticContent += ["xAOD::VertexContainer#JPsiVertices"]
         StaticContent += ["xAOD::VertexAuxContainer#JPsiVerticesAux."]
+        StaticContent += ["xAOD::TrackParticleContainer#JPsiVerticesTracks"]
+        StaticContent += ["xAOD::TrackParticleAuxContainer#JPsiVerticesTracksAux."]
         StaticContent += ["xAOD::TrackParticleContainer#JPsiMuSAExtrapolatedTrackParticles"]
         StaticContent += ["xAOD::TrackParticleAuxContainer#JPsiMuSAExtrapolatedTrackParticlesAux."]
         StaticContent += ["xAOD::VertexContainer#ValidationMuSAVertices"]
