@@ -10374,6 +10374,36 @@ HLT_g20_tight_j35_0eta290_nnJvtv1_bgn277_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_j
     2: 2
     3: 1
     4: 3
+HLT_g20_tight_j40_j35a_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 1
+    4: 4
+    5: 14
+HLT_g20_tight_j40_j35a_j25a_j25_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 1
+    4: 1
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 1
+    4: 6
 HLT_g20_tight_probe_L1eEM18M_2mu14_L12MU8F:
   eventCount: 0
   stepCounts:
@@ -10452,6 +10482,22 @@ HLT_g24_tight_icaloloose_j50c_j30c_j24c_03dRAB35_03dRAC35_15dRBC45_50invmBC130_p
     4: 4
     5: 12
     6: 52
+HLT_g24_tight_j50c_j30c_j24c_03dRAB30_03dRAC30_15dRBC45_50invmBC130_pf_ftf_L1eEM26M:
+  eventCount: 1
+  stepCounts:
+    0: 5
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 1
+  stepFeatures:
+    0: 5
+    1: 4
+    2: 4
+    3: 4
+    4: 12
+    5: 52
 HLT_g250_etcut_L1eEM26M:
   eventCount: 0
 HLT_g250_etcut_L1eEM28M:
