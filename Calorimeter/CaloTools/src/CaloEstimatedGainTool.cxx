@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file CaloTools/src/CaloEstimatedGainTool.cxx
@@ -144,8 +144,12 @@ CaloEstimatedGainTool::estimatedLArGain (const EventContext& ctx,
     float adc=0.;
     
     //Cells (with E scale and weights from LArG3Escale)
-    if (step == Step::CELLS) 
-      adc = energy / (adc2mev (ctx, caloDDE, CaloGain::LARMEDIUMGAIN)) + 1000;
+    if (step == Step::CELLS)  {
+      float fac = adc2mev (ctx, caloDDE, CaloGain::LARMEDIUMGAIN);
+      if (fac != 0) {
+        adc = energy / fac + 1000;
+      }
+    }
     //RawChannels    
     else if (step == Step::RAWCHANNELS)
     {
