@@ -442,7 +442,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
         // neutral pions doesn't reach the material  between emec-hec and emb-tile, so normally the fit is screwed there
         // let's set fit coefficients for neutral pions in this DM area equal to the charged pion 
         if( indexes[CaloLocalHadCoeffHelper::DIM_EMFRAC]==1 && (dmArea->getTitle() == "ENG_CALIB_DEAD_HEC0" || dmArea->getTitle() == "ENG_CALIB_DEAD_TILE0" ) ) {
-          std::vector<int > tmp = indexes;
+          std::vector<int > tmp = std::move(indexes);
           tmp[CaloLocalHadCoeffHelper::DIM_EMFRAC]=0;
           int iBin = m_HadDMCoeff->getBin( n_area, tmp);
           const CaloLocalHadCoeff::LocalHadCoeff *had_pars = new_data->getCoeff(iBin);

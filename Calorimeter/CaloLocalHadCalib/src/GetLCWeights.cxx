@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -453,7 +453,7 @@ StatusCode GetLCWeights::execute()
   // the weights get a weight itself proportinal to the calib hit energy 
   // sum of the cluster over the total calib hit energy
 
-  if ( eCalibTot > 0 ) {
+  if ( eCalibTot > 0 && nClusECalibGt0 > 0 ) {
     const double inv_eCalibTot = 1. / eCalibTot;
     const double inv_nClusECalibGt0 = 1. / nClusECalibGt0;
     for (unsigned int j=0;j<cc->size();j++) {
