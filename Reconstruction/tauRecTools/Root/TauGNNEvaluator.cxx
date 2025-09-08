@@ -91,7 +91,7 @@ std::unique_ptr<TauGNN> TauGNNEvaluator::load_network(const std::string& network
   ATH_MSG_INFO("Using network config: " << pr_network_file);
   
   // Load the weights and create the network
-  std::unique_ptr<TauGNN> net = std::make_unique<TauGNN>(pr_network_file, config);
+  std::unique_ptr<TauGNN> net = std::make_unique<TauGNN>(pr_network_file, config, m_useTRT);
   if(!net) ATH_MSG_ERROR("No network configured.");
 
   return net;

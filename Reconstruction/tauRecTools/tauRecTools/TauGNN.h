@@ -45,7 +45,7 @@ public:
     };
     std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel;
 public:
-    TauGNN(const std::string &nnFile, const Config &config);
+    TauGNN(const std::string &nnFile, const Config &config, bool useTRT);
     ~TauGNN();
 
     // Output the SaltModel tuple 
@@ -95,6 +95,8 @@ private:
 
     // Variable calculator to calculate input variables on the fly
     std::unique_ptr<TauGNNUtils::GNNVarCalc> m_var_calc;
+    bool m_useTRT = true;
+
     std::vector<float> flatten(const std::vector<std::vector<float>>& mat) const {
         std::vector<float> flat;
         for (size_t col = 0; col < mat[0].size(); col++){

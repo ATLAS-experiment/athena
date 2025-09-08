@@ -736,6 +736,7 @@ def TauGNNEvaluatorCfg(flags, version=0, applyLooseTrackSel=False, applyTightTra
     TauGNNEvaluator = CompFactory.getComp("TauGNNEvaluator")
     GNNConf = flags.Tau.TauGNNConfig[version]
     myTauGNNEvaluator = TauGNNEvaluator(name = _name,
+                                              useTRT = flags.Detector.EnableTRT,
                                               NetworkFileInclusive = GNNConf,
                                               OutputVarname = flags.Tau.GNTauScoreName[version],
                                               OutputPTau = "GNTauProbTau",
@@ -785,6 +786,7 @@ def TauEleRNNEvaluatorCfg(flags, applyLooseTrackSel=False):
     TauJetRNNEvaluator = CompFactory.getComp("TauJetRNNEvaluator")
     RNNConf = flags.Tau.TauEleRNNConfig    
     myTauEleRNNEvaluator = TauJetRNNEvaluator(name = _name,
+                                              useTRT = flags.Detector.EnableTRT,
                                               NetworkFile1P = RNNConf[0],
                                               NetworkFile3P = RNNConf[1],
                                               OutputVarname = "RNNEleScore",

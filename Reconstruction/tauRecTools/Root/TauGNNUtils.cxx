@@ -11,7 +11,16 @@
 
 namespace TauGNNUtils {
 
-GNNVarCalc::GNNVarCalc() : asg::AsgMessaging("TauGNNUtils::GNNVarCalc") {}
+GNNVarCalc::GNNVarCalc(bool useTRT) :
+    asg::AsgMessaging("TauGNNUtils::GNNVarCalc") {
+    initialize_map(useTRT);
+}
+
+void GNNVarCalc::initialize_map(bool useTRT) {
+    std::call_once(m_init_flag, [useTRT]() {
+        if(!useTRT) m_track_map["eProbabilityHT"] = Variables::Track::eProbabilityHT_noTRT;
+    });
+}
 
 float GNNVarCalc::compute(const std::string &name, const xAOD::TauJet &tau) const {
     // Retrieve calculator function
@@ -462,6 +471,12 @@ bool eProbabilityHT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, fl
     const auto success = track.track()->summaryValue(eProbabilityHT, xAOD::eProbabilityHT);
     out = eProbabilityHT;
     return success;
+}
+
+bool eProbabilityHT_noTRT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &/*track*/, float &out) {
+    // Dummy eProbHT = 1.
+    out = 1.;
+    return true;
 }
 
 bool eProbabilityNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, float &out) {  
