@@ -191,7 +191,7 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
     if ( fillerCardinality == 1 ) { // simplest case, optimising this to be super fast
       for ( auto& var: monitoredVariables ) {
         if ( var.get().name().compare( filler->histogramVariablesNames()[0] ) == 0 )  {
-          tl_vars.var[0] = &var.get();
+          tl_vars.set(0, &var.get());
           {
             auto guard{filler->getLock()};
             filler->fill( tl_vars );

@@ -31,10 +31,10 @@ namespace Monitored {
         const size_t maskSize = vars.cut->size();
         // Abort if no cut entries or first (and only) entry is false
         if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
-        if (ATH_UNLIKELY(maskSize > 1 && maskSize != vars.var[0]->size())) {
+        if (ATH_UNLIKELY(maskSize > 1 && maskSize != vars[0]->size())) {
           MsgStream log(Athena::getMessageSvc(), "HistogramFiller1D");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
-              << maskSize << " " << vars.var[0]->size() << endmsg;
+              << maskSize << " " << vars[0]->size() << endmsg;
         }
       }
 
@@ -44,18 +44,18 @@ namespace Monitored {
       if (vars.weight) {
         auto weightAccessor = [&](size_t i){ return vars.weight->get(i); };
 
-        if (ATH_UNLIKELY(vars.weight->size() != vars.var[0]->size())) {
+        if (ATH_UNLIKELY(vars.weight->size() != vars[0]->size())) {
           MsgStream log(Athena::getMessageSvc(), "HistogramFiller1D");
           log << MSG::ERROR << "Weight does not match the size of plotted variable: "
-              << vars.weight->size() << " " << vars.var[0]->size() << endmsg;
+              << vars.weight->size() << " " << vars[0]->size() << endmsg;
         }
         // Need to fill here while weightVector is still in scope
-        if (not vars.cut) return HistogramFiller::fill<TH1>(weightAccessor, detail::noCut, *vars.var[0]);
-        else              return HistogramFiller::fill<TH1>(weightAccessor, cutMaskAccessor, *vars.var[0]);
+        if (not vars.cut) return HistogramFiller::fill<TH1>(weightAccessor, detail::noCut, *vars[0]);
+        else              return HistogramFiller::fill<TH1>(weightAccessor, cutMaskAccessor, *vars[0]);
       }
 
-      if (not vars.cut) return HistogramFiller::fill<TH1>(detail::noWeight, detail::noCut, *vars.var[0]);
-      else              return HistogramFiller::fill<TH1>(detail::noWeight, cutMaskAccessor, *vars.var[0]);
+      if (not vars.cut) return HistogramFiller::fill<TH1>(detail::noWeight, detail::noCut, *vars[0]);
+      else              return HistogramFiller::fill<TH1>(detail::noWeight, cutMaskAccessor, *vars[0]);
     }
   };
 }

@@ -61,7 +61,7 @@ namespace Monitored {
           ++idx; continue;
         }
         TBranch* branch = static_cast<TBranch*>(branchList->At(idxgood));
-        m_fillerFunctions[idx](branch, *vars.var[idx]);
+        m_fillerFunctions[idx](branch, *vars[idx]);
         ++idx; ++idxgood;
       }
       for (Int_t i = 0; i < branchList->GetEntries(); ++i) {

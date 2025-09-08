@@ -37,9 +37,9 @@ namespace Monitored {
       if (vars.weight) {
         // Weighted fill
         auto weightAccessor = [&](size_t i){ return vars.weight->get(i); };
-        const size_t size0 = vars.var[0]->size();
-        const size_t size1 = vars.var[1]->size();
-        const size_t size2 = vars.var[2]->size();
+        const size_t size0 = vars[0]->size();
+        const size_t size1 = vars[1]->size();
+        const size_t size2 = vars[2]->size();
         const size_t sizeWeight = vars.weight->size();
         if (ATH_UNLIKELY(size0 > 1 && size1 > 1 && size2 > 1 &&
                          sizeWeight > 1 && size0 != sizeWeight)) {
@@ -49,12 +49,12 @@ namespace Monitored {
             return 0;
         }
         // Need to fill here while weightVector is still in scope
-        if (not vars.cut) return HistogramFiller::fill<TProfile2D>(weightAccessor, detail::noCut, *vars.var[0], *vars.var[1], *vars.var[2]);
-        else              return HistogramFiller::fill<TProfile2D>(weightAccessor, cutMaskAccessor, *vars.var[0], *vars.var[1], *vars.var[2]);
+        if (not vars.cut) return HistogramFiller::fill<TProfile2D>(weightAccessor, detail::noCut, *vars[0], *vars[1], *vars[2]);
+        else              return HistogramFiller::fill<TProfile2D>(weightAccessor, cutMaskAccessor, *vars[0], *vars[1], *vars[2]);
       } 
       // Unweighted fill
-      if (not vars.cut) return HistogramFiller::fill<TProfile2D>(detail::noWeight, detail::noCut, *vars.var[0], *vars.var[1], *vars.var[2]);
-      else              return HistogramFiller::fill<TProfile2D>(detail::noWeight, cutMaskAccessor, *vars.var[0], *vars.var[1], *vars.var[2]);
+      if (not vars.cut) return HistogramFiller::fill<TProfile2D>(detail::noWeight, detail::noCut, *vars[0], *vars[1], *vars[2]);
+      else              return HistogramFiller::fill<TProfile2D>(detail::noWeight, cutMaskAccessor, *vars[0], *vars[1], *vars[2]);
     }
   };
 

@@ -72,48 +72,53 @@ namespace Monitored {
     struct VariablesPack {
       VariablesPack() {}
       VariablesPack( const std::initializer_list<const Monitored::IMonitoredVariable*>&  v)
-	:var( v ) {}
+        :m_var( v ) {}
 
       /**
        * @brief number of variables in the pack ( not counting the weight and mask )
        */
       size_t size () const {
-	return var.size() - std::count( var.begin(), var.end(), nullptr );
+        return m_var.size() - std::count( m_var.begin(), m_var.end(), nullptr );
       }
 
       /**
        * @brief removes all monitored variables
        */
       inline void reset() {
-	std::fill( var.begin(), var.end(), nullptr );
-	cut = nullptr;
-	weight = nullptr;
+        std::fill( m_var.begin(), m_var.end(), nullptr );
+        cut = nullptr;
+        weight = nullptr;
       }
 
       /**
-       * @brief sets monitored variable at the index (may need to reszie vector of variables)
+       * @brief sets monitored variable at the index (may need to resize vector of variables)
        */
       inline void set( unsigned index, const IMonitoredVariable* ptr ) {
-	if ( ATH_UNLIKELY( var.size() <= index ) ) {
-	  var.resize(index+1);
-	}
-	var[index] = ptr;
+        if ( ATH_UNLIKELY( m_var.size() <= index ) ) {
+          m_var.resize(index+1);
+        }
+        m_var[index] = ptr;
       }
 
       /**
        * @brief names of all variables stored
        */
       std::vector<std::string> names() const {
-	std::vector<std::string> r;
-	for ( const auto* v: var )
-	  if ( v != nullptr )
-	    r.push_back( v->name() );
-	return r;
+        std::vector<std::string> r;
+        for ( const auto* v: m_var )
+          if ( v != nullptr )
+            r.push_back( v->name() );
+        return r;
       }
 
-      std::vector<const Monitored::IMonitoredVariable*> var = { nullptr, nullptr, nullptr, nullptr }; //!< storage for variables, default size of 4, serves all histograming uses
+      const Monitored::IMonitoredVariable& operator[](std::size_t i) { return *m_var[i]; }
+      const Monitored::IMonitoredVariable* operator[](std::size_t i) const { return m_var[i]; }
+
       const Monitored::IMonitoredVariable* weight = nullptr; //!< pointer to weight variable, typically absent
       const Monitored::IMonitoredVariable* cut = nullptr; //!< pointer to cut mask variable, typically absent
+
+    private:
+      std::vector<const Monitored::IMonitoredVariable*> m_var = { nullptr, nullptr, nullptr, nullptr }; //!< storage for variables, default size of 4, serves all histograming uses
     };
 
     /**
