@@ -125,14 +125,14 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 |-----------------------------------|------------|------------|
 | Input seeds                       |     148845 |     148845 |
 | No track parameters               |          0 |          0 |
-| Used   seeds                      |     116752 |     116752 |
-| Cannot find track                 |     111770 |     111770 |
+| Used   seeds                      |     116753 |     116753 |
+| Cannot find track                 |     111771 |     111771 |
 | Duplicate seeds                   |       1418 |       1418 |
-| Initial param estimation failed   |      30675 |      30675 |
+| Initial param estimation failed   |      30674 |      30674 |
 | CKF tracks                        |       4982 |       4982 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |        420 |        420 |
-| Stopped tracks reaching max holes |      95435 |      95435 |
+| Stopped tracks reaching max holes |      95436 |      95436 |
 | Seeds with more than one branch   |          0 |          0 |
 | Tracks failing second CKF         |        175 |        175 |
 | Stopped tracks below pT cut       |      16335 |      16335 |
@@ -147,7 +147,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 | duplication / seeds                      | 0.00952669 | 0.00952669 |
 | Rejected refined params / seeds          |          0 |          0 |
 | selected / CKF tracks                    |  0.0843035 |  0.0843035 |
-| selected tracks / used seeds             | 0.00359737 | 0.00359737 |
+| selected tracks / used seeds             | 0.00359734 | 0.00359734 |
 | branched tracks / used seeds             |          0 |          0 |
 | no 2nd CKF / CKF tracks                  |  0.0351265 |  0.0351265 |
 | shared hits / CKF tracks                 |   0.278402 |   0.278402 |
