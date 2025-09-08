@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloEvent/test/CaloConstCellContainer_test.cxx
@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cassert>
+#include <memory>
 
 
 using CellVector = std::vector<const CaloCell *>;
@@ -61,11 +62,11 @@ int main()
   if (!Athena_test::initGaudi("CaloEvent/CaloCellContainer_test.txt", pSvcLoc)) {
     std::cerr << "This test can not be run" << std::endl;
     return 0;
-  }  
+  }
 
-  CaloTester tester;
-  const CaloCell_ID& helper = tester.caloID();
-  CellVector cells = tester.get_const_cells();
+  auto tester = std::make_unique<CaloTester>();
+  const CaloCell_ID& helper = tester->caloID();
+  CellVector cells = tester->get_const_cells();
 
   Athena_test::URNG stlrand;
 

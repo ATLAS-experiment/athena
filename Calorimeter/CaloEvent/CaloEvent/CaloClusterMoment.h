@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTERMOMENT_H
@@ -139,6 +139,12 @@ public:
    * defines the default moment value
    */
   CaloClusterMoment() : m_value(0.) { }
+
+  CaloClusterMoment (const CaloClusterMoment&) = default;
+  CaloClusterMoment (CaloClusterMoment&&) = default;
+
+  CaloClusterMoment& operator= (const CaloClusterMoment&) = default;
+  CaloClusterMoment& operator= (CaloClusterMoment&&) = default;
 
   // Destructors
 
