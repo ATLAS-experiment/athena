@@ -16,7 +16,7 @@
 
 #include "../../IGlobalSimAlgTool.h"
 #include "../Hypothesis/UCL/GenericTob.h"
-
+#include "GlobalLArCellContainer.h"
 #include <bitset>
 #include <string>
 #include <cassert>
@@ -24,8 +24,7 @@
 namespace GlobalSim {
 
   class GlobalLArCell;
-  class GlobalLArCellContainer;
-  class GenericTob;
+  
 
   class GlobalCellTowerAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
