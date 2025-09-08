@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloLumiConditions/src/CaloBCIDCoeffs.cxx
@@ -239,7 +239,7 @@ void CaloBCIDCoeffs::findCellCoeffs (const float* ofcs,
   for (size_t i = 0; i < nsamples_coeff; ++i) {
     for (size_t j = 0; j < nshapes; ++j) {
       // Index of coefficient we're filling.
-      size_t ndx = i - j + (nshapes-1);
+      size_t ndx = (nshapes-1) + i - j;
 
       // Find OFC coefficient.
       float ofc = 0;
