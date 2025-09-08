@@ -26,6 +26,7 @@ outputAOD="AOD.root"
 nEvents="1"
 skipCheck=0
 doClusters="0"
+doSeeds="0"
 skipEvents=0
 
 ## parsing flags
@@ -38,6 +39,7 @@ while [ $# -ge 1 ];do
         -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; doClusters="1" ;;
+        -k  | --doSeeds )       if [ $# -lt 1 ] ; then usage ; fi ; doSeeds="1" ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -81,6 +83,7 @@ else
     --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
     --preExec "flags.Tracking.doPixelDigitalClustering=True;\
+               flags.Tracking.ITkActsValidateF100Pass.storeTrackSeeds=${doSeeds};\
                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \

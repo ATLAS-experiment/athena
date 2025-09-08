@@ -26,6 +26,7 @@ inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTra
 outputAOD="AOD.root"
 nEvents="-1"
 skipCheck=0
+doSeeds="0"
 skipEvents=0
 
 ## parsing flags
@@ -37,6 +38,7 @@ while [ $# -ge 1 ];do
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
+        -k  | --doSeeds )       if [ $# -lt 1 ] ; then usage ; fi ; doSeeds="1" ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -70,7 +72,8 @@ Reco_tf.py --CA \
     --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF150Flags,FPGATrackSimConfTools.FPGATrackSimAnalysisConfig.FPGATrackSimF150FlagCfg' \
     --preExec "flags.Tracking.doPixelDigitalClustering=True;\
-                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
+               flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
+               flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \
