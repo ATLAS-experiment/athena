@@ -30,6 +30,128 @@ using Print=HepMC3::Print;
 using GenHeavyIon=HepMC3::GenHeavyIon;
 using GenEvent=HepMC3::GenEvent;
 
+class ShortEventAttribute : public HepMC3::Attribute {
+public:
+    ShortEventAttribute():HepMC3::Attribute(){}
+    ShortEventAttribute(const HepMC3::GenEvent* e):HepMC3::Attribute(){ from_event(e); }
+
+    bool from_event(const HepMC3::GenEvent* e){
+      NUP=e->particles().size();
+      resize();
+      XWGTUP = e->weights().size() ? e->weights()[0] : 1.0;
+      auto A_signal_process_id=e->attribute<HepMC3::IntAttribute>("signal_process_id");
+      IDPRUP = A_signal_process_id?A_signal_process_id->value() : 0;
+      auto A_event_scale=e->attribute<HepMC3::DoubleAttribute>("event_scale");
+      SCALUP = A_event_scale? A_event_scale->value():0;
+      auto A_alphaQCD=e->attribute<HepMC3::DoubleAttribute>("alphaQCD");
+      AQCDUP = A_alphaQCD? A_alphaQCD->value():0;
+      auto A_alphaQED=e->attribute<HepMC3::DoubleAttribute>("alphaQED");
+      AQEDUP = A_alphaQED? A_alphaQED->value():0;
+
+      for ( int i = 0; i < NUP; ++i ){
+        PUP[i][0] = e->particles().at(i)->momentum().px();
+        PUP[i][1] = e->particles().at(i)->momentum().py();
+        PUP[i][2] = e->particles().at(i)->momentum().pz();
+        PUP[i][3] = e->particles().at(i)->momentum().e();
+        PUP[i][4] = e->particles().at(i)->momentum().m();
+        IDUP[i] = e->particles().at(i)->pdg_id();
+        auto pv = e->particles().at(i)->production_vertex();
+        auto ev = e->particles().at(i)->end_vertex();
+        if (pv && ev ) ISTUP[i] = 2;
+        if (pv && !ev ) ISTUP[i] = 1;
+        if (e->particles().at(i)->status() == 4 || !pv ) ISTUP[i] = -1;
+        auto flow1 = e->particles().at(i)->attribute<HepMC3::IntAttribute>("flow1");
+        auto flow2 = e->particles().at(i)->attribute<HepMC3::IntAttribute>("flow2");
+        ICOLUP[i].first = flow1 ? flow1->value() : 0;
+        ICOLUP[i].second = flow2 ? flow2->value() : 0;
+        int l = 0,h = 0;
+        if (pv) for (auto p: pv->particles_in()) { l= std::min(l,p->id()); h=std::max(h,p->id());}
+        MOTHUP[i].first = h;
+        MOTHUP[i].second = l;
+      }
+      return true;
+   }
+
+    bool from_string(const std::string &att) override {
+      std::istringstream iss(att);
+      iss >> NUP;
+      iss >> IDPRUP; 
+      iss >> XWGTUP;
+      iss >> SCALUP;
+      iss >> AQEDUP;
+      iss >> AQCDUP; 
+      resize();
+      for ( int i = 0; i < NUP; ++i ){
+        iss >>  IDUP[i];
+        iss >>  ISTUP[i];
+        iss >>  MOTHUP[i].first;
+        iss >>  MOTHUP[i].second;
+        iss >>  ICOLUP[i].first;
+        iss >>  ICOLUP[i].second;
+        iss >>  PUP[i][0];
+        iss >>  PUP[i][1];
+        iss >>  PUP[i][2];
+        iss >>  PUP[i][3];
+        iss >> PUP[i][4];
+        iss >>  VTIMUP[i];
+        iss >>  SPINUP[i];
+      }
+        set_is_parsed(true);
+        return true;
+    }
+
+    bool to_string(std::string &fl) const  override {
+      std::ostringstream file;
+      file << " " << std::setw(4) << NUP
+           << " " << std::setw(6) << IDPRUP
+           << " " << std::setw(14) << XWGTUP
+           << " " << std::setw(14) << SCALUP
+           << " " << std::setw(14) << AQEDUP
+           << " " << std::setw(14) << AQCDUP << "\n";
+      for ( int i = 0; i < NUP; ++i )
+        file << " " << std::setw(8) << IDUP[i]
+             << " " << std::setw(2) << ISTUP[i]
+             << " " << std::setw(4) << MOTHUP[i].first
+             << " " << std::setw(4) << MOTHUP[i].second
+             << " " << std::setw(4) << ICOLUP[i].first
+             << " " << std::setw(4) << ICOLUP[i].second
+             << " " << std::setw(14) << PUP[i][0]
+             << " " << std::setw(14) << PUP[i][1]
+             << " " << std::setw(14) << PUP[i][2]
+             << " " << std::setw(14) << PUP[i][3]
+             << " " << std::setw(14) << PUP[i][4]
+             << " " << std::setw(1) << VTIMUP[i]
+             << " " << std::setw(1) << SPINUP[i] << std::endl;
+       fl+=file.str();
+       return true;
+    }
+
+  void resize() {
+    IDUP.resize(NUP);
+    ISTUP.resize(NUP);
+    MOTHUP.resize(NUP);
+    ICOLUP.resize(NUP);
+    PUP.resize(NUP, std::vector<double>(5));
+    VTIMUP.resize(NUP);
+    SPINUP.resize(NUP);
+  }
+
+  int NUP=0;
+  int IDPRUP=0;
+  double XWGTUP=0;
+  double SCALUP=0;
+  double AQEDUP=0;
+  double AQCDUP=0;
+  std::vector<long> IDUP{};
+  std::vector<int> ISTUP{};
+  std::vector< std::pair<int,int> > MOTHUP{};
+  std::vector< std::pair<int,int> > ICOLUP{};
+  std::vector< std::vector<double> > PUP{};
+  std::vector<double> VTIMUP{};
+  std::vector<double> SPINUP{};
+};
+
+
 class GenEventBarcodes : public HepMC3::Attribute
 {
 public:

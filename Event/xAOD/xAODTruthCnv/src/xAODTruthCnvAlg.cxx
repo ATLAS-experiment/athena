@@ -62,27 +62,33 @@ namespace xAODMaker {
             ATH_CHECK( m_meta.initialize (m_metaStore, m_metaName) );
         }
         
-	// initialize handles
-	ATH_CHECK(m_truthLinkContainerKey.initialize());
+        // initialize handles
+        ATH_CHECK(m_truthLinkContainerKey.initialize());
 
-	// only if doing full truth
-	ATH_CHECK(m_aodContainerKey.initialize());
-	ATH_CHECK(m_xaodTruthEventContainerKey.initialize());
-	ATH_CHECK(m_xaodTruthPUEventContainerKey.initialize(m_doAllPileUp || m_doInTimePileUp));
-	ATH_CHECK(m_xaodTruthParticleContainerKey.initialize());
-	ATH_CHECK(m_xaodTruthVertexContainerKey.initialize());
+        // only if doing full truth
+        ATH_CHECK(m_aodContainerKey.initialize());
+        ATH_CHECK(m_xaodTruthEventContainerKey.initialize());
+        ATH_CHECK(m_xaodTruthPUEventContainerKey.initialize(m_doAllPileUp || m_doInTimePileUp));
+        ATH_CHECK(m_xaodTruthParticleContainerKey.initialize());
+        ATH_CHECK(m_xaodTruthVertexContainerKey.initialize());
+        if (!m_lheTruthParticleContainerKey.empty()){
+          ATH_CHECK(m_lheTruthParticleContainerKey.initialize());
+        }
 
-	ATH_CHECK(m_evtInfo.initialize());
+        ATH_CHECK(m_evtInfo.initialize());
 
-	ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
-	ATH_CHECK(incSvc.retrieve());
-	incSvc->addListener( this, "BeginRun", 10);
+        ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
+        ATH_CHECK(incSvc.retrieve());
+        incSvc->addListener( this, "BeginRun", 10);
 
         ATH_MSG_DEBUG("AODContainerName = " << m_aodContainerKey.key() );
         ATH_MSG_DEBUG("xAOD TruthEventContainer name = " << m_xaodTruthEventContainerKey.key() );
         ATH_MSG_DEBUG("xAOD TruthPileupEventContainer name = " << m_xaodTruthPUEventContainerKey.key());
         ATH_MSG_DEBUG("xAOD TruthParticleContainer name = " << m_xaodTruthParticleContainerKey.key() );
         ATH_MSG_DEBUG("xAOD TruthVertexContainer name = " << m_xaodTruthVertexContainerKey.key() );
+        if (!m_lheTruthParticleContainerKey.empty()){
+          ATH_MSG_DEBUG("xAOD TruthLHEParticleContainer name = " << m_lheTruthParticleContainerKey.key() );
+        }
 
         if (m_doAllPileUp) ATH_MSG_INFO( "All pile-up truth (including out-of-time) will be written" );
         if (m_doInTimePileUp) ATH_MSG_INFO( "In-time pile-up truth (but not out-of-time) will be written" );
@@ -95,232 +101,273 @@ namespace xAODMaker {
     StatusCode xAODTruthCnvAlg::execute (const EventContext& ctx) const {
         
         SG::WriteHandle<xAODTruthParticleLinkVector> truthLinkVec(m_truthLinkContainerKey, ctx);
-	ATH_CHECK(truthLinkVec.record(std::make_unique<xAODTruthParticleLinkVector>()));
+        ATH_CHECK(truthLinkVec.record(std::make_unique<xAODTruthParticleLinkVector>()));
         
-	// Retrieve the HepMC truth:
-	SG::ReadHandle<McEventCollection> mcColl(m_aodContainerKey, ctx);
-	// validity check is only really needed for serial running. Remove when MT is only way.
-	if (!mcColl.isValid()) {
-	  ATH_MSG_ERROR("Could not retrieve HepMC with key:" << m_aodContainerKey.key());
-	  return StatusCode::FAILURE;
-	} else {
-	  ATH_MSG_DEBUG( "Retrieved HepMC with key: " << m_aodContainerKey.key() );
-	}
+        // Retrieve the HepMC truth:
+        SG::ReadHandle<McEventCollection> mcColl(m_aodContainerKey, ctx);
+        // validity check is only really needed for serial running. Remove when MT is only way.
+        if (!mcColl.isValid()) {
+          ATH_MSG_ERROR("Could not retrieve HepMC with key:" << m_aodContainerKey.key());
+          return StatusCode::FAILURE;
+        } else {
+          ATH_MSG_DEBUG( "Retrieved HepMC with key: " << m_aodContainerKey.key() );
+        }
 
-	// **************************************************************
-	// Create the xAOD containers and their auxiliary stores:
-	// **************************************************************
-	// Signal event
-	SG::WriteHandle<xAOD::TruthEventContainer> xTruthEventContainer(m_xaodTruthEventContainerKey, ctx);
-	ATH_CHECK(xTruthEventContainer.record(std::make_unique<xAOD::TruthEventContainer>(),
-					      std::make_unique<xAOD::TruthEventAuxContainer>()));
-	ATH_MSG_DEBUG( "Recorded TruthEventContainer with key: " << m_xaodTruthEventContainerKey.key() );
+        // **************************************************************
+        // Create the xAOD containers and their auxiliary stores:
+        // **************************************************************
+        // Signal event
+        SG::WriteHandle<xAOD::TruthEventContainer> xTruthEventContainer(m_xaodTruthEventContainerKey, ctx);
+        ATH_CHECK(xTruthEventContainer.record(std::make_unique<xAOD::TruthEventContainer>(),
+                                              std::make_unique<xAOD::TruthEventAuxContainer>()));
+        ATH_MSG_DEBUG( "Recorded TruthEventContainer with key: " << m_xaodTruthEventContainerKey.key() );
 
-	// Pile-up events
-	SG::WriteHandle<xAOD::TruthPileupEventContainer> xTruthPileupEventContainer;
-	if (m_doAllPileUp || m_doInTimePileUp) {
-	  xTruthPileupEventContainer = SG::WriteHandle<xAOD::TruthPileupEventContainer>(m_xaodTruthPUEventContainerKey, ctx);
-	  ATH_CHECK(xTruthPileupEventContainer.record(std::make_unique<xAOD::TruthPileupEventContainer>(),
-						      std::make_unique<xAOD::TruthPileupEventAuxContainer>()));
-	  ATH_MSG_DEBUG( "Recorded TruthPileupEventContainer with key: " << m_xaodTruthPUEventContainerKey.key() );
-	}
+        // Pile-up events
+        SG::WriteHandle<xAOD::TruthPileupEventContainer> xTruthPileupEventContainer;
+        if (m_doAllPileUp || m_doInTimePileUp) {
+          xTruthPileupEventContainer = SG::WriteHandle<xAOD::TruthPileupEventContainer>(m_xaodTruthPUEventContainerKey, ctx);
+          ATH_CHECK(xTruthPileupEventContainer.record(std::make_unique<xAOD::TruthPileupEventContainer>(),
+                                                      std::make_unique<xAOD::TruthPileupEventAuxContainer>()));
+          ATH_MSG_DEBUG( "Recorded TruthPileupEventContainer with key: " << m_xaodTruthPUEventContainerKey.key() );
+        }
 
-	// Particles
-	SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainer(m_xaodTruthParticleContainerKey, ctx);
-	ATH_CHECK(xTruthParticleContainer.record(std::make_unique<xAOD::TruthParticleContainer>(),
-						 std::make_unique<xAOD::TruthParticleAuxContainer>()));
-	ATH_MSG_DEBUG( "Recorded TruthParticleContainer with key: " << m_xaodTruthParticleContainerKey.key() );
-	// Vertices
-	SG::WriteHandle<xAOD::TruthVertexContainer> xTruthVertexContainer(m_xaodTruthVertexContainerKey, ctx);
-	ATH_CHECK(xTruthVertexContainer.record(std::make_unique<xAOD::TruthVertexContainer>(),
-					       std::make_unique<xAOD::TruthVertexAuxContainer>()));
-	ATH_MSG_DEBUG( "Recorded TruthVertexContainer with key: " << m_xaodTruthVertexContainerKey.key() );
-             
-	// ***********************************************************************************
-	// Create the xAOD objects
-	// This consists of three parts:
-	// (1)  For each Athena event, loop over the GenEvents and build TruthEvent collections
-	//      In principle there can be more than one GenEvent per event
-	// (2)  For each GenEvent, loop over the GenParticles. For each GenParticle:
-	//      (a) Create a TruthParticle.
-	//      (b) Call fillParticle
-	//      (c) Add the TruthParticle to the TruthParticle container, and add
-	//          an EL to this TruthParticle to the truthParticles in TruthEvent
-	//          (call this EL eltp)
-	//      (d) For the GenVertex * that's this particle's production vertex,
-	//          (i) see if it is in tempMap. If not, add it.
-	//          (ii) add a copy of eltp (the EL to this truth particle) to map[gv].second
-	//      (e) For the GenVertex * that's this particle's decay vertex,
-	//          (i) see if it is in tempMap. If not, add it.
-	//          (ii) add a copy of eltp (the EL to this truth particle) to map[gv].first
-	// (3) Iterate over tempMap. For each GenVertex *:
-	//      (a) Create a TruthVertex
-	//      (b) Call fillVertex
-	//      (c) Add the TruthVertex to the TruthTruth container, and add an EL to this TruthVertex
-	//          to the truthVertices in TruthEvent. (call this EL eltv)
-	//      (d) call tv->setIncomingParticles(mapiter.second.first)  <- I think mapiter.second.first is the first of the pair
-	//      (e) call tv->setOutgoingParticles(mapiter.second.second)
-	//      (f) Iterate through the incomingParticles, and set the decay vertex EL as eltv.
-	//      (g) Iterate through the outgoingParticles, and set the incoming vertex EL as eltv.
-	//
-	// Comment lines below follow this recipe
-	// ************************************************************************************
+        // Particles
+        SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainer(m_xaodTruthParticleContainerKey, ctx);
+        ATH_CHECK(xTruthParticleContainer.record(std::make_unique<xAOD::TruthParticleContainer>(),
+                                                 std::make_unique<xAOD::TruthParticleAuxContainer>()));
+        ATH_MSG_DEBUG( "Recorded TruthParticleContainer with key: " << m_xaodTruthParticleContainerKey.key() );
+        // Vertices
+        SG::WriteHandle<xAOD::TruthVertexContainer> xTruthVertexContainer(m_xaodTruthVertexContainerKey, ctx);
+        ATH_CHECK(xTruthVertexContainer.record(std::make_unique<xAOD::TruthVertexContainer>(),
+                                               std::make_unique<xAOD::TruthVertexAuxContainer>()));
+        ATH_MSG_DEBUG( "Recorded TruthVertexContainer with key: " << m_xaodTruthVertexContainerKey.key() );
+
+        // To keep track of whether we wrote an LHE event already or not
+        bool hadLHERecord = false;
+
+        // ***********************************************************************************
+        // Create the xAOD objects
+        // This consists of three parts:
+        // (1)  For each Athena event, loop over the GenEvents and build TruthEvent collections
+        //      In principle there can be more than one GenEvent per event
+        // (2)  For each GenEvent, loop over the GenParticles. For each GenParticle:
+        //      (a) Create a TruthParticle.
+        //      (b) Call fillParticle
+        //      (c) Add the TruthParticle to the TruthParticle container, and add
+        //          an EL to this TruthParticle to the truthParticles in TruthEvent
+        //          (call this EL eltp)
+        //      (d) For the GenVertex * that's this particle's production vertex,
+        //          (i) see if it is in tempMap. If not, add it.
+        //          (ii) add a copy of eltp (the EL to this truth particle) to map[gv].second
+        //      (e) For the GenVertex * that's this particle's decay vertex,
+        //          (i) see if it is in tempMap. If not, add it.
+        //          (ii) add a copy of eltp (the EL to this truth particle) to map[gv].first
+        // (3) Iterate over tempMap. For each GenVertex *:
+        //      (a) Create a TruthVertex
+        //      (b) Call fillVertex
+        //      (c) Add the TruthVertex to the TruthTruth container, and add an EL to this TruthVertex
+        //          to the truthVertices in TruthEvent. (call this EL eltv)
+        //      (d) call tv->setIncomingParticles(mapiter.second.first)  <- I think mapiter.second.first is the first of the pair
+        //      (e) call tv->setOutgoingParticles(mapiter.second.second)
+        //      (f) Iterate through the incomingParticles, and set the decay vertex EL as eltv.
+        //      (g) Iterate through the outgoingParticles, and set the incoming vertex EL as eltv.
+        //
+        // Comment lines below follow this recipe
+        // ************************************************************************************
             
-	// (1) Build TruthEvents
-	ATH_MSG_DEBUG("Number of GenEvents in this Athena event = " << mcColl->size());
-	for (unsigned int cntr = 0; cntr < mcColl->size(); ++cntr) {
-	  const HepMC::GenEvent* genEvt = (*mcColl)[cntr];
-	  bool isSignalProcess(false);
-	  if (cntr==0) isSignalProcess=true;
-	  if (cntr>0) {
-	    // Handle pile-up events
-	    // If in-time pileup only is requested, loop stops when
-	    // the separator between out-of-time and in-time is reached
-	    // Separator defined by pid==0 and eventNumber==-1 as per
-	    // https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/PileupDigitization#Arrangement_of_Truth_Information
-	    if (!m_doInTimePileUp && !m_doAllPileUp) break;
-	    isSignalProcess=false;
-	    int pid = HepMC::signal_process_id(genEvt);
-	    int eventNumber = genEvt->event_number();
-	    if (m_doInTimePileUp && pid==0 && eventNumber==-1) break; // stop at the separator
-	  }
+        // (1) Build TruthEvents
+        ATH_MSG_DEBUG("Number of GenEvents in this Athena event = " << mcColl->size());
+        for (unsigned int cntr = 0; cntr < mcColl->size(); ++cntr) {
+          const HepMC::GenEvent* genEvt = (*mcColl)[cntr];
+          bool isSignalProcess(false);
+          if (cntr==0) isSignalProcess=true;
+          if (cntr>0) {
+            // Handle pile-up events
+            // If in-time pileup only is requested, loop stops when
+            // the separator between out-of-time and in-time is reached
+            // Separator defined by pid==0 and eventNumber==-1 as per
+            // https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/PileupDigitization#Arrangement_of_Truth_Information
+            if (!m_doInTimePileUp && !m_doAllPileUp) break;
+            isSignalProcess=false;
+            int pid = HepMC::signal_process_id(genEvt);
+            int eventNumber = genEvt->event_number();
+            if (m_doInTimePileUp && pid==0 && eventNumber==-1) break; // stop at the separator
+          }
                 
-	  xAOD::TruthEvent* xTruthEvent = new xAOD::TruthEvent();
-	  xAOD::TruthPileupEvent* xTruthPileupEvent = new xAOD::TruthPileupEvent();
+          xAOD::TruthEvent* xTruthEvent = new xAOD::TruthEvent();
+          xAOD::TruthPileupEvent* xTruthPileupEvent = new xAOD::TruthPileupEvent();
                 
                 
-	  if (isSignalProcess) {
-	    xTruthEventContainer->push_back( xTruthEvent );
-	    // Cross-section
-	    auto crossSection = genEvt->cross_section();
+          if (isSignalProcess) {
+            xTruthEventContainer->push_back( xTruthEvent );
+            // Cross-section
+            auto crossSection = genEvt->cross_section();
 #ifdef HEPMC3
-	    xTruthEvent->setCrossSection(crossSection ? (float)crossSection->xsec() : -1);
-	    xTruthEvent->setCrossSectionError(crossSection ? (float)crossSection->xsec_err() : -1);
+            xTruthEvent->setCrossSection(crossSection ? (float)crossSection->xsec() : -1);
+            xTruthEvent->setCrossSectionError(crossSection ? (float)crossSection->xsec_err() : -1);
 #else
-	    xTruthEvent->setCrossSection(crossSection ? (float)crossSection->cross_section() : -1);
-	    xTruthEvent->setCrossSectionError(crossSection ? (float)crossSection->cross_section_error() : -1);
+            xTruthEvent->setCrossSection(crossSection ? (float)crossSection->cross_section() : -1);
+            xTruthEvent->setCrossSectionError(crossSection ? (float)crossSection->cross_section_error() : -1);
 #endif
                     
-	    if (m_writeMetaData) {
-	      //The mcChannelNumber is used as a unique identifier for which truth meta data belongs to
-	      uint32_t mcChannelNumber = 0;
-	      SG::ReadHandle<xAOD::EventInfo> evtInfo (m_evtInfo,ctx);
-	      if (evtInfo.isValid()) {
-		mcChannelNumber = evtInfo->mcChannelNumber();
-		if (mcChannelNumber==0) mcChannelNumber = evtInfo->runNumber();
-	      }
-	      else {
-		ATH_MSG_FATAL("Faied to retrieve EventInfo");
-		return StatusCode::FAILURE;
-	      }
+            if (m_writeMetaData) {
+              //The mcChannelNumber is used as a unique identifier for which truth meta data belongs to
+              uint32_t mcChannelNumber = 0;
+              SG::ReadHandle<xAOD::EventInfo> evtInfo (m_evtInfo,ctx);
+              if (evtInfo.isValid()) {
+                mcChannelNumber = evtInfo->mcChannelNumber();
+                if (mcChannelNumber==0) mcChannelNumber = evtInfo->runNumber();
+              }
+              else {
+                ATH_MSG_FATAL("Faied to retrieve EventInfo");
+                return StatusCode::FAILURE;
+              }
 
               ATH_CHECK( m_meta.maybeWrite (mcChannelNumber, *genEvt, m_metaFields) );
-	    }
-	    // Event weights
-	    vector<float> weights;
-	    for (const double& w : genEvt->weights()) weights.push_back((float)(w));
-	    //AV This to be decided. It is always a good idea to have a default weight 1.0. 
-	    //if (weights.empty()) weights.push_back(1.0); 
-	    xTruthEvent->setWeights(weights);
+            }
+            // Event weights
+            vector<float> weights;
+            for (const double& w : genEvt->weights()) weights.push_back((float)(w));
+            //AV This to be decided. It is always a good idea to have a default weight 1.0. 
+            //if (weights.empty()) weights.push_back(1.0); 
+            xTruthEvent->setWeights(weights);
                     
-	    // Heavy ion info
-	    auto const hiInfo = genEvt->heavy_ion();
-	    if (hiInfo) {
+            // Heavy ion info
+            auto const hiInfo = genEvt->heavy_ion();
+            if (hiInfo) {
 #ifdef HEPMC3
               /* Please note HepMC3 as well as more recent HePMC2 versions   have more Hi parameters */
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll_hard, xAOD::TruthEvent::NCOLLHARD);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Npart_proj, xAOD::TruthEvent::NPARTPROJ);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Npart_targ, xAOD::TruthEvent::NPARTTARG);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll, xAOD::TruthEvent::NCOLL);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->spectator_neutrons, xAOD::TruthEvent::SPECTATORNEUTRONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->spectator_protons, xAOD::TruthEvent::SPECTATORPROTONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->N_Nwounded_collisions, xAOD::TruthEvent::NNWOUNDEDCOLLISIONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_N_collisions, xAOD::TruthEvent::NWOUNDEDNCOLLISIONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_Nwounded_collisions, xAOD::TruthEvent::NWOUNDEDNWOUNDEDCOLLISIONS);
-	      xTruthEvent->setHeavyIonParameter((float)hiInfo->impact_parameter, xAOD::TruthEvent::IMPACTPARAMETER);
-	      xTruthEvent->setHeavyIonParameter((float)hiInfo->event_plane_angle, xAOD::TruthEvent::EVENTPLANEANGLE);
-	      xTruthEvent->setHeavyIonParameter((float)hiInfo->eccentricity, xAOD::TruthEvent::ECCENTRICITY);
-	      xTruthEvent->setHeavyIonParameter((float)hiInfo->sigma_inel_NN, xAOD::TruthEvent::SIGMAINELNN);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll_hard, xAOD::TruthEvent::NCOLLHARD);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Npart_proj, xAOD::TruthEvent::NPARTPROJ);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Npart_targ, xAOD::TruthEvent::NPARTTARG);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll, xAOD::TruthEvent::NCOLL);
+              xTruthEvent->setHeavyIonParameter(hiInfo->spectator_neutrons, xAOD::TruthEvent::SPECTATORNEUTRONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->spectator_protons, xAOD::TruthEvent::SPECTATORPROTONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->N_Nwounded_collisions, xAOD::TruthEvent::NNWOUNDEDCOLLISIONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_N_collisions, xAOD::TruthEvent::NWOUNDEDNCOLLISIONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_Nwounded_collisions, xAOD::TruthEvent::NWOUNDEDNWOUNDEDCOLLISIONS);
+              xTruthEvent->setHeavyIonParameter((float)hiInfo->impact_parameter, xAOD::TruthEvent::IMPACTPARAMETER);
+              xTruthEvent->setHeavyIonParameter((float)hiInfo->event_plane_angle, xAOD::TruthEvent::EVENTPLANEANGLE);
+              xTruthEvent->setHeavyIonParameter((float)hiInfo->eccentricity, xAOD::TruthEvent::ECCENTRICITY);
+              xTruthEvent->setHeavyIonParameter((float)hiInfo->sigma_inel_NN, xAOD::TruthEvent::SIGMAINELNN);
 #else
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll_hard(), xAOD::TruthEvent::NCOLLHARD);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Npart_proj(), xAOD::TruthEvent::NPARTPROJ);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Npart_targ(), xAOD::TruthEvent::NPARTTARG);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll(), xAOD::TruthEvent::NCOLL);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->spectator_neutrons(), xAOD::TruthEvent::SPECTATORNEUTRONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->spectator_protons(), xAOD::TruthEvent::SPECTATORPROTONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->N_Nwounded_collisions(), xAOD::TruthEvent::NNWOUNDEDCOLLISIONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_N_collisions(), xAOD::TruthEvent::NWOUNDEDNCOLLISIONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_Nwounded_collisions(), xAOD::TruthEvent::NWOUNDEDNWOUNDEDCOLLISIONS);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->impact_parameter(), xAOD::TruthEvent::IMPACTPARAMETER);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->event_plane_angle(), xAOD::TruthEvent::EVENTPLANEANGLE);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->eccentricity(), xAOD::TruthEvent::ECCENTRICITY);
-	      xTruthEvent->setHeavyIonParameter(hiInfo->sigma_inel_NN(), xAOD::TruthEvent::SIGMAINELNN);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll_hard(), xAOD::TruthEvent::NCOLLHARD);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Npart_proj(), xAOD::TruthEvent::NPARTPROJ);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Npart_targ(), xAOD::TruthEvent::NPARTTARG);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll(), xAOD::TruthEvent::NCOLL);
+              xTruthEvent->setHeavyIonParameter(hiInfo->spectator_neutrons(), xAOD::TruthEvent::SPECTATORNEUTRONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->spectator_protons(), xAOD::TruthEvent::SPECTATORPROTONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->N_Nwounded_collisions(), xAOD::TruthEvent::NNWOUNDEDCOLLISIONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_N_collisions(), xAOD::TruthEvent::NWOUNDEDNCOLLISIONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_Nwounded_collisions(), xAOD::TruthEvent::NWOUNDEDNWOUNDEDCOLLISIONS);
+              xTruthEvent->setHeavyIonParameter(hiInfo->impact_parameter(), xAOD::TruthEvent::IMPACTPARAMETER);
+              xTruthEvent->setHeavyIonParameter(hiInfo->event_plane_angle(), xAOD::TruthEvent::EVENTPLANEANGLE);
+              xTruthEvent->setHeavyIonParameter(hiInfo->eccentricity(), xAOD::TruthEvent::ECCENTRICITY);
+              xTruthEvent->setHeavyIonParameter(hiInfo->sigma_inel_NN(), xAOD::TruthEvent::SIGMAINELNN);
 #endif
-	      // This doesn't yet exist in our version of HepMC
-	      // xTruthEvent->setHeavyIonParameter(hiInfo->centrality(),xAOD::TruthEvent::CENTRALITY);
-	    }
+              // This doesn't yet exist in our version of HepMC
+              // xTruthEvent->setHeavyIonParameter(hiInfo->centrality(),xAOD::TruthEvent::CENTRALITY);
+            }
                     
-	    // Parton density info
-	    // This will exist 99% of the time, except for e.g. cosmic or particle gun simulation
-	    auto const pdfInfo = genEvt->pdf_info();
-	    if (pdfInfo) {
+            // Parton density info
+            // This will exist 99% of the time, except for e.g. cosmic or particle gun simulation
+            auto const pdfInfo = genEvt->pdf_info();
+            if (pdfInfo) {
 #ifdef HEPMC3
-	      xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[0], xAOD::TruthEvent::PDGID1);
-	      xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[1], xAOD::TruthEvent::PDGID2);
-	      xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID1);
-	      xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID2);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[0], xAOD::TruthEvent::PDGID1);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[1], xAOD::TruthEvent::PDGID2);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID1);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID2);
                         
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->x[0], xAOD::TruthEvent::X1);
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->x[1], xAOD::TruthEvent::X2);
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->scale, xAOD::TruthEvent::Q);
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->xf[0], xAOD::TruthEvent::XF1);
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->xf[1], xAOD::TruthEvent::XF2);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->x[0], xAOD::TruthEvent::X1);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->x[1], xAOD::TruthEvent::X2);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->scale, xAOD::TruthEvent::Q);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->xf[0], xAOD::TruthEvent::XF1);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->xf[1], xAOD::TruthEvent::XF2);
 #else
-	      xTruthEvent->setPdfInfoParameter(pdfInfo->id1(), xAOD::TruthEvent::PDGID1);
-	      xTruthEvent->setPdfInfoParameter(pdfInfo->id2(), xAOD::TruthEvent::PDGID2);
-	      xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id1(), xAOD::TruthEvent::PDFID1);
-	      xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id2(), xAOD::TruthEvent::PDFID2);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->id1(), xAOD::TruthEvent::PDGID1);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->id2(), xAOD::TruthEvent::PDGID2);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id1(), xAOD::TruthEvent::PDFID1);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id2(), xAOD::TruthEvent::PDFID2);
                         
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->x1(), xAOD::TruthEvent::X1);
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->x2(), xAOD::TruthEvent::X2);
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->scalePDF(), xAOD::TruthEvent::Q);
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf1(), xAOD::TruthEvent::XF1);
-	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf2(), xAOD::TruthEvent::XF2);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->x1(), xAOD::TruthEvent::X1);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->x2(), xAOD::TruthEvent::X2);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->scalePDF(), xAOD::TruthEvent::Q);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf1(), xAOD::TruthEvent::XF1);
+              xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf2(), xAOD::TruthEvent::XF2);
 #endif
-	    }
-	  }else{//not isSignalProcess
+            }
+
+            // Handle LHE particles, only supported for HEPMC3
+#ifdef HEPMC3
+            auto lhe_record_attribute = genEvt->attribute<HepMC::ShortEventAttribute>("LHERecord");
+
+            if (lhe_record_attribute && !hadLHERecord && !m_lheTruthParticleContainerKey.empty()){
+              hadLHERecord=true;
+              // The event had an LHE record, so let's record it. This will only happen once per event.
+              SG::WriteHandle<xAOD::TruthParticleContainer> xTruthLHEParticleContainer(m_lheTruthParticleContainerKey, ctx);
+              ATH_CHECK(xTruthLHEParticleContainer.record(std::make_unique<xAOD::TruthParticleContainer>(),
+                                                          std::make_unique<xAOD::TruthParticleAuxContainer>()));
+              ATH_MSG_DEBUG( "Recorded TruthLHEParticleContainer with key: " << m_lheTruthParticleContainerKey.key() );
+              // The LHE record is stored in a struct with old-style LHE format, so we have to re-encode it
+              for (int nPart=0;nPart<lhe_record_attribute->NUP;++nPart) {
+                // Create TruthParticle
+                xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
+                // Put particle into container;
+                xTruthLHEParticleContainer->push_back( xTruthParticle );
+                // Copy LHE info into the new particle; good description is in https://arxiv.org/abs/hep-ph/0609017
+                xTruthParticle->setPdgId( lhe_record_attribute->IDUP[nPart] );
+                xTruthParticle->setBarcode( nPart+1 );
+                xTruthParticle->setStatus( lhe_record_attribute->ISTUP[nPart] );
+                xTruthParticle->setPx( lhe_record_attribute->PUP[nPart][0] );
+                xTruthParticle->setPy( lhe_record_attribute->PUP[nPart][1] );
+                xTruthParticle->setPz( lhe_record_attribute->PUP[nPart][2] );
+                xTruthParticle->setE( lhe_record_attribute->PUP[nPart][3] );
+                xTruthParticle->setM( lhe_record_attribute->PUP[nPart][4] );
+              } // End of loop over particles
+            } // End of if we found the LHE record attribute
+            else if (hadLHERecord){
+              ATH_MSG_WARNING("Truth record appeared to have two LHE records; this should not be possible");
+            }
+#else
+            if (!m_lheTruthParticleContainerKey.empty()){
+              ATH_MSG_WARNING("HEPMC2 does not support LHE truth record storage. Skipping.");
+            }
+#endif
+
+          }else{//not isSignalProcess
       xTruthPileupEventContainer->push_back( xTruthPileupEvent );
     }
                 
-	  // (2) Build particles and vertices
-	  // Map for building associations between particles and vertices
-	  // The pair in the map is the (incomingParticles . outgoingParticles) of the given vertex
-	  // If signal process vertex is a disconnected vertex (no incoming/outgoing particles), add it manually
-	  VertexMap vertexMap;
-	  VertexMap::iterator mapItr;
-	  vector<HepMC::ConstGenVertexPtr> vertices;
+          // (2) Build particles and vertices
+          // Map for building associations between particles and vertices
+          // The pair in the map is the (incomingParticles . outgoingParticles) of the given vertex
+          // If signal process vertex is a disconnected vertex (no incoming/outgoing particles), add it manually
+          VertexMap vertexMap;
+          VertexMap::iterator mapItr;
+          vector<HepMC::ConstGenVertexPtr> vertices;
                 
-	  // Check signal process vertex
-	  // If this is a disconnected vertex, add it manually or won't be added from the loop over particles below.
-	   auto disconnectedSignalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
-	  if (disconnectedSignalProcessVtx) {
+          // Check signal process vertex
+          // If this is a disconnected vertex, add it manually or won't be added from the loop over particles below.
+           auto disconnectedSignalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
+          if (disconnectedSignalProcessVtx) {
 #ifdef HEPMC3
-	    if (disconnectedSignalProcessVtx->particles_in().empty() &&
-		disconnectedSignalProcessVtx->particles_out().empty() ) {
+            if (disconnectedSignalProcessVtx->particles_in().empty() &&
+                disconnectedSignalProcessVtx->particles_out().empty() ) {
 #else
-	    if (disconnectedSignalProcessVtx->particles_in_size() == 0 &&
-		disconnectedSignalProcessVtx->particles_out_size() == 0 ) {
+            if (disconnectedSignalProcessVtx->particles_in_size() == 0 &&
+                disconnectedSignalProcessVtx->particles_out_size() == 0 ) {
 #endif
-	      //This is a disconnected vertex, add it manually
-	      vertices.push_back (disconnectedSignalProcessVtx);
-	    }
-	  } else {
-	    ATH_MSG_WARNING("Signal process vertex pointer not valid in HepMC Collection for GenEvent #" << cntr << " / " << mcColl->size());
-	  }
+              //This is a disconnected vertex, add it manually
+              vertices.push_back (disconnectedSignalProcessVtx);
+            }
+          } else {
+            ATH_MSG_WARNING("Signal process vertex pointer not valid in HepMC Collection for GenEvent #" << cntr << " / " << mcColl->size());
+          }
                 
-	  // Get the beam particles
-	  pair<HepMC::ConstGenParticlePtr,HepMC::ConstGenParticlePtr> beamParticles;
-	  bool genEvt_valid_beam_particles=false;
+          // Get the beam particles
+          pair<HepMC::ConstGenParticlePtr,HepMC::ConstGenParticlePtr> beamParticles;
+          bool genEvt_valid_beam_particles=false;
 #ifdef HEPMC3
         auto beamParticles_vec = genEvt->beams();
         genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
@@ -338,85 +385,85 @@ namespace xAODMaker {
         for (auto part: *genEvt) {
             int k = part->barcode();
 #endif
-	    // (a) create TruthParticle
-	    xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
+            // (a) create TruthParticle
+            xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
       // (b) Put particle into container;
-	    xTruthParticleContainer->push_back( xTruthParticle );
-	    fillParticle(xTruthParticle, part); // (c) Copy HepMC info into the new particle
-	    // (d) Build Event<->Particle element link
-	    const ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, xTruthParticleContainer->size()-1);
-	    if (isSignalProcess) xTruthEvent->addTruthParticleLink(eltp);
-	    if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
+            xTruthParticleContainer->push_back( xTruthParticle );
+            fillParticle(xTruthParticle, part); // (c) Copy HepMC info into the new particle
+            // (d) Build Event<->Particle element link
+            const ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, xTruthParticleContainer->size()-1);
+            if (isSignalProcess) xTruthEvent->addTruthParticleLink(eltp);
+            if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
                     
-	    // Create link between HepMC and xAOD truth
-	    if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,0,EBC_MAINEVCOLL,HepMcParticleLink::IS_POSITION), eltp));
-	    if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,genEvt->event_number()), eltp));
+            // Create link between HepMC and xAOD truth
+            if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,0,EBC_MAINEVCOLL,HepMcParticleLink::IS_POSITION), eltp));
+            if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,genEvt->event_number()), eltp));
                     
-	    // Is this one of the beam particles?
-	    if (genEvt_valid_beam_particles) {
-	      if (isSignalProcess) {
+            // Is this one of the beam particles?
+            if (genEvt_valid_beam_particles) {
+              if (isSignalProcess) {
           if (part == beamParticles.first) xTruthEvent->setBeamParticle1Link(eltp);
           if (part == beamParticles.second) xTruthEvent->setBeamParticle2Link(eltp);
-	      }
-	    }
-	    // (e) Particle's production vertex
-	    auto productionVertex = part->production_vertex();
+              }
+            }
+            // (e) Particle's production vertex
+            auto productionVertex = part->production_vertex();
             // Skip the dummy vertex that HepMC3 adds
             // Can distinguish it from real vertices because it has
             // a null event pointer.
-	    if (productionVertex && productionVertex->parent_event() != nullptr) {
-	      VertexParticles& parts = vertexMap[productionVertex];
-	      if (parts.incoming.empty() && parts.outgoing.empty())
+            if (productionVertex && productionVertex->parent_event() != nullptr) {
+              VertexParticles& parts = vertexMap[productionVertex];
+              if (parts.incoming.empty() && parts.outgoing.empty())
           vertices.push_back (productionVertex);
-	      parts.outgoingEL.push_back(eltp);
-	      parts.outgoing.push_back(xTruthParticle);
-	    }
-	    //
-	    // else maybe want to keep track that this is the production vertex
-	    //
-	    // (f) Particle's decay vertex
-	    auto decayVertex = part->end_vertex();
-	    if (decayVertex) {
-	      VertexParticles& parts = vertexMap[decayVertex];
-	      if (parts.incoming.empty() && parts.outgoing.empty())
+              parts.outgoingEL.push_back(eltp);
+              parts.outgoing.push_back(xTruthParticle);
+            }
+            //
+            // else maybe want to keep track that this is the production vertex
+            //
+            // (f) Particle's decay vertex
+            auto decayVertex = part->end_vertex();
+            if (decayVertex) {
+              VertexParticles& parts = vertexMap[decayVertex];
+              if (parts.incoming.empty() && parts.outgoing.empty())
           vertices.push_back (decayVertex);
-	      parts.incomingEL.push_back(eltp);
-	      parts.incoming.push_back(xTruthParticle);
-	    }
+              parts.incomingEL.push_back(eltp);
+              parts.incoming.push_back(xTruthParticle);
+            }
                     
-	  } // end of loop over particles
+          } // end of loop over particles
                 
-	  // (3) Loop over the map
-	  auto signalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
+          // (3) Loop over the map
+          auto signalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
     xTruthVertexContainer->reserve(vertices.size());
-	  for (const auto&  vertex : vertices) {
-	    const auto& parts = vertexMap[vertex];
-	    // (a) create TruthVertex
-	    xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
+          for (const auto&  vertex : vertices) {
+            const auto& parts = vertexMap[vertex];
+            // (a) create TruthVertex
+            xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
       // (b) Put particle into container (so has store)
-	    xTruthVertexContainer->push_back( xTruthVertex );
-	    fillVertex(xTruthVertex, vertex); // (c) Copy HepMC info into the new vertex
-	    // (d) Build Event<->Vertex element link
-	    ElementLink<xAOD::TruthVertexContainer> eltv(*xTruthVertexContainer, xTruthVertexContainer->size()-1);
-	    // Mark if this is the signal process vertex
-	    if (vertex == signalProcessVtx && isSignalProcess) xTruthEvent->setSignalProcessVertexLink(eltv);
-	    if (isSignalProcess) xTruthEvent->addTruthVertexLink(eltv);
-	    if (!isSignalProcess) xTruthPileupEvent->addTruthVertexLink(eltv);
-	    // (e) Assign incoming particles to the vertex, from the map
-	    xTruthVertex->setIncomingParticleLinks( parts.incomingEL );
-	    // (f) Assign outgoing particles to the vertex, from the map
-	    xTruthVertex->setOutgoingParticleLinks( parts.outgoingEL );
-	    // (g) Set Particle<->Vertex links for incoming particles
-	    for (xAOD::TruthParticle* p : parts.incoming) p->setDecayVtxLink(eltv);
-	    // (h) Set Particle<->Vertex links for incoming particles
-	    for (xAOD::TruthParticle* p : parts.outgoing) p->setProdVtxLink(eltv);
-	  } //end of loop over vertices
+            xTruthVertexContainer->push_back( xTruthVertex );
+            fillVertex(xTruthVertex, vertex); // (c) Copy HepMC info into the new vertex
+            // (d) Build Event<->Vertex element link
+            ElementLink<xAOD::TruthVertexContainer> eltv(*xTruthVertexContainer, xTruthVertexContainer->size()-1);
+            // Mark if this is the signal process vertex
+            if (vertex == signalProcessVtx && isSignalProcess) xTruthEvent->setSignalProcessVertexLink(eltv);
+            if (isSignalProcess) xTruthEvent->addTruthVertexLink(eltv);
+            if (!isSignalProcess) xTruthPileupEvent->addTruthVertexLink(eltv);
+            // (e) Assign incoming particles to the vertex, from the map
+            xTruthVertex->setIncomingParticleLinks( parts.incomingEL );
+            // (f) Assign outgoing particles to the vertex, from the map
+            xTruthVertex->setOutgoingParticleLinks( parts.outgoingEL );
+            // (g) Set Particle<->Vertex links for incoming particles
+            for (xAOD::TruthParticle* p : parts.incoming) p->setDecayVtxLink(eltv);
+            // (h) Set Particle<->Vertex links for incoming particles
+            for (xAOD::TruthParticle* p : parts.outgoing) p->setProdVtxLink(eltv);
+          } //end of loop over vertices
                 
-	  // Delete the event that wasn't used
-	  if (isSignalProcess) delete xTruthPileupEvent;
-	  if (!isSignalProcess) delete xTruthEvent;
+          // Delete the event that wasn't used
+          if (isSignalProcess) delete xTruthPileupEvent;
+          if (!isSignalProcess) delete xTruthEvent;
                 
-	} // end of loop over McEventCollection
+        } // end of loop over McEventCollection
             
                 
         std::stable_sort(truthLinkVec->begin(), truthLinkVec->end(), SortTruthParticleLink());
@@ -425,53 +472,53 @@ namespace xAODMaker {
         return StatusCode::SUCCESS;
     }
     
-	void xAODTruthCnvAlg::handle(const Incident& incident) {
-	  if (m_firstBeginRun && incident.type()==IncidentType::BeginRun) {
-	    m_firstBeginRun = false;
-	    ServiceHandle<StoreGateSvc> inputStore("StoreGateSvc/InputMetaDataStore", name());
-	    if(inputStore.retrieve().isFailure()) {
-	      ATH_MSG_ERROR("Failed to retrieve Input Metadata Store");
-	      return;
-	    }
-	    const IOVMetaDataContainer* tagInfo{nullptr};
-	    if(inputStore->retrieve(tagInfo,"/TagInfo").isFailure()) {
-	      ATH_MSG_WARNING("Failed to retrieve /TagInfo metadata from the input store");
-	      return;
-	    }
-	    if(tagInfo->payloadContainer()->size()>0) {
-	      CondAttrListCollection* tagInfoPayload = tagInfo->payloadContainer()->at(0);
-	      if(tagInfoPayload->size()>0) {
-		const CondAttrListCollection::AttributeList& al = tagInfoPayload->attributeList(0);
-		if (al.exists("lhefGenerator")){
-		  m_metaFields.lhefGenerator = al["lhefGenerator"].data<std::string>();
-		}
+        void xAODTruthCnvAlg::handle(const Incident& incident) {
+          if (m_firstBeginRun && incident.type()==IncidentType::BeginRun) {
+            m_firstBeginRun = false;
+            ServiceHandle<StoreGateSvc> inputStore("StoreGateSvc/InputMetaDataStore", name());
+            if(inputStore.retrieve().isFailure()) {
+              ATH_MSG_ERROR("Failed to retrieve Input Metadata Store");
+              return;
+            }
+            const IOVMetaDataContainer* tagInfo{nullptr};
+            if(inputStore->retrieve(tagInfo,"/TagInfo").isFailure()) {
+              ATH_MSG_WARNING("Failed to retrieve /TagInfo metadata from the input store");
+              return;
+            }
+            if(tagInfo->payloadContainer()->size()>0) {
+              CondAttrListCollection* tagInfoPayload = tagInfo->payloadContainer()->at(0);
+              if(tagInfoPayload->size()>0) {
+                const CondAttrListCollection::AttributeList& al = tagInfoPayload->attributeList(0);
+                if (al.exists("lhefGenerator")){
+                  m_metaFields.lhefGenerator = al["lhefGenerator"].data<std::string>();
+                }
 
-		if (al.exists("generators")){
-		  m_metaFields.generators = al["generators"].data<std::string>();
-		}
+                if (al.exists("generators")){
+                  m_metaFields.generators = al["generators"].data<std::string>();
+                }
 
-		if (al.exists("evgenProcess")){
-		  m_metaFields.evgenProcess = al["evgenProcess"].data<std::string>();
-		}
+                if (al.exists("evgenProcess")){
+                  m_metaFields.evgenProcess = al["evgenProcess"].data<std::string>();
+                }
 
-		if (al.exists("evgenTune")){
-		  m_metaFields.evgenTune = al["evgenTune"].data<std::string>();
-		}
+                if (al.exists("evgenTune")){
+                  m_metaFields.evgenTune = al["evgenTune"].data<std::string>();
+                }
 
-		if (al.exists("hardPDF")){
-		  m_metaFields.hardPDF = al["hardPDF"].data<std::string>();
-		}
+                if (al.exists("hardPDF")){
+                  m_metaFields.hardPDF = al["hardPDF"].data<std::string>();
+                }
 
-		if (al.exists("softPDF")){
-		  m_metaFields.softPDF = al["softPDF"].data<std::string>();
-		}
-	      }
-	    }
-	    else {
-	      ATH_MSG_WARNING("Empty Tag Info metadata!");
-	    }
-	  }
-	}
+                if (al.exists("softPDF")){
+                  m_metaFields.softPDF = al["softPDF"].data<std::string>();
+                }
+              }
+            }
+            else {
+              ATH_MSG_WARNING("Empty Tag Info metadata!");
+            }
+          }
+        }
 
 
     // A helper to set up a TruthVertex (without filling the ELs)
@@ -532,7 +579,7 @@ namespace xAODMaker {
     StatusCode
     xAODTruthCnvAlg::MetaDataWriter::maybeWrite (uint32_t mcChannelNumber,
                                                  const HepMC::GenEvent& genEvt,
-						 const MetadataFields& metaFields)
+                                                 const MetadataFields& metaFields)
     {
       // This bit needs to be serialized.
       lock_t lock (m_mutex);
@@ -578,24 +625,24 @@ namespace xAODMaker {
         md->setWeightNames( orderedWeightNameVec );
 #endif
 
-	if(!metaFields.lhefGenerator.empty()) {
-	  md->setLhefGenerator(metaFields.lhefGenerator);
-	}
-	if(!metaFields.generators.empty()) {
-	  md->setGenerators(metaFields.generators);
-	}
-	if(!metaFields.evgenProcess.empty()) {
-	  md->setEvgenProcess(metaFields.evgenProcess);
-	}
-	if(!metaFields.evgenTune.empty()) {
-	  md->setEvgenTune(metaFields.evgenTune);
-	}
-	if(!metaFields.hardPDF.empty()) {
-	  md->setHardPDF(metaFields.hardPDF);
-	}
-	if(!metaFields.softPDF.empty()) {
-	  md->setSoftPDF(metaFields.softPDF);
-	}
+        if(!metaFields.lhefGenerator.empty()) {
+          md->setLhefGenerator(metaFields.lhefGenerator);
+        }
+        if(!metaFields.generators.empty()) {
+          md->setGenerators(metaFields.generators);
+        }
+        if(!metaFields.evgenProcess.empty()) {
+          md->setEvgenProcess(metaFields.evgenProcess);
+        }
+        if(!metaFields.evgenTune.empty()) {
+          md->setEvgenTune(metaFields.evgenTune);
+        }
+        if(!metaFields.hardPDF.empty()) {
+          md->setHardPDF(metaFields.hardPDF);
+        }
+        if(!metaFields.softPDF.empty()) {
+          md->setSoftPDF(metaFields.softPDF);
+        }
       }
 
       return StatusCode::SUCCESS;
