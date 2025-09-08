@@ -186,11 +186,11 @@ int MuonIdHelper::get_expanded_id_calc(const Identifier& compact_id, ExpandedIde
             result = 0;
         } else if (0 == begin) {
             ExpandedIdentifier empty;
-            result = m_dict->unpack(compact_id, empty, end, id);
+            result = m_dict->unpack(this->group(), compact_id, empty, end, id);
         } else {
             // Non-zero prefix - we assume that the prefix contains
             // the IdDet level
-            result = m_dict->unpack(compact_id, context->prefix_id(), end, id);
+            result = m_dict->unpack(this->group(), compact_id, context->prefix_id(), end, id);
         }
     }
     if (!id.isValid()) {

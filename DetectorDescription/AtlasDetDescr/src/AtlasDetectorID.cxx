@@ -391,7 +391,7 @@ AtlasDetectorID::show_to_string(const Identifier id, const IdContext *context, c
         ATH_MSG_WARNING(__func__<<" No detector type associated to id "<<id);
         return result;
     }
-    if (dict->unpack(compact, prefix, max_index, expId)) {
+    if (dict->unpack(m_group, compact, prefix, max_index, expId)) {
         return result;
     }
 
@@ -449,7 +449,7 @@ std::string AtlasDetectorID::print_to_string(Identifier id,
             ATH_MSG_WARNING(__func__<<":"<<__LINE__<<" No dictionary could be associated to "<<id);
             return result;
         }
-        if (dict->unpack(compact, prefix, max_index," ", result)) {
+        if (dict->unpack(m_group, compact, prefix, max_index," ", result)) {
             return result;
         }
     }

@@ -1602,10 +1602,10 @@ int Tile_Base_ID::get_expanded_id  (const Identifier& id,
   }
   else if ( 0 == begin) {
     ExpandedIdentifier empty;
-    result = dict()->unpack(id, empty, end, exp_id);
+    result = dict()->unpack(group(), id, empty, end, exp_id);
   }
   else {
-    result = dict()->unpack(id, context->prefix_id(), end, exp_id);
+    result = dict()->unpack(group(), id, context->prefix_id(), end, exp_id);
   }
   return result;
 }
