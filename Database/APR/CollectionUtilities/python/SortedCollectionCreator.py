@@ -92,7 +92,7 @@ class SortedCollectionCreator:
 
    def writeCollection(self, outputCollection, outputCollectionType):
       """write sorted collection into a Collection file"""
-      self.info("Writing Event collection {} ".format(outputCollection+".root"))
+      self.info("Writing Event collection {} ".format(outputCollection))
       self.collDescription.setName(outputCollection)
       self.collDescription.setType(outputCollectionType)
       # create the output collection (file)
