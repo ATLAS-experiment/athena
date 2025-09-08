@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigPartialEventBuilding_PEBInfoWriterToolBase_h
@@ -54,7 +54,7 @@ public:
   virtual ~PEBInfoWriterToolBase();
 
   /// Adds a pass-through decision with attached PEB information created by \c createPEBInfo for each input
-  StatusCode decide(std::vector<Input>& inputs) const;
+  StatusCode decide(const EventContext& ctx, std::vector<Input>& inputs) const;
   /// Returns the decision id
   HLT::Identifier id() const {return m_decisionId;}
   /// Returns the key used to record/retrieve the ROB list
@@ -64,7 +64,7 @@ public:
 
 protected:
   /// Creates the PEBInfo which is attached to the decision in \c decide. Has to be implemented by the derived class.
-  virtual PEBInfo createPEBInfo(const Input& input) const = 0;
+  virtual PEBInfo createPEBInfo(const EventContext& ctx, const Input& input) const = 0;
   /// MaxRoIs property
   Gaudi::Property<int> m_maxRoIs {
     this, "MaxRoIs", -1, "Create PEB list only for the first N RoIs from input decisions (<0 means no limit)"
