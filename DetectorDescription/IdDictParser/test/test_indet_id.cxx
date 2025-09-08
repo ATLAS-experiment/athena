@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -488,7 +488,7 @@ int main (int argc, char* argv[])  {
       dictionary->pack32 (id, 0, 6, packedB); 
       std::cout << "b=[" << packedB << "]" << std::endl; 
       ExpandedIdentifier id2;
-      dictionary->unpack (packedB, ExpandedIdentifier (), 6, id2); 
+      dictionary->unpack ("pixel", packedB, ExpandedIdentifier (), 6, id2);
       std::cout << "unpack->[" << (std::string) id2 << "]" << std::endl; 
       if(test_pixel (idd, pixel_region)) {
         std::cout << "test_pixel failed" << std::endl;

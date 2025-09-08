@@ -691,10 +691,10 @@ int TileHWID::get_expanded_id  (const HWIdentifier& id, ExpandedIdentifier& exp_
   }
   else if ( 0 == begin) {
     ExpandedIdentifier empty;
-    result = m_dict->unpack(id, empty, end, exp_id);
+    result = m_dict->unpack(group(), id, empty, end, exp_id);
   }
   else {
-    result = m_dict->unpack(id, context->prefix_id(), end, exp_id);
+    result = m_dict->unpack(group(), id, context->prefix_id(), end, exp_id);
   }
   return result;
 }

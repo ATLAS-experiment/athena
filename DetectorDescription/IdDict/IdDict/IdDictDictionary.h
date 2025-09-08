@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictDictionary_H
@@ -142,7 +142,8 @@ public:
      *  the provided prefix (result will include the prefix) and up to
      *  index2 - (index1 is assumed to be 0, i.e. part of prefix). 
      */
-    int unpack (const Identifier& id, 
+    int unpack (const std::string& group,
+                const Identifier& id,
                 const ExpandedIdentifier& prefix,
                 size_t index2,
                 ExpandedIdentifier& unpackedId) const; 
@@ -152,7 +153,8 @@ public:
      *  prefix (result will include the prefix) and up to index2 -
      *  (index1 is assumed to be 0, i.e. part of prefix).
      */
-    int unpack (const Identifier& id, 
+    int unpack (const std::string& group,
+                const Identifier& id,
                 const ExpandedIdentifier& prefix,
                 size_t index2,
                 const std::string& sep,

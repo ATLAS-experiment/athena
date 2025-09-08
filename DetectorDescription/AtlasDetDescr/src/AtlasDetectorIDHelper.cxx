@@ -17,7 +17,7 @@ AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
   m_initialized = true;
 
-  AtlasDetectorID atlas_id;
+  AtlasDetectorID atlas_id ("", "");
 
   const IdDictDictionary* dict = dict_mgr.find_dictionary("InnerDetector");
   

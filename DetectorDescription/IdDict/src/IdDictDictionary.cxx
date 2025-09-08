@@ -671,7 +671,8 @@ int IdDictDictionary::reset(size_t index1,
 __attribute__ ((flatten))
 #endif
 int
-IdDictDictionary::unpack(const Identifier& id,
+IdDictDictionary::unpack(const std::string& /*group*/,
+                         const Identifier& id,
                          const ExpandedIdentifier& prefix,
                          size_t index2,
                          ExpandedIdentifier& unpackedId) const {
@@ -783,7 +784,8 @@ IdDictDictionary::unpack(const Identifier& id,
  *  (index1 is assumed to be 0, i.e. part of prefix).
  */
 int
-IdDictDictionary::unpack(const Identifier& id,
+IdDictDictionary::unpack(const std::string& /*group*/,
+                         const Identifier& id,
                          const ExpandedIdentifier& prefix,
                          size_t index2,
                          const std::string& sep,

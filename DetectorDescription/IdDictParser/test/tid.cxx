@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDictParser/test/tid.cxx,v 1.3 2005-04-29 16:11:22 schaffer Exp $ 
@@ -105,7 +105,7 @@ int main (int argc, char* argv[])
         std::cout << "b=[" << packedB << "]" << std::endl; 
  
 	ExpandedIdentifier id2;
-	dictionary->unpack (packedB, ExpandedIdentifier (), 6, id2); 
+	dictionary->unpack ("pixel", packedB, ExpandedIdentifier (), 6, id2);
  
         std::cout << "unpack->[" << (std::string) id2 << "]" << std::endl; 
       } 

@@ -19,8 +19,6 @@
  *
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "Identifier/Identifier.h"
 #include "Identifier/IdContext.h"
 #include "Identifier/IdHelper.h"
@@ -33,12 +31,9 @@
 #include <string>
 #include <vector>
 
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
 
 class IdDictDictionary;
 class AtlasDetectorIDHelper;
-
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 
 /**
@@ -85,8 +80,7 @@ public:
 
     /// @name strutors
     //@{
-    AtlasDetectorID(const std::string& name = "AtlasDetectorID",
-                    const std::string& group = "");
+    AtlasDetectorID(const std::string& name, const std::string& group);
     virtual ~AtlasDetectorID();
     AtlasDetectorID(const AtlasDetectorID& other) = delete;
     AtlasDetectorID& operator= (const AtlasDetectorID& other) = delete;
@@ -478,15 +472,9 @@ private:
 
 
 
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
 CLASS_DEF(AtlasDetectorID, 164875623, 1)
-
-/////////////////////////////////////////////////////////////////////////////
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-/////////////////////////////////////////////////////////////////////////////
 
 inline ExpandedIdentifier
 AtlasDetectorID::indet_exp           (void) const
