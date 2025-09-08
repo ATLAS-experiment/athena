@@ -102,16 +102,16 @@ namespace CP {
 
     std::vector<float> getCorrections(const xAOD::Jet& j); //, bool constScale);
 
-    JTC::TS overlap(const xAOD::Jet& j, JTC::Hole region);
+    JTC::TS overlap(const xAOD::Jet& j, const JTC::Hole& region);
 
     int getPtBin(float pt); //in MeV
     
-    bool inIOV(JTC::Hole region, int run);
+    bool inIOV(const JTC::Hole& region, int run);
 
-    bool inHole(const xAOD::Jet& j, JTC::Hole rdead);
-    bool inHole(float eta, float phi, JTC::Hole rdead);
+    bool inHole(const xAOD::Jet& j, const JTC::Hole& rdead);
+    bool inHole(float eta, float phi, const JTC::Hole& rdead);
       
-    IPair getModulePosition(const xAOD::Jet& jet, JTC::Hole module);
+    IPair getModulePosition(const xAOD::Jet& jet, const JTC::Hole& module);
 
     void loadModulesFromMap(const xAOD::Jet& jet, JTC::TS& status, const std::map<std::string,JTC::Hole>& hmap, JTC::PART part=JTC::PART::LB, JTC::TYPE type=JTC::TYPE::DB);
     StatusCode loadAllModules(const xAOD::Jet& jet, JTC::TS& status);
