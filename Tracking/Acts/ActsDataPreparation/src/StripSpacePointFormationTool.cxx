@@ -85,6 +85,13 @@ namespace ActsTrk {
         /// via the ContainerAccessor.
 
         const auto hashesProc = (hashesToProcess.size() > 0 ? hashesToProcess : stripAccessor.allIdentifiers());
+
+        //factor out floating point conversions
+        double overlapLimitOpposite = m_overlapLimitOpposite;
+        double overlapLimitPhi      = m_overlapLimitPhi;
+        double overlapLimitEtaMin   = m_overlapLimitEtaMin;
+        double overlapLimitEtaMax   = m_overlapLimitEtaMax;
+
         for (auto& idHash : hashesProc) {
             const InDetDD::SiDetectorElement* thisElement = elements.getDetectorElement(idHash);
             if ( not thisElement->isStereo() ) {
@@ -133,8 +140,8 @@ namespace ActsTrk {
                 // You can remove all the overlaps if requested.
                 // Here you test only the opposite element
                 if(not processOverlaps) Nmax = 2;
-
-                float hwidth(properties.halfWidth(idHash));
+                //factor double conversion outside of loop
+                double hwidth(static_cast<double>(properties.halfWidth(idHash)));
                 int n = 0;
 
 
@@ -163,39 +170,39 @@ namespace ActsTrk {
 
                     switch (n) {
                         case Opposite: {
-                            overlapExtents[ 0] = -m_overlapLimitOpposite;
-                            overlapExtents[ 1] =  m_overlapLimitOpposite;
+                            overlapExtents[ 0] = -overlapLimitOpposite;
+                            overlapExtents[ 1] =  overlapLimitOpposite;
                             break;
                         }
                         case PhiMinus: {
                             overlapExtents[ 6] =-hwidth;
-                            overlapExtents[ 7] =-hwidth+m_overlapLimitPhi;
-                            overlapExtents[ 8] = hwidth-m_overlapLimitPhi;
+                            overlapExtents[ 7] =-hwidth+overlapLimitPhi;
+                            overlapExtents[ 8] = hwidth-overlapLimitPhi;
                             overlapExtents[ 9] = hwidth;
                             break;
                         }
                         case PhiPlus: {
-                            overlapExtents[10] = hwidth-m_overlapLimitPhi;
+                            overlapExtents[10] = hwidth-overlapLimitPhi;
                             overlapExtents[11] = hwidth;
                             overlapExtents[12] =-hwidth;
-                            overlapExtents[13] =-hwidth+m_overlapLimitPhi;
+                            overlapExtents[13] =-hwidth+overlapLimitPhi;
                             break;
                         }
                         case EtaMinus: {
-			  overlapExtents[ 2] = m_overlapLimitEtaMin;
-			  overlapExtents[ 3] = m_overlapLimitEtaMax;
+			  overlapExtents[ 2] = overlapLimitEtaMin;
+			  overlapExtents[ 3] = overlapLimitEtaMax;
 			  if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) != 0) {
-			    overlapExtents[ 2] =-m_overlapLimitEtaMax;
-			    overlapExtents[ 3] =-m_overlapLimitEtaMin;
+			    overlapExtents[ 2] =-overlapLimitEtaMax;
+			    overlapExtents[ 3] =-overlapLimitEtaMin;
 			  }
 			  break;
                         }
 		        default: {
-			  overlapExtents[ 4] = m_overlapLimitEtaMin;
-			  overlapExtents[ 5] = m_overlapLimitEtaMax;
+			  overlapExtents[ 4] = overlapLimitEtaMin;
+			  overlapExtents[ 5] = overlapLimitEtaMax;
 			  if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) == 0) {
-			    overlapExtents[ 4] = -m_overlapLimitEtaMax;
-			    overlapExtents[ 5] = -m_overlapLimitEtaMin;
+			    overlapExtents[ 4] = -overlapLimitEtaMax;
+			    overlapExtents[ 5] = -overlapLimitEtaMin;
 			  }
 			  break;
                         }
@@ -488,11 +495,11 @@ namespace ActsTrk {
             std::swap( variance(0, 0), variance(1, 0) );
 
         // evaluation of measurement details
-        float topHalfStripLength = 0.5*firstInfo.stripDirection().norm();
+        double topHalfStripLength = 0.5*firstInfo.stripDirection().norm();
         Eigen::Matrix<double, 3, 1> topStripDirection = -firstInfo.stripDirection()/(2.*topHalfStripLength);
         Eigen::Matrix<double, 3, 1> topStripCenter = 0.5*firstInfo.trajDirection();
 
-        float bottomHalfStripLength = 0.5*secondInfo.stripDirection().norm();
+        double bottomHalfStripLength = 0.5*secondInfo.stripDirection().norm();
         Eigen::Matrix<double, 3, 1> bottomStripDirection = -secondInfo.stripDirection()/(2.*bottomHalfStripLength);
 
         Eigen::Matrix<double, 3, 1> stripCenterDistance = firstInfo.stripCenter() - secondInfo.stripCenter();
@@ -505,14 +512,14 @@ namespace ActsTrk {
 	toAdd.cov_r = variance(0,0);
 	toAdd.cov_z = variance(1,0);
 	toAdd.measurementIndexes = std::array<std::size_t,2> ({firstInfo.clusterIndex(), secondInfo.clusterIndex()});
-	toAdd.topHalfStripLength = topHalfStripLength;
-	toAdd.bottomHalfStripLength = bottomHalfStripLength;
+	toAdd.topHalfStripLength = static_cast<float>(topHalfStripLength);
+	toAdd.bottomHalfStripLength = static_cast<float>(bottomHalfStripLength);
 	toAdd.topStripDirection = topStripDirection.cast<float>();
 	toAdd.bottomStripDirection = bottomStripDirection.cast<float>();
 	toAdd.stripCenterDistance = stripCenterDistance.cast<float>();
 	toAdd.topStripCenter = topStripCenter.cast<float>();
 
-	collection.push_back(toAdd);
+	collection.push_back(std::move(toAdd));
 
         return StatusCode::SUCCESS;
     }
