@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // //-----------------------------------------------------------------------
@@ -78,7 +78,8 @@ std::optional<CaloLocalHadCoeff> CaloLCCoeffHelper::InitDataFromFile(const char 
     ist.clear(); ist.str(sLine);
     std::string sdummy, area_title;
     int area_indx(0), area_type(0), area_npars(0);
-    if( !(ist >> sdummy >> area_indx >> area_title >> area_type >> area_npars) ) {
+    if( !(ist >> sdummy >> area_indx >> area_title >> area_type >> area_npars) ||
+        area_npars < 0 || area_npars > 1000 ) {
       std::cout << "CaloLCCoeffHelper::initDataFromFile() -> Error! Could not parse line '" << cLine << "' at p1." << std::endl;
       return std::nullopt;
     }
