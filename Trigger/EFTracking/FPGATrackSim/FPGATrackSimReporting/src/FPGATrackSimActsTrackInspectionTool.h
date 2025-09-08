@@ -40,6 +40,8 @@ namespace FPGATrackSim {
       };
       Acts::BoundVector parameters = {};
       std::deque<std::unique_ptr<Measurement>> trackMeasurements;
+      double chi2 = 0.0;
+      unsigned int ndof = 0u;
     };
 
     // Typedef within the class
