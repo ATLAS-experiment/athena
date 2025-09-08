@@ -65,7 +65,7 @@ def fromRunArgs(runArgs):
     cfg.merge(InDetTrackRecoCfg(flags))  
 
     cfg.merge(TRT_StrawStatusCfg(flags))
-    cfg.merge(TRT_CalibrationMgrCfg(flags, calibconstants=runArgs.dbconst ,DoCalibrate=runArgs.calibrate))
+    cfg.merge(TRT_CalibrationMgrCfg(flags, calibconstants=runArgs.calibconstants ,DoCalibrate=runArgs.calibrate))
 
     processPostInclude(runArgs, flags, cfg)
     processPostExec(runArgs, flags, cfg)

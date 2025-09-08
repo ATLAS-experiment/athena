@@ -28,7 +28,8 @@ StatusCode TrigL2MuonSA::StgcDataPreparator::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigL2MuonSA::StgcDataPreparator::prepareData(const TrigRoiDescriptor* p_roids,
+StatusCode TrigL2MuonSA::StgcDataPreparator::prepareData(const EventContext& ctx,
+                                                         const TrigRoiDescriptor* p_roids,
 							 TrigL2MuonSA::StgcHits&  stgcHits) const
 {
 
@@ -45,7 +46,7 @@ StatusCode TrigL2MuonSA::StgcDataPreparator::prepareData(const TrigRoiDescriptor
     ATH_MSG_INFO("no stgcPrepContainerKey");
     return StatusCode::SUCCESS;
   }
-  auto stgcPrepContainerHandle = SG::makeHandle(m_stgcPrepContainerKey);
+  auto stgcPrepContainerHandle = SG::makeHandle(m_stgcPrepContainerKey, ctx);
   if (!stgcPrepContainerHandle.isValid()) {
     ATH_MSG_ERROR("Cannot retrieve sTgc PRD Container key: " << m_stgcPrepContainerKey.key());
     return StatusCode::FAILURE;
@@ -59,15 +60,15 @@ StatusCode TrigL2MuonSA::StgcDataPreparator::prepareData(const TrigRoiDescriptor
 
     ATH_MSG_DEBUG("Use RoI based data access");
     const IRoiDescriptor* iroi = static_cast<const IRoiDescriptor*> (p_roids);
-    if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, stgcHashList);
+    if (iroi) m_regionSelector->lookup(ctx)->HashIDList(*iroi, stgcHashList);
     else {
       TrigRoiDescriptor fullscan_roi( true );
-      m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, stgcHashList);
+      m_regionSelector->lookup(ctx)->HashIDList(fullscan_roi, stgcHashList);
     }
     ATH_MSG_DEBUG("stgcHashList.size()=" << stgcHashList.size());
 
     std::vector<uint32_t> stgcRobList;
-    m_regionSelector->lookup( Gaudi::Hive::currentContext() )->ROBIDList(*iroi, stgcRobList);
+    m_regionSelector->lookup(ctx)->ROBIDList(*iroi, stgcRobList);
 
     if (!stgcHashList.empty()) {
 

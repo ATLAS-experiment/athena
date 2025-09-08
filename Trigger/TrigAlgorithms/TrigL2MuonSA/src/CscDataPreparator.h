@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_CSCDATAPREPARATOR_H
@@ -31,8 +31,9 @@ namespace TrigL2MuonSA {
     
   public:
 
-    StatusCode prepareData(TrigL2MuonSA::MuonRoad&  muonRoad,
-			   TrigL2MuonSA::CscHits&   cscHits) const;
+    StatusCode prepareData(const EventContext& ctx,
+                           TrigL2MuonSA::MuonRoad&  muonRoad,
+                           TrigL2MuonSA::CscHits&   cscHits) const;
 
     void setRoIBasedDataAccess(bool use_RoIBasedDataAccess) {m_use_RoIBasedDataAccess = use_RoIBasedDataAccess;};
 

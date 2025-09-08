@@ -28,7 +28,8 @@ namespace TrigL2MuonSA {
 
     virtual StatusCode initialize() override;
 
-    StatusCode prepareData(const TrigRoiDescriptor* p_roids,
+    StatusCode prepareData(const EventContext& ctx,
+                           const TrigRoiDescriptor* p_roids,
 			   TrigL2MuonSA::StgcHits& stgcHits) const;
 
     void setRoIBasedDataAccess(bool use_RoIBasedDataAccess) {m_use_RoIBasedDataAccess = use_RoIBasedDataAccess;};

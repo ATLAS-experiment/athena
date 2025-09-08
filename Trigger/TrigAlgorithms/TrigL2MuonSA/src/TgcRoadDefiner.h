@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_TGCROADDEFINER_H
@@ -33,7 +33,8 @@ class TgcRoadDefiner: public AthAlgTool
   
   virtual StatusCode initialize() override;
 
-  StatusCode defineRoad(const TrigRoiDescriptor*     p_roids,
+  StatusCode defineRoad(const EventContext& ctx,
+                        const TrigRoiDescriptor*     p_roids,
                         const bool                   insideOut,
                         const TrigL2MuonSA::TgcHits& tgcHits,
                         TrigL2MuonSA::MuonRoad&      muonRoad,

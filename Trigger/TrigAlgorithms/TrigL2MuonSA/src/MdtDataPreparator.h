@@ -44,13 +44,15 @@ namespace TrigL2MuonSA {
 
     virtual StatusCode initialize() override;
 
-    StatusCode prepareData(const TrigRoiDescriptor* p_roids,
+    StatusCode prepareData(const EventContext& ctx,
+			    const TrigRoiDescriptor* p_roids,
 			    const TrigL2MuonSA::RpcFitResult& rpcFitResult,
 			    TrigL2MuonSA::MuonRoad&           muonRoad,
 			    TrigL2MuonSA::MdtRegion&          mdtRegion,
 			    TrigL2MuonSA::MdtHits&            mdtHits) const;
 
-    StatusCode prepareData(const TrigRoiDescriptor* p_roids,
+    StatusCode prepareData(const EventContext& ctx,
+			    const TrigRoiDescriptor* p_roids,
 			    const TrigL2MuonSA::TgcFitResult& tgcFitResult,
 			    TrigL2MuonSA::MuonRoad&           muonRoad,
 			    TrigL2MuonSA::MdtRegion&          mdtRegion,
@@ -62,6 +64,7 @@ namespace TrigL2MuonSA {
   private:
 
     StatusCode getMdtHits(
+        const EventContext& ctx,
         const TrigRoiDescriptor* p_roids,
 			  TrigL2MuonSA::MuonRoad& muonRoad,
 			  TrigL2MuonSA::MdtHits& mdtHits) const;

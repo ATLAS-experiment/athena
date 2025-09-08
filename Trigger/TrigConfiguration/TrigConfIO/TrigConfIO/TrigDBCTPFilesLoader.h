@@ -42,7 +42,8 @@ namespace TrigConf {
        * @param ctpfiles [out] the loaded L1CTPFiles
        * @param loadMask [in] bit mask which specifies which content should be loaded (default is 0x0F which loads all content)
        *   0x01 - CTPFiles, 0x02 - SMX files, 0x04 - TMC, 0x08 - MUCTPI
-       * @param outFileName [in] if set, an outputfile with the raw data blob is written
+       * @param outFileName [in] name of file to write out the loaded data (optional, by default no file will be written)
+       * @return true if loading (and optional writing) was successfull
        */
       bool loadHardwareFiles( unsigned int smk,
                               L1CTPFiles & ctpfiles,

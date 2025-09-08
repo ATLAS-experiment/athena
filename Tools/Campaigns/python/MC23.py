@@ -392,8 +392,7 @@ def MC23gNoPileUp(flags):
     _MC23NoPileUp(flags)
 
     flags.Input.MCCampaign = Campaign.MC23g
-    # TODO: replace with the actual run number
-    flags.Input.ConditionsRunNumber = 470000
+    flags.Input.ConditionsRunNumber = 495000
 
 
 def MC23NoPileUpLowMuRun(flags):

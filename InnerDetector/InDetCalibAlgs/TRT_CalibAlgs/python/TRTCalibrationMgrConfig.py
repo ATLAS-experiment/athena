@@ -119,7 +119,7 @@ if __name__ == '__main__':
     parser.add_argument('--filesInput'  , nargs='+', default=[],help="Input files. RAW data")
     parser.add_argument('--fileOutput'  , default="basic.root" ,help="Output file name. Flat Ntuple")
     parser.add_argument('--doCalibrator',action='store_true' ,help="Run the calibrator to obtain the constants")
-    parser.add_argument('--dbconst', default="" ,help="Input file constants for writer")
+    parser.add_argument('--calibconstants', default="" ,help="Input file constants for writer")
     args = parser.parse_args()
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

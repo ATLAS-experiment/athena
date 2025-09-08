@@ -28,10 +28,10 @@ if __name__ == "__main__":
     python -m TRT_ConditionsAlgs.TRT_DBUpdate --prod           -> for data production
     python -m TRT_ConditionsAlgs.TRT_DBUpdate --prod --isMC    -> for MC production''')
     
-    parser.add_argument('--prod',action='store_true' ,help="Meant for production only")
-    parser.add_argument('--isMC',action='store_true' ,help="By default is DATA. If set then MC")
-    parser.add_argument('--pwd', required=True ,help="COOL DB password - used by experts only")
-    parser.add_argument('-s','--skipToken',action='store_true' ,help="Skips auth-get-user-token if provided (you must have one active)")
+    parser.add_argument('--prod', action='store_true', help="Meant for production only")
+    parser.add_argument('--isMC', action='store_true', help="By default is DATA. If set then MC")
+    parser.add_argument('--pwd', required=True, help="COOL DB password - used by experts only")
+    parser.add_argument('-s', '--skipToken', action='store_true', help="Skips auth-get-user-token if provided (you must have one active)")
     args = parser.parse_args()
 
     # Export COOL_FLASK environment variable
