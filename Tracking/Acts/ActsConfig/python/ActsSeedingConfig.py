@@ -473,7 +473,8 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
     if flags.Tracking.ActiveConfig.extension == "ActsHeavyIon" and processPixels:
         kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags,
                                                                                                    name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool')))
-    if processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.Default:
+
+    if processStrips and (flags.Acts.SeedingStrategy is SeedingStrategy.Default or flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet):
         kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
                                                                                                    name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
         
