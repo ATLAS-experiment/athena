@@ -227,6 +227,10 @@ def createMonTool( flags, slicetag, chain ) :
     defineHisto( monTool,  "d0_vs_phi_rec_prof", path=mypath, type="TProfile", title="d0 vs phi_rec_prof",  xbins=25,     xmin=-pi,  xmax=pi )
 
     if "probe" in cs.extra: 
+        if "Jpsi" in chain:
+            defineHisto( monTool,  "invmass",      path=mypath, type="TH1F", title="invariant mass;mass [GeV]", xbins=50, xmin=0, xmax=10 )
+            defineHisto( monTool,  "invmass_obj",  path=mypath, type="TH1F", title="invariant mass;mass [GeV]", xbins=50, xmin=0, xmax=10 )
+        else: 
             defineHisto( monTool,  "invmass",      path=mypath, type="TH1F", title="invariant mass;mass [GeV]", xbins=320, xmin=0, xmax=200 )
             defineHisto( monTool,  "invmass_obj",  path=mypath, type="TH1F", title="invariant mass;mass [GeV]", xbins=320, xmin=0, xmax=200 )
             
