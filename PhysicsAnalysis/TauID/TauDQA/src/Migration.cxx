@@ -133,26 +133,4 @@ namespace Tau{
     }
     return;
   }
-
-  void Migration::decayModeFill(int trueMode, int recP, int recN, TH1 *histo, float weight)
-  {
-    xAOD::TauJetParameters::DecayMode recMode = xAOD::TauJetParameters::DecayMode::Mode_Error;
-    if ( recP == 1 && recN == 0 ) {
-      recMode = xAOD::TauJetParameters::DecayMode::Mode_1p0n;
-    }
-    if ( recP == 1 && recN == 1 ) {
-      recMode = xAOD::TauJetParameters::DecayMode::Mode_1p1n;
-    }
-    if ( recP == 1 && recN > 1 ) {
-      recMode = xAOD::TauJetParameters::DecayMode::Mode_1pXn;
-    }
-    if ( recP == 3 && recN == 0 ) {
-      recMode = xAOD::TauJetParameters::DecayMode::Mode_3p0n;
-    }
-    if ( recP == 3 && recN >= 1 ){
-      recMode = xAOD::TauJetParameters::DecayMode::Mode_3pXn;
-    }
-    this->decayModeFill(trueMode, recMode, histo, weight);
-  }
-      
 }

@@ -62,7 +62,6 @@ namespace Tau{
 	void initializePlots();
 	std::string m_sTauJetContainerName;
 	void decayModeFill(int trueMode, int recMode, TH1 *histo, float weight);
-	void decayModeFill(int trueMode, int recP, int recN, TH1 *histo, float weight);
     };
     
 }
