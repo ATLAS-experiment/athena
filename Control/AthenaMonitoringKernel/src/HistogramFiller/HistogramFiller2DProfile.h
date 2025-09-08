@@ -8,7 +8,7 @@
 #include "TProfile2D.h"
 #include "boost/range/combine.hpp"
 
-#include "AthenaMonitoringKernel/HistogramFiller.h"
+#include "HistogramFiller.h"
 
 namespace Monitored {
   /**

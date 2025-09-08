@@ -7,7 +7,7 @@
 
 #include "TEfficiency.h"
 
-#include "AthenaMonitoringKernel/HistogramFiller.h"
+#include "HistogramFiller.h"
 #include "HistogramFillerUtils.h"
 
 namespace Monitored {

@@ -7,7 +7,7 @@
 
 #include "TH1.h"
 
-#include "AthenaMonitoringKernel/HistogramFiller.h"
+#include "HistogramFiller.h"
 #include "HistogramFillerUtils.h"
 
 #include "AthenaKernel/getMessageSvc.h"
