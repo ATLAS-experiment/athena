@@ -65,34 +65,44 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 
 
 
-    larDigitalTriggMonAlg = helper.addAlgorithm(CompFactory.LArDigitalTriggMonAlg('larDigitalTriggMonAlg'))
-    larDigitalTriggMonAlg.ProblemsToMask=["maskedOSUM"] #highNoiseHG","highNoiseMG","highNoiseLG","deadReadout","deadPhys"]
-    if nsamples < 4:
-        larDigitalTriggMonAlg.LArRawSCEtRecoContainerKey="dummy" # this will not exists, so not used in monitoring
-         
     hasEtId = False
     hasEt = False
     hasAdc = False
     hasAdcBas = False
+    RawSCContainerKey = ""
+    DigitContainerKey = ""
     for i in range(0,len(streamTypes)):
         mlog.info("runinfo.streamTypes()[i]: "+str(streamTypes[i]))
         if streamTypes[i] ==  "SelectedEnergy":
             hasEtId = True
-            larDigitalTriggMonAlg.LArRawSCContainerKey = "SC_ET_ID"
+            RawSCContainerKey = "SC_ET_ID"
         if streamTypes[i] ==  "Energy":
             hasEt = True
-            larDigitalTriggMonAlg.LArRawSCContainerKey = "SC_ET"
+            RawSCContainerKey = "SC_ET"
         if streamTypes[i] ==  "RawADC":
             hasAdc = True
             larLATOMEBuilderAlg.LArDigitKey = "SC"
             larLATOMEBuilderAlg.isADCBas = False
-            larDigitalTriggMonAlg.LArDigitContainerKey = "SC"
+            DigitContainerKey = "SC"
         if streamTypes[i] ==  "ADC":
             hasAdcBas = True
-            larDigitalTriggMonAlg.isADCBas = True
-            larDigitalTriggMonAlg.LArDigitContainerKey = "SC_ADC_BAS"
+            DigitContainerKey = "SC_ADC_BAS"
             larLATOMEBuilderAlg.isADCBas = True
             larLATOMEBuilderAlg.LArDigitKey = "SC_ADC_BAS"
+
+    # if no energies in the receipe, do not run this algo....
+    if len(RawSCContainerKey)==0:
+       print("No energies, not including LArDigitalTriggMonAlg")
+       return helper.result()
+
+    larDigitalTriggMonAlg = helper.addAlgorithm(CompFactory.LArDigitalTriggMonAlg('larDigitalTriggMonAlg'))
+    larDigitalTriggMonAlg.ProblemsToMask=["maskedOSUM"] #highNoiseHG","highNoiseMG","highNoiseLG","deadReadout","deadPhys"]
+    if nsamples < 4:
+        larDigitalTriggMonAlg.LArRawSCEtRecoContainerKey="dummy" # this will not exists, so not used in monitoring
+
+    larDigitalTriggMonAlg.isADCBas = hasAdcBas
+    larDigitalTriggMonAlg.LArRawSCContainerKey = RawSCContainerKey
+    larDigitalTriggMonAlg.LArDigitContainerKey = DigitContainerKey
 
     if (hasEtId and hasEt): #prefer EtId if both in recipe
         hasEt = False
