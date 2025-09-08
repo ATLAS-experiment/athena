@@ -12,7 +12,7 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgMessaging/AsgMessaging.h"
 #include <unordered_map>
-
+#include <mutex>
 
 
 
@@ -152,6 +152,9 @@ bool nSCTHitsPlusDeadSensors (
 bool eProbabilityHT(
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, float &out);
 
+bool eProbabilityHT_noTRT(
+    const xAOD::TauJet &tau, const xAOD::TauTrack &track, float &out);
+
 bool eProbabilityNN(
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, float &out);
 
@@ -277,7 +280,7 @@ public:
     using ClusterCalc = std::function<bool(const xAOD::TauJet &, const xAOD::CaloVertexedTopoCluster &, float &)>;  
 
 public:
-    GNNVarCalc();
+    GNNVarCalc(bool useTRT);
     ~GNNVarCalc() = default;
 
     // Methods to compute the output (vector) based on the variable name
@@ -294,6 +297,9 @@ public:
                  const std::vector<xAOD::CaloVertexedTopoCluster> &clusters) const;
 
 private:
+    static void initialize_map(bool useTRT);
+    inline static std::once_flag m_init_flag; // ensures thread-safe one-time init
+
     // Lookup tables
     inline static const std::unordered_map<std::string, ScalarCalc>  m_scalar_map = {
         {"isolFrac",                  Variables::Scalar::isolFrac},
@@ -312,7 +318,7 @@ private:
         {"pt",                        Variables::Scalar::pt}
     };
 
-    inline static const std::unordered_map<std::string, TrackCalc>   m_track_map = {
+    inline static std::unordered_map<std::string, TrackCalc> m_track_map ATLAS_THREAD_SAFE = {
         {"pt_log",                    Variables::Track::pt_log},
         {"trackPt",                   Variables::Track::trackPt},
         {"trackEta",                  Variables::Track::trackEta},
@@ -347,6 +353,7 @@ private:
         {"CENTER_LAMBDA",             Variables::Cluster::CENTER_LAMBDA},
         {"et",                        Variables::Cluster::et}
     };
+
 };
 
 } // namespace TauJetGNNUtils

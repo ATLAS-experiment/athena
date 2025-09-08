@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUJETRNN_H
@@ -45,7 +45,7 @@ public:
 public:
     // Construct a network from the .json specification created by the lwtnn
     // converters (kerasfunc2json.py).
-    TauJetRNN(const std::string &filename, const Config &config);
+    TauJetRNN(const std::string &filename, const Config &config, bool useTRT);
     ~TauJetRNN();
 
     // Compute the signal probability in [0, 1] or a default value
@@ -88,6 +88,8 @@ private:
 
     // Variable calculator to calculate input variables on the fly
     std::unique_ptr<TauJetRNNUtils::VarCalc> m_var_calc;
+
+    bool m_useTRT = true;
 };
 
 #endif // TAURECTOOLS_TAUJETRNN_H

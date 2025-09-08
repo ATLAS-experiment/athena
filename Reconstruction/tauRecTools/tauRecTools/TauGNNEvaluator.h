@@ -76,6 +76,7 @@ private:
     Gaudi::Property<float> m_max_cluster_dr{this, "MaxClusterDR", 1.0f};
     Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
     Gaudi::Property<bool> m_doTrackClassification{this, "TrackClassification", true};
+    Gaudi::Property<bool> m_useTRT{this, "useTRT", true};
     Gaudi::Property<float> m_minTauPt{this, "MinTauPt", 0.};
     Gaudi::Property<bool> m_applyLooseTrackSel{this, "ApplyLooseTrackSel", false};
     Gaudi::Property<bool> m_applyTightTrackSel{this, "ApplyTightTrackSel", false};

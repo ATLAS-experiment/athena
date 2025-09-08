@@ -12,10 +12,10 @@
 
 #include "tauRecTools/TauGNNUtils.h"
 
-TauGNN::TauGNN(const std::string &nnFile, const Config &config):
+TauGNN::TauGNN(const std::string &nnFile, const Config &config, bool useTRT):
     asg::AsgMessaging("TauGNN"),
     m_saltModel(std::make_shared<FlavorTagInference::SaltModel>(nnFile)),
-    m_config{config}
+    m_config{config}, m_useTRT(useTRT)
   {
     //==================================================//
     // This part is ported from FTagDiscriminant GNN.cxx//
@@ -91,7 +91,7 @@ TauGNN::TauGNN(const std::string &nnFile, const Config &config):
         }
     }
     // Load the variable calculator
-    m_var_calc = std::make_unique<TauGNNUtils::GNNVarCalc>();
+    m_var_calc = std::make_unique<TauGNNUtils::GNNVarCalc>(m_useTRT);
     ATH_MSG_INFO("TauGNN object initialized successfully!");
 }
 

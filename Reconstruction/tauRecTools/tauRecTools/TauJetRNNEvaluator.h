@@ -61,6 +61,7 @@ private:
     Gaudi::Property<float> m_max_cluster_dr{this, "MaxClusterDR", 1.0f};
     Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
     Gaudi::Property<bool> m_doTrackClassification{this, "TrackClassification", true};
+    Gaudi::Property<bool> m_useTRT{this, "useTRT", true};
     Gaudi::Property<std::string> m_input_layer_scalar{this, "InputLayerScalar", "scalar"};
     Gaudi::Property<std::string> m_input_layer_tracks{this, "InputLayerTracks", "tracks"};
     Gaudi::Property<std::string> m_input_layer_clusters{this, "InputLayerClusters", "clusters"};
