@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_TrigCompositeUtils_h
@@ -442,7 +442,10 @@ namespace TrigCompositeUtils {
   /**
    * @brief Extract features from the supplied linkVector (obtained through recursiveGetDecisions).
    * @param[in] navPaths Sub-graph of the trigger navigation which is to be considered.
-   * @param[in] lastFeatureOfType True for TrigDefs::lastFeatureOfType. stops at the first feature (of the correct type) found per path through the navigation.
+   * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
+                          way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
    * @param[in] featureName Optional name of feature link as saved online. The "feature" link is enforced, others may have been added. 
    * @param[in] chains Optional set of Chain IDs which features are being requested for. Used to set the ActiveState of returned LinkInfo objects.
    * @return Typed vector of LinkInfo. Each LinkInfo wraps an ElementLink to a feature and a pointer to the feature's Decision object in the navigation.
@@ -451,7 +454,7 @@ namespace TrigCompositeUtils {
   const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType( 
     const NavGraph& navGraph, 
     const std::string& containerSGKey = "",
-    const bool lastFeatureOfType = true,
+    const unsigned int behaviour = TrigDefs::lastFeatureOfType,
     const std::string& navElementLinkKey = featureString(),
     const DecisionIDContainer chainIDs = DecisionIDContainer());
 
@@ -468,7 +471,7 @@ namespace TrigCompositeUtils {
     std::set<const NavGraphNode*>& fullyExploredFrom,
     const NavGraphNode* navGraphNode, 
     const std::string& containerSGKey,
-    const bool lastFeatureOfType,
+    const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer chainIDs);
 
@@ -491,10 +494,11 @@ namespace TrigCompositeUtils {
    * Populates provided vector with all located links to T of the corresponding linkName. 
    * @param[in] start the Decision Object from where recursive search should begin
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
-   * @param[inout] links Reference to vector, this will be populated with the found links. 
+   * @param[inout] links Reference to vector, this will be populated with the found links.
    * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
-                          branch once a link has been located and collected. 
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
    * @param[inout] fullyExploredFrom Optional cache used by the recursive algorithm to avoid exploring each node multiple times. 
    */
   template<typename T>
@@ -512,8 +516,9 @@ namespace TrigCompositeUtils {
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
    * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
-                          branch once a link has been located and collected. 
-   * @return Vector with the found links. 
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
+   * @return Vector with the found links.
    */
   template<typename T>
   std::vector<LinkInfo<T>>

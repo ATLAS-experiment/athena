@@ -590,7 +590,7 @@ namespace TrigCompositeUtils {
     bool found = typelessFindLinksCommonLinkCollection(start, linkName, keyVec, clidVec, indexVec, sourceVec);
    
     // Early exit
-    if (found && behaviour == TrigDefs::lastFeatureOfType) {
+    if (found && (behaviour & TrigDefs::lastFeatureOfType)) {
       return true;
     }
     // If not Early Exit, then recurse
@@ -637,7 +637,7 @@ namespace TrigCompositeUtils {
     bool found = typelessFindLinksCommonLinkCollection(start_decisionObject, linkName, keyVec, clidVec, indexVec, sourceVec);
 
     // Early exit
-    if (found && behaviour == TrigDefs::lastFeatureOfType) {
+    if (found && (behaviour & TrigDefs::lastFeatureOfType)) {
       return true;
     }
     // If not Early Exit, then recurse
@@ -807,10 +807,11 @@ namespace TrigCompositeUtils {
           continue;
         HLT::Identifier legID = createLegName(chainName, legIdx);
         std::vector<LinkInfo<xAOD::IParticleContainer>> legFeatures;
-        for (const LinkInfo<xAOD::IParticleContainer>& info : features)
-          if (passed(legID.numeric(), info.decisions))
+        for (const LinkInfo<xAOD::IParticleContainer>& info : features) {
+          if (info.decisions->contains(legID.numeric()))
             legFeatures.push_back(info);
-      combinations.addLeg(legMultiplicities.at(legIdx), std::move(legFeatures));
+        }
+        combinations.addLeg(legMultiplicities.at(legIdx), std::move(legFeatures));
       }
     return combinations;
   }

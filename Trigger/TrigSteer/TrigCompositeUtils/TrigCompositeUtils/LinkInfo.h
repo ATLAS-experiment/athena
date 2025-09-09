@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOMPOSITEUTILS_LINKINFO_H
@@ -9,7 +9,8 @@
 #include "AthLinks/ElementLink.h"
 #include "AsgMessaging/StatusCode.h"
 
-#include <set>
+#include <optional>
+#include <unordered_set>
 
 namespace TrigCompositeUtils {
   /**
@@ -27,18 +28,15 @@ namespace TrigCompositeUtils {
   template<typename T>
   struct LinkInfo {
     LinkInfo() = default;
-    LinkInfo(
-      const Decision* s, const ElementLink<T>& l, ActiveState as = ActiveState::UNSET)
+    LinkInfo(const Decision* s, const ElementLink<T>& l, ActiveState as = ActiveState::UNSET)
       : source{s}, link{l}, state{as} {
-        if (s)
-        {
-          decisions.insert(s->decisions().begin(), s->decisions().end());
-        }
-      }
-    
-    LinkInfo(
-      const Decision* s, const ElementLink<T>& l, ActiveState as, const DecisionIDContainer &decisions)
-      : source{s}, link{l}, state{as}, decisions(decisions) {}
+      if (s) decisions.emplace(s->decisions().begin(), s->decisions().end());
+    }
+
+    LinkInfo(const Decision* s, const ElementLink<T>& l, ActiveState as, const DecisionIDContainer &decisionIDs)
+      : source{s}, link{l}, state{as} {
+      decisions.emplace(decisionIDs.begin(), decisionIDs.end());
+    }
 
     bool isValid() const {
       return source && link.isValid();
@@ -61,8 +59,9 @@ namespace TrigCompositeUtils {
     ElementLink<T> link;
     /// Was the linked feature active for any requested chains
     ActiveState state{ActiveState::UNSET};
-    /// All decision IDs active for this feature
-    DecisionIDContainer decisions;
+    /// All decision IDs active for this feature. Only available if filled explicitly via constructor
+    /// or findLinks called with TrigDefs::fillDecisions.
+    std::optional<std::unordered_set<DecisionID>> decisions;
   };
 } //> end namespace TrigCompositeUtils
 
