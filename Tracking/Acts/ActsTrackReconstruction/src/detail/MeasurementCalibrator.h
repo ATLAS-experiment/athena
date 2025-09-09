@@ -98,7 +98,7 @@ namespace ActsTrk {
       };
    };
 
-   struct MeasurementCalibrator2 {
+   struct MeasurementCalibrator {
       using PixelPos = xAOD::MeasVector<2>;
       using PixelCov = xAOD::MeasMatrix<2>;
       // @TODO should pass through bound state
@@ -130,7 +130,7 @@ namespace ActsTrk {
       StripCalibrator strip_preCalibrator;
       HGTDCalibrator hgtd_preCalibrator;
 
-      MeasurementCalibrator2(const IOnBoundStateCalibratorTool *pixelTool)
+      MeasurementCalibrator(const IOnBoundStateCalibratorTool *pixelTool)
       {
          // @TODO add support for real calibrators
 
@@ -140,10 +140,10 @@ namespace ActsTrk {
             pixelTool->connectPixelCalibrator( calibrate_after_measurement_selection ? pixel_postCalibrator : pixel_preCalibrator );
          }
          if (calibrate_after_measurement_selection) {
-            pixel_preCalibrator.template connect<&MeasurementCalibrator2::passthrough<2, xAOD::PixelCluster>>(this);
+            pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, xAOD::PixelCluster>>(this);
          }
-         strip_preCalibrator.template connect<&MeasurementCalibrator2::passthrough<1, xAOD::StripCluster>>(this);
-         hgtd_preCalibrator.template connect<&MeasurementCalibrator2::passthrough<3, xAOD::HGTDCluster>>(this);
+         strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
+         hgtd_preCalibrator.template connect<&MeasurementCalibrator::passthrough<3, xAOD::HGTDCluster>>(this);
       }
 
       const PixelCalibrator &pixelPostCalibrator() const  { return pixel_postCalibrator; }

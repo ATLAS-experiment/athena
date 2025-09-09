@@ -31,7 +31,7 @@
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
 #include "src/IMeasurementSelector.h"
 #include "src/detail/CalibratorRegistry.h"
-#include "src/detail/MeasurementCalibrator2.h"
+#include "src/detail/MeasurementCalibrator.h"
 
 #include "boost/container/small_vector.hpp"
 
@@ -339,7 +339,7 @@ namespace {
       using BoundState = std::tuple<Acts::BoundTrackParameters, Acts::BoundMatrix, double>;
       // the delegate used by the track finder to which the measurement selector needs to be connected to
 
-      AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator2 &&calibrator,
+      AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator &&calibrator,
                                   const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                   TheAtlasMeasurementSelector::Config &&config)
          : m_calibrator( std::move(calibrator)),
@@ -373,7 +373,7 @@ namespace {
       }
 
       // provides the calibrators
-      ActsTrk::MeasurementCalibrator2         m_calibrator;
+      ActsTrk::MeasurementCalibrator         m_calibrator;
 
       // the actual measurement selector
       TheAtlasMeasurementSelector             m_measurementSelector;
@@ -389,7 +389,7 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Act
                                                                        const std::vector<size_t> &numMeasurementsCutOff) {
 
     // set calibrators per measurement container type (order does not matter);
-    ActsTrk::MeasurementCalibrator2 atl_measurement_calibrator(onTrackCalibratorTool);
+    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(onTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
 
     using AtlMeasurementSelector = AtlasActsMeasurmentSelector<RecoTrackContainer>;
