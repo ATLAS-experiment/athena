@@ -147,6 +147,20 @@ void fillFromCollection(ToolHandle<GenericMonitoringTool>& monTool)
   timeboth(mon, root, h, "fillFromCollection");
 }
 
+void fillFromCollectionCutMask(ToolHandle<GenericMonitoringTool>& monTool)
+{
+  std::vector<double> v = {1.0, 3.2, -0.2, 0.3, 1.2};
+  std::vector<char>   c = {  1,   0,    1,   1,   0};
+  auto mon = [&]() {
+    auto eta = Monitored::Collection("Eta", v);
+    auto cut = Monitored::Collection("CutMask", c);
+    auto group = Monitored::Group(monTool, eta, cut);
+  };
+
+  std::cout << std::left << std::setw(30) << "fillFromCollectionCutMask" << "MON: "
+            << timeit(mon) << std::endl;
+}
+
 int main(int argc, char** argv)
 {
   namespace po = boost::program_options;
@@ -189,6 +203,7 @@ int main(int argc, char** argv)
   CALLGRIND_STOP_INSTRUMENTATION;
 
   fillFromCollection(monTool);
+  fillFromCollectionCutMask(monTool);
 
   // Make sure that THistSvc gets finalized.
   // Otherwise, the output file will get closed while global dtors are running,

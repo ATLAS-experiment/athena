@@ -17,18 +17,18 @@ namespace Monitored {
     virtual unsigned fill(const HistogramFiller::VariablesPack& vars) const override {
       if ( ATH_UNLIKELY(vars.size() == 0 or vars.var[0] == nullptr) ) { return 0; }
 
-      std::function<bool(size_t)> cutMaskAccessor;
       if (vars.cut) {
-        // handling of the cutmask
-        auto cutMaskValuePair = getCutMaskFunc(vars.cut);
-        if (cutMaskValuePair.first == 0) { return 0; }
-        if (ATH_UNLIKELY(cutMaskValuePair.first > 1 && cutMaskValuePair.first != vars.var[0]->size())) {
+        const size_t maskSize = vars.cut->size();
+        // Abort if no cut entries or first (and only) entry is false
+        if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
+
+        if (ATH_UNLIKELY(maskSize > 1 && maskSize != vars.var[0]->size())) {
           MsgStream log(Athena::getMessageSvc(), "VecHistogramFiller1D");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
-              << cutMaskValuePair.first << " " << vars.var[0]->size() << endmsg;
+              << maskSize << " " << vars.var[0]->size() << endmsg;
         }
-        cutMaskAccessor = cutMaskValuePair.second;
       }
+
       auto histogram = this->histogram<TH1>();
        
       if ( ATH_UNLIKELY( static_cast<size_t>(histogram->GetNbinsX()) + (m_histDef->kVecUO ? 2 : 0) != vars.var[0]->size() ) ) {
@@ -43,7 +43,7 @@ namespace Monitored {
 
       const unsigned offset = m_histDef->kVecUO ? 0 : 1;
       for (unsigned i = 0; i < vars.var[0]->size(); ++i) {
-        if (cutMaskAccessor == nullptr or cutMaskAccessor(i)) {
+        if (vars.cut == nullptr or vars.cut->get(i)) {
           const double value = vars.var[0]->get(i);
           histogram->AddBinContent(i+offset, value);
           histogram->SetEntries(histogram->GetEntries() + value);

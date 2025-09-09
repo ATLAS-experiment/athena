@@ -25,10 +25,14 @@ namespace Monitored {
         return 0;
       }
 
-      // handling of the cutmask
-      auto cutMaskValuePair = getCutMaskFunc(vars.cut);
-      if (cutMaskValuePair.first == 0) { return 0; }
-      const auto & cutMaskAccessor = cutMaskValuePair.second;
+      if (vars.cut) {
+        const size_t maskSize = vars.cut->size();
+        // Abort if no cut entries or first (and only) entry is false
+        if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
+      }
+
+      // Accessor for cut mask in case one is defined
+      auto cutMaskAccessor = [&](size_t i) { return static_cast<bool>(vars.cut->get(i)); };
 
       if (vars.weight) {
         // Weighted fill

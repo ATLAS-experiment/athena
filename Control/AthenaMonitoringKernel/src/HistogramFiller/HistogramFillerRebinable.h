@@ -36,13 +36,15 @@ namespace Monitored {
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars ) const override {
       if (AXIS >= vars.size() ) { return 0; }
       if (vars.var[AXIS]->size()==0) { return 0; }
+
       // check if any of the cutmasks are non-zero before attempting any rebinning
-      auto cutMaskFuncPair = BASE::getCutMaskFunc(vars.cut);
-      bool anyTrue = false;
-      for(size_t i=0;i<cutMaskFuncPair.first;i++) {
-          anyTrue |= cutMaskFuncPair.second(i);
+      if (vars.cut) {
+        bool anyTrue = false;
+        for(size_t i=0; i<vars.cut->size(); i++) {
+          anyTrue |= static_cast<bool>(vars.cut->get(i));
+        }
+        if(!anyTrue) { return 0; }
       }
-      if(!anyTrue) { return 0; }
 
       double min = std::numeric_limits<double>::max();
       double max = std::numeric_limits<double>::min();

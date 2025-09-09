@@ -26,18 +26,20 @@ namespace Monitored {
     }
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars ) const override {
-      std::function<bool(size_t)> cutMaskAccessor;
+
       if ( vars.cut ) {
-        // handling of the cutmask
-        auto cutMaskValuePair = getCutMaskFunc(vars.cut);
-        if (cutMaskValuePair.first == 0) { return 0; }
-        if (ATH_UNLIKELY(cutMaskValuePair.first > 1 && cutMaskValuePair.first != vars.var[0]->size())) {
+        const size_t maskSize = vars.cut->size();
+        // Abort if no cut entries or first (and only) entry is false
+        if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
+        if (ATH_UNLIKELY(maskSize > 1 && maskSize != vars.var[0]->size())) {
           MsgStream log(Athena::getMessageSvc(), "HistogramFiller1D");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
-              << cutMaskValuePair.first << " " << vars.var[0]->size() << endmsg;
+              << maskSize << " " << vars.var[0]->size() << endmsg;
         }
-        cutMaskAccessor = cutMaskValuePair.second;
       }
+
+      // Accessor for cut mask in case one is defined
+      auto cutMaskAccessor = [&](size_t i) { return static_cast<bool>(vars.cut->get(i)); };
 
       if (vars.weight) {
         auto weightAccessor = [&](size_t i){ return vars.weight->get(i); };
@@ -49,11 +51,11 @@ namespace Monitored {
         }
         // Need to fill here while weightVector is still in scope
         if (not vars.cut) return HistogramFiller::fill<TH1>(weightAccessor, detail::noCut, *vars.var[0]);
-        else                  return HistogramFiller::fill<TH1>(weightAccessor, std::move(cutMaskAccessor), *vars.var[0]);
+        else              return HistogramFiller::fill<TH1>(weightAccessor, cutMaskAccessor, *vars.var[0]);
       }
 
       if (not vars.cut) return HistogramFiller::fill<TH1>(detail::noWeight, detail::noCut, *vars.var[0]);
-      else                  return HistogramFiller::fill<TH1>(detail::noWeight, std::move(cutMaskAccessor), *vars.var[0]);      
+      else              return HistogramFiller::fill<TH1>(detail::noWeight, cutMaskAccessor, *vars.var[0]);
     }
   };
 }
