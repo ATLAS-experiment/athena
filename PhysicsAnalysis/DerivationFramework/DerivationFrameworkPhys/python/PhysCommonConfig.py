@@ -69,7 +69,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(EGammaCommonCfg(flags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
-    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
+    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg, AddDiTauChargeDecoratorCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     acc.merge(JetCommonCfg(flags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
@@ -84,6 +84,9 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     # for AOD produced before 24.0.17, the electron removal tau is not available
     if flags.Tau.TauEleRM_isAvailable:
         acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_EleRM"))
+    # ditau Charge
+    acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJets"))
+    acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJetsLowPt"))
     if flags.Reco.EnableBTagging:
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         from DerivationFrameworkFlavourTag.FtagDerivationConfig import (

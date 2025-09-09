@@ -201,6 +201,26 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     return acc
 
 
+def AddDiTauChargeDecoratorCfg(flags, **kwargs):
+    """Decorate DiTau charge"""
+
+    kwargs.setdefault("DiTauContainerName", "DiTauJets")
+    kwargs.setdefault("prefix",           kwargs['DiTauContainerName'])
+
+    acc = ComponentAccumulator()
+   
+    DiTauChargeDecorator = CompFactory.DerivationFramework.DiTauChargeDecorator
+    DiTauChargeDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
+
+    prefix = kwargs['prefix']
+    diTauChargeDecorator = DiTauChargeDecorator(name               = f"{prefix}_DiTauChargeDecorator",
+                                                DiTauContainerName = kwargs['DiTauContainerName'])
+    acc.addPublicTool(diTauChargeDecorator)
+    acc.addEventAlgo(DiTauChargeDecoratorKernel(name              = f"{prefix}_DiTauIDDecorKernel",
+                                                AugmentationTools = [diTauChargeDecorator]))
+
+    return acc
+
 # TauJets_MuonRM steering
 def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
     """Configure the MuonRM AOD tau building"""
