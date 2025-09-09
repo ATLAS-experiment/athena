@@ -14,7 +14,7 @@ namespace FlavorTagInference {
         const FTagOptions& options) 
     {
       typedef xAOD::TrackParticle Tp;
-      typedef xAOD::Jet Jet;
+      typedef xAOD::IParticle Jet;
       BTagTrackIpAccessor aug(options.track_prefix);
       switch(config) {
         case ConstituentsSortOrder::ABS_D0_SIGNIFICANCE_DESCENDING:
@@ -214,7 +214,7 @@ namespace FlavorTagInference {
     // start by defining the raw functions, there's a factory
     // function below to convert the configuration enums to a
     // std::function
-    Tracks negativeIpOnly(BTagTrackIpAccessor& aug, const Tracks& tracks, const xAOD::Jet& j) 
+    Tracks negativeIpOnly(BTagTrackIpAccessor& aug, const Tracks& tracks, const xAOD::IParticle& j) 
     {
         Tracks filtered;
         // we want to reverse the order of the tracks as part of the
@@ -243,20 +243,20 @@ namespace FlavorTagInference {
         case FlipTagConfig::FLIP_SIGN:
           // Just flips the order
           return {
-            [](const Tracks& tr, const xAOD::Jet& ) {
+            [](const Tracks& tr, const xAOD::IParticle& ) {
               return Tracks(tr.crbegin(), tr.crend());},
             {}
           };
         case FlipTagConfig::SIMPLE_FLIP:
           // Just flips the order
           return {
-            [](const Tracks& tr, const xAOD::Jet& ) {
+            [](const Tracks& tr, const xAOD::IParticle& ) {
               return Tracks(tr.crbegin(), tr.crend());},
             {}
           };
 
         case FlipTagConfig::STANDARD:
-          return {[](const Tracks& tr, const xAOD::Jet& ) { return tr; }, {}};
+          return {[](const Tracks& tr, const xAOD::IParticle& ) { return tr; }, {}};
         default: {
           throw std::logic_error("Unknown flip config");
         }
@@ -301,7 +301,7 @@ namespace FlavorTagInference {
 
 
     Tracks TracksLoader::getTracksFromJet(
-        const xAOD::Jet& jet) const
+        const xAOD::IParticle& jet) const
     {
         std::vector<std::pair<double, const Track*>> tracks;
         for (const Track *tp : m_associator(jet)) {
@@ -318,8 +318,8 @@ namespace FlavorTagInference {
         return only_tracks;
     }
 
-    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>>
-    TracksLoader::getData(const xAOD::Jet& jet) const
+    std::tuple<Inputs, std::vector<const xAOD::IParticle*>>
+    TracksLoader::getData(const xAOD::IParticle& jet) const
     {
         Tracks sorted_tracks = getTracksFromJet(jet);
         Tracks flipped_tracks = m_trackFlipper(sorted_tracks, jet);
@@ -332,12 +332,12 @@ namespace FlavorTagInference {
         }
 
         Inputs features = m_seqGetter.getFeats(jet, flipped_tracks);
-        return std::make_tuple(m_config.output_name, features, flipped_iparticles);
+        return std::make_tuple(features, flipped_iparticles);
     }
 
     //! kept for DL2 track loading only. Can be removed once DL2 is fully deprecated.
     std::tuple<char, std::map<std::string, std::vector<double>>> TracksLoader::getDL2Data(
-      const xAOD::Jet& jet, 
+      const xAOD::IParticle& jet, 
       std::function<char(const Tracks&)> ip_checker) const{
       char invalid = 0;
       Tracks flipped_tracks;
