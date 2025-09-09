@@ -50,6 +50,7 @@ class TEfficiency;
 namespace dqutils {
 
   typedef std::map<std::string, std::vector<int> > keycyclemap;
+  typedef std::map<std::string, std::set<std::string> > fileLBMap_t;
   void populateKeyMapping(TDirectory*, keycyclemap&);
 
   enum debugLevel_t { none = 0, DEBUG, VERBOSE };
@@ -93,7 +94,7 @@ namespace dqutils {
     
 
     typedef std::map< std::string, TDirectory* >  DirMap_t;
-
+    
     static void getAllDirs(DirMap_t& dirmap, TDirectory* dir, const std::string & dirName);
 
     static TDirectory* createDir(DirMap_t& dirmap, TDirectory* dir, const std::string & parent, const std::string & path);
@@ -104,7 +105,7 @@ namespace dqutils {
 
     static void fillMetaDataMap(std::map<std::string, dqutils::MonitoringFile::MetaData>& mdMap, TDirectory* dir);
 
-    int mergeFiles(const std::string & outFileName, const std::vector<std::string>& files);
+    int mergeFiles(const std::string & outFileName, const std::vector<std::string>& files, fileLBMap_t& lbMap, bool fillLBDirs=true);
 
     int mergeFiles(const std::string & outFileName, const std::string & listFileName);
 
