@@ -33,6 +33,8 @@ namespace {
 constexpr std::size_t s_muonBarrelId = 30;
 constexpr std::size_t s_muonEndcapAId = 31;
 constexpr std::size_t s_muonEndcapCId = 32;
+constexpr std::size_t s_muonEndcapMiddleAId = 33;
+constexpr std::size_t s_muonEndcapMiddleCId = 34;
 }
 
 namespace ActsTrk {
@@ -51,15 +53,23 @@ const MuonChamberSet allChambers = m_detMgr->getAllChambers();
 MuonChamberSet barrelStations;
 MuonChamberSet endcapAStations;
 MuonChamberSet endcapCStations;
+MuonChamberSet endcapMiddleAStations;
+MuonChamberSet endcapMiddleCStations;
 
 for(const MuonGMR4::Chamber* chamber: allChambers){
 
   if(isChamberInTheStation(*chamber, {StIdx::BI, StIdx::BM, StIdx::BO, StIdx::EE, StIdx::EI}, EndcapSide::Both)) {
     barrelStations.insert(chamber);
-  } else if(isChamberInTheStation(*chamber, {StIdx::EM, StIdx::EO}, EndcapSide::A)) {
+  } else if(isChamberInTheStation(*chamber, {StIdx::EO}, EndcapSide::A)) {
     endcapAStations.insert(chamber);
-  } else if(isChamberInTheStation(*chamber, {StIdx::EM, StIdx::EO}, EndcapSide::C)) {
+  } else if(isChamberInTheStation(*chamber, {StIdx::EO}, EndcapSide::C)) {
     endcapCStations.insert(chamber);
+  }else if(isChamberInTheStation(*chamber, {StIdx::EM}, EndcapSide::A)) {
+    endcapMiddleAStations.insert(chamber);
+  } else if(isChamberInTheStation(*chamber, {StIdx::EM}, EndcapSide::C)) {
+    endcapMiddleCStations.insert(chamber);
+  } else {
+    ATH_MSG_WARNING("Chamber " << chamber->identString() << " not assigned to any station!");
   }
 }
 
@@ -69,10 +79,12 @@ auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintN
 Acts::VolumeBoundFactory boundsFactory{};
 
 auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI",Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory);
-auto endcapANode = buildMuonNode(gctx, endcapAStations, "EM_EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
-auto endcapCNode = buildMuonNode(gctx, endcapCStations, "EM_EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory);
+auto endcapANode = buildMuonNode(gctx, endcapAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
+auto endcapCNode = buildMuonNode(gctx, endcapCStations, "EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory);
+auto endcapMiddleANode = buildMuonNode(gctx, endcapMiddleAStations, "EM_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleAId), boundsFactory);
+auto endcapMiddleCNode = buildMuonNode(gctx, endcapMiddleCStations, "EM_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleCId), boundsFactory);
 
-// Add to the muon barrel child node (e.g calo or Itk) - if existed
+//Add to the muon barrel child node (e.g calo or Itk) - if existed
 if(childNode){
   barrelNode->addChild(std::move(childNode));
 }
@@ -80,6 +92,8 @@ if(childNode){
 muonNode->addChild(std::move(barrelNode));
 muonNode->addChild(std::move(endcapANode));
 muonNode->addChild(std::move(endcapCNode));
+muonNode->addChild(std::move(endcapMiddleANode));
+muonNode->addChild(std::move(endcapMiddleCNode));
 
 return muonNode;
 
