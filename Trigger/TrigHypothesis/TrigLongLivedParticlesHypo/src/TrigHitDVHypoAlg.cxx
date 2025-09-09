@@ -455,97 +455,50 @@ int TrigHitDVHypoAlg::getSPLayer(int layer, float eta) const
 
 StatusCode TrigHitDVHypoAlg::doMonitor(const xAOD::TrigCompositeContainer* dvContainer ) const
 {
-   std::vector<float> mnt_eta1_ly0_spfr;
-   std::vector<float> mnt_eta1_ly1_spfr;
-   std::vector<float> mnt_eta1_ly2_spfr;
-   std::vector<float> mnt_eta1_ly3_spfr;
-   std::vector<float> mnt_eta1_ly4_spfr;
-   std::vector<float> mnt_eta1_ly5_spfr;
-   std::vector<float> mnt_eta1_ly6_spfr;
-   std::vector<float> mnt_eta1_ly7_spfr;
-   std::vector<int>   mnt_eta1_n_qtrk;
-   std::vector<float> mnt_eta1_bdtscore;
-   std::vector<float> mnt_1eta2_ly0_spfr;
-   std::vector<float> mnt_1eta2_ly1_spfr;
-   std::vector<float> mnt_1eta2_ly2_spfr;
-   std::vector<float> mnt_1eta2_ly3_spfr;
-   std::vector<float> mnt_1eta2_ly4_spfr;
-   std::vector<float> mnt_1eta2_ly5_spfr;
-   std::vector<float> mnt_1eta2_ly6_spfr;
-   std::vector<float> mnt_1eta2_ly7_spfr;
-   std::vector<int>   mnt_1eta2_n_qtrk;
-   std::vector<float> mnt_1eta2_bdtscore;
-   auto mon_eta1_ly0_spfr  = Monitored::Collection("eta1_ly0_spfr",   mnt_eta1_ly0_spfr);
-   auto mon_eta1_ly1_spfr  = Monitored::Collection("eta1_ly1_spfr",   mnt_eta1_ly1_spfr);
-   auto mon_eta1_ly2_spfr  = Monitored::Collection("eta1_ly2_spfr",   mnt_eta1_ly2_spfr);
-   auto mon_eta1_ly3_spfr  = Monitored::Collection("eta1_ly3_spfr",   mnt_eta1_ly3_spfr);
-   auto mon_eta1_ly4_spfr  = Monitored::Collection("eta1_ly4_spfr",   mnt_eta1_ly4_spfr);
-   auto mon_eta1_ly5_spfr  = Monitored::Collection("eta1_ly5_spfr",   mnt_eta1_ly5_spfr);
-   auto mon_eta1_ly6_spfr  = Monitored::Collection("eta1_ly6_spfr",   mnt_eta1_ly6_spfr);
-   auto mon_eta1_ly7_spfr  = Monitored::Collection("eta1_ly7_spfr",   mnt_eta1_ly7_spfr);
-   auto mon_eta1_n_qtrk    = Monitored::Collection("eta1_n_qtrk",     mnt_eta1_n_qtrk);
-   auto mon_eta1_bdtscore  = Monitored::Collection("eta1_bdtscore",   mnt_eta1_bdtscore);
-   auto mon_1eta2_ly0_spfr = Monitored::Collection("1eta2_ly0_spfr",  mnt_1eta2_ly0_spfr);
-   auto mon_1eta2_ly1_spfr = Monitored::Collection("1eta2_ly1_spfr",  mnt_1eta2_ly1_spfr);
-   auto mon_1eta2_ly2_spfr = Monitored::Collection("1eta2_ly2_spfr",  mnt_1eta2_ly2_spfr);
-   auto mon_1eta2_ly3_spfr = Monitored::Collection("1eta2_ly3_spfr",  mnt_1eta2_ly3_spfr);
-   auto mon_1eta2_ly4_spfr = Monitored::Collection("1eta2_ly4_spfr",  mnt_1eta2_ly4_spfr);
-   auto mon_1eta2_ly5_spfr = Monitored::Collection("1eta2_ly5_spfr",  mnt_1eta2_ly5_spfr);
-   auto mon_1eta2_ly6_spfr = Monitored::Collection("1eta2_ly6_spfr",  mnt_1eta2_ly6_spfr);
-   auto mon_1eta2_ly7_spfr = Monitored::Collection("1eta2_ly7_spfr",  mnt_1eta2_ly7_spfr);
-   auto mon_1eta2_n_qtrk   = Monitored::Collection("1eta2_n_qtrk",    mnt_1eta2_n_qtrk);
-   auto mon_1eta2_bdtscore = Monitored::Collection("1eta2_bdtscore",  mnt_1eta2_bdtscore);
-   auto monitorIt = Monitored::Group( m_monTool,
-				      mon_eta1_ly0_spfr, mon_eta1_ly1_spfr, mon_eta1_ly2_spfr, mon_eta1_ly3_spfr,
-				      mon_eta1_ly4_spfr, mon_eta1_ly5_spfr, mon_eta1_ly6_spfr, mon_eta1_ly7_spfr,
-				      mon_eta1_n_qtrk, mon_eta1_bdtscore,
-				      mon_1eta2_ly0_spfr, mon_1eta2_ly1_spfr, mon_1eta2_ly2_spfr, mon_1eta2_ly3_spfr,
-				      mon_1eta2_ly4_spfr, mon_1eta2_ly5_spfr, mon_1eta2_ly6_spfr, mon_1eta2_ly7_spfr,
-				      mon_1eta2_n_qtrk, mon_1eta2_bdtscore);
+   auto mon_ly0_spfr  = Monitored::Collection(
+      "ly0_spfr", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_ly0_sp_frac"); });
+   auto mon_ly1_spfr  = Monitored::Collection(
+      "ly1_spfr", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_ly1_sp_frac"); });
+   auto mon_ly2_spfr  = Monitored::Collection(
+      "ly2_spfr", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_ly2_sp_frac"); });
+   auto mon_ly3_spfr  = Monitored::Collection(
+      "ly3_spfr", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_ly3_sp_frac"); });
+   auto mon_ly4_spfr  = Monitored::Collection(
+      "ly4_spfr", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_ly4_sp_frac"); });
+   auto mon_ly5_spfr  = Monitored::Collection(
+      "ly5_spfr", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_ly5_sp_frac"); });
+   auto mon_ly6_spfr  = Monitored::Collection(
+      "ly6_spfr", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_ly6_sp_frac"); });
+   auto mon_ly7_spfr  = Monitored::Collection(
+      "ly7_spfr", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_ly7_sp_frac"); });
+   auto mon_bdtscore  = Monitored::Collection(
+      "bdtscore", *dvContainer, [&](const Decision* d){ return d->getDetail<float>("hitDV_bdt_score"); });
+   auto mon_n_qtrk    = Monitored::Collection(
+      "n_qtrk", *dvContainer, [&](const Decision* d){ return d->getDetail<int>("hitDV_n_track_qual"); });
 
-   //
-   for ( auto dv : *dvContainer ) {
-      int   seed_type   = dv->getDetail<int>  ("hitDV_seed_type");
+   // fill CutMask to split spacespoints into eta regions
+   std::vector<char> mask_eta1(dvContainer->size(), 0);
+   std::vector<char> mask_1eta2(dvContainer->size(), 0);
+   auto mon_eta1_mask  = Monitored::Collection( "cutEta1", mask_eta1 );
+   auto mon_1eta2_mask = Monitored::Collection( "cut1Eta2", mask_1eta2 );
+
+   for (size_t i = 0; i<dvContainer->size(); ++i) {
+      const Decision* dv = (*dvContainer)[i];
+
       // do not fill sp-seeded candidates
-      if( seed_type == SeedType::SP ) continue;
-      float seed_eta    = dv->getDetail<float>("hitDV_seed_eta");
-      int   n_track_qual= dv->getDetail<int>  ("hitDV_n_track_qual");
-      float bdt_score   = dv->getDetail<float>("hitDV_bdt_score");
-      float ly0_sp_frac = dv->getDetail<float>("hitDV_ly0_sp_frac");
-      float ly1_sp_frac = dv->getDetail<float>("hitDV_ly1_sp_frac");
-      float ly2_sp_frac = dv->getDetail<float>("hitDV_ly2_sp_frac");
-      float ly3_sp_frac = dv->getDetail<float>("hitDV_ly3_sp_frac");
-      float ly4_sp_frac = dv->getDetail<float>("hitDV_ly4_sp_frac");
-      float ly5_sp_frac = dv->getDetail<float>("hitDV_ly5_sp_frac");
-      float ly6_sp_frac = dv->getDetail<float>("hitDV_ly6_sp_frac");
-      float ly7_sp_frac = dv->getDetail<float>("hitDV_ly7_sp_frac");
-      if( std::abs(seed_eta) < 1.0 ) {
-	 mnt_eta1_ly0_spfr.push_back(ly0_sp_frac);
-	 mnt_eta1_ly1_spfr.push_back(ly1_sp_frac);
-	 mnt_eta1_ly2_spfr.push_back(ly2_sp_frac);
-	 mnt_eta1_ly3_spfr.push_back(ly3_sp_frac);
-	 mnt_eta1_ly4_spfr.push_back(ly4_sp_frac);
-	 mnt_eta1_ly5_spfr.push_back(ly5_sp_frac);
-	 mnt_eta1_ly6_spfr.push_back(ly6_sp_frac);
-	 mnt_eta1_ly7_spfr.push_back(ly7_sp_frac);
-	 mnt_eta1_n_qtrk.push_back(n_track_qual);
-	 mnt_eta1_bdtscore.push_back(bdt_score);
-      }
-      else if( std::abs(seed_eta) < 2.0 ) {
-	 mnt_1eta2_ly0_spfr.push_back(ly0_sp_frac);
-	 mnt_1eta2_ly1_spfr.push_back(ly1_sp_frac);
-	 mnt_1eta2_ly2_spfr.push_back(ly2_sp_frac);
-	 mnt_1eta2_ly3_spfr.push_back(ly3_sp_frac);
-	 mnt_1eta2_ly4_spfr.push_back(ly4_sp_frac);
-	 mnt_1eta2_ly5_spfr.push_back(ly5_sp_frac);
-	 mnt_1eta2_ly6_spfr.push_back(ly6_sp_frac);
-	 mnt_1eta2_ly7_spfr.push_back(ly7_sp_frac);
-	 mnt_1eta2_n_qtrk.push_back(n_track_qual);
-	 mnt_1eta2_bdtscore.push_back(bdt_score);
-      }
+      if( dv->getDetail<int>("hitDV_seed_type") == SeedType::SP ) continue;
+
+      // fill the cut mask according to eta range
+      const float abs_eta = std::abs(dv->getDetail<float>("hitDV_seed_eta"));
+      if     ( abs_eta < 1.0 ) mask_eta1[i] = 1;
+      else if( abs_eta < 2.0 ) mask_1eta2[i] = 1;
    }
 
-   //
+   auto monitorIt = Monitored::Group( m_monTool,
+                                      mon_ly0_spfr, mon_ly1_spfr, mon_ly2_spfr, mon_ly3_spfr,
+                                      mon_ly4_spfr, mon_ly5_spfr, mon_ly6_spfr, mon_ly7_spfr,
+                                      mon_n_qtrk, mon_bdtscore, mon_eta1_mask, mon_1eta2_mask );
+
    return StatusCode::SUCCESS;
 }
 
