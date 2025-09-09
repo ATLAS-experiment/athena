@@ -186,6 +186,7 @@ StatusCode CaloAddCellPedShift::stop()
           auto it = pedBlobMap.find(iCool);
           if (it == pedBlobMap.end()) {
             ATH_MSG_ERROR("Bad system id " << iCool);
+            fclose(fp);
             return StatusCode::FAILURE;
           }
           const CaloCondBlobFlt* const flt = it->second;
