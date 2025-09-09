@@ -347,33 +347,27 @@ namespace FlavorTagInference {
     // This focuses on the scalar inputs, i.e. the inputs for DL1d,
     // the code for the track inputs is below.
     std::tuple<
-      std::vector<internal::VarFromBTag>,
-      std::vector<internal::VarFromJet>,
+      std::vector<std::pair<std::string, internal::VarFromJet>>,
       FTagDataDependencyNames>
     createBvarGetters(
       const std::vector<FTagInputConfig>& inputs)
     {
       FTagDataDependencyNames deps;
-      std::vector<internal::VarFromBTag> varsFromBTag;
-      std::vector<internal::VarFromJet> varsFromJet;
+      std::vector<std::pair<std::string, internal::VarFromJet>> varsFromJet;
 
       for (const auto& input: inputs) {
         if (input.type != EDMType::CUSTOM_GETTER) {
-          auto filler = internal::get::varFromBTag(input.name, input.type,
-                                         input.default_flag);
-          deps.bTagInputs.insert(input.name);
-          varsFromBTag.push_back(filler);
+          throw std::runtime_error("Unsupported input type");
         } else {
-          varsFromJet.push_back(getter_utils::namedCustomJetGetter(input.name));
+          varsFromJet.push_back(std::make_pair(input.name, getter_utils::namedCustomJetGetter(input.name)));
         }
         if (input.default_flag.size() > 0) {
           deps.bTagInputs.insert(input.default_flag);
         }
       }
 
-      return std::make_tuple(varsFromBTag, varsFromJet, deps);
+      return std::make_tuple(varsFromJet, deps);
     }
-
 
     // Translate configuration to setter functions
     //

@@ -18,7 +18,7 @@ namespace FlavorTagInference {
           cfg.inputs, options))
     {
         SG::AuxElement::ConstAccessor<HitLinks> acc("hitsAssociatedWithJet");
-        m_associator = [acc](const xAOD::Jet& jet) -> TMVV {
+        m_associator = [acc](const xAOD::IParticle& jet) -> TMVV {
           TMVV hits;
           for (const ElementLink<TMC>& link : acc(jet)){
             if (!link.isValid()) {
@@ -34,7 +34,7 @@ namespace FlavorTagInference {
     }
 
     std::vector<const xAOD::TrackMeasurementValidation*> HitsLoader::getHitsFromJet(
-        const xAOD::Jet& jet
+        const xAOD::IParticle& jet
     ) const
     {
         std::vector<const xAOD::TrackMeasurementValidation*> hits;
@@ -44,11 +44,11 @@ namespace FlavorTagInference {
         return hits;
     }
 
-    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> HitsLoader::getData(
-      const xAOD::Jet& jet) const {
+    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> HitsLoader::getData(
+      const xAOD::IParticle& jet) const {
         Hits sorted_hits = getHitsFromJet(jet);
         std::vector<const xAOD::IParticle*> dummy;
-        return std::make_tuple(m_config.output_name, m_seqGetter.getFeats(jet, sorted_hits), dummy);
+        return std::make_tuple(m_seqGetter.getFeats(jet, sorted_hits), dummy);
     }
 
     const FTagDataDependencyNames& HitsLoader::getDependencies() const {

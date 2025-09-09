@@ -37,7 +37,7 @@ namespace FlavorTagDiscriminants {
                                  lwt::rep::all));
     }
 
-    auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
+    auto [vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromJet = vj;
     m_dataDependencyNames += ds;
     
@@ -85,7 +85,7 @@ namespace FlavorTagDiscriminants {
     using namespace internal;
     std::vector<NamedVar> vvec;
     for (const auto& getter: m_varsFromJet) {
-      vvec.push_back(getter(jet));
+      vvec.push_back(getter.second(jet));
     }
     std::map<std::string, std::map<std::string, double> > nodes;
     if (m_variable_cleaner) {

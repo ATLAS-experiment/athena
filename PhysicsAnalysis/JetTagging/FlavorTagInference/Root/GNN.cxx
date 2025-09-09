@@ -58,9 +58,11 @@ namespace FlavorTagInference {
     m_dataLoader.data_dependency_names += dd;
 
     // Update dependencies and used remap from the constituents loaders.
-    for (const auto& loader : m_dataLoader.constituents_loaders) {
-      m_dataLoader.data_dependency_names += loader->getDependencies();
-      std::set<std::string> used_remap = loader->getUsedRemap();
+    for (const auto& loader : m_dataLoader.vectorVarLoaders) {
+      auto loader_name = loader.first;
+      auto constituent_loader = loader.second;
+      m_dataLoader.data_dependency_names += constituent_loader->getDependencies();
+      std::set<std::string> used_remap = constituent_loader->getUsedRemap();
       rd.merge(used_remap);
     }
     dataprep::checkForUnusedRemaps(m_dataLoader.ftag_options.remap_scalar, rd);
@@ -115,6 +117,7 @@ namespace FlavorTagInference {
   void GNN::decorate(const xAOD::IParticle& i_jet) const {
     /* Main function for decorating a i_jet object with GNN outputs. */
     SaltModelData salt_model_data = m_dataLoader.loadInputs(&i_jet);
+    // DumpGnnInputs(salt_model_data.gnn_inputs);
     auto input_tracks = salt_model_data.constituents.at("track_features");
 
 

@@ -60,7 +60,7 @@ namespace FlavorTagInference {
   namespace internal {
     // typedefs
     typedef std::pair<std::string, double> NamedVar;
-    typedef xAOD::Jet Jet;
+    typedef xAOD::IParticle Jet;
     typedef std::vector<const xAOD::TrackParticle*> Tracks;
 
     // getter functions
@@ -160,8 +160,7 @@ namespace FlavorTagInference {
 
     // return the scalar getter functions for NNs
     std::tuple<
-      std::vector<internal::VarFromBTag>,
-      std::vector<internal::VarFromJet>,
+      std::vector<std::pair<std::string, internal::VarFromJet>>,
       FTagDataDependencyNames>
     createBvarGetters(
       const std::vector<FTagInputConfig>& inputs);

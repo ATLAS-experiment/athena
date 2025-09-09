@@ -44,10 +44,10 @@ namespace FlavorTagInference {
     using Constituents = std::vector<const T*>;
 
     template <typename T>
-    using SequenceGetterFunc = std::function<std::vector<double>(const xAOD::Jet&, const Constituents<T>&)>;
+    using SequenceGetterFunc = std::function<std::vector<double>(const xAOD::IParticle&, const Constituents<T>&)>;
     // -------------------------------------------------------
 
-    std::function<std::pair<std::string, double>(const xAOD::Jet&)>
+    std::function<std::pair<std::string, double>(const xAOD::IParticle&)>
     namedCustomJetGetter(const std::string&);
 
     template <typename T>
@@ -70,13 +70,13 @@ namespace FlavorTagInference {
         public:
           using Const = Constituents<T>;
           using InputSequence = std::function<std::pair<std::string, std::vector<double>>(
-              const xAOD::Jet&,
+              const xAOD::IParticle&,
               const Const&)>;
 
           SeqGetter(const std::vector<InputVariableConfig>& inputs, const FTagOptions& options);
 
-          std::pair<std::vector<float>, std::vector<int64_t>> getFeats(const xAOD::Jet& jet, const Const& constituents) const;
-          std::map<std::string, std::vector<double>> getDL2Feats(const xAOD::Jet& jet, const Const& constituents) const;
+          std::pair<std::vector<float>, std::vector<int64_t>> getFeats(const xAOD::IParticle& jet, const Const& constituents) const;
+          std::map<std::string, std::vector<double>> getDL2Feats(const xAOD::IParticle& jet, const Const& constituents) const;
 
           const std::set<std::string>& getDependencies() const;
           const std::set<std::string>& getUsedRemap() const;

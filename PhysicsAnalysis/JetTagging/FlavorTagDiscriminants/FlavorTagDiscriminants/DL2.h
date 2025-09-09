@@ -37,7 +37,7 @@ namespace FlavorTagDiscriminants {
     std::string m_input_node_name;
     std::unique_ptr<lwt::LightweightGraph> m_graph;
     std::unique_ptr<lwt::NanReplacer> m_variable_cleaner;
-    std::vector<internal::VarFromJet> m_varsFromJet;
+    std::vector<std::pair<std::string, internal::VarFromJet>> m_varsFromJet;
     std::vector<std::shared_ptr<TracksLoader>> m_tracksLoaders;
     std::map<std::string, internal::OutNodeFloat> m_decorators;
     float m_defaultValue;

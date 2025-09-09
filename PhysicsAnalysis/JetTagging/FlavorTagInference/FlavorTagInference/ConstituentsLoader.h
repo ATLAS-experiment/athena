@@ -79,8 +79,7 @@ namespace FlavorTagInference {
             {
             };
             virtual ~IConstituentsLoader() = default;
-            virtual std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
-                const xAOD::Jet& jet) const = 0;
+            virtual std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(const xAOD::IParticle& jet) const = 0;
             virtual const FTagDataDependencyNames& getDependencies() const = 0;
             virtual const std::set<std::string>& getUsedRemap() const = 0;
             virtual const std::string& getName() const = 0;

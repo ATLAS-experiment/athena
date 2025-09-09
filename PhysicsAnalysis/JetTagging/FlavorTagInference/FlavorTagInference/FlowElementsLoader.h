@@ -27,15 +27,15 @@ namespace FlavorTagInference {
     class FlowElementsLoader : public IConstituentsLoader {
       public:
         FlowElementsLoader(const ConstituentsInputConfig& cfg, const FTagOptions& options);
-        std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
-          const xAOD::Jet& jet ) const override ;
+        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(
+          const xAOD::IParticle& jet ) const override ;
         const FTagDataDependencyNames& getDependencies() const override;
         const std::set<std::string>& getUsedRemap() const override;
         const std::string& getName() const override;
         const ConstituentsType& getType() const override;
       protected:
         // typedefs
-        typedef xAOD::Jet Jet;
+        typedef xAOD::IParticle Jet;
         typedef std::pair<std::string, double> NamedVar;
         typedef std::pair<std::string, std::vector<double> > NamedSeq;
         // FlowElement typedefs
@@ -54,7 +54,7 @@ namespace FlavorTagInference {
 
         FlowElementSortVar flowElementSortVar(ConstituentsSortOrder);
         
-        std::vector<const xAOD::FlowElement*> getFlowElementsFromJet(const xAOD::Jet& jet) const;
+        std::vector<const xAOD::FlowElement*> getFlowElementsFromJet(const xAOD::IParticle& jet) const;
 
         FlowElementSortVar m_flowElementSortVar;
         getter_utils::SeqGetter<xAOD::FlowElement> m_seqGetter;        
