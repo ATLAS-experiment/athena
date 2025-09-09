@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARSCDIGIT_H
@@ -35,7 +35,7 @@ public:
              const std::vector<short> & sample_values,
      	     const std::vector<unsigned short> & bcids) :
     LArDigit(channel_value, CaloGain::LARHIGHGAIN, sample_values),
-    m_chan(channel), m_sourceId(sourceId), m_BCId(std::move(bcids))
+    m_chan(channel), m_sourceId(sourceId), m_BCId(bcids)
     {};
 
   /** @return channel value */
