@@ -137,7 +137,9 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
                 phits.push_back(std::make_shared<FPGATrackSimHit>(hitCopy));
                 break;
             case 1:
-                if (rmap_1st->getRegions(hit).size() > 0) phits.push_back(std::make_shared<FPGATrackSimHit>(hitCopy));
+                // For first stage hits, require that they are also pixel hits. This is a safe assumption because
+                // the inside out algorithm will only ever run on pixels.
+                if (rmap_1st->getRegions(hit).size() > 0 && hit.isPixel()) phits.push_back(std::make_shared<FPGATrackSimHit>(hitCopy));
                 break;
             case 2:
                 if (rmap_1st->getRegions(hit).size() == 0) phits.push_back(std::make_shared<FPGATrackSimHit>(hitCopy));

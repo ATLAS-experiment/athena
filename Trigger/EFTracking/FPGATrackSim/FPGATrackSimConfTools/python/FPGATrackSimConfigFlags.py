@@ -11,6 +11,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('wrapperFileName2', [])
     cf.addFlag('secondInputToolN', 0)
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
+    cf.addFlag('loadRegionMap', True)
+    cf.addFlag('loadRadii', True)
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
     cf.addFlag('doMultiTruth', True)

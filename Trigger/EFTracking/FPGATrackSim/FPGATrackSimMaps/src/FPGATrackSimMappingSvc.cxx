@@ -198,16 +198,16 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         fin.close();
 
         ATH_MSG_DEBUG("Creating the 1st stage region map: " << PathResolverFindCalibFile(m_rmap_path.value()));
-        m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
+        m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value()), !(m_loadRegionMap.value())));
 
         ATH_MSG_DEBUG("Creating the 2nd stage region map: " << PathResolverFindCalibFile(m_rmap_path.value()));
-        m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_rmap_path.value())));
+        m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_rmap_path.value()), !(m_loadRegionMap.value())));
 
         ATH_MSG_DEBUG("Creating the sub-region map: " << PathResolverFindCalibFile(m_subrmap_path.value()));
-        m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value())));
+        m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value()), !(m_loadRegionMap.value())));
 
         ATH_MSG_DEBUG("Creating the 2nd stage sub-region map:" << PathResolverFindCalibFile(m_subrmap_path.value()));
-        m_subrmap_2nd = std::make_unique<FPGATrackSimRegionMap>(m_pmap_vector_2nd, PathResolverFindCalibFile(m_subrmap_path.value()));
+        m_subrmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_subrmap_path.value()), !(m_loadRegionMap.value())));
 
         ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
         ATH_MSG_DEBUG("Loading the Module LUT from " << PathResolverFindCalibFile(m_modulelut_path.value()));

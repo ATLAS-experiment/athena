@@ -66,7 +66,7 @@ class FPGATrackSimRegionMap
         // Constructors/Initialization
         // See doc on m_layerOverrides for info on argument layerOverrides
 
-        FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath);
+        FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath, bool m_inclusive);
 
         void loadModuleIDLUT(std::string const & filepath);
 
@@ -116,6 +116,9 @@ class FPGATrackSimRegionMap
 
         std::vector<std::vector<double>> m_radii_map;
             // Index by region, logical layer. Assume we DON'T have separate radii per section.
+
+        // If set, this means that we don't actually try to read the region map.
+        bool m_inclusive = false;
 
         ///////////////////////////////////////////////////////////////////////
         // Helper Functions
