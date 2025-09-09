@@ -12,6 +12,8 @@
 #include "MuonIdHelpers/RpcIdHelper.h"
 #include "MuonIdHelpers/TgcIdHelper.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
+#include <format>//to catch std::format_error
+#include <memory>
 
 int check_hash_retrieval(MuonIdHelper* idhelp) {
     IdentifierHash hash;
@@ -94,7 +96,8 @@ int check_CSC_hash_conversion(CscIdHelper* idhelp) {
 }
 
 int check_muon_decoding(IdDictMgr& idd, bool hasCSC, bool hasSTgc, bool hasMM) {
-    MdtIdHelper mdt_id;
+    auto pMdtId=std::make_unique<MdtIdHelper>();//on heap to avoid large stack use
+    MdtIdHelper & mdt_id = *pMdtId;
     if (mdt_id.initialize_from_dictionary(idd)) {
         std::cout << "check_muon_decoding - cannot init from mdt dict" << std::endl;
         return 1;
@@ -108,7 +111,8 @@ int check_muon_decoding(IdDictMgr& idd, bool hasCSC, bool hasSTgc, bool hasMM) {
     }
     if (check_hash_retrieval(&rpc_id)) return 1;
 
-    TgcIdHelper tgc_id;
+    auto pTgcId = std::make_unique<TgcIdHelper>();//on heap to avoid large stack use
+    TgcIdHelper & tgc_id = *pTgcId;
     if (tgc_id.initialize_from_dictionary(idd)) {
         std::cout << "check_muon_decoding - cannot init from tgc dict" << std::endl;
         return 1;
@@ -126,7 +130,8 @@ int check_muon_decoding(IdDictMgr& idd, bool hasCSC, bool hasSTgc, bool hasMM) {
     }
 
     if (hasSTgc) {
-        TgcIdHelper sTgc_id;
+        auto pSTgcId = std::make_unique<TgcIdHelper>();//on heap to avoid large stack use
+        TgcIdHelper & sTgc_id = *pSTgcId;
         if (sTgc_id.initialize_from_dictionary(idd)) {
             std::cout << "check_muon_decoding - cannot init from sTgc dict" << std::endl;
             return 1;
@@ -161,12 +166,16 @@ int checkDictFile(const std::string& filename, bool hasCSC = true, bool hasSTgc 
  * otherwise 1.
  */
 int main() {
-    // check Run 2 layout (no STgc/MM)
-    if (checkDictFile("IdDictMuonSpectrometer_R.03.xml", true, false, false)) return 1;
-    // check asymmetric Run 3 layout
-    if (checkDictFile("IdDictMuonSpectrometer_R.09.02.Asym.xml")) return 1;
-    // check symmetric Run 3 layout (no CSC)
-    if (checkDictFile("IdDictMuonSpectrometer_R.09.02.xml", false, true, true)) return 1;
-
+    try{
+      // check Run 2 layout (no STgc/MM)
+      if (checkDictFile("IdDictMuonSpectrometer_R.03.xml", true, false, false)) return 1;
+      // check asymmetric Run 3 layout
+      if (checkDictFile("IdDictMuonSpectrometer_R.09.02.Asym.xml")) return 1;
+      // check symmetric Run 3 layout (no CSC)
+      if (checkDictFile("IdDictMuonSpectrometer_R.09.02.xml", false, true, true)) return 1;
+    } catch(std::format_error & /*e*/){
+      std::cout<<"Format error reported from checkDictFile in muon_id_test"<<std::endl;
+      return 1;
+    }
     return 0;
 }
