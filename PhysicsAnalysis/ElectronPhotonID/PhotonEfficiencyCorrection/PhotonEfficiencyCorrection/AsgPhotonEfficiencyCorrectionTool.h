@@ -163,7 +163,7 @@ private:
     columnar::EgammaAccessor<columnar::ObjectColumn> photonsAcc {*this, "Photons"};
     columnar::ClusterAccessor<columnar::ObjectColumn> clusterAcc {*this, "egammaClusters"};
     columnar::VertexAccessor<columnar::ObjectColumn> verticesAcc {*this, "GSFConversionVertices"};
-    columnar::TrackAccessor<columnar::ObjectColumn> tracksAcc {*this, "InDetTrackParticles"};
+    columnar::TrackAccessor<columnar::ObjectColumn> tracksAcc {*this, "GSFTrackParticles"};
 
     columnar::EventInfoAccessor<uint32_t> randomRunNumberAcc {*this, "RandomRunNumber"};
   

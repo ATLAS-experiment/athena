@@ -71,9 +71,9 @@ TEST_F (ColumnarMemoryTest, AsgPhotonEfficiencyCorrectionTool)
   columnMap.addColumn ("GSFConversionVertices.trackParticleLinks.data", {0, 1});
   columnMap.addColumn ("GSFConversionVertices.trackParticleLinks.offset", {0, columnMap.columnSize("GSFConversionVertices.trackParticleLinks.data")});
 
-  columnMap.addColumn ("InDetTrackParticles", {0, 2});
-  columnMap.addColumn ("InDetTrackParticles.numberOfPixelHits", {1, 1});
-  columnMap.addColumn ("InDetTrackParticles.numberOfSCTHits", {1, 1});
+  columnMap.addColumn ("GSFTrackParticles", {0, 2});
+  columnMap.addColumn ("GSFTrackParticles.numberOfPixelHits", {1, 1});
+  columnMap.addColumn ("GSFTrackParticles.numberOfSCTHits", {1, 1});
 
   columnMap.addColumn ("Photons.sfOut", {0});
   columnMap.addColumn ("Photons.validOut", {0});

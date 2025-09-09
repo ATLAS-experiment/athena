@@ -99,7 +99,7 @@ namespace columnar
 
     void addColumn (const std::string& name, std::vector<std::any> data);
 
-    ColumnarOffsetType columnSize (const std::string& name);
+    std::size_t columnSize (const std::string& name);
 
     void setExpectation (const std::string& name, const std::vector<std::any> & values);
 

@@ -119,6 +119,12 @@ namespace columnar
     /// the xAOD type to use with ElementLink
     using xAODElementLinkType = typename CIBase::xAODElementLinkType;
 
+
+    /// Variant Specific Definitions
+    /// ----------------------------
+
+    using baseId = CIBase;
+
     static constexpr std::size_t numVariants = sizeof...(CIList);
 
     static constexpr std::array<std::string_view,numVariants> idNameArray = {CIList::idName...};
