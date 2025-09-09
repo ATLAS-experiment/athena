@@ -54,7 +54,7 @@
 
 template<typename C>
 bool isEmptyCont(C& c) {
-  return (!c.isValid() || c->size()==0); 
+  return (c.key().empty() || !c.isValid() || c->size()==0); 
 }
 
 
@@ -80,6 +80,9 @@ StatusCode LArDigitalTriggMonAlg::initialize()
 
   ATH_MSG_INFO("Done building tool map");
 
+  ATH_MSG_INFO("Input containers=" << m_rawSCContainerKey << " / " << m_rawSCEtRecoContainerKey);
+
+  
   /** Get bad-channel mask (only if jO IgnoreBadChannels is true)*/
   ATH_CHECK(m_bcContKey.initialize());
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
@@ -87,8 +90,8 @@ StatusCode LArDigitalTriggMonAlg::initialize()
   ATH_CHECK(m_digitContainerKey.initialize());
   ATH_CHECK(m_keyPedestalSC.initialize());
   ATH_CHECK(m_caloSuperCellMgrKey.initialize());
-  ATH_CHECK(m_rawSCContainerKey.initialize());
-  ATH_CHECK(m_rawSCEtRecoContainerKey.initialize());
+  ATH_CHECK(m_rawSCContainerKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_rawSCEtRecoContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_actualMuKey.initialize());
   ATH_CHECK(m_LATOMEHeaderContainerKey.initialize());
@@ -249,25 +252,39 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,ctx};
   const LArOnOffIdMapping* cabling=*cablingHdl;
 
-  SG::ReadHandle<LArDigitContainer> hLArDigitContainer{m_digitContainerKey,ctx}; //"SC"
-  if (!hLArDigitContainer.isValid()) {
-    ATH_MSG_WARNING("The requested digit container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
+  SG::ReadHandle<LArDigitContainer> hLArDigitContainer;
+  if (!m_digitContainerKey.empty()) {
+    hLArDigitContainer= SG::ReadHandle<LArDigitContainer>{m_digitContainerKey,ctx}; //"SC"  
+    if (!hLArDigitContainer.isValid()) {
+      ATH_MSG_WARNING("The requested digit container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }
+  }
+  else {
     ATH_MSG_DEBUG("hLArDigitContainer.size() " << hLArDigitContainer->size());
   }
-  SG::ReadHandle<LArRawSCContainer > hSCetContainer{m_rawSCContainerKey,ctx}; //"SC_ET"
-  if (!hSCetContainer.isValid()) {
-    ATH_MSG_WARNING("The requested SC ET container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
+
+  
+  SG::ReadHandle<LArRawSCContainer> hSCetContainer;
+  if (!m_rawSCContainerKey.empty()) {
+    hSCetContainer = SG::ReadHandle<LArRawSCContainer>{m_rawSCContainerKey, ctx};  //"SC_ET"
+    if (!hSCetContainer.isValid()) {
+      ATH_MSG_WARNING("The requested SC ET container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }
+  } 
+  else {
     ATH_MSG_DEBUG("hSCetContainer.size() " << hSCetContainer->size());
   }
-  SG::ReadHandle<LArRawSCContainer > hSCetRecoContainer{m_rawSCEtRecoContainerKey,ctx}; //"SC_ET_RECO"
-  if (!hSCetRecoContainer.isValid()) {
-    ATH_MSG_WARNING("The requested SC ET reco container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
+
+  SG::ReadHandle<LArRawSCContainer> hSCetRecoContainer;
+  if (!m_rawSCEtRecoContainerKey.empty()) {
+    hSCetRecoContainer = SG::ReadHandle<LArRawSCContainer>{m_rawSCEtRecoContainerKey, ctx};  //"SC_ET_RECO"
+    if (!hSCetRecoContainer.isValid()) {
+      ATH_MSG_WARNING("The requested SC ET reco container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }
+  } 
+  else {
     ATH_MSG_DEBUG("hSCetRecoContainer.size() " << hSCetRecoContainer->size());
   }
-
 
   SG::ReadHandle<LArLATOMEHeaderContainer> hLArLATOMEHeaderContainer{m_LATOMEHeaderContainerKey,ctx}; //"SC_LATOME_HEADER"
   if (!hLArLATOMEHeaderContainer.isValid()) {
@@ -457,7 +474,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
     }  // End if(LArDigitContainer is valid)
 
 
-    if (hSCetContainer.isValid() && hSCetRecoContainer.isValid()) {
+    if (!isEmptyCont(hSCetContainer) && !isEmptyCont(hSCetRecoContainer)) {
       LArRawSCContainer::const_iterator itSC = hSCetContainer->begin();
       LArRawSCContainer::const_iterator itSC_e= hSCetContainer->end();
       LArRawSCContainer::const_iterator itSCReco = hSCetRecoContainer->begin();
