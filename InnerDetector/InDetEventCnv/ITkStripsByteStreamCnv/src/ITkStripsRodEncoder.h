@@ -69,7 +69,8 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   
   mutable std::atomic<uint8_t> m_bcid = 0;
   mutable std::atomic<uint8_t> m_l0tag = 0;
-  void encodeData(const std::vector<uint16_t>& clusters, std::vector<uint8_t>& data_encode,
+  
+  void encodeData(const std::vector<uint16_t>& clusters, const uint16_t ichannel, std::vector<uint8_t>& data_encode,
                                 int typ, uint8_t l0tag, uint8_t bc_count) const;
   
   /**
