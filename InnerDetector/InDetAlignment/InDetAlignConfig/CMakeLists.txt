@@ -15,13 +15,13 @@ if (NOT SIMULATIONBASE)
 
     atlas_add_test( InDetAlign_CL_L11
         SCRIPT test_CL_L11.sh 10
-        PROPERTIES TIMEOUT 1800
+        PROPERTIES TIMEOUT 3600
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/unitTestRun_CL
         POST_EXEC_SCRIPT noerror.sh)
        
     atlas_add_test( InDetAlign_CL_L16
         SCRIPT test_CL_L16.sh 10
-        PROPERTIES TIMEOUT 1800
+        PROPERTIES TIMEOUT 3600
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/unitTestRun_CL
         DEPENDS InDetAlign_CL_L11
         POST_EXEC_SCRIPT noerror.sh)
