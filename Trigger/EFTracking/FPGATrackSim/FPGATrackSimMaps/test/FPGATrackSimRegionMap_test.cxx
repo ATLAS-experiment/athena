@@ -63,7 +63,7 @@ int main(int, char**)
         test_pmaps.push_back(std::unique_ptr< FPGATrackSimPlaneMap> (new FPGATrackSimPlaneMap(finTest, 0, 1,overrides))); 
     }
 
-    FPGATrackSimRegionMap rmap(test_pmaps, rmap_path);
+    FPGATrackSimRegionMap rmap(test_pmaps, rmap_path, false);
 
     test(rmap);
     test_LUT(rmap);

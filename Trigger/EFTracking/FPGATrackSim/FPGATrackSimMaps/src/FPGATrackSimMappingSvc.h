@@ -58,6 +58,7 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         Gaudi::Property<std::string> m_radii2nd_path {this, "radiiFile2nd", "", "path of the average radius file for 2nd stage" };
         Gaudi::Property<std::vector <int> > m_layerOverrides {this, "layerOverride", {}, "Overrides the selection of the 1st stage logical layers in the plane map. Each entry declares a detector layer to use as a logical layer. Specify a detector layer with { SiliconTech * 1000 + DetectorZone * 100 + PhysicalLayer }"};
         Gaudi::Property<bool> m_loadRadii {this, "loadRadii", true, "Whether or not to attempt to read in the idealized radii files" };
+        Gaudi::Property<bool> m_loadRegionMap {this, "loadRegionMap", true, "Whether or not to attempt to loda the region maps; if false, isInRegion will always return true" };
 
             // Map unique pointers
         //vector of pmaps
