@@ -126,6 +126,15 @@ def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F1
                                              'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
 
     if(not runStandalone):
+        if(not flags.FPGADataPrep.ForTiming): 
+            from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+            acc.merge(FPGATrackSimReportingCfg(flags,
+                                               perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
+                                            **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
+                                                'xAODStripClusterContainers' : ['ITkStripClusters'],
+                                                'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
+                                                'isDataPrep': True} ))
+        
         from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
         acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
         

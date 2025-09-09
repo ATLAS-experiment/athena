@@ -582,7 +582,16 @@ def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
                   'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
         acc.merge(addToAOD(flags, toAOD))
-        
+    
+    
+    from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+    acc.merge(FPGATrackSimReportingCfg(flags,
+                                       perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
+                                        **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
+                                            'xAODStripClusterContainers' : ['ITkStripClusters'],
+                                            'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
+                                            'isDataPrep': True} ))
+    
     return acc
 
 def FPGATrackSimDataPrepFlagCfg(flags): # to be used in the Reco_tf configuration
