@@ -105,57 +105,58 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /
   }
 
   std::vector<uint8_t> vec8Data;
-  vec8Data.reserve(10);
-
+  uint16_t ichannel = 0;
   //Iterate over processed strip data and find clusters
   for (const auto& [key, StripData] : allStripData) {
     int ptype = 1;
     for (size_t i = 0; i < StripData.size(); ++i) {
-      if (StripData[i].any()) {
-              std::bitset<256> hits = StripData[i];
-        //Use clusterFinder to extract clusters from the bitset
-        std::vector<uint16_t> clusters = clusterFinder(hits);
-        encodeData(clusters, vec8Data, ptype, m_l0tag , m_bcid);
-      }
+      std::bitset<256> hits = StripData[i];
+      //Use clusterFinder to extract clusters from the bitset
+      std::vector<uint16_t> clusters = clusterFinder(hits);
+      encodeData(clusters, ichannel, vec8Data, ptype, m_l0tag , m_bcid);
+      ++ichannel;
     }
-    //Update BCID and L0Tag counters
-    m_bcid = (m_bcid + 1) & 0x7F;
-    m_l0tag = (m_l0tag + 1) & 0x7F;
   }
+  //Update BCID and L0Tag counters
+  m_bcid = (m_bcid + 1) & 0x7F;
+  m_l0tag = (m_l0tag + 1) & 0x7F;
   packFragments(vec8Data,vec32Data);
   return;
 }
 
 void
-ITkStripsRodEncoder::encodeData(const std::vector<uint16_t>& clusters, std::vector<uint8_t>& data_encode,
+ITkStripsRodEncoder::encodeData(const std::vector<uint16_t>& clusters, const uint16_t ichannel,std::vector<uint8_t>& data_encode,
                                 int ptyp, uint8_t l0tag, uint8_t bc_count) const {
 
-  uint16_t header = getHeaderPhysicsPacket(ptyp, l0tag, bc_count);
+  size_t total_clusters = clusters.size();
+  size_t cluster_pos = 0;
 
-  data_encode.push_back((header>>8) & 0xff);
-  data_encode.push_back(header & 0xff);
+  while (cluster_pos < total_clusters) {
+    // Header + 4 clusters
+    uint16_t header = getHeaderPhysicsPacket(ptyp, l0tag, bc_count);
+    data_encode.push_back((header>>8) & 0xff);
+    data_encode.push_back(header & 0xff);
 
-  size_t cluster_count = 0;
-  for ( uint16_t cluster : clusters) {
-    if (cluster_count == 4){
-      // Max number of clusters per package 4 
-      break;
+    size_t max_cluster_pp = 0; //Max clusters per packet
+    for (; max_cluster_pp < 4 && cluster_pos < total_clusters; ++max_cluster_pp, ++cluster_pos) {
+      uint16_t cluster = clusters[cluster_pos];
+      // cluster bits:
+      // "0" + 4-bit channel number + 11-bit cluster dropping the last cluster bit
+      uint16_t clusterbits = ((ichannel & 0xf) << 11) | (cluster & 0x7ff);
+      data_encode.push_back((clusterbits>>8) & 0xff);
+      data_encode.push_back(clusterbits & 0xff);
     }
 
-    uint16_t clusterbits = cluster & 0x7ff;
-    data_encode.push_back((clusterbits>>8) & 0xff);
-    data_encode.push_back(clusterbits & 0xff);
-    cluster_count++;
+    while (max_cluster_pp < 4) {
+      data_encode.push_back(0x7F); // Cluster empty (0x7FF in 12 bits)
+      data_encode.push_back(0xFF);
+      ++max_cluster_pp;
+    }
   }
-  
-  while (cluster_count < 4) {
-        data_encode.push_back(0x7F);  // Cluster empty (0x7FF in 12 bits)
-        data_encode.push_back(0xFF);
-        cluster_count++;
-    }
 
   return;
 }
+
 
 std::vector<uint16_t>
 ITkStripsRodEncoder::clusterFinder(const std::bitset<256>& inputData, const uint8_t maxCluster) const {
