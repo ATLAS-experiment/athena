@@ -12,31 +12,18 @@
 #include <EventLoop/Worker.h>
 
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
-#include <EventLoop/AlgorithmMemoryModule.h>
-#include <EventLoop/AlgorithmStateModule.h>
-#include <EventLoop/AlgorithmTimerModule.h>
-#include <EventLoop/BatchInputModule.h>
+#include <AsgTools/AsgComponentConfig.h>
 #include <EventLoop/BatchJob.h>
 #include <EventLoop/BatchSample.h>
 #include <EventLoop/BatchSegment.h>
-#include <EventLoop/DirectInputModule.h>
 #include <EventLoop/Driver.h>
-#include <EventLoop/EventCountModule.h>
 #include <EventLoop/EventRange.h>
-#include <EventLoop/FactoryPreloadModule.h>
-#include <EventLoop/FileExecutedModule.h>
-#include <EventLoop/GridReportingModule.h>
 #include <EventLoop/Job.h>
-#include <EventLoop/LeakCheckModule.h>
-#include <EventLoop/MemoryMonitorModule.h>
 #include <EventLoop/MessageCheck.h>
+#include <EventLoop/Module.h>
 #include <EventLoop/OutputStream.h>
 #include <EventLoop/OutputStreamData.h>
 #include <EventLoop/StatusCode.h>
-#include <EventLoop/StopwatchModule.h>
-#include <EventLoop/PostClosedOutputsModule.h>
-#include <EventLoop/TEventModule.h>
-#include <EventLoop/WorkerConfigModule.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <RootCoreUtils/ThrowMsg.h>
@@ -64,6 +51,20 @@
 
 namespace EL
 {
+  namespace
+  {
+    StatusCode make_module (std::unique_ptr<Detail::Module>& module, asg::AsgComponentConfig config)
+    {
+      using namespace msgEventLoop;
+      ANA_MSG_DEBUG ("making EventLoop module of type " + config.type());
+      ANA_CHECK (config.makeComponentExpert (module, "new %1% (\"%2%\")", false, "ELModule."));
+      ANA_MSG_DEBUG ("Created EventLoop module of type " << config.type());
+      return StatusCode::SUCCESS;
+    }
+  }
+
+
+
   void Worker ::
   testInvariant () const
   {
@@ -382,32 +383,57 @@ namespace EL
     const bool xAODInput = m_metaData->castBool (Job::optXAODInput, false);
 
     ANA_MSG_INFO ("xAODInput = " << xAODInput);
+
     if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
-      m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("EarlyMemoryMonitorModule"));
+      m_moduleConfig.emplace_back ("EL::Detail::MemoryMonitorModule/EarlyMemoryMonitorModule");
+    if (auto cacheSize = metaData()->castDouble (Job::optCacheSize, 0); cacheSize > 0)
+    {
+      m_moduleConfig.emplace_back ("EL::Detail::TreeCacheModule/TreeCacheModule");
+      ANA_CHECK (m_moduleConfig.back().setProperty ("cacheSize", Long64_t (cacheSize)));
+      ANA_CHECK (m_moduleConfig.back().setProperty ("cacheLearnEntries", Long64_t (metaData()->castInteger (Job::optCacheLearnEntries, 0))));
+      ANA_CHECK (m_moduleConfig.back().setProperty ("printPerFileStats", metaData()->castBool (Job::optPrintPerFileStats, false)));
+    }
     if (xAODInput)
-      m_modules.push_back (std::make_unique<Detail::TEventModule> ("TEventModule"));
+    {
+      m_moduleConfig.emplace_back ("EL::Detail::TEventModule/TEventModule");
+      ANA_CHECK (m_moduleConfig.back().setProperty ("accessMode", metaData()->castString (Job::optXaodAccessMode)));
+      if (metaData()->castDouble (Job::optXAODSummaryReport, 1) == 0)
+        ANA_CHECK (m_moduleConfig.back().setProperty ("summaryReport", false));
+      ANA_CHECK (m_moduleConfig.back().setProperty ("useStats", metaData()->castBool (Job::optXAODPerfStats, false)));
+    }
     auto factoryPreload = metaData()->castString (Job::optFactoryPreload, "");
     if (!factoryPreload.empty())
     {
-      auto module = std::make_unique<Detail::FactoryPreloadModule> ("FactoryPreloadModule");
-      module->preloader = factoryPreload;
+      m_moduleConfig.emplace_back ("EL::Detail::FactoryPreloadModule/FactoryPreloadModule");
+      ANA_CHECK (m_moduleConfig.back().setProperty ("preloader", factoryPreload));
+    }
+    m_moduleConfig.emplace_back ("EL::Detail::LeakCheckModule/LeakCheckModule");
+    ANA_CHECK (m_moduleConfig.back().setProperty ("failOnLeak", metaData()->castBool (Job::optMemFailOnLeak, false)));
+    ANA_CHECK (m_moduleConfig.back().setProperty ("absResidentLimit", metaData()->castInteger (Job::optMemResidentIncreaseLimit, 10000)));
+    ANA_CHECK (m_moduleConfig.back().setProperty ("absVirtualLimit", metaData()->castInteger (Job::optMemVirtualIncreaseLimit, 0)));
+    ANA_CHECK (m_moduleConfig.back().setProperty ("perEvResidentLimit", metaData()->castInteger (Job::optMemResidentPerEventIncreaseLimit, 10)));
+    ANA_CHECK (m_moduleConfig.back().setProperty ("perEvVirtualLimit", metaData()->castInteger (Job::optMemVirtualPerEventIncreaseLimit, 0)));
+    m_moduleConfig.emplace_back ("EL::Detail::StopwatchModule/StopwatchModule");
+    if (metaData()->castBool (Job::optGridReporting, false))
+      m_moduleConfig.emplace_back ("EL::Detail::GridReportingModule/GridReportingModule");
+    if (metaData()->castBool (Job::optAlgorithmTimer, false))
+      m_moduleConfig.emplace_back ("EL::Detail::AlgorithmTimerModule/AlgorithmTimerModule");
+    if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
+      m_moduleConfig.emplace_back ("EL::Detail::AlgorithmMemoryModule/AlgorithmMemoryModule");
+    m_moduleConfig.emplace_back ("EL::Detail::FileExecutedModule/FileExecutedModule");
+    m_moduleConfig.emplace_back ("EL::Detail::EventCountModule/EventCountModule");
+    m_moduleConfig.emplace_back ("EL::Detail::WorkerConfigModule/WorkerConfigModule");
+    m_moduleConfig.emplace_back ("EL::Detail::AlgorithmStateModule/AlgorithmStateModule");
+    m_moduleConfig.emplace_back ("EL::Detail::PostClosedOutputsModule/PostClosedOutputsModule");
+    if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
+      m_moduleConfig.emplace_back ("EL::Detail::MemoryMonitorModule/LateMemoryMonitorModule");
+
+    for (const auto& config : m_moduleConfig)
+    {
+      std::unique_ptr<Detail::Module> module;
+      ANA_CHECK (make_module (module, config));
       m_modules.push_back (std::move (module));
     }
-    m_modules.push_back (std::make_unique<Detail::LeakCheckModule> ("LeakCheckModule"));
-    m_modules.push_back (std::make_unique<Detail::StopwatchModule> ("StopwatchModule"));
-    if (metaData()->castBool (Job::optGridReporting, false))
-      m_modules.push_back (std::make_unique<Detail::GridReportingModule>("GridReportingModule"));
-    if (metaData()->castBool (Job::optAlgorithmTimer, false))
-      m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ("AlgorithmTimerModule"));
-    if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
-      m_modules.push_back (std::make_unique<Detail::AlgorithmMemoryModule> ("AlgorithmMemoryModule"));
-    m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ("FileExecutedModule"));
-    m_modules.push_back (std::make_unique<Detail::EventCountModule> ("EventCountModule"));
-    m_modules.push_back (std::make_unique<Detail::WorkerConfigModule> ("WorkerConfigModule"));
-    m_modules.push_back (std::make_unique<Detail::AlgorithmStateModule> ("AlgorithmStateModule"));
-    m_modules.push_back (std::make_unique<Detail::PostClosedOutputsModule> ("PostClosedOutputsModule"));
-    if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
-      m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("LateMemoryMonitorModule"));
 
     if (m_outputs.find (Job::histogramStreamName) == m_outputs.end())
     {
@@ -757,16 +783,6 @@ namespace EL
 
 
 
-  void Worker ::
-  addModule (std::unique_ptr<Detail::Module> module)
-  {
-    RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE (module != nullptr);
-    m_modules.push_back (std::move (module));
-  }
-
-
-
   ::StatusCode Worker ::
   directExecute (const SH::SamplePtr& sample, const Job& job,
                  const std::string& location, const SH::MetaObject& options)
@@ -794,15 +810,14 @@ namespace EL
     }
 
     {
-      auto module = std::make_unique<Detail::DirectInputModule> ("DirectInputModule");
-      module->fileList = sample->makeFileList();
+      m_moduleConfig.emplace_back ("EL::Detail::DirectInputModule/DirectInputModule");
+      ANA_CHECK (m_moduleConfig.back().setProperty ("fileList", sample->makeFileList()));
       Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
       if (maxEvents != -1)
-        module->maxEvents = maxEvents;
+        ANA_CHECK (m_moduleConfig.back().setProperty ("maxEvents", maxEvents));
       Long64_t skipEvents = metaData()->castDouble (Job::optSkipEvents, 0);
       if (skipEvents != 0)
-        module->skipEvents = skipEvents;
-      addModule (std::move (module));
+        ANA_CHECK (m_moduleConfig.back().setProperty ("skipEvents", skipEvents));
     }
 
     ANA_CHECK (initialize ());
@@ -829,6 +844,7 @@ namespace EL
       }
 
       std::unique_ptr<BatchJob> job (dynamic_cast<BatchJob*>(file->Get ("job")));
+      m_batchJob = job.get();
       if (job.get() == nullptr)
       {
         ANA_MSG_ERROR ("failed to retrieve BatchJob object");
@@ -863,13 +879,11 @@ namespace EL
       }
 
       {
-        auto module = std::make_unique<Detail::BatchInputModule> ("BatchInputModule");
+        m_moduleConfig.emplace_back ("EL::Detail::BatchInputModule/BatchInputModule");
+        ANA_CHECK (m_moduleConfig.back().setProperty ("jobId", job_id));
         Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
         if (maxEvents != -1)
-          module->maxEvents = maxEvents;
-        module->sample = sample;
-        module->segment = segment;
-        addModule (std::move (module));
+          ANA_CHECK (m_moduleConfig.back().setProperty ("maxEvents", maxEvents));
       }
 
       ANA_CHECK (initialize ());
@@ -981,7 +995,7 @@ namespace EL
     setJobConfig (std::move (*jobConfig));
 
     {
-      auto module = std::make_unique<Detail::DirectInputModule> ("DirectInputModule");
+      std::vector<std::string> fileList;
       std::ifstream infile("input.txt");
       while (infile) {
         std::string sLine;
@@ -990,20 +1004,21 @@ namespace EL
         while (ssLine) {
           std::string sFile;
           if (!getline(ssLine, sFile, ',')) break;
-          module->fileList.push_back(sFile);
+          fileList.push_back(sFile);
         }
       }
-      if (module->fileList.size() == 0) {
+      if (fileList.size() == 0) {
         ANA_MSG_ERROR ("no input files provided");
         //User was expecting input after all.
         gSystem->Exit(EC_BADINPUT);
       }
+      m_moduleConfig.emplace_back ("EL::Detail::DirectInputModule/DirectInputModule");
+      ANA_CHECK (m_moduleConfig.back().setProperty ("fileList", fileList));
 
       if (nEventsPerJob != -1)
-        module->maxEvents = nEventsPerJob;
+        ANA_CHECK (m_moduleConfig.back().setProperty ("maxEvents", nEventsPerJob));
       if (SkipEvents != 0)
-        module->skipEvents = SkipEvents;
-      addModule (std::move (module));
+        ANA_CHECK (m_moduleConfig.back().setProperty ("skipEvents", SkipEvents));
     }
 
     ANA_CHECK (initialize());
