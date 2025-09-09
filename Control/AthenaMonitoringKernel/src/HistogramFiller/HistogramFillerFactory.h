@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFillerFactory_h
@@ -10,10 +10,10 @@
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthenaMonitoringKernel/HistogramDef.h"
-#include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "AthenaMonitoringKernel/IHistogramProvider.h"
 
 #include "HistogramFactory.h"
+#include "HistogramFiller.h"
 
 namespace Monitored {
   /**

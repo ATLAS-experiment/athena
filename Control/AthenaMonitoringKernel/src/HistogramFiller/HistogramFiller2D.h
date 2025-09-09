@@ -7,7 +7,7 @@
 
 #include "TH2.h"
 
-#include "AthenaMonitoringKernel/HistogramFiller.h"
+#include "HistogramFiller.h"
 #include "HistogramFillerUtils.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 #include "GaudiKernel/MsgStream.h"

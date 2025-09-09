@@ -7,7 +7,7 @@
 
 #include "TTree.h"
 
-#include "AthenaMonitoringKernel/HistogramFiller.h"
+#include "HistogramFiller.h"
 #include <boost/algorithm/string.hpp>
 
 namespace Monitored {
