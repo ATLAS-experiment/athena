@@ -80,9 +80,7 @@ namespace dqutils {
   // Internally used data-structures:
 
   class histCollection {
-
    public:
-    typedef std::map<std::string, std::vector<std::string>> fileLBMap_t;
     explicit histCollection(TFile* out, bool skipExisting = false) : m_out{out}, m_skipExisting(skipExisting) {};
     histCollection() = delete;
 
@@ -552,7 +550,7 @@ namespace dqutils {
             if (!name.starts_with("lb_") && !name.starts_with("lowStat_LB")) {
               this->addDirectory(subdir, newName, filename);
             } else {
-              m_fileLBMap[newName].push_back(filename);
+              m_fileLBMap[newName].insert(filename);
             }
           }
         }
@@ -790,7 +788,7 @@ namespace dqutils {
     delete md;
   }
 
-  int MonitoringFile::mergeFiles(const std::string& outFileName, const std::vector<std::string>& files) {
+  int MonitoringFile::mergeFiles(const std::string & outFileName, const std::vector<std::string>& files, fileLBMap_t& lbmap, bool fillLBDirs) {
     std::cout << "Writing file: " << outFileName << std::endl;
     std::cout << "Start merging [" << files.size() << "] histogram files" << std::endl;
     dqi::DisableMustClean disabled;
@@ -825,20 +823,13 @@ namespace dqutils {
       return -1;
     }
     std::cout << "Opened/created output file " << outFileName << std::endl;
-
-
-    auto TFiledel = [](TFile* f) {
-        f->Delete("");
-        f->Close();
-        delete f;
-      };
-
+    
     histCollection hc(outfile.get());
     hc.addDirExclusion(m_mergeMatchDirRE);
     hc.addHistExclusion(m_mergeMatchHistoRE);
 
     // Open first input file, mostly to get the run-directory
-    std::unique_ptr<TFile,decltype(TFiledel)> in1(TFile::Open(files[0].c_str()));
+    std::unique_ptr<TFile> in1(TFile::Open(files[0].c_str()));
     if (!in1) {
       std::cout << "ERROR, could not open input file " << files[0] << std::endl;
       return -1;
@@ -881,7 +872,7 @@ namespace dqutils {
 
     for (size_t i = 1; i < files.size(); ++i) {
       std::cout << "Working on file " << 1+i << "/" << nFiles << ": " << files[i] << std::endl;
-      std::unique_ptr<TFile,decltype(TFiledel)> in(TFile::Open(files[i].c_str()));
+      std::unique_ptr<TFile> in(TFile::Open(files[i].c_str()));
       if (!in) {
         std::cout << "ERROR, could not open input file " << files[i] << std::endl;
         return -1;
@@ -894,14 +885,23 @@ namespace dqutils {
 
     std::cout << "Start writing output ..." << std::endl;
     hc.write();
-
+   
     if (m_doTiming) {
       std::cout << "CPU time for histogram merging: (regular histograms)" << std::endl;
       hc.printTiming();
     }
-    const auto lbmap = hc.getFileLBMapAndClear();
-    if (!lbmap.empty()) {
+
+    auto newlbmap = hc.getFileLBMapAndClear();
+    
+    // Update file-to-lbdir map pass as argument with the new map from these files
+    for (auto& [lbname, newfileset] : newlbmap) {
+      auto& fileset = lbmap[lbname];
+      fileset.merge(newfileset);
+    }
+
+    if (!lbmap.empty() && fillLBDirs) {
       std::cout << "Start merging lb_nnn and lowStat_LB directories (" << lbmap.size() << " in total)" << std::endl;
+    
       histCollection hclb(outfile.get());
       hclb.addDirExclusion(m_mergeMatchDirRE);
       hclb.addHistExclusion(m_mergeMatchHistoRE);
@@ -909,9 +909,9 @@ namespace dqutils {
       // Sort lb/file list by file-name to avoid re-oping the same files:
       // Copy map to vector<pair> ...
       std::vector<std::pair<std::string, std::vector<std::string>>> lbToFiles;
-      for (const auto& val : lbmap) {
-        if (val.second.size() > 0)
-          lbToFiles.emplace_back(val);
+      for (const auto&  [lb,fileSet] : lbmap) {
+        if (fileSet.size() > 0)
+          lbToFiles.emplace_back(lb,std::vector<std::string>(fileSet.begin(),fileSet.end()));
       }
 
       //..and sort the vector
@@ -919,9 +919,9 @@ namespace dqutils {
                 [](const decltype(lbToFiles)::value_type& a, const decltype(lbToFiles)::value_type& b) { return a.second[0] < b.second[0]; });
 
       size_t counter = 0;
-      std::unique_ptr<TFile, decltype(TFiledel)> in;
+      std::unique_ptr<TFile> in;
       for (const auto& [dir, filenames] : lbToFiles) {
-        std::cout << "Merging/copying directory " << dir << " from " << filenames.size() << "input file(s) (" << ++counter << "/" << lbToFiles.size() << ")"
+        std::cout << "Merging/copying directory " << dir << " from " << filenames.size() << " input file(s) (" << ++counter << "/" << lbToFiles.size() << ")"
                   << std::endl;
         for (const std::string& fName : filenames) {
           if (!in || strcmp(in->GetName(), fName.c_str()) != 0) {
@@ -951,7 +951,6 @@ namespace dqutils {
       }  // end loop over lbmap
       in.reset(nullptr);
     }
-    outfile->Close();
     return 0;
   }
 
@@ -967,8 +966,10 @@ namespace dqutils {
       return -1;
     }
 
+
+    fileLBMap_t fileLBMap;
     if (allFiles.size() <= nFilesAtOnce) {
-      return mergeFiles(outFileName, allFiles);
+      return mergeFiles(outFileName, allFiles, fileLBMap, true);
     }
 
     FileList_t procFiles, tmpIntermediateFiles;
@@ -991,13 +992,13 @@ namespace dqutils {
         nameStream << "tmp_merge_" << counter << ".root";
         tmpOutputFile = nameStream.str();
         tmpIntermediateFiles.push_back(tmpOutputFile);
-        int stat=mergeFiles(tmpOutputFile, procFiles);
+        int stat=mergeFiles(tmpOutputFile, procFiles, fileLBMap,false);
         if (stat) return stat;
         procFiles.clear();
       }
     }
 
-    int stat=mergeFiles(outFileName, tmpIntermediateFiles);
+    int stat=mergeFiles(outFileName, tmpIntermediateFiles,fileLBMap,true);
     if (stat) return stat;
 
     for (const auto& tmpFile : tmpIntermediateFiles) {
@@ -1140,8 +1141,6 @@ namespace dqutils {
     }
 
     outfile->Write();
-    outfile->Close();
-
     //  gROOT->SetMustClean(useRecursiveDelete);
     return true;
   }
