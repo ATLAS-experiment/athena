@@ -117,6 +117,13 @@ def getNNs(flags):
             },
             *[{'folds' : [nn_path]} for nn_path in gn3_paths]
         ],
+        'AntiKt4EMTopoJets': [
+            {
+                'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True,
+            },
+        ],
         'AntiKt4EMPFlowCustomVtxJets': [
             {
                 'folds': pf_nns,
