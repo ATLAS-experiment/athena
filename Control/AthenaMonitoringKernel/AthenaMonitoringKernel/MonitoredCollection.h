@@ -390,7 +390,7 @@ namespace Monitored {
     ObjectsRefCollection(std::string name, const std::reference_wrapper<T>& collection,
                          std::function<R(const const_value_type&)> converterToR)
         : IMonitoredVariable(std::move(name)),
-	        m_collection(std::move(collection)),
+	        m_collection(collection),
           m_converterToR(std::move(converterToR)) {}
 
     ObjectsRefCollection(ObjectsRefCollection const&) = delete;
