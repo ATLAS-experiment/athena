@@ -10,6 +10,7 @@
 
 #include <ColumnarCore/LinkColumn.h>
 #include <ColumnarVariant/VariantDef.h>
+#include <ColumnarVariant/VariantOptObjectId.h>
 #include <ColumnarCore/VectorColumn.h>
 
 namespace columnar
@@ -73,6 +74,12 @@ namespace columnar
       return m_link->isValid();
     }
 
+    /// get an OptObjectId for this link
+    [[nodiscard]] OptObjectId<CI,CM> opt_value () const
+    {
+      return OptObjectId<CI,CM> (getXAODObject ());
+    }
+
     /// whether this link is valid and points to an object of the given container
     ///
     /// Note that this is only exact in columnar mode, in xAOD mode it
@@ -131,21 +138,22 @@ namespace columnar
   }
 
   // in xAOD mode we can do a fairly straightforward conversion from
-  // std::vector as the logic is inside ObjectLink
+  // ElementLink as the logic is inside ObjectLink
   template<ContainerIdConcept CIBase,typename... CIList>
-  struct ColumnTypeTraits<std::vector<ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeXAOD>>,ColumnarModeXAOD> final
+  struct ColumnTypeTraits<ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeXAOD>,ColumnarModeXAOD> final
   {
     using CI = VariantContainerId<CIBase,CIList...>;
     using CM = ColumnarModeXAOD;
     using LinkType = ElementLink<typename CI::xAODElementLinkType>;
-    using ColumnType = NativeColumn<std::vector<LinkType>>;
+    using ColumnType = NativeColumn<LinkType>;
     static constexpr bool isNativeType = false;
     static constexpr bool useConvertInput = true;
     static constexpr bool useConvertWithDataInput = false;
     static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnBase*/, ColumnInfo& info) {return info;}
-    static auto convertInput (const std::vector<LinkType>& value) {
-      return detail::VectorConvertView ([](const LinkType& link) {return ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeXAOD> (&link);}, std::span<const LinkType>(value));};
-    using UserType = decltype(convertInput(std::declval<std::vector<LinkType>>()));
+    static auto convertInput (const LinkType& value) {
+      return ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeXAOD> (&value);
+    };
+    using UserType = ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeXAOD>;
   };
 
 
@@ -160,7 +168,7 @@ namespace columnar
     using CI = VariantContainerId<CIBase,CIList...>;
     using CM = ColumnarModeArray;
 
-    ObjectLink (ColumnarOffsetType val_link, const std::uint8_t* val_keys, void** val_data)
+    ObjectLink (typename CM::LinkIndexType val_link, const typename CM::LinkKeyType* val_keys, void** val_data)
       : m_link (val_link), m_keys (val_keys), m_data (val_data)
     {}
 
@@ -179,6 +187,23 @@ namespace columnar
     [[nodiscard]] bool has_value () const noexcept
     {
       return m_link != invalidObjectIndex;
+    }
+
+    /// get an OptObjectId for this link
+    [[nodiscard]] OptObjectId<CI,CM> opt_value () const
+    {
+      if (m_link == CM::invalidLinkValue)
+        return OptObjectId<CI,CM> ();
+      const auto key = getLinkKey();
+      for (unsigned i = 0; i < CI::numVariants; ++ i)
+      {
+        if (m_keys[i] == key)
+          return OptObjectId<CI,CM> (m_data, i, getLinkIndex());
+      }
+      // not sure whether we should throw here or return a nullopt, but
+      // throwing is probably the safer default. if it becomes an issue
+      // we can revisit this.
+      throw std::runtime_error ("link key does not match any known container: " + std::to_string(key));
     }
 
     /// whether this link is valid and points to an object of the given container
@@ -242,22 +267,22 @@ namespace columnar
         return OptObjectId<CI2,CM> ();
     }
 
-    [[nodiscard]] ColumnarOffsetType getLinkIndex () const noexcept
+    [[nodiscard]] auto getLinkIndex () const noexcept
     {
-      return m_link & ~(static_cast<ColumnarOffsetType>(0xff) << (8*(sizeof(ColumnarOffsetType)-1)));
+      return CM::getLinkIndex (m_link);
     }
 
-    [[nodiscard]] std::uint8_t getLinkKey () const noexcept
+    [[nodiscard]] auto getLinkKey () const noexcept
     {
-      return m_link >> (8*(sizeof(ColumnarOffsetType)-1));
+      return CM::getLinkKey (m_link);
     }
 
     /// Private Members
     /// ===============
   private:
 
-    ColumnarOffsetType m_link = 0;
-    const std::uint8_t* m_keys = nullptr;
+    typename CM::LinkIndexType m_link = 0;
+    const CM::LinkKeyType* m_keys = nullptr;
     void** m_data = nullptr;
   };
   template<typename... CIList>
@@ -265,6 +290,75 @@ namespace columnar
   {
     return str << obj.getLinkKey() << "/" << obj.getLinkIndex();
   }
+
+  // in external mode we need to use a vector column, as well as an
+  // extra column to contain our keys in order.
+  template<ContainerIdConcept CI,ContainerIdConcept CIBase,ContainerIdConcept... CIList>
+  class AccessorTemplate<CI,ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeArray>,ColumnAccessMode::input,ColumnarModeArray> final
+  {
+    /// Public Members
+    /// ==============
+  public:
+
+    using VariantCI = VariantContainerId<CIBase,CIList...>;
+    static constexpr ColumnAccessMode CAM = ColumnAccessMode::input;
+    using CM = ColumnarModeArray;
+    static constexpr std::array containerIdNames = {CIList::idName...};
+
+    AccessorTemplate () = default;
+
+    AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
+    {
+      std::string dataName = columnBase.containerStoreName (CI::idName) + "." + name;
+      std::string keysName = columnBase.containerStoreName (CI::idName) + "." + name + ".keys";
+
+      auto dataInfo = info;
+      dataInfo.offsetName = columnBase.containerStoreName (CI::idName);
+      dataInfo.variantLinkKeyColumn = keysName;
+      dataInfo.variantLinkContainers.reserve (VariantCI::numVariants);
+      for (unsigned i = 0; i < VariantCI::numVariants; ++ i)
+        dataInfo.variantLinkContainers.push_back (columnBase.containerStoreName (containerIdNames[i]));
+      auto keyInfo = info;
+      keyInfo.fixedDimensions.push_back (VariantCI::numVariants);
+
+      m_dataData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_dataData, &typeid (typename CM::LinkIndexType), ColumnAccessMode::input);
+      columnBase.addColumn (dataName, m_dataData.get(), std::move (dataInfo));
+      m_keysData = std::make_unique<ColumnAccessorDataArray> (&m_keysIndex, &m_keysData, &typeid (typename CM::LinkKeyType), ColumnAccessMode::input);
+      columnBase.addColumn (keysName, m_keysData.get(), std::move (keyInfo));
+    }
+
+    AccessorTemplate (AccessorTemplate&& that)
+    {
+      moveAccessor (m_dataIndex, m_dataData, that.m_dataIndex, that.m_dataData);
+      moveAccessor (m_keysIndex, m_keysData, that.m_keysIndex, that.m_keysData);
+    }
+
+    AccessorTemplate& operator = (AccessorTemplate&& that)
+    {
+      if (this != &that)
+      {
+        moveAccessor (m_dataIndex, m_dataData, that.m_dataIndex, that.m_dataData);
+        moveAccessor (m_keysIndex, m_keysData, that.m_keysIndex, that.m_keysData);
+      }
+      return *this;
+    }
+
+    auto operator () (ObjectId<CI,CM> id) const noexcept
+    {
+      auto *data = static_cast<const typename CM::LinkIndexType*>(id.getData()[m_dataIndex]);
+      auto *keys = static_cast<const typename CM::LinkKeyType*>(id.getData()[m_keysIndex]);
+      return ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeArray> (data[id.getIndex()], keys, id.getData());
+    }
+
+    /// Private Members
+    /// ===============
+  private:
+
+    unsigned m_dataIndex = 0u;
+    std::unique_ptr<ColumnAccessorDataArray> m_dataData;
+    unsigned m_keysIndex = 0u;
+    std::unique_ptr<ColumnAccessorDataArray> m_keysData;
+  };
 
   // in external mode we need to use a vector column, as well as an
   // extra column to contain our keys in order.
@@ -302,9 +396,9 @@ namespace columnar
 
       m_offsetData = std::make_unique<ColumnAccessorDataArray> (&m_offsetIndex, &m_offsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       columnBase.addColumn (offsetName, m_offsetData.get(), std::move (offsetInfo));
-      m_dataData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_dataData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
+      m_dataData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_dataData, &typeid (typename CM::LinkIndexType), ColumnAccessMode::input);
       columnBase.addColumn (dataName, m_dataData.get(), std::move (dataInfo));
-      m_keysData = std::make_unique<ColumnAccessorDataArray> (&m_keysIndex, &m_keysData, &typeid (std::uint8_t), ColumnAccessMode::input);
+      m_keysData = std::make_unique<ColumnAccessorDataArray> (&m_keysIndex, &m_keysData, &typeid (typename CM::LinkKeyType), ColumnAccessMode::input);
       columnBase.addColumn (keysName, m_keysData.get(), std::move (keyInfo));
     }
 
@@ -329,9 +423,9 @@ namespace columnar
     auto operator () (ObjectId<CI,CM> id) const noexcept
     {
       auto *offset = static_cast<const ColumnarOffsetType*>(id.getData()[m_offsetIndex]);
-      auto *data = static_cast<const ColumnarOffsetType*>(id.getData()[m_dataIndex]);
-      auto *keys = static_cast<const std::uint8_t*>(id.getData()[m_keysIndex]);
-      return detail::VectorConvertView ([keys,data=id.getData()](ColumnarOffsetType value) {return ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeArray> (value, keys,data);}, std::span<const ColumnarOffsetType> (data + offset[id.getIndex()], offset[id.getIndex()+1]-offset[id.getIndex()]));
+      auto *data = static_cast<const typename CM::LinkIndexType*>(id.getData()[m_dataIndex]);
+      auto *keys = static_cast<const typename CM::LinkKeyType*>(id.getData()[m_keysIndex]);
+      return detail::VectorConvertView ([keys,data=id.getData()](typename CM::LinkIndexType value) {return ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeArray> (value, keys,data);}, std::span<const typename CM::LinkIndexType> (data + offset[id.getIndex()], offset[id.getIndex()+1]-offset[id.getIndex()]));
     }
 
     /// Private Members

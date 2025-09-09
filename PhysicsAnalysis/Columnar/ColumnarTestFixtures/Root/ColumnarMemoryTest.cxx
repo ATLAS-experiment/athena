@@ -208,7 +208,7 @@ namespace columnar
 
 
 
-  ColumnarOffsetType ColumnarMemoryTest::ColumnMapType ::
+  std::size_t ColumnarMemoryTest::ColumnMapType ::
   columnSize (const std::string& name)
   {
     auto iter = m_inputs.find (name);
