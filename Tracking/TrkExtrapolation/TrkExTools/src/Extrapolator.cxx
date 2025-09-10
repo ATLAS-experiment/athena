@@ -609,6 +609,12 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
   }
   ++cache.m_methodSequence;
   ATH_MSG_DEBUG("M-[" << cache.m_methodSequence << "] extrapolateToNextMaterialLayer(...) ");
+  if (cache.m_methodSequence > m_maxMethodSequence) {
+    ATH_MSG_WARNING("Too many method sequence calls of  extrapolateToNextMaterialLayer: "
+		    << cache.m_methodSequence);
+    cache.m_status=Cache::kRecursionCountExceeded;
+    return {};
+  }
 
   // this is the core of the material loop
   // extrapolation without target surface returns:
