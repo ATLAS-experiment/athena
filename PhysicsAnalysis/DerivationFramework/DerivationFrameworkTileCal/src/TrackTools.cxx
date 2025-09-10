@@ -548,6 +548,11 @@ std::vector<float> TrackTools::getEnergyInCones(const xAOD::TrackParticle* track
   std::vector<float> energyInCone(drCones.size(), 0.F);
 
   std::unique_ptr<Trk::CaloExtension> extension = m_caloExtensionTool->caloExtension(ctx, *track);
+
+  if (!extension) {
+    return energyInCone;
+  }
+
   CaloExtensionHelpers::EntryExitLayerMap entryExitLayerMap;
   CaloExtensionHelpers::entryExitLayerMap(*extension, entryExitLayerMap);
 
