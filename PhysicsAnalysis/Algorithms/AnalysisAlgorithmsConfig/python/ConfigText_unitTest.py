@@ -79,12 +79,21 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (btagger='GN2v01')
     config.setOptions (btagWP='FixedCutBEff_65')
     config.setOptions (saveScores='All')
+    # Jets.JVT
+    config.addBlock('Jets.JVT', containerName='AnaJets')
+    # FTagJetTriggerMatching
+    bjetTriggerChainsPerYear = {
+        2022: ['HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
+        2023: ['HLT_2j45_0eta290_020jvt_bgn160_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
+        2024: ['HLT_2j45_0eta290_020jvt_bgn260_2j45_pf_ftf_presel2j25XX2j25bgtwo85_L14jJ40p0ETA25'],
+    }
+    config.addBlock( 'Jets.FTagTriggerMatching' )
+    config.setOptions (containerName='AnaJets')
+    config.setOptions (triggerChainsPerYear=bjetTriggerChainsPerYear)
     # Jets.FlavourTaggingEventSF
     config.addBlock( 'Jets.FlavourTaggingEventSF')
     config.setOptions (containerName='AnaJets.baselineJvt')
     config.setOptions (btagger='GN2v01')
-    # Jets.JVT
-    config.addBlock('Jets.JVT', containerName='AnaJets')
 
     # Large-R jets
     config.addBlock('Jets')
