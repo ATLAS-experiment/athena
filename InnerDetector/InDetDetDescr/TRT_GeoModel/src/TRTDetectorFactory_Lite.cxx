@@ -183,9 +183,6 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
     shellPosVec.push_back(T);
   }
 
-  //---------------------- Check if the folder TRT/Cond/StatusHT is in place ------------------------//
-  m_strawsvcavailable = true;
-
   //---------------------- Initialize ID Helper ------------------------------------//
   const TRT_ID *idHelper = nullptr;
 
@@ -568,7 +565,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 
 	Identifier TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
 	int strawStatusHT = TRTCond::StrawStatus::Good;
-	if (m_strawsvcavailable) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
+	if (m_statusAccessor) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 	refreshGasBarrel(strawStatusHT,pShell);
 	
 	//-------------------------------------------------------------------//
@@ -804,7 +801,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
+		if (m_statusAccessor) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 		
 		
 		childPlane = mapFPV["TRTWheelA-StrawPlane-"
@@ -933,7 +930,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
+		if (m_statusAccessor) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 		
 		childPlane = mapFPV["TRTWheelB-StrawPlane-"
 				    +std::to_string(iiSide)+"-"
@@ -1180,7 +1177,7 @@ void  TRTDetectorFactory_Lite::refreshGasEndcap(int strawStatusHT, GeoVPhysVol *
   
   const GeoMaterial *material = m_xenonGas.get();
 
-  if (m_strawsvcavailable && (strawStatusHT == TRTCond::StrawStatus::Dead ||
+  if (m_statusAccessor && (strawStatusHT == TRTCond::StrawStatus::Dead ||
 			      strawStatusHT == TRTCond::StrawStatus::Argon))
     material= m_argonGas.get();
 
@@ -1200,7 +1197,7 @@ void  TRTDetectorFactory_Lite::refreshGasBarrel(int strawStatusHT, GeoVPhysVol *
 
   const GeoMaterial *material = m_xenonGas.get();
 
-  if (m_strawsvcavailable && (strawStatusHT == TRTCond::StrawStatus::Dead ||
+  if (m_statusAccessor && (strawStatusHT == TRTCond::StrawStatus::Dead ||
 			      strawStatusHT == TRTCond::StrawStatus::Argon))
     material= m_argonGas.get();
 

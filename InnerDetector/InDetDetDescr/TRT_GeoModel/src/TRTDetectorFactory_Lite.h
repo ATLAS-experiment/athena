@@ -74,7 +74,6 @@ private:
   bool m_useOldActiveGasMixture{};
   bool m_DC2CompatibleBarrelCoordinates{};
   bool m_alignable{};
-  bool m_strawsvcavailable{};
   bool m_useDynamicAlignFolders{};
 
   GeoIntrusivePtr<const GeoMaterial> m_xenonGas{nullptr};
