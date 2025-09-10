@@ -41,14 +41,15 @@ TCS::jXESort::sortBitCorrect(const InputTOBArray & input, TOBArray & output) {
    }
 
    const jXETOBArray & mets = dynamic_cast<const jXETOBArray&>(input);
-   int missingET = quadraticSumBW(mets[0].Ex(), mets[0].Ey());
+   int missingEx = std::clamp(std::abs(mets[0].Ex()), 0, (1<<13) - 1 );
+   int missingEy = std::clamp(std::abs(mets[0].Ey()), 0, (1<<13) - 1 );
+   int missingET = quadraticSumBW(missingEx,missingEy);
    //clamp missingET value as in FW since GenericTOBs only use 13 bits for ET values
    //"sorted" missingET is thus far the only exception that can exceed this based on 
    //the corresponding input TOBs' possible value ranges
    missingET = std::clamp(missingET, 0, (1<<13) - 1 );
    
    int metphi = TSU::Trigo::atan2(mets[0].Ex(),mets[0].Ey());
-    
    TRG_MSG_DEBUG("MET phi values " << metphi << " from x/y = " << mets[0].Ex() << "/" << mets[0].Ey() << "( ET = " << missingET << ")"  );
    output.push_back( GenericTOB( missingET, 0, metphi ) );
 
