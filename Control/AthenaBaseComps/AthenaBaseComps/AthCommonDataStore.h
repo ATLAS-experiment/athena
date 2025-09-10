@@ -53,7 +53,7 @@ class AthCommonDataStore : public PBASE {
 public:
   template <typename... T>
   AthCommonDataStore(const std::string& name, T... args)
-    : PBASE(name, args...),
+    : PBASE(name, std::move(args)...),
       m_evtStore    ( "StoreGateSvc/StoreGateSvc",  name ),
       m_detStore    ( "StoreGateSvc/DetectorStore", name ),
       m_varHandleArraysDeclared (false)
