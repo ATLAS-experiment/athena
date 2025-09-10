@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -103,7 +103,7 @@ public:
          mycatalog->getFirstPFN(fid, pfn, filetype);
          CPPUNIT_ASSERT_MESSAGE("wrong pfn", new_pfn==pfn );  
          CPPUNIT_ASSERT_MESSAGE("wrong filetype", new_filetype==filetype );
-         registered_pfns.insert( new_pfn );
+         registered_pfns.emplace( std::move(new_pfn) );
          //register LFN 
          // mycatalog->registerLFN(pfn,std::string("lfn:")+names[i]);
          mycatalog->registerLFN(fid, std::string("lfn:")+names[i]);
