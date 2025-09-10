@@ -124,22 +124,35 @@ namespace PixelDigitization{
     const auto nRows = p_design->rowsPerCircuit();
     const auto totalCells = nCircuits * nColumns * nRows;
     int nNoise = CLHEP::RandPoisson::shoot(rndmEngine, totalCells * totalNoiseOccupancy);
+
+    //my tests
+    const auto nCircuitsPerCol = p_design->numberOfCircuitsPerColumn();
+    const auto nCircuitsPerRow = p_design->numberOfCircuitsPerRow();
+    //std::cout << "CircuitsPerCol = " << CircuitsPerCol << std::endl;
+    //std::cout << "CircuitsPerRow = " << CircuitsPerRow << std::endl;
+
     //prepare to enter loop
     const auto technology = p_design->getReadoutTechnology();
     for (int i = 0; i < nNoise; i++) {
       int circuit = CLHEP::RandFlat::shootInt(rndmEngine, nCircuits);
       int column = CLHEP::RandFlat::shootInt(rndmEngine, nColumns);
+      int CircuitsPerCol = CLHEP::RandFlat::shootInt(rndmEngine, CircuitsPerCol);
+      int CircuitsPerRow = CLHEP::RandFlat::shootInt(rndmEngine, CircuitsPerRow); 
       int row = CLHEP::RandFlat::shootInt(rndmEngine, nRows);
       if (row > 159 && technology == InDetDD::PixelReadoutTechnology::FEI3) {
         row += 8;
       } // jump over ganged pixels - rowsPerCircuit == 320 above
       
 
-      InDetDD::SiReadoutCellId roCell =
-        (circuit > 1)
-          ? InDetDD::SiReadoutCellId(nRows + row, nColumns * (circuit - 2) + column)
-          : InDetDD::SiReadoutCellId(row, nColumns * circuit + column);
+      //InDetDD::SiReadoutCellId roCell =
+      //  (circuit > 1)
+      //    ? InDetDD::SiReadoutCellId(nRows + row, nColumns * (circuit - 2) + column)
+      //    : InDetDD::SiReadoutCellId(row, nColumns * circuit + column);
+
+      InDetDD::SiReadoutCellId roCell = InDetDD::SiReadoutCellId(row + nRows*(CircuitsPerCol -1), column + nColumns*(CircuitsPerRow -1));
      
+
+
       //InDetDD::SiReadoutCellId roCell(row, nColumns * circuit + column);
       Identifier noisyID = chargedDiodes.element()->identifierFromCellId(roCell);
       
