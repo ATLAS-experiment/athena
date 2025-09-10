@@ -267,8 +267,8 @@ namespace ActsTrk
     detail::RecoTrackContainer actsTracksContainer(actsTrackBackend,
                                                    actsTrackStateBackend);
 
-    if (m_addPixelStripCounts) {
-      addPixelStripCounts(actsTracksContainer);
+    if (m_addCounts) {
+      addCounts(actsTracksContainer);
     }
 
     detail::ExpectedLayerPatternHelper::add(actsTracksContainer);
@@ -352,8 +352,8 @@ namespace ActsTrk
     detail::RecoTrackContainer resolvedTracksContainer(resolvedTrackBackend, resolvedTrackStateBackend);
     detail::ExpectedLayerPatternHelper::add(resolvedTracksContainer);
 
-    if (m_addPixelStripCounts) {
-      addPixelStripCounts(resolvedTracksContainer);
+    if (m_addCounts) {
+      addCounts(resolvedTracksContainer);
     }
 
     // Start ambiguity resolution
@@ -442,8 +442,8 @@ namespace ActsTrk
     Acts::VectorMultiTrajectory trackStateBackend;
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
 
-    if (m_addPixelStripCounts) {
-      addPixelStripCounts(tracksContainerTemp);
+    if (m_addCounts) {
+      addCounts(tracksContainerTemp);
     }
 
     detail::ExpectedLayerPatternHelper::add(tracksContainerTemp);
@@ -970,19 +970,19 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     // - trimOtherNoneMeasurement
     Acts::trimTrack(track, true, true, true, true);
     Acts::calculateTrackQuantities(track);
-    if (m_addPixelStripCounts) {
-      initPixelStripCounts(track);
+    if (m_addCounts) {
+      initCounts(track);
       for (const auto trackState : track.trackStatesReversed()) {
-        updatePixelStripCounts(track, trackState.typeFlags(), measurementType(trackState));
+        updateCounts(track, trackState.typeFlags(), measurementType(trackState));
       }
-      checkPixelStripCounts(track);
+      checkCounts(track);
     }
 
     ++ntracks;
     ++event_stat[category_i][kNOutputTracks];
 
     if ( not trackFinder().trackSelector.isValidTrack(track) or
-         not selectPixelStripCountsFinal(track)) {
+         not selectCountsFinal(track)) {
       ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
       if ( m_trackStatePrinter.isSet() ) {
         m_trackStatePrinter->printTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex, true);

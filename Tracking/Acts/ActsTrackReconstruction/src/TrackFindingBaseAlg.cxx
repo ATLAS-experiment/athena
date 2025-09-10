@@ -33,7 +33,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_ptMinMeasurements);
     ATH_MSG_DEBUG("   " << m_absEtaMaxMeasurements);
     ATH_MSG_DEBUG("   " << m_doBranchStopper);
-    ATH_MSG_DEBUG("   " << m_addPixelStripCounts);
+    ATH_MSG_DEBUG("   " << m_addCounts);
     ATH_MSG_DEBUG("   " << m_doTwoWay);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
@@ -246,8 +246,8 @@ namespace ActsTrk {
 
     auto rootBranch = tracksContainerTemp.makeTrack();
     rootBranch.copyFromWithoutStates(trackProxy);  // #3534
-    if (m_addPixelStripCounts) {
-      copyPixelStripCounts(rootBranch, trackProxy);
+    if (m_addCounts) {
+      copyCounts(rootBranch, trackProxy);
     }
 
     // perform track finding
@@ -267,6 +267,8 @@ namespace ActsTrk {
           return xAOD::UncalibMeasType::PixelClusterType;
         case DetectorType::Sct:
           return xAOD::UncalibMeasType::StripClusterType;
+        case DetectorType::Hgtd:
+          return xAOD::UncalibMeasType::HGTDClusterType;
         default:
           break;
         }
@@ -284,10 +286,10 @@ namespace ActsTrk {
       const detail::MeasurementIndex &measurementIndex,
       const std::size_t typeIndex,
       EventStats::value_type &event_stat_category_i) const {
-    if (m_addPixelStripCounts) {
-      updatePixelStripCounts(track, trackState.typeFlags(),
-                             measurementType(trackState));
-      checkPixelStripCounts(track);
+    if (m_addCounts) {
+      updateCounts(track, trackState.typeFlags(),
+                   measurementType(trackState));
+      checkCounts(track);
     }
 
     if (m_trackStatePrinter.isSet()) {
@@ -335,9 +337,9 @@ namespace ActsTrk {
     bool tooManyHoles = (track.nHoles() > cutSet.maxHoles);
     bool tooManyOutliers = (track.nOutliers() > cutSet.maxOutliers);
 
-    if (m_addPixelStripCounts) {
+    if (m_addCounts) {
       auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] =
-          selectPixelStripCounts(track, eta);
+          selectCounts(track, eta);
       enoughMeasurements = enoughMeasurements && enoughMeasurementsPS;
       tooManyHoles = tooManyHoles || tooManyHolesPS;
       tooManyOutliers = tooManyOutliers || tooManyOutliersPS;
@@ -351,18 +353,21 @@ namespace ActsTrk {
       ++event_stat_category_i[kNStoppedTracksMaxHoles];
     }
 
-    if (m_addPixelStripCounts) {
+    if (m_addCounts) {
       ATH_MSG_DEBUG("CkfBranchStopper: stop and "
                     << (enoughMeasurements ? "keep" : "drop")
                     << " branch with nHoles=" << track.nHoles() << " ("
                     << s_branchState.nPixelHoles(track) << " pixel+"
-                    << s_branchState.nStripHoles(track)
-                    << " strip), nOutliers=" << track.nOutliers() << " ("
+                    << s_branchState.nStripHoles(track) << " strip+"
+                    << s_branchState.nHgtdHoles(track)
+                    << " hgtd), nOutliers=" << track.nOutliers() << " ("
                     << s_branchState.nPixelOutliers(track) << "+"
-                    << s_branchState.nStripOutliers(track)
+                    << s_branchState.nStripOutliers(track) << "+"
+                    << s_branchState.nHgtdOutliers(track)
                     << "), nMeasurements=" << track.nMeasurements() << " ("
                     << s_branchState.nPixelHits(track) << "+"
-                    << s_branchState.nStripHits(track) << ")");
+                    << s_branchState.nStripHits(track) << "+"
+                    << s_branchState.nHgtdHits(track) << ")");
     } else {
       ATH_MSG_DEBUG("CkfBranchStopper: stop and "
                     << (enoughMeasurements ? "keep" : "drop")
@@ -376,27 +381,33 @@ namespace ActsTrk {
   }
 
 
-  void TrackFindingBaseAlg::addPixelStripCounts(detail::RecoTrackContainer& tracksContainer)
+  void TrackFindingBaseAlg::addCounts(detail::RecoTrackContainer& tracksContainer)
   {
     tracksContainer.addColumn<unsigned int>("nPixelHits");
     tracksContainer.addColumn<unsigned int>("nStripHits");
+    tracksContainer.addColumn<unsigned int>("nHgtdHits");
     tracksContainer.addColumn<unsigned int>("nPixelHoles");
     tracksContainer.addColumn<unsigned int>("nStripHoles");
+    tracksContainer.addColumn<unsigned int>("nHgtdHoles");
     tracksContainer.addColumn<unsigned int>("nPixelOutliers");
     tracksContainer.addColumn<unsigned int>("nStripOutliers");
+    tracksContainer.addColumn<unsigned int>("nHgtdOutliers");
   }
 
-  void TrackFindingBaseAlg::initPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track)
+  void TrackFindingBaseAlg::initCounts(const detail::RecoTrackContainer::TrackProxy &track)
   {
     s_branchState.nPixelHits(track) = 0;
     s_branchState.nStripHits(track) = 0;
+    s_branchState.nHgtdHits(track) = 0;
     s_branchState.nPixelHoles(track) = 0;
     s_branchState.nStripHoles(track) = 0;
+    s_branchState.nHgtdHoles(track) = 0;
     s_branchState.nPixelOutliers(track) = 0;
     s_branchState.nStripOutliers(track) = 0;
+    s_branchState.nHgtdOutliers(track) = 0;
   }
 
-  void TrackFindingBaseAlg::updatePixelStripCounts(
+  void TrackFindingBaseAlg::updateCounts(
       const detail::RecoTrackContainer::TrackProxy &track,
       Acts::ConstTrackStateType typeFlags, xAOD::UncalibMeasType detType) {
     if (detType == xAOD::UncalibMeasType::PixelClusterType) {
@@ -415,38 +426,55 @@ namespace ActsTrk {
       } else if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
         s_branchState.nStripHits(track)++;
       }
+    } else if (detType == xAOD::UncalibMeasType::HGTDClusterType) {
+      if (typeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+        s_branchState.nHgtdHoles(track)++;
+      } else if (typeFlags.test(Acts::TrackStateFlag::OutlierFlag)) {
+        s_branchState.nHgtdOutliers(track)++;
+      } else if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+        s_branchState.nHgtdHits(track)++;
+      }
     }
   }
-
-  void TrackFindingBaseAlg::copyPixelStripCounts(
-      const detail::RecoTrackContainer::TrackProxy &track,
+  
+  void TrackFindingBaseAlg::copyCounts(
+                                       const detail::RecoTrackContainer::TrackProxy &track,
       const detail::RecoTrackContainer::TrackProxy &other) {
     s_branchState.nPixelHits(track) = s_branchState.nPixelHits(other);
     s_branchState.nStripHits(track) = s_branchState.nStripHits(other);
+    s_branchState.nHgtdHits(track) = s_branchState.nHgtdHits(other);
     s_branchState.nPixelHoles(track) = s_branchState.nPixelHoles(other);
     s_branchState.nStripHoles(track) = s_branchState.nStripHoles(other);
+    s_branchState.nHgtdHoles(track) = s_branchState.nHgtdHoles(other);
     s_branchState.nPixelOutliers(track) = s_branchState.nPixelOutliers(other);
     s_branchState.nStripOutliers(track) = s_branchState.nStripOutliers(other);
+    s_branchState.nHgtdOutliers(track) = s_branchState.nHgtdOutliers(other);
   }
 
-  void TrackFindingBaseAlg::checkPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const {
+  void TrackFindingBaseAlg::checkCounts(const detail::RecoTrackContainer::TrackProxy &track) const {
     // This check will fail if there are other types (HGTD, MS?) of hits, holes, or outliers.
     // The check can be removed when it is no longer appropriate.
-    if (track.nMeasurements() != s_branchState.nPixelHits(track) + s_branchState.nStripHits(track))
+    if (track.nMeasurements() != s_branchState.nPixelHits(track) + s_branchState.nStripHits(track) + s_branchState.nHgtdHits(track))
       ATH_MSG_WARNING("mismatched hit count: total (" << track.nMeasurements()
                       << ") != pixel (" << s_branchState.nPixelHits(track)
-                      << ") + strip (" << s_branchState.nStripHits(track) << ")");
-    if (track.nHoles() < s_branchState.nPixelHoles(track) + s_branchState.nStripHoles(track))  // allow extra HGTD holes
+                      << ") + strip (" << s_branchState.nStripHits(track)
+                      << ") + hgtd (" << s_branchState.nHgtdHits(track)
+                      << ")");
+    if (track.nHoles() != s_branchState.nPixelHoles(track) + s_branchState.nStripHoles(track) + s_branchState.nHgtdHoles(track))
       ATH_MSG_WARNING("mismatched hole count: total (" << track.nHoles()
                       << ") < pixel (" << s_branchState.nPixelHoles(track)
-                      << ") + strip (" << s_branchState.nStripHoles(track) << ")");
-    if (track.nOutliers() != s_branchState.nPixelOutliers(track) + s_branchState.nStripOutliers(track))
+                      << ") + strip (" << s_branchState.nStripHoles(track)
+                      << ") + hgtd (" << s_branchState.nHgtdHoles(track)
+                      << ")");
+    if (track.nOutliers() != s_branchState.nPixelOutliers(track) + s_branchState.nStripOutliers(track) + s_branchState.nHgtdOutliers(track))
       ATH_MSG_WARNING("mismatched outlier count: total (" << track.nOutliers()
                       << ") != pixel (" << s_branchState.nPixelOutliers(track)
-                      << ") + strip (" << s_branchState.nStripOutliers(track) << ")");
+                      << ") + strip (" << s_branchState.nStripOutliers(track)
+                      << ") + hgtd (" << s_branchState.nHgtdOutliers(track)
+                      << ")");
   };
 
-  std::array<bool, 3> TrackFindingBaseAlg::selectPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const {
+  std::array<bool, 3> TrackFindingBaseAlg::selectCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const {
     bool enoughMeasurements = true, tooManyHoles = false, tooManyOutliers = false;
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
     std::size_t etaBin = (std::abs(eta) < trackSelectorCfg.absEtaEdges.front())   ? 0
@@ -461,10 +489,13 @@ namespace ActsTrk {
 
     enoughMeasurements = enoughMeasurements && !cutMin(s_branchState.nPixelHits(track), m_minPixelHits);
     enoughMeasurements = enoughMeasurements && !cutMin(s_branchState.nStripHits(track), m_minStripHits);
+    enoughMeasurements = enoughMeasurements && !cutMin(s_branchState.nHgtdHits(track), m_minHgtdHits);
     tooManyHoles = tooManyHoles || cutMax(s_branchState.nPixelHoles(track), m_maxPixelHoles);
     tooManyHoles = tooManyHoles || cutMax(s_branchState.nStripHoles(track), m_maxStripHoles);
+    tooManyHoles = tooManyHoles || cutMax(s_branchState.nHgtdHoles(track), m_maxHgtdHoles);
     tooManyOutliers = tooManyOutliers || cutMax(s_branchState.nPixelOutliers(track), m_maxPixelOutliers);
     tooManyOutliers = tooManyOutliers || cutMax(s_branchState.nStripOutliers(track), m_maxStripOutliers);
+    tooManyOutliers = tooManyOutliers || cutMax(s_branchState.nHgtdOutliers(track), m_maxHgtdOutliers);
 
     return {enoughMeasurements, tooManyHoles, tooManyOutliers};
   }
@@ -736,10 +767,10 @@ namespace ActsTrk {
     return out;
   }
 
-  bool TrackFindingBaseAlg::selectPixelStripCountsFinal(const detail::RecoTrackContainer::TrackProxy &track) const {
-    if (not m_addPixelStripCounts) return true;
+  bool TrackFindingBaseAlg::selectCountsFinal(const detail::RecoTrackContainer::TrackProxy &track) const {
+    if (not m_addCounts) return true;
     double eta = -std::log(std::tan(0.5 * track.theta()));
-    auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] = selectPixelStripCounts(track, eta);
+    auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] = selectCounts(track, eta);
     return enoughMeasurementsPS && !tooManyHolesPS && !tooManyOutliersPS;
   }
 
