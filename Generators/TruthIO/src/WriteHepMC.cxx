@@ -23,8 +23,8 @@ StatusCode WriteHepMC::initialize() {
      return StatusCode::FAILURE;
   }
 #ifdef HEPMC3
-  m_momentumunit = HepMC3::Units::momentum_unit(m_units.substr(0,2));
-  m_lengthunit = HepMC3::Units::length_unit(m_units.substr(3,4));
+  m_momentumunit = HepMC3::Units::momentum_unit(m_units.substr(0,3));
+  m_lengthunit = HepMC3::Units::length_unit(m_units.substr(3,2));
   if (m_format == "hepmc2") {
     auto writer = new HepMC3::WriterAsciiHepMC2(m_outfile);
     writer->set_precision(m_precision);
@@ -36,8 +36,8 @@ StatusCode WriteHepMC::initialize() {
     m_hepmcio.reset(writer);
   }
 #else
-  m_momentumunit = (m_units.substr(0,2) == "MEV") ? HepMC::Units::MEV : HepMC::Units::GEV;
-  m_lengthunit = (m_units.substr(3,4) == "CM") ? HepMC::Units::CM : HepMC::Units::MM;
+  m_momentumunit = (m_units.substr(0,3) == "MEV") ? HepMC::Units::MEV : HepMC::Units::GEV;
+  m_lengthunit = (m_units.substr(3,2) == "CM") ? HepMC::Units::CM : HepMC::Units::MM;
   m_hepmcio.reset( new HepMC::IO_GenEvent(m_outfile) );
   m_hepmcio->precision(m_precision);
 #endif
