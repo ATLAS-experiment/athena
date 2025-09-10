@@ -303,7 +303,7 @@ void AthenaOutputStreamTool::propagateProvenance( const DataHeader& src_dh )
       else if( dhTransAddr ) {
          DataHeaderElement dhe(dhTransAddr.get(), dhTransAddr->address(), pTag);
          m_dataHeader->insertProvenance(dhe);
-         insertedTags.insert(pTag);
+         insertedTags.insert(std::move(pTag));
       }
    }
 
