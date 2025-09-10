@@ -1,4 +1,6 @@
-
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef LARDEADOTXFROMSC_H
 #define LARDEADOTXFROMSC_H
 
@@ -19,8 +21,8 @@ class LArDeadOTXFromSC
   const std::vector<float>& correctionFromThisOTXdead(HWIdentifier febid) const{
     return m_FEBFromSC.at(febid);
   }
-  void addFEB(HWIdentifier febid, std::vector<float>& vec){
-     if (!this->isThisOTXdead(febid)) m_FEBFromSC[febid]=std::move(vec);
+  void addFEB(HWIdentifier febid, const std::vector<float> & vec){
+     if (!this->isThisOTXdead(febid)) m_FEBFromSC[febid]=vec;
      return;
   }
 
