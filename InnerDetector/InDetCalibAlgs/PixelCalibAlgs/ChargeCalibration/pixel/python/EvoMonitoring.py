@@ -13,6 +13,8 @@ import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
+MaxThreshold = 10
+MaxSlope = 10
 
 def arrayCharge(parameters, layer):
     
@@ -36,7 +38,7 @@ def percent( a,b):
 
 def failsCheckTuning(parameters, layer):
     tot    = 30
-    error  = 5 # percentage
+    error  = MaxSlope # percentage
     expected_charge = 20000 # electrons
     
     if layer == "Blayer":
@@ -128,7 +130,7 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
                 
             m,b = np.polyfit(newQ ,oldQ,1)
             slopes.append(m)
-            boolFit = (abs((1-m)/m)*100) > 5
+            boolFit = (abs((1-m)/m)*100) > MaxThreshold
             
             if boolFit or boolTOT:
                 key = "%-18s - %i" % (mod_str, mod)
@@ -275,7 +277,7 @@ def setupRunEvo(path_newCalib, path_oldCalib):
     fout.write("%-20s: %5i\n"   % ("Total FE L2"       , information["L2"]["ok"]    +information["L2"]["bad"]    ))
     fout.write("%-20s: %5i\n\n" % ("Total FE Disk"     , information["Disk"]["ok"]  +information["Disk"]["bad"]  ))
     
-    fout.write('FrontEnds deviating more than 5% of TOT vs charge gradient between new and previous calibration:\n')
+    fout.write(f'FrontEnds deviating more than {MaxThreshold}% of TOT vs charge gradient between new and previous calibration:\n')
     fout.write("%-11s: %-4i (%6.2f%%)\n"   % ("IBL FEs"   , information["IBL"]["bad"]   , percent(information["IBL"]["bad"]   ,information["IBL"]["ok"])   ))    
     fout.write("%-11s: %-4i (%6.2f%%)\n"   % ("Blayer FEs", information["Blayer"]["bad"], percent(information["Blayer"]["bad"],information["Blayer"]["ok"])))    
     fout.write("%-11s: %-4i (%6.2f%%)\n"   % ("L1 FEs"    , information["L1"]["bad"]    , percent(information["L1"]["bad"]    ,information["L1"]["ok"])    ))    
