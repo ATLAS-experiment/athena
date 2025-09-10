@@ -4,9 +4,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsConfig.ActsConfigFlags import SeedingStrategy
 from ActsConfig.ActsUtilities import extractChildKwargs
-from ActsInterop import UnitConstants
 from AthenaCommon.Utils.unixtools import find_datafile
-import AthenaCommon.SystemOfUnits as Units
+from ActsInterop import UnitConstants as ActsUnits
+import AthenaCommon.SystemOfUnits as GaudiUnits
 
 def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -21,7 +21,7 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
 
   isLRT=flags.Tracking.ActiveConfig.extension == "LargeD0"
   
-  kwargs.setdefault("pTmin", 0.9 * Units.GeV)
+  kwargs.setdefault("pTmin", 0.9 * GaudiUnits.GeV)
   kwargs.setdefault("MaxGraphEdges", 3000000)
   kwargs.setdefault("ConnectionFileName",
                     "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
@@ -42,8 +42,8 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("deltaZMax" , float("inf"))
     kwargs.setdefault("maxPtScattering", float("inf"))
     kwargs.setdefault("useVariableMiddleSPRange", False)
-    kwargs.setdefault("rMax", 320. * UnitConstants.mm)
-    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed)
+    kwargs.setdefault("rMax", 320. * ActsUnits.mm)
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
     kwargs.setdefault("rRangeMiddleSP", [
         [0,0],
@@ -69,15 +69,15 @@ def ActsFastPixelSeedingToolCfg(flags,
                                 name: str = "ActsFastPixelSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
     ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 900 * UnitConstants.MeV)
+    kwargs.setdefault("minPt", 0.9 * ActsUnits.GeV)
     kwargs.setdefault("sigmaScattering", 2.)
     kwargs.setdefault("maxPtScattering", float("inf"))
     kwargs.setdefault("maxSeedsPerSpM", 3)
-    kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
-    kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
+    kwargs.setdefault("collisionRegionMin", -150 * ActsUnits.mm)
+    kwargs.setdefault("collisionRegionMax", 150 * ActsUnits.mm)
     kwargs.setdefault("maxPhiBins", 200)
-    kwargs.setdefault("gridRMax", 250 * UnitConstants.mm)
-    kwargs.setdefault("deltaRMax", 200 * UnitConstants.mm)
+    kwargs.setdefault("gridRMax", 250 * ActsUnits.mm)
+    kwargs.setdefault("deltaRMax", 200 * ActsUnits.mm)
     kwargs.setdefault("zBinsCustomLooping" , [2, 10, 3, 9, 6, 4, 8, 5, 7])
     kwargs.setdefault("rRangeMiddleSP", [
              [0.0, 0.0],
@@ -122,11 +122,11 @@ def ActsFastPixelSeedingToolCfg(flags,
     kwargs.setdefault("zBinEdges", [-3000., -2000, -1400., -910., -500., -250.,  250., 500., 910., 1400., 2000, 3000.])
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
-    kwargs.setdefault("rMax", 320 * UnitConstants.mm)
+    kwargs.setdefault("rMax", 320 * ActsUnits.mm)
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
 
-    kwargs.setdefault("deltaRMaxTopSP", 220 * UnitConstants.mm)
-    kwargs.setdefault("deltaRMaxBottomSP", 135 * UnitConstants.mm)
+    kwargs.setdefault("deltaRMaxTopSP", 220 * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxBottomSP", 135 * ActsUnits.mm)
 
     return ActsPixelSeedingToolCfg(flags, name, **kwargs)
 
@@ -135,30 +135,30 @@ def ActsStripSeedingToolCfg(flags,
                             **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    impactMax = 20. * UnitConstants.mm
-    collisionRegionAbsMax = 200. * UnitConstants.mm
+    impactMax = 20. * ActsUnits.mm
+    collisionRegionAbsMax = 200. * ActsUnits.mm
     if flags.Tracking.ActiveConfig.extension in ["ActsLargeRadius", "ActsValidateLargeRadiusSeeds", "ActsValidateLargeRadiusStandalone"]:
-        impactMax = 300. * UnitConstants.mm
-        collisionRegionAbsMax = 500. * UnitConstants.mm
+        impactMax = 300. * ActsUnits.mm
+        collisionRegionAbsMax = 500. * ActsUnits.mm
 
     
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
     kwargs.setdefault("doSeedQualitySelection", False)
     # For SpacePointGridConfig
-    kwargs.setdefault("gridRMax" , 1000. * UnitConstants.mm)
-    kwargs.setdefault("deltaRMax" , 600. * UnitConstants.mm)
+    kwargs.setdefault("gridRMax" , 1000. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMax" , 600. * ActsUnits.mm)
     kwargs.setdefault("impactMax" , impactMax)
     # For SeedfinderConfig
     kwargs.setdefault("rMax" , flags.Tracking.ActiveConfig.radMax)
-    kwargs.setdefault("deltaRMinTopSP" , 20. * UnitConstants.mm)
-    kwargs.setdefault("deltaRMaxTopSP" , 300. * UnitConstants.mm)
-    kwargs.setdefault("deltaRMinBottomSP" , 20. * UnitConstants.mm)
-    kwargs.setdefault("deltaRMaxBottomSP" , 300. * UnitConstants.mm)
-    kwargs.setdefault("deltaZMax" , 900. * UnitConstants.mm)
+    kwargs.setdefault("deltaRMinTopSP" , 20. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxTopSP" , 300. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMinBottomSP" , 20. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxBottomSP" , 300. * ActsUnits.mm)
+    kwargs.setdefault("deltaZMax" , 900. * ActsUnits.mm)
     kwargs.setdefault("interactionPointCut" , False)
     kwargs.setdefault("zBinsCustomLooping" , [7, 8, 6, 9, 5, 10, 4, 11, 3, 12, 2])
-    kwargs.setdefault("deltaRMiddleMinSPRange" , 30 * UnitConstants.mm)
-    kwargs.setdefault("deltaRMiddleMaxSPRange" , 150 * UnitConstants.mm)
+    kwargs.setdefault("deltaRMiddleMinSPRange" , 30 * ActsUnits.mm)
+    kwargs.setdefault("deltaRMiddleMaxSPRange" , 150 * ActsUnits.mm)
     kwargs.setdefault("useDetailedDoubleMeasurementInfo" , True)
     kwargs.setdefault("maxPtScattering", float("inf"))
     # For SeedFilterConfig
@@ -198,9 +198,9 @@ def ActsFastPixelOrthogonalSeedingToolCfg(flags,
     ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
 
     ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 900 * UnitConstants.MeV)
-    kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
-    kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
+    kwargs.setdefault("minPt", 0.9 * ActsUnits.GeV)
+    kwargs.setdefault("collisionRegionMin", -150 * ActsUnits.mm)
+    kwargs.setdefault("collisionRegionMax", 150 * ActsUnits.mm)
     kwargs.setdefault("useExperimentCuts", True)
     
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
@@ -212,13 +212,13 @@ def ActsStripOrthogonalSeedingToolCfg(flags,
     acc = ComponentAccumulator()
     
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
-    kwargs.setdefault("impactMax" , 20. * UnitConstants.mm)
-    kwargs.setdefault('rMax', 1200. * UnitConstants.mm)
-    kwargs.setdefault("deltaRMinTopSP" , 20. * UnitConstants.mm)
-    kwargs.setdefault("deltaRMaxTopSP" , 300. * UnitConstants.mm)
-    kwargs.setdefault("deltaRMinBottomSP" , 20. * UnitConstants.mm)
-    kwargs.setdefault("deltaRMaxBottomSP" , 300. * UnitConstants.mm)
-    kwargs.setdefault("deltaZMax" , 900. * UnitConstants.mm)
+    kwargs.setdefault("impactMax" , 20. * ActsUnits.mm)
+    kwargs.setdefault('rMax', 1200. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMinTopSP" , 20. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxTopSP" , 300. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMinBottomSP" , 20. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxBottomSP" , 300. * ActsUnits.mm)
+    kwargs.setdefault("deltaZMax" , 900. * ActsUnits.mm)
     kwargs.setdefault("interactionPointCut" , False)
     kwargs.setdefault("impactWeightFactor" , 1.)
     kwargs.setdefault("compatSeedLimit" , 4)
@@ -228,8 +228,8 @@ def ActsStripOrthogonalSeedingToolCfg(flags,
     kwargs.setdefault("maxSeedsPerSpMConf" , 100)
     kwargs.setdefault("maxQualitySeedsPerSpMConf" , 100)
     kwargs.setdefault("useDeltaRorTopRadius" , False)
-    kwargs.setdefault("rMinMiddle", 33. * UnitConstants.mm)
-    kwargs.setdefault("rMaxMiddle", 1200. * UnitConstants.mm)
+    kwargs.setdefault("rMinMiddle", 33. * ActsUnits.mm)
+    kwargs.setdefault("rMaxMiddle", 1200. * ActsUnits.mm)
     
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
     return acc

@@ -63,8 +63,6 @@ def createActsHeavyIonTrackingPassFlags():
     icf.doActsAmbiguityResolution = lambda pcf : pcf.Acts.doAmbiguityResolution
     icf.doActsToAthenaResolvedTrack = lambda pcf : pcf.Acts.doAmbiguityResolution
 
-    # Other specific flags
-    icf.minPTSeed = 0.4
     # Deactivate CTIDE processor fit
     icf.doAmbiguityProcessorTrackFit = False    
     return icf
