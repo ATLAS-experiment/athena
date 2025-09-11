@@ -40,19 +40,14 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
  public:
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-
   virtual StatusCode initialize() override ;
   virtual StatusCode execute(const EventContext& ctx) const override ;
-
 
  private:
 
   /// returns the clusters from allClusters which are close enough to caloExtensions
   std::vector<const xAOD::CaloCluster* >
-  associatedClusters(const Trk::CaloExtension & caloExtensions, const xAOD::CaloClusterContainer & allClusters,
-                     const EventContext& ctx) const;
-  
-  
+  associatedClusters(const Trk::CaloExtension & caloExtensions, const xAOD::CaloClusterContainer & allClusters, const EventContext& ctx) const;
 
   Gaudi::Property<float> m_dr {this, "DeltaR", 0.1, "max deltaR to match track and cluster" };
   Gaudi::Property<bool> m_useCovariance {this, "UseCovariance", true, "use covariance from TrkParameters to evaluate angular uncertainties"};
@@ -76,8 +71,7 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
   // decorations 
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_assocClustersDecor {this, "AssociatedClusterDecorKey" , "", "Decoration key to store associated clusters. IMPORTANT  must be consistent with TrackParticleContainer" };
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_caloEntryParsDecor {this, "CaloEntryParsDecorKey" , "", "Decoration name to store trk parameters to calo entry (if non blank). IMPORTANT : must be consistent with TrackParticleContainer" };
-  SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_sigmaWidthKey
-    { this, "SigmaWidthKey", m_caloClusters, "sigmaWidth", "sigmaWidth decoration" };
+  SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_sigmaWidthKey{ this, "SigmaWidthKey", m_caloClusters, "sigmaWidth", "sigmaWidth decoration" };
 };
 
 #endif
