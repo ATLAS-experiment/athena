@@ -26,7 +26,7 @@ namespace Monitored {
       : HistogramFiller(definition, std::move(provider)) {}
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars) const override {
-      if (ATH_UNLIKELY(vars[0] == nullptr or vars[1] == nullptr )) return 0;
+      if (ATH_UNLIKELY(vars.size()!=2 or vars[0] == nullptr or vars[1] == nullptr )) return 0;
 
       const size_t size0 = vars[0]->size();
       const size_t size1 = vars[1]->size();
