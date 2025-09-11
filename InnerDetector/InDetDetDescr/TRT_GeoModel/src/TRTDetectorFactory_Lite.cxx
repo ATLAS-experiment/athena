@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -10,6 +10,7 @@
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapDescriptor.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
+#include "TRT_ConditionsData/StrawStatus.h"
 #include "InDetReadoutGeometry/Version.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 #include "IdDictDetDescr/IdDictManager.h"
@@ -47,7 +48,6 @@ using namespace GeoXF;
 //
 TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqliteReader, 
 						 InDetDD::AthenaComps * athenaComps,
-						 const ITRT_StrawStatusSummaryTool* sumTool, // added for Argon
 						 bool useOldActiveGasMixture,
 						 bool DC2CompatibleBarrelCoordinates,
 						 int overridedigversion,
@@ -59,7 +59,6 @@ TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqlit
     m_DC2CompatibleBarrelCoordinates(DC2CompatibleBarrelCoordinates),
     m_overridedigversion(overridedigversion),
     m_alignable(alignable),
-    m_sumTool(sumTool),
     m_useDynamicAlignFolders(useDynamicAlignmentFolders)
 { 
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DetectorTool.h"
@@ -19,9 +19,12 @@
 #include "TRT_ConditionsData/StrawDxContainer.h" 
 
 #include "AthenaKernel/ClassID_traits.h"
+#include "PathResolver/PathResolver.h"
 #include "SGTools/DataProxy.h"
 
 #include "CxxUtils/checker_macros.h"
+
+#include <memory>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Please consult the README for more information about which options to set in your joboptions file. //
@@ -73,9 +76,6 @@ StatusCode TRT_DetectorTool::create()
   // Get the detector configuration.
   ATH_CHECK( m_geoDbTagSvc.retrieve());
 
-  // Get the straw status tool
-  ATH_CHECK(m_sumTool.retrieve());
-  
   DecodeVersionKey versionKey(&*m_geoDbTagSvc, "TRT");
 
   // Unless we are using custom trt, the switch positions are going to
@@ -96,7 +96,21 @@ StatusCode TRT_DetectorTool::create()
     return (StatusCode::FAILURE); 
   } 
   GeoPhysVol *world = theExpt->getPhysVol();
-  
+
+  std::unique_ptr<TRTStrawStatusAccessor> strawStatusAccessor;
+  ATH_CHECK(m_sumTool.retrieve(DisableTool{ !m_dumpStrawStatus }));
+  if(!m_dumpStrawStatus && (m_doArgonMixture || m_doKryptonMixture) ) {
+    // Read Straw Statuses from the ASCII file
+    strawStatusAccessor = std::make_unique<TRTStrawStatusAccessor>();
+    const std::string strawStatusPath = PathResolverFindCalibFile(m_strawStatusFile);
+    if (strawStatusPath.empty()) {
+      ATH_MSG_ERROR("Failed to resolve path for StrawStatusFile: " << m_strawStatusFile << ", the job will fail now.");
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_VERBOSE("StrawStatusFile: " << m_strawStatusFile << ", resolved path: " << strawStatusPath);
+    strawStatusAccessor->fill(strawStatusPath);
+  }
+
   GeoModelIO::ReadGeoModel* sqliteReader  = m_geoDbTagSvc->getSqliteReader();
   //
   // If we are using the SQLite reader, then we are not building the raw geometry but
@@ -122,7 +136,6 @@ StatusCode TRT_DetectorTool::create()
 
       TRTDetectorFactory_Lite theTRTFactory(sqliteReader,
 					    m_athenaComps,
-                                            m_sumTool.get(),
                                             m_useOldActiveGasMixture,
                                             m_DC2CompatibleBarrelCoordinates,
                                             m_overridedigversion,
@@ -255,7 +268,8 @@ StatusCode TRT_DetectorTool::create()
       ATH_MSG_INFO( " Building TRT geometry from GeoModel factory TRTDetectorFactory_Full" );
       
       TRTDetectorFactory_Full theTRTFactory(m_athenaComps, 
-					    m_sumTool.get(),
+					    m_dumpStrawStatus ? m_sumTool.get() : nullptr,
+					    std::move(strawStatusAccessor),
 					    m_useOldActiveGasMixture,
 					    m_DC2CompatibleBarrelCoordinates,
 					    m_overridedigversion,
