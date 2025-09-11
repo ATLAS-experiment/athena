@@ -230,7 +230,7 @@ def ITkTrackRecoPassCfg(flags,
     TrackContainer = "Resolved" + extension + "Tracks"
     # For Acts we have another convention, with the extention as the first element in the name
     if extension in _actsExtensions:
-        TrackContainer = extension + "ResolvedTracks"
+        TrackContainer = extension + "ResolvedTracks" if flags.Acts.doAmbiguityResolution else extension + "Tracks"
     if doTrackOverlay and extension == "Conversion":
         TrackContainer = flags.Overlay.SigPrefix + TrackContainer
 
