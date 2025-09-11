@@ -148,7 +148,7 @@ namespace SH
   ScanDir& ScanDir ::
   sampleRename (const std::string& pattern, const std::string& name)
   {
-    m_sampleRename.push_back (std::pair<boost::regex,std::string> (boost::regex (RCU::glob_to_regexp (pattern)), name));
+    m_sampleRename.push_back (std::pair<std::regex,std::string> (std::regex (RCU::glob_to_regexp (pattern)), name));
     return *this;
   }
 

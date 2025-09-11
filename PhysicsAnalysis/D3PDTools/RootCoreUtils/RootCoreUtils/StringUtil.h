@@ -17,14 +17,6 @@
 
 
 #include <RootCoreUtils/Global.h>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma GCC diagnostic ignored "-Wkeyword-macro"
-#include <boost/regex.hpp>
-#pragma GCC diagnostic pop
-
 #include <regex>
 #include <string>
 
@@ -45,8 +37,6 @@ namespace RCU
   ///   expression
   /// guarantee: strong
   /// failures: out of memory II
-  bool match_expr (const boost::regex& expr, const std::string& str);
-
   bool match_expr (const std::regex& expr, const std::string& str);
 
 

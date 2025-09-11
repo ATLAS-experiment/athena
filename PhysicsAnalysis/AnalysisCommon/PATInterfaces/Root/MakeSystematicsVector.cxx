@@ -272,7 +272,7 @@ namespace CP
 		group = iter;
 	    }
 	  }
-	} else if (RCU::match_expr (boost::regex (m_config[iter].pattern.c_str()), sys.first))
+	} else if (RCU::match_expr (std::regex (m_config[iter].pattern.c_str()), sys.first))
 	{
 	  if (m_config[iter].toys > 0 && ensemble.empty())
 	    RCU_THROW_MSG ("toys only supported for ensemble systematics");

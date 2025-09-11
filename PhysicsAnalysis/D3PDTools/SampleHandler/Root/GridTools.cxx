@@ -249,7 +249,7 @@ namespace SH
       RCU_THROW_MSG ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
-    boost::regex pattern (filter);
+    std::regex pattern (filter);
     std::string line;
     while (std::getline (str, line))
     {
@@ -311,8 +311,8 @@ namespace SH
     // vector
     std::map<std::string,std::string> resultMap;
 
-    boost::regex urlPattern ("^root://.*");
-    boost::regex pattern (filter);
+    std::regex urlPattern ("^root://.*");
+    std::regex pattern (filter);
     std::string line;
     while (std::getline (str, line))
     {
@@ -361,12 +361,12 @@ namespace SH
       RCU_THROW_MSG ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
-    boost::regex pattern ("^\\| ([a-zA-Z0-9_.-]+):([a-zA-Z0-9_.-]+) +\\| ([a-zA-Z0-9_.-]+) +\\| *$");
+    std::regex pattern ("^\\| ([a-zA-Z0-9_.-]+):([a-zA-Z0-9_.-]+) +\\| ([a-zA-Z0-9_.-]+) +\\| *$");
     std::string line;
     while (std::getline (str, line))
     {
-      boost::smatch what;
-      if (boost::regex_match (line, what, pattern))
+      std::smatch what;
+      if (std::regex_match (line, what, pattern))
       {
 	RucioListDidsEntry entry;
 	entry.scope = what[1];
@@ -399,12 +399,12 @@ namespace SH
       RCU_THROW_MSG ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
-    boost::regex pattern ("^\\| +([^ ]+) +\\| +([^ ]+) +\\| +([^ ]+ [^ ]+) +\\| +([^ ]+) +\\| +([^: ]+): ([^ ]+) +\\| *$");
+    std::regex pattern ("^\\| +([^ ]+) +\\| +([^ ]+) +\\| +([^ ]+ [^ ]+) +\\| +([^ ]+) +\\| +([^: ]+): ([^ ]+) +\\| *$");
     std::string line;
     while (std::getline (str, line))
     {
-      boost::smatch what;
-      if (boost::regex_match (line, what, pattern) &&
+      std::smatch what;
+      if (std::regex_match (line, what, pattern) &&
           what[1] != "SCOPE")
       {
 	RucioListFileReplicasEntry entry;
@@ -446,7 +446,7 @@ namespace SH
       RCU_THROW_MSG ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
-    boost::regex pattern ("^([^:]+): *(.+)$");
+    std::regex pattern ("^([^:]+): *(.+)$");
     std::string line;
     std::unique_ptr<MetaObject> meta (new MetaObject);
 
@@ -460,15 +460,15 @@ namespace SH
 
     while (std::getline (str, line))
     {
-      boost::smatch what;
+      std::smatch what;
       if (line == "------")
       {
         addMeta ();
         meta.reset (new MetaObject);
-      } else  if (boost::regex_match (line, what, pattern))
+      } else  if (std::regex_match (line, what, pattern))
       {
 	if (meta->get (what[1]))
-          throw std::runtime_error ("duplicate entry: " + what[1]);
+          throw std::runtime_error (std::string("duplicate entry: ") + what[1].str());
 	meta->setString (what[1], what[2]);
       } else if (!line.empty())
       {
