@@ -163,6 +163,11 @@ atlas_add_citest( DerivationRun3Data_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun3MC_PHYS_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e 'mtDerivation' --tag mc_PHYS --threads 1
+   LOG_IGNORE_PATTERN "WARNING FPE" # Ignore FPEs for now
+   PROPERTIES PROCESSORS 1 )
+
 atlas_add_citest( DerivationRun3Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
