@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRIGGER_VERSIONS_TRIGCOMPOSITE_V1_ICC
@@ -57,21 +57,20 @@ namespace xAOD {
 
   template< typename TYPE >
   bool TrigComposite_v1::getDetail( const std::string& name, TYPE& value) const {
-    if( ! hasDetail<TYPE>(name) ) {
-       return false;
-    }
     // Object used to access the auxiliary data:
     ConstAccessor< TYPE > acc( name );
+
+    if( ! acc.isAvailable( *this ) ) {
+       return false;
+    }
     value = acc( *this );
     return true;
   }
 
   template< typename TYPE >
   TYPE TrigComposite_v1::getDetail( const std::string& name ) const {
-    TYPE temp;
-    if ( getDetail(name, temp) == false ) 
-      throw std::runtime_error( "xAOD::TrigComposite::getDetail<TYPE>("+name+") encountered missing detail"); 
-    return temp; // RVO
+    ConstAccessor< TYPE > acc( name );
+    return acc( *this );
   }
   
   template< class CONTAINER >
