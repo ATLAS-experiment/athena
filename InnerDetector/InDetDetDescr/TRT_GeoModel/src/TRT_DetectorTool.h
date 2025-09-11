@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_GEOMODEL_TRTDETECTORTOOL_H
@@ -8,7 +8,7 @@
 #include "GeoModelUtilities/GeoModelTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
+#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 #include "CxxUtils/checker_macros.h"
 #include <string>
 
@@ -53,7 +53,10 @@ public:
 
     ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
     ServiceHandle< IGeometryDBSvc > m_geometryDBSvc;
-    ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool; // added for Argon
+
+    Gaudi::Property<bool> m_dumpStrawStatus{this, "DumpStrawStatus", false};
+    Gaudi::Property<std::string> m_strawStatusFile{this, "StrawStatusFile", ""};
+    ToolHandle<ITRT_StrawStatusSummaryTool> m_sumTool{this, "SummaryTool", ""}; // added for Argon
  
     bool m_doArgonMixture;
     bool m_doKryptonMixture;

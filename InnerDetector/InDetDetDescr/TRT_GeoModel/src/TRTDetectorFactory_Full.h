@@ -1,60 +1,56 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-//-----------------------------------------------------------------------------//
-//                                                                             //
-//  TRTDetectorFactory_Full                                                    //
-//                                                                             //
-//  Authors:  Joe Boudreau, Andrei and Iouris Zalite, Thomas Kittelmann        //
-//                                                                             //
-//  This class creates the TRT Geometry. Cf. the README file                   //
-//                                                                             //
-//-----------------------------------------------------------------------------//
+/**
+ * @class TRTDetectorFactory_Full
+ *
+ * @brief This class creates the TRT Geometry
+ *
+ * @author Joe Boudreau, Andrei and Iouris Zalite, Thomas Kittelmann
+ */
 
-#ifndef TRTDetectorFactory_Full_h
-#define TRTDetectorFactory_Full_h 1
-#include "GeoPrimitives/GeoPrimitives.h"
+#ifndef TRT_GEOMODEL_TRTDETECTORFACTORY_FULL_H
+#define TRT_GEOMODEL_TRTDETECTORFACTORY_FULL_H
+
+#include "TRTParameterInterface.h"
+#include "TRTStrawStatusAccessor.h"
+
 #include "InDetGeoModelUtils/InDetDetectorFactoryBase.h"
+#include "InDetGeoModelUtils/InDetMaterialManager.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
 #include "GeoModelKernel/GeoDefinitions.h"
-#include "CxxUtils/checker_macros.h"
 
-#include <string>
+#include <memory>
 
-class GeoPhysVol;
 class GeoFullPhysVol;
-class TRTParameterInterface;
-class InDetMaterialManager;
 
 class TRTDetectorFactory_Full : public InDetDD::DetectorFactoryBase  {
 
  public:
   
-  //--------------------------Public Interface:--------------------------------//
-  //                                                                           //
-  // Constructor:                                                              //
-  TRTDetectorFactory_Full(InDetDD::AthenaComps * athenaComps,                  //
-			  const ITRT_StrawStatusSummaryTool * sumTool,         //
-			  bool useOldActiveGasMixture,                         //
-			  bool DC2CompatibleBarrelCoordinates,                 //
-			  int overridedigversion,                              //
-			  bool alignable,                                      //
-			  bool doArgon,                                        //
-			  bool doKrypton,                                      //
-			  bool useDynamicAlignmentFolders);                    //
-  //                                                                           //
-  // Destructor:                                                               //
-  ~TRTDetectorFactory_Full();                                                  //
-  //                                                                           //
-  // Creation of geometry:                                                     //
-  virtual void create(GeoPhysVol *world);                                      //
-  //                                                                           //
-  // Access to the results:                                                    //
-  virtual const InDetDD::TRT_DetectorManager * getDetectorManager() const;     //
-  //                                                                           //
+  // Constructor:
+  TRTDetectorFactory_Full(InDetDD::AthenaComps * athenaComps,
+			  const ITRT_StrawStatusSummaryTool * sumTool,
+			  std::unique_ptr<const TRTStrawStatusAccessor> statusAccessor,
+			  bool useOldActiveGasMixture,
+			  bool DC2CompatibleBarrelCoordinates,
+			  int overridedigversion,
+			  bool alignable,
+			  bool doArgon,
+			  bool doKrypton,
+			  bool useDynamicAlignmentFolders);
+
+  // Destructor:
+  ~TRTDetectorFactory_Full();
+
+  // Creation of geometry:
+  virtual void create(GeoPhysVol *world) override;
+
+  // Access to the results:
+  virtual const InDetDD::TRT_DetectorManager * getDetectorManager() const override;
   //---------------------------------------------------------------------------//
 
   const std::string& name() const { 
@@ -62,15 +58,14 @@ class TRTDetectorFactory_Full : public InDetDD::DetectorFactoryBase  {
     return n;
   }
 
- typedef TRTCond::StrawStatusMultChanContainer StrawStatusContainer;
- private:  
+  typedef TRTCond::StrawStatusMultChanContainer StrawStatusContainer;
 
-  //---------------------------Illegal operations:---------------------------------//
-  //                                                                               //
-  const TRTDetectorFactory_Full & operator=(const TRTDetectorFactory_Full &right); //
-  TRTDetectorFactory_Full(const TRTDetectorFactory_Full &right);                   //
-  //                                                                               //
-  //-------------------------------------------------------------------------------//
+  //---------------------------Illegal operations:---------------------------------
+  const TRTDetectorFactory_Full & operator=(const TRTDetectorFactory_Full &right) = delete;
+  TRTDetectorFactory_Full(const TRTDetectorFactory_Full &right) = delete;
+  //-------------------------------------------------------------------------------
+
+ private:  
 
   // Gas mixture enumerator
   enum ActiveGasMixture
@@ -94,12 +89,13 @@ class TRTDetectorFactory_Full : public InDetDD::DetectorFactoryBase  {
   InDetDD::TRT_DetectorManager                  *m_detectorManager = nullptr; // ownership handed to calleer.
   std::unique_ptr<InDetMaterialManager>         m_materialManager;
   std::unique_ptr<TRTParameterInterface>        m_data;
+  std::unique_ptr<const TRTStrawStatusAccessor> m_statusAccessor;
+  const ITRT_StrawStatusSummaryTool* m_sumTool{nullptr};
 
   bool m_useOldActiveGasMixture;
   bool m_DC2CompatibleBarrelCoordinates;
   int m_overridedigversion;
   bool m_alignable;
-  const ITRT_StrawStatusSummaryTool* m_sumTool; // added for Argon
   bool m_strawsvcavailable;
   bool m_doArgon;
   bool m_doKrypton;
