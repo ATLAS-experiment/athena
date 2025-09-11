@@ -36,6 +36,9 @@ def alphanumeric_block_name(func):
         # Get the string returned by the 'instanceName()' method of a config block
         orig_name = func(*args, **kwargs)
 
+        if orig_name is None:
+            return ""
+
         # Allowed replacements - anything else is likely a mistake on the user-side
         result = orig_name.replace("||", "OR").replace("&&", "AND").replace("(","LB").replace(")","RB").replace(" ","")
 
