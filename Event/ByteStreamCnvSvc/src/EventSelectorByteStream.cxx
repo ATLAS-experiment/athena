@@ -386,13 +386,12 @@ StatusCode EventSelectorByteStream::nextImpl(IEvtSelector::Context& it,
       // check bad event flag and handle as configured
       if (badEvent) {
          int nbad = ++n_bad_events;
-         ATH_MSG_INFO("Bad event encountered, current count at " << nbad);
+         ATH_MSG_WARNING("Bad event encountered, current count at " << nbad);
          bool toomany = (m_maxBadEvts >= 0 && nbad > m_maxBadEvts);
-         if (toomany) {ATH_MSG_FATAL("too many bad events ");}
          if (!m_procBadEvent || toomany) {
-            // End of file
+            ATH_MSG_ERROR("Cannot continue processing: bad event handling disabled or limit exceeded (" << nbad << " events)");
             it = *m_endIter;
-            return(StatusCode::FAILURE);
+            return StatusCode::FAILURE;
          }
          ATH_MSG_WARNING("Continue with bad event");
       }
@@ -429,29 +428,25 @@ StatusCode EventSelectorByteStream::nextImpl(IEvtSelector::Context& it,
                if (!m_counterTool.empty()) {
                   if (!m_counterTool->postNext().isSuccess()) {
                      ATH_MSG_WARNING("Failed to postNext() CounterTool.");
+                  }
                }
-            }
-            break;
-         }
+               // Validate the event
+               try {
+                  m_eventSource->validateEvent();
+               }
+               catch (const ByteStreamExceptions::badFragmentData&) {
+                  int nbad = ++n_bad_events;
+                  ATH_MSG_WARNING("Bad fragment data encountered, current count at " << nbad);
 
-         // Validate the event
-         try {
-            m_eventSource->validateEvent();
-         }
-         catch (const ByteStreamExceptions::badFragmentData&) {
-            ATH_MSG_ERROR("badFragment data encountered");
-
-            int nbad = ++n_bad_events;
-            ATH_MSG_INFO("Bad event encountered, current count at " << nbad);
-
-            bool toomany = (m_maxBadEvts >= 0 && nbad > m_maxBadEvts);
-	         if (toomany) {ATH_MSG_FATAL("too many bad events ");}
-            if (!m_procBadEvent || toomany) {
-               // End of file
-	            it = *m_endIter;
-	         return(StatusCode::FAILURE);
-   	      }
-            ATH_MSG_WARNING("Continue with bad event");
+                  bool toomany = (m_maxBadEvts >= 0 && nbad > m_maxBadEvts);
+                  if (!m_procBadEvent || toomany) {
+                     ATH_MSG_ERROR("Cannot continue processing: bad event handling disabled or limit exceeded (" << nbad << " events)");
+                     it = *m_endIter;
+                     return StatusCode::FAILURE;
+                  }
+                  ATH_MSG_WARNING("Continue with bad event");
+               }
+               break;
          }
       } else {
          if (!m_skipEventSequence.empty() && m_NumEvents == m_skipEventSequence.front()) {
