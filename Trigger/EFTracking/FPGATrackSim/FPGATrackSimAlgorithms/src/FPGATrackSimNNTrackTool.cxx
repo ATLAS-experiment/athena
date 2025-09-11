@@ -176,7 +176,7 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
           }
 	  
 	  if (m_doGNNTracking) {
-	    inputTensorValues.resize(39);
+	   inputTensorValues.resize(m_nInputsGNN * 3);
 	  }
 	}
 	else {
@@ -929,7 +929,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
         // NN Estimator needs 9 spacepoints -> 27 inputs
         // If there are more than 9 spacepoints entered, then it accepts the first 9
         // If there are less than 9 spacepoints, then it enters no values for it (although I actually probably need to just reject these)
-        inputTensorValues.resize(27);
+        inputTensorValues.resize(m_nInputsGNN * 3); 
         
         inputTensorValuesAll.push_back(inputTensorValues);
         FPGATrackSimTrack track_cand;

@@ -31,12 +31,12 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.doEDMConversion=True \
     Trigger.FPGATrackSim.runCKF=False \
     Trigger.FPGATrackSim.pipeline='F-410' \
-    Trigger.FPGATrackSim.GNN.graphTool=graphTool.MetricLearning \
-    Trigger.FPGATrackSim.GNN.moduleMapTol=0.001 \
+    Trigger.FPGATrackSim.GNN.graphTool=graphTool.ModuleMap \
+    Trigger.FPGATrackSim.GNN.moduleMapTol=0.5 \
     Trigger.FPGATrackSim.GNN.moduleMapPath=$GNN_MODULE_MAP \
     Trigger.FPGATrackSim.GNN.MLModelPath=$GNN_METRIC_LEARNING \
     Trigger.FPGATrackSim.GNN.GNNModelPath=$GNN_ONNX_MODEL \
-    Trigger.FPGATrackSim.GNN.doGNNRootOutput=True \
+    Trigger.FPGATrackSim.GNN.doGNNRootOutput=False \
     Trigger.FPGATrackSim.GNN.doGNNTracking=True \
     Trigger.FPGATrackSim.sampleType=$SAMPLE_TYPE \
     Trigger.FPGATrackSim.mapsDir=$MAPS_9L \
@@ -47,10 +47,13 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     Trigger.FPGATrackSim.bankDir=$BANKS_9L \
     Trigger.FPGATrackSim.FakeNNonnxFile1st=$ONNX_INPUT_FAKE_2ND \
     Trigger.FPGATrackSim.ParamNNonnxFile1st=$ONNX_INPUT_PARAM_2ND \
-    Trigger.FPGATrackSim.GNN.nInputsGNN=9 \
+    Trigger.FPGATrackSim.FakeNNonnxFile2nd=$ONNX_INPUT_FAKE_2ND \
+    Trigger.FPGATrackSim.ParamNNonnxFile2nd=$ONNX_INPUT_PARAM_2ND \
+    Trigger.FPGATrackSim.NNCartesianCoordinates=False \
     Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
-    Trigger.FPGATrackSim.doOverlapRemoval=False \
-    Trigger.FPGATrackSim.writeOfflPRDInfo=True
+    Trigger.FPGATrackSim.doOverlapRemoval=True \
+    Trigger.FPGATrackSim.writeOfflPRDInfo=True \
+    Trigger.FPGATrackSim.writeAdditionalOutputData=False
 }
 run_F410
 if [ -z $ArtJobType ];then # skip file check for ART (this has already been done in CI)

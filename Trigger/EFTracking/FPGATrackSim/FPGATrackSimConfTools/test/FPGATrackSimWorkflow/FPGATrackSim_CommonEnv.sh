@@ -26,7 +26,6 @@ BANKS_5L="banks_5L/${BANK_5L_VERSION}/"
 
 COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/${BANKS_5L}/combined_matrix_reg34.root"
 
-
 # NN 1st stage
 ONNX_INPUT_FAKE="NN/1stStage/${NN_1ST}/Class_5Hits_V007"
 ONNX_INPUT_PARAM="NN/1stStage/${NN_1ST}/Param_5Hits_V004"
@@ -37,9 +36,9 @@ ONNX_INPUT_HIT="NN/2ndStage/${NN_2ND}/NNPathfinderHit_4Hits_V011"
 ONNX_INPUT_VOL="NN/2ndStage/${NN_2ND}/NNPathfinderVol_4Hits_V011"
 
 # GNN
-GNN_MODULE_MAP="GNN/v0.10/FPGATrackSim_DoubletModuleMap_v1.root" # New training will be done later
-GNN_ONNX_MODEL="GNN/v0.10/edge_classifier-InteractionGNN2-v1.onnx" # New training will be done later
-GNN_METRIC_LEARNING="GNN/v0.12/graph_construction-MetricLearning-FPGATrackSim.onnx" # New training will be done later
+GNN_METRIC_LEARNING="GNN/v0.12/graph_construction-MetricLearning-FPGATrackSim.onnx"
+GNN_MODULE_MAP="GNN/v0.12/FPGATrackSim_DoubletModuleMap_final"
+GNN_ONNX_MODEL="GNN/v0.12/edge_classifier-InteractionGNN2-FPGATrackSim_final"
 
 # set default values
 RUN_CKF=True
