@@ -104,7 +104,7 @@ namespace asg
       auto res_result = share.lock();
       if (res_result != nullptr)
       {
-	result = res_result;
+	result = std::move(res_result);
 	return StatusCode::SUCCESS;
       }
       ToolHandle<interfaceType_t> th;
