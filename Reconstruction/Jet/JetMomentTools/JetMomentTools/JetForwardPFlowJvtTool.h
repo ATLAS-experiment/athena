@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardPFlowJvtTool.h
@@ -165,6 +165,8 @@ namespace pflow {
     
     ToolHandle<CP::WeightPFOTool> m_wpfotool{this,"WeightPFOTool", "", "Weight PFO tool name"};
     ToolHandle<IJetCalibrationTool> m_pfoJES{this,"JetCalibrationTool", "", "Jet calibration tool name"};
+
+    Gaudi::Property<bool> m_suppressInputDependence{this, "SuppressInputDependence", false};
 
   };
 #endif //> !FORWARDJVTTOOL_JVT_FORWARDJVTTOOL_H
