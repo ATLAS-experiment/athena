@@ -268,6 +268,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         if (m_doNNTrack) {
             ATH_MSG_DEBUG("Performing NN tracking");
             ATH_CHECK(m_NNTrackTool->getTracks_1st(roads_1st, tracks_1st));
+            if (m_doGNNTrack) {
+                ATH_MSG_DEBUG("Performing track parameter estimation");
+                ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks_1st,true,m_evtSel->getMin(), m_evtSel->getMax()));
+            }
         } else {
             ATH_MSG_DEBUG("Performing Linear tracking");
             if (m_passLowestChi2TrackOnly) { // Pass only the lowest chi2 track per road

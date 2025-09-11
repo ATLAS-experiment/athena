@@ -14,11 +14,16 @@ FPGATrackSimGNNGraphConstructionTool::FPGATrackSimGNNGraphConstructionTool(const
 
 StatusCode FPGATrackSimGNNGraphConstructionTool::initialize()
 {
+    ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     if(m_graphTool == "ModuleMap") {
-        if(m_moduleMapPath == "") { // Require a path provided for the Module Map
-                ATH_MSG_FATAL("ERROR! No Module Map provided. Please provide a valid path to a ROOT file."); 
-                return StatusCode::FAILURE;
+        if (m_FPGATrackSimMapping->getGNNModuleMapString() != "") {
+            m_moduleMapPath = m_FPGATrackSimMapping->getGNNModuleMapString();
         }
+        else {
+            ATH_MSG_ERROR("Path to 1st stage NN-based fake track removal ONNX file is empty! If you want to run this pipeline, you need to provide an input file.");
+            return StatusCode::FAILURE;
+        }
+
         if(m_moduleMapType == "doublet") {
             loadDoubletModuleMap(); // Load the doublet module map and store entry branches in vectors
         }
@@ -49,7 +54,7 @@ StatusCode FPGATrackSimGNNGraphConstructionTool::getEdges(const std::vector<std:
 
 void FPGATrackSimGNNGraphConstructionTool::loadDoubletModuleMap()
 {
-    std::unique_ptr<TFile> file(TFile::Open(m_moduleMapPath.value().c_str()));
+    std::unique_ptr<TFile> file(TFile::Open(m_moduleMapPath.c_str()));
     std::unique_ptr<TTree> tree(static_cast<TTree*>(file->Get("TreeModuleDoublet")));
 
     unsigned int mid1_value = 0;

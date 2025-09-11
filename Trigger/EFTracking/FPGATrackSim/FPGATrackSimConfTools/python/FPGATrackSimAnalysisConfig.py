@@ -364,10 +364,13 @@ def FPGATrackSimRoadUnionToolGNNCfg(flags,name="FPGATrackSimRoadUnionToolGNN"):
     patternRecoTool = CompFactory.FPGATrackSimGNNPatternRecoTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimGNNPatternRecoTool"))
     patternRecoTool.GNNGraphHitSelector = CompFactory.FPGATrackSimGNNGraphHitSelectorTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimGNNGraphHitSelectorTool"))
     patternRecoTool.GNNGraphConstruction = result.popToolsAndMerge(FPGATrackSimGNNGraphConstructionToolCfg(flags))
-    patternRecoTool.GNNEdgeClassifier = result.popToolsAndMerge(FPGATrackSimGNNEdgeClassifierToolCfg(flags))
+    edgeResult, edgeClassifierTools = FPGATrackSimGNNEdgeClassifierToolCfg(flags)
+    result.merge(edgeResult)
+    patternRecoTool.GNNEdgeClassifiers = edgeClassifierTools
     patternRecoTool.GNNRoadMaker = result.popToolsAndMerge(FPGATrackSimGNNRoadMakerToolCfg(flags))
     patternRecoTool.GNNRootOutput = result.popToolsAndMerge(FPGATrackSimGNNRootOutputToolCfg(flags))
     patternRecoTool.doGNNRootOutput = flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput
+    patternRecoTool.regionNum = int(flags.Trigger.FPGATrackSim.region)
 
     RF.tools = [patternRecoTool]
     result.addPublicTool(RF, primary=True)
@@ -379,12 +382,13 @@ def FPGATrackSimGNNGraphConstructionToolCfg(flags,name="FPGATrackSimGNNGraphCons
 
     GNNGraphConstructionTool = CompFactory.FPGATrackSimGNNGraphConstructionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     GNNGraphConstructionTool.graphTool = flags.Trigger.FPGATrackSim.GNN.graphTool.value
+    GNNGraphConstructionTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+
 
     # Module Map Configuration
     GNNGraphConstructionTool.moduleMapType=flags.Trigger.FPGATrackSim.GNN.moduleMapType.value
     GNNGraphConstructionTool.moduleMapFunc=flags.Trigger.FPGATrackSim.GNN.moduleMapFunc.value
     GNNGraphConstructionTool.moduleMapTol=flags.Trigger.FPGATrackSim.GNN.moduleMapTol
-    GNNGraphConstructionTool.moduleMapPath=PathResolver.FindCalibFile(flags.Trigger.FPGATrackSim.GNN.moduleMapPath)
 
     # Metric Learning Configuration
     GNNGraphConstructionTool.metricLearningR=flags.Trigger.FPGATrackSim.GNN.metricLearningR
@@ -400,19 +404,23 @@ def FPGATrackSimGNNGraphConstructionToolCfg(flags,name="FPGATrackSimGNNGraphCons
 
     return result
 
-def FPGATrackSimGNNEdgeClassifierToolCfg(flags,name="FPGATrackSimGNNEdgeClassifierTool"):
+def FPGATrackSimGNNEdgeClassifierToolCfg(flags, name="FPGATrackSimGNNEdgeClassifierTool"):
     result = ComponentAccumulator()
 
     from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
 
-    GNNEdgeClassifierTool = CompFactory.FPGATrackSimGNNEdgeClassifierTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
-    GNNEdgeClassifierTool.GNNInferenceTool = result.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(
-       flags, flags.Trigger.FPGATrackSim.GNN.GNNModelPath, OnnxRuntimeType.CPU))
+    region = int(flags.Trigger.FPGATrackSim.region)
+    model_path = f"{flags.Trigger.FPGATrackSim.GNN.GNNModelPath}_{region}.onnx"
 
-    result.setPrivateTools(GNNEdgeClassifierTool)
+    GNNEdgeClassifierTool = CompFactory.FPGATrackSimGNNEdgeClassifierTool(
+        FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags, name))
+    GNNEdgeClassifierTool.GNNInferenceTool = result.popToolsAndMerge(
+        OnnxRuntimeInferenceToolCfg(flags, model_path, OnnxRuntimeType.CPU, name=f"OnnxInferenceTool_{region}")
+    )
+    GNNEdgeClassifierTool.regionNum = region
 
-    return result
+    return result, [GNNEdgeClassifierTool]
 
 def FPGATrackSimGNNRoadMakerToolCfg(flags,name="FPGATrackSimGNNRoadMakerTool"):
     result = ComponentAccumulator()
@@ -432,7 +440,8 @@ def FPGATrackSimGNNRootOutputToolCfg(flags,name="FPGATrackSimGNNRootOutputTool")
     GNNRootOutputTool = CompFactory.FPGATrackSimGNNRootOutputTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     GNNRootOutputTool.OutputRegion = str(flags.Trigger.FPGATrackSim.region)
 
-    result.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
+    if(flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput):
+        result.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
     result.setPrivateTools(GNNRootOutputTool)
 
     return result
@@ -480,7 +489,7 @@ def NNTrackToolCfg(flags,name="FPGATrackSimNNTrackTool"):
     NNTrackTool.IdealGeoRoads = False
     NNTrackTool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints and not flags.Trigger.FPGATrackSim.ActiveConfig.genScan and not flags.Trigger.FPGATrackSim.ActiveConfig.GNN
     NNTrackTool.SPRoadFilterTool = result.popToolsAndMerge(SPRoadFilterToolCfg(flags))
-    NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 9
+    NNTrackTool.MinNumberOfRealHitsInATrack = 5 if flags.Trigger.FPGATrackSim.ActiveConfig.genScan else 7 if flags.Trigger.FPGATrackSim.ActiveConfig.GNN else 9
     NNTrackTool.useSectors = False
     NNTrackTool.doGNNTracking = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
     NNTrackTool.nInputsGNN = flags.Trigger.FPGATrackSim.GNN.nInputsGNN
@@ -577,6 +586,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput1st = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput1st
     theFPGATrackSimLogicalHitsProcessAlg.NumOfHitPerGrouping = flags.Trigger.FPGATrackSim.ActiveConfig.NumOfHitPerGrouping
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack_1st = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
+    theFPGATrackSimLogicalHitsProcessAlg.DoGNNTrack = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
