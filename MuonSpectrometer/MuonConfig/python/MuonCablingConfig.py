@@ -18,7 +18,7 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
             if flags.GeoModel.Run <= LHCPeriod.Run3:   
                 cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-5"
             else:
-                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-5"
+                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-6"
 
         result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
         kwargs.setdefault("MapFolders",  cablingFolder)
