@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CMAPARAMETERS_H
@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <list>
+#include <memory>
 
 #include "MuonCablingTools/ShowRequest.h"
 #include "RPC_CondCabling/CMAidentity.h"
