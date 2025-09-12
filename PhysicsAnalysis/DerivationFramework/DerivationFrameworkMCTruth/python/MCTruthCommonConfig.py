@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # MCTruthCommonConfig
 # Contains the configuration for the common truth containers/decorations used in analysis DAODs
@@ -168,6 +168,7 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
 def AddStandardTruthContentsCfg(flags,
                                 decorationDressing='dressedPhoton',
                                 includeTausInDressingPhotonRemoval=False,
+                                navInputCollections = ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"],
                                 prefix=''):
 
     acc = ComponentAccumulator()
@@ -190,7 +191,7 @@ def AddStandardTruthContentsCfg(flags,
         acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing+"_tau"
 
     # Add back the navigation contect for the collections we want
-    acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
+    acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, navInputCollections, prefix=prefix))
     # Some more additions for standard TRUTH3
     acc.merge(AddBosonsAndDownstreamParticlesCfg(flags))
     if isEVNT: acc.merge(AddLargeRJetD2Cfg(flags))
