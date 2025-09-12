@@ -8,6 +8,8 @@
 #include "TrigT1TGC/TGCArguments.h"
 #include "TrigT1TGC/TGCReadoutIndex.h"
 
+#include <memory>
+
 namespace LVL1TGC {
 class TGCTMDB;
 class TGCNSW;
