@@ -349,6 +349,10 @@ def getDevSignatures():
         ChainProp(name='HLT_j260_35smcINF_60bgntwoxt_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175_35smcINF_60bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
 
+        # Central jet chains for rate plots
+        ChainProp(name='HLT_j175C_35smcINF_60bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_60bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
         # 65% WP
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_65bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_65bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
@@ -362,6 +366,10 @@ def getDevSignatures():
         ChainProp(name='HLT_j175_35smcINF_65bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j260_35smcINF_65bgntwoxt_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175_35smcINF_65bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
+        # Central jet chains for rate plots
+        ChainProp(name='HLT_j175C_35smcINF_65bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_65bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
 
         # 70% WP
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_70bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
@@ -377,6 +385,10 @@ def getDevSignatures():
         ChainProp(name='HLT_j260_35smcINF_70bgntwoxt_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175_35smcINF_70bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
 
+        # Central jet chains for rate plots
+        ChainProp(name='HLT_j175C_35smcINF_70bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_70bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
         # 75% WP
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_75bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_75bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
@@ -390,6 +402,10 @@ def getDevSignatures():
         ChainProp(name='HLT_j175_35smcINF_75bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j260_35smcINF_75bgntwoxt_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175_35smcINF_75bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
+        # Central jet chains for rate plots
+        ChainProp(name='HLT_j175C_35smcINF_75bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_75bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
 
         # 80% WP
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_80bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
@@ -405,6 +421,10 @@ def getDevSignatures():
         ChainProp(name='HLT_j260_35smcINF_80bgntwoxt_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175_35smcINF_80bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
 
+        # Central jet chains for rate plots
+        ChainProp(name='HLT_j175C_35smcINF_80bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_80bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
         # 85% WP
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_85bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_85bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
@@ -419,6 +439,10 @@ def getDevSignatures():
         ChainProp(name='HLT_j260_35smcINF_85bgntwoxt_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175_35smcINF_85bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
 
+        # Central jet chains for rate plots
+        ChainProp(name='HLT_j175C_35smcINF_85bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_85bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
         # 90% WP
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
@@ -426,8 +450,6 @@ def getDevSignatures():
         ChainProp(name='HLT_j260_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j260_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j260_35smcINF_a10sd_cssk_90bgntwoxt_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
-
-
 
         # 95% WP
         ChainProp(name='HLT_j210_35smcINF_a10sd_cssk_95bgntwoxt_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
@@ -442,6 +464,10 @@ def getDevSignatures():
         ChainProp(name='HLT_j175_35smcINF_95bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j260_35smcINF_95bgntwoxt_j175_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j175_35smcINF_95bgntwoxt_j260_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+
+        # Central jet chains for rate plots
+        ChainProp(name='HLT_j175C_35smcINF_95bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
+        ChainProp(name='HLT_j260C_35smcINF_95bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
 
         # Test chain for X to bb tagging with offline GN2Xv01 tagger
         ChainProp(name='HLT_j110_a10sd_cssk_79bgntwox_pf_jes_ftf_preselj80_L1jJ60', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
