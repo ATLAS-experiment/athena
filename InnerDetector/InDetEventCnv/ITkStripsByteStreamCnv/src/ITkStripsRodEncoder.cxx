@@ -17,8 +17,8 @@
 namespace { // Anonymous namespace
   template<unsigned int n>
   unsigned long long
-  chunk(std::bitset<256> b){
-    static constexpr std::bitset<256> mask64(~0ULL);
+  chunk(std::bitset<128> b){
+    static constexpr std::bitset<128> mask64(~0ULL);
     static constexpr unsigned int shift{n * 64};
     return ((b >>shift) & mask64).to_ullong();
   }
@@ -162,13 +162,21 @@ std::vector<uint16_t>
 ITkStripsRodEncoder::clusterFinder(const std::bitset<256>& inputData, const uint8_t maxCluster) const {
 
   std::vector<uint16_t> clusters;
+  
+  // Split into far (odd) and near (even) strips
+  std::bitset<128> dataEven;
+  std::bitset<128> dataOdd;
+  for(int i=0; i<128; ++i){
+    dataEven[i] = inputData[2*i];
+    dataOdd[i] = inputData[2*i+1];
+  }
 
-  // Split the 256-bit input data into four 64-bit chunks for processing
-  uint64_t d0l = chunk<0>(inputData);
-  uint64_t d0h = chunk<1>(inputData);
+  // Split the 128-bit Even and Odd data into four 64-bit chunks for processing
+  uint64_t d0l = chunk<0>(dataEven);
+  uint64_t d0h = chunk<1>(dataEven);
 
-  uint64_t d1l = chunk<2>(inputData);
-  uint64_t d1h = chunk<3>(inputData);
+  uint64_t d1l = chunk<0>(dataOdd);
+  uint64_t d1h = chunk<1>(dataOdd);
 
   while (d0l or d0h or d1l or d1h){
     if (clusters.size() > maxCluster) break;
