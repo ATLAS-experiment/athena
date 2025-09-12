@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <math.h>
 #include <sstream>
 #include <iomanip>
 
 #include "TrigMuonEvent/MuonFeatureDetails.h"
 
-//#include "GaudiKernel/MsgStream.h"
 
 MuonFeatureDetails::MuonFeatureDetails() {
   m_id = NULLID; 
