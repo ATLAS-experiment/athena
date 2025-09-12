@@ -202,8 +202,7 @@ def SCTErrMonAlgConfig(flags):
                         opt='kLBNHistoryDepth=30,kAlwaysCreate')
 
     # Filled in fillByteStreamErrorsHelper
-    myMonGroup.defineHistogram(varname="maskedLinksBin;Masked Links",
-                               weight="maskedLinks",
+    myMonGroup.defineHistogram(varname="maskedLinksBin, maskedLinks;MaskedLinks",
                                type="TProfile",
                                title="Number of Masked Links for SCT,ECA,B,ECC",
                                path="GENERAL/errors",
