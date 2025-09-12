@@ -79,8 +79,8 @@ private:
                                                                  ///< (to be switched off when adding misalignments to a given geometry)
     int                                    m_MisalignmentMode;   //!< Flag which Misalignment mode is to be generated
     long int                               m_nEvents;
-    bool                                   m_translation;        ///< Flag which turns on misalignment with translation 
-    bool                                   m_rotation;           ///< Flag which turns on misalignment with rotation 
+    std::vector<double>                    m_translation;        ///< Flag which turns on misalignment with translation 
+    std::vector<double>                    m_rotation;           ///< Flag which turns on misalignment with rotation 
     std::vector<double>                    m_local_translation;        ///< Specify misalignment with translation
     std::vector<double>                    m_local_rotation;           ///< Specify misalignment with rotation
     std::string                            m_index;              ///< Generate misalignment according to module indices
