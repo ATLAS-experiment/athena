@@ -78,6 +78,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('hitThreshold', 2)
     cf.addFlag('varyingThreshold', True)
     cf.addFlag('varyingHitThresholds', [])
+    cf.addFlag('MinSpacePointsPerSeed',3)
+    cf.addFlag('MaxSpacePointsPerSeed',3)
 
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -380,7 +382,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('parMin', [-1000, -1000, 0.0, 0.0, -10])
     cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
-
+    cf.addFlag('keepNInnerHits', -1)
     return cf
 
 def createSecondStageFPGATrackSimConfigFlags():

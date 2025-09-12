@@ -190,7 +190,35 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
   }
 
   // copy roads to output vector
-  roads.reserve(m_roads.size());  
+  roads.reserve(m_roads.size());
+
+  // if we run seeding with this we may choose to only keep N hits. Note that for now we only can choose to keep N inner hits, in the future
+  // we might consider keeping other combinations
+  if (m_keepNInnerHits.value() > 0) { // if less than zero this is not enabled
+    for (auto & r : m_roads) {
+      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> hits = r->getAllHits();
+      int n = std::min(m_keepNInnerHits.value(), static_cast<int>(hits.size()));
+
+      std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> vec;
+      for (auto & temp : hits) {
+	      for (auto & hit : temp) { // in reality this is only size one in genscan
+	        if (hit->isReal() && hit->isPixel()) {
+	          std::vector<std::shared_ptr<const FPGATrackSimHit>> tempvec;
+	          tempvec.push_back(hit);
+	          vec.push_back(tempvec);
+	        }
+	      }
+	      if ((int)(vec.size()) == n) {
+	       break;
+	      }
+      }
+	             
+      // then resize back so the vector is correct
+      vec.resize(m_binnedhits->getNLayers());
+      r->setHits(std::move(vec));
+    }
+  }
+  
   for (auto & r : m_roads) roads.push_back(std::move(r));
   ATH_MSG_DEBUG("Roads = " << roads.size());
 
