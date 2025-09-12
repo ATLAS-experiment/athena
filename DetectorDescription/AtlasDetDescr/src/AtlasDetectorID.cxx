@@ -363,6 +363,10 @@ AtlasDetectorID::show_to_string(const Identifier id, const IdContext *context, c
     std::string result("Unable to decode id");
     unsigned int max_index = (context) ? context->end_index() : 999;
 
+    if (!id.is_valid()) {
+      return "[INVALID]";
+    }
+
     if (!m_is_initialized_from_dict)
         return result;
 

@@ -187,6 +187,8 @@ int MuonIdHelper::get_expanded_id_calc(const Identifier& compact_id, ExpandedIde
         } else if (0 == begin) {
             ExpandedIdentifier empty;
             result = m_dict->unpack(this->group(), compact_id, empty, end, id);
+            // Ensure that the expected number of fields were unpacked.
+            if (id.fields() != end+1) result = 1;
         } else {
             // Non-zero prefix - we assume that the prefix contains
             // the IdDet level
