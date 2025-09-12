@@ -214,14 +214,19 @@ StatusCode TrigSignatureMoni::stop() {
 }
 
 StatusCode TrigSignatureMoni::fillHistogram(const TrigCompositeUtils::DecisionIDContainer& dc, int row, LockedHandle<TH2>& histogram) const {
+
+  // This locks the histogram handle for the entire duration of the function,
+  // which is faster than (un)locking the handle many times during the loop.
+  auto lockedHist = *histogram;
+
   for (TrigCompositeUtils::DecisionID id : dc)  {
     auto id2bin = m_chainIDToBinMap.find( id );
-    if ( id2bin == m_chainIDToBinMap.end() ) {
-      if ( !HLT::Identifier(id).name().starts_with("leg") ) {
+    if ( id2bin != m_chainIDToBinMap.end() ) {
+      lockedHist->Fill( id2bin->second, static_cast<double>(row) );
+    }
+    else {
+      if ( !TrigCompositeUtils::isLegId(HLT::Identifier(id)) )
         ATH_MSG_WARNING( "HLT chain " << HLT::Identifier(id) << " not configured to be monitored" );
-      }
-    } else {
-      histogram->Fill( id2bin->second, static_cast<double>(row) );
     }
   }
   return StatusCode::SUCCESS;
