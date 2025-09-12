@@ -214,7 +214,9 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                             ATH_MSG_DEBUG("No windows for predicted fineID " << fineID << ", using maximum in provided list instead!");
                             fineID_index = -1;
                         }
-                        fineID_index = fineID_it - m_windowFineID.begin();
+                        else {
+                            fineID_index = fineID_it - m_windowFineID.begin();
+                        }
                     }
                     if (m_windowR.size() > 1) {
                         if (fineID_index == -1) {
