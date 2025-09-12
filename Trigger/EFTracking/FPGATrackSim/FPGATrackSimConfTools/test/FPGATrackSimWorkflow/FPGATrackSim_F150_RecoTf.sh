@@ -72,6 +72,7 @@ Reco_tf.py --CA \
     --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF150Flags,FPGATrackSimConfTools.FPGATrackSimAnalysisConfig.FPGATrackSimF150FlagCfg' \
     --preExec "flags.Tracking.doPixelDigitalClustering=True;\
+               flags.Trigger.FPGATrackSim.GenScan.keepNInnerHits=3;\
                flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \

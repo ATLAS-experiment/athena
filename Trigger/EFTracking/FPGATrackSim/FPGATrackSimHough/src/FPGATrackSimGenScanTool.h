@@ -131,7 +131,7 @@ protected:
     Gaudi::Property<double> m_phiWeight{this, "phiChi2Weight", 1.0, "Weight for phi component of chi2 in genscan fit"};
     Gaudi::Property<double> m_etaWeight{this, "etaChi2Weight", 1.0, "Weight for eta component of chi2 in genscan fit"};
     Gaudi::Property<bool> m_inBinFiltering {this, "inBinFiltering", true, "Filter roads that appear to be outside their bin"};
-
+    Gaudi::Property<int> m_keepNInnerHits {this, "keepNInnerHits", -1, "If this is greater than 0, we keep the N most inner hits only in a raod and drop the others"};
     ///////////////////////////////////////////////////////////////////////
     // Core
 

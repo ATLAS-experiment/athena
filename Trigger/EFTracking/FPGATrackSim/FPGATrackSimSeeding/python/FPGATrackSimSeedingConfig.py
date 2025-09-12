@@ -10,8 +10,8 @@ def FPGATrackSimSeedingCfg(flags, name='FPGATrackSimSeedingAlg', **kwargs):
     kwargs.setdefault('FPGAPixelClustersKey', "ITkPixelClusters")
     kwargs.setdefault('FPGASpacePointsKey', "ITkPixelSpacePoints")
     kwargs.setdefault('OutputSeeds', "ActsValidateF150PixelSeeds")
-    kwargs.setdefault('MinSpacePointsPerSeed', 4)
-    kwargs.setdefault('MaxSpacePointsPerSeed', 5)
+    kwargs.setdefault('MinSpacePointsPerSeed', flags.Trigger.FPGATrackSim.MinSpacePointsPerSeed)
+    kwargs.setdefault('MaxSpacePointsPerSeed', flags.Trigger.FPGATrackSim.MaxSpacePointsPerSeed)
     
     acc.addEventAlgo(CompFactory.FPGATrackSim.FPGATrackSimSeedingAlg(name, **kwargs))
     return acc
