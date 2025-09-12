@@ -7,6 +7,7 @@
 #include "GNN_Geometry.h"
 #include "GNN_DataStorage.h"
 
+#include<iostream>
 #include<cmath>
 #include<cstring>
 #include<algorithm>
@@ -92,7 +93,7 @@ void TrigFTF_GNN_EtaBin::generatePhiIndexing(float dphi) {
   
 }
 
-TrigFTF_GNN_DataStorage::TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry& g) : m_geo(g) {
+TrigFTF_GNN_DataStorage::TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry& g, const std::vector<std::array<float, 5> >& lut) : m_geo(g), m_mlLUT(lut) {
   m_etaBins.resize(g.num_bins());
 }
 
@@ -127,7 +128,7 @@ int TrigFTF_GNN_DataStorage::loadPixelGraphNodes(short layerIndex, const std::ve
     else {
       if (useML) {
 	float cluster_width = node.pixelClusterWidth();
-	if(cluster_width > 0.2) continue;
+	if(cluster_width > 0.35) continue;
       }
       m_etaBins.at(binIndex).m_vn.push_back(&node);
     }
@@ -201,6 +202,10 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
 
     if(!isBarrel) continue;
 
+    // adjusting cuts on |cot(theta)| using pre-trained LUT
+    
+    int lutSize = m_mlLUT.size();
+    
     int nBins = pL->m_bins.size();
 
     for(int b=0;b<nBins;b++) {//loop over eta-bins in Layer
@@ -210,14 +215,37 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
       if(B.empty()) continue;
       
       for(unsigned int nIdx=0;nIdx<B.m_vn.size();nIdx++) {
+	
         float cluster_width = B.m_vn[nIdx]->pixelClusterWidth();
-	//adjusting cuts using fitted boundaries of |cot(theta)| vs. cluster z-width distribution 
-        float min_tau = 6.7*(cluster_width - 0.2);//linear fit
-        float max_tau = 1.6 + 0.15/(cluster_width + 0.2) + 6.1*(cluster_width - 0.2);//linear fit + correction for short clusters
 
-        B.m_params[nIdx][0] = min_tau;
+	float locPosY = B.m_vn[nIdx]->localPositionY();
+
+	int lutBinIdx = std::floor(20*cluster_width) - 1;//lut bin width is 0.05 mm
+
+	if (lutBinIdx >= lutSize) continue;
+
+	const std::array<float, 5> lutBin = m_mlLUT.at(lutBinIdx);
+	
+	float dist2border = 10.0 - std::abs(locPosY);
+
+	float min_tau = -100.0;
+	float max_tau = 100.0;
+
+	if (dist2border > 0.3f) {//far enough from the edge
+	  min_tau = lutBin[1];
+	  max_tau = lutBin[2];
+	} else {//possible cluster shortening at a module edge
+	  min_tau = lutBin[3];
+	  max_tau = lutBin[4];
+	}
+
+	if (max_tau < 0) {//insufficient training data
+	  max_tau = 100.0;//use "no-cut" default
+	}
+
+	B.m_params[nIdx][0] = min_tau;
         B.m_params[nIdx][1] = max_tau;
-        
+	
       }
     }
   }

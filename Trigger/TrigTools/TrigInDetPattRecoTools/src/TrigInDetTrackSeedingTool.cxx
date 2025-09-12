@@ -74,14 +74,14 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
   TrigInDetTrackSeedingResult seedStats;
   
-	output.clear();
+  output.clear();
 
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };  
   const Amg::Vector3D &vertex = beamSpotHandle->beamPos();
   float shift_x = vertex.x() - beamSpotHandle->beamTilt(0)*vertex.z();
   float shift_y = vertex.y() - beamSpotHandle->beamTilt(1)*vertex.z();
 
-  std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo);
+  std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
   
   int nPixels = 0;
   int nStrips = 0;
@@ -153,7 +153,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
   if(!m_useGPU) {
 
-    std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo);
+    std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
 
     std::vector<const Trk::SpacePoint*> vSP;
 
@@ -649,6 +649,7 @@ void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spC
     const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(sp->clusterList().first);
     if(pCL != nullptr){
       tmpColl[idx].m_pcw = pCL->width().z();
+      tmpColl[idx].m_locPosY = pCL->localPosition().y();
     }
 
     idx++;

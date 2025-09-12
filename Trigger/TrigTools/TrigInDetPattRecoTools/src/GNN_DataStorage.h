@@ -17,7 +17,7 @@ class TrigFTF_GNN_Geometry;
 
 struct TrigFTF_GNN_Node {
 
-  TrigFTF_GNN_Node(unsigned short l) : m_x(0), m_y(0), m_z(0), m_r(0), m_phi(0), m_layer(l), m_pcw(0) {};
+  TrigFTF_GNN_Node(unsigned short l) : m_x(0), m_y(0), m_z(0), m_r(0), m_phi(0), m_layer(l), m_pcw(0), m_locPosY(0) {};
 
   inline float x() const {return m_x;}
   inline float y() const {return m_y;}
@@ -27,13 +27,14 @@ struct TrigFTF_GNN_Node {
   inline float r() const {return m_r;}
   inline unsigned short layer() const {return m_layer;}
   inline float pixelClusterWidth() const {return m_pcw;}
+  inline float localPositionY() const {return m_locPosY;}
   
   inline int sp_idx() const {return m_idx;}
   
   float m_x, m_y, m_z, m_r, m_phi;
   unsigned short m_layer{10000};
   unsigned int m_idx{std::numeric_limits<unsigned int>::max()};
-  float m_pcw;
+  float m_pcw, m_locPosY;
 };
 
 
@@ -78,7 +79,7 @@ public:
 
 class TrigFTF_GNN_DataStorage {
 public:
-  TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&);
+  TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&, const std::vector<std::array<float, 5> >&);
   ~TrigFTF_GNN_DataStorage();
 
   int loadPixelGraphNodes(short, const std::vector<TrigFTF_GNN_Node>&, bool);
@@ -98,7 +99,8 @@ public:
 protected:
 
   const TrigFTF_GNN_Geometry& m_geo;
-
+  const std::vector<std::array<float, 5> >& m_mlLUT;
+  
   std::vector<TrigFTF_GNN_EtaBin> m_etaBins; 
 
 };
