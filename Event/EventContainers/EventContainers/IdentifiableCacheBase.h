@@ -1,18 +1,15 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: IdentifiableCacheBase.h 791541 2017-01-09 10:43:53Z smh $
-
-
 
 #ifndef EVENTCONTAINERS_IDENTIFIABLECACHEBASE_H
 #define EVENTCONTAINERS_IDENTIFIABLECACHEBASE_H
 
 
 #include "Identifier/IdentifierHash.h"
+#include <memory>
 #include <mutex>
 #include <atomic>
 #include "EventContainers/IDC_WriteHandleBase.h"
