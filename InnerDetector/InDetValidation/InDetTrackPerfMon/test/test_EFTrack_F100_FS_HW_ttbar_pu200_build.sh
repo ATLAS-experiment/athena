@@ -33,6 +33,7 @@ cwd=$(pwd)
 doF110=0
 xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin"
 bdfid="0000:c3:00.1"
+doCodeType="F1X0"
 
 
 run () {
@@ -65,6 +66,7 @@ while [ $# -ge 1 ]; do
         -f  | --doF110 )        if [ $# -lt 1 ] ; then usage ; fi ; doF110="1" ;;
         -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
         -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
+        -q  | --doCodeType )    if [ $# -lt 2 ] ; then usage ; fi ; doCodeType="$2" ; shift ;;
         *) shift ;;
     esac
     shift
@@ -85,6 +87,7 @@ if [ "$doF110" == "1" ]; then
         -f \
         -o "${OutSampleName}.AOD.pool.root" \
         -x ${xclbinPath} \
+        -q ${doCodeType} \
         -b ${bdfid}
         #-n 10
 else
@@ -93,6 +96,7 @@ else
         -i ${InputRDOfiles} \
         -o "${OutSampleName}.AOD.pool.root" \
         -x ${xclbinPath} \
+        -q ${doCodeType} \
         -b ${bdfid}
         #-n 10
 fi

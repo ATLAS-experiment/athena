@@ -51,6 +51,7 @@ skipCheck=0
 doF110=0
 xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin"
 bdfid="0000:c3:00.1"
+doCodeType="F1X0"
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -64,6 +65,7 @@ while [ $# -ge 1 ];do
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; doClusters="1" ;;
         -f  | --doF110 )        if [ $# -lt 1 ] ; then usage ; fi ; doF110="1" ;;
+        -q  | --doCodeType )    if [ $# -lt 2 ] ; then usage ; fi ; doCodeType="$2" ; shift ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -92,6 +94,7 @@ if [ "$doClusters" == "1" ]; then
             -o ${outputAOD} \
             -n ${nEvents} \
             -x ${xclbinPath} \
+            -q ${doCodeType} \
             -b ${bdfid} \
             -f \
             -c
@@ -102,6 +105,7 @@ if [ "$doClusters" == "1" ]; then
             -o ${outputAOD} \
             -n ${nEvents} \
             -x ${xclbinPath} \
+            -q ${doCodeType} \
             -b ${bdfid} \
             -c
     fi
@@ -112,6 +116,7 @@ elif [ "$doF110" == "1" ]; then
         -o ${outputAOD} \
         -n ${nEvents} \
         -x ${xclbinPath} \
+        -q ${doCodeType} \
         -b ${bdfid} \
         -f \
         -c
@@ -121,6 +126,7 @@ else
         -i ${inputRDO} \
         -o ${outputAOD} \
         -x ${xclbinPath} \
+        -q ${doCodeType} \
         -b ${bdfid} \
         -n ${nEvents}
 fi
