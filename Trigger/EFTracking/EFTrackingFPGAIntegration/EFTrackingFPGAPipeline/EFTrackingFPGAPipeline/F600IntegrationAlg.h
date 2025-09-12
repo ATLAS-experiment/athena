@@ -180,9 +180,9 @@
         // NOTE: These are temporary and are used to inject TVs in where kernels would otherwise go.
         // Once all kernels are working these will be removed.
         int readTVLength(std::string filepath) const;
-        void readTV(const std::string filepath, int n_words, uint64_t *data) const;
+        void readTV(const std::string &filepath, int n_words, uint64_t *data) const;
         
-        void outputHexData(size_t dataLen, uint64_t *data, const std::string dataDescriptor) const;
+        void outputHexData(size_t dataLen, uint64_t *data, const std::string &dataDescriptor) const;
      };
  }
  

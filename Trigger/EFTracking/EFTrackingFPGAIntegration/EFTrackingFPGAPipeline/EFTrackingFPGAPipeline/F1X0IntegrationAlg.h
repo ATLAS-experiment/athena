@@ -3,11 +3,11 @@
 */
 
 /**
- * @file src/F100IntegrationAlg.h
+ * @file src/F1X0IntegrationAlg.h
  */
 
-#ifndef EFTRACKING_FPGA_INTEGRATION_F100IntegrationAlg_H
-#define EFTRACKING_FPGA_INTEGRATION_F100IntegrationAlg_H
+#ifndef EFTRACKING_FPGA_INTEGRATION_F1X0IntegrationAlg_H
+#define EFTRACKING_FPGA_INTEGRATION_F1X0IntegrationAlg_H
 
 // EFTracking include
 #include "EFTrackingFPGAPipeline/IntegrationBase.h"
@@ -30,7 +30,7 @@ namespace EFTrackingFPGAIntegration
      * This algorithm is used to benchmark and optimize the FPGA output memory migration
      * and output conversion. It expects the use of FPGA pass-through kernel.
      */
-    class F100IntegrationAlg : public IntegrationBase
+    class F1X0IntegrationAlg : public IntegrationBase
     {
     public:
         using IntegrationBase::IntegrationBase;
@@ -54,9 +54,6 @@ namespace EFTrackingFPGAIntegration
 
         Gaudi::Property<bool> m_doF110{
             this, "doF110", "", "Run F110 instead of F100"}; //!< Boolean to run F110 instead of F100
-
-        Gaudi::Property<std::string> m_edmKernelName{
-            this, "EDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
 
         Gaudi::Property<std::string> m_pixelEdmKernelName{
             this, "PixelEDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
@@ -102,7 +99,6 @@ namespace EFTrackingFPGAIntegration
         mutable std::vector<cl::Kernel> m_stripL2GKernels ATLAS_THREAD_SAFE;
 
         // EDM prep
-        mutable std::vector<cl::Kernel> m_edmPrepKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_pixelEdmPrepKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripEdmPrepKernels ATLAS_THREAD_SAFE;
 
@@ -131,4 +127,4 @@ namespace EFTrackingFPGAIntegration
     };
 }
 
-#endif // EFTRACKING_FPGA_INTEGRATION_F100IntegrationAlg_H
+#endif // EFTRACKING_FPGA_INTEGRATION_F1X0IntegrationAlg_H
