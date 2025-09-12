@@ -5,11 +5,11 @@
 #ifndef AthenaMonitoringKernel_HistogramFiller_h
 #define AthenaMonitoringKernel_HistogramFiller_h
 
+#include <boost/container/small_vector.hpp>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <vector>
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #include "AthenaMonitoringKernel/HistogramDef.h"
 #include "AthenaMonitoringKernel/IHistogramProvider.h"
@@ -70,50 +70,52 @@ namespace Monitored {
      * @brief helper class to pass variables to fillers
      */
     struct VariablesPack {
-      VariablesPack() {}
+      VariablesPack() = default;
       VariablesPack( const std::initializer_list<const Monitored::IMonitoredVariable*>&  v)
-	:var( v ) {}
+        : m_var( v ) {}
+
+      /**
+       * @brief get monitored variable at given index
+       */
+      const Monitored::IMonitoredVariable* operator[](std::size_t i) const {
+        return m_var[i];
+      }
 
       /**
        * @brief number of variables in the pack ( not counting the weight and mask )
        */
       size_t size () const {
-	return var.size() - std::count( var.begin(), var.end(), nullptr );
+        return m_var.size();
       }
 
       /**
-       * @brief removes all monitored variables
-       */
-      inline void reset() {
-	std::fill( var.begin(), var.end(), nullptr );
-	cut = nullptr;
-	weight = nullptr;
-      }
-
-      /**
-       * @brief sets monitored variable at the index (may need to reszie vector of variables)
+       * @brief sets monitored variable at the index (may need to resize vector of variables)
        */
       inline void set( unsigned index, const IMonitoredVariable* ptr ) {
-	if ( ATH_UNLIKELY( var.size() <= index ) ) {
-	  var.resize(index+1);
-	}
-	var[index] = ptr;
+        if ( m_var.size() <= index ) {
+          m_var.resize(index+1);
+        }
+        m_var[index] = ptr;
       }
 
       /**
        * @brief names of all variables stored
        */
       std::vector<std::string> names() const {
-	std::vector<std::string> r;
-	for ( const auto* v: var )
-	  if ( v != nullptr )
-	    r.push_back( v->name() );
-	return r;
+        std::vector<std::string> r;
+        for ( const auto* v: m_var )
+          if ( v != nullptr )
+            r.push_back( v->name() );
+        return r;
       }
 
-      std::vector<const Monitored::IMonitoredVariable*> var = { nullptr, nullptr, nullptr, nullptr }; //!< storage for variables, default size of 4, serves all histograming uses
       const Monitored::IMonitoredVariable* weight = nullptr; //!< pointer to weight variable, typically absent
       const Monitored::IMonitoredVariable* cut = nullptr; //!< pointer to cut mask variable, typically absent
+
+    private:
+      /** Vector with small buffer optimization to avoid dynamic allocation for the most common
+          case of histograms with a maximum of 3 variables. Only 3D TEfficiency and TTress need more. */
+      boost::container::small_vector<const Monitored::IMonitoredVariable*, 3> m_var;
     };
 
     /**

@@ -35,7 +35,7 @@ namespace Monitored {
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars ) const override {
       if (AXIS >= vars.size() ) { return 0; }
-      if (vars.var[AXIS]->size()==0) { return 0; }
+      if (vars[AXIS]->size()==0) { return 0; }
 
       // check if any of the cutmasks are non-zero before attempting any rebinning
       if (vars.cut) {
@@ -48,7 +48,7 @@ namespace Monitored {
 
       double min = std::numeric_limits<double>::max();
       double max = std::numeric_limits<double>::min();
-      const IMonitoredVariable& var = *vars.var[AXIS];
+      const IMonitoredVariable& var = *vars[AXIS];
       for (size_t i = 0; i < var.size(); i++) {
         const double v = var.get(i);
         if (v < min) min = v;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_GenericMonitoringTool_h
@@ -74,9 +74,6 @@ public:
   virtual uint32_t lumiBlock();
 
 private:
-  void invokeFillersDebug(const std::shared_ptr<Monitored::HistogramFiller>& filler,
-                          const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& monitoredVariables) const;
-  
   /// THistSvc (do NOT fix the service type (only the name) to allow for a different implementation online
   ServiceHandle<ITHistSvc> m_histSvc { this, "THistSvc", "THistSvc", "Histogramming svc" };
   Gaudi::Property<std::string> m_histoPath { this, "HistPath", {}, "Directory for histograms [name of parent if not set]" };

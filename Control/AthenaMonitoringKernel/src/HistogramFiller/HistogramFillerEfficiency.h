@@ -21,16 +21,16 @@ namespace Monitored {
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars ) const override {
 
-      if ( ATH_UNLIKELY( vars.var[0] == nullptr or vars.var[1] == nullptr ) ) return 0;
+      if ( ATH_UNLIKELY( vars[0] == nullptr or vars[1] == nullptr ) ) return 0;
 
       if (vars.cut) {
         const size_t maskSize = vars.cut->size();
         // Abort if no cut entries or first (and only) entry is false
         if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
-        if (ATH_UNLIKELY(maskSize > 1 && maskSize != vars.var[0]->size())) {
+        if (ATH_UNLIKELY(maskSize > 1 && maskSize != vars[0]->size())) {
           MsgStream log(Athena::getMessageSvc(), "HistogramFillerEfficiency");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
-              << maskSize << " " << vars.var[0]->size() << endmsg;
+              << maskSize << " " << vars[0]->size() << endmsg;
         }
       }
 
@@ -38,31 +38,31 @@ namespace Monitored {
       const TH1* efftot = efficiency->GetTotalHistogram();
 
       const unsigned nMonVar = vars.size();
-      const size_t var0Size = vars.var[0]->size();
+      const size_t var0Size = vars[0]->size();
       if ( nMonVar==2 ) { // Single observable (1D TEfficiency)
         for (unsigned i = 0; i < var0Size; ++i) {
           if (vars.cut==nullptr || vars.cut->get(i)) {
-            efficiency->Fill(vars.var[0]->get(i),
-                             detail::getFillValue<Axis::X>(efftot, vars.var[1], i));
+            efficiency->Fill(vars[0]->get(i),
+                             detail::getFillValue<Axis::X>(efftot, vars[1], i));
           }
         }
         return var0Size;
       } else if ( nMonVar==3 ) { // Two observables (2D TEfficiency)
         for (unsigned i = 0; i < var0Size; ++i) {
           if (vars.cut==nullptr || vars.cut->get(i)) {
-            efficiency->Fill(vars.var[0]->get(i),
-                             detail::getFillValue<Axis::X>(efftot, vars.var[1], i),
-                             detail::getFillValue<Axis::Y>(efftot, vars.var[2], i));
+            efficiency->Fill(vars[0]->get(i),
+                             detail::getFillValue<Axis::X>(efftot, vars[1], i),
+                             detail::getFillValue<Axis::Y>(efftot, vars[2], i));
           }
         }
         return var0Size;
       } else if ( nMonVar==4 ) { // Three observables (3D Efficiency)
         for (unsigned i = 0; i < var0Size; ++i) {
           if (vars.cut==nullptr || vars.cut->get(i)) {
-            efficiency->Fill(vars.var[0]->get(i),
-                             detail::getFillValue<Axis::X>(efftot, vars.var[1], i),
-                             detail::getFillValue<Axis::Y>(efftot, vars.var[2], i),
-                             detail::getFillValue<Axis::Z>(efftot, vars.var[3], i));
+            efficiency->Fill(vars[0]->get(i),
+                             detail::getFillValue<Axis::X>(efftot, vars[1], i),
+                             detail::getFillValue<Axis::Y>(efftot, vars[2], i),
+                             detail::getFillValue<Axis::Z>(efftot, vars[3], i));
           }
         }
         return var0Size;

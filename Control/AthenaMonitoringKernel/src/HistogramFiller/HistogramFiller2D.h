@@ -26,10 +26,10 @@ namespace Monitored {
       : HistogramFiller(definition, std::move(provider)) {}
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars) const override {
-      if (ATH_UNLIKELY(vars.var[0] == nullptr or vars.var[1] == nullptr )) return 0;
+      if (ATH_UNLIKELY(vars.size()!=2 or vars[0] == nullptr or vars[1] == nullptr )) return 0;
 
-      const size_t size0 = vars.var[0]->size();
-      const size_t size1 = vars.var[1]->size();
+      const size_t size0 = vars[0]->size();
+      const size_t size1 = vars[1]->size();
 
       if (ATH_UNLIKELY(size0 == 0 || size1 == 0)) {
         // nothing to do
@@ -69,12 +69,12 @@ namespace Monitored {
           return 0;
         }
         // Need to fill here while weightVector is still in scope
-        if (not vars.cut) return HistogramFiller::fill<H>(weightAccessor, detail::noCut, *vars.var[0], *vars.var[1]);
-        else                  return HistogramFiller::fill<H>(weightAccessor, cutMaskAccessor, *vars.var[0], *vars.var[1]);
+        if (not vars.cut) return HistogramFiller::fill<H>(weightAccessor, detail::noCut, *vars[0], *vars[1]);
+        else                  return HistogramFiller::fill<H>(weightAccessor, cutMaskAccessor, *vars[0], *vars[1]);
       }
 
-      if (not vars.cut) return HistogramFiller::fill<H>(detail::noWeight, detail::noCut, *vars.var[0], *vars.var[1]);
-      else                  return HistogramFiller::fill<H>(detail::noWeight, cutMaskAccessor, *vars.var[0], *vars.var[1]);
+      if (not vars.cut) return HistogramFiller::fill<H>(detail::noWeight, detail::noCut, *vars[0], *vars[1]);
+      else                  return HistogramFiller::fill<H>(detail::noWeight, cutMaskAccessor, *vars[0], *vars[1]);
     }
   };
 

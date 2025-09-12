@@ -23,7 +23,7 @@ namespace Monitored {
         return 0;
       }
 
-      const size_t varVecSize = vars.var[0]->size();
+      const size_t varVecSize = vars[0]->size();
 
       if (vars.cut) {
         const size_t maskSize = vars.cut->size();
@@ -40,7 +40,7 @@ namespace Monitored {
       auto histogram = this->histogram<TH1>();
       for (; i < varVecSize; i++) {
         if (vars.cut && !vars.cut->get(i)) { continue; }
-        const unsigned bin = histogram->FindBin(vars.var[0]->get(i));
+        const unsigned bin = histogram->FindBin(vars[0]->get(i));
 
         for (unsigned j = bin; j > 0; --j) {
           histogram->AddBinContent(j);
