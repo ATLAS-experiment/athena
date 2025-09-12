@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictDictionaryRef.h"
@@ -130,8 +130,8 @@ void IdDictDictionaryRef::generate_implementation(const IdDictMgr& idd,
       m_generated_implementation = true;
     } else {
       std::cout <<
-      "IdDictDictionaryRef::generate_implementation: - WARNING no dictionary found, cannot generate implementation "
-                << std::endl;
+        "IdDictDictionaryRef::generate_implementation: - WARNING no dictionary named " << m_dictionary_name << " found, cannot generate implementation "
+       << std::endl;
     }
   }
 }

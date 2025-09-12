@@ -138,20 +138,24 @@ public:
 
 
     /** 
-     *  Unpack the value_type id to an expanded Identifier, considering
-     *  the provided prefix (result will include the prefix) and up to
-     *  index2 - (index1 is assumed to be 0, i.e. part of prefix). 
+     *  Unpack the value_type id to an expanded Identifier for a given group,
+     *  considering the provided prefix (result will include the prefix)
+     *  and up to index2 - (index1 is assumed to be 0, i.e. part of prefix).
+     *
+     *  Returns 0 on success, nonzero on error.
      */
     int unpack (const std::string& group,
                 const Identifier& id,
                 const ExpandedIdentifier& prefix,
                 size_t index2,
-                ExpandedIdentifier& unpackedId) const; 
+                ExpandedIdentifier& unpackedId) const;
    
     /** 
-     *  Unpack the value_type id to a string, considering the provided
-     *  prefix (result will include the prefix) and up to index2 -
-     *  (index1 is assumed to be 0, i.e. part of prefix).
+     *  Unpack the value_type id to a string for a given group,
+     *  considering the provided prefix (result will include the prefix)
+     *  and up to index2 - (index1 is assumed to be 0, i.e. part of prefix).
+     *
+     *  Returns 0 on success, nonzero on error.
      */
     int unpack (const std::string& group,
                 const Identifier& id,
@@ -213,6 +217,9 @@ public:
    
     /// Set the dictionary tag
     void                set_dict_tag     (const std::string& tag);
+
+    /// Dump regions and trees for each group.
+    void dump() const;
 
 
     std::string m_name{};  
