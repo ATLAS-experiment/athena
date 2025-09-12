@@ -21,7 +21,7 @@
 
 #include "ProxyProviderSvc.h"
 
-#include "boost/range/adaptor/reversed.hpp"
+#include <ranges>
 #include "TClass.h"
 
 using namespace std;
@@ -88,7 +88,7 @@ void setProviderOnList (ProxyProviderSvc::TAdList& tList,
                         IAddressProvider* provider,
                         StoreID::type storeID)
 {
-  for (SG::TransientAddress* tad : boost::adaptors::reverse (tList)) {
+  for (SG::TransientAddress* tad : std::views::reverse (tList)) {
     if (tad->provider() != nullptr) break;
     tad->setProvider (provider, storeID);
   }
