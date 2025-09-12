@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -20,8 +20,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
             AddStandardTruthContentsCfg,
             AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
-            AddPVCollectionCfg,
-            AddTruthCollectionNavigationDecorationsCfg)
+            AddPVCollectionCfg)
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthCollectionMakerCfg
         PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(TruthCollectionMakerCfg(
             flags,
@@ -33,21 +32,19 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
         acc.addEventAlgo(CommonAugmentation("PhysCommonTruthCharmKernel",AugmentationTools=[PhysCommonTruthCharmTool]))
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
-        acc.merge(AddStandardTruthContentsCfg(flags))
-        acc.merge(AddTruthCollectionNavigationDecorationsCfg(
-            flags,
-            TruthCollections=["TruthElectrons",
-                              "TruthMuons", 
-                              "TruthPhotons", 
-                              "TruthTaus", 
-                              "TruthNeutrinos", 
-                              "TruthBSM", 
-                              "TruthBottom", 
-                              "TruthTop", 
-                              "TruthBoson",
-                              "TruthCharm",
-                              "TruthHFWithDecayParticles"],
-            prefix = 'PHYS_'))
+        acc.merge(AddStandardTruthContentsCfg
+                  (flags,
+                   navInputCollections = ["TruthElectrons",
+                                          "TruthMuons",
+                                          "TruthPhotons",
+                                          "TruthTaus",
+                                          "TruthNeutrinos",
+                                          "TruthBSM",
+                                          "TruthBottom",
+                                          "TruthTop",
+                                          "TruthBoson",
+                                          "TruthCharm",
+                                          "TruthHFWithDecayParticles"]))
         # Re-point links on reco objects
         acc.merge(AddMiniTruthCollectionLinksCfg(flags))
         acc.merge(AddPVCollectionCfg(flags))
