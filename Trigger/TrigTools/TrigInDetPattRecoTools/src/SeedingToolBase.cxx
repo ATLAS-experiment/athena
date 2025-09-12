@@ -51,6 +51,28 @@ StatusCode SeedingToolBase::initialize() {
 
   m_geo = std::make_unique<TrigFTF_GNN_Geometry>(m_layerGeometry, m_connector);
 
+
+  if (m_useML) {
+    std::string lut_fileName = PathResolver::find_file(m_lutFile, "DATAPATH");
+    if (lut_fileName.empty()) {
+      ATH_MSG_FATAL("Cannot find ML predictor LUT file " << lut_fileName);
+      return StatusCode::FAILURE;
+    }
+    else {
+      m_mlLUT.reserve(100);
+      std::ifstream ifs(lut_fileName.c_str());
+      while (!ifs.eof()) {
+	float cl_width, min1, max1, min2, max2;
+	ifs >> cl_width >> min1 >> max1 >> min2 >> max2;
+	if (ifs.eof()) break;
+	std::array<float, 5> lut_line = {cl_width, min1, max1, min2, max2};
+	m_mlLUT.emplace_back(lut_line);
+      }
+      ifs.close();
+      ATH_MSG_INFO("ML predictor is initialized from file " << lut_fileName<<" LUT has "<<m_mlLUT.size()<<" entries");
+    }
+  }
+  
   m_phiSliceWidth = 2*M_PI/m_nMaxPhiSlice;
   
   ATH_MSG_INFO("SeedingToolBase initialized ");

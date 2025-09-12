@@ -60,6 +60,7 @@ class SeedingToolBase: public AthAlgTool {
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};
   IntegerProperty m_nBufferEdges{this, "BufferEdges", 200000};
   StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4.txt"};
+  StringProperty  m_lutFile{this, "MLpredictorLutFileName", "gbts_ml_pixel_barrel_loose.lut"};
 
   BooleanProperty m_useGPUseedExtraction{this, "UseGPUseedExtraction", true};
   BooleanProperty m_useOldTunings{this, "UseOldTunings", false};
@@ -71,6 +72,7 @@ class SeedingToolBase: public AthAlgTool {
   std::unique_ptr<GNN_FasTrackConnector> m_connector = nullptr;
   std::vector<TrigInDetSiLayer> m_layerGeometry;
   std::unique_ptr<const TrigFTF_GNN_Geometry> m_geo = nullptr;
+  std::vector<std::array<float, 5> > m_mlLUT;
 };
 
 #endif
