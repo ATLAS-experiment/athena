@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTCONTAINERS_I_INTERNALIDC_H
@@ -7,6 +7,7 @@
 
 #include "Identifier/IdentifierHash.h"
 #include "GaudiKernel/StatusCode.h"
+#include <memory>
 #include <vector>
 
 namespace EventContainers{
