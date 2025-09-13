@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILETMDBRAWCHANNELMONITORALGORITHM_H
@@ -45,8 +45,8 @@ class TileTMDBRawChannelMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<bool> m_fillEfficiencyHistograms{this,
         "FillEfficiencyHistograms", false, "Fill TMDB efficiency histograms"};
 
-    Gaudi::Property<bool> m_numberOfThresholds{this,
-        "NumberOfThresholds", false, "Number of thresholds to check (Run2: 2, Run3: 1)"};
+    Gaudi::Property<unsigned> m_numberOfThresholds{this,
+        "NumberOfThresholds", 1, "Number of thresholds to check (Run2: 2, Run3: 1)"};
 
     SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKey{this,
         "MuRcvRawChCnt", "MuRcvRawChCnt", "TMDB raw container"};
