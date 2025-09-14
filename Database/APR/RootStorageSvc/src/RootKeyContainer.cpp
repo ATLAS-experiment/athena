@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -358,7 +358,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
   if ( dbH.isValid() && dir_nam.length() > 0 )    {
     std::string nam = sanitisedName.starts_with('/') ? sanitisedName.substr(1)
                                                      : std::move(sanitisedName);
-    size_t idx1     = std::string::npos, idx2 = nam.find('/',1);
+    size_t idx1     = 0, idx2 = nam.find('/',1);
     TDirectory::TContext dirCtxt(0);
     IDbDatabase* idb = dbH.info();
     m_rootDb = dynamic_cast<RootDatabase*>(idb);
@@ -368,8 +368,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
     }
     m_dir  = m_rootDb->file();
     do  {
-      //bug: on entry, idx1 = 18446744073709551615UL. Adding 1 overflows size_t.
-      std::string s = nam.substr(idx1+1, idx2-idx1-1); 
+      std::string s = nam.substr(idx1, idx2-idx1); 
       m_dir->cd();
       TDirectory* dir = (TDirectory*)m_dir->Get(s.c_str());
       if ( 0==dir && mode&pool::CREATE && !s.empty() ) {
@@ -389,10 +388,11 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
               << DbPrint::endmsg;
           return Error;
         }
-        idx1  = idx2;
-        idx2  = nam.find('/', idx1+1);
+        if (idx2 == std::string::npos) break;
+        idx1  = idx2+1;
+        idx2  = nam.find('/', idx1);
       }
-    } while ( m_dir && idx1 != std::string::npos );
+    } while ( m_dir );
     if (m_dir)
       m_dir->cd();
     DbOption opt1("DEFAULT_WRITEPOLICY","");

@@ -97,7 +97,7 @@ DbStatus RootDatabase::onOpen(DbDatabase& dbH, DbAccessMode mode)  {
         << "and file not opened for update." << DbPrint::endmsg;
   }
   else {
-    m_version = par_val;
+    m_version = std::move(par_val);
   }
   if ( m_file )  {
     log << DbPrintLvl::Debug << dbH.name() << " File version:" << int(m_file->GetVersion())
