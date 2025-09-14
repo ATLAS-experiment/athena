@@ -198,7 +198,7 @@ public:
 
   void disableFADCCorrections();
 
-  void LoadEnergyCalibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& calibSplines)
+  void LoadEnergyCalibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>&& calibSplines)
   {
     (*m_msgFunc_p)(ZDCMsg::Verbose, "Loading energy calibrations");
 
@@ -206,8 +206,8 @@ public:
     m_haveECalib = true;
   }
 
-  void LoadT0Calibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& T0HGOffsetSplines,
-                          std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& T0LGOffsetSplines)
+  void LoadT0Calibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>&& T0HGOffsetSplines,
+                          std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>&& T0LGOffsetSplines)
   {
     (*m_msgFunc_p)(ZDCMsg::Verbose, "Loading timing calibrations");
 
