@@ -751,6 +751,9 @@ bool RAuxStore::hasEntryFor(SG::auxid_t auxid) const {
 
 StatusCode RAuxStore::getEntryFor(SG::auxid_t auxid) {
 
+  // Guard against multi-threaded execution:
+  guard_t guard(m_impl->m_mutex);
+
   assert(m_impl);
   assert(m_impl->m_fields.size() > auxid);
   assert(m_impl->m_fields[auxid]);
@@ -829,7 +832,7 @@ StatusCode RAuxStore::setupInputData(SG::auxid_t auxid) {
       return StatusCode::RECOVERABLE;
     }
     // We have a dynamic field:
-    fieldName = dynFieldName;
+    fieldName = std::move(dynFieldName);
   }
 
   // Get the object describing this field.
