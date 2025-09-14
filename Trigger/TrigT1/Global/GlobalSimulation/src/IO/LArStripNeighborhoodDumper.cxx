@@ -25,7 +25,7 @@ namespace GlobalSim {
         << eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)
         << " weight " << eventInfo.mcEventWeight() << '\n';
 
-    for (const auto& nbhd : neighborhoods) {
+    for (const auto nbhd : neighborhoods) {
       out << *nbhd << '\n';
     }
 
@@ -75,7 +75,7 @@ namespace GlobalSim {
 	<< eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)
 	<< " weight " << eventInfo.mcEventWeight() << '\n';
 
-    for (const auto& n : neighborhoods) {dump_n(n, out);}
+    for (const auto n : neighborhoods) {dump_n(n, out);}
 
 
     out.close();

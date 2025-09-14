@@ -47,7 +47,7 @@ namespace GlobalSim {
     SG::WriteHandle<std::vector<float> > h_eRatioSimple(m_eRatioSimpleKey, ctx);
     CHECK(h_eRatioSimple.record(std::make_unique<std::vector<float> >()));
 	
-    for (const auto& nbhd : *in) {
+    for (const auto nbhd : *in) {
       auto c_phi = combine_phi(nbhd);
       if (msgLevel() <= MSG::DEBUG) {
         std::stringstream ss;
