@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -258,15 +258,15 @@ public:
     _dataAnalyzer_p->SetDebugLevel(debugLevel);
   }
 
-  void LoadEnergyCalibrations(const std::array<std::array<TSpline*, 4>, 2>&  calibSplines)
+  void LoadEnergyCalibrations(std::array<std::array<TSpline*, 4>, 2>&&  calibSplines)
   {
-    _dataAnalyzer_p->LoadEnergyCalibrations(calibSplines);
+    _dataAnalyzer_p->LoadEnergyCalibrations(std::move(calibSplines));
   }
 
-  void LoadT0Calibrations(const std::array<std::array<TSpline*, 4>, 2>&  calibSplinesHG,
-			   const std::array<std::array<TSpline*, 4>, 2>&  calibSplinesLG)
+  void LoadT0Calibrations(std::array<std::array<TSpline*, 4>, 2>&&  calibSplinesHG,
+			   std::array<std::array<TSpline*, 4>, 2>&&  calibSplinesLG)
   {
-    _dataAnalyzer_p->LoadtT0Calibrations(calibSplinesHG, calibSplinesLG);
+    _dataAnalyzer_p->LoadtT0Calibrations(std::move(calibSplinesHG), std::move(calibSplinesLG));
   }
 
   void SetLBDepT0(int iside, int imod, TSpline* t0SplineLG, TSpline* t0SplineHG);

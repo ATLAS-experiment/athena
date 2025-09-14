@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <string>
@@ -58,7 +58,7 @@ void LoadCalibrations(ZDCTreeAnalysis* ana, const std::string & filename, int ru
       }
     }
 
-    ana->LoadEnergyCalibrations(ECalibSplinePtrs);
+    ana->LoadEnergyCalibrations(std::move(ECalibSplinePtrs));
   }
 
   if (t0Calib) {
@@ -87,7 +87,7 @@ void LoadCalibrations(ZDCTreeAnalysis* ana, const std::string & filename, int ru
       }
     }
 
-    ana->LoadT0Calibrations(t0CalibSplinePtrsHG, t0CalibSplinePtrsLG);
+    ana->LoadT0Calibrations(std::move(t0CalibSplinePtrsHG), std::move(t0CalibSplinePtrsLG));
   }
 
   file->Close();
