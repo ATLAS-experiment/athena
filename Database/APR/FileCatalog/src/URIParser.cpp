@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "POOLCore/DbPrint.h"
@@ -40,7 +40,7 @@ namespace pool{
       }else{
         mystr=me;
       }
-      m_contactstr=mystr;
+      m_contactstr=std::move(mystr);
     }
     //
     //look up separators

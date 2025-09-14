@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**FClistPFN.cpp -- FileCatalog command line tool to list the PFN entries from the catalog
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     if( !mylfn.empty() ) {
        fids.push_back( mycatalog->lookupLFN( mylfn ) );
     } else if( !myfid.empty() ) {
-       fids.push_back( myfid );
+       fids.emplace_back( std::move(myfid) );
     } else {
        // go through all FIDs in the catalog
        mycatalog->getFIDs( fids );
