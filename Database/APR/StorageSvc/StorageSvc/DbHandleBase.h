@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -46,6 +46,13 @@ namespace pool    {
     ~DbHandleBase() {  m_type.check();                  }
     /// Standard constructor
     DbHandleBase() : m_ptr(0), m_type(0)  {             }
+
+    // Copy/move handled by derived classes.
+    DbHandleBase (const DbHandleBase&) = delete;
+    DbHandleBase (DbHandleBase&&) = delete;
+    DbHandleBase& operator= (const DbHandleBase&) = delete;
+    DbHandleBase& operator= (DbHandleBase&&) = delete;
+
     /// Set handle type
     void setType(const DbType& typ)       { m_type=typ; }
     /// Set data pointer
