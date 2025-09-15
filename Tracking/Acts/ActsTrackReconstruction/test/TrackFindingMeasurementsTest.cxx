@@ -127,13 +127,13 @@ int main() {
   geometryIdMap.insert( std::make_pair( ActsTrk::makeDetectorElementKey( xAOD::UncalibMeasType::HGTDClusterType, hgtdContainer.front()->identifierHash() ),
 					ActsTrk::DetectorElementToActsGeometryIdMap::makeValue( hgtdGeoId ) ) );
   
-  measurements.addMeasurements(0, pixelContainer, geometryIdMap);
-  measurements.addMeasurements(1, stripContainer, geometryIdMap);
-  measurements.addMeasurements(2, hgtdContainer, geometryIdMap);
-
   measurementIndex.addMeasurements(pixelContainer);
   measurementIndex.addMeasurements(stripContainer);
   measurementIndex.addMeasurements(hgtdContainer);
+
+  measurements.addMeasurements(0, pixelContainer, geometryIdMap, &measurementIndex);
+  measurements.addMeasurements(1, stripContainer, geometryIdMap, &measurementIndex);
+  measurements.addMeasurements(2, hgtdContainer, geometryIdMap, &measurementIndex);
 
   // check post-fill
   std::cout << "----------------------------------------------" << std::endl;

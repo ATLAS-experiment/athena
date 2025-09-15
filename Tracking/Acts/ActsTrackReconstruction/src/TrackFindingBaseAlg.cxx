@@ -582,7 +582,8 @@ namespace ActsTrk {
                                           std::make_pair(kNoSecond, "Tracks failing second CKF"),
                                           std::make_pair(kNStoppedTracksMinPt, "Stopped tracks below pT cut"),
                                           std::make_pair(kNStoppedTracksMaxEta, "Stopped tracks above max eta"),
-                                          std::make_pair(kNTotalSharedHits, "Total shared hits")
+                                          std::make_pair(kNTotalSharedHits, "Total shared hits"),
+                                          std::make_pair(kNForcedSeedMeasurements, "Total forced measurements")
                                       });
       assert(stat_labels.size() == kNStat);
       std::vector<std::string> categories;
@@ -676,7 +677,8 @@ namespace ActsTrk {
                                                       TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("branched tracks / used seeds", kMultipleBranches, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("no 2nd CKF / CKF tracks", kNoSecond, kNOutputTracks),
-                                                      TableUtils::defineSimpleRatio("shared hits / CKF tracks", kNTotalSharedHits, kNOutputTracks)});
+                                                      TableUtils::defineSimpleRatio("shared hits / CKF tracks", kNTotalSharedHits, kNOutputTracks),
+                                                      TableUtils::defineSimpleRatio("forced measurements / used seeds", kNForcedSeedMeasurements, kNUsedSeeds)});
 
       std::vector<float> ratio = TableUtils::computeRatios(ratio_def,
                                                            nSeedCollections() + 1,

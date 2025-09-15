@@ -11,9 +11,10 @@ ignore_pattern="ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-  	     from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-	     flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2; \
-	     flags.Tracking.doTruth=False;" \
+             from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+             flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2; \
+             flags.Tracking.doTruth=False; \
+             flags.Tracking.doPixelDigitalClustering=True" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \
