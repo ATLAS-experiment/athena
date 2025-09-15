@@ -4,6 +4,9 @@
 #ifndef MEASUREMENTCONTAINERWITHDIMENSION_H
 #define MEASUREMENTCONTAINERWITHDIMENSION_H
 #include <variant>
+#include <vector>
+#include <sstream>
+#include <algorithm>
 
 // Helper type to associate the measurement dimension to the pointer to a measurement container
 template <typename container_t, std::size_t DIM>

@@ -90,6 +90,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_ambiStrategy);
     ATH_MSG_DEBUG("   " << m_autoReverseSearch);
     ATH_MSG_DEBUG("   " << m_countSharedHits);
+    ATH_MSG_DEBUG("   " << m_forceTrackOnSeed);
 
     ATH_CHECK(m_paramEstimationTool.retrieve());
     ATH_CHECK(m_seedContainerKeys.initialize());
@@ -196,18 +197,18 @@ namespace ActsTrk
       det_el_status_arr.at(det_el_col_iter - det_el_collections.begin()) = det_el_status.cptr();
     }
 
-    detail::TrackFindingMeasurements measurements(uncalibratedMeasurementContainers.size() /* number of measurement containers*/);
-    std::size_t measurementIndexContainersSize = (m_skipDuplicateSeeds || m_countSharedHits || m_trackStatePrinter.isSet()) ? uncalibratedMeasurementContainers.size() : 0ul;
-    detail::MeasurementIndex measurementIndex(measurementIndexContainersSize);
-    detail::SharedHitCounter sharedHits;
+    detail::MeasurementIndex measurementIndex(uncalibratedMeasurementContainers.size());
+    for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer) {
+      measurementIndex.addMeasurements(*uncalibratedMeasurementContainers[icontainer]);
+    }
 
+    detail::TrackFindingMeasurements measurements(uncalibratedMeasurementContainers.size());
     for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer) {
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
       measurements.addMeasurements(icontainer,
                                    *uncalibratedMeasurementContainers[icontainer],
-                                   *m_trackingGeometryTool->surfaceIdMap());
-      if (measurementIndexContainersSize > 0ul)
-        measurementIndex.addMeasurements(*uncalibratedMeasurementContainers[icontainer]);
+                                   *m_trackingGeometryTool->surfaceIdMap(),
+                                   m_forceTrackOnSeed ? &measurementIndex : nullptr);
     }
 
     ATH_MSG_DEBUG("measurement index size = " << measurementIndex.size());
@@ -282,6 +283,8 @@ namespace ActsTrk
       // CalibrationContext converter not implemented yet.
       .calib = getCalibrationContext(ctx)
     };
+
+    detail::SharedHitCounter sharedHits;
 
     // Perform the track finding for all initial parameters.
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
@@ -555,6 +558,13 @@ namespace ActsTrk
             printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType, true);
           }
         }
+
+        auto measurementRangesForced =
+            m_forceTrackOnSeed ? std::make_unique<ActsTrk::detail::MeasurementRangeListFlat>(measurements.setMeasurementRangesForced(seed, measurementIndex))
+                               : nullptr;
+        measurementSelector->setMeasurementRangesForced(measurementRangesForced.get());
+        if (measurementRangesForced)
+          event_stat[category_i][kNForcedSeedMeasurements] += measurementRangesForced->size();
 
         // Get the Acts tracks, given this seed
         // Result here contains a vector of TrackProxy objects

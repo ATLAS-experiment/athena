@@ -169,6 +169,7 @@ namespace ActsTrk {
       kNStoppedTracksMinPt,
       kNStoppedTracksMaxEta,
       kNTotalSharedHits,
+      kNForcedSeedMeasurements,
       kNStat
     };
 

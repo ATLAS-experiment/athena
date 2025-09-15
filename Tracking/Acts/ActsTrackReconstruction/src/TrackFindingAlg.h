@@ -119,6 +119,7 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/Z boundary for using the top space point in the track parameter estimation"};
     Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), automatically determined by the param estimation tool"};
     Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
+    Gaudi::Property<bool> m_forceTrackOnSeed{this, "forceTrackOnSeed", true, "force track to use measurements from the seed"};
 
 
     // Ambiguity resolution
