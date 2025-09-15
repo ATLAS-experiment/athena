@@ -2,8 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <map>
-#include <mutex>
 #include <algorithm>
 
 #include <TH1.h>
@@ -125,31 +123,6 @@ namespace Monitored {
     }
 }
 
-namespace std {
-  // Next four functions are for speeding up lookups in the the caching of invokeFillers
-  // They allow us to directly compare keys of the cache std::map
-  // with vectors of IMonitoredVariables, avoiding memory allocations
-  // these compare strings and IMonitoredVariables
-  bool operator<(const std::string& a, const std::reference_wrapper<Monitored::IMonitoredVariable>& b)  {
-    return a < b.get().name();
-  }
-  bool operator<(const std::reference_wrapper<Monitored::IMonitoredVariable>& a, const std::string& b)  {
-    return a.get().name() < b;
-  }
-
-  // lexicographical comparison of cache map items and vector of IMonitoredVariables
-  bool operator<(const std::vector<std::string>& lhs,
-                 const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& rhs) {
-    return std::lexicographical_compare(lhs.begin(), lhs.end(),
-                                        rhs.begin(), rhs.end());
-  }
-  bool operator<(const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& lhs,
-                 const std::vector<std::string>& rhs) {
-    return std::lexicographical_compare(lhs.begin(), lhs.end(),
-                                        rhs.begin(), rhs.end());
-  }
-}
-
 namespace {
   void invokeFillersDebug(MsgStream& log,
                           const Monitored::HistogramFiller::VariablesPack& vars,
@@ -175,29 +148,33 @@ namespace {
           << "\n  Selected monitored variables: " << vars.names() << endmsg;
     }
   }
+
+  /**
+   * Concatenate the monitored variable names to create a key to be used in the ConcurrentStr map.
+   * This may seem very inefficient but is actually faster than the previous solution of storing a
+   * std::vector<std::string> in a std::map + mutex.
+   */
+  std::string fillerKey(const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& v) {
+    std::string r;
+    for (const auto& m : v) r.append(m.get().name());
+    return r;
+  }
 }
 
 void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& monitoredVariables) const {
   // This is the list of fillers to consider in the invocation.
   // If we are using the cache then this may be a proper subset of m_fillers; otherwise will just be m_fillers
-  const std::vector<std::shared_ptr<Monitored::HistogramFiller>>* fillerList{nullptr};
-  // do we need to update the cache?
-  bool makeCache = false;
+  const std::vector<std::shared_ptr<Monitored::HistogramFiller>>* fillerList{&m_fillers};
   // pointer to list of matched fillers, if we need to update the cache (default doesn't create the vector)
-  std::unique_ptr<std::vector<std::shared_ptr<Monitored::HistogramFiller>>> matchedFillerList;
+  std::vector<std::shared_ptr<Monitored::HistogramFiller>>* matchedFillerList{nullptr};
   if (m_useCache) {
-    // lock the cache during lookup
-    std::scoped_lock cacheguard(m_cacheMutex);
-    const auto match = m_fillerCacheMap.find(monitoredVariables);
+    const auto match = m_fillerCacheMap.find(fillerKey(monitoredVariables));
     if (match != m_fillerCacheMap.end()) {
-      fillerList = match->second.get();
+      fillerList = &match->second;
     } else {
-      fillerList = &m_fillers;
-      matchedFillerList = std::make_unique<std::vector<std::shared_ptr<Monitored::HistogramFiller>>>();
-      makeCache = true;
+      // make new cache entry
+      matchedFillerList = new std::vector<std::shared_ptr<Monitored::HistogramFiller>>;
     }
-  } else {
-    fillerList = &m_fillers;
   }
 
   for ( auto filler: *fillerList ) {
@@ -210,8 +187,8 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
             auto guard{filler->getLock()};
             filler->fill({&var.get()});
           }
-          if (makeCache) { 
-            matchedFillerList->push_back(filler); 
+          if (matchedFillerList) {
+            matchedFillerList->push_back(filler);
           }
           break;
         }
@@ -246,7 +223,7 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
           auto guard{filler->getLock()};
           filler->fill( vars );
         }
-        if (makeCache) { 
+        if (matchedFillerList) {
           matchedFillerList->push_back(std::move(filler));
         }
       } else if ( ATH_UNLIKELY( msgLvl(MSG::DEBUG) && matchesCount != 0 ) ) { // something has matched, but not all, worth informing user
@@ -255,19 +232,10 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
     }
   }
 
-  if (makeCache) {
-    // we may hit this multiple times. If another thread has updated the cache in the meanwhile, don't update
-    // (or we might delete the fillerList under another thread)
-    std::scoped_lock cacheguard(m_cacheMutex);
-    const auto match = m_fillerCacheMap.find(monitoredVariables);
-    if (match == m_fillerCacheMap.end()) {
-      std::vector<std::string> key;
-      key.reserve(monitoredVariables.size());
-      for (const auto& mv : monitoredVariables) {
-        key.push_back(mv.get().name());
-      }
-      m_fillerCacheMap[key].swap(matchedFillerList);
-    }
+  if (matchedFillerList) {
+    // We may hit this multiple times. If another thread has updated the cache in the meanwhile,
+    // nothing will be done here.
+    m_fillerCacheMap.emplace(fillerKey(monitoredVariables), std::move(*matchedFillerList));
   }
 }
 
