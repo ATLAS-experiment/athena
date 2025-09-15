@@ -617,6 +617,6 @@ float JetCaloEnergies::getMoment(const xAOD::CaloCluster* cluster, const xAOD::C
         bool isRetrieved = cluster->retrieveMoment(momentType, moment);
         if (isRetrieved) return (float) moment;
     }
-    ATH_MSG_WARNING("Can not retrieve moment from cluster");
+    ATH_MSG_DEBUG("Can not retrieve moment from cluster");
     return 0.0;
 }
