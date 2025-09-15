@@ -48,7 +48,7 @@ namespace SG {
       } else {
         // Skip blank keys
         if (b.key() != "") {
-          std::vector<Base>::push_back(b);
+          std::vector<Base>::emplace_back(std::move(b));
         }
       }
     }
