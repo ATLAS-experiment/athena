@@ -5,6 +5,7 @@
 #include "MuonRDO/TgcRdo.h"
 #include "AthenaKernel/errorcheck.h"
 #include <bit>
+#include <cstring>  // memset
 
 // Default constructor
 TgcRdo::TgcRdo() : DataVector<TgcRawData>()

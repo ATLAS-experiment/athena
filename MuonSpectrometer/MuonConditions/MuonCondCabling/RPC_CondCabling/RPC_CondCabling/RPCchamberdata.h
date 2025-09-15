@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCCHAMBERDATA_H
 #define RPCCHAMBERDATA_H
 
 #include <list>
+#include <memory>
 
 #include "MuonCablingTools/RPCdecoder.h"
 #include "MuonCablingTools/ShowRequest.h"
