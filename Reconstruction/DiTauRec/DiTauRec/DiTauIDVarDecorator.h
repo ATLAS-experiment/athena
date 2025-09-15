@@ -21,6 +21,7 @@ public:
   virtual ~DiTauIDVarDecorator();
   virtual StatusCode initialize() override;
   virtual StatusCode execute(DiTauCandidateData * data, const EventContext& ctx) const override;
+  virtual StatusCode executeObj(xAOD::DiTauJet& xDiTau, const EventContext& ctx) const override; 
 
 private: 
   struct SubjetTrackingInfo{

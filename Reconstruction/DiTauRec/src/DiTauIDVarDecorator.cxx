@@ -69,10 +69,15 @@ StatusCode DiTauIDVarDecorator::initialize() {
   return StatusCode::SUCCESS;
 }
 
-
 StatusCode DiTauIDVarDecorator::execute(DiTauCandidateData * data, const EventContext& ctx) const {
     xAOD::DiTauJet* xDiTauPtr = data->xAODDiTau;
     xAOD::DiTauJet& xDiTau = *xDiTauPtr;
+    ATH_CHECK( executeObj(xDiTau, ctx));
+    return StatusCode::SUCCESS; 
+}
+
+StatusCode DiTauIDVarDecorator::executeObj( xAOD::DiTauJet& xDiTau, const EventContext& ctx) const{
+
     ATH_MSG_DEBUG("Calculate DiTau ID variables");
     
     static const SG::Accessor< int > n_subjetsDec("n_subjets");
