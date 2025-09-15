@@ -1,23 +1,44 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 import sys
 
+def scanFullName(oname):
+    
+    if "-" in oname:
+        nname = oname.replace("-", "")
+        if nname.startswith("S"):
+            return f"SCAN_S000{nname[1:]}"
+
+    elif len(oname) == 15 and oname.startswith("SCAN_S000"):
+        return oname
+
+    else:
+        print(f"ERROR: Scan name '{oname}' is wrong. Should have for example 'SCAN_S000092961' or 'S092-961' format")
+        sys.exit(1) 
+
 if __name__=="__main__":
     
     import argparse
-    parser = argparse.ArgumentParser(prog='python -m PixelCalibAlgs.IBLCalibrationConfig.',
+    parser = argparse.ArgumentParser(prog='python -m PixelCalibAlgs.IBLCalibrationConfig',
                             description="""Calibration tool for IBL.\n\n
-                            Example: python -m PixelCalibAlgs.IBLCalibrationConfig --folder "global/path/to/folder/" --thr "threshold_file" --totLowQ "totLowCharge_file" 
-                                                                                   --totHisDis "totHisDisConfig_file" [--runCal --skipPlots]""")
+                            Example: python -m PixelCalibAlgs.IBLCalibrationConfig --folder "global/path/to/folder/" 
+                            --thr "threshold_file" 
+                            --totLowQ "totLowCharge_file" 
+                            --totHisDis "totHisDisConfig_file" 
+                            [--runCal --skipPlots]""")
     
-    parser.add_argument('--folder'    , required=True, help="Directory path to the files")
-    parser.add_argument('--thr'       , required=True, help="Format must be \"SCAN_SXXXXXXXXX\" - THRESHOLD_SCAN (0Preset_full)")
-    parser.add_argument('--totLowQ'   , required=True, help="Format must be \"SCAN_SXXXXXXXXX\" - TOT_CALIB (0Preset_lowcharge) ")
-    parser.add_argument('--totHisDis' , required=True, help="Format must be \"SCAN_SXXXXXXXXX\" - TOT_CALIB (0Preset_lowcharge_HisDisConfig)")
+    parser.add_argument('--folder'    , type=str, default="/eos/atlas/atlascerngroupdisk/det-pix/p1/scan-data/", help="Directory path to the files")
+    parser.add_argument('--thr'       , required=True, help="Format must be \"SCAN_SXXXXXXXXX\" or \"SXXX-XXX\" - THRESHOLD_SCAN (0Preset_full)")
+    parser.add_argument('--totLowQ'   , required=True, help="Format must be \"SCAN_SXXXXXXXXX\" or \"SXXX-XXX\" - TOT_CALIB (0Preset_lowcharge) ")
+    parser.add_argument('--totHisDis' , required=True, help="Format must be \"SCAN_SXXXXXXXXX\" or \"SXXX-XXX\" - TOT_CALIB (0Preset_lowcharge_HisDisConfig)")
     parser.add_argument('--tag'       , type=str, default="PixelChargeCalibration-DATA-RUN2-UPD4-28", help="Tag in order to read the DB")
     parser.add_argument('--runCal'    , action='store_true', help="Runs only the IBL Calibration layer")
     parser.add_argument('--skipPlots' , action='store_true', help="Skips the plotting step - Slower the running time")
     
     args = parser.parse_args()
+
+    args.thr       = scanFullName(args.thr)
+    args.totHisDis = scanFullName(args.totHisDis)
+    args.totLowQ   = scanFullName(args.totLowQ)
 
     try:
         print("Running IBLCalibration layers..")

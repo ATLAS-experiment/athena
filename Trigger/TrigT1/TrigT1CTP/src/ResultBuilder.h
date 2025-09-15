@@ -90,7 +90,7 @@ namespace LVL1CTP {
      std::pair< std::unique_ptr<xAOD::CTPResult>, std::unique_ptr<xAOD::CTPResultAuxInfo> > constructCTPResult( const EventIDBase & eventID, 
 							  const std::vector<uint32_t> & tbp, const std::vector<uint32_t> & tap, 
 							  const std::vector<uint32_t> & tav, const std::vector<uint32_t> & tip,
-							  const std::vector<uint32_t> & extra ) const;
+							  const std::vector<uint32_t> & extra, const unsigned char triggerType ) const;
 
      
    private:

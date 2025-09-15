@@ -354,11 +354,12 @@ LVL1CTP::ResultBuilder::constructCTPResult( const EventIDBase & eventID,
                                             const std::vector<uint32_t> & tap,
                                             const std::vector<uint32_t> & tav,
                                             const std::vector<uint32_t> & tip,
-                                            const std::vector<uint32_t> & extra ) const
+                                            const std::vector<uint32_t> & extra,
+                                            const unsigned char triggerType ) const
 {
    auto wrongSize = [this](const std::vector<uint32_t> & vec, uint32_t exp, std::string_view name) {
       if (vec.size() == exp) {return false;}
-      ATH_MSG_ERROR("Wrong " << name << " vector size passed to constructRDOResult, " << vec.size() << " instead of " << exp);
+      ATH_MSG_ERROR("Wrong " << name << " vector size passed to constructCTPResult, " << vec.size() << " instead of " << exp);
       return true;
    };
    if (wrongSize(tip, m_ctpDataFormat->getTIPwords(), "TIP")
@@ -375,13 +376,31 @@ LVL1CTP::ResultBuilder::constructCTPResult( const EventIDBase & eventID,
    data.insert(data.end(),tap.begin(),tap.end());
    data.insert(data.end(),tav.begin(),tav.end());
    data.insert(data.end(),extra.begin(),extra.end());
-     
+
+   // Source id for header words. Convention for source id in LVL1: 0 for DAQ
+   const uint32_t source_id{eformat::helper::SourceIdentifier(eformat::TDAQ_CTP, 1).code()};
+
+   // Version word for header words
+   uint32_t version_word = eformat::DEFAULT_ROD_VERSION;
+   const uint32_t l1a_pos{0};
+   version_word |= ((extra.size() & m_ctpDataFormat->getProgrammableExtraWordsMask()) << m_ctpDataFormat->getProgrammableExtraWordsShift());
+   version_word |= ((l1a_pos & m_ctpDataFormat->getL1APositionMask()) << m_ctpDataFormat->getL1APositionShift());
+   version_word |= ((m_ctpVersionNumber & m_ctpDataFormat->getCTPFormatVersionMask()) << m_ctpDataFormat->getCTPFormatVersionShift());
+
+   // Create the CTPResult and CTPResultAuxInfo objects
    auto result = std::make_unique<xAOD::CTPResult>();
    auto resultAux = std::make_unique<xAOD::CTPResultAuxInfo>();
    result->setStore(resultAux.get());
-   CTPResultUtils::initialize(*result, m_ctpVersionNumber, std::move(data), extra.size());
-   CTPResultUtils::setTimeSec(*result, eventID.time_stamp());                // Time stamp: 32-bit UTC seconds
-   CTPResultUtils::setTimeNanoSec(*result, eventID.time_stamp_ns_offset());  // Time stamp: 28-bit nanoseconds
+   CTPResultUtils::initialize(*result, m_ctpVersionNumber, data, extra.size());
+   result->setHeaderMarker(eformat::ROD);
+   result->setHeaderFormatVersion(version_word);
+   result->setSourceID(source_id);
+   result->setRunNumber(eventID.run_number());
+   result->setBCID(eventID.bunch_crossing_id());
+   result->setTriggerType(triggerType);
+   result->setTimeSec(eventID.time_stamp());
+   result->setTimeNanoSec(eventID.time_stamp_ns_offset());
+   result->setNumDataWords(data.size());
    ATH_MSG_DEBUG( "Created CTPResult object" );
    return std::make_pair(std::move(result), std::move(resultAux));
 }

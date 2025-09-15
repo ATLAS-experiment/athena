@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -53,6 +53,29 @@ def TileCTBGeoG4SDCalcCfg(flags, hit_collection_name, name="TileCTBGeoG4SDCalc",
     kwargs.setdefault("TileTB", True)
     kwargs.setdefault("DoCalibHitParticleID", flags.Sim.ParticleID )
     kwargs.setdefault("OutputCollectionNames", hit_collection_name)
+
+    if flags.Tile.Sim.DeltaTHit != 'NONE':
+        kwargs.setdefault("DeltaTHit", flags.Tile.Sim.DeltaTHit)
+    if flags.Tile.Sim.TimeCut != 'NONE':
+        kwargs.setdefault("TimeCut", flags.Tile.Sim.TimeCut)
+    if flags.Tile.Sim.PlateToCell != 'NONE':
+        kwargs.setdefault("PlateToCell", flags.Tile.Sim.PlateToCell)
+    if flags.Tile.Sim.doTileRaw != 'NONE':
+        kwargs.setdefault("DoTileRow", flags.Tile.Sim.doTileRaw)
+    if flags.Tile.Sim.doTOFCorrection != 'NONE':
+        kwargs.setdefault("DoTOFCorrection", flags.Tile.Sim.doTOFCorrection)
+    if flags.Tile.Sim.doBirk != 'NONE':
+        kwargs.setdefault("DoBirk", flags.Tile.Sim.doBirk)
+    if any([flags.Tile.Sim.OldBirk != 'NONE', flags.Tile.Sim.Birk1 != 'NONE', flags.Tile.Sim.Birk2 != 'NONE']):
+        import AthenaCommon.SystemOfUnits as Units
+        gramsPerMeVcmSq = Units.g / (Units.MeV * Units.cm2)
+        if flags.Tile.Sim.OldBirk != 'NONE':
+            kwargs.setdefault("birk1", 0.0130 * gramsPerMeVcmSq)
+            kwargs.setdefault("birk2", 9.6e-6 * gramsPerMeVcmSq * gramsPerMeVcmSq)
+        if flags.Tile.Sim.Birk1 != 'NONE':
+            kwargs.setdefault("birk1", flags.Tile.Sim.Birk1 * gramsPerMeVcmSq)
+        if flags.Tile.Sim.Birk2 != 'NONE':
+            kwargs.setdefault("birk2", flags.Tile.Sim.Birk2 *gramsPerMeVcmSq * gramsPerMeVcmSq)
 
     result.addService(CompFactory.TileGeoG4SDCalc(name, **kwargs), primary=True)
     return result

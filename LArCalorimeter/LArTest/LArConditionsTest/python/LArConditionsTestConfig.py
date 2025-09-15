@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -64,6 +64,7 @@ if __name__ == "__main__":
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     flags.Input.isMC=True
     flags.IOVDb.GlobalTag="OFLCOND-CSC-00-01-00"
+    flags.Input.Files=[]
     flags.Input.TypedCollections=[]
     flags.Input.MCCampaign=Campaign.Unknown
     flags.fillFromArgs()
