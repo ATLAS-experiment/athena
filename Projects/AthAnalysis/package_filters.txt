@@ -237,7 +237,6 @@
 + Event/EventInfo.*
 + Event/EventAthenaPool
 + Event/EventTPCnv
-+ Event/EventPTCnv
 + DetectorDescription/Identifier
 + DetectorDescription/GeoModel/GeoModelInterfaces
 
