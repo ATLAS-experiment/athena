@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHVIEWS_VIEW_H
@@ -9,7 +9,6 @@
 
 #include "AthenaKernel/IProxyDict.h"
 #include "AthViews/SimpleView.h"
-#include "AthViews/DebugView.h"
 #include "AthLinks/ElementLink.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
@@ -40,15 +39,10 @@ public:
    }
 
 
-#ifdef ATHVIEWS_DEBUG
-  void impl ( DebugView* impl ) { m_implementation = impl; }
-  DebugView* impl (void ) { return m_implementation; }
-  const DebugView* impl ( void ) const { return m_implementation; }
-#else
   void impl ( SimpleView* impl ) { m_implementation = impl; }
   SimpleView* impl (void ) { return m_implementation; }
   const SimpleView* impl ( void ) const { return m_implementation; }
-#endif
+
   size_t viewID() const{ return m_index; }
 
   /**
@@ -142,11 +136,7 @@ public:
 
 private:
 
-#ifdef ATHVIEWS_DEBUG
-  DebugView *m_implementation;
-#else
   SimpleView *m_implementation;
-#endif
   size_t m_index;
 };
 } // EOF SG namespace

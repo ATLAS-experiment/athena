@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthViews/View.h"
@@ -18,11 +18,7 @@ View::View(const std::string& name, const int index, const bool AllowFallThrough
     fullName += std::to_string( index );
   }
 
-#ifdef ATHVIEWS_DEBUG
-  m_implementation = new DebugView( fullName, AllowFallThrough, storeName );
-#else
   m_implementation = new SimpleView( fullName, AllowFallThrough, storeName );
-#endif
 }
 
 View::~View () {

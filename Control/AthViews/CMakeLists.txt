@@ -30,11 +30,6 @@ atlas_add_dictionary( AthViewsAlgsDict
                       LINK_LIBRARIES AthLinks TrigSteeringEvent
                       ELEMENT_LINKS TrigRoiDescriptorCollection )
 
-option( ATHVIEWS_DEBUG "Build debugging version" OFF )
-if( ATHVIEWS_DEBUG )
-  add_compile_definitions( ATHVIEWS_DEBUG )
-endif()
-
 # Tests in the package:
 atlas_add_test( ViewLinking_test
                 SOURCES test/ViewLinking_test.cxx
