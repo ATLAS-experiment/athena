@@ -48,8 +48,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
     -c ${dcubeShifterXml} \
     -r ${dcubeRef} \
     physval.ntuple.root
-  echo "art-result: $? shifter_plots"
-  
+  echo "art-result: $? shifter_plots"  
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_shifter_last \
