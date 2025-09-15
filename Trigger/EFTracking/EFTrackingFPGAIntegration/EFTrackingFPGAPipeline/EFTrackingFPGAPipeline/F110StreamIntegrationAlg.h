@@ -56,10 +56,10 @@ namespace EFTrackingFPGAIntegration
 
         Gaudi::Property<std::string> m_stripEdmKernelName{this, "StripEDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
 
-        Gaudi::Property<std::string> m_pixelClusterKernelName{this, "PixelClusterKernelName", "", "Name of the pixel clustering kernel"}; //!< Name of the pixel clustering kernel
+        Gaudi::Property<std::string> m_pixelStartClusterKernelName{this, "PixelStartClusterKernelName", "", "Name of the pixel clustering start kernel"}; //!< Name of the pixel clustering kernel start
+        Gaudi::Property<std::string> m_pixelEndClusterKernelName{this, "PixelEndClusterKernelName", "", "Name of the pixel clustering end kernel"}; //!< Name of the pixel clustering kernel start
 
         Gaudi::Property<std::string> m_stripStartClusterKernelName{this, "StripStartClusterKernelName", "", "Name of the strip clustering start kernel"}; //!< Name of the strip clustering kernel start
-
         Gaudi::Property<std::string> m_stripEndClusterKernelName{this, "StripEndClusterKernelName", "", "Name of the strip clustering end kernel"}; //!< Name of the strip clustering kernel start
 
 
@@ -81,7 +81,8 @@ namespace EFTrackingFPGAIntegration
 
         // Kernels
         // Clustering
-        mutable std::vector<cl::Kernel> m_pixelClusteringKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_pixelStartClusteringKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_pixelEndClusteringKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripStartClusteringKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripEndClusteringKernels ATLAS_THREAD_SAFE;
 

@@ -101,9 +101,11 @@ def F110StreamIntegrationCfg(flags, name = 'F110StreamIntegrationAlg', **kwarg):
 
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
     kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
-    kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')    
-    kwarg.setdefault('StripStartClusterKernelName','configurableLengthWideLoader')
-    kwarg.setdefault('StripEndClusterKernelName','dynamicLengthWideUnloader')
+    kwarg.setdefault('PixelStartClusterKernelName','loaderPixel')
+    kwarg.setdefault('PixelEndClusterKernelName','unloaderPixel')
+
+    kwarg.setdefault('StripStartClusterKernelName','loaderStrip')
+    kwarg.setdefault('StripEndClusterKernelName','unloaderStrip')
     kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
