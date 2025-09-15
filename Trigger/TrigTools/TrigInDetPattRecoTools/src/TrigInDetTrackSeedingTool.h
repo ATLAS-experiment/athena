@@ -24,8 +24,8 @@
 #include "IRegionSelector/IRegSelTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 
-#include "GNN_FasTrackConnector.h"
-#include "GNN_Geometry.h"
+#include "TrigInDetPattRecoTools/GNN_FasTrackConnector.h"
+#include "TrigInDetPattRecoTools/GNN_Geometry.h"
 #include "GNN_DataStorage.h"
 
 #include "SeedingToolBase.h"

@@ -4,7 +4,7 @@
 
 
 #include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
-#include "GNN_Geometry.h"
+#include "TrigInDetPattRecoTools/GNN_Geometry.h"
 #include "GNN_DataStorage.h"
 
 #include<iostream>

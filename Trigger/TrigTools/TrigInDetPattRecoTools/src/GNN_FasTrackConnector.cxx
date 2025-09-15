@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GNN_FasTrackConnector.h"
+#include "TrigInDetPattRecoTools/GNN_FasTrackConnector.h"
 #include <iostream>
 #include <cstring>
 
