@@ -4,7 +4,6 @@
 # * 1L skimming
 # * InDetTrackParticles with |z0|*sinTheta < 6.0
 #====================================================================
-
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
@@ -17,6 +16,17 @@ def STDM13KernelCfg(flags, name='STDM13Kernel', **kwargs):
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+
+
+    ## FTAG augmentations - run b-tagging on PFlow jets
+    from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+    acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
+
+    #===================================================
+    # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS
+    #===================================================
+    from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
+    acc.merge(HFClassificationCommonCfg(flags))
 
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
     
@@ -68,6 +78,9 @@ def STDM13Cfg(flags):
     
     STDM13SlimmingHelper = SlimmingHelper("STDM13SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
+    from DerivationFrameworkFlavourTag import FtagBaseContent
+    FtagBaseContent.addCommonAugmentation(flags, acc, STDM13SlimmingHelper)
+    
     STDM13SlimmingHelper.SmartCollections = [
         "Electrons",
         "Muons",
@@ -76,6 +89,7 @@ def STDM13Cfg(flags):
         "PrimaryVertices",
         "InDetTrackParticles",
         "BTagging_AntiKt4EMPFlow",
+        "AntiKt4EMPFlowJets_FTAG",
     ]
 
     STDM13SlimmingHelper.AllVariables = [
@@ -85,7 +99,8 @@ def STDM13Cfg(flags):
         "BTagging_AntiKt4EMPFlow",
         "AntiKt4TruthDressedWZJets",
         "TruthEvents","TruthHFWithDecayParticles","TruthBoson","TruthBottom", "TruthCharm","TruthElectrons","TruthMuons","TruthTop","TruthTaus","MET_Truth",
-        "TruthPrimaryVertices","TruthHFWithDecayVertices",
+        "TruthPrimaryVertices","TruthHFWithDecayVertices","AntiKt4EMPFlowJets_FTAG",
+##        "AntiKt4EMPFlowJets"
     ]
 
     STDM13SlimmingHelper.IncludeTriggerNavigation = False
@@ -99,6 +114,25 @@ def STDM13Cfg(flags):
     STDM13SlimmingHelper.IncludeBPhysTriggerContent = False
     STDM13SlimmingHelper.IncludeMinBiasTriggerContent = False
 
+   # Truth extra content
+    if flags.Input.isMC:
+
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
+        addTruth3ContentToSlimmerTool(STDM13SlimmingHelper)
+        STDM13SlimmingHelper.AllVariables += ['TruthLHEParticles', 'TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+        STDM13SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
+                                          "Muons.TruthLink",
+                                          "Photons.TruthLink",
+                                          "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt"]
+        
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
+        acc.merge(AddTauAndDownstreamParticlesCfg(flags))
+        STDM13SlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
+
+        # Extra content
+    STDM13SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.QGTransformer_ConstScore.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub" ]
+
+    
     # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
