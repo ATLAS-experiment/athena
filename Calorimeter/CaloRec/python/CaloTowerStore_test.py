@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # @file CaloUtils/share/CaloTowerStore_test.py
 # @author scott snyder <snyder@bnl.gov>
@@ -14,6 +14,7 @@ from AthenaConfiguration.TestDefaults import defaultGeometryTags
 from Campaigns.Utils import Campaign
 
 flags=initConfigFlags()
+flags.Input.Files=[]
 flags.Input.isMC=True
 flags.IOVDb.GlobalTag = 'OFLCOND-SDR-BS14T-IBL-06'
 flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2

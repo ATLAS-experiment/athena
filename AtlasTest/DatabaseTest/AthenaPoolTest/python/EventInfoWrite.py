@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -17,6 +17,7 @@ flags.IOVDb.GlobalTag = 'OFLCOND-SDR-BS14T-IBL-06'
 flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
 flags.LAr.doAlign=False
 flags.Input.MCCampaign=Campaign.Unknown
+flags.Input.Files=[]
 flags.Input.TypedCollections=[]
 
 flags.Exec.DebugMessageComponents=["TagInfoMgr",

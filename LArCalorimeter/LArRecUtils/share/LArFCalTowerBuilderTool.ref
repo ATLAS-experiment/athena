@@ -1,3 +1,4 @@
+Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v37r2)
