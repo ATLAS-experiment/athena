@@ -21,39 +21,12 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TrigValTools.TrigValSteering import Test, CheckSteps
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
-preExec = ';'.join([
-    'flags.Trigger.triggerMenuSetup=\'MC_pp_run4_v1\'',
-    'flags.Trigger.AODEDMSet=\'AODFULL\'',
-])
-
-rdo2aod = ExecStep.ExecStep()
-rdo2aod.type = 'Reco_tf'
-rdo2aod.input = 'ttbar_pu200_Run4'
-rdo2aod.threads = 8
-rdo2aod.max_events = 100
-rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
-rdo2aod.args += ' --CA "all:True"'
-rdo2aod.args += ' --preExec "all:{:s};"'.format(preExec)
-rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200" "RAWtoALL:ActsConfig.ActsCIFlags.actsWorkflowFlags"'
-rdo2aod.args += ' --conditionsTag f"default:{defaultConditionsTags.RUN4_MC}"'
-rdo2aod.args += ' --ignorePatterns "Propagation.+reached.+the.+step.+count.+limit,Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"'
-rdo2aod.timeout = 5400 # default = 3600 s
-rdo2aod.flags = ['Trigger.enabledSignatures=[\'Muon\',\'Egamma\',\'Jet\',\'Bjet\',\'Tau\']',  
-                 'Trigger.useActsTracking=True',
-                 'Acts.useCache=True',
-                 'Acts.GsfRefitActs=True',
-                 'Acts.GsfDirectNavigation=True',
-                 'Tracking.doPixelDigitalClustering=True',
-                 'Tracking.doITkFastTracking=True',
-                 'Trigger.doRuntimeNaviVal=True',
-                 'ITk.doTruth=False',
-                 'Tracking.doTruth=False',
-                 f'IOVDb.GlobalTag=\'{defaultConditionsTags.RUN4_MC}\'',
-                 ]
+EFTrackPipeline = "C100"
+from TrigAnalysisTest.test_trigAna_RDOtoAOD_v1Dev_Run4_Acts_Common import prepare_acts_rdo2aod
+rdo2aod = prepare_acts_rdo2aod(EFTrackPipeline)
 
 test = Test.Test()
 test.art_type = 'grid'
