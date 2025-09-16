@@ -7,6 +7,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format, MetadataCategory
 from AthenaCommon.CFElements import seqAND, seqOR, parOR, flatAlgorithmSequences, getSequenceChildren, isSequence
+from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from AthenaCommon.Logging import logging
 
 __log = logging.getLogger('TriggerConfig')
@@ -33,8 +34,8 @@ def collectHypos( steps ):
     for stepSeq in steps.Members:
         if not isSequence( stepSeq ):
             continue
-
-        if "filter" in stepSeq.getName():
+        
+        if CFNaming.FILTER_POSTFIX in stepSeq.getName():
             __log.debug("Skipping filtering steps %s", stepSeq.getName() )
             continue
 
@@ -65,8 +66,8 @@ def __decisionsFromHypo( hypo ):
 
 
 def collectViewMakers( steps ):
-    """ collect all view maker algorithms in the configuration """
-    makers = [] # map with name, instance and encompasing recoSequence
+    """ collect all EventViewCreatorAlgorithm algorithms in the configuration """
+    makers = set() # map with name, instance and encompasing recoSequence
     for stepSeq in getSequenceChildren( steps ):
         for recoSeq in getSequenceChildren( stepSeq ):
             if not isSequence( recoSeq ):
@@ -74,9 +75,8 @@ def collectViewMakers( steps ):
             algsInSeq = flatAlgorithmSequences( recoSeq )
             for seq,algs in algsInSeq.items():
                 for alg in algs:
-                    if "EventViewCreator" in alg.getFullJobOptName(): # TODO base it on checking types of write handles once available
-                        if alg not in makers:
-                            makers.append(alg)
+                    if "Views" in alg._properties:                                            
+                        makers.add(alg)
     __log.debug("Found ViewMakers: %s", ' '.join([ maker.getName() for maker in makers ]))
     return makers
 
@@ -92,8 +92,8 @@ def collectFilters( steps ):
     __log.info("Collecting filters")
     filters = defaultdict( list )
 
-    for stepSeq in steps.Members:
-        if "filter" in stepSeq.getName():
+    for stepSeq in steps.Members:        
+        if CFNaming.FILTER_POSTFIX in stepSeq.getName():
             filters[stepSeq.getName()] = stepSeq.Members
             __log.debug("Found Filters in Step %s : %s", stepSeq.getName(), stepSeq.Members)
 

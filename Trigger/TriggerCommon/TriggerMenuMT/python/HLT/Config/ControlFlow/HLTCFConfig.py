@@ -259,7 +259,7 @@ def createDataFlow(flags, chains):
                 
             log.debug("Now Filter has chains: %s", sequenceFilter.getChains())
             log.debug("Now Filter has chains/input: %s", sequenceFilter.getChainsPerInput())
-            # store legs and mult in the CFGroup
+            # store legs in the CFGroup
             lastCFgroup.addStepLeg(chainStep, chain.name)                                  
 
             if len(chain.steps) == nstep+1:
