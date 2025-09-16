@@ -13,6 +13,7 @@
 #include "CxxUtils/starts_with.h"
 
 #include <format>
+#include <unordered_set>
 
 static const SG::AuxElement::Accessor< std::vector<TrigCompositeUtils::DecisionID> > readWriteAccessor("decisions");
 static const SG::AuxElement::ConstAccessor< std::vector<TrigCompositeUtils::DecisionID> > readOnlyAccessor("decisions");
@@ -273,7 +274,7 @@ namespace TrigCompositeUtils {
     return *it;
   }
 
-  std::vector<const Decision*> getRejectedDecisionNodes(const asg::EventStoreType* eventStore,
+  std::vector<const Decision*> getRejectedDecisionNodes([[maybe_unused]] const asg::EventStoreType* eventStore,
     const EventContext& ctx,
     const std::string& summaryCollectionKey,
     const DecisionIDContainer& ids,
@@ -282,14 +283,14 @@ namespace TrigCompositeUtils {
     // The following list contains all known summary store identifiers where the graph nodes are spread out over O(100s) or O(1000s)
     // of different SG collections. This is the raw output from running the trigger online.
     // When dealing with this, we need to query eventStore->keys in every event to obtain the full set of collections to process.
-    static const std::vector<std::string> knownDistributedSummaryStores{
+    static const std::unordered_set<std::string> knownDistributedSummaryStores{
       "HLTNav_Summary",
       "_HLTNav_Summary"
     };
 
     // The following list contains all known summary store identifiers where all nodes from the graph have been compactified / condensed
     // down into a single container. Here we just have to search this one container.
-    static const std::vector<std::string> knownCompactSummaryStores{"HLTNav_Summary_OnlineSlimmed",
+    static const std::unordered_set<std::string> knownCompactSummaryStores{"HLTNav_Summary_OnlineSlimmed",
       "HLTNav_Summary_ESDSlimmed",
       "HLTNav_Summary_AODSlimmed",
       "HLTNav_Summary_DAODSlimmed",
@@ -298,20 +299,19 @@ namespace TrigCompositeUtils {
 
     std::vector<std::string> keys; // The SG keys we will be exploring to find rejected decision nodes
 
-    if (std::find(knownDistributedSummaryStores.cbegin(), knownDistributedSummaryStores.cend(), summaryCollectionKey) != knownDistributedSummaryStores.end() or summaryCollectionKey == "") {
+    if (knownDistributedSummaryStores.contains(summaryCollectionKey) or summaryCollectionKey.empty()) {
       
       // If we have a distributed store then we need to query SG to find all keys.
       // This should be a rare case now that we run compactification "online" (i.e. immediately after the trigger has executed) 
 #ifndef XAOD_STANDALONE
       // The list of containers we need to read can change on a file-by-file basis (it depends on the SMK)
       // Hence we query SG for all collections rather than maintain a large and ever changing ReadHandleKeyArray
-      eventStore->keys(static_cast<CLID>( ClassID_traits< DecisionContainer >::ID() ), keys);
+      eventStore->keys<DecisionContainer>(keys);
 #else
-      eventStore->event(); // Avoid unused warning
       throw std::runtime_error("Cannot obtain rejected HLT features in AnalysisBase when reading from uncompactified navigation containers, run trigger navigation slimming first if you really need this.");
 #endif
 
-    } else if (std::find(knownCompactSummaryStores.cbegin(), knownCompactSummaryStores.cend(), summaryCollectionKey) != knownCompactSummaryStores.end()) {
+    } else if (knownCompactSummaryStores.contains(summaryCollectionKey)) {
 
       keys.push_back(summaryCollectionKey);
 
@@ -326,16 +326,25 @@ namespace TrigCompositeUtils {
 
     std::vector<const Decision*> output; // The return vector of identified nodes where one of the chains in 'ids' was rejected
 
+    // ReadHandleKey to be re-used in the loop to avoid repeated CLID lookups
+    SG::ReadHandleKey<DecisionContainer> containerRHKey("temp");
+    if (!containerRHKey.initialize().isSuccess()) {
+      throw std::runtime_error("Cannot initialize ReadHandleKey for DecisionContainer");
+    }
+
     // Loop over each DecisionContainer,
     for (const std::string& key : keys) {
       // Get and check this container
       if ( not (CxxUtils::starts_with(key, "HLTNav_") or CxxUtils::starts_with(key, "_HLTNav_")) ) {
         continue; // Only concerned about the decision containers which make up the navigation, they have name prefix of HLTNav (or _HLTNav for transient-only mode)
       }
-      if (keysToIgnore.count(key) == 1) {
+      if (keysToIgnore.contains(key)) {
         continue; // Have been asked to not explore this SG container
       }
-      SG::ReadHandle<DecisionContainer> containerRH(key, ctx);
+
+      // Create ReadHandle for this key
+      containerRHKey = key;
+      auto containerRH = SG::makeHandle(containerRHKey, ctx);
       if (!containerRH.isValid()) {
         throw std::runtime_error("Unable to retrieve " + key + " from event store.");
       }
@@ -345,7 +354,7 @@ namespace TrigCompositeUtils {
           continue; // Only want Decision objects created by HypoAlgs or ComboHypoAlgs
         }
         const std::vector<ElementLink<DecisionContainer>> mySeeds = d->objectCollectionLinks<DecisionContainer>(seedString());
-        if (mySeeds.size() == 0) {
+        if (mySeeds.empty()) {
           continue;
         }
         const bool allSeedsValid = std::all_of(mySeeds.begin(), mySeeds.end(), [](const ElementLink<DecisionContainer>& s) { return s.isValid(); });
@@ -357,12 +366,12 @@ namespace TrigCompositeUtils {
         }
 
         DecisionIDContainer activeChainsIntoThisDecision;
-        decisionIDs(*(mySeeds.at(0)), activeChainsIntoThisDecision); // Get list of active chains from the first parent
+        decisionIDs(*mySeeds[0], activeChainsIntoThisDecision); // Get list of active chains from the first parent
         if (mySeeds.size() > 1) {
           for (size_t i = 1; i < mySeeds.size(); ++i) {
             // If there are more than one parent, we only want to keep the intersection of all of the seeds
             DecisionIDContainer moreActiveChains;
-            decisionIDs(*(mySeeds.at(i)), moreActiveChains);
+            decisionIDs(*mySeeds[i], moreActiveChains);
             DecisionIDContainer intersection;
             std::set_intersection(activeChainsIntoThisDecision.begin(), activeChainsIntoThisDecision.end(),
               moreActiveChains.begin(), moreActiveChains.end(),
@@ -375,7 +384,7 @@ namespace TrigCompositeUtils {
         // So the size of activeChainsIntoThisDecision corresponds to the number of HypoTools which will have run
         // What do we care about? A chain, or all chains?
         DecisionIDContainer chainsToCheck;
-        if (ids.size() == 0) { // We care about *all* chains
+        if (ids.empty()) { // We care about *all* chains
           chainsToCheck = activeChainsIntoThisDecision;
         } else { // We care about specified chains
           chainsToCheck = ids;
@@ -385,8 +394,8 @@ namespace TrigCompositeUtils {
         DecisionIDContainer activeChainsPassedByThisDecision;
         decisionIDs(d, activeChainsPassedByThisDecision);
         for (const DecisionID checkID : chainsToCheck) {
-          if (activeChainsPassedByThisDecision.find(checkID) == activeChainsPassedByThisDecision.end() && // I was REJECTED here ...
-              activeChainsIntoThisDecision.count(checkID) == 1) { // ... but PASSSED by all my inputs
+          if (not activeChainsPassedByThisDecision.contains(checkID) && // I was REJECTED here ...
+              activeChainsIntoThisDecision.contains(checkID)) { // ... but PASSSED by all my inputs
             output.push_back(d);
             break;
           }
