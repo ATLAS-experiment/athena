@@ -222,15 +222,21 @@ def BTagginglessContent(jetcol, ConfigFlags=None):
     # https://its.cern.ch/jira/browse/AFT-779
     gn3v00_models = [
         "GN3V00",
-        "GN3PflowV00",
-        "GN3MuonsV00",
         "GN3PflowMuonsV00"
     ]
-    for gn3_dev in gn3v00_models:
-        extra_flavours = ["tau",]
-        if gn3_dev in {"GN3PflowMuonsV00"}:
-            extra_flavours = ["tau", "ud", "g", "s", "quark"]
-            BTaggingRun3AuxVar += [f"{gn3_dev}_ptFromTruthDressedWZJet"]
+    gn3v01_models = [
+        "GN3EPCLV01"
+    ]
+    for gn3_dev in gn3v00_models + gn3v01_models:
+        match gn3_dev:
+            case "GN3PflowMuonsV00":
+                extra_flavours = ["tau", "ud", "g", "s", "quark"]
+                BTaggingRun3AuxVar += [f"{gn3_dev}_ptFromTruthDressedWZJet"]
+            case "GN3EPCLV01":
+                extra_flavours = ["tau", "ud", "g", "s", "bquark", "antibquark", "cquark", "anticquark", "other"]
+                BTaggingRun3AuxVar += [f"{gn3_dev}_ptFromTruthDressedWZJet"]
+            case _:
+                extra_flavours = ["tau",]
         BTaggingRun3AuxVar += _getVars(gn3_dev, extra_flavours=extra_flavours, flip_modes=["SimpleFlip"])
 
     isRun4 = _isRun4(ConfigFlags)
