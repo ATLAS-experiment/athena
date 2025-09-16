@@ -39,9 +39,6 @@ namespace DerivationFramework {
     // create shallow copy
     auto shallowCopy = xAOD::shallowCopyContainer (*ditauContainer);
 
-    ATH_CHECK( evtStore()->record(shallowCopy.first, m_ditauContainerKey.key()+"Trans"));
-    ATH_CHECK( evtStore()->record(shallowCopy.second, m_ditauContainerKey.key()+"TransAux."));
-
     for (auto ditau : *shallowCopy.first) {
 
       float score = m_tDiTauOnnxDiscriminantTool->GetDiTauObjOnnxScore(*ditau); 
@@ -50,6 +47,9 @@ namespace DerivationFramework {
       const xAOD::DiTauJet* xDiTau = ditauContainer->at(ditau->index());
       scoreDecor(*xDiTau) = score;
     }
+
+    delete shallowCopy.first;
+    delete shallowCopy.second;
 
     return StatusCode::SUCCESS;
   }
