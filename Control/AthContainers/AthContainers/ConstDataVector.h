@@ -65,7 +65,7 @@
 #include "AthContainers/DataVector.h"
 #include "AthLinks/ElementLink.h"
 #include <initializer_list>
-#include <boost/type_traits.hpp>
+#include <type_traits>
 
 /**
  * @brief @c DataVector adapter that acts like it holds const pointers.
@@ -117,7 +117,7 @@ public:
   typedef typename std::reverse_iterator<iterator>
     reverse_iterator;
 
-  typedef boost::true_type isSequence;
+  typedef std::true_type isSequence;
 
   /// If true, then this type must own its contents.
   // cppcheck-suppress duplInheritedMember
@@ -935,7 +935,7 @@ struct ClassID_traits<ConstDataVector<DV> >
   : public ClassID_traits<DV>
 {
 public:
-  BOOST_STATIC_CONSTANT(bool, s_isConst = true);
+  static constexpr bool s_isConst = true;
 };
 
 
