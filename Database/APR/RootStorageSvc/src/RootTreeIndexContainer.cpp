@@ -1,8 +1,9 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *   */
 
 // Local implementation files
+#include "POOLCore/DbPrint.h"
 #include "StorageSvc/DbOption.h"
 #include "RootDatabase.h"
 #include "RootTreeIndexContainer.h"
@@ -11,6 +12,9 @@
 #include "TTree.h"
 #include "TBranch.h"
 #include "TTreeIndex.h"
+
+// External include files
+#include "valgrind/valgrind.h"
 
 using namespace pool;
 
@@ -26,6 +30,11 @@ DbStatus RootTreeIndexContainer::open( DbDatabase& dbH,
                                        const DbTypeInfo* info,
                                        DbAccessMode mod)
 {
+   if( RUNNING_ON_VALGRIND ) {
+      DbPrint log("RootTreeIndexContainer.open");
+      log << DbPrintLvl::Warning << "Valgrind detected, "
+        "TTree index will be truncated by hand while reading!" << DbPrint::endmsg;
+   }
    auto db = static_cast<const RootDatabase*>( dbH.info() );
    m_indexBump = db? db->currentIndexMasterID() : 0;
    return  RootTreeContainer::open( dbH, nam, info, mod );
@@ -79,6 +88,17 @@ DbStatus RootTreeIndexContainer::writeObject(ActionList::value_type& action)
 
 DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID_t& oid)
 {
+   // ROOT internally uses long double when building custom indices
+   // Unfortunately, valgrind doesn't properly handle long double
+   // Therefore, when running under valgrind we mask out the PID
+   // part of the index (first 32 bits) and use the rest
+   // This is not a bulletproof approach as things will not work
+   // if we're reading files produced w/ AthenaMP+SharedWriter
+   // but should still work for all other known cases
+   // See ATEAM-1082 for more details
+   if( RUNNING_ON_VALGRIND ) {
+      oid.second &= 0xFFFFFFFF;
+   }
    if( (oid.second >> 32) > 0 ) {
       if( m_firstRead ) {
          // on the first read check if the index can and should be rebuilt
