@@ -17,6 +17,7 @@ def TruthParticleFixerAlgCfg(flags, name='xAODTruthParticleFixer',
                              f'{container}Aux.', f'InFile{container}Aux.'))
     kwargs.setdefault('InputContainer', f'InFile{container}')
     kwargs.setdefault('OutputContainer', container)
+    kwargs.setdefault('LinkPrefixToRemove', 'InFile')
     acc.addEventAlgo(
         CompFactory.xAODMaker.TruthParticleFixerAlg(name, **kwargs))
     return acc
@@ -33,5 +34,6 @@ def TruthVertexFixerAlgCfg(flags, name='xAODTruthVertexFixer',
                              f'{container}Aux.', f'InFile{container}Aux.'))
     kwargs.setdefault('InputContainer', f'InFile{container}')
     kwargs.setdefault('OutputContainer', container)
+    kwargs.setdefault('LinkPrefixToRemove', 'InFile')
     acc.addEventAlgo(CompFactory.xAODMaker.TruthVertexFixerAlg(name, **kwargs))
     return acc

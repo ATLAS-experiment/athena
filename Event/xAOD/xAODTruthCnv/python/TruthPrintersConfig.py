@@ -62,9 +62,11 @@ if __name__ == '__main__':
 
     # Fix the reading of the truth collections that we are going to print.
     acc.merge(TruthParticleFixerAlgCfg(flags, name='TruthElectronsFixer',
-                                       container='TruthElectrons'))
+                                       container='TruthElectrons',
+                                       ParticleLinks=['parentLinks', 'childLinks']))
     acc.merge(TruthParticleFixerAlgCfg(flags, name='TruthMuonsFixer',
-                                       container='TruthMuons'))
+                                       container='TruthMuons',
+                                       ParticleLinks=['parentLinks', 'childLinks']))
     acc.merge(TruthVertexFixerAlgCfg(flags, name='PrimaryVertexFixer',
                                      container='TruthPrimaryVertices'))
 
