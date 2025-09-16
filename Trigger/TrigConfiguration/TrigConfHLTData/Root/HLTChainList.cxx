@@ -125,7 +125,7 @@ TrigConf::HLTChainList::setL2LowerChainCounter(const CTPConfig* ctpcfg) {
    for(HLTChain* ch : *this) {
       if(ch->level() == "EF") continue;
       std::string low_chain_names = ch->lower_chain_name();
-      TrigConf::removeAllSpaces(low_chain_names);
+      std::erase(low_chain_names,' ');
       vector<string> low_chain_names_V = split(low_chain_names,",");
       std::vector<int> lccs;
       for(string lowerChainName : low_chain_names_V)
