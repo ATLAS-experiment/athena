@@ -38,6 +38,7 @@ def EGammaCommonCfg(ConfigFlags):
     # SHOWER SHAPE CORRECTIONS IN MC
     # TUNE27: e FUDGE FACTORS RUN2 FULL DATA, derived with rel 22.2
     # TUNE25: gamma FUDGE FACTORS RUN2 FULL DATA, derived with or 21.2
+    # AF3 is tuned to FullSim, so same FFs can be used for AF3 and FS
     # ====================================================================
     isMC = ConfigFlags.Input.isMC
     isFullSim = False
@@ -48,7 +49,7 @@ def EGammaCommonCfg(ConfigFlags):
     if isMC:
         print("EGammaCommon: isFullSim = ", isFullSim)
 
-    if isFullSim:
+    if isMC:
         from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
             ElectronVariableCorrectionToolCfg,
             PhotonVariableCorrectionToolCfg,
@@ -294,7 +295,7 @@ def EGammaCommonCfg(ConfigFlags):
     )
     acc.addPublicTool(PhotonIsEMSelectorLoose)
 
-    # Medium 
+    # Medium
     PhotonIsEMSelectorMedium = acc.popToolsAndMerge(
         AsgPhotonIsEMSelectorCfg(
             ConfigFlags, name="PhotonIsEMSelectorMedium", quality=egammaPID.PhotonIDMedium
@@ -384,6 +385,8 @@ def EGammaCommonCfg(ConfigFlags):
         EGElectronLikelihoodToolWrapperCfg,
     )
 
+    # Note: LH selectors don't need fudging since the LH is tuned to data
+
     # decorate electrons with the output of LH very loose
     ElectronPassLHVeryLoose = acc.getPrimaryAndMerge(
         EGElectronLikelihoodToolWrapperCfg(
@@ -460,7 +463,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNLoose",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorLoose,
-            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isMC else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNLoose",
             ContainerName="Electrons",
@@ -483,7 +486,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNMedium",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorMedium,
-            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isMC else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNMedium",
             ContainerName="Electrons",
@@ -497,7 +500,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNTight",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorTight,
-            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isMC else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNTight",
             ContainerName="Electrons",
@@ -511,7 +514,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNVeryLooseNoCF97",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorVeryLooseNoCF97,
-            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isMC else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNVeryLooseNoCF97",
             ContainerName="Electrons",
@@ -524,7 +527,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNLooseNoCF",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorLooseNoCF,
-            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isMC else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNLooseNoCF",
             ContainerName="Electrons",
@@ -538,7 +541,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNMediumNoCF",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorMediumNoCF,
-            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isMC else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNMediumNoCF",
             ContainerName="Electrons",
@@ -552,7 +555,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNTightNoCF",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorTightNoCF,
-            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isMC else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNTightNoCF",
             ContainerName="Electrons",
@@ -630,7 +633,7 @@ def EGammaCommonCfg(ConfigFlags):
         )
     )
 
-    # decorate photons with the output of IsEM medium 
+    # decorate photons with the output of IsEM medium
     # on MC, fudge the shower shapes before computing the ID (but the
     # original shower shapes are not overridden)
     PhotonPassIsEMMedium = acc.getPrimaryAndMerge(
