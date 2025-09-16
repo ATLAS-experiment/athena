@@ -131,6 +131,12 @@ StatusCode Pythia8_i::genInitialize() {
 
   // Add flag to switch off from JO the Pythia8ToHepMC::print_inconsistency internal variable
   m_pythia->settings.addFlag("AthenaPythia8ToHepMC:print_inconsistency",true);
+  
+  // Revert the recoil strategy to the old default of 1, ie. 'recoil to color'
+  // In 8.314, the default option was changed to 0, 'recoil to top' and we 
+  // revert it back unless 'recoil to top' 
+  // is explicitly needed for the samples 
+  if (m_version > 8.313) m_pythia->readString("TimeShower:recoilStrategyRF = 1");
 
   // Add UserHooks first because these potentially add new settings that must exist prior to parsing commands
 

@@ -91,6 +91,8 @@ atlas_add_component( EvtGen_i
 atlas_install_joboptions( share/common/*.py )
 atlas_install_runtime( share/file/*.DEC share/file/*.table share/file/*.dec share/file/*.pdt share/file/*.dat )
 
+atlas_install_python_modules( python/*.py )
+
 set( EvtGenEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of EvtGenEnvironment.cmake" )
 find_package( EvtGenEnvironment )
