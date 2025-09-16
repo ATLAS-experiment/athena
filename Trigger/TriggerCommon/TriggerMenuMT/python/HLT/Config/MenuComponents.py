@@ -15,7 +15,6 @@ from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 from collections.abc import MutableSequence
 import functools
 import re
-import types
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
@@ -406,7 +405,7 @@ class MenuSequence:
 
     def connectToFilter(self, outfilter):
         """Connect filter to the InputMaker"""
-        log.debug("connecting %s to inputs of %s", outfilter, self.maker.Alg.name)
+        log.debug("connectToFilter: connecting %s to inputs of %s", outfilter, self.maker.Alg.name)
         self.maker.addInput(outfilter)
           
     def getHypoToolConf(self) :
@@ -540,7 +539,7 @@ class Chain(object):
             new_step_name =  prev_step_name+'_'+empty_step_name+'%d_'%stepID+next_step_name
 
             log.debug("Adding empty step %s", new_step_name)
-            steps_to_add += [ChainStep(new_step_name, chainDicts=prev_chain_dict, comboHypoCfg=ComboHypoCfg, isEmpty=True)]
+            steps_to_add += [ChainStep(new_step_name, chainDicts=prev_chain_dict, isEmpty=True)]
         
         self.steps = chain_steps_pre_split + steps_to_add + chain_steps_post_split
 
@@ -598,7 +597,7 @@ class ChainStep(object):
     legID is taken from the ChainDict;
     """
     
-    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = ComboHypoCfg , comboToolConfs = None, isEmpty = False, createsGhostLegs = False):
+    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = functools.partial(ComboHypoCfg) , comboToolConfs = None, isEmpty = False, createsGhostLegs = False):
 
         # default mutable values must be initialized to None
         if SequenceGens is None:  SequenceGens = []
@@ -608,6 +607,9 @@ class ChainStep(object):
         self.name = name
         self.sequences = []
         self.sequenceGens = SequenceGens 
+        if not isinstance(comboHypoCfg, functools.partial):             
+            raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with ComboHypo %s that is not a function" % (name, comboHypoCfg) ) 
+        
         self.comboHypoCfg = comboHypoCfg
         self.comboToolConfs = list(comboToolConfs)       
         self.stepDicts = chainDicts # one dict per leg        
@@ -646,9 +648,10 @@ class ChainStep(object):
         self.makeCombo()
 
     def createSequences(self):
-        """ creation of this step sequences with instantiation of the CAs"""
-        log.debug("creating sequences for step %s", self.name)
+        """ creation of this step sequences with instantiation of the CAs"""        
+        log.debug("createSequences: creating %d sequences for step %s", len(self.sequenceGens), self.name)
         for seq in self.sequenceGens:
+            log.debug("createSequences: creating sequence %s", seq.func.__name__)
             self.sequences.append(seq()) # create the sequences         
             
     
@@ -674,7 +677,8 @@ class ChainStep(object):
         self.comboToolConfs.append(tool)
 
     def getComboHypoFncName(self):
-        return self.comboHypoCfg.__name__ if isinstance(self.comboHypoCfg, types.FunctionType) else self.comboHypoCfg        
+        return self.comboHypoCfg.func.__name__ 
+
 
 
     def makeCombo(self):

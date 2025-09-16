@@ -62,18 +62,7 @@ protected:
   Gaudi::Property<std::string> m_CaloCellContainerSDName{this, "CaloCellContainerSDName", "", "Name of the associated CaloCellContainerSD"};
   // Flag to enable G4 transportation
   Gaudi::Property<bool> m_doG4Transport{this, "doG4Transport", false, "Flag to enable G4 transportation"};
-  /// @brief Optional flags that allow to further limit the usage of fast simulation beyond the default configuration
-  /// Note: For fast simulation jobs, default values should be used. They are only useful in special cases
-  /// where you want to further limit the usage of fast sim, e.g. if we want to replace certain parts of full simulation
-  Gaudi::Property<bool>  m_doPhotons{this, "doPhotons", true, "Flag to enable FCS simulation for photons"};
-  Gaudi::Property<bool>  m_doElectrons{this, "doElectrons", true, "Flag to enable FCS simulation for electrons and positrons"};
-  Gaudi::Property<bool>  m_doHadrons{this, "doHadrons", true, "Flag to enable FCS simulation for pions and other hadrons"};
-  Gaudi::Property<float> m_AbsEtaMin{this, "AbsEtaMin", 0, "Abs(Eta) lower bound for FastCaloSim"};
-  Gaudi::Property<float> m_AbsEtaMax{this, "AbsEtaMax", 10, "Abs(Eta) upper bound for FastCaloSim"};
-  Gaudi::Property<float> m_EkinMinPhotons{this, "EkinMinPhotons", 0, "Kinetic photon energy lower bound for FastCaloSim"};
-  Gaudi::Property<float> m_EkinMaxPhotons{this, "EkinMaxPhotons", std::numeric_limits<float>::max(), "Kinetic photon energy upper bound for FastCaloSim"};
-  Gaudi::Property<float> m_EkinMinElectrons{this, "EkinMinElectrons", 0, "Kinetic electron energy lower bound for FastCaloSim"};
-  Gaudi::Property<float> m_EkinMaxElectrons{this, "EkinMaxElectrons", std::numeric_limits<float>::max(), "Kinetic electron energy upper bound for FastCaloSim"};
+  // Flag to enable punch-through simulation
   Gaudi::Property<bool>  m_doPunchThrough{this, "doPunchThrough", true, "Run punchthrough simulation for particle entering Calo-MS boundary"};
 };
 
