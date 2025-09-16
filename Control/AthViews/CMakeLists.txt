@@ -34,6 +34,12 @@ atlas_add_test( ViewLinking_test
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} AthViews AthenaKernel GaudiKernel StoreGateLib TestTools )
 
+atlas_add_test( ViewPerf_test
+                SOURCES test/ViewPerf_test.cxx
+                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GTEST_LIBRARIES} AthViews AthenaKernel GaudiKernel StoreGateLib TestTools
+                POST_EXEC_SCRIPT nopost.sh )
+
 atlas_add_test( ViewCollectionMerge_test
                 SOURCES test/ViewCollectionMerge_test.cxx
                 INCLUDE_DIRS ${GMOCK_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
