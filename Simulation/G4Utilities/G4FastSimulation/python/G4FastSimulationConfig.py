@@ -47,28 +47,5 @@ def FastCaloSimCfg(flags, **kwargs):
     # Config PunchThroughG4Tool
     kwargs.setdefault('doPunchThrough', flags.Sim.FastCalo.doPunchThrough)
 
-    # Config FastCaloSim
-    kwargs.setdefault('doEMECFCS', flags.Sim.FastCalo.doEMECFCS)
-    if flags.Sim.FastCalo.doEMECFCS:  # AF3 in EMEC and G4 in rest
-        kwargs.setdefault('doPhotons', True)
-        kwargs.setdefault('doElectrons', True)
-        kwargs.setdefault('doHadrons', False)
-        kwargs.setdefault('AbsEtaMin', 1.5)
-        kwargs.setdefault('AbsEtaMax', 3.2)
-        kwargs.setdefault('EkinMinPhotons', 10)
-        kwargs.setdefault('EkinMaxPhotons', 2048)
-        kwargs.setdefault('EkinMinElectrons', 10)
-        kwargs.setdefault('EkinMaxElectrons', 256)
-    else: # These are set to AF3 configuration
-        kwargs.setdefault('doPhotons', True)
-        kwargs.setdefault('doElectrons', True)
-        kwargs.setdefault('doHadrons', True)
-        kwargs.setdefault('AbsEtaMin', 0)
-        kwargs.setdefault('AbsEtaMax', 10)
-        kwargs.setdefault('EkinMinPhotons', 0)
-        kwargs.setdefault('EkinMaxPhotons', float('inf'))
-        kwargs.setdefault('EkinMinElectrons', 0)
-        kwargs.setdefault('EkinMaxElectrons', float('inf'))
-
     result.setPrivateTools(CompFactory.FastCaloSimTool(name="FastCaloSim", **kwargs))
     return result
