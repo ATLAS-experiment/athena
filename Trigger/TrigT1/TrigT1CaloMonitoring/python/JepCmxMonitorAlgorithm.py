@@ -58,7 +58,6 @@ def JepCmxMonitoringConfig(inputFlags):
     nFrame = 8
     nLoc = 4
     NumberOfSummaryBins = 4
-    EventSamples = 10
 
     # trigger threshold labels
     l1menu = getL1MenuAccess(inputFlags)
@@ -280,14 +279,7 @@ def JepCmxMonitoringConfig(inputFlags):
     myGroup.defineHistogram('cmxErrorSummary;cmx_1d_ErrorSummary',
                             title='Error Summary of CMX Jet and Energy', type='TH1F',
                             path=errHardPath, cutmask='',
-                            xbins=
-NumberOfSummaryBins, xmin=0., xmax=NumberOfSummaryBins, xlabels=errSummary_labels)
-    
-    myGroup.defineHistogram(';cmx_2d_ErrorEventNumbers',
-                            title='JEM-CMX Error Event Numbers;Events with Error/Mismatch;',type='TH2I',
-                            cutmask='', path=errHardPath,
-                            xbins=EventSamples, xmin=0, xmax=EventSamples, xlabels=numberLabels(EventSamples, 1),
-                            ybins=NumberOfSummaryBins, ymin=0, ymax=NumberOfSummaryBins, ylabels=errSummary_labels)
+                            xbins=NumberOfSummaryBins, xmin=0., xmax=NumberOfSummaryBins, xlabels=errSummary_labels)
 
     acc = helper.result()
     result.merge(acc)
