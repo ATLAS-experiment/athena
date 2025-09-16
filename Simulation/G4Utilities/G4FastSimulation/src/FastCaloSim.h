@@ -44,16 +44,6 @@ class FastCaloSim: public G4VFastSimulationModel
               const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
               const Gaudi::Property<std::string>& CaloCellContainerSDName,
               const Gaudi::Property<bool>& doG4Transport,
-              const Gaudi::Property<bool>& doPhotons,
-              const Gaudi::Property<bool>& doElectrons,
-              const Gaudi::Property<bool>& doHadrons,
-              const Gaudi::Property<float>& AbsEtaMin,
-              const Gaudi::Property<float>& AbsEtaMax,
-              const Gaudi::Property<float>& EkinMinPhotons,
-              const Gaudi::Property<float>& EkinMaxPhotons,
-              const Gaudi::Property<float>& EkinMinElectrons,
-              const Gaudi::Property<float>& EkinMaxElectrons,
-              const Gaudi::Property<bool>& doEMECFCS,
               const Gaudi::Property<bool>& doPunchThrough,
               FastCaloSimTool * FastCaloSimTool);
   ~FastCaloSim() {}
@@ -96,18 +86,6 @@ class FastCaloSim: public G4VFastSimulationModel
   Gaudi::Property<std::string> m_CaloCellContainerSDName;
   // Boolean flag to enable Geant4 transportation
   Gaudi::Property<bool> m_doG4Transport;
-
-  // Boundaries to enable AF3 transportation
-  Gaudi::Property<bool> m_doPhotons;
-  Gaudi::Property<bool> m_doElectrons;
-  Gaudi::Property<bool> m_doHadrons;
-  Gaudi::Property<float> m_AbsEtaMin;
-  Gaudi::Property<float> m_AbsEtaMax;
-  Gaudi::Property<float> m_EkinMinPhotons;
-  Gaudi::Property<float> m_EkinMaxPhotons;
-  Gaudi::Property<float> m_EkinMinElectrons;
-  Gaudi::Property<float> m_EkinMaxElectrons;
-  Gaudi::Property<float> m_doEMECFCS;
 
   //For PunchThrough
   Gaudi::Property<bool> m_doPunchThrough;
