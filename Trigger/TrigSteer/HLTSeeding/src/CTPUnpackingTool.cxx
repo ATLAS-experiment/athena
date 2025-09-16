@@ -3,7 +3,7 @@
 */
 #include "CTPUnpackingTool.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
-#include "TrigT1Result/CTPResult.h"
+#include "TrigT1Result/CTPResult.h" // TODO: Deprecate in favour of using new xAOD::CTPResult class
 #include "TrigT1Result/RoIBResult.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -22,6 +22,7 @@ CTPUnpackingTool::CTPUnpackingTool( const std::string& type,
 StatusCode CTPUnpackingTool::initialize() {
   ATH_CHECK( m_L1MenuKey.initialize() );
   ATH_CHECK( m_HLTMenuKey.initialize() );
+  ATH_CHECK( m_ctpResultKey.initialize( m_useEDMxAOD ) );
 
 
   ATH_CHECK( CTPUnpackingToolBase::initialize() );
@@ -90,18 +91,41 @@ StatusCode CTPUnpackingTool::start() {
 }
 
 
-StatusCode CTPUnpackingTool::decode( const EventContext& /*ctx*/, const ROIB::RoIBResult& roib,  HLT::IDVec& enabledChains ) const {
+StatusCode CTPUnpackingTool::decode( const EventContext& ctx, const ROIB::RoIBResult& roib,  HLT::IDVec& enabledChains ) const {
   auto nItems = Monitored::Scalar( "Items", 0 );
   auto nChains = Monitored::Scalar( "Chains", 0 );
 
-  auto ctpBits = m_useTBPBit ? roib.cTPResult().TBP() : roib.cTPResult().TAV();
+  std::vector<uint32_t> ctpBits;
+  if (m_useEDMxAOD) { // Need to make sure you can pick up the correct CTPResult in StoreGate
+
+    // Retrieve xAOD::CTPResult object
+    SG::ReadHandle<xAOD::CTPResult> ctpRes{ m_ctpResultKey, ctx };
+    if (!ctpRes.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve CTPResult with key " << m_ctpResultKey.key());
+      return StatusCode::FAILURE;
+    };
+
+    // Get the appropriate trigger bits for L1A bunch
+    ctpBits = m_useTBPBit ? ctpRes->getTBPWords() : ctpRes->getTAVWords();
+
+  }
+  else {
+
+    // Get appropriate trigger bits from ROIB::CTPResult object in RoIBResult object
+    auto rois = m_useTBPBit ? roib.cTPResult().TBP() : roib.cTPResult().TAV();
+    ctpBits.reserve(rois.size());
+
+    // Trigger bits stored in vector of ROIB::CTPRoI objects (which are just uint32_t), need to convert to a vector of type uint32_t
+    std::transform(rois.begin(), rois.end(), std::back_inserter(ctpBits), [](const ROIB::CTPRoI& roi){ return roi.roIWord(); });
+
+  }
   const size_t bitsSize = ctpBits.size();
   constexpr static size_t wordSize{32};
 
   for ( size_t wordCounter = 0; wordCounter < bitsSize; ++wordCounter ) {
     for ( size_t bitCounter = 0;  bitCounter < wordSize; ++bitCounter ) {
       const size_t ctpIndex = wordSize*wordCounter + bitCounter;
-      const bool decision = ( ctpBits[wordCounter].roIWord() & ((uint32_t)1 << bitCounter) ) > 0;
+      const bool decision = ( ctpBits[wordCounter] & ((uint32_t)1 << bitCounter) ) > 0;
 
       if ( decision or m_forceEnable ) {
         if ( decision ) {
