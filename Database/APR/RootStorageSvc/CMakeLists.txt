@@ -5,14 +5,15 @@ atlas_subdir( RootStorageSvc )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core RIO TreePlayer Tree MathCore Hist pthread ROOTNTuple)
+find_package( valgrind )
 find_package( VDT )
 
 # Component(s) in the package:
 atlas_add_library( RootStorageSvc
                    src/*.cpp
                    NO_PUBLIC_HEADERS
-                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthContainersInterfaces
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VALGRIND_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${VALGRIND_LIBRARIES} AthContainers AthContainersInterfaces
                    RootUtils RootUtilsPyROOT StorageSvc RootAuxDynIO POOLCore GaudiKernel
                    CxxUtils )
 
