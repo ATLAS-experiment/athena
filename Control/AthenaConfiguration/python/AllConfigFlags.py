@@ -350,8 +350,10 @@ def initConfigFlags():
 
         # Run dependent simulation
         acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict(), help='runNumber to timestamp map')
+
         acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance, help='default DB connection string')
-        acf.addFlag("IOVDb.CrestServer", "http://crest-undertow-api.web.cern.ch", help="CREST server URL")
+        acf.addFlag("IOVDb.CrestServer", "https://crest.cern.ch", help="CREST server URL") # FIXME could this be merged with IOVDb.DBConnection?
+        acf.addFlag("IOVDb.UseCREST", False, help='Use COOL by default for now')
 
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')
