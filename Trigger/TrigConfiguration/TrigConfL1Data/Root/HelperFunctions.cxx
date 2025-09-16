@@ -17,7 +17,6 @@
 #include "boost/lexical_cast.hpp"
 #include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/erase.hpp>
 using namespace std;
 using namespace TrigConf;
 
@@ -35,12 +34,6 @@ void
 TrigConf::strip(std::string& str) {
   boost::algorithm::trim(str);
 }
-
-// helper method: remove all spaces in string
-void TrigConf::removeAllSpaces(std::string& str) {
-   boost::algorithm::erase_all(str, " ");
-}
-
 
 // helper method: replace tabs by single space
 void TrigConf::replaceTabs(std::string& str) {
