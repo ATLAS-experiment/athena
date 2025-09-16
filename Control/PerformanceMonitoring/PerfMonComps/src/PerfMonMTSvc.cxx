@@ -307,7 +307,13 @@ void PerfMonMTSvc::stopCompAud(const std::string& stepName, const std::string& c
 
   // Store
   data_map_unique_t& compLevelDataMap = m_compLevelDataMapVec[ithread];
-  compLevelDataMap[currentState]->addPointStop(meas, doMem);
+  auto itr = compLevelDataMap.find(currentState);
+
+  // This can happen if we never got the startCompAud call.
+  // Usually because Gaudi's AuditorSvc was not fully initialized yet.
+  if (itr==compLevelDataMap.end()) return;
+
+  itr->second->addPointStop(meas, doMem);
 
   // Once the first time IncidentProcAlg3 is excuted, toggle m_isFirstEvent to false.
   // Doing it this way, instead of at EndAlgorithms incident, makes sure there is no
