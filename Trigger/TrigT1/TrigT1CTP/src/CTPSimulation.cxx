@@ -1153,7 +1153,7 @@ LVL1CTP::CTPSimulation::simulateItems(const std::map<std::string, unsigned int> 
 
    // create CTP output format and store in the event
    if (m_useEDMxAOD) {
-     std::pair< std::unique_ptr<xAOD::CTPResult>, std::unique_ptr<xAOD::CTPResultAuxInfo> > ctpResultAuxPair = m_resultBuilder->constructCTPResult( eventID, tbp, tap, tav, tip, extra );
+     std::pair< std::unique_ptr<xAOD::CTPResult>, std::unique_ptr<xAOD::CTPResultAuxInfo> > ctpResultAuxPair = m_resultBuilder->constructCTPResult( eventID, tbp, tap, tav, tip, extra, triggerType);
      std::unique_ptr<xAOD::CTPResult> ctpResult = std::move(ctpResultAuxPair.first);
      std::unique_ptr<xAOD::CTPResultAuxInfo> ctpResultAux = std::move(ctpResultAuxPair.second);
      auto ctpResultWriteHandle = SG::makeHandle( m_oKeyCTPResult, context );

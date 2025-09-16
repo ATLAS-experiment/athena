@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -163,6 +163,10 @@ int main(int argc, char** argv) {
       catch(TrigConf::IOException & ex) {
          cout << "Could not load HLT menu a second time from " << dbalias << " and smk " << smk << ". An exception occurred: " << ex.what() << endl;
          twiceHLTMenu=false;
+      }
+      catch (std::ios_base::failure & e){
+        cout << "ios_base exception "<<e.what()<<" caught in doubleLoad.\n";
+        return 1;
       }
    }
 

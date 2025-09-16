@@ -79,6 +79,11 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.doTimingHistogramsForCell', {'LBA14':['A4','B6','D1'],'LBA22':['A4','B6','D1'],'EBA22':['A13','B12','D5']}) # Production of Tile timing histograms per selected cells ({}: switched off)
      tcf.addFlag('Tile.useOnlineChannelStatus', True) # Use online DB with channel/adc status
 
+     def __tilesim():
+          from TileConfiguration.TileSimConfigFlags import createTileSimConfigFlags
+          return createTileSimConfigFlags()
+     tcf.addFlagsCategory('Tile.Sim', __tilesim, prefix=True)
+
      return tcf
 
 

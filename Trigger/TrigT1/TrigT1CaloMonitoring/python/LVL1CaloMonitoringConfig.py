@@ -415,6 +415,11 @@ thresholds th_AnyBinIsError {
         kwargsCopy["opt"] = ['kCanRebin','kAddBinsDynamically','kAlwaysCreate']
         kwargsCopy["merge"] = "merge"
         is2d = (kwargsCopy["title"].count(";")>1)
+        # take the right number of variables for defining the histogram
+        if is2d:
+            argsCopy[0] = argsCopy[0].split(",")[0] + "," + argsCopy[0].split(",")[1] + ";" + argsCopy[0].rsplit(";",1)[-1]
+        else:
+            argsCopy[0] = argsCopy[0].split(",")[0] + ";" + argsCopy[0].rsplit(";",1)[-1]
         self.defineHistogram(argsCopy[0],type="TH2I" if is2d else "TH1I",xbins=1,xmin=0,xmax=1,ybins=1 if is2d else None,ymin=0,ymax=1,fillGroup=fillGroup,**kwargsCopy)
         if not any([x in self.dqEnv for x in ['tier0','online']]):
             out = self.fillGroups[fillGroup].defineTree(*args,**kwargs)

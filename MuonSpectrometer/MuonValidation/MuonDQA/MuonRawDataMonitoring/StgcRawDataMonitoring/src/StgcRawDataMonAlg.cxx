@@ -118,6 +118,10 @@ void sTgcRawDataMonAlg::fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataCont
 	auto sectorMon    = Monitored::Scalar<int>("sector_layer_" + layerStr, sectorsTotal);
 	auto padNumberMon = Monitored::Scalar<int>("padNumber_layer_" + layerStr, padNumber);
 	fill("Occupancy", sectorMon, padNumberMon);
+
+  auto layerMon  = Monitored::Scalar<int>(channelName+"layer_" + side + sectorStr, layer);
+  auto quadMon   = Monitored::Scalar<int>(channelName+"quad_" + side + sectorStr, stationEtaAbs);
+  fill("Occupancy", layerMon, quadMon);
       }
 
       else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
@@ -136,6 +140,10 @@ void sTgcRawDataMonAlg::fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataCont
 	auto sectorMon      = Monitored::Scalar<int>("sector_layer_" + layerStr, sectorsTotal);
 	auto stripNumberMon = Monitored::Scalar<int>("stripNumber_layer_" + layerStr, stripNumber);
 	fill("Occupancy", sectorMon, stripNumberMon);
+
+  auto layerMon  = Monitored::Scalar<int>(channelName+"layer_" + side + sectorStr, layer);
+  auto quadMon   = Monitored::Scalar<int>(channelName+"quad_" + side + sectorStr, stationEtaAbs);
+  fill("Occupancy", layerMon, quadMon);
       }
 
       else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
@@ -148,16 +156,15 @@ void sTgcRawDataMonAlg::fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataCont
 	auto stationEtaMon      = Monitored::Scalar<int>("stationEta_layer_" + layerStr, stationEta);
 	auto wireGroupNumberMon = Monitored::Scalar<int>("wireGroupNumber_layer_" + layerStr, wireGroupNumber + (sector - 1)*maxWireGroupNumberQ3);
 	fill("Occupancy", stationEtaMon, wireGroupNumberMon);
-      }
 
-      auto layerMon  = Monitored::Scalar<int>(channelName+"layer_" + side + sectorStr, layer);
-      auto quadMon   = Monitored::Scalar<int>(channelName+"quad_" + side + sectorStr, stationEtaAbs);
-      fill("OccupancyShifter", layerMon, quadMon);
+  auto layerMon  = Monitored::Scalar<int>(channelName+"layer_" + side + sectorStr, layer);
+  auto quadMon   = Monitored::Scalar<int>(channelName+"quad_" + side + sectorStr, stationEtaAbs);
+  fill("Occupancy", layerMon, quadMon);
+      }
 
       auto sectorMon = Monitored::Scalar<int>(channelName+"Sector", sectorsTotal);      
       auto febMon    = Monitored::Scalar<int>(channelName+"Feb", getFEBs(stationEta,layer));
-      fill("Overview", sectorMon, febMon);
-      
+      fill("Overview", sectorMon, febMon);    
       
     }
   }
@@ -282,7 +289,7 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
 	auto stripClusterTimesMon       = Monitored::Scalar<float>("stripTrackTiming_layer_" + std::to_string(layer), stripClusterTimes);
 	auto stripClusterSizeMon        = Monitored::Scalar<unsigned int>("stripTrackClusterSize_layer_" + std::to_string(layer), csize);
 	fill("sTgcTiming", stripClusterSectorSidedMon, stripClusterTimesMon);
-	fill("padTriggerShifter", stripClusterSectorSidedMon, stripClusterSizeMon);
+	fill("padTriggerExpert", stripClusterSectorSidedMon, stripClusterSizeMon);
 
         ATH_MSG_DEBUG("Strip Timing: " << stripClusterTimes);        
         
@@ -376,7 +383,7 @@ void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const xAOD::MuonContain
       auto RelBCIDPerSectorMon = Monitored::Scalar<int>("relBCID_"+ side + "_sector_" + std::to_string(std::abs(sectorNumber)), triggerRelBCID);
       auto PhiIDPerSectorMon   = Monitored::Scalar<int>("phiIds_"  + side + "_sector_" + std::to_string(std::abs(sectorNumber)), triggerPhiIds);
       auto BandIDPerSectorMon  = Monitored::Scalar<int>("bandID_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), triggerBandIds);
-      fill("padTriggerShifter", RelBCIDPerSectorMon, PhiIDPerSectorMon, BandIDPerSectorMon);
+      fill("padTriggerExpert", RelBCIDPerSectorMon, PhiIDPerSectorMon, BandIDPerSectorMon);
    } // end Number of triggers loop
 
    for (size_t hits = 0; hits < numberOfHits; ++hits){
@@ -432,7 +439,7 @@ void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const xAOD::MuonContain
 
 	    auto hitRelBCIDPerSectorMon = Monitored::Scalar<int>("hitRelBCID_"+side+"_sector_"+std::to_string(std::abs(sectorNumbers)), hitRelBCID);
 	    auto hitpfebsPerSectorMon = Monitored::Scalar<int>("hitPfebs_"+side+"_sector_"+std::to_string(std::abs(sectorNumbers)), hitpfebs);
-	    fill("padTriggerShifter", hitRelBCIDPerSectorMon, hitpfebsPerSectorMon);
+	    fill("padTriggerExpert", hitRelBCIDPerSectorMon, hitpfebsPerSectorMon);
          } // end TrackStateOnSurface loop
       } // end Muon loop
     } // end NSW_PadTriggerData loop
@@ -519,13 +526,14 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
             std::string side = GeometricSectors::sTgcSide[isideIndex];
             
             auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", true);
-            
             auto rPosStripMon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerIndex), rPos);
             fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripMon, effQuestionMon);
+            //GlobalRGroup
             
             auto xPosStripmon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerIndex), xPos);
             auto yPosStripmon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerIndex), yPos);
             fill("padTriggerShifter", xPosStripmon, yPosStripmon, effQuestionMon);
+            //StripEfficiency
           } // End of loop over efficient layers
         } // End of efficient case
         

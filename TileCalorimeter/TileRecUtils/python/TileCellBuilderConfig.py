@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile Cell builder tool"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, BeamType
 from TileConfiguration.TileConfigFlags import TileRunType
 from AthenaConfiguration.Enums import ProductionStep
 
@@ -22,8 +22,9 @@ def TileCellBuilderCfg(flags, mergeChannels=True, **kwargs):
     kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer)
     kwargs.setdefault('SkipGain', -1) # Never skip any gain by default
 
-    kwargs.setdefault('MBTSContainer', 'MBTSContainer' if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
-    kwargs.setdefault('E4prContainer', 'E4prContainer' if flags.GeoModel.Run is LHCPeriod.Run2 else "")
+    testBeam = flags.Beam.Type is BeamType.TestBeam
+    kwargs.setdefault('MBTSContainer', 'MBTSContainer' if not testBeam and flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
+    kwargs.setdefault('E4prContainer', 'E4prContainer' if not testBeam and flags.GeoModel.Run is LHCPeriod.Run2 else "")
 
     kwargs['mergeChannels'] = mergeChannels
     if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
@@ -35,8 +36,9 @@ def TileCellBuilderCfg(flags, mergeChannels=True, **kwargs):
     from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
     acc.merge( TileDQstatusAlgCfg(flags) )
 
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    acc.merge(LArGMCfg(flags))
+    if not testBeam:
+        from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+        acc.merge(LArGMCfg(flags))
 
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
