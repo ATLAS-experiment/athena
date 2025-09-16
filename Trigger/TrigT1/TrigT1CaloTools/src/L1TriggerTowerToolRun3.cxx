@@ -24,8 +24,7 @@
 
 #include <cstdint>
 #include <tuple>
-#include <boost/range/adaptor/reversed.hpp>
-using namespace boost::adaptors;
+#include <ranges>
 
 namespace LVL1 
 {
@@ -438,7 +437,7 @@ void L1TriggerTowerToolRun3::fir(const std::vector<int> &digits, const L1CaloCoo
           not most natural for processing vectors in software. So reverse order
           here before using */
       firCoeffs.reserve(hwCoeffs->size()); // avoid frequent reallocations
-      for (auto &i : reverse(*hwCoeffs)) {
+      for (auto &i : std::views::reverse(*hwCoeffs)) {
 	firCoeffs.push_back(i);	
 	  }
     } else ATH_MSG_WARNING( "::fir: No L1CaloPprConditions found" );
