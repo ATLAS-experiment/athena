@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgMessaging/MessageCheck.h"
@@ -79,7 +79,12 @@ namespace TrigCompositeUtils {
               << "From A:" << A.dataID() << ":" << A.index() << " Dump:" << std::endl << *start << std::endl
                               << "From B:" << B.dataID() << ":" << B.index() << " Dump:" << std::endl << *(info.source));
           }
-          info.decisions.insert(ids.begin(), ids.end());
+          if (behaviour & TrigDefs::fillDecisions) {
+            if (info.decisions.has_value())
+              info.decisions->insert(ids.begin(), ids.end());
+            else
+              info.decisions.emplace(ids.begin(), ids.end());
+          }
           duplicate = true;
         }
       }
@@ -87,7 +92,7 @@ namespace TrigCompositeUtils {
         links.emplace_back(start, featureLink);
     }
     // Early exit
-    if (linkFound && behaviour == TrigDefs::lastFeatureOfType) {
+    if (linkFound && (behaviour & TrigDefs::lastFeatureOfType)) {
       return;
     }
     // If not Early Exit, then recurse
@@ -157,7 +162,7 @@ namespace TrigCompositeUtils {
   const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType(
     const NavGraph& navGraph,
     const std::string& containerSGKey,
-    const bool lastFeatureOfType,
+    const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer chainIDs) {
 
@@ -170,7 +175,7 @@ namespace TrigCompositeUtils {
         fullyExploredFrom,
         finalNode,
         containerSGKey,
-        lastFeatureOfType,
+        behaviour,
         navElementLinkKey,
         chainIDs);
     }
@@ -185,12 +190,10 @@ namespace TrigCompositeUtils {
     std::set<const NavGraphNode*>& fullyExploredFrom,
     const NavGraphNode* navGraphNode, 
     const std::string& containerSGKey,
-    const bool lastFeatureOfType,
+    const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer chainIDs) {
 
-
- 
     const Decision* decisionObj = navGraphNode->node();
     const Decision* decisionObjChild = (navGraphNode->children().size() == 1 ? navGraphNode->children().at(0)->node() : nullptr);
     const std::vector<DecisionID> &ids = decisionIDs(decisionObj);
@@ -277,13 +280,18 @@ namespace TrigCompositeUtils {
         if (vecIt->state == ActiveState::INACTIVE and state == ActiveState::ACTIVE) {
           vecIt->state = ActiveState::ACTIVE;
         }
-        // Update the set of passed IDs
-        vecIt->decisions.insert(ids.begin(), ids.end());
+        if (behaviour & TrigDefs::fillDecisions) {
+          // Update the set of passed IDs
+          if (vecIt->decisions.has_value())
+            vecIt->decisions->insert(ids.begin(), ids.end());
+          else
+            vecIt->decisions.emplace(ids.begin(), ids.end());
+        }
       }
     }
 
     // Stop processing this path through the navigation if the lastFeatureOfType flag is set
-    if (featureLinks.size() && lastFeatureOfType) {
+    if (featureLinks.size() && (behaviour & TrigDefs::lastFeatureOfType)) {
       return;
     }
 
@@ -298,7 +306,7 @@ namespace TrigCompositeUtils {
         fullyExploredFrom,
         seedNavNode,
         containerSGKey,
-        lastFeatureOfType,
+        behaviour,
         navElementLinkKey,
         chainIDs);
     }
