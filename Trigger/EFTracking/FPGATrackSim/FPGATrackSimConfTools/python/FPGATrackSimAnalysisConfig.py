@@ -726,15 +726,11 @@ def FPGATrackSimF150FlagCfg(flags):
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
     
-    flags.Concurrency.NumThreads=4
-    flags.Concurrency.NumConcurrentEvents=1
-    flags.Concurrency.NumProcs=0
+    FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg(flags)
     
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
-    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
-    FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg(flags)
     flags.Trigger.FPGATrackSim.tracking = False
     flags.Trigger.FPGATrackSim.Hough.genScan = True
     flags.Trigger.FPGATrackSim.convertSPs = True
@@ -753,6 +749,8 @@ def FPGATrackSimSeedingCfg(flags):
     
     from FPGATrackSimSeeding.FPGATrackSimSeedingConfig import FPGATrackSimSeedingCfg
     acc.merge(FPGATrackSimSeedingCfg(flags))
+    if (flags.Trigger.FPGATrackSim.writeAdditionalOutputData):
+        acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
     
     return acc
 

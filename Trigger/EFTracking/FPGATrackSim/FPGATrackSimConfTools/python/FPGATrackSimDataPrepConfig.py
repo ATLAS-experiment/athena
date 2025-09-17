@@ -602,12 +602,7 @@ def FPGATrackSimDataPrepFlagCfg(flags): # to be used in the Reco_tf configuratio
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
     
-    flags.Concurrency.NumThreads=1
-    flags.Concurrency.NumConcurrentEvents=1
-    flags.Concurrency.NumProcs=0
-    
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
-    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
     flags = FPGATrackSimRegionFlagCfg(flags)
