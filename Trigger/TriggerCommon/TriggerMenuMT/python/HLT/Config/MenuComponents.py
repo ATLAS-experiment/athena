@@ -597,10 +597,11 @@ class ChainStep(object):
     legID is taken from the ChainDict;
     """
     
-    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = functools.partial(ComboHypoCfg) , comboToolConfs = None, isEmpty = False, createsGhostLegs = False):
+    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = None, comboToolConfs = None, isEmpty = False, createsGhostLegs = False):
 
         # default mutable values must be initialized to None
         if SequenceGens is None:  SequenceGens = []
+        if comboHypoCfg is None: comboHypoCfg = functools.partial(ComboHypoCfg)
         if comboToolConfs is None: comboToolConfs = []
         assert chainDicts is not None,"Error building a ChainStep without chainDicts"
 

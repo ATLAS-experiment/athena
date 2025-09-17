@@ -22,11 +22,11 @@ def writeEmulationFiles(data):
 
 class makeChainStep(object):
     """Used to store the step info, regardless of the chainDict"""
-    def __init__(self, name, seq=[], comboHypoCfg=functools.partial(ComboHypoCfg) , comboToolConfs=[], chainDicts=None, isEmpty=False):
+    def __init__(self, name, seq=None, comboHypoCfg=None, comboToolConfs=None, chainDicts=None, isEmpty=False):
         self.name = name
-        self.seq = seq
-        self.comboToolConfs = comboToolConfs
-        self.comboHypoCfg = comboHypoCfg
+        self.seq = seq if seq is not None else []
+        self.comboHypoCfg = comboHypoCfg if comboHypoCfg is not None else functools.partial(ComboHypoCfg)
+        self.comboToolConfs = comboToolConfs if comboToolConfs is not None else []
         self.chainDicts = chainDicts
         self.isEmpty = isEmpty
     
