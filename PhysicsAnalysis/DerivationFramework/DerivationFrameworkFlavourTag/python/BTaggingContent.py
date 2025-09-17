@@ -97,7 +97,7 @@ BTaggingLargeRAux += _getVarsXbb("GN2Xv01")
 # please contact the analsyis contacts before removing (but please remove at some point)
 BTaggingLargeRAux += _getVarsXbb("GN2Xv02")
 BTaggingLargeRAux += _getVarsXbb("GN2XTauV00", extra_flavours=['htautauhad'])
-BTaggingLargeRAux += [f'GN3XV00_p{x}' for x in ["htautauhad", "hbb", "hcc", "top", "qcdbb", "qcdbx", "qcdcx", "qcdll", "Wqq"]]
+BTaggingLargeRAux += [f'GN3XPV01_p{x}' for x in ["htautauhad", "hbb", "hcc", "top", "qcdbb", "qcdbx", "qcdcx", "qcdll", "Wqq"]]
 
 # standard outputs for Run 4
 BTaggingRun4Aux = [
