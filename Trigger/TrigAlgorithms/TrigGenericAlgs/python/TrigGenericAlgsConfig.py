@@ -144,7 +144,7 @@ def L1CorrelationMonitoringCfg(flags):
     # delta BC × CTPID occupancy maps (TBP)
     mon.defineHistogram(
         'DeltaBCAll,CTPIDAll;MistimeMap_TBP',
-        path='EXPERT', type='TH2I',
+        path='EXPERT', type='TH2F',
         title='TBP occupancy vs delta BC and CTPID;delta BC (relative to L1A);CTPID',
         xbins=2*maxBC+1, xmin=-maxBC-0.5, xmax=maxBC+0.5,
         ybins=512,      ymin=-0.5,        ymax=511.5
@@ -153,64 +153,64 @@ def L1CorrelationMonitoringCfg(flags):
     # TAP
     mon.defineHistogram(
         'DeltaBCAll_TAP,CTPIDAll_TAP;MistimeMap_TAP',
-        path='EXPERT', type='TH2I',
+        path='EXPERT', type='TH2F',
         title='TAP occupancy vs delta BC and CTPID;delta BC (relative to L1A);CTPID',
         xbins=2*maxBC+1, xmin=-maxBC-0.5, xmax=maxBC+0.5,
         ybins=512,      ymin=-0.5,        ymax=511.5
     )
 
-    # 512×512 pair maps: CTPID(delta BC=0) vs CTPID(delta BC=±1, ±2)
+    # 512×512 pair maps: CTPID(BC=0) vs CTPID(BC=±1, ±2)
     mon.defineHistogram(
         'CTPID0tbp_m2,CTPIDtbp_m2;PairMap_TBP_DeltaBCm2',
-        path='EXPERT', type='TH2I',
-        title='TBP: CTPID(delta BC=0) vs CTPID(delta BC=-2);CTPID at delta BC=0;CTPID at delta BC=-2',
+        path='EXPERT', type='TH2F',
+        title='TBP: CTPID at BC 0 vs CTPID at BC=-2;CTPID at BC=0;CTPID at BC=-2',
         xbins=512, xmin=-0.5, xmax=511.5,
         ybins=512, ymin=-0.5, ymax=511.5
     )
     mon.defineHistogram(
         'CTPID0tbp_m1,CTPIDtbp_m1;PairMap_TBP_DeltaBCm1',
-        path='EXPERT', type='TH2I',
-        title='TBP: CTPID(delta BC=0) vs CTPID(delta BC=-1);CTPID at delta BC=0;CTPID at delta BC=-1',
+        path='EXPERT', type='TH2F',
+        title='TBP: CTPID at BC 0 vs CTPID at BC=-1;CTPID at BC=0;CTPID at BC=-1',
         xbins=512, xmin=-0.5, xmax=511.5,
         ybins=512, ymin=-0.5, ymax=511.5
     )
     mon.defineHistogram(
         'CTPID0tbp_p1,CTPIDtbp_p1;PairMap_TBP_DeltaBCp1',
-        path='EXPERT', type='TH2I',
-        title='TBP: CTPID(delta BC=0) vs CTPID(delta BC=+1);CTPID at delta BC=0;CTPID at delta BC=+1',
+        path='EXPERT', type='TH2F',
+        title='TBP: CTPID at BC 0 vs CTPID at BC=+1;CTPID at BC=0;CTPID at BC=+1',
         xbins=512, xmin=-0.5, xmax=511.5,
         ybins=512, ymin=-0.5, ymax=511.5
     )
     mon.defineHistogram(
         'CTPID0tbp_p2,CTPIDtbp_p2;PairMap_TBP_DeltaBCp2',
-        path='EXPERT', type='TH2I',
-        title='TBP: CTPID(delta BC=0) vs CTPID(delta BC=+2);CTPID at delta BC=0;CTPID at delta BC=+2',
+        path='EXPERT', type='TH2F',
+        title='TBP: CTPID at BC 0 vs CTPID at BC=+2;CTPID at BC=0;CTPID at BC=+2',
         xbins=512, xmin=-0.5, xmax=511.5,
         ybins=512, ymin=-0.5, ymax=511.5
     )
     # 512×512 TAP pair maps
     mon.defineHistogram(
         'CTPID0tap_m2,CTPIDtap_m2;PairMap_TAP_DeltaBCm2',
-        path='EXPERT', type='TH2I',
-        title='TAP: CTPID(delta BC=0) vs CTPID(delta BC=-2);CTPID at delta BC=0;CTPID at delta BC=-2',
+        path='EXPERT', type='TH2F',
+        title='TAP: CTPID at BC 0 vs CTPID at BC=-2;CTPID at BC=0;CTPID at BC=-2',
         xbins=512, xmin=-0.5, xmax=511.5, ybins=512, ymin=-0.5, ymax=511.5
     )
     mon.defineHistogram(
         'CTPID0tap_m1,CTPIDtap_m1;PairMap_TAP_DeltaBCm1',
-        path='EXPERT', type='TH2I',
-        title='TAP: CTPID(delta BC=0) vs CTPID(delta BC=-1);CTPID at delta BC=0;CTPID at delta BC=-1',
+        path='EXPERT', type='TH2F',
+        title='TAP: CTPID at BC 0 vs CTPID at BC=-1;CTPID at BC=0;CTPID at BC=-1',
         xbins=512, xmin=-0.5, xmax=511.5, ybins=512, ymin=-0.5, ymax=511.5
     )
     mon.defineHistogram(
         'CTPID0tap_p1,CTPIDtap_p1;PairMap_TAP_DeltaBCp1',
-        path='EXPERT', type='TH2I',
-        title='TAP: CTPID(delta BC=0) vs CTPID(delta BC=+1);CTPID at delta BC=0;CTPID at delta BC=+1',
+        path='EXPERT', type='TH2F',
+        title='TAP: CTPID at BC 0 vs CTPID at BC=+1;CTPID at BC=0;CTPID at BC=+1',
         xbins=512, xmin=-0.5, xmax=511.5, ybins=512, ymin=-0.5, ymax=511.5
     )
     mon.defineHistogram(
         'CTPID0tap_p2,CTPIDtap_p2;PairMap_TAP_DeltaBCp2',
-        path='EXPERT', type='TH2I',
-        title='TAP: CTPID(delta BC=0) vs CTPID(delta BC=+2);CTPID at delta BC=0;CTPID at delta BC=+2',
+        path='EXPERT', type='TH2F',
+        title='TAP: CTPID at BC 0 vs CTPID at BC=+2;CTPID at BC=0;CTPID at BC=+2',
         xbins=512, xmin=-0.5, xmax=511.5, ybins=512, ymin=-0.5, ymax=511.5
     )
 
