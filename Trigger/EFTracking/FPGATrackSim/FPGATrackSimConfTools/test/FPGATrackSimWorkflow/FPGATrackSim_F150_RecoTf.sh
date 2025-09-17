@@ -28,6 +28,7 @@ nEvents="-1"
 skipCheck=0
 doSeeds="0"
 skipEvents=0
+generateTvInputs="0"
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -39,6 +40,7 @@ while [ $# -ge 1 ];do
         -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -k  | --doSeeds )       if [ $# -lt 1 ] ; then usage ; fi ; doSeeds="1" ;;
+        -g  | --generateTvInputs ) if [ $# -lt 1 ] ; then usage ; fi ; generateTvInputs="1" ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -67,14 +69,24 @@ fi
 export ATHENA_CORE_NUMBER=1
 source FPGATrackSim_CommonEnv.sh
 ## running reconstruction
+
+# Prepare preExec flags
+preExecFlags="flags.Tracking.doPixelDigitalClustering=True;\
+               flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy=2;\
+               flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
+               flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
+               flags.Trigger.FPGATrackSim.sampleType='skipTruth';"
+
+if [ "$generateTvInputs" == "1" ]; then
+    preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.writeAdditionalOutputData=True;\
+                   flags.Trigger.FPGATrackSim.doOverlapRemoval=False;"
+fi
+
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF150Flags,FPGATrackSimConfTools.FPGATrackSimAnalysisConfig.FPGATrackSimF150FlagCfg' \
-    --preExec "flags.Tracking.doPixelDigitalClustering=True;\
-               flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy=2;\
-               flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
-               flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
+    --preExec "${preExecFlags}" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \
