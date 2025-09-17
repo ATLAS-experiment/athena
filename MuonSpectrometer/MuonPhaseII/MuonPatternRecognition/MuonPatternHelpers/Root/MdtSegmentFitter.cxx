@@ -16,12 +16,9 @@
 #include <format>
 
 namespace {
-    constexpr double c_inv = 1. / Gaudi::Units::c_light;
     /* Cut off value for the determinant. Hessian matrices with a determinant smaller than this 
        are considered to be invalid */
     constexpr double detCutOff = 1.e-8;
-
-    
 }
 
 namespace MuonR4::SegmentFit{
