@@ -382,7 +382,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('parMin', [-1000, -1000, 0.0, 0.0, -10])
     cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
-    cf.addFlag('keepNInnerHits', -1)
+    cf.addFlag('keepHitsStrategy', -1)
     return cf
 
 def createSecondStageFPGATrackSimConfigFlags():

@@ -192,32 +192,25 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
   // copy roads to output vector
   roads.reserve(m_roads.size());
 
-  // if we run seeding with this we may choose to only keep N hits. Note that for now we only can choose to keep N inner hits, in the future
-  // we might consider keeping other combinations
-  if (m_keepNInnerHits.value() > 0) { // if less than zero this is not enabled
-    for (auto & r : m_roads) {
-      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> hits = r->getAllHits();
-      int n = std::min(m_keepNInnerHits.value(), static_cast<int>(hits.size()));
+  if (m_keepHitsStrategy > 0) {
+    for (std::unique_ptr<FPGATrackSimRoad>& r : m_roads) {
+      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& hits = r->getAllHits();
+      layer_bitmask_t hitmask = r->getHitLayers();
+      std::vector<unsigned> toUse = PickHitsToUse(hitmask);
 
-      std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> vec;
-      for (auto & temp : hits) {
-	      for (auto & hit : temp) { // in reality this is only size one in genscan
-	        if (hit->isReal() && hit->isPixel()) {
-	          std::vector<std::shared_ptr<const FPGATrackSimHit>> tempvec;
-	          tempvec.push_back(hit);
-	          vec.push_back(tempvec);
-	        }
-	      }
-	      if ((int)(vec.size()) == n) {
-	       break;
-	      }
+      std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> vec(5); // even if not all layers have hits, they need to be in the vector as empty vectors
+      for (size_t ihit = 0; ihit < toUse.size(); ++ihit) {
+        unsigned int layer = toUse[ihit];
+        if (layer >= hits.size() || hits[layer].empty()) {
+          ATH_MSG_ERROR("Hit index out of range in keepHitsStrategy: layer=" << layer << ", hits.size()=" << hits.size());
+          return StatusCode::FAILURE;
+        }
+        vec[ihit].push_back(hits[layer][0]);
       }
-	             
-      // then resize back so the vector is correct
-      vec.resize(m_binnedhits->getNLayers());
       r->setHits(std::move(vec));
     }
   }
+
   
   for (auto & r : m_roads) roads.push_back(std::move(r));
   ATH_MSG_DEBUG("Roads = " << roads.size());
@@ -880,4 +873,100 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
   chi2 = std::sqrt(m_etaWeight * eta_chi2 * eta_chi2 + m_phiWeight * phi_chi2 * phi_chi2);
 
   return inBin;
+}
+
+std::vector<unsigned> FPGATrackSimGenScanTool::PickHitsToUse(layer_bitmask_t hitmask) const
+{
+  std::vector<unsigned> toUse;
+  switch (m_keepHitsStrategy) {
+    case 1: // try and pick hits furthest apart, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,2,3};
+        }
+      }
+      break;
+    case 2: // pick inner hits, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,1,2};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,2,3};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,3};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,1,3};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,1,2};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,1,2};
+        }
+      }
+      break;
+    case 3: // pick outer hits, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {1,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {1,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {1,2,3};
+        }
+      }
+      break;
+    case 4: // keep 4 hits, choose middle one to drop if necessary
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,1,2,3};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,2,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,3,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,1,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,1,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,1,2,3};
+        }
+      }
+      break;
+  }
+  return toUse;
 }
