@@ -8,25 +8,21 @@
 #include <MuonTruthHelpers/MuonSimHitHelpers.h>
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
-#include "MuonIdHelpers/MmIdHelper.h"
+
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include "MuonPatternHelpers/CombinatorialSeedSolver.h"
 #include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
-#include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 
 #include "TruthUtils/HepMCHelpers.h"
 
+#include "Acts/Seeding/CombinatorialSeedSolver.hpp"
+
 #include <ranges>
-#include <vector>
-#include <unordered_set>
-#include <nlohmann/json.hpp>
 #include <format>
-#include <fstream> 
 
-
+using namespace Acts::Experimental::CombinatorialSeedSolver;
 namespace {
     inline const MuonGMR4::StripDesign& getDesign(const MuonR4::SpacePoint& sp) {
         if (sp.type() == xAOD::UncalibMeasType::MMClusterType) {
@@ -42,7 +38,6 @@ namespace {
                     return re->wireDesign(prd->measurementHash());
                 case sTgcIdHelper::Pad:
                     return re->padDesign(prd->measurementHash());
-
             }
         }
         THROW_EXCEPTION("Invalid space point for design retrival "<<sp.msSector()->idHelperSvc()->toString(sp.identify()));
@@ -59,7 +54,7 @@ namespace {
 
 namespace MuonR4 {
 
-using namespace SegmentFitHelpers;
+using namespace SegmentFit;
 constexpr unsigned int minLayers{4};
 
 StatusCode CombinatorialNSWSeedFinderAlg::initialize() {
@@ -110,8 +105,8 @@ inline CombinatorialNSWSeedFinderAlg::HitWindow
                                                      const Amg::Vector3D& dirEstUp,
                                                      const Amg::Vector3D& dirEstDn) const{
 
-    const Amg::Vector3D estPlaneArrivalUp = extrapolateToPlane(beamSpotPos, dirEstUp, testHit);
-    const Amg::Vector3D estPlaneArrivalDn = extrapolateToPlane(beamSpotPos, dirEstDn, testHit); 
+    const Amg::Vector3D estPlaneArrivalUp = SeedingAux::extrapolateToPlane(beamSpotPos, dirEstUp, testHit);
+    const Amg::Vector3D estPlaneArrivalDn = SeedingAux::extrapolateToPlane(beamSpotPos, dirEstDn, testHit); 
 
     bool below{true}, above{true};
     switch (classifyStrip(testHit)) {
@@ -120,8 +115,8 @@ inline CombinatorialNSWSeedFinderAlg::HitWindow
         case V:{
             const double halfLength = 0.5* stripHalfLength(testHit);
             /// Calculate the strip edges
-            const Amg::Vector3D leftEdge  = testHit.positionInChamber() - halfLength * testHit.directionInChamber();
-            const Amg::Vector3D rightEdge = testHit.positionInChamber() + halfLength * testHit.directionInChamber();
+            const Amg::Vector3D leftEdge  = testHit.localPosition() - halfLength * testHit.sensorDirection();
+            const Amg::Vector3D rightEdge = testHit.localPosition() + halfLength * testHit.sensorDirection();
 
             /// Check whether the both edges are below the lower estimated muon arrival
             below = estPlaneArrivalDn.y() > std::max(leftEdge.y(), rightEdge.y());
@@ -130,7 +125,7 @@ inline CombinatorialNSWSeedFinderAlg::HitWindow
             break; 
         } case X: {
             /// No extrapolation needed
-            const double hY = testHit.positionInChamber().y();
+            const double hY = testHit.localPosition().y();
             below = estPlaneArrivalDn.y() > hY;
             /// Analogous check for the upper edge
             above = estPlaneArrivalUp.y() < hY;
@@ -201,14 +196,14 @@ void CombinatorialNSWSeedFinderAlg::constructPrelimnarySeeds(const Amg::Vector3D
         }
         const SpacePoint* hit0 = combinatoricLayers[0].get()[iterLay0];
         /// Construct the beamspot to first hit connection to guestimate the angle
-        const Amg::Vector3D initSeedDir{(beamSpot - hit0->positionInChamber()).unit()};
+        const Amg::Vector3D initSeedDir{(beamSpot - hit0->localPosition()).unit()};
         const Amg::Vector3D dirEstUp = Amg::dirFromAngles(initSeedDir.phi(), initSeedDir.theta() - m_windowTheta); 
         const Amg::Vector3D dirEstDn = Amg::dirFromAngles(initSeedDir.phi(), initSeedDir.theta() + m_windowTheta); 
 
         ATH_MSG_VERBOSE("Reference hit: "<<m_idHelperSvc->toString(hit0->identify())
-                      <<", position: "<<Amg::toString(hit0->positionInChamber())
+                      <<", position: "<<Amg::toString(hit0->localPosition())
                       <<", seed dir: "<<Amg::toString(initSeedDir)
-                      <<", seed plane: "<<Amg::toString(extrapolateToPlane(beamSpot, initSeedDir, *hit0)));
+                      <<", seed plane: "<<Amg::toString(SeedingAux::extrapolateToPlane(beamSpot, initSeedDir, *hit0)));
         /** Apply cut window on theta of the seed. */
         for( iterLay1 = startLay1; iterLay1 <  combinatoricLayers[1].get().size() ; ++iterLay1){
             TEST_HIT_CORRIDOR(1, iterLay1, startLay1);
@@ -234,11 +229,11 @@ CombinatorialNSWSeedFinderAlg::HitVec
     
     //the hits we need to return to extend the segment seed
     HitVec combinatoricHits;
-    
+
     //the stripHitsLayers are already the unused ones - only use for the extension
     for (std::size_t i = 0; i < extensionLayers.size(); ++i) {
         const HitVec& layer{extensionLayers[i].get()};
-        const Amg::Vector3D extrapPos = extrapolateToPlane(startPos, direction, *layer.front());
+        const Amg::Vector3D extrapPos = SeedingAux::extrapolateToPlane(startPos, direction, *layer.front());
 
         unsigned int indexOfHit = layer.size() + 1;
         unsigned int triedHit{0};
@@ -249,8 +244,8 @@ CombinatorialNSWSeedFinderAlg::HitVec
             if (usedHits[i].get().at(j)) {
                 continue;
             }
-            auto hit = layer.at(j);   
-            double pull = std::sqrt(SegmentFitHelpers::chiSqTermStrip(extrapPos, direction, *hit, msg()));
+            auto hit = layer.at(j);
+            const double pull = std::sqrt(SeedingAux::chi2Term(extrapPos, direction, *hit));
             ATH_MSG_VERBOSE("Trying extension with hit " << m_idHelperSvc->toString(hit->identify()));
            
             //find the hit with the minimum pull (check at least one hit after we have increasing pulls)
@@ -271,8 +266,8 @@ CombinatorialNSWSeedFinderAlg::HitVec
         if (minPull < m_minPullThreshold) {
             const auto* bestCand = layer.at(indexOfHit);
             ATH_MSG_VERBOSE("Extension successfull - hit" << m_idHelperSvc->toString(bestCand->identify())
-                          <<", pos: "<<Amg::toString(bestCand->positionInChamber())
-                          <<", dir: "<<Amg::toString(bestCand->directionInChamber())<<" found with pull "<<minPull);
+                          <<", pos: "<<Amg::toString(bestCand->localPosition())
+                          <<", dir: "<<Amg::toString(bestCand->sensorDirection())<<" found with pull "<<minPull);
             combinatoricHits.push_back(bestCand);
         }
     }
@@ -286,15 +281,14 @@ std::unique_ptr<SegmentSeed>
                                                     const HitLaySpan_t& extensionLayers,
                                                     const UsedHitSpan_t& usedHits) const {
 
-    HitVec hits{initialSeed.begin(), initialSeed.end()};
-    std::array<double, 4> params = CombinatorialSeedSolver::defineParameters(bMatrix, hits);
+    std::array<double, 4> params = defineParameters(bMatrix, initialSeed);
 
-    const auto [segPos, direction] = CombinatorialSeedSolver::seedSolution(hits, params);
+    const auto [segPos, direction] = seedSolution(initialSeed, params);
 
     // check the consistency of the parameters - expected to lay in the strip's
     // length
     for (std::size_t i = 0; i < 4; ++i) {
-        const double halfLength = stripHalfLength(*hits[i]);
+        const double halfLength = stripHalfLength(*initialSeed[i]);
         
         if (std::abs(params[i]) > halfLength) {
             ATH_MSG_VERBOSE("Seed Rejection: Invalid seed - outside of the strip's length");
@@ -310,6 +304,7 @@ std::unique_ptr<SegmentSeed>
 
     // extend the seed to the segment -- include hits from the other layers too
     auto extendedHits = extendHits(segPos, direction, extensionLayers, usedHits);
+    HitVec hits{initialSeed.begin(),initialSeed.end()};
     hits.insert(hits.end(), extendedHits.begin(), extendedHits.end());
     return std::make_unique<SegmentSeed>(tanTheta, interceptY, tanPhi,
                                          interceptX, hits.size(),
@@ -349,8 +344,7 @@ CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, con
                                              reEle->localToGlobalTrans(gctx, simHit->identify());
             const Amg::Vector3D hitPos = toChamb * xAOD::toEigen(simHit->localPosition());
             const Amg::Vector3D hitDir = toChamb.linear() * xAOD::toEigen(simHit->localDirection());
-        
-            const double pull = std::sqrt(SegmentFitHelpers::chiSqTermStrip(hitPos,hitDir, *sp, msgStream()));
+            const double pull = std::sqrt(SeedingAux::chi2Term(hitPos, hitDir, *sp));
             const double pull2 = (mmClust->localPosition<1>().x() - simHit->localPosition().x()) / std::sqrt(mmClust->localCovariance<1>().x());
             primitives.push_back(MuonValR4::drawLabel(std::format("ml: {:1d}, gap: {:1d}, {:}, pull: {:.2f} / {:.2f}", reEle->multilayer(), mmClust->gasGap(), 
                                 !design.hasStereoAngle() ? "X" : design.stereoAngle() >0 ? "U": "V",pull, pull2),legX,legY,14));
@@ -374,7 +368,7 @@ CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, con
                 seedHits[2] = stripHitsLayers[k].front();
                 for (std::size_t l = k + 1; l < layerSize; ++l) {
                     seedHits[3] = stripHitsLayers[l].front();
-                    AmgSymMatrix(2) bMatrix = CombinatorialSeedSolver::betaMatrix(seedHits);                   
+                    AmgSymMatrix(2) bMatrix = betaMatrix(seedHits);                   
                     if (std::abs(bMatrix.determinant()) < 1.e-6) {
                         continue;
                     }
@@ -448,8 +442,8 @@ StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const
         if (msgLvl(MSG::VERBOSE)) {
             for(const auto& hitMax : max->getHitsInMax()){
                 ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitMax->identify())<<", "
-                                <<Amg::toString(hitMax->positionInChamber())<<", dir: "
-                                <<Amg::toString(hitMax->directionInChamber()));
+                                <<Amg::toString(hitMax->localPosition())<<", dir: "
+                                <<Amg::toString(hitMax->sensorDirection()));
             }
         }
         for (auto &seed : seeds) {
@@ -461,7 +455,7 @@ StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const
         
                 for(const auto& hit : seed->getHitsInMax()){
                     sstr<<" *** Hit "<<m_idHelperSvc->toString(hit->identify())<<", "
-                        << Amg::toString(hit->positionInChamber())<<", dir: "<<Amg::toString(hit->directionInChamber())<<std::endl;
+                        << Amg::toString(hit->localPosition())<<", dir: "<<Amg::toString(hit->sensorDirection())<<std::endl;
                 }
                 ATH_MSG_VERBOSE(sstr.str());
             }

@@ -92,8 +92,6 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::VectorBranch<uint16_t>&        m_spoint_tdc{m_tree.newVector<uint16_t>("tdc")};
 
     MuonVal::VectorBranch<float>&           m_spoint_covX{m_tree.newVector<float>("covX")};
-    MuonVal::VectorBranch<float>&           m_spoint_covXY{m_tree.newVector<float>("covXY")};
-    MuonVal::VectorBranch<float>&           m_spoint_covYX{m_tree.newVector<float>("covYX")};
     MuonVal::VectorBranch<float>&           m_spoint_covY{m_tree.newVector<float>("covY")};
     MuonVal::VectorBranch<float>&           m_spoint_driftR{m_tree.newVector<float>("driftR")};
 

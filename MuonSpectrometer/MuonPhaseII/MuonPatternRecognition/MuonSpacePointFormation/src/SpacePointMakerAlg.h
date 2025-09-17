@@ -35,95 +35,35 @@ namespace MuonR4{
             StatusCode finalize() override;
         
         private:
-            /** @brief Returns the transform from the attached Muon chamber frame to the sector frame
-             * @param gctx: Geometry context to calculate the relative alignment between chamber & measurement
-             * @param meas: Uncalibrated muon measurement */
-            template<class MeasType> Amg::Transform3D toChamberTransform(const ActsGeometryContext& gctx, 
-                                                                         const Amg::Transform3D& sectorTrans,
-                                                                         const MeasType* meas) const;
-            /** @brief Returns the position of the uncalibrated muon measurement in the sector frame
-             * @param meas: Uncalibrated muon measurement
-             * @param toChamberTrans: transform from the attached Muon chamber frame to the sector frame */
-            template<class MeasType> Amg::Vector3D positionInChamber(const MeasType* meas,
-                                                                     const Amg::Transform3D& toChamberTrans) const;
-            /** @brief Returns the direction of the measurement channel in the sector frame
-             * @param meas: Uncalibrated muon measurement
-             * @param toChamberTrans: transform from the attached Muon chamber frame to the sector frame */
-            template<class MeasType> Amg::Vector3D channelDirInChamber(const MeasType* meas,
-                                                                       const Amg::Transform3D& toChamberTrans) const;
-            /** @brief Returns the direction, in the sector frame, of the precision axis of the measurement, i.e. 
-             * the vector pointing to the next strip or tube 
-             * @param meas: Uncalibrated muon measurement
-             * @param toChamberTrans: transform from the attached Muon chamber frame to the sector frame */
-            template<class MeasType> Amg::Vector3D channelNormalInChamber(const MeasType* meas,
-                                                                          const Amg::Transform3D& toChamberTrans) const;
-            /** @brief Helper function to calculate the covariance for spacepoints having only one measurement 
-             * @param primaryMeas: Uncalibrated muon measurement
-             * @param dir: direction of the measurement channel in the sector frame
-             * @param nor: direction of the precision axis of the measurement in the sector frame */
-            template<class MeasType> AmgSymMatrix(2) computeCov(const MeasType* primaryMeas,
-                                                                const Amg::Vector3D& dir,
-                                                                const Amg::Vector3D& nor) const;
-            /** @brief Helper function to calculate the covariance for spacepoints having two measurements
-             * @param primaryMeas: Primary uncalibrated muon measurement
-             * @param secondaryMeas: Secondary uncalibrated muon measurement
-             * @param nor1: direction of the precision axis of the primary measurement in the sector frame
-             * @param nor2: direction of the precision axis of the secondary measurement in the sector frame */                                                    
-            AmgSymMatrix(2) computeCov(const xAOD::UncalibratedMeasurement* primaryMeas,
-                                       const xAOD::UncalibratedMeasurement* secondaryMeas,
-                                       const Amg::Vector3D& nor1,
-                                       const Amg::Vector3D& nor2) const;
-            /** @brief Helper function that creates the spacepoint and populates it, when having one measurement
-             * @param pointColl: Collection of spacepoints where the new one is being push
-             * @param primaryMeas: Uncalibrated muon measurement
-             * @param toChamberTrans: transform from the attached Muon chamber frame to the sector frame */
-            template <class MeasType> void fillSpacePoint (std::vector<SpacePoint>& pointColl,
-                                                          const MeasType* primaryMeas,
-                                                          const Amg::Transform3D& toChamberTrans) const;
-            /** @brief Helper function that creates the spacepoint and populates it, when having two measurement
-             * @param pointColl: Collection of spacepoints where the new one is being push
-             * @param primaryMeas: Primary uncalibrated muon measurement
-             * @param secondaryMeas: Secondary uncalibrated muon measurement
-             * @param toChamberTrans_eta: transform from the attached Muon chamber frame to the sector frame for the primary meas
-             * @param toChamberTrans_phi: transform from the attached Muon chamber frame to the sector frame for the secondary meas */
-            template <class MeasType> void fillSpacePoint (std::vector<SpacePoint>& pointColl,
-                                                           const MeasType* primaryMeas,
-                                                           const MeasType* secondaryMeas,
-                                                           const Amg::Transform3D& toChamberTrans_eta, 
-                                                           const Amg::Transform3D& toChamberTrans_phi) const;
-            
             /** @brief Helper class to keep track of how many eta+phi, eta and phi only space points are built
              *         in various detector regions. The SpacePointStatistics split the counts per muon station layer,
              *         i.e., BarrelInner, BarrelMiddle, EndCapInner, etc. are distinct categoriges. Each category
              *         is further subdivided into the indivudal stationEtas of the chambers and finally also into
-             *         the technology type of the hit.
-             */
+             *         the technology type of the hit. */
             class SpacePointStatistics{
                 public:
                     /** @brief Standard constructor
                      *  @param idHelperSvc: Pointer to the MuonIdHelperSvc needed to sort each hit into
                      *                      a counting category. */
                     SpacePointStatistics(const Muon::IMuonIdHelperSvc* idHelperSvc);
-                
                     /** @brief Adds the vector of space points to the overall statistics. */
                     void addToStat(const std::vector<SpacePoint>& spacePoints);
                     /** @brief Print the statistics table of the built space points per category 
                      *         into the log-file / console */
                     void dumpStatisics(MsgStream& msg) const;
-
                 private:
                     /** @brief Helper struct to count the space-points in each 
                      *          detector category. */
                     struct StatField{
                         /** @brief Number of space points measuring eta & phi */
-                        unsigned int measEtaPhi{0};
+                        unsigned measEtaPhi{0};
                         /** @brief Number of space points measuring eta only */
-                        unsigned int measEta{0};
+                        unsigned measEta{0};
                         /** @brief Number of space points measuring phi only*/
-                        unsigned int measPhi{0};
+                        unsigned measPhi{0};
                         /** @brief Helper method returning the sum of the three
                          *         space point type counts */
-                        unsigned int allHits() const;
+                        unsigned allHits() const;
                     };
                     /** @brief Helper struct to define the counting categories. */
                     struct FieldKey{
@@ -151,8 +91,9 @@ namespace MuonR4{
             };
             /** @brief Container abrivation of the presorted space point container per MuonChambers */
             using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::SpectrometerSector*, SpacePointsPerChamber>;
-
-  
+            
+            /** @brief Abrivation of a MuonSapcePoint bucket vector */
+            using SpacePointBucketVec = std::vector<SpacePointBucket>;
             /** @brief Retrieve an uncalibrated measurement container <ContType> and fill the hits into the
              *         presorted space point map. Per associated MuonChamber, hits from Tgc, Rpc, sTgcs are 
              *         grouped by their gasGap location and then divided into eta & phi measurements. If both
@@ -160,16 +101,27 @@ namespace MuonR4{
              *         In any other case, the measurements are just transformed into a SpacePoint.
              *  @param ctx: Event context of the current event
              *  @param key: ReadHandleKey to access the container of data type <ContType>
-             *  @param fillContainer: Global container into which all space points are filled.
-             */
+             *  @param fillContainer: Global container into which all space points are filled. */
             template <class ContType> 
                 StatusCode loadContainerAndSort(const EventContext& ctx,
                                                 const SG::ReadHandleKey<ContType>& key,
                                                 PreSortedSpacePointMap& fillContainer) const;
-                                                    
-            /** @brief Abrivation of a MuonSapcePoint bucket vector */
-            using SpacePointBucketVec = std::vector<SpacePointBucket>;
-
+            /** @brief: Check whether the occupancy cuts of hits in a gasGap are surpassed.
+             *          The method is specified for each of the 3 strip technologies, 
+             *          Rpc, Tgc, sTgc and applies a technology-dependent upper bound on the 
+             *          number of phi & eta hits. If the threshold is surpassed, only 1D space
+             *          points are built intsead of 2D ones
+             * @param etaHits: List of all presorted eta measurements in a gas gap
+             * @param phiHits: List of all presorted phi measurements in a gas gap */
+            template <class PrdType>
+                bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
+                                     const std::vector<const PrdType*>& phiHits) const;
+            /** @brief Fills all space points that are beloni */
+            template <class PrdType> 
+                void fillUncombinedSpacePoints(const ActsGeometryContext& gctx,
+                                               const Amg::Transform3D& sectorTrans,
+                                               const std::vector<PrdType>& prdsToFill,
+                                               std::vector<SpacePoint>& outColl) const;          
             /** @brief Distribute the premade spacepoints per chamber into their individual SpacePoint
              *         buckets. A new bucket is created everytime if the hit to fill is along the z-axis 
              *         farther away from the first point in the bucket than the <spacePointWindowSize>.
@@ -207,16 +159,7 @@ namespace MuonR4{
              * @param sortedPoints: List of all processed buckets in the chamber. The list is augmented by 1 element */
             void newBucket(const SpacePoint& refSp,
                            SpacePointBucketVec& sortedPoints) const;
-            /** @brief: Check whether the occupancy cuts of hits in a gasGap are surpassed.
-             *          The method is specified for each of the 3 strip technologies, 
-             *          Rpc, Tgc, sTgc and applies a technology-dependent upper bound on the 
-             *          number of phi & eta hits. If the threshold is surpassed, only 1D space
-             *          points are built intsead of 2D ones
-             * @param etaHits: List of all presorted eta measurements in a gas gap
-             * @param phiHits: List of all presorted phi measurements in a gas gap */
-            template <class PrdType>
-                bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
-                                     const std::vector<const PrdType*>& phiHits) const;
+
             
             SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xMdtMeasurements",
                                                                       "Key to the uncalibrated Drift circle measurements"};
@@ -252,7 +195,7 @@ namespace MuonR4{
             Gaudi::Property<bool> m_doStat{this, "doStats", false, 
                                            "If enabled the algorithm keeps track how many hits have been made" };
             
-            Gaudi::Property<unsigned int> m_capacityBucket{this,"CapacityBucket" , 50};
+            Gaudi::Property<unsigned> m_capacityBucket{this,"CapacityBucket" , 50};
             std::unique_ptr<SpacePointStatistics> m_statCounter ATLAS_THREAD_SAFE{};
 
             Gaudi::Property<double> m_maxOccRpcEta{this, "maxRpcEtaOccupancy", 0.1, 

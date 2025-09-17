@@ -223,11 +223,11 @@ namespace MuonR4{
         Amg::MatrixX covMatrix(4, 4);
         covMatrix.setIdentity();
         using namespace MuonR4::SegmentFit;
-        covMatrix(Trk::locX, Trk::locX) = segment.covariance()(toInt(ParamDefs::x0), toInt(ParamDefs::x0));
-        covMatrix(Trk::locY, Trk::locY) = segment.covariance()(toInt(ParamDefs::y0), toInt(ParamDefs::y0));
+        covMatrix(Trk::locX, Trk::locX) = segment.covariance()(Acts::toUnderlying(ParamDefs::x0), Acts::toUnderlying(ParamDefs::x0));
+        covMatrix(Trk::locY, Trk::locY) = segment.covariance()(Acts::toUnderlying(ParamDefs::y0), Acts::toUnderlying(ParamDefs::y0));
 
-        covMatrix(Trk::phi0, Trk::phi0)   = segment.covariance()(toInt(ParamDefs::phi), toInt(ParamDefs::phi));
-        covMatrix(Trk::theta, Trk::theta) = segment.covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta));
+        covMatrix(Trk::phi0, Trk::phi0)   = segment.covariance()(Acts::toUnderlying(ParamDefs::phi), Acts::toUnderlying(ParamDefs::phi));
+        covMatrix(Trk::theta, Trk::theta) = segment.covariance()(Acts::toUnderlying(ParamDefs::theta), Acts::toUnderlying(ParamDefs::theta));
 
         auto legacySeg = std::make_unique<Muon::MuonSegment>(Amg::Vector2D::Zero(), std::move(segDir),
                                                              std::move(covMatrix), segSurf.release(),

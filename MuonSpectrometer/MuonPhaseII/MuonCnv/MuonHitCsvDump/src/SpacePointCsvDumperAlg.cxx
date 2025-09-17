@@ -116,24 +116,25 @@ StatusCode SpacePointCsvDumperAlg::execute(){
 
         file<<secId<<delim;
         file<<bucketId<<delim;
-        file<<precCutOff(spacePoint.positionInChamber().x())<<delim;
-        file<<precCutOff(spacePoint.positionInChamber().y())<<delim;
-        file<<precCutOff(spacePoint.positionInChamber().z())<<delim;
+        file<<precCutOff(spacePoint.localPosition().x())<<delim;
+        file<<precCutOff(spacePoint.localPosition().y())<<delim;
+        file<<precCutOff(spacePoint.localPosition().z())<<delim;
         //
-        file<<precCutOff(spacePoint.normalInChamber().x())<<delim;
-        file<<precCutOff(spacePoint.normalInChamber().y())<<delim;
-        file<<precCutOff(spacePoint.normalInChamber().z())<<delim;
+        file<<precCutOff(spacePoint.sensorDirection().x())<<delim;
+        file<<precCutOff(spacePoint.sensorDirection().y())<<delim;
+        file<<precCutOff(spacePoint.sensorDirection().z())<<delim;
         //
-        file<<precCutOff(spacePoint.directionInChamber().x())<<delim;
-        file<<precCutOff(spacePoint.directionInChamber().y())<<delim;
-        file<<precCutOff(spacePoint.directionInChamber().z())<<delim;
+        file<<precCutOff(spacePoint.toNextSensor().x())<<delim;
+        file<<precCutOff(spacePoint.toNextSensor().y())<<delim;
+        file<<precCutOff(spacePoint.toNextSensor().z())<<delim;
         //
         file<<precCutOff(spacePoint.planeNormal().x())<<delim;
         file<<precCutOff(spacePoint.planeNormal().y())<<delim;
         file<<precCutOff(spacePoint.planeNormal().z())<<delim;
         //
-        file<<precCutOff(spacePoint.covariance()(Amg::x, Amg::x))<<delim;
-        file<<precCutOff(spacePoint.covariance()(Amg::y, Amg::y))<<delim;
+        using CovIdx = SpacePoint::CovIdx;
+        file<<precCutOff(spacePoint.covariance()[Acts::toUnderlying(CovIdx::phiCov)])<<delim;
+        file<<precCutOff(spacePoint.covariance()[Acts::toUnderlying(CovIdx::etaCov)])<<delim;
         /// Dummy value for the moment
         file<<1.<<delim;
         file<<precCutOff(spacePoint.driftRadius())<<delim;

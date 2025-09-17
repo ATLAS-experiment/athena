@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
 #define MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
@@ -120,16 +120,14 @@ namespace MuonR4{
             /** @brief Toggle seed recalibration. The two seed circles are recalibrated using 
              *         the initial seed */
             Gaudi::Property<bool> m_recalibSeed{this, "SeedRecalibrate", false};
-            /** @brief Toggle seed refit. The segment seed is fastly refitted 
-             *         using the collected seed drift circles */
-            Gaudi::Property<bool> m_refineSeed{this, "SeedRefine", false};
             /** Cut on the segment chi2 / nDoF to launch the outlier removal */
             Gaudi::Property<double> m_outlierRemovalCut{this, "OutlierRemoval", 5.};
             Gaudi::Property<double> m_recoveryPull{this, "RecoveryPull", 5.};
             /** @brief Minimum number of precision hits to accept the segment */
             Gaudi::Property<unsigned> m_precHitCut{this, "PrecHitCut" , 3};
-
-            std::unique_ptr<SegmentAmbiSolver> m_ambiSolver{};
+            /** @brief Use the fast Mdt fitter where possible */
+            Gaudi::Property<bool> m_useFastFitter{this, "useFastFitter", true};
+            std::unique_ptr<SegmentFit::SegmentAmbiSolver> m_ambiSolver{};
 
     };
 }

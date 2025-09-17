@@ -91,9 +91,9 @@ namespace MuonR4 {
                     if (dc->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime){
                         continue;
                     }
-                    m_spoint_x.push_back(sp->positionInChamber().x());
-                    m_spoint_y.push_back(sp->positionInChamber().y());
-                    m_spoint_z.push_back(sp->positionInChamber().z());
+                    m_spoint_x.push_back(sp->localPosition().x());
+                    m_spoint_y.push_back(sp->localPosition().y());
+                    m_spoint_z.push_back(sp->localPosition().z());
                     m_spoint_driftR.push_back(sp->driftRadius());
                     m_spoint_station.push_back(m_idHelperSvc->stationName(sp->identify()));
                     m_spoint_layer.push_back(layer);
@@ -122,9 +122,9 @@ namespace MuonR4 {
 
                 for (const auto sp : hitsInLay){
 
-                    m_spoint_x.push_back(sp->positionInChamber().x());
-                    m_spoint_y.push_back(sp->positionInChamber().y());
-                    m_spoint_z.push_back(sp->positionInChamber().z());
+                    m_spoint_x.push_back(sp->localPosition().x());
+                    m_spoint_y.push_back(sp->localPosition().y());
+                    m_spoint_z.push_back(sp->localPosition().z());
                     m_spoint_driftR.push_back(sp->driftRadius());
                     m_spoint_station.push_back(m_idHelperSvc->stationName(sp->identify()));
                     m_spoint_layer.push_back(layer);

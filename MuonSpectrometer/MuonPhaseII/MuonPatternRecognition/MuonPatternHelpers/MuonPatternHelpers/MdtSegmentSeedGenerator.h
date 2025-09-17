@@ -1,21 +1,23 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNHELPERS_MDTSEGMENTSEEDGENERATOR_H
 #define MUONR4_MUONPATTERNHELPERS_MDTSEGMENTSEEDGENERATOR_H
 
 #include <AthenaBaseComps/AthMessaging.h>
+#include <ActsInterop/Logger.h>
 #include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 #include <MuonPatternEvent/SegmentSeed.h>
-#include <GaudiKernel/SystemOfUnits.h>
-
 
 #include <vector>
 #include <array>
 
-
-namespace MuonR4 {
+namespace MuonR4{
     class ISpacePointCalibrator;
+    class CalibratedSpacePoint;
+}
+
+namespace MuonR4::SegmentFit {
     /** @brief Helper class to generate valid seeds for the segment fit. The generator first returns a seed
      *         directly made from the patten recogntion. Afterwards it builds seeds by lying tangent lines
      *         to a pair of drift circles. The pairing starts from the innermost & outermost layers with tubes.
@@ -24,7 +26,6 @@ namespace MuonR4 {
     class MdtSegmentSeedGenerator: public AthMessaging {
         public:
             using HitVec = SpacePointPerLayerSplitter::HitVec;
-            
             /** @brief Configuration switches of the module  */
             struct Config{
                 /** @brief Cut on the theta angle */
@@ -51,11 +52,7 @@ namespace MuonR4 {
                 /** @brief Recalibrate the seed drift circles from the initial estimate  */
                 bool recalibSeedCircles{false};
                 /** @brief Pointer to the space point calibrator */
-                const ISpacePointCalibrator* calibrator{nullptr};
-                /** @brief Toggle whether the seed is rapidly refitted */
-                bool fastSeedFit{true};
-                /** @brief Toggle whether an initial t0 fit shall be executed */
-                bool fastSegFitWithT0{false};
+                const MuonR4::ISpacePointCalibrator* calibrator{nullptr};
                 /** @brief Maximum number of iterations in the fast segment fit */
                 unsigned int nMaxIter{100};
                 /** @brief Precision cut off in the fast segment fit */
@@ -64,7 +61,7 @@ namespace MuonR4 {
             /** @brief Helper struct from a generated Mdt seed */
             struct DriftCircleSeed{
                 /** @brief Seed parameters */
-                SegmentFit::Parameters parameters{SegmentFit::Parameters::Zero()};
+                Parameters parameters{Parameters::Zero()};
                 /** @brief List of calibrated measurements */
                 std::vector<std::unique_ptr<CalibratedSpacePoint>> measurements{};
                 /** @brief Iterations to obtain the seed */
@@ -108,7 +105,7 @@ namespace MuonR4 {
                 /** @brief: Theta of the line */
                 double theta{0.};
                 /** @brief Intersecpt of the line */
-                double Y0{0.};
+                double y0{0.};
                 /** @brief: Uncertainty on the slope*/
                 double dTheta{0.};
                 /** @brief: Uncertainty on the intercept */
@@ -117,14 +114,25 @@ namespace MuonR4 {
                 HitVec seedHits{};
                 /** @brief Vector of radial signs of the valid hits */
                 std::vector<int> solutionSigns{};
-
+                /** @brief valid seed */
+                bool isValid{true};
+                /** @brief Outstream operator */
                 friend std::ostream& operator<<(std::ostream& ostr, const SeedSolution& sol) {
                     return sol.print(ostr);
                 }
                 std::ostream& print(std::ostream& ostr) const;
             };
-
-
+            /** @brief Estimate the line tangential to two space points for a given left/right pattern
+             *  @param topHit: First drift circle space point
+             *  @param bottomHit: Second drift cricle space point
+             *  @param signs: Left/right ambiguity to the first & second space point */
+            template <Acts::Experimental::CompositeSpacePoint SpacePoint_t>
+                SeedSolution estimateTangentLine(const SpacePoint_t& topHit, const SpacePoint_t& bottomHit,
+                                                 const SignComboType& signs) const;
+            /** @brief Construct the 3D-Line parameters from the estimates theta & y0 from the tangent line
+             *  @param theta: Tangent line theta in the y-z plane
+             *  @param y0: Y intercept at z=0 */
+            Line_t::ParamVector constructLinePars(const double theta, const double y0) const;
             /** @brief Tries to build the seed from the two hits. Fails if the solution is invalid
              *         or if the seed has already been built before
              *  @param topHit: Hit candidate from the upper layer
@@ -134,76 +142,14 @@ namespace MuonR4 {
                                                      const HoughHitType& topHit, 
                                                      const HoughHitType& bottomHit, 
                                                      const SignComboType& signs); 
-            /** @brief Auxillary struct to calculate fit constants */
-            struct SeedFitAuxilliaries {
-                /** @brief Tube position center weigthed with inverse covariances */
-                Amg::Vector3D centerOfGrav{Amg::Vector3D::Zero()};
-                /** @brief Vector of inverse covariances */
-                std::vector<double> invCovs{};
-                /** @brief Vector of drfit signs */
-                std::vector<int> driftSigns{};
-                /** @brief Covariance norm */
-                double covNorm{0.};
-                /** @brief Expectation value of T_{z}^{2} - T_{y}^{2} */
-                double T_zzyy{0.};
-                /** @brief Expectation value of T_{y} * T_{z} */
-                double T_yz{0.}; 
-                /** @brief Expectation value of T_{z} * r  */
-                double T_rz{0.};
-                /** @brief Expectation value of T_{y} * r  */
-                double T_ry{0.};
-                /** @brief Prediced y0 given as the expection value of the radii
-                 *         divided by the inverse covariance sum. */
-                double fitY0{0.};
-            };
-
-            struct SeedFitAuxWithT0: public SeedFitAuxilliaries{
-                /** @brief Constructor */
-                SeedFitAuxWithT0(SeedFitAuxilliaries&& parent):
-                    SeedFitAuxilliaries{std::move(parent)}{}
-                    /** @brief Expectation value of T_{y} * v */
-                    double T_vy{0.};
-                    /** @brief Expectation value of T_{z} * v */
-                    double T_vz{0.};
-                    /** @brief Expectation value of T_{y} * a */
-                    double T_ay{0.};
-                    /** @brief Expectation value of T_{z} * a */
-                    double T_az{0.};
-                    /** @brief Expectation value of r * v */
-                    double R_vr{0.};
-                    /** @brief Expectation value of v * v */
-                    double R_vv{0.};
-                    /** @brief Expectation value of r * a */
-                    double R_va{0.};
-                    /** @brief First derivative of the fitted Y0 */
-                    double fitY0Prime{0.};
-                    /** @brief Second derivative of the ftted Y0 */
-                    double fitY0TwoPrime{0.};
-            };
-
-            /** @brief Helper function to estimate the auxillary variables that remain constant
-             *         during the fit.
-             *  @param seed: Reference to the seed to calculate the variables from */
-            SeedFitAuxilliaries estimateAuxillaries(const DriftCircleSeed& seed) const;  
-            /** @brief Helper function to estimate the auxillary variables that remain constants
-             *          during the fit with t0
-             *  @param ctx: EventContext to recalibrate the hits
-             *  @param seed: Reference to the seed to calculate the variables from */
-            SeedFitAuxWithT0 estimateAuxillaries(const EventContext& ctx,
-                                                 const DriftCircleSeed& seed) const;          
-            /** @brief Refine the seed by performing a fast Mdt segment fit. 
-             *  @param seed: Seed built from the tangent adjacent to the two seed circles */
-            void fitDriftCircles(DriftCircleSeed& seed) const;
-            /** @brief Refine the seed by performing a fast Mdt segment fit with t0 constraint
-             *  @param ctx: EventContext to recalibrate the hits
-             *  @param seed: Seed built from the tangent adjacent to the two seed circles */
-            void fitDriftCirclesWithT0(const EventContext& ctx,
-                                       DriftCircleSeed& seed) const;            
             /** @brief Prepares the generator to generate the seed from the next pair of drift circles */
             void moveToNextCandidate();
+            /** @brief Translate the SeedGenerator config to a Seed auxillary config */
+            static SeedingAux::Config translate(const Config& cfg); 
             Config m_cfg{};
-            
 
+            /** @brief Line to instantiate the seed parameters */
+            Line_t m_line{};
             const SegmentSeed* m_segmentSeed{nullptr};
             SpacePointPerLayerSplitter m_hitLayers{m_segmentSeed->getHitsInMax()};
             
@@ -224,5 +170,6 @@ namespace MuonR4 {
         
     };
 }
+#include <MuonPatternHelpers/MdtSegmentSeedGenerator.icc>
 
 #endif
