@@ -146,7 +146,7 @@ class sTgcDigitMaker : public AthMessaging {
   */
 
   int m_channelTypes{3}; // 1 -> strips, 2 -> strips+wires, 3 -> strips/wires/pads
-  double m_theta{0.8}; // theta=0.8 value best matches the PDF
+  double m_theta{10}; // theta=10 tuned to match cluster size and charge profile
   double m_meanGasGain{5.e4};  // mean gain estimated from ATLAS note "ATL-MUON-PUB-2014-001"
   bool m_doPadSharing{false};
 
@@ -159,7 +159,7 @@ class sTgcDigitMaker : public AthMessaging {
   double m_posResAngular{0.305/m_StripResolution};
   // Strip cluster charge profile: [0] = norm of inner Gaussian, [1] = sigma of inner Gaussian,
   //   [2] = norm of outer Gaussian, [3] = sigma of outer Gaussian
-  static constexpr std::array<double, 4> m_clusterProfile{0.350, 0.573, 0.186, 1.092};
+  static constexpr std::array<double, 2> m_clusterProfile{0.573, 1.092};
   // Dependence of energy deposited on incident angle
   double m_chargeAngularFactor{4.0};
   // Overall factor to scale the total strip cluster charge
