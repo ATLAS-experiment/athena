@@ -152,10 +152,10 @@ namespace MuonR4{
                     }
                     using namespace SegmentFit;
                     const auto pars = localSegmentPars(*segment);
-                    m_segmentLocX += pars[toInt(ParamDefs::x0)];
-                    m_segmentLocY += pars[toInt(ParamDefs::y0)];
-                    m_segmentLocTheta += pars[toInt(ParamDefs::theta)];
-                    m_segmentLocPhi += pars[toInt(ParamDefs::phi)];
+                    m_segmentLocX += pars[Acts::toUnderlying(ParamDefs::x0)];
+                    m_segmentLocY += pars[Acts::toUnderlying(ParamDefs::y0)];
+                    m_segmentLocTheta += pars[Acts::toUnderlying(ParamDefs::theta)];
+                    m_segmentLocPhi += pars[Acts::toUnderlying(ParamDefs::phi)];
 
                     /** For the moment this only works on MC */
                     unsigned truthLink = -1;
@@ -226,11 +226,10 @@ namespace MuonR4{
                 m_spoint_nSegments.push_back(segIdxs.size());
                 
                 m_bucket_spacePoints = bucket->size();
-                m_spoint_localPosition.push_back(sp->positionInChamber());
-                m_spoint_covX.push_back(sp->covariance()(Amg::x, Amg::x));
-                m_spoint_covY.push_back(sp->covariance()(Amg::y, Amg::y));
-                m_spoint_covXY.push_back(sp->covariance()(Amg::x, Amg::y));
-                m_spoint_covYX.push_back(sp->covariance()(Amg::y, Amg::x));
+                m_spoint_localPosition.push_back(sp->localPosition());
+                using CovIdx = SpacePoint::CovIdx;
+                m_spoint_covX.push_back(sp->covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
+                m_spoint_covY.push_back(sp->covariance()[Acts::toUnderlying(CovIdx::etaCov)]);
                 m_spoint_driftR.push_back(sp->driftRadius());
                 m_spoint_measuresEta.push_back(sp->measuresEta());
                 m_spoint_measuresPhi.push_back(sp->measuresPhi());
@@ -242,17 +241,17 @@ namespace MuonR4{
                     m_spoint_trueLabel.push_back(m_visionTool->isLabeled(*sp));
                 }
 
-                Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->positionInChamber();
+                Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->localPosition();
                 m_spoint_globalPosition.push_back( globalPos );
             }
 
             for (const xAOD::MuonSegment* truthSeg: truthSegments) {
                 using namespace SegmentFit;
                 const auto truthPars = localSegmentPars(*truthSeg);
-                m_truthSegLocX     += truthPars[toInt(ParamDefs::x0)];
-                m_truthSegLocY     += truthPars[toInt(ParamDefs::y0)];
-                m_truthSegLocTheta += truthPars[toInt(ParamDefs::theta)];
-                m_truthSegLocPhi   += truthPars[toInt(ParamDefs::phi)];
+                m_truthSegLocX     += truthPars[Acts::toUnderlying(ParamDefs::x0)];
+                m_truthSegLocY     += truthPars[Acts::toUnderlying(ParamDefs::y0)];
+                m_truthSegLocTheta += truthPars[Acts::toUnderlying(ParamDefs::theta)];
+                m_truthSegLocPhi   += truthPars[Acts::toUnderlying(ParamDefs::phi)];
             }
 
             m_bucket_layers = layNumbers.size();

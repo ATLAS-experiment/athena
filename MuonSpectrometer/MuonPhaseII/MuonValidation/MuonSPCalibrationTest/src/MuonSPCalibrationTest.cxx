@@ -32,16 +32,16 @@ StatusCode MuonSPCalibrationTest::execute() {
             for(const auto& sp : *spBucket) {
                 if (!sp) continue;
                 ATH_MSG_ALWAYS("Processing SpacePoint " << m_idHelperSvc->toString(sp->identify()) << " with dimension " << sp->dimension() 
-                                << " and position " << Amg::toString(sp->positionInChamber())
-                                << " and direction " << Amg::toString(sp->directionInChamber()));
+                                << " and position " << Amg::toString(sp->localPosition())
+                                << " and direction " << Amg::toString(sp->sensorDirection()));
 
                 // Get the seed position and direction in the chamber
-                Amg::Vector3D seedPosInChamb = sp->positionInChamber();
-                Amg::Vector3D seedDirInChamb = sp->directionInChamber();
+                Amg::Vector3D seedPosInChamb = sp->localPosition();
+                Amg::Vector3D seedDirInChamb = sp->sensorDirection();
 
                 CalibSpacePointPtr calibSP =  m_calibTool->calibrate(ctx, sp.get(), seedPosInChamb, seedDirInChamb, 0.0);
-                ATH_MSG_ALWAYS("Calibrated SpacePoint: with position " << Amg::toString(calibSP->positionInChamber())
-                                << " and direction " << Amg::toString(calibSP->directionInChamber()));
+                ATH_MSG_ALWAYS("Calibrated SpacePoint: with position " << Amg::toString(calibSP->localPosition())
+                                << " and direction " << Amg::toString(calibSP->sensorDirection()));
             }
 
         }

@@ -12,7 +12,6 @@
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
-#include "MuonSpacePoint/UtilFunctions.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MdtCalibData/MdtFullCalibData.h"
 
@@ -23,11 +22,14 @@
 
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+
+#include "Acts/Utilities/MathHelpers.hpp"
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
 }
 
 namespace MuonR4{
+     using namespace Acts::UnitLiterals;
      using CalibSpacePointVec = ISpacePointCalibrator::CalibSpacePointVec;
      using CalibSpacePointPtr = ISpacePointCalibrator::CalibSpacePointPtr;
      using State = CalibratedSpacePoint::State;
@@ -80,15 +82,16 @@ namespace MuonR4{
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
             return nullptr;
         }
-        const Amg::Vector3D& spPos{spacePoint->positionInChamber()};
+        const Amg::Vector3D& spPos{spacePoint->localPosition()};
         const Amg::Transform3D& locToGlob{spacePoint->msSector()->localToGlobalTrans(*gctx)};
-        Amg::Vector3D chDir{spacePoint->directionInChamber()};
+        const Amg::Vector3D& chDir{spacePoint->sensorDirection()};
 
         // Adjust the space point position according to the external seed. But only if the space point
         // is a 1D strip
         Amg::Vector3D calibSpPos = spacePoint->dimension() == 2 ? spPos
                                  : spPos + Amg::intersect<3>(posInChamb, dirInChamb, spPos, chDir).value_or(0) * chDir;               
 
+        SpacePoint::Cov_t cov = spacePoint->covariance();
         CalibSpacePointPtr calibSP{};
         switch (spacePoint->type()) {
             case xAOD::UncalibMeasType::MdtDriftCircleType: {
@@ -98,34 +101,29 @@ namespace MuonR4{
 
                 Amg::Vector3D closestApproach{locToGlob* locClosestApproach};
                 const double timeOfArrival = closestApproach.mag() * c_inv  + timeOffset;
-                AmgSymMatrix(2) jac{AmgSymMatrix(2)::Identity()};
-                jac.col(0) = spacePoint->normalInChamber().block<2,1>(0,0).unit();
-                jac.col(1) = spacePoint->directionInChamber().block<2,1>(0,0).unit();
 
-                if (spacePoint->dimension() == 1) {
+                if (ATH_LIKELY(spacePoint->dimension() == 1)) {
                     auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
                     calibInput.setTrackDirection(locToGlob.linear() * dirInChamb,
-                                                 dirInChamb.phi() || posInChamb[toInt(AxisDefs::phi)] );
+                                                 Acts::abs(dirInChamb.phi() - 90._degree) > 1.e-7 );
                     calibInput.setTimeOfFlight(timeOfArrival);
                     calibInput.setClosestApproach(std::move(closestApproach));
                     ATH_MSG_VERBOSE("Parse hit calibration "<<m_idHelperSvc->toString(dc->identify())<<", "<<calibInput);
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(ctx, calibInput);
                     ATH_MSG_VERBOSE("Returned calibration object "<<calibOutput);
                     State fitState{State::Valid};
-                    AmgSymMatrix(2) diagCov{AmgSymMatrix(2)::Identity()};
-                    diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()),2);
                     /** In valid drift radius has been created */
                     if (calibOutput.status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
                         ATH_MSG_DEBUG("Failed to create a valid hit from "<<m_idHelperSvc->toString(dc->identify())
                                         <<std::endl<<calibInput<<std::endl<<calibOutput);
                         fitState =  State::FailedCalib;
-                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
+                        cov[Acts::toUnderlying(AxisDefs::etaCov)] = dc->readoutElement()->innerTubeRadius();
                     } else {
-                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(calibOutput.driftRadiusUncert(), 2);
+                        cov[Acts::toUnderlying(AxisDefs::etaCov)] = Acts::square(calibOutput.driftRadiusUncert());
                     }
-                    calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);
-                    calibSP->setCovariance<2>(jac.inverse()*diagCov*jac);
+                    calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), fitState);
+                    calibSP->setCovariance(cov);
                     calibSP->setDriftRadius(calibOutput.driftRadius());
                 } else {
                     auto* dc = static_cast<const xAOD::MdtTwinDriftCircle*>(spacePoint->primaryMeasurement());
@@ -141,20 +139,19 @@ namespace MuonR4{
                                                                                               std::move(calibInput),
                                                                                               std::move(twinInput)); 
 
-                    AmgSymMatrix(2) diagCov{AmgSymMatrix(2)::Identity()};
                     State fitState{State::Valid};
                     if (calibOutput.primaryStatus() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
                         ATH_MSG_DEBUG("Failed to create a valid hit from "<<m_idHelperSvc->toString(dc->identify())
                                      <<std::endl<<calibOutput);
-                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
-                        diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()), 2);
+                        cov[Acts::toUnderlying(AxisDefs::etaCov)] = Acts::square(dc->readoutElement()->innerTubeRadius());
+                        cov[Acts::toUnderlying(AxisDefs::phiCov)] = Acts::square(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()));
                         fitState = State::FailedCalib;
                     } else {
-                        diagCov(toInt(AxisDefs::phi), toInt(AxisDefs::phi)) = std::pow(calibOutput.uncertPrimaryR(), 2);
-                        diagCov(toInt(AxisDefs::eta), toInt(AxisDefs::eta)) = std::pow(calibOutput.sigmaZ(), 2);
+                        cov[Acts::toUnderlying(AxisDefs::etaCov)] = Acts::square(calibOutput.uncertPrimaryR());
+                        cov[Acts::toUnderlying(AxisDefs::phiCov)] = Acts::square(calibOutput.sigmaZ());
                     }
-                    calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);
-                    calibSP->setCovariance<2>(jac.inverse()*diagCov*jac);
+                    calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), fitState);
+                    calibSP->setCovariance(cov);
                     calibSP->setDriftRadius(calibOutput.primaryDriftR());
                 }
                 break;
@@ -166,11 +163,9 @@ namespace MuonR4{
                 const Amg::Transform3D toGasGap{strip->readoutElement()->globalToLocalTrans(*gctx, strip->layerHash()) * locToGlob};
                 const Amg::Vector3D lPos = toGasGap * calibSpPos;
                 using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
-                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir));
-                AmgSymMatrix(3) cov{AmgSymMatrix(3)::Identity()};
-                cov.block<2,2>(0, 0) = spacePoint->covariance();
-
-                cov(2, 2) = m_rpcTimeResolution * m_rpcTimeResolution;
+                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
+        
+                cov[Acts::toUnderlying(AxisDefs::timeCov)] = Acts::square(m_rpcTimeResolution);
 
                 const double time1 = strip->time() 
                                    - strip->readoutElement()->distanceToEdge(strip->layerHash(),
@@ -182,34 +177,22 @@ namespace MuonR4{
 
                     const double time2 = strip2->time() -
                                          strip2->readoutElement()->distanceToEdge(strip2->layerHash(),
-                                                                                  Eigen::Rotation2D{M_PI_2}*lPos.block<2,1>(0,0),
+                                                                                  Eigen::Rotation2D{90._degree}*lPos.block<2,1>(0,0),
                                                                                   EdgeSide::readOut)/m_rpcSignalVelocity;
                     /// Average the time
                     calibSP->setTimeMeasurement(0.5*(time1 + time2));
                     /// Add the difference to the covariance though
-                    cov(2,2) += std::pow(0.5*(time1 - time2), 2);
-                    cov(2,1) = cov(1,2) = - strip->readoutElement()->stripPhiPitch() /m_rpcSignalVelocity / std::sqrt(12.)* std::sqrt(cov(2, 2));
-                    cov(2,0) = cov(0,2) = - strip->readoutElement()->stripEtaPitch() /m_rpcSignalVelocity / std::sqrt(12.)* std::sqrt(cov(2, 2));
-
-                } else {
-                    calibSP->setTimeMeasurement(time1);
-                    if (strip->measuresPhi()) {
-                        cov(2,1) = cov(1,2) = - 0.5 *strip->readoutElement()->stripPhiLength() /m_rpcSignalVelocity * std::sqrt(cov(2, 2));
-                    } else {
-                        cov(2,0) = cov(0,2) = - 0.5 *strip->readoutElement()->stripEtaLength() /m_rpcSignalVelocity * std::sqrt(cov(2, 2));
-                    }
-                }
-                calibSP->setCovariance<3>(std::move(cov));
-                /// TODO: Use also the time of the secondary measurement...
+                    cov[Acts::toUnderlying(AxisDefs::timeCov)] += Acts::square(0.5*(time1 - time2));
+                } 
+                calibSP->setCovariance(cov);
                 ATH_MSG_VERBOSE("Create rpc space point "<<m_idHelperSvc->toString(strip->identify())<<", dimension "<<spacePoint->dimension()
-                                << ", at "<<Amg::toString(calibSP->positionInChamber())<<", uncalib time: "
-                             <<strip->time()<<", calib time: "<<calibSP->time()<<" cov " <<toString(calibSP->covariance()));
+                                << ", at "<<Amg::toString(calibSP->localPosition())<<", uncalib time: "
+                                <<strip->time()<<", calib time: "<<calibSP->time()<<" cov " <<calibSP->covariance());
                 break;
            }
            case xAOD::UncalibMeasType::TgcStripType: {
-                /// Reminder to myself, we should modify the covariance if the space point is 1D? Probably... dunno
-                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir));
-                calibSP->setCovariance<2>(spacePoint->covariance());
+                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
+                calibSP->setCovariance(cov);
                 break;
            }
            case xAOD::UncalibMeasType::MMClusterType: {
@@ -223,17 +206,19 @@ namespace MuonR4{
                 }
 
                 Amg::Vector2D locPos{cluster->localPosition<1>()[0] * Amg::Vector2D::UnitX()};
-                Amg::MatrixX loce = spacePoint->covariance();
 
                 Amg::Vector3D globalTrackDir{locToGlob.linear() * dirInChamb};
                 Amg::Vector3D locDir = Muon::NswClustering::toLocal(cluster->readoutElement()->globalToLocalTrans(*gctx, cluster->layerHash()), globalTrackDir);
 
-                Muon::IMMClusterBuilderTool::RIO_Author rotAuthor = m_clusterBuilderToolMM->getCalibratedClusterPosition(ctx, calibClus, locDir ,locPos, loce);
+                Amg::MatrixX calibCov{};
+                calibCov.setZero();
+                calibCov(0,0) = cov[Acts::toUnderlying(AxisDefs::etaCov)];
+                Muon::IMMClusterBuilderTool::RIO_Author rotAuthor = m_clusterBuilderToolMM->getCalibratedClusterPosition(ctx, calibClus, locDir ,locPos, calibCov);
                 if(rotAuthor == Muon::IMMClusterBuilderTool::RIO_Author::unKnownAuthor){
                     ATH_MSG_ERROR("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster->identify()));
                     return nullptr;
                 }
-
+                cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibCov(0, 0);
                 Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTrans(*gctx, cluster->layerHash())};
 
                 Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
@@ -241,8 +226,8 @@ namespace MuonR4{
 
                 calibSpPos = toChamberTrans * calibSpPosInLayer;
 
-                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir));
-                calibSP->setCovariance<2>(spacePoint->covariance());
+                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
+                calibSP->setCovariance(cov);
                 ATH_MSG_DEBUG("calibrated MM cluster "<<m_idHelperSvc->toString(cluster->identify()) << " loc x old " << cluster->localPosition<1>()[0] << " new loc x " << locPos.x());
                                 
                 break;
@@ -262,7 +247,9 @@ namespace MuonR4{
         calibSpacePoints.reserve(spacePoints.size());
         for(const SpacePoint* spacePoint : spacePoints) {
             CalibSpacePointPtr hit = calibrate(ctx, spacePoint, posInChamb, dirInChamb, timeOffset);
-            if (hit) calibSpacePoints.push_back(std::move(hit));
+            if (hit) {
+                calibSpacePoints.push_back(std::move(hit));
+            }
         }
         return calibSpacePoints;
     }
@@ -289,7 +276,7 @@ namespace MuonR4{
                                                    const Acts::CalibrationContext& cctx,
                                                    const Acts::SourceLink& link,
                                                    ActsTrk::MutableTrackContainer::TrackStateProxy trackState) const {
-        
+     
         /** Construct bound track parameters to fetch the global track position */
         const Acts::BoundTrackParameters trackPars{trackState.referenceSurface().getSharedPtr(), 
                                                    trackState.parameters(), trackState.covariance(), 
@@ -409,8 +396,6 @@ namespace MuonR4{
             } default: {
                 THROW_EXCEPTION("The parsed measurement is not a muon measurement. Please check.");
             }
-
         }
-
     }
 }

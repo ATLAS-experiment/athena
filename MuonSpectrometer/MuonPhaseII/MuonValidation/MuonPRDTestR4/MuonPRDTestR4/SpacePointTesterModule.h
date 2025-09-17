@@ -44,11 +44,9 @@ namespace MuonValR4{
            /** @brief Space point drift radius */
            VectorBranch<float>& m_driftR{parent().newVector<float>(m_collName+"spacePoint_driftR")};
            /** @brief Covariance of the space point */
-           VectorBranch<float>& m_covXX{parent().newVector<float>(m_collName+"spacePoint_covXX")};
-           VectorBranch<float>& m_covXY{parent().newVector<float>(m_collName+"spacePoint_covYX")};
-           VectorBranch<float>& m_covYX{parent().newVector<float>(m_collName+"spacePoint_covXY")};
-           VectorBranch<float>& m_covYY{parent().newVector<float>(m_collName+"spacePoint_covYY")};
-
+           VectorBranch<float>& m_covX{parent().newVector<float>(m_collName+"spacePoint_covX")};
+           VectorBranch<float>& m_covY{parent().newVector<float>(m_collName+"spacePoint_covY")};
+           VectorBranch<float>& m_covT{parent().newVector<float>(m_collName+"spacePoint_covT")};
            /** @brief  Does the space point measure phi or eta*/
            VectorBranch<bool>& m_measEta{parent().newVector<bool>(m_collName+"spacePoint_measEta")};
            VectorBranch<bool>& m_measPhi{parent().newVector<bool>(m_collName+"spacePoint_measPhi")};

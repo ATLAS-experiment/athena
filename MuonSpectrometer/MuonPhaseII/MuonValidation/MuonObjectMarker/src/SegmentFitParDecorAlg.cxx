@@ -12,7 +12,7 @@
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
 namespace MuonR4 {
     using namespace SegmentFit;
-    using SegPars = xAOD::MeasVector<toInt(ParamDefs::nPars)>;
+    using SegPars = xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>;
     using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex;
 
     StatusCode SegmentFitParDecorAlg::initialize() {
@@ -121,10 +121,10 @@ namespace MuonR4 {
             const double travDist = Amg::intersect<3>(locPos, locDir, Amg::Vector3D::UnitZ(), 0).value_or(0);
             const Amg::Vector3D atCentre = locPos + travDist * locDir;
             
-            locPars[toInt(ParamDefs::x0)]    = atCentre[toInt(AxisDefs::phi)];
-            locPars[toInt(ParamDefs::y0)]    = atCentre[toInt(AxisDefs::eta)];
-            locPars[toInt(ParamDefs::theta)] = locDir.theta();
-            locPars[toInt(ParamDefs::phi)]   = locDir.phi();
+            locPars[Acts::toUnderlying(ParamDefs::x0)]    = atCentre.x();
+            locPars[Acts::toUnderlying(ParamDefs::y0)]    = atCentre.y();
+            locPars[Acts::toUnderlying(ParamDefs::theta)] = locDir.theta();
+            locPars[Acts::toUnderlying(ParamDefs::phi)]   = locDir.phi();
             ATH_MSG_VERBOSE("Segment "<<chamber->identString()<<" at chamber centre "<<Amg::toString(atCentre)
                           <<" + x *"<<Amg::toString(locDir));
         }

@@ -46,19 +46,19 @@ namespace MuonValR4{
             const MuonR4::Segment* reFitMe = MuonR4::detailedSegment(*seg);
 
             auto preFitPars = localSegmentPars(*seg);
-            m_chamberIndex = toInt(reFitMe->msSector()->chamberIndex());
+            m_chamberIndex = Acts::toUnderlying(reFitMe->msSector()->chamberIndex());
             m_stationSide = reFitMe->msSector()->side();
             m_stationPhi = reFitMe->msSector()->stationPhi();
             /** parameters */
-            m_preFitLocX = preFitPars[toInt(ParamDefs::x0)];
-            m_preFitLocY = preFitPars[toInt(ParamDefs::y0)];
-            m_preFitTheta = preFitPars[toInt(ParamDefs::theta)];
-            m_preFitPhi = preFitPars[toInt(ParamDefs::phi)];
+            m_preFitLocX = preFitPars[Acts::toUnderlying(ParamDefs::x0)];
+            m_preFitLocY = preFitPars[Acts::toUnderlying(ParamDefs::y0)];
+            m_preFitTheta = preFitPars[Acts::toUnderlying(ParamDefs::theta)];
+            m_preFitPhi = preFitPars[Acts::toUnderlying(ParamDefs::phi)];
             /** uncertainty */
-            m_uncertLocX = Amg::error(reFitMe->covariance(), toInt(ParamDefs::x0));
-            m_uncertLocY = Amg::error(reFitMe->covariance(), toInt(ParamDefs::y0));
-            m_uncertTheta = Amg::error(reFitMe->covariance(), toInt(ParamDefs::theta));
-            m_uncertPhi = Amg::error(reFitMe->covariance(), toInt(ParamDefs::phi));
+            m_uncertLocX = Amg::error(reFitMe->covariance(), Acts::toUnderlying(ParamDefs::x0));
+            m_uncertLocY = Amg::error(reFitMe->covariance(), Acts::toUnderlying(ParamDefs::y0));
+            m_uncertTheta = Amg::error(reFitMe->covariance(), Acts::toUnderlying(ParamDefs::theta));
+            m_uncertPhi = Amg::error(reFitMe->covariance(), Acts::toUnderlying(ParamDefs::phi));
 
             m_preFitChi2 = reFitMe->chi2();
             m_preFitNdoF = reFitMe->nDoF();
@@ -75,15 +75,15 @@ namespace MuonValR4{
             m_postFitNTrigEtaHits = seg->nTrigEtaLayers();
             m_postFitNTrigPhiHits = seg->nPhiLayers();
             const auto segPars = localSegmentPars(*seg);
-            m_postFitLocX  = segPars[toInt(ParamDefs::x0)];
-            m_postFitLocY  = segPars[toInt(ParamDefs::y0)];
-            m_postFitTheta = segPars[toInt(ParamDefs::theta)];
-            m_postFitPhi   = segPars[toInt(ParamDefs::phi)];
-            static const SG::ConstAccessor<xAOD::MeasVector<toInt(ParamDefs::nPars)>> acc_seed{"seedSegPars"};
-            m_seedFitLocY  = acc_seed(*seg)[toInt(ParamDefs::y0)];
-            m_seedFitTheta = acc_seed(*seg)[toInt(ParamDefs::theta)];
-            m_seedFitLocX  = acc_seed(*seg)[toInt(ParamDefs::x0)];
-            m_seedFitPhi   = acc_seed(*seg)[toInt(ParamDefs::phi)];
+            m_postFitLocX  = segPars[Acts::toUnderlying(ParamDefs::x0)];
+            m_postFitLocY  = segPars[Acts::toUnderlying(ParamDefs::y0)];
+            m_postFitTheta = segPars[Acts::toUnderlying(ParamDefs::theta)];
+            m_postFitPhi   = segPars[Acts::toUnderlying(ParamDefs::phi)];
+            static const SG::ConstAccessor<xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>> acc_seed{"seedSegPars"};
+            m_seedFitLocY  = acc_seed(*seg)[Acts::toUnderlying(ParamDefs::y0)];
+            m_seedFitTheta = acc_seed(*seg)[Acts::toUnderlying(ParamDefs::theta)];
+            m_seedFitLocX  = acc_seed(*seg)[Acts::toUnderlying(ParamDefs::x0)];
+            m_seedFitPhi   = acc_seed(*seg)[Acts::toUnderlying(ParamDefs::phi)];
             
             m_goodFit = true;
             ATH_CHECK(fillPrefit((*acc_segLink(*seg))));

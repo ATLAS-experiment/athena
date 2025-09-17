@@ -20,7 +20,7 @@ namespace MuonR4{
     using PrdLink_t = ElementLink<PrdCont_t>;
     using PrdLinkVec_t = std::vector<PrdLink_t>;
 
-    using SegPars_t = xAOD::MeasVector<toInt(ParamDefs::nPars)>;
+    using SegPars_t = xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>;
 
 
     using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex;
@@ -87,19 +87,20 @@ namespace MuonR4{
             convertedSeg->setNHits(inSegment->summary().nPrecHits, inSegment->summary().nPhiHits,
                                    inSegment->summary().nEtaTrigHits);
            
+            
             convertedSeg->setT0Error(inSegment->segementT0(), 
-                                     Amg::error(inSegment->covariance(),  toInt(ParamDefs::time)));
+                                     Amg::error(inSegment->covariance(), Acts::toUnderlying(ParamDefs::t0)));
 
             /**  */
             SegPars_t& localPars{dec_locPars(*convertedSeg)};
             const Amg::Vector3D locPos{globToLoc * pos};
             const Amg::Vector3D locDir{globToLoc.linear() * dir};
 
-            localPars[toInt(ParamDefs::x0)] = locPos.x();
-            localPars[toInt(ParamDefs::y0)] = locPos.y();
-            localPars[toInt(ParamDefs::theta)] = locDir.theta();
-            localPars[toInt(ParamDefs::phi)] = locDir.phi();
-            localPars[toInt(ParamDefs::time)] = inSegment->segementT0();
+            localPars[Acts::toUnderlying(ParamDefs::x0)] = locPos.x();
+            localPars[Acts::toUnderlying(ParamDefs::y0)] = locPos.y();
+            localPars[Acts::toUnderlying(ParamDefs::theta)] = locDir.theta();
+            localPars[Acts::toUnderlying(ParamDefs::phi)] = locDir.phi();
+            localPars[Acts::toUnderlying(ParamDefs::t0)] = inSegment->segementT0();
 
             /** Append the prd links */
             PrdLinkVec_t& prdLinks{dec_prdLinks(*convertedSeg)};

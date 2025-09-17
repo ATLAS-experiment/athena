@@ -112,8 +112,8 @@ namespace MuonR4{
                 ATH_MSG_ERROR("Errors during the Prd conversion occured");
                 return StatusCode::FAILURE;
             }
-            const Amg::Vector3D maxPos{seed->positionInChamber()};
-            const Amg::Vector3D locDir{seed->directionInChamber()};
+            const Amg::Vector3D maxPos{seed->localPosition()};
+            const Amg::Vector3D locDir{seed->localDirection()};
 
             Trk::TrackSurfaceIntersection isect{localToGlobal * maxPos, localToGlobal.linear()*locDir,0.};
             ATH_MSG_VERBOSE("Intersection at "<<m_idHelperSvc->toStringChamber(trkHits[0]->identify())<<" "<<Amg::toString(isect.position())<<" "<<Amg::toString(isect.direction())

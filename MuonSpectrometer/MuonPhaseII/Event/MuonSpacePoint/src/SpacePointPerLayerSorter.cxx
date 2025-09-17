@@ -44,11 +44,11 @@ namespace MuonR4 {
         const unsigned int lay2 {sectorLayerNum(sp2)};
 
         if (lay1 == lay2) {
-            const double dy = sp1.positionInChamber().y() - sp2.positionInChamber().y();
+            const double dy = sp1.localPosition().y() - sp2.localPosition().y();
             if ( std::abs(dy) > 20 * Gaudi::Units::micrometer ){ 
                 return dy < 0;
             }
-            return sp1.positionInChamber().x() < sp2.positionInChamber().x();
+            return sp1.localPosition().x() < sp2.localPosition().x();
         }
         return lay1 < lay2;
     }

@@ -6,13 +6,12 @@
 
 #include <AthenaBaseComps/AthMessaging.h>
 #include <MuonPatternEvent/Segment.h>
-#include <GaudiKernel/SystemOfUnits.h>
 
 #include <vector>
 #include <unordered_map>
 #include <array>
 
-namespace MuonR4{
+namespace MuonR4::SegmentFit {
     class SegmentAmbiSolver : public AthMessaging {
         public:
             struct Config{

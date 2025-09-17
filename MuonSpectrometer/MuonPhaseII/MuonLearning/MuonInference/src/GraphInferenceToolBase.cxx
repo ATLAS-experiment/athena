@@ -6,9 +6,8 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "MuonInferenceInterfaces/GraphData.h"
 #include "MuonInferenceInterfaces/NodeFeatureList.h"
-#include "MuonPatternHelpers/MatrixUtils.h"
 #include "PathResolver/PathResolver.h"
-
+#include "Acts/Utilities/MathHelpers.hpp" 
 #include <span>
 
 namespace {
@@ -139,7 +138,7 @@ namespace MuonML{
 
         for (const MuonR4::SpacePointBucket* bucket : *spacePoints) {
             nNodes += graphData.spacePointsInBucket.emplace_back(bucket->size());
-            possConn += MuonR4::sumUp(graphData.spacePointsInBucket.back());
+            possConn += Acts::sumUpToN(graphData.spacePointsInBucket.back());
         }
 
         graphData.nodeIndex = 0;

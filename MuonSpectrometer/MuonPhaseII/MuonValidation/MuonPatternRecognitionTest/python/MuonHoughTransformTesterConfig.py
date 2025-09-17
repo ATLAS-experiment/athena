@@ -30,7 +30,7 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args,flags)
   
     
-    # cfg.getService("MessageSvc").setVerbose = ["MuonSegmentFittingAlg"]
+    cfg.getService("MessageSvc").setVerbose = ["MuonSegmentFittingAlg"]
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
@@ -61,10 +61,10 @@ if __name__=="__main__":
                                                                                                 CanvasPreFix="EtaHoughPlotValid",
                                                                                                 AllCanvasName="AllEtaHoughiDiPuffPlots", doPhiBucketViews = False,
                                                                                                 displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= False))
-        cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-                                                                                                CanvasPreFix="PhiHoughPlotValid",
-                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",doEtaBucketViews = False,
-                                                                                                displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
+        #cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+        #                                                                                        CanvasPreFix="PhiHoughPlotValid",
+        #                                                                                        AllCanvasName="AllPhiHoughiDiPuffPlots",doEtaBucketViews = False,
+        #                                                                                        displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="SegmentPlotValid",
                                                                                                 AllCanvasName="AllSegmentFitPlots", displayTruthOnly = True,
