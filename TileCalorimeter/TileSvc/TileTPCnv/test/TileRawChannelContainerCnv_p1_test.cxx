@@ -25,6 +25,8 @@
 #include "GaudiKernel/MsgStream.h"
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
+#include <memory>
 
 
 class TileCablingSvc
@@ -356,12 +358,17 @@ int main ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "TileTPCnv/TileRawChannelContainerCnv_p1_test\n";
   IdDictParser parser;
-  TileCablingSvc helpers(parser);
-  test1 (helpers.tileid);
+  try{
+    auto helpers = std::make_unique<TileCablingSvc>(parser);
+    test1 (helpers->tileid);
 
-  testCollectionMetaDataNotDSP(helpers.tileid);
-  testCollectionMetaDataGood(helpers.hwid);
-  testCollectionMetaDataBad(helpers.hwid);
+    testCollectionMetaDataNotDSP(helpers->tileid);
+    testCollectionMetaDataGood(helpers->hwid);
+    testCollectionMetaDataBad(helpers->hwid);
+  } catch (std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in TileRawChannelContainerCnv_p1_test."<<std::endl;
+    return 1;
+  }
 
   return 0;
 }
