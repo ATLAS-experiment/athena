@@ -333,7 +333,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
     tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
-    tool.keepNInnerHits = flags.Trigger.FPGATrackSim.GenScan.keepNInnerHits    
+    tool.keepHitsStrategy = flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy
     tool.threshold = 4
 
     # set cuts
