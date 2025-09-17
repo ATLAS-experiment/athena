@@ -36,6 +36,7 @@ def CPAlgorithmsCfg(flags):
     # Set up the systematics loader/handler algorithm:
     subConfig = factory.makeConfig ('CommonServices')
     subConfig.setOptionValue ('.runSystematics', False)
+    subConfig.setOptionValue ('.fixDAODTruthRecord', False)
     configSeq += subConfig
 
     # Create a pile-up analysis config
