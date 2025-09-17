@@ -231,8 +231,8 @@ class ConfigFactory():
         """add algorithms and options"""
 
         # CommonServices
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import CommonServicesConfig
-        self.addAlgConfigBlock(algName="CommonServices", alg=CommonServicesConfig)
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import CommonServices
+        self.addAlgConfigBlock(algName="CommonServices", alg=CommonServices)
 
         # pileup reweighting
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PileupReweightingBlock
