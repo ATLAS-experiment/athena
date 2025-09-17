@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
@@ -72,6 +72,7 @@ if __name__=="__main__":
     flags=initConfigFlags()
     addLArCalibFlags(flags)
 
+    flags.Input.Files=[]
     flags.Input.isMC = False
     flags.IOVDb.DatabaseInstance="CONDBR2"
     flags.LAr.doAlign=False
