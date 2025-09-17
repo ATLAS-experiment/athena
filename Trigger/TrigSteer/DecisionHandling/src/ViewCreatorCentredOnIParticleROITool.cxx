@@ -1,6 +1,6 @@
 
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -27,31 +27,32 @@ StatusCode ViewCreatorCentredOnIParticleROITool::attachROILinks(TrigCompositeUti
   SG::WriteHandle<TrigRoiDescriptorCollection> roisWriteHandle = createAndStoreNoAux(m_roisWriteHandleKey, ctx);
   
   for ( Decision* outputDecision : decisions ) { 
-    const std::vector<LinkInfo<xAOD::IParticleContainer>> myFeature = findLinks<xAOD::IParticleContainer>(outputDecision, m_iParticleLinkName, TrigDefs::lastFeatureOfType);
+    
+    std::set<const Decision*> cache;
+    std::vector<SG::sgkey_t> keys;
+    std::vector<uint32_t> clids;
+    std::vector<Decision::index_type> indices;
+    std::vector<const Decision*> sources;
+    typelessFindLinks(outputDecision, m_iParticleLinkName, keys, clids, indices, sources, TrigDefs::lastFeatureOfType, &cache);
 
-    if(myFeature.size()==0){
-      //check if there is a MET feature (since MET isn't an IParticle), add a FS RoI if there is
-      auto metFeature = findLinks<xAOD::TrigMissingETContainer>(outputDecision, m_iParticleLinkName, TrigDefs::lastFeatureOfType);
-      if(metFeature.size()==1){
-	ATH_MSG_DEBUG("Encountered a MET feature in the CentredOnIParticle ROITool. Cannot centre an ROI on this. Attaching a FullScan RoI");
-	roisWriteHandle->push_back( new TrigRoiDescriptor( RoiDescriptor::FULLSCAN ) );
-	const ElementLink<TrigRoiDescriptorCollection> roiEL = ElementLink<TrigRoiDescriptorCollection>(*roisWriteHandle, roisWriteHandle->size() - 1, ctx);
-	outputDecision->setObjectLink(roiString(), roiEL);
-	continue;
-      }
-      else{
-	ATH_MSG_ERROR("Did not find any xAOD::IParticle: '"<< m_iParticleLinkName << "' for Decsion object index "<<outputDecision->index());
-	return StatusCode::FAILURE;
-      } 
-    }
-    else if (myFeature.size() != 1) {
-      ATH_MSG_ERROR("Did not find exactly one most-recent xAOD::IParticle '" << m_iParticleLinkName << "' for Decision object index " << outputDecision->index()
-        << ", found " << myFeature.size());
+    //expect only one link per decision
+    if(keys.size()!=1){
+      ATH_MSG_ERROR("Did not find exactly one object having searched for a link named '"<<m_iParticleLinkName<<"'. Found "<<keys.size()<<" instead");
       return StatusCode::FAILURE;
     }
-    ATH_CHECK(myFeature.at(0).isValid());
 
-    const ElementLink<xAOD::IParticleContainer> p4EL = myFeature.at(0).link;
+    //first check if we've found a MET feature, and attach a FS RoI if so
+    if( clids.at(0) == ClassID_traits<xAOD::TrigMissingETContainer>::ID()){
+      ATH_MSG_DEBUG("Encountered a MET feature in the CentredOnIParticle ROITool. Cannot centre an ROI on this. Attaching a FullScan RoI");
+      roisWriteHandle->push_back( new TrigRoiDescriptor( RoiDescriptor::FULLSCAN ) );
+      const ElementLink<TrigRoiDescriptorCollection> roiEL = ElementLink<TrigRoiDescriptorCollection>(*roisWriteHandle, roisWriteHandle->size() - 1, ctx);
+      outputDecision->setObjectLink(roiString(), roiEL);
+      continue;
+    }
+
+    //If not MET, we should have an IParticle
+    const ElementLink<xAOD::IParticleContainer> p4EL(keys.at(0), indices.at(0), ctx);
+    ATH_CHECK(p4EL.isValid());
 
     const double reta  = (*p4EL)->eta();
     const double retap = reta + m_roiEtaWidth;
