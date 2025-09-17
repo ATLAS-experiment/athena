@@ -21,7 +21,7 @@
  * @author Joerg Stelzer   <Joerg.Stelzer@cern.ch>  - DESY
  *
  ***********************************************************************************/
-#include "boost/range/adaptor/reversed.hpp"
+#include <ranges>
 
 #include "TrigDecisionTool/Combination.h"
 #include "TrigDecisionTool/Conditions.h"
@@ -170,7 +170,7 @@ Trig::FeatureContainer::get(const std::string& label, unsigned int condition, co
     //typedef std::vector< Trig::Feature<T> > FTV;
     //typename FTV::const_iterator fIt;
     //for (fIt = features.begin(); fIt != features.end(); ++fIt ) {
-    for(const Trig::Feature<T>& f :  boost::adaptors::reverse(features)) {      
+    for(const Trig::Feature<T>& f :  std::views::reverse(features)) {      
       //std::cout << "in FC::get, insertion of feature " << std::endl;
       uniqnessHelper.insert(f);
 

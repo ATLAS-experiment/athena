@@ -15,7 +15,7 @@
  ***********************************************************************************/
 #include <limits>
 #include "boost/regex.hpp"
-#include "boost/range/adaptor/reversed.hpp"
+#include <ranges>
 
 #include "CxxUtils/bitmask.h"
 #include "TrigConfHLTData/HLTChain.h"
@@ -684,7 +684,7 @@ namespace ChainGroup_impl {
       // go over the steps of the chain and collecte TEs combinations for each of the chain step (signature)
       bool last_step=true;
       const TrigConf::HLTSignature* previous_sig(0);
-      for(const TrigConf::HLTSignature* sig : boost::adaptors::reverse(conf->signatureList())) {
+      for(const TrigConf::HLTSignature* sig : std::views::reverse(conf->signatureList())) {
          // chain without signatures
          if (!sig) break;
 

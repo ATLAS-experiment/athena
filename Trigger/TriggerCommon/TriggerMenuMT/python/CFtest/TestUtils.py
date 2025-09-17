@@ -9,6 +9,8 @@ from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 
+import functools
+
 def writeEmulationFiles(data):
     """Writes emulation files. key in the dict is a file name (+.dat), list which is value of each dict el is enetered into the file, one el. per line"""
     for name, d in data.items():
@@ -20,11 +22,11 @@ def writeEmulationFiles(data):
 
 class makeChainStep(object):
     """Used to store the step info, regardless of the chainDict"""
-    def __init__(self, name, seq=[], comboHypoCfg=ComboHypoCfg, comboToolConfs=[], chainDicts=None, isEmpty=False):
+    def __init__(self, name, seq=None, comboHypoCfg=None, comboToolConfs=None, chainDicts=None, isEmpty=False):
         self.name = name
-        self.seq = seq
-        self.comboToolConfs = comboToolConfs
-        self.comboHypoCfg = comboHypoCfg
+        self.seq = seq if seq is not None else []
+        self.comboHypoCfg = comboHypoCfg if comboHypoCfg is not None else functools.partial(ComboHypoCfg)
+        self.comboToolConfs = comboToolConfs if comboToolConfs is not None else []
         self.chainDicts = chainDicts
         self.isEmpty = isEmpty
     

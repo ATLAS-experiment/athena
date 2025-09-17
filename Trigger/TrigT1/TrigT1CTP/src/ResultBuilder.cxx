@@ -401,6 +401,7 @@ LVL1CTP::ResultBuilder::constructCTPResult( const EventIDBase & eventID,
    result->setTimeSec(eventID.time_stamp());
    result->setTimeNanoSec(eventID.time_stamp_ns_offset());
    result->setNumDataWords(data.size());
+   result->setL1AcceptBunchPosition(l1a_pos);
    ATH_MSG_DEBUG( "Created CTPResult object" );
    return std::make_pair(std::move(result), std::move(resultAux));
 }

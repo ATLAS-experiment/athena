@@ -45,15 +45,6 @@ class FastCaloSim: public G4VFastSimulationModel
               const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
               const std::string& CaloCellContainerSDName,
               bool doG4Transport,
-              bool doPhotons,
-              bool doElectrons,
-              bool doHadrons,
-              float AbsEtaMin,
-              float AbsEtaMax,
-              float EkinMinPhotons,
-              float EkinMaxPhotons,
-              float EkinMinElectrons,
-              float EkinMaxElectrons,
               bool doPunchThrough,
               FastCaloSimTool * FastCaloSimTool);
   ~FastCaloSim() {}
@@ -96,17 +87,6 @@ class FastCaloSim: public G4VFastSimulationModel
   std::string m_CaloCellContainerSDName;
   // Boolean flag to enable Geant4 transportation
   bool m_doG4Transport;
-
-  // Boundaries to enable AF3 transportation
-  bool m_doPhotons;
-  bool m_doElectrons;
-  bool m_doHadrons;
-  float m_AbsEtaMin;
-  float m_AbsEtaMax;
-  float m_EkinMinPhotons;
-  float m_EkinMaxPhotons;
-  float m_EkinMinElectrons;
-  float m_EkinMaxElectrons;
 
   //For PunchThrough
   bool m_doPunchThrough;
