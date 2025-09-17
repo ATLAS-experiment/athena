@@ -18,8 +18,8 @@ dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/HitV
 dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/RDOAnalysis_mu_1GeV_simreco.root
 dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_mu1GeV_simreco.root
 
-script=test_MC_mu0_simreco.sh
+script=test_MC_mu0_simreco_multicores.sh
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${dcuberef_sim} ${dcuberef_rdo} ${dcuberef_rec}
+"$script" ${ArtProcess} ${ArtInFile} ${dcuberef_sim} ${dcuberef_rdo} ${dcuberef_rec}
