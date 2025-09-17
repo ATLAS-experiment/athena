@@ -489,29 +489,27 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vecto
                                                                 std::vector<FPGATrackSimTrack> const& tracks_1st,
                                                                 FPGATrackSimDataFlowInfo const* dataFlowInfo)
 {
-  m_logicEventOutputHeader->reset();
+    m_logicEventOutputHeader->reset();
 
-  ATH_MSG_DEBUG("NFPGATrackSimRoads_1st = " << roads_1st.size() << ", NFPGATrackSimTracks_1st = " << tracks_1st.size());
+    ATH_MSG_DEBUG("NFPGATrackSimRoads_1st = " << roads_1st.size() << ", NFPGATrackSimTracks_1st = " << tracks_1st.size());
 
-  if (!m_writeOutputData) return StatusCode::SUCCESS;
+    if (!m_writeOutputData) return StatusCode::SUCCESS;
     m_logicEventOutputHeader->reserveFPGATrackSimRoads_1st(roads_1st.size());
     m_logicEventOutputHeader->addFPGATrackSimRoads_1st(roads_1st);
-  if (m_doTracking) {
+
     m_logicEventOutputHeader->reserveFPGATrackSimTracks_1st(tracks_1st.size());
     m_logicEventOutputHeader->addFPGATrackSimTracks_1st(tracks_1st);
-  }
 
+    m_logicEventOutputHeader->setDataFlowInfo(*dataFlowInfo);
+    ATH_MSG_DEBUG(m_logicEventOutputHeader->getDataFlowInfo());
 
-  m_logicEventOutputHeader->setDataFlowInfo(*dataFlowInfo);
-  ATH_MSG_DEBUG(m_logicEventOutputHeader->getDataFlowInfo());
-
-  // It would be nice to rearrange this so both algorithms use one instance of this tool, I think.
-  // Which means that dataprep can't call writeData because that does Fill().
-  ATH_CHECK(m_writeOutputTool->writeData());
+    // It would be nice to rearrange this so both algorithms use one instance of this tool, I think.
+    // Which means that dataprep can't call writeData because that does Fill().
+    ATH_CHECK(m_writeOutputTool->writeData());
 
 
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 
