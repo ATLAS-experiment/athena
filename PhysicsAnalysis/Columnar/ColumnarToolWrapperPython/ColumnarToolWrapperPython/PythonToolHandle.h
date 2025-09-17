@@ -8,6 +8,7 @@
 /// @author Giordon Stark
 
 #include <AsgMessaging/MessageCheck.h>
+#include <AsgMessaging/AsgMessaging.h>
 #include <AsgTools/AsgTool.h>
 #include <AsgTools/AsgToolConfig.h>
 #include <AsgTools/ToolHandle.h>
@@ -34,12 +35,15 @@ namespace columnar
   /// object for each thread.  Also, the way the tools handle
   /// setting systematics is currently not thread-safe.
 
-  class PythonToolHandle final
+  class PythonToolHandle final : public asg::AsgMessaging
   {
     /// Public Members
     /// ==============
 
   public:
+
+    /// standard constructor
+    PythonToolHandle() : asg::AsgMessaging("PythonToolHandle") {}
 
     /// set the type and name for the tool
     void setTypeAndName (const std::string& typeAndName)
@@ -64,11 +68,17 @@ namespace columnar
     /// preinitialize the tool
     void preinitialize ()
     {
+      ANA_MSG_DEBUG("preinitializing with " << m_toolHandle << " and cleanup " << m_cleanup);
       if (!m_config.makeTool (m_toolHandle, m_cleanup).isSuccess())
         throw std::runtime_error ("failed to create tool");
+
+      ANA_MSG_DEBUG("m_config created tool" << m_toolHandle);
+
       m_tool = dynamic_cast<IColumnarTool*> (&*m_toolHandle);
+
+      ANA_MSG_DEBUG("attempting to dynamically cast to IColumnarTool* gives " << m_tool);
       if (m_tool == nullptr)
-        throw std::runtime_error ("tool does not implement IColumnarTool");
+        throw std::runtime_error ("The tool does not implement IColumnarTool. First, check to make sure you're in the ColumnarAnalysis release. Then, check to see if the tool inherits from ColumnarTool.");
       m_systTool = dynamic_cast<CP::ISystematicsTool*> (m_tool);
     }
 
