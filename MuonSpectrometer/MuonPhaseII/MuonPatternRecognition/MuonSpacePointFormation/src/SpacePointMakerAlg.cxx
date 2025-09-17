@@ -241,8 +241,7 @@ template <typename PrdType>
         if constexpr (std::is_same_v<PrdType, xAOD::TgcStrip>) {
             const bool isStrip = prd->measuresPhi();
             const auto& stripLay = prd->readoutElement()->sensorLayout(prd->layerHash());
-            if (isStrip) {                
-                const auto& radialDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay.design(isStrip));
+            if (isStrip) {
                 toNextSen = toSectorTrans.rotation() * stripLay.to3D(stripNormal(prd->channelNumber()), isStrip);
                 sensorDir = toSectorTrans.rotation() * stripLay.to3D(stripDir(prd->channelNumber()), isStrip);
             } else {

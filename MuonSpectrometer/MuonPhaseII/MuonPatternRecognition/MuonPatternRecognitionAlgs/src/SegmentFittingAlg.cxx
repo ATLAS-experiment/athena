@@ -275,7 +275,7 @@ namespace MuonR4 {
 
         /** Next sort the measurements by chi2 */
         std::ranges::sort(data.calibMeasurements,
-                  [&, this](const HitVec::value_type& a, const HitVec::value_type& b){
+                  [&](const HitVec::value_type& a, const HitVec::value_type& b){
                     using enum CalibratedSpacePoint::State;
                     const double chiSqA = a->fitState() == Valid ? SeedingAux::chi2Term(segPos, segDir, *a) : 0.;
                     const double chiSqB = b->fitState() == Valid ? SeedingAux::chi2Term(segPos, segDir, *b) : 0.;
