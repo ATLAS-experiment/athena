@@ -219,7 +219,7 @@ class ConfigFactory():
         # are being ignored, or run into related cryptic crashes.
         already_fixed_blocks = {
             'Electrons','Photons','Muons','TauJets','DiTauJets','MissingET','FlavourTagging','FlavourTaggingEventSF','XbbTagging',
-            'InDetTracks','KLFitter','EventSelection','PtEtaSelection','ObjectCutFlow','EventCutFlow','Thinning',
+            'InDetTracks','KLFitter','PtEtaSelection','ObjectCutFlow','EventCutFlow','Thinning',
             'IFFClassification','MCTCClassification','PerEventSF','SelectionDecoration','SystObjectLink'}
         if kwargs and name.split('.')[-1] in already_fixed_blocks:
             raise ValueError(f"Config block '{name}' no longer accepts **kwargs. Use config.setOptionValue('option', value) instead!")
