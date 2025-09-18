@@ -77,8 +77,8 @@ def parse_pixelClusSF_file_data(input_file_path):
 
         #Get map between wafer id and hash id
         #Values are in order: bec, ld, phi, eta, side, ID
-        with open("pix_waferid_hash_map.json", "r") as file2:
-            hash_id_map = json.load(file2)
+        with open("pixWafer_id_hash_map.json", "r") as map_file:
+            hash_id_map = json.load(map_file)
 
         #Grab approrpriate bec, layer, eta, sf for the run
         run_data_pairs = {}
@@ -149,9 +149,6 @@ if __name__ == "__main__":
 
         #Convert payload data to JSON string
         json_string_payload = payload_to_json_string_converter(sorted_payload_data)
-
-        #json_string_payload = json.dumps(pixelClusSF_data, sort_keys=True, separators=(",", ":"))
-        #print(json_string_payload)
 
         #Store data in the output folder
         output_data[FIELD_NAMES[0]] = json_string_payload
