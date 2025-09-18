@@ -15,8 +15,8 @@
 #include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "AthenaKernel/IProxyRegistry.h"
-#include "CxxUtils/ConcurrentMap.h"
-#include "CxxUtils/SimpleUpdater.h"
+#include "CxxUtils/sgkey_t.h"
+#include "CxxUtils/sgkey_utilities.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/StatusCode.h"
@@ -183,14 +183,7 @@ namespace SG {
     StoreMap m_storeMap;
 
     /// Map of hashed sgkey -> DataProxy.
-    // Separating this avoids a cppcheck 2.14 syntax error.
-    static constexpr CxxUtils::detail::ConcurrentHashmapVal_t s_nullval =
-      static_cast<CxxUtils::detail::ConcurrentHashmapVal_t> (-1);
-    using KeyMap_t = CxxUtils::ConcurrentMap<
-      sgkey_t, DataProxy*,
-      CxxUtils::SimpleUpdater,
-      SGKeyHash, SGKeyEqual,
-      0, s_nullval>;
+    using KeyMap_t = ConcurrentSGKeyMap<DataProxy*>;
     KeyMap_t m_keyMap;
 
     StoreID::type m_storeID;
