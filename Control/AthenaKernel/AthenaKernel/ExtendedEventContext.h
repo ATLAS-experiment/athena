@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_EXTENDEDEVENTCONTEXT_H
@@ -105,8 +105,22 @@ namespace Atlas {
 
   /**
    * @brief Retrieve an extended context from a context object.
+   *        returning nullptr if it doesn't exist.
+   */
+  const ExtendedEventContext* tryGetExtendedEventContext (const EventContext& ctx);
+
+
+  /**
+   * @brief Retrieve an extended context from a context object.
    */
   ExtendedEventContext& getExtendedEventContext (EventContext& ctx);
+
+
+  /**
+   * @brief Retrieve an extended context from a context object.
+   *        returning nullptr if it doesn't exist.
+   */
+  ExtendedEventContext* tryGetExtendedEventContext (EventContext& ctx);
 
 
   /**
