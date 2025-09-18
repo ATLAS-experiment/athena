@@ -79,7 +79,7 @@ private:
     
     Gaudi::Property<bool> m_sqliteDb{this,"SQLiteDB",false,"Activate GeoModel initialization from SQLite"};
     Gaudi::Property<std::string> m_sqliteDbFullPath{this,"SQLiteDBFullPath","","Explicit setting of full path to SQLiteDB. For testing purposes only"};
-
+    Gaudi::Property<unsigned> m_nTheads{this, "nThreads", 0, "Number of available threads for the geometry reading"};
 
     std::unique_ptr<GeoModelIO::ReadGeoModel> m_sqliteReader{};
     std::shared_ptr<GMDBManager>              m_sqliteDbManager{};

@@ -37,13 +37,20 @@ def GeoModelCfg(flags):
     #TagInfoMgr used by GeoModelSvc but no ServiceHandle. Relies on string-name
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
     result.merge(TagInfoMgrCfg(flags))
-
+    nThreads = 0
+    ### Use the try catch pattern as there's no clear indication whether the job
+    #### is configured in the trigger environment or not. isOnine fails on MC...
+    try:
+        nThreads = flags.Concurrency.NumThreads
+    except Exception:
+        pass
     gms=CompFactory.GeoModelSvc(AtlasVersion=flags.GeoModel.AtlasVersion,
                                 SQLiteDB=flags.GeoModel.SQLiteDB,
                                 SQLiteDBFullPath=flags.GeoModel.SQLiteDBFullPath,
                                 EMECStandard=flags.GeoModel.EMECStandard,
                                 IgnoreTagDifference=flags.GeoModel.IgnoreTagDifference,
-                                SupportedGeometry=int(relversion[0]))
+                                SupportedGeometry=int(relversion[0]),
+                                nThreads = nThreads)
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         ## Protects GeoModelSvc in the simulation from the AlignCallbacks
         gms.AlignCallbacks = False
