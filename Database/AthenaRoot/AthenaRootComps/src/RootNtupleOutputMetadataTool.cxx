@@ -214,7 +214,8 @@ RootNtupleOutputMetadataTool::writeMetadata()
   if (pc.isSuccess()) {
     for (; titer != tend; ++titer) {
       std::string key = titer.key();
-      if (m_treesWritten.find(key) == m_treesWritten.end()) {
+      if (!m_treesWritten.emplace(key).second) {
+        // Not aready in the set.
         const TTree* x = (TTree*)titer->tree(); 
         try { 
           if (this->addMetadata(key,x,typeid(TTree)).isFailure()) failure=true; 
@@ -222,7 +223,6 @@ RootNtupleOutputMetadataTool::writeMetadata()
         catch (...) { 
           ATH_MSG_INFO("Error adding metadata for TTree " << key); 
         } 
-        m_treesWritten.insert(key);
       }
       else {ATH_MSG_WARNING("Tree " << key << " already written");}
     }
