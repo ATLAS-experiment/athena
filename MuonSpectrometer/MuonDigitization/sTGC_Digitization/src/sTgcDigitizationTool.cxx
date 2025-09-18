@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -13,33 +13,23 @@
 //sTGC digitization includes
 #include "sTGC_Digitization/sTgcDigitizationTool.h"
 
-#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "MuonSimData/MuonSimDataCollection.h"
 #include "MuonSimData/MuonSimData.h"
 
 //Outputs
 #include "MuonDigitContainer/sTgcDigitContainer.h"
 
-
 //Geometry
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
-#include "MuonSimEvent/sTgcHitIdHelper.h"
 #include "MuonSimEvent/sTgcSimIdToOfflineId.h"
-#include "TrkDetDescrUtils/GeometryStatics.h"
-#include "TrkEventPrimitives/LocalDirection.h"
-#include "TrkSurfaces/Surface.h"
-#include "CLHEP/Random/RandGaussZiggurat.h"
 
 //Truth
 #include "GeneratorObjects/HepMcParticleLink.h"
-#include "AtlasHepMC/GenParticle.h"
 
 #include "AthenaKernel/RNGWrapper.h"
-
-#include <sstream>
-#include <iostream>
-#include <fstream>
+#include "CLHEP/Random/RandGaussZiggurat.h"
 
 #include <memory>
 
@@ -110,7 +100,7 @@ StatusCode sTgcDigitizationTool::initialize() {
     return StatusCode::FAILURE;
   }
   double meanGasGain = 2.15 * 1E-4 * std::exp(6.88*m_runVoltage);
-  m_digitizer = std::make_unique<sTgcDigitMaker>(m_idHelperSvc.get(), m_doChannelTypes, meanGasGain, m_doPadSharing, m_stripChargeScale, m_applyAsBuiltBLines);
+  m_digitizer = std::make_unique<sTgcDigitMaker>(m_idHelperSvc.get(), m_doChannelTypes, meanGasGain, m_doPadSharing, m_applyAsBuiltBLines);
   m_digitizer->setLevel(static_cast<MSG::Level>(msgLevel()));
   ATH_CHECK(m_digitizer->initialize());
 
