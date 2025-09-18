@@ -30,7 +30,7 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args,flags)
   
     
-    cfg.getService("MessageSvc").setVerbose = ["MuonSegmentFittingAlg"]
+    cfg.getService("MessageSvc").setVerbose = []
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
