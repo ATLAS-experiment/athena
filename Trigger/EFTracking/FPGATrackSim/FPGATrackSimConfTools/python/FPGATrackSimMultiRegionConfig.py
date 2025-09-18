@@ -49,6 +49,21 @@ def FPGATrackSimRunSecondStageOnManyRegions(flags):
                      'FPGATrackSimTrack2ndKey': f"FPGATracks_2nd_reg{region}"}))
     return acc
 
+def FPGATrackSimRunLayerStudyOnManyRegions(flags):
+    acc = ComponentAccumulator()
+    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags 
+    from FPGATrackSimConfTools.FPGATrackSimLayerStudyConfig import FPGATrackSimLayerStudyCfg 
+    
+    for region in flags.Trigger.FPGATrackSim.regionList:
+        flagsLS = flags.clone()
+        flagsLS.Trigger.FPGATrackSim.region = region
+        ConfigureMultiRegionFlags(flagsLS)
+        flagsLS.lock()
+        acc.merge(FPGATrackSimLayerStudyCfg(flagsLS))
+
+    return acc
+
+
 def FPGATrackSimRegionMergeringAlgCfg(flagsIn,name="FPGATrackSimRegionMergingAlg",**kwargs):
     acc = ComponentAccumulator()
     flags = flagsIn.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flagsIn.Trigger.FPGATrackSim.algoTag,keepOriginal=False)
