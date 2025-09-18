@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/src/ExtendedEventContext.cxx
@@ -36,11 +36,31 @@ const ExtendedEventContext& getExtendedEventContext (const EventContext& ctx)
 
 
 /**
+ * @brief Retrieve an extended context from a context object,
+ *        returning nullptr if it doesn't exist.
+ */
+const ExtendedEventContext* tryGetExtendedEventContext (const EventContext& ctx)
+{
+  return ctx.tryGetExtension<ExtendedEventContext>();
+}
+
+
+/**
  * @brief Retrieve an extended context from a context object.
  */
 ExtendedEventContext& getExtendedEventContext (EventContext& ctx)
 {
   return ctx.getExtension<ExtendedEventContext>();
+}
+
+
+/**
+ * @brief Retrieve an extended context from a context object.
+ *        returning nullptr if it doesn't exist.
+ */
+ExtendedEventContext* tryGetExtendedEventContext (EventContext& ctx)
+{
+  return ctx.tryGetExtension<ExtendedEventContext>();
 }
 
 
