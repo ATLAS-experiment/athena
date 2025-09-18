@@ -69,9 +69,6 @@ namespace MuonR4 {
     
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
-        if (ctx.eventID().event_number() != 6) {
-            return StatusCode::SUCCESS;
-        }
         std::vector<std::unique_ptr<Segment>> allSegments{};
         for (const SegmentSeed* seed : *segmentSeeds) {
             std::vector<std::unique_ptr<Segment>> segments = fitSegmentSeed(ctx, *gctx, seed);
@@ -120,7 +117,7 @@ namespace MuonR4 {
                                   std::make_move_iterator(allSegments.begin()),
                                   std::make_move_iterator(allSegments.end()));
         ATH_MSG_VERBOSE("Found in total "<<writeSegments->size()<<" segments. ");
-        return StatusCode::FAILURE; 
+        return StatusCode::SUCCESS; 
     }
 
     SegmentFitResult SegmentFittingAlg::fitSegmentHits(const EventContext& ctx,
