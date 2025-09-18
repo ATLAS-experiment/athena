@@ -121,7 +121,7 @@ namespace ActsTrk
         return StatusCode::FAILURE;
       }
 
-    if (m_ambiStrategy == 1 /* END_OF_TF */) {
+    if (m_ambiStrategy == 1u /* END_OF_TF */) {
       Acts::GreedyAmbiguityResolution::Config cfg;
       cfg.maximumSharedHits = m_maximumSharedHits;
       cfg.maximumIterations = m_maximumIterations;
@@ -1024,7 +1024,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
     event_stat[category_i][kNTotalSharedHits] += nShared;
 
-    if (m_ambiStrategy == 2) { // run the ambiguity during track selection
+    if (m_ambiStrategy == 2u) { // run the ambiguity during track selection
 
       if (actsDestProxy.nSharedHits() <= m_maximumSharedHits) {
         ++event_stat[category_i][kNSelectedTracks];
