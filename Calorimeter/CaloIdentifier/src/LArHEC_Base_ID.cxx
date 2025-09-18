@@ -328,9 +328,10 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
 	}
       }
       int phimin = phi_min(regId);
-      if(phimin < 0) {
-	phimin = 0;
-	std::string strg = "setting phimin to 0 because actual value not found for regId " 
+      int phimax = phi_max(regId);
+      if(phimin < 0 || phimax < 0) {
+	phimin = phimax = 0;
+	std::string strg = "setting phimin/phimax to 0 because actual value not found for regId " 
 	  + show_to_string(regId);
 	if(m_msgSvc) {
 	  log << MSG::WARNING << strg << endmsg;
@@ -344,7 +345,7 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
       hc.m_hash   = min_hash;
       hc.m_etamin = etamin;
       hc.m_phimin = phimin;
-      hc.m_nphi   = phi_max(min)-phimin+1 ;
+      hc.m_nphi   = phimax-phimin+1 ;
       m_hash_calcs[m_pn_reg_impl.unpack(min)] = hc;
 	
       if (m_pn_reg_impl.unpack(min) > 15) {
