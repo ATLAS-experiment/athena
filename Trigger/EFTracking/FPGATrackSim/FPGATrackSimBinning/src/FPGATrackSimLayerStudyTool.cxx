@@ -125,32 +125,41 @@ StatusCode FPGATrackSimLayerStudyTool::registerHistograms(const FPGATrackSimBinn
 
 
 StatusCode FPGATrackSimLayerStudyTool::bookTrees() {
-  ATH_MSG_DEBUG("Booking Layers Study  Tree");
-  m_bin_tree = new TTree("LayerStudy","LayerStudy");
-  m_bin_tree->Branch("bin", &m_bin_tree_bin);
-  m_bin_tree->Branch("r", &m_bin_tree_r);
-  m_bin_tree->Branch("z", &m_bin_tree_z);
-  m_bin_tree->Branch("id", &m_bin_tree_id);
-  m_bin_tree->Branch("hash", &m_bin_tree_hash);
-  m_bin_tree->Branch("layer", &m_bin_tree_layer);
-  m_bin_tree->Branch("side", &m_bin_tree_side);
+  ATH_MSG_DEBUG("Booking Layer Study Tree: " << m_layerStudyTreeName
+                 << " and Truth Tree: " << m_truthTreeName);
+
+  // Create the LayerStudy tree
+  m_bin_tree = new TTree(m_layerStudyTreeName.value().c_str(),
+                         m_layerStudyTreeName.value().c_str());
+  m_bin_tree->Branch("bin",     &m_bin_tree_bin);
+  m_bin_tree->Branch("r",       &m_bin_tree_r);
+  m_bin_tree->Branch("z",       &m_bin_tree_z);
+  m_bin_tree->Branch("id",      &m_bin_tree_id);
+  m_bin_tree->Branch("hash",    &m_bin_tree_hash);
+  m_bin_tree->Branch("layer",   &m_bin_tree_layer);
+  m_bin_tree->Branch("side",    &m_bin_tree_side);
   m_bin_tree->Branch("etamod",  &m_bin_tree_etamod);
   m_bin_tree->Branch("phimod",  &m_bin_tree_phimod);
   m_bin_tree->Branch("dettype", &m_bin_tree_dettype);
-  m_bin_tree->Branch("detzone",  &m_bin_tree_detzone);
+  m_bin_tree->Branch("detzone", &m_bin_tree_detzone);
 
-  m_truth_tree = new TTree("TruthTree", "TruthTree");
+  // Create the Truth tree
+  m_truth_tree = new TTree(m_truthTreeName.value().c_str(),
+                           m_truthTreeName.value().c_str());
   m_truth_tree->Branch("stdpars", &m_truth_tree_phi);
   m_truth_tree->Branch("stdpars", &m_truth_tree_qOverPt);
   m_truth_tree->Branch("stdpars", &m_truth_tree_eta);
   m_truth_tree->Branch("stdpars", &m_truth_tree_d0);
   m_truth_tree->Branch("stdpars", &m_truth_tree_z0);
-  m_truth_tree->Branch("parset", &m_truth_tree_parset);
+  m_truth_tree->Branch("parset",  &m_truth_tree_parset);
 
-  ATH_CHECK(m_tHistSvc->regTree(m_dir + m_bin_tree->GetName(), m_bin_tree));
-  ATH_CHECK(m_tHistSvc->regTree(m_dir + m_truth_tree->GetName(), m_truth_tree));
+  // Register with THistSvc — convert Gaudi::Property to std::string before concatenation
+  ATH_CHECK(m_tHistSvc->regTree(m_dir.value() + m_layerStudyTreeName.value(), m_bin_tree));
+  ATH_CHECK(m_tHistSvc->regTree(m_dir.value() + m_truthTreeName.value(),      m_truth_tree));
+
   return StatusCode::SUCCESS;
 }
+
 void FPGATrackSimLayerStudyTool::ClearTreeVectors()
 {
   m_bin_tree_r.clear();

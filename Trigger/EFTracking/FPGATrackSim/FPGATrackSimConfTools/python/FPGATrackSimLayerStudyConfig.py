@@ -130,29 +130,34 @@ def FPGATrackSimLayerStudyToolCfg(flags):
     result.setPrivateTools(Monitor)
     return result
 
-def FPGATrackSimLayerStudyCfg(inputFlags):
-
-    flags = FPGATrackSimAnalysisConfig.prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(inputFlags)
-
-    result=ComponentAccumulator()
+def FPGATrackSimLayerStudyCfg(flags):
+    from AthenaConfiguration.ComponentFactory import CompFactory    
+    flags = FPGATrackSimAnalysisConfig.prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(flags)
+    result = ComponentAccumulator()
     if not flags.Trigger.FPGATrackSim.wrapperFileName:
         from InDetConfig.InDetPrepRawDataFormationConfig import AthenaTrkClusterizationCfg
         result.merge(AthenaTrkClusterizationCfg(flags))
 
-    theFPGATrackSimLayerStudyAlg = CompFactory.FPGATrackSimLayerStudyAlg()
+    reg = flags.Trigger.FPGATrackSim.region
 
+    monitor_tool = CompFactory.FPGATrackSimLayerStudyTool(
+        f"BinMonitoring_reg{reg}",
+        LayerStudyTreeName=FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags, "LayerStudy"),
+        TruthTreeName=FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags, "TruthTree"),
+    )
+
+    theFPGATrackSimLayerStudyAlg = CompFactory.FPGATrackSimLayerStudyAlg(name=f"FPGATrackSimLayerStudyAlg_reg{reg}")
+
+    theFPGATrackSimLayerStudyAlg.BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg(flags))
+    theFPGATrackSimLayerStudyAlg.BinMonitoringTool = monitor_tool
     theFPGATrackSimLayerStudyAlg.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
     theFPGATrackSimLayerStudyAlg.stage = flags.Trigger.FPGATrackSim.layerStudyStage
-
     theFPGATrackSimLayerStudyAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     theFPGATrackSimLayerStudyAlg.FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
 
-    theFPGATrackSimLayerStudyAlg.BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg(flags))
-    theFPGATrackSimLayerStudyAlg.BinMonitoringTool = result.getPrimaryAndMerge(FPGATrackSimLayerStudyToolCfg(flags))
-
     result.addEventAlgo(theFPGATrackSimLayerStudyAlg)
-
     return result
+
 
 if __name__ == "__main__":
 
@@ -240,6 +245,10 @@ if __name__ == "__main__":
         if flags.Tracking.recoChain:
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
+
+    #Configure Multiregion config algo for layerstudyalg
+    from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimRunLayerStudyOnManyRegions
+    acc.merge(FPGATrackSimRunLayerStudyOnManyRegions(flags))
 
     # Configure both the dataprep and logical hits algorithms.
     acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
