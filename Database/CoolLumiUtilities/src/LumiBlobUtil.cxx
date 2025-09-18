@@ -102,7 +102,6 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
     unsigned int y = 1; // Storage modes
     unsigned int BCID = 0;//Newest BCID number - used for storing the data when y=0 or y=2
     unsigned int BCIDold = 0; //Last BCID number - used for storing data when y=0 or y=2
-    unsigned int len = 0; //calculating the number of luminous bunches when y=2
     float BV = 0; //The actual stored value
     float AB1 = 0; // The avarage value for one LB/timestep
     double element = 0; // This is allways 0, but makes sure it is a double
@@ -161,7 +160,7 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
       } //This ends y=1   
       if (y==2) {
 	const uint16_t* k1 = reinterpret_cast<const uint16_t*> (k);
-	len = *k1;
+	unsigned int len = *k1;
 	k1++;
 	const uint8_t* y12 = k+2*(len+1);
 	for (unsigned int i = 0; i<len; i++, k1++) {
@@ -183,8 +182,8 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
 	  m_bunchLumis.push_back(element);
 	}
 	BCIDold=0;
+        if (len > 0) AB1 = AB1/len;
       } //This ends y=2
-      if (len > 0) AB1 = AB1/len;
       // std::cout << AB1 << std::endl;
     } //This ends x=1    
     if (x==2) {
@@ -245,8 +244,8 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
         for (unsigned int i=BCIDold; i<3564; i++) {
           m_bunchLumis.push_back(element);
         }
+        if (len > 0) AB1 = AB1/len;
       } // This ends y=2               
-      if (len > 0) AB1 = AB1/len;
       //  std::cout << AB1 << std::endl;
     } // This ends x=2     
     if (x==4) {
@@ -321,8 +320,8 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
         for (unsigned int i=(BCIDold); i<3564; i++) {
           m_bunchLumis.push_back(element);
         }
+        if (len > 0) AB1 = AB1/len;
       }//This ends y=2
-      if (len > 0) AB1 = AB1/len;
       //  std::cout << AB1 << std::endl;
     } //This ends x=4
                                                                                                    
