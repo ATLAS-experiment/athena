@@ -458,7 +458,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
           // between signal in scintillator and dead material energy, in some eta regions correlation is absent. So we select here
           // following approach: if fit failed, take coefficients from charged pion data and use them for neutral
           if(!m_FitData[i_size]->isOK) {
-            std::vector<int > tmp = indexes;
+            std::vector<int > tmp = std::move(indexes);
             tmp[CaloLocalHadCoeffHelper::DIM_EMFRAC]=0;
             int iBin = m_HadDMCoeff->getBin( n_area, tmp);
             const CaloLocalHadCoeff::LocalHadCoeff *had_pars = new_data->getCoeff(iBin);
@@ -473,7 +473,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
         }else{
           // if fit went wrong, lets take fit results from neighboting eta bin
           if(!m_FitData[i_size]->isOK) {
-            std::vector<int > tmp = indexes;
+            std::vector<int > tmp = std::move(indexes);
             if(tmp[CaloLocalHadCoeffHelper::DIM_ETA]>0) {
               tmp[CaloLocalHadCoeffHelper::DIM_ETA] -= 1;
             }else if(tmp[CaloLocalHadCoeffHelper::DIM_ETA]==0){
