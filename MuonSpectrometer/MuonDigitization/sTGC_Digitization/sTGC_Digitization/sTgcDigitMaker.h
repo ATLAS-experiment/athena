@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,14 +14,14 @@
 #define STGCDIGITMAKER_H
 
 #include "AthenaBaseComps/AthMessaging.h"
-#include "MuonSimEvent/sTGCSimHit.h"
-#include "MuonSimEvent/sTgcHitIdHelper.h"
+#include "CxxUtils/ArrayHelper.h"
 #include "MuonCondData/DigitEffiData.h"
 #include "MuonCondData/NswCalibDbThresholdData.h"
-#include "MuonReadoutGeometry/sTgcReadoutElement.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "CxxUtils/ArrayHelper.h"
 #include "MuonDigitContainer/sTgcDigit.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonReadoutGeometry/sTgcReadoutElement.h"
+#include "MuonSimEvent/sTGCSimHit.h"
+
 namespace CLHEP {
   class HepRandomEngine;
   class HepRandom;
@@ -41,7 +41,6 @@ class sTgcDigitMaker : public AthMessaging {
                  const int channelTypes,
                  double meanGasGain, 
                  bool doPadChargeSharing,
-                 double stripChargeScale,
                  bool applyAsBuiltBLines);
 
   virtual ~sTgcDigitMaker();
@@ -162,10 +161,8 @@ class sTgcDigitMaker : public AthMessaging {
   static constexpr std::array<double, 2> m_clusterProfile{0.573, 1.092};
   // Dependence of energy deposited on incident angle
   double m_chargeAngularFactor{4.0};
-  // Overall factor to scale the total strip cluster charge
-  double m_stripChargeScale{0.4};
-
-  bool m_applyAsBuiltBLines{false}; // apply as built and B-lines parameters
+  // apply as built and B-lines parameters
+  bool m_applyAsBuiltBLines{false};
 };
 
 #endif

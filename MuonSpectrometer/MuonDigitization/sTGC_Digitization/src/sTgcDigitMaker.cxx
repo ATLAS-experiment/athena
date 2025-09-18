@@ -1,27 +1,26 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTGC_Digitization/sTgcDigitMaker.h"
 
-#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
-#include "MuonDigitContainer/sTgcDigitCollection.h"
-#include "MuonSimEvent/sTgcSimIdToOfflineId.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
-#include "TrkEventPrimitives/LocalDirection.h"
-#include "TrkSurfaces/Surface.h"
-#include "GaudiKernel/MsgStream.h"
+#include "MuonSimEvent/sTgcSimIdToOfflineId.h"
+
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "PathResolver/PathResolver.h"
+
+#include "GaudiKernel/MsgStream.h"
+
 #include "CLHEP/Units/SystemOfUnits.h"
-#include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandGamma.h"
-#include "CLHEP/Vector/ThreeVector.h"
-#include "AthenaBaseComps/AthCheckMacros.h"
 
 #include "TF1.h"
+
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -35,14 +34,12 @@ sTgcDigitMaker::sTgcDigitMaker(const Muon::IMuonIdHelperSvc* idHelperSvc,
                                const int channelTypes,
                                double meanGasGain,
                                bool doPadChargeSharing,
-                               double stripChargeScale,
                                bool applyAsBuiltBLines)
   : AthMessaging ("sTgcDigitMaker"),
   m_idHelperSvc{idHelperSvc},
   m_channelTypes{channelTypes},
   m_meanGasGain{meanGasGain},
   m_doPadSharing{doPadChargeSharing},
-  m_stripChargeScale{stripChargeScale},
   m_applyAsBuiltBLines(applyAsBuiltBLines) {}
 //----- Destructor
 sTgcDigitMaker::~sTgcDigitMaker() = default;
