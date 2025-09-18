@@ -522,7 +522,7 @@ template<class T> inline bool isTechnicolor(const T& p){return isTechnicolor(p->
 template <>
 inline bool isTechnicolor(const DecodedPID& p) {
   const auto& pp = (p.ndigits() == 7) ? p.shift(2) : DecodedPID(0);
-  return (p.ndigits() == 7 && p(0) == 3 && (p(1) == 0 || p(0) == 1) &&
+  return (p.ndigits() == 7 && p(0) == 3 && (p(1) == 0 || p(1) == 1) &&
           (isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) ||
            isDiquark(pp) || isHadron(pp)));
 }
@@ -697,7 +697,12 @@ template<> inline bool isGenericMultichargedParticle(const int& p){ auto value_d
 template<class T> inline bool isNucleus(const T& p){return isNucleus(p->pdg_id());}
 template<> inline bool isNucleus(const DecodedPID& p){
   if (std::abs(p.pid()) == PROTON) return true;
-  return (p.ndigits() == 10 &&  p(0) == 1 &&  p(1) == 0 );
+  if (p.ndigits() != 10) return false;
+  // charge should always be less than or equal to baryon number
+  // the following line is A >= Z
+  const int A = p(8) + 10*p(7) + 100*p(6);
+  const int Z = p(5) + 10*p(4) + 100*p(3);
+  return ( A >= Z &&  p(0) == 1 &&  p(1) == 0 );
 }
 template<> inline bool isNucleus(const int& p){ auto value_digits = DecodedPID(p); return isNucleus(value_digits);}
 
