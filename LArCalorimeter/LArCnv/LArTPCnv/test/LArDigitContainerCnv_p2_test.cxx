@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LArTPCnv/test/LArDigitContainerCnv_p2_test.cxx
@@ -103,6 +103,11 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
 int main ATLAS_NOT_THREAD_SAFE ()
 {
-  test1();
+  try{
+    test1();
+  } catch(std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in LArDigitContainerCnv_p2_test"<<std::endl;
+    return 1;
+  }
   return 0;
 }
