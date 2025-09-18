@@ -199,7 +199,7 @@ pool::CollectionFactory::registerExisting( const pool::ICollectionDescription& d
    log << coral::Debug << "Registering collection PFN=" << physicalName
        << ", LFN=" << logicalName  << coral::MessageStream::endmsg;
 
-   std::unique_ptr<pool::ICollection> collection 
+   std::unique_ptr<pool::ICollection> collection
      ( openWithPhysicalName( physicalName,
                              collectionCatalog,
                              pool::ICollection::READ,
