@@ -24,15 +24,16 @@ typedef std::vector<TestClass*> TestContainer;
 CLASS_DEF( TestContainer, 16530833, 1 )
 
 using namespace SG;
-void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
+void testDataInView( const EventContext& ctx, MsgStream& log ) {
 
   // Make parent view
   auto parentView = new View( "ParentView", -1 );
   auto t1 = std::make_unique<TestClass>();
   t1->value = 1;
   {
-    SG::WriteHandle<TestClass> wh( "test1" );
-    wh.setProxyDict( parentView ).ignore();
+    SG::WriteHandleKey<TestClass> whk( "test1" );
+    EXPECT_TRUE( whk.initialize().isSuccess() );
+    auto wh = ViewHelper::makeHandle( parentView, whk, ctx );
     auto status = wh.record( std::move( t1 ) );
     EXPECT_TRUE( status.isSuccess() );
   }
@@ -42,8 +43,9 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
   auto t2 = std::make_unique<TestClass>();
   t2->value = 2;
   {
-    SG::WriteHandle<TestClass> wh( "test2" );
-    wh.setProxyDict( childView ).ignore();
+    SG::WriteHandleKey<TestClass> whk( "test2" );
+    EXPECT_TRUE( whk.initialize().isSuccess() );
+    auto wh = ViewHelper::makeHandle( childView, whk, ctx );
     auto status = wh.record( std::move( t2 ) );
     EXPECT_TRUE( status.isSuccess() );
   }
@@ -51,21 +53,24 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
   // All prepared, will start testing if queries respond correctly
   {
     // Ask for an object that doesn't exist
-    SG::ReadHandle<TestClass> rh( "test" );
-    rh.setProxyDict( childView ).ignore();
+    SG::ReadHandleKey<TestClass> rhk( "test" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+    auto rh = ViewHelper::makeHandle( childView, rhk, ctx );
     EXPECT_FALSE( rh.isValid() );
   }
   {
     // Ask for object in the child view
-    SG::ReadHandle<TestClass> rh( "test2" );
-    rh.setProxyDict( childView ).ignore();
+    SG::ReadHandleKey<TestClass> rhk( "test2" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+    auto rh = ViewHelper::makeHandle( childView, rhk, ctx );
     EXPECT_TRUE( rh.isValid() );
     EXPECT_EQ( rh->value, 2 );
   }
   {
     // Ask child view for object that only exists in the parent
-    SG::ReadHandle<TestClass> rh( "test1" );
-    rh.setProxyDict( childView ).ignore();
+    SG::ReadHandleKey<TestClass> rhk( "test1" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+    auto rh = ViewHelper::makeHandle( childView, rhk, ctx );
     EXPECT_FALSE( rh.isValid() );
   }
   log << MSG::INFO << "Views that are not linked behave correctly" << endmsg;
@@ -74,15 +79,17 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
   childView->linkParent( parentView );
   {
     // Is the original object still there?
-    SG::ReadHandle<TestClass> rh( "test2" );
-    rh.setProxyDict( childView ).ignore();
+    SG::ReadHandleKey<TestClass> rhk( "test2" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+    auto rh = ViewHelper::makeHandle( childView, rhk, ctx );
     EXPECT_TRUE( rh.isValid() );
     EXPECT_EQ( rh->value, 2 );
   }
   {
     // Is the object from the parent now also visible?
-    SG::ReadHandle<TestClass> rh( "test1" );
-    rh.setProxyDict( childView ).ignore();
+    SG::ReadHandleKey<TestClass> rhk( "test1" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+    auto rh = ViewHelper::makeHandle( childView, rhk, ctx );
     EXPECT_TRUE( rh.isValid() );
     EXPECT_EQ( rh->value, 1);
   }
@@ -93,25 +100,28 @@ void testDataInView( StoreGateSvc* /*sg*/ , MsgStream& log ) {
   t3->value = 3;
   {
     // Can it be recorded? (should be allowed)
-    SG::WriteHandle<TestClass> wh( "test1" );
-    wh.setProxyDict( childView ).ignore();
+    SG::WriteHandleKey<TestClass> whk( "test1" );
+    EXPECT_TRUE( whk.initialize().isSuccess() );
+    auto wh = ViewHelper::makeHandle( childView, whk, ctx );
     auto status = wh.record( std::move( t3 ) );
     EXPECT_TRUE( status.isSuccess() );
   }
   {
     // Do we now see the child object in preference to the parent?
-    SG::ReadHandle<TestClass> rh( "test1" );
-    rh.setProxyDict( childView ).ignore();
+    SG::ReadHandleKey<TestClass> rhk( "test1" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+    auto rh = ViewHelper::makeHandle( childView, rhk, ctx );
     EXPECT_TRUE( rh.isValid() );
     EXPECT_EQ( rh->value, 3);
   }
   log << MSG::INFO << "Hiding works as expected" << endmsg;
 }
 
-void testFallThrough( StoreGateSvc* sg , MsgStream& log) {
+void testFallThrough( const EventContext& ctx, MsgStream& log) {
   auto t = std::make_unique<TestClass>();
-  SG::WriteHandle<TestClass> wh( "inStore" );
-  wh.setProxyDict( sg ).ignore();
+  SG::WriteHandleKey<TestClass> whk( "inStore" );
+  EXPECT_TRUE( whk.initialize().isSuccess() );
+  auto wh = SG::makeHandle(whk, ctx);
   auto status = wh.record( std::move( t ) );
   EXPECT_TRUE( status.isSuccess() );
 
@@ -120,20 +130,22 @@ void testFallThrough( StoreGateSvc* sg , MsgStream& log) {
   // is enabled
   {
     auto opaqueView = new View( "OpaqueView", -1, false );
-    SG::ReadHandle<TestClass> rh( "inStore" );
-    rh.setProxyDict( opaqueView ).ignore();
+    SG::ReadHandleKey<TestClass> rhk( "inStore" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+    auto rh = ViewHelper::makeHandle( opaqueView, rhk, ctx );
     EXPECT_FALSE( rh.isValid() );
   }
   {
     auto transparentView = new View( "TransparentView", -1 );
-    SG::ReadHandle<TestClass> rh( "inStore" );
-    rh.setProxyDict( transparentView ).ignore();
+    SG::ReadHandleKey<TestClass> rhk( "inStore" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+    auto rh = ViewHelper::makeHandle( transparentView, rhk, ctx );
     EXPECT_TRUE( rh.isValid() );
   }
   log << MSG::INFO << "Fall through works as expected" << endmsg;
 }
 
-void testFallThroughLinks( StoreGateSvc* sg , MsgStream& log ) {
+void testFallThroughLinks( const EventContext& ctx, MsgStream& log ) {
 
   // Have to make a container to test element links
   auto t = std::make_unique<TestContainer>();
@@ -143,8 +155,9 @@ void testFallThroughLinks( StoreGateSvc* sg , MsgStream& log ) {
   t->back()->value = 4;
 
   // Store the container in the event-level store
-  SG::WriteHandle<TestContainer> wh( "inStore" );
-  wh.setProxyDict( sg ).ignore();
+  SG::WriteHandleKey<TestContainer> whk( "inStore" );
+  EXPECT_TRUE( whk.initialize().isSuccess() );
+  auto wh = SG::makeHandle(whk, ctx);
   auto status = wh.record( std::move( t ) );
   EXPECT_TRUE( status.isSuccess() );
 
@@ -157,8 +170,9 @@ void testFallThroughLinks( StoreGateSvc* sg , MsgStream& log ) {
 
   // Make a parent view and store the container
   auto parentView = new View( "parentView", -1 );
-  SG::WriteHandle<TestContainer> wh2( "inParent" );
-  wh2.setProxyDict( parentView ).ignore();
+  SG::WriteHandleKey<TestContainer> whk2( "inParent" );
+  EXPECT_TRUE( whk2.initialize().isSuccess() );
+  auto wh2 = ViewHelper::makeHandle( parentView, whk2, ctx );
   status = wh2.record( std::move( t2 ) );
   EXPECT_TRUE( status.isSuccess() );
 
@@ -223,9 +237,12 @@ int main() {
     return -1;
   }
 
-  testDataInView( pStore, log );
-  testFallThrough( pStore, log );
-  testFallThroughLinks( pStore, log );
+  EventContext ctx;
+  Atlas::setExtendedEventContext (ctx, Atlas::ExtendedEventContext(pStore.get()) );
+
+  testDataInView( ctx, log );
+  testFallThrough( ctx, log );
+  testFallThroughLinks( ctx, log );
 
   return 0;
 }
