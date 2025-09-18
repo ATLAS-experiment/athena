@@ -124,6 +124,7 @@ struct Digi_MonValues {
   float digi_diff_adc_ped_norm;
   float digi_diff_adc_ped;
   float digi_diff_adc0_ped;
+  float digi_adc_rms;
   int digi_bcid;
   unsigned int digi_lb;
   bool digi_passDigiNom;
@@ -187,6 +188,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto Digi_Diff_ADC_Ped = Monitored::Scalar<float>("Digi_Diff_ADC_Ped", -999); // Diff_ADC_Pedestal
   auto Digi_Diff_ADC0_Ped = Monitored::Scalar<float>("Digi_Diff_ADC0_Ped", -999); // Pedestal diff
   auto Digi_Diff_ADC_Ped_Norm = Monitored::Scalar<float>("Digi_Diff_ADC_Ped_Norm",-999); // Diff_ADC_Pedestal_Norm
+  auto Digi_ADC_RMS = Monitored::Scalar<float>("Digi_ADC_RMS",-1); // Digi_ADC_RMS
+
   // cuts
   auto notBadQual = Monitored::Scalar<bool>("notBadQual",false);
   auto ADCped10RMS = Monitored::Scalar<bool>("ADCped10RMS",false);
@@ -401,6 +404,17 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
           ADC_0 = ADC_0 / 8;
         }
 
+        float samp_sum = std::accumulate(digito->begin(), digito->end(), 0.0);
+        float samp_mean = samp_sum / static_cast<float>(trueNSamples);
+        float sq_sum = std::inner_product(digito->begin(), digito->end(), digito->begin(), 0.0);
+        float rms_arg = sq_sum / static_cast<float>(trueNSamples) - samp_mean * samp_mean;
+
+        if (rms_arg < 0)
+          Digi_ADC_RMS = -1;
+        else
+          Digi_ADC_RMS = std::sqrt(rms_arg);
+        
+
         // Start Loop over samples
         Digi_Diff_ADC0_Ped = ADC_0 - Pedestal;
         for (unsigned i = 0; i < trueNSamples; ++i) {
@@ -435,10 +449,10 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
           }
 
           lvaluemap_digi.emplace_back(Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos,
-                                      Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom,
+                                      Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, Digi_ADC_RMS, BCID, lumi_block, passDigiNom,
                                       badNotMasked);
           lvaluemap_digi_ALL.emplace_back(Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos,
-                                          Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom,
+                                          Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, Digi_ADC_RMS, BCID, lumi_block, passDigiNom,
                                           badNotMasked);
 
         }  // End loop over samples
@@ -465,10 +479,11 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         auto digi_part_lb = Monitored::Collection("Digi_part_LB", tool, [](const auto& v) { return v.digi_lb; });
         auto digi_part_passDigiNom = Monitored::Collection("Digi_part_passDigiNom", tool, [](const auto& v) { return v.digi_passDigiNom; });
         auto digi_part_badNotMasked = Monitored::Collection("Digi_part_badNotMasked", tool, [](const auto& v) { return v.digi_badNotMasked; });
+        auto digi_part_adc_rms = Monitored::Collection("Digi_part_adc_rms", tool, [](const auto& v) { return v.digi_adc_rms; });
 
         fill(m_tools[m_toolmapLayerNames_digi.at(m_layerNames[ilayer])], digi_part_eta, digi_part_phi, digi_part_ieta, digi_part_iphi, digi_part_sampos,
              digi_part_adc, digi_part_latomesourceidbin, digi_part_pedestal, digi_part_maxpos, digi_part_diff_adc_ped_norm, digi_part_diff_adc_ped,
-             digi_part_diff_adc0_ped, digi_part_bcid, digi_part_lb, digi_part_passDigiNom, digi_part_badNotMasked);
+             digi_part_diff_adc0_ped, digi_part_adc_rms, digi_part_bcid, digi_part_lb, digi_part_passDigiNom, digi_part_badNotMasked);
       }
 
     }  // End if(LArDigitContainer is valid)

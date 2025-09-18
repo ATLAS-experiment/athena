@@ -65,8 +65,6 @@ def checkSequenceConsistency( seq ):
                 __noSubSequenceOfName( c, n, seen )
 
     __noSubSequenceOfName( seq, seq.getName() )
-    for c in getSequenceChildren( seq ):
-        checkSequenceConsistency(c)
 
 
 def isSequence( obj ):

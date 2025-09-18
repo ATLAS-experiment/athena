@@ -57,6 +57,9 @@ TrigDec::TrigDecisionMakerMT::initialize()
 
   ATH_CHECK( m_lvl1Tool.retrieve() );
 
+  ATH_CHECK( m_CTPResultKeyIn.initialize( m_useEDMxAOD ) );
+  ATH_CHECK( m_l1ResultKeyOut.initialize( m_useEDMxAOD ) );
+
   return StatusCode::SUCCESS;
 }
 
@@ -227,19 +230,67 @@ TrigDec::TrigDecisionMakerMT::execute(const EventContext &context) const
 StatusCode
 TrigDec::TrigDecisionMakerMT::getL1Result(const LVL1CTP::Lvl1Result *&result, const EventContext &context) const
 {
-  SG::ReadHandle<ROIB::RoIBResult> roIBResult = SG::makeHandle<ROIB::RoIBResult>(m_ROIBResultKeyIn, context);
-  ATH_CHECK(roIBResult.isValid());
 
-  std::vector< std::unique_ptr<LVL1CTP::Lvl1Item> > itemConfig = m_lvl1Tool->makeLvl1ItemConfig(context);
+  if (m_useEDMxAOD) {
 
-  if (roIBResult->cTPResult().isComplete()) {
-    m_lvl1Tool->createL1Items(itemConfig, *roIBResult, &result);
-    ATH_MSG_DEBUG ( "Built LVL1CTP::Lvl1Result from valid CTPResult.");
-  }
+    SG::ReadHandle<xAOD::CTPResult> ctpResult = SG::makeHandle<xAOD::CTPResult>(m_CTPResultKeyIn, context);
+    ATH_CHECK(ctpResult.isValid());
 
-  if (result == nullptr) {
-    ATH_MSG_ERROR ( "Could not construct L1 result from roIBResult");
-    return StatusCode::FAILURE;
+    // Fill TBP, TAP, TAV when creating the Lvl1Result
+    auto lvl1Result = std::make_unique<LVL1CTP::Lvl1Result>(true);
+
+    // TBP words
+    const std::vector<uint32_t> ctpTBPWords = ctpResult->getTBPWords();
+    for (unsigned int iWord=0; iWord < ctpTBPWords.size(); ++iWord) {
+        lvl1Result->itemsBeforePrescale().push_back(ctpTBPWords[iWord]);
+        ATH_MSG_DEBUG( "TBP word #" << iWord << " is 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << ctpTBPWords[iWord] << std::dec);
+    }
+
+    // TAP words
+    const std::vector<uint32_t> ctpTAPWords = ctpResult->getTAPWords();
+    for (unsigned int iWord=0; iWord < ctpTAPWords.size(); ++iWord) {
+        lvl1Result->itemsAfterPrescale().push_back(ctpTAPWords[iWord]);
+        ATH_MSG_DEBUG("TAP word #" << iWord << " is 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << ctpTAPWords[iWord] << std::dec);
+    }
+
+    // TAV words
+    const std::vector<uint32_t> ctpTAVWords = ctpResult->getTAVWords();
+    for (unsigned int iWord = 0; iWord < ctpTAVWords.size(); ++iWord) {
+        lvl1Result->itemsAfterVeto().push_back(ctpTAVWords[iWord]);
+        ATH_MSG_DEBUG("TAV word #" << iWord << " is 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << ctpTAVWords[iWord] << std::dec);
+    }
+
+    // make sure TBP, TAP, TAV all have 8 entries!
+    if (lvl1Result->itemsBeforePrescale().size() < 8) lvl1Result->itemsBeforePrescale().resize(8, 0);
+    if (lvl1Result->itemsAfterPrescale().size() < 8) lvl1Result->itemsAfterPrescale().resize(8, 0);
+    if (lvl1Result->itemsAfterVeto().size() < 8) lvl1Result->itemsAfterVeto().resize(8, 0);
+
+    result = static_cast<const LVL1CTP::Lvl1Result*>(lvl1Result.get());
+    if (result == nullptr) {
+      ATH_MSG_ERROR ( "Could not construct L1 result from xAOD::CTPResult");
+      return StatusCode::FAILURE;
+    }
+
+    ATH_CHECK(SG::makeHandle(m_l1ResultKeyOut, context).record( std::move(lvl1Result)), {});
+    ATH_MSG_INFO ( "Built LVL1CTP::Lvl1Result from valid xAOD::CTPResult.");
+
+  } else {
+
+    SG::ReadHandle<ROIB::RoIBResult> roIBResult = SG::makeHandle<ROIB::RoIBResult>(m_ROIBResultKeyIn, context);
+    ATH_CHECK(roIBResult.isValid());
+
+    std::vector< std::unique_ptr<LVL1CTP::Lvl1Item> > itemConfig = m_lvl1Tool->makeLvl1ItemConfig(context);
+
+    if (roIBResult->cTPResult().isComplete()) {
+      m_lvl1Tool->createL1Items(itemConfig, *roIBResult, &result);
+      ATH_MSG_DEBUG ( "Built LVL1CTP::Lvl1Result from valid ROIB::CTPResult.");
+    }
+
+    if (result == nullptr) {
+      ATH_MSG_ERROR ( "Could not construct L1 result from roIBResult");
+      return StatusCode::FAILURE;
+    }
+
   }
 
   return StatusCode::SUCCESS;

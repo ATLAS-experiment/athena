@@ -398,6 +398,25 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
                                            ybins=500, ymin=0, ymax=5000,
                                            pattern=[(part)])
+            
+            partGroup_digi.defineHistogram("Digi_part_LB, Digi_part_adc_rms;ADC_RMS_vs_LB_"+thisSel,
+                                           title="RMS of ADC values vs LB "+selStrPart[thisSel]+"; LB; RMS of ADC Values",
+                                           type="TProfile",
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                                           ybins=100, ymin=0, ymax=10,
+                                           pattern=[(part)])
+
+            partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_adc_rms;ADC_RMS_vs_BCID_'+thisSel, 
+                                           title='RMS of ADC values vs BCID '+selStrPart[thisSel]+'; BCID; RMS of ADC Values',
+                                           type='TProfile',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=3564,xmin=-0.5,xmax=3563.5,
+                                           ybins=100, ymin=0, ymax=10,
+                                           pattern=[(part)])
+
 
             partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_BCID_'+thisSel, 
                                            title='ADC - Pedestal (all samples) vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
