@@ -157,7 +157,7 @@ int TileNeighbour::initialize(const Tile_Base_ID* tileID, const std::string& fil
           newCell.neighbours[j1].push_back(tmpName);
         }
       }
-      allCells.push_back(newCell);
+      allCells.push_back(std::move(newCell));
     }
   }
 
