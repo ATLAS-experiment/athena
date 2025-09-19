@@ -50,6 +50,8 @@ namespace MuonGMR4 {
           int stationPhi() const;
           /** @brief Returns the station eta of the chamber */
           int stationEta() const;
+          /** @brief Returns the side of the chamber */
+          int8_t side() const;
           /** @brief Returns an integer representing the stationName */
           int stationName() const;
           /** @brief Returns the MS sector of the chamber */

@@ -66,6 +66,7 @@ namespace MuonGMR4{
     int Chamber::stationPhi() const{ return readoutEles().front()->stationPhi(); }
     int Chamber::stationEta() const{ return readoutEles().front()->stationEta(); }
     int Chamber::stationName() const{ return readoutEles().front()->stationName(); }
+    int8_t Chamber::side() const{ return readoutEles().front()->stationEta() > 0 ? 1 : -1; }
     int Chamber::sector() const{ return idHelperSvc()->sector(readoutEles().front()->identify()); }
     const Chamber::defineArgs& Chamber::parameters() const { return m_args; }
     const Chamber::ReadoutSet& Chamber::readoutEles() const {
