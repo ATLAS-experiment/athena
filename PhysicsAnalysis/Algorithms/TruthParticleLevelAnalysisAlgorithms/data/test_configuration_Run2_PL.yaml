@@ -5,6 +5,7 @@ GeneratorLevelAnalysis: {}
 
 PL_Electrons:
   containerName: TruthElectrons
+  saveUID: true
   PtEtaSelection:
     useDressedProperties: true
     minPt: 20000.0
@@ -12,10 +13,12 @@ PL_Electrons:
     prefix: ""
 PL_Photons:
   containerName: TruthPhotons
+  saveUID: true
   PtEtaSelection:
     minPt: 20000.0
 PL_Muons:
   containerName: TruthMuons
+  saveUID: true
   PtEtaSelection:
     useDressedProperties: true
     minPt: 20000.0
@@ -23,6 +26,7 @@ PL_Muons:
     prefix: ""
 PL_Taus:
   containerName: TruthTaus
+  saveUID: true
   PtEtaSelection:
     minPt: 20000.0
   MCTCClassification:
@@ -39,5 +43,18 @@ PL_OverlapRemoval:
   photons: TruthPhotons
   jets: AntiKt4TruthDressedWZJets
   useRapidityForDeltaR: False
+
+# After configuring each container, many variables will be saved automatically.
+Output:
+  treeName: analysis
+  truthMetVars:
+    - TruthMET_NOSYS.met -> truth_met
+  containersOnlyForMC:
+    truth_mu_: TruthMuons
+    truth_el_: TruthElectrons
+    truth_ph_: TruthPhotons
+    truth_tau_: TruthTaus
+    truth_jet_: AntiKt4TruthDressedWZJets
+    truth_met_: TruthMET
 
 PrintConfiguration: {}
