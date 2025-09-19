@@ -346,7 +346,7 @@ template <class ContType>
             }
        
             for (auto& [etaHits, phiHits, two2DHits] : hitsPerGasGap) {
-                etaHits.clear();
+                ATH_MSG_DEBUG("Found "<<etaHits.size()<<"/"<<phiHits.size()<<" 1D and "<<two2DHits.size()<<" 2D hits in chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
                 /// Fill in the 2D measurements BIL Rpc / sTGC pad
                 fillUncombinedSpacePoints(*gctx, sectorTrans, two2DHits, pointsInChamb.etaHits);
                 /// Only one dimensional space points can be built
@@ -408,7 +408,8 @@ StatusCode SpacePointMakerAlg::execute(const EventContext& ctx) const {
     std::unique_ptr<SpacePointContainer> outContainer = std::make_unique<SpacePointContainer>();
     
     for (auto &[chamber, hitsPerChamber] : preSortedContainer){
-        ATH_MSG_DEBUG("Fill space points for chamber "<<chamber->identString());
+        ATH_MSG_DEBUG("Fill space points for chamber "<<chamber->identString() << " with "<<hitsPerChamber.etaHits.size()
+                        <<" primary and "<<hitsPerChamber.phiHits.size()<<" phi space points.");
         distributePointsAndStore(std::move(hitsPerChamber), *outContainer);
     }
     SG::WriteHandle<SpacePointContainer> writeHandle{m_writeKey, ctx};
