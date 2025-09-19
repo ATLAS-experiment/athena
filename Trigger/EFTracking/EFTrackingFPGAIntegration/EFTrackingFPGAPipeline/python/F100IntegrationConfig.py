@@ -68,6 +68,36 @@ def F1X0XRTIntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
 
     return acc
 
+def F100StreamIntegrationCfg(flags, name = 'F100StreamIntegrationAlg', **kwarg):
+    acc = ComponentAccumulator()
+
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
+    kwarg.setdefault('PixelStartClusterKernelName','loaderPixel')
+    kwarg.setdefault('PixelEndClusterKernelName','unloaderPixelCluster')
+    kwarg.setdefault('PixelEndClusterEdmKernelName','unloaderPixelEdm')
+
+    kwarg.setdefault('StripStartClusterKernelName','loaderStrip')
+    kwarg.setdefault('StripEndClusterKernelName','unloaderStrip')
+    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
+    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
+
+    if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
+        if 'RegSelTool' not in kwarg:
+            from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+            kwarg.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+
+    # Set up Chrono service
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True
+    ))
+
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100StreamIntegrationAlg(name, **kwarg))
+
+    return acc
 
 def F110IntegrationCfg(flags, name = 'F110IntegrationAlg', **kwarg):
     acc = ComponentAccumulator()
@@ -182,6 +212,8 @@ def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F1
         acc.merge(F1X0IntegrationCfg(flags, "F1X0IntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F1X0XRT"):
         acc.merge(F1X0XRTIntegrationCfg(flags, "F1X0XRTIntegrationAlg", **kwargs))
+    elif(flags.FPGADataPrep.doCodeType == "F100Stream"):
+        acc.merge(F100StreamIntegrationCfg(flags, "F100StreamIntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F110"):
         acc.merge(F110IntegrationCfg(flags, "F110IntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F110Stream"):
