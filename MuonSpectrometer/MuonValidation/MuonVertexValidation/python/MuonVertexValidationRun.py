@@ -19,6 +19,8 @@ def GetArgsFromParser():
     parser = ArgumentParser()
     parser.add_argument( "-i", "--inputFile", required=True, help="Input files to run on. Files can be comma or space separated", nargs="+")
     parser.add_argument( "-o", "--outputFile", default="MSVtxVal_out.NTUP.root", help="output root file")
+    parser.add_argument("--triggers", action="store_true", help="Configure the trigger tools")
+    parser.add_argument("--data", action="store_true", help="run on a data file")
     parser.add_argument("--maxEvents", default=-1, type=int, help="How many events shall be run maximally")
     parser.add_argument("--skipEvents", default=0, type=int, help="How many events shall be skipped")
     parser.add_argument("--threads", default=1, type=int, help="number of threads")
@@ -44,7 +46,7 @@ def MSVtxValidationCfg(flags, name="MSVertexValidationAlg", outStream="MSVtxVali
     # setting algorithm properties here via kwargs.setdefault("<property name>", <property value>)
     alg = CompFactory.MSVtxValidationAlg(name, **kwargs)
     result.merge(setupHistSvcCfg(flags,out_file=outFile, out_stream=outStream))
-    result.getPrimaryAndMerge(TriggerMatchingToolCfg(flags, name='R3MatchingTool'))
+    if kwargs.get("readTriggers", False): result.getPrimaryAndMerge(TriggerMatchingToolCfg(flags, name='R3MatchingTool'))
     result.addEventAlgo(alg)
 
     return result
@@ -70,5 +72,5 @@ if __name__ == "__main__":
     flags.Scheduler.ShowDataFlow = True
     flags.lock()
     cfg = setupServicesCfg(flags)
-    cfg.merge(MSVtxValidationCfg(flags, outFile=args.outputFile))
+    cfg.merge(MSVtxValidationCfg(flags, outFile=args.outputFile, readTriggers=args.triggers, isMC=not args.data))
     execute(cfg)
