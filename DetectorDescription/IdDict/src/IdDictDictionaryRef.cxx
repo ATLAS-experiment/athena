@@ -91,7 +91,7 @@ void IdDictDictionaryRef::generate_implementation(const IdDictMgr& idd,
         if (prepend_entries.size() > 0) {
           // Save region number
           const IdDictRegion& region2 = *m_dictionary->m_all_regions.back();
-          size_t region_number = region2.m_index + 1;
+          size_t region_number = region2.index() + 1;
 
           IdDictDictionary::regions_it it;
 

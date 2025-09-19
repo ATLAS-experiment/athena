@@ -19,9 +19,9 @@ BOOST_AUTO_TEST_CASE(IdDictLabelConstructors){
 }
 BOOST_AUTO_TEST_CASE(EmptyIdDictLabelAccessors){
   IdDictLabel f;
-  BOOST_TEST(f.m_name == "");
-  BOOST_TEST(f.m_valued == false);
-  BOOST_TEST(f.m_value == 0);
+  BOOST_TEST(f.name() == "");
+  BOOST_TEST(f.valued() == false);
+  BOOST_TEST(f.value() == 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -64,9 +64,9 @@ IdDictLabel* IdDictDictionary::find_label(const std::string& field, const std::s
 int IdDictDictionary::get_label_value(const std::string& field, const std::string& label, int& value) const {
   IdDictLabel* idLabel = find_label(field, label);
 
-  if (!idLabel || !idLabel->m_valued) return(1);
+  if (!idLabel || !idLabel->valued()) return(1);
 
-  value = idLabel->m_value;
+  value = idLabel->value();
   return(0);
 }
 
@@ -94,13 +94,13 @@ IdDictRegion* IdDictDictionary::find_region(const std::string& region_name) cons
 }
 
 IdDictRegion* IdDictDictionary::find_region(const std::string& region_name, const std::string& group_name) const {
-  for (size_t i = 0; i < m_regions.size(); ++i) {
-    IdDictRegion* region = m_regions[i];
+  for (IdDictRegion* region : m_regions) {
+    if (!region) continue;
     if ((group_name != "") && (region->group_name() != group_name)) continue;
-    if ((region != 0) && (region_name == region->m_name)) return(region);
+    if ((region_name != "") && (region->name() != region_name)) continue;
+    return region;
   }
-
-  return(0);
+  return nullptr;
 }
 
 IdDictGroup* IdDictDictionary::find_group(const std::string& group_name) const {
@@ -114,10 +114,7 @@ IdDictGroup* IdDictDictionary::find_group(const std::string& group_name) const {
 
 void IdDictDictionary::add_subregion(IdDictSubRegion* subregion) {
   if (subregion == 0) return;
-
-  std::string& name = subregion->m_name;
-
-  m_subregions[name] = subregion;
+  m_subregions[subregion->name()] = subregion;
 }
 
 void IdDictDictionary::add_subdictionary_name(const std::string& name) {
@@ -322,7 +319,7 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
       const IdDictRegion& region = *(*it);
 
       // skip regions created from parents
-      if ("dummy" == region.m_name) continue;
+      if ("dummy" == region.name()) continue;
 
       // skip empty regions - may arise from alternate_regions
       // where a tag selects an empty region
@@ -338,7 +335,7 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
       const IdDictRegion& region = *(*it);
 
       // skip regions created from parents
-      if ("dummy" == region.m_name) continue;
+      if ("dummy" == region.name()) continue;
 
       // skip empty regions - may arise from alternate_regions
       // where a tag selects an empty region
@@ -385,7 +382,7 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
       const IdDictRegion& region = *(*it);
 
       // skip regions created from parents
-      if ("dummy" == region.m_name) continue;
+      if ("dummy" == region.name()) continue;
 
       // skip empty regions - may arise from alternate_regions
       // where a tag selects an empty region
@@ -401,7 +398,7 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
       const IdDictRegion& region = *(*it);
 
       // skip regions created from parents
-      if ("dummy" == region.m_name) continue;
+      if ("dummy" == region.name()) continue;
 
       // skip empty regions - may arise from alternate_regions
       // where a tag selects an empty region
@@ -494,7 +491,7 @@ IdDictDictionary::pack32(const ExpandedIdentifier& id,
     for (size_t i = 0; i < region.m_implementation.size(); ++i) {
       if (i >= id.fields()) break;
 
-      const IdDictFieldImplementation& impl = region.m_implementation[i];
+      const IdDictFieldImplementation& impl = region.implementation(i);
 
       if (!impl.field().match(id[i])) {
         selected = false;
@@ -506,7 +503,7 @@ IdDictDictionary::pack32(const ExpandedIdentifier& id,
       size_t position = Identifier::NBITS;
       // We have the proper region.
       for (size_t i = index1; i <= index2; ++i) {
-        const IdDictFieldImplementation& impl = region.m_implementation[i];
+        const IdDictFieldImplementation& impl = region.implementation(i);
 
         Identifier::value_type index = impl.ored_field().get_value_index(id[i]);
 
@@ -570,13 +567,13 @@ IdDictDictionary::pack32(const int* fields,
   // Set the starting position
   size_t position = Identifier::NBITS;
   if (!first_field_index) {
-    const IdDictFieldImplementation& impl = region.m_implementation[index1];
+    const IdDictFieldImplementation& impl = region.implementation(index1);
     position -= impl.bits_offset();
   }
 
   size_t field_index = 0;
   for (size_t i = index1; i <= index2; ++i, ++field_index) {
-    const IdDictFieldImplementation& impl = region.m_implementation[i];
+    const IdDictFieldImplementation& impl = region.implementation(i);
 
     if (m_do_checks) {
       // Field should be within allowed range
@@ -649,7 +646,7 @@ int IdDictDictionary::reset(size_t index1,
 
   size_t field_index = 0;
   for (size_t i = index1; i <= index2; ++i, ++field_index) {
-    const IdDictFieldImplementation& impl = region.m_implementation[i];
+    const IdDictFieldImplementation& impl = region.implementation(i);
 
     size_t position = Identifier::NBITS - impl.bits_offset() - impl.bits();
 
@@ -723,7 +720,7 @@ int IdDictDictionary::unpack(const std::string& group,
       // NOTE: min/max is a number, but for value/label we
       // distinguish between number and name by looking for an IdDictLabel
       const IdDictRange* range = impl.range();
-      const IdDictLabel* label = range->m_field->find_label(range->m_label);
+      const IdDictLabel* label = range->m_field->find_label(range->label());
       switch (range->m_specification) {
       case IdDictRange::by_minmax:
         // For a range of values (numbers), add in the field name
@@ -739,7 +736,7 @@ int IdDictDictionary::unpack(const std::string& group,
           // Is a number, add in field name
           str_value += range->m_field->m_name + ' ';
         }
-        str_value += range->m_label;
+        str_value += range->label();
         break;
 
       case IdDictRange::by_values:
@@ -748,8 +745,8 @@ int IdDictDictionary::unpack(const std::string& group,
         // Is a name
         if (label) {
           // Found label with "find_label" on the field
-          if (label->m_valued) {
-            str_value += range->m_label;
+          if (label->valued()) {
+            str_value += range->label();
           }
         } else {
           // If not found with the "find" above, we must
@@ -832,7 +829,7 @@ IdDictDictionary::unpack(const Identifier& id,
     }
   }
 
-  const IdDictFieldImplementation& impl = region.m_implementation.at(field_index);
+  const IdDictFieldImplementation& impl = region.implementation(field_index);
   size_t prefix_offset = 0;
 
   size_t position = Identifier::NBITS; // overall bit position
@@ -849,7 +846,7 @@ IdDictDictionary::unpack(const Identifier& id,
     }
 
     // One or more fields missing from prefix, get the offset
-    prefix_offset = region.m_implementation[first_field_index].bits_offset();
+    prefix_offset = region.implementation(first_field_index).bits_offset();
 
     if (m_do_checks) {
       // Should have a non-zero number of bits
@@ -926,7 +923,7 @@ IdDictDictionary::copy(const Identifier& idin,
       return(1);
     }
     // One or more fields missing from prefix, get the offset
-    missing_offset = region.m_implementation[first_field_index].bits_offset();
+    missing_offset = region.implementation(first_field_index).bits_offset();
   }
 
   size_t prefix_offset = 0;
@@ -937,10 +934,10 @@ IdDictDictionary::copy(const Identifier& idin,
       return(1);
     }
     // One or more fields missing from prefix, get the offset
-    prefix_offset = region.m_implementation[begin_field_index].bits_offset();
+    prefix_offset = region.implementation(begin_field_index).bits_offset();
   }
 
-  const IdDictFieldImplementation& impl = region.m_implementation[end_field_index];
+  const IdDictFieldImplementation& impl = region.implementation(end_field_index);
   size_t suffix_offset = impl.bits() + impl.bits_offset();
 
   size_t position = Identifier::NBITS; // overall bit position
@@ -978,7 +975,7 @@ IdDictDictionary::copy(const Identifier& idin,
 }
 
 bool
-IdDictDictionary::do_checks(void) const {
+IdDictDictionary::do_checks() const {
   return(m_do_checks);
 }
 
@@ -988,7 +985,7 @@ IdDictDictionary::set_do_checks(bool do_checks) {
 }
 
 bool
-IdDictDictionary::do_neighbours(void) const {
+IdDictDictionary::do_neighbours() const {
   return(m_do_neighbours);
 }
 

@@ -1247,7 +1247,7 @@ int LArHEC_Base_ID::init_neighbors()
       //                                            
       //
       std::vector<short int> regForPrevSamp;
-      std::vector<IdDictRegion*> prevSampDicReg =  vecOfDictRegions[reg]->m_prev_samp;
+      std::vector<const IdDictRegion*> prevSampDicReg =  vecOfDictRegions[reg]->m_prev_samp;
       for(unsigned int isam=0;isam<prevSampDicReg.size();isam++){
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
 	  if(vecOfDictRegions[ireg] == prevSampDicReg[isam]) regForPrevSamp.push_back(ireg);
@@ -1255,7 +1255,7 @@ int LArHEC_Base_ID::init_neighbors()
       }
 
       std::vector<short int> regForNextSamp;
-      std::vector<IdDictRegion*> nextSampDicReg =  vecOfDictRegions[reg]->m_next_samp;
+      std::vector<const IdDictRegion*> nextSampDicReg =  vecOfDictRegions[reg]->m_next_samp;
       for(unsigned int isam=0;isam<nextSampDicReg.size();isam++){
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
 	  if(vecOfDictRegions[ireg] == nextSampDicReg[isam]) regForNextSamp.push_back(ireg);

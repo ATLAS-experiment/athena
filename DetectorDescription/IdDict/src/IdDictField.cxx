@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictField.h"
@@ -26,7 +26,7 @@ bool IdDictField::verify() const {
 IdDictLabel* IdDictField::find_label(const std::string& name) const {
   for (size_t i = 0; i < m_labels.size(); ++i) {
     IdDictLabel* label = m_labels[i];
-    if ((label != 0) && (label->m_name == name)) return(label);
+    if ((label != 0) && (label->name() == name)) return(label);
   }
 
   return(0);
@@ -46,7 +46,7 @@ const std::string
 IdDictField::get_label(size_t index) const {
   std::string result;
   try{
-    result = m_labels.at(index)->m_name;
+    result = m_labels.at(index)->name();
   } catch (std::out_of_range& e) {
     throw std::out_of_range(std::format("IdDictField::get_label : Attempt to access index {} in vector of size {}",
                                         index, m_labels.size()));
@@ -60,8 +60,8 @@ IdDictField::get_label_value(const std::string& name) const {
   if (std::ranges::find_if(name,[](const char c){ return !std::isdigit(c); }) != name.end()) {
     for (const auto* label: m_labels) {
       if (label == nullptr) continue;
-      if (label->m_valued) value = label->m_value;
-      if (label->m_name == name) {
+      if (label->valued()) value = label->value();
+      if (label->name() == name) {
         return(value);
       }
       value++;

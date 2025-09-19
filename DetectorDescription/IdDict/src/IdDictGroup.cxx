@@ -57,7 +57,7 @@ IdDictGroup::build_multirange() const {
     const IdDictRegion& region = *(*it);
 
     // skip regions created from parents
-    if ("dummy" == region.m_name) continue;
+    if ("dummy" == region.name()) continue;
 
     // skip empty regions - may arise from alternate_regions
     // where a tag selects an empty region
@@ -389,7 +389,7 @@ void IdDictGroup::add_tree_field (const IdDictRegion& re,
   };
 
   // This will be the field we're matching.
-  const IdDictFieldImplementation& prev_impl = re.m_implementation[ifield-1];
+  const IdDictFieldImplementation& prev_impl = re.implementation(ifield-1);
 
   {
     // Get the children for the current node.
@@ -435,7 +435,7 @@ void IdDictGroup::add_tree_field (const IdDictRegion& re,
 
   // Indices we want to store.
   index_vector indices = get_field_indices (m_region_tree[inode], prev_impl);
-  const IdDictFieldImplementation& impl = re.m_implementation[ifield];
+  const IdDictFieldImplementation& impl = re.implementation(ifield);
 
   // Children for the node.
   auto children = [&]() -> std::vector<unsigned>& { return std::get<0> (m_region_tree[inode].m_children); };
@@ -493,14 +493,14 @@ IdDictGroup::build_region_tree()
   [[maybe_unused]] unsigned iregion = 0; // Region index, really only for debugging.
   for (const IdDictRegion* re : m_regions) {
     // Skip dummy/empty regions.
-    if (re->fieldSize() == 0 || re->m_name == "dummy") {
+    if (re->fieldSize() == 0 || re->name() == "dummy") {
       ++iregion;
       continue;
     }
 
     // Add an initial node if we haven't done so already.
     if (m_region_tree.empty()) {
-      m_region_tree.emplace_back (re->m_implementation.at(0));
+      m_region_tree.emplace_back (re->implementation(0));
     }
 
     // Add nodes for the current region, starting at field 1.
@@ -534,7 +534,7 @@ void IdDictGroup::dump_regions() const
 {
   std::cout << "Regions:\n";
   for (unsigned iregion = 0; const IdDictRegion* re : m_regions) {
-    std::cout << "  " << iregion++ << " " << re->m_name << " " << re->m_group << " " << re->m_tag << "\n";
+    std::cout << "  " << iregion++ << " " << re->name() << " " << re->m_group << " " << re->m_tag << "\n";
     for (bool first = true; const IdDictFieldImplementation& impl : re->m_implementation) {
       std::cout << (first ? "    " : "; ") << impl.field() << " " << impl.ored_field() << " " << impl.bits() << "/" << impl.bits_offset();
       first = false;
