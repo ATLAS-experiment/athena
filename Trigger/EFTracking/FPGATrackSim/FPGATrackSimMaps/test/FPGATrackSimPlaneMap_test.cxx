@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 /**
  * @file FPGATrackSimSSMap_test.cxx
  * @brief Unit tests for FPGATrackSimSSMap
@@ -6,15 +7,18 @@
  */
 
 #undef NDEBUG
+
+
+#include "TestTools/initGaudi.h"
+#include "AthenaKernel/getMessageSvc.h"
+#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
+
 #include <cassert>
 #include <string>
 #include <iostream>
 #include <numeric>
 #include <filesystem>
-
-#include "TestTools/initGaudi.h"
-#include "AthenaKernel/getMessageSvc.h"
-#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
+#include <stdexcept>
 
 using namespace std;
 
@@ -64,10 +68,13 @@ int main(int, char**)
     vector<int> overrides;    
     finTest.close();
     finTest.open(pmap_path);
-    
-    for (int i = 0; i<6; i++)
-    {
-        pmap_vector_1st.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(finTest, 0, 1)));
+    try{
+      for (int i = 0; i<6; i++) {
+          pmap_vector_1st.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(finTest, 0, 1)));
+      }
+    } catch (std::exception & e){
+      std::cerr<<"Exception "<<e.what()<<" in FPGATrackSimPlaneMap_test"<<std::endl;
+      return 1;
     }
 
     test(pmap_vector_1st);

@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2023-2025 CERN for the benefit of the ATLAS collaboration
 
 
 #include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"
@@ -7,7 +7,7 @@
 using namespace std;
 using namespace htt;
 
-FPGATrackSimModuleRelabel::FPGATrackSimModuleRelabel(std::string geokey, bool remapModules) :
+FPGATrackSimModuleRelabel::FPGATrackSimModuleRelabel(const std::string & geokey, bool remapModules) :
     AthMessaging("FPGATrackSimModuleRelabel"),
     m_geoKey(geokey),
     m_remapModules(remapModules)
