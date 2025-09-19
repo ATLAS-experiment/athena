@@ -20,7 +20,20 @@ namespace InDet{
 
   StatusCode DefectsEmulatorCondAlgBase::initializeBase(unsigned int n_masks, unsigned int wafer_hash_max){
     ATH_CHECK(m_rndmSvc.retrieve());
-    m_rngName = name()+"RandomEngine";
+    m_rngName.reserve( m_rngPerDefectType.value() ?  kMaskDefects + n_masks : 1);
+    if (m_rngPerDefectType.value() ) {
+       m_rngName.push_back(name()+"RngModuleDefects");
+       m_rngName.push_back(name()+"RngCornerDefects");
+       for (unsigned int mask_i=0; mask_i<n_masks; ++mask_i) {
+          std::stringstream rng_name;
+          rng_name << name() << "RngMaskDefect" << mask_i;
+          m_rngName.push_back(rng_name.str());
+       }
+       assert(kMaskDefects+n_masks == m_rngName.size());
+    }
+    else {
+       m_rngName.push_back(name()+"RandomEngine");
+    }
     ATH_CHECK( initializeProbabilities(n_masks) );
     ATH_CHECK( initializeCornerDefects() );
 
@@ -186,7 +199,7 @@ namespace InDet{
   }
 
 
-  unsigned int DefectsEmulatorCondAlgBase::throwNumberOfDefects(CLHEP::HepRandomEngine *rndmEngine,
+  unsigned int DefectsEmulatorCondAlgBase::throwNumberOfDefects(std::span<CLHEP::HepRandomEngine *>rndmEngine,
                                                                 const std::vector<unsigned int> &module_pattern_idx,
                                                                 unsigned int n_masks,
                                                                 unsigned int n_cells,
@@ -209,8 +222,8 @@ namespace InDet{
      }
 
      for (unsigned int mask_i=n_masks; mask_i-->1; ) {
-        assert( mask_i>0);
-        float prob = !has.at(mask_i) ? 1. : CLHEP::RandFlat::shoot(rndmEngine,1.);
+        assert(mask_i>0 && mask_i<rndmEngine.size());
+        float prob = !has.at(mask_i) ? 1. : CLHEP::RandFlat::shoot(rndmEngine[mask_i],1.);
 
         for (unsigned int match_i: module_pattern_idx) {
            unsigned int n_mask_defects_idx=m_perPatternAndMaskFractions.at(match_i).at(mask_i-1).size();
@@ -226,7 +239,7 @@ namespace InDet{
      }
      double defect_prob = totalProbability(module_pattern_idx,kCellDefectProb);
      n_mask_defects[0]= static_cast<unsigned int>(std::max(0,static_cast<int>(
-                                                   CLHEP::RandPoisson::shoot(rndmEngine,
+                                                   CLHEP::RandPoisson::shoot(rndmEngine[0],
                                                                              n_cells * defect_prob))));
      return std::accumulate(n_mask_defects.begin(),n_mask_defects.end(), 0u);
   }

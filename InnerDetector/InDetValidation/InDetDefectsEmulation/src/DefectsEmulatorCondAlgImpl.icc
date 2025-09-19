@@ -184,9 +184,26 @@ namespace InDet{
     {
        auto connected_modules = derived().getModuleConnectionMap(*(detEleColl.cptr()));
 
-       ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_rngName);
-       rngWrapper->setSeed( m_rngName, ctx );
-       CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
+       std::array<CLHEP::HepRandomEngine *, kMaskDefects + T_ModuleHelper::nMasks() > rndmEngine;
+       if (this->m_rngPerDefectType) {
+          assert (m_rngName.size() == rndmEngine.size());
+          unsigned int idx=0;
+          for (const std::string &a_rngName : m_rngName) {
+             ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, a_rngName );
+             rngWrapper->setSeed( a_rngName, ctx );
+             assert( idx < rndmEngine.size());
+             rndmEngine[idx++]=rngWrapper->getEngine(ctx);
+          }
+       }
+       else{
+          assert( !m_rngName.empty());
+          ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_rngName[0]);
+          rngWrapper->setSeed( m_rngName[0], ctx );
+          CLHEP::HepRandomEngine *a_rndmEngine = rngWrapper->getEngine(ctx);
+          for (CLHEP::HepRandomEngine *&elm : rndmEngine) {
+             elm = a_rndmEngine;
+          }
+       }
 
        ModuleIdentifierMatchUtil::ModuleData_t module_data;
        std::vector<unsigned int> module_pattern_idx;
@@ -237,7 +254,7 @@ namespace InDet{
           // patterns control whether a defect is propagated to all modules connected to the same physical sensor
           // or not.
           makeCumulativeProbabilityDist(module_pattern_idx,kModuleDefectProb, cumulative_prob_dist);
-          float prob=(cumulative_prob_dist.empty() || cumulative_prob_dist.back()<=0.) ? 1. : CLHEP::RandFlat::shoot(rndmEngine,1.);
+          float prob=(cumulative_prob_dist.empty() || cumulative_prob_dist.back()<=0.) ? 1. : CLHEP::RandFlat::shoot(rndmEngine[kModuleDefects],1.);
 
           unsigned int match_i=module_pattern_idx.size();
           assert (match_i>0);
@@ -313,7 +330,11 @@ namespace InDet{
           // e.g. chip-defects, core-column defects, single pixel or strip defects
           unsigned int cells = helper.nCells();
           std::vector<typename T_ModuleHelper::KEY_TYPE> &module_defects=(*defects).at(module_i);
-          module_defects.reserve( throwNumberOfDefects(rndmEngine, module_pattern_idx, T_ModuleHelper::nMasks(),cells, n_mask_defects) );
+          module_defects.reserve( throwNumberOfDefects(std::span(&rndmEngine.data()[kMaskDefects], rndmEngine.size()-kMaskDefects),
+                                                       module_pattern_idx,
+                                                       T_ModuleHelper::nMasks(),
+                                                       cells,
+                                                       n_mask_defects) );
 
           // if histogramming is enabled lock for the entire loop, since it would
           // be rather inefficient to lock for each defect pixel or strip separately and
@@ -345,7 +366,8 @@ namespace InDet{
                    unsigned int attempt_i=0;
                    for (attempt_i=0; attempt_i<m_maxAttempts.value(); ++attempt_i) {
                        // chose random pixel or strip which defines the defect location
-                      unsigned int cell_idx=CLHEP::RandFlat::shoot(rndmEngine,cells);
+                      assert(kMaskDefects+mask_i < rndmEngine.size() );
+                      unsigned int cell_idx=CLHEP::RandFlat::shoot(rndmEngine[kMaskDefects+mask_i],cells);
 
                       if (m_checkerBoardToggle) {
                          // for debugging
@@ -396,7 +418,7 @@ namespace InDet{
              // chosen in a random range
 
              // throw the number of corners with corner defects.
-             float defect_prob=CLHEP::RandFlat::shoot(rndmEngine,1.);
+             float defect_prob=CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],1.);
              unsigned int n_corners=m_perPatternCornerDefectNCornerCummulativeProb[module_pattern_idx.front() ].size();
              for (;
                   n_corners>0 && defect_prob<m_perPatternCornerDefectNCornerCummulativeProb[module_pattern_idx.front() ][n_corners-1];
@@ -408,7 +430,7 @@ namespace InDet{
 
                 assert( n_corners < n_corner_combinations.size() );
                 // chose the corners which have defects randomly
-                unsigned int the_combination =CLHEP::RandFlat::shoot(rndmEngine,n_corner_combinations[n_corners] );
+                unsigned int the_combination =CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],n_corner_combinations[n_corners] );
                 unsigned char corner_mask = corner_combinations[n_corners][the_combination];
                 // columns, rows and their pitch are already in direction of the hardware columns and rows
                 unsigned int hwa_columns = helper.columns();
@@ -422,9 +444,9 @@ namespace InDet{
                       // and chose a random sagitta defined by the corssings.
                       assert( m_cornerDefectParamsPerPattern[module_pattern_idx.front()].size()==kNCornerDefectParams);
                       float rx=m_cornerDefectParamsPerPattern[module_pattern_idx.front()][kCornerDefectWidthColumnDirectionOffset]
-                         +CLHEP::RandFlat::shoot(rndmEngine,m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectWidthColumnDirection]);
+                         +CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectWidthColumnDirection]);
                       float ry=m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkWidthRowDirectionOffset]
-                         +CLHEP::RandFlat::shoot(rndmEngine,m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkWidthRowDirection]);
+                         +CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkWidthRowDirection]);
 
                       float sagitta;
                       {
@@ -450,7 +472,7 @@ namespace InDet{
                                                 +  m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagitta])
                                             << " to " << sagitta_offset << ".." << (sagitta_offset+sagitta_range));
                          }
-                         sagitta=sagitta_offset+CLHEP::RandFlat::shoot(rndmEngine,sagitta_range);
+                         sagitta=sagitta_offset+CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],sagitta_range);
                       }
 
                       // compute column range with defects
