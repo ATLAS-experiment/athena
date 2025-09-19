@@ -449,6 +449,25 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  associatePtCut              = 500.))
     LLP1VrtSecInclusiveSuffixes.append(BoostedMuonsSuffix)
 
+
+    # Small-d0 Electrons VSI
+    BoostedElectronsSuffix = "_BoostedElectrons"
+    acc.merge(VrtSecInclusiveCfg(flags,
+                                 name = "VrtSecInclusive_InDet"+BoostedElectronsSuffix,
+                                 AugmentingVersionString     = BoostedElectronsSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackCollection,
+                                 twoTrkVtxFormingD0Cut       = 0.0,
+                                 doSelectTracksFromMuons     = False,
+                                 doSelectTracksFromElectrons = True,
+                                 ElectronLocation            = MergedElectronContainer,
+                                 do_PVvetoCut                = False,
+                                 DoTwoTrSoftBtag             = True,
+                                 TwoTrVrtMinDistFromPVCut    = 0.5,
+                                 associatePtCut              = 500.))
+    LLP1VrtSecInclusiveSuffixes.append(BoostedElectronsSuffix)
+
+
     # MuSA Vertices
     acc.merge(MuSAVtxFitterConfig(flags, 
                                       MuonContainerName=MergedMuonContainer))
