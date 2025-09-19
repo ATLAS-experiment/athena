@@ -722,18 +722,20 @@ def ConfigureMultiRegionFlags(flags):
     print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
 
 
-def FPGATrackSimF150FlagCfg(flags):
-    flags.Scheduler.ShowDataDeps=True
-    flags.Scheduler.CheckDependencies=True
-    
+def FPGATrackSimF150FlagCfg(flags):    
     FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg(flags)
+    
+    flags.Scheduler.ShowDataDeps=True 
+    flags.Scheduler.CheckDependencies=True
+    flags.Debug.DumpEvtStore=False
     
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
     flags.Trigger.FPGATrackSim.tracking = False
     flags.Trigger.FPGATrackSim.Hough.genScan = True
-    flags.Trigger.FPGATrackSim.convertSPs = True
+    flags.Trigger.FPGATrackSim.convertSPs = False # in case we need the conversion to take place on hw we'll have to convert to SPs after the cluster-sorting (will probably need new algorithm)
+    flags.Tracking.ITkActsValidateF150Pass.doActsSpacePoint = not flags.Trigger.FPGATrackSim.convertSPs
     flags.Trigger.FPGATrackSim.Hough.secondStage = False
     flags.Trigger.FPGATrackSim.regionList="34,98,162,226,290,354,418,482,546,610,674,738,802,866,930,994,1058,1122,1186,1250"
     ConfigureMultiRegionFlags(flags)
@@ -749,6 +751,16 @@ def FPGATrackSimSeedingCfg(flags):
     
     from FPGATrackSimSeeding.FPGATrackSimSeedingConfig import FPGATrackSimSeedingCfg
     acc.merge(FPGATrackSimSeedingCfg(flags))
+    
+    
+    if flags.Tracking.ActiveConfig.storeTrackSeeds:
+        from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
+        from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+        
+        acc.merge(ActsStoreTrackSeedsCfg(flags,
+                                         processPixels = True,
+                                         processStrips = not isFastPrimaryPass(flags)))
+    
     
     acc.merge(WriteAdditionalFPGATrackSimOutputCfg(flags))
     
