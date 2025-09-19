@@ -53,6 +53,3 @@ atlas_add_test( ViewScheduling
 atlas_add_test( ViewInheritance
                 SCRIPT test/ViewInheritance.py --threads=1
                 POST_EXEC_SCRIPT nopost.sh )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
