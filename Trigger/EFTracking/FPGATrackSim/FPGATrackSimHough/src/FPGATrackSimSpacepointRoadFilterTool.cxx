@@ -259,7 +259,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
                 // Require that we only keep roads that have enough hits to save time.
                 working_roads[i] = std::move(spacepoints_only);
                 if (strips_only.getNHitLayers() >= m_threshold) {
-                    working_roads.push_back(strips_only);
+                    working_roads.push_back(std::move(strips_only));
                 }
             }
         }
@@ -283,7 +283,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             continue;
         }
 
-            m_postfilter_roads.push_back(road);
+            m_postfilter_roads.push_back(std::move(road));
     }
 
     return retval;

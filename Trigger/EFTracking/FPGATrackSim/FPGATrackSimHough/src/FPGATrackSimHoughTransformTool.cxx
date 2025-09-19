@@ -280,6 +280,10 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
           ATH_MSG_FATAL("Debug: something wrong! layer: " << hit->getLayer());
           break;
       }
+      if (LUT_layer <0){
+        ATH_MSG_ERROR("FPGATrackSimHoughTransformTool: array index is negative");
+        return image;
+      }
       int phi_L_bin = m_h_rfix.at(LUT_layer)->FindBin(hit->getGPhi());
       int MSB = (phi_L_bin >> (m_bitlength -6));
       if(MSB >= 64) MSB = 63;//for barrel, MSB should be up to 63, but this line force it to not crash
@@ -645,10 +649,11 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
                   if (phi0_ht_sector >= 0 && phi0_ht_pre >= 0 && (phi0_ht_sector >= m_bitwise_qApt_conv - m_imageSize_x)) {
                       phi0_ht = phi0_ht_pre;
                   }
+                  /** This condition is never true
                   if (phi0_ht_sector < 0 && phi0_ht_pre >= 0 && (-1 + phi0_ht_sector >= m_bitwise_qApt_conv - m_imageSize_x)) {
                       phi0_ht = phi0_ht_pre;
                   }
-
+                  **/
                   if (phi0_ht <= m_imageSize_x - 1 && phi0_ht >= 0){
                       hitLineQAPtPhi0[n] = {static_cast<int>(n), static_cast<int>(phi0_ht)};
                   }
@@ -827,7 +832,7 @@ void FPGATrackSimHoughTransformTool::makeLUT(std::vector<std::vector<std::vector
       LUT_i.input_end = in_max;
       LUT_i.layer = ri;
       LUT_i.output.push_back({xi, yi, ri});
-      v_LUT.at(ri).at(MSB).push_back(LUT_i);
+      v_LUT.at(ri).at(MSB).push_back(std::move(LUT_i));
     }
     //process for max range
     int MSB2 = (in_max >> (m_bitlength -6));
