@@ -23,6 +23,8 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODJet/JetContainer.h"
 
+#include <TLorentzVector.h>
+
 
 namespace MSVtxValidationAlgUtils {
 
@@ -36,15 +38,22 @@ namespace MSVtxValidationAlgUtils {
     std::vector<const xAOD::TruthParticle*> getChildren(const xAOD::TruthParticle* mother);
     std::vector<const xAOD::TruthParticle*> getStableChildren(const xAOD::TruthParticle* particle, bool findOnlyGenStable);
     std::vector<const xAOD::TruthParticle*> getStableChildrenRecursive(const xAOD::TruthParticle* particle, bool findOnlyGenStable, std::unordered_set<const xAOD::TruthParticle*>& visited);
+    std::vector<const xAOD::TruthParticle*> getDecayProducts(const xAOD::TruthVertex* vtx);
 
-    // displaced vertex approximation within jets
-    struct JetVtxApprox {
+    // active vertices associated with jets
+    struct ActiveVertex {
         const xAOD::TruthVertex* vtx{nullptr};
+        // from the four vector such of the direct decay products of the vertex
+        Double_t vtxEnergy{0.};
+        Double_t vtxMass{0.};
+        Double_t vtxPt{0.};
+        Double_t vtxScalarPtSum{0.}; // scalar pT sum of the direct decay products
+        // decay chain properties
         size_t nChildren{0};
         size_t decayDepth{0};
     };
 
-    JetVtxApprox getJetVtxApprox(const xAOD::Jet* jet, const xAOD::TruthParticleContainer& truthParticles);
+    std::vector<ActiveVertex> getActiveVertices(const xAOD::Jet* jet, const xAOD::TruthParticleContainer& truthParticles);
 
     // vertex isolation
     struct VtxIso {
