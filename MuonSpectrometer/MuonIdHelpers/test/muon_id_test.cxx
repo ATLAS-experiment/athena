@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
+
 
 #include "GaudiKernel/System.h"
 #include "IdDictParser/IdDictParser.h"
@@ -12,8 +12,9 @@
 #include "MuonIdHelpers/RpcIdHelper.h"
 #include "MuonIdHelpers/TgcIdHelper.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
-#include <format>//to catch std::format_error
+#include <stdexcept>
 #include <memory>
+#include <iostream>
 
 int check_hash_retrieval(MuonIdHelper* idhelp) {
     IdentifierHash hash;
@@ -152,7 +153,7 @@ int check_muon_decoding(IdDictMgr& idd, bool hasCSC, bool hasSTgc, bool hasMM) {
 }
 
 int checkDictFile(const std::string& filename, bool hasCSC = true, bool hasSTgc = true, bool hasMM = true) {
-    std::cout << "=========>  checking dictionnary file=" << filename << std::endl;
+    std::cout << "=========>  checking dictionary file=" << filename << std::endl;
     IdDictParser parser;
     parser.register_external_entity("MuonSpectrometer", filename);
     IdDictMgr& idd = parser.parse("IdDictParser/ATLAS_IDS.xml");
@@ -173,8 +174,8 @@ int main() {
       if (checkDictFile("IdDictMuonSpectrometer_R.09.02.Asym.xml")) return 1;
       // check symmetric Run 3 layout (no CSC)
       if (checkDictFile("IdDictMuonSpectrometer_R.09.02.xml", false, true, true)) return 1;
-    } catch(std::format_error & /*e*/){
-      std::cout<<"Format error reported from checkDictFile in muon_id_test"<<std::endl;
+    } catch(std::exception & e){
+      std::cout<<"Exception reported from checkDictFile in muon_id_test: "<<e.what()<<std::endl;
       return 1;
     }
     return 0;
