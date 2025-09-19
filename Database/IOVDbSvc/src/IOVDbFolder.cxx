@@ -1185,8 +1185,10 @@ std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestObjects(cool::ValidityK
     else {
       ATH_MSG_INFO("Cache boundaries outside available IOVs for the folder "+ m_foldername);
     }
+    if(m_crestCoolToFile)
+      dumpFile("crest_dump",vkey,nullptr,false,&m_crest_mng.value(),vkey);
     return iovHashVect;
-      }
+  }
   unsigned indIOVStart = 0;
   for(const auto& iovhash : iovHashVect) {
     if(vkey>=iovhash.first.first && vkey<iovhash.first.second)
