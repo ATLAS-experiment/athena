@@ -16,7 +16,7 @@ atlas_add_tpcnv_library( MuonEventAthenaPoolLib
    AthContainers AthenaKernel StoreGateLib AthenaPoolCnvSvcLib
    Identifier GaudiKernel CscCalibEvent MuonEventTPCnv RPC_CondCablingLib
    MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonChamberT0s
-   MuonPrepRawData MuonTrigCoinData MuonSimData AthenaPoolServicesLib )
+   MuonPrepRawData MuonTrigCoinData MuonSimData )
 
 atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
    MuonEventAthenaPool/*.h src/*Cnv.h src/*Cnv.cxx
@@ -64,7 +64,7 @@ atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
 atlas_add_dictionary( MuonRDOCnvDict
    MuonEventAthenaPool/MuonRDOCnvDict.h
    MuonEventAthenaPool/selection.xml
-   LINK_LIBRARIES CxxUtils AthenaPoolServicesLib MuonRDO MuonRIO_OnTrack
+   LINK_LIBRARIES CxxUtils MuonRDO MuonRIO_OnTrack
    MuonSegment )
 
 # Install files from the package:

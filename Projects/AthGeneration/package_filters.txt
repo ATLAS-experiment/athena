@@ -61,7 +61,6 @@
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
 + Database/AthenaPOOL/AthenaPoolCnvSvc
-+ Database/AthenaPOOL/AthenaPoolServices
 + Database/AthenaPOOL/AthenaPoolUtilities
 + Database/AthenaPOOL/EventSelectorAthenaPool
 + Database/AthenaPOOL/OutputStreamAthenaPool
