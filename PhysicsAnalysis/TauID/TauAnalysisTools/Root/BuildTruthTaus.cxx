@@ -189,10 +189,10 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent,
       xAOD::TruthParticle* truthTau = truthTausEvent.m_xTruthTauContainer->back();
 
       // propagate MCTruthClassifier decorations
-      typeDecorator(*truthTau) = typeReadDecor(*xTruthParticle);
-      originDecorator(*truthTau) = originReadDecor(*xTruthParticle);
-      outcomeDecorator(*truthTau) = outcomeReadDecor(*xTruthParticle);
-      classificationDecorator(*truthTau) = classificationReadDecor(*xTruthParticle);
+      typeDecorator(*truthTau) = typeReadDecor.isAvailable() ?  typeReadDecor(*xTruthParticle) : -1234;
+      originDecorator(*truthTau) = originReadDecor.isAvailable() ? originReadDecor(*xTruthParticle) : -1234;
+      outcomeDecorator(*truthTau) = outcomeReadDecor.isAvailable() ? outcomeReadDecor(*xTruthParticle) : -1234;
+      classificationDecorator(*truthTau) = classificationReadDecor.isAvailable() ? classificationReadDecor(*xTruthParticle) : -1234;
 
       // create link to the original TruthParticle
       ElementLink < xAOD::TruthParticleContainer > lTruthParticleLink(xTruthParticle, *truthTausEvent.m_xTruthParticleContainer);
