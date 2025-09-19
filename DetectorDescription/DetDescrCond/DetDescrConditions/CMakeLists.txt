@@ -4,7 +4,6 @@
 atlas_subdir( DetDescrConditions )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 
 # Component(s) in the package:
@@ -16,9 +15,9 @@ atlas_add_library( DetDescrConditions
                    src/DetStatus.cxx
                    src/DetStatusMap.cxx
                    PUBLIC_HEADERS DetDescrConditions
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   INCLUDE_DIRS  ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} AthenaKernel AthenaPoolUtilities GaudiKernel Identifier )
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaKernel AthenaPoolUtilities GaudiKernel Identifier )
 
 atlas_add_dictionary( DetDescrConditionsDict
                       DetDescrConditions/DetDescrConditionsDict.h
