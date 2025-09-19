@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictRegion.h"
@@ -13,6 +13,12 @@ std::string
 IdDictRegion::group_name() const {
   return(m_group);
 }
+
+const IdDictFieldImplementation& IdDictRegion::implementation(size_t i) const
+{
+    return m_implementation.at(i);
+}
+
 
 void
 IdDictRegion::set_index(size_t index) {

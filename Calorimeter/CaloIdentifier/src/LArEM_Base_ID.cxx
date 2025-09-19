@@ -1422,7 +1422,7 @@ int         LArEM_Base_ID::init_neighbors(void)
       // .... compute prev/next regions in sampling  
       //
       std::vector<short int> regForPrevSamp;
-      std::vector<IdDictRegion*> prevSampDicReg =  vecOfDictRegions[reg]->m_prev_samp;
+      std::vector<const IdDictRegion*> prevSampDicReg =  vecOfDictRegions[reg]->m_prev_samp;
       for(unsigned int isam=0;isam<prevSampDicReg.size();isam++){
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
 	  if(vecOfDictRegions[ireg] == prevSampDicReg[isam]) regForPrevSamp.push_back(ireg);
@@ -1430,7 +1430,7 @@ int         LArEM_Base_ID::init_neighbors(void)
       }
 
       std::vector<short int> regForNextSamp;
-      std::vector<IdDictRegion*> nextSampDicReg =  vecOfDictRegions[reg]->m_next_samp;
+      std::vector<const IdDictRegion*> nextSampDicReg =  vecOfDictRegions[reg]->m_next_samp;
       for(unsigned int isam=0;isam<nextSampDicReg.size();isam++){
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
 	  if(vecOfDictRegions[ireg] == nextSampDicReg[isam]) regForNextSamp.push_back(ireg);
@@ -1441,7 +1441,7 @@ int         LArEM_Base_ID::init_neighbors(void)
       // .... compute prev/next regions in subdet  
       //
       std::vector<short int> regForPrevSubdet;
-      std::vector<IdDictRegion*> prevSubdetDicReg =  vecOfDictRegions[reg]->m_prev_subdet;
+      std::vector<const IdDictRegion*> prevSubdetDicReg =  vecOfDictRegions[reg]->m_prev_subdet;
       for(unsigned int isubdet=0;isubdet<prevSubdetDicReg.size();isubdet++){
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
 	  if(vecOfDictRegions[ireg] == prevSubdetDicReg[isubdet]) regForPrevSubdet.push_back(ireg);
@@ -1449,7 +1449,7 @@ int         LArEM_Base_ID::init_neighbors(void)
       }
 
       std::vector<short int> regForNextSubdet;
-      std::vector<IdDictRegion*> nextSubdetDicReg =  vecOfDictRegions[reg]->m_next_subdet;
+      std::vector<const IdDictRegion*> nextSubdetDicReg =  vecOfDictRegions[reg]->m_next_subdet;
       for(unsigned int isubdet=0;isubdet<nextSubdetDicReg.size();isubdet++){
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
 	  if(vecOfDictRegions[ireg] == nextSubdetDicReg[isubdet]) regForNextSubdet.push_back(ireg);

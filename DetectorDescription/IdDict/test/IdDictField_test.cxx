@@ -17,10 +17,9 @@ BOOST_AUTO_TEST_CASE(IdDictFieldConstructors){
 }
 BOOST_AUTO_TEST_CASE(EmptyIdDictFieldAccessors){
   IdDictField f;
-  //exposed members
   BOOST_TEST(f.m_name == "");
-  BOOST_TEST(f.m_labels.empty()  == true);
-  BOOST_TEST(f.m_index == 0);
+  BOOST_TEST(f.get_label_number()  == 0);
+  BOOST_TEST(f.index() == 0);
   //
   BOOST_TEST(f.find_label ("name") == nullptr);
   BOOST_TEST(f.get_label_number () == 0);
@@ -65,7 +64,6 @@ BOOST_AUTO_TEST_CASE(IdDictSetAndGet){
   // ... but the destructor doesn't (seems dangerous)
   BOOST_CHECK_NO_THROW(f.clear());
   //f2 holds invalid pointers now, but doesn't know
-  BOOST_TEST (lbl1 == f2.m_labels[0]);
   BOOST_TEST(f2.get_label_number() == 3);
   //f knows the originals were deleted, and the vector emptied
   BOOST_TEST(f.get_label_number() == 0);

@@ -1,5 +1,5 @@
  /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictRange_H
@@ -17,16 +17,40 @@ class IdDictField;
 
 class IdDictRange : public IdDictRegionEntry { 
 public: 
+    // ==================================
+    //** @name Constructor/destructor
+    // @{
+
     IdDictRange () = default; 
     ~IdDictRange () = default; 
-    void resolve_references (const IdDictMgr& idd,  
-                             IdDictDictionary& dictionary, 
-                             IdDictRegion& region);  
-    void generate_implementation (const IdDictMgr& idd,  
-                                  IdDictDictionary& dictionary, 
-                                  IdDictRegion& region,
-                                  const std::string& tag = "");   
-    Range build_range () const; 
+
+
+    //@}
+    // ==================================
+    //** @name Simple accessors.
+    // @{
+
+    const std::string& field_name() const;
+    const std::string& label() const;
+
+
+    //@}
+    // ==================================
+    //** @name Methods used to initialize the object.
+    // @{
+
+    virtual void resolve_references (const IdDictMgr& idd,
+                                     IdDictDictionary& dictionary,
+                                     IdDictRegion& region) override;
+    virtual void generate_implementation (const IdDictMgr& idd,
+                                          IdDictDictionary& dictionary,
+                                          IdDictRegion& region,
+                                          const std::string& tag = "") override;
+    virtual Range build_range () const override;
+
+
+    //@}
+
     //data members made public
     std::string m_field_name; 
     IdDictField* m_field{}; 
@@ -62,5 +86,21 @@ public:
 private:
     bool m_resolved_references{};
 }; 
+
+
+inline
+const std::string& IdDictRange::field_name() const
+{
+  return m_field_name;
+}
+
+
+inline
+const std::string& IdDictRange::label() const
+{
+    return m_label;
+}
+
+
 #endif
 

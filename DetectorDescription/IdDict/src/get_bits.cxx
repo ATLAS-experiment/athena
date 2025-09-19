@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "src/get_bits.h"
@@ -18,7 +18,7 @@ namespace IdDict {
     for (k = 0; k < regions.size(); ++k) {
       IdDictRegion* region = regions[k];
       if (region->fieldSize() <= level) continue;
-      const IdDictFieldImplementation& f = region->m_implementation[level];
+      const IdDictFieldImplementation& f = region->implementation(level);
       const Range::field thisField = f.field();
       //on first time, set the original field
       if (k == 0) ored_field = thisField;
@@ -105,7 +105,7 @@ namespace IdDict {
       }
       // Now really split mr into the two subsets
       ++k;
-      const IdDictFieldImplementation& f1 = reference_region->m_implementation[level];
+      const IdDictFieldImplementation& f1 = reference_region->implementation(level);
       Range::field ored_field = f1.field();
       // copy into original test sample, some may have already been
       // added to temp above.
@@ -140,11 +140,11 @@ namespace IdDict {
           IdDictRegion* region = orig[i];
           if (region->m_implementation.size() <= level) continue;
           bool overlap = false;
-          const IdDictFieldImplementation& f = region->m_implementation[level];
+          const IdDictFieldImplementation& f = region->implementation(level);
           const Range::field& thisField = f.field();
           // Now expand bits by or'ing them with other regions
           // at this level, requiring the name to be the same.
-          if (f1.range()->m_field_name == f.range()->m_field_name) overlap = ored_field.overlaps_with(thisField);
+          if (f1.range()->field_name() == f.range()->field_name()) overlap = ored_field.overlaps_with(thisField);
           // Check for either an overlap or force overlap for
           // regions in the same group
           if (overlap || (region->m_group == group)) {

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 #include "IdDict/IdDictRange.h"
 #include "IdDict/IdDictField.h"
@@ -76,13 +76,13 @@ IdDictRange::generate_implementation(const IdDictMgr& /*idd*/,
   region.m_implementation.resize(region.m_implementation.size() + 1);
   IdDictFieldImplementation& impl = region.m_implementation.back();
   impl.set_range(this);
-  if (m_field->m_index == 0) {
+  if (m_field->index() == 0) {
     m_field->m_index = region.fieldSize() - 1;
-  } else if (m_field->m_index != (region.fieldSize() - 1)) {
+  } else if (m_field->index() != (region.fieldSize() - 1)) {
     std::cout << "Bad field index for " << m_field_name
-              << " index " << m_field->m_index
-              << " in dictionary " << dictionary.m_name
-              << " region #" << region.m_index
+              << " index " << m_field->index()
+              << " in dictionary " << dictionary.name()
+              << " region #" << region.index()
               << " group " << region.m_group
               << " tag " << region.m_tag
               << " size " << (region.m_implementation.size() - 1)
