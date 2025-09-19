@@ -4,16 +4,14 @@
 atlas_subdir( AthViews )
 
 # External package dependencies:
-find_package( TBB )
 find_package( GTest )
 
 # Component(s) in the package:
 atlas_add_library( AthViews
                    src/*.cxx
                    PUBLIC_HEADERS AthViews
-                   INCLUDE_DIRS ${TBB_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${TBB_LIBRARIES} AthContainers AthLinks AthenaBaseComps AthenaKernel GaudiKernel StoreGateLib TrigSteeringEvent
-                   PRIVATE_LINK_LIBRARIES SGTools )
+                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel GaudiKernel SGTools StoreGateLib TrigSteeringEvent
+                   PRIVATE_LINK_LIBRARIES AthenaBaseComps )
 
 atlas_add_component( AthViewsAlgs
                      src/components/*.cxx
@@ -22,7 +20,7 @@ atlas_add_component( AthViewsAlgs
 atlas_add_component( AthViewsDFlow
                      src_dflow/*.cxx
                      src_dflow/components/*.cxx
-                     LINK_LIBRARIES AthExHiveLib AthViews AthenaKernel StoreGateLib )
+                     LINK_LIBRARIES AthExHiveLib AthViews AthenaBaseComps AthenaKernel StoreGateLib )
 
 atlas_add_dictionary( AthViewsAlgsDict
                       AthViews/AthViewsWriteDict.h
