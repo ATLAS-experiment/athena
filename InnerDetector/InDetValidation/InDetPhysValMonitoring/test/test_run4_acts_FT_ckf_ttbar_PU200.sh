@@ -133,3 +133,5 @@ run "dcube-athena-acts" \
     -R "athena" \
     idpvm.acts.root
 
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

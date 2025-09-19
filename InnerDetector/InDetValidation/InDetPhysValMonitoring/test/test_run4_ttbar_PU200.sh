@@ -62,3 +62,5 @@ run "dcube-last" \
     -r ${lastref_dir}/idpvm.root \
     idpvm.root
 
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

@@ -79,3 +79,5 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   echo "art-result: $? shifter_plots_lrt_last"
 fi
 
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}
