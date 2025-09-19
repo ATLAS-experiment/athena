@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // geomdb_ofl2onl utility for transferring *locked*
@@ -252,7 +252,7 @@ bool buildDataTables(coral::ISessionProxy* proxySrc, coral::ISessionProxy* proxy
     // Copy _data2tag table if missing - this should happen at some special tests only
     if(!data2TagTableExists) {
       if(buildSchema)
-	copyTable(proxySrc,proxyTarg,data2TagTableName,verbose,format_level);
+	      copyTable(proxySrc,proxyTarg,std::move(data2TagTableName),verbose,format_level);
       else {
 	*logfile << "\t * " << dataTableName << "2TAG table does not exist on the target side!\n";
 	result = false;
@@ -263,8 +263,8 @@ bool buildDataTables(coral::ISessionProxy* proxySrc, coral::ISessionProxy* proxy
     //___________________________________________________________________________________
     // neither of _data and _data2tag tables exist.
     if(buildSchema) {
-      copyTable(proxySrc,proxyTarg,dataTableName,verbose,format_level);
-      copyTable(proxySrc,proxyTarg,data2TagTableName,verbose,format_level);
+      copyTable(proxySrc,proxyTarg,std::move(dataTableName),verbose,format_level);
+      copyTable(proxySrc,proxyTarg,std::move(data2TagTableName),verbose,format_level);
     } else {
       *logfile << "\t * " << dataTableName << " and _DATA2TAG tables don't exist on the target side!\n";
       result = false;
@@ -941,7 +941,7 @@ int main(int argc, char ** argv)
 	  }
 	if(printUsage) break;
       } else {
-	vectInpTags.push_back(param);
+	vectInpTags.push_back(std::move(param));
       }
     }
 

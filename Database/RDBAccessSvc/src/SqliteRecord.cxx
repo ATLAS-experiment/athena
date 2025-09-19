@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,7 +17,7 @@
 #include <sstream>
 
 SqliteRecord::SqliteRecord(SqliteInpDef_ptr def)
-  : m_def(def)
+  : m_def(std::move(def))
 {
 }
 
