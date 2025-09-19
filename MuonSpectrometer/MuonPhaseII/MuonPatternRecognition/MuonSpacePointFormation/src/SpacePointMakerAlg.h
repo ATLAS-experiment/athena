@@ -120,7 +120,7 @@ namespace MuonR4{
             template <class PrdType> 
                 void fillUncombinedSpacePoints(const ActsGeometryContext& gctx,
                                                const Amg::Transform3D& sectorTrans,
-                                               const std::vector<PrdType>& prdsToFill,
+                                               const std::vector<const PrdType*>& prdsToFill,
                                                std::vector<SpacePoint>& outColl) const;          
             /** @brief Distribute the premade spacepoints per chamber into their individual SpacePoint
              *         buckets. A new bucket is created everytime if the hit to fill is along the z-axis 
