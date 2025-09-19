@@ -1,0 +1,90 @@
+{
+    "TrigElectronSel" : {
+        "enabled" : true,
+        "TestType"  : "Trigger",
+        "RefType"   : "Offline", 
+        "TrigTrkKey"    : "HLT_IDTrack_Electron_IDTrig",
+        "ChainNames"    : ["HLT_e22_idperf_loose_L1eEM22M",
+			   "HLT_e26_idperf_loose_L1eEM26M",
+			   "HLT_e26_idperf_tight_L1eEM26M",
+			   "HLT_e5_idperf_tight_L1eEM5" ],
+        "MatchingType"    : "DeltaRMatch",
+        "OfflineQualityWP" : "EFTracking",
+        "dRmax"           : 0.05
+    },
+    "TrigMuonSel" : {
+        "enabled" : true,
+        "TestType"  : "Trigger",
+        "RefType"   : "Offline", 
+        "TrigTrkKey"    : "HLT_IDTrack_Muon_IDTrig",
+        "ChainNames"    : [
+	    "HLT_mu24_idperf_L1MU14FCH"
+        ],
+        "MatchingType"    : "DeltaRMatch",
+	"OfflineQualityWP" : "EFTracking",
+        "dRmax"           : 0.05
+    },
+    "TrigTauSel" : {
+        "enabled" : true,
+        "TestType"  : "Trigger",
+        "RefType"   : "Offline", 
+        "TrigTrkKey"    : "HLT_IDTrack_Tau_IDTrig",
+        "ChainNames"    : [
+	    "HLT_tau25_idperf_tracktwoMVA_L1cTAU20M"  ],
+        "MatchingType"    : "DeltaRMatch",
+	"OfflineQualityWP" : "EFTracking",
+        "dRmax"           : 0.05
+    },
+    "TrigBjetSel" : {
+        "enabled" : true,
+        "TestType"  : "Trigger",
+        "RefType"   : "Offline", 
+        "TrigTrkKey"    : "HLT_IDTrack_Bjet_IDTrig",
+        "ChainNames"    : [
+            "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50",
+            "HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90"  ],
+        "MatchingType"    : "DeltaRMatch",
+	"OfflineQualityWP" : "EFTracking",
+        "dRmax"           : 0.05
+    },
+    "TrigFSSel" : {
+        "enabled" : false,
+        "TestType"  : "Trigger",
+        "RefType"   : "Offline", 
+        "TrigTrkKey"    : "HLT_IDTrack_FS_IDTrig",
+        "ChainNames"    : [
+	    "HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50",
+            "HLT_j45_pf_ftf_preselj20_L1jJ40",
+            "HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ90"  ],
+        "MatchingType"    : "DeltaRMatch",
+	"OfflineQualityWP" : "EFTracking",
+        "dRmax"           : 0.05
+    },
+    "TrigElectronAll" : {
+        "enabled" : false,
+        "TestType"  : "Trigger",
+        "RefType"   : "Offline", 
+        "TrigTrkKey"    : "HLT_IDTrack_Electron_IDTrig",
+        "ChainNames"    : [ "HLT_e.*_idperf_.*" ],
+        "MatchingType"    : "DeltaRMatch",
+        "dRmax"           : 0.05,
+        "pTResMax"        : -9.9,
+        "SelectOfflineObject" : "Electron", 
+        "ObjectQuality"       : "Tight",
+        "plotOfflineElectrons" : true
+    },
+    "TrkAnaOfflDeltaMatch" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth", 
+        "MatchingType"     : "DeltaRMatch",
+	"OfflineQualityWP" : "EFTracking",
+        "dRmax"           : 0.05
+    },
+    "TrkAnaOfflTruth" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth", 
+        "MatchingType"     : "TruthMatch"
+    }
+}
