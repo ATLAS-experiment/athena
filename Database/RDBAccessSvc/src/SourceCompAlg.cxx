@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SourceCompAlg.h"
@@ -179,7 +179,7 @@ StatusCode SourceCompAlg::compareGlobalTags(const std::vector<std::string>& glob
 	  if(!childTag.empty()) {
 	    IRDBRecordset_ptr recPtr = rdbAccessSvc->getRecordsetPtr(nodeName,childTag,"",m_connNames[connInd]);
 	    if(recPtr->size()) {
-	      mapel[nodeName] = recPtr;
+	      mapel[nodeName] = std::move(recPtr);
 	    }
 	  }
 	}
