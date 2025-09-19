@@ -14,3 +14,6 @@ script=test_MC_Run4_acts_FT_ckf_mu0_reco.sh
 echo "Executing script ${script}"
 echo " "
 "$script" ${rdo} 1000
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

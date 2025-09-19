@@ -67,3 +67,6 @@ run "dcube-last" \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/ActsMonitoringOutput.root \
     ActsMonitoringOutput.root
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

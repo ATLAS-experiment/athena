@@ -26,3 +26,6 @@ geotag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometry
 echo "Executing script ${script}"
 echo " "
 "$script" ${inputBS} ${dcubeRef} ${conditions} ${geotag}
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}
