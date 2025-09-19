@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimPhiRoadFilterTool.cxx
@@ -67,7 +67,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(std::vector<std::shared_pt
       }
       
       if (layer_cnt >= m_threshold.value()) {
-	m_postfilter_roads.push_back(newroad);
+	m_postfilter_roads.push_back(std::move(newroad));
       }
 	
     }

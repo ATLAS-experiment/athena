@@ -100,7 +100,7 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   
   // Check inputs
   bool ok = false;
-  if (m_pairFilterDeltaPhiCut.size() != m_binnedhits->getNLayers() - 1)
+  if (std::ssize(m_pairFilterDeltaPhiCut) != static_cast<int>(m_binnedhits->getNLayers()) - 1)
     ATH_MSG_FATAL("initialize() pairFilterDeltaPhiCut must have size nLayers-1=" << m_binnedhits->getNLayers() - 1 << " found " << m_pairFilterDeltaPhiCut.size());
   else if (m_pairFilterDeltaEtaCut.size() != m_binnedhits->getNLayers() - 1)
     ATH_MSG_FATAL("initialize() pairFilterDeltaEtaCut must have size nLayers-1=" << m_binnedhits->getNLayers() - 1 << " found " << m_pairFilterDeltaEtaCut.size());
@@ -194,18 +194,18 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
 
   if (m_keepHitsStrategy > 0) {
     for (std::unique_ptr<FPGATrackSimRoad>& r : m_roads) {
-      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& hits = r->getAllHits();
+      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r->getAllHits();
       layer_bitmask_t hitmask = r->getHitLayers();
       std::vector<unsigned> toUse = PickHitsToUse(hitmask);
 
       std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> vec(5); // even if not all layers have hits, they need to be in the vector as empty vectors
       for (size_t ihit = 0; ihit < toUse.size(); ++ihit) {
         unsigned int layer = toUse[ihit];
-        if (layer >= hits.size() || hits[layer].empty()) {
-          ATH_MSG_ERROR("Hit index out of range in keepHitsStrategy: layer=" << layer << ", hits.size()=" << hits.size());
+        if (layer >= theseHits.size() || theseHits[layer].empty()) {
+          ATH_MSG_ERROR("Hit index out of range in keepHitsStrategy: layer=" << layer << ", hits.size()=" << theseHits.size());
           return StatusCode::FAILURE;
         }
-        vec[ihit].push_back(hits[layer][0]);
+        vec[ihit].push_back(theseHits[layer][0]);
       }
       r->setHits(std::move(vec));
     }
@@ -272,12 +272,12 @@ StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
   // set outputs if not all filters applied
   if (!m_applyPairFilter) {
     // output is just the filtered pairs
-    output_pairsets.push_back(pairs);
+    output_pairsets.push_back(std::move(pairs));
   }
   else if (passedPairFilter && !m_applyPairSetFilter)
   {
     // output is just the filtered pairs
-    output_pairsets.push_back(filteredpairs);
+    output_pairsets.push_back(std::move(filteredpairs));
   }
 
   return StatusCode::SUCCESS;
@@ -321,7 +321,7 @@ void FPGATrackSimGenScanTool::updateState(const IntermediateState &inputstate,
         if (pairPassesFilter(newpair) || (m_applyPairFilter == false)) {
           HitPairSet newset;
           newset.addPair(newpair);
-          outputstate.pairsets.push_back(newset);
+          outputstate.pairsets.push_back(std::move(newset));
         }
       }
     }
@@ -513,7 +513,7 @@ StatusCode FPGATrackSimGenScanTool::groupPairs(HitPairSet &filteredpairs,
     {
       HitPairSet newpairset;
       newpairset.addPair(pair);
-      pairsets.push_back(newpairset);
+      pairsets.push_back(std::move(newpairset));
     }
   }
   

@@ -225,7 +225,7 @@ class TH2D;
     // to show the distance from the bin's center to the hit
     struct eventDispSet {
       eventDispSet(std::string name, int maxevts)
-          : m_name(name), m_maxEvts(maxevts) {}
+          : m_name(std::move(name)), m_maxEvts(maxevts) {}
 
       TGraph *initGraph(const std::string &name);
       void AddPoint(TGraph *g, double x, double y);
@@ -238,7 +238,7 @@ class TH2D;
 
       private:
       const std::string m_name;
-      const unsigned m_maxEvts;
+      const unsigned m_maxEvts{};
 
       std::vector<TGraph *> m_rZ;    // detector coordinates
       std::vector<TGraph *> m_xY;    // detector coordinates
