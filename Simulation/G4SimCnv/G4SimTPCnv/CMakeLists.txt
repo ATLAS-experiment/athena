@@ -14,7 +14,7 @@ atlas_add_library( G4SimTPCnv
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaPoolCnvSvcLib AthenaPoolServicesLib AthenaKernel TrackRecordLib TruthUtils )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaPoolCnvSvcLib AthenaKernel TrackRecordLib TruthUtils )
 
 atlas_add_tpcnv_library( G4SimTPCnvFactories
                          src/factories/*.cxx
