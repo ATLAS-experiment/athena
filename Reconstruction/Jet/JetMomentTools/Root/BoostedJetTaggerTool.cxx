@@ -43,5 +43,13 @@ StatusCode BoostedJetTaggerTool::decorate(const xAOD::JetContainer& jets) const
   if ( m_decorationName.value().compare("TopTransformer") == 0 )
   ATH_CHECK(m_MLTagger -> GetTopConstScore(jets));
 
+  // - W boson
+  if ( m_decorationName.value().compare("WTransformer") == 0 )
+    ATH_CHECK(m_MLTagger -> GetWConstScore(jets));
+
+  // - W boson mass decorrelated
+  if ( m_decorationName.value().compare("WTransformer_massdec") == 0 )
+    ATH_CHECK(m_MLTagger -> GetWConstScore(jets));
+  
   return StatusCode::SUCCESS;
 }

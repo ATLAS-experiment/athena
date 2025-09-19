@@ -15,6 +15,7 @@ class IJSSTaggerUtils : virtual public asg::IAsgTool {
     virtual StatusCode GetConstScore(const xAOD::JetContainer& jets) const = 0;
     virtual StatusCode GetQGConstScore(const xAOD::JetContainer& jets) const = 0;
     virtual StatusCode GetTopConstScore(const xAOD::JetContainer& jets) const = 0;
+    virtual StatusCode GetWConstScore(const xAOD::JetContainer& jets) const = 0;
     virtual StatusCode GetHLScore(const xAOD::JetContainer& jets) const = 0;
     virtual std::map<std::string, double> GetJSSVars(const xAOD::Jet& jet) const = 0;
     virtual StatusCode ReadScaler() = 0;

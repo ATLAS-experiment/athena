@@ -41,7 +41,7 @@ def StandardJetsInDerivCfg(ConfigFlags):
     )
 
     AntiKt10UFOCSSKSoftDrop_deriv = AntiKt10UFOCSSKSoftDrop.clone(
-        modifiers = AntiKt10UFOCSSKSoftDrop.modifiers+("toptransformer",)
+        modifiers = AntiKt10UFOCSSKSoftDrop.modifiers+("toptransformer","wtransformer","wtransformer_massdec")
     )
 
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv,

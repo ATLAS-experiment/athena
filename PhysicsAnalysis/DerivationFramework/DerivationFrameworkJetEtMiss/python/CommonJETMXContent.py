@@ -43,3 +43,4 @@ ExtraJSSVariables = ["C1.C2.C3.C4.D2",
 ### sub-structure ML taggers
 JSSTaggersVariables = ["AntiKt4EMPFlowJets.QGTransformer_ConstScore"]
 JSSTaggersVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore"]
+JSSTaggersVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_ConstScore", "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_massdec_ConstScore"]
