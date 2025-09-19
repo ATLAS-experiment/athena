@@ -150,7 +150,9 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
 
     # boosted jet taggers
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore"]
+    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore", 
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_ConstScore", 
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_massdec_ConstScore"]
 
     # Truth extra content
     if flags.Input.isMC:

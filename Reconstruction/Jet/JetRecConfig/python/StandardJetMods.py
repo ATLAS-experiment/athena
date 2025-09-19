@@ -60,7 +60,9 @@ try:
                             prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+[inputsFromContext("Vertices")])
     )
 except ModuleNotFoundError:
-    # In some releases (AthGeneration) JetCalibTools is not existing
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
 # TBD:
@@ -211,7 +213,9 @@ try:
         
     )
 except ModuleNotFoundError:
-    # In some releases (AthGeneration) JetMomentTools is not existing
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
 # Truth labelling moments
@@ -321,7 +325,9 @@ try :
                                     SuppressInputDependence = True),
     )
 except ModuleNotFoundError:
-    # In some releases (AthGeneration) JetMomentTools is not existing
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
 # Substructure tagger tools: top
@@ -334,7 +340,39 @@ try :
                                      SuppressInputDependence = True),
     )
 except ModuleNotFoundError:
-    # In some releases (AthGeneration) JetMomentTools is not existing
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
+    pass
+
+# Substructure tagger tools: w
+try :
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update( 
+        wtransformer = JetModifier("BoostedJetTaggerTool", "wtransformer",
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolW,
+                            JetContainer = _jetname,
+                            SuppressInputDependence = True),
+    )
+except ModuleNotFoundError:
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
+    pass
+
+# Substructure tagger tools: w mass dec
+try :
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update( 
+        wtransformer_massdec = JetModifier("BoostedJetTaggerTool", "wtransformer_massdec",
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolWMassDec,
+                            JetContainer = _jetname,
+                            SuppressInputDependence = True),
+    )
+except ModuleNotFoundError:
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
 # VR track-jet decorations
