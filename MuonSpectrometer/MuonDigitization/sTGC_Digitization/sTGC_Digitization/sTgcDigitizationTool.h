@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONDIGITIZATION_STGC_DIGITIZATIONTOOL_H
@@ -15,26 +15,21 @@
 
 */
 
-#include "PileUpTools/PileUpMergeSvc.h"
-#include "PileUpTools/PileUpToolBase.h"
-
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "HitManagement/TimedHitCollection.h"
-#include "MuonSimEvent/sTGCSimHitCollection.h"
-#include "MuonSimEvent/sTGCSimHit.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "MuonSimData/MuonSimDataCollection.h"
+#include "MuonCondData/DigitEffiData.h"
 #include "MuonDigitContainer/sTgcDigitContainer.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonSimData/MuonSimDataCollection.h"
+#include "MuonSimEvent/sTGCSimHit.h"
+#include "MuonSimEvent/sTGCSimHitCollection.h"
 #include "NSWCalibTools/INSWCalibSmearingTool.h"
 #include "NSWCalibTools/INSWCalibTool.h"
-#include "CLHEP/Random/RandGaussZiggurat.h"
-#include "CLHEP/Random/RandomEngine.h"
-#include "CLHEP/Geometry/Point3D.h"
-#include "CLHEP/Vector/ThreeVector.h"
-#include "AthenaKernel/IAthRNGSvc.h"
-#include "CLHEP/Units/PhysicalConstants.h"
-#include "MuonCondData/DigitEffiData.h"
+#include "PileUpTools/PileUpMergeSvc.h"
+#include "PileUpTools/PileUpToolBase.h"
 #include "sTGC_Digitization/sTgcDigitMaker.h"
+
+#include "CLHEP/Random/RandomEngine.h"
 
 /*******************************************************************************/
 namespace MuonGM{
@@ -176,8 +171,6 @@ private:
   Gaudi::Property<double> m_limitElectronKineticEnergy{this,"limitElectronKineticEnergy",5.0*CLHEP::MeV,"Minimum kinetic energy for electron hit to be digitized"};
 
   Gaudi::Property<double> m_chargeThreshold{this,"chargeThreshold", 0.030, "vmm charge threshold in pC, need to set useCondThresholds to false if one wants to use this threshold value otherwise the one from the conditions database is used"};
-
-  Gaudi::Property<double> m_stripChargeScale{this, "stripChargeScale",0.4, "strip charge scale"};
 
   Gaudi::Property<bool> m_applyAsBuiltBLines{this, "applyAsBuiltBLines",false, "correct the hit position by the as built and B-lines parameters"};
 

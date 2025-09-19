@@ -442,7 +442,7 @@ def BSMonitoringConfig(inputFlags):
         #myGroup.defineHistogram('barrelSectorIDRoiPhiX,barrelSectorIDRoiPhiY;barrelSectorIDRoiPhi', title='Sector ID vs. RoI #phi for barrel (matched cand only); Sector ID; #phi',
         #                        type='TH2F',path=monROIPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=32,ymin=-math.pi,ymax=math.pi,opt='kAlwaysCreate')
         myGroup.defineHistogram('barrelSectorIDRoiPhiX;barrelSectorIDRoiPhi', title='Sector ID for barrel (matched cand only); Sector ID',
-        type='TH2F',path=monROIPath,xbins=64,xmin=-0.5,xmax=63.5,opt='kAlwaysCreate')
+        path=monROIPath,xbins=64,xmin=-0.5,xmax=63.5,opt='kAlwaysCreate')
         #  CHECK( registerTH2("endcapSectorIDRoiPhi","Sector ID vs. RoI #phi for endcap (matched cand only); Sector ID; #phi", 96,-0.5,95.5,32,-TMath::Pi(),TMath::Pi()) );
         #myGroup.defineHistogram('endcapSectorIDRoiPhiX,endcapSectorIDRoiPhiY;endcapSectorIDRoiPhi', title='Sector ID vs. RoI #phi for endcap (matched cand only); Sector ID; #phi',
         #                        type='TH2F',path=monROIPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=32,ymin=-math.pi,ymax=math.pi,opt='kAlwaysCreate')
