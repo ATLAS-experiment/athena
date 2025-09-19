@@ -95,11 +95,6 @@ class ByteStreamEventStorageOutputSvc :
   Gaudi::Property<std::string> m_streamName{this, "StreamName", "",
     "part of filename"};
 
-  //!< eformat event version to produce, "v40" for run1, or "current"
-  Gaudi::Property<std::string> m_eformatVersion{this, "EformatVersion",
-    "current", "Version of the event format data, use \"v40\" or \"run1\" "
-    "for run1, \"current\" for most current version (default)."};
-
   //!< EventStorage BS version to produce, "v5" for run1, or "current"
   Gaudi::Property<std::string> m_eventStorageVersion{this,
     "EventStorageVersion", "current", "Version of the ByteStream file data, "
@@ -153,8 +148,6 @@ class ByteStreamEventStorageOutputSvc :
  private:  // data
   //! number of event counter
   int m_totalEventCounter{0};
-
-  bool m_isRun1{false};
 
   //! pointer to DataWriter
   std::unique_ptr<ByteStreamDataWriter> m_dataWriter;

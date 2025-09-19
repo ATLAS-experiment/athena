@@ -11,7 +11,6 @@
 
 #include "AthenaKernel/StoreID.h"
 
-#include "ByteStreamCnvSvcLegacy/offline_eformat/old/util.h"
 #include "ByteStreamData/RawEvent.h"
 
 #include "EventStorage/EventStorageRecords.h"
@@ -54,29 +53,6 @@ ByteStreamEventStorageOutputSvc::initialize() {
     ATH_MSG_VERBOSE("io_register[" << this->name() << "]("
                     << m_simpleFileName << ") [ok]");
   }
-
-  // validate m_eformatVersion
-  const std::vector< std::string > choices_ef{"current", "v40", "run1"};
-  if (std::find(choices_ef.begin(), choices_ef.end(), m_eformatVersion)
-      == choices_ef.end()) {
-    ATH_MSG_FATAL("Unexpected value for EformatVersion property: "
-                  << m_eformatVersion);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("eformat version to use: \"" << m_eformatVersion << "\"");
-
-  // validate m_eventStorageVersion
-  const std::vector< std::string > choices_es{"current", "v5", "run1"};
-  if (std::find(choices_es.begin(), choices_es.end(), m_eventStorageVersion)
-      == choices_es.end()) {
-    ATH_MSG_FATAL("Unexpected value for EventStorageVersion property: "
-                  << m_eventStorageVersion);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("event storage (BS) version to use: \""
-               << m_eventStorageVersion << "\"");
-
-  m_isRun1 = (m_eformatVersion == "v40" or m_eformatVersion == "run1");
 
   ATH_CHECK(reinit());
 
@@ -192,35 +168,8 @@ ByteStreamEventStorageOutputSvc::putEvent(
   cache->size = re->fragment_size_word();
   ATH_MSG_DEBUG("event size = " << cache->size << ", start = " << re->start());
 
-  if (m_isRun1) {
-    // convert to current eformat
-    // allocate some extra space just in case
-    ATH_MSG_DEBUG("converting Run 1 format ");
-
-    cache->size += 128;
-    cache->buffer = std::make_unique< DataType[] >(cache->size);
-    ATH_MSG_DEBUG("created buffer 0x"
-                  << std::hex << cache->buffer.get() << std::dec);
-
-    // This builds no-checksum headers, should use the same
-    // checksum type as original event
-    cache->size = offline_eformat::old::convert_to_40(
-        re->start(), cache->buffer.get(), cache->size);
-    ATH_MSG_DEBUG("filled buffer");
-
-    if (cache->size == 0) {
-      // not enough space in buffer
-      ATH_MSG_ERROR("Failed to convert event, buffer is too small");
-      return false;
-    }
-
-    ATH_MSG_DEBUG("event size after conversion =  " << cache->size
-                  << "  version = " << cache->buffer.get()[3]);
-
-  } else {
-    cache->buffer = std::make_unique< DataType[] >(cache->size);
-    std::copy(re->start(), re->start() + cache->size, cache->buffer.get());
-  }
+  cache->buffer = std::make_unique< DataType[] >(cache->size);
+  std::copy(re->start(), re->start() + cache->size, cache->buffer.get());
 
   {
     // multiple data writers concurrently sounds like a bad idea
@@ -324,10 +273,7 @@ void
 ByteStreamEventStorageOutputSvc::updateDataWriterParameters(
     DataWriterParameters& params) const {
 
-  if (m_eventStorageVersion == "v5" or m_eventStorageVersion == "run1")
-    params.version = 5;
-  else params.version = 0;
-
+  params.version = 0;
   params.writingPath = m_inputDir;
 
   if (m_run != 0) params.rPar.run_number = m_run;
