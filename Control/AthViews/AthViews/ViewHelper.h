@@ -147,10 +147,12 @@ namespace ViewHelper
       SG::ReadHandle<T> queryHandle( queryKey, sourceContext );
 
       //Loop over all views
-      for ( SG::View* inputView : viewVector )
+      for ( const SG::View* inputView : viewVector )
       {
+        // setProxyDict only supports non-const stores
+        SG::View* nc_inputView ATLAS_THREAD_SAFE = const_cast< SG::View* >( inputView );
         //Attach the handle to the view
-        StatusCode sc = queryHandle.setProxyDict( inputView );
+        StatusCode sc = queryHandle.setProxyDict( nc_inputView );
         if ( !sc.isSuccess() )
         {
           m_msg << MSG::ERROR <<"Failed to use view " << inputView->name() << " to read " << queryHandle.key() << " resetting output" << endmsg;
@@ -187,10 +189,12 @@ namespace ViewHelper
 
       //Loop over all views
       unsigned int offset = outputData.size(); //allow for existing objects in the container
-      for ( auto inputView : viewVector )
+      for ( const SG::View* inputView : viewVector )
       {
+        // setProxyDict only supports non-const stores
+        SG::View* nc_inputView ATLAS_THREAD_SAFE = const_cast< SG::View* >( inputView );
         //Attach the handle to the view
-        StatusCode sc = queryHandle.setProxyDict( inputView );
+        StatusCode sc = queryHandle.setProxyDict( nc_inputView );
         if ( !sc.isSuccess() )
         {
           m_msg << MSG::ERROR << "Failed to use view " << inputView->name() << " to read " << queryHandle.key() << endmsg;
@@ -198,7 +202,7 @@ namespace ViewHelper
         }
 
         //Nothing to do for empty collections
-        if ( queryHandle->size() == 0 )
+        if ( queryHandle->empty() )
         {
           if (m_msg.level() <= MSG::DEBUG) {
             m_msg << MSG::DEBUG << "Empty collection " << queryHandle.key() <<" in a view " << inputView->name() <<endmsg;
