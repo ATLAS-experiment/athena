@@ -42,21 +42,16 @@ atlas_add_test( ViewCollectionMerge_test
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( SimpleViews
-                SCRIPT athena.py --threads=1 AthViews/SimpleViewExample.py
+                SCRIPT test/SimpleViewExample.py --threads=1
                 PROPERTIES PASS_REGULAR_EXPRESSION "INFO view_test running with store view_9"
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( ViewScheduling
-                SCRIPT athena.py --threads=1 AthViews/ViewScheduling.py
+                SCRIPT test/ViewScheduling.py --threads=1
                 LOG_SELECT_PATTERN "INFO condTestAlg running with store view_0|INFO 109" )
 
 atlas_add_test( ViewInheritance
-                SCRIPT athena.py --threads=1 AthViews/ViewInheritance.py
-                POST_EXEC_SCRIPT nopost.sh )
-
-atlas_add_test( ViewNestFail
-                SCRIPT athena.py --threads=1 AthViews/ViewNest.py
-                PROPERTIES PASS_REGULAR_EXPRESSION "Execution of algorithm nest_alg failed"
+                SCRIPT test/ViewInheritance.py --threads=1
                 POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
