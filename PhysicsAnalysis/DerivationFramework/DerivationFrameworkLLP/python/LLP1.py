@@ -587,7 +587,17 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "MuonsLRT",
         InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
-
+    # GSF tracks associated to photons
+    LLP1PhotonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1PhotonTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SGKey                   = "Photons",
+        InDetTrackParticlesKey  = "",
+        GSFConversionVerticesKey = "GSFConversionVertices",
+        GSFTrackParticlesKey    = "GSFTrackParticles",
+        BestMatchOnly            = True,
+        BestVtxMatchOnly         = True)) 
     # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
     tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD}"
     LLP1TauJetsThinningTool = acc.getPrimaryAndMerge(TauThinningCfg(
@@ -733,6 +743,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                      LLP1ElectronTPThinningTool,
                      LLP1LRTElectronTPThinningTool,
                      LLP1MuonTPThinningTool,
+                     LLP1PhotonTPThinningTool,
                      LLP1LRTMuonTPThinningTool,
                      LLP1TauJetsThinningTool,
                      LLP1TauTPThinningTool,
