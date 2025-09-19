@@ -223,7 +223,7 @@ template <>
 template <typename PrdType>
     void SpacePointMakerAlg::fillUncombinedSpacePoints(const ActsGeometryContext& gctx,
                                                        const Amg::Transform3D& sectorTrans,
-                                                       const std::vector<PrdType>& prdsToFill,
+                                                       const std::vector<const PrdType*>& prdsToFill,
                                                        std::vector<SpacePoint>& outColl) const {
     if (prdsToFill.empty()) {
         return;
@@ -233,26 +233,23 @@ template <typename PrdType>
     Amg::Vector3D sensorDir = toSectorTrans.rotation().col(Amg::y);
     Amg::Vector3D toNextSen = toSectorTrans.rotation().col(Amg::x);
     outColl.reserve(outColl.size() + prdsToFill.size());
-    for (const PrdType prd: prdsToFill) {
-        if (!prd) {
-            THROW_EXCEPTION("STOOONJK!!!!");
-        }
+    for (const PrdType* prd: prdsToFill) {
         SpacePoint& newSp = outColl.emplace_back(prd);
         if constexpr (std::is_same_v<PrdType, xAOD::TgcStrip>) {
             const bool isStrip = prd->measuresPhi();
             const auto& stripLay = prd->readoutElement()->sensorLayout(prd->layerHash());
-            if (isStrip) {
-                toNextSen = toSectorTrans.rotation() * stripLay.to3D(stripNormal(prd->channelNumber()), isStrip);
-                sensorDir = toSectorTrans.rotation() * stripLay.to3D(stripDir(prd->channelNumber()), isStrip);
+            if (isStrip) {                
+                const auto& radialDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay->design(isStrip));
+                toNextSen = toSectorTrans.rotation() * stripLay->to3D(radialDesign.stripNormal(prd->channelNumber()), isStrip);
+                sensorDir = toSectorTrans.rotation() * stripLay->to3D(radialDesign.stripDir(prd->channelNumber()), isStrip);
             } else {
-                toNextSen = toSectorTrans.rotation() * stripLay.to3D(Amg::Vector2D::UnitX(), isStrip);
-                sensorDir = toSectorTrans.rotation() * stripLay.to3D(Amg::Vector2D::UnitY(), isStrip);
+                toNextSen = toSectorTrans.rotation() * stripLay->to3D(Amg::Vector2D::UnitX(), isStrip);
+                sensorDir = toSectorTrans.rotation() * stripLay->to3D(Amg::Vector2D::UnitY(), isStrip);
             }
         }
         newSp.setPosition(positionInChamber(*prd, toSectorTrans));
         newSp.setDirection(sensorDir, toNextSen);
-        auto cov = Acts::filledArray<double,3>(0.);
-        
+        auto cov = Acts::filledArray<double,3>(0.);        
         if (prd->numDimensions() == 2) {
             if constexpr(std::is_same_v<PrdType, xAOD::RpcMeasurement>) {
                 cov[Acts::toUnderlying(CovIdx::etaCov)] = prd->template localCovariance<2>()(0,0);
