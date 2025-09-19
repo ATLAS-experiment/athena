@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/RDBReaderAtlas.h"
@@ -14,6 +14,7 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
+#include "CxxUtils/ArrayHelper.h"
 
 namespace MuonGM {
 
@@ -267,146 +268,103 @@ namespace MuonGM {
     }
 
     void RDBReaderAtlas::ProcessTGCreadout(MYSQL& mysql) {
+        //
+        // in case of layout Q and following
+        //
+        IRDBRecordset_ptr ggln = m_pRDBAccess->getRecordsetPtr("GGLN", m_geoTag, m_geoNode);
 
-        if (getGeometryVersion().substr(0, 1) == "P") {
-            IRDBRecordset_ptr ggsd = m_pRDBAccess->getRecordsetPtr("GGSD", m_geoTag, m_geoNode);
-            IRDBRecordset_ptr ggcd = m_pRDBAccess->getRecordsetPtr("GGCD", m_geoTag, m_geoNode);
-            ATH_MSG_INFO( "RDBReaderAtlas::ProcessTGCreadout GGSD, GGCD retrieven from Oracle" );
-
-            int version = (int)(*ggsd)[0]->getDouble("VERS");
-            float wirespacing = (*ggsd)[0]->getDouble("WIRESP") * Gaudi::Units::cm;
-            ATH_MSG_INFO( " ProcessTGCreadout - version " << version << " wirespacing " << wirespacing );
-
-            //
-            // in case of the layout P03
-            //
-
-            // loop over the banks of station components: ALMN
-            for (unsigned int ich = 0; ich < ggcd->size(); ++ich) {
-                int type = (int)(*ggcd)[ich]->getDouble("ICHTYP");
-
-                if (ich < 19) {
-                    std::string name = RDBReaderAtlas::TGCreadoutName(type);
-
-                    int nchrng = (int)(*ggcd)[ich]->getDouble("NCHRNG");
-           
-                    GasGapIntArray nwgs{}, nsps{};
-                    WiregangArray iwgs1{}, iwgs2{}, iwgs3{};
-
-                    for (int i = 0; i < 3; ++i) {
-                        nwgs[i] = (*ggcd)[ich]->getDouble("NWGS", i);
-                        nsps[i] = (*ggcd)[ich]->getDouble("NSPS", i);
-                    }
-
-                    for (int i = 0; i < nwgs[0]; ++i) {
-                        iwgs1[i] = (*ggcd)[ich]->getDouble("IWGS1", i);
-                    }
-                    for (int i = 0; i < nwgs[1]; ++i) {
-                        iwgs2[i] = (*ggcd)[ich]->getDouble("IWGS2" , i);
-                    }
-
-                    for (int i = 0; i < nwgs[2]; ++i) {
-                        iwgs3[i] = (*ggcd)[ich]->getDouble("IWGS3", i);
-                    }
-                    GeoModel::TransientConstSharedPtr<TgcReadoutParams> rpar = 
-                                std::make_unique<TgcReadoutParams>(name, type, version, wirespacing, nchrng, 
-                                                                   std::move(nwgs), std::move(iwgs1), 
-                                                                   std::move(iwgs2), std::move(iwgs3), 
-                                                                   std::move(nsps));
-                    mysql.StoreTgcRPars(rpar);
-                }
-            }
-        } else {
-            //
-            // in case of layout Q and following
-            //
-            IRDBRecordset_ptr ggln = m_pRDBAccess->getRecordsetPtr("GGLN", m_geoTag, m_geoNode);
-
-            int version(0);
-            float wirespacing(0);
-            unsigned int gglnSize(0);
-            if (ggln)
-                gglnSize = ggln->size();
-            else {
-                ATH_MSG_WARNING(" ProcessTGCreadout - IRDBRecordset_ptr GGLN is nullptr" );
-            }
-            if (gglnSize) {
-                version = (int)(*ggln)[0]->getInt("VERS");
-                wirespacing = (*ggln)[0]->getFloat("WIRESP") * Gaudi::Units::mm;
-            }
-
-            ATH_MSG_INFO( " ProcessTGCreadout - version " << version << " wirespacing " << wirespacing );
-
-            // loop over the banks of station components: ALMN
-            for (unsigned int ich = 0; ich < gglnSize; ++ich) {
-                int type = (int)(*ggln)[ich]->getInt("JSTA");
-                std::string name = "TGCReadout" + MuonGM::buildString(type, 2);
-
-                // NCHRNG missing in GGLN, HARD-CODED !!!
-                int nchrng;
-                if (type == 1 || type == 6 || type == 12 || type >= 18) {
-                    nchrng = 24;
-                } else {
-                    nchrng = 48;
-                }
-                GasGapIntArray nwgs{}, nsps{};
-                WiregangArray iwgs1{}, iwgs2{}, iwgs3{};
-                StripArray slarge{}, sshort{};
-
-                for (int i = 0; i < 3; i++) {
-                    nwgs[i] = (*ggln)[ich]->getInt("NWGS", i );
-                    nsps[i] = (*ggln)[ich]->getInt("NSPS", i);
-                }
-
-                for (int i = 0; i < nwgs[0]; i++) {
-                    iwgs1[i] = (*ggln)[ich]->getInt("IWGS1", i);
-                }
-
-                for (int i = 0; i < nwgs[1]; i++) {
-                    iwgs2[i] = (*ggln)[ich]->getInt("IWGS2", i);
-                }
-                for (int i = 0; i < nwgs[2]; i++) {
-                    iwgs3[i] = (*ggln)[ich]->getInt("IWGS3", i);
-                }
-
-                // read and store parameters for strips
-                float pdist = (*ggln)[ich]->getFloat("PDIST");
-
-                for (int i = 0; i < nsps[0] + 1; i++) {
-                    slarge[i] = (*ggln)[ich]->getFloat("SLARGE", i);
-                    sshort[i] = (*ggln)[ich]->getFloat("SHORT", i);
-                }
-                GeoModel::TransientConstSharedPtr<TgcReadoutParams> rpar = 
-                        std::make_unique<TgcReadoutParams>(name, type, version, wirespacing, nchrng, 
-                                                    std::move(nwgs), std::move(iwgs1), std::move(iwgs2), std::move(iwgs3), 
-                                                    pdist, 
-                                                    std::move(slarge), std::move(sshort), 
-                                                     std::move(nsps));
-                mysql.StoreTgcRPars(rpar);
-             
-                // parameters for TGC inactive inner structure
-
-                std::ostringstream Astr;
-                if (ich < 9) {
-                    Astr << "0" << ich + 1;
-                } else {
-                    Astr << ich + 1;
-                }
-                std::string A = Astr.str();
-                TGC *tgc = dynamic_cast<TGC*>(mysql.GetTechnology("TGC" + A));
-                tgc->widthWireSupport = (*ggln)[ich]->getFloat("S1PP");
-                tgc->widthGasChannel = (*ggln)[ich]->getFloat("S2PP");
-                tgc->distanceWireSupport = (*ggln)[ich]->getFloat("WSEP");
-                tgc->offsetWireSupport[0] = (*ggln)[ich]->getFloat("SP1WI");
-                tgc->offsetWireSupport[1] = (*ggln)[ich]->getFloat("SP2WI");
-                tgc->offsetWireSupport[2] = (*ggln)[ich]->getFloat("SP3WI");
-                tgc->angleTilt = (*ggln)[ich]->getFloat("TILT") * Gaudi::Units::deg;
-                tgc->radiusButton = (*ggln)[ich]->getFloat("SP1BU");
-                tgc->pitchButton[0] = (*ggln)[ich]->getFloat("SP2BU");
-                tgc->pitchButton[1] = (*ggln)[ich]->getFloat("SP3BU");
-                tgc->angleButton = (*ggln)[ich]->getFloat("SP4BU") * Gaudi::Units::deg;
-            }
+        int version(0);
+        float wirespacing(0);
+        unsigned int gglnSize(0);
+        if (ggln)
+            gglnSize = ggln->size();
+        else {
+            ATH_MSG_WARNING(" ProcessTGCreadout - IRDBRecordset_ptr GGLN is nullptr" );
         }
+        if (gglnSize) {
+            version = (int)(*ggln)[0]->getInt("VERS");
+            wirespacing = (*ggln)[0]->getFloat("WIRESP") * Gaudi::Units::mm;
+        }
+
+        ATH_MSG_INFO( " ProcessTGCreadout - version " << version << " wirespacing " << wirespacing );
+
+        // loop over the banks of station components: ALMN
+        for (unsigned int ich = 0; ich < gglnSize; ++ich) {
+            int type = (int)(*ggln)[ich]->getInt("JSTA");
+            std::string name = "TGCReadout" + MuonGM::buildString(type, 2);
+
+            // NCHRNG missing in GGLN, HARD-CODED !!!
+            int nchrng;
+            if (type == 1 || type == 6 || type == 12 || type >= 18) {
+                nchrng = 24;
+            } else {
+                nchrng = 48;
+            }
+            using enum TgcReadoutParams::TgcReadoutArraySizes;
+            GasGapIntArray nwgs{make_array<int, MaxNGaps>(0)};
+            GasGapIntArray nsps{make_array<int, MaxNGaps>(0)};
+            WiregangArray iwgs1{make_array<int, MaxNGangs>(0)};
+            WiregangArray iwgs2{make_array<int, MaxNGangs>(0)};
+            WiregangArray iwgs3{make_array<int, MaxNGangs>(0)};
+            std::vector<StripArray> slarge{make_array<double, MaxNStrips>(0)}; 
+            std::vector<StripArray> sshort{make_array<double, MaxNStrips>(0)};
+
+            for (int i = 0; i < 3; i++) {
+                nwgs[i] = (*ggln)[ich]->getInt("NWGS", i );
+                nsps[i] = (*ggln)[ich]->getInt("NSPS", i);
+            }
+            for (int i = 0; i < nwgs[0]; i++) {
+                iwgs1[i] = (*ggln)[ich]->getInt("IWGS1", i);
+            }
+
+            for (int i = 0; i < nwgs[1]; i++) {
+                iwgs2[i] = (*ggln)[ich]->getInt("IWGS2", i);
+            }
+            for (int i = 0; i < nwgs[2]; i++) {
+                iwgs3[i] = (*ggln)[ich]->getInt("IWGS3", i);
+            }
+
+            // read and store parameters for strips
+            float pdist = (*ggln)[ich]->getFloat("PDIST");
+
+            for (int i = 0; i < nsps[0] + 1; i++) {
+                slarge[0][i] = (*ggln)[ich]->getFloat("SLARGE", i);
+                sshort[0][i] = (*ggln)[ich]->getFloat("SHORT", i);
+            }
+            GeoModel::TransientConstSharedPtr<TgcReadoutParams> rpar = 
+                    std::make_unique<TgcReadoutParams>(name, type, wirespacing, nchrng, 
+                                                      std::move(nwgs), 
+                                                      std::move(iwgs1), 
+                                                      std::move(iwgs2), 
+                                                      std::move(iwgs3), 
+                                                      pdist, 
+                                                      std::move(slarge), 
+                                                      std::move(sshort), 
+                                                      std::move(nsps));
+            mysql.StoreTgcRPars(rpar);
+            // parameters for TGC inactive inner structure
+
+            std::ostringstream Astr;
+            if (ich < 9) {
+                Astr << "0" << ich + 1;
+            } else {
+                Astr << ich + 1;
+            }
+            std::string A = Astr.str();
+            TGC *tgc = dynamic_cast<TGC*>(mysql.GetTechnology("TGC" + A));
+            tgc->widthWireSupport = (*ggln)[ich]->getFloat("S1PP");
+            tgc->widthGasChannel = (*ggln)[ich]->getFloat("S2PP");
+            tgc->distanceWireSupport = (*ggln)[ich]->getFloat("WSEP");
+            tgc->offsetWireSupport[0] = (*ggln)[ich]->getFloat("SP1WI");
+            tgc->offsetWireSupport[1] = (*ggln)[ich]->getFloat("SP2WI");
+            tgc->offsetWireSupport[2] = (*ggln)[ich]->getFloat("SP3WI");
+            tgc->angleTilt = (*ggln)[ich]->getFloat("TILT") * Gaudi::Units::deg;
+            tgc->radiusButton = (*ggln)[ich]->getFloat("SP1BU");
+            tgc->pitchButton[0] = (*ggln)[ich]->getFloat("SP2BU");
+            tgc->pitchButton[1] = (*ggln)[ich]->getFloat("SP3BU");
+            tgc->angleButton = (*ggln)[ich]->getFloat("SP4BU") * Gaudi::Units::deg;
+        }
+        
     }
 
     std::string RDBReaderAtlas::TGCreadoutName(int ichtyp) {
