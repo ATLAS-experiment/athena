@@ -200,15 +200,15 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
       const std::string::size_type pos3 = output.find(']', pos2);
       const std::string value = output.substr(pos2 + 1, pos3 - pos2 - 1);
       if (thisKey == "OutputCollection") {
-         dhContainerPrefix = value;
+         dhContainerPrefix = std::move(value);
       } else if (thisKey == "PoolContainerPrefix") {
-         containerPrefix = value;
+         containerPrefix = std::move(value);
       } else if (thisKey == "TopLevelContainerName") {
-         containerNameHint = value;
+        containerNameHint = std::move(value);
       } else if (thisKey == "SubLevelBranchName") {
-         branchNameHint = value;
+         branchNameHint = std::move(value);
       } else if (thisKey == "PoolContainerFriendPostfix") {
-         containerFriendPostfix = value;
+         containerFriendPostfix = std::move(value);
       }
       pos1 = output.find('[', pos3);
    }

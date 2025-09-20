@@ -591,10 +591,10 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
             if (databaseName.empty()) {
                databaseName = "*";
             }
-            containerName = val;
+            containerName = std::move(val);
          } else {
-            attributeName = tag;
-            valueString = val;
+            attributeName = std::move(tag);
+            valueString = std::move(val);
          }
       }
       if (!attributeName.empty() && !valueString.empty()) {

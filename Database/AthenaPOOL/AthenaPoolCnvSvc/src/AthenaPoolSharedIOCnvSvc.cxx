@@ -168,25 +168,46 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
             // StopWatch listens from here until the end of this current scope
             {
                PMonUtils::BasicStopWatch stopWatch("cRep_" + objName, this->m_chronoMap);
-               std::string tokenStr = placementStr;
-               std::string contName = strstr(placementStr, "[CONT=");
-               tokenStr.erase(tokenStr.find("[CONT=")); //throws if [CONT= not found
-               tokenStr.append(contName, contName.find(']') + 1);
-               contName = contName.substr(6, contName.find(']') - 6);
-               std::string className = strstr(placementStr, "[PNAME=");
-               className = className.substr(7, className.find(']') - 7);
+               std::string_view pStr = placementStr;
+               std::string::size_type cpos = pStr.find ("[CONT=");
+               if (cpos == std::string::npos) {
+                 ATH_MSG_ERROR("No CONT field in placement string: " << pStr);
+                 return StatusCode::FAILURE;
+               }
+               std::string tokenStr (pStr.substr(0, cpos));
+               std::string contName (pStr.substr(cpos, std::string::npos));
+               std::string::size_type cl1 = contName.find(']');
+               if (cl1 == std::string::npos) {
+                 ATH_MSG_ERROR("Missing close bracket after CONT field in placement string: " << pStr);
+                 return StatusCode::FAILURE;
+               }
+               tokenStr.append(contName, cl1 + 1);
+               contName = contName.substr(6, cl1 - 6);
+
+               std::string::size_type ppos = pStr.find ("[PNAME=");
+               if (ppos == std::string::npos) {
+                 ATH_MSG_ERROR("No PNAME field in placement string: " << pStr);
+                 return StatusCode::FAILURE;
+               }
+               std::string className (pStr.substr(ppos, std::string::npos));
+               std::string::size_type cl2 = className.find(']');
+               if (cl2 == std::string::npos) {
+                 ATH_MSG_ERROR("Missing close bracket after PNAME field in placement string: " << pStr);
+                 return StatusCode::FAILURE;
+               }
+               className = className.substr(7, cl2 - 7);
                RootType classDesc = RootType::ByNameNoQuiet(className);
                void* obj = nullptr;
                std::ostringstream oss2;
                oss2 << std::dec << num;
                std::string::size_type len = m_metadataContainerProp.value().size();
                bool foundContainer = false;
-               std::size_t pPos = contName.find('(');
-               if (contName.compare(0, pPos, m_metadataContainerProp.value()) == 0) {
+               std::size_t opPos = contName.find('(');
+               if (contName.compare(0, opPos, m_metadataContainerProp.value()) == 0) {
                   foundContainer = true;
                } else {
                   for (const auto& item: m_metadataContainersAug.value()) {
-                     if (contName.compare(0, pPos, item) == 0){
+                     if (contName.compare(0, opPos, item) == 0){
                         foundContainer = true;
                         len = item.size();
                         break;
@@ -203,7 +224,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                         std::string memName = "SHM[NUM=" + oss1.str() + "]";
                         FileIncident beginInputIncident(name(), "BeginInputFile", memName);
                         incSvc->fireIncident(beginInputIncident);
-                        FileIncident endInputIncident(name(), "EndInputFile", memName);
+                        FileIncident endInputIncident(name(), "EndInputFile", std::move(memName));
                         incSvc->fireIncident(endInputIncident);
                      }
                      m_metadataClient = num;
@@ -211,7 +232,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                   // Retrieve MetaDataSvc
                   ServiceHandle<IAthMetaDataSvc> metadataSvc("MetaDataSvc", name());
                   ATH_CHECK(metadataSvc.retrieve());
-                  sc = metadataSvc->shmProxy(std::string(placementStr) + "[NUM=" + oss2.str() + "]");
+                  sc = metadataSvc->shmProxy(std::string(pStr) + "[NUM=" + oss2.str() + "]");
                   if (sc.isRecoverable()) {
                      ATH_MSG_WARNING("MetaDataSvc::shmProxy() no proxy added.");
                   } else if (sc.isFailure()) {
@@ -331,7 +352,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
          }
          if (dataHeaderSeen) {
             // DataHeader was the last object, need to tell the converter there is no DHForm coming
-            GenericAddress address(0, 0, "", dataHeaderID);
+            GenericAddress address(0, 0, "", std::move(dataHeaderID));
             if (!DHcnv->updateRepRefs(&address, nullptr).isSuccess()) {
                ATH_MSG_ERROR("Failed updateRepRefs for DataHeader");
                return abortSharedWrClients(-1);
@@ -365,7 +386,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
       return(StatusCode::SUCCESS);
    }
    if (outputConnection.empty()) {
-      outputConnection = fileName;
+      outputConnection = std::move(fileName);
    } else {
       outputConnection = outputConnectionSpec;
       if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient() && m_parallelCompression) {
