@@ -73,7 +73,7 @@ def TrigMBTS(configFlags):
         mbExpGroup = monConfig.addGroup(alg, chain+'_expert',
                                         topPath='HLT/MBTSMon/'+chain+'/')
         mbExpGroup.defineHistogram(
-            'MBTShits', type='TH2F', title='MBTS total hits;# of Hits;Entry Rate', xbins=24, xmin=0, xmax=100)
+            'MBTShits', type='TH1F', title='MBTS total hits;# of Hits;Entry Rate', xbins=24, xmin=0, xmax=100)
 
         mbExpGroup.defineHistogram('MBTS_A_meanEnergy', type='TH1F',
                                    title='Mean MBTS Energy A side passed;MBTS Energy [pC];Entry Rate', xbins=100, xmin=-0.1, xmax=9.9)
