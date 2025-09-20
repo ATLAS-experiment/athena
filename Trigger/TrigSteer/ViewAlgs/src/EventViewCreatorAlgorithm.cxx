@@ -1,7 +1,7 @@
 /*
   General-purpose view creation algorithm <bwynne@cern.ch>
   
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventViewCreatorAlgorithm.h"
@@ -300,8 +300,7 @@ StatusCode EventViewCreatorAlgorithm::placeRoIInView( const ElementLink<TrigRoiD
   view->setROI(roiEL);
 
   //store the RoI in the view
-  auto handle = SG::makeHandle( m_inViewRoIs, context );
-  ATH_CHECK( handle.setProxyDict( view ) );
+  auto handle = ViewHelper::makeHandle( view, m_inViewRoIs, context );
   ATH_CHECK( handle.record( std::move( oneRoIColl ) ) );
   return StatusCode::SUCCESS;
 }
@@ -324,12 +323,10 @@ StatusCode EventViewCreatorAlgorithm::placeMuonInView( const xAOD::Muon* theObje
   if(msLink.isValid() && extTrackLink.isValid()) muonCandidate->push_back( new MuonCombined::MuonCandidate(msLink, (*extTrackLink)->trackLink(), (*extTrackLink)->index()) );
 
   //store both in the view
-  auto handleMuon = SG::makeHandle( m_inViewMuons,context );
-  ATH_CHECK( handleMuon.setProxyDict( view ) );
+  auto handleMuon = ViewHelper::makeHandle( view, m_inViewMuons, context );
   ATH_CHECK( handleMuon.record( std::move( oneObjectCollection ), std::move( oneObjectAuxCollection )) );
 
-  auto handleCandidate = SG::makeHandle( m_inViewMuonCandidates,context );
-  ATH_CHECK( handleCandidate.setProxyDict( view ) );
+  auto handleCandidate = ViewHelper::makeHandle( view, m_inViewMuonCandidates, context );
   ATH_CHECK( handleCandidate.record( std::move( muonCandidate ) ) );
 
   return StatusCode::SUCCESS;
@@ -349,8 +346,7 @@ StatusCode EventViewCreatorAlgorithm::placeJetInView( const xAOD::Jet* theObject
   oneObjectCollection->push_back( copiedJet );
   *copiedJet = *theObject;
 
-  auto handle = SG::makeHandle( m_inViewJets,context );  
-  ATH_CHECK( handle.setProxyDict( view ) ); 
+  auto handle = ViewHelper::makeHandle( view, m_inViewJets, context );
   ATH_CHECK( handle.record( std::move(oneObjectCollection),std::move(oneObjectAuxCollection) ) );
 
   return StatusCode::SUCCESS;
