@@ -92,7 +92,6 @@ public:
 
   void swap (TestUpdater& other)
   {
-    std::lock_guard<std::mutex> g (m_mutex);
     auto swap_atomic = [] (std::atomic<T*>& a, std::atomic<T*>& b)
     {
       T* tmp = a.load (std::memory_order_relaxed);
@@ -102,16 +101,21 @@ public:
     };
 
     swap_atomic (m_p, other.m_p);
+    std::lock_guard<std::mutex> g (m_mutex);
+    std::lock_guard<std::mutex> gother (other.m_mutex);
     m_garbage.swap (other.m_garbage);
     std::swap (m_inGrace, other.m_inGrace);
   }
 
 
-  unsigned int inGrace() const { return m_inGrace; }
+  unsigned int inGrace() const {
+    std::lock_guard<std::mutex> g (m_mutex);
+    return m_inGrace;
+  }
 
 
 private:
-  std::mutex m_mutex;
+  mutable std::mutex m_mutex;
   std::atomic<T*> m_p;
   std::vector<T*> m_garbage;
   unsigned int m_inGrace;
