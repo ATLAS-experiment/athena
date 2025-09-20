@@ -123,7 +123,6 @@ class ConfigurablePersistencyTestCase( unittest.TestCase ):
       from AthenaCommon.AlgSequence import AlgSequence
       job = AlgSequence()
       job += CfgMgr.AthenaOutputStream('MyOutputStream')
-      job += CfgMgr.AthenaConditionStream ('MyConditionStream')
 
       ## service manager
       from AthenaCommon.AppMgr import ServiceMgr as svcMgr
@@ -175,8 +174,6 @@ class ConfigurablePersistencyTestCase( unittest.TestCase ):
       topSequence = AlgSequence()
       self.assertTrue(hasattr(topSequence, 'MyOutputStream'),
                       "topSequence is missing 'MyOutputStream' !")
-      self.assertTrue(hasattr(topSequence, 'MyConditionStream' ),
-                      "topSequence is missing 'MyConditionStream' !")
 
       from AthenaCommon.AppMgr import ServiceMgr as svcMgr
       self.assertTrue(hasattr(svcMgr, 'MyTHistSvc'),
@@ -193,8 +190,6 @@ class ConfigurablePersistencyTestCase( unittest.TestCase ):
       topSequence = AlgSequence()
       assert hasattr(topSequence, 'MyOutputStream'), \
              'topSequence is missing MyOutputStream !'
-      assert hasattr(topSequence, 'MyConditionStream' ), \
-             'topSequence is missing MyConditionStream !'
       
       ## test service manager
       from AthenaCommon.AppMgr import ServiceMgr as svcMgr
@@ -257,7 +252,6 @@ class ConfigurablePersistencyTestCase( unittest.TestCase ):
       from AthenaCommon.AlgSequence import AlgSequence
       job = AlgSequence()
       job += CfgMgr.AthenaOutputStream('MyOutputStream')
-      job += CfgMgr.AthenaConditionStream ('MyConditionStream')
 
       from AthenaCommon.AppMgr import ServiceMgr as svcMgr
       svcMgr += CfgMgr.THistSvc( 'MyTHistSvc' )
@@ -314,8 +308,6 @@ class ConfigurablePersistencyTestCase( unittest.TestCase ):
 
       from AthenaCommon.AlgSequence import AlgSequence
       job = AlgSequence()
-      assert     hasattr(job, 'MyConditionStream'), \
-              'topSequence is missing MyConditionStream !'
 
       assert not hasattr(job, 'MyOutputStream'), \
               'topSequence has MyOutputStream (and it should NOT) !'
@@ -347,8 +339,6 @@ class ConfigurablePersistencyTestCase( unittest.TestCase ):
       assert hasattr(job, 'MyOutputStream'), \
              'topSequence is missing MyOutputStream !'
 
-      assert hasattr(job, 'MyConditionStream'), \
-             'topSequence is missing MyConditionStream !'
       """ % {
          'THistSvcOutput' : thistSvcOutput1,
          'PickleFileName' : pickleName,
