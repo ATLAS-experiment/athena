@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -205,10 +205,11 @@ void TileGeoG4CalibSD::Initialize(G4HCofThisEvent* /*HCE*/) {
   {
     auto lookupDM = std::make_unique<TileGeoG4DMLookupBuilder>(hitColl->GetLookupBuilder(), m_rdbSvc, m_geoModSvc, m_detStoreSvc, verboseLevel);
     lookupDM->BuildLookup(m_tileTB,m_calc->GetOptions()->plateToCell);
-    if (verboseLevel >= 5) G4cout << "Lookup built for Tile" << G4endl;
-
     m_plateToCell = lookupDM->GetPlateToCell();
-    G4cout << "Using plateToCell = " << (m_plateToCell ? "true" : "false") << G4endl;
+    if (verboseLevel >= 5) {
+      G4cout << "Lookup built for Tile" << G4endl;
+      G4cout << "Using plateToCell = " << (m_plateToCell ? "true" : "false") << G4endl;
+    }
 
     // current settings for AddToCell and AddToGirder are controlled just by one flag
     m_addToCell = m_plateToCell;
