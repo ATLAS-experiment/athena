@@ -15,6 +15,7 @@
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
+#include <memory>
 
 // Forward declarations
 namespace pool {
@@ -65,7 +66,7 @@ private: // properties
 
 private: // internal helper functions
    /// Return pointer to new PoolCollectionConverter
-   PoolCollectionConverter* getCollectionCnv();
+  std::unique_ptr<PoolCollectionConverter> getCollectionCnv();
 };
 
 #endif
