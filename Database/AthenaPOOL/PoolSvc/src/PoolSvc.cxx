@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolSvc.cxx
@@ -247,6 +247,7 @@ StatusCode PoolSvc::stop() {
 
 //__________________________________________________________________________
 void PoolSvc::clearState() {
+   std::lock_guard<CallMutex> lock(m_pool_mut);
    // Cleanup persistency service
    for (const auto& persistencySvc : m_persistencySvcVec) {
       delete persistencySvc;
@@ -912,7 +913,7 @@ StatusCode PoolSvc::setFrontierCache(const std::string& conn) {
          for (int irep = 0, nrep = dbset->numberOfReplicas(); irep < nrep; ++irep) {
 	    const std::string pcon = dbset->replica(irep).connectionString();
 	    if (pcon.compare(0, 9, "frontier:") == 0) {
-               physcons.push_back(pcon);
+               physcons.push_back(std::move(pcon));
             }
          }
          delete dbset; dbset = nullptr;
