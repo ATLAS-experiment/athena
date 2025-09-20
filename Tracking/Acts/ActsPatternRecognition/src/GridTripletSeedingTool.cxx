@@ -230,7 +230,6 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_tripletFinderCfg.minPt = m_minPt;
   m_tripletFinderCfg.sigmaScattering = m_sigmaScattering;
   m_tripletFinderCfg.radLengthPerSeed = m_radLengthPerSeed;
-  m_tripletFinderCfg.maxPtScattering = m_maxPtScattering;
   m_tripletFinderCfg.impactMax = m_impactMax;
   m_tripletFinderCfg.helixCutTolerance = 1.;
   m_tripletFinderCfg.toleranceParam = m_toleranceParam;
