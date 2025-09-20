@@ -91,7 +91,6 @@ StatusCode AthenaOutputStream::initialize() {
    ATH_CHECK( m_pCLIDSvc.retrieve() );
    ATH_CHECK( m_dictLoader.retrieve() );
    ATH_CHECK( m_tpCnvSvc.retrieve() );
-   ATH_CHECK( m_itemSvc.retrieve() );
    ATH_CHECK( m_outSeqSvc.retrieve() );
 
    // Get Output Stream tool for writing
@@ -704,17 +703,6 @@ StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
                  ATH_MSG_DEBUG(std::format(" Added object {},\"{}\"", item_id, proxyName));
                }
 
-               // Build ItemListSvc string
-               std::string tn;
-               std::stringstream tns;
-               if (!m_pCLIDSvc->getTypeNameOfID(item_id, tn).isSuccess()) {
-                  ATH_MSG_ERROR(std::format(" Could not get type name for id {},\"{}\"", item_id, proxyName));
-                  tns << item_id << '_' << proxyName;
-               } else {
-                  tn += '_' + proxyName;
-                  tns << tn;
-               }
-
                /// Handle variable selections.
                /// Both variable selection and lossy float compression
                /// are limited to event data for the time being
@@ -731,8 +719,7 @@ StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
 
                   if (auxstore) {
                     handleVariableSelection (*auxstore, *itemProxy,
-                                             tns.str(), aux_attr,
-                                             vetoes);
+                                             aux_attr, vetoes);
 
                     // Here comes the compression logic using ThinningInfo
                     // Get a hold of all AuxIDs for this store (static, dynamic etc.)
@@ -760,9 +747,6 @@ StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
                }
 
                added = true;
-               if (m_itemSvc->addStreamItem(this->name(),tns.str()).isFailure()) {
-                  ATH_MSG_WARNING(std::format("Unable to record item {} in Svc", tns.str()));
-               }
             }
          } else if (keyMatch && xkeyMatch) {
             removed = true;
@@ -832,7 +816,6 @@ AthenaOutputStream::buildCompressionSet (const ToolHandle<SG::IFolder>& handle,
 /// Here we build the vetoed AuxIDs
 void AthenaOutputStream::handleVariableSelection (const SG::IConstAuxStore& auxstore,
                                                   SG::DataProxy& itemProxy,
-                                                  const std::string& tns,
                                                   const std::string& aux_attr,
                                                   SG::SelectionVetoes& vetoes) const
 {
@@ -843,11 +826,6 @@ void AthenaOutputStream::handleVariableSelection (const SG::IConstAuxStore& auxs
     std::string attr;
     while( std::getline(ss, attr, '.') ) {
       attributes.insert(attr);
-      std::stringstream temp;
-      temp << tns << attr;
-      if (m_itemSvc->addStreamItem(this->name(),temp.str()).isFailure()) {
-        ATH_MSG_WARNING(std::format("Unable to record item {} in Svc", temp.str()));
-      }
     }
   }
 
