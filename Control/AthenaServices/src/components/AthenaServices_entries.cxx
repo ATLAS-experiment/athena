@@ -4,7 +4,6 @@
 #include "../PyAthenaEventLoopMgr.h"
 #include "../AthenaOutputStream.h"
 #include "../AthenaOutputStreamTool.h"
-#include "../AthenaConditionStream.h"
 #include "../MultipleEventLoopMgr.h"
 #include "../MixingEventSelector.h"
 #include "../ThinningCacheTool.h"
@@ -37,7 +36,6 @@
 #include "../ROOTMessageFilterSvc.h"
 
 DECLARE_COMPONENT( AthenaOutputStream )
-DECLARE_COMPONENT( AthenaConditionStream )
 DECLARE_COMPONENT( TestRandomSeqAlg )
 DECLARE_COMPONENT( MultipleEventLoopMgr )
 DECLARE_COMPONENT( AthenaEventLoopMgr )
