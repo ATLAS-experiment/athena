@@ -415,7 +415,7 @@ namespace MuonR4::SegmentFit{
                     miniHessian = mFullPivLU.inverse();
                 }  
             } else if (validHessian) {
-                miniHessian = miniHessian.inverse();
+                miniHessian = miniHessian.inverse().eval();
             }
             if (validHessian) {
                 prevPars.block<nDim,1>(0,0) = currPars.block<nDim,1>(0,0);
