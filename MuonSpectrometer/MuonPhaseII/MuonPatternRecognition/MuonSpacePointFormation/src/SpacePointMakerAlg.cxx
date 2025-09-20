@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "SpacePointMakerAlg.h"
 
@@ -259,6 +259,9 @@ template <typename PrdType>
                 cov[Acts::toUnderlying(CovIdx::etaCov)] = prd->template localCovariance<2>()(1,1);
             } else {
                 ATH_MSG_WARNING("Unsupported measurement type. "<<typeid(PrdType).name());
+                // Prevent division by zero later on.
+                cov[Acts::toUnderlying(CovIdx::phiCov)] = 1;
+                cov[Acts::toUnderlying(CovIdx::etaCov)] = 1;
             }
         } else {
             /// 
