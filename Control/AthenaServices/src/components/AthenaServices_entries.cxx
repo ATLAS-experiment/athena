@@ -15,7 +15,6 @@
 #include "../AthDictLoaderSvc.h"
 #include "../PageAccessControlSvc.h"
 #include "../DecisionSvc.h"
-#include "../ItemListSvc.h"
 #include "../AthenaSummarySvc.h"
 #include "../LoggedMessageSvc.h"
 #include "../RCUSvc.h"
@@ -53,7 +52,6 @@ DECLARE_COMPONENT( CoreDumpSvc )
 DECLARE_COMPONENT( PageAccessControlSvc )
 DECLARE_COMPONENT( AthDictLoaderSvc )
 DECLARE_COMPONENT( DecisionSvc )
-DECLARE_COMPONENT( ItemListSvc )
 DECLARE_COMPONENT( AthenaSummarySvc )
 DECLARE_COMPONENT( LoggedMessageSvc )
 DECLARE_COMPONENT( Athena::RCUSvc )

@@ -26,7 +26,6 @@
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "AthenaKernel/IAthenaOutputTool.h"
 #include "AthenaKernel/IDictLoaderSvc.h"
-#include "AthenaKernel/IItemListSvc.h"
 #include "AthenaKernel/ITPCnvSvc.h"
 #include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/IIncidentListener.h"
@@ -102,7 +101,6 @@ protected:
    ServiceHandle<StoreGateSvc>* m_currentStore;
 
    /// Handles to all the necessary services
-   ServiceHandle<IItemListSvc>             m_itemSvc{this, "ItemListSvc", "ItemListSvc"};
    ServiceHandle<MetaDataSvc>              m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};
    ServiceHandle<IDictLoaderSvc>           m_dictLoader{this, "AthDictLoaderSvc", "AthDictLoaderSvc"};
    ServiceHandle<ITPCnvSvc>                m_tpCnvSvc{this, "AthTPCnvSvc", "AthTPCnvSvc"};
@@ -237,7 +235,6 @@ private:
 
    void handleVariableSelection (const SG::IConstAuxStore& auxstore,
                                  SG::DataProxy& itemProxy,
-                                 const std::string& tns,
                                  const std::string& aux_attr,
                                  SG::SelectionVetoes& vetoes) const;
 
