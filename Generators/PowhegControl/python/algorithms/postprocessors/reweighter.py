@@ -50,7 +50,7 @@ def reweighter(process, weight_groups, powheg_LHE_output):
     non_weight_attributes = ["parameter_names", "combination_method", "keywords"]
 
     ## Dictionary of available keywords for faster XML-reweighting: from rwl_setup_param_weights.f
-    xml_kwds = {"renscfact": "renscfact", "facscfact": "facscfact", "lhans1": "lhapdf", "lhans2": "lhapdf", "width_correction" : "width_correction"}
+    xml_kwds = {"renscfact": "renscfact", "facscfact": "facscfact", "lhans1": "lhapdf", "lhans2": "lhapdf", "width_correction" : "width_correction", "run_mode": "run_mode"}
 
     # Initial values for scale, PDF and other weight groups
     _idx_scale_start, _idx_PDF_start, _idx_other_start = 1001, 2001, 3001
@@ -117,7 +117,10 @@ def reweighter(process, weight_groups, powheg_LHE_output):
     if process.use_XML_reweighting:
         # Add nominal weight if not already present
         if not default_weight_exists_already(powheg_LHE_output) and not any([weight.group == "nominal" for weight in weight_list]):
-            weight_list = [WeightTuple(ID=0, name="nominal", group="nominal", parallel_xml_compatible=True, parameter_settings=[], keywords=None, combine=None)] + weight_list
+            if process.has_parameter("run_mode") and process.parameters_by_keyword("run_mode")[0].value  != 1 and hasattr(process, "reweight_for_MiNNLO") and process.reweight_for_MiNNLO:
+                weight_list = [WeightTuple(ID=0, name="nominal", group="nominal", parallel_xml_compatible=True, parameter_settings=[("run_mode",1)], keywords={"run_mode":["run_mode"]}, combine=None)] + weight_list
+            else:
+                weight_list = [WeightTuple(ID=0, name="nominal", group="nominal", parallel_xml_compatible=True, parameter_settings=[], keywords=None, combine=None)] + weight_list
 
         FileParser("powheg.input").text_replace("pdfreweight .*", "pdfreweight 0")
         # Construct xml output
@@ -151,6 +154,8 @@ def reweighter(process, weight_groups, powheg_LHE_output):
             FileParser("powheg.input").text_replace("rwl_file .*", "rwl_file 'reweighting_input.xml'")
             FileParser("powheg.input").text_replace("rwl_add .*", "rwl_add 1")
             FileParser("powheg.input").text_replace("clobberlhe .*", "clobberlhe 1")
+            if process.has_parameter("run_mode") and process.parameters_by_keyword("run_mode")[0].value  != 1 and hasattr(process, "reweight_for_MiNNLO") and process.reweight_for_MiNNLO:
+                FileParser("powheg.input").text_replace("run_mode .*", "run_mode 1")
 
             logger.info("Preparing simultaneous calculation of {} additional weights for generated events.".format(n_parallel_xml_weights))
 

@@ -67,13 +67,17 @@ from .Wt_DR_modified import Wt_DR_modified
 from .Wt_DS import Wt_DS
 from .WW import WW
 from .WWj import WWj
+from .WWj_MiNNLO import WWj_MiNNLO
 from .Wy import Wy
 from .WZ import WZ
+from .WZj_MiNNLO import WZj_MiNNLO
 from .yj import yj
 from .Z import Z
 from .Z_EW import Z_EW
 from .Z_SMEFT import Z_SMEFT
+from .Zgamj_MiNNLO import Zgamj_MiNNLO
 from .Zj import Zj
 from .Zj_MiNNLO import Zj_MiNNLO
 from .Zjj import Zjj
 from .ZZ import ZZ
+from .ZZj_MiNNLO import ZZj_MiNNLO
