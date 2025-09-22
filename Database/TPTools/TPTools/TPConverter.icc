@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -57,7 +57,7 @@ toPersistentWithKey_impl( const TRANS *trans,
       PERS	tmp_pers;
       transToPersWithKey( trans, &tmp_pers, key, log);
       // do NOT use back() here (the vector has already grown)
-      m_pStorage->operator[]( size ) = tmp_pers;
+      m_pStorage->operator[]( size ) = std::move(tmp_pers);
    } else {
       if( m_curRecLevel > 0 && !m_ignoreRecursion) {
 	 throw std::runtime_error(
