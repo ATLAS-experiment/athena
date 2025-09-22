@@ -7,7 +7,7 @@
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
 # art-include: 24.0/Athena
-# art-memory: 7000
+# art-memory: 4000
 # art-output: AOD.pool.root
 # art-output: ESD.pool.root
 # art-output: RDO.pool.root
