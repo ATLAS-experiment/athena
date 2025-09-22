@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RDBAccessSvc )
@@ -13,8 +13,8 @@ atlas_add_library( RDBAccessSvcLib
                    RDBAccessSvc/*.h
                    INTERFACE
                    PUBLIC_HEADERS RDBAccessSvc
-                   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} 
-                   LINK_LIBRARIES ${CORAL_LIBRARIES} GaudiKernel DBLock )
+                   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${CORAL_LIBRARIES} ${Boost_LIBRARIES} GaudiKernel DBLock )
 
 atlas_add_component( RDBAccessSvc
                      src/*.cxx src/components/*.cxx

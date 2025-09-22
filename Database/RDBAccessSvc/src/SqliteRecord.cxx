@@ -11,6 +11,7 @@
 
 
 #include "SqliteRecord.h"
+#include "boost/io/ios_state.hpp"
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
@@ -109,6 +110,7 @@ void SqliteRecord::addValue(const std::string& field
 
 void SqliteRecord::dump() const
 {
+  boost::io::ios_all_saver saver (std::cout);
   bool first{true};
   for(const auto& [colName,colType] : *m_def) {
     if(first) {
