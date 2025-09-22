@@ -2,10 +2,10 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArClusterCellMonConfig(flags):
+def CaloClusterCellMonConfig(flags):
 
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'LArClusterCellMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'CaloClusterCellMonAlgCfg')
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     cfg=ComponentAccumulator()
@@ -24,21 +24,21 @@ def LArClusterCellMonConfig(flags):
 
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    lArCellMonAlg=CompFactory.LArClusterCellMonAlg
+    lArCellMonAlg=CompFactory.CaloClusterCellMonAlg
 
-    algname='LArClusterCellMonAlg'
+    algname='CaloClusterCellMonAlg'
     from AthenaConfiguration.Enums import BeamType
     if flags.Beam.Type is BeamType.Cosmics:
         algname=algname+'Cosmics'
 
-    algo = LArClusterCellMonConfigCore(helper, lArCellMonAlg, flags,
+    algo = CaloClusterCellMonConfigCore(helper, lArCellMonAlg, flags,
                                 flags.Beam.Type is BeamType.Cosmics,
                                 flags.Input.TriggerStream,
                                 flags.Input.isMC, flags.Common.isOnline,
                                 algname)
     algo.useTrigger = flags.DQ.useTrigger
 
-    #copied from LArClusterCellMonTool
+    #copied from CaloClusterCellMonTool
     algo.rndmTriggerNames    = "L1_RD0, L1_RD0_FILLED, L1_RD0_EMPTY, L1_RD1, L1_RD1_NOISE, L1_RD1_HIST, L1_RD1_BGRP4, L1_RD1_BGRP5"
     algo.caloTriggerNames    = "L1_EM[0-9]+, L1_HA[0-9]+, L1_J[0-9]+.*, L1_JB[0-9]+, L1_JF[0-9]+, L1_TE[0-9]+, L1_JE[0-9]+, L1_XE[0-9]+, L1_2EM[0-9]+, L1_2FJ[0-9]+, L1_2J[0-9]+,L1_3J[0-9]+.*,L1_4J[0-9]+.*,L1_5J[0-9]+,L1_6J[0-9]+,L1_FJ[0-9]+.*"
     algo.minBiasTriggerNames = "L1_RD0_FILLED, L1_MBTS_1, L1_MBTS_2, L1_MBTS_1_1"
@@ -57,37 +57,37 @@ def LArClusterCellMonConfig(flags):
     return cfg
 
 
-def LArClusterCellMonConfigCore(helper, algclass, flags, isCosmics=False, TriggerStream='CosmicCalo', isMC=False, isOnline=False, algname='LArClusterCellMonAlg'):
+def CaloClusterCellMonConfigCore(helper, algclass, flags, isCosmics=False, TriggerStream='CosmicCalo', isMC=False, isOnline=False, algname='CaloClusterCellMonAlg'):
 
 
-    LArClusterCellMonAlg = helper.addAlgorithm(algclass, algname)
+    CaloClusterCellMonAlg = helper.addAlgorithm(algclass, algname)
 
     if not isCosmics and not isMC:
-        LArClusterCellMonAlg.useReadyFilterTool=True
+        CaloClusterCellMonAlg.useReadyFilterTool=True
     else:
-        LArClusterCellMonAlg.useReadyFilterTool=False
+        CaloClusterCellMonAlg.useReadyFilterTool=False
 
     if isMC:
-        LArClusterCellMonAlg.useBadLBTool=False
+        CaloClusterCellMonAlg.useBadLBTool=False
     else:
-        LArClusterCellMonAlg.useBadLBTool=True
+        CaloClusterCellMonAlg.useBadLBTool=True
 
     if isCosmics or TriggerStream!='physics_CosmicCalo':
-       LArClusterCellMonAlg.useBeamBackgroundRemoval = False
-       LArClusterCellMonAlg.useLArCollisionFilterTool = False 
+       CaloClusterCellMonAlg.useBeamBackgroundRemoval = False
+       CaloClusterCellMonAlg.useLArCollisionFilterTool = False 
     else:
-       LArClusterCellMonAlg.useBeamBackgroundRemoval = True
-       LArClusterCellMonAlg.useLArCollisionFilterTool = True
+       CaloClusterCellMonAlg.useBeamBackgroundRemoval = True
+       CaloClusterCellMonAlg.useLArCollisionFilterTool = True
 
     if isOnline:
-       LArClusterCellMonAlg.useLArNoisyAlg = False   
+       CaloClusterCellMonAlg.useLArNoisyAlg = False   
     else:   
-       LArClusterCellMonAlg.useLArNoisyAlg = True
+       CaloClusterCellMonAlg.useLArNoisyAlg = True
 
     GroupName="LArClusterCell"
-    LArClusterCellMonAlg.MonGroupName = GroupName
+    CaloClusterCellMonAlg.MonGroupName = GroupName
 
-    LArClusterCellMonAlg.EnableLumi = True
+    CaloClusterCellMonAlg.EnableLumi = True
     
     
     from CaloMonitoring.LArCellBinning import lArCellBinningScheme
@@ -95,19 +95,19 @@ def LArClusterCellMonConfigCore(helper, algclass, flags, isCosmics=False, Trigge
     binlabels=["TotalEvents","ATLAS Ready","with Good LAr LB","with No LAr Collision","with No Beam Background", "with No Trigger Filter","with No LArError"] 
 
     # triggers to use
-    LArClusterCellMonAlg.rndmTriggerNames    = "L1_RD0, L1_RD0_FILLED, L1_RD0_EMPTY, L1_RD1, L1_RD1_NOISE, L1_RD1_HIST, L1_RD1_BGRP4, L1_RD1_BGRP5"
-    LArClusterCellMonAlg.caloTriggerNames    = "L1_EM[0-9]+, L1_HA[0-9]+, L1_J[0-9]+.*, L1_JB[0-9]+, L1_JF[0-9]+, L1_TE[0-9]+, L1_JE[0-9]+, L1_XE[0-9]+, L1_2EM[0-9]+, L1_2FJ[0-9]+, L1_2J[0-9]+,L1_3J[0-9]+.*,L1_4J[0-9]+.*,L1_5J[0-9]+,L1_6J[0-9]+,L1_FJ[0-9]+.*"
-    LArClusterCellMonAlg.minBiasTriggerNames = "L1_RD0_FILLED, L1_MBTS_1, L1_MBTS_2, L1_MBTS_1_1"
-    LArClusterCellMonAlg.metTriggerNames     = "EF_xe[0-9]+.*"
-    LArClusterCellMonAlg.miscTriggerNames    = ""
+    CaloClusterCellMonAlg.rndmTriggerNames    = "L1_RD0, L1_RD0_FILLED, L1_RD0_EMPTY, L1_RD1, L1_RD1_NOISE, L1_RD1_HIST, L1_RD1_BGRP4, L1_RD1_BGRP5"
+    CaloClusterCellMonAlg.caloTriggerNames    = "L1_EM[0-9]+, L1_HA[0-9]+, L1_J[0-9]+.*, L1_JB[0-9]+, L1_JF[0-9]+, L1_TE[0-9]+, L1_JE[0-9]+, L1_XE[0-9]+, L1_2EM[0-9]+, L1_2FJ[0-9]+, L1_2J[0-9]+,L1_3J[0-9]+.*,L1_4J[0-9]+.*,L1_5J[0-9]+,L1_6J[0-9]+,L1_FJ[0-9]+.*"
+    CaloClusterCellMonAlg.minBiasTriggerNames = "L1_RD0_FILLED, L1_MBTS_1, L1_MBTS_2, L1_MBTS_1_1"
+    CaloClusterCellMonAlg.metTriggerNames     = "EF_xe[0-9]+.*"
+    CaloClusterCellMonAlg.miscTriggerNames    = ""
 
     # Global Settings:
 
    #---single Group for non threshold histograms
     cellMonGroup = helper.addGroup(
-        LArClusterCellMonAlg,
+        CaloClusterCellMonAlg,
         GroupName,
-        '/CaloMonitoring/LArClusterCellMon/'
+        '/CaloMonitoring/CaloClusterCellMon/'
 
     )
 
@@ -132,27 +132,39 @@ def LArClusterCellMonConfigCore(helper, algclass, flags, isCosmics=False, Trigge
                                  xbins=1
                              )
     
-    cellMonGroup.defineHistogram('cellhash',
-                                 title='Total number of cells contributing to clusters, per online-hash',
+    cellMonGroup.defineHistogram('larhash',
+                                 title='Total number of LAr Cells contributing to clusters, per online-hash',
                                  type='TH1I', path=summ_hist_path,
                                  xbins=195072,xmin=-0.5,xmax=195072.5
                              )
 
+    cellMonGroup.defineHistogram('tilehash',
+                                 title='Total number of Tile PMTs contributing to clusters, per online-hash',
+                                 type='TH1I', path=summ_hist_path,
+                                 xbins=12602,xmin=-0.5,xmax=12601.5
+                             )
 
-
-    for part in LArClusterCellMonAlg.LayerNames:
+    for part in CaloClusterCellMonAlg.LayerNames:
         cellMonGroup.defineHistogram('celleta_'+part+',cellphi_'+part+';NClusteredCells_'+part,
                                      title="Total number of cells contributing to clusters in (#eta,#phi) for "+part+";cell #eta;cell #phi",
                                      weight='NClusteredCells_'+part,
                                      type='TH2I', path="ClusterCell/", 
                                      xbins = lArCellBinningScheme.etaRange[part],
-                                     ybins = lArCellBinningScheme.phiRange[part]
-)
-     
+                                     ybins = lArCellBinningScheme.phiRange[part])
         pass #part loop
 
+    for part in ("TileBar0","TileBar1","TileBar2","TileGap0","TileGap1","TileGap2","TileExt0","TileExt1","TileExt2"):
+        for side in ("A","C"):
+            part+=side
+            cellMonGroup.defineHistogram('celleta_'+part+',cellphi_'+part+';NClusteredCells_'+part,
+                                        title="Total number of cells contributing to clusters in (#eta,#phi) for "+part+";cell #eta;cell #phi",
+                                        weight='NClusteredCells_'+part,
+                                        type='TH2I', path="ClusterCell/", 
+                                        xbins = 17, xmin = -1.7, xmax = 1.7,
+                                        ybins = 64, ymin = -3.14, ymax = 3.14)
+        pass #part loop
 
-    return LArClusterCellMonAlg
+    return CaloClusterCellMonAlg
 
 
 if __name__=='__main__':
@@ -160,9 +172,12 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags,defaultGeometryTags
     flags.Input.Files = defaultTestFiles.RAW_RUN3
-    flags.Output.HISTFileName = 'LArClusterCellMonOutput.root'
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
+    flags.Output.HISTFileName = 'CaloClusterCellMonOutput.root'
     flags.DQ.enableLumiAccess = True
     flags.DQ.useTrigger = True
     flags.DQ.Environment = 'tier0'
@@ -202,6 +217,6 @@ if __name__=='__main__':
     cfg.merge(CaloRecoCfg(flags))
 
 
-    cfg.merge(LArClusterCellMonConfig(flags)) 
+    cfg.merge(CaloClusterCellMonConfig(flags)) 
 
     cfg.run(10) #use cfg.run() to run on all events
