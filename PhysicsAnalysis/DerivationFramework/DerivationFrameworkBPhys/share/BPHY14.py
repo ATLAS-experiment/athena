@@ -97,7 +97,7 @@ BPHY14_Select_Jpsi2mumu = DerivationFramework__Select_onia2mumu(
                                                                 InputVtxContainerName = "BPHY14OniaCandidates",
                                                                 VtxMassHypo           = 3096.916,
                                                                 MassMin               = 2000.0,
-                                                                MassMax               = 3600.0,
+                                                                MassMax               = 4000.0,
                                                                 Chi2Max               = 200,
                                                                 DoVertexType          = 7)
 
@@ -111,7 +111,7 @@ BPHY14_Select_Psi2mumu = DerivationFramework__Select_onia2mumu(
                                                                InputVtxContainerName = "BPHY14OniaCandidates",
                                                                VtxMassHypo           = 3686.09,
                                                                MassMin               = 3300.0,
-                                                               MassMax               = 4500.0,
+                                                               MassMax               = 7500.0,
                                                                Chi2Max               = 200,
                                                                DoVertexType          = 7)
 
@@ -119,14 +119,14 @@ ToolSvc += BPHY14_Select_Psi2mumu
 print BPHY14_Select_Psi2mumu
 
 # Added by ASC
-## c/ augment and select Upsilon(nS)->mumu candidates
+## d/ augment and select Upsilon(nS)->mumu candidates
 BPHY14_Select_Upsi2mumu = DerivationFramework__Select_onia2mumu(
                                                                 name                  = "BPHY14_Select_Upsi2mumu",
                                                                 HypothesisName        = "Upsi",
                                                                 InputVtxContainerName = "BPHY14OniaCandidates",
                                                                 VtxMassHypo           = 9460.30,
                                                                 MassMin               = 7000.0,
-                                                                MassMax               = 12500.0,
+                                                                MassMax               = 15000.0,
                                                                 Chi2Max               = 200,
                                                                 DoVertexType          = 7)
 
@@ -153,7 +153,7 @@ from DerivationFrameworkJetEtMiss.METCommon import *
 from DerivationFrameworkEGamma.EGammaCommon import *
 
 #photonRequirements = '(DFCommonPhotons_et >= 5*GeV) && (abs(DFCommonPhotons_eta) < 2.6)'# && (Photons.Loose)'
-photonRequirements = 'DFCommonPhotons_et > 5*GeV'
+photonRequirements = 'Photons.Tight'
 
 
 expression = "(count(BPHY14OniaCandidates.passed_Jpsi) > 0 || count(BPHY14OniaCandidates.passed_Psi) > 0 || count(BPHY14OniaCandidates.passed_Upsi) > 0) && count("+photonRequirements+") >0"
