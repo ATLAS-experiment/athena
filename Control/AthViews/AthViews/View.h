@@ -9,7 +9,7 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/IProxyDict.h"
-#include "AthLinks/DeclareIndexingPolicy.h"
+#include "AthContainers/DataVector.h"
 #include "AthLinks/ElementLink.h"
 #include "SGTools/transientKey.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -282,42 +282,8 @@ namespace SG {
 /**
  * @brief View container for recording in StoreGate
  */
-class ViewContainer {
-  typedef std::vector<SG::View*> T;
-  T m_data;
-public:
+typedef DataVector<SG::View> ViewContainer;
 
-  typedef T::const_iterator const_iterator;
-  typedef T::iterator iterator;
-  typedef T::reverse_iterator reverse_iterator;
-  typedef T::const_reference const_reference;
-  typedef T::reference reference;
-  typedef T::value_type value_type;
-
-
-  ~ViewContainer() { 
-    std::for_each(m_data.begin(), m_data.end(), [](SG::View* v){ delete v; } ); 
-  }
-  void push_back( SG::View* ptr ) { m_data.push_back( ptr ); }
-  size_t size() const { return m_data.size(); }
-  bool empty() const { return m_data.empty(); }
-  void clear() {     
-    std::for_each(m_data.begin(), m_data.end(), [](SG::View* v){ delete v; } );   m_data.clear(); 
-  }
-  const_iterator begin() const { return m_data.begin(); }
-  const_iterator end() const { return m_data.end(); }
-  iterator begin() { return m_data.begin(); }
-  iterator end() { return m_data.end(); }
-  reverse_iterator rbegin() { return m_data.rbegin(); }
-  reverse_iterator rend() { return m_data.rend(); }
-
-  const_reference at(size_t pos) const { return m_data.at(pos); }
-  reference at(size_t pos) { return m_data.at(pos); }
-  const_reference back() const { return m_data.back(); }
-  reference back() { return m_data.back(); }
-};
-
-CONTAINER_IS_SEQUENCE(ViewContainer)
 CLASS_DEF( ViewContainer , 1160627009 , 1 )
 
 #endif
