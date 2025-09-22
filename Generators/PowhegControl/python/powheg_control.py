@@ -348,6 +348,8 @@ class PowhegControl(object):
         @param parameters_to_vary  Names of the parameters to vary.
         @param combination_method  Method for combining the weights.
         """
+        if self.process.has_parameter("run_mode") and self.process.parameters_by_keyword("run_mode")[0].value  != 1 and hasattr(self.process, "reweight_for_MiNNLO") and self.process.reweight_for_MiNNLO:
+            parameters_to_vary.append("run_mode")
         if not self.process.is_reweightable:
             logger.warning("Additional event weights cannot be added by this process! Remove reweighting lines from the jobOptions.")
             raise ValueError("Additional event weights cannot be added by this process! Remove reweighting lines from the jobOptions.")
@@ -366,11 +368,14 @@ class PowhegControl(object):
         if group_name not in self.__event_weight_groups.keys():
             raise ValueError("Weight group '{}' has not been defined.".format(group_name))
         n_expected = len(self.__event_weight_groups[group_name]["parameter_names"])
+        if self.process.has_parameter("run_mode") and self.process.parameters_by_keyword("run_mode")[0].value  != 1 and hasattr(self.process, "reweight_for_MiNNLO") and self.process.reweight_for_MiNNLO:
+            parameter_values.append(1)
         if len(parameter_values) is not n_expected:
             raise ValueError("Expected {} parameter values but only got {}".format(n_expected, len(parameter_values)))
         self.__event_weight_groups[group_name][weight_name] = []
         for parameter_name, value in zip(self.__event_weight_groups[group_name]["parameter_names"], parameter_values):
             self.__event_weight_groups[group_name][weight_name].append((parameter_name, value))
+
 
     def __setattr__(self, key, value):
         """! Override default attribute setting to stop users setting non-existent attributes.

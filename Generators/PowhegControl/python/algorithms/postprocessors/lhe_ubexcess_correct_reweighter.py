@@ -18,6 +18,7 @@ def lhe_ubexcess_correct_reweighter(powheg_LHE_output):
 	#get ubexcess correction factors for btilde and remnant events from st4 pwgcounter files
 	btilde_factor = get_ub_correction_factor("btilde")
 	remnant_factor = get_ub_correction_factor("remn")
+	reg_factor = get_ub_correction_factor("reg")
 
 	## Regex to extract floats :: from perldoc perlretut
 	regex_match_floats = r"([+-]? *(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)"
@@ -44,7 +45,7 @@ def lhe_ubexcess_correct_reweighter(powheg_LHE_output):
 			f_output.write(new_preamble)
 		for input_event in LHE.event_iterator(powheg_LHE_output):
 			factor = -1
-			# check if event is a btilde (rwgt = 1) or remnant (rwgt = 2) event 
+			# check if event is a btilde (rwgt = 1) or remnant (rwgt = 2) event or regular (rwgt = 3)
 			# and chose the corresponding correction factor
 			for line in input_event.splitlines():
 				if '#rwgt' in line:
@@ -53,6 +54,8 @@ def lhe_ubexcess_correct_reweighter(powheg_LHE_output):
 						factor = btilde_factor
 					elif evt_type == '2':
 						factor = remnant_factor
+					elif evt_type == '3':
+						factor = reg_factor
 					else:
 						logger.error("Event is neither a btilde nor remnant event, exiting!")
 						sys.exit()
