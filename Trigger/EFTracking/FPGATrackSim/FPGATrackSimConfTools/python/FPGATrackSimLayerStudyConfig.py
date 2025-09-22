@@ -250,10 +250,8 @@ if __name__ == "__main__":
     from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimRunLayerStudyOnManyRegions
     acc.merge(FPGATrackSimRunLayerStudyOnManyRegions(flags))
 
-    # Configure both the dataprep and logical hits algorithms.
+    # Configure dataprep as well; layerstudy is already configured above
     acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
-    acc.merge(FPGATrackSimLayerStudyCfg(flags))
-
 
     acc.store(open('AnalysisConfig.pkl','wb'))
     acc.foreach_component("*FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
