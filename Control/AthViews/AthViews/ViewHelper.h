@@ -271,8 +271,7 @@ namespace ViewHelper
     // setProxyDict only supports non-const stores
     SG::View* nview ATLAS_THREAD_SAFE = const_cast< SG::View* >( view );
     auto handle = SG::makeHandle( key, ctx );
-    handle.setProxyDict( nview ).orThrow("Cannot create handle for key " +
-                                         key.fullKey().fullKey() + " in view " + view->name() );
+    handle.setProxyDict( nview ).ignore();  // can never fail
     return handle;
   }
 
@@ -293,8 +292,7 @@ namespace ViewHelper
     // setProxyDict only supports non-const stores
     SG::View* nview ATLAS_THREAD_SAFE = const_cast< SG::View* >( view );
     auto handle = SG::makeHandle<T>(dKey, context );
-    handle.setProxyDict( nview ).orThrow("Cannot create  WriteDecorHandle of key " + dKey.key() + " type " +
-                                         ClassID_traits<T>::typeName() + " in view " + view->name() );
+    handle.setProxyDict( nview ).ignore();   // can never fail
     return handle;
   }
 
