@@ -60,7 +60,6 @@ def viewCfg(flags):
    acc.addEventAlgo(view_make_2, sequenceName="viewSequence")
    acc.addSequence( parOR("view_2"), parentName="viewSequence" )
    acc.addEventAlgo(view_verify_2, sequenceName="view_2")
-   acc.addEventAlgo(view_verify_2, sequenceName="view_2")
    acc.addEventAlgo(view_test, sequenceName="view_2")
 
    return acc
