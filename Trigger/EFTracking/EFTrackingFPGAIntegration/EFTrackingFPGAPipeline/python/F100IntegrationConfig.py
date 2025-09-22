@@ -79,6 +79,7 @@ def F100StreamIntegrationCfg(flags, name = 'F100StreamIntegrationAlg', **kwarg):
 
     kwarg.setdefault('StripStartClusterKernelName','loaderStrip')
     kwarg.setdefault('StripEndClusterKernelName','unloaderStrip')
+    kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
     kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
