@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CondDBObjects/GenericDbTable.h"
@@ -436,9 +436,7 @@ int GenericDbTable::setType(unsigned n_column, dataTypes type)
 		{		 
 		    CondDBColumnArrayInt * tmpColumn = new CondDBColumnArrayInt;
 		    tmpColumn->type = m_conddbtable[n_column]->type;
-		    vector<long int> tmp;
-		    tmp.push_back(NULLINT);
-		    tmpColumn->column.push_back(tmp);
+		    tmpColumn->column.push_back({NULLINT});
 		    if ((m_conddbtable[n_column]->name.size()))
 			tmpColumn->name = m_conddbtable[n_column]->name;
 		    delete(m_conddbtable[n_column]);
@@ -449,9 +447,7 @@ int GenericDbTable::setType(unsigned n_column, dataTypes type)
 		{		 
 		    CondDBColumnArrayLong * tmpColumn = new CondDBColumnArrayLong;
 		    tmpColumn->type = m_conddbtable[n_column]->type;
-		    vector<int64> tmp;
-		    tmp.push_back(NULLLONG);
-		    tmpColumn->column.push_back(tmp);
+		    tmpColumn->column.push_back({NULLLONG});
 		    if ((m_conddbtable[n_column]->name.size()))
 			tmpColumn->name = m_conddbtable[n_column]->name;
 		    delete(m_conddbtable[n_column]);
@@ -462,9 +458,7 @@ int GenericDbTable::setType(unsigned n_column, dataTypes type)
 		{		 
 		    CondDBColumnArrayBool * tmpColumn = new CondDBColumnArrayBool;
 		    tmpColumn->type = m_conddbtable[n_column]->type;
-		    vector<short int> tmp;
-		    tmp.push_back(-1);
-		    tmpColumn->column.push_back(tmp);
+		    tmpColumn->column.push_back({-1});
 		    if ((m_conddbtable[n_column]->name.size()))
 			tmpColumn->name = m_conddbtable[n_column]->name;
 		    delete(m_conddbtable[n_column]);
@@ -475,9 +469,7 @@ int GenericDbTable::setType(unsigned n_column, dataTypes type)
 		{
 		    CondDBColumnArrayFloat * tmpColumn = new CondDBColumnArrayFloat;
 		    tmpColumn->type = m_conddbtable[n_column]->type;
-		    vector<float> tmp;
-		    tmp.push_back(NULLFLOAT);
-		    tmpColumn->column.push_back(tmp);
+		    tmpColumn->column.push_back({NULLFLOAT});
 		    if ((m_conddbtable[n_column]->name.size()))
 			tmpColumn->name = m_conddbtable[n_column]->name;
 		    delete(m_conddbtable[n_column]);
@@ -490,7 +482,7 @@ int GenericDbTable::setType(unsigned n_column, dataTypes type)
 		    tmpColumn->type = m_conddbtable[n_column]->type;
 		    vector<string> tmp;
 		    tmp.push_back("NULL");
-		    tmpColumn->column.push_back(tmp);
+		    tmpColumn->column.push_back({"NULL"});
 		    if ((m_conddbtable[n_column]->name.size()))
 			tmpColumn->name = m_conddbtable[n_column]->name;
 		    delete(m_conddbtable[n_column]);
@@ -501,9 +493,7 @@ int GenericDbTable::setType(unsigned n_column, dataTypes type)
 		{
 		    CondDBColumnArrayDouble * tmpColumn = new CondDBColumnArrayDouble;
 		    tmpColumn->type = m_conddbtable[n_column]->type;
-		    vector<double> tmp;
-		    tmp.push_back(NULLDOUBLE);
-		    tmpColumn->column.push_back(tmp);
+		    tmpColumn->column.push_back({NULLDOUBLE});
 		    if ((m_conddbtable[n_column]->name.size()))
 			tmpColumn->name = m_conddbtable[n_column]->name;
 		    delete(m_conddbtable[n_column]);
@@ -542,8 +532,7 @@ int GenericDbTable::setNull(unsigned n_column, const string &null)
 	    }
 	    case kArrayString:
 	    {
-		vector<string> tmp(1,null);
-		static_cast<CondDBColumnArrayString*>(m_conddbtable[n_column])->column[0] = tmp;
+		static_cast<CondDBColumnArrayString*>(m_conddbtable[n_column])->column[0] = vector<string> (1,null);
 		return CDB_SUCCESS;
 	    }
 	    case kFloat:
@@ -553,8 +542,7 @@ int GenericDbTable::setNull(unsigned n_column, const string &null)
 	    }
 	    case kArrayFloat:
 	    {
-		vector<float> tmp(1,atof(null.c_str()));
-		static_cast<CondDBColumnArrayFloat*>(m_conddbtable[n_column])->column[0] = tmp;
+		static_cast<CondDBColumnArrayFloat*>(m_conddbtable[n_column])->column[0] = vector<float> (1,atof(null.c_str()));
 		return CDB_SUCCESS;
 	    }
 	    case kInt:
@@ -564,8 +552,7 @@ int GenericDbTable::setNull(unsigned n_column, const string &null)
 	    }
 	    case kArrayInt:
 	    {
-		vector<long int> tmp(1,atol(null.c_str()));
-		static_cast<CondDBColumnArrayInt*>(m_conddbtable[n_column])->column[0] = tmp;
+		static_cast<CondDBColumnArrayInt*>(m_conddbtable[n_column])->column[0] = vector<long int> (1,atol(null.c_str()));
 		return CDB_SUCCESS;
 	    }
 	    case kBool:
@@ -580,8 +567,7 @@ int GenericDbTable::setNull(unsigned n_column, const string &null)
 	    }
 	    case kArrayLongLong:
 	    {
-		vector<int64> tmp(1,atoi64(null.c_str()));
-		static_cast<CondDBColumnArrayLong*>(m_conddbtable[n_column])->column[0] = tmp;
+		static_cast<CondDBColumnArrayLong*>(m_conddbtable[n_column])->column[0] = vector<int64> (1,atoi64(null.c_str()));
 		return CDB_SUCCESS;
 	    }
 	    case kDouble:
@@ -591,8 +577,7 @@ int GenericDbTable::setNull(unsigned n_column, const string &null)
 	    }
 	    case kArrayDouble:
 	    {
-		vector<double> tmp(1,atof(null.c_str()));
-		static_cast<CondDBColumnArrayDouble*>(m_conddbtable[n_column])->column[0] = tmp;
+		static_cast<CondDBColumnArrayDouble*>(m_conddbtable[n_column])->column[0] = vector<double> (1,atof(null.c_str()));
 		return CDB_SUCCESS;
 	    }
 	    default:
@@ -615,8 +600,7 @@ int GenericDbTable::setNull(unsigned n_column, const long int &null)
 	}
 	else if (m_conddbtable[n_column]->type == kArrayInt)
 	{
-	    vector<long int> tmp(1,null);
-	    static_cast<CondDBColumnArrayInt*>(m_conddbtable[n_column])->column[0] = tmp;
+	    static_cast<CondDBColumnArrayInt*>(m_conddbtable[n_column])->column[0] = vector<long int> (1,null);
 	    return CDB_SUCCESS;
 	}  
 	else
@@ -638,8 +622,7 @@ int GenericDbTable::setNull(unsigned n_column, const int64 &null)
 	}
 	else if (m_conddbtable[n_column]->type == kArrayLongLong)
 	{
-	    vector<int64> tmp(1,null);
-	    static_cast<CondDBColumnArrayLong*>(m_conddbtable[n_column])->column[0] = tmp;
+	    static_cast<CondDBColumnArrayLong*>(m_conddbtable[n_column])->column[0] = vector<int64> (1,null);
 	    return CDB_SUCCESS;
 	}
 	else
@@ -661,8 +644,7 @@ int GenericDbTable::setNull(unsigned n_column, const float &null)
 	}
 	else if (m_conddbtable[n_column]->type == kArrayFloat)
 	{
-	    vector<float>  tmp(1,null);
-	    static_cast<CondDBColumnArrayFloat*>(m_conddbtable[n_column])->column[0] = tmp;
+	    static_cast<CondDBColumnArrayFloat*>(m_conddbtable[n_column])->column[0] = vector<float>  (1,null);
 	    return CDB_SUCCESS;
 	}
 	else
@@ -684,8 +666,7 @@ int GenericDbTable::setNull(unsigned n_column, const double &null)
 	}
 	else if (m_conddbtable[n_column]->type == kArrayDouble)
 	{
-	    vector<double> tmp(1, null);
-	    static_cast<CondDBColumnArrayDouble*>(m_conddbtable[n_column])->column[0] = tmp;
+	    static_cast<CondDBColumnArrayDouble*>(m_conddbtable[n_column])->column[0] = vector<double> (1, null);
 	    return CDB_SUCCESS;
 	}
 	else
@@ -1495,7 +1476,7 @@ int GenericDbTable::setColumndata(unsigned n_column, const vector<vector<string>
 			    else
 				tmp.push_back(atol(data[j][i].c_str()));
 			}
-			aux.push_back(tmp);
+			aux.push_back(std::move(tmp));
 		    }
 		    index = setColumndata(n_column, aux);
 		    break;
@@ -1517,7 +1498,7 @@ int GenericDbTable::setColumndata(unsigned n_column, const vector<vector<string>
 			    else
 				tmp.push_back(atoi64(data[j][i].c_str()));
 			}
-			aux.push_back(tmp);
+			aux.push_back(std::move(tmp));
 		    }
 		    index = setColumndata(n_column, aux);
 		    break;
@@ -1537,7 +1518,7 @@ int GenericDbTable::setColumndata(unsigned n_column, const vector<vector<string>
 			    else
 				tmp.push_back(atoi(data[j][i].c_str()));
 			}
-			aux.push_back(tmp);
+			aux.push_back(std::move(tmp));
 		    }
 		    index = setColumndata(n_column, aux);
 		    break;
@@ -1559,7 +1540,7 @@ int GenericDbTable::setColumndata(unsigned n_column, const vector<vector<string>
 			    else
 				tmp.push_back(atof(data[j][i].c_str()));
 			}
-			aux.push_back(tmp);
+			aux.push_back(std::move(tmp));
 		    }
 		    index = setColumndata(n_column, aux);
 		    break;
@@ -1581,7 +1562,7 @@ int GenericDbTable::setColumndata(unsigned n_column, const vector<vector<string>
 			    else
 				tmp.push_back(strtod(data[j][i].c_str(), (char**)NULL));
 			}
-			aux.push_back(tmp);
+			aux.push_back(std::move(tmp));
 		    }
 		    index = setColumndata(n_column, aux);
 		    break;
