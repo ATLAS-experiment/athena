@@ -2,24 +2,22 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "RecoTauPlots.h"
+#include "TauParticleFlowPlots.h"
 
 namespace Tau{
 
-  RecoTauPlots::RecoTauPlots(PlotBase* pParent, const std::string& sDir, const std::string& sTauJetContainerName):
+  TauParticleFlowPlots::TauParticleFlowPlots(PlotBase* pParent, const std::string& sDir, const std::string& sTauJetContainerName):
     PlotBase(pParent, sDir),
-    m_oParamPlots(this, "", sTauJetContainerName),
+    m_oTauKinematicPlots(this, "", sTauJetContainerName),
     m_sTauJetContainerName(sTauJetContainerName)
   {
   }
 	
-  RecoTauPlots::~RecoTauPlots()
+  TauParticleFlowPlots::~TauParticleFlowPlots()
   {
   }
 
-  void RecoTauPlots::initializePlots(){
-    
-    //  m_oParamPlots.initialize();
+  void TauParticleFlowPlots::initializePlots(){
 
     m_cellBased_neuPFO_Pt     = Book1D("cellBased_PFO_n_Pt",m_sTauJetContainerName + " Neutral PFO pt; pt; # PFO",200,0.,200000.);
     m_cellBased_neuPFO_Eta    = Book1D("cellBased_PFO_n_Eta",m_sTauJetContainerName + " Neutral PFO eta; eta; # PFO",128,-3.2,3.2);
@@ -46,7 +44,7 @@ namespace Tau{
 
   }
     
-  void RecoTauPlots::fill(const xAOD::TauJet& thisTau, float weight) {
+  void TauParticleFlowPlots::fill(const xAOD::TauJet& thisTau, float weight) {
 
     //Access Particle Flow Object
 
@@ -112,7 +110,7 @@ namespace Tau{
     thisTau.panTauDetail( xAOD::TauJetParameters::PanTauDetails::PanTau_BDTVar_Combined_DeltaR1stNeutralTo1stCharged, panTauFloat);
     m_pantau_CellBasedInput_BDTVar_Combined_DeltaR1stNeutralTo1stCharged->Fill(panTauFloat, weight);
  
-    m_oParamPlots.fill(thisTau, weight);
+    m_oTauKinematicPlots.fill(thisTau, weight);
   }
 
 }

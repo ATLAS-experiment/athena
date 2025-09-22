@@ -2,13 +2,13 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "HadProngPlots.h"
+#include "TauIDVariablesPlots.h"
 #include "AthContainers/ConstAccessor.h"
 #include "AthenaKernel/Units.h"
 
 namespace Tau{
 
-HadProngPlots::HadProngPlots(PlotBase* pParent, const std::string& sDir,
+TauIDVariablesPlots::TauIDVariablesPlots(PlotBase* pParent, const std::string& sDir,
 			       const std::string& sTauJetContainerName):
    PlotBase(pParent, sDir),
    m_oGeneralTauPlots(this, "", sTauJetContainerName),
@@ -16,11 +16,11 @@ HadProngPlots::HadProngPlots(PlotBase* pParent, const std::string& sDir,
 {
 }
 	
-HadProngPlots::~HadProngPlots()
+TauIDVariablesPlots::~TauIDVariablesPlots()
 {
 }
 
-void HadProngPlots::initializePlots(){
+void TauIDVariablesPlots::initializePlots(){
 
    // m_oGeneralTauPlots.initialize();
    m_tauCoreFrac   = Book1D("CoreFrac",m_sTauJetContainerName + " Tau CoreFrac; CoreFrac; # Taus",40,0.,2.);
@@ -39,7 +39,7 @@ void HadProngPlots::initializePlots(){
    m_tauSflight    = Book1D("Sflight",m_sTauJetContainerName + " Tau flight sign. ; Sflight; # Taus",100,-10.,20.);
 }
 
-void HadProngPlots::fill(const xAOD::TauJet& tau, float weight) {
+void TauIDVariablesPlots::fill(const xAOD::TauJet& tau, float weight) {
   m_oGeneralTauPlots.fill(tau, weight);
 
   float avariable = 0.;

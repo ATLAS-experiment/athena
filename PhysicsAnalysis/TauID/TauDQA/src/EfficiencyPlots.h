@@ -2,19 +2,19 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUDQA_EFFICIENCYPTPLOTS_H
-#define TAUDQA_EFFICIENCYPTPLOTS_H
+#ifndef TAUDQA_EFFICIENCYPLOTS_H
+#define TAUDQA_EFFICIENCYPLOTS_H
 
 #include "TrkValHistUtils/PlotBase.h"
-#include "ParamPlots.h"
+#include "TauKinematicPlots.h"
 #include "xAODTau/TauJet.h"
 
 namespace Tau{
 
-class EfficiencyPtPlots: public PlotBase {
+class EfficiencyPlots: public PlotBase {
 public:
-  EfficiencyPtPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-  virtual ~EfficiencyPtPlots();
+  EfficiencyPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
+  virtual ~EfficiencyPlots();
   
   void fill(const xAOD::TauJet& tau, float weight);
   

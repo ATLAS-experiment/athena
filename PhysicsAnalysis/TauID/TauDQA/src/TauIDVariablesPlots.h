@@ -2,23 +2,22 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUDQA_HADPRONGPLOTS_H
-#define TAUDQA_HADPRONGPLOTS_H
+#ifndef TAUDQA_TAUIDVARIABLESPLOTS_H
+#define TAUDQA_TAUIDVARIABLESPLOTS_H
 
 #include "GeneralTauPlots.h"
 #include "xAODTau/TauJet.h"
 
 namespace Tau{
 
-class HadProngPlots: public PlotBase {
+class TauIDVariablesPlots: public PlotBase {
   public:
-    HadProngPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
-    virtual ~HadProngPlots();
+    TauIDVariablesPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
+    virtual ~TauIDVariablesPlots();
 
     void fill(const xAOD::TauJet& tau, float weight);
 
     Tau::GeneralTauPlots m_oGeneralTauPlots;
-    TH1* m_tauNWideTracks{};
     TH1* m_tauCoreFrac{};
     TH1* m_tauEoverPTrk{};
     TH1* m_tauTrkAvgDist{};
