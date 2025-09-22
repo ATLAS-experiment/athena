@@ -12,7 +12,6 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "CxxUtils/ConcurrentPtrSet.h"
-#include "CxxUtils/SimpleUpdater.h"
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 
