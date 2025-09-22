@@ -74,15 +74,14 @@ def FlavorTaggingCfg(
           JetCollection,
           pv_col='PrimaryVertices',
           trackAugmenterPrefix=None,
-          fast=False):
+          fast=False,
+          JetTrackAssociator='TracksForBTagging',
+          trackCollection='InDetTrackParticles',
+          ):
 
     """
     Run flavour tagging on jet collection in derivations.
     """
-
-    JetTrackAssociator = 'TracksForBTagging'
-    trackCollection='InDetTrackParticles'
-
 
     acc = ComponentAccumulator()
     if fast:
