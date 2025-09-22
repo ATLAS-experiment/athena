@@ -64,6 +64,7 @@ namespace EFTrackingFPGAIntegration
         Gaudi::Property<std::string> m_stripEndClusterKernelName{this, "StripEndClusterKernelName", "", "Name of the strip clustering end kernel"}; //!< Name of the strip clustering kernel start
 
 
+        Gaudi::Property<std::string> m_pixelL2GKernelName{this, "PixelL2GKernelName", "", "Name of the pixel L2G kernel"}; //!< Name of the pixel L2G kernel
         Gaudi::Property<std::string> m_stripL2GKernelName{this, "StripL2GKernelName", "", "Name of the strip L2G kernel"}; //!< Name of the strip L2G kernelS
 
 
@@ -73,6 +74,7 @@ namespace EFTrackingFPGAIntegration
         mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write
         mutable std::atomic<cl_ulong> m_pixelClusteringTime{0}; //!< Time for pixel clustering
         mutable std::atomic<cl_ulong> m_stripClusteringTime{0}; //!< Time for strip clustering
+        mutable std::atomic<cl_ulong> m_pixelL2GTime{0};        //!< Time for pixel L2G
         mutable std::atomic<cl_ulong> m_stripL2GTime{0};        //!< Time for strip L2G
         mutable std::atomic<cl_ulong> m_pixelEdmPrepTime{0};    //!< Time for pixel EDM preparation
         mutable std::atomic<cl_ulong> m_stripEdmPrepTime{0};    //!< Time for strip EDM preparation
@@ -89,6 +91,7 @@ namespace EFTrackingFPGAIntegration
         mutable std::vector<cl::Kernel> m_stripEndClusteringKernels ATLAS_THREAD_SAFE;
 
         // L2G
+        mutable std::vector<cl::Kernel> m_pixelL2GKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripL2GKernels ATLAS_THREAD_SAFE;
 
         // EDM prep
@@ -104,7 +107,9 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Buffer> m_pixelClusterEDMOutputBufferList;
         std::vector<cl::Buffer> m_stripClusterEDMOutputBufferList;
         // L2G
+        std::vector<cl::Buffer> m_pixelL2GOutputBufferList;
         std::vector<cl::Buffer> m_stripL2GOutputBufferList;
+        std::vector<cl::Buffer> m_pixelL2GEDMOutputBufferList;
         std::vector<cl::Buffer> m_stripL2GEDMOutputBufferList;
         // EDMPrep
         std::vector<cl::Buffer> m_edmPixelOutputBufferList;
