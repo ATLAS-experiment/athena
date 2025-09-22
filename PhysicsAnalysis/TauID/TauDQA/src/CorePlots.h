@@ -2,18 +2,18 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUDQA_NEWCOREPLOTS_H
-#define TAUDQA_NEWCOREPLOTS_H
+#ifndef TAUDQA_COREPLOTS_H
+#define TAUDQA_COREPLOTS_H
 
 #include "GeneralTauPlots.h"
 #include "xAODTau/TauJet.h"
 
 namespace Tau{
 
-class NewCorePlots: public PlotBase {
+class CorePlots: public PlotBase {
   public:
-    NewCorePlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-    virtual ~NewCorePlots();
+    CorePlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
+    virtual ~CorePlots();
     void fill(const xAOD::TauJet& tau, float weight);
 
     TH1*  m_ipZ0SinThetaSigLeadTrk{};

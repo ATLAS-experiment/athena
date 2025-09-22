@@ -1,20 +1,20 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef TAUDQA_TAUVALIDATIONPLOTS_H
 #define TAUDQA_TAUVALIDATIONPLOTS_H
 
 // PlotBase objects
-#include "ParamPlots.h"
+#include "TauKinematicPlots.h"
 #include "GeneralTauPlots.h"
-#include "HadProngPlots.h"
+#include "TauIDVariablesPlots.h"
 #include "EVetoPlots.h"
 #include "ResolutionPlots.h"
-#include "RecoTauPlots.h"
-#include "NewCorePlots.h"
-#include "Migration.h"
-#include "EfficiencyPtPlots.h"
+#include "TauParticleFlowPlots.h"
+#include "CorePlots.h"
+#include "DecayModeMigration.h"
+#include "EfficiencyPlots.h"
 
 #include "xAODJet/JetContainer.h"
 #include "xAODEgamma/ElectronContainer.h" 
@@ -28,61 +28,61 @@ class TauValidationPlots:public PlotBase {
 
 
     	// tau1P plots : variables for tau ID and EVeto
-      Tau::HadProngPlots m_oHad1ProngPlots;
+      Tau::TauIDVariablesPlots m_oHad1ProngPlots;
 
       // tau3P plots : variables for tau ID
-      Tau::HadProngPlots m_oHad3ProngPlots;
+      Tau::TauIDVariablesPlots m_oHad3ProngPlots;
 
       // electron veto variables for electrons matching tau candidates	
-      Tau::ParamPlots      m_oElMatchedParamPlots;
-      Tau::EVetoPlots      m_oElMatchedEVetoPlots;
+      Tau::TauKinematicPlots  m_oElMatchedParamPlots;
+      Tau::EVetoPlots         m_oElMatchedEVetoPlots;
 
       // general tau all fake prongs plots
       Tau::GeneralTauPlots m_oFakeGeneralTauAllProngsPlots;
 
 
     	// tau1P fake plots : variables for tau ID
-      Tau::HadProngPlots  m_oFakeHad1ProngPlots;		      
+      Tau::TauIDVariablesPlots  m_oFakeHad1ProngPlots;		      
 
       // tau3P fake plots : variables for tau ID
-      Tau::HadProngPlots  m_oFakeHad3ProngPlots;	        
+      Tau::TauIDVariablesPlots  m_oFakeHad3ProngPlots;	        
 
       // general tau all fake prongs plots
       Tau::GeneralTauPlots m_oRecoGeneralTauAllProngsPlots;
 	
     	// tau1P fake plots : variables for tau ID
-      Tau::HadProngPlots  m_oRecoHad1ProngPlots;		      
+      Tau::TauIDVariablesPlots  m_oRecoHad1ProngPlots;		      
 
       // tau3P fake plots : variables for tau ID
-      Tau::HadProngPlots  m_oRecoHad3ProngPlots;	        
+      Tau::TauIDVariablesPlots  m_oRecoHad3ProngPlots;	        
 
       // All tau Reco with no match to truth
-      Tau::RecoTauPlots m_oRecoTauAllProngsPlots;		
+      Tau::TauParticleFlowPlots m_oRecoTauAllProngsPlots;		
 
-      Tau::RecoTauPlots m_oMatchedTauAllProngsPlots;
-      Tau::RecoTauPlots m_oFakeTauAllProngsPlots;
+      Tau::TauParticleFlowPlots m_oMatchedTauAllProngsPlots;
+      Tau::TauParticleFlowPlots m_oFakeTauAllProngsPlots;
 
       //Efficiency plots
-      Tau::EfficiencyPtPlots m_oMatchedTauEffPlots;
-      Tau::EfficiencyPtPlots m_oMatchedTauEff1PPlots;
-      Tau::EfficiencyPtPlots m_oMatchedTauEff3PPlots;
+      Tau::EfficiencyPlots m_oMatchedTauEffPlots;
+      Tau::EfficiencyPlots m_oMatchedTauEff1PPlots;
+      Tau::EfficiencyPlots m_oMatchedTauEff3PPlots;
 
-      Tau::EfficiencyPtPlots m_oRecTauEffPlots;
-      Tau::EfficiencyPtPlots m_oRecTauEff1PPlots;
-      Tau::EfficiencyPtPlots m_oRecTauEff3PPlots;
+      Tau::EfficiencyPlots m_oRecTauEffPlots;
+      Tau::EfficiencyPlots m_oRecTauEff1PPlots;
+      Tau::EfficiencyPlots m_oRecTauEff3PPlots;
 
-      Tau::EfficiencyPtPlots m_oFakeTauEffPlots;
-      Tau::EfficiencyPtPlots m_oFakeTauEff1PPlots;
-      Tau::EfficiencyPtPlots m_oFakeTauEff3PPlots;
+      Tau::EfficiencyPlots m_oFakeTauEffPlots;
+      Tau::EfficiencyPlots m_oFakeTauEff1PPlots;
+      Tau::EfficiencyPlots m_oFakeTauEff3PPlots;
 
       // All tau Reco with Backwards compatability, for comparison with 17.X.Y
-      Tau::NewCorePlots m_oNewCorePlots;		
+      Tau::CorePlots m_oNewCorePlots;		
 
-      Tau::NewCorePlots m_oNewCoreMatchedPlots;
-      Tau::NewCorePlots m_oNewCoreFakePlots;
+      Tau::CorePlots m_oNewCoreMatchedPlots;
+      Tau::CorePlots m_oNewCoreFakePlots;
 
-      //Migration Matrix plots
-      Tau::Migration m_oMigrationPlots;
+      //DecayMode Migration Matrix plots
+      Tau::DecayModeMigration m_oMigrationPlots;
 
       //Resolution Plots 
       Tau::ResolutionPlots m_oMatchedResolutionPlots;
@@ -90,39 +90,39 @@ class TauValidationPlots:public PlotBase {
       Tau::ResolutionPlots m_oMatchedResolution3PPlots;
 
       // Plots with the "nominal" tau selection
-      Tau::ParamPlots m_oElMatchedParamPlotsNom;
+      Tau::TauKinematicPlots m_oElMatchedParamPlotsNom;
       Tau::EVetoPlots m_oElMatchedEVetoPlotsNom;
-      Tau::EfficiencyPtPlots m_oElMatchedEff1PPlotsNom;
+      Tau::EfficiencyPlots m_oElMatchedEff1PPlotsNom;
       Tau::GeneralTauPlots m_oFakeGeneralNom;
-      Tau::HadProngPlots m_oFakeHad1ProngNom;
-      Tau::HadProngPlots m_oFakeHad3ProngNom;
-      Tau::EfficiencyPtPlots m_oFakeTauEffPlotsNom;
-      Tau::EfficiencyPtPlots m_oFakeTauEff1PPlotsNom;
-      Tau::EfficiencyPtPlots m_oFakeTauEff3PPlotsNom;
-      Tau::RecoTauPlots m_oFakeTauRecoTauPlotsNom;
-      Tau::NewCorePlots m_oNewCoreFakePlotsNom;
+      Tau::TauIDVariablesPlots m_oFakeHad1ProngNom;
+      Tau::TauIDVariablesPlots m_oFakeHad3ProngNom;
+      Tau::EfficiencyPlots m_oFakeTauEffPlotsNom;
+      Tau::EfficiencyPlots m_oFakeTauEff1PPlotsNom;
+      Tau::EfficiencyPlots m_oFakeTauEff3PPlotsNom;
+      Tau::TauParticleFlowPlots m_oFakeTauRecoTauPlotsNom;
+      Tau::CorePlots m_oNewCoreFakePlotsNom;
       
       Tau::GeneralTauPlots m_oRecoGeneralNom;
-      Tau::HadProngPlots m_oRecoHad1ProngNom;
-      Tau::HadProngPlots m_oRecoHad3ProngNom;
-      Tau::EfficiencyPtPlots m_oRecTauEffPlotsNom;
-      Tau::EfficiencyPtPlots m_oRecTauEff1PPlotsNom;
-      Tau::EfficiencyPtPlots m_oRecTauEff3PPlotsNom;
-      Tau::RecoTauPlots m_oRecTauRecoTauPlotsNom;
-      Tau::NewCorePlots m_oNewCoreRecTauPlotsNom;
+      Tau::TauIDVariablesPlots m_oRecoHad1ProngNom;
+      Tau::TauIDVariablesPlots m_oRecoHad3ProngNom;
+      Tau::EfficiencyPlots m_oRecTauEffPlotsNom;
+      Tau::EfficiencyPlots m_oRecTauEff1PPlotsNom;
+      Tau::EfficiencyPlots m_oRecTauEff3PPlotsNom;
+      Tau::TauParticleFlowPlots m_oRecTauRecoTauPlotsNom;
+      Tau::CorePlots m_oNewCoreRecTauPlotsNom;
       
       Tau::GeneralTauPlots m_oMatchedGeneralNom;
       Tau::ResolutionPlots m_oMatchedResolutionPlotsNom;
       Tau::ResolutionPlots m_oMatchedResolution1PPlotsNom;
       Tau::ResolutionPlots m_oMatchedResolution3PPlotsNom;
-      Tau::HadProngPlots m_oMatchedHad1ProngNom;
-      Tau::HadProngPlots m_oMatchedHad3ProngNom;
-      Tau::EfficiencyPtPlots m_oMatchedTauEffPlotsNom;
-      Tau::EfficiencyPtPlots m_oMatchedTauEff1PPlotsNom;
-      Tau::EfficiencyPtPlots m_oMatchedTauEff3PPlotsNom;
-      Tau::RecoTauPlots m_oMatchedTauRecoTauPlotsNom;
-      Tau::Migration m_oMigrationPlotsNom;
-      Tau::NewCorePlots m_oNewCoreMatchedPlotsNom;
+      Tau::TauIDVariablesPlots m_oMatchedHad1ProngNom;
+      Tau::TauIDVariablesPlots m_oMatchedHad3ProngNom;
+      Tau::EfficiencyPlots m_oMatchedTauEffPlotsNom;
+      Tau::EfficiencyPlots m_oMatchedTauEff1PPlotsNom;
+      Tau::EfficiencyPlots m_oMatchedTauEff3PPlotsNom;
+      Tau::TauParticleFlowPlots m_oMatchedTauRecoTauPlotsNom;
+      Tau::DecayModeMigration m_oMigrationPlotsNom;
+      Tau::CorePlots m_oNewCoreMatchedPlotsNom;
 
 
 };

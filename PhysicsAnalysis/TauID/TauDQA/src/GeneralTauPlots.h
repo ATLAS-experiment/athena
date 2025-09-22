@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUDQA_GENERALTAUPLOTS_H
 #define TAUDQA_GENERALTAUPLOTS_H
 
 #include "TrkValHistUtils/PlotBase.h" //inheritance
-#include "ParamPlots.h" //member
+#include "TauKinematicPlots.h" //member
 #include "xAODTau/TauJet.h" //typedef
 
 namespace Tau{
@@ -18,7 +18,7 @@ class GeneralTauPlots: public PlotBase {
       
       void fill(const xAOD::TauJet& tau, float weight);
 
-      Tau::ParamPlots m_oParamPlots;
+      Tau::TauKinematicPlots m_oTauKinematicPlots;
       TH1* m_tauCharge{};
       TH1* m_tauNChargedTracks{};
       TH1* m_tauNIsolatedTracks{};

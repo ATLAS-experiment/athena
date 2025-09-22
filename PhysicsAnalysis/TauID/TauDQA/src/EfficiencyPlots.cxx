@@ -4,22 +4,22 @@
 
 #include <utility>
 
-#include "EfficiencyPtPlots.h"
+#include "EfficiencyPlots.h"
 #include "AthenaKernel/Units.h"
 
 namespace Tau{
 
-  EfficiencyPtPlots::EfficiencyPtPlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
+  EfficiencyPlots::EfficiencyPlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
     PlotBase(pParent, sDir),
     m_sTauJetContainerName(std::move(sTauJetContainerName))
   {	
   }
 
-  EfficiencyPtPlots::~EfficiencyPtPlots()
+  EfficiencyPlots::~EfficiencyPlots()
   {
   }
 
-  void EfficiencyPtPlots::initializePlots()
+  void EfficiencyPlots::initializePlots()
   {
     m_eff_pt_jetRNNloose       = BookTProfile("Eff_Pt_jetRNNloose"," Matched Tau loose RNN eff in pt; pt; eff",20, 0., 150.0);
     m_eff_pt_jetRNNmed         = BookTProfile("Eff_Pt_jetRNNmed","Matched Tau med RNN eff in pt; pt; eff", 20, 0.0, 150.0);
@@ -56,7 +56,7 @@ namespace Tau{
 
   }
 
-  void EfficiencyPtPlots::fill(const xAOD::TauJet& tau, float weight)
+  void EfficiencyPlots::fill(const xAOD::TauJet& tau, float weight)
   {
     if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigLoose) ) {
       m_eff_pt_jetRNNloose      ->Fill(tau.pt()/Athena::Units::GeV, 1., weight);

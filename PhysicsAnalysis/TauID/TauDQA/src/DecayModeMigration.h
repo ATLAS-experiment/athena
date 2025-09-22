@@ -2,11 +2,11 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUDQA_MIGRATION_H
-#define TAUDQA_MIGRATION_H
+#ifndef TAUDQA_DECAYMODEMIGRATION_H
+#define TAUDQA_DECAYMODEMIGRATION_H
 
 #include "TrkValHistUtils/PlotBase.h"
-#include "ParamPlots.h"
+#include "TauKinematicPlots.h"
 #include "xAODTau/TauJet.h"
 #include "xAODPFlow/PFO.h"
 
@@ -30,10 +30,10 @@ namespace Tau{
 	t3r1,
 	DECAYSIZE
     };
-    class Migration: public PlotBase {
+    class DecayModeMigration: public PlotBase {
     public:
-	Migration(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-	virtual ~Migration();
+	DecayModeMigration(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
+	virtual ~DecayModeMigration();
 
 	/* void fill(const xAOD::TauJet& tau,int nProng, int nNeu); */
 	void fill(const xAOD::TauJet& tau, xAOD::TauJetParameters::DecayMode trueMode, float weight);

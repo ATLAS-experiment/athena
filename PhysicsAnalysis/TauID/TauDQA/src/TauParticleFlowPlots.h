@@ -2,24 +2,24 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUDQA_RECOTAUPLOTS_H
-#define TAUDQA_RECOTAUPLOTS_H
+#ifndef TAUDQA_TAUPARTICLEFLOWPLOTS_H
+#define TAUDQA_TAUPARTICLEFLOWPLOTS_H
 
 #include "TrkValHistUtils/PlotBase.h"
-#include "ParamPlots.h"
+#include "TauKinematicPlots.h"
 #include "xAODTau/TauJet.h"
 #include "xAODPFlow/PFO.h"
 
 namespace Tau{
 
-class RecoTauPlots: public PlotBase {
+class TauParticleFlowPlots: public PlotBase {
   public:
-    RecoTauPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
-    virtual ~RecoTauPlots();
+    TauParticleFlowPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
+    virtual ~TauParticleFlowPlots();
 
     void fill(const xAOD::TauJet& tau, float weight);
 
-    Tau::ParamPlots m_oParamPlots;
+    Tau::TauKinematicPlots m_oTauKinematicPlots;
 
     //Here I try to include CellBased substructure variables, from the Particle Flow Object (PFO), begining with basic charged and neutral PFO 4-vector.
     TH1* m_cellBased_neuPFO_Pt{};

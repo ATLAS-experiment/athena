@@ -5,24 +5,24 @@
 #include <utility>
 #include <algorithm>
 
-#include "NewCorePlots.h"
+#include "CorePlots.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 #include "AthContainers/ConstAccessor.h"
 #include "AthenaKernel/Units.h"
 
 namespace Tau{
 
-  NewCorePlots::NewCorePlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
+  CorePlots::CorePlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
     PlotBase(pParent, sDir),
     m_sTauJetContainerName(std::move(sTauJetContainerName))
   {	
   }
 	
-  NewCorePlots::~NewCorePlots()
+  CorePlots::~CorePlots()
   {
   }
 
-  void NewCorePlots::initializePlots(){
+  void CorePlots::initializePlots(){
 
     m_ipZ0SinThetaSigLeadTrk           = Book1D("ipZ0SinThetaSigLeadTrk",m_sTauJetContainerName + "Tau ipZ0SinThetaSigLeadTrk ;ipZ0SinThetaSigLeadTrk ;# of Taus", 50, -10, 10);
     m_etOverPtLeadTrk                  = Book1D("etOverPtLeadTrk",m_sTauJetContainerName + "Tau etOverPtLeadTrk ;etOverPtLeadTrk ;# of Taus", 50, 0, 4.);
@@ -86,7 +86,7 @@ namespace Tau{
     m_TVz = Book1D("tauVertexZ", "tau vertex z:tau vertex z [mmm]",24,-120.,120.);
  }
 
-  void NewCorePlots::fill(const xAOD::TauJet& tau, float weight) {
+  void CorePlots::fill(const xAOD::TauJet& tau, float weight) {
 
     float avariable = 0.;
 

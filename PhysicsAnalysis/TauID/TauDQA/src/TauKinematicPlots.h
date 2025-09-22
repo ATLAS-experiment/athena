@@ -2,18 +2,18 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUDQA_PARAMPLOTS_H
-#define TAUDQA_PARAMPLOTS_H
+#ifndef TAUDQA_TAUKINEMATICPLOTS_H
+#define TAUDQA_TAUKINEMATICPLOTS_H
 
 #include "TrkValHistUtils/PlotBase.h"
 #include "xAODBase/IParticle.h"
 
 namespace Tau{
 
-class ParamPlots:public PlotBase {
+class TauKinematicPlots:public PlotBase {
    public:      
-      ParamPlots(PlotBase *pParent, const std::string& sDir, std::string sParticleType);
-      ~ParamPlots();
+      TauKinematicPlots(PlotBase *pParent, const std::string& sDir, std::string sParticleType);
+      ~TauKinematicPlots();
       void fill(const xAOD::IParticle& prt, float weight);
       
       TH1* eta{};
@@ -30,6 +30,6 @@ class ParamPlots:public PlotBase {
 
 }
 
-#endif // TAUDQA_PARAMPLOTS_H
+#endif // TAUDQA_TAUKINEMATICPLOTS_H
 
 

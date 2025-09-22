@@ -4,22 +4,22 @@
 
 #include <utility>
 
-#include "ParamPlots.h"
+#include "TauKinematicPlots.h"
 #include "AthenaKernel/Units.h"
 
 namespace Tau{
 
-ParamPlots::ParamPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType)
+TauKinematicPlots::TauKinematicPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType)
    : PlotBase(pParent, sDir),
      m_sParticleType(std::move(sParticleType))
 {
 }
 
-ParamPlots::~ParamPlots()
+TauKinematicPlots::~TauKinematicPlots()
 {
 }
 
-void ParamPlots::initializePlots()
+void TauKinematicPlots::initializePlots()
 {
    pt  = Book1D("pt" , m_sParticleType+" pt;" +m_sParticleType+" Transverse Momentum [GeV];Entries / 1 GeV",25,0.,200);
    eta = Book1D("eta", m_sParticleType+" eta;"+m_sParticleType+" Pseudo-Rapidity;Entries / 0.05", 32, -3.2, 3.2);
@@ -29,7 +29,7 @@ void ParamPlots::initializePlots()
 }
 
    
-void ParamPlots::fill(const xAOD::IParticle& tau, float weight)
+void TauKinematicPlots::fill(const xAOD::IParticle& tau, float weight)
 {
   pt->Fill(tau.pt()/Athena::Units::GeV, weight);
   eta->Fill(tau.eta(), weight);

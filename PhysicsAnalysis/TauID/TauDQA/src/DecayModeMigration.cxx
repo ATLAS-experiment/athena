@@ -4,21 +4,21 @@
 
 #include <utility>
 
-#include "Migration.h"
+#include "DecayModeMigration.h"
 
 namespace Tau{
 
-  Migration::Migration(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
+  DecayModeMigration::DecayModeMigration(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
     PlotBase(pParent, sDir),
     m_sTauJetContainerName(std::move(sTauJetContainerName))
   {
   }
 
-  Migration::~Migration()
+  DecayModeMigration::~DecayModeMigration()
   {
   }
 
-  void Migration::initializePlots()
+  void DecayModeMigration::initializePlots()
   {
     m_migration_panTau = Book1D("panTau_migration",m_sTauJetContainerName + " panTau migration",DECAYSIZE,0,DECAYSIZE);
     m_migration_panTauProto = Book1D("panTauProto_migration",m_sTauJetContainerName + " panTau proto migration",DECAYSIZE,0,DECAYSIZE);
@@ -31,7 +31,7 @@ namespace Tau{
   }
 
 
-  void Migration::fill(const xAOD::TauJet& thisTau, xAOD::TauJetParameters::DecayMode trueMode, float weight)
+  void DecayModeMigration::fill(const xAOD::TauJet& thisTau, xAOD::TauJetParameters::DecayMode trueMode, float weight)
   {
     int isPanTauCandidate = 0;
     bool foundDetail = thisTau.panTauDetail(xAOD::TauJetParameters::PanTauDetails::PanTau_isPanTauCandidate, isPanTauCandidate);
@@ -51,7 +51,7 @@ namespace Tau{
 
   }
 
-  void Migration::decayModeFill(int trueMode, int recMode, TH1 *histo, float weight)
+  void DecayModeMigration::decayModeFill(int trueMode, int recMode, TH1 *histo, float weight)
   {
     if ( recMode >= xAOD::TauJetParameters::DecayMode::Mode_Other || trueMode >= xAOD::TauJetParameters::DecayMode::Mode_Other ) return;
    
