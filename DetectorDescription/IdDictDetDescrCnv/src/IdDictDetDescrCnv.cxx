@@ -351,7 +351,7 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
       ATH_MSG_WARNING("Unable to determine RDBAccessSvc backend. Using default dictionaries");
       // Get Calo Neighbor tables from Oracle and return
       IRDBRecordset_ptr caloNeighborTable = m_rdbAccessSvc->getRecordsetPtr("CaloNeighborTable", "CaloNeighborTable-00");
-      collectCaloNeighbors(caloNeighborTable);
+      collectCaloNeighbors(std::move(caloNeighborTable));
       return StatusCode::SUCCESS;
     }
 
@@ -396,7 +396,7 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
         dictFile << dictString;
         dictFile.close();
 
-        fileName = dictFileName;
+        fileName = std::move(dictFileName);
         dictTag.clear();   // This may change in the future if we also write dict tags into SQLite
 
         ATH_MSG_DEBUG(dictName << " read from the SQLite database as a BLOB");
@@ -505,7 +505,7 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
     }
     // Size == 0 if not found
     if (caloNeighborTable->size()) {
-        collectCaloNeighbors(caloNeighborTable);
+        collectCaloNeighbors(std::move(caloNeighborTable));
     }
 
     // Get Muon
