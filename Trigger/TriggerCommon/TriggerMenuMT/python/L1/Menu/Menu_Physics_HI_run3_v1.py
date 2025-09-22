@@ -94,7 +94,7 @@ def defineMenu():
         'L1_jTE50_VjTE200',
 
         # jTEFWD UCC seeds: ATR-30726
-        'L1_jTEFWD8300',
+        'L1_jTEFWD6500',
 
         #Overlay items
         'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
