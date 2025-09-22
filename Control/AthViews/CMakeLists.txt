@@ -53,3 +53,8 @@ atlas_add_test( ViewScheduling
 atlas_add_test( ViewInheritance
                 SCRIPT test/ViewInheritance.py --threads=1
                 POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( ViewNestFail
+                SCRIPT test/ViewNest.py --threads=1
+                PROPERTIES PASS_REGULAR_EXPRESSION "Execution of algorithm nest_alg failed"
+                POST_EXEC_SCRIPT nopost.sh )
