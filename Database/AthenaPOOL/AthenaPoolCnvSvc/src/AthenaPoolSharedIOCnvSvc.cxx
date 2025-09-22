@@ -163,7 +163,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
          while (num > 0) {
             std::string objName = "ALL";
             if (useDetailChronoStat()) {
-               std::string objName(placementStr); //FIXME, better descriptor
+               objName = placementStr; //FIXME, better descriptor
             }
             // StopWatch listens from here until the end of this current scope
             {
