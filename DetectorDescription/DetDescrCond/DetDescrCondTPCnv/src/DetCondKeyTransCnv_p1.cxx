@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DetDescrConditions/DetCondKeyTrans.h"
@@ -26,9 +26,9 @@ void DetCondKeyTransCnv_p1::transToPers(const DetCondKeyTrans* trans, DetCondKey
     size_t sz = trans->keyTrans().size();
     pers->m_trans.reserve(12*sz);
 
-    for (const DetCondKeyTrans::KeyTrans::value_type& trans : trans->keyTrans()) {
-        pers->m_keys.push_back(trans.first);
-        const HepGeom::Transform3D& tf = trans.second;
+    for (const DetCondKeyTrans::KeyTrans::value_type& transk : trans->keyTrans()) {
+        pers->m_keys.push_back(transk.first);
+        const HepGeom::Transform3D& tf = transk.second;
         pers->m_trans.push_back( tf.xx() );
         pers->m_trans.push_back( tf.xy() );
         pers->m_trans.push_back( tf.xz() );
