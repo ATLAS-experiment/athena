@@ -109,11 +109,11 @@ StatusCode DBReplicaSvc::readConfig() {
             sequal=true;
           } else if (!sequal) {
             // token is a domain name
-            domains.push_back(token);
+            domains.push_back(std::move(token));
           } else {
             // token is a server name
     	    if (!m_nofailover || servers.size()==0 || token=="atlas_dd") 
-              servers.push_back(token);
+              servers.push_back(std::move(token));
           }
         }
         iofs1=iofs2+1;
