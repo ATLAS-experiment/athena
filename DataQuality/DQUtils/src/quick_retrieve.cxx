@@ -20,7 +20,6 @@
 
 #include <CoolApplication/DatabaseSvcFactory.h>
 
-#include <boost/typeof/typeof.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/function.hpp>
 
@@ -140,7 +139,7 @@ payload_fetcher_t create_payload_fetcher(const char* name,
     // a PyObject*, `converter`.
     #define MAKE_FETCHER(type, converter)                                      \
         if (type_name == #type)                                                \
-            return bind(payload_fetcher<cool::type, BOOST_TYPEOF(converter)>,  \
+            return bind(payload_fetcher<cool::type, decltype(converter)>,  \
                         _1, name, &converter);
     
     // See the python c-api reference for python conversion functions
