@@ -20,11 +20,11 @@
 #include <map>
 #include <limits>
 
-class LArClusterCellMonAlg : public CaloMonAlgBase {
+class CaloClusterCellMonAlg : public CaloMonAlgBase {
  
  public:
   using CaloMonAlgBase::CaloMonAlgBase;
-  ~LArClusterCellMonAlg()=default;
+  ~CaloClusterCellMonAlg()=default;
   
   virtual StatusCode initialize()  override final;
   virtual StatusCode fillHistograms(const EventContext& ctx) const override final;
@@ -38,7 +38,7 @@ private:
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey {this,"CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
 
-  Gaudi::Property<std::string> m_MonGroupName  {this, "MonGroupName", "LArClusterCellMonGroup"};
+  Gaudi::Property<std::string> m_MonGroupName  {this, "MonGroupName", "CaloClusterCellMonGroup"};
 
  
   StringArrayProperty m_layerNames{this, "LayerNames", {"EMBPA", "EMBPC", "EMB1A", "EMB1C", "EMB2A", "EMB2C", "EMB3A", "EMB3C",
@@ -47,7 +47,7 @@ private:
 					    "FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C"},
                                                        "Names of individual layers to monitor"};
 
-  StringArrayProperty m_partitionNames{this, "PartitionNames", {"EMBA","EMBC","EMECA","EMECC","HECA","HECC","FCALA","FCALC"}};  
+  //StringArrayProperty m_partitionNames{this, "PartitionNames", {"EMBA","EMBC","EMECA","EMECC","HECA","HECC","FCALA","FCALC"}};  
 
   // Trigger Awareness:
   enum TriggerType{RNDM,CALO,MINBIAS,MET,MISC,NOTA,MAXTRIGTYPE};
@@ -73,6 +73,10 @@ private:
 
   const LArOnlineID* m_onlineID{nullptr};  
 
+  const std::array<std::string,9> m_tileNames{
+        "TileBar0","TileBar1","TileBar2",
+        "TileGap0","TileGap1","TileGap2",
+        "TileExt0","TileExt1","TileExt2"};
 };
 
 #endif 
