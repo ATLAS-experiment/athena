@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AnalysisAlgorithmsConfig.CPBaseRunner import CPBaseRunner
 import os
+import sys
 
 class EventLoopCPRunScript(CPBaseRunner):
     def __init__(self):
@@ -77,7 +78,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         newHistFile = currentDir / f"hist-{self.outputName}.root"
         # rename merged hist-ntuple to output_name.root
         if self.args.merge_output_files and newHistFile.exists():
-            self.logger.info(f"renmaing the hist-{self.outputName}.root to {self.outputName}.root")
+            self.logger.info(f"renaming the hist-{self.outputName}.root to {self.outputName}.root")
             newHistFile.rename(currentDir / f"{self.outputName}.root")
         
     def driverSubmit(self, driver):
@@ -93,6 +94,13 @@ class EventLoopCPRunScript(CPBaseRunner):
         else:
             os.waitpid(pid, 0) # parent waits for child process to finish
             return
+        
+    def getExitCode(self):
+        import ROOT
+        statusCode = ROOT.EL.Driver.retrieve(self.args.work_dir if self.args.work_dir else 'workDir') 
+        if statusCode:
+            return 0
+        return 1
     
     def run(self):
         self.setup()
@@ -126,5 +134,9 @@ class EventLoopCPRunScript(CPBaseRunner):
 
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
         self.driverSubmit(driver)
+        exitCode = self.getExitCode()
+        
         if self.args.work_dir is None: # move output if work_dir is not used
             self.moveOutputFiles()
+
+        sys.exit(exitCode)
