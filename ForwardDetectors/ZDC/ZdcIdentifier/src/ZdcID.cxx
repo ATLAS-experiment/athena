@@ -69,7 +69,7 @@ ZdcID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
     int fwdField   = -1;
     if (atlasDict->get_label_value("subdet", "ForwardDetectors", fwdField)) {
         log << MSG::ERROR << "Could not get value for label 'ForwardDetectors' of field 'subdet' in dictionary " 
-            << atlasDict->m_name
+            << atlasDict->name()
             << endmsg;
         return (1);
     }
@@ -78,7 +78,7 @@ ZdcID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
     int zdcField   = -1;
     if (m_dict->get_label_value("part", "ZDC", zdcField)) {
         log << MSG::ERROR << "Could not get value for label 'ZDC' of field 'part' in dictionary " 
-            << m_dict->m_name
+            << m_dict->name()
             << endmsg;
         return (1);
     }
@@ -161,7 +161,7 @@ ZdcID::initLevelsFromDict()
     // Find a ZDC region
     IdDictField* field = m_dict->find_field("subdet");
     if (field) {
-        m_FORWARD_INDEX = field->m_index;
+        m_FORWARD_INDEX = field->index();
     }
     else {
         log << MSG::ERROR << "ZdcID::initLevelsFromDict - unable to find 'subdet' field "  << endmsg;
@@ -169,7 +169,7 @@ ZdcID::initLevelsFromDict()
     }
     field = m_dict->find_field("part");
     if (field) {
-        m_ZDC_INDEX = field->m_index;
+        m_ZDC_INDEX = field->index();
     }
     else {
         log << MSG::ERROR << "ZdcID::initLevelsFromDict - unable to find 'part' field "  << endmsg;
@@ -177,7 +177,7 @@ ZdcID::initLevelsFromDict()
     }
     field = m_dict->find_field("side");
     if (field) {
-        m_SIDE_INDEX = field->m_index;
+        m_SIDE_INDEX = field->index();
     }
     else {
         log << MSG::ERROR << "ZdcID::initLevelsFromDict - unable to find 'side' field "  << endmsg;
@@ -185,7 +185,7 @@ ZdcID::initLevelsFromDict()
     }
     field = m_dict->find_field("module");
     if (field) {
-        m_MODULE_INDEX = field->m_index;
+        m_MODULE_INDEX = field->index();
     }
     else {
         log << MSG::ERROR << "ZdcID::initLevelsFromDict - unable to find 'module' field "   << endmsg;
@@ -193,7 +193,7 @@ ZdcID::initLevelsFromDict()
     }
     field = m_dict->find_field("type");
     if (field) {
-        m_TYPE_INDEX = field->m_index;
+        m_TYPE_INDEX = field->index();
     }
     else {
         log << MSG::ERROR<< "ZdcID::initLevelsFromDict - unable to find 'type' field "  << endmsg;
@@ -201,7 +201,7 @@ ZdcID::initLevelsFromDict()
     }
     field = m_dict->find_field("channel");
     if (field) {
-        m_CHANNEL_INDEX = field->m_index;
+        m_CHANNEL_INDEX = field->index();
     }
     else {
         log << MSG::ERROR << "ZdcID::initLevelsFromDict - unable to find 'channel' field " << endmsg;        
@@ -210,14 +210,14 @@ ZdcID::initLevelsFromDict()
     
     // Set the field implementations: for bec, lay/disk, eta/phi mod
 
-    const IdDictRegion& region = *m_dict->m_regions[m_zdc_region_index];
+    const IdDictRegion& region = m_dict->region(m_zdc_region_index);
 
-    m_forward_impl  = region.m_implementation[m_FORWARD_INDEX]; 
-    m_zdc_impl      = region.m_implementation[m_ZDC_INDEX]; 
-    m_side_impl     = region.m_implementation[m_SIDE_INDEX]; 
-    m_module_impl   = region.m_implementation[m_MODULE_INDEX]; 
-    m_type_impl     = region.m_implementation[m_TYPE_INDEX]; 
-    m_channel_impl  = region.m_implementation[m_CHANNEL_INDEX]; 
+    m_forward_impl  = region.implementation(m_FORWARD_INDEX);
+    m_zdc_impl      = region.implementation(m_ZDC_INDEX);
+    m_side_impl     = region.implementation(m_SIDE_INDEX);
+    m_module_impl   = region.implementation(m_MODULE_INDEX);
+    m_type_impl     = region.implementation(m_TYPE_INDEX);
+    m_channel_impl  = region.implementation(m_CHANNEL_INDEX);
 
     if (m_msgSvc) {
         log << MSG::DEBUG << "decode index and bit fields for each level: "  << endmsg;
