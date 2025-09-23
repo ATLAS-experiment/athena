@@ -17,6 +17,7 @@
  */
 SG::View::View( std::string const& name, int index, bool allowFallThrough, std::string const& storeName ) :
   m_store( storeName, name ),
+  m_keyMap(KeyMap_t::Updater_t()),
   m_name( name ),
   m_allowFallThrough( allowFallThrough )
 {
@@ -57,7 +58,18 @@ SG::DataProxy* SG::View::recordObject ( SG::DataObjectSharedPtr<DataObject> obj,
                                         const std::string& key,
                                         bool allowMods,
                                         bool returnExisting)
-{ return m_store->recordObject( obj, viewKey(key), allowMods, returnExisting ); }
+{
+  // Record the object under the view name
+  SG::DataProxy* proxy = m_store->recordObject( obj, viewKey(key), allowMods, returnExisting );
+
+  // Remember the hashed rawKey -> viewKey mapping for use in proxy_exact
+  if (proxy) {
+    const IStringPool::sgkey_t keyNoView = m_store->stringToKey( key, obj->clID() );
+    m_keyMap.emplace(keyNoView, proxy->sgkey());
+  }
+
+  return proxy;
+}
 
 
 /**
@@ -66,10 +78,21 @@ SG::DataProxy* SG::View::recordObject ( SG::DataObjectSharedPtr<DataObject> obj,
  *
  * Find an exact match; no handling of aliases, etc.
  * Returns 0 to flag failure.
+ *
+ * @note
+ * The implementation of proxy_exact is a bit special for the view case.
+ * This method is called by the Read/WriteHandle to avoid lengthy lookups via the
+ * string key. However, the @c sgkey that is passed is the hashed key of the
+ * original HandleKey (without the view prefix). So whenever we store an object in
+ * a view, we calculate the raw hashed key in @c recordObject() and store a mapping to
+ * the hashed view key to be able to retrieve the correct proxy here.
  */
-SG::DataProxy* SG::View::proxy_exact ( SG::sgkey_t /*sgkey*/ ) const {
-  // Lookup via hashed key not supported at the moment
-  return nullptr;
+SG::DataProxy* SG::View::proxy_exact ( SG::sgkey_t sgkey ) const {
+  auto itr = m_keyMap.find(sgkey);
+  if (itr != m_keyMap.end()) {
+    return m_store->proxy_exact( itr->second );
+  }
+  else return nullptr;
 }
 
 

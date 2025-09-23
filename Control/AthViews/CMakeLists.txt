@@ -38,6 +38,7 @@ atlas_add_test( ViewPerf_test
                 SOURCES test/ViewPerf_test.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} AthViews AthenaKernel GaudiKernel StoreGateLib TestTools
+                PROPERTIES DISABLED TRUE  # build but don't run the performance test by default
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( ViewCollectionMerge_test

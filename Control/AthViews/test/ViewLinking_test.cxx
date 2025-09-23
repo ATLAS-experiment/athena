@@ -23,9 +23,47 @@ CLASS_DEF( TestClass, 16530831, 1 )
 typedef std::vector<TestClass*> TestContainer;
 CLASS_DEF( TestContainer, 16530833, 1 )
 
-using namespace SG;
-void testDataInView( const EventContext& ctx, MsgStream& log ) {
+using SG::View;
 
+
+void testProxy() {
+  // Make view
+  auto view = new View( "MyView", -1 );
+  auto t1 = std::make_unique<TestClass>();
+  t1->value = 1;
+
+  // Write data
+  {
+    SG::WriteHandle<TestClass> wh( "test" );
+    wh.setProxyDict( view ).ignore();
+    auto status = wh.record( std::move( t1 ) );
+    EXPECT_TRUE( status.isSuccess() );
+  }
+
+  // Read data
+  {
+    SG::ReadHandleKey<TestClass> rhk( "test" );
+    EXPECT_TRUE( rhk.initialize().isSuccess() );
+
+    auto rh = SG::makeHandle(rhk);
+    rh.setProxyDict( view ).ignore();
+
+    // Retrieve via CLID and name (in view)
+    SG::DataProxy* proxy1 = view->proxy(rhk.clid(), "test");
+    EXPECT_TRUE( proxy1 && proxy1->isValid() );
+
+    SG::ReadHandleKey<TestClass> rhk2( "test" );
+    EXPECT_TRUE( rhk2.initialize().isSuccess() );
+
+    // Retrieve via hashed key
+    SG::DataProxy* proxy2 = view->proxy_exact(rhk.hashedKey());
+    EXPECT_TRUE( proxy2 && proxy2->isValid() );
+    EXPECT_TRUE( proxy1 == proxy2 );
+  }
+}
+
+
+void testDataInView( const EventContext& ctx, MsgStream& log ) {
   // Make parent view
   auto parentView = new View( "ParentView", -1 );
   auto t1 = std::make_unique<TestClass>();
@@ -240,6 +278,7 @@ int main() {
   EventContext ctx;
   Atlas::setExtendedEventContext (ctx, Atlas::ExtendedEventContext(pStore.get()) );
 
+  testProxy();
   testDataInView( ctx, log );
   testFallThrough( ctx, log );
   testFallThroughLinks( ctx, log );
