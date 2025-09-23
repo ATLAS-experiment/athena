@@ -54,6 +54,7 @@ void CustomMonopoleFactory::loadCustomMonopoles()
       std::string::size_type beg_idx,end_idx;
       bool isQball = false;
       bool isFCP = false; // Wendy Taylor: fractionally charged particle
+      bool isDyon = false; // Ethan Brooks Dyons
 
       beg_idx = line.find_first_not_of("\t #");
       if(beg_idx > 0 && line[beg_idx-1] == '#') continue;
@@ -96,6 +97,8 @@ void CustomMonopoleFactory::loadCustomMonopoles()
 
       isFCP = (lowerCaseName.find("fcp") != std::string::npos) ? true : false;
 
+      isDyon = (lowerCaseName.find("dyonss") != std::string::npos || lowerCaseName.find("dyonos") != std::string::npos) ? true : false; // Set Dyon boolean True if dyon same sign or opposite sign is present
+
       G4cout << "CustomMonopoleFactory: name = " << name << G4endl;
 
       if(abs(pdgCode) / 1000000 == 0)
@@ -119,8 +122,16 @@ void CustomMonopoleFactory::loadCustomMonopoles()
 	      elChargeFromPDGcode = (pdgCode>0) ? round(100.*XX/YY)/100. : -round(100.*XX/YY)/100.;
 	      G4cout << "CustomMonopoleFactory: elChargeFromPDGcode = " << elChargeFromPDGcode << G4endl;
 	    }
+          
+          if(isDyon) // Ethan Brooks Dyons
+          {
+            elChargeFromPDGcode =  (abs((int)(pdgCode/10000)) == 412) ? -pdgCode%4120000/10 : pdgCode%4110000/10; // encoding of electric charge in the dyon PDGID
+	    magCharge = (pdgCode>0) ? 1 : -1; // sign matches PDG sign, only allow for plus or minus one magnetic charge
+	    G4cout << "Loading Dyons: " << magCharge << G4endl;
+          }
 
-          if (!isQball && !isFCP && abs((int)(pdgCode/10000)) == 412) elChargeFromPDGcode = -elChargeFromPDGcode;
+
+          if (!isQball && !isFCP && !isDyon && abs((int)(pdgCode/10000)) == 412) elChargeFromPDGcode = -elChargeFromPDGcode;
 
 
           if (elChargeFromPDGcode != elCharge) {
