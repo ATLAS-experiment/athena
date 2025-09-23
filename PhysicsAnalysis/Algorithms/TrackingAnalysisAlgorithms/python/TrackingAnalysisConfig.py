@@ -297,13 +297,8 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
                     alg.filterTool.fFakeLoose = 0.10
                     alg.filterTool.fFakeTight = 1.00
                 elif config.geometry() is LHCPeriod.Run3:
-                    if config.campaign() is Campaign.MC23a:
-                        # 2022 recommendations (MC23a)
-                        alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
-                        alg.filterTool.fFakeLoose = 0.40
-                        alg.filterTool.fFakeTight = 1.00
-                    elif config.campaign() is Campaign.MC23d:
-                        # 2023 recommendations (MC23d)
+                    if config.campaign() in [Campaign.MC23a, Campaign.MC23d, Campaign.MC23e]:
+                        # 2022/23/24 recommendations (MC23a/d/e)
                         alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
                         alg.filterTool.fFakeLoose = 0.40
                         alg.filterTool.fFakeTight = 1.00
