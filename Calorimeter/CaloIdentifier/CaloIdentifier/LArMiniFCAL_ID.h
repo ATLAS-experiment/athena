@@ -245,7 +245,6 @@ private:
   // initialized - no description in xml dictionary
   bool                          m_is_initialized;  
   size_type                     m_fcal_region_index;
-  size_type                     m_minifcal_region_index;
   size_type                     m_LAR_INDEX;
   size_type                     m_MiniFCAL_INDEX;
   size_type                     m_POSNEG_INDEX;

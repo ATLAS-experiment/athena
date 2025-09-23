@@ -245,7 +245,7 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int caloValue   = -1;
     if (m_dict->get_label_value("subdet", "Calorimeter", caloValue)) 
       {
-	strm << m_dict->m_name;
+	strm << m_dict->name();
 	strg= "Could not get value for label 'Calorimeter' of field 'subdet' in dictionary "+strm.str(); 
 	if(m_msgSvc)
 	  {
@@ -264,7 +264,7 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     // positive half  FLG 12 Jul 07: negative side -> problem for test beam
     if (m_dict->get_label_value("DetZside", "positive_lvl1_side", lvl1CaloValue)) 
       {
-	strm << m_dict->m_name;
+	strm << m_dict->name();
 	//	strg = " Could not get value for label 'negative_lvl1_side' of field 'DetZside in dictionary"+strm.str();
 	strg = " Could not get value for label 'positive_lvl1_side' of field 'DetZside in dictionary"+strm.str();
 	if(m_msgSvc)
@@ -737,7 +737,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   IdDictRegion* reg = m_dict->find_region("Lvl1_0");
   if (reg) 
     {
-      m_lvl1_region_index = reg->m_index;
+      m_lvl1_region_index = reg->index();
     }
   else 
     {
@@ -755,7 +755,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   // Fing a LVL1 region
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_CALO_INDEX = field->m_index ;
+    m_CALO_INDEX = field->index();
   }
   else 
     {
@@ -773,7 +773,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   
   field = m_dict->find_field("DetZside") ;
   if (field) {
-    m_DETZSIDE_INDEX = field->m_index ;
+    m_DETZSIDE_INDEX = field->index();
   }
   else 
     {
@@ -791,7 +791,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
  
  field = m_dict->find_field("LVL1sampling") ;
   if (field) {
-    m_SAMPLING_INDEX = field->m_index ;
+    m_SAMPLING_INDEX = field->index();
   }
   else 
     {
@@ -808,7 +808,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   
   field = m_dict->find_field("region") ;
   if (field) {
-    m_REGION_INDEX = field->m_index ;
+    m_REGION_INDEX = field->index();
   }
   else 
     {
@@ -829,7 +829,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
 
   field = m_dict->find_field("eta") ;
   if (field) {
-    m_ETA_INDEX = field->m_index ;
+    m_ETA_INDEX = field->index();
   }
   else 
     {
@@ -847,7 +847,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   
   field = m_dict->find_field("phi") ;
   if (field) {
-    m_PHI_INDEX = field->m_index ;
+    m_PHI_INDEX = field->index();
   }
   else 
     {
@@ -866,7 +866,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   
   field = m_dict->find_field("layer") ;
   if (field) {
-    m_LAYER_INDEX = field->m_index ;
+    m_LAYER_INDEX = field->index();
   }
   else 
     {
@@ -883,15 +883,15 @@ int   CaloLVL1_ID::initLevelsFromDict()
   
   // Set the field implementations
 
-  const IdDictRegion& region = *m_dict->m_regions[m_lvl1_region_index];
+  const IdDictRegion& region = m_dict->region(m_lvl1_region_index);
 
-  m_calo_impl     = region.m_implementation[m_CALO_INDEX]; 
-  m_lvl1_impl     = region.m_implementation[m_DETZSIDE_INDEX]; 
-  m_sampling_impl = region.m_implementation[m_SAMPLING_INDEX]; 
-  m_region_impl   = region.m_implementation[m_REGION_INDEX]; 
-  m_eta_impl      = region.m_implementation[m_ETA_INDEX]; 
-  m_phi_impl      = region.m_implementation[m_PHI_INDEX]; 
-  m_layer_impl    = region.m_implementation[m_LAYER_INDEX]; 
+  m_calo_impl     = region.implementation(m_CALO_INDEX);
+  m_lvl1_impl     = region.implementation(m_DETZSIDE_INDEX);
+  m_sampling_impl = region.implementation(m_SAMPLING_INDEX);
+  m_region_impl   = region.implementation(m_REGION_INDEX);
+  m_eta_impl      = region.implementation(m_ETA_INDEX);
+  m_phi_impl      = region.implementation(m_PHI_INDEX);
+  m_layer_impl    = region.implementation(m_LAYER_INDEX);
 
   if (!m_quiet) {
     strm1 << m_calo_impl.show_to_string();

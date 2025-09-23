@@ -163,7 +163,7 @@ int  LArFCAL_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
       std::stringstream strm ;
-      strm <<  atlasDict->m_name ;
+      strm <<  atlasDict->name();
       strg = "Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary " 
       + strm.str();
       if(m_msgSvc) {
@@ -180,7 +180,7 @@ int  LArFCAL_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr
     int larFcalField   = -1;
     if (dict()->get_label_value("part", "LArFCAL", larFcalField)) {
       std::stringstream strm ;
-      strm <<  atlasDict->m_name ;
+      strm <<  atlasDict->name();
       strg = "Could not get value for label 'LArFCAL' of field 'part' in dictionary " 
       + strm.str();
       if(m_msgSvc) {
@@ -357,7 +357,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
 
   IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
-    m_LAR_INDEX = field->m_index ;
+    m_LAR_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'subdet' field ";
@@ -372,7 +372,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
 
   field = dict()->find_field("part") ;
   if (field) {
-    m_FCAL_INDEX = field->m_index ;
+    m_FCAL_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'part' field ";
@@ -387,7 +387,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
 
   field = dict()->find_field("barrel-endcap") ;
   if (field) {
-    m_POSNEG_INDEX = field->m_index ;
+    m_POSNEG_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'barrel-endcap' field ";
@@ -402,7 +402,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
   
   field = dict()->find_field("module") ;
   if (field) {
-    m_MODULE_INDEX = field->m_index ;
+    m_MODULE_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'module' field ";
@@ -419,7 +419,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
 
   field = dict()->find_field("eta-fcal") ;
   if (field) {
-    m_ETA_INDEX = field->m_index ;
+    m_ETA_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'eta' field ";
@@ -434,7 +434,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
   
   field = dict()->find_field("phi-fcal") ;
   if (field) {
-    m_PHI_INDEX = field->m_index ;
+    m_PHI_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'phi' field ";
@@ -449,7 +449,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
   
   field = dict()->find_field("is-slar-fcal") ;
   if (field) {
-    m_SLAR_INDEX = field->m_index ;
+    m_SLAR_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -465,7 +465,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
 
   // Set the field implementations
 
-  const IdDictRegion& region = *dict()->m_regions[m_fcal_region_index];
+  const IdDictRegion& region = dict()->region(m_fcal_region_index);
 
   /*
   std::cout << "LArFCAL_Base_ID::initLevelsFromDict - found levels " << std::endl ;
@@ -476,13 +476,13 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
   std::cout << "phi            " << m_PHI_INDEX      << std::endl ;
   */
 
-  m_lar_impl      = region.m_implementation[m_LAR_INDEX]; 
-  m_fcal_impl      = region.m_implementation[m_FCAL_INDEX]; 
-  m_pn_impl       = region.m_implementation[m_POSNEG_INDEX]; 
-  m_module_impl   = region.m_implementation[m_MODULE_INDEX]; 
-  m_eta_impl      = region.m_implementation[m_ETA_INDEX]; 
-  m_phi_impl      = region.m_implementation[m_PHI_INDEX]; 
-  m_slar_impl     = region.m_implementation[m_SLAR_INDEX]; 
+  m_lar_impl      = region.implementation(m_LAR_INDEX);
+  m_fcal_impl     = region.implementation(m_FCAL_INDEX);
+  m_pn_impl       = region.implementation(m_POSNEG_INDEX);
+  m_module_impl   = region.implementation(m_MODULE_INDEX);
+  m_eta_impl      = region.implementation(m_ETA_INDEX);
+  m_phi_impl      = region.implementation(m_PHI_INDEX);
+  m_slar_impl     = region.implementation(m_SLAR_INDEX);
 
   if (!m_quiet) {
     if(m_msgSvc) {

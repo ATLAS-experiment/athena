@@ -185,7 +185,7 @@ int CaloIDHelper::get_hash  (const Identifier& id, IdentifierHash& hash_id, cons
 float CaloIDHelper::etaGranularity(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return m_vecOfDictRegions[regHash]->m_deta;
+  return m_vecOfDictRegions[regHash]->deta();
 }
 
 
@@ -196,7 +196,7 @@ float CaloIDHelper::etaGranularity(const IdentifierHash regHash) const
 float CaloIDHelper::phiGranularity(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return  2. * M_PI / m_vecOfDictRegions[regHash]->m_dphi ;
+  return  2. * M_PI / m_vecOfDictRegions[regHash]->dphi();
 }
 
 
@@ -207,7 +207,7 @@ float CaloIDHelper::phiGranularity(const IdentifierHash regHash) const
 float CaloIDHelper::eta0(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return (m_vecOfDictRegions[regHash]->m_eta0);
+  return (m_vecOfDictRegions[regHash]->eta0());
 }
 
 
@@ -218,7 +218,7 @@ float CaloIDHelper::eta0(const IdentifierHash regHash) const
 float CaloIDHelper::phi0(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return (m_vecOfDictRegions[regHash]->m_phi0);
+  return (m_vecOfDictRegions[regHash]->phi0());
 }
 
 

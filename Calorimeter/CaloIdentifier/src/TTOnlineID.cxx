@@ -134,7 +134,7 @@ int  TTOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int caloValue   = -1;
   if (atlasDict->get_label_value("subdet", "Calorimeter", caloValue)) {
     std::stringstream strm;
-    strm << atlasDict->m_name;
+    strm << atlasDict->name();
     strg= " Could not get value for label 'Calorimeter' of field 'subdet' in dictionary "+strm.str();
     if(m_msgSvc){
       log << MSG::ERROR << strg << endmsg;
@@ -159,7 +159,7 @@ int  TTOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   if (m_dict->get_label_value("DetZside", "no_side", m_iDetZSideFieldValue)) {
     if (!oldTag) {
       std::stringstream strm;
-      strm <<  m_dict->m_name;
+      strm <<  m_dict->name();
       strg = "WARNING : Could not get value for label 'DetZside' in dictionary "+strm.str();
       if(m_msgSvc) {
 	log << MSG::INFO << strg << endmsg;
@@ -390,7 +390,7 @@ int TTOnlineID::initLevelsFromDict()
   // Save index to a Online LVL1 region for unpacking - search with region name
   IdDictRegion* reg = m_dict->find_region("PPM_Crate-00");
   if (reg) {
-      m_l1online_regions_index = reg->m_index;}
+      m_l1online_regions_index = reg->index();}
   else {
     if(!oldTag) log << MSG::INFO  << "WARNING : TTOnlineID::initLevelsFromDict - unable to find 'PPM_Crate-00' region" << endmsg;
     return (0);
@@ -401,7 +401,7 @@ int TTOnlineID::initLevelsFromDict()
   // ------------------
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_calo_index = field->m_index;}
+    m_calo_index = field->index();}
   else {
     log << MSG::INFO  <<  "TTOnlineID::initLevelsFromDict - unable to find 'Calo' field "
               << endmsg ;
@@ -412,7 +412,7 @@ int TTOnlineID::initLevelsFromDict()
 
   field = m_dict->find_field("DetZside") ;
   if (field) {
-    m_detzside_index = field->m_index ;}
+    m_detzside_index = field->index();}
   else {
     log << MSG::INFO  <<  "TTOnlineID::initLevelsFromDict - unable to find 'DetZside' field "
               << endmsg ;
@@ -423,7 +423,7 @@ int TTOnlineID::initLevelsFromDict()
 
   field = m_dict->find_field("crate") ;
   if (field) {
-    m_crate_index = field->m_index ;}
+    m_crate_index = field->index();}
   else {
     log << MSG::INFO  <<  "TTOnlineID::initLevelsFromDict - unable to find 'crate' field "
               << endmsg ;
@@ -433,7 +433,7 @@ int TTOnlineID::initLevelsFromDict()
 
   field = m_dict->find_field("module") ;
   if (field) {
-    m_module_index = field->m_index ;
+    m_module_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "TTOnlineID::initLevelsFromDict - unable to find 'module' field "
@@ -444,7 +444,7 @@ int TTOnlineID::initLevelsFromDict()
 
   field = m_dict->find_field("submodule") ;
   if (field) {
-    m_submodule_index = field->m_index ;
+    m_submodule_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "TTOnlineID::initLevelsFromDict - unable to find 'submodule' field " << endmsg ;
@@ -454,7 +454,7 @@ int TTOnlineID::initLevelsFromDict()
 
   field = m_dict->find_field("channel") ;
   if (field) {
-    m_channel_index = field->m_index ;
+    m_channel_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "TTOnlineID::initLevelsFromDict - unable to find 'channel' field " << endmsg;
@@ -465,7 +465,7 @@ int TTOnlineID::initLevelsFromDict()
 
   // Set the field implementation
   // ------------------------------
-  const IdDictRegion& region = *m_dict->m_regions[m_l1online_regions_index];
+  const IdDictRegion& region = m_dict->region(m_l1online_regions_index);
   log << MSG::DEBUG  << "[initLevelsFromDict] (10) found levels: " << endmsg ;
   log << MSG::DEBUG  << "[initLevelsFromDict] > subdet         " << m_calo_index           << endmsg ;
   log << MSG::DEBUG  << "[initLevelsFromDict] > detzside       " << m_detzside_index  << endmsg ;
@@ -476,20 +476,20 @@ int TTOnlineID::initLevelsFromDict()
 
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...fields implementation... " << endmsg;
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...implementation: m_calo_index " << endmsg;
-  m_calo_impl          = region.m_implementation[m_calo_index];
+  m_calo_impl          = region.implementation(m_calo_index);
 
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...implementation: m_det_side_index " << endmsg;
-  m_calo_detzside_impl = region.m_implementation[m_detzside_index];
+  m_calo_detzside_impl = region.implementation(m_detzside_index);
 
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...implementation: m_crate_index " << endmsg;
-  m_crate_impl     = region.m_implementation[m_crate_index];
+  m_crate_impl     = region.implementation(m_crate_index);
 
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...implementation: m_module_index " << endmsg;
-  m_module_impl     = region.m_implementation[m_module_index];
+  m_module_impl     = region.implementation(m_module_index);
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...implementation: m_submodule_index " << endmsg;
-  m_submodule_impl   = region.m_implementation[m_submodule_index];
+  m_submodule_impl   = region.implementation(m_submodule_index);
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...implementation: m_channel_index " << endmsg;
-  m_channel_impl   = region.m_implementation[m_channel_index];
+  m_channel_impl   = region.implementation(m_channel_index);
 
   if (!m_quiet) {
     log << MSG::DEBUG  << "[initLevelsFromDict] (11) decode index and bit fields for each level: " << endmsg;

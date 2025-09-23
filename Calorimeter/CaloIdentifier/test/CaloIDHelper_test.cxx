@@ -225,7 +225,7 @@ void test_helper()
               << helper.phi0(hashid) << " "
               << helper.etaGranularity(hashid) << " "
               << helper.phiGranularity(hashid) << "\n";
-    assert (helper.dictRegions()[hashid]->m_eta0 == helper.eta0(hashid));
+    assert (helper.dictRegions()[hashid]->eta0() == helper.eta0(hashid));
   }
 }
 
