@@ -271,7 +271,7 @@ namespace CaloG4
                << " escaped World volume with status=" << status << G4endl;
       }
 
-      G4double escapedEnergy =
+      const G4double escapedEnergy =
         measurableEnergy(particle,
                          particle->GetPDGEncoding(),
                          dynParticle->GetTotalEnergy(),
@@ -333,30 +333,20 @@ namespace CaloG4
     if (particleDef == G4Electron::Definition() ||
         particleDef == G4Proton::Definition() ||
         particleDef == G4Neutron::Definition() ||
-        PDGEncoding == 1000010020 || PDGEncoding == 1000010030 ||
-        PDGEncoding == 1000020040 || PDGEncoding == 1000020030) {
+        PDGEncoding > 0 && MC::isNucleus(PDGEncoding) ||
+        particleDef == G4Lambda::Definition() ||
+        particleDef == G4SigmaPlus::Definition() ||
+        particleDef == G4SigmaZero::Definition() ||
+        particleDef == G4SigmaMinus::Definition() ||
+        particleDef == G4XiMinus::Definition() ||
+        particleDef == G4XiZero::Definition() ||
+        particleDef == G4OmegaMinus::Definition()) {
       measurableEnergy = kineticEnergy;
     }
-    else if (particleDef == G4Positron::Definition()) {
-      measurableEnergy = 2.* totalEnergy - kineticEnergy;
-    }
-    else if (PDGEncoding > 1000010019) { //for nuclei
-      measurableEnergy = kineticEnergy;
-    }
-    else if (particleDef == G4Lambda::Definition() ||
-             particleDef == G4SigmaPlus::Definition() ||
-             particleDef == G4SigmaZero::Definition() ||
-             particleDef == G4SigmaMinus::Definition() ||
-             particleDef == G4XiMinus::Definition() ||
-             particleDef == G4XiZero::Definition() ||
-             particleDef == G4OmegaMinus::Definition()) {
-      measurableEnergy = kineticEnergy;
-    }
-
-    else if (particleDef == G4AntiNeutron::Definition()) {
-      measurableEnergy = 2.* totalEnergy - kineticEnergy;
-    }
-    else if (particleDef == G4AntiProton::Definition() ||
+    else if (particleDef == G4Positron::Definition() ||
+             particleDef == G4AntiProton::Definition() ||
+             particleDef == G4AntiNeutron::Definition() ||
+             // Need anti-nuclei???
              particleDef == G4AntiLambda::Definition() ||
              particleDef == G4AntiSigmaPlus::Definition() ||
              particleDef == G4AntiSigmaZero::Definition() ||
@@ -428,7 +418,7 @@ namespace CaloG4
     else if (particleDef == G4Neutron::Definition()){
       correctionForMass = - neutronMass;
     }
-    else if (PDGEncoding > 1000010019 ){ //for nuclei
+    else if (PDGEncoding > 0 && MC::isNucleus(PDGEncoding)){
       return kineticEnergy;
     }
     else if (particleDef == G4Lambda::Definition() ||

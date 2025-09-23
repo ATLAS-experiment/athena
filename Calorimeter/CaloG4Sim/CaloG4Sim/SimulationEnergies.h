@@ -110,6 +110,7 @@ namespace CaloG4
                               G4double totalEnergy,
                               G4double kineticEnergy) const;
 
+    // This method is currently not called
     G4double measurableEnergyV2(const G4ParticleDefinition *particleDef,
                                 G4int PDGEncoding,
                                 G4double totalEnergy,
