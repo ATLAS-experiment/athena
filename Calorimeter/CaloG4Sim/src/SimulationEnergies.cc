@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // SimulationEnergies.cc
@@ -120,6 +120,7 @@
 #include "G4ios.hh"
 
 #include "CxxUtils/AthUnlikelyMacros.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <vector>
 #include <string>
@@ -196,10 +197,11 @@ namespace CaloG4
     }
 
     G4Track* pTrack = step->GetTrack();
-    G4ParticleDefinition* particle = pTrack->GetDefinition();
+    const G4ParticleDefinition* particle = pTrack->GetDefinition();
+    const int particlePDGID = particle->GetPDGEncoding();
 
     // If it is a step of a neutrino tracking:
-    if (ParticleIsNeutrino(particle)) {
+    if (MC::isNeutrino(particlePDGID)) {
       return result;
     }
 
@@ -221,7 +223,7 @@ namespace CaloG4
 
       result.energy[kInvisible0]  =
         measurableEnergy(particle,
-                         particle->GetPDGEncoding(),
+                         particlePDGID,
                          incomingEtot,
                          incomingEkin);
     }
@@ -237,14 +239,14 @@ namespace CaloG4
         //----- extract information about each new secondary particle:
         G4ParticleDefinition *secondaryID = aConstSecondaryTrack->GetDefinition();
         const G4double totalEofSecondary = aConstSecondaryTrack->GetTotalEnergy();
+        const int secondaryPDGID = secondaryID->GetPDGEncoding();
         //----- use this information:
-        if (ParticleIsNeutrino(secondaryID)) {
+        if (MC::isNeutrino(secondaryPDGID)) {
           result.energy[kInvisible0] -= totalEofSecondary;
           result.energy[kEscaped] += totalEofSecondary;
         }
         else {
           //----- extract further information about each new secondary particle:
-          const int secondaryPDGID = secondaryID->GetPDGEncoding();
           const G4double kinEofSecondary = aConstSecondaryTrack->GetKineticEnergy();
           result.energy[kInvisible0] -= measurableEnergy(secondaryID,
                                                          secondaryPDGID,
@@ -572,13 +574,6 @@ namespace CaloG4
         return false;
       }
     }
-  }
-
-  inline G4bool SimulationEnergies::ParticleIsNeutrino( G4ParticleDefinition* particle ) const
-  {
-    return (particle == G4NeutrinoE::Definition() || particle == G4AntiNeutrinoE::Definition() || // nu_e,   anti_nu_e
-            particle == G4NeutrinoMu::Definition() || particle == G4AntiNeutrinoMu::Definition() || // nu_mu,  anti_nu_mu
-            particle == G4NeutrinoTau::Definition() || particle == G4AntiNeutrinoTau::Definition());   // nu_tau, anti_nu_tau
   }
 
 std::unique_ptr<G4Step> SimulationEnergies::CreateFakeStep(G4Track* a_track, G4double a_energy) const
