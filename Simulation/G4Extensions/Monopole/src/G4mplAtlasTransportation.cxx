@@ -679,6 +679,11 @@ G4VParticleChange* G4mplAtlasTransportation::AlongStepDoIt( const G4Track& track
   //
   fParticleChange.SetPointerToVectorOfAuxiliaryPoints
     (fFieldPropagator->GimmeTrajectoryVectorAndForgetIt() );
+  
+  if (track.GetStepLength() < 0){ // Issue with interpolation in Geant4 range table can cause negative step lengths specifically for dyons
+    fParticleChange.ProposeTrackStatus( fStopAndKill ) ; // to avoid crash, kill particle before this happens since negative step length has no physical meaning
+    G4cout << "Warning HIP Killed due to negative step length" << G4endl;
+  }
 
   return &fParticleChange ;
 }

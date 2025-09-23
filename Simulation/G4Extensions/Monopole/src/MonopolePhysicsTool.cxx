@@ -95,7 +95,7 @@ void MonopolePhysicsTool::ConstructProcess()
           }
 
 
-          if(particle->GetPDGCharge() != 0.0) {
+          else if(particle->GetPDGCharge() != 0.0) { // don't apply process for dyons, electric ionisation is applied in G4mplAtlasIonisationWithDeltaModel.cxx
             pmanager->AddProcess(new G4hIonisation(),  -1, 2, 2);
           }
           pmanager->DumpInfo();
