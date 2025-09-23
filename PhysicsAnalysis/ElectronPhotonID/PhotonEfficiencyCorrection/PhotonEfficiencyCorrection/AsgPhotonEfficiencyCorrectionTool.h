@@ -174,7 +174,6 @@ private:
   
     columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
     columnar::ClusterAccessor<float> clusterEAcc {*this, "calE"};
-    columnar::ClusterAccessor<float> clusterEtaAcc {*this, "calEta"};
     columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
   };
   std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors>(*this)};
