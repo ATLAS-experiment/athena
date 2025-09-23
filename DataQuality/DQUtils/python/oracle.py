@@ -11,8 +11,6 @@ from DQUtils.sugar import IOVSet
 from xml.dom.minidom import parse
 from os.path import exists
 
-from future.standard_library import install_aliases
-install_aliases()
 from urllib.parse import urlparse # noqa: E402
 
 def parse_auth_file(file_name, connection):

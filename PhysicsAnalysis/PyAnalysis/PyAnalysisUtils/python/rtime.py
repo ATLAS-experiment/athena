@@ -7,7 +7,6 @@
 # Purpose: Measure the execution time of a function.
 #
 
-from __future__ import print_function
 
 import resource
 

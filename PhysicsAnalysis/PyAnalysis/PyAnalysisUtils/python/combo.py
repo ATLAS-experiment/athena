@@ -7,7 +7,6 @@
 # Purpose: Generators for combinations and permutations.
 #
 
-from __future__ import print_function
 
 """Generators for combinations and permutations.
 

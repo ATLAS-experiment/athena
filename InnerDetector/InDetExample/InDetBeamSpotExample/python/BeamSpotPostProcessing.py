@@ -15,8 +15,6 @@ from InDetBeamSpotExample.PostProcessing import PostProcessingStep, PostProcessi
 from InDetBeamSpotExample.TaskManager import TaskManager
 from InDetBeamSpotExample import COOLUtils
 
-from future import standard_library
-standard_library.install_aliases()
 import subprocess
 
 linkTemplates = {

@@ -6,7 +6,6 @@
 # Purpose: Polynomial interpolation in a table.
 #
 
-from __future__ import print_function
 
 """
 Polynomial interpolation in a table.

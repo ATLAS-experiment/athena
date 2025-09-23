@@ -3,7 +3,6 @@
 # This file contains a number of helper functions for defining R-hadron mass spectra
 # A large data table at the top is then used in several of the helper functions
 
-from __future__ import print_function
 
 """
 The offset options.  Dictionary of PDG IDs with offsets.

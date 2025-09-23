@@ -7,7 +7,6 @@
 # Purpose: Diff two root tuple files.
 #
 
-from __future__ import print_function
 
 # Always run in batch mode.
 import os
