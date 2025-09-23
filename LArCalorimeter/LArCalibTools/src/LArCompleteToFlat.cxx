@@ -273,8 +273,8 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
 
       if (ofca.size()==nSamples) {
 	for (unsigned i=0;i<nSamples;++i) {
-          if(std::isnan(ofca[i]) || std::isinf(ofca[i])) {
-	    pOfca[hs*nSamples+i]=1.0;
+          if(std::isnan(ofca[i]) || std::isinf(ofca[i]) || (m_isSC && fabs(ofca[i])> 10.)) { // protection
+            pOfca[hs*nSamples+i]=1.0;
           } else { 
 	    pOfca[hs*nSamples+i]=ofca[i];
           }
@@ -292,9 +292,9 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
      
       if (ofcb.size()==nSamples) {
 	for (unsigned i=0;i<nSamples;++i) {
-          if(std::isnan(ofcb[i]) || std::isinf(ofcb[i])) {
-	     pOfcb[hs*nSamples+i]=1.0;
-          } else {
+          if(std::isnan(ofcb[i]) || std::isinf(ofcb[i]) || (m_isSC && fabs(ofcb[i])> 100.)) { // protection
+             pOfcb[hs*nSamples+i]=1.0;
+          } else { 
 	     pOfcb[hs*nSamples+i]=ofcb[i];
           }
           // FIXME: it should be replaced by proper conditions per channel
