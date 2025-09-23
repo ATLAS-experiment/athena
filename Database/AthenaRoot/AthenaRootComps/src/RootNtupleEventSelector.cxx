@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootNtupleEventSelector.cxx 
@@ -1133,13 +1133,12 @@ void RootNtupleEventSelector::addMetadataFromDirectory(TDirectoryFile *metadir, 
     }
 
     const std::string meta_key = key->GetName();
-    if (meta_keys.find(meta_key) != meta_keys.end()) {
+    if (!meta_keys.emplace(key->GetName()).second) {
+      // key was already in the set:
       // meta_key is another cycle from a previous key entry.
       // *ASSUME* the highest cycle is the one we are interested in
       // *AND* that it was the previous one...
       continue;
-    } else {
-      meta_keys.insert(meta_key);
     }
 
     std::string fullPrefix(prefix);
