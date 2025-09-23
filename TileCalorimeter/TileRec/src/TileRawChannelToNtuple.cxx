@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -17,6 +17,7 @@
 //*****************************************************************************
 
 //Gaudi Includes
+#include "AthenaBaseComps/AthCheckMacros.h"
 #include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/SmartDataPtr.h"
@@ -24,6 +25,7 @@
 //Atlas include
 #include "AthenaKernel/errorcheck.h"
 #include "EventContainers/SelectAllObject.h"
+#include "StoreGate/ReadHandle.h"
 
 // Calo include
 #include "CaloIdentifier/TileID.h"
@@ -35,24 +37,6 @@
 
 const int max_chan=12288;
 
-// Constructor & deconstructor
-TileRawChannelToNtuple::TileRawChannelToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-  , m_ntuplePtr(0)
-  , m_ntupleID("h70")
-  , m_ntupleLoc("/FILE1/TileRec")
-  , m_rawChannelContainer("TileRawChannelCnt")
-  , m_tileID(0)
-  , m_tileHWID(0)
-{
-  declareProperty("TileRawChannelContainer", m_rawChannelContainer);    
-  declareProperty("NTupleLoc", m_ntupleLoc);
-  declareProperty("NTupleID", m_ntupleID);
-}
-
-TileRawChannelToNtuple::~TileRawChannelToNtuple()
-{
-}
 
 // Alg standard interface function
 StatusCode TileRawChannelToNtuple::initialize() 
@@ -62,8 +46,8 @@ StatusCode TileRawChannelToNtuple::initialize()
 
   // retrieve TileID helper from det store
 
-  CHECK( detStore()->retrieve(m_tileID) );
-  CHECK( detStore()->retrieve(m_tileHWID) );
+  ATH_CHECK( detStore()->retrieve(m_tileID) );
+  ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
   m_ntupleLoc="/NTUPLES" + m_ntupleLoc;
 
@@ -90,21 +74,24 @@ StatusCode TileRawChannelToNtuple::initialize()
     }
   }
 
-  CHECK( m_ntuplePtr->addItem("TileRC/nchan",m_nchan,0,max_chan) );
-  CHECK( m_ntuplePtr->addItem("TileRC/totalE",m_tolE) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/nchan",m_nchan,0,max_chan) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/totalE",m_tolE) );
 
-  CHECK( m_ntuplePtr->addItem("TileRC/energy",m_nchan,m_energy) );
-  CHECK( m_ntuplePtr->addItem("TileRC/time",m_nchan,m_time) );
-  CHECK( m_ntuplePtr->addItem("TileRC/quality",m_nchan,m_quality) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/energy",m_nchan,m_energy) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/time",m_nchan,m_time) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/quality",m_nchan,m_quality) );
 
-  CHECK( m_ntuplePtr->addItem("TileRC/detector",m_nchan,m_detector,0,3) );
-  CHECK( m_ntuplePtr->addItem("TileRC/side",m_nchan,m_side,-1,1) );
-  CHECK( m_ntuplePtr->addItem("TileRC/sample",m_nchan,m_sample,-1,3) );
-  CHECK( m_ntuplePtr->addItem("TileRC/eta",m_nchan,m_eta,-1,15) );
-  CHECK( m_ntuplePtr->addItem("TileRC/phi",m_nchan,m_phi,0,63) );
-  CHECK( m_ntuplePtr->addItem("TileRC/pmt",m_nchan,m_pmt,-1,1) );
-  CHECK( m_ntuplePtr->addItem("TileRC/channel",m_nchan,m_channel,0,47) );
-  CHECK( m_ntuplePtr->addItem("TileRC/gain",m_nchan,m_gain,0,2) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/detector",m_nchan,m_detector,0,3) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/side",m_nchan,m_side,-1,1) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/sample",m_nchan,m_sample,-1,3) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/eta",m_nchan,m_eta,-1,15) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/phi",m_nchan,m_phi,0,63) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/pmt",m_nchan,m_pmt,-1,1) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/channel",m_nchan,m_channel,0,47) );
+  ATH_CHECK( m_ntuplePtr->addItem("TileRC/gain",m_nchan,m_gain,0,2) );
+
+  ATH_CHECK(m_cablingSvc.retrieve());
+  ATH_CHECK(m_rawChannelContainerKey.initialize());
 
   ATH_MSG_INFO( "Initialization completed" );
   return StatusCode::SUCCESS;
@@ -114,11 +101,11 @@ StatusCode TileRawChannelToNtuple::execute()
 {
 
   // step1: read RCs from TDS
-  const TileRawChannelContainer* RawChannelCnt;
-  CHECK( evtStore()->retrieve(RawChannelCnt, m_rawChannelContainer) );
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey);
+  ATH_CHECK( rawChannelContainer.isValid() );
 
   // step2: to fill items in ntuple
-  SelectAllObject<TileRawChannelContainer> selRCs(RawChannelCnt);
+  SelectAllObject<TileRawChannelContainer> selRCs(rawChannelContainer.cptr());
   SelectAllObject<TileRawChannelContainer>::const_iterator it=selRCs.begin(); 
   SelectAllObject<TileRawChannelContainer>::const_iterator end=selRCs.end(); 
   m_nchan=0;
@@ -161,7 +148,7 @@ StatusCode TileRawChannelToNtuple::execute()
   }      
  
   // step3: commit ntuple
-  CHECK( ntupleSvc()->writeRecord(m_ntuplePtr) );
+  ATH_CHECK( ntupleSvc()->writeRecord(m_ntuplePtr) );
 
   // Execution completed.
   ATH_MSG_DEBUG( "execute() completed successfully" );

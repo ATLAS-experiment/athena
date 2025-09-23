@@ -27,3 +27,13 @@ atlas_add_test( TileHitVecToNtuple_test
                 SCRIPT python -m TileRec.TileHitVecToNtupleConfig
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileDigitsToNtuple_test
+                SCRIPT python -m TileRec.TileDigitsToNtupleConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileRawChannelToNtuple_test
+                SCRIPT python -m TileRec.TileRawChannelToNtupleConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
