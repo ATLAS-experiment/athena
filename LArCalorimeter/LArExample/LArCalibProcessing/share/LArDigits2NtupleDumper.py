@@ -86,7 +86,8 @@ if __name__=='__main__':
      else:   
         flags.LArSCDump.nSamples=4
   else:
-     flags.LArSCDump.nSamples=runinfo.nSamples()
+     if runinfo is not None:
+        flags.LArSCDump.nSamples=runinfo.nSamples()
 
   flags.LArSCDump.digitsKey=args.dkey
   if  args.nsamp > 0 and args.nsamp < flags.LArSCDump.nSamples:
