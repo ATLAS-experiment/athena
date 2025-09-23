@@ -9,7 +9,6 @@ Calculate FCal Sampling Fractions
 Calculate the FCal sampling fractions from Geant4 simulation.
 """
 
-from __future__ import absolute_import, division, print_function
 
 
 import argparse

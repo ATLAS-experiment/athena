@@ -6,7 +6,6 @@
 # Purpose: Interactive python commands for plotting from a tuple-like object.
 #
 
-from __future__ import print_function
 
 """Interactive python commands for plotting from a tuple-like object.
 This module provides in python functionality similar to TTree::Draw

@@ -1,4 +1,3 @@
-from __future__ import division
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Module with Digitization transform options and substep

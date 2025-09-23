@@ -36,8 +36,6 @@ import pprint
 from InDetBeamSpotExample.TaskManager import *
 from InDetBeamSpotExample.Utils import getRunFromName
 
-from future import standard_library
-standard_library.install_aliases()
 import subprocess
 
 

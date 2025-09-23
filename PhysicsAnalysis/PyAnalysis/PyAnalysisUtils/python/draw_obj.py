@@ -51,7 +51,6 @@ printeps(fname) is a shortcut to print an eps file from the current canvas.
 get_canvas() returns the canvas currently being used for drawing.
 get_pad() returns the pad currently being used for drawing.
 """
-from __future__ import division
 
 
 from ROOT import gROOT, TCanvas, TVirtualPad, TH1, TH2, TObject

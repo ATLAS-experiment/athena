@@ -6,7 +6,6 @@
 # Purpose: Dump out MC truth information.
 #
 
-from __future__ import print_function
 
 """Dump out MC truth information.
 
