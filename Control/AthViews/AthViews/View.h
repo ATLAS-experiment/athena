@@ -11,6 +11,8 @@
 #include "AthenaKernel/IProxyDict.h"
 #include "AthContainers/DataVector.h"
 #include "AthLinks/ElementLink.h"
+#include "CxxUtils/sgkey_t.h"
+#include "CxxUtils/sgkey_utilities.h"
 #include "SGTools/transientKey.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -268,6 +270,9 @@ namespace SG {
 
     ServiceHandle< StoreGateSvc > m_store;
     ElementLink<TrigRoiDescriptorCollection> m_roi;
+
+    using KeyMap_t = SG::ConcurrentSGKeyMap<sgkey_t>;
+    KeyMap_t m_keyMap;
 
     std::set< const SG::View* > m_parents;
     std::vector< std::string > m_fallFilter;
