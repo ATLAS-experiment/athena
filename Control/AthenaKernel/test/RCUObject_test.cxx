@@ -13,8 +13,7 @@
 #include "AthenaKernel/RCUObject.h"
 #include "AthenaKernel/IRCUSvc.h"
 #include "CxxUtils/checker_macros.h"
-#include "boost/thread/shared_mutex.hpp"
-#include "boost/thread/shared_lock_guard.hpp"
+#include <shared_mutex>
 #include <cassert>
 #include <iostream>
 #include <thread>
@@ -219,7 +218,7 @@ public:
   };
 
 private:
-  boost::shared_mutex m_sm;
+  std::shared_mutex m_sm;
   RCUObject<Payload> m_rcuobj;
 };
 
@@ -246,7 +245,7 @@ void ThreadedTest::runtest()
 
 void ThreadedTest::testThread::operator()()
 {
-  boost::shared_lock_guard<boost::shared_mutex> guard (m_test.m_sm);
+  std::shared_lock<std::shared_mutex> guard (m_test.m_sm);
   Gaudi::Hive::setCurrentContextId (m_iworker);
 
   for (int i=0; i < 10000; i++) {
