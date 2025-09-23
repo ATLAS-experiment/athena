@@ -440,10 +440,10 @@ RegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
   if (Debugger::debug ()) { 
     Debugger::tab (parser.level());
     std::cout << "RegionFactory::idd_start> name, group, tag, next eta, prev/next samp, prev/next subdet "
-      << parser.m_region->m_name << " " 
+      << parser.m_region->name() << " "
       << parser.m_region->m_group << " " 
       << parser.m_region->m_tag << " " 
-      << parser.m_region->m_next_abs_eta << " ";
+      << parser.m_region->next_abs_eta() << " ";
     for (unsigned int i = 0; i < parser.m_region->m_prev_samp_names.size(); ++i) {
       std::cout << parser.m_region->m_prev_samp_names[i] << " ";
     }
@@ -456,10 +456,10 @@ RegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
     for (unsigned int i = 0; i < parser.m_region->m_next_subdet_names.size(); ++i) {
       std::cout << parser.m_region->m_next_subdet_names[i] << " ";
     }
-    std::cout << parser.m_region->m_eta0 << " "
-      << parser.m_region->m_deta << " "
-      << parser.m_region->m_phi0 << " "
-      << parser.m_region->m_dphi << " "
+    std::cout << parser.m_region->eta0() << " "
+      << parser.m_region->deta() << " "
+      << parser.m_region->phi0() << " "
+      << parser.m_region->dphi() << " "
       << std::endl; 
   } 
 }
@@ -476,7 +476,7 @@ RegionFactory::idd_end (IdDictParser& parser, const XMLCoreNode& /*node*/)  {
       if (parser.m_dictionary != 0) parser.m_dictionary->m_all_regions.push_back (parser.m_region);  
       // Check whether region is empty, i.e. no region entries have
       // been found and added
-      if (parser.m_region->m_entries.size() == 0) {
+      if (parser.m_region->n_entries() == 0) {
         parser.m_region->m_is_empty = true;
       }
     } else if (parser.m_dictionary != 0) {
@@ -484,7 +484,7 @@ RegionFactory::idd_end (IdDictParser& parser, const XMLCoreNode& /*node*/)  {
       parser.m_dictionary->m_all_regions.push_back (parser.m_region);  
       // Check whether region is empty, i.e. no region entries have
       // been found and added
-      if (parser.m_region->m_entries.size() == 0) {
+      if (parser.m_region->n_entries() == 0) {
           parser.m_region->m_is_empty = true;
       }
     } else {
