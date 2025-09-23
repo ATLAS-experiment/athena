@@ -102,7 +102,7 @@ namespace EL
     TEST_F (DirectInputModuleTest, simpleTest)
     {
       auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
-      module->fileList = {"test1.root", "test2.root"};
+      ASSERT_SUCCESS (module->setProperty("fileList", std::vector<std::string> {"test1.root", "test2.root"}));
 
       actions.toProcessFiles =
       {
@@ -118,9 +118,9 @@ namespace EL
     TEST_F (DirectInputModuleTest, skipLimitTest)
     {
       auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
-      module->fileList = {"test1.root", "test2.root"};
-      module->skipEvents = 5u;
-      module->maxEvents = 10u;
+      ASSERT_SUCCESS (module->setProperty("fileList", std::vector<std::string> {"test1.root", "test2.root"}));
+      ASSERT_SUCCESS (module->setProperty("skipEvents", 5u));
+      ASSERT_SUCCESS (module->setProperty("maxEvents", 10u));
 
       actions.toProcessFiles =
       {
@@ -136,8 +136,8 @@ namespace EL
     TEST_F (DirectInputModuleTest, skipFileTest)
     {
       auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
-      module->fileList = {"test1.root", "test2.root"};
-      module->skipEvents = 15u;
+      ASSERT_SUCCESS (module->setProperty("fileList", std::vector<std::string> {"test1.root", "test2.root"}));
+      ASSERT_SUCCESS (module->setProperty("skipEvents", 15u));
 
       actions.toProcessFiles =
       {
@@ -152,8 +152,8 @@ namespace EL
     TEST_F (DirectInputModuleTest, limitFileTest)
     {
       auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
-      module->fileList = {"test1.root", "test2.root"};
-      module->maxEvents = 5u;
+      ASSERT_SUCCESS (module->setProperty("fileList", std::vector<std::string> {"test1.root", "test2.root"}));
+      ASSERT_SUCCESS (module->setProperty("maxEvents", 5u));
 
       actions.toProcessFiles =
       {
@@ -168,7 +168,7 @@ namespace EL
     TEST_F (DirectInputModuleTest, emptyFileTest)
     {
       auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
-      module->fileList = {"empty.root", "test1.root", "test2.root"};
+      ASSERT_SUCCESS (module->setProperty("fileList", std::vector<std::string> {"empty.root", "test1.root", "test2.root"}));
 
       actions.toProcessFiles =
       {
@@ -184,8 +184,8 @@ namespace EL
     TEST_F (DirectInputModuleTest, skipToEmptyTest)
     {
       auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
-      module->fileList = {"test1.root", "empty.root", "test2.root"};
-      module->skipEvents = 10u;
+      ASSERT_SUCCESS (module->setProperty("fileList", std::vector<std::string> {"test1.root", "empty.root", "test2.root"}));
+      ASSERT_SUCCESS (module->setProperty("skipEvents", 10u));
 
       actions.toProcessFiles =
       {

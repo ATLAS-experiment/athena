@@ -19,6 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "CxxUtils/SealDebug.h"
 #include "CxxUtils/UnwindBacktrace.h"
 #include "CxxUtils/no_sanitize_undefined.h"
+#include <vector>
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -145,8 +146,9 @@ void filter (char* buf)
 void dumptrace (FILE* fp)
 {
   fseek (fp, 0, SEEK_SET);
-  char buf[65536];
-  while (fgets (buf, sizeof (buf), fp)) {
+  std::vector<char> vbuf (65536);
+  char* buf = vbuf.data();
+  while (fgets (buf, vbuf.size(), fp)) {
     if (strstr (buf, "libasan") != nullptr)
       continue;
     if (strstr (buf, "_start") != nullptr)
@@ -320,8 +322,9 @@ std::string accumtrace (FILE* fp)
 {
   std::string s;
   fseek (fp, 0, SEEK_SET);
-  char buf[65536];
-  while (fgets (buf, sizeof (buf), fp)) {
+  std::vector<char> vbuf (65536);
+  char* buf = vbuf.data();
+  while (fgets (buf, vbuf.size(), fp)) {
     if (strstr (buf, "libasan") != nullptr)
       continue;
     if (strstr (buf, "DebugAids::stacktrace") != nullptr)

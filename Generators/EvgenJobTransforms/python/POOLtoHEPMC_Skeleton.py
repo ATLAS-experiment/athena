@@ -64,6 +64,10 @@ def fromRunArgs(runArgs):
     if hasattr(runArgs, 'hepmcFormat'):
        hepMCFormat = runArgs.hepmcFormat
 
+    hepMCUnits = 'GEVMM'
+    if hasattr(runArgs, 'hepmcUnits'):
+       hepMCUnits = runArgs.hepmcUnits
+
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
     setPerfmonFlagsFromRunArgs(flags, runArgs)
@@ -99,6 +103,7 @@ def fromRunArgs(runArgs):
     cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
                       OutputFile = my_output_HepMCFile,
                       Format = hepMCFormat,
+                      Units = hepMCUnits,
                       McEventKey = McEventKey ) )
     # Here one should set the output format
     # Post-include

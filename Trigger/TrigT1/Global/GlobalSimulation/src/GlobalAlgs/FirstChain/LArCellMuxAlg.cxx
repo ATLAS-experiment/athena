@@ -14,7 +14,7 @@
 #include "xAODEventInfo/EventInfo.h"
 
 #include <fstream>
-#include <fmt/core.h>
+#include <format>
 
 namespace GlobalSim {
 
@@ -67,7 +67,7 @@ namespace GlobalSim {
     
     std::ofstream out;
     if (m_writeMuxInputBitstreamToFile) {
-        std::string filename = fmt::format("{}_MuxInput_{}_{}.dat", name(), eventInfo.runNumber(), eventInfo.eventNumber());
+        std::string filename = std::format("{}_MuxInput_{}_{}.dat", name(), eventInfo.runNumber(), eventInfo.eventNumber());
         out.open(filename);
         if (!out) {
             ATH_MSG_ERROR("Failed to open file: " << filename);
@@ -176,7 +176,7 @@ namespace GlobalSim {
         return StatusCode::SUCCESS;
     }
 
-    std::string filename = fmt::format("{}_MuxOutput_{}_{}.dat", name(), eventInfo.runNumber(), eventInfo.eventNumber());
+    std::string filename = std::format("{}_MuxOutput_{}_{}.dat", name(), eventInfo.runNumber(), eventInfo.eventNumber());
     std::ofstream out(filename);
     if (!out) {
         ATH_MSG_ERROR("Failed to open file: " << filename);
@@ -205,7 +205,7 @@ namespace GlobalSim {
     // Loop over all MUX IDs
     for (int muxID = 0; muxID < 32; ++muxID) {
 
-        std::string muxKey = fmt::format("apl-gbl-mux-lasp-{:02d}", muxID);
+        std::string muxKey = std::format("apl-gbl-mux-lasp-{:02}", muxID);
         out << "====== " << muxKey << " is sending to GEP:\n";
 
         std::bitset<6> bitsetMuxID(muxID);

@@ -34,7 +34,7 @@ StatusCode Gbts2ActsSeedingTool::finalize() {
 
 StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const {
   
-    std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo);
+  std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
 
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
     
@@ -69,7 +69,7 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 	node.m_x = pos.x() - shift_x;
 	node.m_y = pos.y() - shift_y;
 	node.m_z = pos.z();
-    node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
+	node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
 	node.m_phi = std::atan2(node.m_y, node.m_x);
 	node.m_idx = idx;
 
@@ -77,6 +77,7 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
             const xAOD::PixelCluster* pCL = dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
             if(pCL != nullptr){
                 node.m_pcw = pCL->widthInEta();
+		node.m_locPosY = pCL->localPosition<2>().y();
             }
         }
     }

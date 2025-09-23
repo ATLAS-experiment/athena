@@ -392,11 +392,6 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
     rp->GetLowerRefGraph()->SetMaximum(1.5);
     rp->GetLowYaxis()->SetNdivisions(505);
 
-    if (valid) {
-      c1->SetTicks(0, 1);
-      c1->Update();
-    }
-
     if (!fileOpen)
     {
       // Open file

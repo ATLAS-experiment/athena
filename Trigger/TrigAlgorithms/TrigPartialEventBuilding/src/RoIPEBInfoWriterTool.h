@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigPartialEventBuilding_RoIPEBInfoWriterTool_h
@@ -23,7 +23,7 @@ public:
 
 protected:
   /// Implementation of PEBInfoWriterToolBase::createPEBInfo
-  virtual PEBInfoWriterToolBase::PEBInfo createPEBInfo(const PEBInfoWriterToolBase::Input& input) const override;
+  virtual PEBInfoWriterToolBase::PEBInfo createPEBInfo(const EventContext& ctx, const PEBInfoWriterToolBase::Input& input) const override;
 
 private:
   // ------------------------- Tool handles ------------------------------------

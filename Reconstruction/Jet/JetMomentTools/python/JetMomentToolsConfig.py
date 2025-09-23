@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
                                                                       
@@ -215,7 +215,8 @@ def getPFlowfJVTTool(jetdef, modspec):
                                                   FEName = jetdef.inputdef.containername,
                                                   ORName = "",
                                                   FjvtRawName = "DFCommonJets_fJvt",
-                                                  includePV = False)
+                                                  includePV = False,
+                                                  SuppressInputDependence = True)
 
     return fJVTTool
 

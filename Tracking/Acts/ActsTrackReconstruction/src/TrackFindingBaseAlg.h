@@ -134,13 +134,16 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<std::size_t>> m_maxSharedHits{this, "maxSharedHits", {}, "TrackSelector: maxSharedHits"};
     Gaudi::Property<std::vector<double>> m_maxChi2{this, "maxChi2", {}, "TrackSelector: maxChi2"};
 
-    Gaudi::Property<bool> m_addPixelStripCounts{this, "addPixelStripCounts", true, "keep separate pixel and strip counts and apply the following cuts"};
+    Gaudi::Property<bool> m_addCounts{this, "addCounts", true, "keep separate pixel, strip and hgtd counts and apply the following cuts"};
     Gaudi::Property<std::vector<std::size_t>> m_minPixelHits{this, "minPixelHits", {}, "minimum number of pixel hits"};
     Gaudi::Property<std::vector<std::size_t>> m_minStripHits{this, "minStripHits", {}, "minimum number of strip hits"};
+    Gaudi::Property<std::vector<std::size_t>> m_minHgtdHits{this, "minHgtdHits", {}, "minimum number of hgtd hits"};
     Gaudi::Property<std::vector<std::size_t>> m_maxPixelHoles{this, "maxPixelHoles", {}, "maximum number of pixel holes"};
     Gaudi::Property<std::vector<std::size_t>> m_maxStripHoles{this, "maxStripHoles", {}, "maximum number of strip holes"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxHgtdHoles{this, "maxHgtdHoles", {}, "maximum number of hgtd holes"};
     Gaudi::Property<std::vector<std::size_t>> m_maxPixelOutliers{this, "maxPixelOutliers", {}, "maximum number of pixel outliers"};
     Gaudi::Property<std::vector<std::size_t>> m_maxStripOutliers{this, "maxStripOutliers", {}, "maximum number of strip outliers"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxHgtdOutliers{this, "maxHgtdOutliers", {}, "maximum number of hgtd outliers"};
 
     Gaudi::Property<std::vector<std::uint32_t>> m_endOfWorldVolumeIds {this, "EndOfTheWorldVolumeIds", {}, ""};
 
@@ -166,6 +169,7 @@ namespace ActsTrk {
       kNStoppedTracksMinPt,
       kNStoppedTracksMaxEta,
       kNTotalSharedHits,
+      kNForcedSeedMeasurements,
       kNStat
     };
 
@@ -290,24 +294,27 @@ namespace ActsTrk {
     struct BranchState {
       static constexpr Acts::ProxyAccessor<unsigned int> nPixelHits{"nPixelHits"};
       static constexpr Acts::ProxyAccessor<unsigned int> nStripHits{"nStripHits"};
+      static constexpr Acts::ProxyAccessor<unsigned int> nHgtdHits{"nHgtdHits"};
       static constexpr Acts::ProxyAccessor<unsigned int> nPixelHoles{"nPixelHoles"};
       static constexpr Acts::ProxyAccessor<unsigned int> nStripHoles{"nStripHoles"};
+      static constexpr Acts::ProxyAccessor<unsigned int> nHgtdHoles{"nHgtdHoles"};
       static constexpr Acts::ProxyAccessor<unsigned int> nPixelOutliers{"nPixelOutliers"};
       static constexpr Acts::ProxyAccessor<unsigned int> nStripOutliers{"nStripOutliers"};
+      static constexpr Acts::ProxyAccessor<unsigned int> nHgtdOutliers{"nHgtdOutliers"};
     };
     static constexpr BranchState s_branchState{};
 
-    static void addPixelStripCounts(detail::RecoTrackContainer &tracksContainer);
-    static void initPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track);
-    static void updatePixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track,
-                                       Acts::ConstTrackStateType typeFlags,
-                                       xAOD::UncalibMeasType detType);
-    static void copyPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track,
-                                     const detail::RecoTrackContainer::TrackProxy &other);
-    void checkPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
-    std::array<bool, 3> selectPixelStripCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;
+    static void addCounts(detail::RecoTrackContainer &tracksContainer);
+    static void initCounts(const detail::RecoTrackContainer::TrackProxy &track);
+    static void updateCounts(const detail::RecoTrackContainer::TrackProxy &track,
+                             Acts::ConstTrackStateType typeFlags,
+                             xAOD::UncalibMeasType detType);
+    static void copyCounts(const detail::RecoTrackContainer::TrackProxy &track,
+                           const detail::RecoTrackContainer::TrackProxy &other);
+    void checkCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
+    std::array<bool, 3> selectCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;
 
-    bool selectPixelStripCountsFinal(const detail::RecoTrackContainer::TrackProxy &track) const;
+    bool selectCountsFinal(const detail::RecoTrackContainer::TrackProxy &track) const;
 
     /// Private access to the logger
     const Acts::Logger &logger() const

@@ -1,6 +1,7 @@
 // AsgExampleTools_entries.cxx
 
 #include <FTagAnalysisAlgorithms/BTaggingEfficiencyAlg.h>
+#include <FTagAnalysisAlgorithms/BTaggingTriggerMatchingAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingTriggerEfficiencyAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
@@ -11,6 +12,7 @@
 #include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT (CP::BTaggingEfficiencyAlg)
+DECLARE_COMPONENT (CP::BTaggingTriggerMatchingAlg)
 DECLARE_COMPONENT (CP::BTaggingTriggerEfficiencyAlg)
 DECLARE_COMPONENT (CP::BTaggingInformationDecoratorAlg)
 DECLARE_COMPONENT (CP::BTaggingScoresAlg)

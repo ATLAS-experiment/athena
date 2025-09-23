@@ -18,6 +18,7 @@
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
 #include <ColumnarToolWrapper/ColumnarToolWrapper.h>
 #include <PATInterfaces/ISystematicsTool.h>
+#include <TruthUtils/ParticleConstants.h>
 #include <xAODJet/JetContainer.h>
 #include <xAODMissingET/versions/MissingETAuxAssociationMap_v2.h>
 #include <xAODMissingET/versions/MissingETBase.h>
@@ -109,8 +110,13 @@ namespace columnar
       {"AnalysisPhotons", 0x35d1472f},
       {"AnalysisJets", 0x1afd1919},
       {"egammaClusters", 0x15788d1f},
-      {"InDetTrackParticles", 0x2e42db0b},
-      {"GSFConversionVertices", 0x1f3e85c9}
+      {"GSFConversionVertices", 0x1f3e85c9},
+      {"InDetTrackParticles", 0x1d3890db},
+      {"CombinedMuonTrackParticles", 0x340d9196},
+      {"ExtrapolatedMuonTrackParticles", 0x14e35e9f},
+      {"GSFTrackParticles", 0x2e42db0b},
+      {"InDetForwardTrackParticles", 0x143c6846},
+      {"MuonSpectrometerTrackParticles", 0x3993c8f3},
     };
 
     template<typename T>
@@ -136,6 +142,16 @@ namespace columnar
 
       BranchReader (const BranchReader&) = delete;
       BranchReader& operator= (const BranchReader&) = delete;
+
+      void setIsStatic (bool isStatic)
+      {
+        m_isStatic = isStatic;
+      }
+
+      [[nodiscard]] const std::string& branchName () const
+      {
+        return m_branchName;
+      }
 
       [[nodiscard]] std::string columnName () const
       {
@@ -179,7 +195,79 @@ namespace columnar
           throw std::runtime_error ("branch not connected: " + m_branchName);
         if (m_branch->GetEntry (entry) <= 0)
           throw std::runtime_error ("failed to get entry " + std::to_string (entry) + " for branch: " + m_branchName);
+        if (m_data == nullptr)
+          throw std::runtime_error ("got nullptr reading data for branch: " + m_branchName);
         return *m_data;
+      }
+
+      const T& getCachedEntry () const
+      {
+        return *m_data;
+      }
+    };
+
+    template<typename T>
+    class BranchReaderArray final
+    {
+    public:
+      std::string m_branchName;
+      TBranch *m_branch = nullptr;
+      std::vector<T> m_dataVec;
+
+    public:
+      BranchReaderArray (const std::string& val_branchName)
+        : m_branchName (val_branchName)
+      {}
+
+      BranchReaderArray (const BranchReaderArray&) = delete;
+      BranchReaderArray& operator= (const BranchReaderArray&) = delete;
+
+      [[nodiscard]] std::string columnName () const
+      {
+        std::string columnName = m_branchName;
+        if (auto index = columnName.find ("AuxDyn."); index != std::string::npos)
+          columnName.replace (index, 6, "");
+        else if (auto index = columnName.find ("Aux."); index != std::string::npos)
+          columnName.replace (index, 3, "");
+        else if (columnName.find (".") != std::string::npos)
+          throw std::runtime_error ("branch name does not contain AuxDyn or Aux: " + m_branchName);
+        return columnName;
+      }
+
+      [[nodiscard]] std::string containerName () const
+      {
+        if (auto index = m_branchName.find ("AuxDyn."); index != std::string::npos)
+          return m_branchName.substr (0, index);
+        else if (auto index = m_branchName.find ("Aux."); index != std::string::npos)
+          return m_branchName.substr (0, index);
+        else if (m_branchName.find (".") == std::string::npos)
+          return m_branchName;
+        else
+          throw std::runtime_error ("branch name does not contain AuxDyn or Aux: " + m_branchName);
+      }
+
+      void connectTree (TTree *tree)
+      {
+        m_branch = tree->GetBranch (m_branchName.c_str());
+        if (!m_branch)
+          throw std::runtime_error ("failed to get branch: " + m_branchName);
+        m_branch->SetMakeClass (1);
+        if (!m_dataVec.empty())
+          m_branch->SetAddress (m_dataVec.data());
+      }
+
+      std::span<const T> getEntry (Long64_t entry, std::size_t size)
+      {
+        if (!m_branch)
+          throw std::runtime_error ("branch not connected: " + m_branchName);
+        if (m_dataVec.size() < size)
+        {
+          m_dataVec.resize (size);
+          m_branch->SetAddress (m_dataVec.data());
+        }
+        if (size > 0 && m_branch->GetEntry (entry) <= 0)
+          throw std::runtime_error ("failed to get entry " + std::to_string (entry) + " for branch: " + m_branchName);
+        return std::span<const T>(m_dataVec.data(), size);
       }
     };
 
@@ -497,9 +585,10 @@ namespace columnar
     template<typename T>
     struct ColumnDataVectorVectorLink final : public PhysliteTestHelpers::IColumnData
     {
+      using CM = ColumnarModeArray;
       BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
-      std::vector<ColumnarOffsetType> columnData;
+      std::vector<typename CM::LinkIndexType> columnData;
       const std::vector<ColumnarOffsetType>* targetOffsetColumn = nullptr;
       SG::sgkey_t targetKey = 0;
       std::string targetContainerName;
@@ -689,10 +778,11 @@ namespace columnar
     template<typename T>
     struct ColumnDataVectorLink final : public PhysliteTestHelpers::IColumnData
     {
+      using CM = ColumnarModeArray;
       BranchReader<std::vector<ElementLink<T>>> branchReader;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       std::vector<ColumnarOffsetType> offsets = {0};
-      std::vector<ColumnarOffsetType> columnData;
+      std::vector<typename CM::LinkIndexType> columnData;
       const std::vector<ColumnarOffsetType>* targetOffsetColumn = nullptr;
       SG::sgkey_t targetKey = 0;
       std::string targetContainerName;
@@ -799,12 +889,174 @@ namespace columnar
     };
 
     template<typename T>
+    struct ColumnDataVectorSplitLink final : public PhysliteTestHelpers::IColumnData
+    {
+      using CM = ColumnarModeArray;
+      BranchReader<Int_t> branchReaderSize;
+      BranchReaderArray<UInt_t> branchReaderKey;
+      BranchReaderArray<UInt_t> branchReaderIndex;
+      const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
+      std::vector<ColumnarOffsetType> offsets = {0};
+      std::vector<typename CM::LinkIndexType> columnData;
+      std::vector<const std::vector<ColumnarOffsetType>*> targetOffsetColumns;
+      std::vector<SG::sgkey_t> targetKeys;
+      std::vector<typename CM::LinkKeyType> keyColumnData;
+      Benchmark benchmarkUnpack;
+      Benchmark benchmark;
+
+      ColumnDataVectorSplitLink (const std::string& val_branchName)
+        : branchReaderSize (val_branchName), branchReaderKey (val_branchName + ".m_persKey"), branchReaderIndex (val_branchName + ".m_persIndex"), benchmarkUnpack (branchReaderSize.columnName()+"(unpack)"), benchmark (branchReaderSize.columnName())
+      {
+        outputColumns.push_back ({.name = branchReaderSize.columnName()});
+        outputColumns.push_back ({.name = branchReaderSize.containerName(), .isOffset = true, .primary = false});
+        outputColumns.push_back ({.name = branchReaderSize.columnName() + ".keys", .primary = false});
+      }
+
+      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      {
+        auto iter = requestedColumns.find (outputColumns.at(0).name);
+        if (iter == requestedColumns.end())
+          return false;
+        outputColumns.at(0).enabled = true;
+
+        branchReaderSize.connectTree (tree);
+        branchReaderKey.connectTree (tree);
+        branchReaderIndex.connectTree (tree);
+
+        if (iter->second.offsetName != outputColumns.at(1).name)
+          throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
+
+        auto linkContainers = iter->second.variantLinkContainers;
+        if (linkContainers.empty())
+        {
+          if (iter->second.linkToName.empty())
+            throw std::runtime_error ("missing link container for: " + outputColumns.at(0).name);
+          linkContainers.push_back (iter->second.linkToName);
+        } else
+        {
+          if (!iter->second.linkToName.empty())
+            throw std::runtime_error ("link container and variant link containers both set for: " + outputColumns.at(0).name);
+        }
+        for (const auto& container : linkContainers)
+        {
+          if (auto keyIter = knownKeys.find (container); keyIter != knownKeys.end())
+            targetKeys.push_back (keyIter->second);
+          else
+            throw std::runtime_error ("no key known for link container: " + container);
+          if (auto targetOffsetIter = offsetColumns.find (container); targetOffsetIter != offsetColumns.end())
+            targetOffsetColumns.push_back (targetOffsetIter->second);
+          else
+            throw std::runtime_error ("missing offset column: " + container);
+          keyColumnData.push_back (keyColumnData.size());
+        }
+        requestedColumns.erase (iter);
+
+        if (auto offsetIter = offsetColumns.find (outputColumns.at(1).name); offsetIter != offsetColumns.end())
+          offsetColumn = offsetIter->second;
+        else
+          offsetColumns.emplace (outputColumns.at(1).name, &offsets);
+
+        iter = requestedColumns.find (outputColumns.at(1).name);
+        if (iter != requestedColumns.end())
+        {
+          outputColumns.at(1).enabled = true;
+          requestedColumns.erase (iter);
+        }
+
+        iter = requestedColumns.find (outputColumns.at(2).name);
+        if (iter != requestedColumns.end())
+        {
+          outputColumns.at(2).enabled = true;
+          requestedColumns.erase (iter);
+        }
+
+        return true;
+      }
+
+      virtual void clearColumns () override
+      {
+        columnData.clear();
+        offsets.clear();
+        offsets.push_back (0);
+      }
+
+      virtual void getEntry (Long64_t entry) override
+      {
+        benchmark.startTimer ();
+        std::size_t branchDataSize = branchReaderSize.getEntry (entry);
+        auto branchDataKey = branchReaderKey.getEntry (entry, branchDataSize);
+        auto branchDataIndex = branchReaderIndex.getEntry (entry, branchDataSize);
+        benchmark.stopTimer ();
+        benchmarkUnpack.startTimer ();
+        for (auto& targetOffsetColumn : targetOffsetColumns)
+        {
+          if (targetOffsetColumn->size() <= offsets.size())
+            throw std::runtime_error ("target offset column not yet filled for: " + outputColumns.at(0).name);
+        }
+        for (std::size_t index = 0; index < branchDataSize; ++index)
+        {
+          if (branchDataIndex[index] == static_cast<UInt_t>(-1))
+            columnData.push_back (invalidObjectIndex);
+          else
+          {
+            CM::LinkIndexType keyIndex = CM::invalidLinkValue;
+            if (auto keyIter = std::find(targetKeys.begin(), targetKeys.end(), branchDataKey[index]); keyIter != targetKeys.end())
+            {
+              keyIndex = std::distance(targetKeys.begin(), keyIter);
+            } else if (targetKeys.empty())
+            {
+              targetKeys.push_back (branchDataKey[index]);
+              keyIndex = 0;
+              std::cout << "assume target key for " << outputColumns.at(0).name << " is " << std::hex << branchDataKey[index] << std::dec << std::endl;
+            } else
+            {
+              std::ostringstream error;
+              error << "target key mismatch: read " << std::hex << branchDataKey[index];
+              error << ", expected one of";
+              for (const auto& key : targetKeys)
+                error << " " << key;
+              error << " for " << outputColumns.at(0).name;
+              throw std::runtime_error (std::move (error).str());
+            }
+            auto& targetOffsetColumn = *targetOffsetColumns.at(keyIndex);
+            auto targetOffset = targetOffsetColumn.at (offsets.size()-1);
+            CM::LinkIndexType linkIndex = branchDataIndex[index];
+            linkIndex += targetOffset;
+            if (linkIndex >= targetOffsetColumn.at(offsets.size()))
+              throw std::runtime_error (std::format ("index out of range for link: {} >= {} (base index {})", outputColumns.at(0).name, linkIndex, targetOffsetColumn.at(offsets.size()), targetOffset));
+            columnData.push_back (CM::mergeLinkKeyIndex (keyIndex, branchDataIndex[index] + targetOffset));
+          }
+        }
+        offsets.push_back (columnData.size());
+        if (offsetColumn)
+        {
+          if (offsetColumn->size() != offsets.size())
+            throw std::runtime_error ("offset column not filled yet: " + outputColumns.at(1).name);
+          if (offsetColumn->back() != offsets.back())
+            throw std::runtime_error ("offset column does not match: " + outputColumns.at(1).name);
+        }
+        benchmarkUnpack.stopTimer ();
+      }
+
+      virtual void setData (ColumnarToolWrapperData& tool) override
+      {
+        if (outputColumns.at(0).enabled)
+          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
+        if (outputColumns.at(1).enabled)
+          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+        if (outputColumns.at(2).enabled)
+          tool.setColumn (outputColumns.at(2).name, keyColumnData.size(), keyColumnData.data());
+      }
+    };
+
+    template<typename T>
     struct ColumnDataVectorVectorVariantLink final : public PhysliteTestHelpers::IColumnData
     {
+      using CM = ColumnarModeArray;
       BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
-      std::vector<ColumnarOffsetType> columnData;
-      std::vector<std::uint8_t> keysColumn;
+      std::vector<typename CM::LinkIndexType> columnData;
+      std::vector<typename CM::LinkKeyType> keysColumn;
       std::vector<std::string> containers;
       std::vector<SG::sgkey_t> containerKeys;
       std::vector<const std::vector<ColumnarOffsetType>*> containerOffsets;
@@ -909,8 +1161,8 @@ namespace columnar
               columnData.push_back (invalidObjectIndex);
             else
             {
-              ColumnarOffsetType key = 0xff;
-              ColumnarOffsetType index = 0;
+              typename CM::LinkIndexType key = 0xff;
+              typename CM::LinkIndexType index = 0;
               for (std::size_t i = 0; i < containers.size(); ++i)
               {
                 if (element.key() == containerKeys[i])
@@ -936,7 +1188,7 @@ namespace columnar
                     forbiddenContainers.insert (containers[i]);
                 }
               }
-              columnData.push_back (index | (key << 8*(sizeof(ColumnarOffsetType)-1)));
+              columnData.push_back (CM::mergeLinkKeyIndex (key, index));
             }
           }
           offsets.push_back (columnData.size());
@@ -1241,6 +1493,7 @@ namespace columnar
 
     knownColumns.push_back (std::make_shared<ColumnDataEventCount> ());
 
+    tree->SetMakeClass (1);
     {
       std::unordered_map<std::string,TBranch*> branches;
       {
@@ -1356,64 +1609,42 @@ namespace columnar
     // for testing it seems like a reasonable workaround.
     knownColumns.push_back (std::make_shared<ColumnDataSamplingPattern> ("egammaClusters"));
 
+    // For branches that are element links they need to be explicitly
+    // declared to have the correct xAOD type, correct split setting,
+    // and correct linked containers.
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisElectronsAuxDyn.caloClusterLinks"));
-
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer>> ("GSFConversionVerticesAuxDyn.trackParticleLinks"));
-
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisElectrons.ptOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisElectrons.ptRank", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisElectrons.etaRank", 0));
-
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisElectrons.sfOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisElectrons.validOut", 0));
-
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisPhotonsAuxDyn.caloClusterLinks"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::VertexContainer>> ("AnalysisPhotonsAuxDyn.vertexLinks"));
-
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisPhotons.sfOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisPhotons.validOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisPhotons.selection", 0));
-
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisMuons.objectType", xAOD::Type::Muon));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.m", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisMuons.ptRank", 0));
-
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.ptOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.chargeOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.InnerDetectorCharge", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.InnerDetectorPt", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.MuonSpectrometerCharge", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.MuonSpectrometerPt", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.sfOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisMuons.validOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.MetObjectWeight", 0));
-
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisJets.objectType", xAOD::Type::Jet));
-
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisJets.ptOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisJets.mOut", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<char>> ("AnalysisJets.selection", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisJets.MetObjectWeight", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisJets.MetObjectWeightSoft", 0));
-
-    knownColumns.push_back (std::make_shared<ColumnDataVectorLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.inDetTrackParticleLink"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.combinedTrackParticleLink"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.extrapolatedMuonSpectrometerTrackParticleLink"));
-
-    knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", std::vector<std::string>{"Muons", "RefJet", "MuonEloss", "PVSoftTrk"}));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("OutputMET.mpx", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("OutputMET.mpy", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("OutputMET.sumet", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint64_t>> ("OutputMET.source", 0));
-
+    knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.inDetTrackParticleLink"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.combinedTrackParticleLink"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.extrapolatedMuonSpectrometerTrackParticleLink"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer>> ("GSFConversionVerticesAuxDyn.trackParticleLinks"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorLink<xAOD::JetContainer>>("METAssoc_AnalysisMETAux.jetLink"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer>>("METAssoc_AnalysisMETAux.objectLinks"));
 
+    // For METMaker we need to preplace all of the MET terms that we
+    // expect to be used, that's what this lined does.
+    knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", std::vector<std::string>{"Muons", "RefJet", "MuonEloss", "PVSoftTrk"}));
+
+    // For METMaker we need various extra columns to run. This may need
+    // some work to avoid, but would likey be worth it.
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisMuons.objectType", xAOD::Type::Muon));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.m", ParticleConstants::muonMassInMeV));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisJets.objectType", xAOD::Type::Jet));
+
+    // These are columns that represent variables that are normally held
+    // by METAssociationHelper, or alternatively are decorated on the
+    // MET terms (even though they are per object).
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.MetObjectWeight", 0));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisJets.MetObjectWeight", 0));
+    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisJets.MetObjectWeightSoft", 0));
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<MissingETBase::Types::bitmask_t>> ("METAssoc_AnalysisMET.useObjectFlags", 0));
   }
 
   void ColumnarPhysLiteTest :: setupColumns (ColumnarToolWrapper& toolWrapper)
   {
+    using namespace asg::msgUserCode;
+
     std::unordered_map<std::string,ColumnInfo> requestedColumns;
     for (auto& column : toolWrapper.getColumnInfo())
       requestedColumns[column.name] = std::move (column);
@@ -1435,6 +1666,45 @@ namespace columnar
       else
         std::cout << "optional column not claimed: " << column.first << std::endl;
     }
+    std::erase_if (unclaimedColumns, [&] (auto& columnName)
+    {
+      const auto& info = requestedColumns.at (columnName);
+      if (info.accessMode != ColumnAccessMode::output || !info.fixedDimensions.empty())
+        return false;
+      auto offsetIter = std::find_if (usedColumns.begin(), usedColumns.end(), [&] (const std::shared_ptr<PhysliteTestHelpers::IColumnData>& column)
+      {
+        for (auto& output : column->outputColumns)
+        {
+          if (output.name == info.offsetName)
+            return true;
+        }
+        return false;
+      });
+      if (offsetIter == usedColumns.end())
+        return false;
+      std::shared_ptr<PhysliteTestHelpers::IColumnData> myColumn;
+      if (*info.type == typeid(float))
+        myColumn = std::make_shared<PhysliteTestHelpers::ColumnDataOutVector<float>> (info.name, 0);
+      else if (*info.type == typeid(char))
+        myColumn = std::make_shared<PhysliteTestHelpers::ColumnDataOutVector<char>> (info.name, 0);
+      else if (*info.type == typeid(std::uint16_t))
+        myColumn = std::make_shared<PhysliteTestHelpers::ColumnDataOutVector<std::uint16_t>> (info.name, 0);
+      else if (*info.type == typeid(std::uint64_t))
+        myColumn = std::make_shared<PhysliteTestHelpers::ColumnDataOutVector<std::uint64_t>> (info.name, 0);
+      else
+      {
+        ANA_MSG_WARNING ("unhandled column type: " << info.name << " " << info.type->name());
+        return false;
+      }
+      knownColumns.push_back (myColumn);
+      if (!myColumn->connect (tree, offsetColumns, requestedColumns))
+      {
+        ANA_MSG_WARNING ("failed to connect dynamic output column: " << info.name);
+        return false; 
+      }
+      usedColumns.push_back (myColumn);
+      return true;
+    });
     if (!unclaimedColumns.empty())
     {
       std::string message = "columns not claimed:";
@@ -1526,6 +1796,13 @@ namespace columnar
       Benchmark benchmarkGetEntry (name + " getEntry");
 
       const auto numberOfEvents = event.getEntries();
+#ifdef XAOD_STANDALONE
+      std::cout << "known container keys:" << std::endl;
+      for (auto& [container, key] : columnar::PhysliteTestHelpers::knownKeys)
+      {
+        std::cout << std::format ("  {} -> 0x{:x}, 0x{:x} -> {}", container, event.getHash (container), key, event.getName (key)) << std::endl;
+      }
+#endif
       if (numberOfEvents == 0){
         throw std::runtime_error ("ColumnarPhysLiteTest: numberOfEvents == 0");
       }

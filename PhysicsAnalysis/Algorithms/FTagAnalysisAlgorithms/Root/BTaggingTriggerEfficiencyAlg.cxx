@@ -11,9 +11,6 @@
 //
 
 #include <FTagAnalysisAlgorithms/BTaggingTriggerEfficiencyAlg.h>
-#include "TrigCompositeUtils/ChainNameParser.h"
-#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
-#include "xAODBTagging/BTagging.h"
 
 //
 // method implementations
@@ -23,11 +20,7 @@ namespace CP
 {
   BTaggingTriggerEfficiencyAlg::BTaggingTriggerEfficiencyAlg
   (const std::string &name, ISvcLocator *svcLoc) :
-    EL::AnaAlgorithm(name, svcLoc),
-    m_trigDecTool("Trig::TrigDecisionTool/TrigDecisionTool")
-  {
-    declareProperty("TrigDecisionTool", m_trigDecTool, "trigger decision tool");
-  }
+    EL::AnaAlgorithm(name, svcLoc) {}
 
   StatusCode BTaggingTriggerEfficiencyAlg ::
   initialize ()
@@ -41,14 +34,14 @@ namespace CP
     ANA_CHECK (m_offlineEfficiencyTool.retrieve());
     ANA_CHECK (m_triggerEfficiencyTool.retrieve());
     ANA_CHECK (m_conditionalEfficiencyTool.retrieve());
-
-    ANA_CHECK (m_trigDecTool.retrieve());
     
     ANA_CHECK (m_jetHandle.initialize (m_systematicsList));
     ATH_CHECK (m_truthFlav.initialize(m_systematicsList, m_jetHandle));
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_jetHandle, SG::AllowEmpty));
-    ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_jetHandle, SG::AllowEmpty));
+
     ANA_CHECK (m_scaleFactorDecoration.initialize (m_systematicsList, m_jetHandle));
+    ANA_CHECK (m_matchingDecoration.initialize (m_systematicsList, m_jetHandle));
+    ANA_CHECK (m_bTagMatchingDecoration.initialize (m_systematicsList, m_jetHandle));
 
     ANA_CHECK (m_systematicsList.addSystematics (*m_offlineEfficiencyTool));
     ANA_CHECK (m_systematicsList.addSystematics (*m_triggerEfficiencyTool));
@@ -56,7 +49,6 @@ namespace CP
 
     ANA_CHECK (m_systematicsList.initialize());
     ANA_CHECK (m_outOfValidity.initialize());
-    ANA_CHECK(m_bjetInput.initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -75,35 +67,12 @@ namespace CP
       const xAOD::JetContainer *jets = nullptr;
       ANA_CHECK (m_jetHandle.retrieve (jets, sys));
 
-      m_matchedOfflineOnlineJets.clear(); 
-      SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput);
-
-      for (const xAOD::Jet* jet : *jets) {
-        if (m_preselection.getBool(*jet, sys)) {
-          float minDR = 0.4;
-          const xAOD::Jet* bestHLTJet = nullptr;
-          for (const xAOD::Jet* hlt_bjet : *hlt_bjets) {
-            float dR = jet->p4().DeltaR(hlt_bjet->p4());
-            if (dR < minDR) {
-                minDR = dR;
-                bestHLTJet = hlt_bjet;
-            }
-          }
-          m_matchedOfflineOnlineJets[jet] = bestHLTJet;
-        }
-      }
-
       for (const xAOD::Jet *jet : *jets)
       {
-        bool matched = false;
-        bool passTrigger = false;
-
         if (m_preselection.getBool (*jet, sys))
         {
           float sf = 1.;
           CP::CorrectionCode valid;
-
-          ATH_CHECK(passTriggerBtag(jet, passTrigger, matched));
 
           // For non-bjet, just get offline scale factor
           if(m_truthFlav.get(*jet, sys)!=5){
@@ -128,8 +97,8 @@ namespace CP
             condEff_data *= condEff_MC;
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
 
-            if(matched){
-              if(passTrigger){
+            if(static_cast<bool>(m_matchingDecoration.get(*jet, sys))){
+              if(static_cast<bool>(m_bTagMatchingDecoration.get(*jet,sys))){
                 sf = condEff_data * trigEff_data;
                 sf /= condEff_MC * trigEff_MC;
               }
@@ -160,117 +129,9 @@ namespace CP
         } else {
           m_scaleFactorDecoration.set (*jet, invalidScaleFactor(), sys);
         }
-        
-        m_matchingDecoration.set (*jet, matched, sys);
-        m_bTagMatchingDecoration.set (*jet, passTrigger, sys);
       }
     }
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BTaggingTriggerEfficiencyAlg::passTriggerBtag(const xAOD::Jet* jet, bool& btag, bool& matched) const{
-    btag = false;
-    matched = false;
-    if(!m_trigDecTool->isPassed(m_trigger)){
-      // No further check, btag will be false
-      return StatusCode::SUCCESS;
-    }
-
-    Trig::FeatureRequestDescriptor frd;
-    frd.setChainGroup(m_trigger);
-
-    int ileg = 0;
-    const xAOD::IParticle* bestHLT = nullptr;
-    float minDRHLT = 0.4; // hard-coded matching distance
-
-    for (const ChainNameParser::LegInfo& legInfo :
-	   ChainNameParser::HLTChainInfo(m_trigger)){
-      if (legInfo.signature == "j"){
-        ATH_MSG_VERBOSE(" Leg" << ileg << ": "
-          << " " << legInfo.legName() << " "
-          << legInfo.type() << " " << legInfo.signature
-          << " " << legInfo.threshold);
-          
-        frd.setRestrictRequestToLeg(ileg);
-        auto hlt_jets = m_trigDecTool->features<xAOD::IParticleContainer>(frd);
-        auto mapjet = m_matchedOfflineOnlineJets.find(jet);
-        if (mapjet != m_matchedOfflineOnlineJets.end() && mapjet->second){
-          auto hlt_bjet =  mapjet->second;
-          if (hlt_bjet->pt() > legInfo.threshold &&  abs( hlt_bjet->eta()) < m_etamax.value()){
-            matched = true;
-          }
-        }
-
-	for (const auto& hlt_jet_link : hlt_jets){
-	  const xAOD::IParticle *hlt_jet = *hlt_jet_link.link;
-	  float dR = jet->p4().DeltaR(hlt_jet->p4());
-	  bool hasBtag = false;
-	  if(m_useRun3TriggerEDM){
-            // we need to access via the trigger decision tool
-	    hasBtag = hlt_jet_link.source->hasObjectLink("btag");
-	  }
-	  else{
-	    double hlt_bscore = -1.;
-	    ATH_CHECK(getBtagScore(hlt_jet, hlt_bscore));
-	    hasBtag = hlt_bscore > m_btagThreshold;
-	  }
-
-	  ATH_MSG_VERBOSE("  pt: "
-			  << hlt_jet->pt() << " eta: " << hlt_jet->eta()
-			  << " phi: " << hlt_jet->phi() << " dR: " << dR
-			  << " btag: " << hasBtag);
-
-	  if (bestHLT && isSameJet(bestHLT, hlt_jet))
-	    btag |= hasBtag; // if any leg claims b-tag, then the jet is b-tagged
-	  else if (dR < minDRHLT) {
-	    minDRHLT = dR;
-	    bestHLT = hlt_jet;
-	    btag = hasBtag;
-	  }
-	}
-      }
-
-      ATH_MSG_VERBOSE(" =dRHLT: " << minDRHLT << " bestHLT pT: "
-		      << (bestHLT ? bestHLT->pt() : -99.)
-		      << " btag: " << btag);
-
-      ileg++;
-    }
-    return StatusCode::SUCCESS;
-  }
-
-  bool BTaggingTriggerEfficiencyAlg::isSameJet(const xAOD::IParticle *jet1,
-					       const xAOD::IParticle *jet2) const{
-    // Need this function because jet1 == jet2 would return false
-    // when comparing b-jet to untagged jet
-    return (jet1->p4().DeltaR(jet2->p4()) < 0.01) &&
-      (std::abs(jet1->pt() - jet2->pt()) < 100);
-  }
-
-  StatusCode BTaggingTriggerEfficiencyAlg::getBtagScore(const xAOD::IParticle *jet, double& hlt_bscore) const {
-    SG::ConstAccessor<const xAOD::BTagging*> acc("HLTBTag");
-    const xAOD::BTagging* tagInfo = acc(*jet);
-
-    if(m_trigger.value().find("mv2c20") != std::string::npos){
-      if(!tagInfo->MVx_discriminant("MV2c20", hlt_bscore)){
-	ATH_MSG_ERROR("MV2c20 discriminant not accessible");
-	return StatusCode::FAILURE;
-      }
-    }
-    else if(m_trigger.value().find("mv2c10") != std::string::npos){
-      if(!tagInfo->MVx_discriminant("MV2c10", hlt_bscore)){
-	ATH_MSG_ERROR("MV2c10 discriminant not accessible");
-	return StatusCode::FAILURE;
-      }
-    }
-    else{
-      double w1 = tagInfo->IP3D_pb() / tagInfo->IP3D_pu();
-      double w2 = tagInfo->SV1_pb() / tagInfo->SV1_pu();
-      double W = w1 * w2;
-      if ( W/(1.0+W) < 1.0 )
-	hlt_bscore = -1.0 * std::log10(1.0 - ( W / ( 1.0 + W ) ) );
-      else hlt_bscore = 50;
-    }
-    return StatusCode::SUCCESS;
-  }
 }

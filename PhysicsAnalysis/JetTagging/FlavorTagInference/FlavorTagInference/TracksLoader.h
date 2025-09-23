@@ -44,10 +44,10 @@ namespace FlavorTagInference {
       public:
 
         TracksLoader(const ConstituentsInputConfig&, const FTagOptions& options);
-        std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
-          const xAOD::Jet& jet ) const override;
+        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(
+          const xAOD::IParticle& jet ) const override;
         std::tuple<char, std::map<std::string, std::vector<double>>>  getDL2Data(
-          const xAOD::Jet& jet, 
+          const xAOD::IParticle& jet, 
           std::function<char(const Tracks&)> ip_checker) const;
         const FTagDataDependencyNames& getDependencies() const override;
         const std::set<std::string>& getUsedRemap() const override;
@@ -55,7 +55,7 @@ namespace FlavorTagInference {
         const ConstituentsType& getType() const override;
       private:
         // typedefs
-        typedef xAOD::Jet Jet;
+        typedef xAOD::IParticle Jet;
         typedef xAOD::TrackParticle Track;
         // tracks typedefs
         typedef std::function<double(const Track*,

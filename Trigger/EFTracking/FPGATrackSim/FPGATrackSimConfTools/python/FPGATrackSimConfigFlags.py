@@ -11,6 +11,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('wrapperFileName2', [])
     cf.addFlag('secondInputToolN', 0)
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
+    cf.addFlag('loadRegionMap', True)
+    cf.addFlag('loadRadii', True)
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
     cf.addFlag('doMultiTruth', True)
@@ -76,6 +78,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('hitThreshold', 2)
     cf.addFlag('varyingThreshold', True)
     cf.addFlag('varyingHitThresholds', [])
+    cf.addFlag('MinSpacePointsPerSeed',3)
+    cf.addFlag('MaxSpacePointsPerSeed',3)
 
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -378,7 +382,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('parMin', [-1000, -1000, 0.0, 0.0, -10])
     cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
-
+    cf.addFlag('keepNInnerHits', -1)
     return cf
 
 def createSecondStageFPGATrackSimConfigFlags():
@@ -418,7 +422,7 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("edgeScoreCut",0.8)
     cf.addFlag("doGNNRootOutput",False)
     cf.addFlag("doGNNTracking",False)
-    cf.addFlag("nInputsGNN",9)
+    cf.addFlag("nInputsGNN",13)
     
     return cf
 

@@ -100,7 +100,7 @@ def DiTauIDVarDecoratorCfg(flags, name="DiTauRec_IDVarDecorator", **kwargs):
 def DiTauOnnxScoreCalculatorCfg(flags, name="DiTauRec_OnnxScoreCalculator", **kwargs):
     """Configure the OnnxScoreCalculator"""
     acc = ComponentAccumulator()
-    kwargs.setdefault("onnxModelPath", "DiTauRec/omni.onnx")
+    kwargs.setdefault("onnxModelPath", "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx")
     kwargs.setdefault("maxTracks", 10)
     acc.setPrivateTools(CompFactory.DiTauOnnxDiscriminantTool(name, **kwargs))
     return acc

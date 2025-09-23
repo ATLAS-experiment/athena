@@ -277,11 +277,11 @@ CondInputLoader::start()
                         << vhk.fullKey());
           fail = true;
         } else {
-          m_vhk.push_back(vhk);
+          m_vhk.emplace_back(std::move(vhk));
         }
       }
     } else {
-      m_vhk.push_back(vhk);
+      m_vhk.emplace_back(std::move(vhk));
     }
   }
   

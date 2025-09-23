@@ -29,6 +29,7 @@
 #   include "SGTools/CurrentEventStore.h"
 #   include "SGTools/DataProxy.h"
 #endif // not XAOD_STANDALONE
+#include "CxxUtils/ClassName.h"
 #include "CxxUtils/no_sanitize_undefined.h"
 
 // Interface include(s):
@@ -500,7 +501,7 @@ namespace xAOD {
                ::TClass* cl = ::TClass::GetClass(className, LOAD, SILENT);
                if ((cl != nullptr) && cl->InheritsFrom(::TTree::Class())){
                   // key is corresponding to a metadata tree
-                  lOtherMetaTreeNames.insert(keyName);
+                  lOtherMetaTreeNames.insert(std::move(keyName));
                }
             }
          }
@@ -778,9 +779,17 @@ namespace xAOD {
       metatree->SetDirectory( file );
 
       // Create the only branch in it:
-      metatree->Branch( "EventFormat",
-         SG::normalizedTypeinfoName( typeid( xAOD::EventFormat ) ).c_str(),
-         &m_outputEventFormat );
+      try {
+        metatree->Branch( "EventFormat",
+           SG::normalizedTypeinfoName( typeid( xAOD::EventFormat ) ).c_str(),
+           &m_outputEventFormat );
+      }
+      catch (const CxxUtils::ClassName::ExcBadClassName& e) {
+         ::Error( "xAOD::TEvent::finishWritingTo",
+                  XAOD_MESSAGE( "Class name parsing fails for %s ! " ),
+                  e.what() );
+         return StatusCode::FAILURE;
+      }
 
       // Create a copy of the m_outputMetaObjects variable. This is necessary
       // because the putAux(...) function will modify this variable while we
@@ -1838,7 +1847,7 @@ namespace xAOD {
                ::Info("xAOD::TEvent::getNames",
                      "Matched %s to key %s",
                      targetClassName.c_str(), key.c_str());
-               keys.insert(key);
+               keys.insert(std::move(key));
             }
          }
       } else {
@@ -3209,7 +3218,7 @@ namespace xAOD {
       std::string auxKey;
       if( isAuxStore( mgr ) ) {
          auxMgr = &mgr;
-         auxKey = key;
+         auxKey = std::move(key);
       } else {
          auto itr = objects.find( key + "Aux." );
          if( itr == objects.end() ) {

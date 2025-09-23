@@ -79,12 +79,12 @@ def getMCSignatures():
         ChainProp(name="HLT_mu14_L1MU8VFC", groups=SingleMuonGroup),
         ChainProp(name='HLT_2mu4_L12MU3V',  groups=MultiMuonGroup),
 
-        #ATR-29567
-        ChainProp(name='HLT_mu16_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu18_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu20_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu18_ivarmedium_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu20_ivarmedium_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
+        #ATR-29567 + ATR-30593
+        ChainProp(name='HLT_mu16_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=EOFL1MuGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu18_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=EOFL1MuGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu20_ivarmedium_L1MU12FCH', l1SeedThresholds=['MU12FCH'], groups=EOFL1MuGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu18_ivarmedium_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=EOFL1MuGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu20_ivarmedium_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=EOFL1MuGroup+SingleMuonGroup),
 
         
         #-- nscan ATR-19376, TODO: to be moved to physics once debugged to a resaonable rate

@@ -16,6 +16,10 @@ namespace EL
 {
   class AnaAlgorithm;
   class AnaReentrantAlgorithm;
+  namespace Detail
+  {
+    class Module;
+  }
 }
 
 namespace asg
@@ -50,6 +54,10 @@ namespace asg
   {
     return registerComponentFactory (type, [] (const std::string& name) -> std::unique_ptr<AsgComponent> { return std::make_unique<T> (name, nullptr); });
   }
+  template<typename T> StatusCode registerELModuleFactory (const std::string& type)
+  {
+    return registerComponentFactory (type, [] (const std::string& name) -> std::unique_ptr<AsgComponent> { return std::make_unique<T> (name); });
+  }
   /// @}
 
   /// more generic versions of factory registration
@@ -68,6 +76,11 @@ namespace asg
   StatusCode registerGenericComponentFactory (const std::string& type)
   {
     return registerServiceFactory<T> (type);
+  }
+  template<typename T> requires std::is_base_of_v<EL::Detail::Module,T>
+  StatusCode registerGenericComponentFactory (const std::string& type)
+  {
+    return registerELModuleFactory<T> (type);
   }
   /// @}
 

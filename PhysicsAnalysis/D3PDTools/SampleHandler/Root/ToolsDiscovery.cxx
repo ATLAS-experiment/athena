@@ -266,7 +266,7 @@ namespace SH
 	if (ds.empty())
 	  RCU_THROW_MSG ("no dataset configured for grid dataset " + ds);
 
-	boost::regex pattern (RCU::glob_to_regexp (grid->meta()->castString (MetaFields::gridFilter, MetaFields::gridFilter_default)));
+	std::regex pattern (RCU::glob_to_regexp (grid->meta()->castString (MetaFields::gridFilter, MetaFields::gridFilter_default)));
 
         std::set<std::string> knownFiles;
         std::map<std::string,std::string> usedFiles;
@@ -336,7 +336,7 @@ namespace SH
     if (!file.get())
       RCU_THROW_MSG ("could not open file: " + mysample->fileName(0));
     TObject *object = 0;
-    boost::regex mypattern (pattern);
+    std::regex mypattern (pattern);
     for (TIter iter (file->GetListOfKeys()); (object = iter.Next()); )
     {
       if (RCU::match_expr (mypattern, object->GetName()) &&

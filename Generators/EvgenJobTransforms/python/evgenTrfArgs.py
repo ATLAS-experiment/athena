@@ -74,6 +74,14 @@ def addStdEvgenArgs(parser):
                                  trfArgClasses.argString("hepmc3", runarg=True)],
                         type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
 
+    parser.add_argument("--hepmcUnits", group="Evgen",
+                        help="Unitst to use when writing HepMC files",
+                        default=trfArgClasses.argString("GEVMM", runarg=True),
+                        choices=[trfArgClasses.argString("GEVCM", runarg=True),
+                                 trfArgClasses.argString("MEVCM", runarg=True),
+                                 trfArgClasses.argString("MEVMM", runarg=True)],
+                        type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
+
     parser.add_argument("--extension", group="Evgen",
                         help="Extension to use when writing HepMC files",
                         default=trfArgClasses.argString("hepmc", runarg=True),

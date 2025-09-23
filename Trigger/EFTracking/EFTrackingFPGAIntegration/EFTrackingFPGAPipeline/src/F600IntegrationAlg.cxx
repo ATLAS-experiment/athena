@@ -15,7 +15,7 @@ namespace EFTrackingFPGAIntegration
         return full_cu_name;
     }
 
-    void F600IntegrationAlg::outputHexData(size_t dataLen, uint64_t *data, const std::string dataDescriptor) const {
+    void F600IntegrationAlg::outputHexData(size_t dataLen, uint64_t *data, const std::string& dataDescriptor) const {
         ATH_MSG_DEBUG("STARTING " << dataDescriptor << " words:");
         for (size_t i = 0; i < dataLen; i++) {
           ATH_MSG_DEBUG(std::hex << std::setw(16) << std::setfill('0') << data[i]);
@@ -86,7 +86,7 @@ namespace EFTrackingFPGAIntegration
         return n_words;
     }
 
-    void F600IntegrationAlg::readTV(const std::string filepath, int n_words, uint64_t *data) const {
+    void F600IntegrationAlg::readTV(const std::string& filepath, int n_words, uint64_t *data) const {
         std::ifstream file_in;
         std::string line_in = "";
 

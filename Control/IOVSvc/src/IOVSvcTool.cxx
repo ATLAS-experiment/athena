@@ -449,7 +449,7 @@ IOVSvcTool::handle(const Incident &inc) {
       for (pmITR p=fitr.first; p!=fitr.second; ++p) {
         BFCN *f = p->second;
         std::string key = prx->name();
-        resetKeys[f].push_back(key);
+        resetKeys[f].emplace_back(prx->name());
       }
     }
 
@@ -1025,8 +1025,7 @@ IOVSvcTool::preLoadProxies(const EventContext& ctx) {
     pmITR pitr;
     for (pitr=pi.first; pitr!=pi.second; ++pitr) {
       BFCN *f = pitr->second;
-      std::string key = dp->name();
-      resetKeys[f].push_back(key);
+      resetKeys[f].emplace_back(dp->name());
     }
     
     CBNode* cn = m_trigTree->findNode( dp );
@@ -1182,8 +1181,9 @@ IOVSvcTool::PrintProxyMap() const{
 void 
 IOVSvcTool::PrintProxyMap(const SG::DataProxy* dp) const {
 
+  auto it = m_names.find(dp);
   msg() << "  " << dp << "  " << dp->clID() << "  "
-        << m_names.find(dp)->second << endl;
+        << (it == m_names.end() ? "???" : it->second) << endl;
   auto pi = m_proxyMap.equal_range(dp);
   if (pi.first == pi.second) {
     msg() << "         ->  no callback associated" << endl;

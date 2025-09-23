@@ -64,20 +64,18 @@ namespace EL
         return StatusCode::FAILURE;
       }
 
-      std::string modeStr = data.m_metaData->castString
-        (Job::optXaodAccessMode);
-      if (!modeStr.empty())
+      if (!m_modeStr.value().empty())
       {
         xAOD::TEvent::EAuxMode mode = xAOD::TEvent::kClassAccess; //compiler dummy
-        if (modeStr == Job::optXaodAccessMode_class)
+        if (m_modeStr.value() == Job::optXaodAccessMode_class)
           mode = xAOD::TEvent::kClassAccess;
-        else if (modeStr == Job::optXaodAccessMode_branch)
+        else if (m_modeStr.value() == Job::optXaodAccessMode_branch)
           mode = xAOD::TEvent::kBranchAccess;
-        else if (modeStr == Job::optXaodAccessMode_athena)
+        else if (m_modeStr.value() == Job::optXaodAccessMode_athena)
           mode = xAOD::TEvent::kAthenaAccess;
         else
         {
-          ANA_MSG_ERROR ("unknown XAOD access mode: " << modeStr);
+          ANA_MSG_ERROR ("unknown XAOD access mode: " << m_modeStr.value());
           return StatusCode::FAILURE;
         }
         m_event.reset (new xAOD::TEvent (mode));
@@ -85,15 +83,14 @@ namespace EL
       {
         m_event.reset (new xAOD::TEvent);
       }
-      if (data.m_metaData->castDouble (Job::optXAODSummaryReport, 1) == 0)
+      if (!m_summaryReport.value())
         xAOD::TFileAccessTracer::enableDataSubmission (false);
 
       m_store.reset (new xAOD::TStore);
 
       m_evtStore = std::make_unique<asg::SgTEvent> (m_event.get(), m_store.get());
 
-      m_useStats = data.m_metaData->castBool (Job::optXAODPerfStats, false);
-      if (m_useStats)
+      if (m_useStats.value())
         xAOD::PerfStats::instance().start();
 
       data.m_tevent = m_event.get();
@@ -120,7 +117,7 @@ namespace EL
     StatusCode TEventModule ::
     postFinalize (ModuleData& data)
     {
-      if (m_useStats)
+      if (m_useStats.value())
       {
         xAOD::PerfStats::instance().stop();
         std::unique_ptr<xAOD::ReadStats> stats

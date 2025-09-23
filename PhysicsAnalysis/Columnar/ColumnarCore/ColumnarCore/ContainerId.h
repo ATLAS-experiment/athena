@@ -169,6 +169,8 @@ namespace columnar
   /// concept for a container id
   template<typename CI>
   concept ContainerIdConcept = CI::isContainerId;
+  template<typename CI>
+  concept RegularContainerIdConcept = CI::isContainerId && CI::regularObjectId;
 
   // forward declarations of columnar core classes for which I often
   // provide specific aliases for different container ids.

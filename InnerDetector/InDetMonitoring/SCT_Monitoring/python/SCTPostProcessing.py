@@ -1,6 +1,25 @@
 #
 #  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 #
+def _bec_layer_link(h):
+    #  hist name format: <histname>_<layer>_<link>
+    # possible <histnames> (B, ECA, ECC):
+    # (noiseoccupancymaptrigger, noiseoccupancymaptriggerECp, noiseoccupancymaptriggerECm)
+    # (ineff, ineffp, ineffm)
+    # (SCT_NumberOfErrorsB, SCT_NumberOfErrorsEA, SCT_NumberOfErrorsEC)
+    name = h.GetName()
+    # define bec
+    if 'EA' in name or 'ECp' in name or 'ineffp' in name:
+        bec = 2
+    elif 'EC' in name or 'ECm' in name or 'ineffm' in name:
+        bec = -2
+    else:
+        bec = 0
+    # define layer and link
+    layer = int(name.split('_')[-2])
+    link = int(name.split('_')[-1])
+    return (bec, layer, link)
+
 def effcomb(inputs):
     import ROOT
     rv = ROOT.TH1F('SctEffDistribution;Efficiency;Links', 'SCT Efficiency Distribution', 500, 0, 1)
@@ -23,7 +42,8 @@ def conf(inputs, label, thr):
     for i in range(len(inputs[0][1])):
         plots = [_[1][i] for _ in inputs]  # all plots passed as first element of list
         if i < 3:
-            #for plot in plots:
+            # order the plots, two layer links are next to each other
+            plots = sorted(plots, key=_bec_layer_link)
             for m in range(int(len(plots)/2)):
                 plot0 = plots[2*m]
                 plot1 = plots[2*m+1]

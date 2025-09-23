@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrackParticleTruthAthenaPool )
@@ -19,7 +19,7 @@ find_package( AthenaPoolUtilitiesTest )
 
 if( ATHENAPOOLUTILITIESTEST_FOUND )
    set( TRACKPARTICLETRUTHATHENAPOOL_REFERENCE_TAG
-        TrackParticleTruthAthenaPoolReference-01-00-00 )
+        TrackParticleTruthAthenaPoolReference-01-00-01 )
   run_tpcnv_test( TrackParticleTruthTPCnv_18.0.0   AOD-18.0.0-full
                   REFERENCE_TAG ${TRACKPARTICLETRUTHATHENAPOOL_REFERENCE_TAG} )
 else()

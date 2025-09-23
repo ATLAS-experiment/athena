@@ -30,9 +30,10 @@ namespace EL
 
       using Module::Module;
 
-      BatchSample *sample = nullptr;
-      BatchSegment *segment = nullptr;
-      std::optional<uint64_t> maxEvents;
+      Gaudi::Property<int> jobId {this, "jobId", -1,
+        "the id/index of the subjob we are processing"};
+      Gaudi::Property<std::int64_t> maxEvents {this, "maxEvents", -1,
+        "the maximum number of events to process (-1 means all)"};
 
 
 

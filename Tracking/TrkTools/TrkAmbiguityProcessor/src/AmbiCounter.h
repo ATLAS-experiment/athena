@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrkAmbiguityProcessor_AmbiCounter_icc
 #define TrkAmbiguityProcessor_AmbiCounter_icc
 #include <array>
+#include <numeric>
 #include <vector>
 #include <string>
 #include "TrkTrack/Track.h"

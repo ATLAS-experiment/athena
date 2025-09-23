@@ -13,7 +13,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "AthenaMonitoringKernel/IMonitoredVariable.h"
 
 namespace Monitored {

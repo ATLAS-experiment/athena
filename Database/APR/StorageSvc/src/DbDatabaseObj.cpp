@@ -455,7 +455,7 @@ DbStatus DbDatabaseObj::open()   {
                 log << "--->Reading Param:" << n << "=[" << v << ']' 
                     << DbPrint::endmsg;
                 m_paramMap[n] = v;
-                if (n == "FID") fids.push_back(v);
+                if (n == "FID") fids.emplace_back(std::move(v));
               }
             }
             it.object()->~DbString(); m_params.free(it.object());

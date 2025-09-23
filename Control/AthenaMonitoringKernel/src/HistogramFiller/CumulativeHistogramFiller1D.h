@@ -23,22 +23,24 @@ namespace Monitored {
         return 0;
       }
 
-      const size_t varVecSize = vars.var[0]->size();
+      const size_t varVecSize = vars[0]->size();
 
-      // handling of the cutmask
-      auto cutMaskValuePair = getCutMaskFunc( vars.cut );
-      if (cutMaskValuePair.first == 0) { return 0; }
-      if (ATH_UNLIKELY(cutMaskValuePair.first > 1 && cutMaskValuePair.first != varVecSize)) {
-        MsgStream log(Athena::getMessageSvc(), "CumulativeHistogramFiller1D");
-        log << MSG::ERROR << "CutMask does not match the size of plotted variable: " 
-            << cutMaskValuePair.first << " " << varVecSize << endmsg;
+      if (vars.cut) {
+        const size_t maskSize = vars.cut->size();
+        // Abort if no cut entries or first (and only) entry is false
+        if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
+        if (ATH_UNLIKELY(maskSize > 1 && maskSize != varVecSize)) {
+          MsgStream log(Athena::getMessageSvc(), "CumulativeHistogramFiller1D");
+          log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
+              << maskSize << " " << varVecSize << endmsg;
+        }
       }
-      const auto & cutMaskValue = cutMaskValuePair.second;
+
       unsigned i{0};
       auto histogram = this->histogram<TH1>();
       for (; i < varVecSize; i++) {
-        if (!cutMaskValue(i)) { continue; }
-        const unsigned bin = histogram->FindBin(vars.var[0]->get(i));
+        if (vars.cut && !vars.cut->get(i)) { continue; }
+        const unsigned bin = histogram->FindBin(vars[0]->get(i));
 
         for (unsigned j = bin; j > 0; --j) {
           histogram->AddBinContent(j);

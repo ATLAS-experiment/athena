@@ -17,6 +17,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
+#include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimObjects/FPGATrackSimGNNEdge.h"
 #include "FPGATrackSimObjects/FPGATrackSimGNNHit.h"
 
@@ -47,6 +48,7 @@ class FPGATrackSimGNNGraphConstructionTool : public AthAlgTool
         // Handles
 
         ToolHandle<AthOnnx::IOnnxRuntimeInferenceTool> m_MLInferenceTool {this, "MLInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"};
+        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc", ""};
 
         ///////////////////////////////////////////////////////////////////////
         // Properties
@@ -55,7 +57,6 @@ class FPGATrackSimGNNGraphConstructionTool : public AthAlgTool
         Gaudi::Property<std::string> m_moduleMapType { this, "moduleMapType", "", "Type for Module Map for graph construction" };
         Gaudi::Property<std::string> m_moduleMapFunc { this, "moduleMapFunc", "", "Function for Module Map for graph construction" };
         Gaudi::Property<float> m_moduleMapTol { this, "moduleMapTol", 0.0, "Tolerance value for Module Map cut calculations" };
-        Gaudi::Property<std::string> m_moduleMapPath { this, "moduleMapPath", "", "Location of Module Map ROOT file" };
         Gaudi::Property<float> m_metricLearningR { this, "metricLearningR", 0.0, "Clustering radius for Metric Learning"};
         Gaudi::Property<int> m_metricLearningMaxN { this, "metricLearningMaxN", 1, "Max number of neighbours for Metric Learning"};
 
@@ -63,6 +64,7 @@ class FPGATrackSimGNNGraphConstructionTool : public AthAlgTool
         // Convenience
 
         // Module Map Information
+        std::string m_moduleMapPath;
         std::vector<unsigned int> m_mid1{};
         std::vector<unsigned int> m_mid2{};
         std::vector<float> m_z0min_12{};

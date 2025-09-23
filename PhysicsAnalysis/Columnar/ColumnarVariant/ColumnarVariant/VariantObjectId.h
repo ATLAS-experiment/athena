@@ -66,6 +66,15 @@ namespace columnar
       return acc (*this, std::forward<Args> (args)...);}
 
 
+    /// Mode-Specific Public Members
+    /// ============================
+  public:
+
+    [[nodiscard]] ObjectId<typename CI::baseId,CM> getBaseObject () const
+    {
+      return ObjectId<typename CI::baseId,CM> (*m_object);
+    }
+
 
     /// Private Members
     /// ===============

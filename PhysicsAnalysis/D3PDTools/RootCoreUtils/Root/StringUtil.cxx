@@ -36,21 +36,6 @@ namespace RCU
   }
 
 
-
-  bool match_expr (const boost::regex& expr, const std::string& str)
-  {
-    boost::match_results<std::string::const_iterator> what;
-    std::size_t count = boost::regex_match (str, what, expr);
-
-    for (std::size_t iter = 0; iter != count; ++ iter)
-    {
-      if (what[iter].matched && what[iter].first == str.begin() &&
-	  what[iter].second == str.end())
-	return true;
-    }
-    return false;
-  }
-
   bool match_expr(const std::regex& expr, const std::string& str) 
   {
     std::match_results<std::string::const_iterator> what;

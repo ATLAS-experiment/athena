@@ -66,14 +66,6 @@ private:
     Cache_WriteHandleKey m_ClusterCache{this,"ClusterCache",""};
     Cache_BackendUpdateHandleKey m_ClusterCacheBackend{this,"ClusterCacheBackend",""};
 
-    // expected number of clusters for RDO
-    // This values is used for reserving enough memory of the cluster container
-    // reserve = m_expectedClustersPerRDO * nRDOs
-    // The default values has been computed on a tt-bar PU200 sample
-    // comparing the memory usage and the container capacity
-    Gaudi::Property<int> m_expectedClustersPerRDO {this, "expectedClustersPerRDO", 32,
-      "Expected number of clusters for RDO"};
-
     Gaudi::Property<std::string> m_idHelperName {this, "IDHelper", "",
       "Name of ID helper to fetch from detstore" };
 

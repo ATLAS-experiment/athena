@@ -40,7 +40,7 @@ skipCheck=0
 storeClusters=False
 runF110=False
 skipEvents=0
-doCodeType="F100"
+doCodeType="F1X0"
 
 ## parsing flags
 while [ $# -ge 1 ];do

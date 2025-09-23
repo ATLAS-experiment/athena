@@ -103,7 +103,7 @@ class FTagConfig (ConfigBlock):
         # Save the b-tagging score
         if self.saveScores in ['True', 'All']:
             # Save the b-tagger weight
-            alg = config.createAlgorithm('CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg')
+            alg = config.createAlgorithm('CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlgScore')
             alg.jets = config.readName (self.containerName)
             alg.taggerWeightDecoration = f'{self.btagger}'
             alg.affectingSystematicsFilter = '.*' # only run it on nominal!

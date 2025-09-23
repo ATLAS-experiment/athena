@@ -39,6 +39,19 @@ StatusCode TrigNavSlimmingMTAlg::doRepack(TrigCompositeUtils::Decision* decision
     return StatusCode::SUCCESS;
   }
 
+  if (not m_repackFeaturesExclusionList.empty()) {
+    // Check the feature's StoreGate key against the exclusion list. If it is on the list, then we don't repack the feature.
+    // We instead leave it pointing to its current online physics object. It is assumed that this online physics object will 
+    // be kept in the DAOD via signature specific logic.
+    const std::string featureStoreGateKey = currentEL.dataID();
+    for (const std::string& exclusionEntry : m_repackFeaturesExclusionList) {
+      if (featureStoreGateKey == exclusionEntry) {
+        ATH_MSG_VERBOSE("Will not repack this feature " << currentEL.index() << " from " <<  currentEL.dataID() << ", as this container is on the exclusion list");
+        return StatusCode::SUCCESS;
+      }
+    }
+  }
+
   (**writeHandle).push_back( new xAOD::Particle() ); // Need to do this before performing the copy to assign with the Aux store
 
   const xAOD::IParticle* current = *currentEL;

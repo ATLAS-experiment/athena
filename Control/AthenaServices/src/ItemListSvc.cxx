@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ItemListSvc.cxx 
@@ -38,6 +38,7 @@ StatusCode ItemListSvc::initialize()
 // Just print out the streams for each item
 StatusCode ItemListSvc::finalize()
 {
+  lock_t lock (m_mutex);
   ATH_MSG_DEBUG("ItemListSvc finalize");
   std::map<std::string, std::set<std::string> >::const_iterator it = m_streamItems.begin();
   ATH_MSG_DEBUG("-- OUTPUT STREAM ITEM OVERLAP SUMMARY --");

@@ -7,7 +7,7 @@
 
 #include "TH2.h"
 
-#include "AthenaMonitoringKernel/HistogramFiller.h"
+#include "HistogramFiller.h"
 #include "HistogramFillerUtils.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 #include "GaudiKernel/MsgStream.h"
@@ -26,10 +26,10 @@ namespace Monitored {
       : HistogramFiller(definition, std::move(provider)) {}
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars) const override {
-      if (ATH_UNLIKELY(vars.var[0] == nullptr or vars.var[1] == nullptr )) return 0;
+      if (ATH_UNLIKELY(vars.size()!=2 or vars[0] == nullptr or vars[1] == nullptr )) return 0;
 
-      const size_t size0 = vars.var[0]->size();
-      const size_t size1 = vars.var[1]->size();
+      const size_t size0 = vars[0]->size();
+      const size_t size1 = vars[1]->size();
 
       if (ATH_UNLIKELY(size0 == 0 || size1 == 0)) {
         // nothing to do
@@ -43,20 +43,21 @@ namespace Monitored {
         return 0;
       }
 
-      std::function<bool(size_t)> cutMaskAccessor;
       if (vars.cut) {
-        // handling of the cutmask
-        auto cutMaskValuePair = getCutMaskFunc(vars.cut);
-        if (cutMaskValuePair.first == 0) { return 0; }
+        const size_t maskSize = vars.cut->size();
+        // Abort if no cut entries or first (and only) entry is false
+        if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
         if (ATH_UNLIKELY(size0 > 1 && size1 > 1 &&
-                         cutMaskValuePair.first > 1 && size0 != cutMaskValuePair.first)) {
+                         maskSize > 1 && size0 != maskSize)) {
           MsgStream log(Athena::getMessageSvc(), "HistogramFiller2D");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
-              << cutMaskValuePair.first << " " << size0 << endmsg;
+              << maskSize << " " << size0 << endmsg;
           return 0;
         }
-        cutMaskAccessor = cutMaskValuePair.second;
       }
+
+      // Accessor for cut mask in case one is defined
+      auto cutMaskAccessor = [&](size_t i) { return static_cast<bool>(vars.cut->get(i)); };
 
       if (vars.weight) {
         auto weightAccessor = [&](size_t i){ return vars.weight->get(i); };
@@ -68,12 +69,12 @@ namespace Monitored {
           return 0;
         }
         // Need to fill here while weightVector is still in scope
-        if (not vars.cut) return HistogramFiller::fill<H>(weightAccessor, detail::noCut, *vars.var[0], *vars.var[1]);
-        else                  return HistogramFiller::fill<H>(weightAccessor, std::move(cutMaskAccessor), *vars.var[0], *vars.var[1]);
+        if (not vars.cut) return HistogramFiller::fill<H>(weightAccessor, detail::noCut, *vars[0], *vars[1]);
+        else                  return HistogramFiller::fill<H>(weightAccessor, cutMaskAccessor, *vars[0], *vars[1]);
       }
 
-      if (not vars.cut) return HistogramFiller::fill<H>(detail::noWeight, detail::noCut, *vars.var[0], *vars.var[1]);
-      else                  return HistogramFiller::fill<H>(detail::noWeight, std::move(cutMaskAccessor), *vars.var[0], *vars.var[1]);
+      if (not vars.cut) return HistogramFiller::fill<H>(detail::noWeight, detail::noCut, *vars[0], *vars[1]);
+      else                  return HistogramFiller::fill<H>(detail::noWeight, cutMaskAccessor, *vars[0], *vars[1]);
     }
   };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONBASE_COLLECTIONDESCRIPTION_H
@@ -66,6 +66,10 @@ namespace pool {
      */ 
     CollectionDescription& operator=( const CollectionDescription& rhs )
     { operator=( (const ICollectionDescription&) rhs ); return *this; }
+
+    // Defaults should work for move.
+    CollectionDescription (CollectionDescription&&) = default;
+    CollectionDescription& operator= (CollectionDescription&&) = default;
 
     /**
      * Equality operator.

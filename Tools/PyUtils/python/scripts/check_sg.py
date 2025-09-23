@@ -37,7 +37,7 @@ def main(args):
         files = [files]
 
     from collections import defaultdict
-    from PyUtils.PoolFile import extract_items
+    from PyUtils.MetaReader import read_metadata
     import os
     import sys
 
@@ -50,13 +50,15 @@ def main(args):
             print ("## checking [%s]..." % (fname,))
 
             item_list = defaultdict(list)
-            for name, key in extract_items(fname, verbose=False, items_type='eventdata'):
+            md = read_metadata(fname)
+            for name, key in md.get(fname, {}).get('itemList', []):
                 item_list[name].append(key)
 
             print ("="*80)
             print ("%40s%s%-40s" % ("Container type", " | ","StoreGate keys"))
             print ("%40s%s%-40s" % ("-"*40, "-+-", "-"*(40-3)))
             for name, sgkeys in sorted(item_list.items()):
+                sgkeys = [(k.decode("utf-8") if not isinstance(k, str) else k) for k in sgkeys]
                 print ("%40s%s%-40s" % (name, " | ", ', '.join(sorted(sgkeys))))
             print ("="*80)
             if args.output:

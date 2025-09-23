@@ -5,12 +5,11 @@
 #include "FlavorTagInference/GNNDataLoader.h"
 
 FlavorTagInference::GNNDataLoader::GNNDataLoader(std::shared_ptr<const SaltModel> saltModel, const GNNOptions& gnn_options) : 
-  salt_model(saltModel),
-  graph_config(saltModel->getGraphConfig()),
+  SaltModelEDMLoaderBase(saltModel),
   m_gnn_options(gnn_options)
   {
     // Create configuration objects for data preprocessing.
-    auto [inputs, constituents_configs, fo] = 
+    auto [inputs_config, constituents_configs, fo] = 
         dataprep::createGetterConfig<
             SaltModelGraphConfig::GraphConfig, 
             SaltModelGraphConfig::OutputNodeConfig
@@ -19,60 +18,48 @@ FlavorTagInference::GNNDataLoader::GNNDataLoader(std::shared_ptr<const SaltModel
             m_gnn_options.flip_config, 
             m_gnn_options.variable_remapping
         );
+    auto salt_model_version = salt_model->getSaltModelVersion();
 
     for (auto config : constituents_configs){
       switch (config.type){
       using enum ConstituentsType;
       case TRACK:
-        constituents_loaders.push_back(std::make_shared<TracksLoader>(config, fo));
+        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<TracksLoader>(config, fo));
         break;
       case FLOW_ELEMENT:
-        constituents_loaders.push_back(std::make_shared<FlowElementsLoader>(config, fo));
+        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<FlowElementsLoader>(config, fo));
         break;
       case HIT:
-        constituents_loaders.push_back(std::make_shared<HitsLoader>(config, fo));
+        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<HitsLoader>(config, fo));
         break;
       case ELECTRON:
-        constituents_loaders.push_back(std::make_shared<ElectronsLoader>(config, fo));
+        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<ElectronsLoader>(config, fo));
         break;
       default:
         throw std::runtime_error("Unknown constituent type");
       }
     }
     // Initialize jet and b-tagging input getters.
-    auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
-    vars_from_jet = vj;
-    data_dependency_names = ds;
+    scalarInputName = (salt_model_version == SaltModelVersion::V2 ? "jets" : "jet_features");
+    auto [vars_from_jet, ds] = dataprep::createBvarGetters(inputs_config);
+    data_dependency_names = std::move(ds);
     ftag_options = std::move(fo);
+    for (const auto& [name, getter]: vars_from_jet) {
+      addScalarLoader(
+        name,
+        [getter](const xAOD::IParticle* p) { 
+          auto jet = dynamic_cast<const xAOD::Jet*>(p);
+          return getter(*jet).second; 
+      });
+    }
   }
 
-FlavorTagInference::SaltModelData FlavorTagInference::GNNDataLoader::loadInputs(const xAOD::IParticle* p) const{
-    auto jet = dynamic_cast<const xAOD::Jet*>(p);
-
-    SaltModelData salt_model_data;
-    // jet level inputs
-    std::vector<float> jet_feat;
-    for (const auto& getter: vars_from_jet) {
-      jet_feat.push_back(getter(*jet).second);
-    }
-    std::vector<int64_t> jet_feat_dim = {1, static_cast<int64_t>(jet_feat.size())};
-    Inputs jet_info(jet_feat, jet_feat_dim);
-    if (salt_model->getSaltModelVersion() == SaltModelVersion::V2) {
-      salt_model_data.gnn_inputs.insert({"jets", jet_info});
-    } else {
-      salt_model_data.gnn_inputs.insert({"jet_features", jet_info});
-    }
-
-    // constituent level inputs
-    for (const auto& loader : constituents_loaders){
-      auto [input_name, input_data, input_objects] = loader->getData(*jet);
-      if (salt_model->getSaltModelVersion() != SaltModelVersion::V2) {
-        input_name.pop_back();
-        input_name.append("_features");
-      }
-      salt_model_data.gnn_inputs.insert({input_name, input_data});
-      salt_model_data.num_inputs += input_data.first.size();
-      salt_model_data.constituents[input_name] = input_objects;
-    }
-    return salt_model_data;
+std::string FlavorTagInference::GNNDataLoader::getVecInputName(const SaltModelVersion salt_model_version, const ConstituentsInputConfig& constituents_config) const {
+  if (salt_model_version == SaltModelVersion::V2){
+    return constituents_config.output_name;
+  } else {
+    auto out = constituents_config.output_name;
+    out.pop_back();
+    return out + "_features";
+  }
 }

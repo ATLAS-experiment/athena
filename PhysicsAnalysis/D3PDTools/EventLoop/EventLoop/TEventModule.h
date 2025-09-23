@@ -10,6 +10,7 @@
 
 #include <EventLoop/Global.h>
 
+#include <AsgTools/PropertyWrapper.h>
 #include <EventLoop/Module.h>
 #include <memory>
 
@@ -73,7 +74,10 @@ namespace EL
 
       /// description: whether we collect D3PDPerfStats statistics
     private:
-      bool m_useStats; //!
+      Gaudi::Property<bool> m_useStats {this, "useStats", false}; //!
+
+      Gaudi::Property<std::string> m_modeStr {this, "accessMode", ""}; //!
+      Gaudi::Property<bool> m_summaryReport {this, "summaryReport", true}; //!
     };
   }
 }

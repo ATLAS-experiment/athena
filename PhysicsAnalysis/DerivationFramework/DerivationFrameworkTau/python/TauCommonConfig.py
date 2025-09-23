@@ -156,6 +156,32 @@ def AddDiTauLowPtCfg(flags, **kwargs):
 
     return acc
 
+def AddDiTauIDDecorationCfg(flags, **kwargs):
+    """Decorate ditau ID scores """
+
+    acc = ComponentAccumulator()
+
+    import DiTauRec.DiTauToolsConfig as DiTauTools
+
+    diTauOnnxScoreCalculator = acc.popToolsAndMerge(DiTauTools.DiTauOnnxScoreCalculatorCfg(
+            flags, 
+            onnxModelPath                   = "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx",
+        ))
+
+    acc.addPublicTool(diTauOnnxScoreCalculator)
+
+    DiTauIDDecoratorWrapper = CompFactory.DerivationFramework.DiTauIDDecoratorWrapper
+    DiTauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
+
+    DiTauIDDecoratorWrapper = DiTauIDDecoratorWrapper(name               = "DiTauIDDecoratorWrapper",
+                                                      DiTauContainerName = kwargs['DiTauContainerName'],
+                                                      DiTauOnnxDiscriminantTool = diTauOnnxScoreCalculator)
+
+    acc.addPublicTool(DiTauIDDecoratorWrapper)
+    acc.addEventAlgo(DiTauIDDecoratorKernel(name              = "DiTauIDDecorKernel",
+                                            AugmentationTools = [DiTauIDDecoratorWrapper]))
+    return acc
+    
 
 def AddTauIDDecorationCfg(flags, **kwargs):
     """Decorate tau ID scores and working points"""
@@ -200,6 +226,26 @@ def AddTauIDDecorationCfg(flags, **kwargs):
 
     return acc
 
+
+def AddDiTauChargeDecoratorCfg(flags, **kwargs):
+    """Decorate DiTau charge"""
+
+    kwargs.setdefault("DiTauContainerName", "DiTauJets")
+    kwargs.setdefault("prefix",           kwargs['DiTauContainerName'])
+
+    acc = ComponentAccumulator()
+   
+    DiTauChargeDecorator = CompFactory.DerivationFramework.DiTauChargeDecorator
+    DiTauChargeDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
+
+    prefix = kwargs['prefix']
+    diTauChargeDecorator = DiTauChargeDecorator(name               = f"{prefix}_DiTauChargeDecorator",
+                                                DiTauContainerName = kwargs['DiTauContainerName'])
+    acc.addPublicTool(diTauChargeDecorator)
+    acc.addEventAlgo(DiTauChargeDecoratorKernel(name              = f"{prefix}_DiTauIDDecorKernel",
+                                                AugmentationTools = [diTauChargeDecorator]))
+
+    return acc
 
 # TauJets_MuonRM steering
 def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):

@@ -540,8 +540,17 @@ def Pi0ClusterCreatorCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'Pi0ClusterCreator'
 
+    # TauPi0ClusterCreator accesses cells via links only, which doesn't
+    # make a scheduler dependency.  So make additional explicit dependencies
+    # on cells in the input file.
+    extraInputs = []
+    for typ, nam in [i.split('#') for i in flags.Input.TypedCollections]:
+        if typ == 'CaloCellContainer':
+            extraInputs += [('CaloCellContainer', nam)]
+
     TauPi0ClusterCreator = CompFactory.getComp("TauPi0ClusterCreator")
-    TauPi0ClusterCreator = TauPi0ClusterCreator(name = _name)
+    TauPi0ClusterCreator = TauPi0ClusterCreator(name = _name,
+                                                ExtraInputs = extraInputs)
 
     result.setPrivateTools(TauPi0ClusterCreator)
     return result

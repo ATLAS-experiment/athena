@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TClass.h>
@@ -98,11 +98,11 @@ namespace xAOD {
       // simple memory copying:
       TMethodCall* mc = m_assign.call();
       if( mc ) {
-        auto copyone = [mc] (void* dst, const void* src)
+        auto copyone = [mc] (void* dst_, const void* src_)
           {
             mc->ResetParam();
-            mc->SetParam( ( Long_t ) src );
-            mc->Execute( dst );
+            mc->SetParam( ( Long_t ) src_ );
+            mc->Execute( dst_ );
           };
 
          // If the source range doesn't overlap with the destination:

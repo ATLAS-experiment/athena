@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -81,6 +81,27 @@ namespace pool  {
       switchPtr(0);
       return *this;
     }
+
+    // Move
+    DbDatabase (DbDatabase&& cp)
+    {
+      setPtr (cp.m_ptr);
+      setType (cp.m_type);
+      cp.setPtr (nullptr);
+      cp.setType(DbType(0));
+    }
+    DbDatabase& operator= (DbDatabase&& cp)
+    {
+      if (&cp != this) {
+        switchPtr (nullptr);
+        setPtr (cp.m_ptr);
+        setType (cp.m_type);
+        cp.setPtr (nullptr);
+        cp.setType(DbType(0));
+      }
+      return *this;
+    }
+
     /// Access reference counter
     int refCount()  const;
     /// Access to access mode member

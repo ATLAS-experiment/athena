@@ -1169,10 +1169,10 @@ void Tester<CONT>::test()
 template <class CONT>
 void perftest_one()
 {
-  Tester<CONT> tester;
-  std::cout << tester.name() << "\n";
-  tester.test();
-  tester.report();
+  auto tester = std::make_unique<Tester<CONT> >();
+  std::cout << tester->name() << "\n";
+  tester->test();
+  tester->report();
 }
 
 

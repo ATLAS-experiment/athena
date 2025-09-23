@@ -1,13 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RegionSelectorBase_H
 #define RegionSelectorBase_H
 
 #include "GaudiKernel/MsgStream.h"
-#include "iostream"
-#include "string"
+
+#include <iostream>
+#include <memory>
+#include <string>
 
 namespace MuonCalib {
 

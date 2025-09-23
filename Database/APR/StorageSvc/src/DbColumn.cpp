@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DbColumn.cpp 726071 2016-02-25 09:23:05Z krasznaa $
@@ -97,7 +97,7 @@ DbStatus DbColumn::fromString( const string& string_rep)  {
           nread += 1;
           break;
         case 1:
-          m_typeName = s;
+          m_typeName = std::move(s);
           nread += 1;
           break;
         case 2:

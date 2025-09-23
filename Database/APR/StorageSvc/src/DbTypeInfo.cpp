@@ -96,10 +96,10 @@ static const std::string __typeinfoName( const std::type_info& tinfo) {
     }
   }
   else  {
-    char buff[16*1024];
-    size_t len = sizeof(buff);
     int    status = 0;
-    result = __cxxabiv1::__cxa_demangle(class_name, buff, &len, &status);
+    char* dem = __cxxabiv1::__cxa_demangle(class_name, 0, 0, &status);
+    result = dem;
+    ::free (dem);
   }
   return result;
 }
@@ -134,8 +134,10 @@ DbTypeInfo::DbTypeInfo(const Guid& guid, TypeH type, Columns& cols)
    }
    setShapeID(guid);
    if( cols.size() == 0 )   {
-      std::string full = DbReflex::fullTypeName(type);
-      std::string nam = (full.substr(0,2)=="::") ? full.substr(2) : full;
+      std::string nam = DbReflex::fullTypeName(type);
+      if (nam.starts_with ("::")) {
+        nam.erase (0, 2);
+      }
       int col_type = DbColumn::POINTER;
       if(clazz()) {
         if (clazz().TypeInfo() == typeid(unsigned char)) col_type = DbColumn::UCHAR;
@@ -252,7 +254,7 @@ DbStatus DbTypeInfo::i_fromString( const std::string& string_rep)  {
   const char* p1 = tmp.c_str();
   DbColumn* col = 0;
   setShapeID(Guid::null());
-  for(i = 0; i < sizeof(itm)/sizeof(itm[0]); ++i)   {
+  for(i = 0; p1 != nullptr && i < sizeof(itm)/sizeof(itm[0]); ++i)   {
 Again:
     p1 = ::strstr(p1, itm[i][0]);
     if ( p1 )    {

@@ -95,11 +95,11 @@ private: // properties
   ServiceHandle<StoreGateSvc>                m_storeGate;     //!< StoreGateSvc
   ServiceHandle<StoreGateSvc>                m_inputMetadata; //!< StoreGateSvc
   ServiceHandle<IROBDataProviderSvc>         m_robProvider;
-  Gaudi::Property<bool>                      m_sequential;    //!< enable sequential reading.
-  Gaudi::Property<bool>                      m_dump;
-  Gaudi::Property<float>                     m_wait;
-  Gaudi::Property<bool>                      m_valEvent;
-  Gaudi::Property<std::string>               m_eventInfoKey;
+  Gaudi::Property<bool>                      m_sequential{this, "EnableSequential", false, "enable sequential reading"};
+  Gaudi::Property<bool>                      m_dump{this, "DumpFlag", false, "Dump fragments"};
+  Gaudi::Property<float>                     m_wait{this, "WaitSecs", 0.0f, "Seconds to wait if input is in wait state"};
+  Gaudi::Property<bool>                      m_valEvent{this, "ValidateEvent", false, "switch on check_tree when reading events"};
+  Gaudi::Property<std::string>               m_eventInfoKey{this, "EventInfoKey", "EventInfo", "Key of EventInfo in metadata store"};
 
 
 private: // internal helper functions

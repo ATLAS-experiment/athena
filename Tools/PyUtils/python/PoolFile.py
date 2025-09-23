@@ -11,7 +11,6 @@ __author__  = "Sebastien Binet <binet@cern.ch>"
 __all__ = [
     'PoolFileCatalog',
     'PoolOpts',
-    'extract_items',
     'isRNTuple',
     'PoolRecord',
     'PoolFile',
@@ -450,37 +449,6 @@ def make_pool_record (branch, dirType):
                       branch.GetEntries(),
                       dirType=dirType,
                       typeName=typeName)
-
-def extract_items(pool_file, verbose=True, items_type='eventdata'):
-    """Helper function to read a POOL file and extract the item-list from the
-    DataHeader content.
-    @params
-      `pool_file`  the name of the pool file to inspect
-      `verbose`    self-explanatory
-      `items_type` what kind of items one is interested in
-                   allowed values: 'eventdata' 'metadata'
-    Note: this function is actually executed in a forked sub-process
-          if `fork` is True
-    """
-    _allowed_values = ('eventdata',
-                       'metadata',)
-    if items_type not in _allowed_values:
-        err = "".join([
-            "invalid argument for 'items_type'. ",
-            "got: [%s] " % items_type,
-            "(allowed values: %r)" % _allowed_values
-            ])
-        raise ValueError(err)
-
-    key = '%s_items' % items_type
-    f_root = _root_open(pool_file)
-    import PyUtils.FilePeekerTool as fpt
-    fp = fpt.FilePeekerTool(f_root)
-    items = fp.getPeekedData(key)
-
-    if items is None:
-        items = []
-    return items
 
 class PoolRecord(object):
     """

@@ -194,6 +194,20 @@ if __name__ == "__main__":
     from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
     ConfigureMultiRegionFlags(flags)
 
+    # The region map needs to not be loaded when running layer study; we set this here to
+    # guarantee it propagates consistently to all code that tries to set up the mapping service.
+    flags.Trigger.FPGATrackSim.loadRegionMap = False
+    flags.Trigger.FPGATrackSim.loadRadii = False
+
+    # We also don't want to load any of the ONNX files, so set them to the empty string.
+    # Again, override the user.
+    flags.Trigger.FPGATrackSim.FakeNNonnxFile1st = ""
+    flags.Trigger.FPGATrackSim.FakeNNonnxFile2nd = ""
+    flags.Trigger.FPGATrackSim.ParamNNonnxFile1st = ""
+    flags.Trigger.FPGATrackSim.ParamNNonnxFile2nd = ""
+    flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile = ""
+    flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile = ""
+
     flags.lock()
     flags.dump()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")

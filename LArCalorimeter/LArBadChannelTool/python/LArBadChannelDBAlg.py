@@ -21,7 +21,7 @@ def LArBadChannelDBAlgCfg(flags,InputFile,dbname="LAR_OFL",folder=None,tag=None,
 
 
     if folder is None:
-        if dbname in ("LAR","LAR_ONL"):
+        if dbname in ("LAR","LAR_ONL") or flags.Input.isMC:
             folder="/LAR/BadChannels/BadChannels"
         else:
             folder="/LAR/BadChannelsOfl/BadChannels"
@@ -69,12 +69,13 @@ if __name__=="__main__":
     parser.add_argument("--loglevel", default=None, help="logging level (ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, or FATAL")
     parser.add_argument("-r","--runnumber",default=0, type=int, help="IOV start (runnumber)")
     parser.add_argument("-l","--lbnumber",default=0, type=int, help="IOV start (LB number)")
-    parser.add_argument("--runnumber2",default=0x7FFFFFFF, type=int, help="IOV start (runnumber)")
-    parser.add_argument("--lbnumber2",default=0xFFFFFFFF, type=int, help="IOV start (LB number)")
+    parser.add_argument("--runnumber2",default=0x7FFFFFFF, type=int, help="IOV end (runnumber)")
+    parser.add_argument("--lbnumber2",default=0xFFFFFFFF, type=int, help="IOV end (LB number)")
     parser.add_argument("-o","--output",default="BadChannels.db", help="sqlite output file name")
     parser.add_argument("-f","--folder",default=None, help="database folder to create")
     parser.add_argument("-t","--tag",default=None, help="folder-level tag (or tag-suffix) to create")
     parser.add_argument("--SC", action='store_true', help="Work on SuperCells")
+    parser.add_argument("--MC", action='store_true', help="Work on OFLP200")
 
 
     (args,leftover)=parser.parse_known_args(sys.argv[1:])
@@ -88,16 +89,17 @@ if __name__=="__main__":
     flags=initConfigFlags()
     addLArCalibFlags(flags)
 
-    flags.Input.isMC = False
-    flags.IOVDb.DatabaseInstance="CONDBR2"
+    flags.Input.isMC = args.MC
+    from Campaigns.Utils import Campaign
+    flags.Input.MCCampaign = Campaign.Unknown
+    flags.IOVDb.DatabaseInstance="OFLP200" if flags.Input.isMC else "CONDBR2"
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=[args.runnumber if args.runnumber>0 else 300000]
-    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-06"
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
+    flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_MC if flags.Input.isMC else defaultConditionsTags.RUN3_DATA22
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     flags.LArCalib.isSC=args.SC
-
-    flags.IOVDb.DBConnection="sqlite://;schema="+args.output+";dbname=CONDBR2"
+    flags.IOVDb.DBConnection=f"sqlite://;schema={args.output};dbname={flags.IOVDb.DatabaseInstance}"
 
     if args.loglevel:
         from AthenaCommon import Constants

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -1123,68 +1123,68 @@ namespace CaloRecGPU
     template <class Func, class ... Args>
     constexpr void apply_to_all_samplings(Func && F, Args && ... args)
     {
-      F(sampling_0, std::forward<Args>(args)...);
-      F(sampling_1, std::forward<Args>(args)...);
-      F(sampling_2, std::forward<Args>(args)...);
-      F(sampling_3, std::forward<Args>(args)...);
-      F(sampling_4, std::forward<Args>(args)...);
-      F(sampling_5, std::forward<Args>(args)...);
-      F(sampling_6, std::forward<Args>(args)...);
-      F(sampling_7, std::forward<Args>(args)...);
-      F(sampling_8, std::forward<Args>(args)...);
-      F(sampling_9, std::forward<Args>(args)...);
-      F(sampling_10, std::forward<Args>(args)...);
-      F(sampling_11, std::forward<Args>(args)...);
-      F(sampling_12, std::forward<Args>(args)...);
-      F(sampling_13, std::forward<Args>(args)...);
-      F(sampling_14, std::forward<Args>(args)...);
-      F(sampling_15, std::forward<Args>(args)...);
-      F(sampling_16, std::forward<Args>(args)...);
-      F(sampling_17, std::forward<Args>(args)...);
-      F(sampling_18, std::forward<Args>(args)...);
-      F(sampling_19, std::forward<Args>(args)...);
-      F(sampling_20, std::forward<Args>(args)...);
-      F(sampling_21, std::forward<Args>(args)...);
-      F(sampling_22, std::forward<Args>(args)...);
-      F(sampling_23, std::forward<Args>(args)...);
-      F(sampling_24, std::forward<Args>(args)...);
-      F(sampling_25, std::forward<Args>(args)...);
-      F(sampling_26, std::forward<Args>(args)...);
-      F(sampling_27, std::forward<Args>(args)...);
+      F(sampling_0, args...);
+      F(sampling_1, args...);
+      F(sampling_2, args...);
+      F(sampling_3, args...);
+      F(sampling_4, args...);
+      F(sampling_5, args...);
+      F(sampling_6, args...);
+      F(sampling_7, args...);
+      F(sampling_8, args...);
+      F(sampling_9, args...);
+      F(sampling_10, args...);
+      F(sampling_11, args...);
+      F(sampling_12, args...);
+      F(sampling_13, args...);
+      F(sampling_14, args...);
+      F(sampling_15, args...);
+      F(sampling_16, args...);
+      F(sampling_17, args...);
+      F(sampling_18, args...);
+      F(sampling_19, args...);
+      F(sampling_20, args...);
+      F(sampling_21, args...);
+      F(sampling_22, args...);
+      F(sampling_23, args...);
+      F(sampling_24, args...);
+      F(sampling_25, args...);
+      F(sampling_26, args...);
+      F(sampling_27, args...);
     }
 
     ///@p F must be prepared to receive as first argument a EtaPhiMapEntry<N, M>, as well as any arguments.
     template <class Func, class ... Args>
     constexpr void apply_to_all_samplings(Func && F, Args && ... args) const
     {
-      F(sampling_0, std::forward<Args>(args)...);
-      F(sampling_1, std::forward<Args>(args)...);
-      F(sampling_2, std::forward<Args>(args)...);
-      F(sampling_3, std::forward<Args>(args)...);
-      F(sampling_4, std::forward<Args>(args)...);
-      F(sampling_5, std::forward<Args>(args)...);
-      F(sampling_6, std::forward<Args>(args)...);
-      F(sampling_7, std::forward<Args>(args)...);
-      F(sampling_8, std::forward<Args>(args)...);
-      F(sampling_9, std::forward<Args>(args)...);
-      F(sampling_10, std::forward<Args>(args)...);
-      F(sampling_11, std::forward<Args>(args)...);
-      F(sampling_12, std::forward<Args>(args)...);
-      F(sampling_13, std::forward<Args>(args)...);
-      F(sampling_14, std::forward<Args>(args)...);
-      F(sampling_15, std::forward<Args>(args)...);
-      F(sampling_16, std::forward<Args>(args)...);
-      F(sampling_17, std::forward<Args>(args)...);
-      F(sampling_18, std::forward<Args>(args)...);
-      F(sampling_19, std::forward<Args>(args)...);
-      F(sampling_20, std::forward<Args>(args)...);
-      F(sampling_21, std::forward<Args>(args)...);
-      F(sampling_22, std::forward<Args>(args)...);
-      F(sampling_23, std::forward<Args>(args)...);
-      F(sampling_24, std::forward<Args>(args)...);
-      F(sampling_25, std::forward<Args>(args)...);
-      F(sampling_26, std::forward<Args>(args)...);
-      F(sampling_27, std::forward<Args>(args)...);
+      F(sampling_0, args...);
+      F(sampling_1, args...);
+      F(sampling_2, args...);
+      F(sampling_3, args...);
+      F(sampling_4, args...);
+      F(sampling_5, args...);
+      F(sampling_6, args...);
+      F(sampling_7, args...);
+      F(sampling_8, args...);
+      F(sampling_9, args...);
+      F(sampling_10, args...);
+      F(sampling_11, args...);
+      F(sampling_12, args...);
+      F(sampling_13, args...);
+      F(sampling_14, args...);
+      F(sampling_15, args...);
+      F(sampling_16, args...);
+      F(sampling_17, args...);
+      F(sampling_18, args...);
+      F(sampling_19, args...);
+      F(sampling_20, args...);
+      F(sampling_21, args...);
+      F(sampling_22, args...);
+      F(sampling_23, args...);
+      F(sampling_24, args...);
+      F(sampling_25, args...);
+      F(sampling_26, args...);
+      F(sampling_27, args...);
     }
 
     ///@p F must be prepared to receive as first argument a EtaPhiMapEntry<N, M>, as well as any arguments.

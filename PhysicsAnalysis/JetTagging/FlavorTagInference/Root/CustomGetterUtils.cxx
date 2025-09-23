@@ -19,26 +19,26 @@ namespace {
   using FlavorTagInference::getter_utils::SequenceGetterFunc;
   // ______________________________________________________________________
   // Custom getters for jet input features
-  std::function<double(const xAOD::Jet&)> customJetGetter(
+  std::function<double(const xAOD::IParticle&)> customJetGetter(
     const std::string& name)
   {
     if (name == "pt") {
-      return [](const xAOD::Jet& j) -> float {return j.pt();};
+      return [](const xAOD::IParticle& j) -> float {return j.pt();};
     }
     if (name == "log_pt") {
-      return [](const xAOD::Jet& j) -> float {return std::log(j.pt());};
+      return [](const xAOD::IParticle& j) -> float {return std::log(j.pt());};
     }
     if (name == "eta") {
-      return [](const xAOD::Jet& j) -> float {return j.eta();};
+      return [](const xAOD::IParticle& j) -> float {return j.eta();};
     }
     if (name == "abs_eta") {
-      return [](const xAOD::Jet& j) -> float {return std::abs(j.eta());};
+      return [](const xAOD::IParticle& j) -> float {return std::abs(j.eta());};
     }
     if (name == "energy") {
-      return [](const xAOD::Jet& j) -> float {return j.e();};
+      return [](const xAOD::IParticle& j) -> float {return j.e();};
     }
     if (name == "mass") {
-      return [](const xAOD::Jet& j) -> float {return j.m();};
+      return [](const xAOD::IParticle& j) -> float {return j.m();};
     }
 
     throw std::logic_error("no match for custom getter " + name);
@@ -60,7 +60,7 @@ namespace {
         {}
 
       std::pair<std::string, std::vector<double>>
-      operator()(const xAOD::Jet&, const std::vector<const U*>& constituents) const {
+      operator()(const xAOD::IParticle&, const std::vector<const U*>& constituents) const {
         std::vector<double> sequence;
         for (const U* el: constituents) {
           sequence.push_back(m_getter(*el));
@@ -73,14 +73,14 @@ namespace {
   template <typename Const>
   class CustomSeqGetter
   {
-    using F = std::function<double(const Const&, const xAOD::Jet&)>;
+    using F = std::function<double(const Const&, const xAOD::IParticle&)>;
     private:
       F m_getter;
     public:
       CustomSeqGetter(F getter): m_getter(getter) {}
       
       std::vector<double>
-      operator()(const xAOD::Jet& jet, const std::vector<const Const*>& constituents) const {
+      operator()(const xAOD::IParticle& jet, const std::vector<const Const*>& constituents) const {
         std::vector<double> sequence;
         sequence.reserve(constituents.size());
         for (const auto* constituent: constituents) {
@@ -97,7 +97,7 @@ namespace {
     const std::string& prefix)
   {
     using Tp = xAOD::TrackParticle;
-    using Jet = xAOD::Jet;
+    using Jet = xAOD::IParticle;
 
     // Note that we have two names for the lifetimeSigned variables
     // here. We should eventually remove the ones with the `IP3D_*`
@@ -171,7 +171,7 @@ namespace {
   getterFromTracksNoIpDep(const std::string& name)
   {
     using Tp = xAOD::TrackParticle;
-    using Jet = xAOD::Jet;
+    using Jet = xAOD::IParticle;
 
     if (name == "qOverP") {
       return CustomSeqGetter<Tp>([](const Tp& p, const Jet&) {
@@ -275,7 +275,7 @@ namespace {
   template <typename T> std::optional<SequenceGetterFunc<T>>
   getterFromIParticles(const std::string& name)
   {
-    using Jet = xAOD::Jet;
+    using Jet = xAOD::IParticle;
 
     if (name == "pt") {
       return CustomSeqGetter<T>([](const T& p, const Jet&) {
@@ -365,7 +365,7 @@ namespace {
   getterFromFlowElements(const std::string& name)
   {   
     using Fl = xAOD::FlowElement;
-    using Jet = xAOD::Jet;
+    using Jet = xAOD::IParticle;
     if (name == "isCharged") {
       return CustomSeqGetter<Fl>([](const Fl& p, const Jet&) {
         return p.isCharged();
@@ -375,8 +375,8 @@ namespace {
   }
 
 
-  // Eigen::Vector3d getJab(const Eigen::Vector3d local_hits, const xAOD::Jet& j)
-  Eigen::Vector3d getJab(const float local_hitX, const float local_hitY, const float local_hitZ, const xAOD::Jet& j)
+  // Eigen::Vector3d getJab(const Eigen::Vector3d local_hits, const xAOD::IParticle& j)
+  Eigen::Vector3d getJab(const float local_hitX, const float local_hitY, const float local_hitZ, const xAOD::IParticle& j)
   {
     // I want to compute jab coordinates: jet projection, adjacent
     // projection, beamline projection. The "adjacent" projection
@@ -404,7 +404,7 @@ namespace {
   getterFromHits(const std::string& name)
   {
     using Tmv = xAOD::TrackMeasurementValidation;
-    using Jet = xAOD::Jet;
+    using Jet = xAOD::IParticle;
     
     SG::AuxElement::ConstAccessor<float> local_hitX("HitsXRelToBeamspot");
     SG::AuxElement::ConstAccessor<float> local_hitY("HitsYRelToBeamspot");
@@ -434,7 +434,7 @@ namespace {
   std::optional<SequenceGetterFunc<xAOD::Electron>>
   getterFromElectrons(const std::string& name, const std::string& prefix)
   {
-    using Jet = xAOD::Jet;
+    using Jet = xAOD::IParticle;
     using El = xAOD::Electron;
 
     SG::AuxElement::ConstAccessor<float> pt_varcone30{"ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000"};
@@ -505,10 +505,10 @@ namespace {
     // which returns the pair we wanted.
     //
     // Case for jet variables
-    std::function<std::pair<std::string, double>(const xAOD::Jet&)>
+    std::function<std::pair<std::string, double>(const xAOD::IParticle&)>
     namedCustomJetGetter(const std::string& name) {
       auto getter = customJetGetter(name);
-      return [name, getter](const xAOD::Jet& j) {
+      return [name, getter](const xAOD::IParticle& j) {
         return std::make_pair(name, getter(j));
       };
     }
@@ -563,7 +563,7 @@ namespace {
     SeqGetter<T>::getNamedCustomSeqGetter(const std::string& name, const std::string& prefix) {
       auto [getter, deps] = buildCustomSeqGetter<T>(name, prefix);
       return {
-        [n=name, g=getter](const xAOD::Jet& j, const std::vector<const T*>& t) {
+        [n=name, g=getter](const xAOD::IParticle& j, const std::vector<const T*>& t) {
           return std::make_pair(n, g(j, t));
         },
         deps
@@ -605,7 +605,7 @@ namespace {
         auto [seqGetter, seq_deps] = seqFromConsituents(input_cfg, options);
 
         if(input_cfg.flip_sign){
-          auto seqGetter_flip=[g=seqGetter](const xAOD::Jet&jet, const Const& constituents){
+          auto seqGetter_flip=[g=seqGetter](const xAOD::IParticle&jet, const Const& constituents){
             auto [n,v] = g(jet,constituents);
             std::for_each(v.begin(), v.end(), [](double &n){ n=-1.0*n; });
             return std::make_pair(n,v);
@@ -624,7 +624,7 @@ namespace {
 
     template <typename T>
     std::pair<std::vector<float>, std::vector<int64_t>> SeqGetter<T>::getFeats(
-      const xAOD::Jet& jet, const Const& constituents) const
+      const xAOD::IParticle& jet, const Const& constituents) const
     {
       std::vector<float> cnsts_feats;
       int num_vars = m_sequence_getters.size();
@@ -651,7 +651,7 @@ namespace {
 
     template <typename T>
     std::map<std::string, std::vector<double>> SeqGetter<T>::getDL2Feats(
-      const xAOD::Jet& jet, const Const& constituents) const
+      const xAOD::IParticle& jet, const Const& constituents) const
     {
       std::map<std::string, std::vector<double>> feats;
       for (const auto& seq_getter: m_sequence_getters){

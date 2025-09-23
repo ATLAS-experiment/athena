@@ -16,4 +16,8 @@ namespace ActsTrk::detail {
     return m_measurementOffsets;
   }
 
+  inline const xAOD::UncalibratedMeasurementContainer* TrackFindingMeasurements::container(std::size_t typeIndex) const {
+    return m_containers.at(typeIndex);
+  }
+
 }  // namespace ActsTrk::detail

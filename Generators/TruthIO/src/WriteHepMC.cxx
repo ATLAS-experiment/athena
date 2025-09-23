@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthIO/WriteHepMC.h"
@@ -13,12 +13,18 @@ WriteHepMC::WriteHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("OutputFile", m_outfile="events.hepmc");
   declareProperty("Precision", m_precision=8);
   declareProperty("Format", m_format="hepmc2");
+  declareProperty("Units", m_units="GEVMM");
 }
 
 
 StatusCode WriteHepMC::initialize() {
   CHECK(GenBase::initialize());
+  if (m_units.size() != 5) {
+     return StatusCode::FAILURE;
+  }
 #ifdef HEPMC3
+  m_momentumunit = HepMC3::Units::momentum_unit(m_units.substr(0,3));
+  m_lengthunit = HepMC3::Units::length_unit(m_units.substr(3,2));
   if (m_format == "hepmc2") {
     auto writer = new HepMC3::WriterAsciiHepMC2(m_outfile);
     writer->set_precision(m_precision);
@@ -30,6 +36,8 @@ StatusCode WriteHepMC::initialize() {
     m_hepmcio.reset(writer);
   }
 #else
+  m_momentumunit = (m_units.substr(0,3) == "MEV") ? HepMC::Units::MEV : HepMC::Units::GEV;
+  m_lengthunit = (m_units.substr(3,2) == "CM") ? HepMC::Units::CM : HepMC::Units::MM;
   m_hepmcio.reset( new HepMC::IO_GenEvent(m_outfile) );
   m_hepmcio->precision(m_precision);
 #endif
@@ -40,9 +48,13 @@ StatusCode WriteHepMC::initialize() {
 StatusCode WriteHepMC::execute() {
   // Just write out the first (i.e. signal) event in the collection
 #ifdef HEPMC3
-  m_hepmcio->write_event(*(event_const()));
+  auto ev = std::make_shared<HepMC3::GenEvent>(*(event_const()));
+  ev->set_units(m_momentumunit,m_lengthunit);
+  m_hepmcio->write_event(*(ev.get()));
 #else
-  m_hepmcio->write_event(event_const());
+  auto ev = std::make_shared<HepMC::GenEvent>(*(event_const()));
+  ev->use_units(m_momentumunit,m_lengthunit);
+  m_hepmcio->write_event(*(ev.get()));
 #endif
   return StatusCode::SUCCESS;
 }

@@ -398,9 +398,11 @@ if __name__=='__main__':
                                                ))
 
   if "DSPThr" in objects:
-     from IOVDbSvc.IOVDbSvcConfig import addFolders
-     cfg.merge(addFolders(flags,"/LAR/Configuration/DSPThresholdFlat/Thresholds",detDb="LAR_ONL"))  
-     cfg.addEventAlgo(CompFactory.LArDSPThresholds2Ntuple(DumpFlat=True,FlatFolder="/LAR/Configuration/DSPThresholdFlat/Thresholds"))
+     from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
+     f1 = "/LAR/Configuration/DSPThresholdFlat/Thresholds"
+     f2 = "/LAR/NoiseOfl/DSPThresholds"
+     cfg.merge(addFoldersSplitOnline(flags,"LAR",f1,f2,splitMC=True))
+     cfg.addEventAlgo(CompFactory.LArDSPThresholds2Ntuple(DumpFlat=True,FlatFolder=f2 if flags.Input.isMC else f1))
 
   if "MinBias" in objects:
      #FIXME different for MC

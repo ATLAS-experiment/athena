@@ -459,6 +459,10 @@ StatusCode AthenaOutputStream::write() {
          streamer = dynamic_cast<IAthenaOutputStreamTool*>( st );
          IProperty *mstreamer_props = dynamic_cast<IProperty*> (&*m_streamer);
          IProperty *streamer_props = dynamic_cast<IProperty*> (&*streamer);
+         if (!mstreamer_props || !streamer_props) {
+           ATH_MSG_FATAL("Cannot cast streamer to IProperty");
+           return StatusCode::FAILURE;
+         }
          for ( const auto& prop : mstreamer_props->getProperties() ) {
             ATH_CHECK( streamer_props->setProperty( *prop ) );
          }
