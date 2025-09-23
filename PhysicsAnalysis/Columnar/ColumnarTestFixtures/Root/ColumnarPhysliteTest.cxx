@@ -614,13 +614,15 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        targetContainerName = iter->second.linkToName;
+        if (iter->second.linkTargetNames.size() != 1)
+          throw std::runtime_error ("expected exactly one link target name for: " + outputColumns.at(0).name);
+        targetContainerName = iter->second.linkTargetNames.at(0);
         if (auto keyIter = knownKeys.find (targetContainerName); keyIter != knownKeys.end())
           targetKey = keyIter->second;
-        if (auto offsetIter = offsetColumns.find (iter->second.linkToName); offsetIter != offsetColumns.end())
+        if (auto offsetIter = offsetColumns.find (iter->second.linkTargetNames.at(0)); offsetIter != offsetColumns.end())
           targetOffsetColumn = offsetIter->second;
         else
-          throw std::runtime_error ("missing offset column: " + iter->second.linkToName);
+          throw std::runtime_error ("missing offset column: " + iter->second.linkTargetNames.at(0));
 
         requestedColumns.erase (iter);
 
@@ -808,13 +810,15 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        targetContainerName = iter->second.linkToName;
+        if (iter->second.linkTargetNames.size() != 1)
+          throw std::runtime_error ("expected exactly one link target name for: " + outputColumns.at(0).name);
+        targetContainerName = iter->second.linkTargetNames.at(0);
         if (auto keyIter = knownKeys.find (targetContainerName); keyIter != knownKeys.end())
           targetKey = keyIter->second;
-        if (auto targetOffsetIter = offsetColumns.find (iter->second.linkToName); targetOffsetIter != offsetColumns.end())
+        if (auto targetOffsetIter = offsetColumns.find (iter->second.linkTargetNames.at(0)); targetOffsetIter != offsetColumns.end())
           targetOffsetColumn = targetOffsetIter->second;
         else
-          throw std::runtime_error ("missing offset column: " + iter->second.linkToName);
+          throw std::runtime_error ("missing offset column: " + iter->second.linkTargetNames.at(0));
 
         requestedColumns.erase (iter);
 
@@ -926,17 +930,7 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        auto linkContainers = iter->second.variantLinkContainers;
-        if (linkContainers.empty())
-        {
-          if (iter->second.linkToName.empty())
-            throw std::runtime_error ("missing link container for: " + outputColumns.at(0).name);
-          linkContainers.push_back (iter->second.linkToName);
-        } else
-        {
-          if (!iter->second.linkToName.empty())
-            throw std::runtime_error ("link container and variant link containers both set for: " + outputColumns.at(0).name);
-        }
+        const auto& linkContainers = iter->second.linkTargetNames;
         for (const auto& container : linkContainers)
         {
           if (auto keyIter = knownKeys.find (container); keyIter != knownKeys.end())
@@ -1102,7 +1096,7 @@ namespace columnar
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
-        containers = iter->second.variantLinkContainers;
+        containers = iter->second.linkTargetNames;
         if (containers.empty() || iter->second.variantLinkKeyColumn.empty())
           throw std::runtime_error ("no variant link containers for: " + outputColumns.at(0).name);
         if (iter->second.variantLinkKeyColumn != outputColumns.at(2).name)

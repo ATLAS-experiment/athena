@@ -315,9 +315,9 @@ namespace columnar
       auto dataInfo = info;
       dataInfo.offsetName = columnBase.containerStoreName (CI::idName);
       dataInfo.variantLinkKeyColumn = keysName;
-      dataInfo.variantLinkContainers.reserve (VariantCI::numVariants);
+      dataInfo.linkTargetNames.reserve (VariantCI::numVariants);
       for (unsigned i = 0; i < VariantCI::numVariants; ++ i)
-        dataInfo.variantLinkContainers.push_back (columnBase.containerStoreName (containerIdNames[i]));
+        dataInfo.linkTargetNames.push_back (columnBase.containerStoreName (containerIdNames[i]));
       auto keyInfo = info;
       keyInfo.fixedDimensions.push_back (VariantCI::numVariants);
 
@@ -388,9 +388,9 @@ namespace columnar
       auto dataInfo = info;
       dataInfo.offsetName = offsetName;
       dataInfo.variantLinkKeyColumn = keysName;
-      dataInfo.variantLinkContainers.reserve (VariantCI::numVariants);
+      dataInfo.linkTargetNames.reserve (VariantCI::numVariants);
       for (unsigned i = 0; i < VariantCI::numVariants; ++ i)
-        dataInfo.variantLinkContainers.push_back (columnBase.containerStoreName (containerIdNames[i]));
+        dataInfo.linkTargetNames.push_back (columnBase.containerStoreName (containerIdNames[i]));
       auto keyInfo = info;
       keyInfo.fixedDimensions.push_back (VariantCI::numVariants);
 

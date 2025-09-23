@@ -100,7 +100,7 @@ namespace columnar
     static constexpr bool useConvertWithDataInput = true;
     static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& columnarTool, ColumnInfo& info)
     {
-      info.linkToName = columnarTool.containerStoreName(LT::idName);
+      info.linkTargetNames = {columnarTool.containerStoreName(LT::idName)};
       return info;
     }
 
