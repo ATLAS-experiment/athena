@@ -98,7 +98,7 @@ if [ "$USEEXCTRACE" = "1" ] || [ "$USEEXCTRACE" = "true" ]; then
     # Abuse which to search for the library.
     EXCTRACE_LIB=`PATH=$LD_LIBRARY_PATH /usr/bin/which libexctrace_collector.so`
     if [ "$EXCTRACE_LIB" = "" ]; then
-        error "ERROR: Cannot find libexctrace_collector.so"
+        echo "ERROR: Cannot find libexctrace_collector.so"
         exit 1
     fi
     echo "Preloading `basename $EXCTRACE_LIB`"
@@ -112,7 +112,7 @@ if [ "$USEEXCABORT" = "1" ] || [ "$USEEXCABORT" = "true" ]; then
     # Abuse which to search for the library.
     EXCABORT_LIB=`PATH=$LD_LIBRARY_PATH /usr/bin/which libexcabort.so`
     if [ "$EXCABORT_LIB" = "" ]; then
-        error "ERROR: Cannot find libexcabort.so"
+        echo "ERROR: Cannot find libexcabort.so"
         exit 1
     fi
     echo "Preloading `basename $EXCABORT_LIB`"
