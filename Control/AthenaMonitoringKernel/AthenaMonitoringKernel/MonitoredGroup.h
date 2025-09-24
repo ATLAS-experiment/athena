@@ -85,8 +85,9 @@ namespace Monitored {
         try {
           fill();
         }
-        catch (const GaudiException&) {
+        catch (std::exception &) {
           // fill can throw due to dereferencing a Gaudi handle
+          //or boost container exception
           std::abort();
         }
       }
