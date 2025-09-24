@@ -300,13 +300,13 @@ def addMainSequences(flags, cfg):
 
 def addEvgenSequences(flags, cfg):
     from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Generator), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Fix), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.PreFilter), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Test), parentName="AthAlgSeq")
-    # TODO: needs to setup proper filtering sequence
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Filter), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Main), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Generator), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Fix), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.PreFilter), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Test), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Filter), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName=EvgenSequence.Main.value)
 
 
 def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
