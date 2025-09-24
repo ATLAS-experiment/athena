@@ -373,7 +373,7 @@ namespace MuonR4::SegmentFit{
             }
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Hessian matrix: \n"<<hessian
                 <<",\nblock Hessian:\n"<<miniHessian<<",\n determinant: "<<miniHessian.determinant());
-            covariance.block<nDim,nDim>(0,0) = miniHessian.inverse();
+            covariance.block<nDim,nDim>(0,0) = miniHessian.inverse().eval();
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": covariance: \n"<<covariance);
     }
 
