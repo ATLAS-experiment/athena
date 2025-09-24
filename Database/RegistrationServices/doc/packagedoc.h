@@ -143,15 +143,6 @@ specific. The current Tools are listed below.
         <li>StoreName (DEFAULT: 'StoreGateSvc')</li>
       </ul>
     </ul>
-  <li>RegistrationStreamTagTool</li>
-    <ul>
-      <li>Input: TagAthenaAttributeList</li>
-      <li>Output: POOL Collection</li>
-      <li>Properties:</li>
-      <ul>
-        <li>FragmentByGroup (DEFAULT: false) If true, then form collection fragments based on GRP settings in AttributeType.</li>
-      </ul>
-    </ul>
   <li>RegistrationStreamHDFTool</li>
     <ul>
       <li>Input: AthenaAttributeList</li>

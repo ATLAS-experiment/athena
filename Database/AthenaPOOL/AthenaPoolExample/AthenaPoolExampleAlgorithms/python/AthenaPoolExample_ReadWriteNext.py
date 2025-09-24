@@ -50,7 +50,6 @@ acc.addEventAlgo( CompFactory.AthPoolEx.WriteTag("WriteTag", OutputLevel = DEBUG
 
 MagicWriteTag = CompFactory.AthPoolEx.WriteTag("MagicWriteTag", OutputLevel = DEBUG)
 MagicWriteTag.Key = "MagicTag"
-MagicWriteTag.TagKey = "MagicTag"
 MagicWriteTag.Magic = 24
 acc.addEventAlgo( MagicWriteTag )
 

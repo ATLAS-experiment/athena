@@ -45,7 +45,6 @@ namespace AthenaPoolUtilitiesDummyClasses
 }
 
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
-#include "AthenaPoolUtilities/TagAthenaAttributeList.h"
 #include "AthenaPoolUtilities/AthenaAttributeListSpecification.h"
 #include "AthenaPoolUtilities/AthenaAttributeSpecification.h"
 
