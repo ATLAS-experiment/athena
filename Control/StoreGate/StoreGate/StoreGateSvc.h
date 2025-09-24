@@ -120,8 +120,6 @@ class StoreGateSvc : public extends<Service,
 {
 
 public:
-#ifndef BOOST_NO_CXX11_TEMPLATE_ALIASES
-#ifndef BOOST_NO_CXX11_VARIADIC_TEMPLATES
   /////////////////////////////////////////////////////////////////////////
   /// \name Basic Client Interface: data object creation
   //@{
@@ -147,8 +145,6 @@ public:
   template <typename T, typename TKEY, typename... ARGS>
   SG::WPtr<T> create(const TKEY& key, ARGS... constructorArgs);
   //@}
-#endif   /* needs C++11 variadic templates to call arbitrary constructors */
-#endif   /* needs "templated typedef" to define SG::WPtr (for now) */
 
   /////////////////////////////////////////////////////////////////////////
   /// \name Basic Client Interface: data object registration
