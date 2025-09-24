@@ -5,7 +5,6 @@ atlas_subdir( MuonCondTest )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( Boost )
 find_package( CORAL )
 
 # Component(s) in the package:
@@ -13,7 +12,7 @@ atlas_add_component( MuonCondTest
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CoralUtilitiesLib GaudiKernel 
+                     LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CoralUtilitiesLib GaudiKernel 
                                     GeoPrimitives Identifier MuonAlignmentData MuonCondData MuonCondInterface MuonIdHelpersLib 
                                     MuonReadoutGeometry MdtCalibData StoreGateLib MuonCablingData MuonReadoutGeometryR4 )
 
