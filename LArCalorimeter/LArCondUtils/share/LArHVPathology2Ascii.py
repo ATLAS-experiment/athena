@@ -80,7 +80,7 @@ if __name__=="__main__":
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags=initConfigFlags()
-
+    flags.Input.Files = []
     flags.Input.isMC = False
     flags.IOVDb.DatabaseInstance="CONDBR2"
     flags.LAr.doAlign=False

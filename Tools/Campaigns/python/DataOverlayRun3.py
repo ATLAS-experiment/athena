@@ -30,4 +30,4 @@ def DataOverlay2025OO(flags):
     """Configuration for OO data overlay for year 2025"""
     _DataOverlayRun3Cfg(flags)
 
-    flags.Overlay.DataOverlayConditions = "OverlayConfiguration.DataOverlayConditions.DataOverlay2025OO"
+    flags.Overlay.DataOverlayConditions = "OverlayConfiguration.DataOverlayConditions.DataOverlay2025OOCfg"
