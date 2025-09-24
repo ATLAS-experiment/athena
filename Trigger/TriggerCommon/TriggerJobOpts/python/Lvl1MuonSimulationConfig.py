@@ -271,6 +271,7 @@ def NSWTriggerConfig(flags):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, Load=rdoInputs))
 
+    PadEmulatorTool = CompFactory.NSWL1.PadEmulatorTool("NSWL1__PadEmulatorTool", DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches, IsMC = flags.Input.isMC, sTGC_DigitContainerName="sTGC_DIGITS_L1")
     PadTdsTool = CompFactory.NSWL1.PadTdsOfflineTool("NSWL1__PadTdsOfflineTool", IsMC = flags.Input.isMC, sTGC_DigitContainerName="sTGC_DIGITS_L1")
     PadTriggerLogicTool = CompFactory.NSWL1.PadTriggerLogicOfflineTool("NSWL1__PadTriggerLogicOfflineTool")
     StripTdsTool = CompFactory.NSWL1.StripTdsOfflineTool("NSWL1__StripTdsOfflineTool", IsMC=flags.Input.isMC, sTGC_DigitContainerName="sTGC_DIGITS_L1")
@@ -278,6 +279,11 @@ def NSWTriggerConfig(flags):
     StripSegmentTool = CompFactory.NSWL1.StripSegmentTool("NSWL1__StripSegmentTool")
     MMTriggerTool = CompFactory.NSWL1.MMTriggerTool("NSWL1__MMTriggerTool",DoNtuple=flags.Trigger.L1MuonSim.WriteMMBranches, IsMC = flags.Input.isMC, MmDigitContainer="MM_DIGITS_L1")
     TriggerProcessorTool = CompFactory.NSWL1.TriggerProcessorTool("NSWL1__TriggerProcessorTool")
+
+    # Include NswDcsDb Algorithm for data
+    if not flags.Input.isMC:
+        from MuonConfig.MuonCondAlgConfig import NswDcsDbAlgCfg
+        acc.merge(NswDcsDbAlgCfg(flags))
 
     dosTGC =  flags.Trigger.L1MuonSim.doPadTrigger or flags.Trigger.L1MuonSim.doStripTrigger
     if dosTGC:
@@ -290,6 +296,7 @@ def NSWTriggerConfig(flags):
                                                DoMMDiamonds = flags.Trigger.L1MuonSim.doMMTrigger,
                                                DosTGC = dosTGC,
                                                DoPad = flags.Trigger.L1MuonSim.doPadTrigger,
+                                               PadEmulatorTool = PadEmulatorTool,
                                                DoStrip = flags.Trigger.L1MuonSim.doStripTrigger,
                                                PadTdsTool = PadTdsTool,
                                                PadTriggerTool = PadTriggerLogicTool,
