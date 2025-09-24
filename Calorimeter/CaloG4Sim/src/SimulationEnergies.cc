@@ -74,7 +74,6 @@
 #include "MCTruth/AtlasG4EventUserInfo.h"
 
 #include "G4EventManager.hh"
-#include "G4SteppingManager.hh"
 #include "G4TrackVector.hh"
 #include "G4StepPoint.hh"
 #include "G4Step.hh"
@@ -204,23 +203,21 @@ namespace CaloG4
       return result;
     }
 
-    G4TrackStatus status = pTrack->GetTrackStatus();
-    G4double dEStepVisible = step->GetTotalEnergyDeposit();
-    G4int processSubTypeValue=0;
-    if ( step->GetPostStepPoint()->GetProcessDefinedStep() != nullptr ) {
-      //from G4VProcess.hh
-      processSubTypeValue =
-        step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessSubType();
-    }
+    const G4TrackStatus status = pTrack->GetTrackStatus();
+    const G4double dEStepVisible = step->GetTotalEnergyDeposit();
+    //from G4VProcess.hh
+    const G4int processSubTypeValue=
+      ( step->GetPostStepPoint()->GetProcessDefinedStep() ) ?
+      step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessSubType() : 0;
 
-    G4double EkinPreStep = step->GetPreStepPoint()->GetKineticEnergy();
+    const G4double EkinPreStep = step->GetPreStepPoint()->GetKineticEnergy();
     const G4DynamicParticle* dynParticle = pTrack->GetDynamicParticle();
-    G4double EkinPostStep = pTrack->GetKineticEnergy();
+    const G4double EkinPostStep = pTrack->GetKineticEnergy();
 
     // Start of calculation of invisible energy for current step.
     if ( status == fStopAndKill ){ // StopAndKill stepping particle at PostStep
-      G4double incomingEkin = EkinPreStep - dEStepVisible;
-      G4double incomingEtot = dynParticle->GetMass() + incomingEkin;
+      const G4double incomingEkin = EkinPreStep - dEStepVisible;
+      const G4double incomingEtot = dynParticle->GetMass() + incomingEkin;
 
       result.energy[kInvisible0]  =
         measurableEnergy(particle,
@@ -233,50 +230,27 @@ namespace CaloG4
       result.energy[kInvisible0] = EkinPreStep - EkinPostStep - dEStepVisible;
     }
 
-    G4SteppingManager* steppingManager =
-      G4EventManager::GetEventManager()->GetTrackingManager()->GetSteppingManager();
-
-    // Copy internal variables from the G4SteppingManager.
-    G4TrackVector* fSecondary = steppingManager->GetfSecondary();
-    G4int fN2ndariesAtRestDoIt = steppingManager->GetfN2ndariesAtRestDoIt();
-    G4int fN2ndariesAlongStepDoIt = steppingManager->GetfN2ndariesAlongStepDoIt();
-    G4int fN2ndariesPostStepDoIt = steppingManager->GetfN2ndariesPostStepDoIt();
-
-    G4int tN2ndariesTot = fN2ndariesAtRestDoIt +
-                          fN2ndariesAlongStepDoIt +
-                          fN2ndariesPostStepDoIt;
-
     // loop through secondary particles which were added at current step
-    // to the list of all secondaries of current track:
-    G4int loopStart = (*fSecondary).size() - tN2ndariesTot;
-    size_t loopEnd  = (*fSecondary).size();
-    if (loopStart < 0) {
-      loopEnd = loopEnd - loopStart;
-      loopStart = 0;
-    }
-
-    G4ParticleDefinition *secondaryID;
-    G4double totalEofSecondary=0, kinEofSecondary=0, measurEofSecondary=0;
-
-    for(size_t lp1=loopStart; lp1<loopEnd; lp1++) {
-
-      //----- extract information about each new secondary particle:
-      secondaryID = (*fSecondary)[lp1]->GetDefinition();
-      totalEofSecondary = (*fSecondary)[lp1]->GetTotalEnergy();
-
-      //----- use this information:
-      if (ParticleIsNeutrino(secondaryID)) {
-        result.energy[kInvisible0] -= totalEofSecondary;
-        result.energy[kEscaped] += totalEofSecondary;
-      }
-      else {
-        //----- extract further information about each new secondary particle:
-        kinEofSecondary = (*fSecondary)[lp1]->GetKineticEnergy();
-        measurEofSecondary = measurableEnergy(secondaryID,
-                                              secondaryID->GetPDGEncoding(),
-                                              totalEofSecondary,
-                                              kinEofSecondary);
-        result.energy[kInvisible0] -= measurEofSecondary;
+    const std::vector<const G4Track*>  *secondaryVector = step->GetSecondaryInCurrentStep();
+    if (secondaryVector && !secondaryVector->empty()) {
+      for (const G4Track* aConstSecondaryTrack : *secondaryVector ) {
+        //----- extract information about each new secondary particle:
+        G4ParticleDefinition *secondaryID = aConstSecondaryTrack->GetDefinition();
+        const G4double totalEofSecondary = aConstSecondaryTrack->GetTotalEnergy();
+        //----- use this information:
+        if (ParticleIsNeutrino(secondaryID)) {
+          result.energy[kInvisible0] -= totalEofSecondary;
+          result.energy[kEscaped] += totalEofSecondary;
+        }
+        else {
+          //----- extract further information about each new secondary particle:
+          const int secondaryPDGID = secondaryID->GetPDGEncoding();
+          const G4double kinEofSecondary = aConstSecondaryTrack->GetKineticEnergy();
+          result.energy[kInvisible0] -= measurableEnergy(secondaryID,
+                                                         secondaryPDGID,
+                                                         totalEofSecondary,
+                                                         kinEofSecondary);
+        }
       }
     }
 
