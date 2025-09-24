@@ -103,7 +103,7 @@ namespace MuonR4 {
                 if (nBeforeAmbi != segments.size()) {
                     drawFinalReco("post ambiguity");
                 }
-            } else  if (m_visionTool.isEnabled() && segments.empty() &&
+            } else if (m_visionTool.isEnabled() && segments.empty() &&
                       std::ranges::count_if(seed->getHitsInMax(),[this](const SpacePoint* hit){
                             return  m_visionTool->isLabeled(*hit);
                       })) {
@@ -159,6 +159,7 @@ namespace MuonR4 {
         fitCfg.doTimeFit = m_doT0Fit;
         fitCfg.reCalibrate = m_recalibInFit;
         fitCfg.useFastFit = m_useFastFitter;
+        fitCfg.useSecOrderDeriv = m_hessianResidual;
 
         MdtSegmentFitter fitter{name(), std::move(fitCfg)};
         return fitter.fitSegment(ctx, std::move(calibHits), startPars, locToGlob);
@@ -175,6 +176,7 @@ namespace MuonR4 {
         genCfg.hitPullCut = m_seedHitChi2;
         genCfg.recalibSeedCircles = m_recalibSeed;
         genCfg.calibrator = m_calibTool.get();
+        genCfg.startWithPattern = m_tryPatternPars;
         
 
         /// At very high inclanation angles, the muon may traverse 3 hits in the same layer (E.g. BEE)
