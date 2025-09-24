@@ -21,6 +21,7 @@
 #include <chrono>
 #include <format>
 #include <iostream>
+#include <stdexcept>
 
 // Number of iterations for test
 const size_t N = 1e6;
@@ -80,7 +81,11 @@ void testSG(const EventContext& ctx)
 struct TimeIt {
   using clock_t = std::chrono::high_resolution_clock;
   ~TimeIt() {
-    std::cout << std::format("{:10} {:>8}\n", name, std::chrono::duration_cast<std::chrono::microseconds>(clock_t::now()-t0));
+    try{
+      std::cout << std::format("{:10} {:>8}\n", name, std::chrono::duration_cast<std::chrono::microseconds>(clock_t::now()-t0));
+    } catch ( std::format_error & e){
+      std::cerr<<"Format error in ViewPerf_test\n";
+    }
   }
   std::string name;
   clock_t::time_point t0{clock_t::now()};
@@ -95,11 +100,21 @@ int main() {
   EXPECT_TRUE( pStore );
 
   EventContext ctx;
-  ctx.setExtension( Atlas::ExtendedEventContext(pStore.get()) );
+  try{
+    ctx.setExtension( Atlas::ExtendedEventContext(pStore.get()) );
+  } catch (std::bad_any_cast & e){
+    std::cerr<<"Exception bad_any_cast in ViewPerf_test"<<std::endl;
+    return 1;
+  }
 
   {
     TimeIt t{"no View"};
-    testSG(ctx);
+    try{
+      testSG(ctx);
+    } catch (std::exception & e){
+      std::cerr<<"Exception "<<e.what()<<" in ViewPerf_test"<<std::endl;
+      return 1;
+    }
   }
   {
     TimeIt t{"with View"};
