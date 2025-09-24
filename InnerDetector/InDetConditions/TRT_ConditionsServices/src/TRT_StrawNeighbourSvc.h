@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_STRAWNEIGHBOURSVC_H
@@ -15,6 +15,7 @@
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include <string>
+#include <vector>
 
 class TRT_ID;
 class StoreGateSvc;
