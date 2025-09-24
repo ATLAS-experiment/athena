@@ -324,10 +324,9 @@ namespace columnar
     remapName (m_info.name);
     remapName (m_info.offsetName);
     remapName (m_info.replacesColumn);
-    remapName (m_info.linkToName);
+    for (auto& linkTargetName : m_info.linkTargetNames)
+      remapName (linkTargetName);
     remapName (m_info.variantLinkKeyColumn);
-    for (auto& variantLinkContainers : m_info.variantLinkContainers)
-      remapName (variantLinkContainers);
   }
 
 
