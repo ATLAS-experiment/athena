@@ -275,7 +275,7 @@ namespace NSWL1 {
           std::sort(slopeBC.begin(), slopeBC.end());
           slopeBC.erase( std::unique(slopeBC.begin(), slopeBC.end()), slopeBC.end() );
           for (const auto &bc : slopeBC) {
-            Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(sectorPhi, side, bc);
+            Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(sectorPhi-1, side, bc);
 
             for (const auto &slope : diamondSlopes) {
               if (bc == slope.BC) {
