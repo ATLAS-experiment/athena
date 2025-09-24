@@ -172,6 +172,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         SG::WriteHandleKey<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey","FPGASpacePoints_1st","FPGATrackSim SpacePoints key"};
 
         // Write out roads, hits in roads, and tracks.
+        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey_1st{this, "FPGATrackSimHitKey_1st","FPGAHits_1st","FPGATrackSim 1st stage hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey_2nd{this, "FPGATrackSimHitKey_2nd","FPGAHits_2nd","FPGATrackSim 2nd stage hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitFilteredKey{this, "FPGATrackSimHitFiltered1stKey","FPGAHitsFiltered_1st","FPGATrackSim Filtered Hits 1st stage key"};
         SG::WriteHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoads1stKey","FPGAHitsInRoads_1st","FPGATrackSim Hits in 1st stage roads key"};

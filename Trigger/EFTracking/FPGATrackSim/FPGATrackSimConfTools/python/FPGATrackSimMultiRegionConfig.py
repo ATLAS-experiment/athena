@@ -24,7 +24,8 @@ def FPGATrackSimRunFirstStageOnManyRegions(flags):
         
         from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimLogicalHitsProcessAlgCfg
         acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags1st,
-                  **{'FPGATrackSimHitKey_2nd': f"FPGAHits_2nd_reg{region}",
+                  **{'FPGATrackSimHitKey_1st': f"FPGAHits_1st_reg{region}",
+                     'FPGATrackSimHitKey_2nd': f"FPGAHits_2nd_reg{region}",
                      'FPGATrackSimHitFiltered1stKey': f"FPGAHitsFiltered_1st_reg{region}",
                      'FPGATrackSimHitInRoads1stKey': f"FPGAHitsInRoads_1st_reg{region}",
                      'FPGATrackSimRoad1stKey': f"FPGARoads_1st_reg{region}",
