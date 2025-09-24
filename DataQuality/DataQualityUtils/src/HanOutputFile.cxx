@@ -134,10 +134,10 @@ namespace dqutils
       }
 
       DirMap_t::value_type dirmapVal(dirName, dir);
-      dirmap.insert(dirmapVal);
+      dirmap.insert(std::move(dirmapVal));
     } else {
       DirMap_t::value_type dirmapVal("<top_level>", dir);
-      dirmap.insert(dirmapVal);
+      dirmap.insert(std::move(dirmapVal));
     }
 
     dir->cd();
@@ -184,14 +184,14 @@ namespace dqutils
           return;
         }
         DirStrMap_t::value_type dirstrmapVal(objName, obj);
-        dirstrmap.insert(dirstrmapVal);
+        dirstrmap.insert(std::move(dirstrmapVal));
       } else {
         DirStrMap_t::value_type dirstrmapVal(objName, obj);
-        dirstrmap.insert(dirstrmapVal);
+        dirstrmap.insert(std::move(dirstrmapVal));
       }
     } else { // If the object is a file
       DirStrMap_t::value_type dirstrmapVal("<top_level>", obj);
-      dirstrmap.insert(dirstrmapVal);
+      dirstrmap.insert(std::move(dirstrmapVal));
     }
 
     if (obj_type == "TDirectoryFile" || obj_type == "TDirectory" || obj_type == "TFile") {
@@ -258,7 +258,7 @@ namespace dqutils
         const char* path(dir->GetPath());
         std::string assName(obj->GetName());
         AssMap_t::value_type AssmapVal(assName, path);
-        dirmap.insert(AssmapVal);
+        dirmap.insert(std::move(AssmapVal));
       }
       delete obj;
     }
@@ -737,7 +737,7 @@ namespace dqutils
       if (aMapIter == m_assessMap.end()) {
         AssMap_t* aMap = new AssMap_t();
         DirToAssMap_t::value_type aMapVal(idir->first, aMap);
-        aMapIter = m_assessMap.insert(aMapVal).first;
+        aMapIter = m_assessMap.insert(std::move(aMapVal)).first;
         getAllAssessments(*aMap, idir->second);
       }
 
@@ -834,7 +834,7 @@ namespace dqutils
         if (aMapIter == m_assessMap.end()) {
           AssMap_t* aMap = new AssMap_t();
           DirToAssMap_t::value_type aMapVal(idir->first, aMap);
-          aMapIter = m_assessMap.insert(aMapVal).first;
+          aMapIter = m_assessMap.insert(std::move(aMapVal)).first;
           getAllAssessments(*aMap, idir->second);
         }
 
@@ -938,7 +938,7 @@ namespace dqutils
       if (aMapIter == m_assessMap.end()) {
         AssMap_t* aMap = new AssMap_t();
         DirToAssMap_t::value_type aMapVal(idir->first, aMap);
-        aMapIter = m_assessMap.insert(aMapVal).first;
+        aMapIter = m_assessMap.insert(std::move(aMapVal)).first;
         getAllAssessments(*aMap, idir->second);
       }
 
@@ -1022,7 +1022,7 @@ namespace dqutils
       if (aMapIter == m_assessMap.end()) {
         AssMap_t* aMap = new AssMap_t();
         DirToAssMap_t::value_type aMapVal(idir->first, aMap);
-        aMapIter = m_assessMap.insert(aMapVal).first;
+        aMapIter = m_assessMap.insert(std::move(aMapVal)).first;
         getAllAssessments(*aMap, idir->second);
       }
 
@@ -1097,7 +1097,7 @@ namespace dqutils
       if (aMapIter == m_assessMap.end()) {
         AssMap_t* aMap = new AssMap_t();
         DirToAssMap_t::value_type aMapVal(idir->first, aMap);
-        aMapIter = m_assessMap.insert(aMapVal).first;
+        aMapIter = m_assessMap.insert(std::move(aMapVal)).first;
         getAllAssessments(*aMap, idir->second);
       }
       AssMap_t::const_iterator aend = aMapIter->second->end();
