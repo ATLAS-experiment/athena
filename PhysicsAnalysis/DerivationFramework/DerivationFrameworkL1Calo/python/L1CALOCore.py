@@ -575,11 +575,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         # Special collection for Born leptons
         acc.merge(AddBornLeptonCollectionCfg(flags))
 
-        L1CaloSlimmingHelper.AppendToDictionary.update (
-            {
-                'HardScatterParticles':'xAOD::TruthParticleContainer','HardScatterParticlesAux':'xAOD::TruthParticleAuxContainer'}
-        )
-
         AllVariables += [
             "TruthElectrons",
             "TruthMuons",
@@ -587,7 +582,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
             "TruthTaus",
             "TruthNeutrinos",
             "BornLeptons",
-            "HardScatterParticles",
             "MET_Truth",
             "AntiKt4TruthJets",
             "AntiKt4TruthWZJets",
