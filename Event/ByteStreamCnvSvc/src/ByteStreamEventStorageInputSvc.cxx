@@ -384,6 +384,8 @@ ByteStreamEventStorageInputSvc::buildFragment(
 StatusCode
 ByteStreamEventStorageInputSvc::generateDataHeader()
 {
+  std::lock_guard<std::mutex> lock(m_readerMutex);
+
   // get file GUID
   m_fileGUID = m_reader->GUID();
 
