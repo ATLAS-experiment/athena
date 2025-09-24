@@ -161,6 +161,24 @@ void fillFromCollectionCutMask(ToolHandle<GenericMonitoringTool>& monTool)
   std::cout << std::format("{:<30}MON: {}\n", "fillFromCollectionCutMask", timeit(mon));
 }
 
+class SvcMgrWrapper{
+  private :
+  ISvcManager* m_svcMgr{};
+  public:
+  SvcMgrWrapper(ISvcLocator* pSvcLoc):m_svcMgr(dynamic_cast<ISvcManager*>(pSvcLoc)){
+    if (m_svcMgr) m_svcMgr->start().ignore();
+  }
+  ~SvcMgrWrapper(){
+    if (m_svcMgr){
+      // Make sure that THistSvc gets finalized.
+      // Otherwise, the output file will get closed while global dtors are running,
+      // which can lead to crashes.
+      m_svcMgr->stop().ignore();
+      m_svcMgr->finalize().ignore();
+    }
+  }
+};
+
 int main(int argc, char** argv)
 {
   namespace po = boost::program_options;
@@ -183,7 +201,7 @@ int main(int argc, char** argv)
   }
 
   CxxUtils::ubsan_suppress([]() { TInterpreter::Instance(); });
-  ISvcLocator* pSvcLoc;
+  ISvcLocator* pSvcLoc{};
   if (!Athena_test::initGaudi("GenericMonPerf.txt", pSvcLoc)) {
     std::cerr << "ERROR This test can not be run" << std::endl;
     return -1;
@@ -193,8 +211,8 @@ int main(int argc, char** argv)
   histSvc = pSvcLoc->service("THistSvc");
   CHECK_WITH_CONTEXT(histSvc.isValid(), "GenericMonPerf_test", -1);
 
-  ISvcManager* svcmgr = dynamic_cast<ISvcManager*>(pSvcLoc);
-  svcmgr->start().ignore();
+  SvcMgrWrapper svc(pSvcLoc);
+  
 
   ToolHandle<GenericMonitoringTool> monTool("GenericMonitoringTool/MonTool");
   CHECK_WITH_CONTEXT(monTool.retrieve(), "GenericMonPerf_test", -1);
@@ -206,15 +224,15 @@ int main(int argc, char** argv)
   CALLGRIND_START_INSTRUMENTATION;
   fillFromMultipleScalars(monTool);
   CALLGRIND_STOP_INSTRUMENTATION;
+  try{
+    fillFromCollection(monTool);
+    fillFromCollectionCutMask(monTool);
+  } catch (std::exception & e){
+    std::cerr<<" Exception "<<e.what()<<" in GenericMonPerf_test"<<std::endl;
+    return -1;
+  }
 
-  fillFromCollection(monTool);
-  fillFromCollectionCutMask(monTool);
-
-  // Make sure that THistSvc gets finalized.
-  // Otherwise, the output file will get closed while global dtors are running,
-  // which can lead to crashes.
-  svcmgr->stop().ignore();
-  svcmgr->finalize().ignore();
+  
 
   return 0;
 }
