@@ -69,7 +69,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 	unsigned int nTowers = 0;
 	for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
 
-        Toweret=gfexTowerRoI->towerEt();
+        Toweret=gfexTowerRoI->towerEt(); //returns MLE value
         Towersaturationflag=gfexTowerRoI->isSaturated();
         float eta = gfexTowerRoI->eta();
         float phi = gfexTowerRoI->phi();
@@ -110,7 +110,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
 		Towereta = eta;	
 			
-		if(gfexTowerRoI->towerEt() >= 200 ){
+		if(gfexTowerRoI->towerEt() >= 1662 ){
 			nTowers++;
 		}
 
@@ -128,8 +128,8 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 		}
 
 
-		//GREATER THAN 2GEV
-		if (gfexTowerRoI->towerEt() >= 10){
+		//GREATER THAN 2GEV MLE=1342
+		if (gfexTowerRoI->towerEt() >= 1342){
 			if (std::abs(eta) >= 3.2 ){
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
@@ -147,8 +147,8 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 			}
 			
 		}
-      	//only for h_gTower_coldtowers_etaphimap
-		else if (gfexTowerRoI->towerEt() <= -10){
+      	//only for h_gTower_coldtowers_etaphimap MLE = 1182
+		else if (gfexTowerRoI->towerEt() <= 1182){
 			if (std::abs(eta) >= 3.2){
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
