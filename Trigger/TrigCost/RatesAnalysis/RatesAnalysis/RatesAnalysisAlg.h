@@ -36,7 +36,6 @@ namespace TrigConf {
  */
 class RatesAnalysisAlg: public ::AthAnalysisAlgorithm { 
  public: 
-  
   /**
    * Method by which the trigger pass/fail decision is calculated. Via manual or automated emulator or 
    * using the Trigger Decision Tool for a pre-existing item.
@@ -49,7 +48,6 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
 
   RatesAnalysisAlg( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~RatesAnalysisAlg(); 
-
   virtual StatusCode ratesInitialize() = 0; //!< To be implemented by the user. Register "triggers" to calculate the rate for 
   virtual StatusCode ratesExecute() = 0; //!<  To be implemented by the user. Supply pass/fail for all "triggers"
   virtual StatusCode ratesFinalize() = 0; //!< To be implemented by the user.
@@ -184,10 +182,21 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
    * @param f Exponential factor
    */
   void setExponentialMuScalingFactor(const double f) { m_expoScalingFactor = f; }
+ 
+ protected:
+  virtual StatusCode initialize(); //!< Get the trigger decision tool and set up global groups
+  double m_linearLumiFactor;
+  WeightingValuesSummary_t m_weightingValues; //!< Possible weighting & lumi extrapolation values for the current event
+  double m_ratesDenominator; //!< How much walltime is seen by the algorithm. This is what we need to normalise to.  
+  Gaudi::Property<bool> m_doHistograms{this, "DoHistograms", true, "Switch on histogram output of rate vs. mu and position in train."};
+  Gaudi::Property<bool> m_doMultiSliceDiJet{this, "DoMultiSliceDiJet", false, "Enable the HS-softer-than-PU (HSTP) filter; reweight the Slices according to Jet/ETMiss procedure; recommended by PMG for di-jet slices."};
+  StatusCode pass_HstpFilter(bool &pass); //!< Boolean indicating if the event passes the HS-softer-than-PU (HSTP) filter
+  virtual StatusCode initialize_extra_content(); //!< Initialization of additional payload for inherited classes
+  std::unordered_map<std::string, std::unique_ptr<RatesTrigger>> m_triggers; //!< All individual triggers (L1 or HLT)
+  const std::unordered_map<std::string, std::unique_ptr<RatesTrigger>>& getTriggerMap() const;
 
  private: 
 
-  virtual StatusCode initialize(); //!< Get the trigger decision tool and set up global groups
   virtual StatusCode execute(); //!< In first call - register all triggers. Then load event weighting parameters, fill trigger decisions, compute group rates.
   virtual StatusCode finalize(); //!< Print rates
 
@@ -238,7 +247,6 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   
   bool isZero(double v) const { return fabs(v) < 1e-10; } //!< Helper function for floating point subtraction
 
-  std::unordered_map<std::string, std::unique_ptr<RatesTrigger>> m_triggers; //!< All individual triggers (L1 or HLT)
   std::unordered_map<std::string, std::unique_ptr<RatesScanTrigger>> m_scanTriggers; //!< All individual rates-scan triggers (L1 or HLT)
   std::unordered_map<std::string, std::unique_ptr<RatesGroup>> m_groups; //!< All regular and CPS groups 
   std::unordered_map<std::string, std::unique_ptr<RatesGroup>> m_globalGroups; //!< Big (master) groups which do the OR of the whole menu 
@@ -262,7 +270,11 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
 
   ToolHandle<IEnhancedBiasWeighter> m_enhancedBiasRatesTool{this, "EnhancedBiasRatesTool", "EnhancedBiasWeighter/EnhancedBiasRatesTool"};
   ToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool"};
-  ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", ""};
+  ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", "TrigConf::xAODConfigSvc"};
+
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfo", "EventInfo", "EventInfo name"}; 
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthHS_jets_RHKey{this, "TruthHSJetsKey", "AntiKt4TruthJets", "Key for the hard scatter truth jet collection"};
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthPU_jets_RHKey{this, "truthPUJetsKey", "InTimeAntiKt4TruthJets", "Key for the pileup jet collection"};
 
   Gaudi::Property<double> m_expoScalingFactor{this, "ExpoScalingFactor", 0.1, "Optional. Exponential factor if using exponential-mu rates scaling."};
   Gaudi::Property<double> m_inelasticCrossSection{this, "InelasticCrossSection", 8e-26, "Inelastic cross section in units cm^2. Default 80 mb at 13 TeV."};
@@ -272,18 +284,15 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   Gaudi::Property<bool> m_doExpressRates{this, "DoExpressRates", false, "Calculate total rates for the express stream."};
   Gaudi::Property<bool> m_useBunchCrossingData{this, "UseBunchCrossingData", true, "BunchCrossing data requires CONDBR2 access. Can be disabled here if this is a problem."};
   Gaudi::Property<bool> m_currentEventIsUnbiased; //!< If the current event was triggered online by RDx or not. Random seeded HLT chains must only see these
-  Gaudi::Property<bool> m_doHistograms{this, "DoHistograms", true, "Switch on histogram output of rate vs. mu and position in train."};
   Gaudi::Property<bool> m_enableLumiExtrapolation{this, "EnableLumiExtrapolation", true, "If false then no extrapolation in L, N_bunch or <mu> will be performed.."};
   Gaudi::Property<uint32_t> m_vetoStartOfTrain{this, "VetoStartOfTrain", 0, "How many BCID to veto at the start of a bunch train."};
-  //Gaudi::Property<std::string> m_prescalesJSON{this, "PrescalesJSON", "",  "Optional JSON of prescales from the TrigMenuRuleBook to apply."};
   Gaudi::Property<std::map<std::string, std::map<std::string, double>>> m_prescalesJSON{this, "PrescalesJSON", {},  "Optional JSON of prescales from the TrigMenuRuleBook to apply."};
-
+  Gaudi::Property<std::string> m_histogramSuffix{this, "histogramSuffix", "", "Optional suffix to add to the name of the rate denominator histogram."};
 
   double m_targetMu; //!< What pileup level the prediction is targeting
   double m_targetBunches; //!< How many bunches the prediction is targeting
   double m_targetLumi; //!< What instantaneous luminosity the prediction is targeting
   uint32_t m_runNumber; //!<What is the RunNumber
-  double m_ratesDenominator; //!< How much walltime is seen by the algorithm. This is what we need to normalise to.
   uint32_t m_eventCounter; //!< Count how many events processed
   double m_weightedEventCounter; //!< Count how many weighted events were processed
 
@@ -292,7 +301,6 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
 
   TTree* m_metadataTree; //!< Used to write out some metadata needed by post-processing (e.g. bunchgroup, lumi)
 
-  WeightingValuesSummary_t m_weightingValues; //!< Possible weighting & lumi extrapolation values for the current event 
 }; 
 
 #endif //> !RATESANALYSIS_RATESANALYSISALG_H

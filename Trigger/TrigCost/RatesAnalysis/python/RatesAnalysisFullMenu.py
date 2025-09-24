@@ -11,32 +11,40 @@ if __name__=='__main__':
   flags = initConfigFlags()
   parser = flags.getArgumentParser()
   #
-  parser.add_argument('--disableHistograms', action='store_false', help='Turn off histograming')
-  parser.add_argument('--disableGlobalGroups', action='store_false', help='Turn off global groups')
-  parser.add_argument('--disableTriggerGroups', action='store_false', help='Turn off per-trigger groups')
-  parser.add_argument('--disableExpressGroup', action='store_false', help='Turn off express stream rates')
-  parser.add_argument('--disableUniqueRates', action='store_false', help='Turn off unique rates (much faster!)')
-  parser.add_argument('--disableLumiExtrapolation', action='store_false', help='Turn off luminosity extrapolation')
-  #
-  parser.add_argument('--doRatesVsPositionInTrain', action='store_true', help='Study rates vs BCID position in bunch train')
-  parser.add_argument('--vetoStartOfTrain', default=0, type=int, help='Number of BCIDs at the start of the train to veto, implies doRatesVsPositionInTrain')
-  #
-  parser.add_argument('--outputHist', default='RatesHistograms.root', type=str, help='Histogram output ROOT file')
-  parser.add_argument('--inputPrescalesHLTJSON', default='', type=str, help='JSON of HLT prescales to simulate applying when computing rates')
-  parser.add_argument('--inputPrescalesL1JSON', default='', type=str, help='JSON of L1 prescales to simulate applying when computing rates')
-  parser.add_argument('--ebWeightsDirectory', default='', type=str, help='Path to directory with local EB xml files')
-  #
-  parser.add_argument('--targetLuminosity', default=2e34, type=float)
+  parser.add_argument('--disableGlobalGroups', action='store_true', help='Turn off global groups')
+  parser.add_argument('--disableTriggerGroups', action='store_true', help='Turn off per-trigger groups')
+  parser.add_argument('--disableExpressGroup', action='store_true', help='Turn off express stream rates')
+  parser.add_argument('--disableUniqueRates', action='store_true', help='Turn off unique rates (much faster!)')
+  parser.add_argument('--disableLumiExtrapolation', action='store_true', help='Turn off luminosity extrapolation')
   #
   parser.add_argument('--MCDatasetName', default='', type=str, help='For MC input: Name of the dataset, can be used instead of MCCrossSection, MCFilterEfficiency')
   parser.add_argument('--MCCrossSection', default=0.0, type=float, help='For MC input: Cross section of process in nb')
   parser.add_argument('--MCFilterEfficiency', default=1.0, type=float, help='For MC input: Filter efficiency of any MC filter (0.0 - 1.0)')
   parser.add_argument('--MCKFactor', default=1.0, type=float, help='For MC input: Additional multiplicitive fudge-factor to the supplied cross section.')
   parser.add_argument('--MCIgnoreGeneratorWeights', action='store_true', help='For MC input: Flag to disregard any generator weights.')
+  #  
+  parser.add_argument('--doRatesVsPositionInTrain', action='store_true', help='Study rates vs BCID position in bunch train')
+  parser.add_argument('--vetoStartOfTrain', default=0, type=int, help='Number of BCIDs at the start of the train to veto, implies doRatesVsPositionInTrain')
+  #
+  parser.add_argument('--targetLuminosity', default=2e34, type=float)
+  #
+  parser.add_argument('--outputHist', default='RatesHistograms.root', type=str, help='Histogram output ROOT file')
+  parser.add_argument('--inputPrescalesHLTJSON', default='', type=str, help='JSON of HLT prescales to simulate applying when computing rates')
+  parser.add_argument('--inputPrescalesL1JSON', default='', type=str, help='JSON of L1 prescales to simulate applying when computing rates')
+  parser.add_argument('--ebWeightsDirectory', default='', type=str, help='Path to directory with local EB xml files')
+  #
+  parser.add_argument('flags', nargs='*', help='Config flag overrides')
+  #
+
   args = parser.parse_args()
+
+  flags.Exec.EventPrintoutInterval = 1000
+  flags.Common.MsgSuppression = False
+  flags.Concurrency.NumThreads = 1
 
   args = flags.fillFromArgs(parser=parser)
   flags.lock()
+
   useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
 
   # Initialize configuration object, add accumulator, merge, and run.
@@ -55,13 +63,11 @@ if __name__=='__main__':
   from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
   cfg.merge(MetaDataSvcCfg(flags))
 
-  cfgsvc = CompFactory.TrigConf.xAODConfigSvc('xAODConfigSvc')
-  cfg.addService(cfgsvc)
+  from TrigConfxAOD.TrigConfxAODConfig import getxAODConfigSvc
+  cfgsvc = cfg.getPrimaryAndMerge(getxAODConfigSvc(flags))
 
-  tdt = CompFactory.Trig.TrigDecisionTool('TrigDecisionTool')
-  tdt.TrigConfigSvc = cfgsvc
-  tdt.NavigationFormat = "TrigComposite"
-  cfg.addPublicTool(tdt)
+  from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+  tdt = cfg.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
 
   # If the dataset name is in the input files path, then it will be fetched from there
   # Note to enable autolookup, first run "lsetup pyami; voms-proxy-init -voms atlas" and enter your grid pass phrase
@@ -85,24 +91,26 @@ if __name__=='__main__':
   ebw.MCCrossSection = xsec
   ebw.MCFilterEfficiency = fEff
   ebw.MCKFactor = args.MCKFactor
+  ebw.DoMultiSliceDiJet = False # Use the emulation example for this
   ebw.MCIgnoreGeneratorWeights = args.MCIgnoreGeneratorWeights
   ebw.EBWeightsDirectory = args.ebWeightsDirectory if args.ebWeightsDirectory else ""
   cfg.addPublicTool(ebw)
 
   rates = CompFactory.FullMenu()
   #rates.PrescalesJSON = args.inputPrescalesJSON
-  rates.DoTriggerGroups = args.disableTriggerGroups
-  rates.DoGlobalGroups = args.disableGlobalGroups
-  rates.DoExpressRates = args.disableExpressGroup
-  rates.DoUniqueRates = args.disableUniqueRates
-  rates.DoHistograms = args.disableHistograms
+  rates.DoTriggerGroups = not args.disableTriggerGroups
+  rates.DoGlobalGroups = not args.disableGlobalGroups
+  rates.DoExpressRates = not args.disableExpressGroup
+  rates.DoUniqueRates = not args.disableUniqueRates
   rates.UseBunchCrossingData = useBunchCrossingData
   rates.TargetLuminosity = args.targetLuminosity
   rates.VetoStartOfTrain = args.vetoStartOfTrain
-  rates.EnableLumiExtrapolation = args.disableLumiExtrapolation
+  rates.EnableLumiExtrapolation = not args.disableLumiExtrapolation
   rates.EnhancedBiasRatesTool = ebw
   rates.TrigDecisionTool = tdt
   rates.TrigConfigSvc = cfgsvc
+  rates.DoMultiSliceDiJet = False # Use the emulation example for this
+  rates.histogramSuffix = "" # Use the emulation example for this
 
   """Return all of the HLT items, and their lower chains
   in a JSON menu
@@ -148,10 +156,6 @@ if __name__=='__main__':
   if useBunchCrossingData:
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
     cfg.merge(BunchCrossingCondAlgCfg(flags))
-
-  eventLoop = CompFactory.AthenaEventLoopMgr()
-  eventLoop.EventPrintoutInterval = 1000
-  cfg.addService(eventLoop)
 
   # If you want to turn on more detailed messages ...
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
