@@ -6,7 +6,6 @@
 #include "PileUpMTAlg.h"
 
 #include <CxxUtils/XXH.h>
-#include <fmt/format.h>
 #include <unistd.h>
 
 #include <boost/core/demangle.hpp>
@@ -275,10 +274,19 @@ StatusCode PileUpMTAlg::execute() {
           return std::format("{}{}", rng.size(), rng[0] == 0 ? 'E' : 'F');
         }) |
         ranges::to<std::vector<std::string>>;
-    // Must use fmt::format here because std::format has no range formatting support
-    fmt::format_to(trace, "mu = {}, central BCID = {}, bunch pattern = [{}]\n",
+    // Manual join using std::ostringstream as std::format does not support ranges
+    std::string joined_pattern;
+    for (size_t i = 0; i < bunch_pattern.size(); ++i) {
+      joined_pattern += bunch_pattern[i];
+      if (i + 1 < bunch_pattern.size()) {
+        joined_pattern += " ";
+      }
+    }
+
+    std::format_to(trace,
+                   "mu = {}, central BCID = {}, bunch pattern = [{}]\n",
                    cur_avg_mu, m_beamInt->getCurrentT0BunchCrossing(),
-                   fmt::join(bunch_pattern, " "));
+                   joined_pattern);
   }
   // Copy subevents
   if (!hsEvt->subEvents().empty()) {
