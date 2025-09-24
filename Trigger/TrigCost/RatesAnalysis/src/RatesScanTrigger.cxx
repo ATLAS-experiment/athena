@@ -89,6 +89,11 @@ void RatesScanTrigger::execute(const WeightingValuesSummary_t& weights) {
   }
 }
 
+  void RatesScanTrigger::setHistoName(const std::string& newName){
+    m_rateScanHist->SetName(newName.c_str());
+  }
+
+
 const std::string RatesScanTrigger::printRate(const double ratesDenominator) const {
   std::stringstream ss;
   const int nBins = m_rateScanHistCachedPtr->GetNbinsX();

@@ -1,0 +1,42 @@
+{
+  "_comment": "Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration",
+  "L1_items": [
+    "L1_ADVAET",
+    "L1_ADVAEL",
+    "L1_BPH-2M9-0DR15-2MU3VF",
+    "L1_BPH-2M9-2DR15-2MU5VF",
+    "L1_BPH-8M15-0DR22-2MU5VF",
+    "L1_BPH-0M10-3MU3VF",
+    "L1_MU14FCH",
+    "L1_2MU8VF",
+    "L1_3MU5VF",
+    "L1_eTAU80_2cTAU30M_DR-eTAU30eTAU20",
+    "L1_eTAU60_2eTAU20M_jXE80",
+    "L1_eTAU140",
+    "L1_eTAU80_2eTAU60",
+    "L1_jXE100",
+    "L1_eEM26M",
+    "L1_2eEM18M",
+    "L1_2eEM24L",
+    "L1_eEM24L_3eEM12L",
+    "L1_J100",
+    "L1_3J50",
+    "L1_4J15",
+    "L1_jJ160",
+    "L1_jJ140_3jJ60",
+    "L1_MJJ-500-NFF",
+    "L1_jMJJ-500-NFF",
+    "L1_MU5VF_jMJJ-300-NFF"
+  ],
+  "userDefinedL1items": [
+    {
+      "name": "L1_BPH-0DR3-eEM9jJ40_check",
+      "definition": "TOPO_0DR03-eEM9ab-CjJ40ab[x1]"
+    },
+    {
+      "name": "L1_TOPO_0DETA24-eTAU30s2-eTAU12s2_TOPO_700INVM-AjJ60s6-AjJ50s6",
+      "definition": "TOPO_0DETA24-eTAU30s2-eTAU12s2[x1] & TOPO_700INVM-AjJ60s6-AjJ50s6[x1]"
+    }
+
+  ]
+}

@@ -101,7 +101,7 @@ class RatesTrigger : public RatesHistoBase {
    * @return The information to be printed
    */
   virtual const std::string printRate(const double ratesDenominator) const;
- 
+  double getTotalPrescaleWeight() const; 
   /**
    * @brief Prints the RatesTrigger's express rate
    * @param ratesDenominator The walltime for the run, needed to normalise from integrated weighted counts to a rate.
