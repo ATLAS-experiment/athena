@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
     parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
                                             action='store_true')
@@ -14,10 +15,7 @@ if __name__=="__main__":
     parser.set_defaults(noSTGC=True)
  
     parser.set_defaults(outRootFile="HoughTransformTester.root")
-    parser.set_defaults(inputFile=[
-                                    #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
-                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
-                                    ])
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
     parser.set_defaults(eventPrintoutLevel = 50)
    
     args = parser.parse_args()

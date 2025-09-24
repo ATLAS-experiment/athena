@@ -605,8 +605,8 @@ if __name__=="__main__":
     # python -m MuonConfig.MuonSegmentFindingConfig --threads=1
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
 
-    args, flags = SetupMuonStandaloneConfigFlags()
-    cfg = SetupMuonStandaloneCA(args, flags)
+    flags = SetupMuonStandaloneConfigFlags()
+    cfg = SetupMuonStandaloneCA(flags)
 
     # Run the actual test.
     acc = MuonSegmentFindingCfg(flags)
@@ -633,10 +633,5 @@ if __name__=="__main__":
     cfg.store(f)
     f.close()
     
-    if not args.config_only:
-        sc = cfg.run(20)
-        if not sc.isSuccess():
-            import sys
-            sys.exit("Execution failed")
-    else:
-        cfg.wasMerged()
+    from MuonConfig.MuonConfigUtils import executeTest
+    executeTest(cfg)

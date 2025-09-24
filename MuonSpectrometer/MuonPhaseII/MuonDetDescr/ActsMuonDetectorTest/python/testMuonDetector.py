@@ -39,7 +39,8 @@ def MuonDetectorNavTestCfg(flags, name = "MuonDetectorNavTest", **kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
     parser.set_defaults(outRootFile="MuonNavigationTestR4_NewMaterial_Passive.root")

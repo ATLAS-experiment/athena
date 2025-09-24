@@ -30,22 +30,14 @@ def GetArgsFromParser():
 
     return args
 
-
-def setupHistSvcCfg(flags, out_file="out.root", out_stream="MSVtxValidation"):
-    result = ComponentAccumulator()
-    if len(out_file) == 0: return result
-    histSvc = CompFactory.THistSvc(Output=[f"{out_stream} DATAFILE='{out_file}', OPT='RECREATE'"])
-    result.addService(histSvc, primary=True)
-    return result
-
-
 def MSVtxValidationCfg(flags, name="MSVertexValidationAlg", outStream="MSVtxValidation", outFile="out.root", **kwargs):
     # outStream defines the steam to place the tree and histograms 
     from TriggerMatchingTool.TriggerMatchingToolConfig import TriggerMatchingToolCfg
     result = ComponentAccumulator()
     # setting algorithm properties here via kwargs.setdefault("<property name>", <property value>)
     alg = CompFactory.MSVtxValidationAlg(name, **kwargs)
-    result.merge(setupHistSvcCfg(flags,out_file=outFile, out_stream=outStream))
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    result.merge(setupHistSvcCfg(flags,outFile=outFile, outStream=outStream))
     if kwargs.get("readTriggers", False): result.getPrimaryAndMerge(TriggerMatchingToolCfg(flags, name='R3MatchingTool'))
     result.addEventAlgo(alg)
 

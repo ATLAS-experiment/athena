@@ -129,18 +129,17 @@ def MuSAVtxFitterValidationConfig(flags, name="MuSAVtxFitterValidation", **kwarg
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    
+    from MuonConfig.MuonConfigUtils import executeTest, SetupMuonStandaloneCA, configureCondTag
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
     flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
-    
+    configureCondTag(flags)
     flags.fillFromArgs()
     
     flags.lock()
 
-    from MuonCondTest.MdtCablingTester import setupServicesCfg
-    cfg = setupServicesCfg(flags)
+    cfg = SetupMuonStandaloneCA(flags)
     from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
     from AthenaConfiguration.Enums import LHCPeriod
     cfg.merge(LRTMuonMergerAlg(flags,
@@ -149,15 +148,9 @@ if __name__ == "__main__":
                                 overlapStrategy       = 1,
                                 UseRun3WP = flags.GeoModel.Run == LHCPeriod.Run3))
     cfg.merge(MuSAVtxFitterConfig(flags, MuonContainerName="StdWithLRTMuons"))
-    cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
 
     cfg.getService("MessageSvc").enableSuppression = True
 
-    # Get maximum events from flags
-    evtMax = flags.Exec.MaxEvents if flags.Exec.MaxEvents > 0 else None
-    
-    sc = cfg.run(evtMax)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
+    executeTest(cfg)
+   

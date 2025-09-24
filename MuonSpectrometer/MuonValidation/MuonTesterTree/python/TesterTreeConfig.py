@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -27,9 +27,9 @@ if __name__ == "__main__":
     flags.Scheduler.ShowDataFlow = True
     flags.Exec.MaxEvents = 1
     flags.lock()
-    from MuonCondTest.MdtCablingTester import setupServicesCfg
-    cfg = setupServicesCfg(flags)
-    from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg, executeTest
+    
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg, executeTest, SetupMuonStandaloneCA
+    cfg = SetupMuonStandaloneCA(flags)
     cfg.merge(setupHistSvcCfg(flags, outStream="TestStream", outFile = args.outRootFile))
     cfg.merge(TesterTreeAlgCfg(flags))
 

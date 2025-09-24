@@ -11,31 +11,28 @@ def TgcDigtJitterTestAlgCfg(flags, name="TgcCondDbTestAlg", **kwargs):
     return result
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from MuonCondTest.MdtCablingTester import SetupArgParser, setupServicesCfg
-    
+    from MuonCondTest.MdtCablingTester import SetupArgParser
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from MuonConfig.MuonConfigUtils import executeTest, SetupMuonStandaloneCA
+ 
     parser = SetupArgParser()
     parser.add_argument("--jsonFile", default="TGC_Digitization_timejitter.json", 
                         help="If the test is run multiple times to ensure reproducibility, then the dump of the test can be resteered")
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run2MC.ESD.pool.root"])
+    parser.set_defaults(inputFile=defaultTestFiles.ESD_RUN2_MC)
     args = parser.parse_args()
 
     flags = initConfigFlags()
-    flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumThreads = 1 
+    flags.Concurrency.NumConcurrentEvents = 1 
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
     flags.lock()
-   
-    cfg = setupServicesCfg(flags)
+    flags.dump()
+    
+    cfg = SetupMuonStandaloneCA(flags)
     cfg.getService('MessageSvc').setVerbose = ["TgcDigitJitterData"]
     from MuonConfig.MuonCondAlgConfig import TgcDigitJitterCondAlgCfg
     cfg.merge(TgcDigitJitterCondAlgCfg(flags, readFromJSON = args.jsonFile))
-    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    cfg.merge(MuonIdHelperSvcCfg(flags))
     cfg.merge(TgcDigtJitterTestAlgCfg(flags))
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    flags.dump()
-    sc = cfg.run(1)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
+    executeTest(cfg)
+    

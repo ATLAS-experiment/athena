@@ -6,13 +6,8 @@ from AthenaConfiguration.Enums import ProductionStep
 
 
 def RDOAnalysisOutputCfg(flags, output_name="RDOAnalysis"):
-    result = ComponentAccumulator()
-
-    histsvc = CompFactory.THistSvc(name="THistSvc",
-                                   Output=[ f"{output_name} DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'" ])
-    result.addService(histsvc)
-
-    return result
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    return setupHistSvcCfg(flags, outFile =flags.Output.HISTFileName, outStream =  output_name)
 
 
 def EventInfoRDOAnalysisCfg(flags, name="EventInfoRDOAnalysis", **kwargs):
@@ -454,26 +449,16 @@ def TGC_RDOAnalysisCfg(flags, name="TGC_RDOAnalysis", **kwargs):
 
 def SetupArgParser():
     from argparse import ArgumentParser
-
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
-    parser.add_argument("--inputFile", "-i", default=[
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/d1759/v5/myRDO.pool.root"
-                        ], 
+    parser.add_argument("--inputFile", "-i", default= defaultTestFiles.RDO_RUN3, 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoTag", default="ATLAS-R3S-2021-03-02-00", help="Geometry tag to use", choices=["ATLAS-R2-2016-01-02-01",
-                                                                                     "ATLAS-R3S-2021-03-02-00"])
-    parser.add_argument("--condTag", default="OFLCOND-MC23-SDR-RUN3-09", help="Conditions tag to use",
-                                                                         choices=["OFLCOND-MC16-SDR-RUN2-11",
-                                                                                  "OFLCOND-MC23-SDR-RUN3-09"])
-
     parser.add_argument("--outFile", default="RDOAnalysis.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--nEvents", help="Number of events to run", type = int ,default = 1)
     parser.add_argument("--skipEvents", help="Number of events to skip", type = int, default = 0)
     parser.add_argument("--geoModelFile", default ="", help="GeoModel SqLite file containing the muon geometry.")
  
-   
-
     return parser
 
 if __name__ == "__main__":
@@ -483,8 +468,6 @@ if __name__ == "__main__":
     flags.Concurrency.NumThreads = args.threads
     flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
     flags.Input.Files = args.inputFile 
-    flags.GeoModel.AtlasVersion = args.geoTag
-    flags.IOVDb.GlobalTag = args.condTag
     flags.Scheduler.ShowDataDeps = True 
     flags.Scheduler.ShowDataFlow = True
     flags.Exec.FPE= 500
@@ -494,7 +477,8 @@ if __name__ == "__main__":
     if len (args.geoModelFile) > 0:
         flags.GeoModel.SQLiteDB = True
         flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
-
+    from MuonConfig.MuonConfigUtils import configureCondTag
+    configureCondTag(flags)
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
