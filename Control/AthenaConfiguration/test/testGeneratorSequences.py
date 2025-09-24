@@ -42,11 +42,11 @@ class TestGeneratorSequences(unittest.TestCase):
         ca.merge(ca1)
 
         self.assertIsNotNone(findAlgorithm(ca.getSequence(EvgenSequence.Post.value), "PostAlgo2"), "Algorithm not placed in sub-sequence")
-        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "PostAlgo2", 5), "Algorithm not placed at the right depth")
+        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "PostAlgo2", 6), "Algorithm not placed at the right depth")
         self.assertIsNotNone(findSubSequence(ca.getSequence(), EvgenSequence.Post.value), "The sequence is not added")
 
         ca.addEventAlgo(TestAlgo("PostAlgo3"), sequenceName=EvgenSequence.Post.value)
-        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "PostAlgo3", 5), "Algorithm not added at the end")
+        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "PostAlgo3", 6), "Algorithm not added at the end")
 
         ca.printConfig(prefix="test_main")
 
@@ -60,7 +60,7 @@ class TestGeneratorSequences(unittest.TestCase):
         ca.merge(ca1, sequenceName=EvgenSequence.PreFilter.value)
 
         self.assertIsNotNone(findAlgorithm(ca.getSequence(EvgenSequence.PreFilter.value), "PostAlgo1"), "Algorithm not placed in sub-sequence")
-        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "PostAlgo1", 5), "Algorithm not placed at the right depth")
+        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "PostAlgo1", 6), "Algorithm not placed at the right depth")
 
         ca.printConfig(prefix="test_override")
 
@@ -80,18 +80,18 @@ class TestGeneratorSequences(unittest.TestCase):
         ca.merge(ca2)
 
         self.assertIsNotNone(findAlgorithm(ca.getSequence(EvgenSequence.Generator.value), "GeneratorAlgo1"), "Algorithm not placed in sub-sequence")
-        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "GeneratorAlgo1", 2), "Algorithm not placed at the right depth")
+        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "GeneratorAlgo1", 3), "Algorithm not placed at the right depth")
 
         self.assertIsNotNone(findAlgorithm(ca.getSequence(EvgenSequence.Post.value), "PostAlgo1"), "Algorithm not placed in sub-sequence")
-        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "PostAlgo1", 2), "Algorithm not placed at the right depth")
+        self.assertIsNotNone(findAlgorithm(ca.getSequence(), "PostAlgo1", 3), "Algorithm not placed at the right depth")
 
         ca.printConfig(prefix="test_complex_fragment")
 
         ca_main = MainEvgenServicesCfg(self.flags, withSequences=True)
         ca_main.merge(ca)
 
-        self.assertIsNotNone(findAlgorithm(ca_main.getSequence(), "GeneratorAlgo1", 5), "Algorithm not placed at the right depth")
-        self.assertIsNotNone(findAlgorithm(ca_main.getSequence(), "PostAlgo1", 5), "Algorithm not placed at the right depth")
+        self.assertIsNotNone(findAlgorithm(ca_main.getSequence(), "GeneratorAlgo1", 6), "Algorithm not placed at the right depth")
+        self.assertIsNotNone(findAlgorithm(ca_main.getSequence(), "PostAlgo1", 6), "Algorithm not placed at the right depth")
 
         ca_main.printConfig(prefix="test_complex_fragment_main")
 
@@ -106,8 +106,8 @@ class TestGeneratorSequences(unittest.TestCase):
         ca_main_plain = MainEvgenServicesCfg(self.flags, withSequences=True)
         ca_main_plain.merge(ca_plain)
 
-        self.assertIsNotNone(findAlgorithm(ca_main_plain.getSequence(), "GeneratorAlgo1", 5), "Algorithm not placed at the right depth")
-        self.assertIsNotNone(findAlgorithm(ca_main_plain.getSequence(), "PostAlgo1", 5), "Algorithm not placed at the right depth")
+        self.assertIsNotNone(findAlgorithm(ca_main_plain.getSequence(), "GeneratorAlgo1", 6), "Algorithm not placed at the right depth")
+        self.assertIsNotNone(findAlgorithm(ca_main_plain.getSequence(), "PostAlgo1", 6), "Algorithm not placed at the right depth")
 
         ca_main_plain.printConfig(prefix="test_complex_fragment_plain_merged")
 
