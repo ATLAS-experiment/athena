@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 // R/W/D handles
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 // My own header file
 #include "TruthBornLeptonCollectionMaker.h"
@@ -46,6 +47,12 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
    ATH_CHECK( m_particlesKey.initialize() );
    ATH_MSG_INFO("Using " << m_particlesKey.key() << " as the input truth container key");
 
+   // ReadDecorHandleKeys
+   ATH_CHECK(m_originAccessorKey.initialize());
+   ATH_CHECK(m_typeAccessorKey.initialize());
+   ATH_CHECK(m_outcomeAccessorKey.initialize());
+   ATH_CHECK(m_classificationAccessorKey.initialize());
+
   // Output truth particles
   if (m_collectionName.empty()) {
     ATH_MSG_FATAL("No key provided for the new truth particle collection");
@@ -53,16 +60,12 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
   } else {ATH_MSG_INFO("New truth particle collection key: " << m_collectionName.key() );}
   ATH_CHECK( m_collectionName.initialize());
 
-  // Decoration keys
-  m_originDecoratorKey = m_collectionName.key() + ".classifierParticleOrigin";
+  // Decoration keys - FIXME we should not need to use WriteDecorHandleKeys here.
   ATH_CHECK(m_originDecoratorKey.initialize());
-  m_typeDecoratorKey = m_collectionName.key() + ".classifierParticleType";
   ATH_CHECK(m_typeDecoratorKey.initialize());
-  m_outcomeDecoratorKey = m_collectionName.key() + ".classifierParticleOutCome";
   ATH_CHECK(m_outcomeDecoratorKey.initialize());
-  m_classificationDecoratorKey = m_collectionName.key() + ".Classification";
   ATH_CHECK(m_classificationDecoratorKey.initialize());
-  
+
   // TODO: needs to be made MT-friendly
   ATH_CHECK( m_metaStore.retrieve() );
 
@@ -124,10 +127,10 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
   SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey, ctx);
   SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
 
-  static const SG::ConstAccessor<unsigned int> classifierParticleTypeAcc("classifierParticleType");
-  static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
-  static const SG::ConstAccessor<unsigned int> classifierParticleOutComeAcc("classifierParticleOutCome");
-  static const SG::ConstAccessor<unsigned int> ClassificationAcc("Classification");
+  SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > originAccessor(m_originAccessorKey, ctx);
+  SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeAccessor(m_typeAccessorKey, ctx);
+  SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeAccessor(m_outcomeAccessorKey, ctx);
+  SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationAccessor(m_classificationAccessorKey, ctx);
 
   // add relevant particles to new collection
   for (unsigned int i=0; i<truthParticles->size(); ++i) {
@@ -197,10 +200,10 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
     // Fill with numerical content
     *xTruthParticle=*theParticle;
     // Copy over the decorations if they are available
-    typeDecorator(*xTruthParticle) = classifierParticleTypeAcc.withDefault(*theParticle, 0);
-    originDecorator(*xTruthParticle) = classifierParticleOriginAcc.withDefault(*theParticle, 0);
-    outcomeDecorator(*xTruthParticle) = classifierParticleOutComeAcc.withDefault(*theParticle, 0);
-    classificationDecorator(*xTruthParticle) = ClassificationAcc.withDefault(*theParticle, 0);
+    typeDecorator(*xTruthParticle) = typeAccessor.withDefault(*theParticle, 0);
+    originDecorator(*xTruthParticle) = originAccessor.withDefault(*theParticle, 0);
+    outcomeDecorator(*xTruthParticle) = outcomeAccessor.withDefault(*theParticle, 0);
+    classificationDecorator(*xTruthParticle) = classificationAccessor.withDefault(*theParticle, 0);
   } // Loop over all particles
 
   return StatusCode::SUCCESS;
