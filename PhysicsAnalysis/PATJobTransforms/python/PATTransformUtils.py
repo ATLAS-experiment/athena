@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Module with PAT transform options and substeps
 
@@ -9,7 +9,7 @@ msg = msg.getChild(__name__)
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
 from PyJobTransforms.trfArgs import getExtraDPDList
-from PyJobTransforms.trfExe import  NTUPMergeExecutor, POOLMergeExecutor
+from PyJobTransforms.trfExe import  NTUPMergeExecutor, POOLMergeExecutor, NtupPhysValPostProcessingExecutor
     
 def addPhysValidationMergeFiles(parser):
     # TODO: Better to somehow auto-import this from PhysicsAnalysis/PhysicsValidation/PhysValMonitoring
@@ -32,17 +32,17 @@ def addNTUPMergeSubsteps(executorSet, skip_post_processing=False):
     intermediateStep = 'NTUP_PHYSVAL_MRG0'
     try:
         if skip_post_processing:
-            msg.info("User requested to SKIP post-processing ('--skipPostProcessing' [%s]), so we'll skip running post-processing.", skip_post_processing)
+            msg.info("User requested to SKIP post-processing ('--skipPostProcessing' [%s]), so we'll just do merging and skip running post-processing.", skip_post_processing)
             out_data = ['NTUP_PHYSVAL_MRG']
         else:
-            msg.info("We'll run merging and post-processing (currently implemented only for ID track monitoring).")
+            msg.info("We'll run merging and post-processing (implemented for ID track monitoring, EGamma, and BTagging).")
             out_data = [intermediateStep]
 
         executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVAL', exe='hadd', inData=['NTUP_PHYSVAL'], outData=out_data, exeArgs=[]))
 
         if not skip_post_processing:
-            executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVALPostProc', exe='postProcessIDPVMHistos', inData=[intermediateStep], outData=['NTUP_PHYSVAL_MRG'], exeArgs=[]))
-
+            executorSet.add(NTUPMergeExecutor(name='NTUPLEPHYSVALIDTrackingPostProc', exe='postProcessIDPVMHistos', inData=[intermediateStep], outData=['NTUP_PHYSVAL_MRG1'], exeArgs=[]))
+            executorSet.add(NtupPhysValPostProcessingExecutor(name='NTUPLEPHYSVALPostProc', exe='physvalPostProcessing.py', inData=['NTUP_PHYSVAL_MRG1'], outData=['NTUP_PHYSVAL_MRG'],exeArgs=[]))
 
         # Extra Tier-0 NTUPs
         extraNTUPs = getExtraDPDList(NTUPOnly = True)

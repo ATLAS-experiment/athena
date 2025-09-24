@@ -19,7 +19,6 @@ from PATJobTransforms.PATTransformUtils import addNTUPMergeSubsteps, addPhysVali
 @stdTrfExceptionHandler
 @sigUsrStackTrace
 def main():
-    
     msg.info('This is %s' % sys.argv[0])
     if sys.argv[1:] == []:
         msg.info("%s stopped at %s, no input parameters given" % (sys.argv[0], time.asctime()))

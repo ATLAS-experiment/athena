@@ -2149,6 +2149,25 @@ class NTUPMergeExecutor(scriptExecutor):
 
         super(NTUPMergeExecutor, self).preExecute(input=input, output=output)
 
+## @brief Specialist execution class for running post processing on merged PHYVAL NTUPLE file
+class NtupPhysValPostProcessingExecutor(scriptExecutor):
+    """Executor for running physvalPostProcessing.py with <input> <output> args"""
+
+    def preExecute(self, input = set(), output = set()):
+        self.setPreExeStart()
+        msg.debug('[NTUP] Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))
+
+        self._cmd = [self.exe, ]
+        
+        if len(input) != 1 or len(output) != 1:
+                raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_FAIL'),
+                                                                f'Exactly one input and one output must be specified (got inputs={len(input)}, outputs={len(output)})')
+                                                                
+        self._cmd.append(self.conf.dataDictionary[list(input)[0]].value[0])
+        self._cmd.append(self.conf.dataDictionary[list(output)[0]].value[0])
+
+        # Finalize execution setup by calling the parent class method
+        super(NtupPhysValPostProcessingExecutor, self).preExecute(input=input, output=output)
 
 ## @brief Specalise the script executor to deal with the BS merge oddity of excluding empty DRAWs 
 class bsMergeExecutor(scriptExecutor):
