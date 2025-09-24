@@ -18,8 +18,6 @@
 #include <stdexcept>
 #include <atomic>
 
-#include <boost/config.hpp>
-
 #include "StoreGate/SGtests.h"
 #include "TestTools/SGassert.h"
 
