@@ -9,6 +9,9 @@
 #include "InDetMeasurementUtilities/ClusterConversionUtilities.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
+#include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
+
+#include "HGTD_RIO_OnTrack/HGTD_ClusterOnTrack.h"
 
 #include <format>
 namespace ActsTrk::detail {
@@ -18,42 +21,34 @@ namespace ActsTrk::detail {
                                            const Acts::CalibrationContext& /*cctx*/,
                                            const Acts::SourceLink& sl,
                                            TrackState_t<trajectory_t> trackState) const {
-      const SourceLink_t sourceLink = unpack(sl);
-      switch (sourceLink->localParameters().dimension()) {
-        case 1: {
-          ProjectorType projector{ProjectorType::e1DimNoTime};
-          /// Hack to make the coordinate systems between Acts & Trk match for the SCT endcap hits          
-          if (sourceLink->associatedSurface().bounds().type() == Trk::SurfaceBounds::Annulus) {
-             projector = ProjectorType::e1DimRotNoTime;
-             if (sourceLink->type(Trk::MeasurementBaseType::Type::RIO_OnTrack)) {
-               const auto* rot = static_cast<const Trk::RIO_OnTrack*>(sourceLink);
-               if (rot->prepRawData()->type(Trk::PrepRawDataType::SCT_Cluster)) {
-                  const auto* clust = static_cast<const InDet::SCT_ClusterOnTrack*>(rot);
-                  const auto [pos, cov] = TrackingUtilities::convertSCT_LocalPosCov(*clust->prepRawData());
-                  setState<1, trajectory_t>(projector, pos, cov, sl, trackState);
-                  break;
-               }
-             }
-          } 
-          setState<1, trajectory_t>(projector, sourceLink->localParameters(), sourceLink->localCovariance(),
-                                    sl, trackState);
-          break;
-        } case 2: {
-          setState<2, trajectory_t>(ProjectorType::e2DimNoTime, sourceLink->localParameters(), 
-                                    sourceLink->localCovariance(), sl, trackState);
-          break;
-        }
-        case 3: {
-          setState<3, trajectory_t>(ProjectorType::e2DimWithTime, sourceLink->localParameters(), 
-                                    sourceLink->localCovariance(), sl, trackState);
-          break;
-        }
-        default: {
-          std::stringstream linkDump{};
-          sourceLink->dump(linkDump); 
-          throw std::domain_error(std::format("TrkMeasurementCalibrator::calibrate() - Invalid dimension {:d} for measurement {:} ",
-                                              sourceLink->localParameters().dimension(), linkDump.str()));
-        }
+    const SourceLink_t sourceLink = unpack(sl);
+
+    auto detEl = dynamic_cast<const InDetDD::SiDetectorElement *>(sourceLink->associatedSurface().associatedDetectorElement()); 
+
+    if(auto pixelCluster = dynamic_cast<const InDet::PixelClusterOnTrack *>(sourceLink); pixelCluster != nullptr) {
+      auto [locPos, locCov] = TrackingUtilities::convertPix_LocalPosCov(*pixelCluster->prepRawData());
+      setState<2, trajectory_t>(ProjectorType::e2DimNoTime, locPos, locCov, sl, trackState);
+    } else if(auto stripCluster = dynamic_cast<const InDet::SCT_ClusterOnTrack *>(sourceLink); stripCluster != nullptr) {
+      auto [locPos, locCov] = TrackingUtilities::convertSCT_LocalPosCov(*stripCluster->prepRawData());
+      if( detEl->isBarrel() ) {
+        setState<1, trajectory_t>(ProjectorType::e1DimNoTime, locPos, locCov,
+                                  sl, trackState);
+      } else {
+        setState<1, trajectory_t>(ProjectorType::e1DimRotNoTime, locPos, locCov,
+                                  sl, trackState);
+      }
+    } else if(auto hgtdCluster = dynamic_cast<const HGTD_ClusterOnTrack*>(sourceLink); hgtdCluster != nullptr ) {
+      auto [locPos, locCov] = TrackingUtilities::convertHGTD_LocalPosCov(*hgtdCluster->prepRawData());
+      setState<3, trajectory_t>(ProjectorType::e2DimWithTime, locPos, locCov, sl, trackState);
+     } else {
+      std::stringstream linkDump{};
+      sourceLink->dump(linkDump); 
+      throw std::domain_error(
+        std::format(
+          "TrkMeasurementCalibrator::calibrate() - Invalid dimension {:d} for measurement {:} ",
+          sourceLink->localParameters().dimension(), linkDump.str()
+        )
+      );
     }
   }
 } // namespace ActsTrk::detail
