@@ -95,6 +95,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
     ATH_CHECK( m_FPGAHitKey.initialize() );
+    ATH_CHECK( m_FPGAHitKey_1st.initialize() );
     ATH_CHECK( m_FPGAHitKey_2nd.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
@@ -130,10 +131,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Set up write handles.
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey_1st,ctx);
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_2nd (m_FPGAHitKey_2nd,ctx);
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
     SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
 
+    ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
     ATH_CHECK( FPGAHits_2nd.record (std::make_unique<FPGATrackSimHitCollection>()));
     ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
     ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
@@ -180,6 +183,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
     m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd);
+    // record 1st stage hits in SG
+    for (auto& hit : phits_1st) {
+        FPGAHits_1st->push_back(*hit);
+    }
+
     if(m_writeOutputData) *m_slicedStripHeaderPreSP = *m_slicedStripHeader;
 
     // The slicing engine puts strip hits into a logical event input header. That header now needs to go
