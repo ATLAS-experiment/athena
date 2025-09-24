@@ -2272,21 +2272,21 @@ void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
     }
   }
 
-  digitsMetaData.push_back(bcid);
-  digitsMetaData.push_back(l1id);
-  digitsMetaData.push_back(moduleID);
-  digitsMetaData.push_back(runType);
-  digitsMetaData.push_back(runNumber);
-  digitsMetaData.push_back(pedestalHi);
-  digitsMetaData.push_back(pedestalLo);
-  digitsMetaData.push_back(chargeInjected);
-  digitsMetaData.push_back(timeInjected);
-  digitsMetaData.push_back(capacitor);
-  digitsMetaData.push_back(ecr);
+  digitsMetaData.push_back(std::move(bcid));
+  digitsMetaData.push_back(std::move(l1id));
+  digitsMetaData.push_back(std::move(moduleID));
+  digitsMetaData.push_back(std::move(runType));
+  digitsMetaData.push_back(std::move(runNumber));
+  digitsMetaData.push_back(std::move(pedestalHi));
+  digitsMetaData.push_back(std::move(pedestalLo));
+  digitsMetaData.push_back(std::move(chargeInjected));
+  digitsMetaData.push_back(std::move(timeInjected));
+  digitsMetaData.push_back(std::move(capacitor));
+  digitsMetaData.push_back(std::move(ecr));
   if (version) {
-    digitsMetaData.push_back(bcr);
-    digitsMetaData.push_back(packetVersion);
-    digitsMetaData.push_back(fragmentID);
+    digitsMetaData.push_back(std::move(bcr));
+    digitsMetaData.push_back(std::move(packetVersion));
+    digitsMetaData.push_back(std::move(fragmentID));
   }
 }
 
