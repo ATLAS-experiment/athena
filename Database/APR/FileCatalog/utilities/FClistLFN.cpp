@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**FClistLFN.cpp -- FileCatalog command line tool to list all the LFN entries from the catalog.
@@ -38,7 +38,7 @@ public:
         uris.push_back(elem);
       }else{
         elem=m_contact;
-        uris.push_back(elem);
+        uris.push_back(std::move(elem));
         break;
       }
     }
