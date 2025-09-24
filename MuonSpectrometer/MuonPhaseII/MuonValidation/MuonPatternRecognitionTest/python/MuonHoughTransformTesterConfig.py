@@ -78,6 +78,10 @@ if __name__=="__main__":
                                                                                                 CanvasPreFix="NswPhiHoughPlotValid",
                                                                                                 AllCanvasName="AllNswPhiHoughiDiPuffPlots",
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))
+        cfg.getEventAlgo("NswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="NswSegmentFitPlotValid",
+                                                                                                AllCanvasName="AllNswSegmentFitPlots",
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
 
     executeTest(cfg)
     

@@ -37,7 +37,9 @@ StatusCode MuonSPCalibrationTest::execute() {
 
                 // Get the seed position and direction in the chamber
                 Amg::Vector3D seedPosInChamb = sp->localPosition();
-                Amg::Vector3D seedDirInChamb = sp->sensorDirection();
+                const Amg::Transform3D& locToGlob{sp->msSector()->localToGlobalTrans(*geoCtx)};
+                Amg::Vector3D seedDirInChamb = locToGlob*(sp->localPosition());
+                seedDirInChamb = seedDirInChamb.unit();
 
                 CalibSpacePointPtr calibSP =  m_calibTool->calibrate(ctx, sp.get(), seedPosInChamb, seedDirInChamb, 0.0);
                 ATH_MSG_ALWAYS("Calibrated SpacePoint: with position " << Amg::toString(calibSP->localPosition())

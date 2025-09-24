@@ -59,19 +59,36 @@ def MuonPatternRecognitionCfg(flags):
     result = ComponentAccumulator()
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
+    sgementContainers = []
     if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
-        result.merge(MuonEtaHoughTransformAlgCfg(flags,name="NswEtaHoughTransformAlg", EtaHoughMaxContainer = "MuonHoughNswMaxima", SpacePointContainer = "NswSpacePoints"))
-        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="NswPhiSeedFinderAlg", CombinatorialPhiWriteKey = "MuonHoughNswSegmentSeeds", CombinatorialReadKey = "MuonHoughNswMaxima"))
+        sgementContainers+=["R4MuonSegmentsNsw"]
+        result.merge(MuonEtaHoughTransformAlgCfg(flags, name="NswEtaHoughTransformAlg", 
+                                                        EtaHoughMaxContainer = "MuonHoughNswMaxima", 
+                                                        SpacePointContainer = "NswSpacePoints"))
+        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="NswPhiSeedFinderAlg", 
+                                                       CombinatorialPhiWriteKey = "MuonHoughNswSegmentSeeds", 
+                                                       CombinatorialReadKey = "MuonHoughNswMaxima"))
+        result.merge(MuonSegmentFittingAlgCfg(flags, name="NswSegmentFitter", 
+                                                     OutSegmentContainer=sgementContainers[-1],  
+                                                     ReadKey="MuonHoughNswSegmentSeeds",
+                                                     fitSegmentT0 = False,
+                                                     recalibInFit = False,
+                                                     doBeamspotConstraint=False,
+                                                     useHessianResidual=True,
+                                                     tryPatternPars = True ))
     if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
         result.merge(MuonEtaHoughTransformAlgCfg(flags))
         result.merge(MuonPhiHoughTransformAlgCfg(flags))
-        result.merge(MuonSegmentFittingAlgCfg(flags))
-        from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
-        result.merge(xAODSegmentCnvAlgCfg(flags))
-        if flags.Input.isMC:
-           from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
-           result.merge(RecoSegmentTruthAssocCfg(flags,
-                                                 name="MuonSegmentsFromR4TruthMatching",
-                                                 SegmentKey="MuonSegmentsFromR4"))
+        sgementContainers+=["R4MuonSegments"]
+    
+        result.merge(MuonSegmentFittingAlgCfg(flags,  OutSegmentContainer=sgementContainers[-1]))
+        
+    from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
+    result.merge(xAODSegmentCnvAlgCfg(flags, InSegmentKeys = sgementContainers))
+    if flags.Input.isMC:
+        from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
+        result.merge(RecoSegmentTruthAssocCfg(flags,
+                                                name="MuonSegmentsFromR4TruthMatching",
+                                                SegmentKey="MuonSegmentsFromR4"))
 
     return result

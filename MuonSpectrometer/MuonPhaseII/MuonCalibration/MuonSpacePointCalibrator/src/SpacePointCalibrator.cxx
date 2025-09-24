@@ -24,6 +24,11 @@
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 #include "Acts/Utilities/MathHelpers.hpp"
+
+#include "MuonIdHelpers/sTgcIdHelper.h"
+
+#include <float.h>
+
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
 }
@@ -197,41 +202,77 @@ namespace MuonR4{
            }
            case xAOD::UncalibMeasType::MMClusterType: {
                 const xAOD::MMCluster* cluster = static_cast<const xAOD::MMCluster*>(spacePoint->primaryMeasurement());
-
-                std::vector<NSWCalib::CalibratedStrip> calibClus;
-                StatusCode sc =  m_nswCalibTool->calibrateClus(ctx, *gctx, cluster, locToGlob * posInChamb, calibClus);
-                if(sc.isFailure()) {
-                    ATH_MSG_WARNING("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster->identify()));
-                    return nullptr;
-                }
-
-                Amg::Vector2D locPos{cluster->localPosition<1>()[0] * Amg::Vector2D::UnitX()};
-
-                Amg::Vector3D globalTrackDir{locToGlob.linear() * dirInChamb};
-                Amg::Vector3D locDir = Muon::NswClustering::toLocal(cluster->readoutElement()->globalToLocalTrans(*gctx, cluster->layerHash()), globalTrackDir);
-
-                Amg::MatrixX calibCov{};
-                calibCov.setZero();
-                calibCov(0,0) = cov[Acts::toUnderlying(AxisDefs::etaCov)];
-                Muon::IMMClusterBuilderTool::RIO_Author rotAuthor = m_clusterBuilderToolMM->getCalibratedClusterPosition(ctx, calibClus, locDir ,locPos, calibCov);
-                if(rotAuthor == Muon::IMMClusterBuilderTool::RIO_Author::unKnownAuthor){
-                    ATH_MSG_ERROR("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster->identify()));
-                    return nullptr;
-                }
-                cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibCov(0, 0);
+                Amg::Vector3D globalPos{locToGlob * posInChamb};
+                Amg::Vector3D globalDir{locToGlob.linear() * dirInChamb};
+                
+                std::pair<double, double> calibPosCov {calibrateMM(ctx, *gctx, *cluster, globalPos, globalDir)}; 
+                
+                ATH_MSG_DEBUG("Calibrated pos and cov" << calibPosCov.first << " " << calibPosCov.second);
+                cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibPosCov.second;
                 Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTrans(*gctx, cluster->layerHash())};
 
+                // since we want to take the second coordiante from the external estimate we need to transform the sp posiiton to the layer frame, replace the precission coordinate and transform back
                 Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
-                calibSpPosInLayer.x() = locPos.x();
-
+                ATH_MSG_DEBUG("in layer before calibration" << Amg::toString(calibSpPosInLayer));
+                calibSpPosInLayer.x() = calibPosCov.first;
+                ATH_MSG_DEBUG("in layer after calibration" << Amg::toString(calibSpPosInLayer));
                 calibSpPos = toChamberTrans * calibSpPosInLayer;
 
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
                 calibSP->setCovariance(cov);
-                ATH_MSG_DEBUG("calibrated MM cluster "<<m_idHelperSvc->toString(cluster->identify()) << " loc x old " << cluster->localPosition<1>()[0] << " new loc x " << locPos.x());
+                ATH_MSG_DEBUG("calibrated MM cluster "<<m_idHelperSvc->toString(cluster->identify()) << " loc x old " << cluster->localPosition<1>()[0] << " new loc x " << calibSP->localPosition()[1]  << "cov " << calibSP->covariance());
                                 
                 break;
            }
+           case xAOD::UncalibMeasType::sTgcStripType: {
+                const xAOD::sTgcMeasurement* cluster = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->primaryMeasurement());
+
+                // We do not apply any correction for pads or wire only space points
+                if (cluster->channelType() != sTgcIdHelper::sTgcChannelTypes::Strip) {
+                    ATH_MSG_DEBUG("Calibrating an sTGC Pad or wire " << m_idHelperSvc->toString(cluster->identify()));
+                    calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
+                    calibSP->setCovariance(cov);
+                    break;
+                }
+                
+                double posAlongTheStrip{-FLT_MAX};
+
+                // check if the space point is a strip/wire combination and take the position along the strip from the wire measurement
+                if(spacePoint->secondaryMeasurement() == nullptr) {
+                    ATH_MSG_WARNING("No secondary measurement for sTGC strip cluster " << m_idHelperSvc->toString(cluster->identify()));
+                } else {
+                    const xAOD::sTgcMeasurement* secMeas = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->secondaryMeasurement());
+                    ATH_MSG_ALWAYS("Using secondary measurement "<< m_idHelperSvc->toString(secMeas->identify())<<" for sTGC strip cluster " << m_idHelperSvc->toString(cluster->identify()));
+                    if(secMeas->channelType() != sTgcIdHelper::sTgcChannelTypes::Wire) {
+                        ATH_MSG_ERROR("Secondary measurement is not a wire but "<< m_idHelperSvc->toString(secMeas->identify()));
+                    }
+                    posAlongTheStrip = spacePoint->secondaryMeasurement()->localPosition<1>()[0];
+                }
+
+                Amg::Vector3D globalPos{locToGlob * posInChamb};
+                Amg::Vector3D globalDir{locToGlob.linear() * dirInChamb};
+                
+                const xAOD::sTgcStripCluster* stripClus = static_cast<const xAOD::sTgcStripCluster*>(cluster);
+                std::pair<double, double>  calibPosCov{calibratesTGC(ctx, *gctx, *stripClus, posAlongTheStrip, globalPos, globalDir)}; 
+                
+                ATH_MSG_DEBUG("Calibrated pos and cov" << calibPosCov.first << " " << calibPosCov.second);
+                cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibPosCov.second;
+                Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTrans(*gctx, cluster->layerHash())};
+
+                // since we want to take the second coordiante from the external estimate we need to transform the sp posiiton to the layer frame, replace the precission coordinate and transform back
+                Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
+                ATH_MSG_DEBUG("in layer before calibration" << Amg::toString(calibSpPosInLayer));
+                calibSpPosInLayer.x() = calibPosCov.first;
+                ATH_MSG_DEBUG("in layer after calibration" << Amg::toString(calibSpPosInLayer));
+                calibSpPos = toChamberTrans * calibSpPosInLayer;
+
+                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
+                calibSP->setCovariance(cov);
+                ATH_MSG_DEBUG("calibrated sTGC cluster "<<m_idHelperSvc->toString(cluster->identify()) << " loc x old " << cluster->localPosition<1>()[0] << " new loc x " << calibSP->localPosition()[1]  << "cov " << calibSP->covariance());
+                                
+                break;
+           }
+
            default:
                 ATH_MSG_WARNING("Do not know how to calibrate "<<m_idHelperSvc->toString(spacePoint->identify()));        
         }
@@ -270,6 +311,49 @@ namespace MuonR4{
             return calibConsts->rtRelation->rt()->driftAcceleration(driftTime.value_or(0.));
         }
         return 0.;
+    }
+
+
+    std::pair<double, double> SpacePointCalibrator::calibrateMM(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster& cluster, const Amg::Vector3D& globalPos, const Amg::Vector3D& globalDir) const{
+        std::vector<NSWCalib::CalibratedStrip> calibClus;
+        StatusCode sc =  m_nswCalibTool->calibrateClus(ctx, gctx, cluster, globalPos, calibClus);
+        if(sc.isFailure()) {
+            ATH_MSG_WARNING("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster.identify()));
+            return std::make_pair(0., 0.);
+        }
+
+        Amg::Vector2D locPos{cluster.localPosition<1>()[0] * Amg::Vector2D::UnitX()};
+        Amg::Vector3D locDir = Muon::NswClustering::toLocal(cluster.readoutElement()->globalToLocalTrans(gctx, cluster.layerHash()), globalDir);
+
+        Amg::MatrixX calibCov{};
+        calibCov.resize(1,1);
+        calibCov(0,0) = cluster.localCovariance<1>()(0, 0);
+        ATH_MSG_DEBUG("old loc pos " << locPos[0] << " old cov" << calibCov(0,0)  );
+
+        Muon::IMMClusterBuilderTool::RIO_Author rotAuthor = m_clusterBuilderToolMM->getCalibratedClusterPosition(ctx, calibClus, locDir ,locPos, calibCov);
+        if(rotAuthor == Muon::IMMClusterBuilderTool::RIO_Author::unKnownAuthor){
+            THROW_EXCEPTION("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster.identify()));
+        }
+        ATH_MSG_DEBUG("new loc pos " << locPos[0] << " new cov" << calibCov(0,0)  );
+        return std::make_pair(locPos[0], calibCov(0,0));
+    }
+
+    std::pair<double, double> SpacePointCalibrator::calibratesTGC(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::sTgcStripCluster& cluster,
+                                             double posAlongTheStrip, const Amg::Vector3D& globalPos, const Amg::Vector3D& globalDir) const{
+       
+        // avoid unused variable warning while this code is under development
+        (void) ctx;
+        (void) globalDir;
+
+        // if the second coordiante was not provided by the wire, take it from the seed track position 
+        if(posAlongTheStrip == -FLT_MAX){
+            Amg::Vector3D extPosLocal =  cluster.readoutElement()->globalToLocalTrans(gctx, cluster.layerHash()) * globalPos;
+            posAlongTheStrip = extPosLocal[1];
+        }
+
+        // For now just copying over the local position and covariance. Eventually this should apply corrections from B-Lines and as build geometry
+        
+        return std::make_pair(cluster.localPosition<1>()[0], cluster.localCovariance<1>()(0,0));
     }
 
     void SpacePointCalibrator::calibrateSourceLink(const Acts::GeometryContext& geoctx,
@@ -388,9 +472,54 @@ namespace MuonR4{
                 break;
             } 
             case MMClusterType: {
-                THROW_EXCEPTION("Micromega measurements are not yet implemented");
+                const auto* mmClust = static_cast<const xAOD::MMCluster*>(muonMeas);
+                std::pair<double, double> calibPosCov{calibrateMM(*ctx,* gctx, *mmClust, trackPos, trackDir)};
+                AmgVector(1) pos{AmgVector(1)(calibPosCov.first)};
+                AmgSymMatrix(1) cov{AmgSymMatrix(1)(calibPosCov.second)};
+
+                setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
+                                                               pos, 
+                                                               cov, link, trackState);
                 break;
             } case sTgcStripType: {
+                const auto* stgcClust = static_cast<const xAOD::sTgcMeasurement*>(muonMeas);
+
+                if(stgcClust->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
+                        setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
+                                                                       muonMeas->localPosition<1>(), 
+                                                                       muonMeas->localCovariance<1>(), link, trackState);
+
+                } else if(stgcClust->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                        setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, 
+                                                                       stgcClust->localPosition<2>(), 
+                                                                       stgcClust->localCovariance<2>(), link, trackState);
+
+                
+                } else { // strips
+                    const auto stgCluster = static_cast<const xAOD::sTgcStripCluster*>(muonMeas);
+                    std::pair<double, double> calibPosCov{calibratesTGC(*ctx, *gctx, *stgCluster, -FLT_MAX, trackPos, trackDir)};
+                    if(!m_usesTgcTime){
+                        AmgVector(1) pos{AmgVector(1)(calibPosCov.first)};
+                        AmgSymMatrix(1) cov{AmgSymMatrix(1)(calibPosCov.second)};
+                        setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
+                                                                   pos, 
+                                                                   cov, link, trackState);
+                    } else {
+                        ATH_MSG_WARNING("sTGC time calibration to be implemented...");
+                        AmgVector(2) pos{AmgVector(2)::Zero()};
+                        AmgSymMatrix(2) cov{AmgSymMatrix(2)::Zero()};
+                        pos[0] = calibPosCov.first;
+                        pos[1] = stgCluster->time();
+                        cov(0,0) = calibPosCov.second;
+                        cov(1,1) = std::pow(25 /*ns*/, 2);
+
+                        setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimWithTime, 
+                                                                    pos, 
+                                                                    cov, link, trackState);
+                    }
+                    break; 
+                
+                }
                 THROW_EXCEPTION("sTGC measurements are not yet implemented");
                 break;
             } default: {

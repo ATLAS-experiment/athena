@@ -10,6 +10,8 @@
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
+
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include <memory>
 
 namespace {
@@ -36,7 +38,14 @@ namespace MuonR4{
         /// set the secondary measurement to be the primary one
         if (primMeas->numDimensions() == 2) {
             m_secondaryMeas = m_primaryMeas;
-        }                            
+        } 
+        /// Temporary hack to activate the measures phi flag for micromegas
+        if (primMeas->type() == xAOD::UncalibMeasType::MMClusterType) {
+            const auto* clust = static_cast<const xAOD::MMCluster*>(primMeas);
+            if (clust->readoutElement()->stripLayer(clust->layerHash()).design().hasStereoAngle()) {
+                m_secondaryMeas = m_primaryMeas;
+            }
+        }
     }
     const Amg::Vector3D& SpacePoint::localPosition() const { return m_pos; }
     const Amg::Vector3D& SpacePoint::sensorDirection() const { return m_dir; } 
@@ -75,7 +84,6 @@ namespace MuonR4{
     const MuonGMR4::SpectrometerSector* SpacePoint::msSector() const {
         return m_msSector;
     }
-
 
     xAOD::UncalibMeasType SpacePoint::type() const {
         return primaryMeasurement()->type();

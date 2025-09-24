@@ -97,7 +97,7 @@ namespace MuonR4{
             /// ReadHandle of the seeds
             SG::ReadHandleKey<SegmentSeedContainer> m_seedKey{this, "ReadKey", "MuonHoughStationSegmentSeeds"};
             // write handle key for the output segment seeds 
-            SG::WriteHandleKey<SegmentContainer> m_outSegments{this, "MuonSegmentContainer", "R4MuonSegments"};
+            SG::WriteHandleKey<SegmentContainer> m_outSegments{this, "OutSegmentContainer", "R4MuonSegments"};
             // access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// IdHelperSvc
@@ -109,6 +109,10 @@ namespace MuonR4{
 
             Gaudi::Property<bool> m_doT0Fit{this, "fitSegmentT0", true};
             Gaudi::Property<bool> m_recalibInFit{this, "recalibInFit" , false};
+            /// @brief Try first to fit the pattern parameters. Then proceed with the straw line tangents
+            Gaudi::Property<bool> m_tryPatternPars{this, "tryPatternPars", false};
+            /// @brief Use the expliciit Hessian in the residual calculation
+            Gaudi::Property<bool> m_hessianResidual{this, "useHessianResidual", false};
             /// Add beamline constraint
             Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
             Gaudi::Property<double> m_beamSpotR{this, "BeamSpotRadius", 30.* Gaudi::Units::cm};
