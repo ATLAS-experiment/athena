@@ -59,7 +59,7 @@ namespace MuonR4{
                                   ActsTrk::MutableTrackContainer& outContainer) const;
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
-            SG::ReadHandleKeyArray<xAOD::MuonSegmentContainer> m_segmentKeys{this, "SegmentContainer", {} };
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Pointer to the MuonDetectorManager */
