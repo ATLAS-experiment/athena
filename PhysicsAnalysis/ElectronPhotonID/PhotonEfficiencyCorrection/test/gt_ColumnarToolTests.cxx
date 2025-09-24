@@ -60,7 +60,6 @@ TEST_F (ColumnarMemoryTest, AsgPhotonEfficiencyCorrectionTool)
 
   columnMap.addColumn ("egammaClusters", {0, 1});
   columnMap.addColumn ("egammaClusters.calE", {10e5 * cosh (1)});
-  columnMap.addColumn ("egammaClusters.calEta", {1});
   columnMap.addColumn ("egammaClusters.samplingPattern", {0x4});
   columnMap.addColumn ("egammaClusters.e_sampl.data", {10e5});
   columnMap.addColumn ("egammaClusters.e_sampl.offset", {0, columnMap.columnSize("egammaClusters.e_sampl.data")});
