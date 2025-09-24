@@ -19,7 +19,9 @@
 #include "AthenaKernel/IAthMetaDataSvc.h"
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
+#include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
+
 
 #include "StorageSvc/DbReflex.h"
 #include "FileCatalog/IFileCatalog.h"
@@ -617,7 +619,42 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
          return(StatusCode::FAILURE);
       }
    }
-   return AthenaPoolCnvSvc::createAddress(svcType, clid, par, ip, refpAddress);
+   if (!m_inputStreamingTool.empty() && m_inputStreamingTool->isClient()) {
+      Token addressToken;
+      addressToken.setDb(par[0].substr(4));
+      addressToken.setCont(par[1]);
+      addressToken.setOid(Token::OID_t(ip[0], ip[1]));
+      if (!m_inputStreamingTool->lockObject(addressToken.toString().c_str()).isSuccess()) {
+         ATH_MSG_WARNING("Failed to lock Address Token: " << addressToken.toString());
+         return(StatusCode::FAILURE);
+      }
+      void* buffer = nullptr;
+      std::size_t nbytes = 0;
+      StatusCode sc = m_inputStreamingTool->getObject(&buffer, nbytes);
+      while (sc.isRecoverable()) {
+         // sleep
+         sc = m_inputStreamingTool->getObject(&buffer, nbytes);
+      }
+      if (!sc.isSuccess()) {
+         ATH_MSG_WARNING("Failed to get Address Token: " << addressToken.toString());
+         return(StatusCode::FAILURE);
+      }
+      auto token = std::make_unique<Token>();
+      token->fromString(static_cast<const char*>(buffer)); buffer = nullptr;
+      if (token->classID() == Guid::null()) {
+         token.reset();
+      }
+      m_inputStreamingTool->getObject(&buffer, nbytes).ignore();
+      if (token) {
+         refpAddress = new TokenAddress(POOL_StorageType, clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
+         return(StatusCode::SUCCESS);
+      }
+      else {
+         return(StatusCode::RECOVERABLE);
+      }
+   } else {
+      return AthenaPoolCnvSvc::createAddress(svcType, clid, par, ip, refpAddress);
+   }
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
