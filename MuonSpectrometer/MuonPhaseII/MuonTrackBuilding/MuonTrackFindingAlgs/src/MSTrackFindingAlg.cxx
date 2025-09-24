@@ -18,7 +18,7 @@
 
 namespace MuonR4{
     StatusCode MSTrackFindingAlg::initialize() {
-        ATH_CHECK(m_segmentKeys.initialize());
+        ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_segSelector.retrieve());
@@ -38,13 +38,9 @@ namespace MuonR4{
     StatusCode MSTrackFindingAlg::execute(const EventContext& ctx) const {
         ATH_MSG_VERBOSE("Run track finding in event "<<ctx.eventID().event_number());
         
-        ConstDataVector<xAOD::MuonSegmentContainer> allEventSegs{SG::VIEW_ELEMENTS};
-        for (const SG::ReadHandleKey<xAOD::MuonSegmentContainer>& key : m_segmentKeys) {
-            const xAOD::MuonSegmentContainer* partSegments{nullptr};
-            ATH_CHECK(SG::get(partSegments, key, ctx));
-            allEventSegs.insert(allEventSegs.end(), partSegments->begin(), partSegments->end());
-        }
-        auto seedContainer = findTrackSeeds(ctx, *allEventSegs.asDataVector());
+        const xAOD::MuonSegmentContainer* allEventSegs{nullptr};
+        ATH_CHECK(SG::get(allEventSegs, m_segmentKey, ctx));
+        auto seedContainer = findTrackSeeds(ctx, *allEventSegs);
 
         
         const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
