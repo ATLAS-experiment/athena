@@ -10,10 +10,12 @@
 #include "ThePEG/LesHouches/LesHouchesReader.h"
 #include "ThePEG/PDT/Decayer.h"
 #include "ThePEG/Utilities/CFileLineReader.h"
-#include <string>
-#include <stdio.h>
+
 #include "herwig7_interface.h"
 #include "CxxUtils/checker_macros.h"
+#include <string>
+#include <map>
+#include <vector>
 
 double powheg_weight;
 
@@ -95,13 +97,13 @@ public:
   /**
    * Return the name of the file from where to read events.
    */
-  string filename() const { return m_theFileName; }
+  const std::string & filename() const { return m_theFileName; }
 
   /** 
    * Return the optional weights information string ("Names")
    */
 
-  virtual vector<string> optWeightsNamesFunc();
+  virtual std::vector<std::string> optWeightsNamesFunc();
  
   double eventWeight() {return powheg_weight;}
 
@@ -193,47 +195,47 @@ protected:
    * is its version number. If empty, this is not a Les Houches
    * formatted file
    */
-  string m_LHFVersion;
+  std::string m_LHFVersion;
 
   /**
    * If LHF. All lines (since the last open() or readEvent()) outside
    * the header, init and event tags.
    */
-  string m_outsideBlock;
+  std::string m_outsideBlock;
 
   /**
    * If LHF. All lines from the header block.
    */
-  string m_headerBlock;
+  std::string m_headerBlock;
 
   /**
    * If LHF. Additional comments found in the init block.
    */
-  string m_initComments;
+  std::string m_initComments;
 
   /**
    * If LHF. Map of attributes (name-value pairs) found in the init
    * tag.
    */
-  map<string,string> m_initAttributes;
+  std::map<std::string,std::string> m_initAttributes;
 
   /**
    * If LHF. Additional comments found with the last read event.
    */
-  string m_eventComments;
+  std::string m_eventComments;
 
   /**
    * If LHF. Map of attributes (name-value pairs) found in the last
    * event tag.
    */
-  map<string,string> m_eventAttributes;
+  std::map<std::string,std::string> m_eventAttributes;
 
 private:
 
   /**
    * The name of the file from where to read events.
    */
-  string m_theFileName;
+  std::string m_theFileName;
 
   /**
    *  Whether or not to search for QNUMBERS stuff
@@ -258,14 +260,14 @@ private:
   /**
    * Further information on the weights
    */
-  map<string,string> m_scalemap;
+  std::map<std::string,std::string> m_scalemap;
 
   /**
    * Temporary holder for optional weights
    */
   
-  map<string,double> m_optionalWeightsTemp;
-  map<string,string> m_optionalWeightsLabel;
+  std::map<std::string,double> m_optionalWeightsTemp;
+  std::map<std::string,std::string> m_optionalWeightsLabel;
 
 
 private:
@@ -320,13 +322,13 @@ struct ClassTraits<BB4LPowhegLesHouchesFileReader>
   /**
    * Return the class name.
    */
-  static string className() { return "ThePEG::BB4LPowhegLesHouchesFileReader"; }
+  static std::string className() { return "ThePEG::BB4LPowhegLesHouchesFileReader"; }
   /**
    * Return the name of the shared library to be loaded to get access
    * to the BB4LPowhegLesHouchesFileReader class and every other class it uses
    * (except the base class).
    */
-  static string library() { return "libpowhegHerwigBB4L.so"; }
+  static std::string library() { return "libpowhegHerwigBB4L.so"; }
 
 };
 

@@ -590,7 +590,7 @@ void BB4LPowhegLesHouchesFileReader::open  () {
 	erase_substr(name, "<weightid='"+IdLabel+"'>");
 	name.erase(name.find('<'));
 	m_optionalWeightsLabel[IdLabel]=name;	
-	optionalWeightsNames.push_back(name);
+	optionalWeightsNames.push_back(std::move(name));
       }
       /*END MOD*/
     }
@@ -643,7 +643,7 @@ void BB4LPowhegLesHouchesFileReader::open  () {
     }
   }
   string central = "central";
-  if (m_theIncludeCentral) optionalWeightsNames.push_back(central);
+  if (m_theIncludeCentral) optionalWeightsNames.push_back(std::move(central));
 
   if ( !m_cfile ) {
     heprup.NPRUP = -42;
