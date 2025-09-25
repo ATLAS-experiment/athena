@@ -1,17 +1,12 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def HitAnalysisOutputCfg(flags, output_name='SiHitAnalysis'):
-    acc = ComponentAccumulator()
-
-    histsvc = CompFactory.THistSvc(name="THistSvc",
-                                   Output=[ f"{output_name} DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'" ])
-    acc.addService(histsvc)
-
-    return acc
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    return setupHistSvcCfg(flags, outFile=flags.Output.HISTFileName, outStream=output_name)
 
 
 def BLMHitAnalysisCfg(flags, name='BLMHitAnalysis', **kwargs):
@@ -21,7 +16,6 @@ def BLMHitAnalysisCfg(flags, name='BLMHitAnalysis', **kwargs):
     kwargs.setdefault('CollectionName', 'BLM_Hits')
     kwargs.setdefault('HistPath', '/SiHitAnalysis/')
     acc.addEventAlgo(CompFactory.SiHitAnalysis(name, **kwargs))
-
     acc.merge(HitAnalysisOutputCfg(flags))
 
     return acc
