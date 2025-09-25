@@ -253,7 +253,7 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   //
   int barrel_value;
   if (m_dict->get_label_value("barrel_endcap", "barrel", barrel_value)) {
-    const std::string errMsg = "Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary " + m_dict->m_name;
+    const std::string errMsg = "Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary " + m_dict->name();
     localMessage(errMsg, __func__, MSG::ERROR);
     return(1);
   }
@@ -273,7 +273,7 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
   int inDetField = -1;
   if (atlasDict->get_label_value("subdet", "InnerDetector", inDetField)) {
-    const std::string errMsg = "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " + atlasDict->m_name;
+    const std::string errMsg = "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " + atlasDict->name();
     localMessage(errMsg, __func__, MSG::ERROR);
     return(1);
   }
@@ -281,7 +281,7 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   // Find value for the field SCT
   int sctField = -1;
   if (m_dict->get_label_value("part", "SCT", sctField)) {
-    const std::string errMsg= "Could not get value for label 'SCT' of field 'part' in dictionary " + m_dict->m_name;
+    const std::string errMsg= "Could not get value for label 'SCT' of field 'part' in dictionary " + m_dict->name();
     localMessage(errMsg, __func__, MSG::ERROR);
     return(1);
   }
@@ -590,7 +590,7 @@ SCT_ID::initLevelsFromDict() {
   auto findField = [this](const std::string &name, const size_t indx){
     IdDictField* pField = m_dict->find_field(name);
     if (pField) {
-      m_indices[indx] = pField->m_index;
+      m_indices[indx] = pField->index();
       return true;
     } 
     const auto lvl = (indx == ROW) ? MSG::DEBUG : MSG::ERROR;
@@ -611,19 +611,19 @@ SCT_ID::initLevelsFromDict() {
 
   // Set the field implementations: for bec, lay/disk, eta/phi mod
 
-  const IdDictRegion& region = *m_dict->m_regions[m_sct_region_index];
+  const IdDictRegion& region = m_dict->region(m_sct_region_index);
 
-  m_indet_impl = region.m_implementation[m_indices[INDET]];
-  m_sct_impl = region.m_implementation[m_indices[SCT]];
-  m_bec_impl = region.m_implementation[m_indices[BARREL_EC]];
-  m_lay_disk_impl = region.m_implementation[m_indices[LAYER_DISK]];
-  m_phi_mod_impl = region.m_implementation[m_indices[PHI]];
-  m_eta_mod_impl = region.m_implementation[m_indices[ETA]];
-  m_side_impl = region.m_implementation[m_indices[SIDE]];
+  m_indet_impl = region.implementation(m_indices[INDET]);
+  m_sct_impl = region.implementation(m_indices[SCT]);
+  m_bec_impl = region.implementation(m_indices[BARREL_EC]);
+  m_lay_disk_impl = region.implementation(m_indices[LAYER_DISK]);
+  m_phi_mod_impl = region.implementation(m_indices[PHI]);
+  m_eta_mod_impl = region.implementation(m_indices[ETA]);
+  m_side_impl = region.implementation(m_indices[SIDE]);
   if (m_hasRows) {
-    m_row_impl = region.m_implementation[m_indices[ROW]];
+    m_row_impl = region.implementation(m_indices[ROW]);
   }
-  m_strip_impl = region.m_implementation[m_indices[STRIP]];
+  m_strip_impl = region.implementation(m_indices[STRIP]);
   localMessage("decode index and bit fields for each level: ", __func__, MSG::DEBUG);
   localMessage("indet    " + m_indet_impl.show_to_string(), __func__, MSG::DEBUG);
   localMessage("sct      " + m_sct_impl.show_to_string(), __func__, MSG::DEBUG);
