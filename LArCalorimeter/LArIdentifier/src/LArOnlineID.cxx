@@ -78,7 +78,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
         std::stringstream strm;
-        strm << atlasDict->m_name;
+        strm << atlasDict->name();
         std::string strg= " Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -93,7 +93,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larOnlineField   = -4;
     if (m_dict->get_label_value("part", "LArOnline", larOnlineField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         std::string strg = "Could not get value for label 'LArOnline' of field 'part' in dictionary "+strm.str(); 
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -108,7 +108,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larOnlineCalibField   = -5;
     if (m_dict->get_label_value("part", "LArOnlineCalib", larOnlineCalibField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         std::string strg = "Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
