@@ -30,22 +30,18 @@ atlas_add_test( ConfigTextCompareBlock
 # Isolated structure is needed to avoid two CPRun test simultaneously creating workDir symlink and replace the other one
 # which causes the test to fail.
 # This is needed only when you have multiple CPRun tests.
-set(_fullsim_workdir "${CMAKE_CURRENT_BINARY_DIR}/TestCPRunFullSim")
-file(MAKE_DIRECTORY "${_fullsim_workdir}")
 atlas_add_test( TestCPRunFullSim
   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_MC --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml -e 150
   POST_EXEC_SCRIPT nopost.sh
   PROPERTIES
     TIMEOUT 1000
-    WORKING_DIRECTORY "${_fullsim_workdir}"
+    PRIVATE_WORKING_DIRECTORY
 )
 
-set(_multimuon_workdir "${CMAKE_CURRENT_BINARY_DIR}/TestCPRunMultiMuon")
-file(MAKE_DIRECTORY "${_multimuon_workdir}")
 atlas_add_test( TestCPRunMultiMuon
   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AnalysisAlgorithmsConfig/test_configuration_multi_muon.yaml -e 150
   POST_EXEC_SCRIPT nopost.sh
   PROPERTIES
     TIMEOUT 1000
-    WORKING_DIRECTORY "${_multimuon_workdir}"
+    PRIVATE_WORKING_DIRECTORY
 )
