@@ -12,7 +12,6 @@
  **/
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaPoolUtilities/TagAthenaAttributeList.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 #include "StoreGate/WriteHandleKey.h"
 
@@ -38,7 +37,6 @@ public:
 
 private:
    SG::WriteHandleKey<AthenaAttributeList> m_key { this, "Key", "RunEventTag" };
-   SG::WriteHandleKey<TagAthenaAttributeList> m_tagKey { this, "TagKey", "RunEventTag" };
    IntegerProperty m_magic;
    /// Specification of the event tag metadata schema
    AthenaAttributeListSpecification* m_attribListSpec;
