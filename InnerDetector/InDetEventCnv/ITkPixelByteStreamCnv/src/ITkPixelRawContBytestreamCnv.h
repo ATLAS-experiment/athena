@@ -16,7 +16,9 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthConstConverter.h"
 #include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "ITkPixelCnvTool.h"
+
 
 class ITkPixelRawContByteStreamCnv : public AthConstConverter {
     public:

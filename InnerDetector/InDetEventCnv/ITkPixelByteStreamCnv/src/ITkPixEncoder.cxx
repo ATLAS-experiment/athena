@@ -16,12 +16,13 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 //Constructor sets up the geometry for all future loops
 
-ITkPixEncoder::ITkPixEncoder(const unsigned nCol, const unsigned nRow, const unsigned nColInCCol, 
+ITkPixEncoder::ITkPixEncoder(const bool enableChipID, const unsigned nCol, const unsigned nRow, const unsigned nColInCCol, 
   const unsigned nRowInQRow, const unsigned nEventsPerStream, const bool plainHitMap, 
   const bool dropToT): m_nCol(nCol/nColInCCol), m_nRow(nRow/nRowInQRow), 
-  m_nColInCCol(nColInCCol), m_nRowInQRow(nRowInQRow), m_nEventsPerStream(nEventsPerStream), 
+  m_nColInCCol(nColInCCol), m_nRowInQRow(nRowInQRow), m_nEventsPerStream(nEventsPerStream), m_enableChipID(enableChipID),
   m_plainHitMap(plainHitMap), m_dropToT(dropToT){
-    //nop
+    if (m_enableChipID) m_bitsPerWord = 61;
+    else m_bitsPerWord = 63;
 }
 
 void ITkPixEncoder::addBits64(const uint64_t value, const uint8_t length) const {
@@ -34,12 +35,12 @@ void ITkPixEncoder::addBits64(const uint64_t value, const uint8_t length) const 
     //remaining space in the current word. Also, we only have 63 bits for
     //the added data, as the first bit is EoS.
     //Case 1: there's enough space for the entire information to be added
-    if (length <= (63 - m_currBit)){
+    if (length <= (m_bitsPerWord - m_currBit)){
         
         //The position at which the new bits should be inserted into the block
         //is (length of the block - 1) - (currently last bit) - (length)
         //We need to keep the first bit for EoS, hence the -1
-        m_currBlock |= (value << (63 - m_currBit - length));
+        m_currBlock |= (value << (m_bitsPerWord - m_currBit - length));
         m_currBit += length;
         return;
     }
@@ -49,7 +50,7 @@ void ITkPixEncoder::addBits64(const uint64_t value, const uint8_t length) const 
     else {
 
         //How much space do we have?
-        uint8_t remainingBits = 63 - m_currBit;
+        uint8_t remainingBits = m_bitsPerWord - m_currBit;
 
         //Add that many bits
         m_currBlock |= ((value >> (length - remainingBits)));
@@ -76,7 +77,9 @@ void ITkPixEncoder::pushWords32() const{
     //the output container. Reset the current bloc/bit
     
     //only called from mutex-protected function
-    
+    if (m_enableChipID){
+        m_currBlock |= ((0x0ULL | m_chipID) << 61);
+    }
     uint32_t word1 = m_currBlock >> 32;
     uint32_t word2 = m_currBlock & 0xFFFFFFFF;
     m_words.push_back(word1);
@@ -219,6 +222,10 @@ void ITkPixEncoder::intTag(const uint16_t nEvt) const {
     //does the tag always need to start with 111?
     uint16_t tag = nEvt | (0b111 << 8);
     addBits64(tag, 11);
+}
+
+void ITkPixEncoder::setChipID(const uint8_t& chipID){
+    m_chipID = chipID;
 }
 
 void ITkPixEncoder::clear() const {

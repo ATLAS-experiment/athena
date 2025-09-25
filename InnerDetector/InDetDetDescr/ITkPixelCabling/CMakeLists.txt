@@ -10,15 +10,16 @@ find_package(Boost COMPONENTS unit_test_framework)
 atlas_add_library( ITkPixelCablingLib
                    src/ITkPixelOnlineId.cxx src/ITkPixelCablingData.cxx
                    PUBLIC_HEADERS ITkPixelCabling
-                   LINK_LIBRARIES AthenaKernel Identifier )
+                   LINK_LIBRARIES AthenaKernel Identifier InDetReadoutGeometry PixelReadoutGeometryLib)
 
 atlas_add_component( ITkPixelCabling
                      src/ITkPixelCablingAlg.cxx src/components/*.cxx 
-                     LINK_LIBRARIES ITkPixelCablingLib 
-                     PRIVATE_LINK_LIBRARIES AthenaBaseComps GaudiKernel Identifier InDetIdentifier PathResolver StoreGateLib)
+                     LINK_LIBRARIES ITkPixelCablingLib InDetReadoutGeometry PixelReadoutGeometryLib
+                     PRIVATE_LINK_LIBRARIES AthenaBaseComps GaudiKernel Identifier InDetIdentifier PathResolver StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib)
 
 atlas_install_joboptions(share/*.txt)
 atlas_install_runtime(share/*.dat)
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests in the package:
 atlas_add_test( ITkPixelOnlineId_test	

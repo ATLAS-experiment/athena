@@ -37,10 +37,10 @@ class ITkPixelHitSortingTool: public AthAlgTool {
         StatusCode initialize();
 
         template<class ContainerType>
-        std::map<ITkPixelOnlineId, HitMap> sortRDOHits(const ContainerType* rdoContainer) const;
+        std::map<ITkPixelOnlineId, HitMap> sortRDOHits(const ContainerType* rdoContainer, const ITkPixelCablingData* cabling) const;
 
-        template<class RDOType>
-        StatusCode createRDO(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, InDetRawDataContainer<InDetRawDataCollection<RDOType> > *rdoContainer) const;
+        template<class ContainerType, class RDOType>
+        StatusCode createRDO(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, ContainerType *rdoContainer) const;
 
 
     private:
@@ -52,6 +52,5 @@ class ITkPixelHitSortingTool: public AthAlgTool {
     const InDetDD::PixelDetectorManager* m_detManager{};
 
 };
-
 
 #endif

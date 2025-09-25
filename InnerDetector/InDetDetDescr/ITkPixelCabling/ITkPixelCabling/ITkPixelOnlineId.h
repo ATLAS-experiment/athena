@@ -12,6 +12,8 @@
 #include <cstdint>
 #include <iosfwd>
 #include <compare>
+#include <utility>
+#include <typeindex> //provides std::hash
 
 class ITkPixelOnlineId{
 public:
@@ -41,5 +43,16 @@ private:
   std::uint32_t m_onlineId{INVALID_ONLINE_ID};
 
 };
+
+namespace std {
+  template<>
+  struct hash<ITkPixelOnlineId>{
+    size_t operator()(const ITkPixelOnlineId& id) const{
+      return static_cast<size_t>((unsigned int)id);
+    }
+  };
+}
+  
+  
 
 #endif

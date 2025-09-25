@@ -12,6 +12,7 @@ atlas_add_library( ITkPixelByteStreamCnvLib
    ITkPixelByteStreamCnv/*.h
    INTERFACE
    PUBLIC_HEADERS ITkPixelByteStreamCnv
+   INCLUDE_DIRS src
    LINK_LIBRARIES GaudiKernel ByteStreamData InDetByteStreamErrors InDetRawData )
 
 
