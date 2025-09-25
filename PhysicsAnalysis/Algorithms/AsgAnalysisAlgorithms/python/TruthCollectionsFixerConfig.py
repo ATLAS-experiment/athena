@@ -14,26 +14,16 @@ class TruthCollectionsFixerBlock(ConfigBlock):
     def __init__(self):
         super(TruthCollectionsFixerBlock, self).__init__()
         self.addOption(
-            "truthContainersToFix",
-            [
-                "TruthBoson",
-                "TruthBosonsWithDecayParticles",
-                "TruthElectrons",
-                "TruthMuons",
-                "TruthPhotons",
-                "TruthNeutrinos",
-                "TruthTaus",
-                "TruthTausWithDecayParticles",
-                "TruthTop",
-                "TruthBottom",
-                "TruthCharm",
-                "TruthHFWithDecayParticles",
-                "TruthForwardProtons",
-                "TruthPileupParticles",
-                "BornLeptons",
-            ],
+            "truthParticleContainersToFix",
+            None,
             type=list,
-            info="list of input DAOD truth containers to fix",
+            info="list of input DAOD truthParticle containers to fix",
+        )
+        self.addOption(
+            "truthVertexContainersToFix",
+            None,
+            type=list,
+            info="list of input DAOD truthVertex containers to fix",
         )
         self.addOption("fixDAODTruthRecord", True, type=bool,
                        info="older derivations have the old HepMC barcodes and need to be fixed, otherwise we get "
@@ -47,11 +37,41 @@ class TruthCollectionsFixerBlock(ConfigBlock):
 
         if config.dataType() is DataType.Data: return
 
-        containers = self.truthContainersToFix
-        # not all containers are available in PHYSLITE
-        missing_in_physlite = ["TruthTausWithDecayParticles","TruthCharm","TruthHFWithDecayParticles","TruthPileupParticles"]
-        if config.isPhyslite():
-            containers = list(set(self.truthContainersToFix) - set(missing_in_physlite))
+        partContainers = None
+        if self.truthParticleContainersToFix:
+            partContainers = self.truthParticleContainersToFix
+        elif config.isPhyslite():
+            partContainers = [
+                "TruthBoson", "TruthBosonsWithDecayParticles",
+                "TruthElectrons", "TruthMuons", "TruthPhotons", "TruthNeutrinos",
+                "TruthTaus",
+                "TruthTop", "TruthBottom",
+                "TruthForwardProtons",
+                "BornLeptons"
+            ]
+        else:
+            partContainers = [
+                "TruthBoson", "TruthBosonsWithDecayParticles",
+                "TruthElectrons", "TruthMuons", "TruthPhotons", "TruthNeutrinos",
+                "TruthTaus", "TruthTausWithDecayParticles",
+                "TruthTop", "TruthBottom", "TruthCharm", "TruthHFWithDecayParticles",
+                "TruthForwardProtons", "TruthPileupParticles",
+                "BornLeptons"
+            ]
+            
+        vertContainers = None
+        if self.truthVertexContainersToFix:
+            vertContainers = self.truthVertexContainersToFix
+        elif config.isPhyslite():
+            vertContainers = [
+                "TruthBosonsWithDecayVertices",
+            ]
+        else:
+            vertContainers = [
+                "TruthBosonsWithDecayVertices",
+                "TruthHFWithDecayVertices",
+                "TruthTausWithDecayVertices",
+            ]
 
         # in Athena, we have to rename the containers. In AnalysisBase, we can just overwrite in place
         if DualUseConfig.isAthena:
@@ -60,14 +80,19 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             pps = config.createService("ProxyProviderSvc", "ProxyProviderSvc")
             if "AddressRemappingSvc" not in pps.ProviderNames:
                 pps.ProviderNames += ["AddressRemappingSvc"]
-            for container in containers:
+            for container in partContainers:
                 ars.TypeKeyRenameMaps += [
                     f"xAOD::TruthParticleContainer#{container}->InFile{container}",
                     f"xAOD::AuxContainerBase#{container}Aux.->InFile{container}Aux.",
                 ]
+            for container in vertContainers:
+                ars.TypeKeyRenameMaps += [
+                    f"xAOD::TruthVertexContainer#{container}->InFile{container}",
+                    f"xAOD::AuxContainerBase#{container}Aux.->InFile{container}Aux.",
+                ]
 
         # the actual fix for old DAOD truth schema
-        for container in containers:
+        for container in partContainers:
             alg = config.createAlgorithm(
                 "xAODMaker::TruthParticleFixerAlg",
                 "TruthParticleFixerAlg_" + container,
@@ -83,3 +108,17 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             if DualUseConfig.isAthena and container not in containers_without_parent_child_links:
                 alg.LinkPrefixToRemove = "InFile"
                 alg.ParticleLinks = ["parentLinks", "childLinks"]
+
+        for container in vertContainers:
+            alg = config.createAlgorithm(
+                "xAODMaker::TruthVertexFixerAlg",
+                "TruthVertexFixerAlg_" + container,
+                reentrant=True,
+            )
+            alg.InputContainer = (
+                container if not DualUseConfig.isAthena else f"InFile{container}"
+            )
+            alg.OutputContainer = container
+
+            if DualUseConfig.isAthena :
+                alg.LinkPrefixToRemove = "InFile"
