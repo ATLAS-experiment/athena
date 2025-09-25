@@ -84,7 +84,7 @@ if __name__=="__main__":
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     flags=initConfigFlags()
     addLArCalibFlags(flags)
-
+    flags.Input.Files = []
     flags.Input.isMC = args.MC
     flags.IOVDb.DatabaseInstance="OFLP200" if args.MC else "CONDBR2"
     flags.LAr.doAlign=False
