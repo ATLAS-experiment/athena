@@ -88,7 +88,7 @@ void IOVDbMetaDataTool::handle(const Incident& inc)
 
   StatusCode sc = processInputFileMetaData(fileName);
   if(!sc.isSuccess()) throw std::runtime_error("Could not process input file meta data");
-  m_filesProcessed.insert(fileName);
+  m_filesProcessed.insert(std::move(fileName));
 }
 
 StatusCode IOVDbMetaDataTool::beginInputFile(const SG::SourceID& sid)
