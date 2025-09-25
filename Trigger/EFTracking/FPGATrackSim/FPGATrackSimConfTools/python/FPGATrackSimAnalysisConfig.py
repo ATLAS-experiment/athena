@@ -278,6 +278,8 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
         BinDesc.rin=cutset["rin"]
         BinDesc.rout=cutset["rout"]
 
+        BinDesc.region = flags.Trigger.FPGATrackSim.region
+
         # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
         step1 = CompFactory.FPGATrackSimBinStep("PhiBinning")
         step1.OutputLevel=flags.Trigger.FPGATrackSim.loglevel

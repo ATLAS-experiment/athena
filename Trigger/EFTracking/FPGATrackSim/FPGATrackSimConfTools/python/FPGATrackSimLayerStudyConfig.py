@@ -71,6 +71,7 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
         BinDesc.rin=cutset["rin"]
         BinDesc.rout=cutset["rout"]
 
+        BinDesc.region = flags.Trigger.FPGATrackSim.region
 
         #resolution padding
         BinDesc.D0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["d0"]
