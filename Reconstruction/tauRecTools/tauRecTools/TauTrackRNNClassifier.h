@@ -93,6 +93,7 @@ class TrackRNN
   StatusCode classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
 			    xAOD::TauJet& xTau,
 			    const xAOD::VertexContainer* vertexContainer,
+			    const xAOD::TauTrackContainer& tauTrackContainer,
 			    bool skipTracks=false) const;
   
 private:
@@ -105,6 +106,7 @@ private:
   // properties
   Gaudi::Property<std::string> m_inputWeightsPath{this, "InputWeightsPath", ""};
   Gaudi::Property<unsigned int> m_nMaxNtracks{this, "MaxNtracks", 0};
+  Gaudi::Property<bool> m_removeDuplicateChargedTracks {this, "removeDuplicateChargedTracks", false};
 
   std::unique_ptr<lwtDev::LightweightGraph> m_RNNClassifier; //!
 
