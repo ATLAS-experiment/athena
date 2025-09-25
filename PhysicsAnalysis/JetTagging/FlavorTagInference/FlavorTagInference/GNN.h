@@ -57,7 +57,6 @@ namespace FlavorTagInference {
     virtual std::set<std::string> getAuxInputKeys() const;
     virtual std::set<std::string> getConstituentAuxInputKeys() const;
 
-    std::shared_ptr<const SaltModel> m_saltModel;
   private:
     // private constructor, delegate of the above public ones
     GNN(std::shared_ptr<const SaltModel>, const GNNOptions& opts);
@@ -84,6 +83,7 @@ namespace FlavorTagInference {
     std::tuple<FTagDataDependencyNames, std::set<std::string>>
     createDecorators(const SaltModel::OutputConfig& outConfig, const FTagOptions& options);
 
+    std::shared_ptr<const SaltModel> m_saltModel;
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
     GNNDataLoader m_dataLoader;

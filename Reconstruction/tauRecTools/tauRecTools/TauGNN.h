@@ -43,7 +43,6 @@ public:
         std::string output_node_tau;
         std::string output_node_jet;
     };
-    std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel;
 public:
     TauGNN(const std::string &nnFile, const Config &config, bool useTRT);
     ~TauGNN();
@@ -82,6 +81,7 @@ private:
     using InputSequenceMap = std::map<std::string, VectorMap>;
 
 private:
+    std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel;
     const Config m_config;
 
     // Names of the input variables
