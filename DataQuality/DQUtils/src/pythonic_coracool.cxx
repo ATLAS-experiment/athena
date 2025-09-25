@@ -25,8 +25,7 @@
 #include <CoraCool/CoraCoolObjectIter.h>
 #include <CoraCool/CoraCoolObject.h>
 
-#include <boost/bind/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <string>
 #include <iostream>
@@ -39,8 +38,8 @@ using std::endl;
 using std::string;
 using std::vector;
 
-using boost::bind;
-using boost::placeholders::_1;
+using std::bind;
+using std::placeholders::_1;
 using cool::IFolderPtr;
 using cool::IDatabasePtr;
 using cool::ChannelSelection;
@@ -49,7 +48,7 @@ using coral::Attribute;
 using coral::AttributeSpecification;
 using coral::AttributeList;
 
-typedef boost::function<PyObject* (const AttributeList&)> 
+typedef std::function<PyObject* (const AttributeList&)> 
     coral_attribute_fetcher_t;
 
 // A function to signal that a conversion object could not be found
@@ -144,7 +143,8 @@ bool make_fetchers(
                        
         coral_attribute_fetcher_t pf = create_attribute_fetcher(name, type);
         
-        if (pf == no_coral_conversion_available)
+        auto pff = pf.target<PyObject* (*)(const AttributeList&)>();
+        if ( pff && *pff == &no_coral_conversion_available)
             return false; // Failure: A python exception was thrown above
             
         payload_fetchers.push_back(pf);

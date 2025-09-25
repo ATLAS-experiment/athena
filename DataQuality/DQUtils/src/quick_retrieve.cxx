@@ -20,8 +20,7 @@
 
 #include <CoolApplication/DatabaseSvcFactory.h>
 
-#include <boost/bind/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <vector>
 #include <string>
@@ -36,8 +35,8 @@ using std::endl;
 using std::string;
 using std::vector;
 
-using boost::bind;
-using boost::placeholders::_1;
+using std::bind;
+using std::placeholders::_1;
 
 using cool::DatabaseSvcFactory;
 using cool::IDatabasePtr;
@@ -91,7 +90,7 @@ vector<const cool::IRecordSelection*> make_selection_vector()
 }
 
 // A function taking an IObject and returning a PyObject*
-typedef boost::function<PyObject* (const IObject&)> payload_fetcher_t;
+typedef std::function<PyObject* (const IObject&)> payload_fetcher_t;
 
 // A function to signal that a conversion object could not be found
 PyObject *no_conversion_available(const IObject&) {return NULL;}
@@ -261,7 +260,8 @@ PyObject* quick_retrieve(const IObjectIteratorPtr& objects,
                 
                 payload_fetcher_t pf = create_payload_fetcher(name, type, 
                                                               as_unicode);
-                if (pf == no_conversion_available)
+                auto pff = pf.target<PyObject* (*)(const IObject&)>();
+                if ( pff && *pff == &no_conversion_available)
                     return NULL;
                 payload_fetchers.push_back(pf);
                 Py_DECREF(py_name);
