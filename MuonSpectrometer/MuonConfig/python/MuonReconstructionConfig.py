@@ -238,14 +238,10 @@ def MuonReconstructionConfigTest(flags=None):
 
     if flags is None:
         from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags
-        args, flags = SetupMuonStandaloneConfigFlags()
-    else:
-        args = flags.args()
-        if args is None:
-            raise RuntimeError("MuonReconstructionConfigTest requires flags.fillFromArgs() to be run before flags.lock()")
-
+        flags = SetupMuonStandaloneConfigFlags()
+  
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneCA
-    cfg = SetupMuonStandaloneCA(args, flags)
+    cfg = SetupMuonStandaloneCA(flags)
 
     # Run the actual test.
     acc = MuonReconstructionCfg(flags)
@@ -267,13 +263,9 @@ def MuonReconstructionConfigTest(flags=None):
     cfg.store(f)
     f.close()
 
-    if args.config_only:
-        cfg.wasMerged()
-    else:
-        sc = cfg.run()
-        if not sc.isSuccess():
-            import sys
-            sys.exit("Execution failed")
+    from MuonConfig.MuonConfigUtils import executeTest
+    executeTest(cfg)
+
 
 
 

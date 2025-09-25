@@ -1,37 +1,19 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def SetupArgParser():
     from argparse import ArgumentParser
-
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     parser = ArgumentParser()
     parser.add_argument("-t", "--threads", dest="threads", type=int, help="number of threads", default=1)
     parser.add_argument("-o", "--output", dest="output", default='', help="Text file containing each cabling channel", metavar="FILE")
-    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"], 
+    parser.add_argument("--inputFile", "-i", default=[], 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geometry", default="ATLAS-R2-2016-01-00-01", help="Geometry tag")
-    parser.add_argument("--conditionsTag", default="CONDBR2-BLKPA-RUN2-11", help="conditionsTag")
+    parser.add_argument("--geoTag", default=defaultGeometryTags.RUN2, help="Geometry tag to use", choices=[defaultGeometryTags.RUN2_BEST_KNOWLEDGE ,
+                                                                                                           defaultGeometryTags.RUN3])
     parser.add_argument("--mezzMap", default="", help="External JSON file containing the internal mapping of the mezzanine cards")
     parser.add_argument("--cablingMap", default="", help="External JSON file containing the cabling map of each channel")
     return parser
     
-def setupServicesCfg(flags):
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    result = MainServicesCfg(flags)
-    ### Setup the file reading
-    from AthenaConfiguration.Enums import Format
-    if flags.Input.Format == Format.POOL:
-        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        result.merge(PoolReadCfg(flags))
-    elif flags.Input.Format == Format.BS:
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        result.merge(ByteStreamReadCfg(flags)) 
-
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    result.merge(MuonGeoModelCfg(flags))
-    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    result.merge(MuonIdHelperSvcCfg(flags))    
-    return result
-
 def MdtCablingTestAlgCfg(flags, 
                         name = "MdtCablingTestAlg", 
                         mezzJSON = "", ### External JSON file containing the mezzanine cards 
@@ -52,29 +34,33 @@ def MdtCablingTestAlgCfg(flags,
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from MuonConfig.MuonConfigUtils import executeTest, SetupMuonStandaloneCA, configureCondTag
+
     args = SetupArgParser().parse_args()
 
     flags = initConfigFlags()
-    flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumThreads = 1
+    flags.Exec.MaxEvents = 1
+    flags.Concurrency.NumConcurrentEvents = 1
     flags.Output.ESDFileName = args.output
-    flags.Input.Files = args.inputFile
-    flags.GeoModel.AtlasVersion = args.geometry
-    if not flags.Input.isMC:
-        flags.IOVDb.GlobalTag = args.conditionsTag
-    flags.lock()
 
-    cfg = setupServicesCfg(flags)
+    flags.Input.Files = args.inputFile
+    if not flags.GeoModel.AtlasVersion:
+        flags.GeoModel.AtlasVersion = args.geoTag
+
+    configureCondTag(flags)
+
+ 
+    
+    flags.lock()
+    flags.dump()
+
+    
+
+    cfg = SetupMuonStandaloneCA(flags)
     cfg.merge(MdtCablingTestAlgCfg(flags,
                                mezzJSON=args.mezzMap,
                                cablingJSON=args.cablingMap,
                                dumpFile=args.output))
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    flags.dump()
-   
-    sc = cfg.run(1)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
-
+    executeTest(cfg)
 

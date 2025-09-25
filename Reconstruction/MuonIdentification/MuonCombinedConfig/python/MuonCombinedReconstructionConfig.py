@@ -801,37 +801,33 @@ if __name__ == "__main__":
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneCA
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    args = flags.fillFromArgs()
-
-    # Keep this commented in for now until ATLASRECTS-6858 is fixed
-    # only once !51435 is accepted.
     flags.Input.Files = [
         '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q445_unslimmedTracks.pool.root']
-    # ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q221/21.0/v2/myESD.pool.root']
-
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags
-    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
-
+    from MuonConfig.MuonConfigUtils import configureCondTag
+    configureCondTag(flags)
+   
     flags.Muon.useTGCPriorNextBC = False
     # This fails due to "Hough data per sector vector not found"
     flags.MuonCombined.doMuGirlLowBeta = False
 
+   
+    flags.fillFromArgs()
+
     flags.lock()
     flags.dump()
 
-    cfg = SetupMuonStandaloneCA(args, flags)
+    cfg = SetupMuonStandaloneCA(flags)
 
     from MuonConfig.MuonPrepDataConvConfig import MuonPrepDataConvCfg
     cfg.merge(MuonPrepDataConvCfg(flags))
 
     # "Fixes" to get this working standalone i.e. from ESD
     # Configure topocluster algorithms, and associated conditions
-    acc = MuonCombinedReconstructionCfg(flags)
-    cfg.merge(acc)
+    cfg.merge(MuonCombinedReconstructionCfg(flags))
 
     # This causes a stall due to missing HoughDataPerSectorVec
-    cfg.getEventAlgo(
-        'MuonInDetToMuonSystemExtensionAlg').UseOnlyHitSectors = False
+    cfg.getEventAlgo("MuonInDetToMuonSystemExtensionAlg").UseOnlyHitSectors = False
+    cfg.getEventAlgo("MuonInDetToMuonSystemExtensionAlg_LRT").UseOnlyHitSectors = False
 
     # This causes a stall. See https://its.cern.ch/jira/browse/ATEAM-825
     # Leaving here for the moment, for convenience investigating this bug.
@@ -858,18 +854,6 @@ if __name__ == "__main__":
                    ]
     cfg.merge(AddressRemappingCfg(rename_maps))
 
-    # Commented, because it should be added back in very soon.
-    # itemsToRecord = ["xAOD::MuonContainer#Muons", "xAOD::MuonAuxContainer#MuonsAux.-DFCommonMuonsTight.-DFCommonGoodMuon.-DFCommonMuonsMedium.-DFCommonMuonsLoose"]
-    # SetupMuonStandaloneOutput(cfg, ConfigFlags, itemsToRecord)
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    # f=open("MuonCombinedReconstruction.pkl","wb")
-    # cfg.store(f)
-    # f.close()
-
-    if not args.config_only:
-        sc = cfg.run(20)
-        if not sc.isSuccess():
-            import sys
-            sys.exit("Execution failed")
-    else:
-        cfg.wasMerged()
+    from MuonConfig.MuonConfigUtils import executeTest
+    executeTest(cfg)
+        
