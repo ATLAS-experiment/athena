@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CoraCoolDatabaseSvc.cxx
@@ -23,7 +23,8 @@ cool::IDatabaseSvc& CoraCoolDatabaseSvc::coolIDatabaseSvc() {
 CoraCoolDatabasePtr CoraCoolDatabaseSvc::openDatabase(
  const std::string& dbconn,cool::IDatabasePtr cooldb, bool readonly) {
   CoraCoolDatabasePtr dbase(new CoraCoolDatabase(dbconn,
-                                                 cooldb,m_coralsvc,readonly));
+                                                 std::move(cooldb),
+                                                 m_coralsvc,readonly));
   return dbase;
 }
 
@@ -44,6 +45,7 @@ CoraCoolDatabasePtr CoraCoolDatabaseSvc::openDatabase(
 			    "CoraCoolDatabaseSvc::openDatabase");
     }
   }
-  CoraCoolDatabasePtr dbase(new CoraCoolDatabase(dbconn,cooldb,m_coralsvc,readonly));
+  CoraCoolDatabasePtr dbase(new CoraCoolDatabase(dbconn,std::move(cooldb),
+                                                 m_coralsvc,readonly));
   return dbase;
 }
