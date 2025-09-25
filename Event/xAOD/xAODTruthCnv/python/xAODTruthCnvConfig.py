@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -12,6 +12,8 @@ def GEN_EVNT2xAODCfg(flags, name="GEN_EVNT2xAOD", **kwargs):
     # In case we find the special configuration setting, add the LHE particles
     if flags.Input.SpecialConfiguration.get("HasLHERecord", "False") == "True":
         kwargs.setdefault('xAODTruthLHEParticleContainerName', 'TruthLHEParticles')
+
+    kwargs.setdefault('AODContainerName', 'GEN_EVENT')
 
     xAODTruthCnvAlg = CompFactory.xAODMaker.xAODTruthCnvAlg
     acc.addEventAlgo(xAODTruthCnvAlg(name,**kwargs))
