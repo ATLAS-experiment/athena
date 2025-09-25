@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -96,7 +96,7 @@ HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
         initHelper = true;
         // add in message service for printout
         m_hgtdId->setMessageSvc(msgSvc());        
-        if(dict->m_version == "P2-RUN4"){
+        if(dict->version() == "P2-RUN4"){
             m_hgtdId->set_useNewIdentifierScheme(true); 
         }
     }
