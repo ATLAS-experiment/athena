@@ -142,7 +142,11 @@ AthSequencer::execute( const EventContext& ctx ) const
           if ( !m_ignoreFilter ) {
             // Take the filter passed status of this algorithm as my own status
             const bool passed = theAlgorithm->execState( ctx ).filterPassed();
-            state.setFilterPassed( passed );
+            if ( m_invert ) {
+              state.setFilterPassed( !passed );
+            } else {
+              state.setFilterPassed( passed );
+            }
             
             // The behaviour when the filter fails depends on the 
             // StopOverride property.
@@ -161,7 +165,13 @@ AthSequencer::execute( const EventContext& ctx ) const
     }
   }
 
-  if ( !m_ignoreFilter && !m_names.empty() ) state.setFilterPassed( seqPass );
+  if ( !m_ignoreFilter && !m_names.empty() ) {
+    if ( m_invert ) {
+      state.setFilterPassed( !seqPass );
+    } else {
+      state.setFilterPassed( seqPass );
+    }
+  }
 
   state.setState( AlgExecState::State::Done );
 
