@@ -2,7 +2,7 @@
 # art-description: art job for InDetPhysValMonitoring, Single mu 1GeV
 # art-type: grid
 # art-input: mc23_13p6TeV:mc23_13p6TeV.902070.PG_singlemuon_Pt1_etaFlat0_2p7.merge.EVNT.e8582_e8528
-# art-input-nfiles: 1
+# art-input-nfiles: 10
 # art-cores: 8
 # art-memory: 4096
 # art-include: main/Athena
