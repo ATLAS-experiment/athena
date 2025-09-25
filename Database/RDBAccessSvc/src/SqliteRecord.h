@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -154,7 +154,7 @@ inline SqliteRecord::FieldCheckResult SqliteRecord::checkField(const std::string
 
   auto defIt = m_def->find(field);
   if(defIt==m_def->end()) checkCode = FIELD_CHECK_BAD_NAME;
-  if(defIt->second!=fieldType) checkCode = FIELD_CHECK_BAD_TYPE;
+  else if(defIt->second!=fieldType) checkCode = FIELD_CHECK_BAD_TYPE;
 
   if(checkCode==FIELD_CHECK_OK) {
     checkIt = m_record.find(field);

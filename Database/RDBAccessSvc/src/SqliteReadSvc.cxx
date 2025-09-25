@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -66,7 +66,7 @@ IRDBRecordset_ptr SqliteReadSvc::getRecordsetPtr(const std::string& node
 {
   ATH_MSG_DEBUG("Getting RecordsetPtr with key " << node);
 
-  std::lock_guard<std::mutex> guard(m_recordsetMutex);
+  std::lock_guard<std::mutex> guard(m_sessionMutex);
   if(!m_db) {
     ATH_MSG_ERROR("Connection to the SQLite database not open. Returning empty recordset");
     return IRDBRecordset_ptr(new SqliteRecordset());
