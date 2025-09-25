@@ -92,9 +92,11 @@ CombinatorialNSWSeedFinderAlg::StripOrient
         return design.stereoAngle() > 0. ? StripOrient::U : StripOrient::V;
     } else if (sp.type() == xAOD::UncalibMeasType::sTgcStripType) {
         const auto* prd = static_cast<const xAOD::sTgcMeasurement*>(sp.primaryMeasurement());
-        if (sp.dimension() == 1 && prd->channelType() == sTgcIdHelper::Strip){
-            return StripOrient::X;
+        if (sp.dimension() == 2) {
+            return StripOrient::C;
         }
+        return prd->channelType() == sTgcIdHelper::Strip ? StripOrient::X : StripOrient::P;
+         
     }
     ATH_MSG_WARNING("Cannot classify orientation of "<<m_idHelperSvc->toString(sp.identify()));
     return StripOrient::Unknown;
@@ -123,12 +125,16 @@ inline CombinatorialNSWSeedFinderAlg::HitWindow
             /// Analogous check for the upper edge
             above = estPlaneArrivalUp.y() < std::min(leftEdge.y(), rightEdge.y());
             break; 
-        } case X: {
+        } case X:
+          case C: {
             /// No extrapolation needed
             const double hY = testHit.localPosition().y();
             below = estPlaneArrivalDn.y() > hY;
             /// Analogous check for the upper edge
             above = estPlaneArrivalUp.y() < hY;
+            break;
+        }
+        case P:{
             break;
         }
         case Unknown:{

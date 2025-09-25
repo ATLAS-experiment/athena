@@ -218,6 +218,7 @@ namespace MuonR4::SegmentFit{
             }
         } 
 
+        std::ranges::sort(pullCfg.parsToUse);
         bool recalib{m_cfg.reCalibrate};
         if (!recalib) {
             updateDriftSigns(segmentLine, fitResult);

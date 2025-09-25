@@ -225,7 +225,7 @@ namespace MuonR4{
                 break;
            }
            case xAOD::UncalibMeasType::sTgcStripType: {
-                const xAOD::sTgcMeasurement* cluster = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->primaryMeasurement());
+                const auto* cluster = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->primaryMeasurement());
 
                 // We do not apply any correction for pads or wire only space points
                 if (cluster->channelType() != sTgcIdHelper::sTgcChannelTypes::Strip) {
@@ -235,34 +235,31 @@ namespace MuonR4{
                     break;
                 }
                 
-                double posAlongTheStrip{-FLT_MAX};
+                double posAlongTheStrip{0.};
 
                 // check if the space point is a strip/wire combination and take the position along the strip from the wire measurement
-                if(spacePoint->secondaryMeasurement() == nullptr) {
-                    ATH_MSG_WARNING("No secondary measurement for sTGC strip cluster " << m_idHelperSvc->toString(cluster->identify()));
-                } else {
-                    const xAOD::sTgcMeasurement* secMeas = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->secondaryMeasurement());
-                    ATH_MSG_ALWAYS("Using secondary measurement "<< m_idHelperSvc->toString(secMeas->identify())<<" for sTGC strip cluster " << m_idHelperSvc->toString(cluster->identify()));
-                    if(secMeas->channelType() != sTgcIdHelper::sTgcChannelTypes::Wire) {
-                        ATH_MSG_ERROR("Secondary measurement is not a wire but "<< m_idHelperSvc->toString(secMeas->identify()));
-                    }
+                if(spacePoint->secondaryMeasurement()) {
+                    const auto* secMeas = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->secondaryMeasurement());
+                    ATH_MSG_VERBOSE("Using secondary measurement "<< m_idHelperSvc->toString(secMeas->identify())<<" for sTGC strip cluster " << m_idHelperSvc->toString(cluster->identify()));
                     posAlongTheStrip = spacePoint->secondaryMeasurement()->localPosition<1>()[0];
+                } else {
+                    ATH_MSG_VERBOSE("No secondary measurement for sTGC strip cluster " << m_idHelperSvc->toString(cluster->identify()));
                 }
 
                 Amg::Vector3D globalPos{locToGlob * posInChamb};
                 Amg::Vector3D globalDir{locToGlob.linear() * dirInChamb};
                 
-                const xAOD::sTgcStripCluster* stripClus = static_cast<const xAOD::sTgcStripCluster*>(cluster);
-                std::pair<double, double>  calibPosCov{calibratesTGC(ctx, *gctx, *stripClus, posAlongTheStrip, globalPos, globalDir)}; 
+                const auto* stripClus = static_cast<const xAOD::sTgcStripCluster*>(cluster);
+                const auto [calibPos, calibCov] = calibratesTGC(ctx, *gctx, *stripClus, posAlongTheStrip, globalPos, globalDir); 
                 
-                ATH_MSG_DEBUG("Calibrated pos and cov" << calibPosCov.first << " " << calibPosCov.second);
-                cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibPosCov.second;
+                ATH_MSG_DEBUG("Calibrated pos and cov" << calibPos << " " << calibCov);
+                cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibCov;
                 Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTrans(*gctx, cluster->layerHash())};
 
                 // since we want to take the second coordiante from the external estimate we need to transform the sp posiiton to the layer frame, replace the precission coordinate and transform back
                 Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
                 ATH_MSG_DEBUG("in layer before calibration" << Amg::toString(calibSpPosInLayer));
-                calibSpPosInLayer.x() = calibPosCov.first;
+                calibSpPosInLayer.x() = calibPos;
                 ATH_MSG_DEBUG("in layer after calibration" << Amg::toString(calibSpPosInLayer));
                 calibSpPos = toChamberTrans * calibSpPosInLayer;
 

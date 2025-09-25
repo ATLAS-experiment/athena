@@ -33,11 +33,11 @@
 
 
 namespace MuonR4{
-    class MSTrackFindingAlg : public AthReentrantAlgorithm {
+    class MsTrackFindingAlg : public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
         
-            virtual ~MSTrackFindingAlg();
+            virtual ~MsTrackFindingAlg();
             /** @brief Standard algorithm hook to setup the extrapolator, retrieve the
              *         tools and declare algorithm's data dependencies */
             virtual StatusCode initialize() override final;

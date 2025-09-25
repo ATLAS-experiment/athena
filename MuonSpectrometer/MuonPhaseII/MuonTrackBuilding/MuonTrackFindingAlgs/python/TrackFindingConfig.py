@@ -44,6 +44,6 @@ def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
     kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
 
-    the_alg = CompFactory.MuonR4.MSTrackFindingAlg(name, **kwargs)
+    the_alg = CompFactory.MuonR4.MsTrackFindingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

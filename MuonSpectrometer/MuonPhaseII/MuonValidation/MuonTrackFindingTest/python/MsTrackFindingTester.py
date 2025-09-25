@@ -38,9 +38,7 @@ if __name__=="__main__":
     parser.add_argument("--writeSpacePoints", help="If set to true, the spacepoints in the bucket are saved to disk",
                                               default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(noSTGC=True)
-    parser.set_defaults(noMM=True)
- 
+  
     parser.set_defaults(outRootFile="MsTrkTester.root")
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
    
@@ -52,7 +50,7 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="SegmentRefitTest"))
+                                    outStream="MuonTrackTester"))
 
 
     from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
@@ -64,11 +62,9 @@ if __name__=="__main__":
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
-    cfg.merge(SegmentRefitTestCfg(flags))
-    if False:
-        from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
-        cfg.merge(MSTrackFinderAlgCfg(flags,
-                                      VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
-        cfg.merge(MsTrackTesterCfg(flags))
+    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
+    cfg.merge(MSTrackFinderAlgCfg(flags,
+                                VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
+    cfg.merge(MsTrackTesterCfg(flags))
    
     executeTest(cfg)
