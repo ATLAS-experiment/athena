@@ -307,7 +307,7 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
                eventAutoFlush << flush;
                data = eventAutoFlush.str();
             } else if (flush > 0 && flush < m_numberEventsPerWrite.value()) {
-               flush = flush * (int((m_numberEventsPerWrite.value()) / flush - 0.5) + 1);
+               flush = flush * (int(static_cast<float>(m_numberEventsPerWrite.value()) / flush - 0.5) + 1);
             }
          }
       }
