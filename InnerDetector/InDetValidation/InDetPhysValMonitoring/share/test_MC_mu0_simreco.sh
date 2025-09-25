@@ -51,14 +51,13 @@ conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultC
     --simulator       FullG4MT_QS \
     --conditionsTag   default:$conditionsTag \
     --geometryVersion default:$geotag \
+    --preExec         "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
     --preInclude      'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
     --postInclude     'PyJobTransforms.TransformUtils.UseFrontier' 'HitAnalysis.PostIncludes.IDHitAnalysis'
 sim_tf_exit_code=$?
 echo "art-result: $sim_tf_exit_code sim"
 
 if [ $sim_tf_exit_code -eq 0 ]  ;then
-
- hadd ${dcubemon_sim} SiHitValid.root TRTHitValid.root
 
  echo "download latest result"
  run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"

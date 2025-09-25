@@ -24,7 +24,7 @@ dcube_rec_lastref="dcube_last"
 hits=physval.HITS.root
 rdo=physval.RDO.root
 aod=physval.AOD.root
-dcubemon_sim=SiHitValid.root
+dcubemon_sim=HitValid.root
 dcubemon_rec=physval.ntuple.root
 dcubemon_rdo=RDOAnalysis.root
 
@@ -51,6 +51,7 @@ run Sim_tf.py \
     --CA \
     --conditionsTag "default:${condition}" \
     --simulator 'FullG4MT' \
+    --preExec "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
     --postInclude 'default:PyJobTransforms.UseFrontier' 'HitAnalysis.PostIncludes.ITkHitAnalysis'\
     --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
     --geometryVersion "default:${geometry}" \

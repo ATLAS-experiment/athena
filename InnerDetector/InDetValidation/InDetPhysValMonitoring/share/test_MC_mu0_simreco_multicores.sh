@@ -162,6 +162,7 @@ case $ArtProcess in
         --simulator       FullG4MT_QS \
         --conditionsTag   default:$conditionsTag \
         --geometryVersion default:$geotag \
+        --preExec         "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
         --preInclude      'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
         --postInclude     'PyJobTransforms.TransformUtils.UseFrontier' 'HitAnalysis.PostIncludes.IDHitAnalysis'
 
@@ -169,8 +170,6 @@ case $ArtProcess in
     echo "art-result: $sim_tf_exit_code sim"
 
     if [ $sim_tf_exit_code -eq 0 ]  ;then
-
-        hadd ${dcubemon_sim} SiHitValid.root TRTHitValid.root
 
         # Run digitization + RDOAnalysis
         run Digi_tf.py \
