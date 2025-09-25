@@ -47,8 +47,6 @@ namespace FlavorTagInference {
 
       SaltModel(const std::string& path_to_onnx);
 
-      void initialize();
-
       struct InferenceOutput {
         std::map<std::string, float> singleFloat;
         std::map<std::string, std::vector<char>> vecChar;
@@ -58,12 +56,12 @@ namespace FlavorTagInference {
       InferenceOutput runInference(std::map<std::string, Inputs>& gnn_inputs) const;
 
       const SaltModelGraphConfig::GraphConfig getGraphConfig() const;
-      const nlohmann::json& getMetadata() const;
       const OutputConfig& getOutputConfig() const;
       SaltModelVersion getSaltModelVersion() const;
       const std::string& getModelName() const;
 
     private:
+      const nlohmann::json& getMetadata() const;
       const nlohmann::json loadMetadata(const std::string& key) const;
       const std::string determineModelName() const;
 
