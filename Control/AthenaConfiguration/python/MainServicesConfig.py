@@ -415,8 +415,9 @@ def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr", withSequences=True
     attempted auto-configuration from an input file.
     """
     cfg = MainServicesCfg(flags, LoopMgr)
-    from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-    cfg.merge(McEventSelectorCfg(flags))
+    if not flags.Input.Files:
+        from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
+        cfg.merge(McEventSelectorCfg(flags))
 
     if withSequences:
         addEvgenSequences(flags, cfg)

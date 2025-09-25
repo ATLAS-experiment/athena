@@ -13,6 +13,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 if __name__ == "__main__":
     flags = initConfigFlags()
+    flags.Input.Files = []
     flags.Input.RunNumbers = [284600]
     flags.Input.TimeStamps = [1]  # dummy value
     # workaround for building xAOD::EventInfo without input files

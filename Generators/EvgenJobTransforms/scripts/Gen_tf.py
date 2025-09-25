@@ -201,7 +201,7 @@ def getTransform():
        exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["YODA", "EVNT", "EVNT_Pre", "TXT"]))
        msg.info("Output EVNT file")
     elif "--outputYODAFile" in str(sys.argv[1:]):
-       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", inData=["inNULL"], outData=["YODA", "TXT"]))
+       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["YODA", "TXT"]))
        msg.info("Output EVNT file")
     elif "--outputTXTFile" in str(sys.argv[1:]):
        exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoTXT.py", inData=["inNULL"], outData=["TXT"]))
@@ -209,7 +209,7 @@ def getTransform():
     elif "--outputHEPMCFile" not in str(sys.argv[1:]):
        msg.error("Output cannot be recognised")
 
-    exeSet.add(EvgenExecutor(name="afterburn", skeleton="EvgenJobTransforms/skel.ABtoEVGEN.py", inData=["EVNT_Pre"], outData=["EVNT"]))
+    exeSet.add(EvgenExecutor(name="afterburn", skeleton="EvgenJobTransforms/skel.ABtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["EVNT_Pre"], outData=["EVNT"]))
     exeSet.add(athenaExecutor(name = "AODtoDPD", skeletonFile = "PATJobTransforms/skeleton.AODtoDPD_tf.py",
                               substep = "a2d", inData = ["EVNT"], outData = ["NTUP_TRUTH"], perfMonFile = "ntuple_AODtoDPD.pmon.gz"))
     exeSet.add(athenaExecutor(name = 'EVNTtoHEPMC', skeletonCA = 'EvgenJobTransforms.POOLtoHEPMC_Skeleton',

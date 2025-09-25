@@ -43,6 +43,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     flags = initConfigFlags()
+    flags.Input.Files = []
     flags.Input.RunNumbers = [284500]
     flags.Input.TimeStamps = [1]  # dummy value
     # workaround for building xAOD::EventInfo without input files
