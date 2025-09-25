@@ -2,7 +2,7 @@
 # art-description: art job for InDetPhysValMonitoring, Single piplus 5GeV
 # art-type: grid
 # art-input: mc23_13p6TeV:mc23_13p6TeV.902084.PG_singlepi_Pt5_etaFlat0_2p5.merge.EVNT.e8582_e8528
-# art-input-nfiles: 1
+# art-input-nfiles: 10
 # art-cores: 8
 # art-memory: 4096
 # art-include: main/Athena

@@ -154,10 +154,10 @@ case $ArtProcess in
 
     # Run Simulation
     run Sim_tf.py \
-        --inputEVNTFile   ${ArtInFile} \
+        --inputEVNTFile   $x \
         --outputHITSFile  "$hits" \
         --skipEvents      0 \
-        --maxEvents       10000 \
+        --maxEvents       1000 \
         --randomSeed      24304 \
         --simulator       FullG4MT_QS \
         --conditionsTag   default:$conditionsTag \
