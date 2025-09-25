@@ -36,7 +36,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     IdDictField* field = m_dict->find_field("doubletR");
     if (field) {
-        m_DOUBLETR_INDEX = field->m_index;
+        m_DOUBLETR_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'doubletR' field ");
         status = 1;
@@ -44,7 +44,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("doubletZ");
     if (field) {
-        m_DOUBLETZ_INDEX = field->m_index;
+        m_DOUBLETZ_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'doubletZ' field ");
         status = 1;
@@ -52,7 +52,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("doubletPhi");
     if (field) {
-        m_DOUBLETPHI_INDEX = field->m_index;
+        m_DOUBLETPHI_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'doubletPhi' field ");
         status = 1;
@@ -60,7 +60,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("rpcGasGap");
     if (field) {
-        m_GASGAP_INDEX = field->m_index;
+        m_GASGAP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'rpcGasGap' field ");
         status = 1;
@@ -68,7 +68,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("rpcMeasuresPhi");
     if (field) {
-        m_MEASURESPHI_INDEX = field->m_index;
+        m_MEASURESPHI_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'rpcMeasuresPhi' field ");
         status = 1;
@@ -76,7 +76,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("rpcStrip");
     if (field) {
-        m_CHANNEL_INDEX = field->m_index;
+        m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'rpcStrip' field ");
         status = 1;
@@ -91,19 +91,19 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     if (!rpcGroup) {
         ATH_MSG_ERROR("Cannot find rpc group");
     } else {
-        m_GROUP_INDEX = rpcGroup->regions()[0]->m_index;
+        m_GROUP_INDEX = rpcGroup->regions()[0]->index();
     }
 
-    const IdDictRegion& region = *m_dict->m_regions[m_GROUP_INDEX];
-    m_eta_impl = region.m_implementation[m_ETA_INDEX];
-    m_phi_impl = region.m_implementation[m_PHI_INDEX];
-    m_tec_impl = region.m_implementation[m_TECHNOLOGY_INDEX];
-    m_dbr_impl = region.m_implementation[m_DOUBLETR_INDEX];
-    m_dbz_impl = region.m_implementation[m_DOUBLETZ_INDEX];
-    m_dbp_impl = region.m_implementation[m_DOUBLETPHI_INDEX];
-    m_gap_impl = region.m_implementation[m_GASGAP_INDEX];
-    m_mea_impl = region.m_implementation[m_MEASURESPHI_INDEX];
-    m_str_impl = region.m_implementation[m_CHANNEL_INDEX];
+    const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
+    m_eta_impl = region.implementation(m_ETA_INDEX);
+    m_phi_impl = region.implementation(m_PHI_INDEX);
+    m_tec_impl = region.implementation(m_TECHNOLOGY_INDEX);
+    m_dbr_impl = region.implementation(m_DOUBLETR_INDEX);
+    m_dbz_impl = region.implementation(m_DOUBLETZ_INDEX);
+    m_dbp_impl = region.implementation(m_DOUBLETPHI_INDEX);
+    m_gap_impl = region.implementation(m_GASGAP_INDEX);
+    m_mea_impl = region.implementation(m_MEASURESPHI_INDEX);
+    m_str_impl = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG(" RPC decode index and bit fields for each level: " << std::endl
                                                                       << " muon        " << m_muon_impl.show_to_string() << std::endl
@@ -126,7 +126,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     int muonField = -1;
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
     if (atlasDict->get_label_value("subdet", "MuonSpectrometer", muonField)) {
-        ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->m_name);
+        ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->name());
         return 1;
     }
 

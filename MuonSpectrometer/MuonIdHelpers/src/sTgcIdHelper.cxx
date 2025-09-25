@@ -47,7 +47,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     IdDictField* field = m_dict->find_field("stgcMultilayer");
     if (field) {
-        m_DETECTORELEMENT_INDEX = field->m_index;
+        m_DETECTORELEMENT_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'stgcMultilayer' field ");
         status = 1;
@@ -55,7 +55,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("stgcGasGap");
     if (field) {
-        m_GASGAP_INDEX = field->m_index;
+        m_GASGAP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'stgcGasGap' field ");
         status = 1;
@@ -63,7 +63,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("stgcChannelType");
     if (field) {
-        m_CHANNELTYPE_INDEX = field->m_index;
+        m_CHANNELTYPE_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'channelType' field ");
         status = 1;
@@ -71,7 +71,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("stgcChannel");
     if (field) {
-        m_CHANNEL_INDEX = field->m_index;
+        m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'channel' field ");
         status = 1;
@@ -85,17 +85,17 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     if (!stgcGroup) {
         ATH_MSG_ERROR("Cannot find stgc group");
     } else {
-        m_GROUP_INDEX = stgcGroup->regions()[0]->m_index;
+        m_GROUP_INDEX = stgcGroup->regions()[0]->index();
     }
 
-    const IdDictRegion& region = *m_dict->m_regions[m_GROUP_INDEX];
-    m_eta_impl = region.m_implementation[m_ETA_INDEX];
-    m_phi_impl = region.m_implementation[m_PHI_INDEX];
-    m_tec_impl = region.m_implementation[m_TECHNOLOGY_INDEX];
-    m_mplet_impl = region.m_implementation[m_DETECTORELEMENT_INDEX];
-    m_gap_impl = region.m_implementation[m_GASGAP_INDEX];
-    m_typ_impl = region.m_implementation[m_CHANNELTYPE_INDEX];
-    m_cha_impl = region.m_implementation[m_CHANNEL_INDEX];
+    const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
+    m_eta_impl = region.implementation(m_ETA_INDEX);
+    m_phi_impl = region.implementation(m_PHI_INDEX);
+    m_tec_impl = region.implementation(m_TECHNOLOGY_INDEX);
+    m_mplet_impl = region.implementation(m_DETECTORELEMENT_INDEX);
+    m_gap_impl = region.implementation(m_GASGAP_INDEX);
+    m_typ_impl = region.implementation(m_CHANNELTYPE_INDEX);
+    m_cha_impl = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG(" sTGC decode index and bit fields for each level: " << std::endl
                                                                        << " muon        " << m_muon_impl.show_to_string() << std::endl
@@ -116,7 +116,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     int muonField = -1;
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
     if (atlasDict->get_label_value("subdet", "MuonSpectrometer", muonField)) {
-        ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->m_name);
+        ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->name());
         return 1;
     }
 
