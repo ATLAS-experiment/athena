@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include files
-#include "GaudiKernel/GaudiException.h"
 #include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaBaseComps/FilteredAlgorithm.h"
 #include <cassert>
@@ -19,22 +17,9 @@ using std::vector;
 // Standard Constructor
 FilteredAlgorithm::FilteredAlgorithm(const string& name, 
                                      ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_decSvc("DecisionSvc/DecisionSvc",name)
+  AthAlgorithm(name, pSvcLocator)
 {
   assert( pSvcLocator );
-  declareProperty("AcceptAlgs",
-                  m_acceptNames,
-                  "Filters which if any are passed enable output");
-  declareProperty("RequireAlgs",
-                  m_requireNames,
-                  "Filters which must all be passed to enable output");
-  declareProperty("VetoAlgs",
-                  m_vetoNames,
-                  "Filters which if any are passed disable output");
-
-  declareProperty("decSvc", m_decSvc);
-
 }
 
 // Standard Destructor
