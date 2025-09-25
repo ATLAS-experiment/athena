@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MSTrackFindingAlg.h"
+#include "MsTrackFindingAlg.h"
 
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
@@ -17,7 +17,7 @@
 #include "TruthUtils/AtlasPID.h"
 
 namespace MuonR4{
-    StatusCode MSTrackFindingAlg::initialize() {
+    StatusCode MsTrackFindingAlg::initialize() {
         ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
@@ -33,9 +33,9 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
 
-    MSTrackFindingAlg::~MSTrackFindingAlg() = default;
+    MsTrackFindingAlg::~MsTrackFindingAlg() = default;
 
-    StatusCode MSTrackFindingAlg::execute(const EventContext& ctx) const {
+    StatusCode MsTrackFindingAlg::execute(const EventContext& ctx) const {
         ATH_MSG_VERBOSE("Run track finding in event "<<ctx.eventID().event_number());
         
         const xAOD::MuonSegmentContainer* allEventSegs{nullptr};
@@ -65,7 +65,7 @@ namespace MuonR4{
     }
 
     std::unique_ptr<MsTrackSeedContainer>  
-        MSTrackFindingAlg::findTrackSeeds(const EventContext& ctx,
+        MsTrackFindingAlg::findTrackSeeds(const EventContext& ctx,
                                           const xAOD::MuonSegmentContainer& segments) const {
 
         MsTrackSeeder::Config seederCfg{};
@@ -81,11 +81,12 @@ namespace MuonR4{
         }
         return seedContainer;
     }
-    void MSTrackFindingAlg::fitSeedCandidate(const Acts::GeometryContext& tgContext,
+    void MsTrackFindingAlg::fitSeedCandidate(const Acts::GeometryContext& tgContext,
                                              const Acts::MagneticFieldContext& mfContext,
                                              const Acts::CalibrationContext& calContext,
                                              const MsTrackSeed& seed,
                                               ActsTrk::MutableTrackContainer& outContainer) const {
+        return;
         ATH_MSG_DEBUG("Attempt to fit a new track seed");
 
         std::vector<const xAOD::UncalibratedMeasurement*> measurements{};

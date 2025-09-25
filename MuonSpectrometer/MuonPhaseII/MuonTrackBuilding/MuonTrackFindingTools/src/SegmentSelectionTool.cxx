@@ -72,8 +72,7 @@ namespace MuonR4{
             }
             case xAOD::UncalibMeasType::MMClusterType:
             case xAOD::UncalibMeasType::sTgcStripType:{
-                ATH_MSG_ALWAYS(__FILE__<<":"<<__LINE__<<" Implement me");
-                break;
+                return summary.nPrecHits >= m_nMdtMinHitCut;
             }
             default:
                 break;

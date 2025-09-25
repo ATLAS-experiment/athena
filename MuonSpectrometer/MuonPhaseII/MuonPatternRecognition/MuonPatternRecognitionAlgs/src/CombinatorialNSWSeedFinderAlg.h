@@ -39,7 +39,9 @@ class CombinatorialNSWSeedFinderAlg : public AthReentrantAlgorithm {
         enum class StripOrient{
           U, /// Stereo strips with positive angle
           V, /// Stereo strips with negative angle
-          X,  /// Ordinary eta strips
+          X, /// Ordinary eta strips
+          P, /// Single phi measurements
+          C, /// Combined 2D space point (sTGC wire + strip / sTgc pad)
           Unknown
         };
         /** @brief Determines the orientation of the strip space point */
