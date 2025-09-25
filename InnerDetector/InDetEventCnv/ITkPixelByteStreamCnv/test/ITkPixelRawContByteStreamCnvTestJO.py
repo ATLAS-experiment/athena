@@ -42,6 +42,11 @@ if __name__=="__main__":
    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
    cfg.merge(PoolReadCfg(flags))
 
+   #add cabling
+   from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
+   cfg.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
+
+
    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
    cfg.merge(ITkPixelReadoutManagerCfg(flags))
 
@@ -54,6 +59,11 @@ if __name__=="__main__":
    
    #try and write it in a BS file
    cfg.merge(ByteStreamWriteCfg(flags, ['ITkPixelRDO_Container#ITkPixelRDOs']))
+
+   #explicitly add cabling
+   bs_alg=cfg.getEventAlgo('BSOutputStreamAlg')
+   bs_alg.ExtraInputs.add(('ITkPixelCablingData', 'ConditionStore+ITkPixelCablingData'))
+
    cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
    
    #dump what's in SG

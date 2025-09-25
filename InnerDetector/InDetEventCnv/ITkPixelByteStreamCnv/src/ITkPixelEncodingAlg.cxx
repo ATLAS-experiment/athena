@@ -3,6 +3,7 @@
 */
 
 #include "ITkPixelEncodingAlg.h"
+#include "StoreGate/ReadCondHandle.h"
 
 ITkPixelEncodingAlg::ITkPixelEncodingAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator),
@@ -15,7 +16,7 @@ ITkPixelEncodingAlg::ITkPixelEncodingAlg(const std::string& name, ISvcLocator* p
 StatusCode ITkPixelEncodingAlg::initialize(){
   
   ATH_CHECK(m_pixelRDOKey.initialize());
-  
+
   ATH_CHECK(m_cnvTool.retrieve());
 
   return StatusCode::SUCCESS;

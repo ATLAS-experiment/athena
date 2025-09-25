@@ -24,7 +24,7 @@ class ITkPixEncoder{
     public:
         typedef ITkPixLayout<uint16_t> HitMap;
     
-        ITkPixEncoder(const unsigned nCol = 400, const unsigned nRow = 384, 
+        ITkPixEncoder(const bool enableChipID = true, const unsigned nCol = 400, const unsigned nRow = 384, 
           const unsigned nColInCCol = 8, const unsigned nRowInQRow = 2, 
           const unsigned nEventsPerStream = 16, const bool plainHitMap = false, 
           const bool dropToT = false);
@@ -36,6 +36,8 @@ class ITkPixEncoder{
         void setHitMap(const HitMap& hitMap) const {m_hitMap = hitMap;}
 
         void setEventsPerStream(const unsigned nEventsPerStream = 16){m_nEventsPerStream = nEventsPerStream;}
+
+        void setChipID(const uint8_t& chipID);
 
         void clear() const;
     
@@ -72,7 +74,9 @@ class ITkPixEncoder{
         mutable std::vector<unsigned>  m_lastQRow ATLAS_THREAD_SAFE; //only accessed in mutex-protected function
 
         //Globals - could be replace with compile-time conditioning instead of run-time if performance is critical
-        bool m_plainHitMap{}, m_dropToT{};
+        bool m_enableChipID{}, m_plainHitMap{}, m_dropToT{};
+        size_t m_bitsPerWord;
+        uint8_t m_chipID = 0b00;
 
         // Input
         mutable HitMap m_hitMap ATLAS_THREAD_SAFE; //only accessed in mutex-protected function
