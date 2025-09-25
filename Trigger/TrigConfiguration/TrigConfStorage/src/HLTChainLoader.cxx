@@ -11,7 +11,8 @@
 #include "TrigConfHLTData/HLTSignature.h"
 #include "TrigConfHLTData/HLTTriggerElement.h"
 
-#include "boost/lexical_cast.hpp"
+#include <charconv>
+#include <string_view>
 
 #include "./DBHelper.h"
 
@@ -122,7 +123,11 @@ TrigConf::HLTChainLoader::loadChains( HLTChainList& chainlist ) {
       if(isRun1()) {
          float rerunps = 0;
          string rerunps_s = rmtilde(row["TC.HTC_RERUN_PRESCALE"].data<string>());
-         rerunps = boost::lexical_cast<float,string>(rerunps_s);
+         std::string_view rerunps_sv = rerunps_s;
+         auto [ptr, ec] = std::from_chars(rerunps_sv.data(), rerunps_sv.data() + rerunps_sv.size(), rerunps, std::chars_format::general);
+         if (ec != std::errc()) {
+           rerunps = 0;  // fallback or handle error
+         }
          if(rerunps>=0)
             ch->set_rerun_prescale(rerunps);
       }
@@ -272,10 +277,11 @@ TrigConf::HLTChainLoader::loadStreams( HLTChainList& chainlist ) {
       string type         = rmtilde(row["TR.HTR_TYPE"].data<string>());
       bool obeyLB         = row["TR.HTR_OBEYLB"].data<int>();
       int prescale = 1;
-      try {
-         prescale = boost::lexical_cast<int,string>(prescale_str);
+      std::string_view prescale_str_view = prescale_str;
+      auto [ptr, ec] = std::from_chars(prescale_str_view.data(), prescale_str_view.data() + prescale_str_view.size(), prescale);
+      if (ec != std::errc()) {
+        prescale = 1;
       }
-      catch(boost::bad_lexical_cast & e) {}
       chainlist.chain(chainname)->addStream( new HLTStreamTag(streamname, type, obeyLB, prescale) );
    }
    cursor.close();
@@ -338,7 +344,7 @@ TrigConf::HLTChainLoader::loadSignatures( HLTChainList& chainlist ) {
       if( sig_list[sig_counter] == 0) {
          int logic = row["TS.HTS_LOGIC"].data<int>();
          sig_list[sig_counter] = new HLTSignature(sig_counter, logic, std::vector<HLTTriggerElement*>());
-         sig_list[sig_counter]->set_label( chainname + "_" + boost::lexical_cast<string,int>(sig_counter) );
+         sig_list[sig_counter]->set_label( chainname + "_" + std::to_string(sig_counter) );
       }
 
       HLTSignature* sig = sig_list[sig_counter];
