@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # self test of GeneratorAccumulator
 
@@ -24,6 +24,7 @@ class TestGeneratorSequences(unittest.TestCase):
         log.setLevel(DEBUG)
 
         self.flags = initConfigFlags()
+        self.flags.Input.Files = []
         self.flags.Input.RunNumbers = [284500] # Set to either MC DSID or MC Run Number
         self.flags.Input.TimeStamps = [1] # dummy value
         self.flags.lock()
