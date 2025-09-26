@@ -23,7 +23,9 @@ public:
     //** @name Constructor/destructor
     // @{
 
-    IdDictRegion () = default; 
+    IdDictRegion (const std::string& name,
+                  const std::string& group,
+                  const std::string& tag);
     virtual ~IdDictRegion () =  default; 
 
 
@@ -34,9 +36,11 @@ public:
 
     const std::string& name() const;
     virtual std::string group_name () const override;
+    const std::string& tag() const;
     size_t fieldSize() const; 
     size_t size() const;
     size_t index() const;
+    size_t n_implementation() const;
     const IdDictFieldImplementation& implementation(size_t i) const;
     double eta0() const;
     double deta() const;
@@ -48,9 +52,13 @@ public:
     const std::vector<const IdDictRegion*>& next_samp() const;
     const std::vector<const IdDictRegion*>& prev_subdet() const;
     const std::vector<const IdDictRegion*>& next_subdet() const;
+    const std::vector<std::string>& prev_samp_names() const;
+    const std::vector<std::string>& next_samp_names() const;
+    const std::vector<std::string>& prev_subdet_names() const;
+    const std::vector<std::string>& next_subdet_names() const;
     size_t n_entries() const;
     const IdDictRegionEntry& entry(size_t i) const;
-
+    bool is_empty() const;
 
 
     //@}
@@ -58,7 +66,41 @@ public:
     //** @name Methods used to initialize the object.
     // @{
 
+    /// Add entry to the end of the list.
     void add_entry (IdDictRegionEntry* entry);
+
+    /// Add entry to the start of the list.
+    void prepend_entry (IdDictRegionEntry* entry);
+
+    /// Non-const access to entry pointers.
+    const std::vector<IdDictRegionEntry*>& entries();
+
+    /// Non-const access to implementation objects.
+    IdDictFieldImplementation& implementation(size_t i);
+
+    /// Add a new implementation object and return a reference to it.
+    IdDictFieldImplementation& new_implementation();
+
+    /// Set the name for next_abs_eta.
+    void set_next_abs_eta_name (const std::string& name);
+
+    /// Add a previous sample name.
+    void add_prev_samp_name (const std::string& name);
+
+    /// Add a next sample name.
+    void add_next_samp_name (const std::string& name);
+
+    /// Add a previous subdetector name.
+    void add_prev_subdet_name (const std::string& name);
+
+    /// Add a next subdetector name.
+    void add_next_subdet_name (const std::string& name);
+
+    /// Set eta/phi variables.
+    void set_etaphi (double eta0, double deta, double phi0, double dphi);
+
+    /// Set is_empty flag.
+    void set_is_empty();
 
     void find_neighbours (const IdDictDictionary& dictionary);
 
@@ -73,12 +115,15 @@ public:
     virtual bool verify () const override;
     virtual void clear () override;
 
+    // Loop over levels and set the bit offset for each FieldImplementation
+    void integrate_bits();
 
     //@}
 
-    //
-    //data members are public
+
+protected:
     std::vector <IdDictRegionEntry*>        m_entries;
+private:
     std::vector <IdDictFieldImplementation> m_implementation; 
     size_t                                  m_index{}; 
     std::string                             m_name;
@@ -100,10 +145,7 @@ public:
     float                                   m_deta{};
     float                                   m_phi0{};
     float                                   m_dphi{};
-    
 
-protected:
-    bool m_resolved_references{};
     bool m_generated_implementation{};
 };
 
@@ -112,6 +154,13 @@ inline
 const std::string& IdDictRegion::name() const
 {
     return m_name;
+}
+
+
+inline
+const std::string& IdDictRegion::tag() const
+{
+    return m_tag;
 }
 
 
@@ -193,6 +242,34 @@ const std::vector<const IdDictRegion*>& IdDictRegion::next_subdet() const
 
 
 inline
+const std::vector<std::string>& IdDictRegion::prev_samp_names() const
+{
+    return m_prev_samp_names;
+}
+
+
+inline
+const std::vector<std::string>& IdDictRegion::next_samp_names() const
+{
+    return m_next_samp_names;
+}
+
+
+inline
+const std::vector<std::string>& IdDictRegion::prev_subdet_names() const
+{
+    return m_prev_subdet_names;
+}
+
+
+inline
+const std::vector<std::string>& IdDictRegion::next_subdet_names() const
+{
+    return m_next_subdet_names;
+}
+
+
+inline
 size_t IdDictRegion::n_entries() const
 {
     return m_entries.size();
@@ -203,6 +280,21 @@ inline
 const IdDictRegionEntry& IdDictRegion::entry(size_t i) const
 {
     return *m_entries.at(i);
+}
+
+
+inline
+bool IdDictRegion::is_empty() const
+{
+    return m_is_empty;
+}
+
+
+/// Non-const access to entry pointers.
+inline
+const std::vector<IdDictRegionEntry*>& IdDictRegion::entries()
+{
+    return m_entries;
 }
 
 

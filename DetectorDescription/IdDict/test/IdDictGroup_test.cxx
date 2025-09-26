@@ -34,39 +34,30 @@ BOOST_AUTO_TEST_SUITE(IdDictDictionaryTest)
 
 const std::string group_name = "lar_fcal";
 
+
 std::unique_ptr<IdDictRange> make_range (const std::string& field_name,
                                          const std::string& label)
 {
-  auto r = std::make_unique<IdDictRange>();
-  r->m_field_name = field_name;
-  r->m_specification = IdDictRange::by_label;
-  r->m_label = label;
-  return r;
+  return std::make_unique<IdDictRange>(field_name, label);
 }
-
 
 std::unique_ptr<IdDictRange> make_range (const std::string& field_name,
                                          std::initializer_list<std::string> labels)
 {
-  auto r = std::make_unique<IdDictRange>();
-  r->m_field_name = field_name;
-  r->m_specification = IdDictRange::by_labels;
-  r->m_labels.assign (labels);
-  return r;
+  std::vector<std::string> vlabels (labels);
+  return std::make_unique<IdDictRange> (field_name, vlabels);
 }
 
-
+ 
 std::unique_ptr<IdDictRange> make_range (const std::string& field_name,
                                          const IdDictDictionary& d)
 {
   const IdDictField* f = d.find_field (field_name);
-  auto r = std::make_unique<IdDictRange>();
-  r->m_field_name = field_name;
-  r->m_specification = IdDictRange::by_labels;
+  std::vector<std::string> labels;
   for (size_t i = 0; i < f->get_label_number(); ++i) {
-    r->m_labels.push_back (f->get_label (i));
+    labels.push_back (f->get_label (i));
   }
-  return r;
+  return std::make_unique<IdDictRange>(field_name, labels);
 }
 
 
@@ -74,12 +65,7 @@ std::unique_ptr<IdDictRange> make_range (const std::string& field_name,
                                          int minvalue,
                                          int maxvalue)
 {
-  auto r = std::make_unique<IdDictRange>();
-  r->m_field_name = field_name;
-  r->m_specification = IdDictRange::by_minmax;
-  r->m_minvalue = minvalue;
-  r->m_maxvalue = maxvalue;
-  return r;
+  return std::make_unique<IdDictRange>(field_name, minvalue, maxvalue);
 }
 
 
@@ -87,18 +73,13 @@ std::unique_ptr<IdDictField> make_field (const std::string& field_name,
                                          std::initializer_list<std::string> labels,
                                          std::initializer_list<int> values)
 {
-  auto f = std::make_unique<IdDictField>();
-  f->m_name = field_name;
+  auto f = std::make_unique<IdDictField>(field_name);
 
   std::vector<std::string> vlabels (labels);
   std::vector<int> vvalues (values);
   if (vlabels.size() != vvalues.size()) std::abort();
   for (size_t i = 0; i < vlabels.size(); ++i) {
-    auto l = std::make_unique<IdDictLabel>();
-    l->m_name = vlabels[i];
-    l->m_valued = true;
-    l->m_value = vvalues[i];
-    f->add_label (l.release());
+    f->add_label (new IdDictLabel (vlabels[i], vvalues[i]));
   }
   return f;
 }
@@ -107,13 +88,11 @@ std::unique_ptr<IdDictField> make_field (const std::string& field_name,
 std::unique_ptr<IdDictRegion> make_region (const std::string& name,
                                            const std::string& modlab)
 {
-  auto r = std::make_unique<IdDictRegion>();
-  r->m_name = name;
-  r->m_group = group_name;
+  auto r = std::make_unique<IdDictRegion>(name, group_name, "");
   r->add_entry (make_range ("subdet", "LArCalorimeter").release());
   r->add_entry (make_range ("part", "LArFCAL").release());
   r->add_entry (make_range ("barrel-endcap",
-                             { "negative-endcap-outer-wheel", "positive-endcap-outer-wheel"}).release());
+                            { "negative-endcap-outer-wheel", "positive-endcap-outer-wheel"}).release());
   r->add_entry (make_range ("module", modlab.substr(0, 1)).release());
 
   if (modlab == "1") {
@@ -158,10 +137,12 @@ bool check_unpack (const IdDictDictionary& dictionary,
   Identifier::value_type val = 0;
   const IdDictRegion* r = dictionary.find_region ("dummy");
   std::vector<size_t> vindices (indices);
-  for (size_t ifield = 0; const IdDictFieldImplementation& impl : r->m_implementation)
+  size_t nimpl = r->n_implementation();
+  for (size_t ifield = 0; ifield < nimpl; ++ifield)
   {
+    const IdDictFieldImplementation& impl = r->implementation(ifield);
     if (ifield >= vindices.size()) break;
-    val |= (vindices[ifield++] << impl.shift());
+    val |= (vindices[ifield] << impl.shift());
   }
 
   Identifier id (val);
@@ -246,9 +227,7 @@ BOOST_AUTO_TEST_CASE(Unpack)
   dictionary.add_dictentry (make_region ("LArFCAL-3b", "3b").release());
   dictionary.add_dictentry (make_region ("LArFCAL-3c", "3c").release());
 
-  auto dummy = new IdDictRegion;
-  dummy->m_name = "dummy";
-  dummy->m_group = group_name;
+  auto dummy = new IdDictRegion ("dummy", group_name, "");
   dummy->add_entry (make_range ("subdet", dictionary).release());
   dummy->add_entry (make_range ("part", dictionary).release());
   dummy->add_entry (make_range ("barrel-endcap", dictionary).release());

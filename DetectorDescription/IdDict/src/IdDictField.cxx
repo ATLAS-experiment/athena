@@ -9,6 +9,12 @@
 #include <iostream>
 
 
+IdDictField::IdDictField (const std::string& name)
+  : m_name(name)
+{
+}
+
+
 void IdDictField::resolve_references(const IdDictMgr& /*idd*/) {
 }
 
@@ -37,21 +43,25 @@ IdDictField::add_label(IdDictLabel* label) {
   m_labels.push_back(label);
 }
 
+void
+IdDictField::set_index (size_t index)
+{
+  m_index = index;
+}
+
 size_t
 IdDictField::get_label_number() const {
   return m_labels.size();
 }
 
-const std::string
+const std::string&
 IdDictField::get_label(size_t index) const {
-  std::string result;
   try{
-    result = m_labels.at(index)->name();
+    return m_labels.at(index)->name();
   } catch (std::out_of_range& e) {
     throw std::out_of_range(std::format("IdDictField::get_label : Attempt to access index {} in vector of size {}",
                                         index, m_labels.size()));
   }
-  return result;
 }
 
 ExpandedIdentifier::element_type

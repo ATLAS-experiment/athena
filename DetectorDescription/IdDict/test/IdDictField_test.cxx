@@ -10,14 +10,14 @@ namespace utf = boost::unit_test;
 
 BOOST_AUTO_TEST_SUITE(IdDictFieldTest)
 BOOST_AUTO_TEST_CASE(IdDictFieldConstructors){
-  BOOST_CHECK_NO_THROW(IdDictField());
-  IdDictField f;
+  BOOST_CHECK_NO_THROW(IdDictField(""));
+  IdDictField f("");
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictField f2(f));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictField f3(std::move(f)));
 }
 BOOST_AUTO_TEST_CASE(EmptyIdDictFieldAccessors){
-  IdDictField f;
-  BOOST_TEST(f.m_name == "");
+  IdDictField f("");
+  BOOST_TEST(f.name() == "");
   BOOST_TEST(f.get_label_number()  == 0);
   BOOST_TEST(f.index() == 0);
   //
@@ -35,15 +35,15 @@ BOOST_AUTO_TEST_CASE(IdDictSetAndGet){
     void resolve_references (const IdDictMgr& idd);  
     void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");   
 **/
-  IdDictField f;
+  IdDictField f("");
   //the bool is "has value"
-  auto lbl1 = new IdDictLabel {"label1", true, 2};
+  auto lbl1 = new IdDictLabel ("label1", 2);
   BOOST_CHECK_NO_THROW(f.add_label(lbl1));
   //
-  auto lbl2 = new IdDictLabel("label2", false);
+  auto lbl2 = new IdDictLabel("label2");
   f.add_label(lbl2);
   //special treatment for names which are numbers
-  auto lbl3 = new IdDictLabel("+1000", true, 10);
+  auto lbl3 = new IdDictLabel("+1000", 10);
   f.add_label(lbl3);
   //Now we've added three labels.
   BOOST_TEST(f.get_label_number() == 3);

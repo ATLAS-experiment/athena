@@ -35,8 +35,8 @@ namespace IdDict {
       if (region->fieldSize() <= level) continue;
       // Don't set ored bits for regions outside of group - ok to
       // calculate with them only
-      if (group != region->m_group) continue;
-      IdDictFieldImplementation& f = region->m_implementation[level];
+      if (group != region->group_name()) continue;
+      IdDictFieldImplementation& f = region->implementation(level);
       f.set_ored_field(ored_field);
     }
   }
@@ -54,8 +54,8 @@ namespace IdDict {
          simply the bit width of the corresponding field.
        */
       IdDictRegion* region = regions[0];
-      for (size_t k = level; k < region->m_implementation.size(); ++k) {
-        IdDictFieldImplementation& f = region->m_implementation[k];
+      for (size_t k = level; k < region->n_implementation(); ++k) {
+        IdDictFieldImplementation& f = region->implementation(k);
         f.set_ored_field(f.field());
       }
       return;
@@ -88,8 +88,8 @@ namespace IdDict {
       IdDictRegion* reference_region = 0;
       for (k = 0; k < mr.size(); ++k) {
         reference_region = mr[k];
-        if (reference_region->m_implementation.size() > level) {
-          if (group == reference_region->m_group) {
+        if (reference_region->n_implementation() > level) {
+          if (group == reference_region->group_name()) {
             overlapping.push_back(reference_region);
             break;
           } else {
@@ -138,7 +138,7 @@ namespace IdDict {
         found_overlap = false;
         for (size_t i = 0; i < orig.size(); ++i) {
           IdDictRegion* region = orig[i];
-          if (region->m_implementation.size() <= level) continue;
+          if (region->n_implementation() <= level) continue;
           bool overlap = false;
           const IdDictFieldImplementation& f = region->implementation(level);
           const Range::field& thisField = f.field();
@@ -147,7 +147,7 @@ namespace IdDict {
           if (f1.range()->field_name() == f.range()->field_name()) overlap = ored_field.overlaps_with(thisField);
           // Check for either an overlap or force overlap for
           // regions in the same group
-          if (overlap || (region->m_group == group)) {
+          if (overlap || (region->group_name() == group)) {
             overlapping.push_back(region);
             ored_field |= thisField;
             found_overlap = true;
@@ -164,7 +164,7 @@ namespace IdDict {
       bool none_within_group = true;
       for (size_t i = 0; i < overlapping.size(); ++i) {
         IdDictRegion* region = overlapping[i];
-        if (group == region->m_group) {
+        if (group == region->group_name()) {
           none_within_group = false;
         } else {
           all_within_group = false;

@@ -15,7 +15,7 @@
 
 
 class IdDictField;
-struct IdDictLabel;
+class IdDictLabel;
 class IdDictSubRegion;
 class IdDictRegion;
 class IdDictGroup;
@@ -37,7 +37,11 @@ public:
     // @{
 
     IdDictDictionary ();  
-    ~IdDictDictionary ();  
+    IdDictDictionary (const std::string& name,
+                      const std::string& version = "",
+                      const std::string& date = "",
+                      const std::string& author = "");
+    ~IdDictDictionary ();
 
 
     //@}
@@ -93,10 +97,15 @@ public:
     //** @name Methods used to initialize the object.
     // @{
 
+    /// Non-const access to vector of all regions.
+    const std::vector<IdDictRegion*>& all_regions();
+
     void add_field (IdDictField* field);  
     void add_subregion (IdDictSubRegion* subregion);  
     void add_dictentry (IdDictDictEntry* entry);
+    void add_region (IdDictRegion* region);
     void add_subdictionary_name (const std::string& name);  
+    void set_parent_dict (IdDictDictionary* parent_dict);
 
     /// Set file name
     void                set_file_name    (const std::string& name);
@@ -280,22 +289,23 @@ public:
 
     //@}
 
+private:
     std::string m_name{};
     std::string m_version{};  
     std::string m_date{};  
     std::string m_author{};  
   
-    typedef std::vector<IdDictDictEntry*> entries_type;
-    typedef entries_type::iterator        entries_it;
-    typedef entries_type::const_iterator  entries_const_it;
+    using entries_type = std::vector<IdDictDictEntry*>;
+    using entries_it   = entries_type::iterator;
+    using entries_const_it = entries_type::const_iterator;
 
-    typedef std::vector<IdDictRegion*>    regions_type;
-    typedef regions_type::iterator        regions_it;
-    typedef regions_type::const_iterator  regions_const_it;
+    using regions_type = std::vector<IdDictRegion*>;
+    using regions_it = regions_type::iterator;
+    using regions_const_it = regions_type::const_iterator;
 
-    typedef std::vector<IdDictGroup*>     groups_type;
-    typedef groups_type::iterator         groups_it;
-    typedef groups_type::const_iterator   groups_const_it;
+    using groups_type = std::vector<IdDictGroup*>;
+    using groups_it = groups_type::iterator;
+    using groups_const_it = groups_type::const_iterator;
 
     std::map<std::string, IdDictField*>   m_fields;  
     std::map<std::string, IdDictSubRegion*> m_subregions;  
@@ -305,7 +315,6 @@ public:
     std::vector<std::string>              m_subdictionary_names; 
     IdDictDictionary*                     m_parent_dict{nullptr};
 
-private:
     std::string m_file_name{};  
     std::string m_dict_tag{};  
     bool m_generated_implementation{false};
@@ -378,6 +387,14 @@ IdDictDictionary::set_file_name(const std::string& name){
 inline void                
 IdDictDictionary::set_dict_tag(const std::string& tag){
     m_dict_tag = tag;
+}
+
+
+/// Non-const access to vector of all regions.
+inline
+const std::vector<IdDictRegion*>& IdDictDictionary::all_regions()
+{
+    return m_all_regions;
 }
 
 
