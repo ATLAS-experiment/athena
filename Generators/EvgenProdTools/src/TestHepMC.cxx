@@ -312,7 +312,7 @@ StatusCode TestHepMC::execute() {
 
     // Check beams and work out per-event beam energy
     std::vector<std::shared_ptr<const HepMC3::GenParticle>> beams_t;
-    for (auto p : evt->beams()) { if (p->status() == 4)  beams_t.push_back(p); }
+    for (auto p : evt->beams()) { if (p->status() == 4)  beams_t.push_back(std::move(p)); }
     std::pair<std::shared_ptr<const HepMC3::GenParticle>,std::shared_ptr<const HepMC3::GenParticle>> beams;
     if (beams_t.size() == 2) {
       beams.first=beams_t.at(0);
@@ -653,7 +653,7 @@ StatusCode TestHepMC::execute() {
                               << " @ " << displacement2 << "mm) "
                               << " but parent vertex is displaced (" << decayvtx
                               << " @ " << displacement << "mm)");
-              undisplaceds.push_back(ip);
+              undisplaceds.push_back(std::move(ip));
               ++m_undisplacedLLHdaughtersCheckRate;
             } // Check for displacement below 1 um
           } // Loop over all particles coming from the decay vertex
@@ -775,9 +775,9 @@ StatusCode TestHepMC::execute() {
 
     // Undisplaced decay daughters of displaced vertices
     if (!undisplaceds.empty()) {
-      std::stringstream ss;
-      ss << "Undisplaced decay vertices from displaced particle: ";
-      for (auto b: undisplaceds){
+      std::stringstream ss{"Undisplaced decay vertices from displaced particle: "};
+      for (HepMC::ConstGenParticlePtr b: undisplaceds){
+        // coverity[COPY_INSTEAD_OF_MOVE]
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
