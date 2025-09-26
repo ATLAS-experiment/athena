@@ -42,7 +42,10 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
   }
 
    std::string tauTrackContName=key;
-   tauTrackContName.replace(tauTrackContName.find("Aux."),4,"");
+   if (tauTrackContName.ends_with ("Aux.")) {
+     tauTrackContName.resize (tauTrackContName.size()-4);
+   }
+
    //example names:
    //TauJets : Jets --> Tracks
    //HLT_xAOD__TauJetContainer_TrigTauRecMerged Jet --> Track; +=Tracks
