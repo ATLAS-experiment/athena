@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DiTauRec/DiTauIDVarDecorator.h"
+#include "DiTauRec/DiTauExtraVarDecorator.h"
 
 // Core include(s):
 #include "AthLinks/ElementLink.h"
@@ -15,20 +15,16 @@
 
 #include "xAODTau/DiTauJet.h"
 
-DiTauIDVarDecorator::DiTauIDVarDecorator( const std::string& type, const std::string& name, const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_dDefault(-1234)
+DiTauExtraVarDecorator::DiTauExtraVarDecorator( const std::string& type, const std::string& name, const IInterface * parent) :
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty( "DefaultValue", m_dDefault = -1234);
 }
 
+DiTauExtraVarDecorator::~DiTauExtraVarDecorator() = default;
 
-DiTauIDVarDecorator::~DiTauIDVarDecorator() = default;
-
-
-StatusCode DiTauIDVarDecorator::initialize() {
-  ATH_MSG_INFO( "Initializing DiTauIDVarDecorator" );
+StatusCode DiTauExtraVarDecorator::initialize() {
+  ATH_MSG_INFO( "Initializing DiTauExtraVarDecorator" );
   ATH_CHECK( m_ditau_ptDecKey.initialize() );
   ATH_CHECK( m_f_core_leadDecKey.initialize() );
   ATH_CHECK( m_f_core_sublDecKey.initialize() );
@@ -69,14 +65,14 @@ StatusCode DiTauIDVarDecorator::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode DiTauIDVarDecorator::execute(DiTauCandidateData * data, const EventContext& ctx) const {
+StatusCode DiTauExtraVarDecorator::execute(DiTauCandidateData * data, const EventContext& ctx) const {
     xAOD::DiTauJet* xDiTauPtr = data->xAODDiTau;
     xAOD::DiTauJet& xDiTau = *xDiTauPtr;
     ATH_CHECK( executeObj(xDiTau, ctx));
     return StatusCode::SUCCESS; 
 }
 
-StatusCode DiTauIDVarDecorator::executeObj( xAOD::DiTauJet& xDiTau, const EventContext& ctx) const{
+StatusCode DiTauExtraVarDecorator::executeObj( xAOD::DiTauJet& xDiTau, const EventContext& ctx) const{
 
     ATH_MSG_DEBUG("Calculate DiTau ID variables");
     
@@ -169,7 +165,7 @@ StatusCode DiTauIDVarDecorator::executeObj( xAOD::DiTauJet& xDiTau, const EventC
     return StatusCode::SUCCESS;
 }
 
-float DiTauIDVarDecorator::n_subjets(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const {
+int DiTauExtraVarDecorator::n_subjets(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const {
     int nSubjet = 0;
     while (xDiTau.subjetPt(nSubjet) > 0. ){
         nSubjet++;
@@ -177,26 +173,26 @@ float DiTauIDVarDecorator::n_subjets(const xAOD::DiTauJet& xDiTau, const DitauTr
     return nSubjet;
 }
 
-float DiTauIDVarDecorator::ditau_pt(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const
+float DiTauExtraVarDecorator::ditau_pt(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const
 {
   return xDiTau.subjetPt(0)+xDiTau.subjetPt(1);
 }
 
-float DiTauIDVarDecorator::f_core(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&, int iSubjet) const 
+float DiTauExtraVarDecorator::f_core(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&, int iSubjet) const 
 {
   return xDiTau.fCore(iSubjet);
 }
 
-float DiTauIDVarDecorator::f_subjet(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&, int iSubjet) const {
+float DiTauExtraVarDecorator::f_subjet(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&, int iSubjet) const {
     return xDiTau.subjetPt(iSubjet) / xDiTau.pt();
 }
 
-float DiTauIDVarDecorator::f_subjets(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const
+float DiTauExtraVarDecorator::f_subjets(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const
 {
   return (xDiTau.subjetPt(0) + xDiTau.subjetPt(1))/ xDiTau.pt();
 }
 
-float DiTauIDVarDecorator::f_track(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const
+float DiTauExtraVarDecorator::f_track(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const
 {
     SubjetTrackingInfo subjetInfo = ditauInfo.vSubjetInfo.at(iSubjet);
     float leadTrackPt = subjetInfo.leadTrack ? subjetInfo.leadTrack->pt() : 0;
@@ -204,7 +200,7 @@ float DiTauIDVarDecorator::f_track(const xAOD::DiTauJet&, const DitauTrackingInf
   return leadTrackPt / subjetPt;
 }
 
-float DiTauIDVarDecorator::R_max(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
+float DiTauExtraVarDecorator::R_max(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
     SubjetTrackingInfo subjetInfo = ditauInfo.vSubjetInfo.at(iSubjet);
     float Rmax = 0;
     for (const xAOD::TrackParticle* xTrack: subjetInfo.vTracks) {
@@ -215,22 +211,22 @@ float DiTauIDVarDecorator::R_max(const xAOD::DiTauJet&, const DitauTrackingInfo&
     return Rmax;
 }
 
-int DiTauIDVarDecorator::n_track(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const{ 
+int DiTauExtraVarDecorator::n_track(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const{ 
     return xDiTau.nTracks();
 }
 
-int DiTauIDVarDecorator::n_tracks(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
+int DiTauExtraVarDecorator::n_tracks(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
     SubjetTrackingInfo subjetInfo = ditauInfo.vSubjetInfo.at(iSubjet);
     return subjetInfo.vTracks.size();
 }
 
-int DiTauIDVarDecorator::n_isotrack(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const {
+int DiTauExtraVarDecorator::n_isotrack(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&) const {
   return xDiTau.nIsoTracks();
 }
 
-float DiTauIDVarDecorator::R_tracks(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
-    double R_sum = 0;
-    double pt = 0;
+float DiTauExtraVarDecorator::R_tracks(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
+    float R_sum = 0;
+    float pt = 0;
 
     SubjetTrackingInfo subjetInfo = ditauInfo.vSubjetInfo.at(iSubjet);
     for (const xAOD::TrackParticle* xTrack: subjetInfo.vTracks) {
@@ -243,7 +239,7 @@ float DiTauIDVarDecorator::R_tracks(const xAOD::DiTauJet&, const DitauTrackingIn
     return R_sum / pt;
 }
 
-float DiTauIDVarDecorator::R_core(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
+float DiTauExtraVarDecorator::R_core(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
     double R_sum = 0;
     double pt = 0;
     SubjetTrackingInfo subjetInfo = ditauInfo.vSubjetInfo.at(iSubjet);
@@ -258,7 +254,7 @@ float DiTauIDVarDecorator::R_core(const xAOD::DiTauJet&, const DitauTrackingInfo
 
 }
 
-float DiTauIDVarDecorator::R_track_core(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const { 
+float DiTauExtraVarDecorator::R_track_core(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const { 
     float R_sum = 0;
     float pt = 0;
     for (int i = 0; i < 2; i++) {
@@ -274,7 +270,7 @@ float DiTauIDVarDecorator::R_track_core(const xAOD::DiTauJet&, const DitauTracki
     return R_sum / pt;
 }
 
-float DiTauIDVarDecorator::R_track(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const
+float DiTauExtraVarDecorator::R_track(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const
 {
     float R_sum = 0;
     float pt = 0;
@@ -291,7 +287,7 @@ float DiTauIDVarDecorator::R_track(const xAOD::DiTauJet&, const DitauTrackingInf
     return R_sum / pt;
 }
 
-float DiTauIDVarDecorator::R_track_all(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const
+float DiTauExtraVarDecorator::R_track_all(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const
 {
     double R_sum = 0;
     double pt = 0;
@@ -308,7 +304,7 @@ float DiTauIDVarDecorator::R_track_all(const xAOD::DiTauJet&, const DitauTrackin
     return R_sum / pt;
 }
 
-float DiTauIDVarDecorator::R_isotrack(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const
+float DiTauExtraVarDecorator::R_isotrack(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const
 {
     float R_sum = 0;
     float pt = 0;
@@ -325,7 +321,7 @@ float DiTauIDVarDecorator::R_isotrack(const xAOD::DiTauJet&, const DitauTracking
     return R_sum / pt;
 }
 
-float DiTauIDVarDecorator::mass_track_core(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const
+float DiTauExtraVarDecorator::mass_track_core(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const
 {
     TLorentzVector allCoreTracks_p4;
     for (int i = 0; i < 2; i++) {
@@ -341,7 +337,7 @@ float DiTauIDVarDecorator::mass_track_core(const xAOD::DiTauJet&, const DitauTra
     return mass;
 }
 
-float DiTauIDVarDecorator::mass_core(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const {
+float DiTauExtraVarDecorator::mass_core(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const {
     TLorentzVector allCoreTracks_p4;
     SubjetTrackingInfo subjetInfo = ditauInfo.vSubjetInfo.at(iSubjet);
     for (const xAOD::TrackParticle* xTrack: subjetInfo.vCoreTracks) {
@@ -354,7 +350,7 @@ float DiTauIDVarDecorator::mass_core(const xAOD::DiTauJet&, const DitauTrackingI
     return mass;
 }
 
-float DiTauIDVarDecorator::mass_tracks(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const {
+float DiTauExtraVarDecorator::mass_tracks(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const {
     TLorentzVector allTracks_p4;
     SubjetTrackingInfo subjetInfo = ditauInfo.vSubjetInfo.at(iSubjet);
     for (const xAOD::TrackParticle* xTrack: subjetInfo.vTracks) {
@@ -367,7 +363,7 @@ float DiTauIDVarDecorator::mass_tracks(const xAOD::DiTauJet&, const DitauTrackin
     return mass;
 }
 
-float DiTauIDVarDecorator::mass_track(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const {
+float DiTauExtraVarDecorator::mass_track(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const {
     TLorentzVector allTracks_p4;
     for (const xAOD::TrackParticle* xTrack: ditauInfo.vTracks) {
         allTracks_p4 += xTrack->p4();
@@ -379,7 +375,7 @@ float DiTauIDVarDecorator::mass_track(const xAOD::DiTauJet&, const DitauTracking
     return mass;
 }
 
-float DiTauIDVarDecorator::mass_track_all(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const {
+float DiTauExtraVarDecorator::mass_track_all(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo) const {
     TLorentzVector allTracks_p4;
     for (const xAOD::TrackParticle* xTrack: ditauInfo.vTracks) {
         allTracks_p4 += xTrack->p4();
@@ -394,17 +390,17 @@ float DiTauIDVarDecorator::mass_track_all(const xAOD::DiTauJet&, const DitauTrac
     return mass;
 }
 
-float DiTauIDVarDecorator::E_frac(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&, int iSubjet) const { 
+float DiTauExtraVarDecorator::E_frac(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo&, int iSubjet) const { 
   return xDiTau.subjetE(iSubjet) / xDiTau.subjetE(0);
 }
 
-float DiTauIDVarDecorator::R_subjets(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
+float DiTauExtraVarDecorator::R_subjets(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
   TLorentzVector leadSubjet_p4 = ditauInfo.vSubjetInfo.at(0).subjet_p4;
   TLorentzVector subjet_p4 = ditauInfo.vSubjetInfo.at(iSubjet).subjet_p4;
   return leadSubjet_p4.DeltaR(subjet_p4);
 }
 
-float DiTauIDVarDecorator::d0_leadtrack(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
+float DiTauExtraVarDecorator::d0_leadtrack(const xAOD::DiTauJet&, const DitauTrackingInfo& ditauInfo, int iSubjet) const { 
     SubjetTrackingInfo subjetInfo = ditauInfo.vSubjetInfo.at(iSubjet);
     if (!subjetInfo.leadTrack) {
         return m_dDefault;
@@ -412,15 +408,15 @@ float DiTauIDVarDecorator::d0_leadtrack(const xAOD::DiTauJet&, const DitauTracki
     return subjetInfo.leadTrack->d0();
 }
 
-float DiTauIDVarDecorator::f_isotracks(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo) const { 
-    double iso_pt = 0;
+float DiTauExtraVarDecorator::f_isotracks(const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo) const { 
+    float iso_pt = 0;
     for (const xAOD::TrackParticle* xTrack: ditauInfo.vIsoTracks) {
         iso_pt += xTrack->pt();
     }
     return iso_pt / xDiTau.pt();
 }
 
-StatusCode DiTauIDVarDecorator::getTrackingInfo(xAOD::DiTauJet& xDiTau, DitauTrackingInfo& trackingInfo) const {
+StatusCode DiTauExtraVarDecorator::getTrackingInfo(xAOD::DiTauJet& xDiTau, DitauTrackingInfo& trackingInfo) const {
     static const SG::ConstAccessor<std::vector<ElementLink<xAOD::TrackParticleContainer>>> trackLinksAcc("trackLinks");
     static const SG::ConstAccessor<std::vector<ElementLink<xAOD::TrackParticleContainer>>> isoTrackLinksAcc("isoTrackLinks");
     static const SG::ConstAccessor<float> R_subjetAcc("R_subjet");

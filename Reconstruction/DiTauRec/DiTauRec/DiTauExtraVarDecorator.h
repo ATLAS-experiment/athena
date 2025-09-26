@@ -14,11 +14,11 @@
 #include "AsgDataHandles/WriteDecorHandle.h"
 
 
-class DiTauIDVarDecorator : public DiTauToolBase
+class DiTauExtraVarDecorator : public DiTauToolBase
 {
 public:
-  DiTauIDVarDecorator( const std::string& type, const std::string& name, const IInterface * parent);
-  virtual ~DiTauIDVarDecorator();
+  DiTauExtraVarDecorator( const std::string& type, const std::string& name, const IInterface * parent);
+  virtual ~DiTauExtraVarDecorator();
   virtual StatusCode initialize() override;
   virtual StatusCode execute(DiTauCandidateData * data, const EventContext& ctx) const override;
   virtual StatusCode executeObj(xAOD::DiTauJet& xDiTau, const EventContext& ctx) const override; 
@@ -38,7 +38,7 @@ private:
     std::vector<SubjetTrackingInfo> vSubjetInfo;
   };
 private:
-  float n_subjets       (const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo)              const;
+  int   n_subjets       (const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo)              const;
   float ditau_pt        (const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo)              const;
   float f_core          (const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo, int iSubjet) const;
   float f_subjet        (const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo, int iSubjet) const;
@@ -63,8 +63,9 @@ private:
   float R_subjets       (const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo, int iSubjet) const;
   float d0_leadtrack    (const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo, int iSubjet) const;
   float f_isotracks     (const xAOD::DiTauJet& xDiTau, const DitauTrackingInfo& ditauInfo)              const;
-  
-  float m_dDefault;
+
+  Gaudi::Property<float> m_dDefault{this, "DefaultValue", -1234};
+
   StatusCode getTrackingInfo(xAOD::DiTauJet& xDiTau, DitauTrackingInfo& trackingInfo) const;
 
   // Decorators 
@@ -104,4 +105,4 @@ private:
   SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_d0_leadtrack_leadDecKey { this, "d0LeadtrackLeadDecName", "DiTauJets.d0_leadtrack_lead", "Name of the d0LeadtrackLead Decorator"};          
   SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_d0_leadtrack_sublDecKey { this, "d0LeadtrackSublDecName", "DiTauJets.d0_leadtrack_subl", "Name of the d0LeadtrackSubl Decorator"};          
   SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_f_isotracksDecKey       { this, "fIsotracksDecName",      "DiTauJets.f_isotracks",       "Name of the fIsotracks Decorator"};    
-}; // class DiTauIDVarDecorator
+}; // class DiTauExtraVarDecorator

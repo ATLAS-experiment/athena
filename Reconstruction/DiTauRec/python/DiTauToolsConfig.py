@@ -91,10 +91,10 @@ def DiTauConstituentFinderCfg(flags, name="DiTauRec_DiTauConstituentFinder", **k
     acc.setPrivateTools(CompFactory.DiTauConstituentFinder(name, **kwargs))
     return acc
 
-def DiTauIDVarDecoratorCfg(flags, name="DiTauRec_IDVarDecorator", **kwargs):
-    """Configure the IDVarDecorator"""
+def DiTauExtraVarDecoratorCfg(flags, name="DiTauRec_ExtraVarDecorator", **kwargs):
+    """Configure the ExtraVarDecorator"""
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.DiTauIDVarDecorator(name, **kwargs))
+    acc.setPrivateTools(CompFactory.DiTauExtraVarDecorator(name, **kwargs))
     return acc
 
 def DiTauOnnxScoreCalculatorCfg(flags, name="DiTauRec_OnnxScoreCalculator", **kwargs):
