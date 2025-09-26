@@ -58,7 +58,10 @@
 + InnerDetector/InDetRecTools/TrackVertexAssociationTool
 + InnerDetector/InDetRecTools/InDetSecVtxTruthMatchTool
 + MuonSpectrometer/MuonStationIndex
-+ PhysicsAnalysis/Algorithms/.*
+# Columnar code doesn't use CP algorithms, and is breaking some of the
+# unit tests. At some point we likely want to share configuration code
+# with them, so I'm not completely removing them, but commenting this out.
+# + PhysicsAnalysis/Algorithms/.*
 + PhysicsAnalysis/AnalysisCommon/AssociationUtils
 + PhysicsAnalysis/AnalysisCommon/FakeBkgTools
 + PhysicsAnalysis/AnalysisCommon/AnalysisUtils
