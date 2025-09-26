@@ -27,19 +27,18 @@
 #include <iostream>
 #include <iomanip>
 #include <memory>
-#include <boost/lexical_cast.hpp>
+#include <charconv>
+#include <string_view>
 
 using namespace std;
 using namespace TCS;
-using boost::lexical_cast;
 
 namespace {
    uint32_t interpretGenericParam(const std::string& parvalue) {
-      uint32_t val;
-      try {
-         val  = lexical_cast<uint32_t, string>(parvalue);
-      }
-      catch(const boost::bad_lexical_cast & bc) {
+     uint32_t val = 0;
+     std::string_view parvalue_sv = parvalue;
+     auto [ptr, ec] = std::from_chars(parvalue_sv.data(), parvalue_sv.data() + parvalue_sv.size(), val);
+     if (ec != std::errc()) {
          if( parvalue.size()>=3 && parvalue[0]==':' and parvalue[parvalue.size()-1]==':' ) {
 
             auto x = L1TopoHWParameters::get().find(parvalue.substr(1,parvalue.size()-2));
