@@ -23,6 +23,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimGNNEdge.h"
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
+#include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 
 #include <memory>
 #include <vector>
@@ -54,12 +55,14 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
         // Handles
         
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
+        ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool{this, "LayerNumberTool", "TrigL2LayerNumberToolITk"};
         
         ///////////////////////////////////////////////////////////////////////
         // Properties
 
         Gaudi::Property<float> m_edgeScoreCut { this, "edgeScoreCut", 0.0, "Cut value for edge scores to pass for road making algorithm" };
         Gaudi::Property<std::string> m_roadMakerTool { this, "roadMakerTool", "", "Algorithm to perform graph segmentation into roads"};
+        Gaudi::Property<bool> m_doGNNPixelSeeding { this, "doGNNPixelSeeding", false, "Flag to configure for GNN Pixel Seeding" };
 
         ///////////////////////////////////////////////////////////////////////
         // Convenience
@@ -76,6 +79,8 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
         int m_num_components = 0;
         std::vector<int> m_labels{};
         std::vector<std::vector<int>> m_road_hit_list{};
+        const std::vector<short>* m_pix_h2l{nullptr};
+        const std::vector<TrigInDetSiLayer>* m_layerGeometry{nullptr};
 
         ///////////////////////////////////////////////////////////////////////
         // Helpers
@@ -86,6 +91,7 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
                       const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, 
                       std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads);
         void addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<int>& road_hitIDs);
+        void addRoadForPixelSeed(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<int>& road_hitIDs);
         void resetVectors();
 
         ///////////////////////////////////////////////////////////////////////

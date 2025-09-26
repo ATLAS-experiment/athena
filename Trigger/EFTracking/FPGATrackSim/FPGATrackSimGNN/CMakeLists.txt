@@ -12,7 +12,7 @@ atlas_add_library( FPGATrackSimGNNLib
    src/*.cxx
    NO_PUBLIC_HEADERS
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} AthenaBaseComps AthOnnxInterfaces AthOnnxUtilsLib GaudiKernel FPGATrackSimObjectsLib FPGATrackSimHoughLib FPGATrackSimConfToolsLib )
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} AthenaBaseComps AthOnnxInterfaces AthOnnxUtilsLib GaudiKernel FPGATrackSimObjectsLib FPGATrackSimHoughLib FPGATrackSimConfToolsLib TrigInDetToolInterfacesLib )
    
 atlas_add_component( FPGATrackSimGNN
    src/components/*.cxx
