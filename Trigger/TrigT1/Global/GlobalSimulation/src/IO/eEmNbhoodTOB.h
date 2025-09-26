@@ -14,6 +14,7 @@
 
 #include "IeEmTOB.h"
 #include "eEmTOB.h"
+#include "AthenaKernel/CLASS_DEF.h"
 
 #include "../IO/LArStripNeighborhood.h"
 
@@ -61,4 +62,7 @@ namespace GlobalSim::IOBitwise {
     LArStripNeighborhood m_neighbourhood;
   };
 } //End of namespace 
+
+CLASS_DEF( GlobalSim::IOBitwise::eEmNbhoodTOB , 229822253 , 1 )
+
 #endif //GLOBALSIM_EEMNBHOODTOB_H
