@@ -4,7 +4,7 @@
 
 #include "TrigConfL1Data/DiffStruct.h"
 
-#include "boost/lexical_cast.hpp"
+#include <string>
 
 #include <iostream>
 #include <fstream>
@@ -30,25 +30,25 @@ TrigConf::DiffStruct::check(const std::string& attname, const std::string& lval,
 void
 TrigConf::DiffStruct::check(const std::string& attname, int lval, int rval) {
    if(lval!=rval)
-      attdiffs.push_back(AttDiff(attname, boost::lexical_cast<string,int>(lval), boost::lexical_cast<string,int>(rval) ));
+      attdiffs.push_back(AttDiff(attname, std::to_string(lval), std::to_string(rval) ));
 }
 
 void
 TrigConf::DiffStruct::check(const std::string& attname, unsigned int lval, unsigned int rval) {
    if(lval!=rval)
-      attdiffs.push_back(AttDiff(attname, boost::lexical_cast<string,unsigned int>(lval), boost::lexical_cast<string,unsigned int>(rval) ));
+      attdiffs.push_back(AttDiff(attname, std::to_string(lval), std::to_string(rval) ));
 }
 
 void
 TrigConf::DiffStruct::check(const std::string& attname, float lval, float rval) {
    if(lval!=rval)
-      attdiffs.push_back(AttDiff(attname, boost::lexical_cast<string,float>(lval), boost::lexical_cast<string,float>(rval) ));
+      attdiffs.push_back(AttDiff(attname, std::to_string(lval), std::to_string(rval) ));
 }
 
 void
 TrigConf::DiffStruct::check(const std::string& attname, bool lval, bool rval) {
    if(lval!=rval)
-      attdiffs.push_back(AttDiff(attname, boost::lexical_cast<string,bool>(lval), boost::lexical_cast<string,bool>(rval) ));
+      attdiffs.push_back(AttDiff(attname, std::to_string(lval), std::to_string(rval) ));
 }
 
 void
