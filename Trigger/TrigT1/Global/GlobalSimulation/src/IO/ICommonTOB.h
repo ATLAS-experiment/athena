@@ -14,6 +14,7 @@
 
 #include <bitset>
 #include <ostream>
+#include "AthenaKernel/CLASS_DEF.h"
 
 namespace GlobalSim::IOBitwise{
   /**
@@ -47,4 +48,7 @@ namespace GlobalSim::IOBitwise{
   /** @brief Output stream operator*/
   std::ostream& operator << (std::ostream&, const ICommonTOB&);
 } //End of namespace 
+
+CLASS_DEF( GlobalSim::IOBitwise::ICommonTOB , 220265942 , 1 )
+
 #endif //GLOBALSIM_ICOMMONTOB_H

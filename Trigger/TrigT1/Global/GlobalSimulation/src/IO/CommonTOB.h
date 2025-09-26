@@ -14,6 +14,7 @@
 
 #include "ICommonTOB.h"
 #include "xAODTrigger/eFexEMRoI.h"
+#include "AthenaKernel/CLASS_DEF.h"
 
 #include <bitset>
 
@@ -56,4 +57,7 @@ namespace GlobalSim::IOBitwise{
     std::bitset<ICommonTOB::s_phi_width> m_phi_bits;
   };
 } //End of namespace
+
+CLASS_DEF( GlobalSim::IOBitwise::CommonTOB , 186129504 , 1 )
+
 #endif //GLOBALSIM_COMMONTOB_H

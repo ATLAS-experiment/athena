@@ -14,6 +14,7 @@
 
 #include "IeEmEg1eRatioTOB.h"
 #include "eEmTOB.h"
+#include "AthenaKernel/CLASS_DEF.h"
 
 #include <bitset>
 
@@ -44,6 +45,8 @@ namespace GlobalSim::IOBitwise {
     // Property: Bitset to hold the eGamma1eRatio bits
     std::bitset<s_eGamma1eRatio_width> m_eGamma1eRatio_bits;
   };
-}
+} //End of namespace
 
-#endif
+CLASS_DEF( GlobalSim::IOBitwise::eEmEg1eRatioTOB , 134972597 , 1 )
+
+#endif //GLOBALSIM_EEMEGAMMA1ERATIOTOB_H

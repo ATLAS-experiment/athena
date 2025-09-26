@@ -13,6 +13,7 @@
 #define GLOBALSIM_IEEMTOB_H
 
 #include "ICommonTOB.h"
+#include "AthenaKernel/CLASS_DEF.h"
 
 namespace GlobalSim::IOBitwise {
   /**
@@ -64,4 +65,7 @@ namespace GlobalSim::IOBitwise {
     virtual const std::bitset<s_SeedIsMax_width>& SeedIsMax_bit() const = 0;
   };
 } //End of namespace
+
+CLASS_DEF( GlobalSim::IOBitwise::IeEmTOB , 246749139 , 1 )
+
 #endif //GLOBALSIM_IEEMTOB_H

@@ -14,6 +14,7 @@
 
 #include "IeEmEg1BDTTOB.h"
 #include "eEmTOB.h"
+#include "AthenaKernel/CLASS_DEF.h"
 
 #include <bitset>
 
@@ -45,4 +46,7 @@ namespace GlobalSim::IOBitwise {
     std::bitset<s_eGamma1BDT_width> m_eGamma1BDT_bits;
   };
 }//End of namespace
+
+CLASS_DEF( GlobalSim::IOBitwise::eEmEg1BDTTOB , 6527352 , 1 )
+
 #endif //GLOBALSIM_EEMEGAMMA1BDTTOB_H

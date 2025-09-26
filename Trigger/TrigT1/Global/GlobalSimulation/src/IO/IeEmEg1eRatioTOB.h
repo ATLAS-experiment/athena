@@ -13,6 +13,7 @@
 #define GLOBALSIM_IEEMEG1ERATIOTOB_H
 
 #include "IeEmTOB.h"
+#include "AthenaKernel/CLASS_DEF.h"
 
 namespace GlobalSim::IOBitwise {
   /**
@@ -35,4 +36,7 @@ namespace GlobalSim::IOBitwise {
     virtual std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits() const = 0;
   };
 } //End of namespace
+
+CLASS_DEF( GlobalSim::IOBitwise::IeEmEg1eRatioTOB , 207229871 , 1 )
+
 #endif //GLOBALSIM_IEEMEG1ERATIOTOB_H
