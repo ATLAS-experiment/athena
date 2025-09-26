@@ -20,6 +20,12 @@ def MuonDetectorNavTestCfg(flags, name = "MuonDetectorNavTest", **kwargs):
     from MuonTruthAlgsR4.MuonTruthAlgsConfig import TruthSegmentMakerCfg, TruthSegmentToTruthPartAssocCfg, SdoMultiTruthMakerCfg
 
     from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg, MuonTruthHitCountsAlgCfg
+    if ("TruthEvents" in flags.Input.Collections):
+        from xAODTruthCnv.RedoTruthLinksConfig import RedoTruthLinksAlgCfg
+        result.merge( RedoTruthLinksAlgCfg(flags) )
+    else:
+        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+        result.merge(GEN_AOD2xAODCfg(flags))
 
     result.merge(TruthMuonMakerAlgCfg(flags, pdgIds=[13,998,999]))
     result.merge(MuonTruthHitCountsAlgCfg(flags))
