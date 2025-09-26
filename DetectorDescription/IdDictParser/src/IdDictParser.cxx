@@ -187,12 +187,11 @@ DictionaryFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
   if (Debugger::debug ()) { 
     Debugger::tab (parser.level());
     std::cout << "DictionaryFactory::idd_start>" << std::endl; 
-  } 
-  parser.m_dictionary = new IdDictDictionary; 
-  parser.m_dictionary->m_name    = get_value (node, "name");  
-  parser.m_dictionary->m_version = get_value (node, "version");  
-  parser.m_dictionary->m_date    = get_value (node, "date");  
-  parser.m_dictionary->m_author  = get_value (node, "author");  
+  }
+  parser.m_dictionary = new IdDictDictionary (get_value (node, "name"),
+                                              get_value (node, "version"),
+                                              get_value (node, "date"),
+                                              get_value (node, "author"));
 }  
   
 void 
@@ -214,9 +213,7 @@ FieldFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
     Debugger::tab (parser.level());
     std::cout << "FieldFactory::idd_start>" << std::endl; 
   } 
-  IdDictField* field = new IdDictField; 
-  parser.m_field = field; 
-  field->m_name = get_value (node, "name"); 
+  parser.m_field = new IdDictField(get_value (node, "name"));
 }  
   
 void 
@@ -240,14 +237,11 @@ LabelFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
       std::cout << "LabelFactory::idd_start>" << std::endl; 
   } 
  
-  IdDictLabel* label = new IdDictLabel; 
-  label->m_name = get_value (node, "name"); 
-  if (has_attribute (node, "value")) { 
-      label->m_valued = true; 
-      label->m_value = get_int (node, "value"); 
+  IdDictLabel* label;
+  if (has_attribute (node, "value")) {
+      label = new IdDictLabel (get_value (node, "name"), get_int (node, "value"));
   } else { 
-      label->m_valued = false; 
-      label->m_value = 0; 
+      label = new IdDictLabel (get_value (node, "name"));
   } 
   if (parser.m_field != 0) parser.m_field->add_label (label);  
   else delete label; 
@@ -285,19 +279,8 @@ AltRegionsFactory::idd_end (IdDictParser& parser, const XMLCoreNode& /*node*/)  
   } 
   if (parser.m_altregions != 0) { 
     // Set altregions to point to the default region
-    IdDictAltRegions::map_iterator region_it = parser.m_altregions->m_regions.find ("");
-    if (region_it == parser.m_altregions->m_regions.end()){
-      std::cout << "AltRegionsFactory::idd_end could not find default region. Keys in map " << std::endl;
-      IdDictAltRegions::map_iterator first = parser.m_altregions->m_regions.begin();
-      IdDictAltRegions::map_iterator last  = parser.m_altregions->m_regions.end();
-      int i = 0;
-      for (; first != last; ++first, ++i) {
-        std::cout << " i " << i << " key " << (*first).first;
-      }
-      std::cout << std::endl;
-    } else {
-      parser.m_altregions->m_selected_region = (*region_it).second;
-    }
+    parser.m_altregions->select_region ("");
+
     // add to dict
     if (parser.m_dictionary != 0) parser.m_dictionary->add_dictentry (parser.m_altregions);  
     else delete parser.m_altregions; 
@@ -313,24 +296,13 @@ RegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
       std::cout << "RegionFactory::idd_start>" << std::endl; 
   } 
  
-  parser.m_region = new IdDictRegion; 
-  if (has_attribute (node, "name")){
-      parser.m_region->m_name = get_value (node, "name");
-  }
-
-  // check for tag
-  if (has_attribute (node, "tag")){ 
-      parser.m_region->m_tag = get_value (node, "tag"); 
-  } 
-
-  // check for group name
-  if (has_attribute (node, "group")){ 
-      parser.m_region->m_group = get_value (node, "group"); 
-  } 
+  parser.m_region = new IdDictRegion (get_value (node, "name"),
+                                      get_value (node, "group"),
+                                      get_value (node, "tag"));
 
   // check for next region in absolute eta
   if (has_attribute (node, "next_abs_eta")) { 
-      parser.m_region->m_next_abs_eta_name = get_value (node, "next_abs_eta"); 
+      parser.m_region->set_next_abs_eta_name (get_value (node, "next_abs_eta"));
   } 
 
   // Look for regions in the previous sampling
@@ -345,7 +317,7 @@ RegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
       next = names.find_first_of (" ", pos); 
       std::string name; 
       name = names.substr (pos, next - pos); 
-      parser.m_region->m_prev_samp_names.push_back (name); 
+      parser.m_region->add_prev_samp_name (name);
       if (next == std::string::npos) { 
         break; 
       } else {
@@ -367,10 +339,10 @@ RegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
 
         std::string name; 
         name = names.substr (pos, next - pos); 
-        parser.m_region->m_next_samp_names.push_back (name); 
+        parser.m_region->add_next_samp_name (name);
 
         if (next == std::string::npos) { 
-          break; 
+          break;
         } else {
           pos = next; 
       } 
@@ -385,10 +357,10 @@ RegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
       prev = names.find_first_not_of (" ", pos); 
       if (prev == std::string::npos) break; 
       pos = prev; 
-      prev = names.find_first_of (" ", pos); 
+      prev = names.find_first_of (" ", pos);
       std::string name; 
       name = names.substr (pos, prev - pos); 
-      parser.m_region->m_prev_subdet_names.push_back (name); 
+      parser.m_region->add_prev_subdet_name (name);
       if (prev == std::string::npos) { 
         break; 
       } else {
@@ -408,7 +380,7 @@ RegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
       next = names.find_first_of (" ", pos); 
       std::string name; 
       name = names.substr (pos, next - pos); 
-      parser.m_region->m_next_subdet_names.push_back (name); 
+      parser.m_region->add_next_subdet_name (name);
       if (next == std::string::npos) { 
         break; 
       } else {
@@ -416,45 +388,30 @@ RegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
       } 
     } 
   }
-  
-  // check for eta 0
-  if (has_attribute (node, "eta0")){ 
-    parser.m_region->m_eta0 = get_double (node, "eta0"); 
-  } 
 
-  // check for deta 
-  if (has_attribute (node, "deta")){ 
-    parser.m_region->m_deta = get_double (node, "deta"); 
-  } 
-
-  // check for phi 0
-  if (has_attribute (node, "phi0")){ 
-    parser.m_region->m_phi0 = get_double (node, "phi0"); 
-  } 
-
-  // check for dphi 
-  if (has_attribute (node, "dphi")) { 
-    parser.m_region->m_dphi = get_double (node, "dphi"); 
-  } 
+  parser.m_region->set_etaphi (get_double (node, "eta0"),
+                               get_double (node, "deta"),
+                               get_double (node, "phi0"),
+                               get_double (node, "dphi"));
 
   if (Debugger::debug ()) { 
     Debugger::tab (parser.level());
     std::cout << "RegionFactory::idd_start> name, group, tag, next eta, prev/next samp, prev/next subdet "
       << parser.m_region->name() << " "
-      << parser.m_region->m_group << " " 
-      << parser.m_region->m_tag << " " 
+      << parser.m_region->group_name() << " "
+      << parser.m_region->tag() << " "
       << parser.m_region->next_abs_eta() << " ";
-    for (unsigned int i = 0; i < parser.m_region->m_prev_samp_names.size(); ++i) {
-      std::cout << parser.m_region->m_prev_samp_names[i] << " ";
+    for (const std::string& s : parser.m_region->prev_samp_names()) {
+      std::cout << s << " ";
     }
-    for (unsigned int i = 0; i < parser.m_region->m_next_samp_names.size(); ++i) {
-      std::cout << parser.m_region->m_next_samp_names[i] << " ";
+    for (const std::string& s : parser.m_region->next_samp_names()) {
+      std::cout << s << " ";
     }
-    for (unsigned int i = 0; i < parser.m_region->m_prev_subdet_names.size(); ++i) {
-      std::cout << parser.m_region->m_prev_subdet_names[i] << " ";
+    for (const std::string& s : parser.m_region->prev_subdet_names()) {
+      std::cout << s << " ";
     }
-    for (unsigned int i = 0; i < parser.m_region->m_next_subdet_names.size(); ++i) {
-      std::cout << parser.m_region->m_next_subdet_names[i] << " ";
+    for (const std::string& s : parser.m_region->next_subdet_names()) {
+      std::cout << s << " ";
     }
     std::cout << parser.m_region->eta0() << " "
       << parser.m_region->deta() << " "
@@ -472,20 +429,20 @@ RegionFactory::idd_end (IdDictParser& parser, const XMLCoreNode& /*node*/)  {
   } 
   if (parser.m_region != 0){ 
     if (parser.m_altregions != 0) {
-      parser.m_altregions->m_regions[parser.m_region->m_tag] = parser.m_region;
-      if (parser.m_dictionary != 0) parser.m_dictionary->m_all_regions.push_back (parser.m_region);  
+      parser.m_altregions->add_region (parser.m_region);
+      if (parser.m_dictionary != 0) parser.m_dictionary->add_region (parser.m_region);
       // Check whether region is empty, i.e. no region entries have
       // been found and added
-      if (parser.m_region->n_entries() == 0) {
-        parser.m_region->m_is_empty = true;
+      if (parser.m_region->entries().size() == 0) {
+        parser.m_region->set_is_empty();
       }
     } else if (parser.m_dictionary != 0) {
       parser.m_dictionary->add_dictentry (parser.m_region);  
-      parser.m_dictionary->m_all_regions.push_back (parser.m_region);  
+      parser.m_dictionary->add_region (parser.m_region);
       // Check whether region is empty, i.e. no region entries have
       // been found and added
-      if (parser.m_region->n_entries() == 0) {
-          parser.m_region->m_is_empty = true;
+      if (parser.m_region->entries().size() == 0) {
+          parser.m_region->set_is_empty();
       }
     } else {
       delete parser.m_region; 
@@ -500,8 +457,7 @@ SubRegionFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
     Debugger::tab (parser.level());
     std::cout << "SubRegionFactory::idd_start>" << std::endl; 
   } 
-  parser.m_subregion = new IdDictSubRegion; 
-  parser.m_subregion->m_name = get_value (node, "name"); 
+  parser.m_subregion = new IdDictSubRegion (get_value (node, "name"), "", "");
 } 
   
 void 
@@ -546,21 +502,14 @@ RangeFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
     Debugger::tab (parser.level());
     std::cout << "RangeFactory::idd_start>" << std::endl; 
   } 
-  IdDictRange* range = new IdDictRange; 
+  IdDictRange* range = new IdDictRange (get_value (node, "field"));
   parser.m_regionentry = range; 
-  range->m_field_name = get_value (node, "field"); 
-  range->m_field = 0; 
-  range->m_specification = IdDictRange::unknown;
-  range->m_continuation_mode = IdDictRange::none;
-  range->m_prev_value = 0;
-  range->m_next_value = 0;
-  if (has_attribute (node, "value")){ 
-      range->m_specification = IdDictRange::by_label; 
-      range->m_label = get_value (node, "value"); 
+  if (has_attribute (node, "value")){
+      range->set_range (get_value (node, "value"));
     } else if (has_attribute (node, "values")) { 
-      range->m_specification = IdDictRange::by_labels; 
       std::string labels = get_value (node, "values"); 
-      std::string::size_type pos = 0; 
+      std::string::size_type pos = 0;
+      std::vector<std::string> label_vec;
       for (;;){ 
         std::string::size_type next; 
         next = labels.find_first_not_of (" ", pos); 
@@ -569,39 +518,33 @@ RangeFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
         next = labels.find_first_of (" ", pos); 
         std::string label; 
         label = labels.substr (pos, next - pos); 
-        range->m_labels.push_back (label); 
+        label_vec.push_back (label);
         if (next == std::string::npos) { 
           break; 
         } else  { 
             pos = next; 
         } 
-      } 
+      }
+      range->set_range (label_vec);
     } else  { 
       const bool hasMin = has_attribute (node, "minvalue");
       const bool hasMax = has_attribute (node, "maxvalue");
-      if (hasMin and hasMax) { 
-          range->m_specification = IdDictRange::by_minmax; 
-          range->m_minvalue = get_int (node, "minvalue");
-          range->m_maxvalue = get_int (node, "maxvalue"); 
+      if (hasMin and hasMax) {
+          range->set_range (get_int (node, "minvalue"),
+                            get_int (node, "maxvalue"));
       }
       //falls through to a case where there is *no* attribute value, values, minvalue, maxvalue
       //https://its.cern.ch/jira/browse/ATLASSIM-7295
     } 
   if (has_attribute (node, "wraparound")){
     bool wraparound = get_boolean (node, "wraparound");
-    if (wraparound) range->m_continuation_mode = IdDictRange::wrap_around;
+    if (wraparound) range->set_wrap_around();
   }
   if (has_attribute (node, "prev_value")){
-    range->m_prev_value = get_int (node, "prev_value");
-    range->m_continuation_mode = IdDictRange::has_previous;
+    range->set_prev (get_int (node, "prev_value"));
   }
   if (has_attribute (node, "next_value")) {
-    range->m_next_value = get_int (node, "next_value");
-    if (IdDictRange::has_previous == range->m_continuation_mode){
-      range->m_continuation_mode = IdDictRange::has_both;
-    } else {
-      range->m_continuation_mode = IdDictRange::has_next;
-    }
+    range->set_next (get_int (node, "next_value"));
   }
 }  
   
@@ -611,9 +554,7 @@ ReferenceFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
     Debugger::tab (parser.level());
     std::cout << "ReferenceFactory::idd_start>" << std::endl; 
   } 
-  IdDictReference* reference = new IdDictReference; 
-  parser.m_regionentry = reference; 
-  reference->m_subregion_name = get_value (node, "subregion"); 
+  parser.m_regionentry = new IdDictReference(get_value (node, "subregion"));
 }  
   
 void 
@@ -622,13 +563,12 @@ DictionaryRefFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node) 
     Debugger::tab (parser.level());
     std::cout << "DictionaryRefFactory::idd_start>" << std::endl; 
   } 
-  IdDictDictionaryRef* dictionaryref = new IdDictDictionaryRef; 
+  IdDictDictionaryRef* dictionaryref = new IdDictDictionaryRef (get_value (node, "name"));
   parser.m_regionentry = dictionaryref; 
-  dictionaryref->m_dictionary_name = get_value (node, "name"); 
   // Add dictionary name to subdictionaries
-  if (dictionaryref->m_dictionary_name != "") { 
-    parser.m_idd.add_subdictionary_name (dictionaryref->m_dictionary_name); 
-    if (parser.m_dictionary != 0) parser.m_dictionary->add_subdictionary_name (dictionaryref->m_dictionary_name);  
+  if (dictionaryref->dictionary_name() != "") {
+    parser.m_idd.add_subdictionary_name (dictionaryref->dictionary_name());
+    if (parser.m_dictionary != 0) parser.m_dictionary->add_subdictionary_name (dictionaryref->dictionary_name());
   } 
 }  
   
