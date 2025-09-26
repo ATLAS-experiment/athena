@@ -421,9 +421,9 @@ int main( int argc, char* argv[] ) {
    if( loadHLTPSK && gConfig.hltpsk==0) {
       string prompt = "Please specify HLT Prescaleset key";
       if(gConfig.openended) {
-          prompt += " (starting at LB " + lexical_cast<string,int>(gConfig.lb) + "): ";
+          prompt += " (starting at LB " + std::to_string(gConfig.lb) + "): ";
       } else {
-          prompt += " (for LB " + lexical_cast<string,int>(gConfig.lb) + " - " + std::to_string(gConfig.lbend) + "): ";
+          prompt += " (for LB " + std::to_string(gConfig.lb) + " - " + std::to_string(gConfig.lbend) + "): ";
       }
       readKeyFromPrompt( prompt, gConfig.hltpsk );
    }
