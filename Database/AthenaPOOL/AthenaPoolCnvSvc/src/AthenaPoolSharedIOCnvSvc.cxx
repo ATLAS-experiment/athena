@@ -224,9 +224,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                         std::ostringstream oss1;
                         oss1 << std::dec << m_metadataClient;
                         std::string memName = "SHM[NUM=" + oss1.str() + "]";
-                        FileIncident beginInputIncident(name(), "BeginInputFile", memName);
+                        FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
                         incSvc->fireIncident(beginInputIncident);
-                        FileIncident endInputIncident(name(), "EndInputFile", std::move(memName));
+                        FileIncident endInputIncident(name(), "EndInputMemFile", std::move(memName));
                         incSvc->fireIncident(endInputIncident);
                      }
                      m_metadataClient = num;
@@ -371,9 +371,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
          std::ostringstream oss1;
          oss1 << std::dec << m_metadataClient;
          std::string memName = "SHM[NUM=" + oss1.str() + "]";
-         FileIncident beginInputIncident(name(), "BeginInputFile", memName);
+         FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
          incSvc->fireIncident(beginInputIncident);
-         FileIncident endInputIncident(name(), "EndInputFile", memName);
+         FileIncident endInputIncident(name(), "EndInputMemFile", memName);
          incSvc->fireIncident(endInputIncident);
          if (sc.isFailure()) {
             ATH_MSG_INFO("All SharedWriter clients stopped - exiting");
