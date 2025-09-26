@@ -143,6 +143,10 @@ def SetupVP1():
         type=int,
         help="Start in cruise mode, changing events after N seconds.",
     )
+    # Phase-II
+    group.add_argument(
+        "--phaseII", action="store_true", help="Use this flag for running VP1 with PhaseII setup."
+    )
     # Batch
     group.add_argument(
         "--batch",
@@ -214,9 +218,9 @@ def SetupVP1():
     vp1_empty_input = False
     # This covers the use case where we launch VP1
     # without input files; e.g., to check the detector description
-    if flags.Input.Files == [] or flags.Input.Files == [
+    if (flags.Input.Files == [] or flags.Input.Files == [
         "_ATHENA_GENERIC_INPUTFILE_NAME_"
-    ]:
+    ]) and not args.phaseII:
         from Campaigns.Utils import Campaign
         from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
@@ -238,13 +242,31 @@ def SetupVP1():
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    elif args.phaseII:
+        _logger.verbose("Phase-II mode!")
+        from Campaigns.Utils import Campaign
+        from AthenaConfiguration.TestDefaults import defaultGeometryTags
+        vp1_empty_input = True
+        flags.Input.ProjectName = "mc21_14TeV"
+        flags.Input.RunNumbers = [601229]
+        #flags.Input.ProjectName = "mc20_13TeV"
+        #flags.Input.RunNumbers = [330000]
+        flags.Input.TimeStamps = [1]
+        flags.Input.TypedCollections = []
+
+        # set default CondDB and Geometry version
+        flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-15"
+        flags.Input.isMC = True
+        flags.Input.MCCampaign = Campaign.Unknown
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+        
     else:
         # Now just check file exists, or fail gracefully
         from os import path
 
         for file in flags.Input.Files:
             if not path.exists(flags.Input.Files[0]):
-                _logger.warning("Input file %s does not exist", file)
+                _logger.warning("Input file '%s' does not exist", file)
                 import sys
                 sys.exit(1)
     
