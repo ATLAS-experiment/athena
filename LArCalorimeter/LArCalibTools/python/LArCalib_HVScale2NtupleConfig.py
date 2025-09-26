@@ -77,8 +77,9 @@ if __name__=="__main__":
     flags.Input.TimeStamps=[TimeStamp]
     flags.Input.Files=[]
     flags.IOVDb.DatabaseInstance="CONDBR2"
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
 
     rootfile="hvcorr_read.root"
     if len(sys.argv)>2:
