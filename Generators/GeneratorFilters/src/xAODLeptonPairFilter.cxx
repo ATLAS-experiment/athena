@@ -20,7 +20,7 @@
 
 #include "GeneratorFilters/xAODLeptonPairFilter.h"
 // Other classes used by this class:-
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -84,7 +84,7 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
         std::vector<size_t> parentPDG_tmp;
         for(size_t thisParent_id=0; pitr->prodVtx()->nIncomingParticles()<thisParent_id;thisParent_id++) 
           parentPDG_tmp.push_back(pitr->prodVtx()->incomingParticle(thisParent_id)->pdgId());
-        vLeptonParentPDGIDs.push_back(parentPDG_tmp);
+        vLeptonParentPDGIDs.push_back(std::move(parentPDG_tmp));
     } //loop over TruthParticles
 
 

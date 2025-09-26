@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -25,7 +25,7 @@
 #include "GaudiKernel/MsgStream.h"
 
 // Other classes used by this class:-
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <TLorentzVector.h>
 
@@ -148,7 +148,7 @@ StatusCode LeptonPairFilter::filterEvent() {
 			
 			std::vector<int> parentPDG_tmp;
 			for (auto thisParent: pitr->production_vertex()->particles_in()) parentPDG_tmp.push_back(thisParent->pdg_id());
-			vLeptonParentPDGIDs.push_back(parentPDG_tmp);
+			vLeptonParentPDGIDs.push_back(std::move(parentPDG_tmp));
        }
 #else
     for(HepMC::GenEvent::particle_const_iterator pitr=genEvt->particles_begin();
