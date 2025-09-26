@@ -145,9 +145,8 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   
   SG::SlotSpecificObj< HLTCaloEventCache > m_hLTCaloSlot;
 
-  std::mutex m_initMutex; // this will be gone once we move to new conditions
-  std::mutex m_dataPrepMutex; // this will be gone when reg sel & Rob DP will become thread safe
-  std::mutex m_getCollMutex; // this will be gone
+  std::mutex m_initMutex; // Build all tables in the first event
+  std::mutex m_getCollMutex; // Make sure writing to a collection is protected
   std::mutex m_lardecoderProtect;  // protection for the larRodDecoder
   std::mutex m_tiledecoderProtect;  // protection for the tileRodDecoder
 
