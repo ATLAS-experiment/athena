@@ -458,7 +458,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
          att.second->to_string(st);
          /// bool status = att.second->to_string(st);
          /// One can add here checks for the status
-         persEvt.m_e_attribute_string.push_back(st);
+         persEvt.m_e_attribute_string.push_back(std::move(st));
        }
      }
      persEvt.m_r_attribute_name.clear();
