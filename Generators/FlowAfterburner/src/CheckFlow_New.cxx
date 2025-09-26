@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/CheckFlow_New.h
@@ -15,6 +15,8 @@
 // Soumya Mohapatra : Re-written to check the new Flow implementations (JUNE 2011)
 
 #include "FlowAfterburner/CheckFlow_New.h"
+#include "FlowAfterburner/GenAccessIO.h"
+//
 #include "GeneratorObjects/McEventCollection.h"
 
 #include "GaudiKernel/SmartDataPtr.h"
@@ -22,7 +24,7 @@
 
 #include "GaudiKernel/ITHistSvc.h"
 
-#include "TH1D.h"
+#include "TH1.h"
 #include "TProfile.h"
 
 #include "AtlasHepMC/GenEvent.h"
@@ -30,6 +32,7 @@
 #include "AtlasHepMC/GenVertex.h"
 
 #include "GeneratorObjects/HijingEventParams.h"
+#include <cmath>
 
 /// @todo Migrate to a GenBase class or at least AthAlgorithm
 CheckFlow_New::CheckFlow_New(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -53,8 +56,7 @@ StatusCode CheckFlow_New::initialize(){
     return StatusCode::FAILURE;
   }
 
-  std::string StreamAndPath="/FlowOutPut/";
-  std::string histPath = StreamAndPath;
+  std::string histPath = "/FlowOutPut/";
   char name[100],name1[100];
   for (int ihar=0;ihar<6;ihar++){
 
