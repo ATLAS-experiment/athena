@@ -24,6 +24,8 @@ def main():
     parser.add_argument('--no-calo-noise', action='store_true', help='Switch off Calo noise')
     parser.add_argument('--aant-ntuple', action='store_true', help='Produce output Tile (TB) AANT ntuple (h1000/h2000)')
     parser.add_argument('--hits-ntuple', action='store_true', help='Produce output ntuple with Tile hits')
+    parser.add_argument('--digits-ntuple', action='store_true', help='Produce output ntuple with Tile digits')
+    parser.add_argument('--channels-ntuple', action='store_true', help='Produce output ntuple with Tile raw channels')
     parser.add_argument('--d3pd', action='store_true', help='Produce output Tile D3PD file')
     parser.add_argument('--hits-d3pd', action='store_true', help='Save Tile hits into D3PD')
     parser.add_argument('--hits-info-d3pd', action='store_true', help='Save Tile hits info into D3PD')
@@ -63,6 +65,9 @@ def main():
     if args.conditions_tag:
         flags.IOVDb.GlobalTag = args.conditions_tag
 
+    # Override default configuration flags from command line arguments
+    flags.fillFromArgs(parser=parser)
+
     filePrefix = ""
     if args.file_prefix:
         filePrefix = args.file_prefix
@@ -74,9 +79,6 @@ def main():
         flags.Output.doWriteRDO = True
         outputRDO = f'{filePrefix}.RDO.pool.root'
         flags.Output.RDOFileName = outputRDO
-
-    # Override default configuration flags from command line arguments
-    flags.fillFromArgs(parser=parser)
 
     if args.preExec:
         log.info('Executing preExec: %s', args.preExec)
@@ -123,6 +125,16 @@ def main():
         outputHitsNtuple = f'{filePrefix}.ntup.root'
         from TileRec.TileHitVecToNtupleConfig import TileHitVecToNtupleCfg
         cfg.merge(TileHitVecToNtupleCfg(flags, outputFile=outputHitsNtuple))
+
+    if args.digits_ntuple:
+        outputHitsNtuple = f'{filePrefix}.ntup.root'
+        from TileRec.TileDigitsToNtupleConfig import TileDigitsToNtupleCfg
+        cfg.merge(TileDigitsToNtupleCfg(flags, outputFile=outputHitsNtuple))
+
+    if args.channels_ntuple:
+        outputHitsNtuple = f'{filePrefix}.ntup.root'
+        from TileRec.TileRawChannelToNtupleConfig import TileRawChannelToNtupleCfg
+        cfg.merge(TileRawChannelToNtupleCfg(flags, outputFile=outputHitsNtuple))
 
     if args.d3pd:
         outputD3PD = f'{filePrefix}.d3pd.root'
