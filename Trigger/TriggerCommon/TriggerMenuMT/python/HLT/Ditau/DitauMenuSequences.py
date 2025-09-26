@@ -9,7 +9,7 @@ from DiTauRec.DiTauToolsConfig import (
     DiTauTrackFinderCfg, 
     DiTauConstituentFinderCfg, 
     TVAToolCfg, 
-    DiTauIDVarDecoratorCfg,
+    DiTauExtraVarDecoratorCfg,
     DiTauOnnxScoreCalculatorCfg,
 )
 
@@ -84,7 +84,7 @@ def ditauRecoCfg(flags, inputJets: str, inputVertex: str, inputFSTracks: str,  i
             flags,
             UseRawConstit=False,  # no raw constituents for DiTau reconstruction with PFO jets
         )),
-        acc.popToolsAndMerge(DiTauIDVarDecoratorCfg(
+        acc.popToolsAndMerge(DiTauExtraVarDecoratorCfg(
             flags,
             ditauPtDecName         = f"{flags_ditau.DiTau.DiTauContainer[0]}.ditau_pt",     
             fCoreLeadDecName       = f"{flags_ditau.DiTau.DiTauContainer[0]}.f_core_lead",       

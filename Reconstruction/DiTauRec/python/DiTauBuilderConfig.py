@@ -9,7 +9,7 @@ from DiTauRec.DiTauToolsConfig import (
     DiTauTrackFinderCfg, 
     CellFinderCfg, 
     DiTauConstituentFinderCfg,
-    DiTauIDVarDecoratorCfg, 
+    DiTauExtraVarDecoratorCfg, 
     DiTauOnnxScoreCalculatorCfg
 )
 
@@ -31,8 +31,10 @@ def DiTauBuilderCfg(flags, name="DiTauBuilder", doLowPt=False):
     else:    
         tools.append(acc.popToolsAndMerge(CellFinderCfg(flags)))
 
+    if flags.DiTau.doExtraVariables:
+        tools.append(acc.popToolsAndMerge(DiTauExtraVarDecoratorCfg(flags))) 
+
     if flags.DiTau.doRunDiTauDiscriminant:
-        tools.append(acc.popToolsAndMerge(DiTauIDVarDecoratorCfg(flags)))
         tools.append(acc.popToolsAndMerge(DiTauOnnxScoreCalculatorCfg(flags)))
 
     acc.addEventAlgo(CompFactory.DiTauBuilder(name,

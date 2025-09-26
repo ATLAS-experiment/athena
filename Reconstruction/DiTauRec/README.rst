@@ -69,12 +69,12 @@ These tools are applied in the following order:
 * `DiTauTrackFinder <src/DiTauTrackFinder.cxx>`_ (associates tracks to the seed jet and checks quality criteria)
 * `CellFinder <src/CellFinder.cxx>`_ (stores information of calorimeter cells which are located inside the 
   subjets)
-* `DiTauIDVarDecorator <src/DiTauIDVarDecorator.cxx>`_ (calculates the identifiation variables used by the Omni based discriminant)
+* `DiTauExtraVarDecorator <src/DiTauExtraVarDecorator.cxx>`_ (calculates variables which can used for ditau identification)
 * `DiTauOnnxDiscriminantTool <src/DiTauOnnxDiscriminantTool.xx>`_ (calculate the Omni score used for ditau identification)
 
 These tools are loaded and configured in `DiTauBuilderConfig.py <python/DiTauBuilderConfig.py>`_ and are executed in `DiTauBuilder.cxx <src/DiTauBuilder.cxx>`_.
 
-Note: the `DiTauIDVarDecorator`_ and the `DiTauOnnxDiscriminantTool`_ are not run at reconstruction level, but they are run at derivation level (xAOD -> DxAOD)
+Note: the `DiTauExtraVarDecorator`_ and the `DiTauOnnxDiscriminantTool`_ are not run at reconstruction level, but they can be run at derivation level (xAOD -> DxAOD)
 
 |
 
