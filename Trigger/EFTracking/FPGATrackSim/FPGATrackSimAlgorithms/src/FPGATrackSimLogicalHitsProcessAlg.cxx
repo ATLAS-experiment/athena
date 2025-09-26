@@ -334,7 +334,22 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
     } else { // No tracking; 
       ATH_MSG_DEBUG("No tracking. Just running dummy road2track algorith");
-      roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0));
+      if(m_doGNNPixelSeeding) { //For GNNPixelSeeding, convert the roads to a track in the simplest form
+        for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads_1st) {
+            std::vector<std::shared_ptr<const FPGATrackSimHit>> track_hits;
+            for (unsigned layer = 0; layer < road->getNLayers(); ++layer) {
+                track_hits.insert(track_hits.end(), road->getHits(layer).begin(), road->getHits(layer).end());
+            }
+
+            FPGATrackSimTrack track_cand;
+            track_cand.setNLayers(track_hits.size());
+            for (size_t ihit = 0; ihit < track_hits.size(); ++ihit) {
+                track_cand.setFPGATrackSimHit(ihit, *(track_hits[ihit]));
+            }
+            tracks_1st.push_back(track_cand); 
+        }
+      }
+      else { roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0)); }
     }
 
     std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;

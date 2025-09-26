@@ -422,6 +422,7 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("edgeScoreCut",0.8)
     cf.addFlag("doGNNRootOutput",False)
     cf.addFlag("doGNNTracking",False)
+    cf.addFlag("doGNNPixelSeeding",False)
     cf.addFlag("nInputsGNN",13)
     
     return cf

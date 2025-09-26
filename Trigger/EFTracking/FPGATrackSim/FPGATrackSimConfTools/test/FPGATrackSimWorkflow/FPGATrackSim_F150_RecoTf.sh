@@ -19,6 +19,7 @@ usage () {
     -w  |  --writeAdditionalOutputData      write extra FPGATrackSim outputs (default off)
     -r  |  --region             STRING      region list; e.g. \"[34,98,162]\" or \"34,98,162\"
     -g  |  --keepHitsStrategy   INT         GenScan.keepHitsStrategy value (default = 2)
+    -j  |  --doGNN                          toggle on the GNN pixel seeding configuration (default off)
     -h  |  --help                           this help
 
     Examples:
@@ -40,6 +41,7 @@ skipEvents=0
 writeAdditionalOutputData="0"
 regionList="[34, 98, 162, 226, 290, 354, 418, 482, 546, 610, 674, 738, 802, 866, 930, 994, 1058, 1122, 1186, 1250]"
 keepHitsStrategy="2"   # NEW: user-settable via -g/--keepHitsStrategy
+doGNN="0"
 
 ## parsing flags
 while [ $# -ge 1 ]; do
@@ -54,6 +56,7 @@ while [ $# -ge 1 ]; do
         -w  | --writeAdditionalOutputData ) writeAdditionalOutputData="1" ;;
         -r  | --region )        if [ $# -lt 2 ] ; then usage 1 "Missing value for --region"; fi ; regionList="$2" ; shift ;;
         -g  | --keepHitsStrategy ) if [ $# -lt 2 ] ; then usage 1 "Missing value for --keepHitsStrategy"; fi ; keepHitsStrategy="$2" ; shift ;;
+        -j  | --doGNN )         doGNN="1" ;;
         -h  | --help )          usage 0 ;;
         *) shift ; continue ;;
     esac
@@ -104,11 +107,26 @@ preExecFlags="flags.Tracking.doPixelDigitalClustering=True;\
                flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy=${keepHitsStrategy};\
                flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
-               flags.Trigger.FPGATrackSim.regionList=${regionList};\
-               flags.Trigger.FPGATrackSim.sampleType='skipTruth';"
+               flags.Trigger.FPGATrackSim.regionList=${regionList};"
 
 if [ "$writeAdditionalOutputData" == "0" ]; then
     preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False;"
+fi
+
+if [ "$doGNN" == "0" ]; then # Do GenScan Pixel Seeding
+    preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.Hough.genScan=True;flags.Trigger.FPGATrackSim.sampleType='skipTruth';"
+else # Do GNN Pixel Seeding
+    preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.Hough.genScan=False;\
+                    flags.Trigger.FPGATrackSim.Hough.GNN=True;\
+                    flags.Trigger.FPGATrackSim.GNN.moduleMapPath=\"${GNN_MODULE_MAP}\";\
+                    flags.Trigger.FPGATrackSim.GNN.MLModelPath=\"${GNN_METRIC_LEARNING}\";\
+                    flags.Trigger.FPGATrackSim.GNN.GNNModelPath=\"${GNN_ONNX_MODEL}\";\
+                    flags.Trigger.FPGATrackSim.GNN.moduleMapTol=0.5;\
+                    flags.Trigger.FPGATrackSim.GNN.edgeScoreCut=0.5;\
+                    flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding=True;\
+                    flags.Trigger.FPGATrackSim.doOverlapRemoval=False;\
+                    flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions=False;\
+                    flags.Trigger.FPGATrackSim.sampleType='singleMuons';"
 fi
 
 Reco_tf.py --CA \

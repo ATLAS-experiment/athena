@@ -431,7 +431,11 @@ def FPGATrackSimGNNRoadMakerToolCfg(flags,name="FPGATrackSimGNNRoadMakerTool"):
     GNNRoadMakerTool = CompFactory.FPGATrackSimGNNRoadMakerTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     GNNRoadMakerTool.roadMakerTool = flags.Trigger.FPGATrackSim.GNN.roadMakerTool.value
     GNNRoadMakerTool.edgeScoreCut = flags.Trigger.FPGATrackSim.GNN.edgeScoreCut
+    GNNRoadMakerTool.doGNNPixelSeeding = flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding
     GNNRoadMakerTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+
+    from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
+    GNNRoadMakerTool.LayerNumberTool = result.getPrimaryAndMerge(ITkTrigL2LayerNumberToolCfg(flags))
 
     result.setPrivateTools(GNNRoadMakerTool)
 
@@ -590,6 +594,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.NumOfHitPerGrouping = flags.Trigger.FPGATrackSim.ActiveConfig.NumOfHitPerGrouping
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack_1st = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.DoGNNTrack = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
+    theFPGATrackSimLogicalHitsProcessAlg.DoGNNPixelSeeding = flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
@@ -735,10 +740,10 @@ def FPGATrackSimF150FlagCfg(flags):
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
     flags.Trigger.FPGATrackSim.tracking = False
-    flags.Trigger.FPGATrackSim.Hough.genScan = True
     flags.Trigger.FPGATrackSim.convertSPs = False # in case we need the conversion to take place on hw we'll have to convert to SPs after the cluster-sorting (will probably need new algorithm)
     flags.Tracking.ITkActsValidateF150Pass.doActsSpacePoint = not flags.Trigger.FPGATrackSim.convertSPs
     flags.Trigger.FPGATrackSim.Hough.secondStage = False
+    
     flags.Trigger.FPGATrackSim.regionList="34,98,162,226,290,354,418,482,546,610,674,738,802,866,930,994,1058,1122,1186,1250"
     ConfigureMultiRegionFlags(flags)
     
