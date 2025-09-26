@@ -42,6 +42,10 @@ art_dcube=$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py
 
 lastref_dir=last_results
 
+sim_tf_exit_code=0
+rdoana_tf_exit_code=0
+idpvm_tf_exit_code=0
+
 # Don't run if dcube config not found
 if [ -z "$dcubeshiftercfg_rec" ]; then
     echo "art-result: 1 dcube-xml-config"
@@ -78,7 +82,7 @@ case $ArtProcess in
         echo "art-result: $? dcube_sim_last"
     fi
 
-    if [ $rdoana_tf_exit_code -eq 0 ] ; then
+    if [ $rdoana_tf_exit_code -eq 0 ] ;then
 
         echo "Merging RDOAnalysis.root"
         hadd ${dcubemon_rdo} art_core_*/RDOAnalysis.root
