@@ -16,7 +16,7 @@
 #include "xAODPFlow/PFOAuxContainer.h"
 #include "xAODPFlow/PFO.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 
 
@@ -205,7 +205,7 @@ StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
   // -- TODO: change the hardcoded 0.4
   std::vector<CaloCell_ID::SUBCALO> emSubCaloBlocks;
   emSubCaloBlocks.push_back(CaloCell_ID::LAREM);
-  boost::scoped_ptr<CaloCellList> cellList(new CaloCellList(detMgr, &cellContainer,emSubCaloBlocks)); 
+  std::unique_ptr<CaloCellList> cellList = std::make_unique<CaloCellList>(detMgr, &cellContainer, emSubCaloBlocks);
   // -- FIXME: tau p4 is corrected to point at tau vertex, but the cells are not 
   cellList->select(tau.eta(), tau.phi(), 0.4); 
 
