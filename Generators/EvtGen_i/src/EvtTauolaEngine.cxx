@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2025 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -509,7 +509,7 @@ void EvtTauolaEngine::decayTauEvent( EvtParticle* tauParticle )
                 // Loop through all descendants
 #ifdef HEPMC3
                 for ( auto tauDaug :
-                      HepMC3::Relatives::DESCENDANTS( endVertex ) ) {
+                      HepMC3::Relatives::DESCENDANTS( std::move(endVertex) ) ) {
 #else
                 HepMC::GenVertex::particle_iterator tauIter;
                 // Loop through all descendants
