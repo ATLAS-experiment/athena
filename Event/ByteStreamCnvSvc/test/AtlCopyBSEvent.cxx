@@ -76,7 +76,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
       std::string arg2;
       if ((i+1) < argc) arg2=argv[i+1];
       //set output file name
-      if (arg2.size()>0) fileNameOut=arg2;
+      if (arg2.size()>0) fileNameOut=std::move(arg2);
       else {
 	std::cout << "ERROR: Expected output file name after '" << arg1 << "'" <<std::endl;
 	return -1;
