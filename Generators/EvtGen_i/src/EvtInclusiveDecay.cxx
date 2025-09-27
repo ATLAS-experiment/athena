@@ -296,7 +296,7 @@ StatusCode EvtInclusiveDecay::execute() {
           msg(MSG::ERROR ) << "Overlapping decay tree for particle" << p <<endmsg;
           return StatusCode::FAILURE;
         }
-        decayParticle(hepMC,p);
+        decayParticle(hepMC,std::move(p));
         HepMC::fillBarcodesAttribute(hepMC);
       }
 #else
@@ -417,7 +417,7 @@ StatusCode EvtInclusiveDecay::traverseDecayTree(HepMC::GenParticlePtr p,
         ATH_MSG_WARNING( ([&p, &v](){  std::stringstream ss;   HepMC::Print::line(ss,p); HepMC::Print::line(ss,v);  return ss.str();})());
       }
       for (auto itp: v->particles_out()) {
-        ATH_CHECK(traverseDecayTree(itp,isToBeRemoved,visited,toBeDecayed) );
+        ATH_CHECK(traverseDecayTree(std::move(itp),isToBeRemoved,visited,toBeDecayed) );
       }
     }
   }
@@ -578,7 +578,7 @@ bool EvtInclusiveDecay::isToBeDecayed(HepMC::ConstGenParticlePtr p, bool doCross
   // be flagged as documentation lines
   double m2 = p->momentum().m2();
   if (m2 < -1.0E-3) {
-    ATH_MSG_DEBUG("Ignoring particle " << pdgName(p) << " with m^2 = " << m2);
+    ATH_MSG_DEBUG("Ignoring particle " << pdgName(std::move(p)) << " with m^2 = " << m2);
     return false;
   }
 
