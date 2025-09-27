@@ -193,6 +193,9 @@ GeoSysController::GeoSysController(IVP1System * sys)
   m_d->subSysCheckBoxMap[VP1GeoFlags::SCT] = m_d->ui.checkBox_SCT;
   m_d->subSysCheckBoxMap[VP1GeoFlags::TRT] = m_d->ui.checkBox_TRT;
   m_d->subSysCheckBoxMap[VP1GeoFlags::InDetServMat] = m_d->ui.checkBox_InDetServMat;
+  // Phase-II
+  m_d->subSysCheckBoxMap[VP1GeoFlags::ITkPixel] = m_d->ui.checkBox_ITkPixel;
+  m_d->subSysCheckBoxMap[VP1GeoFlags::ITkStrip] = m_d->ui.checkBox_ITkStrip;
 
   // CALO
   m_d->subSysCheckBoxMap[VP1GeoFlags::LAr] = m_d->ui.checkBox_LAr;

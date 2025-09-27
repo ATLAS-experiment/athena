@@ -430,8 +430,8 @@ QWidget * VP1GeometrySystem::buildController()
    */
 
   if (VP1JobConfigInfo::hasITkGeometry()) {
-    m_d->addSubSystem( VP1GeoFlags::Pixel,"ITkPixel", "", "ITkPixel");
-    m_d->addSubSystem( VP1GeoFlags::SCT,"ITkStrip", "", "ITkStrip");
+    m_d->addSubSystem( VP1GeoFlags::ITkPixel,"ITkPixel", "", "ITkPixel");
+    m_d->addSubSystem( VP1GeoFlags::ITkStrip,"ITkStrip", "", "ITkStrip");
   } else {
     m_d->addSubSystem( VP1GeoFlags::Pixel,"Pixel");
     m_d->addSubSystem( VP1GeoFlags::SCT,"SCT");
