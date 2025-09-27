@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITKPIXEL_DECODINGALG_H
@@ -97,7 +97,7 @@ namespace PixelCallbacks{
             inline void evt_next([[maybe_unused]] uint8_t tag) {};
 
             inline void evt_done() {
-                StatusCode sc = m_rdoContainer->addCollection(m_rdoCollection.release(), m_idHelper->wafer_hash(m_identifier));
+                m_rdoContainer->addCollection(m_rdoCollection.release(), m_idHelper->wafer_hash(m_identifier)).ignore();
             };
 
             inline void add_hit(uint16_t col, uint16_t row, uint16_t tot){
