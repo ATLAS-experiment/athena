@@ -22,7 +22,7 @@ Purpose : create a EventInfoAttList - The Tag information associated to the even
 StatusCode  EventInfoAttListTool::initialize() {
   ATH_MSG_DEBUG("in initialize()");
 
-  m_attribListSpec  = new coral::AttributeListSpecification();
+  m_attribListSpec = new coral::AttributeListSpecification();
   // Note: for any attribute added here, please confirm the corresponding EventInfo member being
   // retained in DAOD smart slimming:
   // PhysicsAnalysis/DerivationFramework/DerivationFrameworkCore/python/EventInfoContent.py
@@ -41,7 +41,6 @@ StatusCode  EventInfoAttListTool::initialize() {
   
   return AthAlgTool::initialize();
 }
-
 
 /* Build attribute list from EventInfo object */
 std::unique_ptr<AthenaAttributeList>
@@ -109,7 +108,7 @@ StatusCode EventInfoAttListTool::eventTag(AthenaAttributeList& eventTag,
 }
 
 
-/** finialize - called once at the end */
+/** finalize - called once at the end */
 StatusCode  EventInfoAttListTool::finalize() {
   ATH_MSG_DEBUG("in finalize()");
   m_attribListSpec->release();
