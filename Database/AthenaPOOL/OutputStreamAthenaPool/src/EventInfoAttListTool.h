@@ -13,8 +13,7 @@ Purpose : Tool to buid the Global Event Tags
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODEventInfo/EventInfo.h" //typedef
 
-#include <string>
-#include <memory> //unique_ptr
+#include <memory>
 
 class AthenaAttributeList;
 namespace coral{
@@ -33,7 +32,7 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
 
-  // interface 
+  // interface
   bool isValid() const;
   const coral::AttributeListSpecification& getAttributeSpecification() const;
   std::unique_ptr<AthenaAttributeList> getAttributeListPtr(const xAOD::EventInfo& einfo) const;
