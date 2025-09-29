@@ -13,7 +13,7 @@
 #include "dqm_core/test/DummyAlgorithmConfig.h"
 
 #include <iostream>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 #include <TCollection.h>
 #include <TDirectory.h>
@@ -104,7 +104,7 @@ execute( const std::string& name, const TObject& data, const dqm_core::Algorithm
   }
   TIter itr(listptr);
   while ( TObject* ireference = itr.Next() ) {
-    boost::scoped_ptr<dqm_core::AlgorithmConfig> subConfig(ConfigureSubAlg(config, ireference));
+    std::unique_ptr<dqm_core::AlgorithmConfig> subConfig(ConfigureSubAlg(config, ireference));
     dqm_core::Result* subResult = m_subalg->execute( name, data, *subConfig );
     if( subResult->status_ != dqm_core::Result::Undefined ) {
       status = ( status == dqm_core::Result::Undefined ) ? dqm_core::Result::Green : status;
