@@ -312,8 +312,15 @@ def LArRDOAnalysisCfg(flags, name="LArRDOAnalysis", **kwargs):
     kwargs.setdefault("InputRawChannelKey", "LArRawChannels")
     kwargs.setdefault("InputTTL1HADKey", "LArTTL1HAD")
     kwargs.setdefault("InputTTL1EMKey", "LArTTL1EM")
-    kwargs.setdefault("InputDigitKey", f"{prefix}LArDigitContainer_MC_Thinned")
-
+    if flags.Digitization.AddCaloDigiThinned or \
+       f"{prefix}LArDigitContainer_MC_Thinned" in flags.Input.Collections or \
+       flags.Common.ProductionStep is ProductionStep.PileUpPresampling or \
+       flags.Common.ProductionStep is ProductionStep.Digitization: \
+        
+        kwargs.setdefault("InputDigitKey", f"{prefix}LArDigitContainer_MC_Thinned")
+    else:
+        kwargs.setdefault("InputDigitKey", "")
+ 
     result.addEventAlgo(CompFactory.LArRDOAnalysis(name, **kwargs))
 
     result.merge(RDOAnalysisOutputCfg(flags))
