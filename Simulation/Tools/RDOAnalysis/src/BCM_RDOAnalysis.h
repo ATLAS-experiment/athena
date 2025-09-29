@@ -1,14 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef BCM_RDO_ANALYSIS_H
 #define BCM_RDO_ANALYSIS_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
+#include "AthenaBaseComps/AthHistogramAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 
 #include "InDetBCM_RawData/BCM_RDO_Container.h"
@@ -19,65 +17,65 @@
 #include <vector>
 #include "TH1.h"
 
-class TTree;
-class TH1;
 
-class BCM_RDOAnalysis : public AthAlgorithm {
+class BCM_RDOAnalysis : public AthHistogramAlgorithm {
 
 public:
-  BCM_RDOAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-  ~BCM_RDOAnalysis(){}
+  using AthHistogramAlgorithm::AthHistogramAlgorithm;
+  ~BCM_RDOAnalysis() = default;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode execute() override final;
-  virtual StatusCode finalize() override final;
 
 private:
-  SG::ReadHandleKey<BCM_RDO_Container> m_inputKey;
-  SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey;
+
+  SG::ReadHandleKey<BCM_RDO_Container> m_inputKey{this, "InputKey", "BCM_RDOs"};
+  SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey{this, "InputTruthKey", "BCM_SDO_Map"};
+
+
+  Gaudi::Property<std::string> m_ntupleFileName{this, "NtupleFileName", "/ntuples/file"};
+  Gaudi::Property<std::string> m_ntupleDirName{this, "NtupleDirectoryName", "/BCM_RDOAnalysis/"};
+  Gaudi::Property<std::string> m_ntupleTreeName{this, "NtupleTreeName", "BCM_RDOAna"};
+  Gaudi::Property<std::string> m_path{this, "HistPath", "/BCM_RDOAnalysis/"};
+
   // RDO
-  std::vector<int>* m_word1;
-  std::vector<int>* m_word2;
-  std::vector<int>* m_chan;
-  std::vector<int>* m_pulse1Pos;
-  std::vector<int>* m_pulse1Width;
-  std::vector<int>* m_pulse2Pos;
-  std::vector<int>* m_pulse2Width;
-  std::vector<int>* m_LVL1A;
-  std::vector<int>* m_BCID;
-  std::vector<int>* m_LVL1ID;
-  std::vector<int>* m_err;
+  std::vector<int>* m_word1{nullptr};
+  std::vector<int>* m_word2{nullptr};
+  std::vector<int>* m_chan{nullptr};
+  std::vector<int>* m_pulse1Pos{nullptr};
+  std::vector<int>* m_pulse1Width{nullptr};
+  std::vector<int>* m_pulse2Pos{nullptr};
+  std::vector<int>* m_pulse2Width{nullptr};
+  std::vector<int>* m_LVL1A{nullptr};
+  std::vector<int>* m_BCID{nullptr};
+  std::vector<int>* m_LVL1ID{nullptr};
+  std::vector<int>* m_err{nullptr};
   // SDO
-  std::vector<unsigned long long>* m_sdoID;
-  std::vector<int>* m_sdoWord;
-  std::vector<int>* m_barcode;
-  std::vector<int>* m_eventIndex;
-  std::vector<float>* m_charge;
-  std::vector< std::vector<int> >* m_barcode_vec;
-  std::vector< std::vector<int> >* m_eventIndex_vec;
-  std::vector< std::vector<float> >* m_charge_vec;
+  std::vector<unsigned long long>* m_sdoID{nullptr};
+  std::vector<int>* m_sdoWord{nullptr};
+  std::vector<int>* m_barcode{nullptr};
+  std::vector<int>* m_eventIndex{nullptr};
+  std::vector<float>* m_charge{nullptr};
+  std::vector< std::vector<int> >* m_barcode_vec{nullptr};
+  std::vector< std::vector<int> >* m_eventIndex_vec{nullptr};
+  std::vector< std::vector<float> >* m_charge_vec{nullptr};
 
   // HISTOGRAMS
-  TH1* m_h_word1;
-  TH1* m_h_word2;
-  TH1* m_h_chan;
-  TH1* m_h_pulse1Pos;
-  TH1* m_h_pulse1Width;
-  TH1* m_h_pulse2Pos;
-  TH1* m_h_pulse2Width;
+  TH1* m_h_word1{nullptr};
+  TH1* m_h_word2{nullptr};
+  TH1* m_h_chan{nullptr};
+  TH1* m_h_pulse1Pos{nullptr};
+  TH1* m_h_pulse1Width{nullptr};
+  TH1* m_h_pulse2Pos{nullptr};
+  TH1* m_h_pulse2Width{nullptr};
 
-  TH1* m_h_sdoID;
-  TH1* m_h_sdoWord;
-  TH1* m_h_barcode;
-  TH1* m_h_eventIndex;
-  TH1* m_h_charge;
+  TH1* m_h_sdoID{nullptr};
+  TH1* m_h_sdoWord{nullptr};
+  TH1* m_h_barcode{nullptr};
+  TH1* m_h_eventIndex{nullptr};
+  TH1* m_h_charge{nullptr};
 
-  TTree* m_tree;
-  std::string m_ntupleFileName;
-  std::string m_ntupleDirName;
-  std::string m_ntupleTreeName;
-  std::string m_path;
-  ServiceHandle<ITHistSvc> m_thistSvc;
+  TTree* m_tree{nullptr};
 };
 
 #endif // BCM_RDO_ANALYSIS_H

@@ -1,73 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "LArRDOAnalysis.h"
 #include "StoreGate/ReadHandle.h"
 
-#include "TTree.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <math.h>
-#include <functional>
-#include <iostream>
-
-LArRDOAnalysis::LArRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-  , m_inputRawChannelKey("LArRawChannels")
-  , m_inputTTL1HADKey("LArTTL1HAD")
-  , m_inputTTL1EMKey("LArTTL1EM")
-  , m_inputDigitKey("LArDigitContainer_MC_Thinned")
-  , m_larID(0)
-  , m_energy(0)
-  , m_time(0)
-  , m_qual(0)
-  , m_prov(0)
-  , m_gain(0)
-  , m_hadOnID(0)
-  , m_hadOffID(0)
-  , m_hadSamples(0)
-  , m_emOnID(0)
-  , m_emOffID(0)
-  , m_emSamples(0)
-  , m_digiID(0)
-  , m_digiGain(0)
-  , m_digiSamples(0)
-
-  , m_h_larID(0)
-  , m_h_energy(0)
-  , m_h_time(0)
-  , m_h_qual(0)
-  , m_h_prov(0)
-  , m_h_gain(0)
-  , m_h_hadOnID(0)
-  , m_h_hadOffID(0)
-  , m_h_hadSamples(0)
-  , m_h_emOnID(0)
-  , m_h_emOffID(0)
-  , m_h_emSamples(0)
-  , m_h_digiID(0)
-  , m_h_digiGain(0)
-  , m_h_digiSamples(0)
-
-  , m_tree(0)
-  , m_ntupleFileName("/ntuples/file1")
-  , m_ntupleDirName("/LArRDOAnalysis/")
-  , m_ntupleTreeName("LArRDOAna")
-  , m_path("/LArRDOAnalysis/")
-  , m_thistSvc("THistSvc", name)
-{
-  declareProperty("InputRawChannelKey", m_inputRawChannelKey);
-  declareProperty("InputTTL1HADKey", m_inputTTL1HADKey);
-  declareProperty("InputTTL1EMKey", m_inputTTL1EMKey);
-  declareProperty("InputDigitKey", m_inputDigitKey);
-  declareProperty("NtupleFileName", m_ntupleFileName);
-  declareProperty("NtupleDirectoryName", m_ntupleDirName);
-  declareProperty("NtupleTreeName", m_ntupleTreeName);
-  declareProperty("HistPath", m_path);
-}
+#include <format>
 
 StatusCode LArRDOAnalysis::initialize() {
   ATH_MSG_DEBUG( "Initializing LArRDOAnalysis" );
@@ -77,94 +16,88 @@ StatusCode LArRDOAnalysis::initialize() {
   ATH_CHECK( m_inputRawChannelKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_inputTTL1HADKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_inputTTL1EMKey.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_inputDigitKey.initialize() );
+  ATH_CHECK( m_inputDigitKey.initialize(SG::AllowEmpty) );
 
-  // Grab Ntuple and histogramming service for tree
-  ATH_CHECK(m_thistSvc.retrieve());
-
-  m_tree = new TTree(TString(m_ntupleTreeName), "LArRDOAna");
-  std::string fullNtupleName = m_ntupleFileName + m_ntupleDirName + m_ntupleTreeName;
-  ATH_CHECK(m_thistSvc->regTree(fullNtupleName, m_tree));
-  if (m_tree) {
-    m_tree->Branch("larID", &m_larID);
-    m_tree->Branch("energy", &m_energy);
-    m_tree->Branch("time", &m_time);
-    m_tree->Branch("qual", &m_qual);
-    m_tree->Branch("prov", &m_prov);
-    m_tree->Branch("gain", &m_gain);
-    m_tree->Branch("hadOnID", &m_hadOnID);
-    m_tree->Branch("hadOffID", &m_hadOffID);
-    m_tree->Branch("hadSamples", &m_hadSamples);
-    m_tree->Branch("emOnID", &m_emOnID);
-    m_tree->Branch("emOffID", &m_emOffID);
-    m_tree->Branch("emSamples", &m_emSamples);
-    m_tree->Branch("digiID", &m_digiID);
-    m_tree->Branch("digiGain", &m_digiGain);
-    m_tree->Branch("digiSamples", &m_digiSamples);
-  }
-  else {
-    ATH_MSG_ERROR("No tree found!");
-  }
-
+ 
+  m_tree = new TTree(m_ntupleTreeName.value().c_str(), "LArRDOAna");
+  std::string fullNtupleName =std::format("{}{}{}",m_ntupleFileName.value(), m_ntupleDirName.value(), 
+                                                   m_ntupleTreeName.value());
+  ATH_CHECK(histSvc()->regTree(fullNtupleName, m_tree));
+  m_tree->Branch("larID", &m_larID);
+  m_tree->Branch("energy", &m_energy);
+  m_tree->Branch("time", &m_time);
+  m_tree->Branch("qual", &m_qual);
+  m_tree->Branch("prov", &m_prov);
+  m_tree->Branch("gain", &m_gain);
+  m_tree->Branch("hadOnID", &m_hadOnID);
+  m_tree->Branch("hadOffID", &m_hadOffID);
+  m_tree->Branch("hadSamples", &m_hadSamples);
+  m_tree->Branch("emOnID", &m_emOnID);
+  m_tree->Branch("emOffID", &m_emOffID);
+  m_tree->Branch("emSamples", &m_emSamples);
+  m_tree->Branch("digiID", &m_digiID);
+  m_tree->Branch("digiGain", &m_digiGain);
+  m_tree->Branch("digiSamples", &m_digiSamples);
+  
   m_h_larID = new TH1F("h_larID", "LAr ID", 100, 0, 5e18);
   m_h_larID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_larID->GetName(), m_h_larID));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_larID->GetName(), m_h_larID));
 
   m_h_energy = new TH1F("h_energy", "LAr energy", 100, -1e5, 5e5);
   m_h_energy->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_energy->GetName(), m_h_energy));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_energy->GetName(), m_h_energy));
 
   m_h_time = new TH1F("h_time", "LAr time", 100, -1e7, 1e7);
   m_h_time->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_time->GetName(), m_h_time));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_time->GetName(), m_h_time));
 
   m_h_qual = new TH1F("h_qual", "LAr quality", 100, 0, 70000);
   m_h_qual->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_qual->GetName(), m_h_qual));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_qual->GetName(), m_h_qual));
 
   m_h_prov = new TH1F("h_prov", "LAr provenance", 100, 0, 9000);
   m_h_prov->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_prov->GetName(), m_h_prov));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_prov->GetName(), m_h_prov));
 
   m_h_gain = new TH1F("h_gain", "LAr gain", 100, 0, 5);
   m_h_gain->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_gain->GetName(), m_h_gain));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_gain->GetName(), m_h_gain));
 
   m_h_hadOnID = new TH1F("h_hadOnID", "Had LAr TTL1 online ID", 100, 0, 3e19);
   m_h_hadOnID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_hadOnID->GetName(), m_h_hadOnID));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_hadOnID->GetName(), m_h_hadOnID));
 
   m_h_hadOffID = new TH1F("h_hadOffID", "Had LAr TTL1 offline ID", 100, 0, 3e19);
   m_h_hadOffID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_hadOffID->GetName(), m_h_hadOffID));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_hadOffID->GetName(), m_h_hadOffID));
 
   m_h_hadSamples = new TH1F("h_hadSamples", "Had LAr TTL1 sample values", 100, -15000, 35000);
   m_h_hadSamples->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_hadSamples->GetName(), m_h_hadSamples));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_hadSamples->GetName(), m_h_hadSamples));
 
   m_h_emOnID = new TH1F("h_emOnID", "EM LAr TTL1 online ID", 100, 0, 3e19);
   m_h_emOnID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_emOnID->GetName(), m_h_emOnID));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_emOnID->GetName(), m_h_emOnID));
 
   m_h_emOffID = new TH1F("h_emOffID", "EM LAr TTL1 offline ID", 100, 0, 3e19);
   m_h_emOffID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_emOffID->GetName(), m_h_emOffID));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_emOffID->GetName(), m_h_emOffID));
 
   m_h_emSamples = new TH1F("h_emSamples", "EM LAr TTL1 sample values", 100, -1e5, 3.5e5);
   m_h_emSamples->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_emSamples->GetName(), m_h_emSamples));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_emSamples->GetName(), m_h_emSamples));
 
   m_h_digiID = new TH1F("h_digiID", "LAr digit ID", 100, 0, 5e18);
   m_h_digiID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_digiID->GetName(), m_h_digiID));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_digiID->GetName(), m_h_digiID));
 
   m_h_digiGain = new TH1F("h_digiGain", "LAr digit gain", 100, 0, 5);
   m_h_digiGain->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_digiGain->GetName(), m_h_digiGain));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_digiGain->GetName(), m_h_digiGain));
 
   m_h_digiSamples = new TH1F("h_digiSamples", "LAr digit sample values", 100, 0, 5000);
   m_h_digiSamples->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_path + m_h_digiSamples->GetName(), m_h_digiSamples));
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_digiSamples->GetName(), m_h_digiSamples));
 
   return StatusCode::SUCCESS;
 }
@@ -188,15 +121,25 @@ StatusCode LArRDOAnalysis::execute() {
   m_digiGain->clear();
   m_digiSamples->clear();
 
-  if (!m_presampling)
-    {
-      // LAr Raw Channels
-      SG::ReadHandle<LArRawChannelContainer> p_larRawCont(m_inputRawChannelKey);
-      if (p_larRawCont.isValid()) {
-        // loop over LAr raw channels container
-        LArRawChannelContainer::const_iterator lar_itr(p_larRawCont->begin());
-        const LArRawChannelContainer::const_iterator lar_end(p_larRawCont->end());
-        for ( ; lar_itr != lar_end; ++lar_itr ) {
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
+  const LArRawChannelContainer* p_larRawCont{nullptr};
+  ATH_CHECK(SG::get(p_larRawCont, m_inputRawChannelKey, ctx));
+
+  const LArTTL1Container* p_larTTL1Cont_had{nullptr};
+  ATH_CHECK(SG::get(p_larTTL1Cont_had, m_inputTTL1HADKey, ctx));
+ 
+  const LArTTL1Container* p_larTTL1Cont_em{nullptr};
+  ATH_CHECK(SG::get(p_larTTL1Cont_em, m_inputTTL1EMKey, ctx));
+
+  const LArDigitContainer* p_larDigiCont{nullptr};
+  ATH_CHECK(SG::get(p_larDigiCont, m_inputDigitKey, ctx));
+  
+
+  if (p_larRawCont) {
+      // loop over LAr raw channels container
+      LArRawChannelContainer::const_iterator lar_itr(p_larRawCont->begin());
+      const LArRawChannelContainer::const_iterator lar_end(p_larRawCont->end());
+      for ( ; lar_itr != lar_end; ++lar_itr ) {
           const HWIdentifier larID(lar_itr->identify());
           const int rawEnergy(lar_itr->energy());
           const int rawTime(lar_itr->time());
@@ -219,16 +162,12 @@ StatusCode LArRDOAnalysis::execute() {
           m_h_qual->Fill(rawQual);
           m_h_prov->Fill(rawProv);
           m_h_gain->Fill(larGain_int);
-        }
       }
-
-
-      // LAr TTL1 - Had
-      SG::ReadHandle<LArTTL1Container> p_larTTL1Cont_had(m_inputTTL1HADKey);
-      if (p_larTTL1Cont_had.isValid()) {
-        LArTTL1Container::const_iterator ttl1Had_itr(p_larTTL1Cont_had->begin());
-        const LArTTL1Container::const_iterator ttl1Had_end(p_larTTL1Cont_had->end());
-        for ( ; ttl1Had_itr != ttl1Had_end; ++ttl1Had_itr ) {
+  }
+  if (p_larTTL1Cont_had) {
+    LArTTL1Container::const_iterator ttl1Had_itr(p_larTTL1Cont_had->begin());
+    const LArTTL1Container::const_iterator ttl1Had_end(p_larTTL1Cont_had->end());
+    for ( ; ttl1Had_itr != ttl1Had_end; ++ttl1Had_itr ) {
           const HWIdentifier& hadOnID((*ttl1Had_itr)->ttOnlineID());
           const Identifier& hadOffID((*ttl1Had_itr)->ttOfflineID());
           const std::vector<float>& hadSamples = (*ttl1Had_itr)->samples();
@@ -244,12 +183,10 @@ StatusCode LArRDOAnalysis::execute() {
 
           m_h_hadOnID->Fill(hadOnID_int);
           m_h_hadOffID->Fill(hadOffID_int);
-        }
-      }
+    }
+  }
 
-      // LAr TTL1 - EM
-      SG::ReadHandle<LArTTL1Container> p_larTTL1Cont_em(m_inputTTL1EMKey);
-      if (p_larTTL1Cont_em.isValid()) {
+  if (p_larTTL1Cont_em) {
         LArTTL1Container::const_iterator ttl1EM_itr(p_larTTL1Cont_em->begin());
         const LArTTL1Container::const_iterator ttl1EM_end(p_larTTL1Cont_em->end());
         for ( ; ttl1EM_itr != ttl1EM_end; ++ttl1EM_itr ) {
@@ -269,12 +206,11 @@ StatusCode LArRDOAnalysis::execute() {
           m_h_emOnID->Fill(emOnID_int);
           m_h_emOffID->Fill(emOffID_int);
         }
-      }
-    }
+  }
+ 
 
   // LAr Digits
-  SG::ReadHandle<LArDigitContainer> p_larDigiCont(m_inputDigitKey);
-  if (p_larDigiCont.isValid()) {
+  if (p_larDigiCont) {
     LArDigitContainer::const_iterator digi_itr(p_larDigiCont->begin());
     const LArDigitContainer::const_iterator digi_end(p_larDigiCont->end());
     for ( ; digi_itr != digi_end; ++digi_itr ) {
@@ -293,16 +229,12 @@ StatusCode LArRDOAnalysis::execute() {
 
       m_h_digiID->Fill(digiID_int);
       m_h_digiGain->Fill(digiGain_int);
-    }
-  }
+   }
+ }
+  
 
-  if (m_tree) {
-    m_tree->Fill();
-  }
-
+  m_tree->Fill();
+  
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArRDOAnalysis::finalize() {
-  return StatusCode::SUCCESS;
-}

@@ -19,8 +19,6 @@
 #include <iostream>
 
 
-HGTD_RDOAnalysis::HGTD_RDOAnalysis(const std::string& name, ISvcLocator *pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator) { }
 
 StatusCode HGTD_RDOAnalysis::initialize() {
   ATH_MSG_DEBUG( "Initializing HGTD_RDOAnalysis" );
@@ -35,33 +33,26 @@ StatusCode HGTD_RDOAnalysis::initialize() {
   ATH_CHECK(detStore()->retrieve(m_HGTD_Manager, m_HGTD_Name.value()));
   ATH_CHECK(detStore()->retrieve(m_HGTD_ID, m_HGTDID_Name.value()));
 
-  // Grab Ntuple and histogramming service for tree
-  ATH_CHECK(m_thistSvc.retrieve());
-
   m_tree = new TTree(m_ntupleName.value().c_str(), "HGTD_RDOAnalysis");
-  ATH_CHECK(m_thistSvc->regTree(m_ntuplePath.value() + m_ntupleName.value(), m_tree));
-  if (m_tree) {
-    m_tree->Branch("m_rdo_module_layer", &m_rdo_module_layer);
-    m_tree->Branch("m_rdo_module_x", &m_rdo_module_x);
-    m_tree->Branch("m_rdo_module_y", &m_rdo_module_y);
-    m_tree->Branch("m_rdo_module_z", &m_rdo_module_z);
-    m_tree->Branch("m_rdo_module_ID", &m_rdo_module_ID);
-    m_tree->Branch("m_rdo_hit_x", &m_rdo_hit_x);
-    m_tree->Branch("m_rdo_hit_y", &m_rdo_hit_y);
-    m_tree->Branch("m_rdo_hit_z", &m_rdo_hit_z);
-    m_tree->Branch("m_rdo_hit_toa", &m_rdo_hit_toa);
-    m_tree->Branch("m_rdo_hit_sdo_toa", &m_rdo_hit_sdo_toa);
-    m_tree->Branch("m_rdo_hit_sdo_truth_category", &m_rdo_hit_sdo_truth_category);
-  } else {
-    ATH_MSG_ERROR("No tree found!");
-  }
+  ATH_CHECK(histSvc()->regTree(m_ntuplePath.value() + m_ntupleName.value(), m_tree));
+  m_tree->Branch("m_rdo_module_layer", &m_rdo_module_layer);
+  m_tree->Branch("m_rdo_module_x", &m_rdo_module_x);
+  m_tree->Branch("m_rdo_module_y", &m_rdo_module_y);
+  m_tree->Branch("m_rdo_module_z", &m_rdo_module_z);
+  m_tree->Branch("m_rdo_module_ID", &m_rdo_module_ID);
+  m_tree->Branch("m_rdo_hit_x", &m_rdo_hit_x);
+  m_tree->Branch("m_rdo_hit_y", &m_rdo_hit_y);
+  m_tree->Branch("m_rdo_hit_z", &m_rdo_hit_z);
+  m_tree->Branch("m_rdo_hit_toa", &m_rdo_hit_toa);
+  m_tree->Branch("m_rdo_hit_sdo_toa", &m_rdo_hit_sdo_toa);
+  m_tree->Branch("m_rdo_hit_sdo_truth_category", &m_rdo_hit_sdo_truth_category);
   /*
   // HISTOGRAMS
 
   /// global histograms
   m_h_rdoID = new TH1F("h_rdoID", "rdoID", 100, 0, 10e17);
   m_h_rdoID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_rdoID->GetName(), m_h_rdoID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_rdoID->GetName(), m_h_rdoID));
   */
 
   return StatusCode::SUCCESS;
@@ -81,12 +72,18 @@ StatusCode HGTD_RDOAnalysis::execute() {
   m_rdo_hit_sdo_toa.clear();
   m_rdo_hit_sdo_truth_category.clear();
 
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
   // Raw HGTD Data
-  SG::ReadHandle<HGTD_RDO_Container> p_RDO_cont (m_inputKey);
-  //Adding SimMap and McEvent here for added truthMatching checks
-  SG::ReadHandle<InDetSimDataCollection> simDataMap (m_inputTruthKey);
+  const HGTD_RDO_Container* p_RDO_cont{nullptr};
+  ATH_CHECK(SG::get(p_RDO_cont, m_inputKey, ctx));
   
-  SG::ReadHandle<McEventCollection> mcEventCollection (m_inputMcEventCollectionKey);
+  //Adding SimMap and McEvent here for added truthMatching checks
+  const InDetSimDataCollection* simDataMap{nullptr};
+  ATH_CHECK(SG::get(simDataMap, m_inputTruthKey, ctx));
+  
+  const McEventCollection* mcEventCollection{nullptr};
+  ATH_CHECK(SG::get(mcEventCollection, m_inputMcEventCollectionKey, ctx));
+  
   bool doTruthMatching = true;
   const HepMC::GenEvent* hardScatterEvent(nullptr);
 
@@ -96,9 +93,8 @@ StatusCode HGTD_RDOAnalysis::execute() {
   }
   if(doTruthMatching) hardScatterEvent = mcEventCollection->at(0);
 
-  if(p_RDO_cont.isValid()) {
-    // loop over RDO container
-    for ( HGTD_RDO_Container::const_iterator rdoCont_itr =  p_RDO_cont->begin(); rdoCont_itr != p_RDO_cont->end(); ++rdoCont_itr ) {
+  // loop over RDO container
+  for ( HGTD_RDO_Container::const_iterator rdoCont_itr =  p_RDO_cont->begin(); rdoCont_itr != p_RDO_cont->end(); ++rdoCont_itr ) {
 
       const HGTD_RDO_Collection* p_RDO_coll(*rdoCont_itr);
       const Identifier rdoIDColl((*rdoCont_itr)->identify());
@@ -135,7 +131,7 @@ StatusCode HGTD_RDOAnalysis::execute() {
         // For truth matching studies we need to get the truth nature of each deposit.
         // For each hit, there can be up to 7 deposit from different nature accessed through the SDO map.
         if(doTruthMatching){
-          if(simDataMap.isValid()){
+          if(simDataMap) {
             InDetSimDataCollection::const_iterator iter = (*simDataMap).find((*rdo_itr)->identify());
             std::vector<SdoInfo> sdo_info;
             if ( iter != (*simDataMap).end() ) {
@@ -174,12 +170,9 @@ StatusCode HGTD_RDOAnalysis::execute() {
         }
       }
     }
-  }
-  else {
-    ATH_MSG_ERROR("No HGTD RDO container found!");
-  }
+  
 
-  if (m_tree) m_tree->Fill();
+  m_tree->Fill();
   
   return StatusCode::SUCCESS;
 }
