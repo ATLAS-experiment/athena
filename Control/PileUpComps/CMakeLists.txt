@@ -7,13 +7,12 @@ atlas_subdir( PileUpComps )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_component( PileUpComps
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES 
                      ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel
                      PileUpToolsLib StoreGateLib

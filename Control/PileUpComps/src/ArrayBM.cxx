@@ -148,7 +148,7 @@ StatusCode ArrayBM::initialize()
                                /*IntType=*/1);  // discrete distribution
   } else {
     m_t0Dist =
-        std::make_unique<boost::random::discrete_distribution<unsigned int>>(
+        std::make_unique<std::discrete_distribution<unsigned int>>(
             m_intensityPattern, m_intensityPattern + m_ipLength);
   }
   return StatusCode::SUCCESS;
