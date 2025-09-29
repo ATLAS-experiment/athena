@@ -100,7 +100,7 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
     storage->initializeNodes(m_useML);
 
-    storage->generatePhiIndexing(1.5*m_phiSliceWidth);
+    storage->generatePhiIndexing(1.5f*m_phiSliceWidth);
 
     std::vector<GNN_Edge> edgeStorage;
 

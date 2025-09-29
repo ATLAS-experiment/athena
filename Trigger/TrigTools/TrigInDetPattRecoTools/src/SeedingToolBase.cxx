@@ -92,7 +92,7 @@ StatusCode SeedingToolBase::finalize() {
 
 std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, const std::unique_ptr<TrigFTF_GNN_DataStorage>& storage, std::vector<TrigFTF_GNN_Edge>& edgeStorage) const {
 
-  const float M_2PI = 2.0*M_PI;
+  constexpr float M_2PI = 2.0*M_PI;
   
   const float cut_dphi_max      = m_LRTmode ? 0.07f : 0.012f;
   const float cut_dcurv_max     = m_LRTmode ? 0.015f : 0.001f;
@@ -106,22 +106,22 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   const float cut_zMinU = min_z0 + maxOuterRadius*roi.dzdrMinus();
   const float cut_zMaxU = max_z0 + maxOuterRadius*roi.dzdrPlus();
 
-  const float ptCoeff = 0.29997*1.9972/2.0;// ~0.3*B/2 - assuming nominal field of 2*T
+  constexpr float ptCoeff = 0.29997*1.9972/2.0;// ~0.3*B/2 - assuming nominal field of 2*T
 
-  float tripletPtMin = 0.8*m_minPt;//correction due to limited pT resolution
-  const float pt_scale     = 900.0/m_minPt;//to re-scale original tunings done for the 900 MeV pT cut
+  float tripletPtMin = 0.8f*m_minPt;//correction due to limited pT resolution
+  const float pt_scale     = 900.0f/m_minPt;//to re-scale original tunings done for the 900 MeV pT cut
   
   float maxCurv = ptCoeff/tripletPtMin;
  
-  float maxKappa_high_eta          = m_LRTmode ? 1.0*maxCurv : std::sqrt(0.8)*maxCurv;
-  float maxKappa_low_eta           = m_LRTmode ? 1.0*maxCurv : std::sqrt(0.6)*maxCurv;
+  float maxKappa_high_eta          = m_LRTmode ? 1.0f*maxCurv : std::sqrt(0.8f)*maxCurv;
+  float maxKappa_low_eta           = m_LRTmode ? 1.0f*maxCurv : std::sqrt(0.6f)*maxCurv;
 
   if(!m_useOldTunings && !m_LRTmode) {//new settings for curvature cuts
     maxKappa_high_eta          = 4.75e-4f*pt_scale;
     maxKappa_low_eta           = 3.75e-4f*pt_scale;
   }
 
-  const float dphi_coeff                 = m_LRTmode ? 1.0*maxCurv : 0.68*maxCurv;
+  const float dphi_coeff                 = m_LRTmode ? 1.0f*maxCurv : 0.68f*maxCurv;
   
   const float minDeltaRadius = 2.0;
     
@@ -248,7 +248,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	    }
 	  }
 
-	  float exp_eta = std::sqrt(1+tau*tau)-tau;
+	  float exp_eta = std::sqrt(1.f+tau*tau)-tau;
 	  
 	  if (m_matchBeforeCreate) {//match edge candidate against edges incoming to n2
 
@@ -287,7 +287,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 		  
 	    int outEdgeIdx = nEdges;
 	  
-	    float uat_2  = 1/exp_eta;
+	    float uat_2  = 1.f/exp_eta;
 	    float Phi2  = phi2 + dPhi2;
 	    float curv2 = curv;
 	    
@@ -339,7 +339,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
 int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStorage) const {
 
-  const int maxIter = 15;
+  constexpr int maxIter = 15;
 
   int maxLevel = 0;
 
@@ -355,12 +355,13 @@ int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStora
     v_old.push_back(pS);//TO-DO: increment level for segments as they already have at least one neighbour
   }
 
+  std::vector<TrigFTF_GNN_Edge*> v_new;
+  v_new.reserve(v_old.size());
+
   for(;iter<maxIter;iter++) {
 
     //generate proposals
-    std::vector<TrigFTF_GNN_Edge*> v_new;
     v_new.clear();
-    v_new.reserve(v_old.size());
     
     for(auto pS : v_old) {
       
@@ -397,7 +398,7 @@ int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStora
     if(nChanges == 0) break;
 
 
-    v_old = std::move(v_new);
+    v_old.swap(v_new);
     v_new.clear();
   }
 
