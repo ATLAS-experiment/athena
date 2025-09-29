@@ -74,11 +74,11 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 	node.m_idx = idx;
 
         if(isPixel && m_useML){
-            const xAOD::PixelCluster* pCL = dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
-            if(pCL != nullptr){
-                node.m_pcw = pCL->widthInEta();
-		node.m_locPosY = pCL->localPosition<2>().y();
-            }
+            //Check type in debug build otherwise assume it is correct
+            assert(dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front())!=nullptr);
+            const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
+            node.m_pcw = pCL->widthInEta();
+            node.m_locPosY = pCL->localPosition<2>().y();
         }
     }
 

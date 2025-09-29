@@ -151,9 +151,11 @@ StripClusteringTool::makeClusters(const EventContext& ctx,
 
     const InDetDD::SiDetectorDesign& design = element.design();
     // get the pitch, this will be the local covariance for the cluster
+
+    assert( element.isBarrel() ||  dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&element.design()) !=nullptr);
     float pitch = element.isBarrel()
       ? design.phiPitch()
-      : dynamic_cast<const InDetDD::StripStereoAnnulusDesign&>(element.design()).phiPitchPhi();
+      : static_cast<const InDetDD::StripStereoAnnulusDesign&>(element.design()).phiPitchPhi();
     Eigen::Matrix<float,1,1> localCov(pitch * pitch * ONE_TWELFTH);
 
     for (typename IStripClusteringTool::Cluster& cl : clusters) {
@@ -209,8 +211,9 @@ computePosition(const StripClusteringTool::Cluster& cluster,
     Eigen::Matrix<float,3,1> posG(element.surface().localToGlobal(pos).cast<float>());
     
     if (!element.isBarrel()) {
+    	assert(dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&design) != nullptr);
 	const InDetDD::StripStereoAnnulusDesign& annulusDesign =
-	    dynamic_cast<const InDetDD::StripStereoAnnulusDesign&>
+	    static_cast<const InDetDD::StripStereoAnnulusDesign&>
 	    (design);
 	pos = annulusDesign.localPositionOfCellPC(element.cellIdOfPosition(pos));
     }
@@ -293,8 +296,9 @@ StripClusteringTool::unpackRDOs(const EventContext& ctx,
      // reserve memory. number evaluated on ttbar pu200
      cells.reserve(60);
      bool badStripOnModule{false};
-
-     std::size_t ncells = static_cast<size_t>(dynamic_cast<const InDetDD::SCT_ModuleSideDesign&>(design).cells());
+     //Check type in debug build otherwise assume it is correct
+     assert(dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&design)!=nullptr);
+     std::size_t ncells = static_cast<size_t>(static_cast<const InDetDD::SCT_ModuleSideDesign&>(design).cells());
      
      // Simple single-entry cache
     Identifier::value_type waferId_compact_cache = 0;
@@ -302,11 +306,10 @@ StripClusteringTool::unpackRDOs(const EventContext& ctx,
     bool cache_valid = false;
 
     for (const StripRDORawData * raw : RDOs) {
-	const SCT3_RawData* raw3 = dynamic_cast<const SCT3_RawData*>(raw);
-	if (!raw3) {
-	    ATH_MSG_ERROR("Casting into SCT3_RawData failed");
-	    return {};
-	}
+
+    	//Check type in debug build otherwise assume it is correct
+    	assert(static_cast<const SCT3_RawData*>(raw)!=nullptr);
+	const SCT3_RawData* raw3 = static_cast<const SCT3_RawData*>(raw);
 
 	std::bitset<3> timePattern(raw3->getTimeBin());
 	if (!passTiming(timePattern)) {
