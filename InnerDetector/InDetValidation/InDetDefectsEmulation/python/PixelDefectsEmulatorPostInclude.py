@@ -269,7 +269,7 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                                       quad_cc_defect_prob, # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                       ],
-                         fractionsOfNDefects=[quad_fractions,[1.]], # dummy fractions for circuit defects
+                         fractionsOfNDefects=[[1.], quad_fractions,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=[], # need empty lists here
@@ -284,7 +284,7 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                                       circuit_cc_defect_prob,    # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                       ],
-                         fractionsOfNDefects=[circuit_fractions,[1.]], # dummy fractions for circuit defects
+                         fractionsOfNDefects=[[1.], circuit_fractions,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=corner_defects,
@@ -299,7 +299,7 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                                       circuit_cc_defect_prob,    # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                     ],
-                         fractionsOfNDefects=[circuit_fractions,[1.]], # dummy fractions for circuit defects
+                         fractionsOfNDefects=[[1.],circuit_fractions,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=corner_defects,

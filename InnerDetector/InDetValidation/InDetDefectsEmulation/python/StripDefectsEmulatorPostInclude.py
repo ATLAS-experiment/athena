@@ -92,6 +92,7 @@ def emulateITkStripDefects(flags,
                                                       probability=[ModuleDefectProb, # probability of a module to be defect
                                                                    StripDefectProb   # probability of a strip to be defect
                                                                    ])])
+    NDefectFractionsPerPattern = fractions
 
     if NoiseProb > 0. :
         # strip noise
@@ -126,6 +127,7 @@ def emulateITkStripDefects(flags,
                                                  MaxRandomPositionAttempts=MaxRandomPositionAttempts,
                                                  ModulePatterns=module_pattern,
                                                  DefectProbabilities=module_defect_prob,
+                                                 NDefectFractionsPerPattern = NDefectFractionsPerPattern,
                                                  CornerDefectParamsPerPattern=[],
                                                  NCornerDefectFractionsPerPattern=[],
                                                  RngPerDefectType=RngPerDefectType,

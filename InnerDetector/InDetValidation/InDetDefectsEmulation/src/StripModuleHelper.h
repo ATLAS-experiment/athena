@@ -136,9 +136,9 @@ namespace InDet {
        */
       std::array<unsigned int,4> offlineRange(const std::pair<unsigned int,unsigned int> &range) const {
          if (range.first != range.second) {
-            if (getRow(range.first) !=0) {
-               throw std::runtime_error("invalid key");
-            };
+            // if (getRow(range.first) !=0) {
+            //    throw std::runtime_error("invalid key");
+            // };
 
             std::pair<unsigned int, unsigned int> start=offlineCoordinates(range.first);
             std::pair<unsigned int, unsigned int> end=offlineCoordinates(range.second);
