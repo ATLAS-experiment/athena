@@ -216,11 +216,10 @@ void FPGATrackSimBinnedHits::readLayerMap(const std::string &filename) {
     for (auto &lyrmods : m_lyr_to_mod_map[bin]) {
       ATH_MSG_VERBOSE(" mods: "  << lyrmods);
     } 
-    if (m_nLayers == 0) {
-      m_nLayers = m_lyr_to_mod_map[bin].size();
-    } else if (m_nLayers != m_lyr_to_mod_map[bin].size())  {
-      ATH_MSG_WARNING("Layer map bins have inconsistent numbers of layers: " << m_nLayers << ", " << m_lyr_to_mod_map[bin].size());
+    if (m_nLayers != 0 && m_nLayers != m_lyr_to_mod_map[bin].size())  {
+        ATH_MSG_WARNING("Layer map bins have inconsistent numbers of layers: " << m_nLayers << ", " << m_lyr_to_mod_map[bin].size());
     }
+    m_nLayers = std::max(m_nLayers, static_cast<unsigned>(m_lyr_to_mod_map[bin].size()));
   }
   ATH_MSG_INFO("JSON layer map speficied " << m_nLayers << " layers" );
 }
