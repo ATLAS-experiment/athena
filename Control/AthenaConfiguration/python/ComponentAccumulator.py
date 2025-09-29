@@ -302,14 +302,14 @@ class ComponentAccumulator(AccumulatorCachable):
         def __getHandles(comp):
             io = []
             for i in comp.ExtraInputs:
-                io.append({"type": i.split("#")[0],
-                            "key": i.split("#")[1],
+                io.append({"type": i[0],
+                            "key": i[1],
                             "comp": comp.getFullJobOptName(),
                             "mode":  "R",
                             "prop": "ExtraInputs"})
             for i in comp.ExtraOutputs:
-                io.append({"type": i.split("#")[0],
-                            "key": i.split("#")[1],
+                io.append({"type": i[0],
+                            "key": i[1],
                             "comp": comp.getFullJobOptName(),
                             "mode":  "W",
                             "prop": "ExtraOutputs"})
