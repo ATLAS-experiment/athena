@@ -15,12 +15,10 @@
 
 // Framework include files
 #include "DbContainerObj.h"
-
 #include "POOLCore/DbPrint.h"
 #include "StorageSvc/IOODatabase.h"
 #include "StorageSvc/IDbContainer.h"
 #include "StorageSvc/DbDomain.h"
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"

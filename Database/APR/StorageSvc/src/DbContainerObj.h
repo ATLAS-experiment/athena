@@ -14,7 +14,6 @@
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbContainer.h"

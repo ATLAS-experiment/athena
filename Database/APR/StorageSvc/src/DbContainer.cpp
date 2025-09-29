@@ -15,7 +15,7 @@
 
 // Framework include files
 #include "StorageSvc/DbHeap.h"
-#include "StorageSvc/DbObject.h"
+#include "StorageSvc/DbObjectHandle.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbToken.h"
