@@ -45,3 +45,66 @@ def IDHitAnalysis(flags):
     if flags.Detector.EnableTRT:
         result.merge(TRTHitAnalysisCfg(flags))
     return result
+
+def MuonHitAnalysis(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+    if flags.Muon.usePhaseIIGeoSetup:
+        from HitAnalysis.HitAnalysisConfig import xMuonHitAnalysisCfg
+
+        if flags.Detector.GeometryMDT:
+            result.merge(xMuonHitAnalysisCfg(flags,
+                                             name="MdtSimHitTester",
+                                             InputKey="xMdtSimHits",
+                                             HistPath="xMuonSimHit/MDT/Hits",
+                                             techIndex=0))
+        if flags.Detector.GeometryRPC:
+            result.merge(xMuonHitAnalysisCfg(flags,
+                                             name="RpcSimHitTester",
+                                             InputKey="xRpcSimHits",
+                                             HistPath="xMuonSimHit/RPC/Hits",
+                                             techIndex=2))
+        if flags.Detector.GeometryTGC:
+            result.merge(xMuonHitAnalysisCfg(flags,
+                                             name="TgcSimHitTester",
+                                             InputKey="xTgcSimHits",
+                                             HistPath="xMuonSimHit/TGC/Hits",
+                                             techIndex=3))
+        if flags.Detector.GeometrysTGC:
+            result.merge(xMuonHitAnalysisCfg(flags,
+                                             name="sTgcSimHitTester",
+                                             InputKey="xStgcSimHits",
+                                             HistPath="xMuonSimHit/sTGC/Hits",
+                                             techIndex=4))
+        if flags.Detector.GeometryMM:
+            result.merge(xMuonHitAnalysisCfg(flags,
+                                             name="MmSimHitTester",
+                                             InputKey="xMmSimHits",
+                                             HistPath="xMuonSimHit/MM/Hits",
+                                             techIndex=5))
+        from MuonPRDTestR4.MuonHitTestConfig import MuonHitTesterCfg
+        result.merge(MuonHitTesterCfg(flags, outFile=flags.Output.HISTFileName))
+    else:
+        if flags.Detector.GeometryMDT:
+            from HitAnalysis.HitAnalysisConfig import MDTHitAnalysisCfg
+            result.merge(MDTHitAnalysisCfg(flags))
+        if flags.Detector.GeometryRPC:
+            from HitAnalysis.HitAnalysisConfig import RPCHitAnalysisCfg
+            result.merge(RPCHitAnalysisCfg(flags))
+        if flags.Detector.GeometryTGC:
+            from HitAnalysis.HitAnalysisConfig import TGCHitAnalysisCfg
+            result.merge(TGCHitAnalysisCfg(flags))
+        if flags.Detector.GeometrysTGC:
+            from HitAnalysis.HitAnalysisConfig import sTGCHitAnalysisCfg
+            result.merge(sTGCHitAnalysisCfg(flags))
+        if flags.Detector.GeometryMM:
+            from HitAnalysis.HitAnalysisConfig import MMHitAnalysisCfg
+            result.merge(MMHitAnalysisCfg(flags)) 
+        if flags.Detector.GeometryCSC:
+            from HitAnalysis.HitAnalysisConfig import CSCHitAnalysisCfg
+            result.merge(CSCHitAnalysisCfg(flags))
+        from MuonPRDTest.HitValAlgSim import HitValAlgSimCfg
+        result.merge(HitValAlgSimCfg(flags, outFile=flags.Output.HISTFileName))
+ 
+ 
+    return result
