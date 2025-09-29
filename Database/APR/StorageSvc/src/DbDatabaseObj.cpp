@@ -727,7 +727,7 @@ DbStatus DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
 
       if( cntH.open( dbd, containerName, typ_info, token.technology(), mode() ).isSuccess() )  {
          if ( typ_info && typ_info == shape ) {
-            return DbObjectAccessor::read(object, shape, cntH, oid );
+            return cntH.load(object, shape, oid);
          }
          DbPrint log( name() );
          log << DbPrintLvl::Error << "Token ClassID " << token.classID().toString()

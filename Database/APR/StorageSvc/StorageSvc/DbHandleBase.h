@@ -20,9 +20,6 @@
  */
 namespace pool    {
 
-  // Forward declarations
-  template <class T> class DbHandleBase;
-
   /** @class DbHandleBase DbHandleBase.h StorageSvc/DbHandleBase.h
     *
     * Description:
@@ -40,7 +37,7 @@ namespace pool    {
     /// Data member: Object pointer. Sub-classes need access on re-assignment
     T*                      m_ptr;
     /// Data member: Technology type. Sub-classes need access on re-assignment
-     DbType                  m_type;
+    DbType                  m_type;
 
     /// Standard destructor
     ~DbHandleBase() {  m_type.check();                  }

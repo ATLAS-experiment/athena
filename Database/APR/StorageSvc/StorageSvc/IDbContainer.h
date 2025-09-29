@@ -13,7 +13,7 @@
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/DbObject.h"
+#include "StorageSvc/DbObjectHandle.h"
 #include "StorageSvc/Transaction.h"
 
 #include <vector>
@@ -28,7 +28,6 @@ namespace pool    {
   class DbTypeInfo;
   class DbDatabase;
   class DbContainer;
-  class DataCallBack;
   class DbOption;
   class DbSelect;
 

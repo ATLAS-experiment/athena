@@ -130,11 +130,6 @@ namespace pool  {
                         int bufferSize,
                         int branchOffsetTabLen);
 
-    /// Find entry identified by his number (=primary key) in the Database
-    DbStatus selectRow( const DataCallBack* call,
-                        const Token::OID_t& linkH,
-                        DbAccessMode        mode);
-
     // Routine needed for TRANSACT_FLUSH, if branch is specified by user.
     DbStatus finishTransAct();
 

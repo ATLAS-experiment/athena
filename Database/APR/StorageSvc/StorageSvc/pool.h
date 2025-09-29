@@ -20,35 +20,7 @@
 #include <string>
 #include <utility>
 
-/* Turn this switch if it is possible to agree on a common 
- * base class for all persistent objects.
- */
-//#define POOL_HAVE_BASE
-
-#ifdef POOL_HAVE_BASE
-#define POOL_BASE               : public pool::DbObject
-#define POOL_BASE1(b1)          POOL_BASE, b1
-namespace pool {  class DbObject; }
-#else
-#define POOL_BASE
-#define POOL_BASE1(b1)          : b1
-namespace pool {  typedef void DbObject; }
-
-#endif
-#define POOL_BASE2(b1,b2)       POOL_BASE1(b1), b2
-#define POOL_BASE3(b1,b2,b3)    POOL_BASE2(b1,b2), b3
-#define POOL_BASE4(b1,b2,b3,b4) POOL_BASE3(b1,b2,b3), b4
-
-#define POOL_BEGIN_STATIC_BLOCK(x) namespace { struct __init  {  __init()  {
-#define POOL_END_STATIC_BLOCK(x)   }}; static __init _i;} void* __init_##x ()  {return &_i;}
-
-namespace pool  {
-  // Type defintions and forward declarations
-  typedef int                   DbAccessMode;
-  typedef std::pair< long long, long long > DbLink;
-}
-
-/* namespace poolDb
+/* namespace pool
  *
  *  Description:
  *  All specific constants for a storage technology
@@ -57,7 +29,12 @@ namespace pool  {
  *  @version 1.0
  */
 namespace pool   {
+  // Type defintions and forward declarations
   class DbInstanceCount;
+
+  typedef void DbObject; 
+  typedef int  DbAccessMode;
+  typedef std::pair< long long, long long > DbLink;
 
   static const long long int INVALID = ~0x0LL;
 
