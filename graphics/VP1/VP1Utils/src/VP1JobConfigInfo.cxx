@@ -181,9 +181,12 @@ bool VP1JobConfigInfo::Imp::actualInit( StoreGateSvc* detStore )
 
   while (!av.atEnd()) {
     std::string name = av.getName();
-    if ( !hasPixelGeometry && (name=="Pixel" or name=="ITkPixel")) {
+
+    if ( !hasITkGeometry && name=="ITkPixel") { hasITkGeometry = true; }
+    if ( !hasITkGeometry && name=="ITkStrip") { hasITkGeometry = true; }
+    if ( !hasPixelGeometry && name=="Pixel") {
       hasPixelGeometry = true;
-      if (not hasITkGeometry and name == "ITkPixel")
+      if (not hasITkGeometry and name == "ITkPixel") //TODO: I guess this was to handle temporary configurations, I think it must be removed at some point
         hasITkGeometry = true;
       if ( !hasBCMGeometry ) {
 	    //Loop under the top Pixel volume to check if there are BCM volumes
@@ -198,9 +201,9 @@ bool VP1JobConfigInfo::Imp::actualInit( StoreGateSvc* detStore )
 	    }
       }
     }
-    if ( !hasSCTGeometry && (name=="SCT" or name=="ITkStrip")) {
+    if ( !hasSCTGeometry && name=="SCT" {
       hasSCTGeometry = true;
-      if (not hasITkGeometry and name == "ITkStrip")
+      if (not hasITkGeometry and name == "ITkStrip")//TODO: I guess this was to handle temporary configurations, I think it must be removed at some point
         hasITkGeometry = true;
     }
     if ( !hasTRTGeometry && name=="TRT") hasTRTGeometry = true;
