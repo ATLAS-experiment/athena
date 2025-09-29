@@ -29,16 +29,59 @@ namespace MuonGMR4{
     Chamber::Chamber(defineArgs&& args):
         m_args{std::move(args)} {}
     
+    //Comparison operator for the MuonChambers: 
+    // Legacy & NSW: sorted by StationName
+    // NSW (MM) & NSW (STG) : sorted b Station Name
+    // NSW (MM/STGC) & NSW(MM/STGC) : if they have same eta and phi -> sorted by multilayer (case for large sectors)
+    // small NSW chambers are sorted by phi - all elements in a sector are grouped in the same chamber
     bool Chamber::operator<(const Chamber& other) const {
+
+        
         if (stationName() != other.stationName()) {
                 return stationName() < other.stationName();
         }
-        if (stationEta() != other.stationEta()) {
+
+        if(stationPhi() != other.stationPhi()) {
+            return stationPhi() < other.stationPhi();
+        }
+
+        if(stationEta() != other.stationEta()){
             return stationEta() < other.stationEta();
         }
-        return stationPhi() < other.stationPhi();
+
+        //for NSW order by multilayer for MMLS and STGCs for the large sectors
+        //MMLs and STLs will fall in this case 
+        const Identifier& id = readoutEles().front()->identify();
+        
+        bool isNSW = (idHelperSvc()->isMM(id) || idHelperSvc()->issTgc(id));
+
+        if(isNSW) {
+
+            const Identifier& otherId = other.readoutEles().front()->identify();
+           
+            if (idHelperSvc()->isMM(id)) {
+                return idHelperSvc()->mmIdHelper().multilayer(id) < idHelperSvc()->mmIdHelper().multilayer(otherId);
+            } else {
+                //stgc case
+                return idHelperSvc()->stgcIdHelper().multilayer(id) < idHelperSvc()->stgcIdHelper().multilayer(otherId);
+            }
+
+        }     
+
+        return false;
+
     }
+
     std::string Chamber::identString() const {
+        if(idHelperSvc()->isMM(readoutEles().front()->identify()) ||
+           idHelperSvc()->issTgc(readoutEles().front()->identify()) ) {
+            return std::format("MSchamber {:} eta {:02} phi {:02} ml {:02}",
+                               idHelperSvc()->stationNameString(readoutEles().front()->identify()),
+                               stationEta(), stationPhi(),
+                               idHelperSvc()->isMM(readoutEles().front()->identify()) ?
+                               idHelperSvc()->mmIdHelper().multilayer(readoutEles().front()->identify()) :
+                               idHelperSvc()->stgcIdHelper().multilayer(readoutEles().front()->identify()));
+        }
         return std::format("MS chamber {:} eta {:02} phi {:02}",
                           idHelperSvc()->stationNameString(readoutEles().front()->identify()),
                           stationEta(), stationPhi());        
