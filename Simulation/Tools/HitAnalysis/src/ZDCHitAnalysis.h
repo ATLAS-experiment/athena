@@ -1,60 +1,57 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_HIT_ANALYSIS_H
 #define ZDC_HIT_ANALYSIS_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthHistogramAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
-
-#include <string>
-#include <vector>
-#include "TH1.h"
-#include "TTree.h"
 #include "ZdcIdentifier/ZdcID.h"
+#include "ZDC_SimEvent/ZDC_SimFiberHit_Collection.h"
+#include "CaloSimEvent/CaloCalibrationHitContainer.h"
 
-class TH1;
-class TTree;
 
  
-class ZDCHitAnalysis : public AthAlgorithm {
+class ZDCHitAnalysis : public AthHistogramAlgorithm {
 
  public:
 
-   ZDCHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-   ~ZDCHitAnalysis(){}
+   using AthHistogramAlgorithm::AthHistogramAlgorithm;
+   ~ZDCHitAnalysis() = default;
 
-   virtual StatusCode initialize();
-   virtual StatusCode execute();
+   virtual StatusCode initialize() override;
+   virtual StatusCode execute() override;
 
  private:
 
    /** Some variables**/
-   TH1*  m_h_zdc_photons[2][5] = {{nullptr,nullptr,nullptr,nullptr,nullptr},{nullptr,nullptr,nullptr,nullptr,nullptr}};
-   TH1*  m_h_zdc_calibTot[2][5]= {{nullptr,nullptr,nullptr,nullptr,nullptr},{nullptr,nullptr,nullptr,nullptr,nullptr}};
-   TH1*  m_h_zdc_calibEM[2][5]= {{nullptr,nullptr,nullptr,nullptr,nullptr},{nullptr,nullptr,nullptr,nullptr,nullptr}};
-   TH1*  m_h_zdc_calibNonEM[2][5]= {{nullptr,nullptr,nullptr,nullptr,nullptr},{nullptr,nullptr,nullptr,nullptr,nullptr}};
+   using TH1_Array = std::array<std::array<TH1*, 5>,2>;
+   TH1_Array m_h_zdc_photons{};
+   TH1_Array m_h_zdc_calibTot{};
+   TH1_Array m_h_zdc_calibEM{};
+   TH1_Array m_h_zdc_calibNonEM{};
    
-   std::vector<int>* m_zdc_fiber_side;
-   std::vector<int>* m_zdc_fiber_mod;
-   std::vector<int>* m_zdc_fiber_channel;
-   std::vector<int>* m_zdc_fiber_photons;
+   std::vector<int>* m_zdc_fiber_side{nullptr};
+   std::vector<int>* m_zdc_fiber_mod{nullptr};
+   std::vector<int>* m_zdc_fiber_channel{nullptr};
+   std::vector<int>* m_zdc_fiber_photons{nullptr};
    
-   std::vector<int>* m_zdc_calib_side;
-   std::vector<int>* m_zdc_calib_mod;
-   std::vector<int>* m_zdc_calib_channel;
-   std::vector<float>* m_zdc_calib_Total;
-   std::vector<float>* m_zdc_calib_EM;
-   std::vector<float>* m_zdc_calib_NonEM;
+   std::vector<int>* m_zdc_calib_side{nullptr};
+   std::vector<int>* m_zdc_calib_mod{nullptr};
+   std::vector<int>* m_zdc_calib_channel{nullptr};
+   std::vector<float>* m_zdc_calib_Total{nullptr};
+   std::vector<float>* m_zdc_calib_EM{nullptr};
+   std::vector<float>* m_zdc_calib_NonEM{nullptr};
 
-   TTree * m_tree;
-   std::string m_ntupleFileName; 
-   std::string m_path;
-   ServiceHandle<ITHistSvc>  m_thistSvc;
-   ZdcID *m_ZdcID;
+   TTree * m_tree{nullptr};
+   Gaudi::Property<std::string> m_path{this, "HistPath","/ZDCHitAnalysis/"};
+   Gaudi::Property<std::string> m_ntupleFileName{this, "NtupleFileName","/ZDCHitAnalysis/"}; 
+
+   SG::ReadHandleKey<ZDC_SimFiberHit_Collection> m_readKey{this, "InputKey", "ZDC_SimFiberHit_Collection"};
+   SG::ReadHandleKey<CaloCalibrationHitContainer> m_readCalibKey{this, "InputCalibKey", "ZDC_CalibrationHit"};
+   ZdcID *m_ZdcID{nullptr};
 
 };
 
