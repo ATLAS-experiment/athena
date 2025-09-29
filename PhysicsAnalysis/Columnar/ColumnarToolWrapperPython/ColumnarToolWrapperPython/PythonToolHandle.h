@@ -14,7 +14,7 @@
 #include <AsgTools/ToolHandle.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
-#include <ColumnarToolWrapper/ColumnarToolWrapper.h>
+#include <ColumnarToolWrapper/ToolColumnVectorMap.h>
 #include <PATInterfaces/ISystematicsTool.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <PATInterfaces/SystematicsUtil.h>
@@ -103,8 +103,10 @@ namespace columnar
       }
       if (m_toolWrapper)
       {
-        m_toolWrapper = std::make_shared<ColumnarToolWrapper> (m_tool);
-        m_columns = std::make_unique<ColumnarToolWrapperData> (m_toolWrapper.get());
+        auto columnHeader = std::make_shared<ColumnVectorHeader> ();
+        m_columnHeader = columnHeader;
+        m_toolWrapper = std::make_shared<ToolColumnVectorMap> (*columnHeader, *m_tool);
+        m_columns = std::make_unique<ColumnVectorData> (m_columnHeader.get());
       }
     }
 
@@ -114,8 +116,10 @@ namespace columnar
       if (m_tool == nullptr)
         preinitialize ();
 
-      m_toolWrapper = std::make_shared<ColumnarToolWrapper> (m_tool);
-      m_columns = std::make_unique<ColumnarToolWrapperData> (m_toolWrapper.get());
+      auto columnHeader = std::make_shared<ColumnVectorHeader> ();
+      m_columnHeader = columnHeader;
+      m_toolWrapper = std::make_shared<ToolColumnVectorMap> (*columnHeader, *m_tool);
+      m_columns = std::make_unique<ColumnVectorData> (m_columnHeader.get());
     }
 
     /// set the tool to apply the given systematic variation
@@ -135,21 +139,14 @@ namespace columnar
     {
       if (!m_columns)
         throw std::runtime_error ("tool not initialized");
-      m_columns->setColumn (key, size, dataPtr);
+      m_columns->setColumn (m_toolWrapper->getColumnIndex (key), size, dataPtr);
     }
 
     /// set a column pointer
     void setColumnVoid (const std::string& name, std::size_t size, const void *dataPtr, const std::type_info& type, bool isConst) {
       if (!m_columns)
         throw std::runtime_error ("tool not initialized");
-      m_columns->setColumnVoid (name, size, dataPtr, type, isConst);
-    }
-
-    /// set a column pointer
-    void setColumnNumpy (const std::string& name, std::size_t size, const void *dataPtr, int type, unsigned bits, bool isConst) {
-      if (!m_columns)
-        throw std::runtime_error ("tool not initialized");
-      m_columns->setColumnNumpy (name, size, dataPtr, type, bits, isConst);
+      m_columns->setColumnVoid (m_toolWrapper->getColumnIndex (name), size, dataPtr, type, isConst);
     }
 
     /// call the tool and reset the columns
@@ -157,8 +154,9 @@ namespace columnar
     {
       if (!m_columns)
         throw std::runtime_error ("no columns set");
-      m_columns->call ();
-      m_columns = std::make_unique<ColumnarToolWrapperData> (m_toolWrapper.get());
+      m_columns->checkData ();
+      m_columns->callNoCheck (*m_tool);
+      m_columns = std::make_unique<ColumnVectorData> (m_columnHeader.get());
     }
 
     /// get the expected column info
@@ -166,7 +164,7 @@ namespace columnar
     {
       if (!m_toolWrapper)
         throw std::runtime_error ("tool not initialized");
-      return m_toolWrapper->getColumnInfo ();
+      return m_tool->getColumnInfo ();
     }
 
     /// get the expected column names
@@ -202,7 +200,8 @@ namespace columnar
     IColumnarTool* m_tool = nullptr;
     CP::ISystematicsTool* m_systTool = nullptr;
 
-    std::shared_ptr<const ColumnarToolWrapper> m_toolWrapper;
-    std::unique_ptr<ColumnarToolWrapperData> m_columns;
+    std::shared_ptr<const ColumnVectorHeader> m_columnHeader;
+    std::shared_ptr<const ToolColumnVectorMap> m_toolWrapper;
+    std::unique_ptr<ColumnVectorData> m_columns;
   };
 }
