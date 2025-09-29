@@ -241,6 +241,19 @@ def MMHitAnalysisCfg(flags, name='MMHitAnalysis', **kwargs):
 
     return acc
 
+def xMuonHitAnalysisCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Muon.usePhaseIIGeoSetup:
+        return result
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags))
+    result.addEventAlgo(CompFactory.MuonValR4.xMuonHitAnalysis(**kwargs))
+    histPath = kwargs["HistPath"]
+    result.merge(HitAnalysisOutputCfg(flags, output_name=histPath[ : histPath.rfind("/")]))
+    return result
+
 
 def sTGCHitAnalysisCfg(flags, name='sTGCHitAnalysis', **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg

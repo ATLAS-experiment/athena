@@ -239,13 +239,13 @@ def RDOAnalysisCfg(flags):
             acc.merge(MdtRdoToMdtDigitCfg(flags, MdtRdoContainer =f"{flags.Overlay.BkgPrefix}MDTCSM",
                                                  MdtDigitContainer=f"{flags.Overlay.BkgPrefix}MDT_DIGITS" ))
 
-        acc.merge(MDT_RDOAnalysisCfg(flags))
+        acc.merge(MdtRDOAnalysisCfg(flags))
 
     if flags.Detector.EnableRPC:
         if "RPCPAD" in flags.Input.Collections or f"{flags.Overlay.BkgPrefix}RPCPAD" in flags.Input.Collections:
             from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg
             acc.merge(RpcRdoToRpcDigitCfg(flags))
-        acc.merge(RPC_RDOAnalysisCfg(flags))
+        acc.merge(RpcRDOAnalysisCfg(flags))
 
     if flags.Detector.EnableTGC:
         from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
@@ -254,7 +254,7 @@ def RDOAnalysisCfg(flags):
         elif f"{flags.Overlay.BkgPrefix}TGCRDO" in flags.Input.Collections:
             acc.merge(TgcRdoToTgcDigitCfg(flags,TgcRdoContainer = f"{flags.Overlay.BkgPrefix}TGCRDO",
                                                 TgcDigitContainer=f"{flags.Overlay.BkgPrefix}TGC_DIGITS"))
-        acc.merge(TGC_RDOAnalysisCfg(flags))
+        acc.merge(TgcRDOAnalysisCfg(flags))
 
     if flags.Detector.EnablesTGC:
         from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
@@ -276,8 +276,15 @@ def RDOAnalysisCfg(flags):
             
 
     if flags.Detector.EnableMuon:
-        from MuonPRDTest.MuonPRDTestCfg import AddHitValAlgCfg
-        acc.merge(AddHitValAlgCfg(flags, name = "MuonHitValAlg", outFile=flags.Output.HISTFileName, doSDOs = True, doDigits=True))
+        if not flags.Muon.usePhaseIIGeoSetup:
+            from MuonPRDTest.HitValAlgDigi import HitValAlgDigiCfg
+            acc.merge(HitValAlgDigiCfg(flags, outFile=flags.Output.HISTFileName))
+        else:
+            from MuonPRDTestR4.MuonHitTestConfig import MuonDigiTestCfg, MuonPileUpTestCfg
+            if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+                acc.merge(MuonPileUpTestCfg(flags, outFile=flags.Output.HISTFileName))
+            else:
+                acc.merge(MuonDigiTestCfg(flags, outFile=flags.Output.HISTFileName))
 
     if flags.Detector.EnableITkPixel:
         acc.merge(ITkPixelRDOAnalysisCfg(flags))
@@ -390,66 +397,70 @@ def CSC_RDOAnalysisCfg(flags, name="CSC_RDOAnalysis", **kwargs):
 
     return result
 
+def MuonSDOAnalyisCfg(flags, **kwargs):
+    if flags.Muon.usePhaseIIGeoSetup:
+        from HitAnalysis.HitAnalysisConfig import xMuonHitAnalysisCfg
+        return xMuonHitAnalysisCfg(flags, **kwargs)
+    result = ComponentAccumulator()
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
+    result.addEventAlgo(CompFactory.MuonVal.MuonSDOAnalysis(**kwargs))
+    histPath = kwargs["HistPath"]
+    result.merge(RDOAnalysisOutputCfg(flags, output_name=histPath[ : histPath.rfind("/")]))
+    return result
 
-def MDT_RDOAnalysisCfg(flags, name="MDT_RDOAnalysis", **kwargs):
+def MdtRDOAnalysisCfg(flags, name="MdtRDOAnalysis", **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result = MuonGeoModelCfg(flags)
-
-    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
-    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
-    kwargs.setdefault("NtupleTreeName", "MDT")
-    kwargs.setdefault("HistPath", "/RDOAnalysis/MDT/")
-    prefix=''
-    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
-        prefix=flags.Overlay.BkgPrefix
+    kwargs.setdefault("HistPath", "RDOAnalysis/MDT")
+    prefix= flags.Overlay.BkgPrefix if flags.Common.ProductionStep is ProductionStep.PileUpPresampling else "" 
     kwargs.setdefault("InputKey", f"{prefix}MDTCSM")
-    kwargs.setdefault("InputTruthKey", f"{prefix}MDT_SDO")
-
-    result.addEventAlgo(CompFactory.MDT_RDOAnalysis(name, **kwargs))
-
+    result.addEventAlgo(CompFactory.MuonVal.MdtRDOAnalysis(name, **kwargs))
     result.merge(RDOAnalysisOutputCfg(flags))
-
+    result.merge(MuonSDOAnalyisCfg(flags, name="MdtSDOAnalysis",
+                                          InputKey=f"{prefix}MDT_SDO",
+                                          HistPath="MuonSDOAnalysis/MDT/SDO",
+                                          techIndex=0))
     return result
 
 
-def RPC_RDOAnalysisCfg(flags, name="RPC_RDOAnalysis", **kwargs):
+def RpcRDOAnalysisCfg(flags, name="RPC_RDOAnalysis", **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result = MuonGeoModelCfg(flags)
 
-    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
-    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
-    kwargs.setdefault("NtupleTreeName", "RPC")
-    kwargs.setdefault("HistPath", "/RDOAnalysis/RPC/")
+    kwargs.setdefault("HistPath", "RDOAnalysis/RPC/")
     prefix=''
     if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
         prefix=flags.Overlay.BkgPrefix
-    kwargs.setdefault("InputKey", f"{prefix}RPCPAD")
-    kwargs.setdefault("InputTruthKey", f"{prefix}RPC_SDO")
-
-    result.addEventAlgo(CompFactory.RPC_RDOAnalysis(name, **kwargs))
+    if not flags.Muon.usePhaseIIGeoSetup:
+        kwargs.setdefault("InputPadKey", f"{prefix}RPCPAD" if not flags.Muon.usePhaseIIGeoSetup else "" )
+    from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
+    result.merge(RPCCablingConfigCfg(flags))
+    kwargs.setdefault("InputRdoKey", f"{prefix}NRPCRDO" if flags.Muon.enableNRPC else "" ) 
+    result.addEventAlgo(CompFactory.MuonVal.RpcRDOAnalysis(name, **kwargs))
 
     result.merge(RDOAnalysisOutputCfg(flags))
-
+    result.merge(MuonSDOAnalyisCfg(flags, name="RpcSDOAnalysis",
+                                          InputKey=f"{prefix}RPC_SDO",
+                                          HistPath="MuonSDOAnalysis/RPC/SDO",
+                                          techIndex=2))
     return result
 
 
-def TGC_RDOAnalysisCfg(flags, name="TGC_RDOAnalysis", **kwargs):
+def TgcRDOAnalysisCfg(flags, name="TGC_RDOAnalysis", **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result = MuonGeoModelCfg(flags)
-
-    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
-    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
-    kwargs.setdefault("NtupleTreeName", "TGC")
-    kwargs.setdefault("HistPath", "/RDOAnalysis/TGC/")
+    kwargs.setdefault("HistPath", "RDOAnalysis/TGC/")
     prefix=''
     if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
         prefix=flags.Overlay.BkgPrefix
     kwargs.setdefault("InputKey", f"{prefix}TGCRDO")
-    kwargs.setdefault("InputTruthKey", f"{prefix}TGC_SDO")
-
-    result.addEventAlgo(CompFactory.TGC_RDOAnalysis(name, **kwargs))
-
+    result.addEventAlgo(CompFactory.MuonVal.TgcRDOAnalysis(name, **kwargs))
     result.merge(RDOAnalysisOutputCfg(flags))
+    result.merge(MuonSDOAnalyisCfg(flags, name="TgcSDOAnalysis",
+                                          InputKey=f"{prefix}TGC_SDO",
+                                          HistPath="MuonSDOAnalysis/TGC/SDO",
+                                          techIndex=3))
 
     return result
 
@@ -484,8 +495,11 @@ if __name__ == "__main__":
     if len (args.geoModelFile) > 0:
         flags.GeoModel.SQLiteDB = True
         flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
-    from MuonConfig.MuonConfigUtils import configureCondTag
-    configureCondTag(flags)
+        from MuonGeoModelTestR4.testGeoModel import configureDefaultTagsCfg
+        configureDefaultTagsCfg(flags)
+    else:
+        from MuonConfig.MuonConfigUtils import configureCondTag
+        configureCondTag(flags)
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -496,6 +510,6 @@ if __name__ == "__main__":
 
     cfg.merge(RDOAnalysisCfg(flags))
 
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    if not cfg.run().isSuccess(): exit(1)
-
+    from MuonConfig.MuonConfigUtils import executeTest
+    executeTest(cfg)
+    
