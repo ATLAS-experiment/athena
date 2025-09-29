@@ -134,9 +134,6 @@ def TauRunnerAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0SelectorCfg(flags)) )
 
-    if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
-        tools.append(result.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
-
     if flags.Tau.doPanTau:
         import PanTauAlgs.JobOptions_Main_PanTau as pantau
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
@@ -151,6 +148,8 @@ def TauRunnerAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.TauAODSelectorCfg(flags)) )
 
     # do some extra variable calculation
+    if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
+        tools.append(result.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauCommonCalcVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
   

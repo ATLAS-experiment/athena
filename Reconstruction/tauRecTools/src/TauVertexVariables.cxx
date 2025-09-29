@@ -25,8 +25,7 @@ TauVertexVariables::TauVertexVariables(const std::string &name) :
 // Destructor
 //-----------------------------------------------------------------------------
 
-TauVertexVariables::~TauVertexVariables() {
-}
+TauVertexVariables::~TauVertexVariables() {}
 
 
 //-----------------------------------------------------------------------------
