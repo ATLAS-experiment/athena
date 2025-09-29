@@ -216,7 +216,8 @@ def AddParentAndDownstreamParticlesCfg(flags,
     # Set up a tool to keep the W/Z/H bosons and all downstream particles
     collection_maker = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
                                                                            name                 ='DFCommon'+prefix+'AndDecaysTool',
-                                                                           NewCollectionName    = collection_name,
+                                                                           NewParticleKey = collection_name+'Particles',
+                                                                           NewVertexKey = collection_name+'Vertices',
                                                                            PDGIDsToKeep         = parents,
                                                                            Generations          = generations,
                                                                            RejectHadronChildren = rejectHadronChildren))
@@ -301,11 +302,12 @@ def AddHFAndDownstreamParticlesCfg(flags, **kwargs):
     kwargs.setdefault("prefix",'')
     acc = ComponentAccumulator()
     # Set up a tool to keep b- and c-quarks and all downstream particles
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthDecayCollectionMakerCfg
+    collection_name = kwargs['prefix']+"TruthHFWithDecay"
     DFCommonHFAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(
         flags,
         name=kwargs['prefix']+"DFCommonHFAndDecaysTool",
-        NewCollectionName=kwargs['prefix']+"TruthHFWithDecay",
+        NewParticleKey = collection_name+'Particles',
+        NewVertexKey = collection_name+'Vertices',
         KeepBHadrons=kwargs['addB'],
         KeepCHadrons=kwargs['addC'],
         Generations=kwargs['generations']))
@@ -351,10 +353,11 @@ def AddBSMAndDownstreamParticlesCfg(flags, generations=-1):
     """Add BSM particles and their downstream particles in a special collection"""
     acc = ComponentAccumulator()
     # Set up a tool to keep the taus and all downstream particles
-     
+    collection_name = "TruthBSMWithDecay"
     DFCommonBSMAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
                                                                                    name              = "DFCommonBSMAndDecaysTool",
-                                                                                   NewCollectionName = "TruthBSMWithDecay",
+                                                                                   NewParticleKey = collection_name+'Particles',
+                                                                                   NewVertexKey = collection_name+'Vertices',
                                                                                    KeepBSM           = True,
                                                                                    Generations       = generations))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
