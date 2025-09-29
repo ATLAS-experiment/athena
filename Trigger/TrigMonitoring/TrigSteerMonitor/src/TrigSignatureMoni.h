@@ -17,10 +17,10 @@
 #include "TimeDivider.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaKernel/AlgorithmTimer.h"
 #include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/LockedHandle.h"
+#include "Gaudi/Utils/PeriodicAction.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigConfData/HLTMenu.h"
 #include "TrigConfData/L1Menu.h"
@@ -63,7 +63,7 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
     LockedHandle<TH2>& getBuffer ATLAS_NOT_CONST_THREAD_SAFE () const;
 
     // Get rate histogram timer pointer
-    std::unique_ptr<Athena::AlgorithmTimer>& getTimer();
+    std::unique_ptr<Gaudi::Utils::PeriodicAction>& getTimer();
 
     // Start the histogram timer with given duration and intervals
     void startTimer(unsigned int duration, unsigned int intervals);
@@ -84,7 +84,7 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
     mutable LockedHandle<TH2> m_bufferHistogram ATLAS_THREAD_SAFE;
     mutable LockedHandle<TH2> m_histogram ATLAS_THREAD_SAFE;
     std::mutex m_mutex;
-    std::unique_ptr<Athena::AlgorithmTimer> m_timer;
+    std::unique_ptr<Gaudi::Utils::PeriodicAction> m_timer;
     std::unique_ptr<TimeDivider> m_timeDivider;
     unsigned int m_duration{0};
   };

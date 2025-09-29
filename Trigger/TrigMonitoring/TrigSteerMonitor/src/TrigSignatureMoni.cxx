@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <regex>
 #include <format>
+#include <chrono>
 
 /// Default bin numbers
 enum BINS {
@@ -513,7 +514,7 @@ LockedHandle<TH2> & TrigSignatureMoni::RateHistogram::getBuffer ATLAS_NOT_CONST_
   return m_bufferHistogram;
 }
 
-std::unique_ptr<Athena::AlgorithmTimer> & TrigSignatureMoni::RateHistogram::getTimer() {
+std::unique_ptr<Gaudi::Utils::PeriodicAction> & TrigSignatureMoni::RateHistogram::getTimer() {
   return m_timer;
 }
 
@@ -524,7 +525,9 @@ void TrigSignatureMoni::RateHistogram::fill(const double x, const double y) cons
 void TrigSignatureMoni::RateHistogram::startTimer(unsigned int duration, unsigned int intervals) {
   m_duration = duration;
   m_timeDivider = std::make_unique<TimeDivider>(intervals, duration, TimeDivider::seconds);
-  m_timer = std::make_unique<Athena::AlgorithmTimer>(duration*50, std::bind(&RateHistogram::callback, this));
+  // Periodic timer with 1/20 of the integration period
+  m_timer = std::make_unique<Gaudi::Utils::PeriodicAction>(std::bind(&RateHistogram::callback, this),
+                                                           std::chrono::milliseconds(duration*1000/20));
 }
 
 void TrigSignatureMoni::RateHistogram::stopTimer() {
@@ -550,11 +553,7 @@ void TrigSignatureMoni::RateHistogram::callback() {
   time_t t = time(0);
   unsigned int newinterval;
   unsigned int oldinterval;
-
   if (m_timeDivider->isPassed(t, newinterval, oldinterval)) {
     updatePublished(m_duration);
   }
-
-  // Schedule itself in another 1/20 of the integration period in milliseconds
-  if (m_timer) m_timer->start(m_duration*50);
 }
