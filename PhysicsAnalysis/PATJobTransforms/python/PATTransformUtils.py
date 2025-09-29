@@ -32,10 +32,10 @@ def addNTUPMergeSubsteps(executorSet, skip_post_processing=False):
     intermediateStep = 'NTUP_PHYSVAL_MRG0'
     try:
         if skip_post_processing:
-            msg.info("User requested to SKIP post-processing ('--skipPostProcessing' [%s]), so we'll just do merging and skip running post-processing.", skip_post_processing)
+            msg.debug("User requested to SKIP post-processing ('--skipPostProcessing' [%s]), so we'll just do merging and skip running post-processing.", skip_post_processing)
             out_data = ['NTUP_PHYSVAL_MRG']
         else:
-            msg.info("We'll run merging and post-processing (implemented for ID track monitoring, EGamma, and BTagging).")
+            msg.debug("We'll run merging and post-processing (implemented for ID track monitoring, EGamma, and BTagging).")
             out_data = [intermediateStep]
 
         executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVAL', exe='hadd', inData=['NTUP_PHYSVAL'], outData=out_data, exeArgs=[]))
