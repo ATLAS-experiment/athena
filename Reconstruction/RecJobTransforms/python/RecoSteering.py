@@ -39,11 +39,6 @@ def RecoSteering(flags):
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
         acc.merge(GEN_AOD2xAODCfg(flags))
         log.info("---------- Configured AODtoxAOD Truth Conversion")
-        # copy background vertex collection to AOD
-        if flags.Overlay.DataOverlay:
-            from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-            acc.merge(addToAOD(flags, [f'xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices',
-                f'xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z']))
 
         # We always want to write pileup truth jets to AOD,
         # irrespective of whether we write jets to AOD in general
