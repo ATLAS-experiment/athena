@@ -8,17 +8,17 @@
 #include <EventBookkeeperTools/FilterReporter.h>
 #include <xAODCutFlow/CutBookkeeper.h>
 
-#include "AllExecutedEventsCounterAlg.h"
+#include "AllWrittenEventsCounterAlg.h"
 
 
-AllExecutedEventsCounterAlg::AllExecutedEventsCounterAlg(const std::string& name,
-                                                         ISvcLocator* pSvcLocator)
+AllWrittenEventsCounterAlg::AllWrittenEventsCounterAlg(const std::string& name,
+                                                       ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
 {
 }
 
 
-StatusCode AllExecutedEventsCounterAlg::initialize ATLAS_NOT_THREAD_SAFE ()
+StatusCode AllWrittenEventsCounterAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_DEBUG("Initializing " << this->name() << "...");
 
@@ -26,7 +26,7 @@ StatusCode AllExecutedEventsCounterAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 
   m_filterParams.cutFlowSvc()->registerTopFilter(m_filterParams.key(),
                                                  m_filterParams.description(),
-                                                 xAOD::CutBookkeeper::CutLogic::ALLEVENTSPROCESSED,
+                                                 xAOD::CutBookkeeper::CutLogic::ALLEVENTSWRITTEN,
                                                  "AllStreams",
                                                  false);
 
@@ -34,7 +34,7 @@ StatusCode AllExecutedEventsCounterAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 }
 
 
-StatusCode AllExecutedEventsCounterAlg::execute(const EventContext& ctx) const
+StatusCode AllWrittenEventsCounterAlg::execute(const EventContext& ctx) const
 {
   FilterReporter filter(m_filterParams, true, ctx);
 
@@ -42,7 +42,7 @@ StatusCode AllExecutedEventsCounterAlg::execute(const EventContext& ctx) const
 }
 
 
-StatusCode AllExecutedEventsCounterAlg::finalize()
+StatusCode AllWrittenEventsCounterAlg::finalize()
 {
   ATH_MSG_DEBUG("Finalizing " << this->name() << "...");
 
