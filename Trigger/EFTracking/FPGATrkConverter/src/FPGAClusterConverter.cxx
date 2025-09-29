@@ -537,37 +537,37 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   float phiWidth = h.getPhiWidth();
   int strip = static_cast<int>(h.getPhiIndex());
   ATH_CHECK(strip >= 0);
-  const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
-  ATH_CHECK(pDE != nullptr);
+  const InDetDD::SiDetectorElement* sDE = m_SCTManager->getDetectorElement(hash);
+  ATH_CHECK(sDE != nullptr);
 
   Identifier wafer_id = m_SCTId->wafer_id(hash);
   Identifier strip_id = m_SCTId->strip_id(wafer_id, strip);
-  InDetDD::SiCellId cell =  pDE->cellIdFromIdentifier(strip_id);
+  InDetDD::SiCellId cell =  sDE->cellIdFromIdentifier(strip_id);
   ATH_MSG_DEBUG("\t\tcell: " << cell);
   ATH_MSG_DEBUG("\t\tstrip_id " << strip_id);
   ATH_MSG_DEBUG("\t\tstrip: " << cell);
   ATH_MSG_DEBUG("\t\tStrip from idHelper: " << m_SCTId->strip(strip_id) );
 
   const InDetDD::SCT_ModuleSideDesign* design; 
-  if (pDE->isBarrel()){ 
-    design = (static_cast<const InDetDD::SCT_ModuleSideDesign*>(&pDE->design())); 
+  if (sDE->isBarrel()){ 
+    design = (static_cast<const InDetDD::SCT_ModuleSideDesign*>(&sDE->design())); 
   } else{ 
-    design = (static_cast<const InDetDD::StripStereoAnnulusDesign*>(&pDE->design())); 
+    design = (static_cast<const InDetDD::StripStereoAnnulusDesign*>(&sDE->design())); 
   }  
 
   const int firstStrip = m_SCTId->strip(rdoList.front());
   const int lastStrip = m_SCTId->strip(rdoList.back());
   const int row = m_SCTId->row(rdoList.front());
-  const int firstStrip1D = design->strip1Dim (firstStrip, row );
-  const int lastStrip1D = design->strip1Dim( lastStrip, row );
+  const int firstStrip1D = design->strip1Dim (firstStrip, row);
+  const int lastStrip1D = design->strip1Dim(lastStrip, row);
   const InDetDD::SiCellId cell1(firstStrip1D);
   const InDetDD::SiCellId cell2(lastStrip1D);
   if (cell2 != design->cellIdInRange(cell2) || cell1 != design->cellIdInRange(cell1)) { // this seems to solve EFTRACK-743
     ATH_MSG_WARNING("Cell ID out of range. Skip making this Strip cluster");
     return StatusCode::SUCCESS;
   }
-  const InDetDD::SiLocalPosition firstStripPos( pDE->rawLocalPositionOfCell(cell1 ));
-  const InDetDD::SiLocalPosition lastStripPos( pDE->rawLocalPositionOfCell(cell2) );
+  const InDetDD::SiLocalPosition firstStripPos( sDE->rawLocalPositionOfCell(cell1 ));
+  const InDetDD::SiLocalPosition lastStripPos( sDE->rawLocalPositionOfCell(cell2) );
   const InDetDD::SiLocalPosition centre( (firstStripPos+lastStripPos) * 0.5 );
   const double width = design->stripPitch() * ( lastStrip - firstStrip + 1 );
 
@@ -597,14 +597,41 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   Eigen::Matrix<float,1,1> localCovariance;
   localCovariance.setZero();
 
-  if (pDE->isBarrel()) {
+  if (sDE->isBarrel()) {
     localPosition(0, 0) = localPos.x();
-    localCovariance(0, 0) = pDE->phiPitch() * pDE->phiPitch() * (1./12.);
-  } else {
-    InDetDD::SiCellId cellId = pDE->cellIdOfPosition(localPos);
-    const InDetDD::StripStereoAnnulusDesign *designNew = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&pDE->design());
-    if ( designNew == nullptr ) return StatusCode::FAILURE;
-    InDetDD::SiLocalPosition localInPolar = designNew->localPositionOfCellPC(cellId);
+    localCovariance(0, 0) = sDE->phiPitch() * sDE->phiPitch() * (1. / 12.);
+  }
+  else {
+    InDetDD::SiCellId cellId = sDE->cellIdOfPosition(localPos);
+    const InDetDD::StripStereoAnnulusDesign* designNew = dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&sDE->design());
+    
+    if (!cellId.isValid() || cellId != designNew->cellIdInRange(cellId)) {
+      std::ostringstream msg;
+      msg << "Original cellId: " << cellId << " (strip=" << cellId.strip() << ")\n";
+      msg << "Cell ID invalid or out of range. Resetting to the closest cell of the active area.\n";
+      const InDetDD::SiCellId minCell = InDetDD::SiCellId(0); // get the first cell of the module
+      const Amg::Vector2D localPosMin = sDE->rawLocalPositionOfCell(minCell); // get raw local coordinates in Vector2D of the first cell
+      const InDetDD::SiCellId maxCell = InDetDD::SiCellId(designNew->cells() - 1); // get the last cell of the module
+      const Amg::Vector2D localPosMax = sDE->rawLocalPositionOfCell(maxCell); // get raw local coordinates in Vector2D of the last cell
+      msg << "Active area boundaries [eta,phi]: min [" << localPosMin.x() << ", " << localPosMin.y() << "] , " <<
+                                               "max [" << localPosMax.x() << ", " << localPosMax.y() << "]\n";
+      msg << "Compared to localPos of invalid cell: [" << localPos.x() << ", " << localPos.y() << "]\n";
+
+      // find the closest cell of the active area and assign it to cellId
+      // this ignores the Lorentz corrections but re-positions the cluster within the active area
+      if (std::abs(localPos[Trk::locR] - localPosMin[Trk::locR]) < std::abs(localPos[Trk::locR] - localPosMax[Trk::locR])) {
+        // this check should suffice instead of something like the following:
+        // (std::sqrt(std::pow(localPos.x() - localPosMin.x(), 2) + std::pow(localPos.y() - localPosMin.y(), 2)) <
+        // std::sqrt(std::pow(localPos.x() - localPosMax.x(), 2) + std::pow(localPos.y() - localPosMax.y(), 2)))
+        msg << "   \\___ resetting to minCell [" << localPosMin.x() << ", " << localPosMin.y() << "]";
+        cellId = minCell;
+      } else {
+        msg << "   \\___ resetting to maxCell [" << localPosMax.x() << ", " << localPosMax.y() << "]";
+        cellId = maxCell;
+      }
+      ATH_MSG_WARNING(msg.str());
+    }
+    InDetDD::SiLocalPosition localInPolar = designNew->localPositionOfCell(cellId);
     localPosition(0, 0) = localInPolar.xPhi();
     localCovariance(0, 0) = designNew->phiPitchPhi() * designNew->phiPitchPhi() * (1./12.);
   }
@@ -816,14 +843,14 @@ StatusCode FPGAClusterConverter::getStripsInfo(const xAOD::StripCluster& cl, flo
   const int &strip = m_SCTId->strip(cl.rdoList().front());
   const IdentifierHash &hash = cl.identifierHash();
 
-  const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
+  const InDetDD::SiDetectorElement* sDE = m_SCTManager->getDetectorElement(hash);
 
   const Identifier &wafer_id = m_SCTId->wafer_id(hash);
   const Identifier &strip_id = m_SCTId->strip_id(wafer_id, strip);
-  const InDetDD::SiCellId & cell =  pDE->cellIdFromIdentifier(strip_id);
+  const InDetDD::SiCellId & cell =  sDE->cellIdFromIdentifier(strip_id);
 
-  const InDetDD::SiLocalPosition localPos( pDE->rawLocalPositionOfCell(cell ));
-  std::pair<Amg::Vector3D, Amg::Vector3D> end = (pDE->endsOfStrip(localPos));
+  const InDetDD::SiLocalPosition localPos( sDE->rawLocalPositionOfCell(cell ));
+  std::pair<Amg::Vector3D, Amg::Vector3D> end = (sDE->endsOfStrip(localPos));
   stripCenter = 0.5 * (end.first + end.second);
   Amg::Vector3D stripDir = end.first - end.second;
   
