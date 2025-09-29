@@ -22,8 +22,8 @@ L1CaloHVCorrectionsForDB::L1CaloHVCorrectionsForDB(const std::string& name, ISvc
     m_caloCellContainerName("AllCalo"),
     m_ttTool("LVL1::L1TriggerTowerTool/L1TriggerTowerTool"),
     m_jmTools("LVL1::L1CaloOfflineTriggerTowerTools/L1CaloOfflineTriggerTowerTools", this),
-    m_rxLayersContainer(0),
-    m_hvCorrectionsContainer(0),
+    m_rxLayersContainer(nullptr),
+    m_hvCorrectionsContainer(nullptr),
     m_firstEvent(true)
 {
     declareProperty("TriggerTowerCollectionName", m_triggerTowerCollectionName);
