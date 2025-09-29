@@ -111,7 +111,19 @@ def _muonSegmentInputsExist(flags):
     if "MuonSegments" in flags.Input.Collections:
         return True, warning
     if isAnalysisRelease():
-        # reco flags don't exist in analysis relase
+        # reco flags don't exist in analysis release
+        return False, warning
+    return flags.Reco.EnableCombinedMuon, warning
+
+def _unassocMuonSegmentInputsExist(flags):
+    warning = "UnAssociated muon segments not present"
+    if flags.Input.RunNumbers[0] < 410000:
+        # Unassociated containers only exist from Run 3 and mc23 onwards
+        return False, warning
+    if "UnAssocMuonSegments" in flags.Input.Collections:
+        return True, warning
+    if isAnalysisRelease():
+        # reco flags don't exist in analysis release
         return False, warning
     return flags.Reco.EnableCombinedMuon, warning
 
@@ -262,6 +274,11 @@ _stdInputList = [
     JetInputExternal("MuonSegments", "MuonSegment", algoBuilder=standardReco("Muons"),
                      prereqs = [inputsFromContext("Tracks")], # most likely wrong : what exactly do we need to build muon segments ?? (and not necessarily full muons ...)
                      filterfn = _muonSegmentInputsExist
+                     ),
+
+    JetInputExternal("UnAssocMuonSegments", "UnAssocMuonSegment", algoBuilder=standardReco("Muons"),
+                     prereqs = [inputsFromContext("Tracks")],
+                     filterfn = _unassocMuonSegmentInputsExist
                      ),
 
 
@@ -470,6 +487,8 @@ _stdSeqList = [
     # *****************************
     # Muon segments. Only used as ghosts
     JetInputConstit("MuonSegment", "MuonSegment", "MuonSegments",                    ),
+    # In Run 3, the MuonSegment container is split into associated and unassociated segments
+    JetInputConstit("UnAssocMuonSegment", "UnAssocMuonSegment", "UnAssocMuonSegments", ),
 
     # *****************************
     # VR track jets as ghosts for large-R jets

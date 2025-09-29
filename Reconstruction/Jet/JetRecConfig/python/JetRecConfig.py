@@ -403,7 +403,7 @@ def getGhostPJGAlg(ghostdef, parentjetdef = None):
     )
 
     pjaclass = CompFactory.PseudoJetAlgorithm
-    if ghostdef.basetype=="MuonSegment":
+    if ghostdef.basetype=="MuonSegment" or ghostdef.basetype=="UnAssocMuonSegment":
         # Muon segments have a specialised type
         pjaclass = CompFactory.MuonSegmentPseudoJetAlgorithm
         kwargs.update( Pt =1e-20 ) # ??,)
