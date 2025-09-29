@@ -773,7 +773,7 @@ namespace ActsTrk
           const Acts::DetectorElementBase*detector_element = surface.associatedDetectorElement();
           if (detector_element) {
             ++counter.n_detector_elements;
-            const ActsDetectorElement *acts_detector_element = dynamic_cast<const ActsDetectorElement*>(detector_element);
+            const ActsDetectorElement *acts_detector_element = static_cast<const ActsDetectorElement*>(detector_element);
             if (!det_el_status->isGood( acts_detector_element->identifyHash() )) {
               ActsTrk::detail::MeasurementRange old_range = measurements.markSurfaceInsensitive(surface_ptr->geometryId());
               if (!old_range.empty()) {
@@ -846,7 +846,7 @@ struct Collector {
       return;
     }
 
-    assert(result == nullptr && "Result type is nullptr");
+    assert(result != nullptr && "Result type is nullptr");
 
     if (currentSurface->associatedDetectorElement() != nullptr) {
       const auto* detElem = dynamic_cast<const ActsDetectorElement*>(currentSurface->associatedDetectorElement());

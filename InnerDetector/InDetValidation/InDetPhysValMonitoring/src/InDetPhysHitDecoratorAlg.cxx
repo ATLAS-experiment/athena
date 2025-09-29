@@ -138,9 +138,9 @@ InDetPhysHitDecoratorAlg::decorateTrack(const xAOD::TrackParticle &particle,
                                       float, float, // track angle in local module frame and associated eta
                                       float, float, uint64_t>; // measurement covariance local X, measurement covariance local Y, surface identifier
     using TrackResult_t = std::vector<SingleResult_t>;
-    const float invalidFloat(-1.);
-    const int invalidInteger(-1);
-    const uint64_t invalidID(0);
+    constexpr float invalidFloat(-1.);
+    constexpr int invalidInteger(-1);
+    constexpr uint64_t invalidID(0);
     const SingleResult_t invalidResult = std::make_tuple(invalidInteger, invalidInteger, invalidInteger,
                                                          invalidFloat, invalidFloat, invalidFloat, invalidFloat,
                                                          invalidInteger, invalidInteger, invalidInteger,
@@ -279,46 +279,45 @@ InDetPhysHitDecoratorAlg::decorateTrack(const xAOD::TrackParticle &particle,
                 if (hit && isUnbiased) {
                     // Cluster width determination
                     if ((det == L0PIXBARR)or(det == PIXEL) or(det == SCT)) {
-                        const InDet::SiCluster* pCluster = dynamic_cast <const InDet::SiCluster*>(hit->prepRawData());
-                        if (pCluster) {
-                            InDet::SiWidth width = pCluster->width();
-                            phiWidth = int(width.colRow().x());
-                            etaWidth = int(width.colRow().y());
+                        assert(dynamic_cast <const InDet::SiCluster*>(hit->prepRawData())!=nullptr);
+                        const InDet::SiCluster* pCluster = static_cast <const InDet::SiCluster*>(hit->prepRawData());
+                        InDet::SiWidth width = pCluster->width();
+                        phiWidth = int(width.colRow().x());
+                        etaWidth = int(width.colRow().y());
 
-                            // get candidate track angle in module local frame
-                            Amg::Vector3D my_track = trackParameters->momentum();
-                            const InDetDD::SiDetectorElement* element = pCluster->detectorElement();
-                            Amg::Vector3D my_normal = element->normal();
-                            Amg::Vector3D my_phiax = element->phiAxis();
-                            Amg::Vector3D my_etaax = element->etaAxis();
-                            float trkphicomp = my_track.dot(my_phiax);
-                            float trketacomp = my_track.dot(my_etaax);
-                            float trknormcomp = my_track.dot(my_normal);
-                            double bowphi = atan2(trkphicomp,trknormcomp);
-                            double boweta = atan2(trketacomp,trknormcomp);
+                        // get candidate track angle in module local frame
+                        Amg::Vector3D my_track = trackParameters->momentum();
+                        const InDetDD::SiDetectorElement* element = pCluster->detectorElement();
+                        Amg::Vector3D my_normal = element->normal();
+                        Amg::Vector3D my_phiax = element->phiAxis();
+                        Amg::Vector3D my_etaax = element->etaAxis();
+                        double trkphicomp = my_track.dot(my_phiax);
+                        double trketacomp = my_track.dot(my_etaax);
+                        double trknormcomp = my_track.dot(my_normal);
+                        double bowphi = std::atan2(trkphicomp,trknormcomp);
+                        double boweta = std::atan2(trketacomp,trknormcomp);
 
-                            float tanl = m_lorentzAngleTool->getTanLorentzAngle(element->identifyHash(), Gaudi::Hive::currentContext());
-                            int readoutside = element->design().readoutSide();
+                        double tanl = m_lorentzAngleTool->getTanLorentzAngle(element->identifyHash(), Gaudi::Hive::currentContext());
+                        int readoutside = element->design().readoutSide();
 
-                            // map the angles of inward-going tracks onto [-PI/2, PI/2]
-                            if(bowphi > M_PI/2) bowphi -= M_PI;
-                            if(bowphi < -M_PI/2) bowphi += M_PI;
+                        // map the angles of inward-going tracks onto [-PI/2, PI/2]
+                        if(bowphi > M_PI/2) bowphi -= M_PI;
+                        if(bowphi < -M_PI/2) bowphi += M_PI;
 
-                            // finally, subtract the Lorentz angle effect
-                            // the readoutside term is needed because of a bug in old
-                            // geometry versions (CSC-01-* and CSC-02-*)
-                            angle = atan(tan(bowphi)-readoutside*tanl);
+                        // finally, subtract the Lorentz angle effect
+                        // the readoutside term is needed because of a bug in old
+                        // geometry versions (CSC-01-* and CSC-02-*)
+                        angle = std::atan(std::tan(bowphi)-readoutside*tanl);
 
-                            double thetaloc=-999.;
-                            if(boweta > -0.5*M_PI && boweta < M_PI/2.) {
-                                thetaloc = M_PI/2.-boweta;
-                            } else if(boweta > M_PI/2. && boweta < M_PI) {
-                                thetaloc = 1.5*M_PI-boweta;
-                            } else { // 3rd quadrant
-                                thetaloc = -0.5*M_PI-boweta;
-                            }
-                            etaloc = -1*log(tan(thetaloc/2.));
+                        double thetaloc=-999.;
+                        if(boweta > -0.5*M_PI && boweta < M_PI/2.) {
+                            thetaloc = M_PI/2.-boweta;
+                        } else if(boweta > M_PI/2. && boweta < M_PI) {
+                            thetaloc = 1.5*M_PI-boweta;
+                        } else { // 3rd quadrant
+                            thetaloc = -0.5*M_PI-boweta;
                         }
+                        etaloc = -1*log(tan(thetaloc/2.));
                     }
                     ATH_MSG_VERBOSE("hit and isUnbiased ok");
                 }
