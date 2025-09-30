@@ -79,7 +79,7 @@ GetNewDaughter( std::string name_ )
   MiniConfigTreeNode* node = new MiniConfigTreeNode( name_, this );
   node->SetAttribKeywordPropagateDown(this->m_propagateDown);
   NodeMap_t::value_type nodeVal( name_, node );
-  m_daughters.insert( nodeVal );
+  m_daughters.insert( std::move(nodeVal) );
   return node;
 }
 
@@ -139,7 +139,7 @@ MiniConfigTreeNode::
 SetAttribute( const std::string & attName, const std::string & attValue, bool isAttribKeyword )
 {
     AttMap_t::value_type attMapVal( attName, AttMap_t::mapped_type(attValue, isAttribKeyword) );
-  m_attributes.insert( attMapVal );
+  m_attributes.insert( std::move(attMapVal) );
 }
 
 
@@ -186,7 +186,7 @@ GetAttributeNames( std::set<std::string>& attSet, bool calledFromDaughter ) cons
     if (calledFromDaughter && ! m_propagateDown && i->second.second) {
     } else {
       std::set<std::string>::value_type setVal( i->first );
-      attSet.insert( setVal );
+      attSet.insert( std::move(setVal) );
     }
   }
 }
@@ -199,7 +199,7 @@ GetAttributeNamesLocal( std::set<std::string>& attSet ) const
   AttIter_t attEnd = m_attributes.end();
   for( AttIter_t i = m_attributes.begin(); i != attEnd; ++i ) {
     std::set<std::string>::value_type setVal( i->first );
-    attSet.insert( setVal );
+    attSet.insert( std::move(setVal) );
   }
 }
 

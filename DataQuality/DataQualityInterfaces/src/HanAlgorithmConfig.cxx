@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -100,7 +100,7 @@ CopyAlgConfig( const HanConfigAssessor& hca )
   while( (par = dynamic_cast<HanConfigAlgPar*>( nextPar() )) != 0 ) {
     parName = std::string( par->GetName() );
     ParsVal_t parMapVal( parName, par->GetValue() );
-    m_parameters.insert( parMapVal );
+    m_parameters.insert( std::move(parMapVal) );
   }
   TIter nextStrPar( hca.GetAllAlgStrPars() );
   HanConfigParMap* strPar;
@@ -114,9 +114,9 @@ CopyAlgConfig( const HanConfigAssessor& hca )
   while( (lim = dynamic_cast<HanConfigAlgLimit*>( nextLim() )) != 0 ) {
     limName = std::string( lim->GetName() );
     ThrVal_t greenMapVal( limName, lim->GetGreen() );
-    m_green_thresholds.insert( greenMapVal );
+    m_green_thresholds.insert( std::move(greenMapVal) );
     ThrVal_t redMapVal( limName, lim->GetRed() );
-    m_red_thresholds.insert( redMapVal );
+    m_red_thresholds.insert( std::move(redMapVal) );
   }
   
   std::string refName( hca.GetAlgRefName() );

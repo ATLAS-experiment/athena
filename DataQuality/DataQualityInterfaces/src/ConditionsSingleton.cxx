@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/ConditionsSingleton.h"
@@ -105,10 +105,10 @@ namespace dqi{
       // for(std::set<std::string>::iterator it=referenceSet.begin();it!=referenceSet.end();++it){
       // 	refs.push_back(*it);
       // }
-      if(!defaultRef.empty())refs.push_back(defaultRef);
+      if(!defaultRef.empty())refs.push_back(std::move(defaultRef));
       return refs;
     }else{
-      refs.push_back(inp);
+      refs.push_back(std::move(inp));
       return refs;
     }
   }

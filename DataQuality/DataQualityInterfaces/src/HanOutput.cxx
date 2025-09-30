@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanOutput.h"
@@ -137,10 +137,10 @@ namespace dqi
     }
 
     DQParMap_t::value_type dqParVal(name, region);
-    m_dqPars.insert(dqParVal);
+    m_dqPars.insert(std::move(dqParVal));
 
     DQRegMap_t::value_type dqRegVal(region, name);
-    m_dqRegs.insert(dqRegVal);
+    m_dqRegs.insert(std::move(dqRegVal));
 
     m_unpublishedDQPars.insert(name);
   }
@@ -197,7 +197,7 @@ namespace dqi
 
           std::string parentName = parent->getName();
           // just remove, don't delete
-          dynamic_cast<TSeqCollection*>((*m_outputMap)[parentName])->Remove(resultList);
+          static_cast<TSeqCollection*>((*m_outputMap)[parentName])->Remove(resultList);
         }
       }
     }
