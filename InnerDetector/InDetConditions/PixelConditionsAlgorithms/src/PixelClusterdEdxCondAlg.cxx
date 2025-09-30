@@ -28,7 +28,7 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
 
   SG::WriteCondHandle<PixelClusterdEdxCondData> writeHandle(m_writeKey, ctx); 
   if (writeHandle.isValid()) {
-    ATH_MSG_INFO("CondHandle " << writeHandle.fullKey() << " is already valid. In theory this should not be called, but may happen if multiple concurrent events are being processed out of order.");
+    ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid. In theory this should not be called, but may happen if multiple concurrent events are being processed out of order.");
     return StatusCode::SUCCESS;
   }
   
@@ -42,7 +42,7 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
   // Construct the output Cond Object and fill it in
   std::unique_ptr<PixelClusterdEdxCondData> writeCdo(std::make_unique<PixelClusterdEdxCondData>());
   if (m_configFlag == false) { //If configuration flag is set to false, do nothing
-    ATH_MSG_INFO("Turned off Pixel cluster dEdx equalization, the default behavior is to apply 1.0 as a scale factor");
+    ATH_MSG_DEBUG("Turned off Pixel cluster dEdx equalization, the default behavior is to apply 1.0 as a scale factor");
     writeCdo->setConfig(false);
   }
   else {
@@ -79,7 +79,7 @@ StatusCode PixelClusterdEdxCondAlg::execute(const EventContext& ctx) const {
           int module_key = std::atoi(module_key_str.c_str());
           IdentifierHash wafer_hashID(module_key); 
           if (!wafer_hashID.is_valid()) {
-            ATH_MSG_FATAL("INVALID HASH ID FOR PIXEL CLUSTER DEDX CALIBRATION");
+            ATH_MSG_FATAL("Invalid hash ID for Pixel cluster dEdx calibration ");
             return StatusCode::FAILURE;
             }
           float scale_factor = objPair.value();

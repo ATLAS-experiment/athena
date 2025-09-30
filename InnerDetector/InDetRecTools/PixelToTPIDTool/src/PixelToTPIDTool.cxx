@@ -129,20 +129,12 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           float cosalpha =
             fabs(dotProd / (*tsosIter)->trackParameters()->momentum().mag());
 
-          ATH_MSG_INFO("Rebecca - Testing pixel hash structure");
           int phi_module = m_pixelid->phi_module(pixclus->identify());
-          ATH_MSG_INFO("Here are the cluster Pixel wafer values (bec, layer, phi, eta): " << bec << " "
-                                                                               << layer << " " 
-                                                                               << phi_module << " " <<
-                                                                                eta_module);
-          
           Identifier idWafer = m_pixelid->wafer_id(bec,layer,phi_module,eta_module,true);
           IdentifierHash idHash = m_pixelid->wafer_hash(idWafer); 
-          ATH_MSG_INFO("This should be the wafer ID HASH: " << idHash);
 
           if (std::abs(cosalpha)<0.16) { continue; }
           float scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getScaleFactor(idHash);
-          ATH_MSG_INFO("Here is the assosciated scale factor: " << scaleFactor);
           float charge=pixclus->prepRawData()->totalCharge()*cosalpha*scaleFactor;
 
           //keep track if this is an ibl cluster with overflow
