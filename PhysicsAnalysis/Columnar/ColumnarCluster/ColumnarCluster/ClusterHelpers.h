@@ -80,6 +80,34 @@ namespace columnar
         return xAOD::CaloClusterDetails::etaBE(sample, samplingPattern, m_eAcc(object), m_etaAcc(object));
       }
     };
+
+
+
+    template<ContainerIdConcept CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
+    class PhiBEAccessor final
+    {
+      ColumnAccessor<CI,std::vector<float>,CM> m_eAcc;
+      ColumnAccessor<CI,std::vector<float>,CM> m_phiAcc;
+      ColumnAccessor<CI,uint32_t,CM> m_samplingPatternAcc;
+
+    public:
+
+      typedef CaloSampling::CaloSample CaloSample;
+
+      PhiBEAccessor (ColumnarTool<CM>& columnarTool)
+        : m_eAcc (columnarTool, "e_sampl"), m_phiAcc (columnarTool, "phi_sampl"), m_samplingPatternAcc (columnarTool, "samplingPattern") {}
+
+      float operator () (ObjectId<CI,CM> object, const unsigned sample) const
+      {
+        // Newer xAODs have the sampling pattern as an auxiliary
+        // variable which is what we are using by default.  For older
+        // xAODs we fall back to the xAOD-only implementation, and hope
+        // that we are not in columnar mode.
+        const auto samplingPattern = m_samplingPatternAcc.isAvailable(object) ? m_samplingPatternAcc(object) : object.getXAODObject().samplingPattern();
+
+        return xAOD::CaloClusterDetails::phiBE(sample, samplingPattern, m_eAcc(object), m_phiAcc(object));
+      }
+    };
   }
 }
 
