@@ -107,19 +107,19 @@ namespace TrackingUtilities {
     return StatusCode::SUCCESS;
   }
 
- std::pair<xAOD::MeasVector<1>, xAOD::MeasMatrix<1>> convertSCT_LocalPosCov(const InDet::SCT_Cluster &cluster) {
+ std::pair<xAOD::MeasVector<1>, xAOD::MeasMatrix<1>> convertSCT_LocalPosCov(const InDet::SCT_Cluster &cluster, bool isITk) {
     const InDetDD::SiDetectorElement& element{*cluster.detectorElement()};
     auto localPos = cluster.localPosition();
 
     float localPosition = 0.f, localCovariance = 0.f;
-    if (element.isBarrel()) {
+    if (element.isBarrel() or (not isITk)) {
       localPosition = localPos.x();
       localCovariance = element.phiPitch() * element.phiPitch() * one_over_twelve;
     } else {
       InDetDD::SiCellId cellId = element.cellIdOfPosition(localPos);
       const auto* design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element.design());
       if ( design == nullptr ) {
-         THROW_EXCEPTION("Invalid bounds from "<<cluster);
+        THROW_EXCEPTION("Invalid bounds from "<<cluster);
       }
       InDetDD::SiLocalPosition localInPolar = design->localPositionOfCellPC(cellId);
       localPosition = localInPolar.xPhi();
@@ -132,11 +132,12 @@ namespace TrackingUtilities {
 
   StatusCode convertInDetToXaodCluster(const InDet::SCT_Cluster& indetCluster,
 				       const InDetDD::SiDetectorElement& element,
-				       xAOD::StripCluster& xaodCluster)
+				       xAOD::StripCluster& xaodCluster,
+               bool isITk)
   {
     IdentifierHash idHash = element.identifyHash();
 
-    const auto [localPosition, localCovariance] = convertSCT_LocalPosCov(indetCluster);
+    const auto [localPosition, localCovariance] = convertSCT_LocalPosCov(indetCluster, isITk);
    
     auto globalPos = indetCluster.globalPosition();
     Eigen::Matrix<float, 3, 1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z());

@@ -152,8 +152,8 @@ StripClusteringTool::makeClusters(const EventContext& ctx,
     const InDetDD::SiDetectorDesign& design = element.design();
     // get the pitch, this will be the local covariance for the cluster
 
-    assert( element.isBarrel() ||  dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&element.design()) !=nullptr);
-    float pitch = element.isBarrel()
+    assert((not m_isITk) || element.isBarrel() ||  dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&element.design()) !=nullptr);
+    float pitch = (element.isBarrel() or (not m_isITk))
       ? design.phiPitch()
       : static_cast<const InDetDD::StripStereoAnnulusDesign&>(element.design()).phiPitchPhi();
     Eigen::Matrix<float,1,1> localCov(pitch * pitch * ONE_TWELFTH);
@@ -192,7 +192,8 @@ computePosition(const StripClusteringTool::Cluster& cluster,
 		double lorentzShift,
 		const IStripClusteringTool::IDHelper& stripID,
 		const InDetDD::SiDetectorElement& element,
-		const InDetDD::SiDetectorDesign& design)
+		const InDetDD::SiDetectorDesign& design,
+		bool isITk )
 {
 
     Identifier ids_front(cluster.ids.front());
@@ -210,7 +211,7 @@ computePosition(const StripClusteringTool::Cluster& cluster,
     pos.xPhi( pos.xPhi() + lorentzShift );
     Eigen::Matrix<float,3,1> posG(element.surface().localToGlobal(pos).cast<float>());
     
-    if (!element.isBarrel()) {
+    if ((not element.isBarrel()) and isITk) {
     	assert(dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&design) != nullptr);
 	const InDetDD::StripStereoAnnulusDesign& annulusDesign =
 	    static_cast<const InDetDD::StripStereoAnnulusDesign&>
@@ -236,7 +237,7 @@ StripClusteringTool::makeCluster(Cluster &cluster,
     std::size_t size = cluster.ids.size();
     
     auto [localPos, globalPos]
-      = computePosition(cluster, size, lorentzShift, stripID, element, design);
+      = computePosition(cluster, size, lorentzShift, stripID, element, design, m_isITk);
 
     // For Strip Clusters the identifier is taken from the front rod list object
     // This is the same strategy used in Athena:
