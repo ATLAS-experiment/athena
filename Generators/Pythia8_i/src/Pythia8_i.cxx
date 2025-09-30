@@ -8,7 +8,7 @@
 
 #include "GeneratorObjects/McEventCollection.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
+#include <charconv>
 
 // calls to fortran routines
 #include "AthenaKernel/RNGWrapper.h"
@@ -271,7 +271,11 @@ StatusCode Pythia8_i::genInitialize() {
 
     for(std::vector<std::string>::const_iterator sId = resonanceIds.begin();
         sId != resonanceIds.end(); ++sId){
-      int idResIn = boost::lexical_cast<int>(*sId);
+      int idResIn = 0;
+      auto result = std::from_chars(sId->data(), sId->data() + sId->size(), idResIn);
+      if (result.ec != std::errc()) {
+          ATH_MSG_ERROR("Invalid resonance ID: " + *sId);
+      }
       m_userResonancePtrs.push_back(Pythia8_UserResonance::UserResonanceFactory::create(resonanceArgs.front(), idResIn));
     }
 

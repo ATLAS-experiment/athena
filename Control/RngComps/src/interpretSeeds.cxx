@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <boost/lexical_cast.hpp>
+#include <charconv>
+#include <iostream>
 #include <boost/tokenizer.hpp>
 
 #include "interpretSeeds.h"
@@ -11,8 +12,14 @@
 inline
 void getLuxury( boost::tokenizer<boost::char_separator<char> >::iterator& token, short& luxLevel) {
   if ((*token) == "LUXURY") {
-    luxLevel = boost::lexical_cast<uint32_t>(*(++token));
-    ++token; 
+     ++token;
+     uint32_t parsedValue = 0;
+     auto result = std::from_chars(token->data(), token->data() + token->size(), parsedValue);
+     if (result.ec != std::errc()) {
+       std::cerr << "Parsing error in function getLuxury." << std::endl;
+     }
+     luxLevel = parsedValue;
+     ++token;
   }
 }
 
@@ -20,8 +27,14 @@ void getLuxury( boost::tokenizer<boost::char_separator<char> >::iterator& token,
 inline
 void getOffset( boost::tokenizer<boost::char_separator<char> >::iterator& token, uint32_t& offset) {
   if ((*token) == "OFFSET") {
-    offset = boost::lexical_cast<uint32_t>(*(++token));
-    ++token; 
+     ++token;
+     uint32_t parsedValue = 0;
+     auto result = std::from_chars(token->data(), token->data() + token->size(), parsedValue);
+     if (result.ec != std::errc()) {
+       std::cerr << "Parsing error in function getOffset." << std::endl;
+     }
+     offset = parsedValue;
+     ++token;
   }
 }
 
@@ -41,18 +54,11 @@ bool interpretSeeds(const std::string& buffer,
     getOffset(token, offset);
     getLuxury(token, luxury);
     getOffset(token, offset);
-
-    try {
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-      seed1 = boost::lexical_cast<uint32_t>(*token++);
-      seed2 = boost::lexical_cast<uint32_t>(*token++);
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-    } catch (const boost::bad_lexical_cast& e) {
+    auto [ptr1, ec1] = std::from_chars(token->data(), token->data() + token->size(), seed1);
+    ++token;
+    auto [ptr2, ec2] = std::from_chars(token->data(), token->data() + token->size(), seed2);
+    ++token;
+    if (ec1 != std::errc() || ec2 != std::errc()) {
       status = false;
     }
   }
@@ -72,21 +78,17 @@ bool interpretSeeds(const std::string& buffer,
     tokenizer::iterator token(tokens.begin());
     stream = *token++;
     --nToks;
-    try {
-      if (nToks == 32) nToks=30; //ranlux (FIXME NEEDED?)
-      for (int i=0; i<nToks; i++) {
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-	seeds.push_back(boost::lexical_cast<uint32_t>(*token++));
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
+    if (nToks == 32) nToks=30; //ranlux (FIXME NEEDED?)
+    for (int i=0; i<nToks; i++) {
+      uint32_t value = 0;
+      auto [ptr, ec] = std::from_chars(token->data(), token->data() + token->size(), value);
+      if (ec != std::errc()) {
+        status = false;
+        break;
       }
-    } catch (const boost::bad_lexical_cast& e) {
-      status = false;
+      seeds.push_back(value);
+      ++token;
     }
-  }
+  }  
   return status;
 }
