@@ -5,56 +5,45 @@
 #ifndef sTGC_HIT_ANALYSIS_H
 #define sTGC_HIT_ANALYSIS_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
-
-#include <string>
-#include <vector>
-#include "TH1.h"
-#include "TH2.h"
-#include "TTree.h"
+#include "MuonSimEvent/sTGCSimHitCollection.h"
+#include "StoreGate/ReadHandleKey.h"
 
 
-
-class TH1;
-class TH2;
-class TTree;
-
-class sTGCHitAnalysis : public AthAlgorithm {
+class sTGCHitAnalysis : public AthHistogramAlgorithm {
 
  public:
 
-  sTGCHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-  ~sTGCHitAnalysis(){}
 
-  virtual StatusCode initialize();
-  virtual StatusCode execute();
+  using AthHistogramAlgorithm::AthHistogramAlgorithm;
+  ~sTGCHitAnalysis() = default;
+
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
 
  private:
 
   /** Some variables**/
 
-  TH2 *m_h_S_rz_A;
-  TH2 *m_h_S_rz_C;
-  TH2 *m_h_S_xy_A;
-  TH2 *m_h_S_xy_C;
-  TH2 *m_h_L_rz_A;
-  TH2 *m_h_L_rz_C;
-  TH2 *m_h_L_xy_A;
-  TH2 *m_h_L_xy_C;
-  TH2 *m_h_rz_A;
-  TH2 *m_h_rz_C;
-  TH2 *m_h_xy_A;
-  TH2 *m_h_xy_C;
-  TH1 *m_h_r_A;
-  TH1 *m_h_r_C;
+  TH2 *m_h_S_rz_A{nullptr};
+  TH2 *m_h_S_rz_C{nullptr};
+  TH2 *m_h_S_xy_A{nullptr};
+  TH2 *m_h_S_xy_C{nullptr};
+  TH2 *m_h_L_rz_A{nullptr};
+  TH2 *m_h_L_rz_C{nullptr};
+  TH2 *m_h_L_xy_A{nullptr};
+  TH2 *m_h_L_xy_C{nullptr};
+  TH2 *m_h_rz_A{nullptr};
+  TH2 *m_h_rz_C{nullptr};
+  TH2 *m_h_xy_A{nullptr};
+  TH2 *m_h_xy_C{nullptr};
+  TH1 *m_h_r_A{nullptr};
+  TH1 *m_h_r_C{nullptr};
 
-  std::string m_ntupleFileName;
+  SG::ReadHandleKey<sTGCSimHitCollection> m_readKey{this,  "InputKey", "sTGC_Hits"};
+  Gaudi::Property<std::string> m_path{this, "HistPath", "/sTGCHitAnalysis/"};
 
-  std::string m_path;
-  ServiceHandle<ITHistSvc>  m_thistSvc;
 
 };
 
