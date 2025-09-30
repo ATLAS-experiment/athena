@@ -632,39 +632,9 @@ namespace xAOD {
   }
 
  float CaloCluster_v1::phiBE(const unsigned sample) const {
-    if (sample>3) {return -999;}
-    const CaloSample barrelSample=(CaloSample)(CaloSampling::PreSamplerB+sample);
-    const CaloSample endcapSample=(CaloSample)(CaloSampling::PreSamplerE+sample);
-    const bool haveBarrel=this->hasSampling(barrelSample);
-    const bool haveEndcap=this->hasSampling(endcapSample);
-    if (haveBarrel && haveEndcap) {
-      //cluster spans barren and endcap
-       float eBarrel=eSample(barrelSample);  //Check for errorcode? Should not happen...
-       float eEndcap=eSample(endcapSample);
-       float eSum=eBarrel+eEndcap;
-       float phiBarrel=phiSample(barrelSample);
-       float phiEndcap=phiSample(endcapSample);
-       if (eSum != 0.0) {
-	 if ((eBarrel > 0 && eEndcap > 0) || (eBarrel < 0 && eEndcap < 0)) {
-	   float phiSum = eSum * phiBarrel + eEndcap * CaloPhiRange::diff(phiEndcap, phiBarrel);
-	   return CaloPhiRange::fix(phiSum / eSum);
-	 } else if (eBarrel > 0)
-	   return phiBarrel;
-	 else
-	   return phiEndcap;
-       }
-       // energy==0 case, should never happen
-       return CaloPhiRange::fix(0.5 * (phiBarrel + phiEndcap));
-    }
-    if  (haveBarrel) {
-      return phiSample(barrelSample);
-    }
-    if (haveEndcap) {
-      return phiSample(endcapSample);
-    }
-
-    //Should never reach this point ...
-    return -999;
+    static const Accessor< std::vector <float > > eAcc("e_sampl");
+    static const Accessor< std::vector <float > > phiAcc("phi_sampl");
+    return CaloClusterDetails::phiBE(sample,m_samplingPattern,eAcc(*this),phiAcc(*this));
   }
 
 

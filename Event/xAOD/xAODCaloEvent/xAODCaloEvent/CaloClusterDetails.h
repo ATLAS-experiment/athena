@@ -5,6 +5,7 @@
 #ifndef XAODCALOEVENT_CALOCLUSTERDETAILS_H
 #define XAODCALOEVENT_CALOCLUSTERDETAILS_H
 
+#include <CaloGeoHelpers/CaloPhiRange.h>
 #include <CaloGeoHelpers/CaloSampling.h>
 #include <bit>
 #include <cstdint>
@@ -135,6 +136,44 @@ namespace xAOD
         return getSamplVar(endcapSample,samplingPattern,eta_sampl);
       }
   
+      //Should never reach this point ...
+      return defaultErrorValue;
+    }
+
+
+
+    [[nodiscard]] inline float phiBE(const unsigned sample, const std::uint32_t samplingPattern, const std::span<const float> e_sampl, const std::span<const float> phi_sampl) {
+      if (sample>3) {return defaultErrorValue;}
+      const CaloSample barrelSample=(CaloSample)(CaloSampling::PreSamplerB+sample);
+      const CaloSample endcapSample=(CaloSample)(CaloSampling::PreSamplerE+sample);
+      const bool haveBarrel=hasSampling(barrelSample, samplingPattern);
+      const bool haveEndcap=hasSampling(endcapSample, samplingPattern);
+      if (haveBarrel && haveEndcap) {
+        //cluster spans barren and endcap
+        float eBarrel=getSamplVar(barrelSample, samplingPattern, e_sampl);  //Check for errorcode? Should not happen...
+        float eEndcap=getSamplVar(endcapSample, samplingPattern, e_sampl);
+        float eSum=eBarrel+eEndcap;
+        float phiBarrel=getSamplVar(barrelSample, samplingPattern, phi_sampl);
+        float phiEndcap=getSamplVar(endcapSample, samplingPattern, phi_sampl);
+        if (eSum != 0.0) {
+          if ((eBarrel > 0 && eEndcap > 0) || (eBarrel < 0 && eEndcap < 0)) {
+            float phiSum = eSum * phiBarrel + eEndcap * CaloPhiRange::diff(phiEndcap, phiBarrel);
+            return CaloPhiRange::fix(phiSum / eSum);
+          } else if (eBarrel > 0)
+            return phiBarrel;
+          else
+            return phiEndcap;
+        }
+        // energy==0 case, should never happen
+        return CaloPhiRange::fix(0.5 * (phiBarrel + phiEndcap));
+      }
+      if  (haveBarrel) {
+        return getSamplVar(barrelSample, samplingPattern, phi_sampl);
+      }
+      if (haveEndcap) {
+        return getSamplVar(endcapSample, samplingPattern, phi_sampl);
+      }
+
       //Should never reach this point ...
       return defaultErrorValue;
     }
