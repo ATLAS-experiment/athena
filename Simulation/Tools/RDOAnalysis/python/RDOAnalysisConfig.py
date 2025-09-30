@@ -417,10 +417,11 @@ def MdtRDOAnalysisCfg(flags, name="MdtRDOAnalysis", **kwargs):
     kwargs.setdefault("InputKey", f"{prefix}MDTCSM")
     result.addEventAlgo(CompFactory.MuonVal.MdtRDOAnalysis(name, **kwargs))
     result.merge(RDOAnalysisOutputCfg(flags))
+    from ROOT.Muon.MuonStationIndex import TechnologyIndex
     result.merge(MuonSDOAnalyisCfg(flags, name="MdtSDOAnalysis",
                                           InputKey=f"{prefix}MDT_SDO",
                                           HistPath="MuonSDOAnalysis/MDT/SDO",
-                                          techIndex=0))
+                                          techIndex=TechnologyIndex.MDT))
     return result
 
 
@@ -440,10 +441,11 @@ def RpcRDOAnalysisCfg(flags, name="RPC_RDOAnalysis", **kwargs):
     result.addEventAlgo(CompFactory.MuonVal.RpcRDOAnalysis(name, **kwargs))
 
     result.merge(RDOAnalysisOutputCfg(flags))
+    from ROOT.Muon.MuonStationIndex import TechnologyIndex
     result.merge(MuonSDOAnalyisCfg(flags, name="RpcSDOAnalysis",
                                           InputKey=f"{prefix}RPC_SDO",
                                           HistPath="MuonSDOAnalysis/RPC/SDO",
-                                          techIndex=2))
+                                          techIndex=TechnologyIndex.RPC))
     return result
 
 
@@ -457,10 +459,11 @@ def TgcRDOAnalysisCfg(flags, name="TGC_RDOAnalysis", **kwargs):
     kwargs.setdefault("InputKey", f"{prefix}TGCRDO")
     result.addEventAlgo(CompFactory.MuonVal.TgcRDOAnalysis(name, **kwargs))
     result.merge(RDOAnalysisOutputCfg(flags))
+    from ROOT.Muon.MuonStationIndex import TechnologyIndex
     result.merge(MuonSDOAnalyisCfg(flags, name="TgcSDOAnalysis",
                                           InputKey=f"{prefix}TGC_SDO",
                                           HistPath="MuonSDOAnalysis/TGC/SDO",
-                                          techIndex=3))
+                                          techIndex=TechnologyIndex.TGC))
 
     return result
 
