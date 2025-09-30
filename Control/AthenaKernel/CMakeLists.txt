@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaKernel )
@@ -140,10 +140,6 @@ atlas_add_test( ThinningInfo_test
 atlas_add_test( getThinningCache_test
   SOURCES test/getThinningCache_test.cxx
   LINK_LIBRARIES AthenaKernel TestTools )
-
-atlas_add_test( AlgorithmTimer_test
-  SOURCES test/AlgorithmTimer_test.cxx
-  LINK_LIBRARIES AthenaKernel )
 
 atlas_add_test( ILockableTool_test
   SOURCES test/ILockableTool_test.cxx
