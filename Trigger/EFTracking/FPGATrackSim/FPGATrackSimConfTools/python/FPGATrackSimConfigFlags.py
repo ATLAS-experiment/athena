@@ -404,6 +404,7 @@ class moduleMapFunc(FlagEnum):
 
 class roadMakerTool(FlagEnum):
     ConnectedComponents = 'ConnectedComponents'
+    JunctionAwareCC = 'JunctionAwareCC'
 
 def createGNNFPGATrackSimConfigFlags():
     cf = createBasicFPGATrackSimConfigFlags()

@@ -23,12 +23,16 @@
 #include "FPGATrackSimObjects/FPGATrackSimGNNEdge.h"
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
+#include <boost/graph/breadth_first_search.hpp>
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 
 #include <memory>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <set>
+
+typedef boost::graph_traits<boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS>>::vertex_descriptor Vertex;
 
 class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
 {
@@ -74,10 +78,10 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
         std::set<int> m_unique_nodes{};
         std::map<int, int> m_node_index_map{};
         std::vector<int> m_unique_indices{};
-        typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> m_Graph;
-        std::vector<int> m_component{};
+        std::vector<int> m_control_var{};
+        std::vector<std::vector<int>> m_component{};
         int m_num_components = 0;
-        std::vector<int> m_labels{};
+        std::vector<std::vector<int>> m_labels{};
         std::vector<std::vector<int>> m_road_hit_list{};
         const std::vector<short>* m_pix_h2l{nullptr};
         const std::vector<TrigInDetSiLayer>* m_layerGeometry{nullptr};
@@ -87,12 +91,14 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
 
         void doScoreCut(const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
         void doConnectedComponents();
+        void doJunctionAwareCC();
         void addRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, 
                       const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, 
                       std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads);
         void addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<int>& road_hitIDs);
         void addRoadForPixelSeed(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<int>& road_hitIDs);
         void resetVectors();
+        void reorderIndices();
 
         ///////////////////////////////////////////////////////////////////////
         // Event Storage
@@ -100,5 +106,29 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
         std::vector<FPGATrackSimRoad> m_roads{};
 };
 
+///////////////////////////////////////////////////////////////////////
+// Helper: Junctoin Aware BFS visitor
+class JunctionAwareVisitor : public boost::default_bfs_visitor
+{
+    public:
+        JunctionAwareVisitor(int& current, std::vector<int>& in_control_vars, std::vector<std::vector<int>>& in_comps,
+                             const boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS>& in_graph,
+                             std::unordered_map<Vertex, std::vector<Vertex>>& in_pred_map);
+
+        template <typename VertexT, typename GraphT>
+            void discover_vertex(VertexT v, const GraphT& g);
+
+        template <typename EdgeT, typename GraphT>
+            void examine_edge(EdgeT e, const GraphT& g);
+
+    private:
+        int& m_current_comp;
+        std::vector<int>& m_control_vars;
+        std::vector<std::vector<int>>& m_components;
+        const boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS>& m_graph;
+        std::unordered_map<Vertex, std::vector<Vertex>>& m_pred_map;
+        int m_initial_comp;
+        int m_n_iter = 1;
+};
 
 #endif // FPGATrackSimGNNRoadMakerTool_H
