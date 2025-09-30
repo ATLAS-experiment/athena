@@ -232,7 +232,7 @@ namespace MuonValR4{
                     }
                     m_histos[h].h_localHitZ->Fill(hit->localPosition().z());
                     m_histos[h].h_globHitXY->Fill(globPos.x(), globPos.y());
-                    m_histos[h].h_globHitRZ->Fill(globPos.perp(), globPos.y());
+                    m_histos[h].h_globHitRZ->Fill(globPos.perp(), globPos.z());
                 }
             }
         } while(viewer.next());

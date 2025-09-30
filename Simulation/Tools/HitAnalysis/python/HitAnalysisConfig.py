@@ -173,6 +173,7 @@ def CaloHitAnalysisCfg(flags, name='CaloHitAnalysis', **kwargs):
     if flags.Detector.GeometryLAr:
         from LArGeoAlgsNV.LArGMConfig import LArGMCfg
         acc.merge(LArGMCfg(flags))
+        acc.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
     kwargs.setdefault("UseLAr", flags.Detector.GeometryLAr)
 
     if flags.Detector.GeometryTile:
@@ -180,7 +181,9 @@ def CaloHitAnalysisCfg(flags, name='CaloHitAnalysis', **kwargs):
         acc.merge(TileGMCfg(flags))
     kwargs.setdefault("UseTile", flags.Detector.GeometryTile)
 
-    kwargs.setdefault('HistPath', f'/{name}/')
+    kwargs.setdefault('HistPath', f'/{name}/histos/Calo/')
+    kwargs.setdefault('NtupleFileName', f'/{name}/ntuples/')
+
     acc.addEventAlgo(CompFactory.CaloHitAnalysis(name, **kwargs))
     acc.merge(HitAnalysisOutputCfg(flags, output_name=name))
     return acc
@@ -251,7 +254,7 @@ def xMuonHitAnalysisCfg(flags, **kwargs):
     result.merge(ActsGeometryContextAlgCfg(flags))
     result.addEventAlgo(CompFactory.MuonValR4.xMuonHitAnalysis(**kwargs))
     histPath = kwargs["HistPath"]
-    result.merge(HitAnalysisOutputCfg(flags, output_name=histPath[ : histPath.rfind("/")]))
+    result.merge(HitAnalysisOutputCfg(flags, output_name=histPath[ : histPath.find("/")]))
     return result
 
 
@@ -310,8 +313,8 @@ def ZDCHitAnalysisCfg(flags, name='ZDCHitAnalysis', **kwargs):
 #Truth
 def TrackRecordAnalysisCfg(flags, name='TrackRecordAnalysis', **kwargs):
     acc = ComponentAccumulator()
-
-    kwargs.setdefault('HistPath', f'/{name}/')
+    kwargs.setdefault('HistPath', f'/{name}/histos/TrackRecord/')
+    kwargs.setdefault('NtupleFileName', f'/{name}/ntuples/')  
     acc.addEventAlgo(CompFactory.TrackRecordAnalysis(name, **kwargs))
     acc.merge(HitAnalysisOutputCfg(flags, output_name="TrackRecordAnalysis"))
 
@@ -321,7 +324,8 @@ def TrackRecordAnalysisCfg(flags, name='TrackRecordAnalysis', **kwargs):
 def TruthHitAnalysisCfg(flags, name='TruthHitAnalysis', **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault('HistPath', f'/{name}/')
+    kwargs.setdefault('HistPath', f'/{name}/histos/TruthHits/')
+    kwargs.setdefault('NtupleFileName', f'/{name}/ntuples/')    
     acc.addEventAlgo(CompFactory.TruthHitAnalysis(name, **kwargs))
     acc.merge(HitAnalysisOutputCfg(flags, output_name="TruthHitAnalysis"))
 
