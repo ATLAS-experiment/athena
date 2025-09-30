@@ -6,7 +6,7 @@
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/CollectionBaseNames.h"
-#include "CollectionBase/boost_tokenizer_headers.h"
+#include <boost/tokenizer.hpp>
 
 #include "FileCatalog/IFileCatalog.h"
 
