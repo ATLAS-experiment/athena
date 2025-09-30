@@ -41,7 +41,7 @@ def GfexInputMonitoringConfig(flags):
 
     helper.defineTree('LBN,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEt,RefTowerEt,TowerSaturationflag,RefTowerSat;errors',
                       "lbn/I:error/string:eventNumber/l:id/i:eta/F:phi/F:et/I:ref_et/I:sat/B:ref_sat/B",
-                      title="errors tree;LBN;Error",fillGroup="errors")
+                      title="errors tree;LBN;Error",fillGroup="errors",cutmask='FillTree')
 
     # histograms of gFex tower variables
     helper.defineHistogram('LBN,NGfexTowers;h_LBN_vs_nGfexTowers', title='Number of gFex towers in each event with Et > 10 GeV (MLE > 1662);LBN; gTowers per event; Number of events',

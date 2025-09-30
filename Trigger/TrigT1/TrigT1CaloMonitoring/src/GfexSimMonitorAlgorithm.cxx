@@ -115,6 +115,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 	auto Signature = Monitored::Scalar<std::string>("Signature",label);
 	auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
 	auto simReady = Monitored::Scalar<bool>("SimulationReady",simReadyFlag);
+	auto FillTree = Monitored::Scalar<bool>("FillTree",true);
 
 	//sorting mismatched data/sim TOB
     std::set<const xAOD::gFexJetRoI*> mismatchedTOBs;
@@ -201,17 +202,17 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 		}*/
         tobMismatched=100;
         auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
-		fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,l1id,evtNumber,dtobEtas,dtobPhis,dtobEts,dtobWord0s,stobEtas,stobPhis,stobEts,stobWord0s,Signature,simReady,eventType);		
+		fill("jet_mismatches",FillTree,simReadyMismatch,tobMismatched,lbn,lbnString,l1id,evtNumber,dtobEtas,dtobPhis,dtobEts,dtobWord0s,stobEtas,stobPhis,stobEts,stobWord0s,Signature,simReady,eventType);		
 		if (label=="gJ" || label=="gLJ") {
             auto locIdx = Monitored::Scalar<std::string>("locIdx","");
 			for(auto tob : DataMismatchedTOBs) {
 				locIdx = std::to_string(tob->iEta()) + ":" + std::to_string(tob->iPhi());
-                fill("mismatches"+label,lbn,locIdx); //only recording data eta,phi vs LBN
+                fill("mismatches"+label,FillTree,lbn,locIdx); //only recording data eta,phi vs LBN
 			}
 		}
 	} else {
         tobMismatched=0;
-        fill("mismatches",lbn,Signature,tobMismatched,simReady,eventType);
+        fill("jet_mismatches",lbn,Signature,tobMismatched,simReady,eventType);
     }
 
 	return !mismatchedTOBs.empty();
@@ -235,6 +236,7 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 	auto eventType = Monitored::Scalar<std::string>("EventType","DataTowers"); // always have data towers
 	auto Signature = Monitored::Scalar<std::string>("Signature",label);
 	auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
+	auto FillTree = Monitored::Scalar<bool>("FillTree",true);
 
 
 	bool mismatches = (tobs1Cont->size()!=tobs2Cont->size());
@@ -289,10 +291,10 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
         tobMismatched=100;
 		
         auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",false/* global RoI not sim ready yet*/);
-        fill("mismatches",simReadyMismatch,lbn,lbnString,evtNumber,l1id,dtobMet1,dtobMet2,dtobWord0s,stobMet1,stobMet2,stobWord0s,Signature,tobMismatched,eventType);
+        fill("global_mismatches",FillTree,simReadyMismatch,lbn,lbnString,evtNumber,l1id,dtobMet1,dtobMet2,dtobWord0s,stobMet1,stobMet2,stobWord0s,Signature,tobMismatched,eventType);
 	} else {
         tobMismatched=0;
-        fill("mismatches",lbn,Signature,tobMismatched,eventType);
+        fill("global_mismatches",lbn,Signature,tobMismatched,eventType);
     }
 
 
