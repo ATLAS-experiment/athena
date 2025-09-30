@@ -54,18 +54,18 @@ namespace GlobalSim {
     }
 
     auto h_towerTOBs = SG::makeHandle(m_gblCellTowers, ctx);
-    auto towers = std::make_unique<GenericTobContainer>();
+    auto towers = std::make_unique<IOBitwise::CommonTOBContainer>();
     towers->reserve(nEta * nPhi);
 
     for (int etaBin = 0; etaBin < nEta; ++etaBin) {
         for (int phiBin = 0; phiBin < nPhi; ++phiBin) {
 
            if (towerEnergies[etaBin][phiBin] == 0) continue;
-           int energyBits = std::clamp(static_cast<int>(towerEnergies[etaBin][phiBin]), 0, (1 << 13) - 1);
+           int energyBits = std::clamp(static_cast<int>(towerEnergies[etaBin][phiBin]), 0, (1 << IOBitwise::CommonTOB::s_et_width) - 1);
 
-           std::string bit_string = makeTowerBits(energyBits, etaBin, phiBin);
-
-           towers->emplace_back(std::make_shared<GenericTob>(bit_string));
+           towers->emplace_back(std::make_shared<IOBitwise::CommonTOB>(std::bitset<IOBitwise::CommonTOB::s_et_width>(energyBits),
+								       std::bitset<IOBitwise::CommonTOB::s_eta_width>(etaBin),
+								       std::bitset<IOBitwise::CommonTOB::s_phi_width>(phiBin)));
         }
     }
 
@@ -75,16 +75,6 @@ namespace GlobalSim {
 
     return StatusCode::SUCCESS;
   }
-
-
-  // Function which assembles the TOB bitstream for a tower
-  std::string GlobalCellTowerAlgTool::makeTowerBits(int energy, int etaBin, int phiBin) {
-      return GlobalCellTowerAlgTool::toBinary(energy, 13) +
-          GlobalCellTowerAlgTool::toBinary(etaBin, 9) +
-          GlobalCellTowerAlgTool::toBinary(phiBin, 7) +
-          std::string(3, '0');
-  }
-
 
   // Overrides toString() function from base class, unused here
   std::string GlobalCellTowerAlgTool::toString() const {

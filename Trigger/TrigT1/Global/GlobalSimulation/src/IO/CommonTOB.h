@@ -38,6 +38,18 @@ namespace GlobalSim::IOBitwise{
      */
     CommonTOB(const GlobalSim::IOBitwise::ICommonTOB& CommonTOB);
 
+    /**
+     * @brief Constructor taking raw bitsets to initialise common bits
+     * @param[in] et_bits the transverse energy bits
+     * @param[in] eta_bits the eta bits
+     * @param[in] phi_bits the phi bits
+     *
+     * To be used to create and initialise a CommonTOB from individual 4-vector bitsets.
+     */
+    CommonTOB(const std::bitset<CommonTOB::s_et_width>& et_bits,
+	      const std::bitset<CommonTOB::s_eta_width>& eta_bits,
+	      const std::bitset<CommonTOB::s_phi_width>& phi_bits);
+    
     //! @copydoc ICommonTOB::~ICommonTOB()
     virtual ~CommonTOB(){};
 
@@ -56,8 +68,12 @@ namespace GlobalSim::IOBitwise{
     /// Property: phi bitset within the common TOB word
     std::bitset<ICommonTOB::s_phi_width> m_phi_bits;
   };
+
+  using CommonTOBContainer = std::vector<std::shared_ptr<CommonTOB>>;
+
 } //End of namespace
 
 CLASS_DEF( GlobalSim::IOBitwise::CommonTOB , 186129504 , 1 )
+CLASS_DEF( GlobalSim::IOBitwise::CommonTOBContainer , 1123153720 , 1 )
 
 #endif //GLOBALSIM_COMMONTOB_H

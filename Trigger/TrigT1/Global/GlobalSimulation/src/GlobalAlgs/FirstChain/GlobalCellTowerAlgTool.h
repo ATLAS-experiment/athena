@@ -15,7 +15,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "../../IGlobalSimAlgTool.h"
-#include "../Hypothesis/UCL/GenericTob.h"
+#include "../../IO/CommonTOB.h"
 #include "GlobalLArCellContainer.h"
 #include <bitset>
 #include <string>
@@ -42,15 +42,6 @@ namespace GlobalSim {
     /** @brief Main functional block running for each event */
     virtual StatusCode run(const EventContext& ctx) const override;
 
-    /** @brief Helper function to convert floating point values into a bitstream */
-    static std::string toBinary(int value, int width) { 
-        assert(width <= 32);
-        return std::bitset<32>(value).to_string().substr(32 - width); 
-    }
-
-    /** @brief Function which assembles the TOB bitstream for a tower */
-    static std::string makeTowerBits(int energy, int etaBin, int phiBin);
-
     /** @brief Overriding toString function from base class */
     virtual std::string toString() const override;
     
@@ -60,7 +51,7 @@ namespace GlobalSim {
     SG::ReadHandleKey<GlobalSim::GlobalLArCellContainer> m_gblLArCellContainerKey {this, "GlobalLArCellsKey", "GlobalLArCells", "Key for the output container of the LAr cells sent to Global"}; 
  
     /** @brief Write key for the output cell towers as a GenericTobContainer */
-    SG::WriteHandleKey<GenericTobContainer> m_gblCellTowers {this, "GlobalCellTowersKey", "GlobalCellTowers", "Key to the container of generic TOBS containing the cell towers"};
+    SG::WriteHandleKey<IOBitwise::CommonTOBContainer> m_gblCellTowers {this, "GlobalCellTowersKey", "GlobalCellTowers", "Key to the container of generic TOBS containing the cell towers"};
 
   };
   
