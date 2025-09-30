@@ -35,7 +35,7 @@
 #include <TFrame.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
-#include <boost/lexical_cast.hpp>
+#include <charconv>
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
@@ -64,16 +64,14 @@ namespace
     std::size_t found = display.find("ScaleRef");
     std::size_t found2 = display.find_first_of(',', found + 1);
     // has multiple entries? Do this later.
-    try
-    {
-      return boost::lexical_cast<Double_t>(display.substr(found + 9, found2 - found - 9));
+    std::string valueStr = display.substr(found + 9, found2 - found - 9);
+    double resultVal = 0.0;
+    auto [ptr, ec] = std::from_chars(valueStr.data(), valueStr.data() + valueStr.size(), resultVal);
+    if (ec != std::errc()) {
+        std::cerr << "Unable to cast scaling value " << valueStr << " to double" << std::endl;
+        return 1.;
     }
-    catch (boost::bad_lexical_cast const&)
-    {
-      std::cerr << "Unable to cast scaling value " << display.substr(found + 9, found2 - found - 9) << " to double"
-                << std::endl;
-      return 1.;
-    }
+    return resultVal;
   }
 }  // end unnamed namespace
 
