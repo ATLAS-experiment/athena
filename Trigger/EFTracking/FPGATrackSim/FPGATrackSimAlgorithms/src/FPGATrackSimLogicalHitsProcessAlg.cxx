@@ -152,7 +152,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Query the event selection service to make sure this event passed cuts.
     if (!m_evtSel->getSelectedEvent()) {
-        return StatusCode::SUCCESS;
+
+      // Potentially write the output data, now it's empty and reset, but this keeps things synchronized over trees
+      if (m_writeOutputData)  {
+       std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
+       std::vector<FPGATrackSimTrack> tracks_1st;
+       auto dataFlowInfo = std::make_unique<FPGATrackSimDataFlowInfo>();
+       ATH_CHECK(writeOutputData(roads_1st, tracks_1st, dataFlowInfo.get()));
+      }      
+
+      return StatusCode::SUCCESS;
     }
     ATH_MSG_INFO("Event accepted by: " << m_evtSel->name());
 

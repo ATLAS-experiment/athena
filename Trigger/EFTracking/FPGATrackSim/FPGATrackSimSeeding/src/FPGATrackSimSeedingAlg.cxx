@@ -19,10 +19,11 @@ namespace FPGATrackSim {
     }
 
     StatusCode FPGATrackSimSeedingAlg::execute(const EventContext& ctx) const {
+
         SG::ReadHandle<FPGATrackSimTrackCollection> tracksHandle{m_FPGATrackCollectionKey, ctx};
         SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle{m_pixelClusterContainerKey, ctx};
         SG::ReadHandle<xAOD::SpacePointContainer> spacePointsHandle{m_spacePointContainerKey, ctx};
-
+	
         ATH_CHECK(tracksHandle.isValid());
         ATH_CHECK(pixelClustersHandle.isValid());
         ATH_CHECK(spacePointsHandle.isValid());

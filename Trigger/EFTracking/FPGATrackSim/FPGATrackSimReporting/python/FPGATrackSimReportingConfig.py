@@ -21,7 +21,7 @@ def FPGATrackSimReportingCfg(flags,name='FPGATrackSimReportingAlg',stage="",**kw
     kwargs.setdefault('perEventReports',True)
     kwargs.setdefault('xAODPixelClusterContainers',["ITkPixelClusters" ,"xAODPixelClustersFromFPGACluster", f"xAODPixelClusters{stage}FromFPGAHit"])
     kwargs.setdefault('xAODStripClusterContainers',["ITkStripClusters" ,"xAODStripClustersFromFPGACluster", f"xAODStripClusters{stage}FromFPGAHit"])
-    kwargs.setdefault('xAODSpacePointContainersFromFPGA',[f"xAODStripSpacePoints{stage}FromFPGA",f"xAODPixelSpacePoints{stage}FromFPGA"])
+    kwargs.setdefault('xAODSpacePointContainersFromFPGA',[])
     kwargs.setdefault('FPGATrackSimTracks','FPGATracks')
     kwargs.setdefault('FPGATrackSimRoads','FPGARoads')
     kwargs.setdefault('FPGATrackSimProtoTracks',[f"ActsProtoTracks{stage}FromFPGATrack",f"ActsProtoTracks{stage}FromFPGARoad"])
