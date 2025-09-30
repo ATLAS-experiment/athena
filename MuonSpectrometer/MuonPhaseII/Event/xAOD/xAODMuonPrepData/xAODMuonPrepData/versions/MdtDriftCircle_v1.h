@@ -21,7 +21,7 @@ namespace xAOD {
 class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
 
    public:
-    using MdtDriftCircleStatus = Muon::MdtDriftCircleStatus;
+    using MdtDriftCircleStatus = ::Muon::MdtDriftCircleStatus;
     /// Default constructor
     MdtDriftCircle_v1() = default;
     /// Virtual destructor
