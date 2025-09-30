@@ -740,6 +740,7 @@ def FPGATrackSimF150FlagCfg(flags):
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
     flags.Trigger.FPGATrackSim.tracking = False
+    flags.Trigger.FPGATrackSim.Hough.genScan = True
     flags.Trigger.FPGATrackSim.convertSPs = False # in case we need the conversion to take place on hw we'll have to convert to SPs after the cluster-sorting (will probably need new algorithm)
     flags.Tracking.ITkActsValidateF150Pass.doActsSpacePoint = not flags.Trigger.FPGATrackSim.convertSPs
     flags.Trigger.FPGATrackSim.Hough.secondStage = False
@@ -751,10 +752,14 @@ def FPGATrackSimF150FlagCfg(flags):
 
 def FPGATrackSimSeedingCfg(flags):
     acc=ComponentAccumulator()
-    acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimClusteringCfg(flags))
+    if not flags.Trigger.FPGATrackSim.runOnPreProducedHeaderFiles:
+        acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimClusteringCfg(flags))
 
-    from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
-    acc.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
+        from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
+        acc.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
+    else:
+        from FPGATrackSimConfTools.FPGATrackSimMergeOutputsConfig import FPGATrackSimMergeOutputsAlgCfg
+        acc.merge(FPGATrackSimMergeOutputsAlgCfg(flags))
     
     from FPGATrackSimSeeding.FPGATrackSimSeedingConfig import FPGATrackSimSeedingCfg
     acc.merge(FPGATrackSimSeedingCfg(flags))

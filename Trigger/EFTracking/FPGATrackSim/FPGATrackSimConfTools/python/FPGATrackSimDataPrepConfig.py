@@ -547,16 +547,32 @@ def FPGATrackSimRegionFlagCfg(flags):
 
 def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
     acc=ComponentAccumulator()
-    acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
-    acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
-        'FPGATrackSimSPKey': 'FPGAClusters_1st',
-        'xAODPixelClusterFromFPGAClusterKey': 'FPGAPixelClusters',
-        'xAODStripClusterFromFPGAClusterKey': 'FPGAStripClusters',
-        'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
-        'doActsTrk': False,
-        'doSP': flags.Trigger.FPGATrackSim.convertSPs,
-    }))
-    
+    if not flags.Trigger.FPGATrackSim.runOnPreProducedHeaderFiles:
+        acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
+            'FPGATrackSimSPKey': 'FPGAClusters_1st',
+            'xAODPixelClusterFromFPGAClusterKey': 'FPGAPixelClusters',
+            'xAODStripClusterFromFPGAClusterKey': 'FPGAStripClusters',
+            'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
+            'doActsTrk': False,
+            'useRoads': False,          
+            'doSP': flags.Trigger.FPGATrackSim.convertSPs,
+        }))
+    else:
+        from FPGATrackSimConfTools.FPGATrackSimMergeOutputsConfig import FPGATrackSimMergeOutputsAlgCfg
+        acc.merge(FPGATrackSimMergeOutputsAlgCfg(flags))            
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
+            'FPGATrackSimHitKey': 'FPGAHits',
+            'xAODPixelClusterFromFPGAHitKey': 'FPGAPixelClusters',
+            'xAODStripClusterFromFPGAHitKey': 'FPGAStripClusters',
+            'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
+            'doActsTrk': True,
+            'useRoads': False,          
+            'doClusters': False,
+            'doHits': True,
+            'doSP': flags.Trigger.FPGATrackSim.convertSPs,
+        }))      
+        
     from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg
     ClusterSorting = FPGAClusterSortingAlgCfg(flags,**{'xAODPixelClusterContainer': 'FPGAPixelClusters',
                                                        'xAODStripClusterContainer': 'FPGAStripClusters',
