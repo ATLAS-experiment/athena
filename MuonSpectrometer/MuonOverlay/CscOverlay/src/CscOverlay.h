@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Overlaying RDOs from two different events for InDet subdetectors.
@@ -14,20 +14,29 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadHandleKey.h"            // for ReadHandleKey
+#include "StoreGate/WriteHandleKey.h"           // for WriteHandleKey
 
-#include "MuonRDO/CscRawDataContainer.h"
-#include "CscCalibTools/ICscCalibTool.h"
-#include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
-#include "AthenaKernel/IAthRNGSvc.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonRDO/CscRawDataContainer.h"        //ReadHandleKey template param
+#include "CscCalibTools/ICscCalibTool.h"        //ToolHandle template param
+#include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"  //ToolHandle template param
+#include "AthenaKernel/IAthRNGSvc.h"            //ServiceHandle template param
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"     //ServiceHandle template param
 
+#include <cstdint>                              // for uint16_t, uint32_t
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 
 namespace CLHEP {
   class HepRandomEngine;
 }
+
+class CscRawData;
+class EventContext;
+class ISvcLocator;
+class StatusCode;
 
 class CscOverlay : public AthReentrantAlgorithm {
 public:
