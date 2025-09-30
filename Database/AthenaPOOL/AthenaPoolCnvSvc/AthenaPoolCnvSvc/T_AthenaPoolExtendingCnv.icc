@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,9 +22,7 @@ template <class TRANS, class PERS>
 inline const std::string
 T_AthenaPoolExtendingCnv< TRANS, PERS >::name() const
 {
-   std::ostringstream ostr;
-   ostr << this->objType();
-   return ostr.str();
+   return std::to_string(this->objType());
 }
 
    

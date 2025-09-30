@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file T_AthenaPoolCustomCnv.icc
@@ -21,6 +21,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <format>
 
 template <class TRANS, class PERS>
 T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::T_AthenaPoolCustomCnvWithKey(ISvcLocator* pSvcLocator,
@@ -150,19 +151,15 @@ inline void T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::poolReadObject(TopLevelTP
 // Remember the POOL object until commit (then delete it)
 template <class TRANS, class PERS>
 inline void T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::keepPoolObj(PERS* obj, const std::string& output) {
-   std::ostringstream oss;
-   oss << Gaudi::Hive::currentContext().slot();
    std::lock_guard   lock(m_pListMutex);
-   m_persObjLists[output + ":" + oss.str()].emplace_back(obj);
+   m_persObjLists[std::format("{}:{}", output, Gaudi::Hive::currentContext().slot())].emplace_back(obj);
 }
 
 // callback from the CleanupSvc to delete persistent objects after commit
 template <class TRANS, class PERS>
 StatusCode T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::cleanUp(const std::string& output) {
-   std::ostringstream oss;
-   oss << Gaudi::Hive::currentContext().slot();
    std::lock_guard   lock(m_pListMutex);
-   m_persObjLists[output + ":" + oss.str()].clear();
+   m_persObjLists[std::format("{}:{}", output, Gaudi::Hive::currentContext().slot())].clear();
    return(StatusCode::SUCCESS);
 }
 

@@ -25,6 +25,8 @@
 #include "RootUtils/APRDefaults.h"
 
 #include <algorithm>
+#include <charconv>
+#include <format>
 #include <iomanip>
 #include <sstream>
 
@@ -46,14 +48,20 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       return(StatusCode::FAILURE);
    }
    // Extracting MaxFileSizes for global default and map by Database name.
-   for (std::vector<std::string>::const_iterator iter = m_maxFileSizes.value().begin(),
-	   last = m_maxFileSizes.value().end(); iter != last; ++iter) {
-      if (auto p = iter->find('='); p != std::string::npos) {
-         long long maxFileSize = atoll(iter->data() + (p + 1));
-         std::string databaseName = iter->substr(0, iter->find_first_of(" 	="));
-         m_databaseMaxFileSize.insert(std::make_pair(databaseName, maxFileSize));
+   for (const auto& maxFileSizeSpec : m_maxFileSizes.value()) {
+      if (auto p = maxFileSizeSpec.find('='); p != std::string::npos) {
+         long long maxFileSize = 0;
+         const char* start = maxFileSizeSpec.data() + (p + 1);
+         const char* end = maxFileSizeSpec.data() + maxFileSizeSpec.size();
+         if (auto [ptr, ec] = std::from_chars(start, end, maxFileSize); ec != std::errc{}) {
+            ATH_MSG_WARNING(std::format("Invalid MaxFileSize value: {}", std::string(start, end)));
+         }
+         std::string databaseName = maxFileSizeSpec.substr(0, maxFileSizeSpec.find_first_of(" 	="));
+         m_databaseMaxFileSize.emplace(std::move(databaseName), maxFileSize);
       } else {
-         m_domainMaxFileSize = atoll(iter->c_str());
+         if (auto [ptr, ec] = std::from_chars(maxFileSizeSpec.data(), maxFileSizeSpec.data() + maxFileSizeSpec.size(), m_domainMaxFileSize); ec != std::errc{}) {
+            ATH_MSG_WARNING(std::format("Invalid MaxFileSize value: {}", maxFileSizeSpec));
+         }
       }
    }
    ATH_MSG_DEBUG("Setting StorageType to " << m_storageTechProp.value());
@@ -153,9 +161,7 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
    std::string objName = "ALL";
    if (m_useDetailChronoStat.value()) {
       if (m_clidSvc->getTypeNameOfID(pAddress->clID(), objName).isFailure()) {
-         std::ostringstream oss;
-         oss << std::dec << pAddress->clID();
-         objName = oss.str();
+         objName = std::to_string(pAddress->clID());
       }
       objName += '#';
       objName += *(pAddress->par() + 1);
@@ -168,7 +174,9 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
          const unsigned int maxContext = m_poolSvc->getInputContextMap().size();
          const unsigned int auxContext = m_poolSvc->getInputContext(tokAddr->getToken()->classID().toString() + tokAddr->getToken()->dbID().toString(), 1);
          char text[32];
-         ::sprintf(text, "[CTXT=%08X]", auxContext);
+         const std::string contextStr = std::format("[CTXT={:08X}]", auxContext);
+         std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
+         text[sizeof(text) - 1] = '\0';
          if (m_poolSvc->getInputContextMap().size() > maxContext) {
             if (m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), "FID:" + tokAddr->getToken()->dbID().toString(), m_persSvcPerInputType.value(), auxContext).isSuccess()) {
                ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for id = " << auxContext << ".");
@@ -187,9 +195,7 @@ StatusCode AthenaPoolCnvSvc::createRep(DataObject* pObject, IOpaqueAddress*& ref
    std::string objName = "ALL";
    if (m_useDetailChronoStat.value()) {
       if (m_clidSvc->getTypeNameOfID(pObject->clID(), objName).isFailure()) {
-         std::ostringstream oss;
-         oss << std::dec << pObject->clID();
-         objName = oss.str();
+         objName = std::to_string(pObject->clID());
       }
       objName += '#';
       objName += pObject->registry()->name();
@@ -220,9 +226,7 @@ StatusCode AthenaPoolCnvSvc::fillRepRefs(IOpaqueAddress* pAddress, DataObject* p
    std::string objName = "ALL";
    if (m_useDetailChronoStat.value()) {
       if (m_clidSvc->getTypeNameOfID(pObject->clID(), objName).isFailure()) {
-         std::ostringstream oss;
-         oss << std::dec << pObject->clID();
-         objName = oss.str();
+         objName = std::to_string(pObject->clID());
       }
       objName += '#';
       objName += pObject->registry()->name();
@@ -286,12 +290,11 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
       // Extracting OUTPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
       extractPoolAttributes(m_poolAttr, &m_containerAttr, &m_databaseAttr, &m_domainAttr);
       //FIXME
-      for (std::vector<std::vector<std::string> >::iterator iter = m_databaseAttr.begin(), last = m_databaseAttr.end();
-                      iter != last; ++iter) {
-         const std::string& opt = (*iter)[0];
-         std::string& data = (*iter)[1];
-         const std::string& file = (*iter)[2];
-         const std::string& cont = (*iter)[3];
+      for (auto& dbAttrEntry : m_databaseAttr) {
+         const std::string& opt = dbAttrEntry[0];
+         std::string& data = dbAttrEntry[1];
+         const std::string& file = dbAttrEntry[2];
+         const std::string& cont = dbAttrEntry[3];
          std::size_t equal = cont.find('='); // Used to remove leading "TTree="
          if (equal == std::string::npos) equal = 0;
          else equal++;
@@ -303,9 +306,7 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
             flush = atoi(data.c_str());
             if (flush < 0 && m_numberEventsPerWrite.value() > 0) {
                flush = m_numberEventsPerWrite.value();
-               std::ostringstream eventAutoFlush;
-               eventAutoFlush << flush;
-               data = eventAutoFlush.str();
+               data = std::to_string(flush);
             } else if (flush > 0 && flush < m_numberEventsPerWrite.value()) {
                flush = flush * (int(static_cast<float>(m_numberEventsPerWrite.value()) / flush - 0.5) + 1);
             }
@@ -381,11 +382,11 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
    long long int currentFileSize = m_poolSvc->getFileSize(outputConnection, m_dbType.type(), contextId);
    if (m_databaseMaxFileSize.find(outputConnection) != m_databaseMaxFileSize.end()) {
       if (currentFileSize > m_databaseMaxFileSize[outputConnection]) {
-         ATH_MSG_WARNING("FileSize > " << m_databaseMaxFileSize[outputConnection] << " for " << outputConnection);
+         ATH_MSG_WARNING(std::format("FileSize {} > {} for {}", currentFileSize, m_databaseMaxFileSize[outputConnection], outputConnection));
          return(StatusCode::RECOVERABLE);
       }
    } else if (currentFileSize > m_domainMaxFileSize) {
-      ATH_MSG_WARNING("FileSize > " << m_domainMaxFileSize <<  " for " << outputConnection);
+      ATH_MSG_WARNING(std::format("FileSize {} > {} for {}", currentFileSize, m_domainMaxFileSize, outputConnection));
       return(StatusCode::RECOVERABLE);
    }
    return(StatusCode::SUCCESS);
@@ -416,7 +417,9 @@ Token* AthenaPoolCnvSvc::registerForWrite(Placement* placement, const void* obj,
    Token* token = nullptr;
          if (m_persSvcPerOutput) { // Use separate PersistencySvc for each output stream/file
             char text[32];
-            ::sprintf(text, "[CTXT=%08X]", m_poolSvc->getOutputContext(placement->fileName()));
+            const std::string contextStr = std::format("[CTXT={:08X}]", m_poolSvc->getOutputContext(placement->fileName()));
+            std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
+            text[sizeof(text) - 1] = '\0';
             placement->setAuxString(text);
          }
          token = m_poolSvc->registerForWrite(placement, obj, classDesc);
@@ -574,15 +577,14 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
 		std::vector<std::vector<std::string> >* domAttr) const {
    std::vector<std::string> opt;
    std::string attributeName, containerName, databaseName, valueString;
-   for (std::vector<std::string>::const_iterator iter = property.value().begin(),
-           last = property.value().end(); iter != last; ++iter) {
+   for (const auto& propertyValue : property.value()) {
       opt.clear();
       attributeName.clear();
       containerName.clear();
       databaseName.clear();
       valueString.clear();
       using Gaudi::Utils::AttribStringParser;
-      for (const AttribStringParser::Attrib& attrib : AttribStringParser (*iter)) {
+      for (const AttribStringParser::Attrib& attrib : AttribStringParser (propertyValue)) {
          const std::string tag = attrib.tag;
          const std::string val = attrib.value;
          if (tag == "DatabaseName") {
@@ -631,11 +633,10 @@ StatusCode AthenaPoolCnvSvc::processPoolAttributes(std::vector<std::vector<std::
 		bool doSet,
 		bool doClear) const {
    bool retError = false;
-   for (std::vector<std::vector<std::string> >::iterator iter = attr.begin(), last = attr.end();
-		   iter != last; ++iter) {
-      if (iter->size() == 2) {
-         const std::string& opt = (*iter)[0];
-         std::string data = (*iter)[1];
+   for (auto& attrEntry : attr) {
+      if (attrEntry.size() == 2) {
+         const std::string& opt = attrEntry[0];
+         std::string data = attrEntry[1];
          if (data == "int" || data == "DbLonglong" || data == "double" || data == "string") {
             if (doGet) {
                if (!m_poolSvc->getAttribute(opt, data, pool::DbType(pool::ROOTTREE_StorageType).type(), contextId).isSuccess()) {
@@ -647,7 +648,7 @@ StatusCode AthenaPoolCnvSvc::processPoolAttributes(std::vector<std::vector<std::
             if (m_poolSvc->setAttribute(opt, data, pool::DbType(pool::ROOTTREE_StorageType).type(), contextId).isSuccess()) {
                ATH_MSG_DEBUG("setAttribute " << opt << " to " << data);
                if (doClear) {
-                  iter->clear();
+                  attrEntry.clear();
                }
             } else {
                ATH_MSG_DEBUG("setAttribute failed for domain attr " << opt << " to " << data);
@@ -655,11 +656,11 @@ StatusCode AthenaPoolCnvSvc::processPoolAttributes(std::vector<std::vector<std::
             }
          }
       }
-      if (iter->size() == 4) {
-         const std::string& opt = (*iter)[0];
-         std::string data = (*iter)[1];
-         const std::string& file = (*iter)[2];
-         const std::string& cont = (*iter)[3];
+      if (attrEntry.size() == 4) {
+         const std::string& opt = attrEntry[0];
+         std::string data = attrEntry[1];
+         const std::string& file = attrEntry[2];
+         const std::string& cont = attrEntry[3];
          if (!fileName.empty() && (0 == fileName.compare(0, fileName.find('?'), file)
 	         || (file[0] == '*' && file.find("," + fileName + ",") == std::string::npos))) {
             if (data == "int" || data == "DbLonglong" || data == "double" || data == "string") {
@@ -674,9 +675,9 @@ StatusCode AthenaPoolCnvSvc::processPoolAttributes(std::vector<std::vector<std::
                   ATH_MSG_DEBUG("setAttribute " << opt << " to " << data << " for db: " << fileName << " and cont: " << cont);
                   if (doClear) {
                      if (file[0] == '*' && !m_persSvcPerOutput) {
-                        (*iter)[2] += "," + fileName + ",";
+                        attrEntry[2] += "," + fileName + ",";
                      } else {
-                        iter->clear();
+                        attrEntry.clear();
                      }
                   }
                } else {
@@ -687,12 +688,6 @@ StatusCode AthenaPoolCnvSvc::processPoolAttributes(std::vector<std::vector<std::
          }
       }
    }
-   for (std::vector<std::vector<std::string> >::iterator iter = attr.begin(); iter != attr.end(); ) {
-      if (iter->empty()) {
-         iter = attr.erase(iter);
-      } else {
-         ++iter;
-      }
-   }
+   std::erase_if(attr, [](const auto& entry) { return entry.empty(); });
    return(retError ? StatusCode::FAILURE : StatusCode::SUCCESS);
 }

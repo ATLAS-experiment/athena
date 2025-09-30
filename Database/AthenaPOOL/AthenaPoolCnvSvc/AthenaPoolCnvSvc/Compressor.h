@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -31,7 +31,7 @@ public:
 		m_bits=16;
                 m_bitStrip = false;
 	}
-	~Compressor(){}
+	~Compressor() = default;
 	
 	void setNrBits(int bits){
 		m_bits=bits;
