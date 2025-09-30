@@ -22,6 +22,14 @@ def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
     result.setPrivateTools(the_tool)
     return result    
 
+def SegmentRefitTestCfg(flags,name="SegmentRefitter", **kwargs):
+    result = ComponentAccumulator()
+    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import ActsMuonSegmentRefitAlgCfg
+    result.merge(ActsMuonSegmentRefitAlgCfg(flags))
+    the_alg = CompFactory.MuonValR4.SegmentRefitTest(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
@@ -39,7 +47,7 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True
-    flags.Muon.doFastMMDigitization = True
+    flags.Muon.doFastMMDigitization = False
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
@@ -54,10 +62,6 @@ if __name__=="__main__":
 
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
-
-    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
-    cfg.merge(MSTrackFinderAlgCfg(flags,
-                                VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
-    cfg.merge(MsTrackTesterCfg(flags))
+    cfg.merge(SegmentRefitTestCfg(flags))
    
     executeTest(cfg)

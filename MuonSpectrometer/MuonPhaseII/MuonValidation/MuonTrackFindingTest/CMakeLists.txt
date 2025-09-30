@@ -20,3 +20,14 @@ atlas_add_component( MuonTrackFindingTest
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+
+atlas_add_test( MsTrackFinderTestR3
+                SCRIPT python -m MuonTrackFindingTest.MsTrackFindingTester --nEvents 1
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( SegmentRefitTestR4
+                SCRIPT python -m MuonTrackFindingTest.SegmentRefitTester --nEvents 1
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
