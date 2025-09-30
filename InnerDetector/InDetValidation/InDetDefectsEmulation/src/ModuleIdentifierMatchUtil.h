@@ -84,7 +84,11 @@ namespace InDet {
             if (test_n%2 != 0 || test_n>=n_expected) return false;
             if constexpr(test_order) {
                for (unsigned int i=0; i<test_n; i+=2) {
-                  if (sub_arr.at(i)>sub_arr.at(i+1)) return false;
+                  if (sub_arr.at(i)>sub_arr.at(i+1)) {
+                     if (sub_arr.at(i+1)!=-2 || (sub_arr.at(i)!=0 && sub_arr.at(i)!=1)) {
+                        return false;
+                     }
+                  }
                }
             }
          }
@@ -158,8 +162,11 @@ namespace InDet {
             for (int module_value : module_data) {
                assert( range_i+1 < pattern.size());
                if (module_value<pattern[range_i] || module_value>pattern[range_i+1]) {
-                  match=false;
-                  break;
+                  // test if even/odd filter and continue if it is and that filter passes
+                  if (pattern[range_i+1]>=pattern[range_i] || pattern[range_i+1]!=-2 || (module_value & 1) != (pattern[range_i] & 1)) {
+                     match=false;
+                     break;
+                  }
                }
                range_i+=2;
             }

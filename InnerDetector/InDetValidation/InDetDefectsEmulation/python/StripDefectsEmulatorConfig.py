@@ -9,6 +9,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.Constants import INFO
 
+# magic ranges indicating an even odd filter
+ODD_INDEX=[1,-2]
+EVEN_INDEX=[0,-2]
+
 def ordered_pairs(a_list) :
     """
     Return True if every two elements in a_list form a pair whose two elements are
@@ -16,7 +20,9 @@ def ordered_pairs(a_list) :
     """
     for i in range(0,len(a_list),2) :
         if a_list[i]>a_list[i+1] :
-            return False
+            if a_list != ODD_INDEX and a_list != EVEN_INDEX :
+                print (i,a_list)
+                return False
     return True
 
 def makeCornerDefectParam(probability=1e-1,
