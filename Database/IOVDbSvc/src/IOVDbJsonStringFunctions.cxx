@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "IOVDbJsonStringFunctions.h"
 #include <regex>
@@ -25,7 +25,7 @@ namespace IOVDbNamespace{
     if (blobPayload){
       return quote(IOVDbNamespace::base64Encode(attr.data<coral::Blob>()));
     }
-    std::string result(payloadOnly);
+    std::string result(std::move(payloadOnly));
     if (result=="NULL"){
       result="null";
     }
