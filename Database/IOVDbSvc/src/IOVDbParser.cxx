@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbParser.cxx
@@ -115,7 +115,7 @@ IOVDbParser::getKey(const std::string& key, const std::string& defvalue,
     return false;
   }
   const auto [theValue,found] = at(key,defvalue);
-  value=theValue;
+  value=std::move(theValue);
   return found;
 }
 
