@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_IATHENAPOOLCLEANUP_H
@@ -20,13 +20,13 @@ class IAthenaPoolCleanUp {
 
 public:
    /// Destructor
-   virtual ~IAthenaPoolCleanUp() {};
+   virtual ~IAthenaPoolCleanUp() = default;
 
    virtual StatusCode cleanUp(const std::string& output) = 0;
 
 protected:
    /// Standard Constructor
-   IAthenaPoolCleanUp() {};
+   IAthenaPoolCleanUp() = default;
 };
 
 #endif
