@@ -7,15 +7,37 @@
 
 #include <string>
   
-struct IdDictLabel {
+class IdDictLabel {
+public:
+    IdDictLabel (const std::string& name);
+    IdDictLabel (const std::string& name, int value);
+
     const std::string& name() const;
     int value() const;
     bool valued() const;
 
+private:
     std::string m_name;  
     bool m_valued{};  
     int m_value{};  
 };  
+
+
+inline
+IdDictLabel::IdDictLabel (const std::string& name)
+  : m_name (name),
+    m_valued (false)
+{
+}
+
+
+inline
+IdDictLabel::IdDictLabel (const std::string& name, int value)
+  : m_name (name),
+    m_valued (true),
+    m_value (value)
+{
+}
 
 
 inline

@@ -34,41 +34,32 @@ int main (int argc, char* argv[])
  
       std::cout << "---- " << n << " ----------------------------" << std::endl; 
       std::cout << "Dictionary " << dictionary.name() << std::endl;
- 
+
       size_t nregions = dictionary.n_regions();
       for (size_t i = 0; i < nregions; ++i)
-        { 
+        {
           const IdDictRegion& region = dictionary.region(i);
- 
           std::cout << "region #" << region.index() << std::endl;
  
-          std::vector <IdDictFieldImplementation>::const_iterator fit; 
-           
           size_t width = 0; 
- 
-          for (fit = region.m_implementation.begin ();  
-               fit != region.m_implementation.end (); 
-               ++fit) 
-            { 
-              const IdDictFieldImplementation& impl = *fit; 
- 
-              size_t w = impl.range()->m_field->m_name.size (); 
+
+          size_t nimpl = region.n_implementation();
+          for (size_t i = 0; i < nimpl; ++i) {
+              const IdDictFieldImplementation& impl = region.implementation(i);
+              size_t w = impl.range()->field()->name().size ();
  
               if (w > width) width = w; 
             } 
  
           int bits = 0; 
  
-          for (fit = region.m_implementation.begin ();  
-               fit != region.m_implementation.end (); 
-               ++fit) 
-            { 
-              const IdDictFieldImplementation& impl = *fit; 
- 
-              size_t w = impl.range()->m_field->m_name.size (); 
- 
-              std::cout << "  implement field #" << impl.range()->m_field->index() <<
-                  " " << impl.range()->m_field->m_name; 
+         for (size_t i = 0; i < nimpl; ++i) {
+              const IdDictFieldImplementation& impl = region.implementation(i);
+
+              size_t w = impl.range()->field()->name().size ();
+
+              std::cout << "  implement field #" << impl.range()->field()->index() <<
+                  " " << impl.range()->field()->name();
  
               tab (width - w); 
  
@@ -80,7 +71,7 @@ int main (int argc, char* argv[])
               bits += impl.bits(); 
             } 
  
-          Range range = region.build_range (); 
+          Range range = region.build_range ();
  
           std::cout << " -> " << (std::string) range <<  
               " (cardinality=" << range.cardinality () << ")" << 

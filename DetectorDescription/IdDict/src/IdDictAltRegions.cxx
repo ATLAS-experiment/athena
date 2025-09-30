@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictAltRegions.h"
@@ -108,4 +108,28 @@ IdDictAltRegions::build_range() const {
 
   if (m_selected_region) result = m_selected_region->build_range();
   return(result);
+}
+
+
+/// Add a new region, with key given by the tag.
+void IdDictAltRegions::add_region (IdDictRegion* region)
+{
+  m_regions[region->tag()] = region;
+}
+
+
+/// Select the named region.
+void IdDictAltRegions::select_region (const std::string& name)
+{
+  map_iterator region_it = m_regions.find (name);
+  if (region_it == m_regions.end()){
+    std::cout << "IdDictAltRegion::select_region could not find region \""
+              << name << "\". Keys in map " << std::endl;
+    for (const auto& p : m_regions) {
+      std::cout << " key " << p.first;
+    }
+    std::cout << std::endl;
+  } else {
+    m_selected_region = region_it->second;
+  }
 }

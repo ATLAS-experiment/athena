@@ -146,17 +146,17 @@ test_lar (const IdDictMgr& idd){
 
   size_t nregions = dictionary->n_regions();
   for (size_t i = 0; i < nregions; ++i) {
-	  const IdDictRegion& region = dictionary->region(i);
+          const IdDictRegion& region = dictionary->region(i);
 	  std::cout << "region #" << region.index() << std::endl;
 	  std::cout << "name "
-		  << region.name() << " group "
-		  << region.m_group << " tag "
-		  << region.m_tag << " next eta ";
+                    << region.name() << " group "
+                    << region.group_name() << " tag "
+                    << region.tag() << " next eta ";
 	  if (region.next_abs_eta()) {
 	    std::cout << region.next_abs_eta()->name() << " ";
 	    if (region.next_abs_eta()->prev_abs_eta()) {
-        std::cout << region.next_abs_eta()->prev_abs_eta()->name();
-      }
+              std::cout << region.next_abs_eta()->prev_abs_eta()->name();
+            }
 	  }
     std::cout << " prev samp ";
     for (const IdDictRegion* r : region.prev_samp()) {
@@ -214,7 +214,7 @@ test_pixel (const IdDictMgr& idd, Identifier::size_type pixel_region){
     int pixelField   = -1;
     if (dict->get_label_value("part", "Pixel", pixelField)) {
 	    std::cout << "Could not get value for label 'Pixel' of field 'part' in dictionary " 
-		    << dict->name()
+                    << dict->name()
 		    << std::endl;
 	    return (1);
     }
@@ -380,31 +380,31 @@ print_bits (const IdDictMgr& idd){
       const IdDictRegion& region = dictionary.region(i);
       std::cout << "region #" << region.index()
           << " name "   << region.name()
-          << " group "  << region.m_group 
-          << " tag "    << region.m_tag	
+          << " group "  << region.group_name()
+          << " tag "    << region.tag()
           << std::endl;  
-      std::vector <IdDictFieldImplementation>::const_iterator fit; 
-      size_t width = 0; 
-      for (fit = region.m_implementation.begin ();fit != region.m_implementation.end ();++fit) {
-        const IdDictFieldImplementation& impl = *fit; 
-        size_t w = impl.range()->m_field->m_name.size (); 
+      size_t width = 0;
+      size_t nimpl = region.n_implementation();
+      for (size_t i = 0; i < nimpl; ++i) {
+        const IdDictFieldImplementation& impl = region.implementation(i);
+        size_t w = impl.range()->field()->name().size ();
         if (w > width) width = w; 
       } 
       int bits = 0; 
-      for (fit = region.m_implementation.begin ();fit != region.m_implementation.end ();++fit) { 
-        const IdDictFieldImplementation& impl = *fit; 
-        size_t w = impl.range()->m_field->m_name.size (); 
-        std::cout << "  implement field #" << impl.range()->m_field->index() <<
-          " " << impl.range()->m_field->m_name;
+      for (size_t i = 0; i < nimpl; ++i) {
+        const IdDictFieldImplementation& impl = region.implementation(i);
+        size_t w = impl.range()->field()->name().size ();
+        std::cout << "  implement field #" << impl.range()->field()->index() <<
+          " " << impl.range()->field()->name();
         tab (width - w); 
-        std::cout << " -> " << (std::string) impl.field() <<  
+        std::cout << " -> " << (std::string) impl.field() <<
           "/" << (std::string) impl.ored_field() <<  
           " (" << impl.bits() << " bits)" <<  
           " (" << impl.bits_offset() << " offset)" <<  
           std::endl; 
         bits += impl.bits(); 
       } 
-      Range range = region.build_range (); 
+      Range range = region.build_range ();
       std::cout << " -> " << (std::string) range <<  
         " (cardinality=" << range.cardinality () << ")" << 
         " (" << bits << " bits)" << std::endl; 
@@ -448,21 +448,20 @@ int main (int argc, char* argv[])  {
 	  // Find value for the field InnerDetector
     const IdDictField* partField = atlasDict->find_field("subdet");
     if (partField) {
-      std::cout << "Found field " << partField->m_name 
-          << " from dictionary " << atlasDict->name()
-          << std::endl;
+      std::cout << "Found field " << partField->name()
+                << " from dictionary " << atlasDict->name()
+                << std::endl;
     } else {
       std::cout << "Could not find 'part' field"
-          << " in dictionary " << atlasDict->name()
-          << std::endl;
+                << " in dictionary " << atlasDict->name()
+                << std::endl;
       return 1;
     }
     int inDetField = -1;
     std::cout << "Found field label size "  
         << partField->get_label_number()
         << std::endl;
-    size_t nlabels = partField->get_label_number();
-    for (size_t ilabel = 0; ilabel < nlabels; ++ilabel) {
+    for (size_t ilabel = 0; ilabel < partField->get_label_number(); ++ilabel) {
       const IdDictLabel& label = partField->label(ilabel);
       std::cout << "Field label  "  
           << label.name() << " "

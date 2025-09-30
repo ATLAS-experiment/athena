@@ -24,15 +24,31 @@ class MultiRange;
  
 class IdDictGroup{ 
 public: 
+    // ==================================
+    //** @name Constructor/destructor
+    // @{
+
     IdDictGroup (); 
     IdDictGroup (const std::string& name); 
     ~IdDictGroup (); 
+
+
+    //@}
+    // ==================================
+    //** @name Simple accessors.
+    // @{
 
     const std::string&  name();
     const std::vector<IdDictDictEntry*>& entries();
     const std::vector<IdDictRegion*>&    regions();
 
+
+    //@}
+    // ==================================
+    //** @name Methods used to initialize the object.
+    // @{
     ///  Get MultiRange for this group
+
     MultiRange build_multirange () const; 
     void add_dictentry (IdDictDictEntry* entry);
 
