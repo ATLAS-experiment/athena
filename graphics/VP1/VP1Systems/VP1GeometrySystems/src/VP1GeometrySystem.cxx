@@ -2247,10 +2247,11 @@ QStringList VP1GeometrySystem::Imp::stationInfo(const MuonGM::MuonStation* stati
 void VP1GeometrySystem::autoAdaptPixelsOrSCT(bool pixel,bool brl, bool ecA, bool ecC, bool bcmA, bool bcmC)
 {
     #ifndef BUILDVP1LIGHT
-      if (!(pixel?VP1JobConfigInfo::hasPixelGeometry():VP1JobConfigInfo::hasSCTGeometry()))
+      if (!( pixel ? (VP1JobConfigInfo::hasPixelGeometry()||VP1JobConfigInfo::hasITkGeometry()) : (VP1JobConfigInfo::hasSCTGeometry()||VP1JobConfigInfo::hasITkGeometry()) ))
         return;
     #endif
-  VP1GeoFlags::SubSystemFlag subSysFlag(pixel?VP1GeoFlags::Pixel:VP1GeoFlags::SCT);
+  //VP1GeoFlags::SubSystemFlag subSysFlag( pixel ? VP1GeoFlags::Pixel : VP1GeoFlags::SCT );
+  VP1GeoFlags::SubSystemFlag subSysFlag( pixel ? VP1GeoFlags::ITkPixel : VP1GeoFlags::ITkStrip );
 
   bool bcm(bcmA||bcmC);
   bool ec(ecA||ecC);
