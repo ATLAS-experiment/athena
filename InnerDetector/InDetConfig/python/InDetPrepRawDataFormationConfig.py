@@ -44,6 +44,25 @@ def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConvers
     return acc
 
 
+def IDInDetToXAODClusterConversionCfg(flags, name="IDInDetToXAODClusterConversion", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault('isITk', False)
+    kwargs.setdefault('ProcessPixel', flags.Detector.EnablePixel)
+    kwargs.setdefault('ProcessStrip', flags.Detector.EnableSCT)
+
+    kwargs.setdefault('PixelDetEleCollKey', "PixelDetectorElementCollection")
+    kwargs.setdefault('StripDetEleCollKey', "SCT_DetectorElementCollection")
+
+    kwargs.setdefault('InputPixelClustersName', "PixelClusters")
+    kwargs.setdefault('InputStripClustersName', "SCT_Clusters")
+
+    kwargs.setdefault('OutputPixelClustersName', "PixelClusters")
+    kwargs.setdefault('OutputStripClustersName', "SCT_Clusters")
+    
+    acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
+    return acc
+
+
 def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConversion", **kwargs):
     acc = ComponentAccumulator()
 

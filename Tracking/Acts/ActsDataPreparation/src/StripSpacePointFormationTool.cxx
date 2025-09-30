@@ -358,7 +358,7 @@ namespace ActsTrk {
                     auto centralValue = localPosition;
                     auto minValue = min;
                     auto maxValue = max;
-                    if (isEndcap) {
+                    if (isEndcap and  m_isITk) { // for Inner Detector SCT, use the same cut as barrel
                         centralValue = stripIndex;
                         minValue = minStrip;
                         maxValue = maxStrip;
@@ -388,7 +388,7 @@ namespace ActsTrk {
                     auto centralValue = currentLocalPos(0, 0);
                     auto minValue = min;
                     auto maxValue = max;
-                    if (isEndcap) {
+                    if (isEndcap and m_isITk) { // for Inner Detector SCT, use the same cut as barrel
                         centralValue = currentStripIndex;
                         minValue = minStrip;
                         maxValue = maxStrip;
@@ -563,7 +563,8 @@ namespace ActsTrk {
                                                          size_t& minStrip,
                                                          size_t& maxStrip) const
     {
-        if (element->isBarrel())
+        // for Inner Detector SCT, gap = 0 in config. 
+        if (element->isBarrel() or (not m_isITk))
             return;
 
         // design for endcap modules
@@ -606,7 +607,7 @@ namespace ActsTrk {
     {
         const Eigen::Matrix<float,1,1>& localPos = cluster->localPosition<1>();
 
-        if (element->isEndcap()) {
+        if (element->isEndcap() and m_isITk) {
             // design for endcap modules
             const InDetDD::StripStereoAnnulusDesign *design
                 = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *> (&element->design());

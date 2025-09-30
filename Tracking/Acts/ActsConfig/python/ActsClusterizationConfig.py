@@ -234,7 +234,6 @@ def ActsStripClusterPreparationAlgCfg(flags,
         acc.addEventAlgo(CompFactory.ActsTrk.StripClusterCacheDataPreparationAlg(name, **kwargs))
     return acc
 
-
 def ActsHgtdClusterPreparationAlgCfg(flags,
                                      name: str = 'ActsHgtdClusterPreparationAlg',
                                      *,

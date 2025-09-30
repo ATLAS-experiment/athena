@@ -96,6 +96,9 @@ private:
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "StripDetEleCollKey", "ITkStripDetectorElementCollection",
       "SiDetectorElementCollection key for strip"};
 
+    Gaudi::Property<bool> m_isITk {this, "isITk", true,
+      "True if running in ITk"};
+
     int m_timeBinBits[3]{-1, -1, -1};
 
 
