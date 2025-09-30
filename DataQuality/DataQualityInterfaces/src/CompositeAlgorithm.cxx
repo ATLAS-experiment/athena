@@ -130,7 +130,7 @@ execute( const std::string& name, const TObject& data, const dqm_core::Algorithm
     std::map<std::string,double>::const_iterator tagsIter = subResult->tags_.begin();
     for( ; tagsIter != tagsEnd; ++tagsIter ) {
       std::map<std::string,double>::value_type tagVal( subAlgsIter->second + std::string("|") + tagsIter->first, tagsIter->second );
-      tags.insert( tagVal );
+      tags.insert( std::move(tagVal) );
     }
     delete subResult;
   }
