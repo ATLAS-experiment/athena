@@ -21,8 +21,8 @@
 L1CaloLinearCalibration::L1CaloLinearCalibration(const std::string& name, ISvcLocator *pSvcLocator)
   : AthAlgorithm(name, pSvcLocator),
     m_l1CaloRampDataContainerKey(""),
-    m_energyScanResultsContainer(0),
-    m_energyScanRunInfoContainer(0)
+    m_energyScanResultsContainer(nullptr),
+    m_energyScanRunInfoContainer(nullptr)
 {
     declareProperty("L1CaloRampDataContainerKey", m_l1CaloRampDataContainerKey);
 }
@@ -59,8 +59,8 @@ StatusCode L1CaloLinearCalibration::finalize()
     L1CaloRampDataContainer::const_iterator it = rampData->begin();
     L1CaloRampDataContainer::const_iterator itEnd = rampData->end();
     std::vector<double> x, ex, y, ey;
-    boost::scoped_ptr<TGraphErrors> graph(0);
-    boost::scoped_ptr<TF1> func(new TF1("func", "pol1", 5., 255.));
+    std::unique_ptr<TGraphErrors> graph(nullptr);
+    std::unique_ptr<TF1> func(new TF1("func", "pol1", 5., 255.));
     double val(0.);
     int errCount = 0;
     for(; it != itEnd; ++it) {
