@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -11,8 +11,8 @@ class TestDataDependenciesCollection( unittest.TestCase ):
         alg = CompFactory.TauProcessorAlg("Algo") # use this one as example because it has rich I/O
         alg.Key_jetInputContainer = "TestJets"
         alg.CellMakerTool = CompFactory.CaloCellTimeCorrTool("TestPrivateTool", Folder="TestFolderA")
-        alg.ExtraInputs = {"ImaginedExtraType#ExInput"}
-        alg.ExtraOutputs = {"ImaginedExtraType#ExOutput"}
+        alg.ExtraInputs.add(("ImaginedExtraType","ExInput"))
+        alg.ExtraOutputs.add(("ImaginedExtraType","ExOutput"))
 
         ca.addEventAlgo(alg)
         ca.addPublicTool(CompFactory.CaloCellTimeCorrTool("SomeOtherTool", Folder="TestFolderB"))
