@@ -10,6 +10,7 @@
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/SCT_RDO_Container.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
+#include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 
 /**
  * @class IEFTrackingFPGADataFormatTool
@@ -37,6 +38,17 @@ class IEFTrackingFPGADataFormatTool : virtual public IAlgTool {
         std::vector<uint64_t> &encodedData,
         const EventContext &ctx
         ) const = 0;
+
+  virtual StatusCode convertFPGASliceToFPGADataFormat(
+  const FPGATrackSimHitCollection*  slices,
+  std::vector<uint64_t> &encodedData,
+  const EventContext &ctx) const =0;
+
+  virtual StatusCode convertFPGAHitsToFPGADataFormat(
+  const FPGATrackSimHitCollection*  hits,
+  std::vector<uint64_t> &encodedData,
+  const EventContext &ctx) const =0;
+
 };
 
 #endif  // EFTRACKINGFPGAINTEGRATION_IEFTRACKINGFPGADATAFORMATTOOL_H
