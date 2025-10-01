@@ -278,7 +278,7 @@ def RDOAnalysisCfg(flags):
     if flags.Detector.EnableMuon:
         if not flags.Muon.usePhaseIIGeoSetup:
             from MuonPRDTest.HitValAlgDigi import HitValAlgDigiCfg
-            acc.merge(HitValAlgDigiCfg(flags, outFile=flags.Output.HISTFileName))
+            acc.merge(HitValAlgDigiCfg(flags, outFile=flags.Output.HISTFileName, doMuEntry = False, doTruth = False))
         else:
             from MuonPRDTestR4.MuonHitTestConfig import MuonDigiTestCfg, MuonPileUpTestCfg
             if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
@@ -321,7 +321,6 @@ def LArRDOAnalysisCfg(flags, name="LArRDOAnalysis", **kwargs):
     kwargs.setdefault("InputTTL1EMKey", "LArTTL1EM")
     if flags.Digitization.AddCaloDigiThinned or \
        f"{prefix}LArDigitContainer_MC_Thinned" in flags.Input.Collections or \
-       flags.Common.ProductionStep is ProductionStep.PileUpPresampling or \
        flags.Common.ProductionStep is ProductionStep.Digitization: \
         
         kwargs.setdefault("InputDigitKey", f"{prefix}LArDigitContainer_MC_Thinned")
