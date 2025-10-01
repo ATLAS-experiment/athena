@@ -124,8 +124,7 @@ StatusCode LarEMSamplingFraction::execute()
   for (const std::string& containerName : m_CalibrationHitContainerNames) {
     if ( !evtStore()->contains<CaloCalibrationHitContainer>(containerName))
     {
-      ATH_MSG_ERROR("SG does not contain calibration hit container " << containerName);
-      return StatusCode::FAILURE;
+      ATH_MSG_WARNING("SG does not contain calibration hit container " << containerName);
     }
     else
       {
