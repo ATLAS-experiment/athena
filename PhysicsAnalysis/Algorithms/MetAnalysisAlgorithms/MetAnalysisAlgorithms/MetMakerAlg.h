@@ -132,8 +132,10 @@ namespace CP
 
     /// \brief the selection on the invisible container
   private:
-    SysReadSelectionHandleArray m_invisSelections {
+    Gaudi::Property<std::vector<std::string>> m_invisSelectionKeys {
       this, "invisibleSelection", {}, "the selection on the particles to be treated as invisible." };
+  private:
+    std::vector<SysReadSelectionHandle> m_invisSelections;
 
     /// \brief the key for \ref m_jetsHandle
   private:

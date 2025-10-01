@@ -38,16 +38,20 @@ namespace CP
     ANA_CHECK (m_muonsSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK (m_photonsSelection.initialize(m_systematicsList, m_photonsHandle, SG::AllowEmpty));
     ANA_CHECK (m_tausSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
-    //ANA_CHECK (m_invisSelections.initialize(m_systematicsList, m_invisHandles));
-     // Initialize invisible selections - need to pair each selection with its corresponding handle
-    if (m_invisSelections.size() != m_invisHandles.size()) {
-      ATH_MSG_ERROR("Number of invisible selections (" << m_invisSelections.size()
+
+    // Initialize invisible selections - need to pair each selection with its corresponding handle
+    if (m_invisSelectionKeys.size() != m_invisHandles.size()) {
+      ATH_MSG_ERROR("Number of invisible selections (" << m_invisSelectionKeys.size()
                     << ") doesn't match number of invisible handles (" << m_invisHandles.size() << ")");
       return StatusCode::FAILURE;
     }
+    m_invisSelections.clear();
+    m_invisSelections.reserve(m_invisHandles.size());
     for (size_t i = 0; i < m_invisHandles.size(); ++i) {
-      ANA_CHECK (m_invisSelections.at(i).initialize(m_systematicsList, m_invisHandles.at(i), SG::AllowEmpty));
+      m_invisSelections.emplace_back(m_invisSelectionKeys[i], this);
+      ANA_CHECK (m_invisSelections.back().initialize(m_systematicsList, m_invisHandles.at(i), SG::AllowEmpty));
     }
+
     ANA_CHECK (m_jetsHandle.initialize (m_systematicsList));
     ANA_CHECK (m_metHandle.initialize (m_systematicsList));
 
