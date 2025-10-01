@@ -81,7 +81,15 @@ def extractTrackingPasses(flags) -> list:
     print("List of scheduled passes:")
     for trackingPass in trackingPasses:
         print(f'- {trackingPass.Tracking.ActiveConfig.extension}')
-        
+    
+    # Check if we found a primary pass (and only one)
+    nPrimaryPasses = 0
+    for current_flags in trackingPasses:
+        if isPrimaryPass(current_flags):
+            nPrimaryPasses += 1
+    if nPrimaryPasses != 1:
+        raise ValueError(f"Problem in the job configuration: exactly one primary pass is required for a proper configuration, but we found {nPrimaryPasses} instead!")
+    
     return trackingPasses
 
 def getListOfGeneratedTrackParticles(flags) -> list[str]:
