@@ -20,7 +20,8 @@
 #include "L1TopoSimulationUtils/L1TopoDataTypes.h"
 #include "L1TopoSimulationUtils/Kinematics.h"
 
-#include <boost/numeric/conversion/cast.hpp>
+#include <limits>
+#include <stdexcept>
 
 #include <iostream>
 #include <cassert>
@@ -124,7 +125,10 @@ int floorSqrt(unsigned int x)
         } else // If mid*mid is greater than x
             end = mid - 1;
     }
-    return boost::numeric_cast<int>(ans);
+    if (ans > static_cast<unsigned long int>(std::numeric_limits<int>::max())) {
+      throw std::out_of_range("Value too large for int");
+    }
+    return static_cast<int>(ans);
 }
 int test4_compare(int u, int v){
     int bw_result = TSU::Kinematics::quadraticSumBW(u,v);
