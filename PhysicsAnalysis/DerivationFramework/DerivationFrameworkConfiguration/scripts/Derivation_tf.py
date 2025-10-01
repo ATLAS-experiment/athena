@@ -10,7 +10,7 @@ import sys
 import time
 
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
-from PyJobTransforms.trfArgs import addAthenaArguments
+from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.transform import transform
 
 # Setup core logging here
@@ -42,6 +42,7 @@ def getTransform():
     trf = transform(executor=executor_set,
                     description='ATLAS derivation framework transform. Inputs must be EVNT, AOD or DAOD. Outputs must be DAOD or D2AOD.')
     addAthenaArguments(trf.parser)
+    addDetectorArguments(trf.parser)
     addDerivationArguments(trf.parser)
     addPhysicsValidationArguments(trf.parser)
     return trf
