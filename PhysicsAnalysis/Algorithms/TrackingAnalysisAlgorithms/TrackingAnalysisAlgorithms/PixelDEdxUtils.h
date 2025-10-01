@@ -33,7 +33,7 @@ namespace PixelDEdx {
   };
 
   void getClusterdEdx( PixelClusterStruct& cluster,
-                        int& nUsedIBLOverflowHits,
+                        int& nIBLOverflowHits,
                         bool tightClusterCleaning = false);
   
   void getdEdxMetrics(const std::vector<PixelClusterStruct>& clusters,

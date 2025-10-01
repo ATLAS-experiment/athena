@@ -1,13 +1,5 @@
 #include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationTool.h"
 
-namespace {
-
-  // Some functions
-
-  // Accessors
-
-} // namespace
-
 namespace CP {
   
   PixelDEdxEqualizationTool::PixelDEdxEqualizationTool(const std::string& tool_name)

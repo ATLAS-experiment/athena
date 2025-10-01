@@ -18,11 +18,10 @@ StatusCode InDet::PixelToTPIDTool::initialize() {
 
   ATH_CHECK(AthAlgTool::initialize());
 
-  /// Equalize the cluster-level dE/dx measurements before taking the truncated mean.
+  /// If requested, equalize the cluster-level dE/dx measurements before taking the truncated mean.
   /// Not yet implemented.  See ATLIDTRKCP-579 for progress.
   /// Will eventually read run- and module-specific SFs from the conditions database.
   /// SFs account for radiation damage & varying operation conditions (bias voltages, thresholds, etc.).
-  /// See PixelDEdxEqualizationAlg for applying these SFs to special (D)xAODs with pixel clusters & MSOSs. 
   if(m_equalizeClusterMeasurements) {
     //ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and return the truncated mean.");
     ATH_MSG_WARNING("Equalization feature is not yet implemented.  See ATLIDTRKCP-579 for progress.");
@@ -54,17 +53,17 @@ StatusCode InDet::PixelToTPIDTool::finalize()
 //============================================================================================
 
 /// Will return the truncated mean dE/dx.
-/// Will also update nUsedHits (the divisor in the truncated mean) and nUsedIBLOverflowHits.
+/// Will also update nUsedHits (the divisor in the truncated mean) and nIBLOverflowHits.
 /// Whether this is the raw or equalized dE/dx will be determined by the tool properties.
 float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                             const Trk::Track& track,
                             int& nUsedHits,
-                            int& nUsedIBLOverflowHits) const
+                            int& nIBLOverflowHits) const
 {
 
   /// passed by ref, so will update here.  
   nUsedHits=0; // divisor in the truncated mean calculation.
-  nUsedIBLOverflowHits=0; // number of IBL hits in overflow.
+  nIBLOverflowHits=0; // number of IBL hits in overflow.
     
   /// Get pixel clusters in this simple struct to abstract away the two EDMs.
   std::vector<PixelDEdx::PixelClusterStruct> clusters;
@@ -100,7 +99,7 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           cluster.locy=pixclus->localParameters()[Trk::locY];
           cluster.bec=m_pixelid->barrel_ec(pixclus->identify());
           cluster.layer=m_pixelid->layer_disk(pixclus->identify());
-          cluster.eta_module=m_pixelid->eta_module(pixclus->identify());//check eta module to select thickness
+          cluster.eta_module=m_pixelid->eta_module(pixclus->identify()); //check eta module to select thickness
             
           float dotProd = (*tsosIter)->trackParameters()->momentum().dot( (*tsosIter)->trackParameters()->associatedSurface().normal() );
           cluster.cosalpha = fabs(dotProd / (*tsosIter)->trackParameters()->momentum().mag());
@@ -126,9 +125,9 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           }
 
           /// If good measurement, update raw cluster dE/dx, passdEdxCutsLoose, and passdEdxCutsTight.
-          /// Also, increment nUsedIBLOverflowHits
+          /// Also, increment nIBLOverflowHits
           /// If bad measurement, keep default negative value for dE/dx, don't increment.
-          getClusterdEdx(cluster, nUsedIBLOverflowHits);
+          getClusterdEdx(cluster, nIBLOverflowHits);
 
           /// Check if good measurement.
           if (cluster.dEdx < 0.0) { continue; }
@@ -139,7 +138,7 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
 
             /// Placeholder of pixel dE/dx equalization during reconstruction.
             /// Will pull equalization SFs from the conditons database.
-            /// See Rebecca Hicks' QT task: ATLIDTRKCP-579.
+            /// See ATLIDTRKCP-579 for progress.
             float SF = 1.;
 
             /// Apply scale factor and store
@@ -167,11 +166,9 @@ float InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
     float sigmadEdxEq = 0;
     PixelDEdx::getdEdxMetrics(clusters, averagedEdxEq, sigmadEdxEq, nUsedHitsEq, true);
 
-    /// Sanity check that nUsedHits and nUsedHitsEq are the same.
-    if (nUsedHitsEq != nUsedHits) {
-      ATH_MSG_ERROR("The numberOfUsedHitsdEdx calculated for the raw ("<< nUsedHits <<") and equalized ("<< nUsedHitsEq <<") dE/dx differ!  Should not happen!");
-    }
-      
+    /// Set nUsedHits to value calculated using the equalized dE/dx.  Passed by reference.
+    nUsedHits = nUsedHitsEq;
+
     /// Return equalized truncated mean dE/dx
     return averagedEdxEq;
   }

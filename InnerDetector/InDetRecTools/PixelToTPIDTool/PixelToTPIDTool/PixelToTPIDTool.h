@@ -49,7 +49,7 @@ namespace InDet {
       virtual float dEdx(const EventContext& ctx,
                          const Trk::Track& track,
                          int& nUsedHits,
-                         int& nUsedIBLOverflowHits) const override final;
+                         int& nIBLOverflowHits) const override final;
 
     private:
       ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc;

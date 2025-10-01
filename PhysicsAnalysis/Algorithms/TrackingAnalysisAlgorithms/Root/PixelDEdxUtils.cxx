@@ -8,10 +8,10 @@ namespace PixelDEdx {
   /// As is the number of IBL hits in overflow (again, only if they are considered for the trunc mean calc).
 
   /// If good measurement, update cluster raw cluster dE/dx, passdEdxCutsLoose, and passdEdxCutsTight.
-  /// Also, increment nUsedIBLOverflowHits.
+  /// Also, increment nIBLOverflowHits.
   /// If bad measurement, keep default negative value for dE/dx, don't increment.
   void getClusterdEdx(PixelClusterStruct& cluster,
-                      int& nUsedIBLOverflowHits,
+                      int& nIBLOverflowHits,
                       bool tightClusterCleaning) {    
 
     float dEdxValue;
@@ -91,7 +91,7 @@ namespace PixelDEdx {
       if(cluster.passdEdxCutsLoose && cluster.passdEdxCutsTight) { // technically shouldn't have to check cluster.passdEdxCutsLoose 
         /// Update counters & assign dE/dx.
         if (cluster.isIBL && cluster.iblOverflow) {
-          nUsedIBLOverflowHits++;
+          nIBLOverflowHits++;
         }
         cluster.dEdx = dEdxValue;
         return;
@@ -106,7 +106,7 @@ namespace PixelDEdx {
       if(cluster.passdEdxCutsLoose) { // technically shouldn't have to check cluster.passdEdxCutsLoose 
         /// Update counters & assign dE/dx.
         if (cluster.isIBL && cluster.iblOverflow) {
-          nUsedIBLOverflowHits++;
+          nIBLOverflowHits++;
         }
         cluster.dEdx = dEdxValue;
         return;

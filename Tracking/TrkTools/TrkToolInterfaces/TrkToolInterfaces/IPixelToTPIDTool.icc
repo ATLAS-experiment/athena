@@ -6,10 +6,10 @@ namespace Trk {
 inline float
 IPixelToTPIDTool::dEdx(const Trk::Track& track,
                        int& nUsedHits,
-                       int& nUsedIBLOverflowHits) const
+                       int& nIBLOverflowHits) const
 {
 
   return dEdx(
-    Gaudi::Hive::currentContext(), track, nUsedHits, nUsedIBLOverflowHits);
+    Gaudi::Hive::currentContext(), track, nUsedHits, nIBLOverflowHits);
 }
 }

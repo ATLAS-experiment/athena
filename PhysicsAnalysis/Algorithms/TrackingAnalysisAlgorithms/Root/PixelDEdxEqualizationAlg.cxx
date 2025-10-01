@@ -120,9 +120,6 @@ namespace CP {
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxHandle(m_clusterdEdxKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxEqHandle(m_clusterdEdxEqKey, ctx);
 
-    /// Increase the event counter
-    m_nEventsProcessed.fetch_add(1, std::memory_order_relaxed);
-
     /// Get run number for scale factor determination.
     /// For MC, run number indicates MC subcampaign.
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
@@ -133,11 +130,6 @@ namespace CP {
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerName, ctx);
     ATH_CHECK( tracks.isValid() );
     
-    // Increase the track counter
-    unsigned int nTracks = tracks->size();
-    m_nTracksProcessed.fetch_add(nTracks, std::memory_order_relaxed);
-    if (nTracks==0) return StatusCode::SUCCESS; // do this first?  MT safe?
-
     // Now decorate
     for (const auto* trk : *tracks) {
 
@@ -161,7 +153,7 @@ namespace CP {
       
       int allPixelHits = 0; // all pixel hits linked to the track.
       int nUsedHits = 0; // divisor in truncated mean.
-      int nUsedIBLOverflowHits = 0; // number of IBL hits in overflow.  Bad name, but matches PixelToTPIDTool.
+      int nIBLOverflowHits = 0; // number of IBL hits in overflow.
 
       /// Get pixel clusters in this simple struct to abstract away the two EDMs.
       std::vector<PixelDEdx::PixelClusterStruct> clusters;
@@ -237,14 +229,14 @@ namespace CP {
           }
           if (*pixclus == nullptr) {
             ATH_MSG_DEBUG("pixclus is a nullptr.");
-            continue; //  necessary?
+            continue;
           }
 
           /// Build simple cluster struct
           PixelDEdx::PixelClusterStruct cluster = getPixelClusterStruct(*pixclus, *msos);
 
           /// Get raw cluster dE/dx.  Will update cluster.dEdx.
-          PixelDEdx::getClusterdEdx(cluster, nUsedIBLOverflowHits, m_tightClusterCleaning);
+          PixelDEdx::getClusterdEdx(cluster, nIBLOverflowHits, m_tightClusterCleaning);
           
           /// Check that the cluster had a valid dE/dx measurement.
           if(cluster.dEdx > 0.) {
@@ -295,9 +287,9 @@ namespace CP {
                             << ") does not match the value calculated here ("<< nUsedHits <<")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
           }
-          if ( (int) stored_numberOfIBLOverflowsdEdx != nUsedIBLOverflowHits) {
+          if ( (int) stored_numberOfIBLOverflowsdEdx != nIBLOverflowHits) {
             ATH_MSG_DEBUG("The numberOfIBLOverflowsdEdx stored in the AOD ("<< (int) stored_numberOfIBLOverflowsdEdx
-                            << ") does not match the value calculated here ("<< nUsedIBLOverflowHits <<")!"
+                            << ") does not match the value calculated here ("<< nIBLOverflowHits <<")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
           }
         }
@@ -328,14 +320,14 @@ namespace CP {
         ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqStdDevKey << " with value " << sigmadEdxEq);
         trackdEdxEqStdDevHandle(*trk) = sigmadEdxEq;
         
-        /// Decorate with nUsedHits and nUsedIBLOverflowHits as calculated here on the xAOD?
+        /// Decorate with nUsedHits and nIBLOverflowHits as calculated here with the xAOD EDM.
         /// Can be different from those calculated during reconstruction due to migration across cluster quality cuts.
         /// Particularly the cluster local (x,y), we changes between the ESD and the xAOD...
         ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqNUsedKey << " with value " << nUsedHitsEq);
         trackdEdxEqNUsedHandle(*trk) = nUsedHitsEq;
         
-        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqIBLOFKey << " with value " << nUsedIBLOverflowHits);
-        trackdEdxEqIBLOFHandle(*trk) = nUsedIBLOverflowHits;
+        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqIBLOFKey << " with value " << nIBLOverflowHits);
+        trackdEdxEqIBLOFHandle(*trk) = nIBLOverflowHits;
         
       } // end cluster-level equalization if 
 
@@ -391,7 +383,7 @@ namespace CP {
     
     float msosTheta = (msos)->localTheta();
     float msosPhi = (msos)->localPhi();
-    float alpha = std::atan(std::hypot(std::tan(msosTheta),std::tan(msosPhi))); //check using correct Theta, phi. TODO
+    float alpha = std::atan(std::hypot(std::tan(msosTheta),std::tan(msosPhi)));
     cluster.cosalpha = std::cos(alpha);
     
     static const SG::AuxElement::ConstAccessor< float > chargeAcc("charge");

@@ -34,11 +34,11 @@ namespace Trk {
     virtual float dEdx(const EventContext& ctx,
                        const Trk::Track& track,
                        int& nUsedHits,
-                       int& nUsedIBLOverflowHits) const = 0;
+                       int& nIBLOverflowHits) const = 0;
 
     float dEdx(const Trk::Track& track,
                int& nUsedHits,
-               int& nUsedIBLOverflowHits) const;
+               int& nIBLOverflowHits) const;
   };
 
   inline const InterfaceID& Trk::IPixelToTPIDTool::interfaceID()
