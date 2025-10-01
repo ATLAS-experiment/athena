@@ -4,7 +4,6 @@
 atlas_subdir( TrkNeuralNetworkUtils )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Matrix Core Tree MathCore Hist )
 
 # Component(s) in the package:
@@ -18,9 +17,8 @@ atlas_add_library( TrkNeuralNetworkUtilsLib
                    ${TrkNeuralNetworkUtilsLibDictSource}
                    PUBLIC_HEADERS TrkNeuralNetworkUtils
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel )
+                   PRIVATE_LINK_LIBRARIES GaudiKernel )
 
 atlas_add_component( TrkNeuralNetworkUtils
                      src/components/*.cxx
