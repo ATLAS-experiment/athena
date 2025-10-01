@@ -22,10 +22,11 @@ void  Amplifier::InitAmplifierParameters()
   m_threshold = 0.;
   m_responseMax = 0.;
   m_triggerElectron = 20.;
-  m_adcOffset = 30.;
-  m_adcFactor = 90.;
+  m_adcOffset = 35.; // determined from Z -> mumu data as of 2025
+  m_adcFactor = 150.; // determined from Z -> mumu data as of 2025
   m_adcFraction = 10.;
   m_binsize = 1.;
+  m_integrationWindowNs = 18.5;
 } 
 
 double Amplifier::ResponseFunction(double time)
@@ -96,7 +97,7 @@ double Amplifier::ResponseFunction(double time)
 void Amplifier::InitResponse(unsigned int bins, double binsize)
 {
   m_binsize = binsize;  
-  m_integrationWindow =  (int)(20./binsize)-1 ;
+  m_integrationWindow =  (int)(m_integrationWindowNs/binsize)-1;
 
   m_response.resize(bins);
   m_signal.resize(bins);
