@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation file for class CutFlowSvc
@@ -278,7 +278,7 @@ void CutFlowSvc::handle( const Incident& inc )
     } else if (m_inputStream != inputstream) {
       const FileIncident* finc = dynamic_cast<const FileIncident*>(&inc);
       if (m_inputStream != "N/A" && m_inputStream != "unknownStream") {
-        ATH_MSG_FATAL("File " << finc->fileName() << " stream " << inputstream
+        ATH_MSG_FATAL("File " << (finc?finc->fileName():"???") << " stream " << inputstream
                               << " does not match previous file "
                               << m_inputStream);
         return;
