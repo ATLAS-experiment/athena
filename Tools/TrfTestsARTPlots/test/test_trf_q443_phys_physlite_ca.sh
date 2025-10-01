@@ -90,7 +90,7 @@ echo "art-result: ${rc4} xAODHistSize"
 
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v13/hist_physlite_25033.root"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v14/hist_physlite_25043.root"
 dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v4/dcube_config_hist_physlite_2402.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
