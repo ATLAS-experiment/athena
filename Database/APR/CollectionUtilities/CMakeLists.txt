@@ -4,7 +4,6 @@
 atlas_subdir( CollectionUtilities )
 
 # External dependencies:
-find_package( Boost )
 find_package( CORAL COMPONENTS CoralBase )
 find_package( XercesC )
 
