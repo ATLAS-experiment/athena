@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetEventCnvTools/InDetEventCnvTool.h"
@@ -16,6 +16,8 @@
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "IdDictDetDescr/IdDictManager.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
 
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
