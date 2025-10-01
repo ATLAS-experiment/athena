@@ -2,10 +2,12 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #undef NDEBUG
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE MultiTrajectorySE_test
 
 #include <boost/test/data/test_case.hpp>
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "Acts/EventData/MeasurementHelpers.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
