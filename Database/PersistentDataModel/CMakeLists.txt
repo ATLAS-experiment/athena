@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PersistentDataModel )
@@ -20,3 +20,9 @@ atlas_add_dictionary( PersistentDataModelDict
                       PersistentDataModel/PersistentDataModelDict.h
                       PersistentDataModel/selection.xml
                       LINK_LIBRARIES PersistentDataModel )
+
+# Unit test for Token legacy OID format support
+atlas_add_test( tokenLegacyOID_test
+                SOURCES test/tokenLegacyOID_test.cxx
+                LINK_LIBRARIES PersistentDataModel
+                POST_EXEC_SCRIPT nopost.sh )
