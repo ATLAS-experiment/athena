@@ -14,8 +14,7 @@
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/pool.h"
-#include "StorageSvc/DbHandleBase.h"
+#include "StorageSvc/DbObjectHandle.h"
 #include "StorageSvc/Transaction.h"
 
 #include <cstdint>
@@ -26,7 +25,6 @@
 namespace pool  {
 
   // Forward declarations
-  class IOODatabase;
   class IDbContainer;
   class DbSelect;
   class DbDatabase;
@@ -34,7 +32,6 @@ namespace pool  {
   class DbContainerObj;
   class DbTransaction;
   class DbOption;
-  template <class T> class DbObjectHandle;
 
   typedef const class Shape        *ShapeH;
 
@@ -104,8 +101,6 @@ namespace pool  {
     uint64_t size();
     /// Access to the Database the container resides in
     DbDatabase& containedIn();
-    /// Allow access to the Database implementation
-    IOODatabase* db();
     /// Let the implementation access the internals
     const IDbContainer* info()  const;
     IDbContainer* info();
