@@ -273,7 +273,7 @@ namespace xAOD {
       /// Function loading a given entry of the input TTree
       ::Int_t getEntry( ::Long64_t entry, ::Int_t getall = 0 );
 
-      /// RDS: Only valid for TChains, i.e. RNTuple doesn't (yet) have a way to 
+      /// RDS: Only valid for TChains, i.e. RNTuple doesn't (yet) have a way to
       ///      specify multiple files as TChain does.
       // /// Get how many files are available on the currently defined input
       // ::Long64_t getFiles() const;
@@ -334,7 +334,7 @@ namespace xAOD {
       /// Function determining the list keys associated with a type name
       void getNames(const std::string& targetClassName,
                     std::vector<std::string>& vkeys,
-                    bool metadata = false) const override;
+                    bool metadata = false) const;
 
       /// @}
 
@@ -413,7 +413,7 @@ namespace xAOD {
 
 
       /// Function adding dynamic variable reading capabilities to an auxiliary
-      /// store object 
+      /// store object
       /// metadata still uses TTree:
       StatusCode setUpDynamicStore( TObjectManager& mgr, ::TTree* tree );
       /// event uses RNTupleReader:
@@ -425,14 +425,14 @@ namespace xAOD {
                                ::Bool_t metadata = kFALSE );
       /// Function connecting a DV object to its auxiliary store - using TTree, for metadata only
       StatusCode setAuxStore( TObjectManager& mgr);
-     
+
       // /// Function saving the dynamically created auxiliary properties
       // StatusCode putAux( ::TTree& outTree, TVirtualManager& mgr,
       //                     ::Int_t basketSize = 32000, ::Int_t splitLevel = 0,
       //                     ::Bool_t metadata = kFALSE );
-     
-      /// RDS: for the three following methods, moving to directly take THolder rather than have one 
-      ///      for TObjectManager and another for RObjectManager. This can eventually be moved to base class 
+
+      /// RDS: for the three following methods, moving to directly take THolder rather than have one
+      ///      for TObjectManager and another for RObjectManager. This can eventually be moved to base class
       ///      and have TEvent use this one.
 
       /// Function checking if a given object may have an auxiliary store
@@ -469,7 +469,7 @@ namespace xAOD {
       /// The auxiliary access mode
       EAuxMode m_auxMode;
 
-      /// The main event reader: RNTupleReader 
+      /// The main event reader: RNTupleReader
       std::unique_ptr<ROOT::RNTupleReader> m_inNtupleReader;
 
       /// Pointer to the metadata tree in the input file

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TEVENT_ICC
 #define XAODROOTACCESS_TEVENT_ICC
@@ -40,6 +40,15 @@ namespace xAOD {
 
       // Simply forward the call:
       return transientContains( key, typeid( T ), kFALSE );
+   }
+
+   /// @param vkeys will be filled with the list of keys (may be empty)
+   /// @param metadata (default false) look in metadata content if true
+   template< typename T >
+   void TEvent::keys( std::vector< std::string >& vkeys,
+                      bool metadata ) const {
+
+      getNames( SG::normalizedTypeinfoName( typeid( T ) ), vkeys, metadata );
    }
 
    /// This function needs to be used when retrieving an object either from
