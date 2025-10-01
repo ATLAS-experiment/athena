@@ -110,6 +110,18 @@ namespace EFTrackingFPGAIntegration
         ATH_MSG_INFO(m_pixelEdmKernelName.value()<<" size: "<<m_pixelEdmPrepKernels.size());
         ATH_MSG_INFO(m_stripEdmKernelName.value()<<" size: "<<m_stripEdmPrepKernels.size());
 
+        if(m_pixelClusteringKernels.size()==0){
+            ATH_MSG_FATAL("No m_pixelClusteringKernels constructed");
+            return StatusCode::FAILURE;
+        }
+
+        // monitoring
+        if ( !m_monTool.empty() ) {
+            ATH_CHECK(m_monTool.retrieve() );
+        }
+        else {
+            ATH_MSG_INFO("Monitoring tool is empty");
+        }
 
         return StatusCode::SUCCESS;
     }
@@ -117,6 +129,11 @@ namespace EFTrackingFPGAIntegration
     StatusCode F1X0IntegrationAlg::execute(const EventContext &ctx) const
     {
         ATH_MSG_DEBUG("Executing F1X0IntegrationAlg");
+        auto mnt_timer_Total = Monitored::Timer<std::chrono::milliseconds>("TIME_Total");
+        auto monTime = Monitored::Group(m_monTool, mnt_timer_Total);
+
+        mnt_timer_Total.start();
+
         m_numEvents++;
 
         /// Input handles
@@ -143,8 +160,6 @@ namespace EFTrackingFPGAIntegration
         size_t stripEDMIndex = m_stripEdmPrepKernels.size() ? ctx.slot() % m_stripEdmPrepKernels.size() : 0;
 
         const cl::CommandQueue &acc_queue = m_acc_queues[bufferIndex];
-
-        ATH_MSG_INFO("Thread number "<<ctx.slot()<<" running on buffer "<<bufferIndex<<" pixelClusterIndex: "<< pixelClusterIndex<<" stripClusterIndex: "<< stripClusterIndex<<" stripL2GIndex: "<< stripL2GIndex<<" pixelL2GIndex: "<< pixelL2GIndex<<" pixelEDMIndex: "<< pixelEDMIndex<<" stripEDMIndex: "<< stripEDMIndex);
 
         cl::Kernel &pixelClusteringKernel = m_pixelClusteringKernels[pixelClusterIndex];
         cl::Kernel &stripClusteringKernel = m_stripClusteringKernels[stripClusterIndex];
@@ -261,6 +276,7 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Event> wait_for_reads = { evt_pixel_cluster_output, evt_strip_cluster_output };
         cl::Event::waitForEvents(wait_for_reads);
 
+        mnt_timer_Total.stop();
 
         if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
         if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
