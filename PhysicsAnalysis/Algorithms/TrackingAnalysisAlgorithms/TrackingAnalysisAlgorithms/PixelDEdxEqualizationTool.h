@@ -52,14 +52,14 @@ namespace CP {
     /// @name Function(s) implementing the IPixelDEdxEqualizationTool interface
     /// @{
 
-    virtual std::shared_ptr<std::vector<TrackSFRecord>> getRunTrackSFs(const int runNumber) const override;
-    virtual std::shared_ptr<std::vector<ClusterSFRecord>> getRunClusterSFs(const int runNumber) const override;
     virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const override;
     virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const int runNumber) const override;
 
   private:
     
     StatusCode initSFsFromTrees();
+    std::shared_ptr<std::vector<TrackSFRecord>> getRunTrackSFs(const int runNumber) const;
+    std::shared_ptr<std::vector<ClusterSFRecord>> getRunClusterSFs(const int runNumber) const;
 
     /// Flags
     Gaudi::Property<bool> m_equalizeTrackMeasurements

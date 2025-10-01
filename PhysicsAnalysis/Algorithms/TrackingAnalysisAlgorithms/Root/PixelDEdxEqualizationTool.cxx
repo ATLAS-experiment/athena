@@ -117,7 +117,7 @@ namespace CP {
     
     // SF data not found in the cache, so prepare to find it in the dataframe.
     // Need a unique write lock for caching.
-    ATH_MSG_INFO("Track SF data for run " << runNumber << " not cached. Will filter and cache now.");
+    ATH_MSG_INFO("Track SF data for run " << runNumber << " not cached. Will filter and cache now."); // worst case, prints once per thread.
 
     // Find closest run number in m_df
     auto runNumbers = m_df->Take<int>("runNumber");
@@ -125,13 +125,12 @@ namespace CP {
                                            [runNumber](int a, int b) {
                                              return std::abs(a - runNumber) < std::abs(b - runNumber);
                                            });
-    ATH_MSG_INFO("Closest run number: " << closestRunNumber);
-    
-    // If MC, make sure the closest run number is the actual run number.
-    if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
-       runNumber==410000 || runNumber==450000 || runNumber==470000) { //MC23a/d/e
-      if(runNumber!=closestRunNumber) {
-        ATH_MSG_ERROR("Could not find exact match for this MC event!");
+
+    if(runNumber!=closestRunNumber) {
+      // If MC, make sure the closest run number is the actual run number.
+      if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
+         runNumber==410000 || runNumber==450000 || runNumber==470000 || runNumber==495000) { //MC23a/d/e/g
+        ATH_MSG_WARNING("Could not find track-level SFs for this MC sub-campaign!  Will use SF=1."); // worst case, prints once per thread.
         auto emptyPtr = std::make_shared<std::vector<TrackSFRecord>>();
         {
           std::unique_lock writeLock(m_mapMutex);
@@ -139,8 +138,11 @@ namespace CP {
         }
         return emptyPtr;
       }
+      else { // data
+        ATH_MSG_WARNING("Could not find track-level SFs for this exact run, so using closest run: " << closestRunNumber); // worst case, prints once per thread.
+      }
     }
-    
+
     // Filter by closestRunNumber
     std::string expr = "runNumber == " + std::to_string(closestRunNumber);
     auto filtered = m_df->Filter(expr);
@@ -187,7 +189,7 @@ namespace CP {
       }
     }
     
-    ATH_MSG_INFO("SF data for run " << runNumber << " not cached. Will filter and cache now.");
+    ATH_MSG_INFO("SF data for run " << runNumber << " not cached. Will filter and cache now."); // worst case, prints once per thread.
     
     // Find closest run number in m_df
     auto runNumbers = m_df->Take<int>("runNumber");
@@ -195,13 +197,10 @@ namespace CP {
                                              [runNumber](int a, int b) {
                                                return std::abs(a - runNumber) < std::abs(b - runNumber);
                                              });
-    ATH_MSG_INFO("Closest run number: " << closestRunNumber);
-
-    // If MC, make sure the closest run number is the actual run number.
-    if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
-       runNumber==410000 || runNumber==450000 || runNumber==470000) { //MC23a/d/e
-      if(runNumber!=closestRunNumber) {
-        ATH_MSG_ERROR("Could not find exact match for this MC event!");
+    if(runNumber!=closestRunNumber) {
+      if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
+         runNumber==410000 || runNumber==450000 || runNumber==470000 || runNumber==495000) { //MC23a/d/e/g
+        ATH_MSG_WARNING("Could not find cluster-level SFs for this MC sub-campaign!  Will use SF=1."); // worst case, prints once per thread.
         auto emptyPtr = std::make_shared<std::vector<ClusterSFRecord>>();
         {
           std::unique_lock writeLock(m_mapMutex);
@@ -209,8 +208,11 @@ namespace CP {
         }
         return emptyPtr;
       }
+      else { // data
+        ATH_MSG_WARNING("Could not find cluster-level SFs for this exact run, so using closest run: " << closestRunNumber); // worst case, prints once per thread.
+      }
     }
-    
+
     // Filter by closestRunNumber
     std::string expr = "runNumber == " + std::to_string(closestRunNumber);
     auto filtered = m_df->Filter(expr);
@@ -259,8 +261,7 @@ namespace CP {
     // Retrieve cached SF data for the given run
     std::shared_ptr<std::vector<TrackSFRecord>> sfRecords = getRunTrackSFs(runNumber);
     if (!sfRecords || sfRecords->empty()) {
-      ATH_MSG_ERROR("No cached SF records found for run " << runNumber);
-      return -1.;
+      return +1.0;
     }
     
     // Get absolute eta, capped to the max bin range
@@ -311,8 +312,7 @@ namespace CP {
     auto sfRecordsPtr = getRunClusterSFs(runNumber);
 
     if (!sfRecordsPtr || sfRecordsPtr->empty()) {
-        ATH_MSG_WARNING("No SF records found for run " << runNumber << ". Returning SF=1.0.");
-        return 1.0;
+        return +1.0;
     }
 
     /// Get bec (barrel vs endcap) & eta bin for the SF.

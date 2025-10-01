@@ -27,12 +27,13 @@ namespace CP {
       return StatusCode::FAILURE;
     }
     else if (m_equalizeClusterMeasurements) {
-      ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and calculate the truncated mean."
-                   << "\nThis can be computationally expensive.  Consider scheduling after track thinning."
-                   << "\nAlternatively, consider using the trackMinPtCutMeV or trackMaxd0Cut properties here.");
+      ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and calculate the truncated mean.");
+      ATH_MSG_INFO("NB: MC20 does not model radiation damage and is not yet supported.  Will apply SF=1.");
     }
     else if (m_equalizeTrackMeasurements) {
       ATH_MSG_INFO("Will equalize the track-level truncated mean dE/dx from the AOD.");
+      ATH_MSG_INFO("NB: Run 3 data is not yet supported, so will apply SFs from last run in Run 2.");
+      ATH_MSG_INFO("NB: MC20 and MC23 are not yet supported, so will apply SF=1.  Radiation damage not modeled in MC20.");
     }
     else{
       ATH_MSG_ERROR("Must choose to equalize the dE/dx measurements at cluster-level OR track-level.");
@@ -41,13 +42,6 @@ namespace CP {
 
     if (m_tightClusterCleaning) {
       ATH_MSG_WARNING("Tight cluster cleaning requested for dE/dx calculation, but feature not yet supported.");
-    }
-
-    if (m_trackMinPtCutMeV > 0.) {
-      ATH_MSG_INFO("Only equalizing dE/dx and decorating tracks with pT > " << m_trackMinPtCutMeV << " MeV.");
-    }
-    if (m_trackMaxd0Cut > 0.) {
-      ATH_MSG_INFO("Only equalizing dE/dx and decorating tracks with |d0| > " << m_trackMaxd0Cut << " mm.");
     }
 
     /// Initialize decorators, independent of equalization strategy.
@@ -118,9 +112,9 @@ namespace CP {
     using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
 
     /// Declare decorators here
-    /// Will cause issues with TrackParticleCreator during reco if included outside of XAOD_STANDALONE.
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqHandle(m_trackdEdxEqKey, ctx);
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqStdDevDeco(m_trackdEdxEqStdDevKey, ctx);
+    /// Following only used if doing cluster-level equalization
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqStdDevHandle(m_trackdEdxEqStdDevKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqNUsedHandle(m_trackdEdxEqNUsedKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqIBLOFHandle(m_trackdEdxEqIBLOFKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxHandle(m_clusterdEdxKey, ctx);
@@ -147,16 +141,6 @@ namespace CP {
     // Now decorate
     for (const auto* trk : *tracks) {
 
-      /// Skip tracks that fail cuts
-      if( (m_trackMinPtCutMeV > 0.) && (trk->pt() < m_trackMinPtCutMeV) ) {
-        ATH_MSG_DEBUG("Skipping track due to low pT: " << trk->pt() << " MeV.");
-        continue;
-      }
-      if( (m_trackMaxd0Cut > 0.) && (std::fabs(trk->d0()) > m_trackMaxd0Cut) ) {
-        ATH_MSG_DEBUG("Skipping track due to large |d0|: " << abs(trk->d0()) << " mm.");
-        continue;
-      }
-      
       /// Apply dE/dx equalization scale factors and recalculate the dE/dx truncated mean.
       ///    This is to account for:
       ///        Radiation damage (worsens charge collection eff)
@@ -177,7 +161,7 @@ namespace CP {
       
       int allPixelHits = 0; // all pixel hits linked to the track.
       int nUsedHits = 0; // divisor in truncated mean.
-      int nUsedIBLOverflowHits = 0; // number of IBL hits in overflow.
+      int nUsedIBLOverflowHits = 0; // number of IBL hits in overflow.  Bad name, but matches PixelToTPIDTool.
 
       /// Get pixel clusters in this simple struct to abstract away the two EDMs.
       std::vector<PixelDEdx::PixelClusterStruct> clusters;
@@ -207,7 +191,7 @@ namespace CP {
         
         /// Get track-level equalization SF
         double SF = m_pixelDEdxEqualizationTool->getTrackdEdxSF(*trk, runNumber);
-        ATH_MSG_INFO("Test: found SF " << SF << " for this track.");
+        ATH_MSG_DEBUG("Found SF " << SF << " for this track.");
         
         /// Apply the SF
         float averagedEdxEq = stored_dEdx * SF;
@@ -225,8 +209,8 @@ namespace CP {
         /// Check for track states:
         static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
         if( ! trackStateAcc.isAvailable( *trk ) ) {
-          ATH_MSG_INFO("Requested cluster-level equalaization, but cannot find TrackState link from xAOD::TrackParticle."); // FIXME downgrade to DEBUG?
-          ATH_MSG_INFO("Could be missing or thinned away. Skipping track."); // FIXME downgrade to DEBUG?
+          ATH_MSG_DEBUG("Requested cluster-level equalaization, but cannot find TrackState link from xAOD::TrackParticle.");
+          ATH_MSG_DEBUG("Could be missing or thinned away. Skipping track.");
           /// Return an invalid value for the equalized truncated mean dE/dx.
           continue;
         }
@@ -242,17 +226,17 @@ namespace CP {
           }
           allPixelHits++;
           if ( (*msos)->type()!=0) {
-            continue; // not fittable.  See Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/TrackStateDefs. Want this?  FIXME
+            continue; // not fittable.  See Tracking/TrkEvent/TrkEventPrimitives/TrkEventPrimitives/TrackStateDefs.h
           }
       
           /// Get the corresponding TrackMeasurementValidation object (cluster/drift tube)
           const ElementLink<xAOD::TrackMeasurementValidationContainer> pixclus = (*msos)->trackMeasurementValidationLink();
           if (not pixclus.isValid()) {
-            ATH_MSG_INFO("Invalid link to cluster.");
+            ATH_MSG_DEBUG("Invalid link to cluster.");
             continue;
           }
           if (*pixclus == nullptr) {
-            ATH_MSG_INFO("pixclus is a nullptr.");
+            ATH_MSG_DEBUG("pixclus is a nullptr.");
             continue; //  necessary?
           }
 
@@ -268,7 +252,8 @@ namespace CP {
             /// Get cluster SF
             double SF = m_pixelDEdxEqualizationTool->getClusterdEdxSF(cluster, runNumber);
             
-            /// If valid SF found, calcualted the equalized cluster dE/dx
+            /// If valid SF found, calculate the equalized cluster dE/dx
+            /// Otherwise, leave it at negative default value to indicate bad SF.
             if(SF > 0.) {
               cluster.dEdxEq = cluster.dEdx * SF;
             }
@@ -341,7 +326,7 @@ namespace CP {
         trackdEdxEqHandle(*trk) = averagedEdxEq;
         
         ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqStdDevKey << " with value " << sigmadEdxEq);
-        trackdEdxEqStdDevDeco(*trk) = sigmadEdxEq;
+        trackdEdxEqStdDevHandle(*trk) = sigmadEdxEq;
         
         /// Decorate with nUsedHits and nUsedIBLOverflowHits as calculated here on the xAOD?
         /// Can be different from those calculated during reconstruction due to migration across cluster quality cuts.
