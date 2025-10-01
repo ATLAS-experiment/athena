@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file EventStreamInfoCnv_p3.cxx
@@ -55,6 +55,6 @@ void EventStreamInfoCnv_p3::transToPers(const EventStreamInfo* trans, EventStrea
    for (const EventType& ttype : trans->getEventTypes()) {
       EventType_p3 ptype;
       typeConv.transToPers(&ttype, &ptype, log);
-      pers->m_eventTypes.push_back(ptype);
+      pers->m_eventTypes.push_back(std::move(ptype));
    }
 }
