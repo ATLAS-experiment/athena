@@ -1,7 +1,7 @@
 // dear emacs, this is -*- c++ -*-
 
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_EVENTTYPE_H
@@ -105,6 +105,11 @@ public:
   //@{
   EventType();
   virtual ~EventType();
+
+  EventType(const EventType&) = default;
+  EventType(EventType&&) = default;
+  EventType& operator=(const EventType&) = default;
+  EventType& operator=(EventType&&) = default;
   //@}
 
   /// Less than comparision needed to create e.g. set<EventType>

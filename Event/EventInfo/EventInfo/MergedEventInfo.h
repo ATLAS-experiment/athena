@@ -43,6 +43,11 @@ public:
                   EventID::number_type newEvtNo,
                   EventID::number_type newTimeStamp = 0);
   virtual ~MergedEventInfo();
+
+  MergedEventInfo(const MergedEventInfo&) = default;
+  MergedEventInfo(MergedEventInfo&&) = default;
+  MergedEventInfo& operator=(const MergedEventInfo&) = default;
+  MergedEventInfo& operator=(MergedEventInfo&&) = default;
   //@}
 
   /// \name DataObject-like clid accessors
