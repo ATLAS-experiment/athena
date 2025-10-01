@@ -58,4 +58,15 @@
    <!-- The TActiveStore helper class: -->
    <class name="xAOD::TActiveStore" />
 
+   <!-- The REvent class: -->
+   <class name="xAOD::Experimental::REvent" >
+      <field name="m_eventReader" transient="true" />
+      <field name="m_inputNTupleIsMissing" transient="true" />
+      <field name="m_metaReader" transient="true" />
+      <field name="m_entry" transient="true" />
+   </class>
+
+   <!-- Python interface class: -->
+   <class name="xAOD::Experimental::RPyEvent" />
+
 </lcgdict>
