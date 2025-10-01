@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from enum import Enum
@@ -101,6 +102,11 @@ class CommonServicesConfig (ConfigBlock) :
                 weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|extrapolation_pt_|JET_.*JvtEfficiency_|PRW_).*"
 
 
+@groupBlocks
+def CommonServices(seq):
+    seq.append(CommonServicesConfig())
+    from AsgAnalysisAlgorithms.TruthCollectionsFixerConfig import TruthCollectionsFixerBlock
+    seq.append(TruthCollectionsFixerBlock())
 
 class IOStatsBlock(ConfigBlock):
     """Print what branches are used in analysis"""
@@ -187,15 +193,15 @@ class PileupReweightingBlock (ConfigBlock):
                     config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
             return
 
-        # check files from autoconfig flags
-        if self.files is None and config.autoconfigFlags() is not None:
-            self.files = config.autoconfigFlags().Input.Files
+        # check files from flags
+        if self.files is None and config.flags is not None:
+            self.files = config.flags.Input.Files
 
         campaign = self.campaign
         # if user didn't explicitly configure campaign, let's try setting it from metadata
         # only needed on MC
         if config.dataType() is not DataType.Data and self.campaign is None:
-            # if we used autoconfigflags, campaign is auto-determined
+            # if we used flags, campaign is auto-determined
             if config.campaign() is not None and config.campaign() is not Campaign.Unknown:
                 campaign = config.campaign()
                 log.info(f'Auto-configuring campaign for PRW from flags: {campaign.value}')
@@ -282,7 +288,7 @@ class PileupReweightingBlock (ConfigBlock):
             log.warning ('Pileup reweighting is not yet supported for Run 4 geometry')
             alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg' )
             alg.uint32Decorations = { 'RandomRunNumber' :
-                                      config.autoconfigFlags().Input.RunNumbers[0] }
+                                      config.flags.Input.RunNumbers[0] }
 
         else:
             alg = config.createAlgorithm( 'CP::PileupReweightingAlg',
@@ -384,7 +390,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
         
         if self.doHFProdFracReweighting:
-            generatorInfo = config.autoconfigFlags().Input.GeneratorsInfo
+            generatorInfo = config.flags.Input.GeneratorsInfo
             log.info(f"Loaded generator info: {generatorInfo}")
 
             DSID = "000000"

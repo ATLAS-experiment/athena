@@ -40,9 +40,12 @@ namespace MuonGM {
     
     inline double TgcReadoutElement::stripLength() const { return m_Rsize; }
     inline double TgcReadoutElement::physicalDistanceFromBase() const { return m_readoutParams->physicalDistanceFromBase(); }
-    inline double TgcReadoutElement::stripPosOnLargeBase(int strip) const { return m_readoutParams->stripPositionOnLargeBase(strip); }
-    inline double TgcReadoutElement::stripPosOnShortBase(int strip) const { return m_readoutParams->stripPositionOnShortBase(strip); }
-    
+    inline double TgcReadoutElement::stripPosOnLargeBase(int strip, int gasGap) const { 
+        return m_readoutParams->stripPositionOnLargeBase(strip, gasGap);
+    }
+    inline double TgcReadoutElement::stripPosOnShortBase(int strip, int gasGap) const { 
+        return m_readoutParams->stripPositionOnShortBase(strip, gasGap);
+    }
     inline double TgcReadoutElement::wireLength(int wire) const {
         return m_Ssize + (wire - 1) * wirePitch() * (m_LongSsize - m_Ssize) / m_Rsize;
     }
@@ -50,8 +53,9 @@ namespace MuonGM {
     inline const TgcReadoutParams* TgcReadoutElement::getReadoutParams() const { return m_readoutParams.get(); }
 
     inline std::pair<double, int> TgcReadoutElement::stripNumberToFetch(int gasGap, int inStrip) const {
-        const bool swapStrip{!((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1))};
-        const bool flip = gasGap !=1;/// {!((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1))};
+        const bool swapStrip{!((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1) || 
+                                m_readoutParams->nStripLayers() > 1)};
+        const bool flip = gasGap !=1 && m_readoutParams->nStripLayers() == 1;
         const int pickStrip = swapStrip ? 33 - inStrip : inStrip;
         return std::make_pair(-1. + 2.*flip, pickStrip);
     }  
@@ -72,10 +76,11 @@ namespace MuonGM {
     inline int TgcReadoutElement::numberOfStrips(int layer, bool isStrip) const { return isStrip ? nStrips(layer) : 
                                                                                                    nWireGangs(layer);
     }
-    inline double TgcReadoutElement::stripLocalX(const int stripNum,
+    inline double TgcReadoutElement::stripLocalX(const int gasGap,
+                                                 const int stripNum,
                                                  const double locY,
                                                  const double refPoint) const {
-        return refPoint + (locY != 0. ? locY * m_stripSlope * (stripPosOnLargeBase(stripNum) - stripPosOnShortBase(stripNum)) : 0.);
+        return refPoint + (locY != 0. ? locY * m_stripSlope * (stripPosOnLargeBase(stripNum, gasGap) - stripPosOnShortBase(stripNum, gasGap)) : 0.);
     }
  
     inline const Amg::Transform3D& TgcReadoutElement::localToGlobalTransf(const Identifier& id) const { 

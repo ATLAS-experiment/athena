@@ -41,17 +41,6 @@ def GetTaggerTrainingMap(flags, jet_col):
             "BTagging/20230307/DL1dv01/antiktvr30rmax4rmin02track/network.json",  # 2023 pre-rec DL1dv01
             "BTagging/20230307/gn2v00/antiktvr30rmax4rmin02track/network.onnx",
         ],
-        "AntiKt10UFOCSSKSoftDropBeta100Zcut10": [
-            "BTagging/20230413/gn2xv00/antikt10ufo/network.onnx",
-            "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
-            "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
-            "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
-            "BTagging/20250310/antikt10ufo/GN2XTauV00.onnx",
-            "BTagging/20250522/GN3XV00/antikt10ufo/network.onnx",
-            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/MC20_bbJES_ak10csskufo_Sep24_calibFactors.onnx", # bJR10v00
-            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
-            "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
-        ],
         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA": [
             "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx", # fold 0 of the GN2v01 (safe for HLT jets)
         ],

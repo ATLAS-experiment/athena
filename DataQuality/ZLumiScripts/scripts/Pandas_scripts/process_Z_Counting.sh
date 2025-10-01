@@ -9,8 +9,8 @@
 if [[ $# -ge 1 ]]; then
     year=$1
     echo "Processing Z counting for year 20${year}"
-    if [[ $1 -ne 24 ]]; then
-	echo "Script unvalidated for years other than 2024 - remove this block later"
+    if [[ $1 -lt 24 ]]; then
+	echo "Script unvalidated for years before 2024 - block for now"
 	exit 1
     fi
 else

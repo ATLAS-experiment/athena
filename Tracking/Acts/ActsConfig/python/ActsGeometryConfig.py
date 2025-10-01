@@ -65,6 +65,9 @@ def ActsTrackingGeometrySvcCfg(flags,
     if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryMuon:
+      subDetectors += ["Muon"]
+      from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+      acc.merge(MuonGeoModelCfg(flags))  
       from ActsMuonDetector.ActsMuonDetectorCfg import MuonBlueprintNodeBuilderCfg
       blueprintTools += [acc.popToolsAndMerge(MuonBlueprintNodeBuilderCfg(flags))]
         # also Calo needs to be added
@@ -249,12 +252,6 @@ def ActsWriteTrackingGeometryCfg(flags,
       subDetectors += ["ITkStrip"]
     if flags.Detector.GeometryHGTD:
       subDetectors += ["HGTD"]
-
-    if 'ObjWriterTool' not in kwargs: 
-      kwargs.setdefault("ObjWriterTool",
-                        acc.getPrimaryAndMerge(ActsObjWriterToolCfg(flags,
-                                                                    OutputDirectory = "obj",
-                                                                    SubDetectors = subDetectors) ))
 
     acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometry(name, **kwargs))
     return acc

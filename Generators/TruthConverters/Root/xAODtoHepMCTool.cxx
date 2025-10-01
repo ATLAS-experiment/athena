@@ -78,7 +78,7 @@ std::vector<HepMC::GenEvent> xAODtoHepMCTool ::getHepMCEvents(const xAOD::TruthE
     // Insert into McEventCollection
     mcEventCollection.push_back(std::move(hepmcEvent));
     #ifdef HEPMC3
-    mcEventCollection[mcEventCollection.size()-1].set_run_info(runinfo);
+    mcEventCollection[mcEventCollection.size()-1].set_run_info(std::move(runinfo));
     #endif
     // Quit if signal only
     if (m_signalOnly)
@@ -109,7 +109,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
   }
   #ifdef HEPMC3
   std::shared_ptr<HepMC3::GenRunInfo> runinfo = std::make_shared<HepMC3::GenRunInfo>();
-  genEvt.set_run_info(runinfo);
+  genEvt.set_run_info(std::move(runinfo));
   std::vector<std::string> wnames;
   wnames.reserve(weights.size());
   for (int idx = 0; idx < int(weights.size()); ++idx) {
@@ -191,7 +191,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 #endif
       // Insert into Event
       if (!prodVtxSeenBefore) {
-        genEvt.add_vertex(hepmcProdVtx);
+        genEvt.add_vertex(std::move(hepmcProdVtx));
       }
     }
     else {
@@ -212,13 +212,13 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       auto hepmcDecayVtx = vertexHelper(xAODDecayVtx, vertexMap, decayVtxSeenBefore);
       // Set the decay/production links
 #ifdef HEPMC3
-      hepmcDecayVtx->add_particle_in(hepmcParticle);
+      hepmcDecayVtx->add_particle_in(std::move(hepmcParticle));
 #else
       hepmcDecayVtx->add_particle_in(hepmcParticle.get());
 #endif
       // Insert into Event
       if (!decayVtxSeenBefore) {
-        genEvt.add_vertex(hepmcDecayVtx);
+        genEvt.add_vertex(std::move(hepmcDecayVtx));
       }
     }
 #ifndef HEPMC3
@@ -290,6 +290,8 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
   std::cout << "   -----------------------------------------------------------------------------------" << std::endl;
 
   int nPart = event->nTruthParticles();
+  std::ios oldState(nullptr); 
+  oldState.copyfmt(std::cout); //save ostream format
   for (int i = 0; i < nPart; ++i)
   {
     const xAOD::TruthParticle *part = event->truthParticle(i);
@@ -318,7 +320,8 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
       if (dvtx)
         uidKids.push_back(HepMC::uniqueID(dvtx));
     }
-
+    
+    
     std::cout << std::setw(10) << HepMC::uniqueID(part) << std::setw(12) << id
               << std::setw(8) << stat
               << std::setprecision(2) << std::fixed
@@ -337,4 +340,5 @@ void xAODtoHepMCTool::printxAODEvent(const xAOD::TruthEvent *event, const xAOD::
     std::cout << std::endl;
   }
   std::cout << "======================================================================================" << std::endl;
+  std::cout.copyfmt(oldState);//restore ostream format
 }

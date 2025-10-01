@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionBase/CollectionFactory.h"
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/CollectionBaseNames.h"
-#include "CollectionBase/boost_tokenizer_headers.h"
+#include <boost/tokenizer.hpp>
 
 #include "FileCatalog/IFileCatalog.h"
 
@@ -199,14 +199,14 @@ pool::CollectionFactory::registerExisting( const pool::ICollectionDescription& d
    log << coral::Debug << "Registering collection PFN=" << physicalName
        << ", LFN=" << logicalName  << coral::MessageStream::endmsg;
 
-   pool::ICollection* collection = openWithPhysicalName( physicalName,
-                                                         collectionCatalog,
-                                                         pool::ICollection::READ,
-                                                         session );
+   std::unique_ptr<pool::ICollection> collection
+     ( openWithPhysicalName( physicalName,
+                             collectionCatalog,
+                             pool::ICollection::READ,
+                             session ) );
 
    bool overwrite( true );
-   bool rc = registerExisting( collection, overwrite, collectionCatalog, logicalName, session );
-   delete collection;   collection = 0;
+   bool rc = registerExisting( collection.get(), overwrite, collectionCatalog, std::move(logicalName), session );
    return rc;
 }
 

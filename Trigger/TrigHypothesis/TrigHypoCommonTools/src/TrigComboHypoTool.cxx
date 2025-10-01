@@ -240,10 +240,14 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
       // Just the features for the current variable evaluation
       Combination combinationToCheck;
 
-      size_t legA_index = getIndexFromLeg(iVarInfo->legA);
-      size_t legB_index = getIndexFromLeg(iVarInfo->legB);
+      size_t legA_index = 0;
+      size_t legB_index = 0;
+
       // For 1-leg chain, the legID is invalid
-      if(m_skipLegCheck) {legA_index = legB_index = 0;}
+      if (!m_skipLegCheck) {
+        legA_index = getIndexFromLeg(iVarInfo->legA);
+        legB_index = getIndexFromLeg(iVarInfo->legB);
+      }
 
       ATH_MSG_DEBUG(
         "Computing " << iVarInfo->varTag << " on legs "

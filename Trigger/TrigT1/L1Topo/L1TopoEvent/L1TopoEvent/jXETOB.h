@@ -18,7 +18,7 @@ namespace TCS {
 
       // constructor with initial values
       // input TOB type can be jXE, jXEC, jXEPERF
-      jXETOB(int ex, int ey, unsigned int et, inputTOBType_t tobType = NONE);
+      jXETOB(int ex, int ey, unsigned long long et, inputTOBType_t tobType = NONE);
 
       // copy constructor
       jXETOB(const jXETOB & jxe);
@@ -29,8 +29,8 @@ namespace TCS {
       // accessors
       int Ex() const { return m_Ex; }
       int Ey() const { return m_Ey; }
-      unsigned int Et() const { return m_Et; }
-      unsigned int Et2() const {return m_Et2; }
+      unsigned long long Et() const { return m_Et; }
+      unsigned long long Et2() const {return m_Et2; }
 
       double ExDouble() const { return m_ExDouble; }
       double EyDouble() const { return m_EyDouble; }
@@ -39,7 +39,7 @@ namespace TCS {
       // setters
       void setEx(int ex) { m_Ex = ex; }
       void setEy(int ey) { m_Ey = ey; }
-      void setEt(unsigned int et) { m_Et = et; }
+      void setEt(unsigned long long et) { m_Et = et; }
       void setEt2(unsigned long long et2) { m_Et2 = et2; }
       
       void setExDouble(double ex) { m_ExDouble = ex; }
@@ -62,7 +62,7 @@ namespace TCS {
 
       int m_Ex {0};
       int m_Ey {0};
-      unsigned int m_Et {0};
+      unsigned long long m_Et {0};
       unsigned long long m_Et2 {0};
 
       double m_ExDouble {0};

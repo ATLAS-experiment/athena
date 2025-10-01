@@ -63,8 +63,6 @@ def createActsHeavyIonTrackingPassFlags():
     icf.doActsAmbiguityResolution = lambda pcf : pcf.Acts.doAmbiguityResolution
     icf.doActsToAthenaResolvedTrack = lambda pcf : pcf.Acts.doAmbiguityResolution
 
-    # Other specific flags
-    icf.minPTSeed = 0.4
     # Deactivate CTIDE processor fit
     icf.doAmbiguityProcessorTrackFit = False    
     return icf
@@ -161,6 +159,12 @@ def createActsValidateConversionSeedsTrackingPassFlags():
     icf.isSecondaryPass = False
     return icf
 
+def createActsValidateLargeRadiusStandaloneTrackingPassFlags():
+    icf = createActsLargeRadiusTrackingPassFlags()
+    icf.extension = "ActsValidateLargeRadiusStandalone"
+    icf.isSecondaryPass = False
+    return icf
+
 def createActsValidateLargeRadiusSeedsTrackingPassFlags():
     icf = createActsLargeRadiusTrackingPassFlags()
     icf.extension = "ActsValidateLargeRadiusSeeds"
@@ -225,5 +229,17 @@ def createEFValidateF100TrackingPassFlags():
     icf.doFPGATrackSim = True
     icf.doActsSpacePoint = True
     icf.doActsSeed = True
+    icf.doActsTrack = True
+    return icf
+
+def createEFValidateF150TrackingPassFlags():
+    icf = createActsTrackingPassFlags()
+    icf.extension = "ActsValidateF150"
+    icf.doActsCluster = False
+    icf.doFPGACluster = True
+    icf.doFPGASeed = True
+    icf.doFPGATrackSim = True
+    icf.doActsSpacePoint = False
+    icf.doActsSeed = False
     icf.doActsTrack = True
     return icf

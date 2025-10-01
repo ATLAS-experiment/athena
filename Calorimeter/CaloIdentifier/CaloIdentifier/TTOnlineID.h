@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOIDENTIFIER_TTONLINEID_H
@@ -39,8 +39,8 @@ class TTOnlineID : public AtlasDetectorID
 
   typedef Identifier::size_type  size_type;
 
-  TTOnlineID(void);
-  ~TTOnlineID(void);
+  TTOnlineID();
+  ~TTOnlineID();
 
 
   /* build towerId HWIdentifier */
@@ -53,8 +53,8 @@ class TTOnlineID : public AtlasDetectorID
   /** (3) create towerId from hash */
   IdentifierHash crateHash( HWIdentifier crate_id ) const;
   /** (4) iterator over towerId */
-  std::vector<HWIdentifier>::const_iterator crate_begin(void) const;
-  std::vector<HWIdentifier>::const_iterator crate_end(void) const;
+  std::vector<HWIdentifier>::const_iterator crate_begin() const;
+  std::vector<HWIdentifier>::const_iterator crate_end() const;
 
   /* build moduleId HWIdentifier */
   /*=========================== */
@@ -66,8 +66,8 @@ class TTOnlineID : public AtlasDetectorID
   /** (3) create towerId from hash */
   IdentifierHash moduleHash( HWIdentifier crate_id ) const;
   /** (4) iterator over towerId */
-  std::vector<HWIdentifier>::const_iterator module_begin(void) const;
-  std::vector<HWIdentifier>::const_iterator module_end(void) const;
+  std::vector<HWIdentifier>::const_iterator module_begin() const;
+  std::vector<HWIdentifier>::const_iterator module_end() const;
 
   /* build submoduleId HWIdentifier */
   /*=========================== */
@@ -79,8 +79,8 @@ class TTOnlineID : public AtlasDetectorID
   /** (3) create towerId from hash */
   IdentifierHash submoduleHash( HWIdentifier crate_id ) const;
   /** (4) iterator over towerId */
-  std::vector<HWIdentifier>::const_iterator submodule_begin(void) const;
-  std::vector<HWIdentifier>::const_iterator submodule_end(void) const;
+  std::vector<HWIdentifier>::const_iterator submodule_begin() const;
+  std::vector<HWIdentifier>::const_iterator submodule_end() const;
 
   /* build moduleId HWIdentifier */
   /*=========================== */
@@ -92,17 +92,17 @@ class TTOnlineID : public AtlasDetectorID
   /** (3) create towerId from hash */
   IdentifierHash channelHash( HWIdentifier crate_id ) const;
   /** (4) iterator over towerId */
-  std::vector<HWIdentifier>::const_iterator channel_begin(void) const;
-  std::vector<HWIdentifier>::const_iterator channel_end(void) const;
+  std::vector<HWIdentifier>::const_iterator channel_begin() const;
+  std::vector<HWIdentifier>::const_iterator channel_end() const;
 
 
 
   /*  hash tables max size */
   /*====================== */
-  size_type  crateHashMax (void) const;
-  size_type  moduleHashMax (void) const;
-  size_type  submoduleHashMax (void) const;
-  size_type  channelHashMax (void) const;
+  size_type  crateHashMax () const;
+  size_type  moduleHashMax () const;
+  size_type  submoduleHashMax () const;
+  size_type  channelHashMax () const;
 
 
   /** Initialization from the identifier dictionary*/
@@ -119,10 +119,10 @@ class TTOnlineID : public AtlasDetectorID
 
   /** context for feedthroughs, feb  & channels */
 
-  IdContext    crateContext(void) const;
-  IdContext    moduleContext(void) const;
-  IdContext    submoduleContext(void) const;
-  IdContext    channelContext(void) const;
+  IdContext    crateContext() const;
+  IdContext    moduleContext() const;
+  IdContext    submoduleContext() const;
+  IdContext    channelContext() const;
 
 
 private:
@@ -149,8 +149,8 @@ private:
   int detzside_field_value() const;
 
   /** init() hashes */
-  int  initLevelsFromDict(void) ;
-  int  init_hashes(void);
+  int  initLevelsFromDict();
+  int  init_hashes();
 
   /** Member Data index */
 	size_type m_calo_index;
@@ -254,13 +254,13 @@ inline IdentifierHash TTOnlineID::crateHash  (HWIdentifier crate_id) const{
 }
 
 //=============================================================================
-inline std::vector<HWIdentifier>::const_iterator TTOnlineID::crate_begin(void) const {
+inline std::vector<HWIdentifier>::const_iterator TTOnlineID::crate_begin() const {
 //=============================================================================
 	return(m_crate_vec.begin());
 }
 
 //=============================================================================
-inline std::vector<HWIdentifier>::const_iterator TTOnlineID::crate_end(void) const {
+inline std::vector<HWIdentifier>::const_iterator TTOnlineID::crate_end() const {
 //=============================================================================
 	return(m_crate_vec.end());
 }
@@ -307,13 +307,13 @@ inline IdentifierHash TTOnlineID::moduleHash  (HWIdentifier module_id) const{
 }
 
 //=============================================================================
-inline std::vector<HWIdentifier>::const_iterator TTOnlineID::module_begin(void) const {
+inline std::vector<HWIdentifier>::const_iterator TTOnlineID::module_begin() const {
 //=============================================================================
 	return(m_module_vec.begin());
 }
 
 //=============================================================================
-inline std::vector<HWIdentifier>::const_iterator TTOnlineID::module_end(void) const {
+inline std::vector<HWIdentifier>::const_iterator TTOnlineID::module_end() const {
 //=============================================================================
 	return(m_module_vec.end());
 }
@@ -362,13 +362,13 @@ inline IdentifierHash TTOnlineID::submoduleHash  (HWIdentifier submodule_id) con
 }
 
 //=============================================================================
-inline std::vector<HWIdentifier>::const_iterator TTOnlineID::submodule_begin(void) const {
+inline std::vector<HWIdentifier>::const_iterator TTOnlineID::submodule_begin() const {
 //=============================================================================
 	return(m_submodule_vec.begin());
 }
 
 //=============================================================================
-inline std::vector<HWIdentifier>::const_iterator TTOnlineID::submodule_end(void) const {
+inline std::vector<HWIdentifier>::const_iterator TTOnlineID::submodule_end() const {
 //=============================================================================
 	return(m_submodule_vec.end());
 }
@@ -418,13 +418,13 @@ inline IdentifierHash TTOnlineID::channelHash  (HWIdentifier channel_id) const{
 }
 
 //=============================================================================
-inline std::vector<HWIdentifier>::const_iterator TTOnlineID::channel_begin(void) const {
+inline std::vector<HWIdentifier>::const_iterator TTOnlineID::channel_begin() const {
 //=============================================================================
 	return(m_channel_vec.begin());
 }
 
 //=============================================================================
-inline std::vector<HWIdentifier>::const_iterator TTOnlineID::channel_end(void) const {
+inline std::vector<HWIdentifier>::const_iterator TTOnlineID::channel_end() const {
 //=============================================================================
 	return(m_channel_vec.end());
 }
@@ -432,25 +432,25 @@ inline std::vector<HWIdentifier>::const_iterator TTOnlineID::channel_end(void) c
 
 /* Hash indices */
 
-inline TTOnlineID::size_type TTOnlineID::crateHashMax (void) const
+inline TTOnlineID::size_type TTOnlineID::crateHashMax () const
 /*====================================================================*/
 {
   return m_crateHashMax;
 }
 
-inline TTOnlineID::size_type TTOnlineID::moduleHashMax (void) const
+inline TTOnlineID::size_type TTOnlineID::moduleHashMax () const
 /*====================================================================*/
 {
   return m_moduleHashMax;
 }
 
-inline TTOnlineID::size_type TTOnlineID::submoduleHashMax (void) const
+inline TTOnlineID::size_type TTOnlineID::submoduleHashMax () const
 /*====================================================================*/
 {
   return m_submoduleHashMax;
 }
 
-inline TTOnlineID::size_type TTOnlineID::channelHashMax (void) const
+inline TTOnlineID::size_type TTOnlineID::channelHashMax () const
 /*====================================================================*/
 {
   return m_channelHashMax;

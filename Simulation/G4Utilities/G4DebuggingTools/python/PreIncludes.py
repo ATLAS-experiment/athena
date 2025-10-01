@@ -15,3 +15,7 @@ def DebugMonopole(flags):
 
 def DebugSleptonsLLP(flags):
     flags.Sim.OptionalUserActionList += ['Sleptons.SleptonsConfig.SleptonsLLP_VerboseSelectorCfg']
+
+
+def DebugRHadrons(flags):
+    flags.Sim.OptionalUserActionList += ['RHadrons.RHadronsConfig.RHadrons_VerboseSelectorCfg']

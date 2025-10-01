@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -31,7 +31,7 @@ namespace CP
     for (auto& [name, value] : m_uint32Decorations)
     {
       ANA_MSG_INFO ("Adding uint32_t decoration " << name << " with value " << value << " to EventInfo");
-      m_decFunctions.push_back([dec = SG::AuxElement::Decorator<uint32_t>(name), value](const xAOD::EventInfo& ei) { dec(ei) = value; });
+      m_decFunctions.push_back([dec = SG::Decorator<uint32_t>(name), value](const xAOD::EventInfo& ei) { dec(ei) = value; });
     }
 
     ANA_CHECK (m_eventInfoHandle.initialize(m_systematicsList));

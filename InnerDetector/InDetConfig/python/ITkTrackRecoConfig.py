@@ -7,7 +7,7 @@ from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
-_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100'] # Possible Acts Alone Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150', 'ActsValidateLargeRadiusStandalone'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags):
@@ -25,9 +25,11 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
         TrackingComponent.ActsValidateConversionSeeds : "ActsValidateConversionSeeds",
         TrackingComponent.ActsValidateLargeRadiusSeeds: "ActsValidateLargeRadiusSeeds",
+        TrackingComponent.ActsValidateLargeRadiusStandalone: "ActsValidateLargeRadiusStandalone",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
         TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
         TrackingComponent.ActsValidateF100 : "ActsValidateF100",
+        TrackingComponent.ActsValidateF150 : "ActsValidateF150",
     }
     
     # Athena Pass
@@ -228,7 +230,7 @@ def ITkTrackRecoPassCfg(flags,
     TrackContainer = "Resolved" + extension + "Tracks"
     # For Acts we have another convention, with the extention as the first element in the name
     if extension in _actsExtensions:
-        TrackContainer = extension + "ResolvedTracks"
+        TrackContainer = extension + "ResolvedTracks" if flags.Acts.doAmbiguityResolution else extension + "Tracks"
     if doTrackOverlay and extension == "Conversion":
         TrackContainer = flags.Overlay.SigPrefix + TrackContainer
 
@@ -398,6 +400,7 @@ def ITkTrackFinalCfg(flags,
             'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
             'ActsConversion' in splitProbName or \
             'ActsLargeRadius' in splitProbName or \
+            'ActsValidateLargeRadiusStandalone' in splitProbName or \
             'ActsLowPt' in splitProbName or \
             ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
         

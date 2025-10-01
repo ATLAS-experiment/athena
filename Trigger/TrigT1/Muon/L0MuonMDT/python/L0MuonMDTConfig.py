@@ -17,16 +17,15 @@ def L0MuonMDTSimCfg(flags, name = "L0MuonMDTSim", **kwargs):
     monTool.defineHistogram('track_input_eta', path='EXPERT', type='TH1F', title=';#eta_{#mu}^{truth};Muons', xbins=50, xmin=-3, xmax=3)
 
     alg.MonTool = monTool
-
-    histSvc = CompFactory.THistSvc(Output=["EXPERT DATAFILE='" + name + ".root' OPT='RECREATE'"])
-
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    result.merge(setupHistSvcCfg(flags, outFile = f"{name}.root", outStream="EXPERT"))
     result.addEventAlgo(alg)
-    result.addService(histSvc)
     return result
 
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.set_defaults(inputFile= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"])
     parser.set_defaults(nEvents = 20)

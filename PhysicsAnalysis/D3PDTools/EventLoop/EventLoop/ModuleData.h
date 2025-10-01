@@ -108,6 +108,9 @@ namespace EL
       /// \brief the list of output files
       std::map<std::string,std::shared_ptr<Detail::OutputStreamData>> m_outputs;
 
+      /// \brief the BatchJob configuration (if used)
+      BatchJob *m_batchJob = nullptr;
+
 
 
       /// \brief explicit constructor for dependency reduction

@@ -8,10 +8,7 @@
 #include "tauRecTools/HelperFunctions.h"
 
 #include "CaloUtils/CaloCellList.h"
-
-#include <boost/scoped_ptr.hpp>
-
-
+#include <memory>
 
 TauPi0CreateROI::TauPi0CreateROI(const std::string& name) :
      TauRecToolBase(name) {
@@ -67,7 +64,7 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
   // TODO: change hardcoded 0.4 to meaningful variable
   std::vector<CaloCell_ID::SUBCALO> emSubCaloBlocks;
   emSubCaloBlocks.push_back(CaloCell_ID::LAREM);
-  boost::scoped_ptr<CaloCellList> cellList(new CaloCellList(caloDDMgr,cellContainer,emSubCaloBlocks)); 
+  std::unique_ptr<CaloCellList> cellList = std::make_unique<CaloCellList>(caloDDMgr, cellContainer, emSubCaloBlocks);
   // FIXME: tau p4 is corrected to point at tau vertex, but the cells are not
   cellList->select(tau.eta(), tau.phi(), 0.4);
 

@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -77,7 +77,7 @@ namespace ThePEG {
   static void setBeamParticles(HepMC3::GenEvent & e, HepMC3::GenParticlePtr p1, HepMC3::GenParticlePtr p2) {
     p1->set_status(4);
     p2->set_status(4);
-    e.set_beam_particles(p1,p2);
+    e.set_beam_particles(std::move(p1),std::move(p2));
   }
   
     static HepMC3::GenParticlePtr newParticle(const Lorentz5Momentum & p,

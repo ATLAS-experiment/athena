@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_GenericMonitoringTool_h
@@ -7,7 +7,6 @@
 
 #include <functional>
 #include <vector>
-#include <mutex>
 #include <memory>
 
 #include "TH1.h"
@@ -15,10 +14,9 @@
 #include "TProfile.h"
 #include "TProfile2D.h"
 
-#include "GaudiKernel/ITHistSvc.h"
-
 #include "AthenaBaseComps/AthAlgTool.h"
-
+#include "CxxUtils/ConcurrentStrToValMap.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -74,9 +72,6 @@ public:
   virtual uint32_t lumiBlock();
 
 private:
-  void invokeFillersDebug(const std::shared_ptr<Monitored::HistogramFiller>& filler,
-                          const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& monitoredVariables) const;
-  
   /// THistSvc (do NOT fix the service type (only the name) to allow for a different implementation online
   ServiceHandle<ITHistSvc> m_histSvc { this, "THistSvc", "THistSvc", "Histogramming svc" };
   Gaudi::Property<std::string> m_histoPath { this, "HistPath", {}, "Directory for histograms [name of parent if not set]" };
@@ -88,9 +83,8 @@ private:
 
   std::vector<std::shared_ptr<Monitored::HistogramFiller>> m_fillers; //!< plain list of fillers
   std::vector<std::shared_ptr<Monitored::HistogramFiller>> m_alwaysCreateFillers; //!< fillers that need touching, usually empty
-  mutable std::map<std::vector<std::string>,std::unique_ptr<std::vector<std::shared_ptr<Monitored::HistogramFiller>>>,std::less<>> m_fillerCacheMap ATLAS_THREAD_SAFE; //!< lookup map to speed up filler searches
-  mutable std::mutex m_cacheMutex;
-
+  using fillerCache_t = CxxUtils::ConcurrentStrToValMap<std::vector<std::shared_ptr<Monitored::HistogramFiller>>, CxxUtils::SimpleUpdater>;
+  mutable fillerCache_t m_fillerCacheMap ATLAS_THREAD_SAFE {fillerCache_t::Updater_t()}; //!< lookup map to speed up filler searches
 };
 
 /**

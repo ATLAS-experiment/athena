@@ -124,6 +124,7 @@ def JETM2Cfg(flags):
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMTopoNoPtCutJets","AntiKt4EMPFlowJets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+                                            "AntiKt4EMPFlowJets_FTAG",
                                             "BTagging_AntiKt4EMPFlow",
                                             "BTagging_AntiKtVR30Rmax4Rmin02Track"]
 

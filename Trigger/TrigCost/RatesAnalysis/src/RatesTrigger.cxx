@@ -92,6 +92,10 @@ void RatesTrigger::execute(const WeightingValuesSummary_t& weights) {
   }
 }
 
+double RatesTrigger::getTotalPrescaleWeight() const {
+    return m_pass ? m_totalPrescaleWeight : 0.;
+}
+
 double RatesTrigger::getPrescale(const bool includeExpress) const { 
   if (includeExpress) return m_prescale * m_expressPrescale;
   return m_prescale;

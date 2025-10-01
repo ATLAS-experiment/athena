@@ -12,6 +12,10 @@ atlas_add_library( MuonStationIndexLib
    MuonStationIndex/*.h Root/*.cxx
    PUBLIC_HEADERS MuonStationIndex )
 
+atlas_add_dictionary( MuonStationIndexDict
+                      MuonStationIndex/MuonStationIndex.h
+                      MuonStationIndex/selection.xml 
+                      LINK_LIBRARIES MuonStationIndexLib)
 # we also add unit tests. 
 # Build them from the files in test/ 
 file(GLOB_RECURSE tests "test/*.cxx")

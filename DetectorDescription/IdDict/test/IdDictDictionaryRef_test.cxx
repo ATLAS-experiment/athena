@@ -11,17 +11,16 @@ namespace utf = boost::unit_test;
 
 BOOST_AUTO_TEST_SUITE(IdDictDictionaryRefTest)
 BOOST_AUTO_TEST_CASE(IdDictDictionaryRefConstructors){
-  BOOST_CHECK_NO_THROW(IdDictDictionaryRef());
-  IdDictDictionaryRef i1;
+  BOOST_CHECK_NO_THROW(IdDictDictionaryRef(""));
+  IdDictDictionaryRef i1("");
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictDictionaryRef i2(i1));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictDictionaryRef i3(std::move(i1)));
 }
 
 
 BOOST_AUTO_TEST_CASE(IdDictDictionaryRefBuildRange){
-  IdDictDictionaryRef f;
   auto pDictionary = std::make_unique<IdDictDictionary>(); 
-  f.m_dictionary = pDictionary.get();
+  IdDictDictionaryRef f (pDictionary.get());
   BOOST_TEST(f.build_range() == Range());
 }
 

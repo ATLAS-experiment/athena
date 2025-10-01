@@ -119,7 +119,7 @@ void calcPlaneConstraint( VKPlaneConstraint * cnst)
 }
 void calcRadiusConstraint( VKRadiusConstraint * cnst)
 {
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = dynamic_cast<VKConstraintBase*>( cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     int NTRK = vk->TrackList.size();
     double curV[3] = {vk->refIterV[0]+vk->cnstV[0], vk->refIterV[1]+vk->cnstV[1],vk->refIterV[2]+vk->cnstV[2]};

@@ -86,6 +86,7 @@ def trigTauJetLVNNEvaluatorCfg(flags, tau_id='', use_taujet_rnnscore=True):
 
     acc.setPrivateTools(CompFactory.TauJetRNNEvaluator(
         name                = f'TrigTau_TauJetLVNNEvaluator_{tau_id}{sfx}',
+        useTRT              = flags.Detector.EnableTRT,
 
         # Network config:
         NetworkFile0P       = id_flags.NetworkConfig[0],
@@ -119,6 +120,7 @@ def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
 
     acc.setPrivateTools(CompFactory.TauGNNEvaluator(
         name                = f'TrigTau_TauJetONNXEvaluator_{tau_id}',
+        useTRT              = flags.Detector.EnableTRT,
 
         # Network config:
         NetworkFile0P       = id_flags.ONNXConfig[0],

@@ -1,6 +1,6 @@
-# do all plot updates, year is hardcoded below
-# ./plot_all.sh [quiet] [update]
-# e.g. for a quiet, minimal update: ./plot_all.sh 1 1
+# do all plot updates
+# ./plot_all.sh [quiet] [update] [year]
+# e.g. for a quiet, minimal update: ./plot_all.sh 1 1 25
 
 if [[ $# -lt 1 ]] || [[ $1 -gt 0 ]]; then
     filter="INFO|Info|WARNING|ERROR"
@@ -18,14 +18,22 @@ else
     update=0
 fi
 
-echo "INFO: Running now ./plot_runwise.sh 24 $update"
+if [[ $# -lt 3 ]]; then
+    year=25
+else
+    year=$3
+fi
+echo "INFO: running for year $year"
 
-./plot_runwise.sh 24 $update | egrep $filter
+echo "INFO: Running now ./plot_runwise.sh $year $update"
 
-echo "INFO: Running now ./plot_yearwise.sh 24 run3"
-./plot_yearwise.sh 24 run3 | egrep $filter
+./plot_runwise.sh $year $update | egrep $filter
+
+echo "INFO: Running now ./plot_yearwise.sh $year run3"
+./plot_yearwise.sh $year 22_23_24 run3 | egrep $filter
+#./plot_yearwise.sh $year run3 | egrep $filter
 
 
-echo "INFO: Running now ./make_latexslides 24"
-./make_latexslides.sh 24 | egrep $filter
+echo "INFO: Running now ./make_latexslides $year"
+./make_latexslides.sh $year | egrep $filter
 

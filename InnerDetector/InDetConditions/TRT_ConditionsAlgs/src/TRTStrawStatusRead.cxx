@@ -40,6 +40,11 @@ StatusCode TRTStrawStatusRead::initialize()
     ATH_CHECK(m_permReadKey.initialize());
     ATH_CHECK(m_statHTReadKey.initialize());
 
+    if( m_printfolder.empty() or (m_printfolder!="Status" and m_printfolder!="StatusHT" and m_printfolder!="StatusPermanent") ){
+        ATH_MSG_ERROR("You must specify the proper FolderToPrint, it could be 'Status', 'StatusHT' or 'StatusPermanent' ");
+        return StatusCode::FAILURE;
+    }
+
     return StatusCode::SUCCESS;
 }
 
@@ -48,8 +53,8 @@ StatusCode TRTStrawStatusRead::execute()
 
     StatusCode sc = StatusCode::SUCCESS;
 
-    ATH_MSG_INFO(" Dump the Straw Status to text file:");
-    sc = writeToTextFile("StrawStatusDump_Writer.txt");
+    ATH_MSG_INFO(" Dump the Straw Status to text file name: "<< m_outputfile);
+    sc = writeToTextFile(m_outputfile.value());
     if (sc.isFailure())
     {
         ATH_MSG_ERROR(" Error writing the text file");
@@ -62,8 +67,6 @@ StatusCode TRTStrawStatusRead::finalize()
 {
     return StatusCode::SUCCESS;
 }
-
-///////////////////////////////////////////////////
 
 StatusCode TRTStrawStatusRead::writeToTextFile(const std::string &filename)
 {
@@ -374,7 +377,7 @@ StatusCode TRTStrawStatusRead::writeToTextFile(const std::string &filename)
 const TRTStrawStatusRead::StrawStatusContainer *TRTStrawStatusRead::getStrawStatusContainer() const
 {
 
-    SG::ReadCondHandle<StrawStatusContainer> rtc(m_statReadKey);
+    SG::ReadCondHandle<TRTCond::StrawStatusMultChanContainer> rtc(m_statReadKey);
     const StrawStatusContainer *strawstatuscontainer = *rtc;
     return strawstatuscontainer;
 }
@@ -382,7 +385,7 @@ const TRTStrawStatusRead::StrawStatusContainer *TRTStrawStatusRead::getStrawStat
 const TRTStrawStatusRead::StrawStatusContainer *TRTStrawStatusRead::getStrawStatusPermanentContainer() const
 {
 
-    SG::ReadCondHandle<StrawStatusContainer> rtc(m_permReadKey);
+    SG::ReadCondHandle<TRTCond::StrawStatusMultChanContainer> rtc(m_permReadKey);
     const StrawStatusContainer *strawstatuscontainer = *rtc;
     return strawstatuscontainer;
 }
@@ -390,7 +393,7 @@ const TRTStrawStatusRead::StrawStatusContainer *TRTStrawStatusRead::getStrawStat
 const TRTStrawStatusRead::StrawStatusContainer *TRTStrawStatusRead::getStrawStatusHTContainer() const
 {
 
-    SG::ReadCondHandle<StrawStatusContainer> rtc(m_statHTReadKey);
+    SG::ReadCondHandle<TRTCond::StrawStatusMultChanContainer> rtc(m_statHTReadKey);
     const StrawStatusContainer *strawstatuscontainer = *rtc;
     return strawstatuscontainer;
 }

@@ -13,10 +13,7 @@
 
 #undef NDEBUG
 
-#include <chrono>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
+
 
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/getMessageSvc.h"
@@ -33,6 +30,12 @@
 #include "TMath.h"
 
 #include "boost/program_options.hpp"
+
+#include <chrono>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <format>
 
 #ifdef ATHMON_VALGRIND
 #include "valgrind/callgrind.h"
@@ -90,8 +93,7 @@ void timeboth(const F1& f1, const F2& f2, const TH1* h, const std::string& title
   auto t2 = timeit(f2);
   assert( h->GetEntries() == fills );
 
-  std::cout << std::left << std::setw(30) << title << "MON: " << std::setw(20) << t1 << " ROOT: " << t2
-            << std::endl;
+  std::cout << std::format("{:<30}MON: {:<20} ROOT: {}\n", title, t1, t2);
 }
 
 void fillFromScalar(ToolHandle<GenericMonitoringTool>& monTool)
@@ -147,13 +149,48 @@ void fillFromCollection(ToolHandle<GenericMonitoringTool>& monTool)
   timeboth(mon, root, h, "fillFromCollection");
 }
 
+void fillFromCollectionCutMask(ToolHandle<GenericMonitoringTool>& monTool)
+{
+  std::vector<double> v = {1.0, 3.2, -0.2, 0.3, 1.2};
+  std::vector<char>   c = {  1,   0,    1,   1,   0};
+  auto mon = [&]() {
+    auto eta = Monitored::Collection("Eta", v);
+    auto cut = Monitored::Collection("CutMask", c);
+    auto group = Monitored::Group(monTool, eta, cut);
+  };
+  std::cout << std::format("{:<30}MON: {}\n", "fillFromCollectionCutMask", timeit(mon));
+}
+
+class SvcMgrWrapper{
+  private :
+  ISvcManager* m_svcMgr{};
+  public:
+  SvcMgrWrapper(ISvcLocator* pSvcLoc):m_svcMgr(dynamic_cast<ISvcManager*>(pSvcLoc)){
+    if (m_svcMgr) m_svcMgr->start().ignore();
+  }
+  ~SvcMgrWrapper(){
+    if (m_svcMgr){
+      // Make sure that THistSvc gets finalized.
+      // Otherwise, the output file will get closed while global dtors are running,
+      // which can lead to crashes.
+      m_svcMgr->stop().ignore();
+      m_svcMgr->finalize().ignore();
+    }
+  }
+};
+
 int main(int argc, char** argv)
 {
   namespace po = boost::program_options;
 
   po::options_description desc("Allowed options");
-  desc.add_options()("help,h", "help message")("runs,r", po::value<size_t>(&RUNS)->default_value(1),
+  try{
+    desc.add_options()("help,h", "help message")("runs,r", po::value<size_t>(&RUNS)->default_value(1),
                                                "number of runs");
+  } catch (boost::bad_lexical_cast & e){
+    std::cout<<"Bad options parse in GenericMonPerf_test: "<<e.what()<<std::endl;
+    return -1;
+  }
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -164,7 +201,7 @@ int main(int argc, char** argv)
   }
 
   CxxUtils::ubsan_suppress([]() { TInterpreter::Instance(); });
-  ISvcLocator* pSvcLoc;
+  ISvcLocator* pSvcLoc{};
   if (!Athena_test::initGaudi("GenericMonPerf.txt", pSvcLoc)) {
     std::cerr << "ERROR This test can not be run" << std::endl;
     return -1;
@@ -174,8 +211,8 @@ int main(int argc, char** argv)
   histSvc = pSvcLoc->service("THistSvc");
   CHECK_WITH_CONTEXT(histSvc.isValid(), "GenericMonPerf_test", -1);
 
-  ISvcManager* svcmgr = dynamic_cast<ISvcManager*>(pSvcLoc);
-  svcmgr->start().ignore();
+  SvcMgrWrapper svc(pSvcLoc);
+  
 
   ToolHandle<GenericMonitoringTool> monTool("GenericMonitoringTool/MonTool");
   CHECK_WITH_CONTEXT(monTool.retrieve(), "GenericMonPerf_test", -1);
@@ -187,14 +224,15 @@ int main(int argc, char** argv)
   CALLGRIND_START_INSTRUMENTATION;
   fillFromMultipleScalars(monTool);
   CALLGRIND_STOP_INSTRUMENTATION;
+  try{
+    fillFromCollection(monTool);
+    fillFromCollectionCutMask(monTool);
+  } catch (std::exception & e){
+    std::cerr<<" Exception "<<e.what()<<" in GenericMonPerf_test"<<std::endl;
+    return -1;
+  }
 
-  fillFromCollection(monTool);
-
-  // Make sure that THistSvc gets finalized.
-  // Otherwise, the output file will get closed while global dtors are running,
-  // which can lead to crashes.
-  svcmgr->stop().ignore();
-  svcmgr->finalize().ignore();
+  
 
   return 0;
 }

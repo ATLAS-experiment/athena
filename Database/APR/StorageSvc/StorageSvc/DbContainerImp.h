@@ -13,7 +13,6 @@
 
 /// Framework include files
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/IDbContainer.h"
 
 // STL include files

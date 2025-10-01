@@ -28,6 +28,8 @@ class TauCalibrationConfig (ConfigBlock):
             "CP::TauTruthMatchingAlg). The default is True.")
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
+        self.addOption ('decorateExtraVariables', True, type=bool,
+            info="decorate extra variables for the reconstructed tau")    
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -77,10 +79,11 @@ class TauCalibrationConfig (ConfigBlock):
                 config.addOutputVar (self.containerName, branchName, branchOutput, noSys=True)
 
         # Decorate extra variables
-        alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg',
-                                      'TauExtraVariablesAlg',
-                                      reentrant=True )
-        alg.taus = config.readName (self.containerName)
+        if self.decorateExtraVariables:
+           alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg',
+                                         'TauExtraVariablesAlg',
+                                         reentrant=True )
+           alg.taus = config.readName (self.containerName)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' )
@@ -102,8 +105,10 @@ class TauCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
         config.addOutputVar (self.containerName, 'passTATTauMuonOLR', 'passTATTauMuonOLR', noSys=True)
-        config.addOutputVar (self.containerName, 'nTracks', 'nTracks', noSys=True)
         config.addOutputVar (self.containerName, 'TESCompatibility', 'TESCompatibility')  
+        if self.decorateExtraVariables:
+            config.addOutputVar (self.containerName, 'nTracksCharged', 'nTracksCharged', noSys=True)
+
 
 class TauWorkingPointConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point

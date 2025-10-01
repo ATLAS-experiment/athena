@@ -23,6 +23,15 @@ namespace {
   const char path_separator = ':'; // Linux and MacOS
   const char* const pathResolverEnvVar = "PATHRESOLVER_DEVAREARESPONSE";
 
+  /// Workaround for ATLASG-2948: TFile::Cp stopped working for
+  /// non-ROOT files at some point around release 25.2.60.
+  bool download_with_curl(const std::string& url, const std::string& output_path) {
+    // -L follows redirects
+    // -s silent mode (no progress bar), remove if you want curl's output
+    std::string cmd = "curl -L -s -o " + output_path + " " + url;
+    int ret = std::system(cmd.c_str());
+    return ret == 0;
+  }
 
   /// Check if a file from "dev/" is loaded and warn/throw if requested
   void checkForDev(asg::AsgMessaging& asgmsg,
@@ -125,7 +134,19 @@ bool PathResolver::PR_find( const std::string& logical_file_name, const std::str
       }
 
       if (!TFile::Cp(fileToDownload.c_str(), targetPath.c_str(), false)) {
-        msg(MSG::WARNING) << "Unable to download file " << fileToDownload << endmsg;
+        msg(MSG::INFO) << "Unable to download file "
+                       << fileToDownload
+                       << " with ROOT, falling back to command line tools"
+                       << endmsg;
+        if (download_with_curl(fileToDownload, targetPath)) {
+          msg(MSG::INFO) << "Successfully curled " << fileToDownload << endmsg;
+          result = targetPath;
+          return true;
+        } else {
+          msg(MSG::WARNING) << "Unable to download file "
+                            << fileToDownload
+                            << endmsg;
+        }
       } else {
         msg(MSG::DEBUG) << "Successfully downloaded " << fileToDownload << endmsg;
         result = targetPath;

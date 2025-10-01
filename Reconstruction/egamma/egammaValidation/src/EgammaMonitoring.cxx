@@ -604,7 +604,7 @@ StatusCode EgammaMonitoring::execute() {
       // Check if it is the prompt electron
       if (TO == MCTruthPartClassifier::SingleElec &&
           TT == MCTruthPartClassifier::IsoElectron &&
-          MC::isSingleParticle(truth)) {
+          MC::isGenStable(truth)) {
         truthPromptElectronAll->fill(truth);
         promptElectronTruthIndex = truth->index();
       }

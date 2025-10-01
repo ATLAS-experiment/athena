@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # MCTruthCommonConfig
 # Contains the configuration for the common truth containers/decorations used in analysis DAODs
@@ -168,6 +168,7 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
 def AddStandardTruthContentsCfg(flags,
                                 decorationDressing='dressedPhoton',
                                 includeTausInDressingPhotonRemoval=False,
+                                navInputCollections = ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"],
                                 prefix=''):
 
     acc = ComponentAccumulator()
@@ -190,7 +191,7 @@ def AddStandardTruthContentsCfg(flags,
         acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing+"_tau"
 
     # Add back the navigation contect for the collections we want
-    acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
+    acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, navInputCollections, prefix=prefix))
     # Some more additions for standard TRUTH3
     acc.merge(AddBosonsAndDownstreamParticlesCfg(flags))
     if isEVNT: acc.merge(AddLargeRJetD2Cfg(flags))
@@ -215,7 +216,8 @@ def AddParentAndDownstreamParticlesCfg(flags,
     # Set up a tool to keep the W/Z/H bosons and all downstream particles
     collection_maker = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
                                                                            name                 ='DFCommon'+prefix+'AndDecaysTool',
-                                                                           NewCollectionName    = collection_name,
+                                                                           NewParticleKey = collection_name+'Particles',
+                                                                           NewVertexKey = collection_name+'Vertices',
                                                                            PDGIDsToKeep         = parents,
                                                                            Generations          = generations,
                                                                            RejectHadronChildren = rejectHadronChildren))
@@ -300,11 +302,12 @@ def AddHFAndDownstreamParticlesCfg(flags, **kwargs):
     kwargs.setdefault("prefix",'')
     acc = ComponentAccumulator()
     # Set up a tool to keep b- and c-quarks and all downstream particles
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthDecayCollectionMakerCfg
+    collection_name = kwargs['prefix']+"TruthHFWithDecay"
     DFCommonHFAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(
         flags,
         name=kwargs['prefix']+"DFCommonHFAndDecaysTool",
-        NewCollectionName=kwargs['prefix']+"TruthHFWithDecay",
+        NewParticleKey = collection_name+'Particles',
+        NewVertexKey = collection_name+'Vertices',
         KeepBHadrons=kwargs['addB'],
         KeepCHadrons=kwargs['addC'],
         Generations=kwargs['generations']))
@@ -350,10 +353,11 @@ def AddBSMAndDownstreamParticlesCfg(flags, generations=-1):
     """Add BSM particles and their downstream particles in a special collection"""
     acc = ComponentAccumulator()
     # Set up a tool to keep the taus and all downstream particles
-     
+    collection_name = "TruthBSMWithDecay"
     DFCommonBSMAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
                                                                                    name              = "DFCommonBSMAndDecaysTool",
-                                                                                   NewCollectionName = "TruthBSMWithDecay",
+                                                                                   NewParticleKey = collection_name+'Particles',
+                                                                                   NewVertexKey = collection_name+'Vertices',
                                                                                    KeepBSM           = True,
                                                                                    Generations       = generations))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
@@ -416,7 +420,7 @@ def AddTruthEnergyDensityCfg(flags):
     # Now add the tool to do the decoration
     DFCommonTruthEDDecorator = CompFactory.DerivationFramework.TruthEDDecorator("DFCommonTruthEDDecorator",
                                                                                 EventInfoName="EventInfo",
-                                                                                EnergyDensityKeys=["TruthIsoCentralEventShape","TruthIsoForwardEventShape"],
+                                                                                EventShapeKeys=["TruthIsoCentralEventShape","TruthIsoForwardEventShape"],
                                                                                 DecorationSuffix="_rho"
                                                                                )
     acc.addPublicTool(DFCommonTruthEDDecorator)

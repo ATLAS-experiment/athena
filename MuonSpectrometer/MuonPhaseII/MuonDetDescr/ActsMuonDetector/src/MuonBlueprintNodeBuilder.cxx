@@ -24,6 +24,7 @@
 
 
 #include <MuonReadoutGeometryR4/Chamber.h>
+#include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <MuonStationIndex/MuonStationIndex.h>
 
 #include "GeoModelValidation/GeoMaterialHelper.h"
@@ -33,6 +34,8 @@ namespace {
 constexpr std::size_t s_muonBarrelId = 30;
 constexpr std::size_t s_muonEndcapAId = 31;
 constexpr std::size_t s_muonEndcapCId = 32;
+constexpr std::size_t s_muonEndcapMiddleAId = 33;
+constexpr std::size_t s_muonEndcapMiddleCId = 34;
 }
 
 namespace ActsTrk {
@@ -45,23 +48,48 @@ namespace ActsTrk {
 
 std::shared_ptr<Acts::Experimental::BlueprintNode> MuonBlueprintNodeBuilder::buildBlueprintNode(const Acts::GeometryContext& gctx, std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
 
-const MuonChamberSet allChambers = m_detMgr->getAllChambers();
+std::variant<MuonChamberSet, MuonSectorSet> elements;
+std::variant<MuonChamberSet, MuonSectorSet> barrelStations, endcapAStations, endcapCStations, endcapMiddleAStations, endcapMiddleCStations;
 
-//Divide the chambers for every blueprint node of the muon system
-MuonChamberSet barrelStations;
-MuonChamberSet endcapAStations;
-MuonChamberSet endcapCStations;
-
-for(const MuonGMR4::Chamber* chamber: allChambers){
-
-  if(isChamberInTheStation(*chamber, {StIdx::BI, StIdx::BM, StIdx::BO, StIdx::EE, StIdx::EI}, EndcapSide::Both)) {
-    barrelStations.insert(chamber);
-  } else if(isChamberInTheStation(*chamber, {StIdx::EM, StIdx::EO}, EndcapSide::A)) {
-    endcapAStations.insert(chamber);
-  } else if(isChamberInTheStation(*chamber, {StIdx::EM, StIdx::EO}, EndcapSide::C)) {
-    endcapCStations.insert(chamber);
-  }
+if (m_useSectors) {
+  elements = m_detMgr->getAllSectors();
+} else {
+  elements = m_detMgr->getAllChambers();
 }
+
+std::visit([&](auto& elems) {
+  using SetType = std::decay_t<decltype(elems)>;
+
+  // Initialize station containers of the same type
+  SetType barrel, endcapA, endcapC, endcapMiddleA, endcapMiddleC;
+
+  for (const auto& element : elems) {
+    if (isElementInTheStation(*element,
+          {StIdx::BI, StIdx::BM, StIdx::BO, StIdx::BE, StIdx::EE, StIdx::EI},
+          EndcapSide::Both)) {
+      barrel.insert(element);
+    } else if (isElementInTheStation(*element, {StIdx::EO}, EndcapSide::A)) {
+      endcapA.insert(element);
+    } else if (isElementInTheStation(*element, {StIdx::EO}, EndcapSide::C)) {
+      endcapC.insert(element);
+    } else if (isElementInTheStation(*element, {StIdx::EM}, EndcapSide::A)) {
+      endcapMiddleA.insert(element);
+    } else if (isElementInTheStation(*element, {StIdx::EM}, EndcapSide::C)) {
+      endcapMiddleC.insert(element);
+    } else {
+      ATH_MSG_WARNING("Element " << element->identString()
+                      << " not assigned to any station!");
+    }
+  }
+
+  // Assign back into the outer variants
+  barrelStations       = std::move(barrel);
+  endcapAStations      = std::move(endcapA);
+  endcapCStations      = std::move(endcapC);
+  endcapMiddleAStations= std::move(endcapMiddleA);
+  endcapMiddleCStations= std::move(endcapMiddleC);
+
+}, elements);
 
   // Top level node for the Muon system
 auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("MuonNode", Acts::AxisDirection::AxisZ);
@@ -69,10 +97,12 @@ auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintN
 Acts::VolumeBoundFactory boundsFactory{};
 
 auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI",Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory);
-auto endcapANode = buildMuonNode(gctx, endcapAStations, "EM_EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
-auto endcapCNode = buildMuonNode(gctx, endcapCStations, "EM_EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory);
+auto endcapANode = buildMuonNode(gctx, endcapAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
+auto endcapCNode = buildMuonNode(gctx, endcapCStations, "EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory);
+auto endcapMiddleANode = buildMuonNode(gctx, endcapMiddleAStations, "EM_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleAId), boundsFactory);
+auto endcapMiddleCNode = buildMuonNode(gctx, endcapMiddleCStations, "EM_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleCId), boundsFactory);
 
-// Add to the muon barrel child node (e.g calo or Itk) - if existed
+//Add to the muon barrel child node (e.g calo or Itk) - if existed
 if(childNode){
   barrelNode->addChild(std::move(childNode));
 }
@@ -80,15 +110,18 @@ if(childNode){
 muonNode->addChild(std::move(barrelNode));
 muonNode->addChild(std::move(endcapANode));
 muonNode->addChild(std::move(endcapCNode));
+muonNode->addChild(std::move(endcapMiddleANode));
+muonNode->addChild(std::move(endcapMiddleCNode));
 
 return muonNode;
 
 }
 
+template<typename MuonElementsSet>
 std::shared_ptr<Acts::Experimental::StaticBlueprintNode>
 MuonBlueprintNodeBuilder::buildMuonNode(
     const Acts::GeometryContext& gctx,
-    const MuonChamberSet& chambers,
+    const MuonElementsSet& elements,
     const std::string& name,
     const Acts::GeometryIdentifier& id,
     Acts::VolumeBoundFactory& boundsFactory) const {
@@ -103,24 +136,27 @@ MuonBlueprintNodeBuilder::buildMuonNode(
     double maxZ = std::numeric_limits<double>::lowest();
     double minZ = std::numeric_limits<double>::max();
 
-   
     int chamberId = 1;
-    ATH_MSG_DEBUG("Chambers= "<<chambers.size());
-    for(const MuonGMR4::Chamber* chamber: chambers){
-      const Amg::Transform3D& transform = chamber->localToGlobalTrans(*context);
+    
+    std::visit([&](const auto& elems){
+  
+    for(const auto& element : elems){
+      const Amg::Transform3D& transform = element->localToGlobalTrans(*context);
+      std::string volName = element->identString();
+
       auto vol = std::make_unique<Acts::TrackingVolume>(
                                             transform,
-                                            chamber->bounds(),
-                                            chamber->identString());
+                                            element->bounds(),
+                                            volName);
 
-      // Get material per chamber, blend it and place it in the center of the volume 
-      auto material = blendChamberMaterial(*chamber);
+      // Get material per chamber, blend it and place it in the center of the volume
+      auto material = blendMaterial(*element);
       vol->addSurface(std::move(material));
-      //the chamber geometry id
+      // //the chamber geometry id
       Acts::GeometryIdentifier chId = id.withLayer(chamberId++);
       vol->assignGeometryId(chId);
 
-      std::pair<std::vector<volumePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*context, *chamber, chId, boundsFactory);
+      std::pair<std::vector<staticNodePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*context, *element, chId, boundsFactory);
 
       for(auto& surface: innerStructure.second){
         vol->addSurface(surface);
@@ -144,19 +180,22 @@ MuonBlueprintNodeBuilder::buildMuonNode(
         //for visualizing each chamber volume individually
         Acts::ObjVisualization3D helper;
         vol->visualize(helper, gctx, {.visible = true},
-                                {.visible = false}, {.visible = true});
-        helper.write(chamber->identString() + ".obj");
+                                {.visible = true}, {.visible = true});
+        helper.write(volName + ".obj");
         helper.clear();
       }
 
       auto node = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
-      for(auto& readoutVol : innerStructure.first){
-         node->addStaticVolume(std::move(readoutVol));
-       }
+      for(auto& childNode : innerStructure.first){
+        node->addChild(std::move(childNode));
+        
+      }
+
 
       
       nodes.emplace_back(std::move(node));
     }
+    }, elements);
 
     double halfLengthZ = 0.5 * std::abs(maxZ - minZ);
     ATH_MSG_DEBUG("Inner radius: " << innerRadius);
@@ -179,19 +218,19 @@ MuonBlueprintNodeBuilder::buildMuonNode(
     return muonNode;
   }
 
-
-std::pair<std::vector<volumePtr>, std::vector<surfacePtr>>
+template<typename T>
+std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>>
 MuonBlueprintNodeBuilder::getSensitiveElements(
     const ActsGeometryContext& gctx,
-    const MuonGMR4::Chamber& chamber,
+    const T& element,
     const Acts::GeometryIdentifier& chId,
     Acts::VolumeBoundFactory& boundsFactory) const {
 
-  std::vector<volumePtr> readoutVolumes;
+  std::vector<staticNodePtr> readoutVolumes;
   std::vector<surfacePtr> readoutSurfaces;
   Acts::GeometryIdentifier::Value mdtId{1};
 
-  for (const MuonGMR4::MuonReadoutElement* readoutEle : chamber.readoutEles()) {
+  for (const MuonGMR4::MuonReadoutElement* readoutEle : element.readoutEles()) {
 
     std::vector<surfacePtr> detSurfaces = readoutEle->getSurfaces();
     switch(readoutEle->detectorType()){
@@ -199,9 +238,9 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
         const auto* mdtReadoutEle = static_cast<const MuonGMR4::MdtReadoutElement*>(readoutEle);
         const MuonGMR4::MdtReadoutElement::parameterBook& parameters{mdtReadoutEle->getParameters()};
 
-          // get the transform to the chamber's frame
-          const Amg::Vector3D toChamber = chamber.globalToLocalTrans(gctx)*mdtReadoutEle->center(gctx);
-          const Acts::Transform3 mdtTransform = chamber.localToGlobalTrans(gctx) * Amg::getTranslate3D(toChamber);     
+          // get the transform to the sector's frame
+          const Amg::Vector3D toChamber = element.globalToLocalTrans(gctx)*mdtReadoutEle->center(gctx);
+          const Acts::Transform3 mdtTransform = element.localToGlobalTrans(gctx) * Amg::getTranslate3D(toChamber);
 
           // create the MDT multilayer volume with the dedicated builder
           Acts::Experimental::MultiWireVolumeBuilder::Config mwCfg;
@@ -223,10 +262,14 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
                               mdtBounds->get(BoundsV::eHalfLengthZ),
                               static_cast<std::size_t>(std::lround(2 * mdtBounds->get(BoundsV::eHalfLengthZ) / parameters.tubePitch))}, 1u}};
           Acts::Experimental::MultiWireVolumeBuilder mdtBuilder{mwCfg};
-          std::unique_ptr<Acts::TrackingVolume> mdtVolume = mdtBuilder.buildVolume(gctx.context());
+          std::unique_ptr<Acts::TrackingVolume> mdtVolume = mdtBuilder.buildVolume();
 
           mdtVolume->assignGeometryId(chId.withExtra(mdtId++));
-          readoutVolumes.push_back(std::move(mdtVolume));
+          //create the blueprint node for the mdt multilayers
+          std::shared_ptr<Acts::Experimental::StaticBlueprintNode> mdtNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(mdtVolume));
+          mdtNode->setNavigationPolicyFactory(mdtBuilder.createNavigationPolicyFactory());
+          readoutVolumes.push_back(std::move(mdtNode));
+
           break;
 
         } case DetectorType::Rpc: 
@@ -250,21 +293,22 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
 }
 
 
-
+template<typename T>
 std::shared_ptr<Acts::Surface>
-MuonBlueprintNodeBuilder::blendChamberMaterial(
-    const MuonGMR4::Chamber& chamber) const {
+MuonBlueprintNodeBuilder::blendMaterial(
+    const T& element) const {
 
-  const float thickness = chamber.halfZ() * 2;
-  PVConstLink parentVolume = chamber.readoutEles().front()->getMaterialGeom()->getParent();
+  const float thickness = element.halfZ() * 2;
+  PVConstLink parentVolume = element.readoutEles().front()->getMaterialGeom()->getParent();
   GeoModelTools::GeoMaterialHelper geoMaterialHelper;
   std::pair<GeoModelTools::GeoMaterialPtr, double> geoMaterials = geoMaterialHelper.collectMaterial(parentVolume);
 
   const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterials.first);
   //rotate about the z axis
-  auto constPtr = chamber.surface().getSharedPtr();
+  auto constPtr = element.surface().getSharedPtr();
   //to assign the material shouldnt be const
   auto ptr = std::const_pointer_cast<Acts::Surface>(constPtr);
+
   Acts::MaterialSlab slab{aMat, thickness};
   std::shared_ptr<Acts::HomogeneousSurfaceMaterial> material = std::make_shared<Acts::HomogeneousSurfaceMaterial>(slab);
   ptr->assignSurfaceMaterial(material);
@@ -272,14 +316,16 @@ MuonBlueprintNodeBuilder::blendChamberMaterial(
 
 }
 
-bool MuonBlueprintNodeBuilder::isChamberInTheStation(const MuonGMR4::Chamber& chamber, const std::vector<StIdx>& stationIndex, const EndcapSide& side) const {
-  StIdx stationIdx = toStationIndex(chamber.chamberIndex());
+template<typename T>
+bool MuonBlueprintNodeBuilder::isElementInTheStation(const T& element, const std::vector<StIdx>& stationIndex, const EndcapSide& side) const {
+  StIdx stationIdx = toStationIndex(element.chamberIndex());
+  auto stationSide = element.side(); 
   bool matchesName = std::ranges::any_of(stationIndex.begin(), stationIndex.end(), [&](const auto& n){
         return stationIdx == n;
       });
-      const int stationEta = chamber.stationEta();
-      bool etaSignCorrect = ((stationEta > 0 && side == EndcapSide::A) || (stationEta < 0 && side == EndcapSide::C) || (side == EndcapSide::Both));
-      return matchesName && etaSignCorrect;
+
+  bool etaSignCorrect = ((stationSide > 0 && side == EndcapSide::A) || (stationSide < 0 && side == EndcapSide::C) || (side == EndcapSide::Both));
+  return matchesName && etaSignCorrect;
 }
 
 

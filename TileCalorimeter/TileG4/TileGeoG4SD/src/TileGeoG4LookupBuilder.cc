@@ -179,9 +179,7 @@ void TileGeoG4LookupBuilder::CreateGeoG4Cells() {
 
   int nCounter = m_dbManager->GetNumTicl();
   if (m_dbManager->GetNumberOfEnv() == 1) {
-    G4cout << "WARNING: CreateGeoG4Cells() - nCells from DB " << nCounter << G4endl;
     nCounter = 45;
-    G4cout << "WARNING: CreateGeoG4Cells() - Changing nCells for barrel-only configuration to " << nCounter << G4endl;
   }
 
   for (counter = 0; counter < nCounter; counter++) {

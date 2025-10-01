@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS // silence Boost pragma message (fixed in Boost 1.76)
@@ -491,13 +491,13 @@ void TrigCostAnalysis::writeMetadata() {
     m_metadataTree->Branch("HLTMenu", &menuStr);
   }
 
-  bool ChainMonitor = (const bool&) m_doMonitorChain;
-  bool ChainAlgorithmMonitor = (const bool&) m_doMonitorChainAlgorithm;
-  bool AlgorithmMonitor = (const bool&) m_doMonitorAlgorithm;
-  bool AlgorithmClassMonitor = (const bool&) m_doMonitorAlgorithmClass;
-  bool ROSMonitor = (const bool&) m_doMonitorROS;
-  bool GlobalsMonitor = (const bool&) m_doMonitorGlobal;
-  bool ThreadMonitor = (const bool&) m_doMonitorThreadOccupancy;
+  bool ChainMonitor = m_doMonitorChain;
+  bool ChainAlgorithmMonitor = m_doMonitorChainAlgorithm;
+  bool AlgorithmMonitor = m_doMonitorAlgorithm;
+  bool AlgorithmClassMonitor = m_doMonitorAlgorithmClass;
+  bool ROSMonitor = m_doMonitorROS;
+  bool GlobalsMonitor = m_doMonitorGlobal;
+  bool ThreadMonitor = m_doMonitorThreadOccupancy;
 
   m_metadataTree->Branch("ChainMonitor", &ChainMonitor);
   m_metadataTree->Branch("ChainAlgorithmMonitor", &ChainAlgorithmMonitor);
@@ -507,9 +507,9 @@ void TrigCostAnalysis::writeMetadata() {
   m_metadataTree->Branch("GlobalsMonitor", &GlobalsMonitor);
   m_metadataTree->Branch("ThreadMonitor", &ThreadMonitor);
 
-  float BaseEventWeight = (const float&) m_baseEventWeight;
-  std::string AdditionalHashMap = (const std::string&) m_additionalHashMap;
-  bool DoEBWeighting = (const bool&) m_useEBWeights;
+  float BaseEventWeight = m_baseEventWeight;
+  std::string AdditionalHashMap = m_additionalHashMap;
+  bool DoEBWeighting = m_useEBWeights;
 
   m_metadataTree->Branch("AdditionalHashMap", &AdditionalHashMap);
   m_metadataTree->Branch("DoEBWeighting", &DoEBWeighting);

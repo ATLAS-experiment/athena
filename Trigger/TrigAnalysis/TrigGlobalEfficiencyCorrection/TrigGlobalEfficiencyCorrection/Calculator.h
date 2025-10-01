@@ -42,6 +42,10 @@ class Calculator : public asg::AsgMessaging {
   bool checkTriggerMatching(TrigGlobalEfficiencyCorrectionTool& parent,
                             bool& matched, const LeptonList& leptons,
                             unsigned runNumber);
+  bool checkTriggerMatching(TrigGlobalEfficiencyCorrectionTool& parent, 
+                            bool& matched, 
+                            std::unordered_map<std::string, bool>* matched_per_trigger, 
+                            const LeptonList& leptons, unsigned runNumber);
   bool getRelevantTriggersForUser(TrigGlobalEfficiencyCorrectionTool& parent,
                                   std::vector<std::string>& triggers,
                                   unsigned runNumber);

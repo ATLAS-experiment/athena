@@ -72,6 +72,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::initialize()
 // --------------------------------------------------------------------------------
 
 StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
+                            const EventContext& ctx,
                             const TrigRoiDescriptor*    p_roids,
                             const TrigL2MuonSA::RpcFitResult& rpcFitResult,
                             TrigL2MuonSA::MuonRoad&  muonRoad,
@@ -81,7 +82,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
   // define regions
   ATH_CHECK( m_mdtRegionDefiner->getMdtRegions(p_roids, rpcFitResult, muonRoad, mdtRegion) );
 
-  ATH_CHECK( getMdtHits(p_roids, muonRoad, mdtHits) );
+  ATH_CHECK( getMdtHits(ctx, p_roids, muonRoad, mdtHits) );
 
   return StatusCode::SUCCESS;
 }
@@ -90,6 +91,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
 // --------------------------------------------------------------------------------
 
 StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
+                            const EventContext& ctx,
                             const TrigRoiDescriptor*          p_roids,
                             const TrigL2MuonSA::TgcFitResult& tgcFitResult,
                             TrigL2MuonSA::MuonRoad&           muonRoad,
@@ -99,7 +101,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
   // define regions
   ATH_CHECK( m_mdtRegionDefiner->getMdtRegions(p_roids, tgcFitResult, muonRoad, mdtRegion) );
 
-  ATH_CHECK( getMdtHits(p_roids, muonRoad, mdtHits) );
+  ATH_CHECK( getMdtHits(ctx, p_roids, muonRoad, mdtHits) );
 
   return StatusCode::SUCCESS;
 }
@@ -109,18 +111,18 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
 // --------------------------------------------------------------------------------
 
 StatusCode TrigL2MuonSA::MdtDataPreparator::getMdtHits(
+                                const EventContext& ctx,
                                 const TrigRoiDescriptor* p_roids,
                                 TrigL2MuonSA::MuonRoad& muonRoad,
                                 TrigL2MuonSA::MdtHits& mdtHits) const
 {
   std::vector<IdentifierHash> mdtHashList;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   if (m_use_RoIBasedDataAccess) {
 
     ATH_MSG_DEBUG("Use RoI based data access");
 
-    m_regionSelector->lookup( ctx )->HashIDList(*p_roids, mdtHashList);
+    m_regionSelector->lookup(ctx)->HashIDList(*p_roids, mdtHashList);
     ATH_MSG_DEBUG("mdtHashList.size()=" << mdtHashList.size());
 
   } else {

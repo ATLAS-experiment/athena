@@ -403,7 +403,7 @@ def getGhostPJGAlg(ghostdef, parentjetdef = None):
     )
 
     pjaclass = CompFactory.PseudoJetAlgorithm
-    if ghostdef.basetype=="MuonSegment":
+    if ghostdef.basetype=="MuonSegment" or ghostdef.basetype=="UnAssocMuonSegment":
         # Muon segments have a specialised type
         pjaclass = CompFactory.MuonSegmentPseudoJetAlgorithm
         kwargs.update( Pt =1e-20 ) # ??,)
@@ -486,6 +486,7 @@ def getJetRecGroomAlg(groomdef,monTool=None,extraOutputs=[]):
         "jetrecalg_"+jetname,
         Provider = groomer,
         Modifiers = mods,
+        ParentDecor = "Parent",
         OutputContainer = jetname)
 
     if not isAnalysisRelease():

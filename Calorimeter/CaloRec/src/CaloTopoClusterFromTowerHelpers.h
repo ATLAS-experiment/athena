@@ -1,5 +1,5 @@
 // -*- c++ -*- 
-/* Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
 #ifndef CALOREC_CALOTOPOCLUSTERFROMTOWERHELPERS
 #define CALOREC_CALOTOPOCLUSTERFROMTOWERHELPERS
 
@@ -256,10 +256,15 @@ namespace CaloRec {
   } // Lookup
 } // CaloRec
 
-inline const std::string&       CaloRec::Lookup::getSamplingName(CaloSampling::CaloSample sid) { return samplingNames.find(sid)->second; }
+inline const std::string&       CaloRec::Lookup::getSamplingName(CaloSampling::CaloSample sid) {
+  auto it = samplingNames.find(sid);
+  if (it != samplingNames.end()) return it->second;
+  static const std::string unknown = "Unknown";
+  return unknown; }
 inline CaloSampling::CaloSample CaloRec::Lookup::getSamplingId(const std::string& sname) { 
-  auto fid(samplingIds.find(sname)); return fid != samplingIds.end() ? fid->second : samplingIds.find("Unknown")->second; 
-}
+  auto it = samplingIds.find(sname);
+  if (it != samplingIds.end()) return it->second;
+  return CaloSampling::Unknown; }
 
 inline bool               CaloRec::Lookup::haveMomentType(const std::string& momentName) { return clusterMomentTypes.contains(momentName); }
 inline const std::string& CaloRec::Lookup::getMomentName(xAOD::CaloCluster::MomentType momentType) { return clusterMomentNames.at(momentType); }

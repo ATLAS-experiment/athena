@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -26,8 +26,12 @@
 #ifndef TileRawChannelToNtuple_H
 #define TileRawChannelToNtuple_H
 
+#include "TileConditions/TileCablingSvc.h"
+
 #include "GaudiKernel/NTuple.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "TileEvent/TileRawChannelContainer.h"
+#include "StoreGate/ReadHandleKey.h"
 
 class TileID;
 class TileHWID;
@@ -36,21 +40,33 @@ class TileHWID;
 
 class TileRawChannelToNtuple : public AthAlgorithm {
 public:
-    //Constructor
-    TileRawChannelToNtuple(const std::string& name, ISvcLocator* pSvcLocator);
 
-    //Destructor 
-    virtual ~TileRawChannelToNtuple();                         
-    
+    using AthAlgorithm::AthAlgorithm;
+    virtual ~TileRawChannelToNtuple() = default;
+
     //Gaudi Hooks
-    StatusCode initialize();    
-    StatusCode execute();
-    StatusCode finalize();
+    StatusCode initialize() override;
+    StatusCode execute() override;
+    StatusCode finalize() override;
 
 private:
-    NTuple::Tuple* m_ntuplePtr;
-    std::string m_ntupleID;
-    std::string m_ntupleLoc;
+
+    Gaudi::Property<std::string> m_ntupleLoc{this,
+       "NTupleLoc", "/FILE1/TileRec", "Tile raw channel ntuple location"};
+
+    Gaudi::Property<std::string> m_ntupleID{this,
+       "NTupleID", "h70", "Tile raw channel ntuple ID"};
+
+    SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKey{this,
+       "TileRawChannelContainer", "TileRawChannelCnt", "Tile raw channel container name."};
+
+    /**
+     * @brief Name of Tile cabling service
+     */
+    ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
+       "TileCablingSvc", "TileCablingSvc", "The Tile cabling service"};
+
+    NTuple::Tuple* m_ntuplePtr{nullptr};
 
     NTuple::Item<int> m_nchan;
     NTuple::Item<double> m_tolE;
@@ -68,10 +84,8 @@ private:
     NTuple::Array<int> m_channel;
     NTuple::Array<int> m_gain;
     
-    std::string m_rawChannelContainer;
-
-    const TileID*   m_tileID;
-    const TileHWID* m_tileHWID;
+    const TileID*   m_tileID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
 };
 
 #endif

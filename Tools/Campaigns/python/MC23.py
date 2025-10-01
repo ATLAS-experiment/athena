@@ -163,7 +163,8 @@ def MC23g(flags):
     flags.Digitization.PU.NumberOfHighPtMinBias = 0.192
     # TODO new bunch structure?
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
-    # TODO: replace with the actual mc23g profile - this is a validation PileupProfile file
+    # TODO: replace with the actual mc23g profile - this is a validation PileupProfile file taken from the mc23e pileup profile
+    # NB: This is the pileup profile that is used in the Digi+Reco step
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run495000_MC23g_MultiBeamspot_VALIDATION' 
 
 
@@ -322,8 +323,8 @@ def MC23gSingleBeamspot(flags):
     MC23g(flags)
 
     # override only pile-up profile
-    # TODO: replace with the actual profile
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run470000_MC23e_SingleBeamspot'
+    # TODO: replace with the actual profile, this is a fake one taken from the mc23e one
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run495000_MC23g_SingleBeamspot_VALIDATION'
 
 
 def MC23LowMu(flags):
@@ -352,7 +353,10 @@ def MC23LowMu(flags):
 
 
 def _MC23NoPileUp(flags):
-    """MC23 flags for MC without pile-up"""
+    """
+    Configure MC23 flags for Monte Carlo simulations without pile-up.
+    This method is used in the Digi-Reco step only.
+    """
     flags.Beam.NumberOfCollisions = 0.
 
     from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
@@ -364,7 +368,10 @@ def _MC23NoPileUp(flags):
 
 
 def MC23aNoPileUp(flags):
-    """MC23a flags for MC without pile-up"""
+    """
+    Configure MC23a flags for Monte Carlo simulations without pile-up.
+    This method is used in the Digi-Reco step only.
+    """
     _MC23NoPileUp(flags)
 
     flags.Input.MCCampaign = Campaign.MC23a
@@ -372,7 +379,10 @@ def MC23aNoPileUp(flags):
 
 
 def MC23dNoPileUp(flags):
-    """MC23d flags for MC without pile-up"""
+    """
+    Configure MC23d flags for Monte Carlo simulations without pile-up.
+    This method is used in the Digi-Reco step only.
+    """
     _MC23NoPileUp(flags)
 
     flags.Input.MCCampaign = Campaign.MC23d
@@ -380,7 +390,10 @@ def MC23dNoPileUp(flags):
 
 
 def MC23eNoPileUp(flags):
-    """MC23e flags for MC without pile-up"""
+    """
+    Configure MC23e flags for Monte Carlo simulations without pile-up.
+    This method is used in the Digi-Reco step only.
+    """
     _MC23NoPileUp(flags)
 
     flags.Input.MCCampaign = Campaign.MC23e
@@ -388,16 +401,21 @@ def MC23eNoPileUp(flags):
 
 
 def MC23gNoPileUp(flags):
-    """MC23g flags for MC without pile-up"""
+    """
+    Configure MC23g flags for Monte Carlo simulations without pile-up.
+    This method is used in the Digi-Reco step only.
+    """
     _MC23NoPileUp(flags)
 
     flags.Input.MCCampaign = Campaign.MC23g
-    # TODO: replace with the actual run number
-    flags.Input.ConditionsRunNumber = 470000
+    flags.Input.ConditionsRunNumber = 495000
 
 
 def MC23NoPileUpLowMuRun(flags):
-    """MC23a flags for MC to match 2002 Low Mu data"""
+    """
+    Configure MC23a flags for Monte Carlo simulations to match 2022 Low Mu data.
+    This method is used in the Digi-Reco step only.
+    """
     _MC23NoPileUp(flags)
 
     flags.Input.MCCampaign = Campaign.MC23a
@@ -405,7 +423,10 @@ def MC23NoPileUpLowMuRun(flags):
 
     
 def MC23NoPileUpLowMuLowB(flags):
-    """MC23d flags for MC to match special run 460348"""
+    """
+    Configure MC23d flags for Monte Carlo simulations to match special run 460348.
+    This method is used in the Digi-Reco step only.
+    """
     _MC23NoPileUp(flags)
 
     flags.Input.MCCampaign = Campaign.MC23d
@@ -558,7 +579,10 @@ def MC23SimulationSingleIoV(flags):
 
 
 def MC23aSimulationMultipleIoV(flags):
-    """MC23 flags for simulation"""
+    """
+    Configure MC23a flags for simulation with multiple Intervals of Validity (IoV).
+    This method is used in the Simulation step only.
+    """
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23a
 
@@ -570,7 +594,10 @@ def MC23aSimulationMultipleIoV(flags):
 
 
 def MC23cSimulationMultipleIoV(flags):
-    """MC23 flags for simulation"""
+    """
+    Configure MC23c flags for simulation with multiple Intervals of Validity (IoV).
+    This method is used in the Simulation step only.
+    """
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23c
 
@@ -582,7 +609,10 @@ def MC23cSimulationMultipleIoV(flags):
 
 
 def MC23eSimulationMultipleIoV(flags):
-    """MC23 flags for simulation"""
+    """
+    Configure MC23e flags for simulation with multiple Intervals of Validity (IoV).
+    This method is used in the Simulation step only.
+    """
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23e
 
@@ -594,16 +624,20 @@ def MC23eSimulationMultipleIoV(flags):
 
 
 def MC23gSimulationMultipleIoV(flags):
-    """MC23 flags for simulation"""
+    """
+    Configure MC23g flags for simulation with multiple Intervals of Validity (IoV).
+    This method is used in the Simulation step only.
+    """
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23g
 
     flags.Input.OverrideRunNumber = True
 
     from RunDependentSimComps.PileUpUtils import generateRunAndLumiProfile
-    # TODO: replace with the actual profile
+    # TODO: replace with the actual profile, this is a fake profile copied from mc23e and used for validation purposed
+    # NB: This is the pileup profile used in the Simulation step only
     generateRunAndLumiProfile(flags,
-                              profile='RunDependentSimData.PileUpProfile_run470000_MC23e_MultiBeamspot')
+                              profile='RunDependentSimData.PileUpProfile_run495000_MC23g_MultiBeamspot_VALIDATION')
 
 
 def MC23SimulationSingleIoVCalibrationHits(flags):

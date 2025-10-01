@@ -7,6 +7,7 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "JetInterface/IJetDecorator.h"
 
@@ -76,8 +77,6 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassMassKey{this, "PassMassName", "PassMass", "SG key for PassMass"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassScoreKey{this, "PassScoreName", "PassScore", "SG key for PassScore"};
 
-    SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
-
     /// Maximum number of warnings
     const int m_nWarnMax = 10;
 
@@ -102,6 +101,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     /// Jet container name
     std::string m_containerName;
+    bool m_isSmallRJet = false;
 
     /// Path to the SF configuration root file
     std::string m_weightConfigPath;
@@ -172,7 +172,8 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readParentKey{this, "ParentName", "Parent", "SG key for Parent"};
 
-    bool m_suppressOutputDependence{};
+    Gaudi::Property<bool> m_suppressInputDependence{this, "SuppressInputDependence", false};
+    Gaudi::Property<bool> m_suppressOutputDependence{this, "SuppressOutputDependence", false};
 
     /// Strings for cut functions
     std::string m_strMassCutLow;

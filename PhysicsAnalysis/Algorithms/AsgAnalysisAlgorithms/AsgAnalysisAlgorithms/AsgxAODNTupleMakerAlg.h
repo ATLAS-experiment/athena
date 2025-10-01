@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ASGANALYSISALGORITHMS_ASGXAODNTUPLEMAKERALG_H
 #define ASGANALYSISALGORITHMS_ASGXAODNTUPLEMAKERALG_H
@@ -198,7 +198,7 @@ namespace CP {
             /// Name of the branch being written
             std::string m_branchName;
             /// Object accessing the variable in question
-            std::unique_ptr< SG::AuxElement::TypelessConstAccessor > m_acc;
+            std::unique_ptr< SG::TypelessConstAccessor > m_acc;
             /// Pointer to the helper object that handles this variable
             const SG::IAuxTypeVectorFactory* m_factory = nullptr;
             /// The object managing the memory of the written variable
@@ -314,7 +314,7 @@ namespace CP {
             /// Name of the branch being written
             std::string m_branchName;
             /// Object accessing the variable in question
-            std::unique_ptr< SG::AuxElement::TypelessConstAccessor > m_acc;
+            std::unique_ptr< SG::TypelessConstAccessor > m_acc;
             /// Pointer to the helper object that handles this variable
             const SG::IAuxTypeVectorFactory* m_factory = nullptr;
             /// The object managing the memory of the written variable

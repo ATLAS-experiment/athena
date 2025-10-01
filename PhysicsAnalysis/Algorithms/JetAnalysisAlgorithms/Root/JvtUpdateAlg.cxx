@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -27,7 +27,7 @@ namespace CP
       return StatusCode::FAILURE;
     }
     m_decorationAccessor = std::make_unique
-      <SG::AuxElement::Accessor<float> > (m_decorationName);
+      <SG::Accessor<float> > (m_decorationName);
 
     ANA_CHECK (m_jvtTool.retrieve());
     ANA_CHECK (m_jetHandle.initialize (m_systematicsList));

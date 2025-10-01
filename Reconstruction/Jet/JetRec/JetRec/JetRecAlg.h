@@ -1,6 +1,6 @@
 // this is a -*- C++ -*- file
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 #include "AnaAlgorithm/AnaReentrantAlgorithm.h"
 #include "AsgTools/ToolHandle.h"
 #include "AsgDataHandles/WriteHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 
 #include "JetInterface/IJetProvider.h"
 #include "JetInterface/IJetModifier.h"
@@ -46,6 +47,7 @@ private:
   ToolHandle<IJetProvider> m_jetprovider ={this , "Provider" , {} , "Tool providing the jets (fastjet, copy, grooming...)"};
   ToolHandleArray<IJetModifier> m_modifiers = {this , "Modifiers", {}, "moment calculators" };
   SG::WriteHandleKey<xAOD::JetContainer> m_output= {this, "OutputContainer", "AntiKt4LCtopoJets", "The output jet container name"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_parentKey= {this, "ParentDecor", "", "The parent decoration of the output jet container"};
 #if !defined (GENERATIONBASE) && !defined (XAOD_ANALYSIS)
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
 #endif

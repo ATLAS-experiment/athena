@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,13 +11,14 @@
 
 
 #include "SqliteRecord.h"
+#include "boost/io/ios_state.hpp"
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
 #include <sstream>
 
 SqliteRecord::SqliteRecord(SqliteInpDef_ptr def)
-  : m_def(def)
+  : m_def(std::move(def))
 {
 }
 
@@ -109,6 +110,7 @@ void SqliteRecord::addValue(const std::string& field
 
 void SqliteRecord::dump() const
 {
+  boost::io::ios_all_saver saver (std::cout);
   bool first{true};
   for(const auto& [colName,colType] : *m_def) {
     if(first) {

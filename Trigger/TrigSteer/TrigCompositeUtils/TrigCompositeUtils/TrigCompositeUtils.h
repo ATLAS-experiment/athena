@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_TrigCompositeUtils_h
@@ -343,12 +343,14 @@ namespace TrigCompositeUtils {
   /**
    * @brief Query all DecisionCollections in the event store, locate all Decision nodes in the graph where an object failed selection for a given chain.
    * @param[in] eventStore Pointer to event store within current event context
+   * @param[in] ctx EventContext
    * @param[in] summaryCollectionKey The primary source of navigation data in the event (i.e the collection which contains the navigation terminus node).
    * @param[in] ids IDs of chain (if multi-leg chain, include all legs) to located failed decision nodes for. Passing an empty set returns all decision nodes which failed at least one chain.
    * @param[in] keysToIgnore Set of SG keys of containers which should not be explored by getRejectedDecisionNodes.
    * @return Vector of Decision nodes whose attached feature failed the trigger chain logic for chain with DecisionID id
    **/
   std::vector<const Decision*> getRejectedDecisionNodes(const asg::EventStoreType* eventStore,
+    const EventContext& ctx,
     const std::string& summaryCollectionKey,
     const DecisionIDContainer& ids = {},
     const std::set<std::string>& keysToIgnore = std::set<std::string>());
@@ -409,25 +411,24 @@ namespace TrigCompositeUtils {
     const std::vector<std::string>& nodesToDrop);
 
 
-
   /// @name Constant string literals used within the HLT
   /// @{
-  const std::string& initialRoIString();
-  const std::string& initialRecRoIString();
-  const std::string& roiString();
-  const std::string& viewString();
-  const std::string& featureString();
-  const std::string& seedString();
+  inline const std::string& initialRoIString() { return Decision::s_initialRoIString; }
+  inline const std::string& initialRecRoIString() { return Decision::s_initialRecRoIString; }
+  inline const std::string& roiString() { return Decision::s_roiString; }
+  inline const std::string& viewString() { return Decision::s_viewString; }
+  inline const std::string& featureString() { return Decision::s_featureString; }
+  inline const std::string& seedString() { return Decision::s_seedString; }
 
-  const std::string& hltSeedingNodeName();
-  const std::string& filterNodeName();
-  const std::string& inputMakerNodeName();
-  const std::string& hypoAlgNodeName();
-  const std::string& comboHypoAlgNodeName();
-  const std::string& summaryFilterNodeName();
-  const std::string& summaryPassNodeName();
-  const std::string& summaryPassExpressNodeName();
-  const std::string& summaryPrescaledNodeName();
+  inline const std::string& hltSeedingNodeName() { return Decision::s_hltSeedingNodeNameString; }
+  inline const std::string& filterNodeName() { return Decision::s_filterNodeNameString; }
+  inline const std::string& inputMakerNodeName() { return Decision::s_inputMakerNodeNameString; }
+  inline const std::string& hypoAlgNodeName() { return Decision::s_hypoAlgNodeNameString; }
+  inline const std::string& comboHypoAlgNodeName() { return Decision::s_comboHypoAlgNodeNameString; }
+  inline const std::string& summaryFilterNodeName() { return Decision::s_summaryFilterNodeNameString; }
+  inline const std::string& summaryPassNodeName() { return Decision::s_summaryPassNodeNameString; }
+  inline const std::string& summaryPassExpressNodeName() { return Decision::s_summaryPassExpressNodeNameString; }
+  inline const std::string& summaryPrescaledNodeName() { return Decision::s_summaryPrescaledNodeNameString; }
   /// @}
 
   /**
@@ -441,7 +442,10 @@ namespace TrigCompositeUtils {
   /**
    * @brief Extract features from the supplied linkVector (obtained through recursiveGetDecisions).
    * @param[in] navPaths Sub-graph of the trigger navigation which is to be considered.
-   * @param[in] lastFeatureOfType True for TrigDefs::lastFeatureOfType. stops at the first feature (of the correct type) found per path through the navigation.
+   * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
+                          way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
    * @param[in] featureName Optional name of feature link as saved online. The "feature" link is enforced, others may have been added. 
    * @param[in] chains Optional set of Chain IDs which features are being requested for. Used to set the ActiveState of returned LinkInfo objects.
    * @return Typed vector of LinkInfo. Each LinkInfo wraps an ElementLink to a feature and a pointer to the feature's Decision object in the navigation.
@@ -450,7 +454,7 @@ namespace TrigCompositeUtils {
   const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType( 
     const NavGraph& navGraph, 
     const std::string& containerSGKey = "",
-    const bool lastFeatureOfType = true,
+    const unsigned int behaviour = TrigDefs::lastFeatureOfType,
     const std::string& navElementLinkKey = featureString(),
     const DecisionIDContainer& chainIDs = DecisionIDContainer());
 
@@ -467,7 +471,7 @@ namespace TrigCompositeUtils {
     std::set<const NavGraphNode*>& fullyExploredFrom,
     const NavGraphNode* navGraphNode, 
     const std::string& containerSGKey,
-    const bool lastFeatureOfType,
+    const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer& chainIDs);
 
@@ -490,10 +494,11 @@ namespace TrigCompositeUtils {
    * Populates provided vector with all located links to T of the corresponding linkName. 
    * @param[in] start the Decision Object from where recursive search should begin
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
-   * @param[inout] links Reference to vector, this will be populated with the found links. 
+   * @param[inout] links Reference to vector, this will be populated with the found links.
    * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
-                          branch once a link has been located and collected. 
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
    * @param[inout] fullyExploredFrom Optional cache used by the recursive algorithm to avoid exploring each node multiple times. 
    */
   template<typename T>
@@ -511,8 +516,9 @@ namespace TrigCompositeUtils {
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
    * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
-                          branch once a link has been located and collected. 
-   * @return Vector with the found links. 
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
+   * @return Vector with the found links.
    */
   template<typename T>
   std::vector<LinkInfo<T>>

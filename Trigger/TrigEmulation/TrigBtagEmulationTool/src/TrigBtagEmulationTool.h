@@ -1,18 +1,20 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 */
 
 #ifndef TrigBtagEmulationTool_H
 #define TrigBtagEmulationTool_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AsgTools/AsgTool.h"
+#include "AsgTools/ToolHandle.h"
 #include "TrigBtagEmulationTool/ITrigBtagEmulationTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
-#include "GaudiKernel/ToolHandle.h"
 
 #include "src/JetManagerTool.h"
 #include "src/TrigBtagEmulationChain.h"
 #include "FlavorTagDiscriminants/DL2HighLevel.h"
+
+#include <TLorentzVector.h>
 
 #include <string>
 #include <vector>
@@ -23,11 +25,10 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 namespace Trig {
 
 class TrigBtagEmulationTool : 
-  public extends<AthAlgTool, Trig::ITrigBtagEmulationTool> {
+  public extends<asg::AsgTool, Trig::ITrigBtagEmulationTool> {
+    ASG_TOOL_CLASS0(TrigBtagEmulationTool)
 public:
-  TrigBtagEmulationTool(const std::string& type, 
-			const std::string& name, 
-			const IInterface* parent);
+  TrigBtagEmulationTool(const std::string& name);
   virtual ~TrigBtagEmulationTool() = default;
 	
   virtual StatusCode initialize() override;
@@ -36,12 +37,14 @@ public:
   virtual const EmulContext& populateJetManagersTriggerObjects() const override;  
   virtual bool isPassed(const std::string& chain) const override;
   virtual bool isPassed(const std::string& chain, const EmulContext&) const override;
+  virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(std::string) const override;
 
 private:
   bool isPassed(const std::string&, const TrigBtagEmulationChain&, const EmulContext&) const;
   bool evaluate_L1(const TrigBtagEmulationChain&, const EmulContext&) const;
   bool evaluate_L1(const std::string&, const EmulContext&) const;
   bool evaluate_HLT(const TrigBtagEmulationChain&, const EmulContext&) const;
+  bool evaluate_HLT(const TrigBtagEmulationChain&, const EmulContext&, std::unordered_map<std::string, std::vector<bool>>&) const;
 
   bool evaluate_preselection(const TrigBtagEmulationChain& chain,
 			     const std::vector<TrigBtagEmulationJet>& preselJets) const;
@@ -80,8 +83,14 @@ private:
   StatusCode retrieveTriggerObjects(const Trig::JetManagerTool&,
 				    EmulContext&) const;
 
+  StatusCode indexRun2TriggerObjects(EmulContext&) const;
+
 private:
+#ifndef XAOD_STANDALONE
   PublicToolHandle<Trig::TrigDecisionTool> m_trigDec {this, "TrigDecisionTool", "",""};
+#else
+  ToolHandle<Trig::TrigDecisionTool> m_trigDec {this, "TrigDecisionTool", "",""};
+#endif
   
   // jet Managers
   ToolHandle< Trig::JetManagerTool > m_manager_PFlow_cnt {this, "JM_PFlow_CNT", "",""};

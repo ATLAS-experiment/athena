@@ -211,6 +211,7 @@ void test2()
     {
       for (size_t i = 0; i < exp.size(); i++) {
         if (exp[i] >= 0)
+          //cppcheck-suppress assertWithSideEffect
           assert (p[i] == std::to_string(exp[i]));
         else
           assert (p[i] == "");

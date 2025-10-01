@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JTOWER_ID_H
@@ -41,9 +41,8 @@ public:
 
   typedef Identifier::size_type  size_type ;
 
-  JTower_ID(void);    
-  ~JTower_ID(void);
-
+  JTower_ID();
+  ~JTower_ID();
 
   
   /** initialization from the identifier dictionary*/

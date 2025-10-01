@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigBtagEmulationTool )
@@ -8,7 +8,7 @@ find_package( ROOT COMPONENTS Core )
 atlas_add_library(TrigBtagEmulationToolLib
 		  INTERFACE
 		  PUBLIC_HEADERS TrigBtagEmulationTool
-		  LINK_LIBRARIES GaudiKernel
+		  LINK_LIBRARIES AsgTools AsgMessagingLib
 		  )
 
 atlas_add_component(TrigBtagEmulationTool
@@ -20,8 +20,6 @@ atlas_add_component(TrigBtagEmulationTool
 		    LINK_LIBRARIES 
 		      ${ROOT_LIBRARIES}
 		      TrigBtagEmulationToolLib
-		      AthenaBaseComps
-		      StoreGateLib
 		      xAODJet
 		      xAODBTagging
 		      xAODTrigger

@@ -6,7 +6,6 @@ from .bbH import bbH
 from .bblvlv import bblvlv
 from .bblvlv_modified import bblvlv_modified 
 from .bblvlv_Beta import bblvlv_Beta
-from .bblvlv_Beta_modified import bblvlv_Beta_modified 
 from .chi0chi0 import chi0chi0
 from .chi0chi1 import chi0chi1
 from .chi1chi1 import chi1chi1
@@ -68,13 +67,17 @@ from .Wt_DR_modified import Wt_DR_modified
 from .Wt_DS import Wt_DS
 from .WW import WW
 from .WWj import WWj
+from .WWj_MiNNLO import WWj_MiNNLO
 from .Wy import Wy
 from .WZ import WZ
+from .WZj_MiNNLO import WZj_MiNNLO
 from .yj import yj
 from .Z import Z
 from .Z_EW import Z_EW
 from .Z_SMEFT import Z_SMEFT
+from .Zgamj_MiNNLO import Zgamj_MiNNLO
 from .Zj import Zj
 from .Zj_MiNNLO import Zj_MiNNLO
 from .Zjj import Zjj
 from .ZZ import ZZ
+from .ZZj_MiNNLO import ZZj_MiNNLO

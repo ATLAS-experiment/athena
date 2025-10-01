@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUMMARY: This code implements a "particle decayer" to allow us to augment the standard 
@@ -214,8 +214,8 @@ StatusCode ParticleDecayer::setDecayPosition( CLHEP::HepRandomEngine* engine, He
    ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the decay vertex");
    HepMC::GenVertexPtr end_vtx = HepMC::newGenVertexPtr();
    end_vtx->set_position(HepMC::FourVector(posLV.x(),posLV.y(),posLV.z(),posLV.t()));
-   end_vtx->add_particle_in(genpart);
-   event->add_vertex(end_vtx);
+   end_vtx->add_particle_in(std::move(genpart));
+   event->add_vertex(std::move(end_vtx));
    return StatusCode::SUCCESS;
 }
 
@@ -344,7 +344,7 @@ StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
            ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new momentum");
            
            ///*** Now allow the two-body decay of the particle
-           CHECK( DFTwoBodyDecay( engine, genpart, m_particlePolarization ) );
+           CHECK( DFTwoBodyDecay( engine, std::move(genpart), m_particlePolarization ) );
 
         }
      }else if (m_LJType == 2) {
@@ -451,7 +451,7 @@ void ParticleDecayer::addParticle(HepMC::GenVertexPtr prod_vtx, int pdg, HepMC::
 HepMC::GenParticlePtr aParticle = HepMC::newGenParticlePtr (HepMC::FourVector(momentum.x(), momentum.y(), momentum.z(), energy), 
 		                           pdg, statusCode);
 
-  prod_vtx->add_particle_out(aParticle);
+  prod_vtx->add_particle_out(std::move(aParticle));
 }
 
 
@@ -518,7 +518,7 @@ StatusCode ParticleDecayer::DFTwoBodyDecay( CLHEP::HepRandomEngine* engine, HepM
    auto v0=daughterLVs.at(0).vect();
    addParticle(end_vtx,  ModeOfDecay, HepMC::FourVector(v0.x(),v0.y(),v0.z(),0.0),    1);
    auto v1=daughterLVs.at(1).vect();
-   addParticle(end_vtx, -ModeOfDecay, HepMC::FourVector(v1.x(),v1.y(),v1.z(),0.0),    1);
+   addParticle(std::move(end_vtx), -ModeOfDecay, HepMC::FourVector(v1.x(),v1.y(),v1.z(),0.0),    1);
 
    return StatusCode::SUCCESS;
 }

@@ -14,6 +14,8 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "ITkPixelRDO_Container.h"
 #include "ITkPixelHitSortingTool.h"
 #include "ITkPixelEncodingTool.h"
+#include "ITkPixelCabling/ITkPixelCablingData.h"
+
 
 
 
@@ -31,7 +33,10 @@ StatusCode ITkPixelCnvTool::initialize(){
 
     //Initialize the sub-tools
     ATH_CHECK(m_hitSortingTool.retrieve());
+
     ATH_CHECK(m_encodingTool.retrieve());
+
+    ATH_CHECK(m_pixelCablingKey.initialize());
 
     return StatusCode::SUCCESS;
 
@@ -43,6 +48,11 @@ StatusCode ITkPixelCnvTool::initialize(){
 */
 template<class ContainerType>
 StatusCode ITkPixelCnvTool::convertToByteStream(const ContainerType* cont) const {
+    
+    //Get the cabling
+    SG::ReadCondHandle<ITkPixelCablingData> cablingData(m_pixelCablingKey);
+    const ITkPixelCablingData* cabling = *cablingData;
+
     //Get the full event assembler from ByteStreamCnvSvcBase
     //SrcIdMap translates lower lvl IDs into higher lvl, e. g. ROD -> ROB, ROB -> ROS, ROS -> Det
     FullEventAssembler<SrcIdMap>* fea = 0;
@@ -58,19 +68,37 @@ StatusCode ITkPixelCnvTool::convertToByteStream(const ContainerType* cont) const
     std::vector<uint32_t>* rod;
 
     //sort the RDO hits based on the FE
-    const std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> EventHitMaps = m_hitSortingTool->sortRDOHits(cont);
+    const std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> EventHitMaps = m_hitSortingTool->sortRDOHits(cont, cabling);
 
-    //Each of the FEs in the map will have it's own ROD
+    int nRODs = 0;
+
     for (const auto& [onlineID, hitMap] : EventHitMaps){
 
+        //make a copy of the onlineID
+        uint32_t onID = (uint32_t)onlineID;
+
         //Encode the FE hits
-        std::vector<uint32_t> encodedStream = m_encodingTool->encodeFE(hitMap);
+        std::vector<uint32_t> encodedStream = m_encodingTool->encodeFE(hitMap, onID & 0x3);
+
+        //Is this a merged quad? If so, collapse the chip ID in the online identifier to 00
+        //we can get the information from cabling's online -> modlue Info map.
+        ITkPixelCabling::ModuleInfo mi = cabling->offlineModuleInfo((onID >> 2) << 2);
+        if (mi.type == ITkPixelCabling::ModuleType::MergedQuad) onID = (onID >> 2) << 2;
+
+        //At this point, the ROD identifier will be labelled with lowest two bits 00 for single
+        //chips, chip 00 in unmerged quads and for entire merged quads, and with
+        //the rest up to 0x3 for the remaining 3 chips in unmerged quads. The higher bits are
+        //the online 'base'. We need this because of the unmerged quads, where one
+        //offline entity maps on 4 online entities.
+        
 
         //Create ROD and insert the payload
-        rod = fea->getRodData((uint32_t)onlineID);
+        rod = fea->getRodData(onID);
+        if (rod->size() == 0) nRODs++;
         rod->insert(rod->end(), encodedStream.begin(), encodedStream.end());
 
     }
+    std::cout << "nRODs = " << nRODs << "\n";
 
     return StatusCode::SUCCESS;
 }

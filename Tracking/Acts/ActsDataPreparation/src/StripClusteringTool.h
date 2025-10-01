@@ -39,6 +39,7 @@ public:
 	       const InDetRawDataCollection<StripRDORawData>& RDOs,
 	       const InDet::SiDetectorElementStatus& stripDetElStatus,
 	       const InDetDD::SiDetectorElement& element,
+         Acts::Ccl::ClusteringData& data,
 	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
     virtual StatusCode
@@ -94,6 +95,9 @@ private:
 
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "StripDetEleCollKey", "ITkStripDetectorElementCollection",
       "SiDetectorElementCollection key for strip"};
+
+    Gaudi::Property<bool> m_isITk {this, "isITk", true,
+      "True if running in ITk"};
 
     int m_timeBinBits[3]{-1, -1, -1};
 

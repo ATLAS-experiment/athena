@@ -51,6 +51,10 @@ void get_SF (
    const Char_t *TVar[NVar] = { "Sampling Fraction" };
    const Char_t *UVar[NVar] = { "SF = <E_{ACT}> /  <E_{TOT}>" };
    const Char_t *CVar[NVar] = { "samf" };
+
+
+   TFile* f=TFile::Open("SF_LAr.root","UPDATE");
+
 //
 //  --------------------------------------------------------------------
 // 
@@ -261,6 +265,10 @@ void get_SF (
          if (it == 2) {
              SamFr[iHEC] =  sf;
             eSamFr[iHEC] = esf;		   
+
+            f->cd();
+            fuc1->SetName(Form("SF_HEC_%s_eta_%4.2f_%4.2f",CHEC[iHEC],xmin,xmax));
+            fuc1->Write("");
          }
 //
 //  Deviation from the fit
@@ -410,6 +418,8 @@ void get_SF (
    }
 //
    fclose (fout);
+
+   f->Close();
 //
 /* ------------------------------------------------------------------ */
 //

@@ -2980,7 +2980,7 @@ namespace Trk {
     const double y = yc + std::abs(r) * std::sin(phi0 + delta_phi);
     const Amg::Vector3D intersect = Amg::Vector3D(x, y, surf.center().z());
     const double perp = intersect.perp();
-    const DiscBounds *discbounds = (const DiscBounds *) (&surf.bounds());
+    const DiscBounds *discbounds = static_cast<const DiscBounds *> (&surf.bounds());
 
     if (perp > discbounds->rMax() || perp < discbounds->rMin()) {
       return {};
@@ -3129,7 +3129,7 @@ namespace Trk {
            * First, convert the pointer to a real CylinderSurface pointer.
            */
           layer = layers[layerindex].first;
-          const CylinderSurface *cylsurf = (const CylinderSurface *) (&layer->surfaceRepresentation());
+          const CylinderSurface *cylsurf = static_cast<const CylinderSurface *> (&layer->surfaceRepresentation());
 
           /*
            * Check if we have a different set of parameters that make more
@@ -3162,7 +3162,7 @@ namespace Trk {
            * lines up.
            */
           layer = layers[layerindex].second;
-          const DiscSurface *discsurf = (const DiscSurface *) (&layer->surfaceRepresentation());
+          const DiscSurface *discsurf = static_cast<const DiscSurface *> (&layer->surfaceRepresentation());
 
           if (oldstates[i]->trackParameters() != nullptr) {
             const double zlayer = discsurf->center().z();
@@ -3360,7 +3360,7 @@ namespace Trk {
          * Grab the bounds from the layer, which is a more useful kind of
          * object that allows us to do some geometric calculations.
          */
-        const DiscBounds *discbounds = (const DiscBounds *) (&(*it)->surfaceRepresentation().bounds());
+        const DiscBounds *discbounds = static_cast<const DiscBounds *> (&(*it)->surfaceRepresentation().bounds());
 
         /*
          * Ensure that we've actually hit the layer!

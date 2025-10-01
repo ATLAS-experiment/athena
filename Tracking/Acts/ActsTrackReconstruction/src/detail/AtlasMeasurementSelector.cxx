@@ -31,7 +31,7 @@
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
 #include "src/IMeasurementSelector.h"
 #include "src/detail/CalibratorRegistry.h"
-#include "src/detail/MeasurementCalibrator2.h"
+#include "src/detail/MeasurementCalibrator.h"
 
 #include "boost/container/small_vector.hpp"
 
@@ -194,6 +194,12 @@ struct AtlasMeasurementSelector
    };
 
    const ActsTrk::detail::MeasurementRangeList *m_measurementRanges{};
+   const ActsTrk::detail::MeasurementRangeListFlat *m_measurementRangesForced{};
+
+   void setMeasurementRangesForced(const ActsTrk::detail::MeasurementRangeListFlat *measurementRangesForced) {
+      m_measurementRangesForced = measurementRangesForced;
+   }
+
    // Helper to provide the mapping between bound parameters and coordinates
    // @TODO is the default projector always good enough or is there some dependency
    //       on the geoemtry ?
@@ -277,22 +283,31 @@ struct AtlasMeasurementSelector
       }
    }
 
-   std::tuple<const measurement_container_variant_t *, abstract_measurement_range_t >
+   std::tuple<const measurement_container_variant_t *, abstract_measurement_range_t, bool >
    containerAndRange(const Acts::Surface &surface) const {
+      if (m_measurementRangesForced) {
+          auto ret = containerAndRangeSingle(*m_measurementRangesForced, surface, true);
+          if (std::get<0>(ret)) return ret;
+      }
+      return containerAndRangeSingle(*m_measurementRanges, surface, false);
+   }
 
-      const ActsTrk::detail::MeasurementRangeList::const_iterator
-         range_iter = m_measurementRanges->find(surface.geometryId().value());
-      if (range_iter == m_measurementRanges->end())
+
+   template <typename MeasurementRangeList_t>
+   static std::tuple<const measurement_container_variant_t *, abstract_measurement_range_t, bool >
+   containerAndRangeSingle(const MeasurementRangeList_t& measurementRanges, const Acts::Surface &surface, bool forced) {
+      typename MeasurementRangeList_t::const_iterator range_iter = measurementRanges.find(surface.geometryId().value());
+      if (range_iter == measurementRanges.end())
       {
-         return {nullptr, abstract_measurement_range_t{}};
+         return {nullptr, abstract_measurement_range_t{}, forced};
       }
       else {
          abstract_measurement_range_t range{range_iter->second.elementBeginIndex(),
                                             range_iter->second.elementEndIndex()};
          assert( !range_iter->second.isMeasurementExpected() || range.begin() <= range.end());
          // if surface marked as defect
-         return { range_iter->second.isMeasurementExpected() ? &(m_measurementRanges->container(range_iter->second.containerIndex())) : nullptr,
-                 std::move(range)};
+         return { forced || range_iter->second.isMeasurementExpected() ? &(measurementRanges.container(range_iter->second.containerIndex())) : nullptr,
+                 std::move(range), forced};
       }
    }
 
@@ -339,7 +354,7 @@ namespace {
       using BoundState = std::tuple<Acts::BoundTrackParameters, Acts::BoundMatrix, double>;
       // the delegate used by the track finder to which the measurement selector needs to be connected to
 
-      AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator2 &&calibrator,
+      AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator &&calibrator,
                                   const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                   TheAtlasMeasurementSelector::Config &&config)
          : m_calibrator( std::move(calibrator)),
@@ -372,8 +387,12 @@ namespace {
          delegate->template connect< & TheAtlasMeasurementSelector::createTrackStates >(&m_measurementSelector);
       }
 
+      void setMeasurementRangesForced(const ActsTrk::detail::MeasurementRangeListFlat *measurementRangesForced) override {
+         m_measurementSelector.setMeasurementRangesForced(measurementRangesForced);
+      }
+
       // provides the calibrators
-      ActsTrk::MeasurementCalibrator2         m_calibrator;
+      ActsTrk::MeasurementCalibrator         m_calibrator;
 
       // the actual measurement selector
       TheAtlasMeasurementSelector             m_measurementSelector;
@@ -389,7 +408,7 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Act
                                                                        const std::vector<size_t> &numMeasurementsCutOff) {
 
     // set calibrators per measurement container type (order does not matter);
-    ActsTrk::MeasurementCalibrator2 atl_measurement_calibrator(onTrackCalibratorTool);
+    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(onTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
 
     using AtlMeasurementSelector = AtlasActsMeasurmentSelector<RecoTrackContainer>;

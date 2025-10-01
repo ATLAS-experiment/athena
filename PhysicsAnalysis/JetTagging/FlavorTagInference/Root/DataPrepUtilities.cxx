@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/DataPrepUtilities.h"
@@ -7,8 +7,6 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagInference/CustomGetterUtils.h"
 #include "FlavorTagInference/StringUtils.h"
 #include "FlavorTagInference/SaltModelGraphConfig.h"
-
-#include "xAODBTagging/BTaggingUtilities.h"
 
 namespace {
   using namespace FlavorTagInference;
@@ -137,7 +135,6 @@ namespace FlavorTagInference {
     : track_prefix ("btagIp_"),
       flip (FlipTagConfig::STANDARD),
       track_link_name ("BTagTrackToJetAssociator"),
-      track_link_type (TrackLinkType::TRACK_PARTICLE),
       default_output_value (NAN),
       invalid_ip_key ("invalidIp"),
       electron_link_name("FTagElectrons")
@@ -240,8 +237,7 @@ namespace FlavorTagInference {
       FTagOptions>
     createGetterConfig( GraphConfig& config,
       FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar,
-      TrackLinkType track_link_type
+      std::map<std::string, std::string> remap_scalar
     ){
 
       // we rewrite the inputs if we're using flip taggers
@@ -343,7 +339,6 @@ namespace FlavorTagInference {
       }
       options.flip = flip_config;
       options.remap_scalar = remap_scalar;
-      options.track_link_type = track_link_type;
       return std::make_tuple(input_config, constituent_configs, options);
     }
 
@@ -352,33 +347,27 @@ namespace FlavorTagInference {
     // This focuses on the scalar inputs, i.e. the inputs for DL1d,
     // the code for the track inputs is below.
     std::tuple<
-      std::vector<internal::VarFromBTag>,
-      std::vector<internal::VarFromJet>,
+      std::vector<std::pair<std::string, internal::VarFromJet>>,
       FTagDataDependencyNames>
     createBvarGetters(
       const std::vector<FTagInputConfig>& inputs)
     {
       FTagDataDependencyNames deps;
-      std::vector<internal::VarFromBTag> varsFromBTag;
-      std::vector<internal::VarFromJet> varsFromJet;
+      std::vector<std::pair<std::string, internal::VarFromJet>> varsFromJet;
 
       for (const auto& input: inputs) {
         if (input.type != EDMType::CUSTOM_GETTER) {
-          auto filler = internal::get::varFromBTag(input.name, input.type,
-                                         input.default_flag);
-          deps.bTagInputs.insert(input.name);
-          varsFromBTag.push_back(filler);
+          throw std::runtime_error("Unsupported input type");
         } else {
-          varsFromJet.push_back(getter_utils::namedCustomJetGetter(input.name));
+          varsFromJet.push_back(std::make_pair(input.name, getter_utils::namedCustomJetGetter(input.name)));
         }
         if (input.default_flag.size() > 0) {
           deps.bTagInputs.insert(input.default_flag);
         }
       }
 
-      return std::make_tuple(varsFromBTag, varsFromJet, deps);
+      return std::make_tuple(varsFromJet, deps);
     }
-
 
     // Translate configuration to setter functions
     //
@@ -492,8 +481,7 @@ namespace FlavorTagInference {
   createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>( 
     lwt::GraphConfig& config,
     FlipTagConfig flip_config,
-    std::map<std::string, std::string> remap_scalar,
-    TrackLinkType track_link_type
+    std::map<std::string, std::string> remap_scalar
   );
 
   template
@@ -504,8 +492,7 @@ namespace FlavorTagInference {
   createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>( 
     SaltModelGraphConfig::GraphConfig& config,
     FlipTagConfig flip_config,
-    std::map<std::string, std::string> remap_scalar,
-    TrackLinkType track_link_type
+    std::map<std::string, std::string> remap_scalar
   );
 
   template

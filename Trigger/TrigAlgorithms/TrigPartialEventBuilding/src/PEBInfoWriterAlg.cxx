@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -111,7 +111,7 @@ StatusCode PEBInfoWriterAlg::execute(const EventContext& eventContext) const {
   // ---------------------------------------------------------------------------
   for (const auto& tool: m_hypoTools) {
     ATH_MSG_DEBUG("Calling " << tool);
-    ATH_CHECK(tool->decide(toolInputs));
+    ATH_CHECK(tool->decide(eventContext, toolInputs));
   }
 
   // ---------------------------------------------------------------------------

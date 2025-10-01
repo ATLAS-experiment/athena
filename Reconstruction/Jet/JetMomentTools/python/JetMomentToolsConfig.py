@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
                                                                       
@@ -215,7 +215,8 @@ def getPFlowfJVTTool(jetdef, modspec):
                                                   FEName = jetdef.inputdef.containername,
                                                   ORName = "",
                                                   FjvtRawName = "DFCommonJets_fJvt",
-                                                  includePV = False)
+                                                  includePV = False,
+                                                  SuppressInputDependence = True)
 
     return fJVTTool
 
@@ -260,12 +261,44 @@ def getBoostedJetTaggerToolTop(jetdef, modspec):
     jssutils = CompFactory.JSSTaggerUtils("JSSTaggerUtils/MyTagger")
 
     ### transformer top tagger score
-    bjtTool = CompFactory.BoostedJetTaggerTool("BoostedJetTaggerTool",
+    bjtTool = CompFactory.BoostedJetTaggerTool("BoostedJetTaggerTool-Top",
                                             MLTagger = jssutils,
                                             JetContainer = jetdef.fullname(),
                                             DecorationName = "TopTransformer",
                                             CalibArea = "TopConstituentTagger/July2025",
                                             ConfigFile = "TopTagger_AntiKt10UFOSoftDrop_Transformer.dat"
                                             )
+
+    return bjtTool
+
+def getBoostedJetTaggerToolW(jetdef, modspec):
+
+    jssutils = CompFactory.JSSTaggerUtils("JSSTaggerUtils/MyTagger")
+
+    ### transformer W tagger score
+    bjtTool = CompFactory.BoostedJetTaggerTool("BoostedJetTaggerTool-W",
+                                            MLTagger = jssutils,
+                                            JetContainer = jetdef.fullname(),
+                                            DecorationName = "WTransformer",                                            
+                                            CalibArea = "WConstituentTagger/July2025",
+                                            ConfigFile = "WTagger_AntiKt10UFOSoftDrop_Transformer.dat"
+                                            )
+
+
+    return bjtTool
+
+def getBoostedJetTaggerToolWMassDec(jetdef, modspec):
+
+    jssutils = CompFactory.JSSTaggerUtils("JSSTaggerUtils/MyTagger")
+
+    ### transformer W tagger score mass decorrelated
+    bjtTool = CompFactory.BoostedJetTaggerTool("BoostedJetTaggerTool-WMassDec",
+                                            MLTagger = jssutils,
+                                            JetContainer = jetdef.fullname(),
+                                            DecorationName = "WTransformer_massdec",                                            
+                                            CalibArea = "WConstituentTaggerMassDec/July2025",
+                                            ConfigFile = "WTagger_AntiKt10UFOSoftDrop_Transformer.dat"
+                                            )
+
 
     return bjtTool

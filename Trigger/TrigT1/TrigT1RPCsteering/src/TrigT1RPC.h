@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCMuonTrigger_H
 #define RPCMuonTrigger_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/NTuple.h"
@@ -32,13 +32,13 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class TrigT1RPC : public AthAlgorithm {
+class TrigT1RPC : public AthReentrantAlgorithm {
 
 public:
 
   TrigT1RPC (const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize();
-  StatusCode execute();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
   IntegerProperty m_fast_debug{this,"FastDebug",0};            // bits for debugging "fast" algos
@@ -71,9 +71,7 @@ private:
   
   BooleanProperty m_useRun3Config{this,"useRun3Config",false};         // flag for using switch between Run3 and Run2 configurations
   
-  StatusCode fill_RPCdata(RPCsimuData&, const RpcCablingCondData* readCdo, const MuonGM::MuonDetectorManager* muDetMgr);
-  
-  BIS78_triggerSimulation m_BIS78TrigSim;
+  StatusCode fill_RPCdata(const EventContext& ctx, RPCsimuData&, BIS78_triggerSimulation&, const RpcCablingCondData* readCdo, const MuonGM::MuonDetectorManager* muDetMgr) const;
 
  private:
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 

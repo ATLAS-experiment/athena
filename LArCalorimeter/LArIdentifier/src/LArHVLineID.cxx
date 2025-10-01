@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArHVLineID.h"
@@ -16,7 +16,8 @@
 #include <string>
 
 
-LArHVLineID::LArHVLineID(void) : 
+LArHVLineID::LArHVLineID() :
+  AtlasDetectorID("LArHVLineID", "LArHV"),
   m_larhvRegion_index(999),
   m_atlas_index(999),
   m_configuration_index(999),
@@ -33,14 +34,14 @@ LArHVLineID::LArHVLineID(void) :
 LArHVLineID:: ~LArHVLineID()= default;
 
 
-IdContext LArHVLineID::hvlineContext(void) const
+IdContext LArHVLineID::hvlineContext() const
 {
   ExpandedIdentifier id;
   return (IdContext(id, 0, m_hvline_index));
 }
 
 /*
-IdContext LArHVLineID::canlineContext(void) const
+IdContext LArHVLineID::canlineContext() const
 {
   ExpandedIdentifier id;
   return (IdContext(id, 0, m_canline_index));
@@ -119,7 +120,7 @@ int  LArHVLineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int larHVValue   = -1;
   if (atlasDict->get_label_value("subdet", "LArHighVoltage", larHVValue)) {
     std::stringstream strm;
-    strm << atlasDict->m_name;
+    strm << atlasDict->name();
     strg= " Could not get value for label 'LArHighVoltage' of field 'subdet' in dictionary "+strm.str();
     if(m_msgSvc){
       log << MSG::ERROR << strg << endmsg;
@@ -136,7 +137,7 @@ int  LArHVLineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int configurationValue   = 1;
   if (m_dict->get_label_value("configuration", "Atlas", configurationValue)) {
     std::stringstream strm;
-    strm <<  m_dict->m_name;      
+    strm <<  m_dict->name();
     strg = "WARNING : Could not get value for label 'configuration' in dictionary "+strm.str();
     if(m_msgSvc) {
       log << MSG::INFO << strg << endmsg;
@@ -194,7 +195,7 @@ int LArHVLineID::get_expanded_id  (const HWIdentifier& id,
 
 
 //=============================================================================
-int LArHVLineID::initLevelsFromDict(void) 
+int LArHVLineID::initLevelsFromDict()
 //=============================================================================
 {
   MsgStream log(m_msgSvc, "LArHVLineID" );
@@ -222,7 +223,7 @@ int LArHVLineID::initLevelsFromDict(void)
   // Search with region name
   IdDictRegion* reg = m_dict->find_region("LArHV-HEC-A");
   if (reg) {
-      m_larhvRegion_index = reg->m_index;}
+      m_larhvRegion_index = reg->index();}
   else {
     log << MSG::INFO  << "WARNING : LArHVLineID::initLevelsFromDict - unable to find 'barrel-region1' region"  
 	      << endmsg;
@@ -234,7 +235,7 @@ int LArHVLineID::initLevelsFromDict(void)
   // ========================================================================
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_atlas_index = field->m_index ;}
+    m_atlas_index = field->index();}
   else {
     log << MSG::INFO  
 	<< "LArHVLineID::initLevelsFromDict - unable to find 'subdet' field " << endmsg ;
@@ -247,7 +248,7 @@ int LArHVLineID::initLevelsFromDict(void)
   // ========================================================================
   field = m_dict->find_field("configuration") ;
   if (field) {
-    m_configuration_index = field->m_index ;}
+    m_configuration_index = field->index();}
   else {
     log << MSG::INFO  
 	<< "LArHVLineID::initLevelsFromDict - unable to find 'configuration' field " << endmsg ;
@@ -260,7 +261,7 @@ int LArHVLineID::initLevelsFromDict(void)
   // ========================================================================
   field = m_dict->find_field("partition") ;
   if (field) {
-    m_partition_index = field->m_index ;}
+    m_partition_index = field->index();}
   else {
     log << MSG::INFO  <<  "LArHVLineID::initLevelsFromDict - unable to find 'partition' field "
               << endmsg ;
@@ -273,7 +274,7 @@ int LArHVLineID::initLevelsFromDict(void)
   // ========================================================================
   field = m_dict->find_field("canline") ;
   if (field) {
-    m_canline_index = field->m_index ;}
+    m_canline_index = field->index();}
   else {
     log << MSG::INFO  <<  "LArHVLineID::initLevelsFromDict - unable to find 'canline' field "
               << endmsg ;
@@ -286,7 +287,7 @@ int LArHVLineID::initLevelsFromDict(void)
   // ========================================================================
   field = m_dict->find_field("cannode") ;
   if (field) {
-    m_cannode_index = field->m_index ;
+    m_cannode_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "LArHVLineID::initLevelsFromDict - unable to find 'cannode' field "
@@ -300,7 +301,7 @@ int LArHVLineID::initLevelsFromDict(void)
   // ========================================================================
   field = m_dict->find_field("hvline") ;
   if (field) {
-    m_hvline_index = field->m_index ;
+    m_hvline_index = field->index();
   }
   else {
     log << MSG::INFO  <<  "LArHVLineID::initLevelsFromDict - unable to find 'hvline' field "
@@ -313,7 +314,7 @@ int LArHVLineID::initLevelsFromDict(void)
   // Set the field implementation
   // ========================================================================
 
-  const IdDictRegion& region = *m_dict->m_regions[m_larhvRegion_index];
+  const IdDictRegion& region = m_dict->region(m_larhvRegion_index);
   log << MSG::DEBUG  << "[initLevelsFromDict] Found levels: " << endmsg ;
   log << MSG::DEBUG  << "[initLevelsFromDict] > larHV           " << m_atlas_index     << endmsg ;
   log << MSG::DEBUG  << "[initLevelsFromDict] > larConfiguration " << m_configuration_index     << endmsg ;
@@ -325,12 +326,12 @@ int LArHVLineID::initLevelsFromDict(void)
 
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...fields implementation... " << endmsg;
   log << MSG::DEBUG  << "[initLevelsFromDict] > ...implementation: m_larhvcalo_index " << endmsg;
-  m_atlas_impl        = region.m_implementation[m_atlas_index]; 
-  m_configuration_impl= region.m_implementation[m_configuration_index]; 
-  m_partition_impl    = region.m_implementation[m_partition_index]; 
-  m_canline_impl      = region.m_implementation[m_canline_index]; 
-  m_cannode_impl      = region.m_implementation[m_cannode_index]; 
-  m_hvline_impl       = region.m_implementation[m_hvline_index]; 
+  m_atlas_impl        = region.implementation(m_atlas_index);
+  m_configuration_impl= region.implementation(m_configuration_index);
+  m_partition_impl    = region.implementation(m_partition_index);
+  m_canline_impl      = region.implementation(m_canline_index);
+  m_cannode_impl      = region.implementation(m_cannode_index);
+  m_hvline_impl       = region.implementation(m_hvline_index);
   
   log << MSG::DEBUG  << "[initLevelsFromDict] Decode index and bit fields for each level: " << endmsg;
   log << MSG::DEBUG  << "[initLevelsFromDict] > larHV      "  << m_atlas_impl.show_to_string() << endmsg;
@@ -348,7 +349,7 @@ int LArHVLineID::initLevelsFromDict(void)
 
 
 //=====================================================
-int  LArHVLineID::init_hashes(void) 
+int  LArHVLineID::init_hashes()
 //=====================================================
 {
   MsgStream log(m_msgSvc, "LArHVLineID" );

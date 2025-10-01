@@ -22,7 +22,6 @@ from TrigEFMissingET.TrigEFMissingETConfig import getMETMonTool
 from abc import ABC, abstractmethod
 from string import ascii_uppercase
 from TrigMissingETHypo.TrigMissingETHypoConfig import TrigMETHypoToolFromDict
-from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 import functools
 
 def streamer_hypo_tool(flags, chainDict):
@@ -242,7 +241,6 @@ class AlgConfig(ABC):
                     else [
                         functools.partial(make_MET_menu_sequenceGenCfg, flags, sel_acc, hypo_tool)                                                
                     ],
-                    comboHypoCfg=ComboHypoCfg,
                     isEmpty=True if sel_acc is None else False
                 )
             )

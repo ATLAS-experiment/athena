@@ -17,7 +17,7 @@ StatusCode TrigL2MuonSA::MuFastPatternFinder::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-void TrigL2MuonSA::MuFastPatternFinder::doMdtCalibration(TrigL2MuonSA::MdtHitData& mdtHit, double track_phi, double phi0, bool isEndcap) const
+void TrigL2MuonSA::MuFastPatternFinder::doMdtCalibration(const EventContext& ctx, TrigL2MuonSA::MdtHitData& mdtHit, double track_phi, double phi0, bool isEndcap) const
 {
    int StationName  = mdtHit.name;
    int StationEta   = mdtHit.StationEta;
@@ -50,7 +50,7 @@ void TrigL2MuonSA::MuFastPatternFinder::doMdtCalibration(TrigL2MuonSA::MdtHitDat
    ATH_MSG_DEBUG("... MDT hit position X/Y/Z/track_phi/Multilayer/Layer/Tube="
 		 << Amg::toString(point, 2) << "/" << track_phi << "/" << Multilayer << "/" << Layer << "/" << Tube);
 
-   MdtCalibOutput calibOut = m_mdtCalibrationTool->calibrate(Gaudi::Hive::currentContext(), calHit,  false);
+   MdtCalibOutput calibOut = m_mdtCalibrationTool->calibrate(ctx, calHit,  false);
    double driftSpace = calibOut.driftRadius();
    double driftSigma = calibOut.driftRadiusUncert();
 
@@ -73,13 +73,14 @@ void TrigL2MuonSA::MuFastPatternFinder::doMdtCalibration(TrigL2MuonSA::MdtHitDat
 // --------------------------------------------------------------------------------
 
 
-StatusCode TrigL2MuonSA::MuFastPatternFinder::findPatterns(const TrigL2MuonSA::MuonRoad&            muonRoad,
+StatusCode TrigL2MuonSA::MuFastPatternFinder::findPatterns(const EventContext& ctx,
+							   const TrigL2MuonSA::MuonRoad&            muonRoad,
 							   TrigL2MuonSA::MdtHits&                   mdtHits,
 							   TrigL2MuonSA::StgcHits&                  stgcHits,
 							   TrigL2MuonSA::MmHits&                    mmHits,
 							   std::vector<TrigL2MuonSA::TrackPattern>& v_trackPatterns) const
 {
-  ATH_CHECK( findPatterns(muonRoad, mdtHits, v_trackPatterns) );
+  ATH_CHECK( findPatterns(ctx, muonRoad, mdtHits, v_trackPatterns) );
   ATH_CHECK( m_nswPatternFinder->findPatterns(muonRoad, stgcHits, mmHits, v_trackPatterns.back()) );
 
   if (msgLvl(MSG::DEBUG)) {
@@ -95,7 +96,8 @@ StatusCode TrigL2MuonSA::MuFastPatternFinder::findPatterns(const TrigL2MuonSA::M
 }
 
 
-StatusCode TrigL2MuonSA::MuFastPatternFinder::findPatterns(const TrigL2MuonSA::MuonRoad&            muonRoad,
+StatusCode TrigL2MuonSA::MuFastPatternFinder::findPatterns(const EventContext& ctx,
+                               const TrigL2MuonSA::MuonRoad&            muonRoad,
 							   TrigL2MuonSA::MdtHits&                   mdtHits,
 							   std::vector<TrigL2MuonSA::TrackPattern>& v_trackPatterns) const
 {
@@ -250,7 +252,7 @@ StatusCode TrigL2MuonSA::MuFastPatternFinder::findPatterns(const TrigL2MuonSA::M
             for(unsigned int i_digi=0; i_digi< v_mdtLayerHits[chamber][i_layer].ndigi_all; i_digi++) {
                 unsigned int i_hit = v_mdtLayerHits[chamber][i_layer].indexes[i_digi];
                 if (i_layer==0) phi0 = mdtHits[i_hit].cPhi0;
-                doMdtCalibration(mdtHits[i_hit], trigger_phi, phi0, muonRoad.isEndcap);
+                doMdtCalibration(ctx, mdtHits[i_hit], trigger_phi, phi0, muonRoad.isEndcap);
                 if (mdtHits[i_hit].isOutlier > 1) continue;
                 mdtSegment.push_back(mdtHits[i_hit]);
             }

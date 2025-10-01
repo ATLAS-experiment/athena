@@ -572,7 +572,8 @@ void test_iterate()
   ii = 0;
   while (const void* p = iterator->next()) {
     const M* pp = reinterpret_cast<const M*> (p);
-    myassert (pp->x == ii++);
+    myassert (pp->x == ii);
+    ++ii;
   }
   delete iterator;
 }

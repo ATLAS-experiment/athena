@@ -57,7 +57,7 @@ namespace MuonR4{
           using LinkDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec_t>;
           using FloatDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float>;
 
-          using SegPars_t = xAOD::MeasVector<SegmentFit::toInt(SegmentFit::ParamDefs::nPars)>;
+          using SegPars_t = xAOD::MeasVector<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>;
           using SegParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t>;
         
           /** @brief Helper struct to ship the write DecorHandles and the reference to the output

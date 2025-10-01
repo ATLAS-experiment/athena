@@ -36,6 +36,8 @@ namespace MuonR4 {
             Gaudi::Property<unsigned> m_nMdtSeedHitCut{this, "minMdtSeedHits" , 4};
             /** @brief Cut on minimum number of Mdt hits to consider the segment for tracking */
             Gaudi::Property<unsigned> m_nMdtMinHitCut{this, "minMdtHits" , 3};
+            /** @brief Minimum number of Nsw hits */
+            Gaudi::Property<unsigned> m_nNswMinHitCut{this, "minNswHits", 5};
             /** @brief Cont on maximum number of outlies to consider the segment for seeding */
             Gaudi::Property<unsigned> m_nMdtSeedOutlierCut{ this, "maxMdtOutliers", 15};
             /** @brief Minimum number of Rpc phi hits in BI to consider the segment for seeding */

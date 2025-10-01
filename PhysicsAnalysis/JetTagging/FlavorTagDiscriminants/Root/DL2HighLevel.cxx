@@ -25,7 +25,6 @@ namespace FlavorTagDiscriminants {
   DL2HighLevel::DL2HighLevel(const std::string& nn_file_name,
                              FlipTagConfig flip_config,
                              std::map<std::string,std::string> remap_scalar,
-                             TrackLinkType track_link_type,
                              float default_output_value):
     m_dl2(nullptr)
   {
@@ -41,7 +40,7 @@ namespace FlavorTagDiscriminants {
       throw std::logic_error("DL2 doesn't support multiple inputs");
     }
     auto [input_config, constituents_configs, options] = dataprep::createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>(
-      config, flip_config, std::move(remap_scalar), track_link_type);
+      config, flip_config, std::move(remap_scalar));
     options.default_output_value = default_output_value;
 
     m_dl2.reset(
@@ -57,9 +56,6 @@ namespace FlavorTagDiscriminants {
   DL2HighLevel::DL2HighLevel(DL2HighLevel&&) = default;
   DL2HighLevel::DL2HighLevel(const DL2HighLevel&) = default;
 
-  void DL2HighLevel::decorate(const xAOD::BTagging& btag) const {
-    m_dl2->decorate(btag);
-  }
   void DL2HighLevel::decorate(const xAOD::IParticle& i_jet) const {
     m_dl2->decorate(i_jet);
   }

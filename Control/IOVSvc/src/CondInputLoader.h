@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CondInputLoader.h 
@@ -19,7 +19,7 @@
 #include "AthenaKernel/IDictLoaderSvc.h"
 #include "AthenaKernel/ITPCnvSvc.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 
 #include <string>
@@ -27,7 +27,7 @@
 
 
 class CondInputLoader
-  : public ::AthAlgorithm
+  : public ::AthReentrantAlgorithm
 { 
 
  public:
@@ -38,7 +38,8 @@ class CondInputLoader
   // Athena algorithm's Hooks
   virtual StatusCode  initialize() override;
   virtual StatusCode  start() override;
-  virtual StatusCode  execute() override;
+  virtual StatusCode  execute(const EventContext& ctx) const override;
+  virtual bool isReEntrant() const override final { return false; }
   virtual StatusCode  finalize() override;
 
 

@@ -47,8 +47,8 @@ StatusCode TRTCondWrite::initialize()
     }
     else
     {
-        ATH_MSG_INFO(" No input text file supplied. Initialization done. ");
-        return StatusCode::SUCCESS;
+        ATH_MSG_ERROR(" No input text file supplied. Initialization done. ");
+        return StatusCode::FAILURE;
     }
 
     // Write keys
@@ -77,7 +77,7 @@ StatusCode TRTCondWrite::execute()
     // Read from text file?
     if (!m_par_caltextfile.empty())
     {
-        std::ifstream infile(m_par_caltextfile.name().c_str());
+        std::ifstream infile(m_par_caltextfile.value().c_str());
         if (infile)
         {
             ATH_MSG_INFO(" Read calibration constants from text file " << m_par_caltextfile);
@@ -90,13 +90,15 @@ StatusCode TRTCondWrite::execute()
         }
         else
         {
-            ATH_MSG_INFO("Input file does not exist ");
+            ATH_MSG_ERROR("Input file does not exist " << m_par_caltextfile.value().c_str());
+            return StatusCode::FAILURE;
         }
         infile.close();
     }
     else
     {
-        ATH_MSG_INFO("No input filename supplied ");
+        ATH_MSG_ERROR("No input filename supplied ");
+        return StatusCode::FAILURE;
     }
 
     return StatusCode::SUCCESS;
@@ -150,6 +152,7 @@ StatusCode TRTCondWrite::readTextFile(const std::string &filename, int &format)
     if (!infile)
     {
         ATH_MSG_ERROR("Cannot find input file " << filename);
+        sc = StatusCode::FAILURE;
     }
     else
     {

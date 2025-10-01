@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "ISF_FastCaloGpu/GeoRegion.h"
 #include <iostream>
 

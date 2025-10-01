@@ -56,14 +56,17 @@ class TrackingComponent(FlagEnum):
     ActsValidateSeeds = "ActsValidateSeeds"
     ActsValidateConversionSeeds = "ActsValidateConversionSeeds"
     ActsValidateLargeRadiusSeeds = "ActsValidateLargeRadiusSeeds"
+    ActsValidateLargeRadiusStandalone = "ActsValidateLargeRadiusStandalone"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
         
     # GNN
     GNNChain = "GNNChain"
+    
     # FPGA
     FPGAChain = "FPGAChain"
     ActsValidateF100 = "ActsValidateF100"
+    ActsValidateF150 = "ActsValidateF150"
 
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
@@ -588,10 +591,12 @@ def createTrackingConfigFlags():
         createActsValidateSeedsTrackingPassFlags,
         createActsValidateConversionSeedsTrackingPassFlags,
         createActsValidateLargeRadiusSeedsTrackingPassFlags,
+        createActsValidateLargeRadiusStandaloneTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags,
-        createEFValidateF100TrackingPassFlags
+        createEFValidateF100TrackingPassFlags,
+        createEFValidateF150TrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
@@ -614,6 +619,8 @@ def createTrackingConfigFlags():
                           createActsValidateConversionSeedsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusSeedsPass",
                           createActsValidateLargeRadiusSeedsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusStandalonePass",
+                          createActsValidateLargeRadiusStandaloneTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",
                           createActsValidateTracksTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
@@ -624,7 +631,10 @@ def createTrackingConfigFlags():
     # Acts F100 validation pass
     icf.addFlagsCategory ("Tracking.ITkActsValidateF100Pass",
                           createEFValidateF100TrackingPassFlags, prefix=True)
-    
+
+    # Acts F150 validation pass
+    icf.addFlagsCategory ("Tracking.ITkActsValidateF150Pass",
+                          createEFValidateF150TrackingPassFlags, prefix=True)
 
     # GNN
     from InDetGNNTracking.InDetGNNTrackingFlags import createGNNTrackingPassFlags

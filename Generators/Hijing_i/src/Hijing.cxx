@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -336,7 +336,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
     HepMC::GenParticlePtr part_t = HepMC::newGenParticlePtr(HepMC::FourVector(0., 0., -etarg, etarg), targ_id, 102 );
     v1->add_particle_in( part_t );
 
-    evt->set_beam_particles(part_p,part_t);
+    evt->set_beam_particles(std::move(part_p),std::move(part_t));
 
     ATH_MSG_DEBUG( "Hijing particles for event # " << m_events << ":\n"
            << " px,      "
@@ -546,7 +546,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
          HepMC::GenVertexPtr newVertex_p = HepMC::newGenVertexPtr(HepMC::FourVector(particleStart.x(),particleStart.y(),particleStart.z(),particleStart.t()));
 
           evt->add_vertex(newVertex_p);
-         vertexPtrVec.push_back(newVertex_p);
+         vertexPtrVec.push_back(std::move(newVertex_p));
          particleVertexIndex = vertexPtrVec.size() - 1;
        }
        else
@@ -580,7 +580,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
 
       // Now add the particle to its vertex
       //
-      vertexPtrVec[particleVertexIndex]->add_particle_out(newParticle_p);
+      vertexPtrVec[particleVertexIndex]->add_particle_out(std::move(newParticle_p));
       partOriginVertex_vec[i-1] = particleVertexIndex;
 
     }

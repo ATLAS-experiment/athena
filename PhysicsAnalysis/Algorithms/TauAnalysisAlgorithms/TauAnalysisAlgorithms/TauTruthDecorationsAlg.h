@@ -41,11 +41,11 @@ namespace CP
     Gaudi::Property<std::string> m_prefix {this, "prefix", "truth_", "the prefix to be added to all output decorations"};
 
     // the mapping of double to float is intentional to save disk space
-    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<double>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_doubleWriteHandleKeys;
-    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<float>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_floatWriteHandleKeys;
-    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<int>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_intWriteHandleKeys;
-    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<unsigned int>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_unsignedIntWriteHandleKeys;
-    std::unordered_map<std::unique_ptr<SG::AuxElement::ConstAccessor<char>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_charWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::ConstAccessor<double>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_doubleWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::ConstAccessor<float>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_floatWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::ConstAccessor<int>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_intWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::ConstAccessor<unsigned int>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_unsignedIntWriteHandleKeys;
+    std::unordered_map<std::unique_ptr<SG::ConstAccessor<char>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_charWriteHandleKeys;
 
     SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_truthDecayModeKey {
       this, "decayModeDecoration", "truth_DecayMode", "the decoration for the tau decay mode"};

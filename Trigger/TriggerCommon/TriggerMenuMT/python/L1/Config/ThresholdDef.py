@@ -310,7 +310,7 @@ class ThresholdDef:
         for thrV in [200,]:
             TEThreshold('jTEC%i' % thrV, 'jTE').setTE(thrV)
 
-        for thrV in [100,]:
+        for thrV in [100,6500]:
             TEThreshold('jTEFWD%i' % thrV, 'jTE').setTE(thrV)
 
         for thrV in [100,5,1]:

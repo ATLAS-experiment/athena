@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  
 def MdtCablMezzAlgCfg(flags, name = "MdtCablMezzAlg", **kwargs):
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from MuonCondTest.MdtCablingTester import setupServicesCfg
-    result = setupServicesCfg(flags)
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    
+    result = ComponentAccumulator()
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
     result.merge(MDTCablingConfigCfg(flags))
     event_algo = CompFactory.MdtCablingJsonDumpAlg(name,**kwargs)
@@ -13,6 +14,8 @@ def MdtCablMezzAlgCfg(flags, name = "MdtCablMezzAlg", **kwargs):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest, configureCondTag, SetupMuonStandaloneCA
+    
     parser = SetupArgParser()
     parser.set_defaults(output="SummaryFile.txt")
     parser.set_defaults(mezzMap="MezzMapping.json")
@@ -20,24 +23,21 @@ if __name__ == "__main__":
    
     args = parser.parse_args()   
     flags = initConfigFlags()
-    flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
-    flags.Output.ESDFileName = args.output
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
+    flags.Exec.MaxEvents = 1
     flags.Input.Files = args.inputFile
-    flags.GeoModel.AtlasVersion = args.geometry
-    flags.IOVDb.GlobalTag = args.conditionsTag
-    flags.lock()   
-    
-    cfg = MdtCablMezzAlgCfg(flags,
+    if not flags.GeoModel.AtlasVersion:
+      flags.GeoModel.AtlasVersion = args.geoTag
+    configureCondTag(flags)
+    flags.lock()
+    flags.dump(evaluate=True)
+
+    cfg = SetupMuonStandaloneCA(flags)
+    cfg.merge( MdtCablMezzAlgCfg(flags,
                             SummaryFile=args.output,
                             OutMezzanineJSON=args.mezzMap,
-                            OutCablingJSON=args.cablingMap)
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    flags.dump()
-
-    sc = cfg.run(1)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
+                            OutCablingJSON=args.cablingMap))
+    executeTest(cfg)
 
 

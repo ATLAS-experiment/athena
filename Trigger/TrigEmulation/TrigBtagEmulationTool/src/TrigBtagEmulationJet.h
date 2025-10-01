@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBTAGEMULATION_JET_H
@@ -16,7 +16,7 @@ namespace Trig {
 
 class TrigBtagEmulationJet {
 public:
-  TrigBtagEmulationJet() = delete;
+  TrigBtagEmulationJet();
   TrigBtagEmulationJet(const xAOD::Jet&, const std::string& btagLink = "btaggingLink");
   TrigBtagEmulationJet(const xAOD::Jet&, const xAOD::BTagging* btag);
   virtual ~TrigBtagEmulationJet() = default;

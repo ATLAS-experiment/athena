@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/DL2.h"
@@ -8,11 +8,8 @@
 #include "lwtnn/LightweightGraph.hh"
 #include "lwtnn/NanReplacer.hh"
 
-#include "xAODBTagging/BTaggingUtilities.h"
+// #include "xAODBTagging/BTaggingUtilities.h"
 
-namespace {
-  const std::string jetLinkName = "jetLink";
-}
 
 
 namespace FlavorTagDiscriminants {
@@ -24,7 +21,6 @@ namespace FlavorTagDiscriminants {
            const std::vector<FTagInputConfig>& inputs,
            const std::vector<ConstituentsInputConfig>& tracks_configs,
            const FTagOptions& options):
-    m_jetLink(jetLinkName),
     m_input_node_name(""),
     m_graph(new lwt::LightweightGraph(graph_config,graph_config.outputs.begin()->first)),
     m_variable_cleaner(nullptr),
@@ -41,8 +37,7 @@ namespace FlavorTagDiscriminants {
                                  lwt::rep::all));
     }
 
-    auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
-    m_varsFromBTag = vb;
+    auto [vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromJet = vj;
     m_dataDependencyNames += ds;
     
@@ -72,17 +67,9 @@ namespace FlavorTagDiscriminants {
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
   }
 
-  void DL2::decorate(const xAOD::BTagging& btag) const {
-    auto jetLink = m_jetLink(btag);
-    if (!jetLink.isValid()) {
-      throw std::runtime_error("invalid jetLink");
-    }
-    const xAOD::Jet& jet = **jetLink;
-    decorate(jet, btag);
-  }
   void DL2::decorate(const xAOD::IParticle& i_jet) const {
     auto jet = dynamic_cast<const xAOD::Jet*>(&i_jet);
-    decorate(*jet, *jet);
+    decorate(*jet);
   }
   void DL2::decorateWithDefaults(const SG::AuxElement& jet) const {
     // save out things
@@ -94,14 +81,11 @@ namespace FlavorTagDiscriminants {
     }
   }
 
-  void DL2::decorate(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
+  void DL2::decorate(const xAOD::Jet& jet) const {
     using namespace internal;
     std::vector<NamedVar> vvec;
-    for (const auto& getter: m_varsFromBTag) {
-      vvec.push_back(getter(btag));
-    }
     for (const auto& getter: m_varsFromJet) {
-      vvec.push_back(getter(jet));
+      vvec.push_back(getter.second(jet));
     }
     std::map<std::string, std::map<std::string, double> > nodes;
     if (m_variable_cleaner) {
@@ -120,15 +104,15 @@ namespace FlavorTagDiscriminants {
 
     for (const auto& loader : m_tracksLoaders){
       std::map<std::string, std::vector<double>> feats;
-      std::tie(invalid, feats) = loader->getDL2Data(jet, btag, m_invalid_track_checker);
+      std::tie(invalid, feats) = loader->getDL2Data(jet, m_invalid_track_checker);
       seqs[loader->getName()] = feats;
     }
 
     for (const auto& def: m_is_defaults) {
-      def(btag) = invalid;
+      def(jet) = invalid;
     }
     if (invalid) {
-      decorateWithDefaults(btag);
+      decorateWithDefaults(jet);
       return;
     }
 
@@ -137,7 +121,7 @@ namespace FlavorTagDiscriminants {
       // the second argument to compute(...) is for sequences
       auto out_vals = m_graph->compute(nodes, seqs, dec.first);
       for (const auto& node: dec.second) {
-        node.second(btag) = out_vals.at(node.first);
+        node.second(jet) = out_vals.at(node.first);
       }
     }
   }

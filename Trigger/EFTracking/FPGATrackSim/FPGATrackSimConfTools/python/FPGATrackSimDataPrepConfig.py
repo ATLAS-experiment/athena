@@ -306,13 +306,17 @@ def FPGATrackSimMappingCfg(flags,name="FPGATrackSimMappingSvc"):
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
     mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii.txt"
     mappingSvc.radiiFile2nd = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii_2nd.txt"
-    mappingSvc.loadRadii = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
+    mappingSvc.loadRadii = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN) and flags.Trigger.FPGATrackSim.loadRadii
+    mappingSvc.loadRegionMap = flags.Trigger.FPGATrackSim.loadRegionMap
+    mappingSvc.DoGNNTrack = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
+
     mappingSvc.FakeNNonnx1st = flags.Trigger.FPGATrackSim.FakeNNonnxFile1st
     mappingSvc.FakeNNonnx2nd = flags.Trigger.FPGATrackSim.FakeNNonnxFile2nd
     mappingSvc.ParamNNonnx1st = flags.Trigger.FPGATrackSim.ParamNNonnxFile1st
     mappingSvc.ParamNNonnx2nd = flags.Trigger.FPGATrackSim.ParamNNonnxFile2nd
     mappingSvc.ExtensionNNVolonnx = flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile
     mappingSvc.ExtensionNNHitonnx = flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile
+    mappingSvc.GNNModuleMap = flags.Trigger.FPGATrackSim.GNN.moduleMapPath
     mappingSvc.layerOverride = []
     result.addService(mappingSvc, create=True, primary=True)
     return result
@@ -543,14 +547,32 @@ def FPGATrackSimRegionFlagCfg(flags):
 
 def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
     acc=ComponentAccumulator()
-    acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
-    acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
-        'xAODPixelClusterFromFPGAClusterKey': 'FPGAPixelClusters',
-        'xAODStripClusterFromFPGAClusterKey': 'FPGAStripClusters',
-        'doActsTrk': False,
-        'doSP': False,
-    }))
-    
+    if not flags.Trigger.FPGATrackSim.runOnPreProducedHeaderFiles:
+        acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
+            'FPGATrackSimSPKey': 'FPGAClusters_1st',
+            'xAODPixelClusterFromFPGAClusterKey': 'FPGAPixelClusters',
+            'xAODStripClusterFromFPGAClusterKey': 'FPGAStripClusters',
+            'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
+            'doActsTrk': False,
+            'useRoads': False,          
+            'doSP': flags.Trigger.FPGATrackSim.convertSPs,
+        }))
+    else:
+        from FPGATrackSimConfTools.FPGATrackSimMergeOutputsConfig import FPGATrackSimMergeOutputsAlgCfg
+        acc.merge(FPGATrackSimMergeOutputsAlgCfg(flags))            
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
+            'FPGATrackSimHitKey': 'FPGAHits',
+            'xAODPixelClusterFromFPGAHitKey': 'FPGAPixelClusters',
+            'xAODStripClusterFromFPGAHitKey': 'FPGAStripClusters',
+            'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
+            'doActsTrk': True,
+            'useRoads': False,          
+            'doClusters': False,
+            'doHits': True,
+            'doSP': flags.Trigger.FPGATrackSim.convertSPs,
+        }))      
+        
     from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg
     ClusterSorting = FPGAClusterSortingAlgCfg(flags,**{'xAODPixelClusterContainer': 'FPGAPixelClusters',
                                                        'xAODStripClusterContainer': 'FPGAStripClusters',
@@ -580,19 +602,23 @@ def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
                   'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
         acc.merge(addToAOD(flags, toAOD))
-        
+    
+    
+    from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+    acc.merge(FPGATrackSimReportingCfg(flags,
+                                       perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
+                                        **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
+                                            'xAODStripClusterContainers' : ['ITkStripClusters'],
+                                            'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
+                                            'isDataPrep': True} ))
+    
     return acc
 
 def FPGATrackSimDataPrepFlagCfg(flags): # to be used in the Reco_tf configuration
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
     
-    flags.Concurrency.NumThreads=1
-    flags.Concurrency.NumConcurrentEvents=1
-    flags.Concurrency.NumProcs=0
-    
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
-    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
     flags = FPGATrackSimRegionFlagCfg(flags)

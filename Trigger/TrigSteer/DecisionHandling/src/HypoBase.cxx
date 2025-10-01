@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionHandling/HypoBase.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
+
+#include <set>
 
 using namespace TrigCompositeUtils;
 
@@ -161,7 +163,7 @@ StatusCode HypoBase::validateParentLinking(const ElementLink<DecisionContainer>&
   static const std::set<std::string> expectedParentsHypoAlg = {inputMakerNodeName()};
   static const std::set<std::string> expectedParentsComboHypoAlg = {hypoAlgNodeName(), inputMakerNodeName(), hltSeedingNodeName()}; // TODO check hltSeedingNodeName(), needed for newJO
   static const std::set<std::string> expectedParentsSummaryFilter = {hypoAlgNodeName(), comboHypoAlgNodeName(), hltSeedingNodeName()};
-  static const std::set<std::string> expectedParentsSummaryPassed = {"SF"}; // TODO change to summaryFilterNodeName() when merged
+  static const std::set<std::string> expectedParentsSummaryPassed = {summaryFilterNodeName()};
 
   const std::set<std::string>* expectedParentsPtr = nullptr;
   if (name == filterNodeName()) {
@@ -174,9 +176,9 @@ StatusCode HypoBase::validateParentLinking(const ElementLink<DecisionContainer>&
     expectedParentsPtr = &expectedParentsHypoAlg;
   } else if (name == comboHypoAlgNodeName()) {
     expectedParentsPtr = &expectedParentsComboHypoAlg;
-  } else if (name == "SF") { // TODO change to summaryFilterNodeName() when merged
+  } else if (name == summaryFilterNodeName()) {
     expectedParentsPtr = &expectedParentsSummaryFilter;
-  } else if (name == "HLTPassRaw") { // TODO change to summaryPassNodeNameString() when merged
+  } else if (name == summaryPassNodeName()) {
     expectedParentsPtr = &expectedParentsSummaryPassed;
   } else {
     printErrorHeader(dEL, msg);
@@ -187,7 +189,7 @@ StatusCode HypoBase::validateParentLinking(const ElementLink<DecisionContainer>&
   }
 
   for (const ElementLink<DecisionContainer>& seed : seeds) {
-    if (expectedParentsPtr->count( (*seed)->name() ) == 0) {
+    if (!expectedParentsPtr->contains( (*seed)->name() )) {
       printErrorHeader(dEL, msg);
       msg << MSG::ERROR << "! Invalid linking from node with name '" << name << "' to one with name '"<< (*seed)->name() << "'." << endmsg;
       msg << MSG::ERROR << "! Allowed seed names are:" << endmsg;

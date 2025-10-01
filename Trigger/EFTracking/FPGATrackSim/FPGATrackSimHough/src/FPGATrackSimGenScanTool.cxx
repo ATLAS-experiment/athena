@@ -22,11 +22,19 @@
 #include <sstream>
 #include <cmath>
 #include <algorithm>
+#include <limits>
 
 
 #include <nlohmann/json.hpp>
 
 #include "TH1.h"
+
+namespace {
+  bool
+  nearZero(const double & v){
+    return std::abs(v)<=std::numeric_limits<double>::min();
+  }
+}
 
 
 
@@ -92,7 +100,7 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   
   // Check inputs
   bool ok = false;
-  if (m_pairFilterDeltaPhiCut.size() != m_binnedhits->getNLayers() - 1)
+  if (std::ssize(m_pairFilterDeltaPhiCut) != static_cast<int>(m_binnedhits->getNLayers()) - 1)
     ATH_MSG_FATAL("initialize() pairFilterDeltaPhiCut must have size nLayers-1=" << m_binnedhits->getNLayers() - 1 << " found " << m_pairFilterDeltaPhiCut.size());
   else if (m_pairFilterDeltaEtaCut.size() != m_binnedhits->getNLayers() - 1)
     ATH_MSG_FATAL("initialize() pairFilterDeltaEtaCut must have size nLayers-1=" << m_binnedhits->getNLayers() - 1 << " found " << m_pairFilterDeltaEtaCut.size());
@@ -182,7 +190,28 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
   }
 
   // copy roads to output vector
-  roads.reserve(m_roads.size());  
+  roads.reserve(m_roads.size());
+
+  if (m_keepHitsStrategy > 0) {
+    for (std::unique_ptr<FPGATrackSimRoad>& r : m_roads) {
+      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r->getAllHits();
+      layer_bitmask_t hitmask = r->getHitLayers();
+      std::vector<unsigned> toUse = PickHitsToUse(hitmask);
+
+      std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> vec(5); // even if not all layers have hits, they need to be in the vector as empty vectors
+      for (size_t ihit = 0; ihit < toUse.size(); ++ihit) {
+        unsigned int layer = toUse[ihit];
+        if (layer >= theseHits.size() || theseHits[layer].empty()) {
+          ATH_MSG_ERROR("Hit index out of range in keepHitsStrategy: layer=" << layer << ", hits.size()=" << theseHits.size());
+          return StatusCode::FAILURE;
+        }
+        vec[ihit].push_back(theseHits[layer][0]);
+      }
+      r->setHits(std::move(vec));
+    }
+  }
+
+  
   for (auto & r : m_roads) roads.push_back(std::move(r));
   ATH_MSG_DEBUG("Roads = " << roads.size());
 
@@ -243,12 +272,12 @@ StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
   // set outputs if not all filters applied
   if (!m_applyPairFilter) {
     // output is just the filtered pairs
-    output_pairsets.push_back(pairs);
+    output_pairsets.push_back(std::move(pairs));
   }
   else if (passedPairFilter && !m_applyPairSetFilter)
   {
     // output is just the filtered pairs
-    output_pairsets.push_back(filteredpairs);
+    output_pairsets.push_back(std::move(filteredpairs));
   }
 
   return StatusCode::SUCCESS;
@@ -292,7 +321,7 @@ void FPGATrackSimGenScanTool::updateState(const IntermediateState &inputstate,
         if (pairPassesFilter(newpair) || (m_applyPairFilter == false)) {
           HitPairSet newset;
           newset.addPair(newpair);
-          outputstate.pairsets.push_back(newset);
+          outputstate.pairsets.push_back(std::move(newset));
         }
       }
     }
@@ -484,7 +513,7 @@ StatusCode FPGATrackSimGenScanTool::groupPairs(HitPairSet &filteredpairs,
     {
       HitPairSet newpairset;
       newpairset.addPair(pair);
-      pairsets.push_back(newpairset);
+      pairsets.push_back(std::move(newpairset));
     }
   }
   
@@ -775,7 +804,11 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
   double r2_t0 = (-N*sum_R2 + sum_R*sum_R);
 
   // all three phi var expresions use the same demoninator
-  double denom_phi = N * r6_t0 + sum_R * r5_t0 + sum_R2 * r4_t0;
+  const double denom_phi = N * r6_t0 + sum_R * r5_t0 + sum_R2 * r4_t0;
+  if (nearZero(denom_phi)){
+    ATH_MSG_ERROR("Divide by zero (phi) trapped in FPGATrackSimGenScanTool::fitRoad");
+    return false;
+  }
 
   // phivar expresions from analytic chi2 minimization
   std::vector<double> phivars(3);
@@ -785,7 +818,11 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
 
   // eta vars
   // same as phi but with not curvature (r^2) term
-  double denom_eta = N*sum_R2 - sum_R*sum_R;
+  const double denom_eta = N*sum_R2 - sum_R*sum_R;
+  if (nearZero(denom_eta)){
+    ATH_MSG_ERROR("Divide by zero (eta) trapped in FPGATrackSimGenScanTool::fitRoad");
+    return false;
+  }
 
   std::vector<double> etavars(2);
   etavars[0] = (-sum_R*sum_EtaR + sum_R2*sum_Eta)/denom_eta;
@@ -836,4 +873,100 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
   chi2 = std::sqrt(m_etaWeight * eta_chi2 * eta_chi2 + m_phiWeight * phi_chi2 * phi_chi2);
 
   return inBin;
+}
+
+std::vector<unsigned> FPGATrackSimGenScanTool::PickHitsToUse(layer_bitmask_t hitmask) const
+{
+  std::vector<unsigned> toUse;
+  switch (m_keepHitsStrategy) {
+    case 1: // try and pick hits furthest apart, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,2,3};
+        }
+      }
+      break;
+    case 2: // pick inner hits, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,1,2};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,2,3};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,3};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,1,3};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,1,2};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,1,2};
+        }
+      }
+      break;
+    case 3: // pick outer hits, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {1,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {1,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {1,2,3};
+        }
+      }
+      break;
+    case 4: // keep 4 hits, choose middle one to drop if necessary
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,1,2,3};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,2,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,3,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,1,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,1,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,1,2,3};
+        }
+      }
+      break;
+  }
+  return toUse;
 }

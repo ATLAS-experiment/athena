@@ -3,8 +3,6 @@
 import os,time
 import stat as statconsts
 
-from future import standard_library
-standard_library.install_aliases()
 import subprocess
 
 __doc__ = """Module with utilities for rfio files"""

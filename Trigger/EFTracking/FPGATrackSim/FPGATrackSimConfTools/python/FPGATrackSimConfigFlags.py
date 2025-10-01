@@ -9,12 +9,16 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('algoTag', 'Hough')
     cf.addFlag('wrapperFileName', [])
     cf.addFlag('wrapperFileName2', [])
+    cf.addFlag('runOnPreProducedHeaderFiles', False)
     cf.addFlag('secondInputToolN', 0)
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
+    cf.addFlag('loadRegionMap', True)
+    cf.addFlag('loadRadii', True)
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
     cf.addFlag('doMultiTruth', True)
     cf.addFlag('SetTruthParametersForTracks', -1)
+    cf.addFlag('FPGATrackSimTestFiles', '')
     cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
     cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
@@ -76,6 +80,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('hitThreshold', 2)
     cf.addFlag('varyingThreshold', True)
     cf.addFlag('varyingHitThresholds', [])
+    cf.addFlag('MinSpacePointsPerSeed',3)
+    cf.addFlag('MaxSpacePointsPerSeed',3)
 
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -121,6 +127,7 @@ def createFPGATrackSimConfigFlags():
 
     # EDM conversion
     cf.addFlag('doEDMConversion', False)
+    cf.addFlag('convertSPs', False)
     cf.addFlag('convertUnmappedHits', False)
     cf.addFlag('writeToAOD', False)
     cf.addFlag('writeClustersToAOD', False)
@@ -377,7 +384,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('parMin', [-1000, -1000, 0.0, 0.0, -10])
     cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
-
+    cf.addFlag('keepHitsStrategy', -1)
     return cf
 
 def createSecondStageFPGATrackSimConfigFlags():
@@ -399,6 +406,7 @@ class moduleMapFunc(FlagEnum):
 
 class roadMakerTool(FlagEnum):
     ConnectedComponents = 'ConnectedComponents'
+    JunctionAwareCC = 'JunctionAwareCC'
 
 def createGNNFPGATrackSimConfigFlags():
     cf = createBasicFPGATrackSimConfigFlags()
@@ -417,7 +425,8 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("edgeScoreCut",0.8)
     cf.addFlag("doGNNRootOutput",False)
     cf.addFlag("doGNNTracking",False)
-    cf.addFlag("nInputsGNN",9)
+    cf.addFlag("doGNNPixelSeeding",False)
+    cf.addFlag("nInputsGNN",13)
     
     return cf
 

@@ -46,7 +46,7 @@ namespace GlobalSim {
     : DataVector<GlobalLArCell>() 
   {
       // Deep-copy DataVector elements
-      for (const auto& cellPtr : other) {
+      for (const auto cellPtr : other) {
           DataVector<GlobalLArCell>::push_back(std::make_unique<GlobalLArCell>(*cellPtr));
       }
 

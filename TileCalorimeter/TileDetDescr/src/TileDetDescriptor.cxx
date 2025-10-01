@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,7 +27,7 @@ TileDetDescriptor::TileDetDescriptor()
         m_n_phi(0),
         m_sign_eta(0)
 {
-  AtlasDetectorID atlas;
+  AtlasDetectorID atlas ("AtlasDetectorID", "");
   m_id = atlas.tile();
   memset(m_eta_min, 0, MAX_N_SAMP_TILEDD*sizeof(float));
   memset(m_eta_max, 0, MAX_N_SAMP_TILEDD*sizeof(float));
@@ -60,7 +60,7 @@ TileDetDescriptor::TileDetDescriptor(const float        eta_min[],
         , m_n_phi((unsigned int) ((phi_max - phi_min)/dphi + 0.5))
         , m_sign_eta(sign_eta)
 {
-  AtlasDetectorID atlas;
+  AtlasDetectorID atlas ("AtlasDetectorID", "");
   m_id = atlas.tile();
   for (unsigned int i=0; i<n_samp; ++i) {
     m_eta_min[i] = eta_min[i];

@@ -26,6 +26,12 @@ def actsHeavyIonFlags(flags) -> None:
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
 
+def actsValidateLargeRadiusStandaloneFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: use legacy primary pass and Acts LRT pass"""
+    flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
+                                TrackingComponent.ActsValidateLargeRadiusStandalone]
+    flags.Tracking.writeSeedValNtuple = True
+
 
 # Validation workflows
 
@@ -36,16 +42,20 @@ def actsValidateClustersFlags(flags) -> None:
 def actsValidateSpacePointsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use for validating Athena-based space point formation"""
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateSpacePoints]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.Default
 
 def actsCoreValidateSpacePointsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use for validating ACTS-based space point formation"""
     from ActsConfig.ActsConfigFlags import SpacePointStrategy
-    flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore
+    flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore    
     actsValidateSpacePointsFlags(flags)
     
 def actsValidateSeedsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateSeeds]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.Default
     flags.Tracking.writeSeedValNtuple = True
 
 def actsValidateConversionSeedsFlags(flags) -> None:
@@ -112,4 +122,9 @@ def actsGSFEgammaFlags(flags) -> None:
 def actsValidateF100Flags(flags) -> None:
     actsWorkflowFlags(flags)
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateF100]
-    flags.Acts.doAmbiguityResolution = True
+    
+def actsValidateF150Flags(flags) -> None:
+    actsValidateF100Flags(flags)
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateF150]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.F150

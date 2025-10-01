@@ -107,7 +107,6 @@ def ActsPixelClusterizationAlgCfg(flags,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("expectedClustersPerRDO", 32)
     kwargs.setdefault("IDHelper", "PixelID")
     kwargs.setdefault("RDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("ClustersKey", "ITkPixelClusters")
@@ -148,7 +147,6 @@ def ActsStripClusterizationAlgCfg(flags,
 
     kwargs.setdefault("RDOContainerKey", "ITkStripRDOs")
     kwargs.setdefault("ClustersKey", "ITkStripClusters")
-    kwargs.setdefault("expectedClustersPerRDO", 6)
     kwargs.setdefault("IDHelper", "SCT_ID")
     kwargs.setdefault("DetEleCollKey", "ITkStripDetectorElementCollection")
     # Regional selection
@@ -235,7 +233,6 @@ def ActsStripClusterPreparationAlgCfg(flags,
     else:
         acc.addEventAlgo(CompFactory.ActsTrk.StripClusterCacheDataPreparationAlg(name, **kwargs))
     return acc
-
 
 def ActsHgtdClusterPreparationAlgCfg(flags,
                                      name: str = 'ActsHgtdClusterPreparationAlg',

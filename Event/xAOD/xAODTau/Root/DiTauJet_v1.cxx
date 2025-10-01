@@ -71,7 +71,7 @@ namespace xAOD {
                      jetLink,
                      setJetLink )
 
-  static const SG::AuxElement::Accessor< DiTauJet_v1::JetLink_t > jetAcc( "jetLink" );
+  static const SG::Accessor< DiTauJet_v1::JetLink_t > jetAcc( "jetLink" );
 
   const Jet* DiTauJet_v1::jet() const {
    return ( *jetAcc( *this ) );
@@ -193,7 +193,7 @@ namespace xAOD {
                      vertexLink,
                      setVertexLink )
 
-  static const SG::AuxElement::Accessor< DiTauJet_v1::VertexLink_t > vertexAcc( "vertexLink" );
+  static const SG::Accessor< DiTauJet_v1::VertexLink_t > vertexAcc( "vertexLink" );
 
   const Vertex* DiTauJet_v1::vertex() const {
     return ( *vertexAcc( *this ) );
@@ -215,7 +215,7 @@ namespace xAOD {
                      trackLinks,
                      setTrackLinks )
   
-  static const SG::AuxElement::Accessor< DiTauJet_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
+  static const SG::Accessor< DiTauJet_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
   
   const TrackParticle* DiTauJet_v1::track( size_t i ) const {
     return ( *trackAcc( *this )[ i ] );
@@ -247,7 +247,7 @@ namespace xAOD {
                      isoTrackLinks,
                      setIsoTrackLinks )
   
-  static const SG::AuxElement::Accessor< DiTauJet_v1::TrackParticleLinks_t > isoTrackAcc( "isoTrackLinks" );
+  static const SG::Accessor< DiTauJet_v1::TrackParticleLinks_t > isoTrackAcc( "isoTrackLinks" );
   
   const TrackParticle* DiTauJet_v1::isoTrack( size_t i ) const {
     return ( *isoTrackAcc( *this )[ i ] );
@@ -279,7 +279,7 @@ namespace xAOD {
                      otherTrackLinks,
                      setOtherTrackLinks )
   
-  static const SG::AuxElement::Accessor< DiTauJet_v1::TrackParticleLinks_t > otherTrackAcc( "otherTrackLinks" );
+  static const SG::Accessor< DiTauJet_v1::TrackParticleLinks_t > otherTrackAcc( "otherTrackLinks" );
   
   const TrackParticle* DiTauJet_v1::otherTrack( size_t i ) const {
     return ( *otherTrackAcc( *this )[ i ] );
@@ -337,7 +337,7 @@ namespace xAOD {
   // Set int detail via enum
   //-------------------------------------------------------------------------
   void DiTauJet_v1::setDetail( DiTauJetParameters::Detail detail, int value ) {
-    const SG::AuxElement::Accessor< int >* acc = xAODDiTau::detailsAccessorV1<int>( detail );
+    const SG::Accessor< int >* acc = xAODDiTau::detailsAccessorV1<int>( detail );
     if (!acc) {
       throw std::runtime_error ("DiTauJet_v1::setDetail: bad detail code");
     }
@@ -348,7 +348,7 @@ namespace xAOD {
   // Set float detail via enum
   //-------------------------------------------------------------------------
   void DiTauJet_v1::setDetail( DiTauJetParameters::Detail detail, float value ) {
-    const SG::AuxElement::Accessor< float >* acc = xAODDiTau::detailsAccessorV1<float>( detail );
+    const SG::Accessor< float >* acc = xAODDiTau::detailsAccessorV1<float>( detail );
     if (!acc) {
       throw std::runtime_error ("DiTauJet_v1::setDetail: bad detail code");
     }

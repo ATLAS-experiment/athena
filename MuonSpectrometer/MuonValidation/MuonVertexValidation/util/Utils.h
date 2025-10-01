@@ -21,6 +21,7 @@ namespace MuonVertexValidationMacroUtils {
 
     constexpr double fidVol_endcaps_etaCut_low = 1.3;
     constexpr double fidVol_endcaps_etaCut_up = 2.5;
+    constexpr double fidVol_endcaps_Lxy_up = 10*Gaudi::Units::m;
     constexpr double fidVol_z_low = 5*Gaudi::Units::m;
     constexpr double fidVol_z_up = 15*Gaudi::Units::m;
 

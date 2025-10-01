@@ -54,7 +54,7 @@
 
 template<typename C>
 bool isEmptyCont(C& c) {
-  return (!c.isValid() || c->size()==0); 
+  return (c.key().empty() || !c.isValid() || c->size()==0); 
 }
 
 
@@ -80,6 +80,9 @@ StatusCode LArDigitalTriggMonAlg::initialize()
 
   ATH_MSG_INFO("Done building tool map");
 
+  ATH_MSG_INFO("Input containers=" << m_rawSCContainerKey << " / " << m_rawSCEtRecoContainerKey);
+
+  
   /** Get bad-channel mask (only if jO IgnoreBadChannels is true)*/
   ATH_CHECK(m_bcContKey.initialize());
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
@@ -87,8 +90,8 @@ StatusCode LArDigitalTriggMonAlg::initialize()
   ATH_CHECK(m_digitContainerKey.initialize());
   ATH_CHECK(m_keyPedestalSC.initialize());
   ATH_CHECK(m_caloSuperCellMgrKey.initialize());
-  ATH_CHECK(m_rawSCContainerKey.initialize());
-  ATH_CHECK(m_rawSCEtRecoContainerKey.initialize());
+  ATH_CHECK(m_rawSCContainerKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_rawSCEtRecoContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_actualMuKey.initialize());
   ATH_CHECK(m_LATOMEHeaderContainerKey.initialize());
@@ -121,6 +124,7 @@ struct Digi_MonValues {
   float digi_diff_adc_ped_norm;
   float digi_diff_adc_ped;
   float digi_diff_adc0_ped;
+  float digi_adc_rms;
   int digi_bcid;
   unsigned int digi_lb;
   bool digi_passDigiNom;
@@ -184,6 +188,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto Digi_Diff_ADC_Ped = Monitored::Scalar<float>("Digi_Diff_ADC_Ped", -999); // Diff_ADC_Pedestal
   auto Digi_Diff_ADC0_Ped = Monitored::Scalar<float>("Digi_Diff_ADC0_Ped", -999); // Pedestal diff
   auto Digi_Diff_ADC_Ped_Norm = Monitored::Scalar<float>("Digi_Diff_ADC_Ped_Norm",-999); // Diff_ADC_Pedestal_Norm
+  auto Digi_ADC_RMS = Monitored::Scalar<float>("Digi_ADC_RMS",-1); // Digi_ADC_RMS
+
   // cuts
   auto notBadQual = Monitored::Scalar<bool>("notBadQual",false);
   auto ADCped10RMS = Monitored::Scalar<bool>("ADCped10RMS",false);
@@ -249,25 +255,39 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,ctx};
   const LArOnOffIdMapping* cabling=*cablingHdl;
 
-  SG::ReadHandle<LArDigitContainer> hLArDigitContainer{m_digitContainerKey,ctx}; //"SC"
-  if (!hLArDigitContainer.isValid()) {
-    ATH_MSG_WARNING("The requested digit container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
+  SG::ReadHandle<LArDigitContainer> hLArDigitContainer;
+  if (!m_digitContainerKey.empty()) {
+    hLArDigitContainer= SG::ReadHandle<LArDigitContainer>{m_digitContainerKey,ctx}; //"SC"  
+    if (!hLArDigitContainer.isValid()) {
+      ATH_MSG_WARNING("The requested digit container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }
+  }
+  else {
     ATH_MSG_DEBUG("hLArDigitContainer.size() " << hLArDigitContainer->size());
   }
-  SG::ReadHandle<LArRawSCContainer > hSCetContainer{m_rawSCContainerKey,ctx}; //"SC_ET"
-  if (!hSCetContainer.isValid()) {
-    ATH_MSG_WARNING("The requested SC ET container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
+
+  
+  SG::ReadHandle<LArRawSCContainer> hSCetContainer;
+  if (!m_rawSCContainerKey.empty()) {
+    hSCetContainer = SG::ReadHandle<LArRawSCContainer>{m_rawSCContainerKey, ctx};  //"SC_ET"
+    if (!hSCetContainer.isValid()) {
+      ATH_MSG_WARNING("The requested SC ET container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }
+  } 
+  else {
     ATH_MSG_DEBUG("hSCetContainer.size() " << hSCetContainer->size());
   }
-  SG::ReadHandle<LArRawSCContainer > hSCetRecoContainer{m_rawSCEtRecoContainerKey,ctx}; //"SC_ET_RECO"
-  if (!hSCetRecoContainer.isValid()) {
-    ATH_MSG_WARNING("The requested SC ET reco container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
+
+  SG::ReadHandle<LArRawSCContainer> hSCetRecoContainer;
+  if (!m_rawSCEtRecoContainerKey.empty()) {
+    hSCetRecoContainer = SG::ReadHandle<LArRawSCContainer>{m_rawSCEtRecoContainerKey, ctx};  //"SC_ET_RECO"
+    if (!hSCetRecoContainer.isValid()) {
+      ATH_MSG_WARNING("The requested SC ET reco container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }
+  } 
+  else {
     ATH_MSG_DEBUG("hSCetRecoContainer.size() " << hSCetRecoContainer->size());
   }
-
 
   SG::ReadHandle<LArLATOMEHeaderContainer> hLArLATOMEHeaderContainer{m_LATOMEHeaderContainerKey,ctx}; //"SC_LATOME_HEADER"
   if (!hLArLATOMEHeaderContainer.isValid()) {
@@ -384,6 +404,17 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
           ADC_0 = ADC_0 / 8;
         }
 
+        float samp_sum = std::accumulate(digito->begin(), digito->end(), 0.0);
+        float samp_mean = samp_sum / static_cast<float>(trueNSamples);
+        float sq_sum = std::inner_product(digito->begin(), digito->end(), digito->begin(), 0.0);
+        float rms_arg = sq_sum / static_cast<float>(trueNSamples) - samp_mean * samp_mean;
+
+        if (rms_arg < 0)
+          Digi_ADC_RMS = -1;
+        else
+          Digi_ADC_RMS = std::sqrt(rms_arg);
+        
+
         // Start Loop over samples
         Digi_Diff_ADC0_Ped = ADC_0 - Pedestal;
         for (unsigned i = 0; i < trueNSamples; ++i) {
@@ -418,10 +449,10 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
           }
 
           lvaluemap_digi.emplace_back(Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos,
-                                      Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom,
+                                      Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, Digi_ADC_RMS, BCID, lumi_block, passDigiNom,
                                       badNotMasked);
           lvaluemap_digi_ALL.emplace_back(Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos,
-                                          Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom,
+                                          Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, Digi_ADC_RMS, BCID, lumi_block, passDigiNom,
                                           badNotMasked);
 
         }  // End loop over samples
@@ -448,16 +479,17 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         auto digi_part_lb = Monitored::Collection("Digi_part_LB", tool, [](const auto& v) { return v.digi_lb; });
         auto digi_part_passDigiNom = Monitored::Collection("Digi_part_passDigiNom", tool, [](const auto& v) { return v.digi_passDigiNom; });
         auto digi_part_badNotMasked = Monitored::Collection("Digi_part_badNotMasked", tool, [](const auto& v) { return v.digi_badNotMasked; });
+        auto digi_part_adc_rms = Monitored::Collection("Digi_part_adc_rms", tool, [](const auto& v) { return v.digi_adc_rms; });
 
         fill(m_tools[m_toolmapLayerNames_digi.at(m_layerNames[ilayer])], digi_part_eta, digi_part_phi, digi_part_ieta, digi_part_iphi, digi_part_sampos,
              digi_part_adc, digi_part_latomesourceidbin, digi_part_pedestal, digi_part_maxpos, digi_part_diff_adc_ped_norm, digi_part_diff_adc_ped,
-             digi_part_diff_adc0_ped, digi_part_bcid, digi_part_lb, digi_part_passDigiNom, digi_part_badNotMasked);
+             digi_part_diff_adc0_ped, digi_part_adc_rms, digi_part_bcid, digi_part_lb, digi_part_passDigiNom, digi_part_badNotMasked);
       }
 
     }  // End if(LArDigitContainer is valid)
 
 
-    if (hSCetContainer.isValid() && hSCetRecoContainer.isValid()) {
+    if (!isEmptyCont(hSCetContainer) && !isEmptyCont(hSCetRecoContainer)) {
       LArRawSCContainer::const_iterator itSC = hSCetContainer->begin();
       LArRawSCContainer::const_iterator itSC_e= hSCetContainer->end();
       LArRawSCContainer::const_iterator itSCReco = hSCetRecoContainer->begin();

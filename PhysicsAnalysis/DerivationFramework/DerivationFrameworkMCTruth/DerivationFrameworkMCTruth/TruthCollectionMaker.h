@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHCOLLECTIONMAKER_H
@@ -27,7 +27,7 @@ class StoreGateSvc;
 namespace DerivationFramework {
 
   class TruthCollectionMaker : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
-    public: 
+    public:
       TruthCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthCollectionMaker();
       StatusCode initialize();
@@ -40,16 +40,16 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey
          {this, "ParticlesKey", "TruthParticles", "ReadHandleKey for input TruthParticleContainer"};
       SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outputParticlesKey
-         {this, "NewCollectionName", "OutputTruthCollection", "WriteHandleKey for new TruthParticleContainer"};
+         {this, "OutputCollectionName", "", "WriteHandleKey for new TruthParticleContainer"};
       // Non-handle properties
       Gaudi::Property<std::string> m_partString
          {this, "ParticleSelectionString", "", "ExpressionEvaluation string for particle selection"};
       Gaudi::Property<bool> m_do_compress
          {this, "Do_Compress", false, "Removes particles with the same pdgId in a decay chain (but keeps first and last)"};
-      Gaudi::Property<bool> m_do_sherpa 
+      Gaudi::Property<bool> m_do_sherpa
          {this, "Do_Sherpa", false, "Checks if there are truth W bosons in the current record.  If not, tries to combine W daughters to create one"};
       Gaudi::Property<bool> m_keep_navigation_info
-         {this, "KeepNavigationInfo", true, "m_do_sherpa currently only works for W+jets"}; 
+         {this, "KeepNavigationInfo", true, "m_do_sherpa currently only works for W+jets"};
       // Decor handles
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_linkDecoratorKey
          {this, "originalTruthParticle", m_outputParticlesKey, "originalTruthParticle", "Name of the decoration linking to the original truth particle"};
@@ -68,7 +68,7 @@ namespace DerivationFramework {
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_hadronOriginDecoratorKey
          {this, "TopHadronOriginFlag", m_outputParticlesKey, "TopHadronOriginFlag", "Name of the decoration which records the origin of hadrons from top decays"};
 
-      // Decorations to be read from elements of the "TruthParticles" container 
+      // Decorations to be read from elements of the "TruthParticles" container
       // to be copied onto elements of the output container.
       SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_originReadDecorKey
          {this, "inputClassifierParticleOrigin", m_particlesKey, "classifierParticleOrigin", "Particle origin"};
@@ -80,7 +80,7 @@ namespace DerivationFramework {
          {this, "inputClassification", m_particlesKey, "Classification", "Classification code"};
 
       ServiceHandle<StoreGateSvc> m_metaStore; //!< Handle on the metadata store for init
-  }; 
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_TRUTHCOLLECTIONMAKER_H

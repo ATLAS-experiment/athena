@@ -317,7 +317,7 @@ SGAudSvc::SGGetCurrentAlg(){
     for (i=m_vAlg.begin();i<m_vAlg.end();++i){
       if (*i==name) {
 	m_nCurrAlg=index;
-	m_currAlg=name;
+	m_currAlg=std::move(name);
 	return true;
       }
       index++;

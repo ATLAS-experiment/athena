@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /cvs/PF/pool/StorageSvc/StorageSvc/DbBlob.h,v 1.14 2010/08/19 14:02:41 trentad Exp $
@@ -360,7 +360,7 @@ namespace pool    {
     for ( i = 0; i < len; i++ )  {
       T    temp;
       s >> temp;
-      v.push_back(temp);
+      v.emplace_back(std::move(temp));
     }
     return s;
   }
@@ -385,7 +385,7 @@ namespace pool    {
     for ( i = 0; i < len; i++ )  {
       T    temp;
       s >> temp;
-      l.push_back(temp);
+      l.emplace_back(std::move(temp));
     }
     return s;
   }

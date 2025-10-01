@@ -14,8 +14,8 @@
  */
 #undef NDEBUG
 #include "AthContainers/DataVector.h"
-#include <cstdlib> //rand
 #include "TestTools/leakcheck.h"
+#include "TestTools/random.h"
 #include "CxxUtils/checker_macros.h"
 #include <iostream>
 struct apple
@@ -44,9 +44,11 @@ struct applePie
                 "DataVector fails is_destructible");
 };
 
-void fillWithApples(apples & appleDataVec){
+void fillWithApples(apples & appleDataVec, uint32_t& seed){
   for (size_t i{0};i!=bushel;++i){
-    const apple * newApple = new apple{rand() % 20, rand() % 20};
+    int a = Athena_test::randi_seed (seed, 20);
+    int b = Athena_test::randi_seed (seed, 20);
+    const apple * newApple = new apple{a, b};
     appleDataVec.push_back(newApple);
   }
 }
@@ -57,28 +59,30 @@ main ATLAS_NOT_THREAD_SAFE ()
   std::cout << "AthContainers/DataVector_rule5_test\n";
 
   [[maybe_unused]] applePie myPie;
+
+  uint32_t seed = 1234;
   
   { //straight assignment, both vectors prefilled
     Athena_test::Leakcheck check;
     apples braeburn;
     apples jonagold;
-    fillWithApples(braeburn);
-    fillWithApples(jonagold);
+    fillWithApples(braeburn, seed);
+    fillWithApples(jonagold, seed);
     braeburn=jonagold;
   }
   { //move-assigned from filled DV to empty DV
     Athena_test::Leakcheck check2;
     apples braeburn;
     apples jonagold;
-    fillWithApples(braeburn);
+    fillWithApples(braeburn, seed);
     jonagold=std::move(braeburn);
   }
   { //move-assigned from filled DV to filled DV
     Athena_test::Leakcheck check3;
     apples braeburn;
     apples jonagold;
-    fillWithApples(braeburn);
-    fillWithApples(jonagold);
+    fillWithApples(braeburn, seed);
+    fillWithApples(jonagold, seed);
     jonagold=std::move(braeburn);
   }
   return 0;

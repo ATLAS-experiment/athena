@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   This class is used in conjunction with SaltModel to run inference on a GNN model.
   Whereas SaltModel handles the interfacing with the ONNX runtime, this class handles
@@ -13,7 +13,6 @@
 
 // Tool includes
 #include "FlavorTagInference/FlipTagEnums.h"
-#include "FlavorTagInference/AssociationEnums.h"
 #include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "FlavorTagInference/GNNOptions.h"
 #include "FlavorTagInference/GNNDataLoader.h"
@@ -21,7 +20,6 @@
 #include "FlavorTagInference/DataPrepUtilities.h"
 
 // EDM includes
-#include "xAODBTagging/BTaggingFwd.h"
 #include "xAODBase/IParticle.h"
 
 #include <memory>
@@ -47,7 +45,6 @@ namespace FlavorTagInference {
     GNN(const std::string& nnFile,
         const FlipTagConfig& flip_config = FlipTagConfig::STANDARD,
         const std::map<std::string, std::string>& variableRemapping = {},
-        const TrackLinkType trackLinkType = TrackLinkType::TRACK_PARTICLE,
         float defaultOutputValue = NAN);
     GNN(GNN&&);
     GNN(const GNN&);
@@ -60,7 +57,6 @@ namespace FlavorTagInference {
     virtual std::set<std::string> getAuxInputKeys() const;
     virtual std::set<std::string> getConstituentAuxInputKeys() const;
 
-    std::shared_ptr<const SaltModel> m_saltModel;
   private:
     // private constructor, delegate of the above public ones
     GNN(std::shared_ptr<const SaltModel>, const GNNOptions& opts);
@@ -87,6 +83,7 @@ namespace FlavorTagInference {
     std::tuple<FTagDataDependencyNames, std::set<std::string>>
     createDecorators(const SaltModel::OutputConfig& outConfig, const FTagOptions& options);
 
+    std::shared_ptr<const SaltModel> m_saltModel;
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
     GNNDataLoader m_dataLoader;

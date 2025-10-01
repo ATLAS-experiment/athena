@@ -192,7 +192,8 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   Gaudi::Property<bool> m_doMultiSliceDiJet{this, "DoMultiSliceDiJet", false, "Enable the HS-softer-than-PU (HSTP) filter; reweight the Slices according to Jet/ETMiss procedure; recommended by PMG for di-jet slices."};
   StatusCode pass_HstpFilter(bool &pass); //!< Boolean indicating if the event passes the HS-softer-than-PU (HSTP) filter
   virtual StatusCode initialize_extra_content(); //!< Initialization of additional payload for inherited classes
-
+  std::unordered_map<std::string, std::unique_ptr<RatesTrigger>> m_triggers; //!< All individual triggers (L1 or HLT)
+  const std::unordered_map<std::string, std::unique_ptr<RatesTrigger>>& getTriggerMap() const;
 
  private: 
 
@@ -246,7 +247,6 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   
   bool isZero(double v) const { return fabs(v) < 1e-10; } //!< Helper function for floating point subtraction
 
-  std::unordered_map<std::string, std::unique_ptr<RatesTrigger>> m_triggers; //!< All individual triggers (L1 or HLT)
   std::unordered_map<std::string, std::unique_ptr<RatesScanTrigger>> m_scanTriggers; //!< All individual rates-scan triggers (L1 or HLT)
   std::unordered_map<std::string, std::unique_ptr<RatesGroup>> m_groups; //!< All regular and CPS groups 
   std::unordered_map<std::string, std::unique_ptr<RatesGroup>> m_globalGroups; //!< Big (master) groups which do the OR of the whole menu 

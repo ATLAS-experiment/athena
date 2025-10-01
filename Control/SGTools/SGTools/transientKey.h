@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file SGTools/tranientKey.h
@@ -38,7 +38,7 @@ namespace SG {
  * @brief Test to see if a key is transoent.
  * @param key The key to test.
  */
-bool isTransientKey (const std::string& key)
+inline bool isTransientKey (const std::string& key)
 {
   return !key.empty() && key[0] == '_';
 }
@@ -48,7 +48,7 @@ bool isTransientKey (const std::string& key)
  * @brief Make a key transient.
  * @param key The key to transform;
  */
-std::string transientKey (const std::string& key)
+inline std::string transientKey (const std::string& key)
 {
   if (isTransientKey (key)) {
     return key;

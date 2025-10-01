@@ -67,8 +67,6 @@ from InDetBeamSpotExample import BeamSpotPostProcessing
 from InDetBeamSpotExample import COOLUtils
 from InDetBeamSpotExample import DiskUtils
 
-from future import standard_library
-standard_library.install_aliases()
 
 from optparse import Option, OptionParser, OptionGroup
 def check_commsep(option, opt, value):

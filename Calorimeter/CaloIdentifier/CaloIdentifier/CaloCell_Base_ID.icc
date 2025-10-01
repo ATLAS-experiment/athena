@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/CaloCell_Base_ID.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -257,13 +255,13 @@ CaloCell_Base_ID::calo_cell_hash (const Identifier cellId) const
 }
 
 //----------------------------------------------------------------------------
-inline CaloCell_Base_ID::size_type     CaloCell_Base_ID::calo_cell_hash_max (void) const
+inline CaloCell_Base_ID::size_type     CaloCell_Base_ID::calo_cell_hash_max () const
 {
   return m_cell_hash_max;
 }
 
 //----------------------------------------------------------------------------
-inline CaloCell_Base_ID::size_type     CaloCell_Base_ID::calo_region_hash_max (void) const
+inline CaloCell_Base_ID::size_type     CaloCell_Base_ID::calo_region_hash_max () const
 {
   return m_region_hash_max;
 }
@@ -406,19 +404,19 @@ inline IdentifierHash CaloCell_Base_ID::calo_region_hash   (const int subCalo, c
 }
 
 //----------------------------------------------------------------------------
-inline CaloCell_Base_ID::id_iterator CaloCell_Base_ID::cell_begin   (void) const
+inline CaloCell_Base_ID::id_iterator CaloCell_Base_ID::cell_begin   () const
 {
   return(m_cell_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline CaloCell_Base_ID::id_iterator CaloCell_Base_ID::cell_end     (void) const
+inline CaloCell_Base_ID::id_iterator CaloCell_Base_ID::cell_end     () const
 {
   return(m_cell_vec.end());
 }
 
 //----------------------------------------------------------------------------
-inline CaloCell_Base_ID::id_range CaloCell_Base_ID::cell_range     (void) const
+inline CaloCell_Base_ID::id_range CaloCell_Base_ID::cell_range     () const
 {
   return id_range (cell_begin(), cell_end());
 }
@@ -450,7 +448,7 @@ CaloCell_Base_ID::cell_range    (const int subCalo) const
 //----------------------------------------------------------------------------
 inline
 CaloCell_Base_ID::id_iterator
-CaloCell_Base_ID::reg_begin    (void) const
+CaloCell_Base_ID::reg_begin    () const
 {
   return(m_region_vec.begin());
 }
@@ -458,7 +456,7 @@ CaloCell_Base_ID::reg_begin    (void) const
 //----------------------------------------------------------------------------
 inline
 CaloCell_Base_ID::id_iterator
-CaloCell_Base_ID::reg_end      (void) const
+CaloCell_Base_ID::reg_end      () const
 {
   return(m_region_vec.end());
 }
@@ -466,7 +464,7 @@ CaloCell_Base_ID::reg_end      (void) const
 //----------------------------------------------------------------------------
 inline
 CaloCell_Base_ID::id_range
-CaloCell_Base_ID::reg_range      (void) const
+CaloCell_Base_ID::reg_range      () const
 {
   return id_range (reg_begin(), reg_end());
 }

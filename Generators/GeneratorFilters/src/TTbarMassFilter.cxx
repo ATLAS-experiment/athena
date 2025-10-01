@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/TTbarMassFilter.h"
 #include "AtlasHepMC/SimpleVector.h"
-#include <algorithm>
+#include <algorithm>//std::max
+#include <cmath>
 
 TTbarMassFilter::TTbarMassFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name, pSvcLocator)
@@ -97,7 +98,7 @@ StatusCode TTbarMassFilter::filterEvent() {
             //Store the production vertex for the given top particle. it's a production vertex
             //  of the initial ('first') top particle for the current final ('last') top.
             if (isFirstTop) {
-              top_vtxs.push_back(prodVtx);
+              top_vtxs.push_back(std::move(prodVtx));
             }
           }
         }

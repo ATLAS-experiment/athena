@@ -115,6 +115,8 @@ StatusCode MetaDataSvc::initialize() {
    m_incSvc->addListener(this, "FirstInputFile", 80, true);
    m_incSvc->addListener(this, "BeginInputFile", 80, true);
    m_incSvc->addListener(this, "EndInputFile", 10, true);
+   m_incSvc->addListener(this, "BeginInputMemFile", 80, true);
+   m_incSvc->addListener(this, "EndInputMemFile", 10, true);
 
    // Register this service for 'I/O' events
    ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", this->name());
@@ -334,11 +336,11 @@ void MetaDataSvc::handle(const Incident& inc) {
       if (!initInputMetaDataStore(fileName).isSuccess()) {
          ATH_MSG_WARNING("Unable to initialize InputMetaDataStore");
       }
-   } else if (inc.type() == "BeginInputFile") {
+   } else if (inc.type() == "BeginInputFile" || inc.type() == "BeginInputMemFile") {
       if(newMetadataSource(inc).isFailure()) {
          ATH_MSG_ERROR("Could not process new metadata source " << fileName);
       }
-   } else if (inc.type() == "EndInputFile") {
+   } else if (inc.type() == "EndInputFile" || inc.type() == "EndInputMemFile") {
       if(retireMetadataSource(inc).isFailure()) {
          ATH_MSG_ERROR("Could not retire metadata source " << fileName);
       }
@@ -428,31 +430,6 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
    std::istringstream iss(numName);
    iss >> num;
    CLID clid = m_persToClid[className];
-   if (clid == 167728019) { // EventStreamInfo, will change tool to combine input metadata, clearing things before...
-      bool foundTool = std::ranges::any_of( m_metaDataTools, []( const auto& tool ) {
-        return tool->name() == "ToolSvc.CopyEventStreamInfo";
-      } );
-      if (!foundTool) {
-         if (serviceLocator()->existsService("CutFlowSvc")) {
-            ServiceHandle<IIncidentListener> cfSvc("CutFlowSvc", this->name()); // Disable CutFlowSvc by stopping its incidents.
-            if (cfSvc.retrieve().isSuccess()) {
-               ATH_MSG_INFO("Disabling incidents for: " << cfSvc.name());
-               m_incSvc->removeListener(cfSvc.get(), IncidentType::BeginInputFile);
-               m_incSvc->removeListener(cfSvc.get(), "MetaDataStop");
-               cfSvc.release().ignore();
-            }
-         }
-         if (serviceLocator()->existsService("xAODConfigSvc")) {
-            ServiceHandle<IIncidentListener> xcSvc("xAODConfigSvc", this->name()); // Disable xAODConfigSvc, fails for merging
-            if (xcSvc.retrieve().isSuccess()) {
-               ATH_MSG_INFO("Disabling incidents for: " << xcSvc.name());
-               m_incSvc->removeListener(xcSvc.get(), IncidentType::BeginInputFile);
-               m_incSvc->removeListener(xcSvc.get(), IncidentType::BeginEvent);
-               xcSvc.release().ignore();
-            }
-         }
-      }
-   }
 
    // make stream-unique keys for infile metadata objects
    // AthenaOutputStream will use this to distribute objects to the right stream (and restore the original key)

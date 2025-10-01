@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,7 +16,7 @@
 void TileDetDescrRegion::print() const
 {
 
-  AtlasDetectorID id;
+  AtlasDetectorID id ("AtlasDetectorID", "");
   std::cout << std::endl << " TileDetDescrRegion print: "
             << std::endl << std::endl;
 

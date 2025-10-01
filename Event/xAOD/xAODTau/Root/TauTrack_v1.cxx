@@ -111,22 +111,22 @@ namespace xAOD {
     }
   }
 
-  static const SG::AuxElement::Accessor< float > d0TJVAAcc( "d0TJVA" );
+  static const SG::Accessor< float > d0TJVAAcc( "d0TJVA" );
   float TauTrack_v1::d0TJVA() const {
     return d0TJVAAcc(*this);
   }
 
-  static const SG::AuxElement::Accessor< float > d0SigTJVAAcc( "d0SigTJVA" );  
+  static const SG::Accessor< float > d0SigTJVAAcc( "d0SigTJVA" );  
   float TauTrack_v1::d0SigTJVA() const {
     return d0SigTJVAAcc(*this);
   }
 
-  static const SG::AuxElement::Accessor< float > z0sinthetaTJVAAcc( "z0sinthetaTJVA" );
+  static const SG::Accessor< float > z0sinthetaTJVAAcc( "z0sinthetaTJVA" );
   float TauTrack_v1::z0sinthetaTJVA() const {
     return z0sinthetaTJVAAcc(*this);
   }
 
-  static const SG::AuxElement::Accessor< float > z0sinthetaSigTJVAAcc( "z0sinthetaSigTJVA" );
+  static const SG::Accessor< float > z0sinthetaSigTJVAAcc( "z0sinthetaSigTJVA" );
   float TauTrack_v1::z0sinthetaSigTJVA() const {
     return z0sinthetaSigTJVAAcc(*this);
   }
@@ -171,7 +171,7 @@ namespace xAOD {
                                      bdtScores,
                                      setBdtScores )
   
-  static const SG::AuxElement::Accessor< std::vector<float> > bdtScoreAcc( "bdtScores" );
+  static const SG::Accessor< std::vector<float> > bdtScoreAcc( "bdtScores" );
   
   float TauTrack_v1::bdtScore( size_t i) const {
     return bdtScoreAcc(*this).at(i);
@@ -200,7 +200,7 @@ namespace xAOD {
   				     trackLinks,
   				     setTrackLinks )
   
-  static const SG::AuxElement::Accessor< TauTrack_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
+  static const SG::Accessor< TauTrack_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
   
   const TrackParticle* TauTrack_v1::track() const {
     return ( *trackAcc( *this )[0] );

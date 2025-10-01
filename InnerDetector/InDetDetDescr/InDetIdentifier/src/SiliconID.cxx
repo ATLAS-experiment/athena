@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -8,8 +8,6 @@
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  *
  */
-
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "InDetIdentifier/SiliconID.h"
 #include "Identifier/IdentifierHash.h"
@@ -21,8 +19,9 @@
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-SiliconID::SiliconID(void)
+SiliconID::SiliconID()
   :
+  AtlasDetectorID("SiliconID", ""),
   m_wafer_hash_max(0),
   m_pixel_wafer_hash_max(0),
   m_pixel_helper(nullptr),
@@ -31,6 +30,7 @@ SiliconID::SiliconID(void)
 
 SiliconID::SiliconID(const PixelID* pixel_helper, const SCT_ID* sct_helper)
   :
+  AtlasDetectorID("SiliconID", ""),
   m_wafer_hash_max(0),
   m_pixel_wafer_hash_max(0),
   m_pixel_helper(pixel_helper),
@@ -93,7 +93,7 @@ SiliconID::get_hash(const Identifier& /*id*/,
 }
 
 int
-SiliconID::test_wafer_hashes(void) const {
+SiliconID::test_wafer_hashes() const {
   MsgStream log(m_msgSvc, "IdDictTest_SiliconID");
 
   log << MSG::INFO << "test_wafer_packing: wafer hash max, pix, sct "

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "JetMomentTools/BoostedJetTaggerTool.h"
@@ -20,6 +20,8 @@ StatusCode BoostedJetTaggerTool::initialize()
     ATH_CHECK(config.setProperty("Decoration", m_decorationName.value()));
     ATH_CHECK(config.setProperty("CalibArea", m_calibArea.value()));
     ATH_CHECK(config.setProperty("ConfigFile", m_configFile.value()));
+    ATH_CHECK(config.setProperty("SuppressInputDependence",
+				 m_suppressInputDependence.value()));
     
     ATH_CHECK(config.makePrivateTool(m_MLTagger) );
     ATH_CHECK(m_MLTagger.retrieve());
@@ -41,5 +43,13 @@ StatusCode BoostedJetTaggerTool::decorate(const xAOD::JetContainer& jets) const
   if ( m_decorationName.value().compare("TopTransformer") == 0 )
   ATH_CHECK(m_MLTagger -> GetTopConstScore(jets));
 
+  // - W boson
+  if ( m_decorationName.value().compare("WTransformer") == 0 )
+    ATH_CHECK(m_MLTagger -> GetWConstScore(jets));
+
+  // - W boson mass decorrelated
+  if ( m_decorationName.value().compare("WTransformer_massdec") == 0 )
+    ATH_CHECK(m_MLTagger -> GetWConstScore(jets));
+  
   return StatusCode::SUCCESS;
 }

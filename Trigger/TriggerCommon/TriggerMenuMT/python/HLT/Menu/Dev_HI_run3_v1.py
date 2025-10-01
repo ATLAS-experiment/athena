@@ -16,7 +16,7 @@ from .Physics_pp_run3_v1 import (
     SupportPhIGroup,
     SingleJetGroup,
 )
-from .PhysicsP1_HI_run3_v1 import HardProbesStream, MinBiasStream, UPCStream
+from .PhysicsP1_HI_run3_v1 import HardProbesStream, MinBiasStream, UPCStream, UCCStream
 from . import MC_HI_run3_v1 as mc_menu
 
 
@@ -144,7 +144,9 @@ def getDevHISignatures():
     ]
 
 
-    chains['HeavyIon'] += []
+    chains['HeavyIon'] += [
+        ChainProp(name='HLT_hi_uccTh1_L1jTEFWD6500', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
+    ]
 
     chains['Streaming'] += [
 

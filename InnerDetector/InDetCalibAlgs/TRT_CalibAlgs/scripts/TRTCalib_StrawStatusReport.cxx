@@ -19,6 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "TSystem.h"
 #include "TRT_StrawMap.h"
 
 using namespace std;
@@ -47,6 +48,8 @@ int main(int argc, char **argv)
 
     std::string filename = "straws." + std::to_string(run) + ".txt";
     std::cout << filename << std::endl;
+    std::cout << "Created output/ folder.\n";
+    gSystem->mkdir("output/",1);
 
     // options for which straws to mask
     for (int i = 2; i < argc; ++i)
@@ -92,12 +95,13 @@ int main(int argc, char **argv)
         }
     }
 
-    std::cout << " checkNoisy_HT = " << checkNoisy_HT
-              << "\n checkNoisy_LT = " << checkNoisy_LT
-              << "\n checkLoEff_HT = " << checkLoEff_HT
-              << "\n checkLoEff_LT = " << checkLoEff_LT
-              << "\n checkDead_LT  = " << checkDead_LT
-              << "\n StatusPermanent  = " << onlyMaskBoards
+    std::cout << "\nOption selection:"
+              << "\n - checkNoisy_HT = " << checkNoisy_HT
+              << "\n - checkNoisy_LT = " << checkNoisy_LT
+              << "\n - checkLoEff_HT = " << checkLoEff_HT
+              << "\n - checkLoEff_LT = " << checkLoEff_LT
+              << "\n - checkDead_LT  = " << checkDead_LT
+              << "\n - StatusPermanent  = " << onlyMaskBoards
               << std::endl;
 
     simpleAnalysis(filename);
@@ -380,7 +384,10 @@ void reportResults(const std::string & filename, int run)
     assert(f);
     int count(0), nevents(0), tmp[9];
     FILE *fout = fopen("TRT_StrawStatusReport.txt", "w");
-    assert(fout);
+    if (!fout) {
+      printf ("Cannot open output file");
+      exit(1);
+    }
     fprintf(fout, "%d %d %d %d %d %lf %lf %lf %2d\n", 0, 0, 0, 0, run, 0., 0., 0., 0);
     //what do these numbers mean, what are valid ranges for them?
     while (fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8) == 9)

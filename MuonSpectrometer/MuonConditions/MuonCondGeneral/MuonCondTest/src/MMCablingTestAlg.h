@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
-   Algorithm to test the validity of the MDT cabling
+   Algorithm to test the validity of the Nsw cabling
 */
 
 #ifndef MUONMDT_CABLING_MMCablingTestAlg_H
@@ -18,10 +18,9 @@
 
 
 
-class MMCablingTestAlg
- : public AthAlgorithm {
+class MMCablingTestAlg : public AthAlgorithm {
 public:
-    MMCablingTestAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthAlgorithm::AthAlgorithm;
     virtual ~MMCablingTestAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
@@ -35,7 +34,7 @@ private:
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
                                                                                 "Key of input MuonDetectorManager condition data"};
 
-    SG::ReadCondHandleKey<Nsw_CablingMap> m_cablingKey{this, "ReadKey", "MicroMegaCabling", "Key of input MM cabling map"};
+    SG::ReadCondHandleKey<Nsw_CablingMap> m_cablingKey{this, "ReadKey", "NswCabling", "Key of input MM cabling map"};
 
     Gaudi::Property<std::string> m_dumpFile{this, "DumpMap", "" , "Text file to which every cabling channel is dumped"};
     

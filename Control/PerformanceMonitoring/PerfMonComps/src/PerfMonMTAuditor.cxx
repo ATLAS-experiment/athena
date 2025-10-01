@@ -36,11 +36,11 @@ StatusCode PerfMonMTAuditor::initialize()
  * Implementation of base class methods
  */
 void PerfMonMTAuditor::before(const std::string& event, const std::string& name,
-                              const EventContext&) {
-  m_perfMonMTSvc->startAud( event , name );
+                              const EventContext& ctx) {
+  m_perfMonMTSvc->startAud( event , name , ctx );
 }
 
 void PerfMonMTAuditor::after(const std::string& event, const std::string& name,
-                             const EventContext&, const StatusCode&) {
-  m_perfMonMTSvc->stopAud( event , name );
+                             const EventContext& ctx, const StatusCode&) {
+  m_perfMonMTSvc->stopAud( event , name , ctx);
 }

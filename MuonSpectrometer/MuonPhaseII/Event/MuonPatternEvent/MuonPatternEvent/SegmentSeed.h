@@ -64,9 +64,9 @@ class SegmentSeed {
     bool hasPhiExtension() const;
 
     /** @brief Returns the position of the seed in the sector frame */
-    Amg::Vector3D positionInChamber() const;
+    Amg::Vector3D localPosition() const;
     /** @brief Returns the direction of the seed in the sector frame */
-    Amg::Vector3D directionInChamber() const; 
+    Amg::Vector3D localDirection() const; 
    private:
         /** @brief Set of defining parameters */
         Parameters m_pars{Parameters::Zero()};

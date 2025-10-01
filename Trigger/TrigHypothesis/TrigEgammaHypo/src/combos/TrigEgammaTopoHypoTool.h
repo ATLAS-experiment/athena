@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGEGAMMAHYPO_TRIGEGAMMATOPOHYPOTOOL_H
@@ -55,7 +55,7 @@ class TrigEgammaTopoHypoTool:  public ComboHypoToolBase {
 
  private:
   
-  virtual bool executeAlg(const std::vector<Combo::LegDecision>& combination) const override;
+  virtual bool executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& ctx) const override;
   
   // flags
   Gaudi::Property< bool > m_acceptAll {this, "AcceptAll", false, "Ignore selection" };

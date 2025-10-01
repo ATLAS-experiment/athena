@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARHEC_ID_H
@@ -85,8 +85,8 @@ class LArHEC_ID
 {
 public:        
 
-  LArHEC_ID(void);    
-  ~LArHEC_ID(void);
+  LArHEC_ID();
+  ~LArHEC_ID();
 
 
   /** initialization from the identifier dictionary*/

@@ -1,5 +1,6 @@
 import os, re, subprocess, shutil
 from MadGraphControl.MadGraphUtils import modify_param_card
+from MCJobOptionUtils.JOsupport import get_physics_short
 
 mgmodels='/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/'
 

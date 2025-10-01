@@ -24,7 +24,6 @@
 #include "BTaggingValidationPlots.h"
 
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
-#include "FlavorTagDiscriminants/BTagMuonAugmenter.h"
 
 // Root includes
 #include "TH1.h"
@@ -76,7 +75,6 @@ namespace JetTagDQA {
     PhysValBTag();
 
     ToolHandle<InDet::IInDetTrackTruthOriginTool> m_trackTruthOriginTool{this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool"};
-    FlavorTagDiscriminants::BTagMuonAugmenter m_muonAugmenter;
 
     // isData flag
     bool m_isData;

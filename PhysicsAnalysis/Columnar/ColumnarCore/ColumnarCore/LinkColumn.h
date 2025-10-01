@@ -92,7 +92,7 @@ namespace columnar
   struct ColumnTypeTraits<OptObjectId<LT>,ColumnarModeArray>
   {
     using CM = ColumnarModeArray;
-    using ColumnType = ColumnarOffsetType;
+    using ColumnType = typename CM::LinkIndexType;
     using UserType = OptObjectId<LT>;
     using DataType = void **;
     static constexpr bool isNativeType = false;
@@ -100,11 +100,11 @@ namespace columnar
     static constexpr bool useConvertWithDataInput = true;
     static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& columnarTool, ColumnInfo& info)
     {
-      info.linkToName = columnarTool.containerStoreName(LT::idName);
+      info.linkTargetNames = {columnarTool.containerStoreName(LT::idName)};
       return info;
     }
 
-    static OptObjectId<LT> convertInput (void **data, ColumnarOffsetType link)
+    static OptObjectId<LT> convertInput (void **data, typename CM::LinkIndexType link)
     {
       if (link == invalidObjectIndex)
         return OptObjectId<LT,CM> ();

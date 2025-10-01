@@ -3,49 +3,100 @@
 # File: InDetAlignConfig/python/IDAlignFlags.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
 
+from AthenaCommon.Logging import logging
+
 def createInDetAlignFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     icf = AthConfigFlags()
 
     icf.addFlag("baseDir", "./")
     icf.addFlag("accumulate", True)
-    icf.addFlag("solveLocal", True)
     icf.addFlag("doMonitoring", False)
-    icf.addFlag("alignInDet", True)
-    icf.addFlag("alignSilicon", True)
     icf.addFlag("alignPixel", True)
     icf.addFlag("alignSCT", True)
     icf.addFlag("alignTRT", True)
-    icf.addFlag("writeConstantsToPool", True)
-    icf.addFlag("writeSilicon", True)
-    icf.addFlag("writeTRT", True)
-    icf.addFlag("writeTRTL3", False)
-    icf.addFlag("writeIBLDistDB", True)
-    icf.addFlag("writeDynamicDB", True)
     icf.addFlag("writeAlignNtuple", False)
-    icf.addFlag("readL3Only", False)
-    icf.addFlag("tagSi", "IndetAlign_test")
-    icf.addFlag("tagTRT", "TRTAlign_test")
-    icf.addFlag("tagBow", "IndetIBLDist")
-    icf.addFlag("BeamSpotTag", "IndetBeampos-RUN3-ES1-UPD2-02")
-    icf.addFlag("DynamicL1IDTag", "InDetAlignL1-RUN3-BLK-UPD4-01")
-    icf.addFlag("DynamicL2PIXTag", "InDetAlignL2PIX-RUN3-BLK-UPD4-01")
-    icf.addFlag("DynamicL2SCTTag", "InDetAlignL2SCT-RUN3-BLK-UPD4-01")
-    icf.addFlag("DynamicL1TRTTag", "TRTAlignL1-RUN3-BLK-UPD4-01")
-    icf.addFlag("DynamicL3SiTag", "")
-    icf.addFlag("DynamicL2TRTTag", "")
-    icf.addFlag("ErrorScalingTag", "")
-    icf.addFlag("LorentzAngleTag", "")
+    icf.addFlag("inputTracksCollection", "CombinedInDetTracks")
+    icf.addFlag("pixelAlignmentLevel", -1)
+    icf.addFlag("pixelAlignmentLevelBarrel", -1)
+    icf.addFlag("pixelAlignmentLevelEndcaps", -1)
+    icf.addFlag("SCTAlignmentLevel", -1)
+    icf.addFlag("SCTAlignmentLevelBarrel", -1)
+    icf.addFlag("SCTAlignmentLevelEndcaps", -1)
+    icf.addFlag("TRTAlignmentLevel", -1)
+    icf.addFlag("TRTAlignmentLevelBarrel", -1)
+    icf.addFlag("TRTAlignmentLevelEndcaps", -1)
+    icf.addFlag("beamSpotTag", "")
+    icf.addFlag("IBLDistTag", "")
+    icf.addFlag("L1IDTag", "")
+    icf.addFlag("L2PIXTag", "")
+    icf.addFlag("L2SCTTag", "")
+    icf.addFlag("L1TRTTag", "")
+    icf.addFlag("L3SiTag", "")
+    icf.addFlag("L2TRTTag", "")
+    icf.addFlag("L3TRTTag", "")
+    icf.addFlag("errorScalingTag", "")
+    icf.addFlag("lorentzAngleTag", "")
     icf.addFlag("MDNTag", "")
-    icf.addFlag("PixelDistortionTag", "")
+    icf.addFlag("pixelDistortionTag", "")
     icf.addFlag("TRTCalibT0TagCos", "")
     icf.addFlag("TRTCalibRtTagCos", "")
-    icf.addFlag("useDynamicAlignFolders", False)
-    icf.addFlag("inputAlignmentConstants", [])
-    icf.addFlag("inputBowingDatabase", "")
-    icf.addFlag("inputDynamicGlobalDatabase", "")
-    icf.addFlag("siPoolFile", [])
     icf.addFlag("inputTFiles", "AlignmentTFile.root")
     icf.addFlag("outputConditionFile", "alignment_output.pool.root")
     
     return icf
+    
+def setL11AlignmentFlags(flags, InputLocalDatabase = ""):
+    flags.InDet.Align.pixelAlignmentLevel = 11
+    flags.InDet.Align.pixelAlignmentLevelBarrel = -1
+    flags.InDet.Align.pixelAlignmentLevelEndcaps = -1
+    
+    flags.InDet.Align.SCTAlignmentLevel = 1
+    flags.InDet.Align.SCTAlignmentLevelBarrel = -1
+    flags.InDet.Align.SCTAlignmentLevelEndcaps = -1
+    
+    flags.InDet.Align.TRTAlignmentLevel = 1
+    flags.InDet.Align.TRTAlignmentLevelBarrel = -1
+    flags.InDet.Align.TRTAlignmentLevelEndcaps = -1
+
+    if InputLocalDatabase:
+        msg = logging.getLogger('setL16AlignmentFlags')
+        msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
+        msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")
+            
+        flags.InDet.Align.IBLDistTag = "InDetAlignIBLDIST-T0-Alignment"
+        flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment"
+
+def setL16AlignmentFlags(flags, InputLocalDatabase = ""):
+    if not flags.InDet.Align.alignPixel:
+        raise Exception("With alignment level '16' the flag 'flags.InDet.Align.alignPixel' must be true'")
+
+    flags.InDet.Align.pixelAlignmentLevel = 16
+    flags.InDet.Align.pixelAlignmentLevelBarrel = -1
+    flags.InDet.Align.pixelAlignmentLevelEndcaps = -1
+    
+    flags.InDet.Align.SCTAlignmentLevel = 1
+    flags.InDet.Align.SCTAlignmentLevelBarrel = -1
+    flags.InDet.Align.SCTAlignmentLevelEndcaps = -1
+    
+    flags.InDet.Align.TRTAlignmentLevel = 1
+    flags.InDet.Align.TRTAlignmentLevelBarrel = -1
+    flags.InDet.Align.TRTAlignmentLevelEndcaps = -1
+
+    flags.InDet.Align.alignSCT = False
+    flags.InDet.Align.alignTRT = False
+    
+    if InputLocalDatabase:
+        msg = logging.getLogger('setL16AlignmentFlags')
+        msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
+        msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")
+    
+        flags.InDet.Align.IBLDistTag = "InDetAlignIBLDIST-T0-Alignment"
+        flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment"
+
+## TODO Fill L2 and L3 from current T0 setup
+def setL2AlignmentFlags(flags):
+    pass  
+    
+def setL3AlignmentFlags(flags):
+    pass  

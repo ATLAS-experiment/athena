@@ -81,16 +81,24 @@ Description: 2D_percentage_occupancy
 
 #2D percentage of cells contributing to clusters
 ---
-Input: [ 'CaloMonitoring/LArClusterCellMon/ClusterCell/NClusteredCells_(?P<lay>EMBP|EMB1|EMB2|EMB3|HEC0|HEC1|HEC2|HEC3|EMECP|EMEC1|EMEC2|EMEC3|FCAL1|FCAL2|FCAL3)(?P<side>A|C)','CaloMonitoring/LArClusterCellMon/Summary/eventCounter' ]
-Output: [ 'CaloMonitoring/LArClusterCellMon/ClusterCell/PercentClusteredCells_{lay}{side}' ]
+Input: [ 'CaloMonitoring/CaloClusterCellMon/ClusterCell/NClusteredCells_(?P<lay>EMBP|EMB1|EMB2|EMB3|HEC0|HEC1|HEC2|HEC3|EMECP|EMEC1|EMEC2|EMEC3|FCAL1|FCAL2|FCAL3|TileBar0|TileBar1|TileBar2|TileGap0|TileGap1|TileGap2|TileExt0|TileExt1|TileExt2)(?P<side>A|C)','CaloMonitoring/CaloClusterCellMon/Summary/eventCounter' ]
+Output: [ 'CaloMonitoring/CaloClusterCellMon/ClusterCell/PercentClusteredCells_{lay}{side}' ]
 Function: CaloMonitoring.CaloMonTransforms.simpleDivideByAcceptedEvts
 Parameters: { titleToReplace : 'Total' , replaceTitWith : 'Average' }
 Description: 2D_cluster_cell
 
-#1D percentage of cells contributing to clusters
+#1D percentage of LAr cells contributing to clusters
 ---
-Input: ['CaloMonitoring/LArClusterCellMon/Summary/cellhash','CaloMonitoring/LArClusterCellMon/Summary/eventCounter' ]
-Output: [ 'CaloMonitoring/LArClusterCellMon/Summary/cellhashPercent' ]
+Input: ['CaloMonitoring/CaloClusterCellMon/Summary/larhash','CaloMonitoring/CaloClusterCellMon/Summary/eventCounter' ]
+Output: [ 'CaloMonitoring/CaloClusterCellMon/Summary/larhashPercent' ]
 Function: CaloMonitoring.CaloMonTransforms.simpleDivideByAcceptedEvts
 Parameters: { titleToReplace : 'Total' , replaceTitWith : 'Average' }
-Description: 1D_cluster_cell
+Description: 1D_cluster_larcell
+
+#1D percentage of Tile cells contributing to clusters
+---
+Input: ['CaloMonitoring/CaloClusterCellMon/Summary/tilehash','CaloMonitoring/CaloClusterCellMon/Summary/eventCounter' ]
+Output: [ 'CaloMonitoring/CaloClusterCellMon/Summary/tilehashPercent' ]
+Function: CaloMonitoring.CaloMonTransforms.simpleDivideByAcceptedEvts
+Parameters: { titleToReplace : 'Total' , replaceTitWith : 'Average' }
+Description: 1D_cluster_tilecell

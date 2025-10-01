@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauJetRNNEvaluator.h"
@@ -82,14 +82,14 @@ StatusCode TauJetRNNEvaluator::initialize() {
   // Load the weights and create the network
   // 0p is for trigger only
   if (!weightfile_0p.empty()) {
-    m_net_0p = std::make_unique<TauJetRNN>(weightfile_0p, config);
+    m_net_0p = std::make_unique<TauJetRNN>(weightfile_0p, config, m_useTRT);
     if (!m_net_0p) {
       ATH_MSG_ERROR("No network configured for 0-prong taus.");
       return StatusCode::FAILURE;
     }
   }
 
-  m_net_1p = std::make_unique<TauJetRNN>(weightfile_1p, config);
+  m_net_1p = std::make_unique<TauJetRNN>(weightfile_1p, config, m_useTRT);
   if (!m_net_1p) {
     ATH_MSG_ERROR("No network configured for 1-prong taus.");
     return StatusCode::FAILURE;
@@ -97,14 +97,14 @@ StatusCode TauJetRNNEvaluator::initialize() {
 
   // 2p is optional
   if (!weightfile_2p.empty()) {
-    m_net_2p = std::make_unique<TauJetRNN>(weightfile_2p, config);
+    m_net_2p = std::make_unique<TauJetRNN>(weightfile_2p, config, m_useTRT);
     if (!m_net_2p) {
       ATH_MSG_ERROR("No network configured for 2-prong taus.");
       return StatusCode::FAILURE;
     }
   }
 
-  m_net_3p = std::make_unique<TauJetRNN>(weightfile_3p, config);      
+  m_net_3p = std::make_unique<TauJetRNN>(weightfile_3p, config, m_useTRT); 
   if (!m_net_3p) {
     ATH_MSG_ERROR("No network configured for 3-prong taus.");
     return StatusCode::FAILURE;

@@ -86,7 +86,7 @@ if __name__=='__main__':
                               disableEventTag=True, takeItemsFromInput=False))
 
    # remove the default folders
-   from CaloLocalHadCalib.CaloLCWPerformanceConfig import blockFolder
+   from IOVDbSvc.IOVDbSvcConfig import blockFolder
    blockFolder(cfg,"/CALO/Ofl/HadCalibration2/CaloEMFrac")
    blockFolder(cfg,"/CALO/Ofl/HadCalibration2/H1ClusterCellWeights")
    blockFolder(cfg,"/CALO/Ofl/HadCalibration2/CaloOutOfCluster")

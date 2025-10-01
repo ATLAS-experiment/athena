@@ -44,7 +44,7 @@ class TauSelectionCutNTracks;
 class TauSelectionCutJetIDWP;
 class TauSelectionCutRNNJetScoreSigTrans;
 class TauSelectionCutGNTauScoreSigTrans;
-class TauSelectionCutRNNEleScore;
+class TauSelectionCutRNNEleScoreSigTrans;
 class TauSelectionCutEleIDWP;
 class TauSelectionCutMuonOLR;
 
@@ -63,7 +63,7 @@ class TauSelectionTool : public virtual IAsgSelectionTool,
   friend class TauSelectionCutJetIDWP;
   friend class TauSelectionCutRNNJetScoreSigTrans;
   friend class TauSelectionCutGNTauScoreSigTrans;
-  friend class TauSelectionCutRNNEleScore;
+  friend class TauSelectionCutRNNEleScoreSigTrans;
   friend class TauSelectionCutEleIDWP;
   friend class TauSelectionCutMuonOLR;
 
@@ -131,7 +131,7 @@ private:
   std::string m_sJetIDWP;
   bool m_useGNTau=false;
   // vector of EleRNN cut regions
-  std::vector<float> m_vEleRNNRegion;
+  std::vector<float> m_vEleRNNSigTransRegion;
   // EleID working point
   std::string m_sEleIDWP;
 
@@ -147,8 +147,8 @@ private:
   Gaudi::Property<float> m_dGNTauSigTransMin{this, "GNTauSigTransMin", NAN};
   Gaudi::Property<float> m_dGNTauSigTransMax{this, "GNTauSigTransMax", NAN};
   Gaudi::Property<float> m_iNTrack{this, "NTrack", NAN};
-  Gaudi::Property<float> m_dEleRNNMin{this, "EleRNNMin", NAN};
-  Gaudi::Property<float> m_dEleRNNMax{this, "EleRNNMax", NAN};
+  Gaudi::Property<float> m_dEleRNNSigTransMin{this, "EleRNNSigTransMin", NAN};
+  Gaudi::Property<float> m_dEleRNNSigTransMax{this, "EleRNNSigTransMax", NAN};
   Gaudi::Property<int> m_iJetIDWP{this, "JetIDWP", 0};
   Gaudi::Property<int> m_iEleIDWP{this, "EleIDWP", 0};
   Gaudi::Property<int> m_iEleIDVersion{this, "EleIDVersion", 1};
@@ -160,7 +160,7 @@ private:
   Gaudi::Property<std::vector<unsigned>> m_vecNTracks{this, "NTracks", {}};
   Gaudi::Property<std::vector<float>> m_vecJetRNNSigTransRegion{this, "JetRNNSigTransRegion", {}};
   Gaudi::Property<std::vector<float>> m_vecGNTauSigTransRegion{this, "GNTauSigTransRegion", {}};
-  Gaudi::Property<std::vector<float>> m_vecEleRNNRegion{this, "EleRNNRegion", {}};
+  Gaudi::Property<std::vector<float>> m_vecEleRNNSigTransRegion{this, "EleRNNSigTransRegion", {}};
 
 protected:
   TFile* m_fOutFile;//!

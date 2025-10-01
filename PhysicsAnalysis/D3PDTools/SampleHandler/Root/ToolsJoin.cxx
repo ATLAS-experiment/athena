@@ -34,7 +34,7 @@ namespace SH
     SampleHandler mysh;
     std::unique_ptr<SampleLocal> mysample (new SampleLocal (sampleName));
 
-    boost::regex mypattern (pattern.c_str());
+    std::regex mypattern (pattern.c_str());
     for (SampleHandler::iterator sample = sh.begin(),
 	   end = sh.end(); sample != end; ++ sample)
     {

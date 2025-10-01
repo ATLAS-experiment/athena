@@ -15,21 +15,6 @@ from InDetAlignGenTools.InDetAlignGenToolsConfig import ITkAlignDBTool
 import sys
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def blockFolder(ca,folder):
-        "Block use of specified conditions DB folder so data can be read from elsewhere"
-        from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-        ca.merge(IOVDbSvcCfg(flags))
-        iovdbsvc=ca.getService("IOVDbSvc")
-        # check existing list of folders and remove it if found
-        for i in range(0,len(iovdbsvc.Folders)):
-            if (iovdbsvc.Folders[i].find(folder)>=0):
-                del iovdbsvc.Folders[i]
-                break
-        condInputLoader=ca.getCondAlgo("CondInputLoader")        
-        for i in range(0, len(condInputLoader.Load)):
-            if (folder in condInputLoader.Load[i][-1] ):
-                del condInputLoader.Load[i]
-                break
 
 
 def getFlags(**kwargs):
@@ -64,18 +49,11 @@ def getFlags(**kwargs):
         MisalignMode = 11 # Radial
     else:
         MisalignMode=int(kwargs.get('MisalignMode',11))
-    if 'Translation' not in kwargs.keys():
-        Translation = True
-    else:
-        Translation=bool(kwargs.get('Translation','True')=='True')
-        if not Translation:
-            print ("Translation not set to \"True\" - disabling generation of translations")
-    if 'Rotation' not in kwargs.keys():
-        Rotation = True
-    else:
-        Rotation=bool(kwargs.get('Rotation','True')=='True')
-        if not Rotation:
-            print ("Rotation not set to \"True\" - disabling generation of rotations")
+    if MisalignMode == 2:
+        translation_scale_str = kwargs.pop('Translation_Scale', '0.1,0.1,0.1')
+        rotation_scale_str = kwargs.pop('Rotation_Scale', '0.1,0.1,0.1')
+        Translation_Scale = [float(x) for x in translation_scale_str.split(',')]
+        Rotation_Scale = [float(x) for x in rotation_scale_str.split(',')]
     if MisalignMode == 7:
         local_translation_str = kwargs.pop('Local_Translation', '0.0,0.0,0.0')
         local_rotation_str = kwargs.pop('Local_Rotation', '0.0,0.0,0.0')
@@ -125,13 +103,17 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     local_rotation_str = kwargs.pop('Local_Rotation', '0.0,0.0,0.0')
     Local_Translation = [float(x) for x in local_translation_str.split(',')]
     Local_Rotation = [float(x) for x in local_rotation_str.split(',')] 
+    translation_scale_str = kwargs.pop('Translation_Scale', '0.1,0.1,0.1')
+    rotation_scale_str = kwargs.pop('Rotation_Scale', '0.1,0.1,0.1')
+    Translation_Scale = [float(x) for x in translation_scale_str.split(',')]
+    Rotation_Scale = [float(x) for x in rotation_scale_str.split(',')]
     acc=MainServicesCfg(flags)
     print ("\n CreateMisalignAlg: Creation of misalignment mode %s: %s \n" % (int(MisalignMode),misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("ASCIIFilenameBase",outFiles)
     kwargs.setdefault("SQLiteTag",'MisalignmentMode_'+str(misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("MisalignMode",int(MisalignMode))
-    kwargs.setdefault("Translation",bool(str(kwargs.pop('Translation','True'))=='True'))
-    kwargs.setdefault("Rotation",bool(str(kwargs.pop('Rotation','True'))=='True'))
+    kwargs.setdefault("Translation_Scale",Translation_Scale)
+    kwargs.setdefault("Rotation_Scale",Rotation_Scale)
     kwargs.setdefault("Local_Translation",Local_Translation)
     kwargs.setdefault("Local_Rotation",Local_Rotation)
     kwargs.setdefault("Index", str(kwargs.pop('Index', '')))

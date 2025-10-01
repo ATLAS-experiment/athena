@@ -2324,8 +2324,8 @@ static void gl2psParseFeedbackBuffer(GLint used)
         prim->factor = 0;
         prim->width = 1;
 
-        node = (GL2PSimagemap*)gl2psMalloc(sizeof(GL2PSimagemap));
-        node->image = (GL2PSimage*)gl2psMalloc(sizeof(GL2PSimage));
+        node = static_cast<GL2PSimagemap*>(gl2psMalloc(sizeof(GL2PSimagemap)));
+        node->image = static_cast<GL2PSimage*>(gl2psMalloc(sizeof(GL2PSimage)));
         node->image->type = 0;
         node->image->format = 0;
         node->next = NULL;
@@ -2369,9 +2369,9 @@ static void gl2psParseFeedbackBuffer(GLint used)
         for(i = 0; i < vtot; i += sizeoffloat){
           current += 2; used -= 2;
           if((vtot - i) >= 4)
-            memcpy(&((reinterpret_cast<char*>(node->image->pixels))[i + v]), &(current[2]), sizeoffloat);
+            memcpy(&(node->image->pixels[i + v]), &(current[2]), sizeoffloat);
           else
-            memcpy(&((reinterpret_cast<char*>(node->image->pixels))[i + v]), &(current[2]), vtot - i);
+            memcpy(&(node->image->pixels[i + v]), &(current[2]), vtot - i);
         }
         current++; used--;
         gl2psListAdd(gl2ps->primitives, &prim);

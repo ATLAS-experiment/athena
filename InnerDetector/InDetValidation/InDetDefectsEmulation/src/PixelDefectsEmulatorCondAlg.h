@@ -29,7 +29,7 @@ namespace InDet {
    }
 
    /** Conditions algorithms for emulating ITK pixel defects.
-    * The algorithm mask random pixels, core columns (group of 8 or 4 consecutive columns of a chip), 
+    * The algorithm mask random pixels, core columns (group of 8 or 4 consecutive columns of a chip),
     * circuits or modules as defect. This data can be used to reject RDOs overlapping with these defects.
     */
    class PixelDefectsEmulatorCondAlg : public DefectsEmulatorCondAlgImpl<PixelDefectsEmulatorCondAlg>

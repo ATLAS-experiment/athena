@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ namespace DerivationFramework {
 
     // Decorate truth jets with origin ID
     SG::WriteDecorHandle<xAOD::JetContainer, int> jetIdDecorator(m_jetIDDecorationKey, ctx);
-    for (const auto& jet : *JetCollection) {
+    for (const auto jet : *JetCollection) {
       int id = -999;
       SG::ConstAccessor<int> hfidAcc(m_hfDecorationName + "_id");
       if(hfidAcc.isAvailable(*jet)){

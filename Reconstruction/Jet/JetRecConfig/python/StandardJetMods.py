@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 This module defines the standard JetModifier tools used in jet reco
 
@@ -60,7 +60,9 @@ try:
                             prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+[inputsFromContext("Vertices")])
     )
 except ModuleNotFoundError:
-    # In some releases (AthGeneration) JetCalibTools is not existing
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
 # TBD:
@@ -211,7 +213,9 @@ try:
         
     )
 except ModuleNotFoundError:
-    # In some releases (AthGeneration) JetMomentTools is not existing
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
 # Truth labelling moments
@@ -277,13 +281,14 @@ stdJetModifiers.update(
 
 # Substructure tools 
 stdJetModifiers.update( 
-    nsubjettiness = JetModifier( "NSubjettinessTool", "nsubjettiness",Alpha = 1.0),
+    nsubjettiness = JetModifier( "NSubjettinessTool", "nsubjettiness", Alpha = 1.0,
+                                 JetContainer = _jetname),
     nsubjettinessR = JetModifier( "NSubjettinessRatiosTool", "nsubjettinessR",),
 
     
     ktdr       = JetModifier("KtDeltaRTool", "ktdr", JetRadius = 0.4),
 
-    ktsplitter = JetModifier( "KTSplittingScaleTool", "ktsplitter"),
+    ktsplitter = JetModifier( "KTSplittingScaleTool", "ktsplitter", JetContainer = _jetname),
     
     angularity = JetModifier( "AngularityTool", "angularity"),
     
@@ -293,19 +298,19 @@ stdJetModifiers.update(
 
     ktmassdrop = JetModifier( "KtMassDropTool", "ktmassdrop"),
 
-    ecorr      = JetModifier( "EnergyCorrelatorTool", "ecorr", Beta = 1.0),
+    ecorr      = JetModifier( "EnergyCorrelatorTool", "ecorr", Beta = 1.0, JetContainer = _jetname),
     ecorrR     = JetModifier( "EnergyCorrelatorRatiosTool", "ecorrR", ),
 
-    ecorrgeneral = JetModifier( "EnergyCorrelatorGeneralizedTool", "ecorrgeneral", DoLSeries = True),
+    ecorrgeneral = JetModifier( "EnergyCorrelatorGeneralizedTool", "ecorrgeneral", DoLSeries = True, JetContainer = _jetname),
     ecorrgeneralratios = JetModifier( "EnergyCorrelatorGeneralizedRatiosTool", "ecorrgeneralratios",  DoLSeries = True),
 
-    comshapes = JetModifier( "CenterOfMassShapesTool","comshapes"),
+    comshapes = JetModifier( "CenterOfMassShapesTool", "comshapes", JetContainer = _jetname),
 
     pull      = JetModifier("JetPullTool", "pull",  UseEtaInsteadOfY = False, IncludeTensorMoments = True ),
 
     charge    = JetModifier( "JetChargeTool", "charge", K=1.0),
 
-    qw = JetModifier( "QwTool", "qw"),
+    qw = JetModifier( "QwTool", "qw", JetContainer = _jetname),
 
     softdropobs = JetModifier("SoftDropObservablesTool", "softdropobs"),
 )
@@ -315,11 +320,14 @@ try :
     from JetMomentTools import JetMomentToolsConfig
     stdJetModifiers.update( 
         qgtransformer = JetModifier("BoostedJetTaggerTool", "qgtransformer",
-                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolQG,
-                            JetContainer = _jetname),
+                                    createfn=JetMomentToolsConfig.getBoostedJetTaggerToolQG,
+                                    JetContainer = _jetname,
+                                    SuppressInputDependence = True),
     )
 except ModuleNotFoundError:
-    # In some releases (AthGeneration) JetMomentTools is not existing
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
 # Substructure tagger tools: top
@@ -327,11 +335,44 @@ try :
     from JetMomentTools import JetMomentToolsConfig
     stdJetModifiers.update( 
         toptransformer = JetModifier("BoostedJetTaggerTool", "toptransformer",
-                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolTop,
-                            JetContainer = _jetname),
+                                     createfn=JetMomentToolsConfig.getBoostedJetTaggerToolTop,
+                                     JetContainer = _jetname,
+                                     SuppressInputDependence = True),
     )
 except ModuleNotFoundError:
-    # In some releases (AthGeneration) JetMomentTools is not existing
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
+    pass
+
+# Substructure tagger tools: w
+try :
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update( 
+        wtransformer = JetModifier("BoostedJetTaggerTool", "wtransformer",
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolW,
+                            JetContainer = _jetname,
+                            SuppressInputDependence = True),
+    )
+except ModuleNotFoundError:
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
+    pass
+
+# Substructure tagger tools: w mass dec
+try :
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update( 
+        wtransformer_massdec = JetModifier("BoostedJetTaggerTool", "wtransformer_massdec",
+                            createfn=JetMomentToolsConfig.getBoostedJetTaggerToolWMassDec,
+                            JetContainer = _jetname,
+                            SuppressInputDependence = True),
+    )
+except ModuleNotFoundError:
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
 # VR track-jet decorations

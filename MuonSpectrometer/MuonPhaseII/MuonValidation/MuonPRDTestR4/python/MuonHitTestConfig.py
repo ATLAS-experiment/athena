@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **kwargs):
     result = ComponentAccumulator()
-    from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
     result.merge(setupHistSvcCfg(flags,outFile=outFile, outStream="MuonR4HitTest"))
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
@@ -64,7 +64,8 @@ def MuonPileUpTestCfg(flags, name="MuonDigiTester", outFile="DigiTest.root", **k
 
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.add_argument("--runTester", help="Choice on the tester to setup", default="SIM", choices=["SIM", "DIGI", "PILEUP"])
     parser.set_defaults(nEvents = -1)

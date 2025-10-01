@@ -114,7 +114,7 @@ TruthCaloShowerDecorator::addBranches() const
   ATH_MSG_DEBUG("Decorating truth parts with truth cluster energy");
   for (const auto* const truthPart : *truthPartContainer) {
     if (!truthPart) continue;
-    if (!MC::isSingleParticle(truthPart)) continue;
+    if (!MC::isGenStable(truthPart)) continue;
     linkDecoratorClusterEtot(*truthPart) = truthClusterEtot;
     linkDecoratorClusterEvis(*truthPart) = truthClusterEvis;
     linkDecoratorClusterEem(*truthPart) = truthClusterEem;

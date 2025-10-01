@@ -22,7 +22,7 @@ ExtrpTPnameFS = recordable("HLT_MSExtrapolatedMuons_FSTrackParticles")
 MSextrpTPname = recordable("HLT_MSOnlyExtrapolatedMuons_FSTrackParticles")
 
 
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
 class muonNames(object):
   def __init__(self):
@@ -440,6 +440,20 @@ def VDVPrecMuTrkCfg(flags, name, suffix):
   return acc
 
 
+def VDVidReuseITkCfg(flags, suffix):
+  acc = ComponentAccumulator()
+
+  vdvName = "VDVidReuseITk"
+  dataObjects = []
+
+  from TrigInDetConfig.TrigInDetConfig import InDetExtraDataObjectsFromDataPrep
+  InDetExtraDataObjectsFromDataPrep(flags, dataObjects)
+
+  alg = CompFactory.AthViews.ViewDataVerifier( name = vdvName+suffix,
+                                               DataObjects = dataObjects)
+  acc.addEventAlgo(alg)
+  return acc
+
 
 def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
 
@@ -485,6 +499,8 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
 
   if flags.Muon.enableTrigIDtrackReuse or suffix != '':
      if 'LRT' not in name or 'FS' not in name:
+        if flags.GeoModel.Run > LHCPeriod.Run3:
+           acc.merge(VDVidReuseITkCfg(flags, suffix))
         if suffix != 'idReuse':
            MuonL2CBInputContainer = muNames.L2CBName+suffix
         else:

@@ -95,6 +95,7 @@ source ActsLegacyConfiguration.sh \
        "${activate_all_flags} \
 	flags.Acts.doAmbiguityResolution=True; \
        " \
+       "ActsExtrapTool.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Got.+error.+during.+propagation:.+PropagatorError:.." \
        >& ActsConfiguration1.log
 
 reco_rc=$?
@@ -119,6 +120,7 @@ source ActsLegacyConfiguration.sh \
        "${activate_all_flags} \
 	flags.Acts.doAmbiguityResolution=False; \
        " \
+       "ActsExtrapTool.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Got.+error.+during.+propagation:.+PropagatorError:.." \
        >& ActsConfiguration2.log
 
 reco_rc=$?

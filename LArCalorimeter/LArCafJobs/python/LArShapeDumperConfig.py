@@ -107,7 +107,7 @@ def LArShapeDumperCfg(flags):
        dumperAlg.ChannelsKey = "LArRawChannels_FromDigits"
 
     dumperAlg.EnergyCutSC = flags.LArShapeDump.energySCCut   
-    #dumperAlg.MinADCMaxSC = flags.LArShapeDump.adcSCCut
+    dumperAlg.MinADCMaxSC = flags.LArShapeDump.adcSCCut
 
     result.addEventAlgo(dumperAlg)
 

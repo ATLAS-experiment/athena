@@ -9,6 +9,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *      Florencia Daneri <maria.florencia.daneri@cern.ch>
  *      Gino Marceca <gino.marceca@cern.ch>
  *      Lars Beemster <lars.beemster@cern.ch>
+ *      Liaoshan Shi <liaoshan.shi@cern.ch>
  *
  * Description:
  *      Base tool class for bjet trigger emulation
@@ -18,10 +19,8 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 namespace Trig {  
 
-TrigBtagEmulationTool::TrigBtagEmulationTool(const std::string& type, 
-					     const std::string& name, 
-					     const IInterface* parent)
-  : base_class(type, name, parent) 
+TrigBtagEmulationTool::TrigBtagEmulationTool(const std::string& name)
+  : base_class(name) 
 {}
 
 
@@ -103,6 +102,12 @@ bool TrigBtagEmulationTool::evaluate_L1(const std::string& chain,
 bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
 					 const EmulContext& emulCtx) const
 {
+  std::unordered_map<std::string, std::vector<bool>> emulationMap;
+  return evaluate_HLT(chain, emulCtx, emulationMap);
+}
+bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
+					 const EmulContext& emulCtx, std::unordered_map<std::string, std::vector<bool>>& emulationMap) const
+{
   if (m_LHCPeriod == 3) {
     for ( bool is_chainPart_PFlow : chain.is_PFlow() ) {
       if ( not is_chainPart_PFlow ) {
@@ -122,6 +127,7 @@ bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
   const int shared_idx = chain.shared_idx();
   const std::vector<int>& jet_multiplicity = chain.jet_multiplicity();
   const std::vector<std::string>& chainPartName = chain.chainPartName();
+  std::vector<std::vector<bool>> emulationMatrix;
 
   int nChainParts = static_cast<int>( jet_multiplicity.size() );
 
@@ -132,7 +138,9 @@ bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
       // chain uses the shared operator, we basically have two chains to check
       std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, pflow_jets, 0, shared_idx);
       std::vector<std::vector<bool>> chainPart_passedjets_btag = evaluate_HLT_chainParts(chain, pflow_jets, shared_idx, nChainParts);
-        
+      emulationMatrix.insert(emulationMatrix.begin(), chainPart_passedjets.begin(), chainPart_passedjets.end());
+      emulationMatrix.insert(emulationMatrix.end(), chainPart_passedjets_btag.begin(), chainPart_passedjets_btag.end());
+
       std::vector<std::string> chainPartNames_leg1(chainPartName.begin(), chainPartName.begin() + shared_idx);
       std::vector<int> multiplicities_leg1(jet_multiplicity.begin(), jet_multiplicity.begin() + shared_idx);
       std::vector<std::string> chainPartNames_leg2(chainPartName.begin() + shared_idx, chainPartName.end());
@@ -143,6 +151,7 @@ bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
     }
     else {
       std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, pflow_jets, 0, nChainParts);
+      emulationMatrix = chainPart_passedjets;
 
       std::vector<std::string> chainPartNames(chainPartName.begin(), chainPartName.end());
       std::vector<int> multiplicities(jet_multiplicity.begin(), jet_multiplicity.end());
@@ -150,16 +159,17 @@ bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
       res = allocate_jets_to_chainParts(chainPart_passedjets, chainPartNames, multiplicities);
     }
   } else if (m_LHCPeriod == 2) {
-      const std::vector<TrigBtagEmulationJet>& ef_jets = m_manager_a4tcemsubjesJet_cnt->getJets(emulCtx);
+      const std::vector<TrigBtagEmulationJet>& a4_jets = m_manager_a4tcemsubjesJet_cnt->getJets(emulCtx);
       const std::vector<TrigBtagEmulationJet> *split_jets = nullptr;
       const std::vector<TrigBtagEmulationJet> *gsc_jets = nullptr;
       if (!m_manager_SplitJet_cnt->jetContainerName().empty()) {
-        split_jets = &m_manager_SplitJet_cnt->getJets(emulCtx);
+        split_jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>("SplitJets_Indexed");
       }
       if (!m_manager_GSCJet_cnt->jetContainerName().empty()) {
-        gsc_jets = &m_manager_GSCJet_cnt->getJets(emulCtx);
+        gsc_jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>("GSCJets_Indexed");
       }
-      std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, ef_jets, 0, nChainParts, split_jets, gsc_jets);
+      std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, a4_jets, 0, nChainParts, split_jets, gsc_jets);
+      emulationMatrix = chainPart_passedjets;
 
       std::vector<std::string> chainPartNames(chainPartName.begin(), chainPartName.end());
       std::vector<int> multiplicities(jet_multiplicity.begin(), jet_multiplicity.end());
@@ -167,6 +177,11 @@ bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
       res = allocate_jets_to_chainParts(chainPart_passedjets, chainPartNames, multiplicities);
   } else {
     ATH_MSG_ERROR("Emulation not supported for LHC Period " << m_LHCPeriod);
+  }
+
+  // Save emulation results in a map
+  for (unsigned int i=0; i<chainPartName.size(); ++i) {
+    emulationMap[chainPartName[i]] = emulationMatrix[i];
   }
 
   return res; 
@@ -192,13 +207,13 @@ bool TrigBtagEmulationTool::evaluate_preselection(const TrigBtagEmulationChain& 
     parse_preselection(presel_part, presel_multiplicity, presel_ptcut, presel_eta_min, presel_eta_max);
     
     for( const auto& preseljet: preselJets ) {
-      if((preseljet.pt() / Gaudi::Units::GeV) >= presel_ptcut &&
+      if((preseljet.pt() * 0.001) >= presel_ptcut &&
          presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
         
-        ATH_MSG_DEBUG( "   - Preselection jet pt=" << (preseljet.pt() / Gaudi::Units::GeV) << " eta=" << preseljet.eta() << " passed.");
+        ATH_MSG_DEBUG( "   - Preselection jet pt=" << (preseljet.pt() * 0.001) << " eta=" << preseljet.eta() << " passed.");
         preseljets_passed++;
       }
-      else if((preseljet.pt() / Gaudi::Units::GeV) < presel_ptcut) {
+      else if((preseljet.pt() * 0.001) < presel_ptcut) {
         // no more Preselection jets left with high enough pt
         break;
       }
@@ -220,7 +235,7 @@ bool TrigBtagEmulationTool::evaluate_preselection(const TrigBtagEmulationChain& 
       multiplicities.push_back(presel_multiplicity);
       
       for ( const auto& preseljet : preselJets ) {
-        if((preseljet.pt() / Gaudi::Units::GeV) >= presel_ptcut &&
+        if((preseljet.pt() * 0.001) >= presel_ptcut &&
            presel_eta_min < std::fabs(preseljet.eta()) && std::fabs(preseljet.eta()) < presel_eta_max) {
           // flag jet as passed this part of preselection
           chainPart_passedjets[chainPart_idx].push_back(true);
@@ -229,7 +244,7 @@ bool TrigBtagEmulationTool::evaluate_preselection(const TrigBtagEmulationChain& 
           chainPart_passedjets[chainPart_idx].push_back(false);
         }
         
-        if((preseljet.pt() / Gaudi::Units::GeV) < presel_ptcut) {
+        if((preseljet.pt() * 0.001) < presel_ptcut) {
           // no more Preselection jets left with high enough pt
           if(chainPart_passedjets[chainPart_idx].size() > chainPart_passedjets_lenmax) {
             chainPart_passedjets_lenmax = chainPart_passedjets[chainPart_idx].size();
@@ -266,12 +281,12 @@ bool TrigBtagEmulationTool::evaluate_dijetmass(const TrigBtagEmulationChain& cha
 
   bool res = false;
   for( const auto& jet1: preselJets ) {
-    if( (jet1.pt() / Gaudi::Units::GeV) < dijet_minjetpt ) {
+    if( (jet1.pt() * 0.001) < dijet_minjetpt ) {
       break;
     }
     
     for( const auto& jet2: preselJets ) {
-      if( (jet2.pt() / Gaudi::Units::GeV) < dijet_minjetpt ) {
+      if( (jet2.pt() * 0.001) < dijet_minjetpt ) {
 	break;
       }
       
@@ -279,10 +294,10 @@ bool TrigBtagEmulationTool::evaluate_dijetmass(const TrigBtagEmulationChain& cha
       double adphi = std::abs(jet1.p4().DeltaPhi(jet2.p4()));
       double adeta = std::abs(jet1.eta() - jet2.eta());
       
-      if((mass / Gaudi::Units::GeV) >= dijet_mass &&
+      if((mass * 0.001) >= dijet_mass &&
 	 (dijet_dphi < 0 || adphi < dijet_dphi) &&
 	 (dijet_deta < 0 || adeta > dijet_deta) ) {
-	ATH_MSG_DEBUG( "   - Dijet system " << (jet1.pt() / Gaudi::Units::GeV) << " and " << (jet2.pt() / Gaudi::Units::GeV) << " passed " << dijetmass );
+	ATH_MSG_DEBUG( "   - Dijet system " << (jet1.pt() * 0.001) << " and " << (jet2.pt() * 0.001) << " passed " << dijetmass );
 	res = true;
 	break;
       }
@@ -471,46 +486,7 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
 
   std::vector<std::vector<bool>> chainPart_passedjets(idx_end - idx_begin);
 
-  std::vector<const TrigBtagEmulationJet*> mainJets, gscJets_indexed, splitJets_indexed;
-  mainJets.reserve(jets.size());
-  for (const auto &jet : jets)
-    mainJets.push_back(&jet);
 
-  if (m_LHCPeriod == 2) {
-    // Multiple jet collections in Run2.
-    // Re-index split and GSC jets to match the a4tcemsubjesJets.
-    // This index will be used in the chainPart_jet_matrix to calculate the emulation result
-    gscJets_indexed.reserve(jets.size());
-    splitJets_indexed.reserve(jets.size());
-
-    for (const auto &jet : jets) {
-      bool splitJetFound = false;
-      bool gscJetFound = false;
-
-      if (splitJets) {
-        for (const auto &splitJet : *splitJets) {
-          if (jet.p4().DeltaR(splitJet.p4()) < 0.05) {
-            splitJets_indexed.push_back(&splitJet);
-            splitJetFound = true;
-            break;
-          }
-        }
-      }
-      if (!splitJetFound) splitJets_indexed.push_back(nullptr);
-
-      if (gscJets) {
-        for (const auto &gscJet : *gscJets) {
-          if (jet.p4().DeltaR(gscJet.p4()) < 0.05) {
-            gscJets_indexed.push_back(&gscJet);
-            gscJetFound = true;
-            break;
-          }
-        }
-        if (!gscJetFound) gscJets_indexed.push_back(nullptr);
-      }
-    }
-  }
-  
   for(size_t chainPart_idx = 0; chainPart_idx < chainPart_passedjets.size(); chainPart_idx++) {
     double jet_pt = jet_pt_vec[chainPart_idx +idx_begin];
     double jet_eta_min = jet_eta_min_vec[chainPart_idx +idx_begin];
@@ -518,13 +494,13 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
     double jvtcut = jvt_vec[chainPart_idx +idx_begin];
     std::string tagger = tagger_vec[chainPart_idx +idx_begin];
     std::string chain_part_name = chainPartName_vec[chainPart_idx +idx_begin];
-    std::vector<const TrigBtagEmulationJet*> jets_to_use = mainJets;
+    const std::vector<TrigBtagEmulationJet>* jets_to_use = &jets;
 
     // Set the jet collection to use based on the chain part name
     if (chain_part_name.find("gsc") != std::string::npos) {
       jet_pt = gsc_pt_vec[chainPart_idx +idx_begin];
       if (gscJets) {
-        jets_to_use = gscJets_indexed;
+        jets_to_use = gscJets;
         ATH_MSG_DEBUG("Using GSC jets for chain part: " << chain_part_name);
       } else {
         ATH_MSG_ERROR("GSC jets not available to emulate chain part: " << chain_part_name << ". Use a4tcemsubjesJets instead. Note that jet pT emulation may not be accurate.");
@@ -532,7 +508,7 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
     }
     else if (chain_part_name.find("split") != std::string::npos) {
       if (splitJets) {
-        jets_to_use = splitJets_indexed;
+        jets_to_use = splitJets;
         ATH_MSG_DEBUG("Using Split jets for chain part: " << chain_part_name);
       } else {
         ATH_MSG_ERROR("Split jets not available to emulate chain part: " << chain_part_name << ". Use a4tcemsubjesJets instead. Note that b-tagging emulation may not work.");
@@ -540,27 +516,27 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
     }
     
     ATH_MSG_DEBUG( ">-- " << chain_part_name << ":" );
-    for( const auto& jet : jets_to_use ) {
-      if (jet == nullptr) {
+    for( const auto& jet : *jets_to_use ) {
+      if (jet.jet() == nullptr) {
         chainPart_passedjets[chainPart_idx].push_back(false);
         continue;
       }
 
       bool passedJvt = true;
       if (jvtcut > 0.) {
-        float jvt = jet->jvt();
-        passedJvt = jvt > jvtcut || jet->pt() / Gaudi::Units::GeV > 120. || std::fabs(jet->eta()) > 2.5;
+        float jvt = jet.jvt();
+        passedJvt = jvt > jvtcut || jet.pt() * 0.001 > 120. || std::fabs(jet.eta()) > 2.5;
       }
       
       if (tagger == "ewTagger") tagger = "newTagger";
-      bool is_bjet = isPassedBTagger(*jet, tagger);
+      bool is_bjet = isPassedBTagger(jet, tagger);
 
-      bool passedPt = jet->pt() > jet_pt;
-      if (m_LHCPeriod == 2) passedPt = jet->et() > jet_pt;
-      
+      bool passedPt = jet.pt() > jet_pt;
+      if (m_LHCPeriod == 2) passedPt = jet.et() > jet_pt;
+
       if(passedPt &&
-	        std::fabs(jet->eta()) > jet_eta_min &&
-	        std::fabs(jet->eta()) < jet_eta_max &&
+	        std::fabs(jet.eta()) > jet_eta_min &&
+	        std::fabs(jet.eta()) < jet_eta_max &&
 	        passedJvt &&
 	        ((tagger != "") ? is_bjet : true) ) {
         // flag jet as passing current chainPart
@@ -569,9 +545,9 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
       else {
         chainPart_passedjets[chainPart_idx].push_back(false);
       }
-      
-      ATH_MSG_DEBUG( " - pt:" << (jet->pt() / Gaudi::Units::GeV)
-		     << ", eta:" << jet->eta()
+
+      ATH_MSG_DEBUG( " - pt:" << (jet.pt() * 0.001)
+		     << ", eta:" << jet.eta()
 		     << ", passedJvt:" << (passedJvt?"Y":"N")
 		     << ((tagger != "") ? ", btag:" : "") << ((tagger != "") ? (is_bjet?"Y":"N") : "")
 		     << ", pass:" << (chainPart_passedjets[chainPart_idx].back()?"Y":"N")
@@ -612,6 +588,9 @@ const EmulContext& TrigBtagEmulationTool::populateJetManagersTriggerObjects() co
     if ( retrieveTriggerObjects( *m_manager_GSCJet_cnt, *emulCtx ).isFailure() ) {
       ATH_MSG_DEBUG("Could not retrieve trigger objects from " << m_manager_GSCJet_cnt->name());
     }
+    if ( indexRun2TriggerObjects(*emulCtx).isFailure() ) {
+      ATH_MSG_DEBUG("Could not index Run2 trigger objects. Emulation results may be incorrect.");
+    }
   }
   
   return *emulCtx;
@@ -638,6 +617,58 @@ StatusCode TrigBtagEmulationTool::retrieveTriggerObjects(const Trig::JetManagerT
   return StatusCode::SUCCESS;
 }
 
+StatusCode TrigBtagEmulationTool::indexRun2TriggerObjects(EmulContext& emulCtx) const
+{
+  // Multiple jet collections in Run2.
+  // Re-index split and GSC jets to match the a4tcemsubjesJets.
+  // This index will be used in the chainPart_jet_matrix to calculate the emulation result
+  const std::vector<TrigBtagEmulationJet>& jets = m_manager_a4tcemsubjesJet_cnt->getJets(emulCtx);
+  const std::vector<TrigBtagEmulationJet>* jets_split = nullptr;
+  const std::vector<TrigBtagEmulationJet>* jets_gsc = nullptr;
+  if (!m_manager_SplitJet_cnt->jetContainerName().empty()) {
+    jets_split = &m_manager_SplitJet_cnt->getJets(emulCtx);
+  }
+  if (!m_manager_GSCJet_cnt->jetContainerName().empty()) {
+    jets_gsc = &m_manager_GSCJet_cnt->getJets(emulCtx);
+  }
+  auto gscJets_indexed = std::make_unique<std::vector<TrigBtagEmulationJet>>();
+  auto splitJets_indexed = std::make_unique<std::vector<TrigBtagEmulationJet>>();
+  gscJets_indexed->reserve(jets.size());
+  splitJets_indexed->reserve(jets.size());
+
+  for (const auto &jet : jets) {
+    bool splitJetFound = false;
+    bool gscJetFound = false;
+
+    if (jets_split) {
+      for (const auto &splitJet : *jets_split) {
+        if (jet.p4().DeltaR(splitJet.p4()) < 0.05) {
+          splitJets_indexed->push_back(splitJet);
+          splitJetFound = true;
+          break;
+        }
+      }
+    }
+    if (!splitJetFound) splitJets_indexed->push_back(TrigBtagEmulationJet());
+
+    if (jets_gsc) {
+      for (const auto &gscJet : *jets_gsc) {
+        if (jet.p4().DeltaR(gscJet.p4()) < 0.05) {
+          gscJets_indexed->push_back(gscJet);
+          gscJetFound = true;
+          break;
+        }
+      }
+      if (!gscJetFound) gscJets_indexed->push_back(TrigBtagEmulationJet());
+    }
+  }
+
+  emulCtx.store( "SplitJets_Indexed", std::move(splitJets_indexed) );
+  emulCtx.store( "GSCJets_Indexed", std::move(gscJets_indexed) );
+
+  return StatusCode::SUCCESS;
+}
+
 StatusCode TrigBtagEmulationTool::addEmulatedChain(const std::string& triggerName, 
 						   const std::vector<std::string>& definition) 
 {
@@ -646,40 +677,126 @@ StatusCode TrigBtagEmulationTool::addEmulatedChain(const std::string& triggerNam
     return StatusCode::FAILURE;
   }
   auto chain = std::make_unique<TrigBtagEmulationChain>( triggerName, definition );
+  #ifndef XAOD_STANDALONE
   chain->setLevel(msgLevel());  
+  #endif
   m_emulatedChains.insert( std::make_pair(triggerName, std::move(chain)) );
   
   return StatusCode::SUCCESS;
 }
 
-bool TrigBtagEmulationTool::isPassedBTagger(const TrigBtagEmulationJet& jet,
+bool TrigBtagEmulationTool::isPassedBTagger(const TrigBtagEmulationJet& emujet,
 					    const std::string& btagger) const
 {
   if (btagger.empty()) return false;
   if (btagger == "offperf") return true;
 
-  const auto& itr = m_tagger_wp.find(btagger);
+  const auto& itr = m_tagger_wp.value().find(btagger);
   if (itr == m_tagger_wp.end()) return false;
 
   double workingPoint = itr->second;
   bool res = false;
 
   if( btagger.substr(0, 4) == "dl1r" ) { // 4 -> strlen("dl1r")
-    res = jet.satisfy("DL1r", workingPoint);
+    res = emujet.satisfy("DL1r", workingPoint);
   } else if( btagger.substr(0, 4) == "dl1d" ) { // 4 -> strlen("dl1d")
-    res = jet.satisfy("DL1d20211216", workingPoint);
+    res = emujet.satisfy("DL1d20211216", workingPoint);
   } else if( btagger == "newTagger" ) {
-    const xAOD::BTagging *btag = jet.btag();
-    if (not btag) return false;
-    m_dl2->decorate(*btag);
-    res = jet.satisfy("DL1dEMUL", workingPoint);
+    const xAOD::Jet *jet = emujet.jet();
+    if (not jet) return false;
+    m_dl2->decorate(*jet);
+    res = emujet.satisfy("DL1dEMUL", workingPoint);
   } else if (btagger.substr(0, 4) == "mv2c") {
-    res = jet.satisfy(btagger, workingPoint);
+    res = emujet.satisfy(btagger, workingPoint);
   } else {
     ATH_MSG_WARNING( "Tagger " << btagger << " not supported." );
   }
 
   return res;
+}
+
+std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> TrigBtagEmulationTool::getEmulatedJets(std::string chainName) const
+{
+  // Return emulation results for given trigger
+  // Result looks something like this:
+  //    chainPart0 | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag)
+  //    chainPart1 | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag)
+  //    chainPart2 | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag) | (p4, btag)
+  //               | j0         | j1         | j2         | j3         | j4         | j5
+ 
+  std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> passedJets;
+
+  if (m_LHCPeriod < 2 || m_LHCPeriod > 3) {
+    ATH_MSG_WARNING("Emulation not implemented for LHC Period " << m_LHCPeriod);
+    return {};
+  }
+  const std::vector<std::string> unsupported = {"_a10", "_invm", "_ht"}; // non-exhaustive list of unsupported chains
+  for (const auto &u : unsupported)
+  {
+    if (chainName.find(u) != std::string::npos) {
+      ATH_MSG_DEBUG("Emulation for Chain " << chainName << " has not been implemented.");
+      return {};
+    }
+  }
+  const auto& itr = m_emulatedChains.find(chainName);
+  if (itr == m_emulatedChains.end()) {
+    ATH_MSG_WARNING("Chain " << chainName << " not found.");
+    return {};
+  }
+  TrigBtagEmulationChain* chain = itr->second.get();
+  std::string tagger = "";
+  for (const auto& tagger_on_leg : chain->tagger()) {
+    if (tagger_on_leg != "" && tagger_on_leg != "offperf") {
+      if (tagger != "" && tagger != tagger_on_leg) {
+        ATH_MSG_WARNING("getEmulatedJets only works for chains with a single b-tagger. Chain " << chainName << " has multiple: " << tagger << " and " << tagger_on_leg);
+        return {};
+      }
+      tagger = tagger_on_leg;
+    }
+  }
+
+  std::unordered_map<std::string, std::vector<bool>> emulationMap;
+  const auto& emulCtx = populateJetManagersTriggerObjects();
+  evaluate_HLT(*chain, emulCtx, emulationMap);
+
+  const std::vector<std::string> &chainPartNames = chain->chainPartName();
+  for (const std::string &chainPartName : chainPartNames) {
+    const std::vector<TrigBtagEmulationJet> *jets = nullptr;
+    const std::vector<TrigBtagEmulationJet> *jets_split = nullptr;
+    if (m_LHCPeriod == 3) {
+      ATH_MSG_WARNING("getEmulatedJets for Run3 chains is not validated. Use with caution.");
+      jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>(m_manager_PFlow_cnt->jetContainerName());
+    }
+    else if (m_LHCPeriod == 2) {
+      // prepare Split jets to get b-tagging information
+      if (tagger != "" && !m_manager_SplitJet_cnt->jetContainerName().empty()) {
+        jets_split = emulCtx.get<std::vector<TrigBtagEmulationJet>>("SplitJets_Indexed");
+      }
+
+      // prepare jet collection to get kinematics
+      if (chainPartName.find("gsc") != std::string::npos && !m_manager_GSCJet_cnt->jetContainerName().empty()) {
+        jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>("GSCJets_Indexed");
+      }
+      else if (chainPartName.find("split") != std::string::npos && !m_manager_SplitJet_cnt->jetContainerName().empty()) {
+        jets = jets_split;
+      }
+      else {
+        jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>(m_manager_a4tcemsubjesJet_cnt->jetContainerName());
+      }
+    }
+
+    std::vector<std::pair<const xAOD::Jet*, bool>> passedJets_per_chain;
+    for (size_t i=0; i<jets->size(); ++i) {
+      if (emulationMap[chainPartName][i]) {
+        // becasue all collections are index-aligned, and b-tagging link points to Split jets
+        bool is_btagged = jets_split ? isPassedBTagger(jets_split->at(i), tagger) : false;
+        passedJets_per_chain.emplace_back(jets->at(i).jet(), is_btagged);
+      }
+    }
+    passedJets[chainPartName] = passedJets_per_chain;
+  }
+  return passedJets;
+
 }
 
 }

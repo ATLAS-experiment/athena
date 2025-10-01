@@ -406,6 +406,15 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
       auto A_filterHT=genEvt->attribute<HepMC3::DoubleAttribute>("filterHT");
       auto A_filterMET=genEvt->attribute<HepMC3::DoubleAttribute>("filterMET");
       auto signal_process_vertex = HepMC::signal_process_vertex(genEvt);
+
+      // If signal vertex not found on the vertices, look on the event (Sherpa)
+      if (!signal_process_vertex) {
+        auto event_spv = genEvt->attribute<HepMC3::IntAttribute>("signal_process_vertex");
+
+        // If the attribute exists, get the vertex
+        if (event_spv) signal_process_vertex = genEvt->vertices().at(-event_spv->value()-1);
+      }
+
       auto A_random_states=genEvt->attribute<HepMC3::VectorLongIntAttribute>("random_states");
       auto beams=genEvt->beams();
       persObj->m_genEvents.
@@ -449,7 +458,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
          att.second->to_string(st);
          /// bool status = att.second->to_string(st);
          /// One can add here checks for the status
-         persEvt.m_e_attribute_string.push_back(st);
+         persEvt.m_e_attribute_string.push_back(std::move(st));
        }
      }
      persEvt.m_r_attribute_name.clear();

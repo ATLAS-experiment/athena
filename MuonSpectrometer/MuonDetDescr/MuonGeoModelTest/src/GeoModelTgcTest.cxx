@@ -259,8 +259,8 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
                     /// Strip bottom & top edges
                     const double stripHalfLength = readoutEle->stripLength() / 2.;
 
-                    const Amg::Vector2D locStripBot{readoutEle->stripPosOnShortBase(strip), -stripHalfLength};                    
-                    const Amg::Vector2D locStripTop{readoutEle->stripPosOnLargeBase(strip), stripHalfLength};
+                    const Amg::Vector2D locStripBot{readoutEle->stripPosOnShortBase(strip, layer), -stripHalfLength};
+                    const Amg::Vector2D locStripTop{readoutEle->stripPosOnLargeBase(strip, layer), stripHalfLength};
                     const Amg::Vector3D globStripBot{surf.localToGlobal(locStripBot)};
                     const Amg::Vector3D globStripTop{surf.localToGlobal(locStripTop)};
                     

@@ -1,5 +1,3 @@
-from future import standard_library
-standard_library.install_aliases()
 # Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 
 def downloadUsingProxy(url, filename=None):

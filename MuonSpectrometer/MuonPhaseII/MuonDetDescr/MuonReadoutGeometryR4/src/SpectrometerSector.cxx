@@ -64,9 +64,9 @@ int SpectrometerSector::stationPhi() const { return m_args.chambers.front()->sta
 int SpectrometerSector::sector() const {return m_args.chambers.front()->sector(); }
 bool SpectrometerSector::barrel() const { return m_args.chambers.front()->barrel(); }
 std::string SpectrometerSector::identString() const {
-    return std::format("{:} {:}-side sector: {:2}",  
+    return std::format("{:} {:}-side sector: {:2} _ {} readout elements",  
                        Muon::MuonStationIndex::chName(chamberIndex()), 
-                       side() == 1 ? 'A' : 'C' , sector());
+                       side() == 1 ? 'A' : 'C' , sector(), readoutEles().size());
 }
 const ChamberSet& SpectrometerSector::chambers() const{ return m_args.chambers; }
 const Acts::PlaneSurface& SpectrometerSector::surface() const {
@@ -169,6 +169,7 @@ SpectrometerSector::fillDetLayIdCache() const{
  
     unsigned int layCounter {0}, nIter {0};
     Identifier lastId {};
+    unsigned int deltaN {0};
     while(++nIter <= reEleSorted.size()){
 
         auto [nextReEle, nextId] = nextLayer(lastId);
@@ -177,15 +178,17 @@ SpectrometerSector::fillDetLayIdCache() const{
         }
 
         unsigned int nLayers = nLayerPerReadout(nextReEle);
-
+        
         if (nextId != lastId) {
-            cache[nextReEle] = range(layCounter, layCounter + nLayers);
+            layCounter += deltaN;
+            deltaN = nLayers;
             lastId = nextId;
-            layCounter += nLayers;
         }
         else{
-            cache[nextReEle] = range(layCounter - nLayers, layCounter);
+            deltaN = std::max(deltaN, nLayers);
         }
+        
+        cache[nextReEle] = range(layCounter, layCounter + nLayers);
 
         ATH_MSG_DEBUG( identString() << " ReEle: " << idHelperSvc()->toStringDetEl(nextReEle->identify()) << 
                      " Add logicLay: " << idHelperSvc()->toStringGasGap(nextId) << " nInserted, layCounter " << cache.at(nextReEle).size() << " ," << layCounter);

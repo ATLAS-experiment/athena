@@ -10,7 +10,6 @@
 ##   lsetup pyami
 ######################
 
-from __future__ import print_function
 
 import sys
 import pyAMI.client

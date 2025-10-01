@@ -4,7 +4,7 @@ from MuonConfig.MuonConfigUtils import SetupMuonStandaloneOutput, SetupMuonStand
 from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFindingCfg
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
+from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultTestFiles
 
 flags = initConfigFlags() 
 flags.Scheduler.ShowDataDeps = True
@@ -15,9 +15,9 @@ flags.Concurrency.NumThreads  = 1
 flags.Concurrency.NumConcurrentEvents = 1
 flags.Exec.FPE= 500
 
-args = flags.fillFromArgs()
 flags.Muon.writexAODPRD = True # This is the flag that tells the convertors to produce xAOD PRDs
-flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1']
+
+flags.Input.Files = defaultTestFiles.RDO_RUN4
 flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.Output.ESDFileName='newESD.pool.root'
 
@@ -25,7 +25,7 @@ setupDetectorFlags(flags)
 flags.lock()
 flags.dump()
 
-cfg = SetupMuonStandaloneCA(args, flags)
+cfg = SetupMuonStandaloneCA(flags)
 
 # Run the actual test.
 acc = MuonSegmentFindingCfg(flags)
@@ -38,13 +38,7 @@ itemsToRecord += ["xAOD::TgcStripContainer#*", "xAOD::TgcStripAuxContainer#*" ]
 itemsToRecord += ["xAOD::RpcStripContainer#*", "xAOD::RpcStripAuxContainer#*" ]
 SetupMuonStandaloneOutput(cfg, flags, itemsToRecord)
 
-# cfg.getService("StoreGateSvc").Dump = True
-cfg.printConfig()
 
-if not args.config_only:
-    sc = cfg.run(20)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
-else:
-    cfg.wasMerged()
+from MuonConfig.MuonConfigUtils import executeTest
+executeTest(cfg)
+

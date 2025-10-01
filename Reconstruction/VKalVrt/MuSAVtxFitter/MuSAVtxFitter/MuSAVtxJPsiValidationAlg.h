@@ -9,6 +9,7 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "JpsiUpsilonTools/JpsiFinder.h"
 
 namespace Analysis { class JpsiFinder; }
@@ -28,6 +29,7 @@ protected:
 
   SG::WriteHandleKey<xAOD::MuonContainer> m_JPsiMuonContainer{ this, "JPsiMuonContainer", "JPsiMuons", "output J/Psi muon collection" };
   SG::WriteHandleKey<xAOD::VertexContainer> m_JPsiVertexContainer{ this, "JPsiVertexContainer", "JPsiVertices", "output J/Psi vertex collection" };
+  SG::WriteHandleKey<xAOD::TrackParticleContainer> m_JPsiTrackParticleContainer{ this, "JPsiTrackParticleContainer", "JPsiVerticesTracks", "output J/Psi track collection" };
 
   ToolHandle<Analysis::JpsiFinder> m_JPsiFinderTool{ this, "JpsiFinderTool", "Analysis::JpsiFinder/JpsiFinder", "find J/Psi -> mumu" };
 };

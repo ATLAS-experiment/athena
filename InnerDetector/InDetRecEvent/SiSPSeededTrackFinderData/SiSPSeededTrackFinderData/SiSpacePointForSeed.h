@@ -18,6 +18,7 @@
 #define SiSpacePointForSeed_h
 
 #include <cmath>
+#include <span>
 
 namespace Trk {
   class SpacePoint;
@@ -42,34 +43,34 @@ namespace InDet {
     SiSpacePointForSeed& operator  = (SiSpacePointForSeed&) noexcept = default;
     ~SiSpacePointForSeed() = default;
 
-    SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*);
-    SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*,const float*);
+    SiSpacePointForSeed(const Trk::SpacePoint*,std::span<float const, 3>);
+    SiSpacePointForSeed(const Trk::SpacePoint*,std::span<float const, 3>, std::span<float const, 4>);
 
-    void set(const Trk::SpacePoint*const&,const float*);
-    void set(const Trk::SpacePoint*const&,const float*,const float*);
-    void setQuality(float);
-    void setParam(const float&);
-    void setD0(const float&);
-    void setEta(const float&);
-    void setDZDR(const float&);
-    void setPt(const float&);
-    void setScorePenalty(const float& par) {m_scorePenalty=par;}
+    void set(const Trk::SpacePoint*,std::span<float const, 3>);
+    void set(const Trk::SpacePoint*,std::span<float const, 3>, std::span<float const, 4>);
+    void setQuality(float q) { if(q <= m_q) m_q = q; }
+    void setParam(float p) {m_param = p;}
+    void setD0(float d0) { m_d0 = d0; }
+    void setEta(float eta) { m_eta = eta; }
+    void setDZDR(float dzdr) { m_dzdr = dzdr; }
+    void setPt(float pt) { m_pt = pt; }
+    void setScorePenalty(float par) {m_scorePenalty=par;}
 
     const Trk::SpacePoint* spacepoint = nullptr; 
-    const float&          x() const {return m_x;}
-    const float&          y() const {return m_y;}
-    const float&          z() const {return m_z;}
-    const float&     radius() const {return m_r;}
-          float         phi() const {return atan2(m_y,m_x);}
-    const float&       covr() const {return m_covr;}
-    const float&       covz() const {return m_covz;}
-    const float&         d0() const {return m_d0;}
-    const float&        eta() const {return m_eta;}
-    const float&      param() const {return m_param;} /// impact parameter
-    const float&      scorePenalty() const {return m_scorePenalty;} /// penalty term in the seed score
-    const float&    quality() const {return m_q ;}      /// quality of the best seed this candidate was seen on 
-    const float&       dzdr() const {return m_dzdr;}
-    const float&         Pt() const {return m_pt;}
+    float          x() const {return m_x;}
+    float          y() const {return m_y;}
+    float          z() const {return m_z;}
+    float     radius() const {return m_r;}
+    float         phi() const {return std::atan2(m_y,m_x);}
+    float       covr() const {return m_covr;}
+    float       covz() const {return m_covz;}
+    float         d0() const {return m_d0;}
+    float        eta() const {return m_eta;}
+    float      param() const {return m_param;} /// impact parameter
+    float      scorePenalty() const {return m_scorePenalty;} /// penalty term in the seed score
+    float    quality() const {return m_q ;}      /// quality of the best seed this candidate was seen on 
+    float       dzdr() const {return m_dzdr;}
+    float         Pt() const {return m_pt;}
     const Trk::Surface* sur() const {return m_su;}
     const Trk::Surface* sun() const {return m_sn;}
 

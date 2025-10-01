@@ -235,10 +235,8 @@ def dump_Fourvec (v, f, parens=1):
 
     #vmom = v.momentumBase() if hasattr(v, 'momentumBase') else None
     vmom = None
-    if isinstance (v,    PyAthena.P4EEtaPhiMBase) or \
-       isinstance (v,    ParticleImpl_EEtaPhiM) or \
-       isinstance (vmom, PyAthena.P4BaseEEtaPhiM) or \
-       isinstance (v, PyAthena.xAOD.IParticle):
+    if isinstance(v, (PyAthena.P4EEtaPhiMBase, ParticleImpl_EEtaPhiM, PyAthena.xAOD.IParticle)) or \
+       isinstance(vmom, PyAthena.P4BaseEEtaPhiM):
         m = v.m()
         eta = v.eta()
         if m > v.e():
@@ -707,6 +705,34 @@ def dump_Muon (m, f):
     return
 
 
+def dump_TauShot (t, f):
+    dump_EL (t.clusterLink(), f)
+    fprint (f, ' ')
+    dump_EL (t.seedLink(), f)
+    fprint (f, ' %d %d %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f' %
+             (t.nCellsInEta(),
+              t.nPhotons(),
+              t.pt1(),
+              t.pt3(),
+              t.pt5(),
+              t.ws5(),
+              t.sdevEta5_WRTmean(),
+              t.sdevEta5_WRTmode(),
+              t.sdevPt5(),
+              t.deltaPt12_min(),
+              t.Fside_3not1(),
+              t.Fside_5not1(),
+              t.Fside_5not3(),
+              t.fracSide_3not1(),
+              t.fracSide_5not1(),
+              t.fracSide_5not3(),
+              t.pt1OverPt3(),
+              t.pt3OverPt5(),
+              t.mergedScore(),
+              t.signalScore()))
+    return
+
+
 def dump_TauDetail (t, f):
     nm = t.className()
     if nm.startswith('Analysis::'):
@@ -830,6 +856,9 @@ def dump_TauPi0Cluster (t, f):
             t.secondEtaWRTClusterPosition_EM1(),
             t.secondEtaWRTClusterPosition_EM2(),
             t.BDTScore())
+    for s in t.tauShotVec():
+        fprint (f, '\n      shot ')
+        dump_TauShot (s, f)
     return
           
 
@@ -845,6 +874,9 @@ def dump_TauPi0Details (t, f):
     for c in t.pi0ClusterVector():
         fprint (f, '\n    ')
         dump_TauPi0Cluster (c, f)
+    for s in t.shotVector():
+        fprint (f, '\n      shot ')
+        dump_TauShot (s, f)
     return
 
 

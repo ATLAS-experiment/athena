@@ -116,7 +116,6 @@ def FlavorTagNNCfg(
     tp_assoc = 'BTagTrackToJetAssociator'
     ip_assoc = 'TracksForBTagging'
     variableRemapping.setdefault(tp_assoc, ip_assoc)
-    trackLinkType = 'IPARTICLE'
     FTI = CompFactory.FlavorTagInference
     alg = FTI.JetTagDecoratorAlg
 
@@ -126,7 +125,6 @@ def FlavorTagNNCfg(
     nn_opts = dict(
         NNFile=NNFile,
         flipTagConfig=FlipConfig,
-        trackLinkType=trackLinkType,
         variableRemapping=variableRemapping
     )
 
@@ -175,7 +173,7 @@ def MultifoldGNNCfg(
 ):
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
-    algname = 'FtagMultifoldNN_{jc}_{tc}_{nn}_{fc}{dz}'.format(
+    algname = 'FtagNN_{jc}_{tc}_{nn}_{fc}{dz}'.format(
         jc=JetCollection,
         tc=TrackCollection,
         nn=nn_name,
@@ -212,7 +210,6 @@ def MultifoldGNNCfg(
     ip_assoc = 'TracksForBTagging'
     remapping.setdefault(tp_assoc, ip_assoc)
     Alg = FTI.JetTagDecoratorAlg
-    trackLinkType = 'IPARTICLE'
     algname += '_Jet'
     container = JetCollection
 
@@ -222,13 +219,12 @@ def MultifoldGNNCfg(
             container=container,
             constituentContainer=TrackCollection,
             decorator=CompFactory.FlavorTagInference.MultifoldGNNTool(
-                name=f'{algname}_tool',
+                name='multifold',
                 foldHashName=foldHashName,
                 nnFiles=nnFilePaths,
                 flipTagConfig=FlipConfig,
                 variableRemapping=remapping,
                 nnSharingService=addAndReturnSharingSvc(flags, acc),
-                trackLinkType=trackLinkType,
                 defaultOutputValues=defaultOutputValues,
                 perFoldDefaultOutputValues=_defaultsFromPaths(nnFilePaths),
                 defaultZeroTracks=default_zero_tracks,

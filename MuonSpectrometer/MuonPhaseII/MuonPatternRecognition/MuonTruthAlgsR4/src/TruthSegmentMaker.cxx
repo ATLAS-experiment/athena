@@ -252,16 +252,16 @@ namespace MuonR4{
         out.ptDecor(*truthSegment) = muonPt(*simHit, globDir);
         out.chargeDecor(*truthSegment) = MC::charge(simHit);
         SegPars_t& locPars{out.paramDecor(*truthSegment)};
-        locPars[toInt(ParamDefs::x0)] = chamberPos.x();
-        locPars[toInt(ParamDefs::y0)] = chamberPos.y();
+        locPars[Acts::toUnderlying(ParamDefs::x0)] = chamberPos.x();
+        locPars[Acts::toUnderlying(ParamDefs::y0)] = chamberPos.y();
         constexpr float betaLowLimit = 1.e-6;
-        locPars[toInt(ParamDefs::time)] = simHit->globalTime() + distance *c_inv / std::max(simHit->beta(), betaLowLimit);
-        locPars[toInt(ParamDefs::theta)] = chamberDir.theta();
-        locPars[toInt(ParamDefs::phi)]   = chamberDir.phi();
+        locPars[Acts::toUnderlying(ParamDefs::t0)] = simHit->globalTime() + distance *c_inv / std::max(simHit->beta(), betaLowLimit);
+        locPars[Acts::toUnderlying(ParamDefs::theta)] = chamberDir.theta();
+        locPars[Acts::toUnderlying(ParamDefs::phi)]   = chamberDir.phi();
         
         truthSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
         truthSegment->setDirection(globDir.x(), globDir.y(), globDir.z());
-        truthSegment->setT0Error(locPars[toInt(ParamDefs::time)], 0.);
+        truthSegment->setT0Error(locPars[Acts::toUnderlying(ParamDefs::t0)], 0.);
                 
         truthSegment->setNHits(nPrecisionHits, nPhiLayers, nTgcEta + nRpcEta);
         truthSegment->setIdentifier(m_idHelperSvc->sector(segId), 

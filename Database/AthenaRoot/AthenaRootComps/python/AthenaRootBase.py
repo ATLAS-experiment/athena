@@ -28,13 +28,6 @@ def _loadBasicAthenaRoot():
      if not hasattr (svcMgr, 'ProxyProviderSvc'):
          svcMgr += CfgMgr.ProxyProviderSvc()
             
-     # Make sure AthenaPoolServices is loaded for custom streamer
-     try:
-          svcMgr += CfgMgr.AthenaRootStreamerSvc()
-     except TypeError:
-          msg.info("could not load AthenaRootStreamerSvc")
-          pass
-     
      if not hasattr (svcMgr, 'InputMetaDataStore'):
           svcMgr += CfgMgr.StoreGateSvc ("InputMetaDataStore")
           pass

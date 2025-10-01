@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbSvc.cxx
@@ -431,7 +431,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
   for (const auto & thisNamePtrPair : m_foldermap) {
     newmap[thisNamePtrPair.second->key()]=thisNamePtrPair.second;
   }
-  m_foldermap=newmap;
+  m_foldermap=std::move(newmap);
   // fill global and explicit folder tags into TagInfo
   if (StatusCode::SUCCESS!=fillTagInfo()) 
     ATH_MSG_ERROR("Could not fill TagInfo object from preLoadAddresses" );
@@ -952,7 +952,7 @@ StatusCode IOVDbSvc::setupFolders() {
       return StatusCode::FAILURE;
     }
     
-    allFolderdata.push_back(folderdata);
+    allFolderdata.push_back(std::move(folderdata));
   }
 
   //2. Loop through overwrites:

@@ -24,7 +24,9 @@ def PixelConditionsSummaryCfg(flags, name="PixelConditionsSummary", **kwargs):
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("UseByteStreamFEI4", (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay)
     kwargs.setdefault("UseByteStreamFEI3", (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay)
-    if flags.Overlay.DataOverlay and flags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing:
+    if (flags.Overlay.DataOverlay and
+        flags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and
+        not flags.Overlay.ByteStream):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, ["IDCInDetBSErrContainer#PixelByteStreamErrs"]))
 

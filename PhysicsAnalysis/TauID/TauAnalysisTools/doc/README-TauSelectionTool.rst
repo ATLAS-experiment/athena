@@ -169,23 +169,23 @@ setup:
      - accepting taus passing the given working point
      -
 
-   * - ``CutEleRNNScore``
-     - ``EleRNNRegion``
+   * - ``CutEleRNNScoreSigTrans``
+     - ``EleRNNSigTransRegion``
      - ``std::vector<double>``
      - accepting taus within electron RNN score regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
      - This cut is applied only on 1 prong tau
 
    * -
-     - ``EleRNNMin``
+     - ``EleRNNSigTransMin``
      - ``double``
      - accepting taus with a electron RNN score above a lower bound
-     - if ``EleRNNMin`` is configured, ``EleRNNRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
+     - if ``EleRNNSigTransMin`` is configured, ``EleRNNSigTransRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
 
    * -
-     - ``EleRNNMax``
+     - ``EleRNNSigTransMax``
      - ``double``
      - accepting taus with a electron RNN score below an upper bound
-     - if ``EleRNNMax`` is configured, ``EleRNNRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
+     - if ``EleRNNSigTransMax`` is configured, ``EleRNNSigTransRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
 
    * - 
      - ``EleIDVersion``
@@ -193,6 +193,11 @@ setup:
      - EleRNN version number for variable to use
      - Default is 1
 
+   * - ``CutEleIDWP``
+     - ``EleIDWP``
+     - ``int``
+     - accepting taus passing the given working point
+  
    * - ``CutMuonOLR``
      - ``MuonOLR``
      - ``bool``

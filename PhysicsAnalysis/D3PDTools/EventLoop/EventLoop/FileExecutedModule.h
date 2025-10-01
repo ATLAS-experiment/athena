@@ -12,6 +12,7 @@
 #include <EventLoop/Global.h>
 
 #include <EventLoop/Module.h>
+#include <TTree.h>
 #include <memory>
 
 class TString;

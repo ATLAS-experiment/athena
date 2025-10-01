@@ -29,6 +29,7 @@
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTrigger/TrigDecision.h"
+#include "xAODTrigger/CTPResult.h"
 
 #include "TrigDecisionMaker/ILvl1ResultAccessTool.h"
 #include "TrigT1Result/RoIBResult.h"
@@ -78,6 +79,7 @@ namespace TrigDec {
 
     Gaudi::Property<bool> m_doL1{this, "doL1",  true, "Read L1 trigger information"};
     Gaudi::Property<bool> m_doHLT{this, "doHLT", true, "Read HLT trigger information"};
+    Gaudi::Property<bool> m_useEDMxAOD{this, "UseEDMxAOD", false, "Flag whether to use xAOD::CTPResult instead of ROIB::RoIBResult for CTP result"};
 
     // Tools & services
     ToolHandle<HLT::ILvl1ResultAccessTool> m_lvl1Tool{this, "Lvl1ResultAccessTool", "HLT::Lvl1ResultAccessTool/Lvl1ResultAccessTool", "L1 tool to fetch"}; //!< tool to ease the access to the L1 results (RoIs, items, etc)
@@ -90,9 +92,11 @@ namespace TrigDec {
 
     SG::ReadHandleKey<HLT::HLTResultMT> m_hltResultKeyIn {this, "HLTResultMT", "HLTResultMT", "Key of the HLTResultMT object to get bits from online bytestream" };
     SG::ReadHandleKey<ROIB::RoIBResult> m_ROIBResultKeyIn {this, "RoIBResult", "RoIBResult", "RoIB Result Object Key"};
+    SG::ReadHandleKey<xAOD::CTPResult> m_CTPResultKeyIn{this, "CTPResult", "CTPResult", "Key to retrieve the L1 xAOD CTP result from SG" };
     SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKeyIn {this, "EventInfo", "EventInfo", "Event Info Object Key"};
 
     // Output configuration
+    SG::WriteHandleKey<LVL1CTP::Lvl1Result> m_l1ResultKeyOut{ this, "L1Result", "L1Result", "L1 result"};
     SG::WriteHandleKey<xAOD::TrigDecision> m_trigDecisionKeyOut {this, "TrigDecisionKey", "xTrigDecision", "Output trigger decision object key"};
 
     // For statistics

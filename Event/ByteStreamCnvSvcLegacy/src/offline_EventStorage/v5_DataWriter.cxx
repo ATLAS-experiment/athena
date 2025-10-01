@@ -506,7 +506,7 @@ DWError DataWriter::closeFile()
 				   m_streamName,
 				   m_applicationName,
 				   m_guid,
-				   checksum,
+				   std::move(checksum),
 				   m_file_end_record.events_in_file, 
 				   m_internal_run_parameters_record.run_number,
 				   m_file_start_record.file_number,
@@ -783,8 +783,7 @@ void DataWriter::replaceGuid() {
     m_next_guid = "";
   }
   
-  string e1="GUID=" + m_guid;
-  m_fmdStrings[0]=e1;
+  m_fmdStrings[0] = "GUID=" + m_guid;
 }
 
 void DataWriter::setGuid(const std::string& Guid){

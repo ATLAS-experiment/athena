@@ -19,9 +19,8 @@
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
-using namespace InDetDD;
-
 #include "PixelGeoUtils.h"
+using namespace InDetDD;
 
 DBM_Module::DBM_Module(InDetDD::PixelDetectorManager* ddmgr,
                        PixelGeometryManager* mgr,

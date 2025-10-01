@@ -27,11 +27,17 @@ set( _dpath "${CMAKE_CURRENT_SOURCE_DIR}/test/B:${_dpath}" )
 set( _dpath "${CMAKE_CURRENT_SOURCE_DIR}/test/A:${_dpath}" )
 
 # Test(s) in the package:
+atlas_add_executable( test-path-resolver
+  test/PathResolver_test.cxx
+  LINK_LIBRARIES CxxUtils PathResolver )
 atlas_add_test( PathResolver_test
-   SOURCES test/PathResolver_test.cxx
-   LINK_LIBRARIES CxxUtils PathResolver
+   SCRIPT test-path-resolver
    ENVIRONMENT "DATAPATH=${_dpath}:$ENV{DATAPATH}"
    LOG_IGNORE_PATTERN "MessageSvc not found" )
+atlas_add_test( PathResolver_test_download
+   SCRIPT "test-path-resolver -d"
+   ENVIRONMENT "DATAPATH=${_dpath}:$ENV{DATAPATH}"
+   POST_EXEC_SCRIPT nopost.sh )
 
 # Skip the runtime environment setup in release rebuilding mode:
 if( ATLAS_RELEASE_MODE )

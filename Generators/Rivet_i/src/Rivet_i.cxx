@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation file for Athena-Rivet interface
@@ -284,7 +284,7 @@ std::unique_ptr<HepMC::GenEvent> Rivet_i::checkEvent(const HepMC::GenEvent& even
     for (size_t i = 0; i < event.weights().size(); i++) { w_names.push_back(std::string("badweight") + std::to_string(i)); }
     modRunInfo->set_weight_names(w_names);
   }
-  modEvent->set_run_info(modRunInfo);
+  modEvent->set_run_info(std::move(modRunInfo));
   std::vector<std::string>  w_names = modEvent->weight_names();
   if (w_names.size()) {
     std::vector<std::pair<std::string,std::string> > w_subs = {
@@ -378,7 +378,7 @@ std::unique_ptr<HepMC::GenEvent> Rivet_i::checkEvent(const HepMC::GenEvent& even
     //AV: the loop is over shared pointers! Should be const auto&
     for (const auto& bp : notBeams)  bp->production_vertex()->remove_particle_out(bp);
     // add dummy beam particles
-    modEvent->set_beam_particles(b1, b2);
+    modEvent->set_beam_particles(std::move(b1), std::move(b2));
   }
   if (modEvent->beams().front()->momentum().e() > 50000.0) {
     MeV2GeV(*modEvent);

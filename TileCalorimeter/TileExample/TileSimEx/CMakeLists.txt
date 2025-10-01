@@ -22,3 +22,8 @@ atlas_add_test( TileSimOutput_test
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
 
+atlas_add_test( TileDigiRec_test
+                SCRIPT athena --CA TileSimEx/TileDigiRec.py --d3pd --cells-d3pd --cells-info-d3pd --digits-d3pd --channels-d3pd --aant-ntuple --hits-ntuple
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
+

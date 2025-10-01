@@ -15,7 +15,6 @@
 #include "StorageSvc/DbBlob.h"
 #include "StorageSvc/DbConnection.h"
 
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbDomain.h"

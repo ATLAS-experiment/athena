@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
-from __future__ import print_function
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -634,7 +633,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             config_file = self.uncertToolConfigPath
         else:
             if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
-                config_file = "rel22/Spring2025_PreRec/" + config_file
+                config_file = "rel22/Summer2025_PreRec/" + config_file
             else:
                 log.warning("Uncertainties for UFO jets are not for Run 4!")
 
@@ -716,7 +715,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             config_file = self.uncertToolConfigPathJMR
         else:
             if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
-                config_file = "rel22/Spring2025_PreRec/" + config_file
+                config_file = "rel22/Summer2025_PreRec/" + config_file
             else:
                 log.warning("Uncertainties for UFO jets are not for Run 4!")
 

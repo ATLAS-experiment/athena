@@ -15,6 +15,7 @@ namespace CP
     const IInterface* parent)
     : asg::AsgTool(std::string(asg::ptrToString(parent))+"#"+type+"/"+myname)
   {
+    // cppcheck-suppress missingReturn; false positive
   }
   template <typename T>
   AsgNumDecorationSelectionTool<T>::~AsgNumDecorationSelectionTool()
@@ -52,7 +53,7 @@ namespace CP
     }
 
     // Construct the decoration accessor for the desired type
-    m_accessor = std::make_unique<SG::AuxElement::ConstAccessor<T>>(m_name);
+    m_accessor = std::make_unique<SG::ConstAccessor<T>>(m_name);
 
     return StatusCode::SUCCESS;
   }

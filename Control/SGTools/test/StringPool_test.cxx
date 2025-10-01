@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  SGTools/StringPool_test.cxx
@@ -99,7 +99,7 @@ void test1()
     std::string str = randstring(seed);
     SG::StringPool::sgkey_t key = sp.stringToKey (str, auxkey);
     assert (key <= SG::StringPool::sgkey_t_max);
-    strings.push_back (str);
+    strings.emplace_back (std::move(str));
     keys.push_back (key);
     aux.push_back (auxkey);
   }

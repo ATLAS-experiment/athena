@@ -7,9 +7,21 @@ StatusCode FPGATrackSimGNNPatternRecoTool::initialize()
 {
     ATH_CHECK(m_GNNGraphHitSelectorTool.retrieve());
     ATH_CHECK(m_GNNGraphConstructionTool.retrieve());
-    ATH_CHECK(m_GNNEdgeClassifierTool.retrieve());
+    ATH_CHECK(m_GNNEdgeClassifierTools.retrieve());
     ATH_CHECK(m_GNNRoadMakerTool.retrieve());
     ATH_CHECK(m_GNNRootOutputTool.retrieve());
+
+    // Need to selected the right tool based on region
+    for (auto& tool : m_GNNEdgeClassifierTools) {
+        if (tool->regionNum() == m_regionNum) {
+            m_selectedGNNEdgeClassifierTool = tool;
+            break;
+        }
+    }
+    if (!m_selectedGNNEdgeClassifierTool.isValid()) {
+        ATH_MSG_ERROR("No GNNEdgeClassifierTool found for region " << m_regionNum);
+        return StatusCode::FAILURE;
+    }
 
     return StatusCode::SUCCESS;
 }
@@ -21,7 +33,7 @@ StatusCode FPGATrackSimGNNPatternRecoTool::getRoads(const std::vector<std::share
     
     ATH_CHECK(m_GNNGraphHitSelectorTool->selectHits(hits, graph_hits)); // Go from FPGATrackSimHits to FPGATrackSimGNNHit -> get information needed for GNNPipeline
     ATH_CHECK(m_GNNGraphConstructionTool->getEdges(graph_hits, graph_edges)); // Build edges using module map (or metric learning)
-    ATH_CHECK(m_GNNEdgeClassifierTool->scoreEdges(graph_hits, graph_edges)); // Score edges using IN GNN
+    ATH_CHECK(m_selectedGNNEdgeClassifierTool->scoreEdges(graph_hits, graph_edges)); // Score edges using IN GNN
     ATH_CHECK(m_GNNRoadMakerTool->makeRoads(hits, graph_hits, graph_edges, roads)); // Build road candidates using connected components (need to make a C++ version of it)
     if(m_doGNNRootOutput) ATH_CHECK(m_GNNRootOutputTool->fillTree(hits, graph_hits, graph_edges, roads)); // Output the hit/edge/road information into a ROOT file
     

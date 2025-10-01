@@ -46,16 +46,15 @@ StatusCode EventInfoTagBuilder::execute(const EventContext &ctx) const
     SG::ReadHandle<AthenaAttributeList> h_att(m_inputAttList, ctx);
     // Check if there is an input to propagate
     if (h_att.isValid()) {
-      for (auto it = h_att->specification().begin();
-                it!= h_att->specification().end(); ++it) {
+      for (const auto& it : h_att->specification()) {
         // Only propagate bool properties
-        if (it->typeName()=="bool"&&!attribList->exists(it->name())) {
+        if (it.typeName() == "bool" && !attribList->exists(it.name())) {
           // Check if there is filtering on the name
-          if (m_filter != "") {
-            if (it->name().find(m_filter)!=std::string::npos) {
+          if (!m_filter.empty()) {
+            if (it.name().find(m_filter) != std::string::npos) {
               // Add those bools to the output attribute list
-              (*attribList).extend(it->name(),it->type());
-              (*attribList)[it->name()].data<bool>() = (*h_att)[it->name()].data<bool>();
+              (*attribList).extend(it.name(), it.type());
+              (*attribList)[it.name()].data<bool>() = (*h_att)[it.name()].data<bool>();
             }
           }
         } // take only bools

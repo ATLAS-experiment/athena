@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModel/Guid.h"
@@ -8,14 +8,16 @@
 #include "CxxUtils/checker_macros.h"
 #include <algorithm>
 #include <map>
+#include <mutex>
+#include <shared_mutex>
 
+using mutex_t = std::shared_mutex;
+using lock_guard_t = std::lock_guard<mutex_t>;   // exclusive access
+using shared_lock_t = std::shared_lock<mutex_t>; // shared access
 
-#include "AthContainers/tools/threading.h"
-#include "AthContainers/tools/upgrade_mutex.h"
-typedef AthContainers_detail::upgrade_mutex mutex_t;
-typedef AthContainers_detail::upgrading_lock<mutex_t> upgrading_lock_t;
-typedef std::lock_guard<mutex_t> lock_guard_t;
-mutex_t shapesMutex;
+namespace {
+  mutex_t shapesMutex;
+}
 
 
 using namespace std;
@@ -49,7 +51,7 @@ namespace {
 
 /// debug function for unit tests
 const ShapeVector allShapes() {
-   upgrading_lock_t lock(shapesMutex); 
+   shared_lock_t lock(shapesMutex);
    ShapeVector sv;
    for( const auto& map_entry : _Init::shapes() ) {
       for( const DbTypeInfo* info : map_entry.second ) {
@@ -64,7 +66,7 @@ const ShapeVector allShapes() {
 /// Access shape registry
 DbStatus DbTransform::getShape(const Guid& shape_Guid, const DbTypeInfo*& shape)
 {
-   upgrading_lock_t lock(shapesMutex); 
+   shared_lock_t lock(shapesMutex);
    ShapeVector& v = _Init::shape(shape_Guid);
    if ( v.size() > 0 ) {
       shape = *(v.begin());
@@ -77,7 +79,7 @@ DbStatus DbTransform::getShape(const Guid& shape_Guid, const DbTypeInfo*& shape)
 /// Access shape registry
 const DbTypeInfo* DbTransform::getShape(const Guid& shape_Guid, const std::string& rep)
 {
-   upgrading_lock_t lock(shapesMutex); 
+   shared_lock_t lock(shapesMutex);
    for( auto shape: _Init::shape(shape_Guid) ) {
       if( shape->toString() == rep )
          return shape;

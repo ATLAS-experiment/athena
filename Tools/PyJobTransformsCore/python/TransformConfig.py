@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "clat@hep.ph.bham.ac.uk"
 
 import os,sys
 from PyJobTransformsCore.trferr import TransformConfigError
-from future.utils import with_metaclass
 
 
 class Descriptor(object):
@@ -314,7 +313,7 @@ class JobConfigMetaClass(type):
     
 
 
-class JobConfig(with_metaclass(JobConfigMetaClass,object)):
+class JobConfig(metaclass=JobConfigMetaClass):
     __slots__ = ( '__name', '__attributes' )
 
     def __init__(self,name=None):

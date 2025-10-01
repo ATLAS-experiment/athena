@@ -68,10 +68,6 @@
   <class name = "MdtCsmContainer_p1" id="66D77835-5290-4C9A-842A-AF10F384FC93" />
   <class name="std::vector<MdtCsm_p1>" />
 
-  <!-- for TP separation backward compatibility using ROOT streamers (MN)  -->
-  <class name="CscRawData_p0" />
-  <class name="CscRawDataStreamer_p0" />
-  
   <class name = "RpcSectorLogicContainer_p1" id="93035F54-0FA9-4A56-98E0-A808DD23C089" />
   
 

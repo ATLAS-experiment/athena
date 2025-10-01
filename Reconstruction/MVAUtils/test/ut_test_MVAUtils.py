@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = "Test for MVAUtils, check simple hardcoded cases"
+""" Test for MVAUtils, check simple hardcoded cases """
+
 __author__ = "Ruggero Turra"
 
 

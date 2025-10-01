@@ -200,7 +200,7 @@ def configureAndRunMadGraph(flags):
     JIRA: https://its.cern.ch/jira/browse/ATLMCPROD-5979
     """
 
-    from MadGraphControl.MadGraphUtilsHelpers import get_physics_short
+    from MCJobOptionUtils.JOsupport import get_physics_short
     phys_short = get_physics_short() # FIXME There must be a more robust way of doing this!?
     infoStrings = phys_short.split("_")
     rhlog.info( "  jobConfig: %s  ", phys_short[0] )

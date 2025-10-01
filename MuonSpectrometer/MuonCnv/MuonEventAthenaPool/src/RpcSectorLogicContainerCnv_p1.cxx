@@ -20,7 +20,7 @@
 
 #include "AthAllocators/DataPool.h"
 
-#include "boost/range/iterator_range.hpp"
+#include <ranges>
 #include <cassert>
 
 void RpcSectorLogicContainerCnv_p1::transToPers(const RpcSectorLogicContainer* transCont,  RpcSectorLogicContainer_p1* persCont, MsgStream & log)  const
@@ -129,7 +129,7 @@ void  RpcSectorLogicContainerCnv_p1::persToTrans(const RpcSectorLogicContainer_p
       index+=5; // Fix for coverity defect 17799 - no multiple index++ in the same line.
       rsl->setHasMoreThan2TriggerCand (persCont->m_hasMoreThan2TriggerCand[indexSL]);
       uint16_t numCounters=persCont->m_slVariables[index++];
-      for (uint16_t i : boost::make_iterator_range (persCont->m_slVariables.begin()+index,
+      for (uint16_t i : std::ranges::subrange (persCont->m_slVariables.begin()+index,
                                                     persCont->m_slVariables.begin()+index + numCounters))
         rsl->addCounter(i);
       index+=numCounters;
@@ -139,7 +139,7 @@ void  RpcSectorLogicContainerCnv_p1::persToTrans(const RpcSectorLogicContainer_p
       
 //std::cout<<"persCont->m_triggerRates.size(): "<<persCont->m_triggerRates.size()<<std::endl;
           
-      for (double r : boost::make_iterator_range(persCont->m_triggerRates.begin()+indexTR,
+      for (double r : std::ranges::subrange(persCont->m_triggerRates.begin()+indexTR,
                                                  persCont->m_triggerRates.begin()+indexTR+numTriggerRates))
         rsl->addTriggerRate (r);
       indexTR+=numTriggerRates;

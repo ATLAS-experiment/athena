@@ -9,7 +9,7 @@ from DiTauRec.DiTauToolsConfig import (
     DiTauTrackFinderCfg, 
     DiTauConstituentFinderCfg, 
     TVAToolCfg, 
-    DiTauIDVarDecoratorCfg,
+    DiTauExtraVarDecoratorCfg,
     DiTauOnnxScoreCalculatorCfg,
 )
 
@@ -68,7 +68,7 @@ def ditauRecoCfg(flags, inputJets: str, inputVertex: str, inputFSTracks: str,  i
         inputVertex=inputVertex,
     )) 
     tools = [
-        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=inputJets)),
+        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, jetCollection=inputJets)),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags)),
         acc.popToolsAndMerge(VertexFinderCfg(
             flags,
@@ -84,7 +84,7 @@ def ditauRecoCfg(flags, inputJets: str, inputVertex: str, inputFSTracks: str,  i
             flags,
             UseRawConstit=False,  # no raw constituents for DiTau reconstruction with PFO jets
         )),
-        acc.popToolsAndMerge(DiTauIDVarDecoratorCfg(
+        acc.popToolsAndMerge(DiTauExtraVarDecoratorCfg(
             flags,
             ditauPtDecName         = f"{flags_ditau.DiTau.DiTauContainer[0]}.ditau_pt",     
             fCoreLeadDecName       = f"{flags_ditau.DiTau.DiTauContainer[0]}.f_core_lead",       
@@ -126,23 +126,6 @@ def ditauRecoCfg(flags, inputJets: str, inputVertex: str, inputFSTracks: str,  i
         acc.popToolsAndMerge(DiTauOnnxScoreCalculatorCfg(
             flags, 
             onnxModelPath                   = f"{flags_ditau.DiTau.CalibFolder}{flags_ditau.DiTau.DiTauIDModel}",
-            DiTauPtDecorName                = f'{flags_ditau.DiTau.DiTauContainer[0]}.ditau_pt',
-            DiTauFCoreLeadName              = f'{flags_ditau.DiTau.DiTauContainer[0]}.f_core_lead',
-            DiTauFCoreSubLeadName           = f'{flags_ditau.DiTau.DiTauContainer[0]}.f_core_subl',
-            DiTauSubjetSublName             = f'{flags_ditau.DiTau.DiTauContainer[0]}.f_subjet_subl',
-            DiTauSubjetsName                = f'{flags_ditau.DiTau.DiTauContainer[0]}.f_subjets',
-            DiTauRMaxLeadName               = f'{flags_ditau.DiTau.DiTauContainer[0]}.R_max_lead',
-            DiTauRMaxSubleadName            = f'{flags_ditau.DiTau.DiTauContainer[0]}.R_max_subl',
-            DiTauNTrackName                 = f'{flags_ditau.DiTau.DiTauContainer[0]}.n_track',
-            DiTauRTrackAllName              = f'{flags_ditau.DiTau.DiTauContainer[0]}.R_track_all',
-            DiTauRIsoTrackAllName           = f'{flags_ditau.DiTau.DiTauContainer[0]}.R_isotrack',
-            DiTauRTrackSubleadName          = f'{flags_ditau.DiTau.DiTauContainer[0]}.R_tracks_subl',
-            DiTauMCoreLeadName              = f'{flags_ditau.DiTau.DiTauContainer[0]}.m_core_lead',
-            DiTauMCoreSubleadName           = f'{flags_ditau.DiTau.DiTauContainer[0]}.m_core_subl',
-            DiTauMTrackLeadName             = f'{flags_ditau.DiTau.DiTauContainer[0]}.m_tracks_lead',
-            DiTauD0LeadTrackLeadName        = f'{flags_ditau.DiTau.DiTauContainer[0]}.d0_leadtrack_lead',
-            DiTauD0SubleadTrackLeadName     = f'{flags_ditau.DiTau.DiTauContainer[0]}.d0_leadtrack_subl',
-            DiTauFIsotracks                 = f'{flags_ditau.DiTau.DiTauContainer[0]}.f_isotracks',
         )),
     ]
 

@@ -219,7 +219,7 @@ class ConfigFactory():
         # are being ignored, or run into related cryptic crashes.
         already_fixed_blocks = {
             'Electrons','Photons','Muons','TauJets','DiTauJets','MissingET','FlavourTagging','FlavourTaggingEventSF','XbbTagging',
-            'InDetTracks','KLFitter','EventSelection','PtEtaSelection','ObjectCutFlow','EventCutFlow','Thinning',
+            'InDetTracks','KLFitter','PtEtaSelection','ObjectCutFlow','EventCutFlow','Thinning',
             'IFFClassification','MCTCClassification','PerEventSF','SelectionDecoration','SystObjectLink'}
         if kwargs and name.split('.')[-1] in already_fixed_blocks:
             raise ValueError(f"Config block '{name}' no longer accepts **kwargs. Use config.setOptionValue('option', value) instead!")
@@ -231,8 +231,8 @@ class ConfigFactory():
         """add algorithms and options"""
 
         # CommonServices
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import CommonServicesConfig
-        self.addAlgConfigBlock(algName="CommonServices", alg=CommonServicesConfig)
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import CommonServices
+        self.addAlgConfigBlock(algName="CommonServices", alg=CommonServices)
 
         # pileup reweighting
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PileupReweightingBlock
@@ -256,6 +256,9 @@ class ConfigFactory():
             superBlocks="Jets")
         from JetAnalysisAlgorithms.BJetCalibAnalysisConfig import BJetCalibAnalysisConfig
         self.addAlgConfigBlock(algName="BJetCalib", alg=BJetCalibAnalysisConfig,
+                               superBlocks="Jets")
+        from FTagAnalysisAlgorithms.FTagTrigMatchAnalysisConfig import FTagJetTrigMatchingBlock
+        self.addAlgConfigBlock(algName="FTagTriggerMatching", alg=FTagJetTrigMatchingBlock,
                                superBlocks="Jets")
         from FTagAnalysisAlgorithms.FTagAnalysisConfig import FTagConfig
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,

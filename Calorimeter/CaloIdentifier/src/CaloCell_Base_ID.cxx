@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/src/CaloCell_Base_ID.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Jul, 2012
- * @brief 
+ * @brief Helper base class for offline cell identifiers
  */
 
 
@@ -15,13 +13,15 @@
 #include "CaloIdentifier/CaloNeighbours.h"
 
 
-CaloCell_Base_ID::CaloCell_Base_ID(const LArEM_Base_ID*   em_id, 
+CaloCell_Base_ID::CaloCell_Base_ID(const std::string& name,
+                                   const LArEM_Base_ID*   em_id, 
                                    const LArHEC_Base_ID*  hec_id, 
                                    const LArFCAL_Base_ID* fcal_id, 
                                    const LArMiniFCAL_ID*  minifcal_id,
                                    const Tile_Base_ID*    tile_id,
 				   bool supercell)
-  : m_emHelper(em_id),
+  : AtlasDetectorID (name, ""),
+    m_emHelper(em_id),
     m_hecHelper(hec_id),
     m_fcalHelper(fcal_id),
     m_minifcalHelper(minifcal_id),
@@ -265,4 +265,22 @@ std::string CaloCell_Base_ID::cell_name(const Identifier id) const {
        << "/iPHI " << this->phi(id);
   }
   return s1.str();
+}
+
+std::string
+CaloCell_Base_ID::show_to_string(const Identifier id,
+                                 const IdContext *context /*= 0*/,
+                                 char sep /*= '.'*/) const
+{
+  if (is_em (id))
+    return m_emHelper->show_to_string (id, context, sep);
+  if (is_hec (id))
+    return m_hecHelper->show_to_string (id, context, sep);
+  if (is_fcal (id))
+    return m_fcalHelper->show_to_string (id, context, sep);
+  if (is_minifcal (id))
+    return m_minifcalHelper->show_to_string (id, context, sep);
+  if (is_tile (id))
+    return m_tileHelper->show_to_string (id, context, sep);
+  return "Unable to decode id";
 }

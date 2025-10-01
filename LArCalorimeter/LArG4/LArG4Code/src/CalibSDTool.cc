@@ -54,8 +54,6 @@ namespace LArG4
       return StatusCode::FAILURE;
     }
 
-    ATH_CHECK(detStore()->retrieve(m_id_helper));
-
     // No general volume list for SensitiveDetectorBase
     m_noVolumes = true;
 
@@ -96,7 +94,7 @@ namespace LArG4
 
     const std::string dead("Dead");
     if(sdName.find(dead)==std::string::npos) {
-      sd->addDetectorHelper(m_id_helper);
+      sd->addDetectorHelper(m_larEmID);
     }
 
     // Assign the volumes to the SD

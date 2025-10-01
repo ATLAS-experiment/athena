@@ -9,6 +9,7 @@ class SeedingStrategy(FlagEnum):
     Gbts = "Gbts"
     Gbts2 = "Gbts2"
     GridTriplet = "GridTriplet"
+    F150 = "F150"
 
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
@@ -102,7 +103,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy
 
     # Seeding
-    actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, type=SeedingStrategy)  # Define Seeding Strategy
+    actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)  # Define Seeding Strategy
     
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClusteringAfterSelection, type=PixelCalibrationStrategy)
@@ -115,6 +116,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
+    actscf.addFlag('Acts.forceTrackOnSeed', lambda pcf: pcf.Acts.SeedingStrategy!=SeedingStrategy.Gbts2 or pcf.Tracking.doPixelDigitalClustering) # GBTS forceTrackOnSeed only seems to work with digital clustering
         
     # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', True)

@@ -13,7 +13,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 
 // PACKAGE
-#include "ActsGeometry/ActsObjWriterTool.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 
 // STL
@@ -39,7 +38,6 @@ private:
 
   ToolHandle<ActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
-  ToolHandle<ActsObjWriterTool> m_objWriterTool{this, "ObjWriterTool", "ActsObjWriterTool"};
   ToolHandle<IActsMaterialJsonWriterTool> m_materialJsonWriterTool{this, "MaterialJsonWriterTool", "ActsMaterialJsonWriterTool"};
 
 };

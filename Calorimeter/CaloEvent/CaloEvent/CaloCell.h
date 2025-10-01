@@ -93,6 +93,12 @@ public:
            uint16_t provenance,
            CaloGain::CaloGain gain);
 
+  CaloCell(const CaloCell&) = default;
+  CaloCell(CaloCell&&) = default;
+
+  CaloCell& operator= (const CaloCell&) = default;
+  CaloCell& operator= (CaloCell&&) = default;
+
 
   /** @brief default destructor */
   virtual ~CaloCell ();

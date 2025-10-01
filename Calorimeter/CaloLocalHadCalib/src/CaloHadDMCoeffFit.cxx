@@ -148,7 +148,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
   // --------------------------------------------------------------------------
   std::cout << "CaloHadDMCoeffFit::process() -> Info. Getting averages..." << std::endl;
   for(int i_ev=0; m_data->GetEntry(i_ev)>0;i_ev++) {
-    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " '" << (static_cast<TChain *>(m_data->fChain))->GetFile()->GetName() << "'" << std::endl;
+    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " '" << static_cast<TChain *>(m_data->fChain)->GetFile()->GetName() << "'" << std::endl;
 
     // checking event quality
     if(isSingleParticle) {
@@ -268,7 +268,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
   // --------------------------------------------------------------------------
   std::cout << "CaloHadDMCoeffFit::process() -> Info. Filling histograms..." << std::endl;
   for(int i_ev=0; m_data->GetEntry(i_ev)>0;i_ev++) {
-    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " '" << (static_cast<TChain *>(m_data->fChain))->GetFile()->GetName() << "'" << std::endl;
+    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " '" << static_cast<TChain *>(m_data->fChain)->GetFile()->GetName() << "'" << std::endl;
 
     if(isSingleParticle) {
       // checking event quality
@@ -442,7 +442,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
         // neutral pions doesn't reach the material  between emec-hec and emb-tile, so normally the fit is screwed there
         // let's set fit coefficients for neutral pions in this DM area equal to the charged pion 
         if( indexes[CaloLocalHadCoeffHelper::DIM_EMFRAC]==1 && (dmArea->getTitle() == "ENG_CALIB_DEAD_HEC0" || dmArea->getTitle() == "ENG_CALIB_DEAD_TILE0" ) ) {
-          std::vector<int > tmp = indexes;
+          std::vector<int > tmp = std::move(indexes);
           tmp[CaloLocalHadCoeffHelper::DIM_EMFRAC]=0;
           int iBin = m_HadDMCoeff->getBin( n_area, tmp);
           const CaloLocalHadCoeff::LocalHadCoeff *had_pars = new_data->getCoeff(iBin);
@@ -458,7 +458,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
           // between signal in scintillator and dead material energy, in some eta regions correlation is absent. So we select here
           // following approach: if fit failed, take coefficients from charged pion data and use them for neutral
           if(!m_FitData[i_size]->isOK) {
-            std::vector<int > tmp = indexes;
+            std::vector<int > tmp = std::move(indexes);
             tmp[CaloLocalHadCoeffHelper::DIM_EMFRAC]=0;
             int iBin = m_HadDMCoeff->getBin( n_area, tmp);
             const CaloLocalHadCoeff::LocalHadCoeff *had_pars = new_data->getCoeff(iBin);
@@ -473,7 +473,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffFit::process(CaloHadDMCoeffData *myData, CaloL
         }else{
           // if fit went wrong, lets take fit results from neighboting eta bin
           if(!m_FitData[i_size]->isOK) {
-            std::vector<int > tmp = indexes;
+            std::vector<int > tmp = std::move(indexes);
             if(tmp[CaloLocalHadCoeffHelper::DIM_ETA]>0) {
               tmp[CaloLocalHadCoeffHelper::DIM_ETA] -= 1;
             }else if(tmp[CaloLocalHadCoeffHelper::DIM_ETA]==0){

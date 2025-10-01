@@ -4,7 +4,6 @@
 #include "../PyAthenaEventLoopMgr.h"
 #include "../AthenaOutputStream.h"
 #include "../AthenaOutputStreamTool.h"
-#include "../AthenaConditionStream.h"
 #include "../MultipleEventLoopMgr.h"
 #include "../MixingEventSelector.h"
 #include "../ThinningCacheTool.h"
@@ -15,7 +14,6 @@
 #include "../AthDictLoaderSvc.h"
 #include "../PageAccessControlSvc.h"
 #include "../DecisionSvc.h"
-#include "../ItemListSvc.h"
 #include "../AthenaSummarySvc.h"
 #include "../LoggedMessageSvc.h"
 #include "../RCUSvc.h"
@@ -35,9 +33,9 @@
 #include "../MPIHiveEventLoopMgr.h"
 #include "../MPIClusterSvc.h"
 #include "../ROOTMessageFilterSvc.h"
+#include "../TimeoutAlg.h"
 
 DECLARE_COMPONENT( AthenaOutputStream )
-DECLARE_COMPONENT( AthenaConditionStream )
 DECLARE_COMPONENT( TestRandomSeqAlg )
 DECLARE_COMPONENT( MultipleEventLoopMgr )
 DECLARE_COMPONENT( AthenaEventLoopMgr )
@@ -53,7 +51,6 @@ DECLARE_COMPONENT( CoreDumpSvc )
 DECLARE_COMPONENT( PageAccessControlSvc )
 DECLARE_COMPONENT( AthDictLoaderSvc )
 DECLARE_COMPONENT( DecisionSvc )
-DECLARE_COMPONENT( ItemListSvc )
 DECLARE_COMPONENT( AthenaSummarySvc )
 DECLARE_COMPONENT( LoggedMessageSvc )
 DECLARE_COMPONENT( Athena::RCUSvc )
@@ -70,3 +67,4 @@ DECLARE_COMPONENT( DecisionAlg )
 DECLARE_COMPONENT( AthReadAlg )
 DECLARE_COMPONENT( MetaDataToolStub )
 DECLARE_COMPONENT( Athena::ROOTMessageFilterSvc )
+DECLARE_COMPONENT( TimeoutAlg )

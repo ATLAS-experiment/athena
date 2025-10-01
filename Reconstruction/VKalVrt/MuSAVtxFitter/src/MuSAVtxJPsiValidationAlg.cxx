@@ -16,6 +16,7 @@ Copyright (C) 2025 CERN for the benefit of the ATLAS collaboration
 #include "xAODTracking/VertexContainer.h"
 #include "JpsiUpsilonTools/JpsiFinder.h"
 #include "VrtSecInclusive/Constants.h"
+#include "xAODTracking/TrackParticleAuxContainer.h"
 
 namespace {
   // Accessors for vertex properties
@@ -49,6 +50,7 @@ StatusCode MuSAVtxJPsiValidationAlg::initialize() {
     ATH_CHECK(m_eventInfo.initialize());
     ATH_CHECK(m_JPsiMuonContainer.initialize());
     ATH_CHECK(m_JPsiVertexContainer.initialize()); 
+    ATH_CHECK(m_JPsiTrackParticleContainer.initialize());
 
     ATH_CHECK(m_JPsiFinderTool.retrieve());
     ATH_MSG_DEBUG("Retrieved J/Psi finder tool: " << m_JPsiFinderTool);
@@ -73,6 +75,9 @@ StatusCode MuSAVtxJPsiValidationAlg::execute() {
 
   SG::WriteHandle<xAOD::VertexContainer> JPsiVertexContainer(m_JPsiVertexContainer, ctx);
   ATH_CHECK(JPsiVertexContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
+
+  SG::WriteHandle<xAOD::TrackParticleContainer> JPsiTrackParticleContainer(m_JPsiTrackParticleContainer, ctx);
+  ATH_CHECK(JPsiTrackParticleContainer.record(std::make_unique<xAOD::TrackParticleContainer>(), std::make_unique<xAOD::TrackParticleAuxContainer>()));
 
   // 1) Run J/Psi finder
   auto jpsiVtxs = std::make_unique<xAOD::VertexContainer>();
@@ -121,7 +126,13 @@ StatusCode MuSAVtxJPsiValidationAlg::execute() {
 
     // copy track particle links
     for (const auto& link : vtx->trackParticleLinks()) {
-      newVtx->addTrackAtVertex(link, 1.0); // weight is set to 1.0 for simplicity
+      if (!link.isValid()) continue;
+      const xAOD::TrackParticle* oldTrack = *link;
+      xAOD::TrackParticle* newTrack = new xAOD::TrackParticle();
+      newTrack->makePrivateStore(*oldTrack);
+      JPsiTrackParticleContainer->push_back(newTrack);
+      ElementLink<xAOD::TrackParticleContainer> newLink(*JPsiTrackParticleContainer, newTrack->index());
+      newVtx->addTrackAtVertex(newLink, 1.0); // weight is set to 1.0 for simplicity
     }
 
     // add identical decos to musa for comparison
@@ -131,7 +142,7 @@ StatusCode MuSAVtxJPsiValidationAlg::execute() {
 
     int vtxCharge = 0;
 
-    for (const auto& link : links) {
+    for (const auto& link : newVtx->trackParticleLinks()) {
       const xAOD::TrackParticle* track = link.isValid() ? *link : nullptr;
       if (!track) continue;
 

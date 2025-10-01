@@ -111,7 +111,7 @@ dqm_core::Result* dqm_algorithms::EfficiencyRefComp::execute(const std::string& 
   }
 
   result->tags_["NBins"] = count;
-  result->object_ =  (boost::shared_ptr<TObject>)static_cast<TObject*>(resulthisto);
+  result->object_ =  boost::shared_ptr<TObject>(resulthisto);
 
   double rthreshold = dqm_algorithms::tools::GetFromMap( "NBins", config.getRedThresholds() );
   double gthreshold = dqm_algorithms::tools::GetFromMap( "NBins", config.getGreenThresholds() );

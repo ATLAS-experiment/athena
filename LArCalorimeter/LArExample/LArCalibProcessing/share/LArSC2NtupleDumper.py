@@ -132,7 +132,6 @@ if __name__=='__main__':
      if args.samples:
         flags.LArSCDump.digitsKey="SC"
      CKeys=["SC_ET"]
-     log.debug(runinfo.streamTypes(), ' ',runinfo.streamLengths())
   else:
      fwversion=runinfo.FWversion()   
      if not (args.accsamples or args.acccalibsamples):   

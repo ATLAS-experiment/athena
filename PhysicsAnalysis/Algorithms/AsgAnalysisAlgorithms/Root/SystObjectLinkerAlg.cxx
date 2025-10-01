@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Teng Jian Khoo
@@ -12,7 +12,7 @@
 #include "AthContainers/ConstDataVector.h"
 
 typedef ElementLink<xAOD::IParticleContainer> iplink_t;
-static const SG::AuxElement::Decorator< iplink_t  > dec_nominalObject("nominalObjectLink");
+static const SG::Decorator< iplink_t  > dec_nominalObject("nominalObjectLink");
 
 namespace CP
 {

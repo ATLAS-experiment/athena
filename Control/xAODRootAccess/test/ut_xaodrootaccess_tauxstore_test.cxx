@@ -152,7 +152,11 @@ int main() {
                "tree" );
       return 1;
    }
-   itree->LoadTree( 0 );
+   if (itree->LoadTree( 0 ) < 0) {
+      ::Error( APP_NAME, "Failed to load the tree "
+               "tree" );
+      return 1;
+   }
    itree->Print();
    ::Info( APP_NAME, "Created transient input TTree for the test" );
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -25,7 +25,7 @@ StatusCode AllExecutedEventsCounterAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   ATH_CHECK(m_filterParams.initialize());
 
   m_filterParams.cutFlowSvc()->registerTopFilter(m_filterParams.key(),
-                                                 "Number of processed events before any cut",
+                                                 m_filterParams.description(),
                                                  xAOD::CutBookkeeper::CutLogic::ALLEVENTSPROCESSED,
                                                  "AllStreams",
                                                  false);

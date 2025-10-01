@@ -6,7 +6,6 @@
 # Purpose: Regression tests for pydraw.py
 #
 
-from __future__ import print_function
 
 
 import sys

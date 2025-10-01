@@ -334,19 +334,20 @@ def meta_diff(
             drop[i] = re.compile( drop[i] )
 
     def filter_key(key):
+        key_str = str(key)  # force conversion to plain Python string
 
         if drop is not None:
             for drop_key in drop:
                 if not regex:
-                    if key.startswith(drop_key):
+                    if key_str.startswith(drop_key):
                         return False
                 else:
-                    if drop_key.match(key):
+                    if drop_key.match(key_str):
                         return False
 
         if ignore_trigger:
             for trigger_key in trigger_keys:
-                if key.startswith(trigger_key):
+                if key_str.startswith(trigger_key):
                     return False
 
         return True

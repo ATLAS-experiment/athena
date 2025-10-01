@@ -183,22 +183,22 @@ namespace SH
     /// \brief the value set by \ref filePattern, converted to a
     ///   regular expression
   private:
-    boost::regex m_filePattern;
+    std::regex m_filePattern;
 
     /// \brief the value set by \ref directoryPattern, converted to a
     ///   regular expression
   private:
-    boost::regex m_directoryPattern;
+    std::regex m_directoryPattern;
 
     /// \brief the value set by \ref samplePattern, converted to a
     ///   regular expression
   private:
-    boost::regex m_samplePattern;
+    std::regex m_samplePattern;
 
     /// \brief the value set by \ref samplePostfix, converted to a
     ///   regular expression
   private:
-    boost::regex m_samplePostfix;
+    std::regex m_samplePostfix;
 
     /// \brief whether \ref samplePostfix has been set to the empty
     /// string
@@ -207,8 +207,8 @@ namespace SH
 
     /// \brief the list of entries from \ref sampleRename
   private:
-    typedef std::vector<std::pair<boost::regex,std::string> >::const_iterator SampleRenameIter;
-    std::vector<std::pair<boost::regex,std::string> > m_sampleRename;
+    typedef std::vector<std::pair<std::regex,std::string> >::const_iterator SampleRenameIter;
+    std::vector<std::pair<std::regex,std::string> > m_sampleRename;
 
     /// \brief the depth set with \ref extraNameComponent, or 0 otherwise
   private:

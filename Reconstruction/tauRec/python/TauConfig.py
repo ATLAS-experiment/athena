@@ -134,12 +134,6 @@ def TauRunnerAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0SelectorCfg(flags)) )
 
-    if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
-        tools.append(result.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
-
-    tools.append( result.popToolsAndMerge(tauTools.TauCommonCalcVarsCfg(flags)) )
-    tools.append( result.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
-
     if flags.Tau.doPanTau:
         import PanTauAlgs.JobOptions_Main_PanTau as pantau
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
@@ -150,8 +144,15 @@ def TauRunnerAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.MvaTESVariableDecoratorCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.MvaTESEvaluatorCfg(flags)) )
 
+    # apply pt cut
     tools.append( result.popToolsAndMerge(tauTools.TauAODSelectorCfg(flags)) )
 
+    # do some extra variable calculation
+    if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
+        tools.append(result.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.TauCommonCalcVarsCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
+  
     if flags.Tau.doTauDiscriminant:
         tools.append( result.popToolsAndMerge(tauTools.TauIDVarCalculatorCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
@@ -409,7 +410,7 @@ def TauConfigTest(flags=None):
 
         flags.Output.AODFileName = "AOD.pool.root"
         flags.Exec.MaxEvents = 50
-
+        
         flags.Scheduler.ShowDataDeps = True
         flags.Scheduler.ShowDataFlow = True
         flags.Scheduler.ShowControlFlow = True

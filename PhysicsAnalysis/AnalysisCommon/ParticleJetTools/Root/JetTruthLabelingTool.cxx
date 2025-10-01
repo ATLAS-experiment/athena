@@ -848,7 +848,7 @@ int JetTruthLabelingTool::getLabel( DecorHandles& dh,
    * 1) Hbb/cc/tautau
    * 2) Contained top
    * 3) Contained W
-   * 4) Contained Zbb/cc/qq
+   * 4) Contained Zbb/cc/qq/tautau
    * 5) Uncontained top
    * 6) Uncontained V
    */
@@ -887,6 +887,10 @@ int JetTruthLabelingTool::getLabel( DecorHandles& dh,
     if ( is_bb ) return LargeRJetTruthLabel::Zbb;
     /// Contained Z->cc
     if ( is_cc ) return LargeRJetTruthLabel::Zcc;
+    /// Contained Z->tautau
+    if ( is_tautauEl ) return LargeRJetTruthLabel::ZtautauEl;
+    if ( is_tautauMu ) return LargeRJetTruthLabel::ZtautauMu;
+    if ( is_tautauHad ) return LargeRJetTruthLabel::ZtautauHad;
   }
   if ( isZ ) {
     /// Contained Z->qq

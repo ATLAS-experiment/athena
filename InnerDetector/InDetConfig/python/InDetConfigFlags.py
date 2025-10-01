@@ -92,4 +92,8 @@ def createInDetConfigFlags():
     icf.addFlagsCategory("InDet.Align", createInDetAlignFlags, prefix=True)
 
 
+    # config flags for alignment configuration
+    from InDetAlignConfig.IDAlignFlags import createInDetAlignFlags
+    icf.addFlagsCategory("InDet.Align", createInDetAlignFlags, prefix=True)
+
     return icf

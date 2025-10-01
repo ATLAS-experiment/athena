@@ -24,11 +24,11 @@
 #include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/Utilities/BinningType.hpp"
 #include "Acts/Surfaces/AnnulusBounds.hpp"
-
+#include "Acts/Surfaces/SurfaceArray.hpp"
 #include "Acts/Visualization/GeometryView3D.hpp"
 #include "Acts/Visualization/ObjVisualization3D.hpp"
+#include "Acts/Utilities/AxisDefinitions.hpp"
 
-#include <Acts/Utilities/AxisDefinitions.hpp>
 #include <iterator>
 #include <unordered_map>
 #include <fstream>

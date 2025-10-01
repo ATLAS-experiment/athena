@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Teng Jian Khoo
@@ -26,7 +26,7 @@ namespace CP
     for(const auto& sys : m_systematicsList.systematicsVector()) {
       std::string decor_name{};
       ATH_CHECK (m_systematicsList.service().makeSystematicsName(decor_name, m_syst_decor_pattern, sys));
-      m_syst_link_acc.insert({sys.hash(),SG::AuxElement::ConstAccessor<iplink_t>(decor_name)});
+      m_syst_link_acc.insert({sys.hash(),SG::ConstAccessor<iplink_t>(decor_name)});
     }
 
     return StatusCode::SUCCESS;
@@ -35,7 +35,7 @@ namespace CP
   template<class T, class C>
   StatusCode SystObjectUnioniserAlg<T,C> ::execute(const EventContext&) const
   {
-    static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
+    static const SG::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
 
     // Populate a map of systematics hash to container, so we
     // can iterate safely regardless of the ordering of systs

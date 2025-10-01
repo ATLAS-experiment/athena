@@ -92,6 +92,11 @@ private:
     this, "RepackFeatures", false,
     "Re-pack the target of all 'feature' edges into a small number of containers (WriteHandle defined above)"};
 
+  Gaudi::Property<std::vector<std::string>> m_repackFeaturesExclusionList{
+    this, "RepackFeaturesExclusionList", {},
+    "Optional list of StoreGate key strings. If strings are provided and RepackFeatures is true, then 'feature' edges  "
+    "whose StoreGate key is an exact match to an entry on the supplied list will not be re-packed and will be left unchanged"};
+
   Gaudi::Property<std::vector<std::string>> m_edgesToDrop{
     this, "EdgesToDrop", {"view"},
     "Any edges within the set of names will be dropped as part of the thinning"};

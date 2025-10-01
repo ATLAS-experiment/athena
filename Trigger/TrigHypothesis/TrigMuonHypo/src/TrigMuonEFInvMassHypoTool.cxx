@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEFInvMassHypoTool.h"
@@ -31,7 +31,7 @@ if(m_acceptAll) {
  return StatusCode::SUCCESS;
 }
 
-bool TrigMuonEFInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination) const{
+bool TrigMuonEFInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& /*ctx*/) const{
 
   //Monitored Variables
   std::vector<float> fexInvMass, fexInvMassSel;

@@ -119,7 +119,7 @@ if __name__ == "__main__":
     acc=MainServicesCfg(flags)
     acc.store(open('FPGATrackSimMapMakerConfig.pkl','wb'))
     acc.merge(FPGATrackSimMapMakerCfg(flags))
-    acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepSetup(flags))
+    acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepSetup(flags,runReco=False))
     
 
     from AthenaConfiguration.Utils import setupLoggingLevels

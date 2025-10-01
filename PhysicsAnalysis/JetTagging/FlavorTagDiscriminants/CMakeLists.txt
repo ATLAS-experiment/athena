@@ -18,10 +18,6 @@ find_package( nlohmann_json )
 
 # source files, depend on the build
 set(FTDSource
-  Root/BTagJetAugmenter.cxx
-  Root/BTagAugmenterTool.cxx
-  Root/BTagMuonAugmenter.cxx
-  Root/BTagMuonAugmenterTool.cxx
   Root/DL2.cxx
   Root/DL2HighLevel.cxx
   Root/DL2Tool.cxx
@@ -47,7 +43,6 @@ atlas_add_library( FlavorTagDiscriminants
     AthContainers
     AthLinks
     JetInterface
-    xAODBTagging
     xAODEventInfo
     xAODJet
     xAODTracking
@@ -69,10 +64,6 @@ set_target_properties( FlavorTagDiscriminants
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( FlavorTagDiscriminantsLib
-    src/BTagToJetLinkerAlg.cxx
-    src/JetToBTagLinkerAlg.cxx
-    src/BTagTrackLinkCopyAlg.cxx
-    src/BTaggingBuilderAlg.cxx
     src/PoorMansIpAugmenterAlg.cxx
     src/HitDecoratorAlg.cxx
     src/JetHitAssociationAlg.cxx

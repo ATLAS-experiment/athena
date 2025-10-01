@@ -53,7 +53,7 @@ namespace columnar
   // This is one of the more tricky accessors, as it need to connect to
   // two underlying columns.  The first column is the offset column, the
   // second is the data column.
-  template<ContainerIdConcept CI,typename CT>
+  template<RegularContainerIdConcept CI,typename CT>
     requires (ColumnTypeTraits<CT,ColumnarModeArray>::isNativeType)
   class AccessorTemplate<CI,std::vector<CT>,ColumnAccessMode::input,ColumnarModeArray> final
   {

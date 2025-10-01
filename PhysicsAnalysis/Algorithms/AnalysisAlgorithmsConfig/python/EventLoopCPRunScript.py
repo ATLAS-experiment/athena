@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AnalysisAlgorithmsConfig.CPBaseRunner import CPBaseRunner
 import os
+import sys
 
 class EventLoopCPRunScript(CPBaseRunner):
     def __init__(self):
@@ -16,7 +17,6 @@ class EventLoopCPRunScript(CPBaseRunner):
                                  action='store_true', help='Run the job with the direct driver')
         derivedGroup.add_argument('--work-dir', dest='work_dir', nargs='?', const='workDir', default=None,
                                   help='The work directory for the EL job. defaults to "workDir".')
-        derivedGroup.add_argument('--no-factory-preload', dest='no_factory_preload', action='store_true', help='Do not preload the component factories for the EL job. The component factories save memory and sidestep some technical issues, so you should not disable them unless you have a good reason to do so.')
         derivedGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
         
         expertGroup = self.parser.add_argument_group('Experts arguments')
@@ -32,7 +32,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         self.logger.info("Configuring algorithms based on YAML file")
         configSeq =  self.config.configure()
         self.logger.info("Configuring common services")
-        configAccumulator = ConfigAccumulator(autoconfigFromFlags=self.flags,
+        configAccumulator = ConfigAccumulator(flags=self.flags,
                                               algSeq=algSeq,
                                               noSystematics=self.args.no_systematics)
         self.logger.info("Configuring algorithms")
@@ -78,7 +78,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         newHistFile = currentDir / f"hist-{self.outputName}.root"
         # rename merged hist-ntuple to output_name.root
         if self.args.merge_output_files and newHistFile.exists():
-            self.logger.info(f"renmaing the hist-{self.outputName}.root to {self.outputName}.root")
+            self.logger.info(f"renaming the hist-{self.outputName}.root to {self.outputName}.root")
             newHistFile.rename(currentDir / f"{self.outputName}.root")
         
     def driverSubmit(self, driver):
@@ -87,7 +87,6 @@ class EventLoopCPRunScript(CPBaseRunner):
         Assistant function to call driver submit. Move the submission to a child process to avoid the main process being terminated.
         Directly calling external driver submission will not return controls to the main process, the main thread will be terminated.
         '''
-        import os
         if (pid := os.fork()) == 0: # child process
             name = self.args.work_dir if self.args.work_dir else 'workDir'
             driver.submit(self.job, name)
@@ -95,6 +94,13 @@ class EventLoopCPRunScript(CPBaseRunner):
         else:
             os.waitpid(pid, 0) # parent waits for child process to finish
             return
+        
+    def getExitCode(self):
+        import ROOT
+        statusCode = ROOT.EL.Driver.retrieve(self.args.work_dir if self.args.work_dir else 'workDir') 
+        if statusCode:
+            return 0
+        return 1
     
     def run(self):
         self.setup()
@@ -118,10 +124,6 @@ class EventLoopCPRunScript(CPBaseRunner):
             self.job.options().setString(ROOT.EL.Job.optStreamAliases, "ANALYSIS=" + ROOT.EL.Job.histogramStreamName)
         else:
             self.job.outputAdd(ROOT.EL.OutputStream('ANALYSIS'))
-        if not self.args.no_factory_preload:
-            preload = os.getenv('EL_FACTORY_PRELOAD', 'libComponentFactoryPreloaderDict.so,CP::preloadComponentFactories')
-            self.logger.info(f"Preloading factories: {preload}")
-            self.job.options().setString(ROOT.EL.Job.optFactoryPreload, preload)
         
         if self.args.run_perf_stat:
             self.job.options().setBool(ROOT.EL.Job.optXAODPerfStats, 1)
@@ -132,5 +134,9 @@ class EventLoopCPRunScript(CPBaseRunner):
 
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
         self.driverSubmit(driver)
+        exitCode = self.getExitCode()
+        
         if self.args.work_dir is None: # move output if work_dir is not used
             self.moveOutputFiles()
+
+        sys.exit(exitCode)

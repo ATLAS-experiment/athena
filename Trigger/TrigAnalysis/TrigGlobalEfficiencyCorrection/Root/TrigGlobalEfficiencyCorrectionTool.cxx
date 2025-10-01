@@ -912,7 +912,8 @@ CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::getEfficiency(
 }
 
 CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::checkTriggerMatching(
-    bool& matched, const std::vector<const xAOD::IParticle*>& particles) {
+    bool& matched,
+    const std::vector<const xAOD::IParticle*>& particles) {
   unsigned runNumber;
   if (!retrieveRunNumber(runNumber)) {
     ATH_MSG_ERROR(
@@ -927,7 +928,30 @@ CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::checkTriggerMatching(
   }
   LeptonList leptons;
   updateLeptonList(leptons, particles);
-  return m_calculator->checkTriggerMatching(*this, matched, leptons, runNumber)
+  return m_calculator->checkTriggerMatching(*this, matched, nullptr, leptons, runNumber)
+             ? CP::CorrectionCode::Ok
+             : CP::CorrectionCode::Error;
+}
+
+CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::checkTriggerMatching(
+    std::unordered_map<std::string, bool>& matched_per_trigger,
+    const std::vector<const xAOD::IParticle*>& particles) {
+  unsigned runNumber;
+  if (!retrieveRunNumber(runNumber)) {
+    ATH_MSG_ERROR(
+        "Unable to retrieve run number, aborting checkTriggerMatching()");
+    return CP::CorrectionCode::Error;
+  }
+  if (!m_validTrigMatchTool) {
+    ATH_MSG_ERROR(
+        "A valid IMatchingTool instance should be provided via the property "
+        "'TriggerMatchingTool'");
+    return CP::CorrectionCode::Error;
+  }
+  LeptonList leptons;
+  updateLeptonList(leptons, particles);
+  bool flag;
+  return m_calculator->checkTriggerMatching(*this, flag, &matched_per_trigger, leptons, runNumber)
              ? CP::CorrectionCode::Ok
              : CP::CorrectionCode::Error;
 }

@@ -58,11 +58,11 @@ namespace Rivet {
       auto prodVtx = p.genParticle()->production_vertex();
       if (prodVtx == nullptr) return false;
       // for each ancestor, check if it matches any of the input particles
-      for (auto ancestor:Rivet::HepMCUtils::particles(prodVtx,Relatives::ANCESTORS)){
+      for (auto ancestor:Rivet::HepMCUtils::particles(std::move(prodVtx),Relatives::ANCESTORS)){
         for ( const auto & part:ptcls )
           if ( ancestor==part.genParticle() ) return true;
       }
-      // if we get here, no ancetor matched any input particle
+      // if we get here, no ancestor matched any input particle
       return false;
     }
 
@@ -222,9 +222,9 @@ namespace Rivet {
       Particles Ws;
       if ( prodMode==HTXS::TTH || prodMode==HTXS::TH ){
         // loop over particles produced in hard-scatter vertex
-              for ( auto ptcl : Rivet::HepMCUtils::particles(HSvtx,Relatives::CHILDREN) ) {
+              for ( auto ptcl : Rivet::HepMCUtils::particles(std::move(HSvtx),Relatives::CHILDREN) ) {
                 if ( !PID::isTop(ptcl->pdg_id()) ) continue;
-          Particle top = getLastInstance(Particle(ptcl));
+          Particle top = getLastInstance(Particle(std::move(ptcl)));
           if ( top.genParticle()->end_vertex() )
             for (const auto &child:top.children())
               if ( PID::isW(child.pid()) ) Ws += getLastInstance(child);

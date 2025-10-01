@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "../SiHitAnalysis.h"
 #include "../CaloHitAnalysis.h"
 #include "../TRTHitAnalysis.h"
@@ -13,6 +16,7 @@
 #include "../AFPHitAnalysis.h"
 #include "../MMHitAnalysis.h"
 #include "../sTGCHitAnalysis.h"
+#include "../xMuonHitAnalysis.h"
 
 DECLARE_COMPONENT( CaloHitAnalysis )
 DECLARE_COMPONENT( SiHitAnalysis )
@@ -30,5 +34,4 @@ DECLARE_COMPONENT( AFPHitAnalysis )
 DECLARE_COMPONENT( MMHitAnalysis )
 DECLARE_COMPONENT( sTGCHitAnalysis )
 
- 
-
+DECLARE_COMPONENT(MuonValR4::xMuonHitAnalysis)

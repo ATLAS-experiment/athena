@@ -647,7 +647,7 @@ void CaloCosmicsClusterMon::DrawLayers()
       fCanvas->Clear();
       fCanvas->Divide(2, nLayerPerCanvas/2);
     }
-    tEntry = static_cast<TGTextLBEntry*>((TGListBox*)fComboLayer->GetListBox()->GetEntry(i));
+    tEntry = static_cast<TGTextLBEntry*>(fComboLayer->GetListBox()->GetEntry(i));
     TString lay = tEntry->GetText()->GetString();
     //TString histoName1 = m_histoNameBase1  + cut + lay;
     TString histoName1 = m_histoNameBase1 + lay;
@@ -750,7 +750,7 @@ void CaloCosmicsClusterMon::DrawRegions()
 	fCanvas->Clear();
 	fCanvas->Divide(2, nEtaSlicePerCanvas/2);
       }
-      tEntry = static_cast<TGTextLBEntry*>(TGListBox*)fComboEtaSlice->GetListBox()->GetEntry(i);
+      tEntry = static_cast<TGTextLBEntry*>(fComboEtaSlice->GetListBox()->GetEntry(i));
       TString cut = tEntry->GetText()->GetString();
       TString histoName1 = m_histoNameBase1  + cut + lay;
       int padIndex = (i%nEtaSlicePerCanvas) + 1;
@@ -793,7 +793,7 @@ void CaloCosmicsClusterMon::DrawEcuts()
       fCanvas->Clear();
       fCanvas->Divide(2, nEcutPerCanvas/2);
     }
-    tEntry = static_cast<TGTextLBEntry*>((TGListBox*)fComboEcut->GetListBox()->GetEntry(i));
+    tEntry = static_cast<TGTextLBEntry*>(fComboEcut->GetListBox()->GetEntry(i));
     TString cut = tEntry->GetText()->GetString();
     TString histoName1 = m_histoNameBase1  + cut + lay;
     int padIndex = (i%nEcutPerCanvas) + 1;

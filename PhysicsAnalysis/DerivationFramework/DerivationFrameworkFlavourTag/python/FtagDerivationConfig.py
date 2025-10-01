@@ -30,8 +30,9 @@ def _addDepsByTaggername(cfgFlags, tagger: str) -> ComponentAccumulator:
         An accumulator containing the additional algorithms based on the dirname.
     """
     acc = ComponentAccumulator()
-    if "GN2Xv02" in tagger:
-        acc.merge(TrackLeptonDecorationCfg(cfgFlags))
+    for gnn in ["GN2Xv02", "GN2XTauV00"]:
+        if gnn in tagger:
+            acc.merge(TrackLeptonDecorationCfg(cfgFlags))
     return acc
 
 
@@ -51,8 +52,15 @@ def HLTJetFTagDecorationCfg(cfgFlags):
 
 def BTagLargeRDecoration(cfgFlags, jet_col):
 
-    jet_col_name_without_Jets = jet_col.replace('Jets', '')
-    nnFiles = GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets)
+    nnList = cfgFlags.BTagging.NNs[jet_col]
+
+    nnFiles = []
+    for nnDict in nnList:
+        folds = nnDict['folds']
+        if len(folds) != 1:
+            raise ValueError(
+                "Multifold networks aren't supported for large-R jets")
+        nnFiles.append(folds[0])
 
     # Doesn't need to be configurable at the moment
     trackContainer = 'GhostTrack'

@@ -10,6 +10,7 @@
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapDescriptor.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
+#include "TRT_ConditionsData/StrawStatus.h"
 #include "InDetReadoutGeometry/Version.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 
@@ -49,6 +50,8 @@
 #include <vector>
 #include <sstream>
 #include <cmath>
+#include <format>
+#include <fstream>
 
 //TK: get rid of these and use GeoGenfun:: and GeoXF:: instead
 using namespace GeoGenfun;
@@ -78,18 +81,20 @@ inline double magn(GeoTrf::Vector2D& vector)
 /////////////////////////////////// Constructor //////////////////////////////////
 //
 TRTDetectorFactory_Full::TRTDetectorFactory_Full(InDetDD::AthenaComps * athenaComps,
-						 const ITRT_StrawStatusSummaryTool* sumTool, // added for Argon
+						 const ITRT_StrawStatusSummaryTool* sumTool,
+						 std::unique_ptr<const TRTStrawStatusAccessor> statusAccessor,
 						 bool useOldActiveGasMixture,
 						 bool DC2CompatibleBarrelCoordinates,
 						 bool alignable,
 						 bool doArgon,
 						 bool doKrypton,
 						 bool useDynamicAlignmentFolders)
-  : InDetDD::DetectorFactoryBase(athenaComps), 
+  : InDetDD::DetectorFactoryBase(athenaComps),
+    m_statusAccessor(std::move(statusAccessor)),
+    m_sumTool(sumTool),
     m_useOldActiveGasMixture(useOldActiveGasMixture),
     m_DC2CompatibleBarrelCoordinates(DC2CompatibleBarrelCoordinates),
     m_alignable(alignable),
-    m_sumTool(sumTool),
     m_strawsvcavailable(0),
     m_doArgon(doArgon),
     m_doKrypton(doKrypton),
@@ -128,6 +133,11 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
   // Create a new detectormanager.
   m_detectorManager = new InDetDD::TRT_DetectorManager(detStore());
 
+  std::ofstream strawStatusFile;
+  if(m_sumTool) {
+    strawStatusFile.open("StrawStatus.txt");
+  }
+
   //---------------------- Initialize the parameter interface ------------------------//
 
   ATH_MSG_DEBUG( " Getting primary numbers from the Detector Description Database " );  
@@ -140,14 +150,10 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
   m_materialManager->addScalingTable(parameterInterface->scalingTable());
 
   //---------------------- Check if the folder TRT/Cond/StatusHT is in place ------------------------//
-  m_strawsvcavailable = false;
-  if (m_doArgon || m_doKrypton){
-    m_strawsvcavailable = detStore()->contains<TRTCond::StrawStatusMultChanContainer>("/TRT/Cond/StatusHT") &&
-                          m_sumTool->getStrawStatusHTContainer() != nullptr;
-  }
+  m_strawsvcavailable = m_doArgon || m_doKrypton;
+
   // --------------------- In a normal reconstruction or digitization job, the folder will not be available at this point. No reason for warnings here.
-  ATH_MSG_INFO( "The folder of /TRT/Cond/StatusHT is available? " << m_strawsvcavailable) ;
-  if (!m_strawsvcavailable) ATH_MSG_DEBUG("The folder of /TRT/Cond/StatusHT is NOT available, WHOLE TRT RUNNING XENON" );
+  if (!m_strawsvcavailable) ATH_MSG_DEBUG("WHOLE TRT RUNNING XENON" );
   if (!m_doArgon  )	ATH_MSG_DEBUG("Tool setup will force to NOT to use ARGON. Ignore this warning if you are running RECONSTRUCTION or DIGI, but cross-check if you are running SIMULATION");
   if (!m_doKrypton)	ATH_MSG_DEBUG( "Tool setup will force to NOT to use KRYPTON. Ignore this warning if you are running RECONSTRUCTION or DIGI, but cross-check if you are running SIMULATION");
   
@@ -862,7 +868,15 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 	pShell->add(new GeoIdentifierTag(iABC));
 	Identifier TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
 	int strawStatusHT = TRTCond::StrawStatus::Good;
-	if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+	if (m_strawsvcavailable) {
+	  if(m_sumTool) {
+	    strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+	    strawStatusFile << TRT_Identifier.get_compact() << std::format("{:5}",strawStatusHT) << std::endl;
+	  }
+	  else {
+	    strawStatusHT = m_statusAccessor->status(TRT_Identifier);
+	  }
+	}
 	ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
 	// Make a radiator
@@ -1200,7 +1214,15 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 		int bar_ec = (iiSide) ? -2 : +2;
 		Identifier TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+		if (m_strawsvcavailable) {
+		  if(m_sumTool) {
+		    strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+		    strawStatusFile << TRT_Identifier.get_compact() << std::format("{:5}",strawStatusHT) << std::endl;
+		  }
+		  else {
+		    strawStatusHT = m_statusAccessor->status(TRT_Identifier);
+		  }
+		}
 		ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
 		// Ruslan: insert plane with Ar-straws
@@ -1499,7 +1521,15 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 		int bar_ec = (iiSide) ? -2 : +2;
 		Identifier TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+		if (m_strawsvcavailable) {
+		  if(m_sumTool) {
+		    strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+		    strawStatusFile << TRT_Identifier.get_compact() << std::format("{:5}",strawStatusHT) << std::endl;
+		  }
+		  else {
+		    strawStatusHT = m_statusAccessor->status(TRT_Identifier);
+		  }
+		}
 		ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
 		//Ruslan: insert plane with Ar-straws
@@ -1691,11 +1721,9 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
   } // end AB
 
 
-
-
-
-
-
+  if(m_sumTool) {
+    strawStatusFile.close();
+  }
 
   if (m_data->includeECFoilHeatExchangerAndMembranes) {
     // Membranes 

@@ -1,75 +1,62 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_RECORD_ANALYSIS_H
 #define TRACK_RECORD_ANALYSIS_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthHistogramAlgorithm.h"
+#include "TrackRecord/TrackRecordCollection.h"
+#include "StoreGate/ReadHandleKey.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
 
-#include <string>
-#include <vector>
-#include "TH1.h"
-#include "TH2.h"
-#include "TTree.h"
-
-class TH1;
-class TH2;
-class TTree;
-
- 
-class TrackRecordAnalysis : public AthAlgorithm {
+class TrackRecordAnalysis : public AthHistogramAlgorithm {
 
  public:
+   using AthHistogramAlgorithm::AthHistogramAlgorithm;
+   ~TrackRecordAnalysis() = default;
 
-   TrackRecordAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-   ~TrackRecordAnalysis(){}
-
-   virtual StatusCode initialize();
-   virtual StatusCode execute();
+   virtual StatusCode initialize()override;
+   virtual StatusCode execute()override;
 
  private:
    
    /** Some variables**/
-   TH1* m_h_hits_x;
-   TH1* m_h_hits_y;
-   TH1* m_h_hits_z;
-   TH1* m_h_hits_r;
-   TH2* m_h_xy;
-   TH2* m_h_zr;
-   TH1* m_h_hits_eta;
-   TH1* m_h_hits_phi;
-   TH1* m_h_hits_px;
-   TH1* m_h_hits_py;
-   TH1* m_h_hits_pz;
-   TH1* m_h_hits_pt;
-   TH1* m_h_time;
-   TH1* m_h_edep;
-   TH1* m_h_pdg;
+   TH1* m_h_hits_x{nullptr};
+   TH1* m_h_hits_y{nullptr};
+   TH1* m_h_hits_z{nullptr};
+   TH1* m_h_hits_r{nullptr};
+   TH2* m_h_xy{nullptr};
+   TH2* m_h_zr{nullptr};
+   TH1* m_h_hits_eta{nullptr};
+   TH1* m_h_hits_phi{nullptr};
+   TH1* m_h_hits_px{nullptr};
+   TH1* m_h_hits_py{nullptr};
+   TH1* m_h_hits_pz{nullptr};
+   TH1* m_h_hits_pt{nullptr};
+   TH1* m_h_time{nullptr};
+   TH1* m_h_edep{nullptr};
+   TH1* m_h_pdg{nullptr};
 
-   std::vector<float>* m_x;
-   std::vector<float>* m_y;
-   std::vector<float>* m_z;
-   std::vector<float>* m_r;
-   std::vector<float>* m_eta;
-   std::vector<float>* m_phi;
-   std::vector<float>* m_px;
-   std::vector<float>* m_py;
-   std::vector<float>* m_pz;
-   std::vector<float>* m_pt;
-   std::vector<float>* m_time;
-   std::vector<float>* m_edep;
-   std::vector<float>* m_pdg;
+   std::vector<float>* m_x{nullptr};
+   std::vector<float>* m_y{nullptr};
+   std::vector<float>* m_z{nullptr};
+   std::vector<float>* m_r{nullptr};
+   std::vector<float>* m_eta{nullptr};
+   std::vector<float>* m_phi{nullptr};
+   std::vector<float>* m_px{nullptr};
+   std::vector<float>* m_py{nullptr};
+   std::vector<float>* m_pz{nullptr};
+   std::vector<float>* m_pt{nullptr};
+   std::vector<float>* m_time{nullptr};
+   std::vector<float>* m_edep{nullptr};
+   std::vector<float>* m_pdg{nullptr};
 
-   std::string m_collection;
+   SG::ReadHandleKey<TrackRecordCollection> m_readKey{this, "CollectionName", "CaloEntryLayer"};
         
-   TTree * m_tree;
-   std::string m_ntupleFileName; 
-   std::string m_path; 
-   ServiceHandle<ITHistSvc>  m_thistSvc;
+   TTree * m_tree{nullptr};
+   Gaudi::Property<std::string> m_ntupleFileName{this, "NtupleFileName", "/TrackRecordAnalysis/"}; 
+   Gaudi::Property<std::string> m_path{this, "HistPath", "/TrackRecordAnalysis/"}; 
 
 };
 

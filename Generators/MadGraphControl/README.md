@@ -1014,7 +1014,7 @@ This file is added to one of the job option directories and linked from the othe
 It is recommended that the top job option is configured based on its name,
 which can be used like so:
 
-      from MadGraphUtilsHelpers import get_physics_short
+      from MCJobOptionUtils.JOsupport import get_physics_short
       phys_short=get_physics_short() # e.g. MGPy8EG_myProcess1
 
 Particularly for signal requests, that allows quick additions of new mass points without

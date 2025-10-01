@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -64,7 +64,7 @@ namespace EL
           if (m_file != 0)
             close();
         }
-
+        //cppcheck-suppress returnByReference
         std::string getPath () const
         {
           return m_path;

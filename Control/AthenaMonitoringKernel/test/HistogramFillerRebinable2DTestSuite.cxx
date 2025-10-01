@@ -16,8 +16,8 @@
 #include "TestTools/initGaudi.h"
 
 #include "TH2D.h"
-#include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "AthenaMonitoringKernel/MonitoredScalar.h"
+#include "../src/HistogramFiller/HistogramFiller.h"
 #include "../src/HistogramFiller/HistogramFillerRebinable.h"
 #include "mocks/MockHistogramProvider.h"
 

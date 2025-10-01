@@ -1,15 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SI_HIT_ANALYSIS_H
 #define SI_HIT_ANALYSIS_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-
-#include "GaudiKernel/LockedHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
+#include "AthenaBaseComps/AthHistogramAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
 
 #include "InDetSimEvent/SiHitCollection.h"
 
@@ -21,12 +18,11 @@ class TH2;
 class TTree;
 
 
-class SiHitAnalysis : public AthAlgorithm
+class SiHitAnalysis : public AthHistogramAlgorithm
 {
 public:
-
-  SiHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-  ~SiHitAnalysis(){}
+  using AthHistogramAlgorithm::AthHistogramAlgorithm;
+  ~SiHitAnalysis() = default;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
@@ -81,9 +77,6 @@ private:
   Gaudi::Property<std::string> m_ntuplePath {this, "NtuplePath", "/SiHitAnalysis/ntuples/", ""};
   Gaudi::Property<bool> m_expert {this, "ExpertMode", false, ""};
   Gaudi::Property<bool> m_extraTruthBranches {this, "ExtraTruthBranches", false, ""};
-
-  ServiceHandle<ITHistSvc> m_thistSvc {this, "HistSvc", "THistSvc", ""};
-
 };
 
 #endif // SI_HIT_ANALYSIS_H

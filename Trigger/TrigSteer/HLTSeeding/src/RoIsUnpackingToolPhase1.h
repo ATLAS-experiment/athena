@@ -14,7 +14,6 @@
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandle.h"
 
-using namespace HLTSeedingNs;
 
 /**
  * @class RoIsUnpackingToolPhase1
@@ -64,6 +63,7 @@ public:
   virtual StatusCode unpack(const EventContext& ctx,
                             const xAOD::TrigComposite& l1TriggerResult,
                             const HLT::IDSet& activeChains) const override {
+    using namespace HLTSeedingNs;
     using namespace TrigCompositeUtils;
     const bool doProbe = !m_decisionsKeyProbe.empty();
 

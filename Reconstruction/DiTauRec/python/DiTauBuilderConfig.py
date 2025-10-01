@@ -9,15 +9,15 @@ from DiTauRec.DiTauToolsConfig import (
     DiTauTrackFinderCfg, 
     CellFinderCfg, 
     DiTauConstituentFinderCfg,
-    DiTauIDVarDecoratorCfg, 
+    DiTauExtraVarDecoratorCfg, 
     DiTauOnnxScoreCalculatorCfg
 )
 
-def DiTauBuilderCfg(flags, name="DiTauBuilder", doLowPt=False, **kwargs):
+def DiTauBuilderCfg(flags, name="DiTauBuilder", doLowPt=False):
     acc = ComponentAccumulator()
 
     tools = [
-        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=flags.DiTau.SeedJetCollection[0])),
+        acc.popToolsAndMerge(SeedJetBuilderCfg(flags)),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
 
@@ -30,24 +30,21 @@ def DiTauBuilderCfg(flags, name="DiTauBuilder", doLowPt=False, **kwargs):
         tools.append(acc.popToolsAndMerge(DiTauConstituentFinderCfg(flags, UseRawConstit=True)))
     else:    
         tools.append(acc.popToolsAndMerge(CellFinderCfg(flags)))
+
+    if flags.DiTau.doExtraVariables:
+        tools.append(acc.popToolsAndMerge(DiTauExtraVarDecoratorCfg(flags))) 
+
     if flags.DiTau.doRunDiTauDiscriminant:
-        tools.append(acc.popToolsAndMerge(DiTauIDVarDecoratorCfg(flags)))
         tools.append(acc.popToolsAndMerge(DiTauOnnxScoreCalculatorCfg(flags)))
 
-    if doLowPt:
-        kwargs.setdefault("DiTauContainer", flags.DiTau.DiTauContainer[1])
-        kwargs.setdefault("minPt", flags.DiTau.JetSeedPt[1])
-    else:
-        kwargs.setdefault("DiTauContainer", flags.DiTau.DiTauContainer[0])
-        kwargs.setdefault("minPt", flags.DiTau.JetSeedPt[0])
-
-    kwargs.setdefault("Tools", tools)
-    kwargs.setdefault("SeedJetName", flags.DiTau.SeedJetCollection[0])
-    kwargs.setdefault("maxEta", flags.DiTau.MaxEta)
-    kwargs.setdefault("Rjet", flags.DiTau.Rjet)
-    kwargs.setdefault("Rsubjet", flags.DiTau.Rsubjet)
-    kwargs.setdefault("Rcore", flags.DiTau.Rcore)
-
-    acc.addEventAlgo(CompFactory.DiTauBuilder(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DiTauBuilder(name,
+                                              DiTauContainer = flags.DiTau.DiTauContainer[1] if doLowPt else flags.DiTau.DiTauContainer[0],
+                                              minPt = flags.DiTau.JetSeedPt[1] if doLowPt else flags.DiTau.JetSeedPt[0],
+                                              Tools = tools,
+                                              SeedJetName = flags.DiTau.SeedJetCollection[0],
+                                              maxEta = flags.DiTau.MaxEta,
+                                              Rjet = flags.DiTau.Rjet,
+                                              Rsubjet = flags.DiTau.Rsubjet,
+                                              Rcore = flags.DiTau.Rcore))
     return acc
 

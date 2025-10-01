@@ -18,7 +18,6 @@
 #include "DbStorageExplorer.h"
 #include "POOLCore/DbPrint.h"
 #include "StorageSvc/DbReflex.h"
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/Transaction.h"
@@ -103,7 +102,7 @@ unsigned int DbStorageSvc::release()   {
 //--- IInterface::queryInterface
 DbStatus DbStorageSvc::queryInterface(const Guid& riid, void** ppvInterface)  {
   if ( IStorageSvc::interfaceID() == riid )  {
-    *ppvInterface = (IStorageSvc*)this;
+    *ppvInterface = static_cast<IStorageSvc*>(this);
   }
   else if ( IStorageExplorer::interfaceID() == riid )  {
     return m_explorer->queryInterface(riid, ppvInterface);

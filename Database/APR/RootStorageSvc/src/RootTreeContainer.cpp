@@ -12,7 +12,6 @@
 //====================================================================
 
 // Framework include files
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbDatabase.h"

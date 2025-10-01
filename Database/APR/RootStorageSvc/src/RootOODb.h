@@ -58,7 +58,7 @@ namespace pool  {
     IDbContainer* createContainer(const DbType& typ);
   private:
     /// Non-owning cache for the domain pointer
-    IDbDomain* m_domainCache;
+    IDbDomain* m_domainCache{};
   };
 
   class RootOOKey : public RootOODb {

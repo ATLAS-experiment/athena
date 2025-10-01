@@ -305,11 +305,11 @@ AthenaSummarySvc::handle(const Incident &inc) {
   }
 
   if (inc.type() == "BeginInputFile" ) {
-    m_inputFilesRead.push_back( fileName );
+    m_inputFilesRead.emplace_back( std::move(fileName) );
   } else if (inc.type() == "BeginOutputFile") {
-    m_outputFiles.push_back( fileName );
+    m_outputFiles.emplace_back( std::move(fileName) );
   } else if (inc.type() == "FailOutputFile") {
-    m_outputFilesError.push_back( fileName );
+    m_outputFilesError.push_back( std::move(fileName) );
   } else if (inc.type() == "BeginEvent") {
     m_eventsRead ++;
   } else if (inc.type() == "SkipEvent") {

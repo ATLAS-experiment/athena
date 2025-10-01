@@ -13,6 +13,7 @@
 #include <xAODInDetMeasurement/PixelClusterContainer.h>
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
+#include "Acts/Clusterization/Clusterization.hpp"
 
 namespace ActsTrk {
 
@@ -51,6 +52,7 @@ public:
 	       const RawDataCollection& RDOs,
 	       const InDet::SiDetectorElementStatus& pixelDetElStatus,
 	       const InDetDD::SiDetectorElement& element,
+         Acts::Ccl::ClusteringData& data,
 	       std::vector<ClusterCollection>& collection) const = 0;
   
     virtual StatusCode

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -34,13 +34,12 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IThinningTool.h"
-#include "DerivationFrameworkMCTruth/DecayGraphHelper.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "xAODJet/JetContainer.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ThinningHandleKey.h"
 
 
@@ -61,7 +60,10 @@ namespace DerivationFramework {
                         const xAOD::TruthParticleContainer* truths) ;
 
   private:
-    SG::ReadHandleKey<xAOD::EventInfo>    m_evt  {this, "EvtInfo", "EventInfo", "EventInfo name"};
+
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EvtInfo", "EventInfo", "EventInfo name"};
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_hardParticleKey {this, "HardParticles", "", "Hard particle container name"};
+    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetsKey {this, "JetName", "", "Truth jet container name"};
 
     StringProperty m_streamName
       { this, "StreamName", "", "Name of the stream being thinned" };
@@ -70,10 +72,7 @@ namespace DerivationFramework {
     SG::ThinningHandleKey<xAOD::TruthVertexContainer> m_truthVertexName
       { this, "TruthVertices", "", "truth vertex container name" };
 
-    std::string m_hardParticleName;
-
-    // TruthJet name and parameters
-    std::string m_jetName;
+    // TruthJet parameters
     float m_jetPtCut;
     float m_jetEtaCut;
     float m_jetConstPtCut;

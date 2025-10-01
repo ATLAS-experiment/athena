@@ -60,10 +60,6 @@
 
 #include "MuonEventAthenaPool/RpcSectorLogicContainer_p1.h"
 
-// for ROOT streamer
-#include "MuonEventAthenaPool/CscRawData_p0.h"
-#include "MuonEventAthenaPool/CscRawDataStreamer_p0.h"
-
 //to stop Checkreq complaining
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "MuonSegment/MuonSegment.h"

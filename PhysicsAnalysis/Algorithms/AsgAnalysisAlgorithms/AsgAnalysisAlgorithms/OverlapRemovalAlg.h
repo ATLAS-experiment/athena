@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -73,7 +73,7 @@ namespace CP
 
     /// \brief the accessor for \ref m_overlapRemovalDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::Accessor<char> > m_overlapRemovalAccessor;
+    std::unique_ptr<const SG::Accessor<char> > m_overlapRemovalAccessor;
 
   };
 }

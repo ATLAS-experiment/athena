@@ -40,7 +40,12 @@ StatusCode DiTauToolBase::execute( DiTauCandidateData *,
 {
   return StatusCode::SUCCESS;
 }
- 
+
+StatusCode DiTauToolBase::executeObj( xAOD::DiTauJet& ,
+                                      const EventContext& /*ctx*/) const
+{
+  return StatusCode::SUCCESS;
+}
 
 StatusCode DiTauToolBase::finalize()
 {

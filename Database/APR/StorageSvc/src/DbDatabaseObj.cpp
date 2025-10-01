@@ -455,7 +455,7 @@ DbStatus DbDatabaseObj::open()   {
                 log << "--->Reading Param:" << n << "=[" << v << ']' 
                     << DbPrint::endmsg;
                 m_paramMap[n] = v;
-                if (n == "FID") fids.push_back(v);
+                if (n == "FID") fids.emplace_back(std::move(v));
               }
             }
             it.object()->~DbString(); m_params.free(it.object());
@@ -727,7 +727,7 @@ DbStatus DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
 
       if( cntH.open( dbd, containerName, typ_info, token.technology(), mode() ).isSuccess() )  {
          if ( typ_info && typ_info == shape ) {
-            return DbObjectAccessor::read(object, shape, cntH, oid );
+            return cntH.load(object, shape, oid);
          }
          DbPrint log( name() );
          log << DbPrintLvl::Error << "Token ClassID " << token.classID().toString()

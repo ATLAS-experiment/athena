@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,9 +11,6 @@ using namespace std;
 
 
 /////////////////////////////////////////////////////////////////////////////
-
-BIS78_triggerSimulation::BIS78_triggerSimulation()
-{}
 
 unsigned int BIS78_triggerSimulation::AddStrip(int sectoreta, int sectorphi, int igap, int mphi, int strip){
   if (igap<1||igap>3) return false;
@@ -28,22 +25,8 @@ unsigned int BIS78_triggerSimulation::AddStrip(int sectoreta, int sectorphi, int
    return 0;
 }
 
-StatusCode BIS78_triggerSimulation::clear(){
-  
-  for (int i=0; i<2; i++){  // 2 sides (0 or 1, just for BIS78, otherwise, for full BIS it should be the eta sector)
-    for (int j=0; j<8; j++){  // 8 sectors
-      for (int k=0;k<3; k++){  // 3 gas gaps
-        m_strip_eta[i][j][k].clear();
-        m_strip_phi[i][j][k].clear();
-      }
-    }
-  }
-  
-  return StatusCode::SUCCESS;
-}
 
-
-void BIS78_triggerSimulation::build_trigRawData(Muon::RpcBis78_TrigRawDataContainer* trgContainer, uint8_t dstrip_phi, uint8_t dstrip_eta, uint16_t bcid)
+void BIS78_triggerSimulation::build_trigRawData(Muon::RpcBis78_TrigRawDataContainer* trgContainer, uint8_t dstrip_phi, uint8_t dstrip_eta, uint16_t bcid) const
 // take the data from TrigT1RPC
 {
   

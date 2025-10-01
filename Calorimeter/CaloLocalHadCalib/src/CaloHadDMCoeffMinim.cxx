@@ -198,7 +198,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffMinim::process(CaloHadDMCoeffData *myData, Cal
 
     //if(m_data->m_mc_ener < m_engBeamMin) continue;
 
-    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " (" << nGoodEvents << ") '" << (static_cast<TChain *>(m_data->fChain))->GetFile()->GetName() << "'" << std::endl;
+    if(i_ev%20000==0) std::cout << "    i_ev: " << i_ev << " (" << nGoodEvents << ") '" << static_cast<TChain *>(m_data->fChain)->GetFile()->GetName() << "'" << std::endl;
 
     double EnergyResolution; // in GeV
     if( abs(m_data->m_mc_pdg) == 211) {
@@ -240,7 +240,7 @@ CaloLocalHadCoeff * CaloHadDMCoeffMinim::process(CaloHadDMCoeffData *myData, Cal
       m_data->PackClusterVars(i_cls, vars);
       int iBin = m_HadDMCoeff->getBin(m_area_index, vars );
 
-      if(iBin >= dmArea->getOffset() && iBin < (dmArea->getOffset()+dmArea->getLength())  && m_data->m_engClusSumCalib > 0.0 && m_data->m_mc_ener > 0.0) {
+      if(iBin >= 0 && iBin >= dmArea->getOffset() && iBin < (dmArea->getOffset()+dmArea->getLength())  && m_data->m_engClusSumCalib > 0.0 && m_data->m_mc_ener > 0.0) {
         auto ev = std::make_unique<MinimSample>();
         // we need only edmtrue and energy in cluster samplings to calculate fcn
         ev->ibin = iBin;
@@ -490,10 +490,12 @@ void CaloHadDMCoeffMinim::make_report(std::string &sreport)
               v_indx[CaloLocalHadCoeffHelper::DIM_ENER] = i_ener;
               v_indx[CaloLocalHadCoeffHelper::DIM_LAMBDA] = i_lambda;
               int iBin = m_HadDMCoeff->getBin(area_indx, v_indx);
-              float xx = dimEta->getXmin() + dimEta->getDx()*i_eta;
-              float w = (float)m_sample_size[iBin-dmArea->getOffset()];
-              smpsize += w;
-              gr->SetPoint(i_eta, xx, w);
+              if (iBin >= 0 && iBin >= dmArea->getOffset()) {
+                float xx = dimEta->getXmin() + dimEta->getDx()*i_eta;
+                float w = (float)m_sample_size[iBin-dmArea->getOffset()];
+                smpsize += w;
+                gr->SetPoint(i_eta, xx, w);
+              }
             }
             str = std::format("Sample size {}",int(smpsize));
             gr->SetTitle(str.c_str());

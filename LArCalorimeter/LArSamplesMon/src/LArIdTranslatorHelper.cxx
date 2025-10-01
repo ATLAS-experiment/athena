@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArIdTranslatorHelper
@@ -268,7 +268,7 @@ TH2* LArIdTranslatorHelper::GetCaloPartitionLayerMap(const int index,bool kProfi
   return th2;
 }
 //____________________________________________________________________________________________________
-TCanvas* LArIdTranslatorHelper::CaloPartitionLayerDisplay(TH1** h,const Char_t* title,bool kLogz)
+TCanvas* LArIdTranslatorHelper::CaloPartitionLayerDisplay(TH2** h,const Char_t* title,bool kLogz)
 {
   // Produces a TCanvas with the partitionlayers arranged.
   // This assumes some hardcoded settings:

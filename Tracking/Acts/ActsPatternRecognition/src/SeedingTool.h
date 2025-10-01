@@ -361,12 +361,22 @@ namespace ActsTrk {
     }
 
     inline bool doubletSelectionFunction(
-      const value_type& /*middle*/,
+      const value_type& middle,
       const value_type& other,
       float cotTheta, bool isBottomCandidate) const {
+      // We remove some doublets that have the middle space point in some specific areas
+      // This should eventually be moved inside ACTS and allow a veto mechanism according
+      // to the user desire.
+      // As of now we cannot really do this since we define a range of validity of the middle
+      // candidate, and if we want to veto some sub-regions inside it, we need to do it here.
+      if (std::abs(middle.z()) > 1500 and
+          middle.radius() > 100 and middle.radius() < 150) {
+        return false;
+      }
+      
       // We remove here some seeds, in case the bottom space point radius is
       // too small (i.e. < fastTrackingRMin)
-
+      
       // This operation is done only within a specific eta window
       // Instead of eta we use the doublet cottheta      
       static constexpr float cotThetaEta120 = 1.5095;
@@ -374,15 +384,15 @@ namespace ActsTrk {
       
       float absCotTheta = std::abs(cotTheta);
       if (isBottomCandidate and other.radius() < m_ExpCutrMin and
-	  absCotTheta > cotThetaEta120 and
-	  absCotTheta < cotThetaEta360) {
-	return false;
+          absCotTheta > cotThetaEta120 and
+          absCotTheta < cotThetaEta360) {
+        return false;
       }
-
+      
       return true;
     }
   };
-
+  
 } // namespace
 
 #endif

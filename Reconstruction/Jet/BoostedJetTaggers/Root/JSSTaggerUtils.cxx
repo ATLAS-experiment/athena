@@ -150,8 +150,7 @@ StatusCode JSSTaggerUtils::initialize(){
   m_decConstScoreKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreKey.key();
   ATH_CHECK( m_decConstScoreKey.initialize() );
 
-  m_readConstScoreKey = m_containerName + "." + m_decorationName + "_" + m_readConstScoreKey.key();
-  ATH_CHECK( m_readConstScoreKey.initialize() );
+  m_constScoreAcc = std::make_unique<SG::ConstAccessor<float>>(m_decorationName + "_ConstScore");
 
   m_decHLScoreKey = m_containerName + "." + m_decorationName + "_" + m_decHLScoreKey.key();
   ATH_CHECK( m_decHLScoreKey.initialize() );
@@ -488,22 +487,14 @@ std::map<std::string, double> JSSTaggerUtils::GetJSSVars(const xAOD::Jet& jet) c
 
   // retrieve ungroomed tracks multiplicity
   int nUngrTracks (-1);
-  SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
-  if(readNtrk500.isAvailable()){
-    nUngrTracks = readNtrk500(jet);
-  }
-  else{
-    int pv_location = findPV();
-    if(pv_location != -1)
-      nUngrTracks = GetUnGroomTracks(jet, pv_location);
-  }
+  int pv_location = findPV();
+  if(pv_location != -1)
+    nUngrTracks = GetUnGroomTracks(jet, pv_location);
 
   // store input variables
   JSSVars["pT"] = jet.pt();
   JSSVars["nTracks"] = nUngrTracks;
-
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readConstScore(m_readConstScoreKey);
-  JSSVars["CNN"] = readConstScore(jet);
+  JSSVars["CNN"] = (*m_constScoreAcc)(jet);
 
   // define the decorator readers
   SG::ReadDecorHandle<xAOD::JetContainer, float> readSplit12(m_readSplit12Key);
@@ -841,4 +832,125 @@ StatusCode JSSTaggerUtils::GetTopConstScore(const xAOD::JetContainer& jets) cons
 
   return StatusCode::SUCCESS;
 
+}
+
+StatusCode JSSTaggerUtils::GetWConstScore(const xAOD::JetContainer& jets) const {
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
+
+  // define vectors to store constituents for calculations
+  long unsigned int nMaxConstituents (100);
+  std::vector<float> pT, eta, phi, E, isValid, px, py, pz;
+  pT.reserve(nMaxConstituents); eta.reserve(nMaxConstituents); phi.reserve(nMaxConstituents); E.reserve(nMaxConstituents);
+  isValid.reserve(nMaxConstituents);
+  px.reserve(nMaxConstituents); py.reserve(nMaxConstituents); pz.reserve(nMaxConstituents);
+
+  for(const xAOD::Jet *jet : jets){
+
+    // init value
+    float score (-99.);
+
+    // get constituents
+    std::vector<xAOD::JetConstituent> constituents = jet -> getConstituents().asSTLVector();
+
+    // skip non physical constituents
+    constituents.erase( std::remove_if( constituents.begin(), constituents.end(),
+                        [] (xAOD::JetConstituent constituent) -> bool {return constituent -> pt() < 1.e-8;}), 
+                        constituents.end()) ;
+
+    // sort by pT
+    std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
+
+    std::vector<xAOD::JetConstituent> constituentsForModel;
+
+    if( constituents.size() > nMaxConstituents )
+    {
+      constituentsForModel = std::vector<xAOD::JetConstituent> (constituents.begin(), constituents.begin() + nMaxConstituents);
+    }
+    else 
+      constituentsForModel = constituents;
+
+    // fill vectors of constituents for calculation
+    pT.clear(); eta.clear(); phi.clear(); E.clear();
+    isValid.clear();
+    px.clear(); py.clear(); pz.clear();
+    for(auto cnst : constituentsForModel){
+      pT.push_back( cnst -> pt() );
+      eta.push_back( cnst -> eta() );
+      phi.push_back( cnst -> phi() );
+      E.push_back( cnst -> e() );
+      isValid.push_back(1.);
+      px.push_back( cnst -> pt() * std::cos(cnst -> phi()) );
+      py.push_back( cnst -> pt() * std::sin(cnst -> phi()) );
+      pz.push_back( cnst -> pt() * std::sinh(cnst -> eta()) );
+    }
+
+    // build constituents, mask and base momentum for interaction variables
+    std::vector<std::vector<float>> const_vars;
+    std::vector<std::vector<float>> masks_vars;
+    std::vector<std::vector<std::vector<float>>> inter_vars;
+
+    for(long unsigned int i=0; i<constituentsForModel.size(); i++){
+
+      // put the constituent in a tlv for help
+      TLorentzVector constituent_i;
+      constituent_i.SetPtEtaPhiE(pT.at(i), eta.at(i), phi.at(i), E.at(i));
+
+      // calculate variables
+      float log_pT = log( pT.at(i));
+      float log_E = log( E.at(i));
+      float log_pT_rel = log( pT.at(i) / jet -> pt());
+      float log_E_rel = log( E.at(i) / jet -> e());
+      float Deta = eta.at(i) - jet -> eta();
+      float Dphi = constituent_i.DeltaPhi(jet -> p4());
+      float DR = sqrt(Deta*Deta + Dphi*Dphi);
+
+      // pack: constituents variables
+      std::vector<float> vars = {log_E, log_pT, log_E_rel, log_pT_rel, Deta, Dphi, DR};
+      const_vars.push_back(vars);
+
+      // pack: mask variable
+      vars = {1.};
+      masks_vars.push_back(vars);
+
+      // explict interaction variables
+      // calculate variables: interactions
+      std::vector<std::vector<float>> inter_vars_int;
+      for(long unsigned int j=0; j<constituentsForModel.size(); j++){
+
+        // tlv for constituents
+        TLorentzVector constituent_j;
+        constituent_j.SetPtEtaPhiE(pT.at(j), eta.at(j), phi.at(j), E.at(j));
+  
+        // preparing variables
+        float delta = constituent_i.DeltaR(constituent_j, true);
+        float min = std::min(pT.at(i), pT.at(j));
+        float mass2 = (constituent_i + constituent_j).M2();
+
+        // final values
+        float log_delta = log(Clip(delta, 1.e-8));
+        float log_mindelta = log(Clip(min * delta, 1.e-8));
+        float log_min_over_pT = log(Clip(min / (pT.at(i) + pT.at(j)), 1.e-8));
+        float log_mass = log(Clip(mass2, 1.e-8));
+
+        std::vector<float> vars = { log_delta,
+                                    log_mindelta,
+                                    log_min_over_pT,
+                                    log_mass
+                                  };
+        inter_vars_int.push_back(vars);
+      }
+
+      inter_vars.push_back(inter_vars_int);
+    }
+
+    // evaluate the model
+    if( constituents.size() > 1 ) 
+      score = m_MLBosonTagger -> retrieveConstituentsScore(const_vars, inter_vars, masks_vars);
+
+    // save decorator
+    decConstScore(*jet) = score;
+  }
+  
+  return StatusCode::SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -56,20 +56,21 @@ uint32_t convert_to_40(const uint32_t* src, uint32_t* dest, uint32_t max,
     uint32_t global_id = static_cast<uint32_t>(fe.global_id());
 
     //create the base FullEvent
-    v40_write::FullEventFragment nfe(fe.source_id(), fe.bc_time_seconds(),
+    auto nfe = std::make_unique<v40_write::FullEventFragment>
+                                    (fe.source_id(), fe.bc_time_seconds(),
                                      fe.bc_time_nanoseconds(),
                                      global_id, fe.run_type(),
                                      fe.run_no(), fe.lumi_block(),
                                      fe.lvl1_id(), fe.bc_id(),
                                      fe.lvl1_trigger_type());
 
-    nfe.lvl1_trigger_info(fe.nlvl1_trigger_info(), fe.lvl1_trigger_info());
-    nfe.lvl2_trigger_info(fe.nlvl2_trigger_info(), fe.lvl2_trigger_info());
-    nfe.event_filter_info(fe.nevent_filter_info(), fe.event_filter_info());
-    nfe.stream_tag(fe.nstream_tag(), fe.stream_tag());
-    nfe.status(fe.nstatus(), fe.status());
-    nfe.minor_version(version.minor_version());
-    nfe.checksum_type(event_checksum);
+    nfe->lvl1_trigger_info(fe.nlvl1_trigger_info(), fe.lvl1_trigger_info());
+    nfe->lvl2_trigger_info(fe.nlvl2_trigger_info(), fe.lvl2_trigger_info());
+    nfe->event_filter_info(fe.nevent_filter_info(), fe.event_filter_info());
+    nfe->stream_tag(fe.nstream_tag(), fe.stream_tag());
+    nfe->status(fe.nstatus(), fe.status());
+    nfe->minor_version(version.minor_version());
+    nfe->checksum_type(event_checksum);
 
     std::vector<v40_write::ROBFragment*> acc_rob;
     for (size_t i=0; i<fe.nchildren(); ++i) {
@@ -93,7 +94,7 @@ uint32_t convert_to_40(const uint32_t* src, uint32_t* dest, uint32_t max,
         nrob->checksum_type(rob_checksum);
 
         //make this new ROB part of the new ROS
-        nfe.append(nrob);
+        nfe->append(nrob);
         //make sure we don't forget to delete this guy
         acc_rob.push_back(nrob);
       }
@@ -106,7 +107,7 @@ uint32_t convert_to_40(const uint32_t* src, uint32_t* dest, uint32_t max,
     }
 
     //now the FullEvent is in `nfe', bind
-    const eformat::write::node_t* top = nfe.bind();
+    const eformat::write::node_t* top = nfe->bind();
     //memcpy the list of pages into contiguous memory
     uint32_t retval = eformat::write::copy(*top, dest, max);
 

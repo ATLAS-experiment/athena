@@ -6,9 +6,23 @@ from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 
 def TileGMCfg(flags):
     result=GeoModelCfg(flags)
-    result.getPrimary().DetectorTools += [ CompFactory.TileDetectorTool() ]
+
+    tileDetectorTool = CompFactory.TileDetectorTool()
     if flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]:
-        result.getPrimary().DetectorTools["TileDetectorTool"].GeometryConfig = "RECO"
+        tileDetectorTool.GeometryConfig = "RECO"
+
+    if flags.Beam.Type is BeamType.TestBeam:
+        if flags.Tile.Sim.Ushape != 'NONE':
+            tileDetectorTool.Ushape = flags.Tile.Sim.Ushape
+        if flags.Tile.Sim.Steel != 'NONE':
+            tileDetectorTool.Steel = flags.Tile.Sim.Steel
+        if flags.Tile.Sim.PVT != 'NONE':
+            tileDetectorTool.PVT = flags.Tile.Sim.PVT
+        if flags.Tile.Sim.CsTube != 'NONE':
+            tileDetectorTool.CsTube = flags.Tile.Sim.CsTube
+
+    result.getPrimary().DetectorTools += [ tileDetectorTool ]
+
     if flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.Digitization] and flags.Beam.Type is BeamType.TestBeam:
         if (flags.TestBeam.Layout=='tb_Tile2000_2003_2B2EB'):
             # 2 Barrels + 2 Extended Barrels
@@ -22,6 +36,8 @@ def TileGMCfg(flags):
         elif (flags.TestBeam.Layout=='tb_Tile2000_2003_5B'):
             # 5 Barrels
             result.getPrimary().TileVersionOverride='TileTB-5B-00'
+
+
 
     return result
 

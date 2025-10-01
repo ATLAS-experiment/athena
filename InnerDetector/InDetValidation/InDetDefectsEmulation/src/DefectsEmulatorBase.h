@@ -68,7 +68,6 @@ protected:
    Gaudi::Property<std::vector<std::vector<double>> > m_noiseShape
       {this,"NoiseShape",{}, "Shape of noise distribution (e.g. used for Pixel tot distribution or strip time bin distribution."};
 
-
    enum EHistType {
       kRejectedHits,
       kNoiseHits,

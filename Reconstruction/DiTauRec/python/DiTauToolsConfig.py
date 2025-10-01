@@ -3,21 +3,20 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def SeedJetBuilderCfg(flags, name="DiTauRec_SeedJetBuilder", **kwargs):
+def SeedJetBuilderCfg(flags, name="DiTauRec_SeedJetBuilder", jetCollection=""):
     """Configure the seed jet builder"""
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.SeedJetBuilder(name, **kwargs))
+    acc.setPrivateTools(CompFactory.SeedJetBuilder(name, 
+                                                   JetCollection = jetCollection if jetCollection != "" else flags.DiTau.SeedJetCollection[0]))
     return acc
 
 
-def SubjetBuilderCfg(flags, name="DiTauRec_SubjetBuilder", **kwargs):
+def SubjetBuilderCfg(flags, name="DiTauRec_SubjetBuilder"):
     """Configure the subjet builder"""
     acc = ComponentAccumulator()
-
-    kwargs.setdefault("Rsubjet", 0.2)
-    kwargs.setdefault("ptminsubjet", 10000)
-
-    acc.setPrivateTools(CompFactory.SubjetBuilder(name, **kwargs))
+    acc.setPrivateTools(CompFactory.SubjetBuilder(name, 
+                                                  Rsubjet = flags.DiTau.Rsubjet,
+                                                  ptminsubjet = flags.DiTau.PtMinSubjet))
     return acc
 
 def TVAToolCfg(flags, name="TVATool_forDiTaus", **kwargs):
@@ -74,13 +73,12 @@ def DiTauTrackFinderCfg(flags, name="DiTauRec_DiTauTrackFinder", **kwargs):
     acc.setPrivateTools(CompFactory.DiTauTrackFinder(name, **kwargs))
     return acc
 
-def CellFinderCfg(flags, name="DiTauRec_CellFinder", **kwargs):
+def CellFinderCfg(flags, name="DiTauRec_CellFinder"):
     """Configure the cell finder"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("Rsubjet", 0.2)
-
-    CellFinder = CompFactory.CellFinder(name, **kwargs)
+    CellFinder = CompFactory.CellFinder(name,
+                                        Rsubjet = flags.DiTau.Rsubjet,)
     acc.setPrivateTools(CellFinder)
     return acc
 
@@ -93,16 +91,16 @@ def DiTauConstituentFinderCfg(flags, name="DiTauRec_DiTauConstituentFinder", **k
     acc.setPrivateTools(CompFactory.DiTauConstituentFinder(name, **kwargs))
     return acc
 
-def DiTauIDVarDecoratorCfg(flags, name="DiTauRec_IDVarDecorator", **kwargs):
-    """Configure the IDVarDecorator"""
+def DiTauExtraVarDecoratorCfg(flags, name="DiTauRec_ExtraVarDecorator", **kwargs):
+    """Configure the ExtraVarDecorator"""
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.DiTauIDVarDecorator(name, **kwargs))
+    acc.setPrivateTools(CompFactory.DiTauExtraVarDecorator(name, **kwargs))
     return acc
 
 def DiTauOnnxScoreCalculatorCfg(flags, name="DiTauRec_OnnxScoreCalculator", **kwargs):
     """Configure the OnnxScoreCalculator"""
     acc = ComponentAccumulator()
-    kwargs.setdefault("onnxModelPath", "DiTauRec/omni.onnx")
+    kwargs.setdefault("onnxModelPath", "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx")
     kwargs.setdefault("maxTracks", 10)
     acc.setPrivateTools(CompFactory.DiTauOnnxDiscriminantTool(name, **kwargs))
     return acc

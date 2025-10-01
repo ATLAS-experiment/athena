@@ -1,14 +1,24 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscOverlay.h"
-
+#include "MuonRDO/CscRawData.h"                  
+#include "MuonIdHelpers/CscIdHelper.h"           
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
+//
+#include "Identifier/Identifier.h"
+#include "Identifier/IdContext.h"                
+//
+#include <set>                                   
+#include <stdexcept>                             // for runtime_error
+#include <algorithm>                             // for max, min, lower_bound
+#include <cmath>                                 // for std::rint
+#include <sstream>                               // for basic_ostringstream
 
 namespace {
   constexpr uint16_t MAX_AMPL = 4095; // 12-bit ADC
@@ -168,8 +178,6 @@ StatusCode CscOverlay::overlayContainer(const CscRawDataContainer *bkgContainer,
           } else {
             for (uint16_t sample : stripSamples) {
               double sampleNoise = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0.0, stripNoise);
-              // TODO: rounding issue - some strange type conversion is going on
-              // uint16_t adcCount = sample + std::lrint(sampleNoise);
               float adcCount = sample + sampleNoise;
               if (adcCount > MAX_AMPL) {
                 ATH_MSG_DEBUG("value out of range (copying over signal): " << adcCount << " "
@@ -177,9 +185,7 @@ StatusCode CscOverlay::overlayContainer(const CscRawDataContainer *bkgContainer,
                               << " IdentifierHash is " << stripHash);
                 adcCount = MAX_AMPL;
               }
-              // TODO: rounding issue
-              // samples.push_back(adcCount);
-              samples.push_back( (uint16_t) rint(adcCount) );
+              samples.push_back( (uint16_t) std::rint(adcCount) );
             }
           }
         }

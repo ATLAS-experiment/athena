@@ -59,6 +59,9 @@ StatusCode LArCelldeadOTXAlg::execute(const EventContext& ctx) const {
   std::vector<float> vecEnergies;
   vecEnergies.reserve(m_onlineSCID->channelHashMax());
   vecEnergies.resize(m_onlineSCID->channelHashMax(),0.0);
+  //will be used below; avoid recreating in tight loop
+  std::vector<float> cellEnergies(128, 0.f);
+  //
   for (const auto* supercell : *scells) {
     if (!supercell)
       continue;
@@ -86,14 +89,14 @@ StatusCode LArCelldeadOTXAlg::execute(const EventContext& ctx) const {
   }  // End loop over SuperCell container
 
   for(size_t i=0;i<m_channels.size();i++){
-        std::vector<uint32_t>& chans = m_channels.at(i);
-        std::vector<float>& mults = m_multipliers.at(i);
-        std::vector<float> cellEnergies;
-        cellEnergies.resize(128,0);
-        for(size_t j=0; j<chans.size(); j++) {
-            if ( chans[j] < 0xfffffffe ) cellEnergies[j] = mults[j]*vecEnergies[chans[j]];
-        }
-	deadHandle->addFEB(m_febs[i],cellEnergies);
+    std::vector<uint32_t>& chans = m_channels[i];
+    std::vector<float>& mults = m_multipliers.at(i);
+    //set vector to zero
+    std::fill(cellEnergies.begin(), cellEnergies.end(),0.f);
+    for(size_t j=0; j<chans.size(); j++) {
+        if ( chans[j] < 0xfffffffe ) cellEnergies[j] = mults[j]*vecEnergies[chans[j]];
+    }
+	  deadHandle->addFEB(m_febs[i],cellEnergies);
   }
   ATH_CHECK(deadHdl.record(std::move(deadHandle)) );
 

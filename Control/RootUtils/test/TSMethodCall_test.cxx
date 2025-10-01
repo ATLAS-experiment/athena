@@ -14,8 +14,7 @@
 #undef NDEBUG
 #include "RootUtils/TSMethodCall.h"
 #include "TClass.h"
-#include "boost/thread/shared_mutex.hpp"
-#include "boost/thread/shared_lock_guard.hpp"
+#include <shared_mutex>
 #include <thread>
 #include <iostream>
 #include <cassert>
@@ -25,7 +24,7 @@ struct TestThread
 {
   TestThread (RootUtils::TSMethodCall& meth,
               int n,
-              boost::shared_mutex& sm)
+              std::shared_mutex& sm)
     : m_meth(meth), m_n(n), m_sm(sm)
   {}
 
@@ -43,7 +42,7 @@ struct TestThread
 
   void operator() ()
   {
-    boost::shared_lock_guard<boost::shared_mutex> guard (m_sm);
+    std::shared_lock<std::shared_mutex> guard (m_sm);
     for (int i = 0; i < m_n; i++) {
       test1 (m_meth);
     }
@@ -51,7 +50,7 @@ struct TestThread
 
   RootUtils::TSMethodCall& m_meth;
   int m_n;
-  boost::shared_mutex& m_sm;
+  std::shared_mutex& m_sm;
 };
 
 
@@ -64,17 +63,22 @@ void test1()
   assert (meth.call() != nullptr);
 
   TestThread::test1 (meth);
-  boost::shared_mutex sm;
-  sm.lock();
-
   const int nthread = 10;
   const int niter = 10000;
   std::thread threads[nthread];
-  for (int i=0; i < nthread; i++)
-    threads[i] = std::thread (TestThread (meth, niter, sm));
 
-  // Try to get the threads starting as much at the same time as possible.
-  sm.unlock();
+  // Declare the mutex in an outer scope
+  std::shared_mutex sm;
+  {
+    // Lock in a nested scope to avoid triggering localMutex warning
+    std::unique_lock<std::shared_mutex> lock(sm);
+
+    // Create threads while holding the lock
+    for (int i = 0; i < nthread; i++)
+      threads[i] = std::thread(TestThread(meth, niter, sm));
+    // Lock is released automatically when this block ends
+    // Try to get the threads starting as much at the same time as possible.
+  }
   for (int i=0; i < nthread; i++)
     threads[i].join();
 }

@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-from __future__ import division
 
 from argparse import ArgumentParser
 from os import listdir, makedirs

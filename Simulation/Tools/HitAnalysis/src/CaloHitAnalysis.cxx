@@ -6,7 +6,6 @@
 #include "CaloHitAnalysis.h"
 
 // Section of includes for LAr calo tests
-#include "LArSimEvent/LArHitContainer.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
@@ -14,11 +13,9 @@
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "CaloIdentifier/TileID.h"
 #include "TileSimEvent/TileHit.h"
-#include "TileSimEvent/TileHitVector.h"
 
 //Section of includes for Calibrated Calo hits
 #include "GeoAdaptors/GeoCaloCalibHit.h"
-#include "CaloSimEvent/CaloCalibrationHitContainer.h"
 
 #include "TString.h"
 #include  "TH1.h"
@@ -30,51 +27,48 @@
 #include <functional>
 #include <iostream>
 
-CaloHitAnalysis::CaloHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-{
-}
 
 
 StatusCode CaloHitAnalysis::initialize() {
   ATH_MSG_DEBUG( "Initializing CaloHitAnalysis" );
   if (m_useTile) {
 
-     CHECK( detStore()->retrieve(m_tileMgr) );
-     CHECK( detStore()->retrieve(m_tileID) );
+     ATH_CHECK( detStore()->retrieve(m_tileMgr) );
+     ATH_CHECK( detStore()->retrieve(m_tileID) );
   }
-  // Grab the Ntuple and histogramming service for the tree
-  CHECK( m_thistSvc.retrieve() );
-
+  ATH_CHECK(m_tileKey.initialize(m_useTile));
   ATH_CHECK(m_caloMgrKey.initialize());
+  ATH_CHECK(m_caloKeys.initialize(m_useLAr));
+  ATH_CHECK(m_caloCalibKeys.initialize(m_calib && m_useLAr));
+  
 
   m_h_cell_e = new TH1D("h_Calo_cell_e", "cell_e", 100,0.,500.);
   m_h_cell_e->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_e->GetName(), m_h_cell_e));
+  ATH_CHECK(histSvc()->regHist( m_path+m_h_cell_e->GetName(), m_h_cell_e));
 
   m_h_cell_eta = new TH1D("h_Calo_cell_eta", "cell_eta", 50,-5.,5.);
   m_h_cell_eta->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_eta->GetName(), m_h_cell_eta));
+  ATH_CHECK(histSvc()->regHist( m_path+m_h_cell_eta->GetName(), m_h_cell_eta));
 
   m_h_cell_phi = new TH1D("h_Calo_cell_phi", "cell_phi", 50,-3.1416,3.1416);
   m_h_cell_phi->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_phi->GetName(), m_h_cell_phi));
+  ATH_CHECK(histSvc()->regHist( m_path+m_h_cell_phi->GetName(), m_h_cell_phi));
 
   m_h_cell_radius = new TH1D("h_Calo_cell_radius", "cell_radius", 100, 0., 6000.);
   m_h_cell_radius->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_radius->GetName(), m_h_cell_radius));
+  ATH_CHECK(histSvc()->regHist( m_path+m_h_cell_radius->GetName(), m_h_cell_radius));
 
   m_h_xy = new TH2F("h_Calo_xy", "xy", 100,-4000,4000,100, -4000, 4000);
   m_h_xy->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_xy->GetName(), m_h_xy));
+  ATH_CHECK(histSvc()->regHist( m_path+m_h_xy->GetName(), m_h_xy));
 
   m_h_zr = new TH2D("h_Calo_zr", "zr", 100,-7000.,7000.,100, 0., 6000.);
   m_h_zr->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_zr->GetName(), m_h_zr));
+  ATH_CHECK(histSvc()->regHist( m_path+m_h_zr->GetName(), m_h_zr));
 
   m_h_etaphi = new TH2D("h_Calo_etaphi", "eta_phi", 50,-5.,5.,50, -3.1416, 3.1416);
   m_h_etaphi->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_etaphi->GetName(), m_h_etaphi));
+  ATH_CHECK(histSvc()->regHist( m_path+m_h_etaphi->GetName(), m_h_etaphi));
 
   //These histograms will be filled only if expert mode is set on
   m_h_time_e = new TH2D("h_Calo_time_e", "energy vs time", 100, 0,50, 100,0,500);
@@ -90,10 +84,10 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_r_e->StatOverflows();
 
   if (m_expert) {
-    CHECK(m_thistSvc->regHist(m_path + m_h_time_e->GetName(), m_h_time_e));
-    CHECK(m_thistSvc->regHist(m_path + m_h_eta_e->GetName(), m_h_eta_e));
-    CHECK(m_thistSvc->regHist(m_path + m_h_phi_e->GetName(), m_h_phi_e));
-    CHECK(m_thistSvc->regHist(m_path + m_h_r_e->GetName(), m_h_r_e));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_time_e->GetName(), m_h_time_e));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_eta_e->GetName(), m_h_eta_e));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_phi_e->GetName(), m_h_phi_e));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_r_e->GetName(), m_h_r_e));
   }
 
   //Histograms for calibrated hits
@@ -128,46 +122,41 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_calib_eTotpartID->StatOverflows();
 
   if (m_calib) {
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_eta->GetName(), m_h_calib_eta));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_phi->GetName(), m_h_calib_phi));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_rz->GetName(), m_h_calib_rz));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_etaphi->GetName(), m_h_calib_etaphi));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_eEM->GetName(), m_h_calib_eEM));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_eNonEM->GetName(), m_h_calib_eNonEM));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_eInv->GetName(), m_h_calib_eInv));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_eEsc->GetName(), m_h_calib_eEsc));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_eTot->GetName(), m_h_calib_eTot));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_eTotpartID->GetName(), m_h_calib_eTotpartID));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_eta->GetName(), m_h_calib_eta));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_phi->GetName(), m_h_calib_phi));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_rz->GetName(), m_h_calib_rz));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_etaphi->GetName(), m_h_calib_etaphi));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_eEM->GetName(), m_h_calib_eEM));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_eNonEM->GetName(), m_h_calib_eNonEM));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_eInv->GetName(), m_h_calib_eInv));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_eEsc->GetName(), m_h_calib_eEsc));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_eTot->GetName(), m_h_calib_eTot));
+    ATH_CHECK(histSvc()->regHist(m_path + m_h_calib_eTotpartID->GetName(), m_h_calib_eTotpartID));
   }
 
   /** now add branches and leaves to the tree */
   m_tree = new TTree("Calo", "Calo");
   std::string fullNtupleName =  "/" + m_ntupleFileName + "/";
-  CHECK( m_thistSvc->regTree(fullNtupleName, m_tree) );
+  ATH_CHECK( histSvc()->regTree(fullNtupleName, m_tree) );
 
-  if (m_tree) {
-    m_tree->Branch("CellEta", &m_cell_eta);
-    m_tree->Branch("CellPhi", &m_cell_phi);
-    m_tree->Branch("CellX", &m_cell_x);
-    m_tree->Branch("CellY", &m_cell_y);
-    m_tree->Branch("CellZ", &m_cell_z);
-    m_tree->Branch("CellE", &m_cell_e);
-    m_tree->Branch("CellRadius", &m_cell_radius);
-    m_tree->Branch("Time", &m_time);
-    m_tree->Branch("CalibEta", &m_calib_eta);
-    m_tree->Branch("CalibPhi", &m_calib_phi);
-    m_tree->Branch("CalibRadius", &m_calib_radius);
-    m_tree->Branch("CalibZ", &m_calib_z);
-    m_tree->Branch("Calib_eEM", &m_calib_eEM);
-    m_tree->Branch("Calib_eNonEM", &m_calib_eNonEM);
-    m_tree->Branch("Calib_eInv", &m_calib_eInv);
-    m_tree->Branch("Calib_eEsc", &m_calib_eEsc);
-    m_tree->Branch("Calib_eTot", &m_calib_eTot);
-    m_tree->Branch("Calib_partID", &m_calib_partID);
-  }
-  else {
-    ATH_MSG_ERROR( "No tree found!" );
-  }
+  m_tree->Branch("CellEta", &m_cell_eta);
+  m_tree->Branch("CellPhi", &m_cell_phi);
+  m_tree->Branch("CellX", &m_cell_x);
+  m_tree->Branch("CellY", &m_cell_y);
+  m_tree->Branch("CellZ", &m_cell_z);
+  m_tree->Branch("CellE", &m_cell_e);
+  m_tree->Branch("CellRadius", &m_cell_radius);
+  m_tree->Branch("Time", &m_time);
+  m_tree->Branch("CalibEta", &m_calib_eta);
+  m_tree->Branch("CalibPhi", &m_calib_phi);
+  m_tree->Branch("CalibRadius", &m_calib_radius);
+  m_tree->Branch("CalibZ", &m_calib_z);
+  m_tree->Branch("Calib_eEM", &m_calib_eEM);
+  m_tree->Branch("Calib_eNonEM", &m_calib_eNonEM);
+  m_tree->Branch("Calib_eInv", &m_calib_eInv);
+  m_tree->Branch("Calib_eEsc", &m_calib_eEsc);
+  m_tree->Branch("Calib_eTot", &m_calib_eTot);
+  m_tree->Branch("Calib_partID", &m_calib_partID);
 
   return StatusCode::SUCCESS;
 }
@@ -195,10 +184,11 @@ StatusCode CaloHitAnalysis::execute() {
   m_calib_eTot->clear();
   m_calib_partID->clear();
 
-  if (m_useTile) {
-    const TileHitVector* hitVec;
-    //const TileHitVector* hitVec;
-    if (evtStore()->retrieve(hitVec,"TileHitVec") == StatusCode::SUCCESS && m_tileMgr && m_tileID) {
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
+  const TileHitVector* hitVec{nullptr};
+  ATH_CHECK(SG::get(hitVec, m_tileKey, ctx));
+
+  if (hitVec) {
       for (const auto& i_hit : *hitVec) {
         Identifier pmt_id = (i_hit).identify();
         Identifier cell_id = m_tileID->cell_id(pmt_id);
@@ -232,18 +222,16 @@ StatusCode CaloHitAnalysis::execute() {
           m_time->push_back(tot_time);
         }
       }
-    }
   } // DoTile
 
   if (m_useLAr) {
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
-    ATH_CHECK(caloMgrHandle.isValid());
-    const CaloDetDescrManager* caloMgr = *caloMgrHandle;
-
-    std::string  lArKey [4] = {"LArHitEMB", "LArHitEMEC", "LArHitFCAL", "LArHitHEC"};
-    for (unsigned int i=0; i<4; i++) {
-      const LArHitContainer* iter;
-      if (evtStore()->retrieve(iter,lArKey[i]) == StatusCode::SUCCESS) {
+    
+    const CaloDetDescrManager* caloMgr{nullptr};
+    ATH_CHECK(SG::get(caloMgr, m_caloMgrKey, ctx));
+ 
+    for (const auto& key : m_caloKeys) {
+      const LArHitContainer* iter{nullptr};
+      ATH_CHECK(SG::get(iter, key, ctx));
         for (auto hi : *iter ) {
           const CaloDetDescrElement *hitElement = caloMgr->get_element(hi->cellID());
           double energy = hi->energy();
@@ -277,18 +265,15 @@ StatusCode CaloHitAnalysis::execute() {
           m_cell_radius->push_back(radius);
           m_time->push_back(time);
         } // End while hits
-      } // End statuscode success upon retrieval of hits
     } // End detector type loop
 
     //For calibrated hits
-    std::string LArCalibKey [3] = {"LArCalibrationHitActive", "LArCalibrationHitInactive","LArCalibrationHitDeadMaterial"};
-    for (unsigned int j=0; j<3; j++) {
-      if (!m_calib) continue;
-      const CaloCalibrationHitContainer* iterator;
-      if (evtStore()->retrieve(iterator, LArCalibKey[j]) == StatusCode::SUCCESS) {
+    for (const auto& calibKey : m_caloCalibKeys){
+      const CaloCalibrationHitContainer* iterator{nullptr};
+      ATH_CHECK(SG::get(iterator,calibKey, ctx));
         //Not tested
         for (auto hit_i : *iterator) {
-          GeoCaloCalibHit geoHit(*hit_i, LArCalibKey[j], caloMgr);
+          GeoCaloCalibHit geoHit(*hit_i, calibKey.key(), caloMgr);
           if (!geoHit) continue;
           const CaloDetDescrElement* Element = geoHit.getDetDescrElement();
           double eta = Element->eta();
@@ -324,7 +309,6 @@ StatusCode CaloHitAnalysis::execute() {
           m_calib_eTot->push_back(totEnergy);
           m_calib_partID->push_back(particleID);
         }
-      }
     }
   } // DoLAr
 

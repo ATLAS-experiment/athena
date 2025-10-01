@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,7 +22,7 @@ class CaloIDHelperTest
   : public CaloIDHelper
 {
 public:
-  CaloIDHelperTest (const std::string& name) : CaloIDHelper(name) {}
+  CaloIDHelperTest (const std::string& name) : CaloIDHelper(name, "lar_em") {}
 
   virtual int  get_expanded_id  (const Identifier& id,
                                  ExpandedIdentifier& exp_id,
@@ -225,7 +225,7 @@ void test_helper()
               << helper.phi0(hashid) << " "
               << helper.etaGranularity(hashid) << " "
               << helper.phiGranularity(hashid) << "\n";
-    assert (helper.dictRegions()[hashid]->m_eta0 == helper.eta0(hashid));
+    assert (helper.dictRegions()[hashid]->eta0() == helper.eta0(hashid));
   }
 }
 

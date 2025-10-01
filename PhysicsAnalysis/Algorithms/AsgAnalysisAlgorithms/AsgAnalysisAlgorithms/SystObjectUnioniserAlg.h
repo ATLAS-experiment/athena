@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   SystObjectUnioniserAlg:
   This alg takes a set of systematic variation containers which have
@@ -94,7 +94,7 @@ private:
       { this, "systVarLink_template", "systVarLink_%SYS%", "Pattern to be substituted with systematics names"};
 
     /// \brief Build a map of syst hash to ConstAccessors to read the systematics links
-    std::unordered_map<size_t,SG::AuxElement::ConstAccessor<iplink_t> >
+    std::unordered_map<size_t,SG::ConstAccessor<iplink_t> >
       m_syst_link_acc;
   };
 

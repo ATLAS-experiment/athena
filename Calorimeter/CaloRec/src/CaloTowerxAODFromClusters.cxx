@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -8,6 +8,7 @@
 
 #include "xAODCaloEvent/CaloTowerContainer.h"
 #include "xAODCaloEvent/CaloTowerAuxContainer.h"
+#include <memory>
 
 #ifndef CALOTOWER_MAX_CELL_COUNT
 #define CALOTOWER_MAX_CELL_COUNT 200000
@@ -45,7 +46,7 @@ StatusCode CaloTowerxAODFromClusters::execute(const EventContext& ctx) const
   if (!caloTowerContainer.isValid())
     return StatusCode::FAILURE;
   
-  std::bitset< CALOTOWER_MAX_CELL_COUNT> addedCellsMap;
+  auto addedCellsMap = std::make_unique<std::bitset< CALOTOWER_MAX_CELL_COUNT> >();
 
   for (const xAOD::CaloCluster* it_cluster : *inputClusterContainer) {
     const CaloClusterCellLink* cellLinks=it_cluster->getCellLinks();
@@ -58,8 +59,8 @@ StatusCode CaloTowerxAODFromClusters::execute(const EventContext& ctx) const
       //Ask cell for it's hash
       const IdentifierHash cellHash = cell->caloDDE()->calo_hash();
       //Check it this cell is already part of reducedCellContainer
-      if (!addedCellsMap.test(cellHash)) {
-	addedCellsMap.set(cellHash);
+      if (!addedCellsMap->test(cellHash)) {
+	addedCellsMap->set(cellHash);
 	assert(cellHash<cellToTower.size());
 	const auto& c2ts=cellToTower[cellHash];
 	//Remember: A cell can contribute to more than one tower!

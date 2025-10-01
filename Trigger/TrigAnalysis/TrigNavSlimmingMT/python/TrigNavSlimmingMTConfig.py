@@ -79,7 +79,8 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
   daodSlim.RepackROIsOutputCollection = "HLTNav_RepackedROIs"
   daodSlim.RepackMET = True # To check: Is there any analysis need to have online-MET(s) in DAOD?
   daodSlim.RepackFeatures = True
-
+  # Note: We rely on BJetTriggerByYearContent.py to keep HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets in the DAOD
+  daodSlim.RepackFeaturesExclusionList = ["HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets"]
   daodSlim.RepackFeaturesOutputCollection_Particle = "HLTNav_RepackedFeatures_Particle"
   daodSlim.RepackFeaturesOutputCollection_MET = "HLTNav_RepackedFeatures_MET"
   daodSlim.EdgesToDrop = ["view"] # "view" element links, only useful online.

@@ -18,8 +18,6 @@
 #include <stdexcept>
 #include <atomic>
 
-#include <boost/config.hpp>
-
 #include "StoreGate/SGtests.h"
 #include "TestTools/SGassert.h"
 
@@ -208,11 +206,13 @@ namespace Athena_test
     expCLIDs.insert (ClassID_traits<Foo>::ID());
     checkCLIDs (rSG, expCLIDs);
     //can't record with same key
-    SGASSERTERROR(rSG.record(new Foo(3), "pFoo1", LOCKED).isSuccess());
+    auto pFoo3 = new Foo(3);
+    SGASSERTERROR(rSG.record(pFoo3, "pFoo1", LOCKED).isSuccess());
     //can't record same object twice
     SGASSERTERROR(rSG.record(pFoo, "pFoo2", !LOCKED).isSuccess());
     //check we haven't left any trace of "pFoo2" in DataStore
-    assert(rSG.record(new Foo(2), "pFoo2", !LOCKED).isSuccess());
+    StatusCode sc;
+    sc = rSG.record(new Foo(2), "pFoo2", !LOCKED);  assert(sc.isSuccess());
 
     const Foo* cpFoo = new Foo;
     assert(rSG.record(cpFoo, "cpFoo").isSuccess());
@@ -223,19 +223,21 @@ namespace Athena_test
     assert(1 == ids.size());
     
     SillyKey key("silly");
-    assert(rSG.record(new Foo(4), key).isSuccess());
+    sc = rSG.record(new Foo(4), key);  assert (sc.isSuccess());
     //can't record with same key
-    SGASSERTERROR(rSG.record(new Foo(5), key).isSuccess());
-    SGASSERTERROR(rSG.record(new Foo(6), key, LOCKED).isSuccess());
+    auto pFoo5 = new Foo(5);
+    SGASSERTERROR(rSG.record(pFoo5, key).isSuccess());
+    auto pFoo6 = new Foo(6);
+    SGASSERTERROR(rSG.record(pFoo6, key, LOCKED).isSuccess());
     std::unique_ptr<Foo> foo5 (new Foo(5));
     SGASSERTERROR(rSG.record(std::move(foo5), key).isSuccess());
     assert (foo5.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
-    assert(rSG.record(new Foo(7), "UnLocked", !LOCKED).isSuccess());
-    assert(rSG.record(new Foo(8), "Locked", LOCKED).isSuccess());
-    assert(rSG.record(new Foo(9), "LockedReset", LOCKED, RESET).isSuccess());
-    assert(rSG.record(new Foo(10), "UnLockedReset", !LOCKED, RESET).isSuccess());
-    assert(rSG.record(new Foo(11), "LockedDelete", LOCKED, DELETE).isSuccess());
+    sc = rSG.record(new Foo(7), "UnLocked", !LOCKED);  assert (sc.isSuccess());
+    sc = rSG.record(new Foo(8), "Locked", LOCKED);  assert (sc.isSuccess());
+    sc = rSG.record(new Foo(9), "LockedReset", LOCKED, RESET);  assert (sc.isSuccess());
+    sc = rSG.record(new Foo(10), "UnLockedReset", !LOCKED, RESET);  assert (sc.isSuccess());
+    sc = rSG.record(new Foo(11), "LockedDelete", LOCKED, DELETE);  assert (sc.isSuccess());
 
     std::unique_ptr<Foo> foo12 (new Foo(12));
     assert(rSG.record(std::move(foo12),
@@ -255,13 +257,13 @@ namespace Athena_test
 
 
     /// Test overwriting.
-    assert (rSG.record(new Foo(101), "ow").isSuccess());
-    assert (rSG.overwrite(new Foo(102), "ow").isSuccess());
-    assert (rSG.overwrite(make_unique<Foo>(103), "ow").isSuccess());
+    sc = rSG.record(new Foo(101), "ow");  assert (sc.isSuccess());
+    sc = rSG.overwrite(new Foo(102), "ow");  assert (sc.isSuccess());
+    sc = rSG.overwrite(make_unique<Foo>(103), "ow");  assert (sc.isSuccess());
 
-    assert (rSG.record(new Foo(104), "ow2", LOCKED).isSuccess());
-    assert (rSG.overwrite(new Foo(105), "ow2", LOCKED).isSuccess());
-    assert (rSG.overwrite(make_unique<Foo>(106), "ow2", LOCKED).isSuccess());
+    sc = rSG.record(new Foo(104), "ow2", LOCKED);  assert (sc.isSuccess());
+    sc = rSG.overwrite(new Foo(105), "ow2", LOCKED);  assert (sc.isSuccess());
+    sc = rSG.overwrite(make_unique<Foo>(106), "ow2", LOCKED);  assert (sc.isSuccess());
 
     /// 14 Foo objects recorded above : check it
     assert(rSG.typeCount<Foo>() == 14);
@@ -778,19 +780,21 @@ namespace Athena_test {
   {  
     cout << "\n*** StoreGateSvcClient_test VersionedKey BEGINS ***" << endl;
     //start by creating an unversioned object to test handling of legacy keys
-    assert(rSG.record(new Foo(11), "aVersObj").isSuccess());
+    StatusCode sc;
+    sc = rSG.record(new Foo(11), "aVersObj"); assert(sc.isSuccess());
     const Foo* pFoo(0);
     assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
     assert(pFoo->i() == 11);
     
     //try to put a VersionedKey on top
     VersionedKey myKey("aVersObj", 77);
-    assert(rSG.record(new Foo(77), (std::string)myKey).isSuccess());
+    sc = rSG.record(new Foo(77), (std::string)myKey); assert(sc.isSuccess());
     const Foo* pFoo77 = rSG.retrieve<Foo>(myKey);
     assert(0 != pFoo77);
     assert(pFoo77->i() == 77);
     //test that we can retrieve the same object with an unversioned key
-    assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
+    pFoo = rSG.retrieve<Foo>("aVersObj");
+    assert(0 != pFoo);
     assert(pFoo->i() == 77);
     
     //check we can retrieve the old object with a default unversioned key
@@ -801,12 +805,13 @@ namespace Athena_test {
 
     const std::string baseKey("aVersObj");
     VersionedKey my2Key(baseKey, 88);
-    assert(rSG.record(new Foo(88), (std::string)my2Key).isSuccess());
-    const Foo* pFoo88(0);
-    assert(0 != (pFoo88 = rSG.retrieve<Foo>(my2Key)));
+    sc = rSG.record(new Foo(88), (std::string)my2Key); assert(sc.isSuccess());
+    const Foo* pFoo88 = rSG.retrieve<Foo>(my2Key);
+    assert(0 != pFoo88);
     assert(pFoo88->i() == 88);
 
-    SGASSERTERROR(rSG.record(new Foo(66), (std::string)my2Key).isSuccess());
+    auto foo66 = new Foo(66);
+    SGASSERTERROR(rSG.record(foo66, (std::string)my2Key).isSuccess());
     VersionedKey my3Key(baseKey, 66);
     assert(rSG.record(new Foo(66), (std::string)my3Key).isSuccess());
 
@@ -938,14 +943,14 @@ namespace Athena_test {
     TestAuxStore* pAux_b = new TestAuxStore;
     assert(rSG.record(pAux_b, "BStandAux.").isSuccess());
 
-    assert( 0 != (pb=rSG.retrieve<BX>("BStand")) );
+    pb = rSG.retrieve<BX>("BStand");
+    assert( 0 != pb );
     //assert (pb->usingStandAloneStore());
     //assert (pb->getStore() == pAux_b);
     
     cout << "*** StoreGateSvcClient_test retrieveAux OK ***\n\n" <<endl;
   }
 
-#ifndef BOOST_NO_CXX11_VARIADIC_TEMPLATES
   void testCreate(::StoreGateSvc& rSG) 
   {  
     cout << "\n*** StoreGateSvcClient_test testCreate BEGINS ***" << endl;
@@ -965,12 +970,6 @@ namespace Athena_test {
 
     cout << "*** StoreGateSvcClient_test testCreate OK ***\n\n" <<endl;
   }
-#else
-  void testCreate(::StoreGateSvc&) 
-  {  
-  }
-#endif
-
 
   void testBoundReset(StoreGateSvc& rSG)
   {

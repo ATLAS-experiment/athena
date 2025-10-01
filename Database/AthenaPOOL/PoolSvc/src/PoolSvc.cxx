@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolSvc.cxx
@@ -43,39 +43,30 @@
 
 #include "DBReplicaSvc/IDBReplicaSvc.h"
 
-#include <cstdlib> 	  // for getenv()
-#include <cstring> 	  // for strcmp()
-#include <algorithm>  // for STL find()
-#include <cstdio>     // for fopen
-#include <ctype.h>    // for isdigit
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
+#include <cstdio>
+#include <cctype>
 #include <exception>  // for runtime_error
 
 bool isNumber(const std::string& s) {
-   return !s.empty() and ( isdigit(s[0]) or s[0]=='+' or s[0]=='-' );
+   return !s.empty() && (std::isdigit(s[0]) || s[0] == '+' || s[0] == '-');
 }
 
 //__________________________________________________________________________
 StatusCode PoolSvc::initialize() {
-   if (!::AthService::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize AthService base class.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(::AthService::initialize());
 
    // Register this service for 'I/O' events
    ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
-   if (!iomgr.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Could not retrieve IoComponentMgr !");
-      return(StatusCode::FAILURE);
-   }
-   if (!iomgr->io_register(this).isSuccess()) {
-      ATH_MSG_FATAL("Could not register myself with the IoComponentMgr !");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(iomgr.retrieve());
+   ATH_CHECK(iomgr->io_register(this));
    // Register input file's names with the I/O manager, unless in SharedWrite mode, set by AthenaPoolCnvSvc
    bool allGood = true;
-   for (auto& catalog : m_readCatalog.value()) {
-      if (catalog.compare(0, 16, "xmlcatalog_file:") == 0) {
-         const std::string& fileName = catalog.substr(16);
+   for (const auto& catalog : m_readCatalog.value()) {
+      if (catalog.starts_with("xmlcatalog_file:")) {
+         const std::string fileName = catalog.substr(16);
          if (!iomgr->io_register(this, IIoComponentMgr::IoMode::READ, fileName, fileName).isSuccess()) {
             ATH_MSG_FATAL("could not register [" << catalog << "] for input !");
             allGood = false;
@@ -84,8 +75,8 @@ StatusCode PoolSvc::initialize() {
          }
       }
    }
-   if (m_writeCatalog.value().compare(0, 16, "xmlcatalog_file:") == 0) {
-      const std::string& fileName = m_writeCatalog.value().substr(16);
+   if (m_writeCatalog.value().starts_with("xmlcatalog_file:")) {
+      const std::string fileName = m_writeCatalog.value().substr(16);
       if (!iomgr->io_register(this, IIoComponentMgr::IoMode::WRITE, fileName, fileName).isSuccess()) {
          ATH_MSG_FATAL("could not register [" << m_writeCatalog.value() << "] for input !");
          allGood = false;
@@ -247,6 +238,7 @@ StatusCode PoolSvc::stop() {
 
 //__________________________________________________________________________
 void PoolSvc::clearState() {
+   std::lock_guard<CallMutex> lock(m_pool_mut);
    // Cleanup persistency service
    for (const auto& persistencySvc : m_persistencySvcVec) {
       delete persistencySvc;
@@ -912,7 +904,7 @@ StatusCode PoolSvc::setFrontierCache(const std::string& conn) {
          for (int irep = 0, nrep = dbset->numberOfReplicas(); irep < nrep; ++irep) {
 	    const std::string pcon = dbset->replica(irep).connectionString();
 	    if (pcon.compare(0, 9, "frontier:") == 0) {
-               physcons.push_back(pcon);
+               physcons.push_back(std::move(pcon));
             }
          }
          delete dbset; dbset = nullptr;
@@ -931,20 +923,18 @@ StatusCode PoolSvc::setFrontierCache(const std::string& conn) {
    // get the WebCacheControl interface via ConnectionSvc
    // note ConnectionSvc should already be loaded by initialize
    coral::IWebCacheControl& webCache = conSvcH.webCacheControl();
-   for (std::vector<std::string>::const_iterator iter = physcons.begin(), last = physcons.end();
-		   iter != last; ++iter) {
-      if (find(m_frontierRefresh.value().begin(), m_frontierRefresh.value().end(), *iter)
-		      == m_frontierRefresh.value().end()
-	      && find(m_frontierRefresh.value().begin(), m_frontierRefresh.value().end(), conn)
-		      == m_frontierRefresh.value().end()) {
+   for (const auto& physcon : physcons) {
+      const auto& refreshList = m_frontierRefresh.value();
+      if (std::find(refreshList.begin(), refreshList.end(), physcon) == refreshList.end()
+          && std::find(refreshList.begin(), refreshList.end(), conn) == refreshList.end()) {
          // set that a table DUMMYTABLE should be refreshed - indicates that everything
          // else in the schema should not be
-         webCache.refreshTable(*iter, "DUMMYTABLE");
+         webCache.refreshTable(physcon, "DUMMYTABLE");
       } else {
          // set the schema to be refreshed
-         webCache.refreshSchemaInfo(*iter);
+         webCache.refreshSchemaInfo(physcon);
       }
-      ATH_MSG_DEBUG("Cache flag for connection " << *iter << " set to " << webCache.webCacheInfo(*iter).isSchemaInfoCached());
+      ATH_MSG_DEBUG("Cache flag for connection " << physcon << " set to " << webCache.webCacheInfo(physcon).isSchemaInfoCached());
    }
    return(StatusCode::SUCCESS);
 }

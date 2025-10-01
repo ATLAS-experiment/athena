@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: InDetAlignConfig/python/SolveConfig.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
@@ -11,17 +11,17 @@ def AlignAlgCfg(flags, name="AlignAlgSolve", **kwargs):
     cfg = ComponentAccumulator()
 
     if "GeometryManagerTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import GeometryManagerToolCfg
+        from InDetAlignConfig.IDAlignToolsConfig import InDetGeometryManagerToolCfg
         kwargs.setdefault("GeometryManagerTool", cfg.addPublicTool(cfg.popToolsAndMerge(
-            GeometryManagerToolCfg(flags))))
+            InDetGeometryManagerToolCfg(flags))))
 
     if "AlignTool" not in kwargs:
         from InDetAlignConfig.IDAlignToolsConfig import GlobalChi2AlignToolCfg
         kwargs.setdefault("AlignTool", cfg.popToolsAndMerge(GlobalChi2AlignToolCfg(flags)))
 
     if "AlignDBTool" not in kwargs:
-        from InDetAlignConfig.IDAlignToolsConfig import AlignDBToolCfg
-        kwargs.setdefault("AlignDBTool", cfg.popToolsAndMerge(AlignDBToolCfg(flags)))
+        from InDetAlignConfig.IDAlignToolsConfig import InDetTrkAlignDBToolCfg
+        kwargs.setdefault("AlignDBTool", cfg.popToolsAndMerge(InDetTrkAlignDBToolCfg(flags)))
 
     if "AlignTrackCreator" not in kwargs:
         from InDetAlignConfig.IDAlignToolsConfig import AlignTrackCreatorCfg
@@ -35,50 +35,43 @@ def AlignAlgCfg(flags, name="AlignAlgSolve", **kwargs):
     cfg.addEventAlgo(CompFactory.Trk.AlignAlg(name, **kwargs))
     return cfg
     
+def WriteConstCfg(flags, name = "WriteConst", **kwargs):
+    cfg = ComponentAccumulator()
+
+    objectList = [
+        "CondAttrListCollection#/Indet/AlignL1/ID",
+        "CondAttrListCollection#/Indet/AlignL2/PIX", 
+        "CondAttrListCollection#/Indet/AlignL2/SCT",
+        "AlignableTransformContainer#/Indet/AlignL3",
+        "CondAttrListCollection#/TRT/AlignL1/TRT",
+        "AlignableTransformContainer#/TRT/AlignL2",
+        # Disable TRT L3 until ATLIDTRKCP-745 is solved
+        #"TRTCond::StrawDxContainer#/TRT/Calib/DX",
+        "CondAttrListCollection#/Indet/IBLDist"
+    ]
     
+    tagList = [
+        "InDetAlignL1-T0-Alignment", 
+        "InDetAlignL2PIX-T0-Alignment", 
+        "InDetAlignL2SCT-T0-Alignment", 
+        "InDetAlignL3-T0-Alignment",
+        "InDetAlignL1TRT-T0-Alignment", 
+        "InDetAlignL2TRT-T0-Alignment",
+        # Disable TRT L3 until ATLIDTRKCP-745 is solved
+        #"InDetAlignL3TRT-T0-Alignment",
+        "InDetAlignIBLDIST-T0-Alignment"
+    ]
+
+    from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
+    cfg.merge(OutputConditionsAlgCfg(
+        flags, 
+        outputFile = flags.InDet.Align.outputConditionFile,
+        ObjectList = objectList, IOVTagList = tagList, WriteIOV = True))
+            
+    return cfg
 
 def SolveCfg(flags, **kwargs):
     cfg = AlignAlgCfg(flags)
+    cfg.merge(WriteConstCfg(flags))
     
-    ##----- Setup of OutputConditionsAlg and its tools -----##
-    
-    if flags.InDet.Align.writeConstantsToPool:
-        objectList = []
-        tagList = []
-
-        if flags.InDet.Align.writeSilicon:
-            if flags.InDet.Align.writeDynamicDB:
-                objectList.extend(["CondAttrListCollection#/Indet/AlignL1/ID",
-                                   "CondAttrListCollection#/Indet/AlignL2/PIX", 
-                                   "CondAttrListCollection#/Indet/AlignL2/SCT",
-                                   "AlignableTransformContainer#/Indet/AlignL3"])
-                tagList.extend(["IndetL1Test", "IndetL2PIXTest", "IndetL2SCTTest",
-                                flags.InDet.Align.tagSi])
-            else:
-                objectList.extend(["AlignableTransformContainer#/Indet/Align"])
-                tagList.extend([flags.InDet.Align.tagSi])
-                
-        if flags.InDet.Align.writeTRT:
-            if flags.InDet.Align.writeDynamicDB:
-                objectList.extend(["CondAttrListCollection#/TRT/AlignL1/TRT",
-                                   "AlignableTransformContainer#/TRT/AlignL2"])
-                tagList.extend(["IndetL1TRTTest", flags.InDet.Align.tagTRT])
-            else:
-                objectList.extend(["AlignableTransformContainer#/TRT/Align"])
-                tagList.extend([flags.InDet.Align.tagTRT])
-                
-        if flags.InDet.Align.writeTRTL3:
-            objectList.extend(["TRTCond::StrawDxContainer#/TRT/Calib/DX"])
-            
-        if flags.InDet.Align.writeIBLDistDB:
-            objectList.extend(["CondAttrListCollection#/Indet/IBLDist"])
-            tagList.extend([flags.InDet.Align.tagBow])
-
-        from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
-        cfg.merge(OutputConditionsAlgCfg(
-            flags, 
-            outputFile = f"{flags.InDet.Align.baseDir}/Solve/{flags.InDet.Align.outputConditionFile}",
-            ObjectList = objectList, IOVTagList = tagList, WriteIOV = False)) ##TODO: Set this to false to avoid errors
-
-    cfg.addEventAlgo(CompFactory.Trk.AlignTrackCollSplitter())
     return cfg

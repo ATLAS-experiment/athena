@@ -29,7 +29,7 @@ public:
    /// Standard AlgTool Constructor
    MakeEventStreamInfo(const std::string& type, const std::string& name, const IInterface* parent);
    /// Destructor
-   virtual ~MakeEventStreamInfo();
+   virtual ~MakeEventStreamInfo() = default;
    /// Required of all IAthenaOutputTools:
    /// Called by AthenaOutputStream::initialize() (via ToolSvc retrieve()).
    virtual StatusCode initialize() override;

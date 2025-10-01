@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -83,9 +83,15 @@ namespace D3PD{
 
         if(m_SaveOffId){
             Identifier digID=tileD->adc_ID();
-            *m_section=(char)m_tileid->section(digID);
-            *m_side=(char)m_tileid->side(digID);
-            *m_tower=(char)m_tileid->tower(digID);
+            if (digID.is_valid()) {
+              *m_section = (char)m_tileid->section(digID);
+              *m_side = (char)m_tileid->side(digID);
+              *m_tower = (char)m_tileid->tower(digID);
+            } else {
+              *m_section = std::numeric_limits<char>::min();
+              *m_side = std::numeric_limits<char>::min();
+              *m_tower = std::numeric_limits<char>::min();
+            }
         }
 
         return StatusCode::SUCCESS;

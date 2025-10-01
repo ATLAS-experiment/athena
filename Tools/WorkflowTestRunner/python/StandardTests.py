@@ -253,6 +253,38 @@ class DerivationTest(WorkflowTest):
 
         super().__init__(ID, run, type, steps, setup)
 
+class DerivationTestMT(WorkflowTest):
+    """Derivations test with AthenaMT"""
+
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+        test_def = ID.split("_")
+        data_type = test_def[0].lower()
+        formats = [format.upper() for format in test_def[1:-1]]
+        extra_args = extra_args.replace("mtDerivation", "")
+
+        threads = 0
+        if setup.custom_threads is not None:
+            threads = setup.custom_threads
+
+        if "maxEvents" not in extra_args:
+            events = 10
+            extra_args += f" --maxEvents {events}"
+
+        if "inputAODFile" not in extra_args:
+            extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
+
+        self.command = \
+            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
+             f" --athenaopts='--threads=1'"
+             f" --formats {' '.join(formats)}"
+             " --outputDAODFile myOutput.pool.root"
+             f" --imf False {extra_args}")
+
+        # skip performance checks for now
+        self.skip_performance_checks = True
+
+        super().__init__(ID, run, type, steps, setup)
+
 
 class GenerationTest(WorkflowTest):
     """Generation test."""

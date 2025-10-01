@@ -80,7 +80,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             name            = kwargs['DiTauThinningToolName'],
             StreamName      = StreamName,
             ContainerName   = "DiTauJets",
-            SelectionString = "DiTauJets.nSubjets > 1"))
+            SelectionString = "DiTauJets.nSubjets > 1 && abs(DiTauJets.charge) < 3"))
 
     # ID tracks associated with high-pt di-tau
     if "DiTauTPThinningToolName" in kwargs:
@@ -90,7 +90,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             StreamName              = StreamName,
             DiTauKey                = "DiTauJets",
             InDetTrackParticlesKey  = "InDetTrackParticles",
-            SelectionString         = "DiTauJets.nSubjets > 1"))
+            SelectionString         = "DiTauJets.nSubjets > 1 && abs(DiTauJets.charge) < 3"))
  
     ## Low-pt di-tau thinning
     if "DiTauLowPtThinningToolName" in kwargs:
@@ -99,7 +99,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             name            = kwargs['DiTauLowPtThinningToolName'],
             StreamName      = StreamName,
             ContainerName   = "DiTauJetsLowPt",
-            SelectionString = "DiTauJetsLowPt.nSubjets > 1"))
+            SelectionString = "DiTauJetsLowPt.nSubjets > 1 && (DiTauJetsLowPt.charge == 0 ||  abs(DiTauJetsLowPt.charge) == 2)"))
     
     # ID tracks associated with low-pt ditau
     if "DiTauLowPtTPThinningToolName" in kwargs:
@@ -109,7 +109,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             StreamName              = StreamName,
             DiTauKey                = "DiTauJetsLowPt",
             InDetTrackParticlesKey  = "InDetTrackParticles",
-            SelectionString         = "DiTauJetsLowPt.nSubjets > 1"))
+            SelectionString         = "DiTauJetsLowPt.nSubjets > 1 && (DiTauJetsLowPt.charge == 0 ||  abs(DiTauJetsLowPt.charge) == 2)"))
  
     # keep calo clusters around electrons
     if "ElectronCaloClusterThinningToolName" in kwargs:

@@ -70,21 +70,6 @@ namespace MC
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
 
-  /// @brief Identify a particlegun particle
-  template <class T> inline bool isSingleParticle(const T&  p) {
-    if constexpr (std::is_same_v<std::remove_const_t<HepMC::remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthParticle_v1>) {
-      return HepMC::uniqueID(p)  == 3 // Post migration format
-        || HepMC::uniqueID(p) == 10001; // pre-migration file read in so barcode copied to id for xAOD::Truth
-    }
-    else {
-#if defined(HEPMC3)
-      return HepMC::uniqueID(p)  == 3 ||  HepMC::barcode(p)  == 10001;
-#else
-      return HepMC::barcode(p)  == 10001;
-#endif
-    }
-  }
-
   /// @brief Identify a special non-interacting particles.
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
     const int apid = std::abs(p->pdg_id());

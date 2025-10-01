@@ -1,0 +1,15 @@
+DSID,generator-version pairs...
+# Powheg+Pythia8 inclusive W production
+361100,Powheg,None,Pythia8,186,EvtGen,1.2.0
+361101,Powheg,None,Pythia8,186,EvtGen,1.2.0
+361102,Powheg,None,Pythia8,186,EvtGen,1.2.0
+361103,Powheg,None,Pythia8,186,EvtGen,1.2.0
+361104,Powheg,None,Pythia8,186,EvtGen,1.2.0
+361105,Powheg,None,Pythia8,186,EvtGen,1.2.0
+# Powheg+Pythia8 inclusive Z production
+361106,Powheg,None,Pythia8,186,EvtGen,1.2.0
+361107,Powheg,None,Pythia8,186,EvtGen,1.2.0
+361108,Powheg,None,Pythia8,186,EvtGen,1.2.0
+# aMcAtNlo+Pythia8 tZq
+545027,aMcAtNlo,3.5.1.atlas3,Pythia8,309,EvtGen,2.1.1
+545028,aMcAtNlo,3.5.1.atlas3,Pythia8,309,EvtGen,2.1.1

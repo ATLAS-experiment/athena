@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MULTIFOLD_GNN_TOOL_H
@@ -14,7 +14,6 @@
 #include "FlavorTagInference/GNNToolifiers.h"
 
 // EDM includes
-#include "xAODBTagging/BTaggingFwd.h"
 #include "xAODJet/JetFwd.h"
 
 #include <memory>

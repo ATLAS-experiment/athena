@@ -45,6 +45,7 @@ run "Reconstruction-gbts" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2; \
+               flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.writeExtendedSi_PRDInfo=True; \
                flags.Acts.doMonitoring=True; \
                flags.Acts.doAnalysis=True; \
@@ -138,3 +139,6 @@ if [ $reco_rc = 0 -o $reco_rc = 68 ]; then
       -R "acts" \
       idpvm.gbts.root
 fi
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

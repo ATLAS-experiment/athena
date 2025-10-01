@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -27,9 +27,10 @@
 
 #include "PathResolver/PathResolver.h"
 
-#include "boost/thread/thread.hpp"
+#include <thread>
+#include <chrono>
 #include <filesystem>
-#include "boost/algorithm/string.hpp"
+#include <ranges>
 
 void   convert_to_HepMC(const ThePEG::Event & m_event, HepMC::GenEvent & evt, bool nocopies,ThePEG::Energy eunit, ThePEG::Length lunit);
 
@@ -95,15 +96,24 @@ StatusCode Herwig7::genInitialize() {
 
   // Use everything from $DATAPATH and $LD_LIBRARY_PATH:
   const char* datapath = getenv( "DATAPATH" );
-  std::vector< std::string > datapaths;
-  boost::split( datapaths, datapath,
-                boost::is_any_of( std::string( ":" ) ) );
+  std::vector<std::string> datapaths;
+  if (datapath) {
+      std::string datapath_str(datapath);
+      for (auto part : std::views::split(datapath_str, ':')) {
+          datapaths.emplace_back(part.begin(), part.end());
+      }
+  }
   for( const std::string& p : datapaths ) {
     ThePEG::Repository::appendReadDir( p );
   }
   const char* ldpath = getenv( "LD_LIBRARY_PATH" );
-  std::vector< std::string > ldpaths;
-  boost::split( ldpaths, ldpath, boost::is_any_of( std::string( ":" ) ) );
+  std::vector<std::string> ldpaths;
+  if (ldpath) {
+      std::string ldpath_str(ldpath);
+      for (auto part : ldpath_str | std::views::split(':')) {
+          ldpaths.emplace_back(std::string(part.begin(), part.end()));
+      }
+  }
   for( const std::string& p : ldpaths ) {
     ThePEG::DynamicLoader::appendPath( p );
   }
@@ -113,7 +123,7 @@ StatusCode Herwig7::genInitialize() {
   // Use PathResolver to find default Hw7 ThePEG repository file.
   const std::string repopath = PathResolver::find_file_from_list("HerwigDefaults.rpo", datapath);
   ATH_MSG_DEBUG("Loading Herwig default repo from " << repopath);
-  ThePEG::Repository::load(repopath);
+  ThePEG::Repository::load(std::move(repopath));
   ATH_MSG_DEBUG("Successfully loaded Herwig default repository");
 
   ATH_MSG_INFO("Setting runfile name '"+m_runfile+"'");
@@ -125,7 +135,7 @@ StatusCode Herwig7::genInitialize() {
   m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
   /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
   struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Herwig7"), std::string("7"), std::string("Used generator")};
-  m_runinfo->tools().push_back(generator);  
+  m_runinfo->tools().push_back(std::move(generator));  
 #endif
   // read in a Herwig runfile and obtain the event generator
   m_gen = Herwig::API::prepareRun(m_api);
@@ -208,7 +218,7 @@ StatusCode Herwig7::fillEvt(HepMC::GenEvent* evt) {
 #else
   HepMC::PdfInfo pdfi(id1, id2, x1, x2, Q, pdf1, pdf2);
 #endif
-  evt->set_pdf_info(pdfi);
+  evt->set_pdf_info(std::move(pdfi));
   ATH_MSG_DEBUG("Added PDF info to HepMC");
 
 //uncomment to list HepMC events
@@ -244,7 +254,7 @@ StatusCode Herwig7::genFinalize() {
     ATH_MSG_INFO("removing Herwig-scratch/Herwig-cache folder from "+std::filesystem::current_path().string());
 
     // sleep for some time to allow all access to terminate
-    boost::this_thread::sleep(boost::posix_time::seconds(5)); /// \todo Think of other way to wait for all access to terminate
+    std::this_thread::sleep_for(std::chrono::seconds(5)); /// \todo Think of other way to wait for all access to terminate
 
     // in case the folder can't be deleted continue with warning
     try {

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -20,34 +20,27 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
             AddStandardTruthContentsCfg,
             AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
-            AddPVCollectionCfg,
-            AddTruthCollectionNavigationDecorationsCfg)
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthCollectionMakerCfg
-        PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(TruthCollectionMakerCfg(
+            AddPVCollectionCfg)
+        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
+        PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             flags,
-            name                    = "PhysCommonTruthCharmTool",
-            NewCollectionName       = "TruthCharm",
-            KeepNavigationInfo      = False,
-            ParticleSelectionString = "(abs(TruthParticles.pdgId) == 4)",
-            Do_Compress             = True)) 
+            name = "PhysCommonTruthCharmTool"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
         acc.addEventAlgo(CommonAugmentation("PhysCommonTruthCharmKernel",AugmentationTools=[PhysCommonTruthCharmTool]))
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
-        acc.merge(AddStandardTruthContentsCfg(flags))
-        acc.merge(AddTruthCollectionNavigationDecorationsCfg(
-            flags,
-            TruthCollections=["TruthElectrons",
-                              "TruthMuons", 
-                              "TruthPhotons", 
-                              "TruthTaus", 
-                              "TruthNeutrinos", 
-                              "TruthBSM", 
-                              "TruthBottom", 
-                              "TruthTop", 
-                              "TruthBoson",
-                              "TruthCharm",
-                              "TruthHFWithDecayParticles"],
-            prefix = 'PHYS_'))
+        acc.merge(AddStandardTruthContentsCfg
+                  (flags,
+                   navInputCollections = ["TruthElectrons",
+                                          "TruthMuons",
+                                          "TruthPhotons",
+                                          "TruthTaus",
+                                          "TruthNeutrinos",
+                                          "TruthBSM",
+                                          "TruthBottom",
+                                          "TruthTop",
+                                          "TruthBoson",
+                                          "TruthCharm",
+                                          "TruthHFWithDecayParticles"]))
         # Re-point links on reco objects
         acc.merge(AddMiniTruthCollectionLinksCfg(flags))
         acc.merge(AddPVCollectionCfg(flags))
@@ -69,7 +62,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(EGammaCommonCfg(flags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
-    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
+    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg, AddDiTauChargeDecoratorCfg, AddDiTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     acc.merge(JetCommonCfg(flags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
@@ -81,9 +74,14 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     # eVeto WP and DeepSet ID for taus and muon-subtracted taus
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets"))
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_MuonRM"))
+    # add ID score for ditau
+    acc.merge(AddDiTauIDDecorationCfg(flags, DiTauContainerName="DiTauJets"))
     # for AOD produced before 24.0.17, the electron removal tau is not available
     if flags.Tau.TauEleRM_isAvailable:
         acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_EleRM"))
+    # ditau Charge
+    acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJets"))
+    acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJetsLowPt"))
     if flags.Reco.EnableBTagging:
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         from DerivationFrameworkFlavourTag.FtagDerivationConfig import (

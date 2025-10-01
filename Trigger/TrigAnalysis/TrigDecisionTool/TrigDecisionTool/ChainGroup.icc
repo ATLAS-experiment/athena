@@ -109,7 +109,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::ChainGroup::feature
     // Obtain navigation routes for objects which fail
     if (condition == TrigDefs::includeFailedDecisions) {
       std::vector<const TrigCompositeUtils::Decision*> rejectedDecisionNodes = 
-        TrigCompositeUtils::getRejectedDecisionNodes(eventStore, HLTSummaryKeyIn.key(), thisChainIDs);
+        TrigCompositeUtils::getRejectedDecisionNodes(eventStore, ctx, HLTSummaryKeyIn.key(), thisChainIDs);
 
       ATH_MSG_DEBUG("Chain " << chainID << " has " << rejectedDecisionNodes.size() 
         << " dangling nodes in the graph from objects which were rejected.");
@@ -142,10 +142,10 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::ChainGroup::feature
     navGraph.printAllPaths(msg(), MSG::VERBOSE);
   }
 
-  const bool lastFeatureOfTypeFlag = (featureCollectionMode == TrigDefs::lastFeatureOfType);
-
   std::vector<TrigCompositeUtils::LinkInfo<CONTAINER>> returnVector =
-    TrigCompositeUtils::recursiveGetFeaturesOfType<CONTAINER>(navGraph, containerSGKey, lastFeatureOfTypeFlag, navElementLinkKey, allRequestedChainIDs);
+    TrigCompositeUtils::recursiveGetFeaturesOfType<CONTAINER>(navGraph, containerSGKey,
+                                                              featureCollectionMode | TrigDefs::fillDecisions, // also fill LinkInfo::decisions
+                                                              navElementLinkKey, allRequestedChainIDs);
 
   size_t invalid = 0;
   for (const TrigCompositeUtils::LinkInfo<CONTAINER>& linkInfo : returnVector) {

@@ -13,7 +13,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "AthenaMonitoringKernel/IMonitoredVariable.h"
 
 namespace Monitored {
@@ -86,8 +85,9 @@ namespace Monitored {
         try {
           fill();
         }
-        catch (const GaudiException&) {
+        catch (std::exception &) {
           // fill can throw due to dereferencing a Gaudi handle
+          //or boost container exception
           std::abort();
         }
       }

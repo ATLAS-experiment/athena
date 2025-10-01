@@ -13,7 +13,7 @@ def splitThousands(s, tSep=',', dSep='.'):
     if s is None:
         return 0
     from builtins import int
-    if isinstance(s, int) or isinstance(s, float):
+    if isinstance(s, (int, float)):
         s = str(s)
     if s[0] == '-' or s[0] == '+':
         lhs=s[0]

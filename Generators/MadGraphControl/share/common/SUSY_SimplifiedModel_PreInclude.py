@@ -70,7 +70,7 @@ define_pj_5FS = True # Defines p and j to include b in process string with 5FS
 force_nobmass_5FS = True # Forces massless b with 5FS
 finalStateB = False # Used with 4FS
 
-from MadGraphControl.MadGraphUtilsHelpers import get_physics_short
+from MCJobOptionUtils.JOsupport import get_physics_short
 phys_short = get_physics_short()
 if 'py1up' in phys_short:
     include("Pythia8_i/Pythia8_A14_NNPDF23LO_Var1Up_EvtGen_Common.py")

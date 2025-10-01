@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -65,7 +65,7 @@ AtlasIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
     ATH_CHECK( detStore()->retrieve(idDictMgr, "IdDict") );
 
     // create the helper
-    auto atlas_id = std::make_unique<AtlasDetectorID>();
+    auto atlas_id = std::make_unique<AtlasDetectorID>("IdDict", "");
     atlas_id->setMessageSvc(msgSvc());
 
     ATH_CHECK( idDictMgr->initializeHelper(*atlas_id) == 0 );

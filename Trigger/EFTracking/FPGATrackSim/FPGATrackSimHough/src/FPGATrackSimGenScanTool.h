@@ -131,6 +131,7 @@ protected:
     Gaudi::Property<double> m_phiWeight{this, "phiChi2Weight", 1.0, "Weight for phi component of chi2 in genscan fit"};
     Gaudi::Property<double> m_etaWeight{this, "etaChi2Weight", 1.0, "Weight for eta component of chi2 in genscan fit"};
     Gaudi::Property<bool> m_inBinFiltering {this, "inBinFiltering", true, "Filter roads that appear to be outside their bin"};
+    Gaudi::Property<int> m_keepHitsStrategy {this, "keepHitsStrategy", -1, "If this is less than 0, do nothing. If 1, pick 3 hits furthest apart. If 2, pick 3 inner hits. If 3, pick 3 outer hits. If 4, drop only middle hit for 5/5 otherwise keep all 4 hits for 4/5"};
 
     ///////////////////////////////////////////////////////////////////////
     // Core
@@ -172,7 +173,9 @@ protected:
     // Experimental fit
     bool fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2) const;
 
-    ///////////////////////////////////////////////////////////////////////
+    std::vector<unsigned> PickHitsToUse(layer_bitmask_t) const;
+
+  ///////////////////////////////////////////////////////////////////////
     // HitPair and HitPairSet Storage Classes
 
     // Pair of hits, methods gives variable you might want to cut on

@@ -13,7 +13,7 @@
 #define DEFINE_TAUJETPARAMETER_ACCESSOR(TYPE, NAME )                               \
   case xAOD::TauJetParameters::NAME:					\
 {                                                               \
-  static const SG::AuxElement::Accessor< TYPE > a( #NAME );		\
+  static const SG::Accessor< TYPE > a( #NAME );		\
   return &a;							\
 }                                                               \
 break;
@@ -21,7 +21,7 @@ break;
 
 #ifndef TAUTRACK_V1_ACCESSORS
 
-  const SG::AuxElement::Accessor< float >* discriminantAccessorV3( xAOD::TauJetParameters::TauID discriminant ) {
+  const SG::Accessor< float >* discriminantAccessorV3( xAOD::TauJetParameters::TauID discriminant ) {
 
     switch( discriminant ) {
 	
@@ -43,7 +43,7 @@ break;
   }
 
 
-  template <> const SG::AuxElement::Accessor< float >* panTauDetailsAccessorV3<float>( xAOD::TauJetParameters::PanTauDetails detail ) {
+  template <> const SG::Accessor< float >* panTauDetailsAccessorV3<float>( xAOD::TauJetParameters::PanTauDetails detail ) {
     
     switch( detail ) {
 	
@@ -72,7 +72,7 @@ break;
     }
   }
 
-  template <> const SG::AuxElement::Accessor< int >* panTauDetailsAccessorV3<int>( xAOD::TauJetParameters::PanTauDetails detail ) {
+  template <> const SG::Accessor< int >* panTauDetailsAccessorV3<int>( xAOD::TauJetParameters::PanTauDetails detail ) {
 
     switch( detail ) {
 	
@@ -97,7 +97,7 @@ break;
 
 
 
-  template <> const SG::AuxElement::Accessor< float >* detailsAccessorV3<float>( xAOD::TauJetParameters::Detail detail ) {
+  template <> const SG::Accessor< float >* detailsAccessorV3<float>( xAOD::TauJetParameters::Detail detail ) {
     
     switch( detail ) {
 
@@ -181,7 +181,7 @@ break;
     }
   }
 
-  template <> const SG::AuxElement::Accessor< int >* detailsAccessorV3<int>( xAOD::TauJetParameters::Detail detail ) {
+  template <> const SG::Accessor< int >* detailsAccessorV3<int>( xAOD::TauJetParameters::Detail detail ) {
 
     switch( detail ) {
 
@@ -203,7 +203,7 @@ break;
     }
   }
 
-  template <> const SG::AuxElement::Accessor< ElementLink<IParticleContainer> >* detailsAccessorV3<ElementLink<IParticleContainer > >( xAOD::TauJetParameters::Detail detail ) {
+  template <> const SG::Accessor< ElementLink<IParticleContainer> >* detailsAccessorV3<ElementLink<IParticleContainer > >( xAOD::TauJetParameters::Detail detail ) {
 
     switch( detail ) {
       
@@ -218,7 +218,7 @@ break;
 
 #else
 
-  template <> const SG::AuxElement::Accessor< float >* trackDetailsAccessorV3<float>( xAOD::TauJetParameters::TrackDetail detail ) {
+  template <> const SG::Accessor< float >* trackDetailsAccessorV3<float>( xAOD::TauJetParameters::TrackDetail detail ) {
     
     switch( detail ) {
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, CaloSamplingEtaEM );

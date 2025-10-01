@@ -19,8 +19,10 @@
 using CxxUtils::strformat;
 
 
-LArEM_Base_ID::LArEM_Base_ID (const std::string& name, bool supercell)
-  : CaloIDHelper (name),
+LArEM_Base_ID::LArEM_Base_ID (const std::string& name,
+                              const std::string& group,
+                              bool supercell)
+  : CaloIDHelper (name, group),
     m_slar (supercell ? 1 : 0)
 {
 }
@@ -242,7 +244,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
   // Find a EM region
   IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
-    m_LAR_INDEX = field->m_index ;
+    m_LAR_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -258,7 +260,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("part") ;
   if (field) {
-    m_EM_INDEX = field->m_index ;
+    m_EM_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -274,7 +276,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("barrel-endcap") ;
   if (field) {
-    m_BEC_INDEX = field->m_index ;
+    m_BEC_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -290,7 +292,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("sampling") ;
   if (field) {
-    m_SAMPLING_INDEX = field->m_index ;
+    m_SAMPLING_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -306,7 +308,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("region") ;
   if (field) {
-    m_REGION_INDEX = field->m_index ;
+    m_REGION_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -322,7 +324,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("eta") ;
   if (field) {
-    m_ETA_INDEX = field->m_index ;
+    m_ETA_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -338,7 +340,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("phi") ;
   if (field) {
-    m_PHI_INDEX = field->m_index ;
+    m_PHI_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -354,7 +356,7 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("is-slar") ;
   if (field) {
-    m_SLAR_INDEX = field->m_index ;
+    m_SLAR_INDEX = field->index();
   }
   else {
     if(m_msgSvc) {
@@ -376,18 +378,18 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
         << " group' field " << endmsg;
   }
   else {
-	m_em_region_index = group->regions()[0]->m_index;
+	m_em_region_index = group->regions()[0]->index();
   }
-  const IdDictRegion& region = *dict()->m_regions[m_em_region_index];
+  const IdDictRegion& region = dict()->region(m_em_region_index);
 
-  m_lar_impl      = region.m_implementation[m_LAR_INDEX]; 
-  m_em_impl       = region.m_implementation[m_EM_INDEX]; 
-  m_bec_impl      = region.m_implementation[m_BEC_INDEX]; 
-  m_sampling_impl = region.m_implementation[m_SAMPLING_INDEX]; 
-  m_region_impl   = region.m_implementation[m_REGION_INDEX]; 
-  m_eta_impl      = region.m_implementation[m_ETA_INDEX]; 
-  m_phi_impl      = region.m_implementation[m_PHI_INDEX]; 
-  m_slar_impl     = region.m_implementation[m_SLAR_INDEX]; 
+  m_lar_impl      = region.implementation(m_LAR_INDEX);
+  m_em_impl       = region.implementation(m_EM_INDEX);
+  m_bec_impl      = region.implementation(m_BEC_INDEX);
+  m_sampling_impl = region.implementation(m_SAMPLING_INDEX);
+  m_region_impl   = region.implementation(m_REGION_INDEX);
+  m_eta_impl      = region.implementation(m_ETA_INDEX);
+  m_phi_impl      = region.implementation(m_PHI_INDEX);
+  m_slar_impl     = region.implementation(m_SLAR_INDEX);
 
   if (!m_quiet) {
     if(m_msgSvc) {
@@ -469,12 +471,12 @@ LArEM_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
       if(m_msgSvc) {
 	log << MSG::ERROR << "Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary " 
-	    << atlasDict->m_name
+	    << atlasDict->name()
 	    << endmsg;
       }
       else {
         std::cout << "Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary " 
-                  << atlasDict->m_name
+                  << atlasDict->name()
                   << std::endl;
       }
       return (1);
@@ -485,12 +487,12 @@ LArEM_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
     if (dict()->get_label_value("part", "LArEM", larEmField)) {
       if(m_msgSvc) {
 	log << MSG::ERROR << "Could not get value for label 'LArEM' of field 'part' in dictionary " 
-	    << dict()->m_name
+	    << dict()->name()
 	    << endmsg;
       }
       else {
         std::cout << "Could not get value for label 'LArEM' of field 'part' in dictionary " 
-                  << dict()->m_name
+                  << dict()->name()
                   << std::endl;
       }
       return (1);
@@ -1397,9 +1399,9 @@ int         LArEM_Base_ID::init_neighbors(void)
       // .... compute prev/next regions in eta 
       //
       short int regForPrevEta=NOT_VALID_REGION;
-      IdDictRegion* prevEtaDicReg =  vecOfDictRegions[reg]->m_prev_abs_eta;
+      const IdDictRegion* prevEtaDicReg =  vecOfDictRegions[reg]->prev_abs_eta();
       short int regForNextEta=NOT_VALID_REGION;
-      IdDictRegion* nextEtaDicReg =  vecOfDictRegions[reg]->m_next_abs_eta;
+      const IdDictRegion* nextEtaDicReg =  vecOfDictRegions[reg]->next_abs_eta();
       for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
 	if(vecOfDictRegions[ireg] == prevEtaDicReg) regForPrevEta = ireg;
 	if(vecOfDictRegions[ireg] == nextEtaDicReg) regForNextEta = ireg;
@@ -1420,18 +1422,16 @@ int         LArEM_Base_ID::init_neighbors(void)
       // .... compute prev/next regions in sampling  
       //
       std::vector<short int> regForPrevSamp;
-      std::vector<IdDictRegion*> prevSampDicReg =  vecOfDictRegions[reg]->m_prev_samp;
-      for(unsigned int isam=0;isam<prevSampDicReg.size();isam++){
+      for (const IdDictRegion* dictreg : vecOfDictRegions[reg]->prev_samp()) {
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
-	  if(vecOfDictRegions[ireg] == prevSampDicReg[isam]) regForPrevSamp.push_back(ireg);
+	  if(vecOfDictRegions[ireg] == dictreg) regForPrevSamp.push_back(ireg);
 	}
       }
 
       std::vector<short int> regForNextSamp;
-      std::vector<IdDictRegion*> nextSampDicReg =  vecOfDictRegions[reg]->m_next_samp;
-      for(unsigned int isam=0;isam<nextSampDicReg.size();isam++){
+      for (const IdDictRegion* dictreg : vecOfDictRegions[reg]->next_samp()) {
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
-	  if(vecOfDictRegions[ireg] == nextSampDicReg[isam]) regForNextSamp.push_back(ireg);
+	  if(vecOfDictRegions[ireg] == dictreg) regForNextSamp.push_back(ireg);
 	}
       }
 
@@ -1439,18 +1439,16 @@ int         LArEM_Base_ID::init_neighbors(void)
       // .... compute prev/next regions in subdet  
       //
       std::vector<short int> regForPrevSubdet;
-      std::vector<IdDictRegion*> prevSubdetDicReg =  vecOfDictRegions[reg]->m_prev_subdet;
-      for(unsigned int isubdet=0;isubdet<prevSubdetDicReg.size();isubdet++){
+      for (const IdDictRegion* dictreg : vecOfDictRegions[reg]->prev_subdet()) {
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
-	  if(vecOfDictRegions[ireg] == prevSubdetDicReg[isubdet]) regForPrevSubdet.push_back(ireg);
+	  if(vecOfDictRegions[ireg] == dictreg) regForPrevSubdet.push_back(ireg);
 	}
       }
 
       std::vector<short int> regForNextSubdet;
-      std::vector<IdDictRegion*> nextSubdetDicReg =  vecOfDictRegions[reg]->m_next_subdet;
-      for(unsigned int isubdet=0;isubdet<nextSubdetDicReg.size();isubdet++){
+      for (const IdDictRegion* dictreg : vecOfDictRegions[reg]->next_subdet()) {
 	for(unsigned int ireg=ireg0;ireg<ireg1;ireg++){
-	  if(vecOfDictRegions[ireg] == nextSubdetDicReg[isubdet]) regForNextSubdet.push_back(ireg);
+	  if(vecOfDictRegions[ireg] == dictreg) regForNextSubdet.push_back(ireg);
 	}
       }
 

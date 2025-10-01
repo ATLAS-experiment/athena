@@ -115,7 +115,7 @@ TrigConf::HLTChain::lower_chain_counters() const {
 namespace TrigConf {
    std::vector<std::string>
    parse(std::string names) {
-      TrigConf::removeAllSpaces(names);
+      std::erase(names,' ');
       return TrigConf::split(names,",");
    }
 }

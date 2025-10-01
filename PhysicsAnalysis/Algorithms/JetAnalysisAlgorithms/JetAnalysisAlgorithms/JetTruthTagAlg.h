@@ -35,8 +35,8 @@ namespace CP {
         Gaudi::Property<float> m_puMinDR{this, "isPUMinDR", 0.6, "Tag a reco jet as PU if it is at least this distance from any truth jet"};
         Gaudi::Property<float> m_puMinPt{this, "isPUMinPt", 0, "Only consider truth jets above this pT to veto jets for being PU tagged"};
 
-        std::optional<SG::AuxElement::Decorator<char>> m_decIsHS;
-        std::optional<SG::AuxElement::Decorator<char>> m_decIsPU;
+        std::optional<SG::Decorator<char>> m_decIsHS;
+        std::optional<SG::Decorator<char>> m_decIsPU;
     };
 }
 

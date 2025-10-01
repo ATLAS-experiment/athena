@@ -23,3 +23,6 @@ script=test_MC_mu0_reco.sh
 echo "Executing script ${script}"
 echo " "
 "$script" ${ArtProcess} ${ArtInFile} ${dcubeRef}
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

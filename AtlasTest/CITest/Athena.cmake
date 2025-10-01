@@ -92,8 +92,6 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
 
 atlas_add_citest( RecoRun3Data_Express
     SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data24_13p6TeV.00477023.express_express.merge.RAW._lb0287._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2025-01 ' --no-output-checks
-    LOG_IGNORE_PATTERN "WARNING FPE .*PixelChargeLUTCalibCondAlg"
-    # ignore FPEs from PixelChargeLUTCalibCondAlg
   )
   
 atlas_add_citest( ZdcRec_ZDCCalib 
@@ -164,6 +162,11 @@ atlas_add_citest( DerivationRun2MCAF3_PHYSLITE
 atlas_add_citest( DerivationRun3Data_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3MC_PHYS_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e 'mtDerivation' --tag mc_PHYS --threads 1
+   LOG_IGNORE_PATTERN "WARNING FPE" # Ignore FPEs for now
+   PROPERTIES PROCESSORS 1 )
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
@@ -303,6 +306,9 @@ atlas_add_citest( ActsExtendedTruth
 atlas_add_citest( ACTS_Propagation_ITk
    SCRIPT ActsITkTest.py )
 
+atlas_add_citest( ACTS_Propagation_ITk_Gen3
+   SCRIPT ActsITkTest.py --gen3)
+
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
@@ -321,12 +327,6 @@ atlas_add_citest( ACTS_Workflow_HeavyIons
  
 atlas_add_citest( ACTS_ValidateClusters
    SCRIPT ActsValidateClusters.sh )
-
-atlas_add_citest( ACTS_ValidateActsCoreSpacePoints
-   SCRIPT ActsValidateActsCoreSpacePoints.sh )
-
-atlas_add_citest( ACTS_ValidateActsTrkSpacePoints
-   SCRIPT ActsValidateActsSpacePoints.sh )
 
 atlas_add_citest( ACTS_ValidateSeeds
    SCRIPT ActsValidateSeeds.sh )

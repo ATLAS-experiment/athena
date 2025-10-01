@@ -32,6 +32,7 @@ class IFPGATrackSimMappingSvc: virtual public IService
         virtual std::string getParamNNMap2ndString() const = 0;
         virtual std::string getExtensionNNHitMapString() const = 0;
         virtual std::string getExtensionNNVolMapString() const = 0;
+        virtual std::string getGNNModuleMapString() const = 0;
 
 };
 

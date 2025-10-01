@@ -80,7 +80,7 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
 
     // decorate LRTs with default RNN scores
     for (auto classifier : m_vClassifier) {
-      ATH_CHECK(classifier->classifyTracks(vLRTs, xTau, vertexContainer, true));
+      ATH_CHECK(classifier->classifyTracks(vLRTs, xTau, vertexContainer, tauTrackCon, true));
     }
   }
 
@@ -104,13 +104,13 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
     }
     // decorate excludedTracks with default RNN scores
     for (auto classifier : m_vClassifier) {
-      ATH_CHECK(classifier->classifyTracks(excludedTracks, xTau, vertexContainer, true));
+      ATH_CHECK(classifier->classifyTracks(excludedTracks, xTau, vertexContainer, tauTrackCon, true));
     }
   } 
 
   // classify tracks
   for (auto classifier : m_vClassifier) {
-    ATH_CHECK(classifier->classifyTracks(vTracks, xTau, vertexContainer));
+    ATH_CHECK(classifier->classifyTracks(vTracks, xTau, vertexContainer, tauTrackCon));
   }
 
   std::vector< ElementLink< xAOD::TauTrackContainer > >& tauTrackLinks(xTau.allTauTrackLinksNonConst());
@@ -181,6 +181,7 @@ StatusCode TrackRNN::initialize()
 StatusCode TrackRNN::classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
 				    xAOD::TauJet& xTau,
 				    const xAOD::VertexContainer* vertexContainer,
+				    const xAOD::TauTrackContainer& tauTrackCon,
 				    bool skipTracks) const
 {
   if(vTracks.empty()) {
@@ -257,7 +258,28 @@ StatusCode TrackRNN::classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
       vTracks[i]->setFlag(xAOD::TauJetParameters::classifiedIsolation, true);
     }
   }
-  
+ 
+  if(m_removeDuplicateChargedTracks){
+    bool alreadyUsed = false;
+    for (unsigned int i = 0; i < vTracks.size(); ++i){
+      alreadyUsed = false;
+      //loop over all up-to-now charged tracks	
+      for( const xAOD::TauTrack* tau_trk : tauTrackCon ) {
+	 if(!(vTracks[i]->flag(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged))) continue;
+	 if( vTracks[i]->track() == tau_trk->track()) alreadyUsed = true;
+      }
+      //if this track has already been used by another tau, don't consider                                         
+      if (alreadyUsed) { 
+	ATH_MSG_INFO( "Found Already Used charged track new, now putting it as unclassified" );       
+        vTracks[i]->setFlag(xAOD::TauJetParameters::classifiedCharged, false);
+	vTracks[i]->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
+      } else { 
+	++i;
+      }
+    }
+  }
+
+
   return StatusCode::SUCCESS;
 }
 

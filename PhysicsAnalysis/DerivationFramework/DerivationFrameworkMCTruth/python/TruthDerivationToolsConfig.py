@@ -24,91 +24,112 @@ def TruthCollectionMakerCfg(flags, name, **kwargs):
                       primary = True)
     return acc
 
+
 def DFCommonTruthMuonToolCfg(flags):
     """Muon truth collection maker"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthMuonTool",
-                                   NewCollectionName       = "TruthMuons",
+                                   OutputCollectionName = "TruthMuons",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(abs(TruthParticles.pdgId) == 13) && TruthParticles.isGenStable")
+
+
+def DFCommonTruthCharmToolCfg(flags, name):
+    """Charm truth collection maker"""
+    return TruthCollectionMakerCfg(
+        flags,
+        name = name,
+        OutputCollectionName = "TruthCharm",
+        KeepNavigationInfo = False,
+        ParticleSelectionString = "(abs(TruthParticles.pdgId) == 4)",
+        Do_Compress = True)
+
 
 def DFCommonTruthElectronToolCfg(flags):
     """Electron truth collection maker"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthElectronTool",
-                                   NewCollectionName       = "TruthElectrons",
+                                   OutputCollectionName = "TruthElectrons",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(abs(TruthParticles.pdgId) == 11) && TruthParticles.isGenStable")
+
 
 def DFCommonTruthPhotonToolCfg(flags):
     """Photon truth collection maker"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthPhotonTool",
-                                   NewCollectionName       = "TruthPhotons",
+                                   OutputCollectionName = "TruthPhotons",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(abs(TruthParticles.pdgId) == 22) && TruthParticles.isGenStable")
+
 
 # this tool is needed for making TruthPhotons from sim samples, where extra cuts are needed. Origin 42 (pi0) and 23 (light meson) cut way down uninteresting photons
 def DFCommonTruthPhotonToolSimCfg(flags):
     """Tool for making TruthPhotons from sim samples"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthPhotonToolSim",
-                                   NewCollectionName       = "TruthPhotons",
+                                   OutputCollectionName = "TruthPhotons",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(abs(TruthParticles.pdgId) == 22) && TruthParticles.isGenStable && ((TruthParticles.classifierParticleOrigin != 42 && TruthParticles.classifierParticleOrigin !=23) || (TruthParticles.pt > 20.0*GeV))")
+
 
 def DFCommonTruthNeutrinoToolCfg(flags):
     """Neutrino truth collection maker"""
     neutrinoexpression = "(TruthParticles.isNeutrino && TruthParticles.isGenStable)"
     return TruthCollectionMakerCfg(flags,
                                    name = "DFCommonTruthNeutrinoTool",
-                                   NewCollectionName       = "TruthNeutrinos",
+                                   OutputCollectionName = "TruthNeutrinos",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = neutrinoexpression)
+
 
 def DFCommonTruthBottomToolCfg(flags):
     """B-quark truth collection maker"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthBottomTool",
-                                   NewCollectionName       = "TruthBottom",
+                                   OutputCollectionName = "TruthBottom",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(abs(TruthParticles.pdgId) == 5)",
                                    Do_Compress             = True)
+
 
 def DFCommonTruthTopToolCfg(flags):
     """Top-quark truth collection maker"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthTopTool",
-                                   NewCollectionName       = "TruthTop",
+                                   OutputCollectionName = "TruthTop",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(abs(TruthParticles.pdgId) == 6)",
                                    Do_Compress             = True)
+
 
 def DFCommonTruthBosonToolCfg(flags):
     """Gauge bosons and Higgs truth collection maker"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthBosonTool",
-                                   NewCollectionName       = "TruthBoson",
+                                   OutputCollectionName = "TruthBoson",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(abs(TruthParticles.pdgId) == 23 || abs(TruthParticles.pdgId) == 24 || abs(TruthParticles.pdgId) == 25)",
                                    Do_Compress             = True,
                                    Do_Sherpa               = True)
 
+
 def DFCommonTruthBSMToolCfg(flags):
     """BSM particles truth collection maker"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthBSMTool",
-                                   NewCollectionName       = "TruthBSM",
+                                   OutputCollectionName = "TruthBSM",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(TruthParticles.isBSM)",
                                    Do_Compress             = True)
+
 
 def DFCommonTruthForwardProtonToolCfg(flags):
     """Forward proton truth collection maker"""
     beam_energy = flags.Beam.Energy
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthForwardProtonTool",
-                                   NewCollectionName       = "TruthForwardProtons",
+                                   OutputCollectionName = "TruthForwardProtons",
                                    KeepNavigationInfo      = False,
                                    ParticleSelectionString = "(TruthParticles.isStable) && (abs(TruthParticles.pdgId)==2212) && (TruthParticles.e>0.8*"+str(beam_energy)+")", # TODO Check whether isGenStable was intended here.
                                    Do_Compress             = True)

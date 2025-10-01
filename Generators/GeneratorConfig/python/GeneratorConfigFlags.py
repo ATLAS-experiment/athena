@@ -36,7 +36,10 @@ def createGeneratorConfigFlags():
     
     # Output yoda file for jobs that require Rivet
     gencf.addFlag("Generator.rivetAnalyses", '')
-        
+
+    # Default PDG parameter settings
+    gencf.addFlag("Generator.PDGparams", True)
+
     return gencf
 
 

@@ -280,7 +280,6 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     variableRemapping=variableRemapping,
                     # note that the tracks are associated to the jet as
                     # and IParticle container.
-                    trackLinkType='IPARTICLE',
                     defaultOutputValue=0,
                     **extra,
                 ),

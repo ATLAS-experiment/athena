@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALOTOWERSEG_H
@@ -622,6 +622,9 @@ CaloTowerSeg::SubSegIterator<TOWER_ITERATOR>::make
     itower = parent.etaphi (subseg.etamin(), subseg.phimin());
     phipos = 0;
   }
+
+  // Should never happen, but check explicitly to prevent a coverity warning.
+  if (itower == outOfRange) std::abort();
 
   beg += itower;
   return SubSegIterator (beg,

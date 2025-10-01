@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATLASDETDESCR_ATLASDETECTORID_H
@@ -19,8 +19,6 @@
  *
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "Identifier/Identifier.h"
 #include "Identifier/IdContext.h"
 #include "Identifier/IdHelper.h"
@@ -33,12 +31,9 @@
 #include <string>
 #include <vector>
 
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
 
 class IdDictDictionary;
 class AtlasDetectorIDHelper;
-
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 
 /**
@@ -85,7 +80,7 @@ public:
 
     /// @name strutors
     //@{
-    AtlasDetectorID(const std::string& name = "AtlasDetectorID");
+    AtlasDetectorID(const std::string& name, const std::string& group);
     virtual ~AtlasDetectorID();
     AtlasDetectorID(const AtlasDetectorID& other) = delete;
     AtlasDetectorID& operator= (const AtlasDetectorID& other) = delete;
@@ -95,6 +90,9 @@ public:
     virtual HelperType helper() const {
       return HelperType::Unimplemented;
     }
+
+    /// Group name for this helper.
+    const std::string& group() const;
 
     /// @name Detector system ids
     //@{
@@ -357,6 +355,9 @@ protected:
     /// change of tags
     bool                reinitialize             (const IdDictMgr& dict_mgr);
 
+    /// Group name.
+    std::string m_group;
+
     /// Flag for subclasses to know whether or not to perform
     /// checks. In general, this is set to false in optimized mode.
     bool        m_do_checks{};
@@ -471,15 +472,9 @@ private:
 
 
 
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
 CLASS_DEF(AtlasDetectorID, 164875623, 1)
-
-/////////////////////////////////////////////////////////////////////////////
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-/////////////////////////////////////////////////////////////////////////////
 
 inline ExpandedIdentifier
 AtlasDetectorID::indet_exp           (void) const

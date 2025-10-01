@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2023-2025 CERN for the benefit of the ATLAS collaboration
 
 // Module relabel object for remapping pixel endcap hits.
 // This small header contains a very simple object, which implements
@@ -32,7 +32,7 @@ class FPGATrackSimModuleRelabel : public AthMessaging{
 public:
 
     // Constructor, maps geokey -> ringIndex.
-    FPGATrackSimModuleRelabel(std::string geokey, bool remapModules);
+    FPGATrackSimModuleRelabel(const std::string & geokey, bool remapModules);
 
     bool remap(FPGATrackSimHit& hit) const;
 

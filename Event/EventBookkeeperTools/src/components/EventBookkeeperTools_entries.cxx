@@ -3,9 +3,11 @@
 #include <EventBookkeeperTools/CutFlowSvc.h>
 
 #include "../AllExecutedEventsCounterAlg.h"
+#include "../AllWrittenEventsCounterAlg.h"
 #include "../TestFilterReentrantAlg.h"
 
 DECLARE_COMPONENT( AllExecutedEventsCounterAlg )
+DECLARE_COMPONENT( AllWrittenEventsCounterAlg )
 DECLARE_COMPONENT( BookkeeperDumperTool )
 DECLARE_COMPONENT( BookkeeperTool )
 DECLARE_COMPONENT( CutFlowSvc )

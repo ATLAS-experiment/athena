@@ -36,6 +36,7 @@ def CPAlgorithmsCfg(flags):
     # Set up the systematics loader/handler algorithm:
     subConfig = factory.makeConfig ('CommonServices')
     subConfig.setOptionValue ('.runSystematics', False)
+    subConfig.setOptionValue ('.fixDAODTruthRecord', False)
     configSeq += subConfig
 
     # Create a pile-up analysis config
@@ -84,16 +85,27 @@ def CPAlgorithmsCfg(flags):
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
-    subConfig.setOptionValue ('.selectionName', 'loose')
+    subConfig.setOptionValue ('.selectionName', 'looseLH')
     subConfig.setOptionValue ('.trackSelection', False)
-    subConfig.setOptionValue ('.identificationWP', 'LooseLHElectron')
+    subConfig.setOptionValue ('.identificationWP', 'LooseLH')
+    subConfig.setOptionValue ('.addSelectionToPreselection', False)
+    subConfig.setOptionValue ('.isolationWP', 'NonIso')
+    subConfig.setOptionValue ('.doFSRSelection', True)
+    subConfig.setOptionValue ('.noEffSF', True)
+    configSeq += subConfig
+    subConfig = factory.makeConfig ('Electrons.WorkingPoint')
+    subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
+    subConfig.setOptionValue ('.selectionName', 'looseDNN')
+    subConfig.setOptionValue ('.trackSelection', False)
+    subConfig.setOptionValue ('.identificationWP', 'LooseDNN')
+    subConfig.setOptionValue ('.addSelectionToPreselection', False)
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.noEffSF', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning')
     subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
-    subConfig.setOptionValue ('.selectionName', 'loose')
+    subConfig.setOptionValue ('.selectionName', 'looseLH||looseDNN')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
@@ -459,8 +471,8 @@ def PHYSLITECfg(flags):
         'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.{GRL_Deco_names}'.format(GRL_Deco_names='.'.join(str(key) for key in (getGoodRunsLists()).keys())),
         'Kt4EMPFlowEventShape.Density',
         'Kt4EMPFlowNeutEventShape.Density',
-        'TauTracks.pt.eta.phi.flagSet.trackLinks',
-        'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R21Precision.GhostBHadronsFinalCount.GhostCHadronsFinalCount.Parent.GN2Xv01_phbb.GN2Xv01_phcc.GN2Xv01_ptop.GN2Xv01_pqcd.GN2Xv02_phbb.GN2Xv02_phcc.GN2Xv02_ptop.GN2Xv02_pqcd',
+        'TauTracks.flagSet.trackLinks',
+        'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R21Precision.GhostBHadronsFinalCount.GhostCHadronsFinalCount.Parent.GN2Xv01_phbb.GN2Xv01_phcc.GN2Xv01_ptop.GN2Xv01_pqcd',
         ]
 
     # Output stream    

@@ -11,10 +11,12 @@
 
 #include <EventLoop/BatchInputModule.h>
 
+#include <EventLoop/BatchJob.h>
 #include <EventLoop/BatchSample.h>
 #include <EventLoop/BatchSegment.h>
 #include <EventLoop/EventRange.h>
 #include <EventLoop/IInputModuleActions.h>
+#include <EventLoop/ModuleData.h>
 #include <RootCoreUtils/Assert.h>
 
 //
@@ -26,8 +28,16 @@ namespace EL
   namespace Detail
   {
     StatusCode BatchInputModule ::
-    processInputs (ModuleData& /*data*/, IInputModuleActions& actions)
+    processInputs (ModuleData& data, IInputModuleActions& actions)
     {
+      BatchSegment *segment = &data.m_batchJob->segments.at(jobId.value());
+      if (int (segment->job_id) != jobId.value())
+      {
+        ANA_MSG_ERROR ("inconsistenty in job id " << jobId.value() << " != " << segment->job_id);
+        return StatusCode::FAILURE;
+      }
+      BatchSample *sample = &data.m_batchJob->samples.at(segment->sample);
+
       Long64_t beginFile = segment->begin_file;
       Long64_t endFile   = segment->end_file;
       Long64_t lastFile  = segment->end_file;
@@ -43,7 +53,7 @@ namespace EL
         eventRange.m_url = sample->files[file];
         eventRange.m_beginEvent = (file == beginFile ? beginEvent : 0);
         eventRange.m_endEvent = (file == lastFile ? endEvent : EventRange::eof);
-        if (maxEvents.has_value())
+        if (maxEvents != -1)
         {
           if (eventRange.m_endEvent == EventRange::eof)
           {

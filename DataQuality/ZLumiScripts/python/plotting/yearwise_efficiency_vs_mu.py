@@ -13,7 +13,7 @@ from array import array
 import argparse
     
 parser = argparse.ArgumentParser()
-parser.add_argument('--year', type=str, help='A year number (15-24) or run3 for full Run3')
+parser.add_argument('--year', type=str, help='A year number (15-25) or run3 or year1_year2_...')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
@@ -25,8 +25,22 @@ indir = args.indir
 outdir = args.outdir
 
 if year == "run3": 
-    years = ["22", "23", "24"]
+    years = ["22", "23", "24", "25"]
     out_tag = "run3"
+    time_format = "%m/%y"
+    ymin, ymax = 0.5, 1.1
+    xtitle = 'Month / Year'
+    date_tag = "Run 3, #sqrt{s} = 13.6 TeV"
+    if channel is not None: 
+        xval = 0.30
+        yval = 0.33
+    else:
+        xval = 0.43
+        yval = 0.33
+    set_size = 1
+elif len(year.split("_")) > 1: 
+    years = year.split("_")
+    out_tag = "data"+year
     time_format = "%m/%y"
     ymin, ymax = 0.5, 1.1
     xtitle = 'Month / Year'
@@ -77,6 +91,8 @@ def plot_efficiency_comb(channel, years):
 
             dfz_small['CombEff'] = dfz_small[channel + 'EffComb']
             dfz_small['CombErr'] = dfz_small[channel + 'ErrComb']
+            # safety to avoid divide by zero - maybe can be removed again later
+            dfz_small.loc[dfz_small['CombErr'] == 0., 'CombErr'] = 1.
 
             # Scale event-level efficiency with FMC
             campaign = "mc23a"

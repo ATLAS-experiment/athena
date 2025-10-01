@@ -118,6 +118,8 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)
+    # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
+    kwargs.setdefault("forceTrackOnSeed", flags.Acts.forceTrackOnSeed and not flags.Tracking.ActiveConfig.isSecondaryPass)
 
     # Borrow many settings from flags.Tracking.ActiveConfig, normally initialised in createITkTrackingPassFlags() at
     # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L121
@@ -251,7 +253,7 @@ def ActsTrackFindingCfg(flags,
     stripSeedLabels = ['SSS']
     # Conversion and LRT do not process pixel seeds
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion', 'ActsLargeRadius']:
+    if flags.Tracking.ActiveConfig.extension in ['ActsConversion', 'ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
         pixelSeedLabels = None
     # Main pass does not process strip seeds in the fast tracking configuration
     elif isFastPrimaryPass(flags):

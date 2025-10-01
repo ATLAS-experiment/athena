@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,7 @@
 #include "AthenaPoolCnvSvc/exceptions.h"
 #include "CxxUtils/exctrace.h"
 #include "GaudiKernel/System.h"
+#include <format>
 #include <sstream>
 
 
@@ -22,11 +23,9 @@ namespace AthenaPoolCnvSvc {
 /// Helper: format exception error string.
 std::string excNoDictForClass_format (const std::type_info& ti)
 {
-  std::ostringstream os;
-  os << "AthenaPoolCnvSvc::::ExcNoDictForClass: "
-     << "Can't find dictionary information for class: ";
-  os << System::typeinfoName(ti);
-  return os.str();
+  return std::string("AthenaPoolCnvSvc::::ExcNoDictForClass: "
+                     "Can't find dictionary information for class: ") +
+         System::typeinfoName(ti);
 }
 
 
@@ -57,12 +56,9 @@ void throwExcNoDictForClass (const std::type_info& ti)
 std::string excUnsupportedVersion_format (const std::type_info& ti,
                                           const Guid& guid)
 {
-  std::ostringstream os;
-  os << "AthenaPoolCnvSvc::::ExcUnsupportedVersion: "
-     << "Unsupported persistent version of "
-     << System::typeinfoName(ti)
-     << " found; guid: " << guid.toString();
-  return os.str();
+  return std::string("AthenaPoolCnvSvc::::ExcUnsupportedVersion: "
+                     "Unsupported persistent version of ") +
+         System::typeinfoName(ti) + " found; guid: " + guid.toString();
 }
 
 
@@ -99,13 +95,9 @@ std::string excCaughtException_format (const char* fnname,
                                        const std::type_info& ti,
                                        const std::string& key)
 {
-  std::ostringstream os;
-  os << "AthenaPoolCnvSvc::::ExcCaughtException: "
-     << "Caught exception in " << fnname
-     << " while " << action
-     << System::typeinfoName(ti) << "/" << key
-     << ": " << System::typeinfoName(typeid(ex)) << ": " << ex.what();
-  return os.str();
+  return std::format("AthenaPoolCnvSvc::::ExcCaughtException: Caught exception in {} while {}{}/{}: {}: {}",
+                     fnname, action, System::typeinfoName(ti), key,
+                     System::typeinfoName(typeid(ex)), ex.what());
 }
 
 

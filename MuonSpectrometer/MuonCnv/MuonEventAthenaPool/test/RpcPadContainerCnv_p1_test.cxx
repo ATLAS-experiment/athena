@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventAthenaPool/test/RpcPadContainerCnv_p1_test.cxx
@@ -17,6 +17,7 @@
 #include "TestTools/leakcheck.h"
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 #include "make_dd.icc"
 
@@ -159,9 +160,14 @@ int main ATLAS_NOT_THREAD_SAFE ()
   ids.emplace_back (0x603e5400);
 
   IdDictParser parser;
-  make_dd(parser);
-  make_cond(rcusvc, ids);
+  try{
+    make_dd(parser);
+    make_cond(rcusvc, ids);
 
-  test1(ids);
+    test1(ids);
+  } catch (std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in RpcPadContainerCnv_p1_test"<<std::endl;
+    return 1;
+  }
   return 0;
 }

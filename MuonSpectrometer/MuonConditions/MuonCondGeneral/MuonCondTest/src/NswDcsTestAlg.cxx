@@ -7,7 +7,7 @@
 // STL
 #include <stdio.h>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <chrono>
 #include <ctime>
 #include <iostream>
 #include <sstream>
@@ -132,13 +132,13 @@ StatusCode NswDcsTestAlg::retrieveData(const EventContext& ctx, const DcsDataTyp
 }
 
 std::string NswDcsTestAlg::timestamp() const {
-    const boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-    const boost::posix_time::time_duration td = now.time_of_day();
-    const long hours = td.hours();
-    const long minutes = td.minutes();
-    const long seconds = td.seconds();
-    const long milliseconds = td.total_milliseconds() - ((hours * 3600 + minutes * 60 + seconds) * 1000);
-    char buf[40];
-    sprintf(buf, "%02ld:%02ld:%02ld.%03ld", hours, minutes, seconds, milliseconds);
-    return buf;
+    auto now = std::chrono::system_clock::now();
+    std::time_t time_now = std::chrono::system_clock::to_time_t(now);
+    std::tm local_tm;
+    localtime_r(&time_now, &local_tm);
+    auto duration_since_epoch = now.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration_since_epoch) % 1000;
+    std::ostringstream oss;
+    oss << std::put_time(&local_tm, "%H:%M:%S") << '.' << std::setw(3) << std::setfill('0') << milliseconds.count();
+    return oss.str();
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictRangeRef_H
@@ -17,20 +17,51 @@ class IdDictRange;
 
 class IdDictRangeRef : public IdDictRegionEntry { 
 public: 
-    IdDictRangeRef () = default; 
-    ~IdDictRangeRef () = default; 
-    void resolve_references (const IdDictMgr& idd,  
-                             IdDictDictionary& dictionary, 
-                             IdDictRegion& region);  
-    void generate_implementation (const IdDictMgr& idd,  
-                                  IdDictDictionary& dictionary, 
-                                  IdDictRegion& region,
-                                  const std::string& tag = "");  
-    void reset_implementation ();  
-    bool verify () const;  
-    Range build_range () const;
-    //data member is public
-    IdDictRange* m_range{};
+    // ==================================
+    //** @name Constructor/destructor
+    // @{
+
+    IdDictRangeRef (IdDictRange& range);
+    virtual ~IdDictRangeRef () = default;
+
+
+    //@}
+    // ==================================
+    //** @name Simple accessors.
+    // @{
+
+    const IdDictRange& range() const;
+
+    //@}
+    // ==================================
+    //** @name Methods used to initialize the object.
+    // @{
+
+    virtual void resolve_references (const IdDictMgr& idd,
+                                     IdDictDictionary& dictionary,
+                                     IdDictRegion& region) override;
+    virtual void generate_implementation (const IdDictMgr& idd,
+                                          IdDictDictionary& dictionary,
+                                          IdDictRegion& region,
+                                          const std::string& tag = "") override;
+    virtual void reset_implementation () override;
+    virtual bool verify () const override;
+    virtual Range build_range () const override;
+
+
+    //@}
+
+
+private:
+    IdDictRange& m_range;
 }; 
+
+
+inline
+const IdDictRange& IdDictRangeRef::range() const
+{
+    return m_range;
+}
+
 
 #endif

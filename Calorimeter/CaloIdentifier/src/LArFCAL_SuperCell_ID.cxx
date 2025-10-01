@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/LArFCAL_SuperCell_ID.h"
@@ -14,13 +14,12 @@
 #include <set>
 #include <string>
 
-LArFCAL_SuperCell_ID::LArFCAL_SuperCell_ID(void) :
-  LArFCAL_Base_ID("LArFCAL_SuperCell_ID", 1)
+LArFCAL_SuperCell_ID::LArFCAL_SuperCell_ID() :
+  LArFCAL_Base_ID("LArFCAL_SuperCell_ID", "slar_fcal", 1)
 {
 }
 
-LArFCAL_SuperCell_ID::~LArFCAL_SuperCell_ID(void) 
-= default;
+LArFCAL_SuperCell_ID::~LArFCAL_SuperCell_ID() = default;
 
 int  LArFCAL_SuperCell_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /*=================================================================*/
@@ -39,8 +38,7 @@ int  LArFCAL_SuperCell_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr
   }
 
   // init base object
-  if (LArFCAL_Base_ID::initialize_base_from_dictionary(dict_mgr,
-						       "slar_fcal"))
+  if (LArFCAL_Base_ID::initialize_base_from_dictionary(dict_mgr, group()))
     return (1);
   
   return 0;

@@ -156,7 +156,7 @@ namespace columnar
 
   // the accessor specialization for type conversions
   template<ContainerIdConcept CI,typename CT,typename CM>
-    requires (ColumnTypeTraits<CT,CM>::useConvertInput || ColumnTypeTraits<CT,CM>::useConvertWithDataInput)
+    requires (CI::regularObjectId && (ColumnTypeTraits<CT,CM>::useConvertInput || ColumnTypeTraits<CT,CM>::useConvertWithDataInput))
   class AccessorTemplate<CI,CT,ColumnAccessMode::input,CM> final
   {
   public:

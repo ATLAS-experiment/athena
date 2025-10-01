@@ -135,7 +135,7 @@ void VP1Serialise::save(const T& t) {//Fallback template method
 template <class T>
 void VP1Serialise::save( T* t)
 {
-  save(static_cast<const T*>(t));
+  save(const_cast<const T*>(t));
 }
 
 #endif

@@ -1,12 +1,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = """
-          Instantiate the
-          Things needed upstream the main egamma Reconstruction,
-          EGamma Reconstruction,
-          Output Item Lists,
-          xAOD related Thinning
-          """
+""" Instantiate the things needed upstream the main egamma Reconstruction,
+    EGamma Reconstruction,
+    Output Item Lists,
+    xAOD related Thinning
+"""
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

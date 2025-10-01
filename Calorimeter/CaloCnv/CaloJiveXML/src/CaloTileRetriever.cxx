@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTileRetriever.h"
@@ -322,6 +322,7 @@ namespace JiveXML {
       Identifier cellid = (*it1)->ID();
       IdentifierHash cell_hash = m_calocell_id->calo_cell_hash( cellid );
       cellInd = cellContainer->findIndex(cell_hash);
+      if (cellInd < 0) continue;
       calcTILELayerSub(cellid);
 
       energyGeV = (*it1)->energy()*(1./GeV);

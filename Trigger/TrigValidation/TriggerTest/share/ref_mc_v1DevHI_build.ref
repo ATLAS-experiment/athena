@@ -454,6 +454,8 @@ HLT_g50_loose_ion_L1eEM26:
     3: 4
 HLT_hi_uccTh1_L1jTE8300:
   eventCount: 0
+HLT_hi_uccTh1_L1jTEFWD6500:
+  eventCount: 0
 HLT_hi_uccTh2_L1jTE10000:
   eventCount: 0
 HLT_hi_uccTh2_L1jTE12000:
@@ -1480,9 +1482,9 @@ HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_25dphiCC_L12eTAU1_VjTE200:
     2: 3
     3: 1
   stepFeatures:
-    0: 21
-    1: 21
-    2: 28
+    0: 29
+    1: 28
+    2: 32
     3: 1
 HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_L12eTAU1_VjTE200:
   eventCount: 0
@@ -1492,9 +1494,9 @@ HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_L12eTAU1_VjTE200:
     2: 3
     3: 1
   stepFeatures:
-    0: 21
-    1: 21
-    2: 28
+    0: 29
+    1: 28
+    2: 32
     3: 1
 HLT_mb_sp_vpix30_hi_FgapAC5_L12eEM1_VjTE200:
   eventCount: 0
@@ -1606,9 +1608,9 @@ HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L12eTAU1_VjTE200:
     2: 3
     3: 1
   stepFeatures:
-    0: 21
-    1: 21
-    2: 28
+    0: 29
+    1: 28
+    2: 32
     3: 1
 HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L12eTAU1_VjTE200_GAP_AANDC:
   eventCount: 0
@@ -1618,9 +1620,9 @@ HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L12eTAU1_VjTE200_GAP_AANDC:
     2: 2
     3: 1
   stepFeatures:
-    0: 14
-    1: 14
-    2: 19
+    0: 20
+    1: 19
+    2: 23
     3: 1
 HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L1DPHI-2eEM1_VjTE200:
   eventCount: 0
@@ -1654,9 +1656,9 @@ HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L1DPHI-2eTAU1_VjTE200:
     2: 3
     3: 1
   stepFeatures:
-    0: 21
-    1: 21
-    2: 28
+    0: 29
+    1: 28
+    2: 32
     3: 1
 HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L1DPHI-2eTAU1_VjTE200_GAP_AANDC:
   eventCount: 0
@@ -1666,9 +1668,9 @@ HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L1DPHI-2eTAU1_VjTE200_GAP_AANDC:
     2: 2
     3: 1
   stepFeatures:
-    0: 14
-    1: 14
-    2: 19
+    0: 20
+    1: 19
+    2: 23
     3: 1
 HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L12eEM1_VjTE200:
   eventCount: 0
@@ -1702,9 +1704,9 @@ HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L12eTAU1_VjTE200:
     2: 3
     3: 1
   stepFeatures:
-    0: 21
-    1: 21
-    2: 28
+    0: 29
+    1: 28
+    2: 32
     3: 1
 HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L12eTAU1_VjTE200_GAP_AANDC:
   eventCount: 0
@@ -1714,9 +1716,9 @@ HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L12eTAU1_VjTE200_GAP_AANDC:
     2: 2
     3: 1
   stepFeatures:
-    0: 14
-    1: 14
-    2: 19
+    0: 20
+    1: 19
+    2: 23
     3: 1
 HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI-2eEM1_VjTE200:
   eventCount: 0
@@ -1750,9 +1752,9 @@ HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI-2eTAU1_VjTE200:
     2: 3
     3: 1
   stepFeatures:
-    0: 21
-    1: 21
-    2: 28
+    0: 29
+    1: 28
+    2: 32
     3: 1
 HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI-2eTAU1_VjTE200_GAP_AANDC:
   eventCount: 0
@@ -1762,9 +1764,9 @@ HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI-2eTAU1_VjTE200_GAP_AANDC:
     2: 2
     3: 1
   stepFeatures:
-    0: 14
-    1: 14
-    2: 19
+    0: 20
+    1: 19
+    2: 23
     3: 1
 HLT_mb_sp_vpix60_hi_FgapAC5_L11INVM-DPHI-2eTAU1_VjTE200:
   eventCount: 0

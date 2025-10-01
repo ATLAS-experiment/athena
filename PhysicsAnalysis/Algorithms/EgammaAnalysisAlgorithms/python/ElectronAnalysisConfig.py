@@ -295,7 +295,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('identificationWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
             "MediumLH, LooseBLayerLH, TightDNN, MediumDNN, LooseDNN, "
-            "TightNoCFDNN, MediumNoCFDNN, VeryLooseNoCF97DNN.")
+            "TightNoCFDNN, MediumNoCFDNN, VeryLooseNoCF97DNN, NoID.")
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
@@ -458,11 +458,16 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
                 dfFlag = "DFCommonElectronsDNN" + self.identificationWP.split('DNN')[0]
                 alg.selectionTool.selectionFlags = [dfFlag]
+        elif self.identificationWP == 'NoID':
+            alg = None
+        else:
+            raise ValueError (f"Electron ID working point '{self.identificationWP}' is not recognised!")
 
-        alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                             preselection=self.addSelectionToPreselection)
+        if alg is not None:
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
         # maintain order of selections
         if 'SiHit' in self.identificationWP:
@@ -616,7 +621,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the ID electron efficiency correction algorithm:
-        if config.dataType() is not DataType.Data and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSF and self.identificationWP != 'NoID':
+
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgID' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -819,8 +825,8 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             # currently recommended versions
             version_Run2 = "2015_2018/rel21.2/Precision_Summer2020_v1"
             map_Run2 = f"{version_Run2}/map4.txt"
-            version_Run3 = "2015_2025/rel22.2/2025_Precision2023_Recommendation"
-            map_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt"
+            version_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4"
+            map_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt"
 
             version = version_Run2 if config.geometry() is LHCPeriod.Run2 else version_Run3
             # Dictionary from TrigGlobalEfficiencyCorrection/MapKeys.cfg

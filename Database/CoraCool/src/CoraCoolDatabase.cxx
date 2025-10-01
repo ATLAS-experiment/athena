@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CoraCoolDatabase.cxx
@@ -38,7 +38,7 @@ CoraCoolDatabase::CoraCoolDatabase(const std::string& dbconn,
                                    cool::IDatabasePtr cooldb,
                                    coral::IConnectionService& coralsvc,
                                    const bool readonly) :
-  m_cooldb(cooldb), 
+  m_cooldb(std::move(cooldb)),
   m_connected(false),
   m_readonly(readonly),
   m_coralsvc(coralsvc),

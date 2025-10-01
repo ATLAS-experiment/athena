@@ -418,7 +418,8 @@ TriggerHLTListRun3 = [
 
     #L1 mistime monitoring
     ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400', 'BS ESD AODFULL', 'L1'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_TrigCompositeMistimeJ400Aux.pass.other_type.beforeafterflag.l1a_type', 'BS ESD AODFULL', 'L1'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_TrigCompositeMistimeJ400Aux.pass.other_type.beforeafterflag.l1a_type.other_type_before.other_type_after.offset_before.offset_after', 'BS ESD AODFULL', 'L1'),
+
 
     # LArPS
     ('xAOD::TrigEMClusterContainer#HLT_LArPS_AllCaloEMClusters',           'BS ESD', 'Egamma', [InViews('LArPS_AllEM_Views')]),
@@ -983,8 +984,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigMissingETContainer#HLT_MET_pfsum_vssk',                    'BS ESD AODFULL AODSLIM', 'MET'),
     ('xAOD::TrigMissingETAuxContainer#HLT_MET_pfsum_vsskAux.',             'BS ESD AODFULL AODSLIM', 'MET'),
 
-    ('xAOD::TrigMissingETContainer#HLT_MET_pfopufit',                      'BS ESD AODFULL AODSLIM', 'MET'),
-    ('xAOD::TrigMissingETAuxContainer#HLT_MET_pfopufitAux.',               'BS ESD AODFULL AODSLIM', 'MET'),
+    ('xAOD::TrigMissingETContainer#HLT_MET_pfopufit',                      'BS ESD AODFULL AODSLIM DarkJetPEBTLA', 'MET'),
+    ('xAOD::TrigMissingETAuxContainer#HLT_MET_pfopufitAux.',               'BS ESD AODFULL AODSLIM DarkJetPEBTLA', 'MET'),
 
     ('xAOD::TrigMissingETContainer#HLT_MET_cvfpufit',                      'BS ESD AODFULL AODSLIM', 'MET'),
     ('xAOD::TrigMissingETAuxContainer#HLT_MET_cvfpufitAux.',               'BS ESD AODFULL AODSLIM', 'MET'),

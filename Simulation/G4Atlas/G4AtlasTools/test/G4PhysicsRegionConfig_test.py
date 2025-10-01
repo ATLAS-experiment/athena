@@ -3,7 +3,6 @@
 """Run tests on G4PhysicsRegionConfig configuration
 
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from __future__ import print_function
 """
 
 if __name__ == '__main__':

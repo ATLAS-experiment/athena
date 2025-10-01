@@ -5,37 +5,11 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.Enums import LHCPeriod
-from Campaigns.Utils import Campaign
 
 from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getReadFromBTaggingObject
 from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
 from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
-from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock, is_year_in_current_period
-from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import get_year_data
-
-
-def trigger_set(config, triggerChainsPerYear, includeAllYearsPerRun, log):
-    triggers = set()
-    if includeAllYearsPerRun:
-        for year in triggerChainsPerYear:
-            if not is_year_in_current_period(config, year):
-                continue
-            triggers.update(get_year_data(triggerChainsPerYear, year))
-    elif config.campaign() is Campaign.MC20a:
-        triggers.update(get_year_data(triggerChainsPerYear, 2015))
-        triggers.update(get_year_data(triggerChainsPerYear, 2016))
-    elif config.campaign() is Campaign.MC20d:
-        triggers.update(get_year_data(triggerChainsPerYear, 2017))
-    elif config.campaign() is Campaign.MC20e:
-        triggers.update(get_year_data(triggerChainsPerYear, 2018))
-    elif config.campaign() is Campaign.MC23a:
-        triggers.update(get_year_data(triggerChainsPerYear, 2022))
-    elif config.campaign() is Campaign.MC23d:
-        triggers.update(get_year_data(triggerChainsPerYear, 2023))
-    else:
-        log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))
-    return triggers
+from FTagAnalysisAlgorithms.FTagTrigMatchAnalysisConfig import trigger_set
 
 
 class FTagJetSFBlock(ConfigBlock):
@@ -164,10 +138,6 @@ class FTagJetSFBlock(ConfigBlock):
         if selectionName is None or selectionName == '':
             selectionName = self.btagger + '_' + self.btagWP
 
-        postfix = selectionName
-        if postfix != "" and postfix[0] != '_':
-            postfix = '_' + postfix
-
         # CDI file
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
@@ -187,7 +157,7 @@ class FTagJetSFBlock(ConfigBlock):
         jetCollection = config.originalName(jetContainer)
         # Potentially modify the readFromBTaggingObject as here determining 
         # if input files has jet tagging probabilities attached to the jet (or still only to the BTagging object)
-        self.readFromBTaggingObject = getReadFromBTaggingObject(config.autoconfigFlags(), jetCollection, self.readFromBTaggingObject)
+        self.readFromBTaggingObject = getReadFromBTaggingObject(config.flags, jetCollection, self.readFromBTaggingObject)
 
         # b-jet trigger-aware SF
         if self.triggerChainsPerYear:
@@ -196,20 +166,11 @@ class FTagJetSFBlock(ConfigBlock):
 
             triggers = trigger_set(config, self.triggerChainsPerYear,
                                    self.includeAllYearsPerRun, log)
-            decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
-            
-            ChainDict = [
-                    "HLT_j80c_020jvt_j55c_020jvt_j28c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
-                    "HLT_j80c_020jvt_j55c_020jvt_j28c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
-                    "HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25",
-                    "HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25"]
             
             for chain in triggers:
-                if  chain not in ChainDict: 
-                    raise ValueError(f"Trigger '{chain}' not supported — no known navigation issues") 
-                
                 chain_noHLT = chain.replace("HLT_", "")
                 chain_out = chain_noHLT if self.removeHLTPrefix else chain
+                chain_out = chain_out.replace('-', '_').replace('.', 'p')
 
                 if self.bTagCalibTriggerFile is not None :
                     bTagCalibTriggerFile = self.bTagCalibTriggerFile
@@ -245,16 +206,9 @@ class FTagJetSFBlock(ConfigBlock):
                     bTagCalibTriggerFile, DSID, alg.conditionalEfficiencyTool,
                     selectionCDI=bTagCalibFile, selectionTagger=self.btagger)
 
-                alg.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
-
-                alg.trigger = chain
-                alg.useRun3TriggerEDM = config.geometry() is LHCPeriod.Run3
-                # Helper function to implement to provide cut for given trigger
-                # Only used for Run 2
-                #alg.btagThreshold = getBTagThreshold(chain)
-
                 alg.scaleFactorDecoration = 'ftag_effSF_' + selectionName + '_' + chain_out + '_%SYS%'
-                alg.selectionDecoration = 'ftag_select_' + selectionName + '_' + chain_out + ',as_char'
+                alg.matchingDecoration = 'ftag_jetTrigMatching_' + chain_out + '_%SYS%'
+                alg.bTagMatchingDecoration = 'ftag_bTagTrigMatching_' + chain_out + '_%SYS%'
                 alg.outOfValidity = 2  # continue silently, but decorate jet with outOfValidityDeco
                 alg.outOfValidityDeco = 'no_ftag_' + selectionName + '_' + chain_out + ',as_char'
                 alg.preselection = config.getPreselection (jetContainer, selectionName)

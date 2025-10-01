@@ -163,7 +163,7 @@ private:
     columnar::EgammaAccessor<columnar::ObjectColumn> photonsAcc {*this, "Photons"};
     columnar::ClusterAccessor<columnar::ObjectColumn> clusterAcc {*this, "egammaClusters"};
     columnar::VertexAccessor<columnar::ObjectColumn> verticesAcc {*this, "GSFConversionVertices"};
-    columnar::TrackAccessor<columnar::ObjectColumn> tracksAcc {*this, "InDetTrackParticles"};
+    columnar::TrackAccessor<columnar::ObjectColumn> tracksAcc {*this, "GSFTrackParticles"};
 
     columnar::EventInfoAccessor<uint32_t> randomRunNumberAcc {*this, "RandomRunNumber"};
   
@@ -174,7 +174,6 @@ private:
   
     columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
     columnar::ClusterAccessor<float> clusterEAcc {*this, "calE"};
-    columnar::ClusterAccessor<float> clusterEtaAcc {*this, "calEta"};
     columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
   };
   std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors>(*this)};

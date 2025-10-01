@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauEvent/TauShot.h"
@@ -10,7 +10,7 @@ namespace Analysis
 {
     // Default Constructor
     TauShot::TauShot() 
-        : P4PtEtaPhiM()
+        : P4EEtaPhiM()
         , NavigableTerminalNode()
         , m_cluster()
         , m_seedCell()
@@ -44,7 +44,7 @@ namespace Analysis
         , I4Momentum(rhs)
         , INavigable4Momentum(rhs)
         //, P4PxPyPzEBase(rhs)
-        , P4PtEtaPhiM(rhs)
+        , P4EEtaPhiM(rhs)
         , NavigableTerminalNode(rhs)
         , m_cluster(rhs.m_cluster)
         , m_seedCell(rhs.m_seedCell)
@@ -75,6 +75,7 @@ namespace Analysis
     TauShot &TauShot::operator= ( const TauShot& rhs )
     {
         if (this!=&rhs){
+            P4EEtaPhiM::operator= (*this);
             m_cluster  = rhs.m_cluster;
             m_seedCell = rhs.m_seedCell;
             m_nCellsInEta = rhs.m_nCellsInEta;

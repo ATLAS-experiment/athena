@@ -199,7 +199,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   }
 
   // Store material in cache
-  float tX0 = X0 > 10e-5 ? t/X0 : 0.;
+  float tX0 = X0 > 10e-5f ? t/X0 : 0.f;
   m_tX0NonSensitiveCache += tX0;
   m_tNonSensitiveCache += t;
   if (!isSensitive)

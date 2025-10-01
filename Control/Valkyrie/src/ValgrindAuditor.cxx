@@ -302,7 +302,7 @@ StatusCode ValgrindAuditor::decodeIntervals()
     }
 
     std::pair<NameEvt,NameEvt> p(ne1,ne2);
-    m_hooks.push_back(p);    
+    m_hooks.emplace_back(std::move(p));
   }
 
   return StatusCode::SUCCESS;

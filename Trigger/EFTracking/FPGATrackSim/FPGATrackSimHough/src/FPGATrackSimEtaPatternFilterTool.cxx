@@ -239,7 +239,7 @@ void FPGATrackSimEtaPatternFilterTool::addRedundantPatterns(std::set<EtaPattern>
         EtaPattern subpatt(currPatt);
         for (auto h : allowmissing)
             subpatt[h] = {};
-        usedPatterns.insert(subpatt);
+        usedPatterns.insert(std::move(subpatt));
 
         // increment allowmissing with rollover
         done = (nExtra == 0);

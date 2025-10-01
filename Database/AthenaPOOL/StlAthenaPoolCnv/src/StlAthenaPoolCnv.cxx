@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCnv.h"
@@ -38,7 +38,7 @@ public:
 	  << endmsg;
       return StatusCode::FAILURE;
     }
-    this->BaseCnv_t::m_classDesc = rflx_type;
+    this->BaseCnv_t::m_classDesc = std::move(rflx_type);
     return StatusCode::SUCCESS;
   }
 };

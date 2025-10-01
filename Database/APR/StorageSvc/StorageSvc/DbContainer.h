@@ -14,7 +14,7 @@
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/DbObject.h"
+#include "StorageSvc/pool.h"
 #include "StorageSvc/DbHandleBase.h"
 #include "StorageSvc/Transaction.h"
 
@@ -214,4 +214,18 @@ namespace pool  {
     //@}
   };
 }       // End namespace pool
+
+
+// operator new for the creation of objects using clustering hint
+inline
+void* operator new (size_t size, pool::DbContainer& cntH, const pool::DbTypeInfo* typ) { 
+   return cntH.allocate(size, typ);
+}
+
+// C++ exception enabled compilation needs this delete operator
+inline
+void operator delete (void *ptr, pool::DbContainer& cntH) {
+   cntH.free(ptr);
+}
+
 #endif  // POOL_DBCONTAINER_H

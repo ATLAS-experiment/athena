@@ -230,7 +230,6 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_tripletFinderCfg.minPt = m_minPt;
   m_tripletFinderCfg.sigmaScattering = m_sigmaScattering;
   m_tripletFinderCfg.radLengthPerSeed = m_radLengthPerSeed;
-  m_tripletFinderCfg.maxPtScattering = m_maxPtScattering;
   m_tripletFinderCfg.impactMax = m_impactMax;
   m_tripletFinderCfg.helixCutTolerance = 1.;
   m_tripletFinderCfg.toleranceParam = m_toleranceParam;
@@ -335,9 +334,19 @@ bool GridTripletSeedingTool::spacePointSelectionFunction(
 }
 
 bool GridTripletSeedingTool::doubletSelectionFunction(
-    const Acts::Experimental::ConstSpacePointProxy2& /*middle*/,
+    const Acts::Experimental::ConstSpacePointProxy2& middle,
     const Acts::Experimental::ConstSpacePointProxy2& other, float cotTheta,
     bool isBottomCandidate) const {
+  // We remove some doublets that have the middle space point in some specific areas
+  // This should eventually be moved inside ACTS and allow a veto mechanism according
+  // to the user desire.
+  // As of now we cannot really do this since we define a range of validity of the middle
+  // candidate, and if we want to veto some sub-regions inside it, we need to do it here.
+  if (std::abs(middle.zr()[0]) > 1500 and
+      middle.zr()[1] > 100 and middle.zr()[1] < 150) {
+    return false;
+  }
+  
   // We remove here some seeds, in case the bottom space point radius is
   // too small (i.e. < fastTrackingRMin)
 
@@ -455,12 +464,23 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       newSp.varianceZ() = static_cast<float>(sp->varianceZ());
       newSp.varianceR() = static_cast<float>(sp->varianceR());
       if (m_useDetailedDoubleMeasurementInfo) {
-        newSp.topStripVector() =
+        Eigen::Vector3f topStripVector =
             sp->topHalfStripLength() * sp->topStripDirection();
-        newSp.bottomStripVector() =
+        Eigen::Vector3f bottomStripVector =
             sp->bottomHalfStripLength() * sp->bottomStripDirection();
-        newSp.stripCenterDistance() = sp->stripCenterDistance();
-        newSp.topStripCenter() = sp->topStripCenter();
+        Eigen::Vector3f stripCenterDistance = sp->stripCenterDistance();
+        Eigen::Vector3f topStripCenter = sp->topStripCenter();
+
+        newSp.topStripVector() = std::array<float, 3>{
+            topStripVector.x(), topStripVector.y(), topStripVector.z()};
+        newSp.bottomStripVector() =
+            std::array<float, 3>{bottomStripVector.x(), bottomStripVector.y(),
+                                 bottomStripVector.z()};
+        newSp.stripCenterDistance() = std::array<float, 3>{
+            stripCenterDistance.x(), stripCenterDistance.y(),
+            stripCenterDistance.z()};
+        newSp.topStripCenter() = std::array<float, 3>{
+            topStripCenter.x(), topStripCenter.y(), topStripCenter.z()};
       }
 
       copyFromIndices.push_back(spIndex);

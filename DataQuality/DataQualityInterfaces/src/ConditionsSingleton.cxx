@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/ConditionsSingleton.h"
@@ -12,7 +12,6 @@
 #include <set>
 #include "boost/tokenizer.hpp"
 #include <boost/algorithm/string.hpp>
-#include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/split.hpp"
 
 namespace dqi{
@@ -64,7 +63,7 @@ namespace dqi{
   }
 
   std::vector<std::string> ConditionsSingleton::getAllReferenceNames(std::string inp) const {
-    boost::algorithm::erase_all(inp," ");
+    std::erase(inp,' ');
     //    if(cleanCond.empty())return inp;
     //std::set<std::string> referenceSet;
     std::vector<std::string> refs;
@@ -106,10 +105,10 @@ namespace dqi{
       // for(std::set<std::string>::iterator it=referenceSet.begin();it!=referenceSet.end();++it){
       // 	refs.push_back(*it);
       // }
-      if(!defaultRef.empty())refs.push_back(defaultRef);
+      if(!defaultRef.empty())refs.push_back(std::move(defaultRef));
       return refs;
     }else{
-      refs.push_back(inp);
+      refs.push_back(std::move(inp));
       return refs;
     }
   }
@@ -120,7 +119,7 @@ namespace dqi{
 
     typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
     std::string cleanCond(condition);
-    boost::algorithm::erase_all(cleanCond," ");//delete all spaces
+    std::erase(cleanCond,' ');//delete all spaces
     boost::char_separator<char> condSep(","); //filed seperator for conditions and respective reference
     tokenizer conditionPairs(condition, condSep);
     for (tokenizer::const_iterator tok_iter = conditionPairs.begin();
@@ -153,10 +152,10 @@ namespace dqi{
   
   std::string ConditionsSingleton::conditionalSelect(std::string inp,const std::string& condition){
     std::string cleanCond(condition);
-    boost::algorithm::erase_all(cleanCond," ");//delete all spaces
+    std::erase(cleanCond,' ');//delete all spaces
     std::map<std::string, std::string> condition_map, reference_map;
     makeConditionMap(condition_map, condition);
-    boost::algorithm::erase_all(inp," ");
+    std::erase(inp,' ');
     //    if(cleanCond.empty())return inp;
     if(inp.find('=')!=std::string::npos){//we have conditions defined on reference
       typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
@@ -217,7 +216,7 @@ namespace dqi{
   std::vector<std::pair<std::string,std::string> > ConditionsSingleton::getConditionReferencePairs(std::string inp) const {
     std::vector<std::pair<std::string,std::string> > condPairs;
     std::map<std::string,std::string>  pairMap;//unique condition-reference pairs;
-    boost::algorithm::erase_all(inp," ");
+    std::erase(inp,' ');
     std::string defaultRef("");
     if(inp.find('=')!=std::string::npos){//we have conditions defined on reference
       typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;

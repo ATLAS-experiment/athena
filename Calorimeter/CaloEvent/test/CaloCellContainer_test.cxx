@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloCellContainer_test.cxx
@@ -19,6 +19,7 @@
 #include <map>
 #include <algorithm>
 #include <iostream>
+#include <memory>
 
 
 
@@ -136,9 +137,9 @@ int main()
     return 0;
   }  
 
-  CaloTester tester;
-  const CaloCell_ID& helper = tester.caloID();
-  CellVector cells = tester.get_cells();
+  auto tester = std::make_unique<CaloTester>();
+  const CaloCell_ID& helper = tester->caloID();
+  CellVector cells = tester->get_cells();
 
   Athena_test::URNG stlrand;
 

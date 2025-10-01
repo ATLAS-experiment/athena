@@ -364,7 +364,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
             StreamName                   = kwargs['StreamName'],
             ParticlesKey                 = "TruthParticles",
             VerticesKey                  = "TruthVertices",
-            EventsKey                    = "TruthEvents",
             WritePartons                 = False,
             WriteHadrons                 = True,
             WriteBHadrons                = True,

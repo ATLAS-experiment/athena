@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHIO_WRITEHEPMC_H
@@ -19,14 +19,18 @@ public:
   StatusCode execute();
 
   std::string m_outfile;
-  int m_precision;
+  int m_precision{8};
   std::string m_format;
+  std::string m_units;
 
 #ifdef HEPMC3
   std::unique_ptr<HepMC3::Writer> m_hepmcio;
+  HepMC3::Units::MomentumUnit m_momentumunit{};
+  HepMC3::Units::LengthUnit m_lengthunit{};
 #else
   std::unique_ptr<HepMC::IO_GenEvent> m_hepmcio;
-
+  HepMC::Units::MomentumUnit m_momentumunit{};
+  HepMC::Units::LengthUnit m_lengthunit{};
 #endif
 };
 

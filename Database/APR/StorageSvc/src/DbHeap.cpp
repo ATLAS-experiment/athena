@@ -3,7 +3,7 @@
 */
 
 #include "StorageSvc/DbHeap.h"
-#include "StorageSvc/DbObject.h"
+#include "StorageSvc/DbObjectHandle.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbObjectGuard.h"
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -17,7 +17,11 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
 // Members
-#include "AthContainers/AuxElement.h"
+#include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/ReadHandleKeyArray.h"
+#include "AsgDataHandles/WriteDecorHandleKeyArray.h"
+#include "xAODEventShape/EventShape.h"
+#include "xAODEventInfo/EventInfo.h"
 
 // STL includes
 #include <string>
@@ -34,10 +38,12 @@ namespace DerivationFramework {
     StatusCode initialize() override final;
 
   private:
-    std::string m_eventInfoName;
-    std::vector<std::string> m_edKeys;
-    std::string m_ed_suffix;
-    std::vector<SG::AuxElement::Decorator<float> > m_dec_eventShape;
+
+    Gaudi::Property<std::string> m_ed_suffix {this, "DecorationSuffix", "_rho"};
+
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EventInfoName", "EventInfo", "EventInfo key"};
+    SG::ReadHandleKeyArray<xAOD::EventShape> m_eventShapeKeys {this, "EventShapeKeys", {}, "Truth EventShape keys"};    
+    SG::WriteDecorHandleKeyArray<xAOD::EventInfo> m_eventDensityDecorKeys {this, "EnergyDensityDecorKeys", {}, "Truth energy density decoration keys"};
   }; /// class
 
 } /// namespace

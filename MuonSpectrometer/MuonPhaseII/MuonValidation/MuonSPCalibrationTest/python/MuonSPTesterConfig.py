@@ -8,8 +8,8 @@ def muonSPTesterCfg(flags, **kwargs):
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
 
-    from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
-    kwargs.setdefault("MMClusterBuilderTool", result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))
+    # from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
+    # kwargs.setdefault("MMClusterBuilderTool", result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))
 
     result.addEventAlgo(CompFactory.MuonValR4.MuonSPCalibrationTest(name="MuonSPCalibrationTest", **kwargs)) 
     return result
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
-
+    cfg.dropEventAlgo("MuonSpacePointMakerAlg")
 
 
     cfg.merge(muonSPTesterCfg(flags))

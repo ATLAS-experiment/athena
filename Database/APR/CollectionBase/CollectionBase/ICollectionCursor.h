@@ -5,6 +5,7 @@
 #ifndef COLLECTIONBASE_ICOLLECTIONCURSOR_H
 #define COLLECTIONBASE_ICOLLECTIONCURSOR_H
 
+#include <cstddef>
 
 class Token;
 
@@ -20,6 +21,12 @@ namespace pool {
   class ICollectionCursor
   {
   public:
+    /// Returns the size of the collection.
+    virtual std::size_t size() = 0;
+
+    /// Seek to a given position in the collection.
+    virtual bool seek(std::size_t position) = 0;
+
     /// Advances the cursor to the next row of the query result set.
     virtual bool next() = 0;
 

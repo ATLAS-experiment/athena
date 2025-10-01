@@ -4,15 +4,16 @@ import collections
 
 AthSequencer = CompFactory.AthSequencer  # cache lookup
 
-def parAND(name, subs=[]):
+def parAND(name, subs=[], invert=False):
     """parallel AND sequencer"""
     return AthSequencer( name,
                          ModeOR = False,
                          Sequential = False,
                          StopOverride = True,
+                         Invert = invert,
                          Members = subs.copy() )
 
-def parOR(name, subs=[]):
+def parOR(name, subs=[], invert=False):
     """parallel OR sequencer
     This is the default sequencer and lets the DataFlow govern the execution entirely.
     """
@@ -20,17 +21,19 @@ def parOR(name, subs=[]):
                          ModeOR = True,
                          Sequential = False,
                          StopOverride = True,
+                         Invert = invert,
                          Members = subs.copy() )
 
-def seqAND(name, subs=[]):
+def seqAND(name, subs=[], invert=False):
     """sequential AND sequencer"""
     return AthSequencer( name,
                          ModeOR = False,
                          Sequential = True,
                          StopOverride = False,
+                         Invert = invert,
                          Members = subs.copy() )
 
-def seqOR(name, subs=[]):
+def seqOR(name, subs=[], invert=False):
     """sequential OR sequencer
     Used when a barrier needs to be set by all subs reached irrespective of the decision
     """
@@ -38,6 +41,7 @@ def seqOR(name, subs=[]):
                          ModeOR = True,
                          Sequential = True,
                          StopOverride = True,
+                         Invert = invert,
                          Members = subs.copy() )
 
 
@@ -65,8 +69,6 @@ def checkSequenceConsistency( seq ):
                 __noSubSequenceOfName( c, n, seen )
 
     __noSubSequenceOfName( seq, seq.getName() )
-    for c in getSequenceChildren( seq ):
-        checkSequenceConsistency(c)
 
 
 def isSequence( obj ):

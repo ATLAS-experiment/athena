@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ----------------------------------------------------------------------
@@ -211,7 +211,7 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
 
     for (auto p: *evt) {
         if (p->status() == 4) {
-            beams.push_back(p);
+            beams.push_back(std::move(p));
         }
     }
 
@@ -254,7 +254,7 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
                         1e9*hadr5_.sigine);
 #endif
 
-    evt->set_heavy_ion(ion);
+    evt->set_heavy_ion(std::move(ion));
 
     //an integer ID uniquely specifying the signal process (i.e. MSUB in Pythia)
     // Epos 1-ND, 2-DD, 3-CD, 4 AB->XB, -4 AB->AX translated into signal_proces_id 101-ND, 105 - DD, 102 - CD, 103 -AB->XB, 104 AB->AX
@@ -285,7 +285,7 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
     HepMC::GenCrossSection xsec;
     xsec.set_cross_section(xsigine, 0.0);
 #endif
-    evt->set_cross_section(xsec);
+    evt->set_cross_section(std::move(xsec));
 
     return StatusCode::SUCCESS;
 }

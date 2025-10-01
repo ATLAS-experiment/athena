@@ -146,7 +146,7 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
 
                 # little helper
                   def flat( classtree ):
-                     if isinstance( classtree, list ) or isinstance( classtree, tuple ):
+                     if isinstance(classtree, (list, tuple)):
                         return [ j for i in classtree for j in flat( i ) ]
                      else:
                         return [ classtree ]
@@ -761,11 +761,11 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
       properties = self.getValuedProperties()
       propstr = ""
       for key,val in sorted(properties.items()):
-         if isinstance(val,GaudiHandles.PublicToolHandle) or isinstance(val,GaudiHandles.PrivateToolHandle):
+         if isinstance(val, (GaudiHandles.PublicToolHandle, GaudiHandles.PrivateToolHandle)):
             propstr += val.getFullName()
          elif isinstance(val,Configurable):
             propstr += "({0}:{1})".format(key,val.getFlattenedProperties())
-         elif isinstance(val,GaudiHandles.PublicToolHandleArray) or isinstance(val,GaudiHandles.PrivateToolHandleArray):
+         elif isinstance(val, (GaudiHandles.PublicToolHandleArray, GaudiHandles.PrivateToolHandleArray)):
             for th in val:
                # Handle ToolHandles that have just been set as strings(?)
                if isinstance(th,Configurable):

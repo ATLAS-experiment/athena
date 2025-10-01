@@ -176,6 +176,7 @@ def mergeParallel(chainDefList, offset, leg_numbering = None, perSig_lengthOfCha
 
                     seqMultName = '_'.join([sigName for sigName in sigNames])
                     nLegs = 1 # TODO, make it follow the real multiplicity of the step
+                    # nLegs = cConfig.steps[current_leg_ag_length-1].nLegs 
                     seqStepName = getMergedEmptyStepName(align_grp_to_lengthen, current_leg_ag_length+i, nLegs, seqMultName)
                     seqNames = [getEmptySeqName(previous_step_dicts[iSeq]['signature'], current_leg_ag_length+i, align_grp_to_lengthen,i) for iSeq in range(len(sigNames))]
 
@@ -510,18 +511,18 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = None, 
             stepName += '_' + currentStepName
 
         theChainStep = ChainStep(stepName, chainDicts = stepDicts, isEmpty = True) 
-        log.debug("[makeCombinedStep] Merged empty step: \n %s", theChainStep)
+        log.debug("[makeCombinedStep] Merged empty step: %s", theChainStep.name)
         return theChainStep
 
     stepSeq = []    
-    legsInStep = []
+    alignLegsInStep = []
     # count the number of legs inside this chain part/step (inner legs) 
     # this happens if the step is already the result of a merging, due to the alignemnt, and can have more than one leg
     # use the alignmentGroups here, which is stored by grouping the legs per alignemnt group
     # TODO: can be extracted from stepDict['chainParts'][0]['multiplicity']?
     for num, chain in enumerate(chainDefList):
-        legsInStep.append(len(chain.alignmentGroups))
-    assert(len(legsInStep) == len(parallel_steps))
+        alignLegsInStep.append(len(chain.alignmentGroups))
+    assert(len(alignLegsInStep) == len(parallel_steps))
 
     for chain_index, step in enumerate(parallel_steps): #this is a horizontal merge!     
          
@@ -529,12 +530,12 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = None, 
             # this happens for merging chains with different numbers of steps, we need to "pad" out with empty sequences to propogate the decisions
             # all other chain parts' steps should contain an empty sequence
 
-            log.debug("[makeCombinedStep] step %s is Empty and has %d legs", step.name if step is not None else "None", legsInStep[chain_index])                                               
+            log.debug("[makeCombinedStep] step %s is Empty and has %d alignemnt group legs", step.name if step is not None else "None", alignLegsInStep[chain_index])                                               
             if alignment_group == "":
                 alignment_group = chainDefList[0].alignmentGroups[0]
 
             # loop over the inner legs of this sub-chain and create one empty sequence per each inner leg
-            for innerLeg in range(legsInStep[chain_index]):
+            for innerLeg in range(alignLegsInStep[chain_index]):
                 new_stepDict = deepcopy(chainDefList[chain_index].steps[-1].stepDicts[-1])
                 seqName = getEmptySeqName( new_stepDict['signature'], stepNumber, alignment_group, innerLeg)            
                 log.debug("[makeCombinedStep] creating Empty sequence %s", seqName)
@@ -551,7 +552,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = None, 
                 stepDicts.append(new_stepDict)
                 leg_counter += 1
 
-            nLegs = legsInStep[chain_index] 
+            nLegs = alignLegsInStep[chain_index] 
             currentStepName = getMergedEmptyStepName(alignment_group, stepNumber, nLegs, signature)
 
             log.debug("[makeCombinedStep] found empty step to be merged, step number: %d chain_index: %s, step name: %s, made new empty sequence name: %s", stepNumber, chain_index, currentStepName, seqName)            
@@ -559,17 +560,15 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = None, 
             
         else:
             # Standard step, append it to the combined step
-            log.debug("[makeCombinedStep] step %s, nLegs  = %s", step.name, str(step.nLegs))
-            if len(step.sequenceGens):                
-                log.debug("[makeCombinedStep]    with sequences = %s", ' '.join(map(str, [seq.func.__name__ for seq in step.sequenceGens])))
+            log.debug("[makeCombinedStep] step %s with nLegs  = %s", step.name, str(step.nLegs))
+            if len(step.sequenceGens):                                
+                log.debug("[makeCombinedStep]    with sequences = [%s]", ', '.join(map(str, [seq.func.__name__ for seq in step.sequenceGens])))
 
             # this function only works if the input chains are single-object chains (one menu seuqnce)
             if len(step.sequenceGens) > 1:
                 log.debug("[makeCombinedStep] combining in an already combined chain")
-
-            if ( comboHypo is None or
-                 (hasattr(step.comboHypoCfg, '__name__') and step.comboHypoCfg.__name__ != "ComboHypoCfg") ):
-                comboHypo = step.comboHypoCfg
+           
+            comboHypo = step.comboHypoCfg
             currentStepName = step.name
             #remove redundant instances of StepN_ and merged_ (happens when merging already merged chains)
             if currentStepName.startswith('merged_'):
@@ -645,7 +644,7 @@ def build_empty_sequences(emptyChainDicts, step_mult, caller, L1decisions, seqNa
         
             
     log.verbose("[%s] emptyChainDicts %s", caller, emptyChainDicts)
-    log.debug("[%s] %s has number of empty sequences %d and empty legs in stepDicts %d",
+    log.debug("[%s] %s has %d empty sequences and %d empty legs in stepDicts",
               caller, chainName, len(emptySequences), len(emptyChainDicts))
     if len(emptySequences) != len(emptyChainDicts):
         log.error("[%s] %s has a different number of empty sequences/legs %d than stepDicts %d",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/CachedValue_test.cxx
@@ -79,7 +79,7 @@ void test1()
   cv3.set (Payload(4));
   assert (cv3.isValid());
   cv3.ptr()->check(4);
-  const CxxUtils::CachedValue<Payload> cv4 (cv3);
+  const CxxUtils::CachedValue<Payload> cv4 (std::move(cv3));
   assert (cv4.isValid());
   cv4.ptr()->check(4);
 }

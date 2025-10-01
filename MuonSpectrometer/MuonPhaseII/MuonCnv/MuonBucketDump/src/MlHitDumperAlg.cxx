@@ -66,7 +66,7 @@ namespace MuonR4{
     std::size_t MlHitDumperAlg::fillSpacePoint(const ActsGeometryContext& gctx, const SpacePoint& sp){
         const Amg::Transform3D& lToGlob = sp.msSector()->localToGlobalTrans(gctx);
         std::size_t idx = m_spCollection->push_back(sp);
-        m_spGlobPos.set(lToGlob * sp.positionInChamber(), idx);
+        m_spGlobPos.set(lToGlob * sp.localPosition(), idx);
 
         switch (sp.type()) {
             using enum xAOD::UncalibMeasType;
@@ -94,8 +94,8 @@ namespace MuonR4{
                 const MuonGMR4::StripDesign& design = re->sensorLayout(prd->layerHash())->design();
                 const double halfLength = design.stripLength(prd->channelNumber());
                 m_spReadoutSide[idx] = 1.;
-                m_spGlobEdgeLow.set( lToGlob*(sp.positionInChamber() -halfLength * sp.directionInChamber()) , idx);
-                m_spGlobEdgeHigh.set(lToGlob*(sp.positionInChamber() +halfLength * sp.directionInChamber()) , idx);
+                m_spGlobEdgeLow.set( lToGlob*(sp.localPosition() -halfLength * sp.sensorDirection()) , idx);
+                m_spGlobEdgeHigh.set(lToGlob*(sp.localPosition() +halfLength * sp.sensorDirection()) , idx);
                 m_spTime[idx] = prd->bcBitMap();
                 break;
             }
@@ -134,12 +134,10 @@ namespace MuonR4{
                     case Strip:
                     case Wire: {
                         const double halfLength = 0.5* re->stripLength(prd->measurementHash());
-                        m_spGlobEdgeLow.set( lToGlob*(sp.positionInChamber() -halfLength * sp.directionInChamber()) , idx);
-                        m_spGlobEdgeHigh.set(lToGlob*(sp.positionInChamber() +halfLength * sp.directionInChamber()) , idx);
+                        m_spGlobEdgeLow.set( lToGlob*(sp.localPosition() -halfLength * sp.sensorDirection()) , idx);
+                        m_spGlobEdgeHigh.set(lToGlob*(sp.localPosition() +halfLength * sp.sensorDirection()) , idx);
                         break;
-                        
                     }
-
                 }
                 break;
             }

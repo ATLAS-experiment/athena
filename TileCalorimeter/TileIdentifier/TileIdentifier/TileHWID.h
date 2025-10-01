@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -55,7 +55,7 @@ public:
   /** 
    * @brief Default constructor
    */
-  TileHWID(void);
+  TileHWID();
 
   /** 
    * @brief Default destructor
@@ -75,7 +75,7 @@ public:
   /**
    * @brief online identifer for whole Tile
    */
-  HWIdentifier        tilehw_id               ( void )                        const;
+  HWIdentifier        tilehw_id               ( )                        const;
   /**
    * @brief ROS HWIdentifer
    */
@@ -208,19 +208,19 @@ public:
   /**
    * @brief idContext for ROSes
    */
-  IdContext    ros_context      (void) const;
+  IdContext    ros_context      () const;
   /**
    * @brief idContext for drawers
    */
-  IdContext    drawer_context   (void) const;
+  IdContext    drawer_context   () const;
   /**
    * @brief idContext for channels
    */
-  IdContext    channel_context  (void) const;
+  IdContext    channel_context  () const;
   /**
    * @brief idContext for ADCs
    */
-  IdContext    adc_context      (void) const;
+  IdContext    adc_context      () const;
 
   /**
    * @brief create compact HW ID from hash id (return == 0 for OK)
@@ -261,55 +261,55 @@ public:
   /**
    * @brief ROS hash table max size
    */
-  inline size_type     ros_hash_max     (void)  const   { return m_ros_hash_max; }
+  inline size_type     ros_hash_max     ()  const   { return m_ros_hash_max; }
   /**
    * @brief drawer hash table max size
    */
-  inline size_type     drawer_hash_max  (void)  const   { return m_drawer_hash_max; }
+  inline size_type     drawer_hash_max  ()  const   { return m_drawer_hash_max; }
   /**
    * @brief channel hash table max size
    */
-  inline size_type     channel_hash_max (void)  const   { return m_channel_hash_max; }
+  inline size_type     channel_hash_max ()  const   { return m_channel_hash_max; }
   /**
    * @brief ADC hash table max size
    */
-  inline size_type     adc_hash_max     (void)  const   { return m_adc_hash_max; }
+  inline size_type     adc_hash_max     ()  const   { return m_adc_hash_max; }
 
   /**
    * @brief begin iterator for ROS Identifiers
    */
-  std::vector<HWIdentifier>::const_iterator ros_begin     (void) const  { return(m_ros_vec.begin()); }
+  std::vector<HWIdentifier>::const_iterator ros_begin     () const  { return(m_ros_vec.begin()); }
   /**
    * @brief end iterator for ROS Identifiers
    */
-  std::vector<HWIdentifier>::const_iterator ros_end       (void) const  { return(m_ros_vec.end()); }
+  std::vector<HWIdentifier>::const_iterator ros_end       () const  { return(m_ros_vec.end()); }
 
   /**
    * @brief begin iterator for drawer Identifiers
    */
-  std::vector<HWIdentifier>::const_iterator drawer_begin  (void) const  { return(m_drawer_vec.begin()); }
+  std::vector<HWIdentifier>::const_iterator drawer_begin  () const  { return(m_drawer_vec.begin()); }
   /**
    * @brief end iterator for drawer Identifiers
    */
-  std::vector<HWIdentifier>::const_iterator drawer_end    (void) const  { return(m_drawer_vec.end()); }
+  std::vector<HWIdentifier>::const_iterator drawer_end    () const  { return(m_drawer_vec.end()); }
 
   /**
    * @brief begin iterator for channel Identifiers
    */
-  std::vector<HWIdentifier>::const_iterator channel_begin (void) const  { return(m_channel_vec.begin()); }
+  std::vector<HWIdentifier>::const_iterator channel_begin () const  { return(m_channel_vec.begin()); }
   /**
    * @brief end iterator for channel Identifiers
    */
-  std::vector<HWIdentifier>::const_iterator channel_end   (void) const  { return(m_channel_vec.end()); }
+  std::vector<HWIdentifier>::const_iterator channel_end   () const  { return(m_channel_vec.end()); }
 
   /**
    * @brief begin iterator for ADC Identifiers
    */
-  std::vector<HWIdentifier>::const_iterator adc_begin     (void) const  { return(m_adc_vec.begin()); }
+  std::vector<HWIdentifier>::const_iterator adc_begin     () const  { return(m_adc_vec.begin()); }
   /**
    * @brief end iterator for ADC Identifiers
    */
-  std::vector<HWIdentifier>::const_iterator adc_end       (void) const  { return(m_adc_vec.end()); }
+  std::vector<HWIdentifier>::const_iterator adc_end       () const  { return(m_adc_vec.end()); }
 
   enum {NOT_VALID_HASH = 64000};
 
@@ -326,9 +326,9 @@ private:
   int                   get_field               ( const HWIdentifier & id,
                                                   size_type index )             const;
 
-  int         initLevelsFromDict(void) ;
+  int         initLevelsFromDict();
 
-  int         init_hashes(void) ;
+  int         init_hashes();
 
   bool        drawer_id  (const HWIdentifier& ros_id,     int drawer,              HWIdentifier& drawer_id  );
   bool        channel_id (const HWIdentifier& ros_id,     int drawer, int channel, HWIdentifier& channel_id );

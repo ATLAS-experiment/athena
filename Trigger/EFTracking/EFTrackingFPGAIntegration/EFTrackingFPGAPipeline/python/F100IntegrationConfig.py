@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def F100IntegrationCfg(flags, name = 'F100IntegrationAlg', **kwarg):
+def F1X0IntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
@@ -16,7 +16,6 @@ def F100IntegrationCfg(flags, name = 'F100IntegrationAlg', **kwarg):
     kwarg.setdefault('StripClusterKernelName','processHits')
     kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
     kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
-    kwarg.setdefault('EDMPrepKernelName', 'EDMPrep')
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
     kwarg.setdefault('doF110', flags.FPGADataPrep.doF110)
@@ -33,7 +32,71 @@ def F100IntegrationCfg(flags, name = 'F100IntegrationAlg', **kwarg):
         PrintEllapsedTime = True
     ))
 
-    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100IntegrationAlg(name, **kwarg))
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F1X0IntegrationAlg(name, **kwarg))
+
+    return acc
+
+def F1X0XRTIntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
+    acc = ComponentAccumulator()
+
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
+    if(flags.FPGADataPrep.doF110):
+        kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
+    else:
+        kwarg.setdefault('PixelClusterKernelName', 'pixclustering_top_v1_0')
+    kwarg.setdefault('StripClusterKernelName','processHits')
+    kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
+    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
+    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
+    kwarg.setdefault('doF110', flags.FPGADataPrep.doF110)
+
+    if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
+        if 'RegSelTool' not in kwarg:
+            from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+            kwarg.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+
+    # Set up Chrono service
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True
+    ))
+
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F1X0XRTIntegrationAlg(name, **kwarg))
+
+    return acc
+
+def F100StreamIntegrationCfg(flags, name = 'F100StreamIntegrationAlg', **kwarg):
+    acc = ComponentAccumulator()
+
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
+    kwarg.setdefault('PixelStartClusterKernelName','loaderPixel')
+    kwarg.setdefault('PixelEndClusterKernelName','unloaderPixelCluster')
+    kwarg.setdefault('PixelEndClusterEdmKernelName','unloaderPixelEdm')
+
+    kwarg.setdefault('StripStartClusterKernelName','loaderStrip')
+    kwarg.setdefault('StripEndClusterKernelName','unloaderStrip')
+    kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
+    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
+    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
+
+    if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
+        if 'RegSelTool' not in kwarg:
+            from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+            kwarg.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+
+    # Set up Chrono service
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True
+    ))
+
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100StreamIntegrationAlg(name, **kwarg))
 
     return acc
 
@@ -61,6 +124,36 @@ def F110IntegrationCfg(flags, name = 'F110IntegrationAlg', **kwarg):
     ))
 
     acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F110IntegrationAlg(name, **kwarg))
+
+    return acc
+
+def F110StreamIntegrationCfg(flags, name = 'F110StreamIntegrationAlg', **kwarg):
+    acc = ComponentAccumulator()
+
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
+    kwarg.setdefault('PixelStartClusterKernelName','pixelLoader')
+    kwarg.setdefault('PixelEndClusterKernelName','pixelUnloader')
+
+    kwarg.setdefault('StripStartClusterKernelName','stripLoader')
+    kwarg.setdefault('StripEndClusterKernelName','stripUnloader')
+    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
+    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
+
+    if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
+        if 'RegSelTool' not in kwarg:
+            from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+            kwarg.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+
+    # Set up Chrono service
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True
+    ))
+
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F110StreamIntegrationAlg(name, **kwarg))
 
     return acc
 
@@ -110,42 +203,61 @@ def F100FlagsCfg(flags):
     return flags
 
 
-def FPGADataPreparation(flags): # thsi is used to run the F100 through Reco_tf
+def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F100 through Reco_tf
     kwargs = {}
     kwargs.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     acc = ComponentAccumulator()
     acc.merge(F100DataEncodingCfg(flags))
     
-    if(flags.FPGADataPrep.doCodeType == "F100"):
-        acc.merge(F100IntegrationCfg(flags, "F100IntegrationAlg", **kwargs))
+    if(flags.FPGADataPrep.doCodeType == "F1X0"):
+        acc.merge(F1X0IntegrationCfg(flags, "F1X0IntegrationAlg", **kwargs))
+    elif(flags.FPGADataPrep.doCodeType == "F1X0XRT"):
+        acc.merge(F1X0XRTIntegrationCfg(flags, "F1X0XRTIntegrationAlg", **kwargs))
+    elif(flags.FPGADataPrep.doCodeType == "F100Stream"):
+        acc.merge(F100StreamIntegrationCfg(flags, "F100StreamIntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F110"):
         acc.merge(F110IntegrationCfg(flags, "F110IntegrationAlg", **kwargs))
+    elif(flags.FPGADataPrep.doCodeType == "F110Stream"):
+        acc.merge(F110StreamIntegrationCfg(flags, "F110StreamIntegrationAlg", **kwargs))
+    else:
+        print("Code Type is not recognized")
+        exit(1)
 
     acc.merge(F100EDMConversionCfg(flags))
-    acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'ITkPixelClusters',
-                                             'sortedxAODStripClusterContainer': 'ITkStripClusters'}))
-    
-    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
-    acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
-    
-    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
-    acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+    acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone else 'ITkPixelClusters',
+                                             'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
 
-    if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
-        toAOD = []
-
-        pixel_cluster_shortlist = ['-pixelClusterLink']
-        strip_cluster_shortlist = ['-sctClusterLink']
+    if(not runStandalone):
+        if(not flags.FPGADataPrep.ForTiming): 
+            from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+            acc.merge(FPGATrackSimReportingCfg(flags,
+                                               perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
+                                            **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
+                                                'xAODStripClusterContainers' : ['ITkStripClusters'],
+                                                'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
+                                                'isDataPrep': True} ))
         
-        pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
-        strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
+        acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+        
+        from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
+        acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
 
-        toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
-                  'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
-                  'xAOD::StripClusterContainer#ITkStripClusters',
-                  'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
+        if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
+            toAOD = []
+
+            pixel_cluster_shortlist = ['-pixelClusterLink']
+            strip_cluster_shortlist = ['-sctClusterLink']
+            
+            pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
+            strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+
+            toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
+                    'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
+                    'xAOD::StripClusterContainer#ITkStripClusters',
+                    'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
+            from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+            acc.merge(addToAOD(flags, toAOD))
     return acc
     
     
@@ -185,10 +297,6 @@ if __name__ == "__main__":
 
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
-
-    kwarg = {}
-
-    kwarg.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
@@ -213,10 +321,8 @@ if __name__ == "__main__":
         from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
         cfg.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
 
+    cfg.merge(FPGADataPreparation(flags,runStandalone=True))
 
-    acc = F100IntegrationCfg(flags, **kwarg)
-    cfg.merge(acc)
-    
     OutputItemList = []
     # # Connection to ACTS
     if flags.FPGADataPrep.DoActs:
@@ -224,9 +330,6 @@ if __name__ == "__main__":
         # convert xAOD Clusters to SPs
         from EFTrackingFPGAUtility.DataPrepToActsConfig import UseActsSpacePointFormationCfg
         cfg.merge(UseActsSpacePointFormationCfg(flags))
-                
-        # Sort FPGAClusters
-        cfg.merge(FPGAClusterSortingCfg(flags))
     
 
         # Run the ACTS Fast Tracking on FPGA clusters

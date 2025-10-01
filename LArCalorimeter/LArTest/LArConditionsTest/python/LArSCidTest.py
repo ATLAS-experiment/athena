@@ -37,6 +37,7 @@ if __name__=="__main__":
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     flags.IOVDb.DatabaseInstance="CONDBR2"
     flags.LAr.doAlign=False
+    flags.Input.Files=[]
     flags.Input.isMC=False
     flags.Input.RunNumbers=[483000,]
     flags.IOVDb.GlobalTag="CONDBR2-BLKPA-RUN2-09"

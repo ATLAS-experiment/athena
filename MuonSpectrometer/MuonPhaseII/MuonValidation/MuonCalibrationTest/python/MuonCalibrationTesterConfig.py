@@ -10,7 +10,8 @@ def MdtCalibDbAlgTestCfg(flags, name = "MdtCalibDbAlgTest", **kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MdtCalibDbAlgTest.root")

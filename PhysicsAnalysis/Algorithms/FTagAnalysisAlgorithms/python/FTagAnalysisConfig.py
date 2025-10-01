@@ -58,7 +58,7 @@ class FTagConfig (ConfigBlock):
         
         # Potentially modify the readFromBTaggingObject as here determining 
         # if input files has jet tagging probabilities attached to the jet (or still only to the BTagging object)
-        self.readFromBTaggingObject = getReadFromBTaggingObject(config.autoconfigFlags(), jetCollection, self.readFromBTaggingObject)
+        self.readFromBTaggingObject = getReadFromBTaggingObject(config.flags, jetCollection, self.readFromBTaggingObject)
 
         selectionName = self.selectionName
         if selectionName is None or selectionName == '' :
@@ -103,7 +103,7 @@ class FTagConfig (ConfigBlock):
         # Save the b-tagging score
         if self.saveScores in ['True', 'All']:
             # Save the b-tagger weight
-            alg = config.createAlgorithm('CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg')
+            alg = config.createAlgorithm('CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlgScore')
             alg.jets = config.readName (self.containerName)
             alg.taggerWeightDecoration = f'{self.btagger}'
             alg.affectingSystematicsFilter = '.*' # only run it on nominal!

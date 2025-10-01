@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_RPCDATAPREPARATOR_H
@@ -41,14 +41,16 @@ class RpcDataPreparator: public AthAlgTool
     
       virtual StatusCode initialize() override;
 
-      StatusCode prepareData(const TrigRoiDescriptor*    p_roids,
-			     TrigL2MuonSA::RpcHits&      rpcHits,
+      StatusCode prepareData(const EventContext& ctx,
+                             const TrigRoiDescriptor*    p_roids,
+                             TrigL2MuonSA::RpcHits&      rpcHits,
                              TrigL2MuonSA::RpcLayerHits& rpcLayerHits,
-			     const ToolHandle<RpcPatFinder>*   rpcPatFinder,
-			     const bool dynamicDeltaRpc) const;
+                             const ToolHandle<RpcPatFinder>*   rpcPatFinder,
+                             const bool dynamicDeltaRpc) const;
 
       //for multi-track SA mode
-      StatusCode prepareData(const TrigRoiDescriptor*         p_roids,
+      StatusCode prepareData(const EventContext& ctx,
+                             const TrigRoiDescriptor*         p_roids,
                              TrigL2MuonSA::RpcLayerClusters&  rpcLayerClusters,
                              const ToolHandle<ClusterPatFinder>*    clusterPatFinder,
                              const bool dynamicDeltaRpc) const;

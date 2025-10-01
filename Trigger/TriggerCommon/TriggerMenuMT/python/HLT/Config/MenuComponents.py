@@ -15,7 +15,6 @@ from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 from collections.abc import MutableSequence
 import functools
 import re
-import types
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
@@ -406,7 +405,7 @@ class MenuSequence:
 
     def connectToFilter(self, outfilter):
         """Connect filter to the InputMaker"""
-        log.debug("connecting %s to inputs of %s", outfilter, self.maker.Alg.name)
+        log.debug("connectToFilter: connecting %s to inputs of %s", outfilter, self.maker.Alg.name)
         self.maker.addInput(outfilter)
           
     def getHypoToolConf(self) :
@@ -540,7 +539,7 @@ class Chain(object):
             new_step_name =  prev_step_name+'_'+empty_step_name+'%d_'%stepID+next_step_name
 
             log.debug("Adding empty step %s", new_step_name)
-            steps_to_add += [ChainStep(new_step_name, chainDicts=prev_chain_dict, comboHypoCfg=ComboHypoCfg, isEmpty=True)]
+            steps_to_add += [ChainStep(new_step_name, chainDicts=prev_chain_dict, isEmpty=True)]
         
         self.steps = chain_steps_pre_split + steps_to_add + chain_steps_post_split
 
@@ -587,41 +586,45 @@ class Chain(object):
                     self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups, '\n '.join(map(str, self.steps)))       
         
 
-# TODO: can we describe emtpy steps with isEmpty flag only (not via nLegs and setting comboHypoCfg=None)?
+
 class ChainStep(object):
     """ Class to describe one step of a chain; 
     a step is described by a list of ChainDicts and a list of sequence generators;
+    there is one leg per ChainDict;
     a step can have one leg (single) or more legs (combined);
-    not-empty steps have one sequence and one ChainDict per leg;
-    empty steps have zero legs, while chainDict len is not zero; 
+    not-empty steps have one sequence per leg;
+    empty steps have zero sequences, while chainDict len is not zero; 
     legID is taken from the ChainDict;
     """
-    #TODO remove default argument comboHypoCfg
-    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = ComboHypoCfg , comboToolConfs = None, isEmpty = False, createsGhostLegs = False):
+    
+    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = None, comboToolConfs = None, isEmpty = False, createsGhostLegs = False):
 
         # default mutable values must be initialized to None
         if SequenceGens is None:  SequenceGens = []
+        if comboHypoCfg is None: comboHypoCfg = functools.partial(ComboHypoCfg)
         if comboToolConfs is None: comboToolConfs = []
-
         assert chainDicts is not None,"Error building a ChainStep without chainDicts"
 
         self.name = name
         self.sequences = []
         self.sequenceGens = SequenceGens 
+        if not isinstance(comboHypoCfg, functools.partial):             
+            raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with ComboHypo %s that is not a function" % (name, comboHypoCfg) ) 
+        
         self.comboHypoCfg = comboHypoCfg
-        self.comboToolConfs = list(comboToolConfs)
-        self.nLegs = len (self.sequenceGens) 
+        self.comboToolConfs = list(comboToolConfs)       
         self.stepDicts = chainDicts # one dict per leg        
+        self.nLegs = len(self.stepDicts) # cannot be zero
         self.isEmpty = isEmpty                
         
         # sanity check on inputs, excluding empty steps 
         if not self.isEmpty:                     
-            log.debug("Building step %s for chain %s: Dict len=%d, nLegs=%i", name, chainDicts[0]['chainName'], len(chainDicts), self.nLegs )             
-            if len(chainDicts) != self.nLegs: 
+            log.debug("Building step %s for chain %s: n.sequences=%d, nLegs=%i", name, chainDicts[0]['chainName'], len (self.sequenceGens) , self.nLegs )             
+            if len (self.sequenceGens)  != self.nLegs: 
                 log.error("[ChainStep] SequenceGens: %s",self.sequenceGens)
-                log.error("[ChainStep] chainDicts: %s",self.stepDicts)
+                log.error("[ChainStep] stepDicts: %s",self.stepDicts)
                 log.error("[ChainStep] n.legs: %i",self.nLegs)
-                raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with %i legs and %i dictionaries. These lists must have the same size" % (name, self.nLegs, len(chainDicts)) )
+                raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with %i legs and %i sequences. These lists must have the same size" % (name, self.nLegs, len (self.sequenceGens) ) )
                         
            
         for iseq, seq in enumerate(self.sequenceGens):              
@@ -632,7 +635,7 @@ class ChainStep(object):
                                                  
         self.onlyJets  = False
         sig_set = None
-        if len(chainDicts) > 0  and 'signature' in chainDicts[0]:             
+        if 'signature' in chainDicts[0]:             
             sig_set = set([step['signature'] for step in chainDicts])
             if len(sig_set) == 1 and ('Jet' in sig_set or 'Bjet' in sig_set):
                 self.onlyJets = True
@@ -643,13 +646,13 @@ class ChainStep(object):
         
         if not self.isEmpty:
             self.setChainPartIndices()
-        self.legIds = self.getLegIds() 
         self.makeCombo()
 
     def createSequences(self):
-        """ creation of this step sequences with instantiation of the CAs"""
-        log.debug("creating sequences for step %s", self.name)
+        """ creation of this step sequences with instantiation of the CAs"""        
+        log.debug("createSequences: creating %d sequences for step %s", len(self.sequenceGens), self.name)
         for seq in self.sequenceGens:
+            log.debug("createSequences: creating sequence %s", seq.func.__name__)
             self.sequences.append(seq()) # create the sequences         
             
     
@@ -669,34 +672,20 @@ class ChainStep(object):
                 leg_counter += 1
         return
 
-    def getLegIds(self):
-        """ get the gelId from the step dictionary for multi-leg chains"""
-        if self.nLegs <= 1: # single leg or empty steps
-            return [0]
-        leg_ids = []
-        for istep,step_dict in enumerate(self.stepDicts):
-            if step_dict['chainName'][0:3] != 'leg':
-                if self.onlyJets:
-                    leg_ids += [istep]
-                else:
-                    log.error("[getLegIds] step %s for chain %s has %i dictionaries but no leg IDs? ",self.name, step_dict['chainName'], self.nLegs)
-                    raise Exception("[getLegIds] cannot extract leg IDs, exiting.")
-            else:
-                leg_ids += [int(step_dict['chainName'][3:6])]
-        return leg_ids
 
     def addComboHypoTools(self, tool):
         #this function does not add tools, it just adds one tool. do not pass it a list!
         self.comboToolConfs.append(tool)
 
     def getComboHypoFncName(self):
-        return self.comboHypoCfg.__name__ if isinstance(self.comboHypoCfg, types.FunctionType) else self.comboHypoCfg        
+        return self.comboHypoCfg.func.__name__ 
+
 
 
     def makeCombo(self):
         """ Configure the Combo Hypo Alg and generate the corresponding function, without instantiation which is done in createSequences() """ 
-        self.combo = None        
-        if self.isEmpty or self.comboHypoCfg is None:
+        self.combo = None
+        if self.isEmpty:
             return        
         comboNameFromStep = CFNaming.comboHypoName(self.name) # name expected from the step name
         funcName = self.getComboHypoFncName() # name of the function generator

@@ -23,7 +23,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventSelector
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/GenericAddress.h"
 #include "CLHEP/Random/RandFlat.h"
-#include <boost/lexical_cast.hpp>
+#include <charconv>
 #include <boost/tokenizer.hpp>
 #include <algorithm>
 #include <cassert>
@@ -35,7 +35,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventSelector
 #include <string>
 
 using namespace std;
-using boost::lexical_cast;
 using boost::tokenizer;
 using boost::char_separator;
 using SG::DataProxy;
@@ -119,15 +118,21 @@ MixingEventSelector::decodeTrigger(string triggDescr) {
   if ( (distance(tokens.begin(), tokens.end()) == 3) ||
        (distance(tokens.begin(), tokens.end()) == 3) ){
     Tokenizer::iterator iToken(tokens.begin());
-    try {
       Gaudi::Utils::TypeNameString selTN(*iToken++);
       //get selector
       SmartIF<IEvtSelector> pSelector(serviceLocator()->service(selTN));
       if (pSelector) {
         //FIXME	  if (!pSelector.done()) {
         //try to add to trig list
-        unsigned int firstEvt(boost::lexical_cast<unsigned int>(*iToken++));
-        unsigned int lastEvt(boost::lexical_cast<unsigned int>(*iToken));
+        unsigned int firstEvt{};
+        unsigned int lastEvt{};
+        auto string1 = *iToken++;
+        auto string2 = *iToken;
+        auto [ptr1, ec1] = std::from_chars(string1.data(), string1.data() + string1.size(), firstEvt);
+        auto [ptr2, ec2] = std::from_chars(string2.data(), string2.data() + string2.size(), lastEvt);
+        if ( ec1 != std::errc() || ec2 != std::errc() ) {
+          ATH_MSG_ERROR("decodeTrigger: Can't cast ["<< string1 << " " << string2  << "] to double(frequency). SKIPPING");
+        } else {
         if (m_trigList.add(Trigger(pSelector, firstEvt, lastEvt))) {
           if (msgLvl(MSG::DEBUG)) {
             SmartIF<INamedInterface> pNamed(pSelector);
@@ -143,17 +148,13 @@ MixingEventSelector::decodeTrigger(string triggDescr) {
              << selTN.type() << '/' << selTN.name()
              << "] not added");
         } //can add to range
+        }
       } else {
         ATH_MSG_ERROR 
           ("decodeTrigger: Selector ["
            << selTN.type() << '/' << selTN.name()
            << "] can not be found or created");
       } //selector available
-    } catch (const boost::bad_lexical_cast& e) {
-      ATH_MSG_ERROR
-	("decodeTrigger: Can't cast ["<< *iToken 
-	 << "] to double(frequency). SKIPPING");
-    } //can cast to frequency
   } else {
     ATH_MSG_ERROR
       ("decodeTrigger: Badly formatted descriptor [" 

@@ -7,8 +7,7 @@
 
 #include <stdexcept>
 #include <map>
-
-#include <boost/functional/hash.hpp>
+#include <functional>
 
 #include <PATInterfaces/SystematicSet.h>
 #include <PATInterfaces/MessageCheck.h>
@@ -313,7 +312,6 @@ namespace CP
   std::size_t SystematicSet::computeHash() const
   {
     static const std::hash<std::string> hashFunction;
-    //static boost::hash<std::string> hashFunction;
     return hashFunction(name());
   }
 

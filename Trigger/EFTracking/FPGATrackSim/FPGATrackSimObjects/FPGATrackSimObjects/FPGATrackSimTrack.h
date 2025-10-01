@@ -201,7 +201,7 @@ class FPGATrackSimTrack {
   // There is currently only one algorithm
   unsigned int m_ORcode = 1; // Each digit should represent pass/fail(1/0) result from a specific OR algorithm
 
-  ClassDefNV(FPGATrackSimTrack, 5)
+  ClassDefNV(FPGATrackSimTrack, 6)
 };
 
 #endif // TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H

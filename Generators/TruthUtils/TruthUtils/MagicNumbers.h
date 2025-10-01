@@ -363,10 +363,10 @@ namespace HepMC {
   template <class T1,class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return StatusBased::is_same_generator_particle(p1, p2); }
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same  particle
-  template <class T1,class T2>  inline bool is_same_particle(const T1& p1,const T2& p2) { return BarcodeBased::is_same_object(p1, p2); }
+  template <class T1,class T2>  inline bool is_same_particle(const T1& p1,const T2& p2) { return StatusBased::is_same_object(p1, p2); }
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same  vertex
-  template <class T1,class T2>  inline bool is_same_vertex(const T1& p1,const T2& p2) { return BarcodeBased::is_same_object(p1, p2); }
+  template <class T1,class T2>  inline bool is_same_vertex(const T1& p1,const T2& p2) { return StatusBased::is_same_object(p1, p2); }
 
   /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
   template <class T1,class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { return StatusBased::is_sim_descendant(p1, p2);}

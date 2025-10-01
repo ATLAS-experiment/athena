@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/CaloCell_Base_ID.h
  * @author scott snyder <snyder@bnl.gov>
@@ -61,7 +58,8 @@ public:
 
 
   /** Constructor */
-  CaloCell_Base_ID(const LArEM_Base_ID*    em_id, 
+  CaloCell_Base_ID(const std::string& name,
+                   const LArEM_Base_ID*    em_id,
                    const LArHEC_Base_ID*   hec_id,
                    const LArFCAL_Base_ID*  fcal_id, 
                    const LArMiniFCAL_ID*   minifcal_id,
@@ -143,9 +141,9 @@ public:
   IdentifierHash subcalo_cell_hash (const Identifier cellId, int& subCalo) const;  // subCalo is an output argument
 
   /**  cell 'global' hash table max size  */
-  size_type     calo_cell_hash_max (void) const;
+  size_type     calo_cell_hash_max () const;
   /**  cell 'global' region table max size  */
-  size_type     calo_region_hash_max (void) const;
+  size_type     calo_region_hash_max () const;
 
   /**  to loop on 'global' cell hashes of one sub-calorimeter alone  
        @param id
@@ -180,11 +178,11 @@ public:
   typedef boost::iterator_range<id_iterator> id_range;
 
   /** begin iterator over full set of Identifiers (LAr + Tiles) */
-  id_iterator cell_begin    (void) const;
+  id_iterator cell_begin    () const;
   /** end iterator over full set of Identifiers (LAr + Tiles) */
-  id_iterator cell_end      (void) const;
+  id_iterator cell_end      () const;
   /** Range over full set of Identifiers (LAr + Tiles) */
-  id_range cell_range      (void) const;
+  id_range cell_range      () const;
 
   /** begin iterator over subCalo sets of cell Identifiers @param subCalo */
   id_iterator cell_begin    (const int subCalo) const;
@@ -194,11 +192,11 @@ public:
   id_range cell_range      (const int subCalo) const;
 
   /** begin iterator over set of region Identifiers (LAr + Tiles) */
-  id_iterator reg_begin    (void) const;
+  id_iterator reg_begin    () const;
   /** end iterator over set of region Identifiers (LAr + Tiles) */
-  id_iterator reg_end      (void) const;
+  id_iterator reg_end      () const;
   /** Range over set of region Identifiers (LAr + Tiles) */
-  id_range reg_range      (void) const;
+  id_range reg_range      () const;
 
   /** begin iterator over subCalo sets of region Identifiers  @param subCalo */
   id_iterator reg_begin    (const int subCalo) const;
@@ -377,6 +375,11 @@ public:
 
   /** Returns the cell-location in a human readable form */
   std::string cell_name(const Identifier id) const;
+
+  std::string show_to_string(const Identifier id,
+                             const IdContext *context = 0,
+                             char sep = '.') const;
+
 
 private:
   SUBCALO get_subcalo (Identifier id) const;

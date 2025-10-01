@@ -82,11 +82,10 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
               cluster_as_FPGATrackSimhit.setCluster1ID(stripCounter);
               stripCounter++;
             }
-            tower.addHit(cluster_as_FPGATrackSimhit);
-
             if(m_LorentzAngleShift>= 0){
 	            ATH_CHECK(m_lorentzAngleTool->updateHitPosition(cluster_as_FPGATrackSimhit, m_LorentzAngleShift));
             }
+            tower.addHit(cluster_as_FPGATrackSimhit);
             cluster.setClusterEquiv(cluster_as_FPGATrackSimhit);
             //send back a copy for monitoring and to check when writing out hits in each road
             clusters.push_back(cluster);
@@ -685,6 +684,7 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
         //Phi width of an incoming strip is the width of the cluster
         int newN = incomingHit.getPhiWidth();
         //Now as above, N+newN
+        clusterEquiv.setPhiCoord((xPhiOld*N + xPhiNew*newN) / (N+newN));
         clusterEquiv.setX((xOld*N + xNew*newN) / (N+newN));
         clusterEquiv.setY((yOld*N + yNew*newN) / (N+newN));
         clusterEquiv.setZ((zOld*N + zNew*newN) / (N+newN));

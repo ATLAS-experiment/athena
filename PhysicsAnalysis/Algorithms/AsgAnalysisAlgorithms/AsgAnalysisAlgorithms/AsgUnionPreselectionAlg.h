@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -68,7 +68,7 @@ namespace CP
 
     /// \brief the accessor for \ref m_selectionDecoration
   private:
-    std::optional<SG::AuxElement::Decorator<char>> m_decorator;
+    std::optional<SG::Decorator<char>> m_decorator;
   };
 
 } // namespace CP

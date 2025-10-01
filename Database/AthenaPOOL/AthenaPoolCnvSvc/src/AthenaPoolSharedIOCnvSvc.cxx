@@ -19,7 +19,9 @@
 #include "AthenaKernel/IAthMetaDataSvc.h"
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
+#include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
+
 
 #include "StorageSvc/DbReflex.h"
 #include "FileCatalog/IFileCatalog.h"
@@ -29,6 +31,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
+#include <format>
 
 //______________________________________________________________________________
 // Initialize the service.
@@ -103,7 +106,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConn
    }
    if (!m_outputStreamingTool.empty() && !m_outputStreamingTool->isClient()) {
       if (m_parallelCompression && outputConnectionSpec.find("[PoolContainerPrefix=" + m_metadataContainerProp.value() + "]") == std::string::npos) {
-         ATH_MSG_DEBUG("connectOutput SKIPPED for metadata-only server: " << outputConnectionSpec);
+         ATH_MSG_DEBUG(std::format("connectOutput SKIPPED for metadata-only server: {}", outputConnectionSpec));
          return(StatusCode::SUCCESS);
       }
       if (!m_parallelCompression && (!m_outputStreamingTool->isServer() || !m_streamServerActive)) {
@@ -147,14 +150,14 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
       StatusCode sc = m_outputStreamingTool->clearObject(&placementStr, num);
       if (sc.isSuccess() && placementStr != nullptr && strlen(placementStr) > 6 && num > 0) {
          const char * matchedChars = strstr(placementStr, "[FILE=");
-         if (not matchedChars){
-           ATH_MSG_ERROR("No matching filename in  " << placementStr);
+         if (!matchedChars){
+           ATH_MSG_ERROR(std::format("No matching filename in {}", placementStr));
            return abortSharedWrClients(num);
          }
          fileName = matchedChars;
          fileName = fileName.substr(6, fileName.find(']') - 6);
          if (!this->connectOutput(fileName).isSuccess()) {
-            ATH_MSG_ERROR("Failed to connectOutput for " << fileName);
+            ATH_MSG_ERROR(std::format("Failed to connectOutput for {}", fileName));
             return abortSharedWrClients(num);
          }
          IConverter* DHcnv = converter(ClassID_traits<DataHeader>::ID());
@@ -163,30 +166,50 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
          while (num > 0) {
             std::string objName = "ALL";
             if (useDetailChronoStat()) {
-               std::string objName(placementStr); //FIXME, better descriptor
+               objName = placementStr; //FIXME, better descriptor
             }
             // StopWatch listens from here until the end of this current scope
             {
                PMonUtils::BasicStopWatch stopWatch("cRep_" + objName, this->m_chronoMap);
-               std::string tokenStr = placementStr;
-               std::string contName = strstr(placementStr, "[CONT=");
-               tokenStr.erase(tokenStr.find("[CONT=")); //throws if [CONT= not found
-               tokenStr.append(contName, contName.find(']') + 1);
-               contName = contName.substr(6, contName.find(']') - 6);
-               std::string className = strstr(placementStr, "[PNAME=");
-               className = className.substr(7, className.find(']') - 7);
+               std::string_view pStr = placementStr;
+               std::string::size_type cpos = pStr.find ("[CONT=");
+               if (cpos == std::string::npos) {
+                 ATH_MSG_ERROR(std::format("No CONT field in placement string: {}", pStr));
+                 return StatusCode::FAILURE;
+               }
+               std::string tokenStr (pStr.substr(0, cpos));
+               std::string contName (pStr.substr(cpos, std::string::npos));
+               std::string::size_type cl1 = contName.find(']');
+               if (cl1 == std::string::npos) {
+                 ATH_MSG_ERROR(std::format("Missing close bracket after CONT field in placement string: {}", pStr));
+                 return StatusCode::FAILURE;
+               }
+               tokenStr.append(contName, cl1 + 1);
+               contName = contName.substr(6, cl1 - 6);
+
+               std::string::size_type ppos = pStr.find ("[PNAME=");
+               if (ppos == std::string::npos) {
+                 ATH_MSG_ERROR(std::format("No PNAME field in placement string: {}", pStr));
+                 return StatusCode::FAILURE;
+               }
+               std::string className (pStr.substr(ppos, std::string::npos));
+               std::string::size_type cl2 = className.find(']');
+               if (cl2 == std::string::npos) {
+                 ATH_MSG_ERROR(std::format("Missing close bracket after PNAME field in placement string: {}", pStr));
+                 return StatusCode::FAILURE;
+               }
+               className = className.substr(7, cl2 - 7);
                RootType classDesc = RootType::ByNameNoQuiet(className);
                void* obj = nullptr;
-               std::ostringstream oss2;
-               oss2 << std::dec << num;
+               const std::string numStr = std::to_string(num);
                std::string::size_type len = m_metadataContainerProp.value().size();
                bool foundContainer = false;
-               std::size_t pPos = contName.find('(');
-               if (contName.compare(0, pPos, m_metadataContainerProp.value()) == 0) {
+               std::size_t opPos = contName.find('(');
+               if (contName.compare(0, opPos, m_metadataContainerProp.value()) == 0) {
                   foundContainer = true;
                } else {
                   for (const auto& item: m_metadataContainersAug.value()) {
-                     if (contName.compare(0, pPos, item) == 0){
+                     if (contName.compare(0, opPos, item) == 0){
                         foundContainer = true;
                         len = item.size();
                         break;
@@ -198,12 +221,10 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                   // For Metadata, before moving to next client, fire file incidents
                   if (m_metadataClient != num) {
                      if (m_metadataClient != 0) {
-                        std::ostringstream oss1;
-                        oss1 << std::dec << m_metadataClient;
-                        std::string memName = "SHM[NUM=" + oss1.str() + "]";
-                        FileIncident beginInputIncident(name(), "BeginInputFile", memName);
+                        std::string memName = std::format("SHM[NUM={}]", m_metadataClient);
+                        FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
                         incSvc->fireIncident(beginInputIncident);
-                        FileIncident endInputIncident(name(), "EndInputFile", memName);
+                        FileIncident endInputIncident(name(), "EndInputMemFile", std::move(memName));
                         incSvc->fireIncident(endInputIncident);
                      }
                      m_metadataClient = num;
@@ -211,7 +232,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                   // Retrieve MetaDataSvc
                   ServiceHandle<IAthMetaDataSvc> metadataSvc("MetaDataSvc", name());
                   ATH_CHECK(metadataSvc.retrieve());
-                  sc = metadataSvc->shmProxy(std::string(placementStr) + "[NUM=" + oss2.str() + "]");
+                  sc = metadataSvc->shmProxy(std::format("{}[NUM={}]", pStr, numStr));
                   if (sc.isRecoverable()) {
                      ATH_MSG_WARNING("MetaDataSvc::shmProxy() no proxy added.");
                   } else if (sc.isFailure()) {
@@ -282,7 +303,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                            // CONTID, e.g., POOLContainer(DataHeader), allows us to distinguish data and metadata headers,
                            // WORKERID allows us to distinguish AthenaMP workers,
                            // and DBID allows us to distinguish streams.
-                           dataHeaderID = std::format("{}/{}/{}", token->contID(), oss2.str(), token->dbID().toString());
+                           dataHeaderID = std::format("{}/{}/{}", token->contID(), numStr, token->dbID().toString());
                         } else if (dataHeaderSeen) {
                            dataHeaderSeen = false;
                            // next object after DataHeader - may be a DataHeaderForm
@@ -331,7 +352,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
          }
          if (dataHeaderSeen) {
             // DataHeader was the last object, need to tell the converter there is no DHForm coming
-            GenericAddress address(0, 0, "", dataHeaderID);
+            GenericAddress address(0, 0, "", std::move(dataHeaderID));
             if (!DHcnv->updateRepRefs(&address, nullptr).isSuccess()) {
                ATH_MSG_ERROR("Failed updateRepRefs for DataHeader");
                return abortSharedWrClients(-1);
@@ -345,12 +366,10 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
       }
       if (sc.isFailure() || fileName.empty()) {
          ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
-         std::ostringstream oss1;
-         oss1 << std::dec << m_metadataClient;
-         std::string memName = "SHM[NUM=" + oss1.str() + "]";
-         FileIncident beginInputIncident(name(), "BeginInputFile", memName);
+         std::string memName = std::format("SHM[NUM={}]", m_metadataClient);
+         FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
          incSvc->fireIncident(beginInputIncident);
-         FileIncident endInputIncident(name(), "EndInputFile", memName);
+         FileIncident endInputIncident(name(), "EndInputMemFile", memName);
          incSvc->fireIncident(endInputIncident);
          if (sc.isFailure()) {
             ATH_MSG_INFO("All SharedWriter clients stopped - exiting");
@@ -361,11 +380,11 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
       }
    }
    if (m_parallelCompression && !fileName.empty()) {
-      ATH_MSG_DEBUG("commitOutput SKIPPED for metadata-only server: " << outputConnectionSpec);
+      ATH_MSG_DEBUG(std::format("commitOutput SKIPPED for metadata-only server: {}", outputConnectionSpec));
       return(StatusCode::SUCCESS);
    }
    if (outputConnection.empty()) {
-      outputConnection = fileName;
+      outputConnection = std::move(fileName);
    } else {
       outputConnection = outputConnectionSpec;
       if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient() && m_parallelCompression) {
@@ -373,8 +392,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
       }
    }
    StatusCode status = AthenaPoolCnvSvc::commitOutput(outputConnection, doCommit);
-   for (std::map<void*, RootType>::iterator iter = commitCache.begin(), last = commitCache.end(); iter != last; ++iter) {
-      iter->second.Destruct(iter->first);
+   for (auto& [ptr, rootType] : commitCache) {
+      rootType.Destruct(ptr);
    }
    return(status);
 }
@@ -591,12 +610,41 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
 		const unsigned long* ip,
 		IOpaqueAddress*& refpAddress) {
    if (m_makeStreamingToolClient.value() > 0 && !m_inputStreamingTool.empty() && !m_inputStreamingTool->isServer() && !m_inputStreamingTool->isClient()) {
-      if (!makeClient(-m_makeStreamingToolClient.value()).isSuccess()) {
-         ATH_MSG_ERROR("Could not make AthenaPoolSharedIOCnvSvc a Share Client");
+      ATH_CHECK(makeClient(-m_makeStreamingToolClient.value()));
+   }
+   if (!m_inputStreamingTool.empty() && m_inputStreamingTool->isClient()) {
+      Token addressToken;
+      addressToken.setDb(par[0].substr(4));
+      addressToken.setCont(par[1]);
+      addressToken.setOid(Token::OID_t(ip[0], ip[1]));
+      ATH_CHECK(m_inputStreamingTool->lockObject(addressToken.toString().c_str()));
+      void* buffer = nullptr;
+      std::size_t nbytes = 0;
+      StatusCode sc = m_inputStreamingTool->getObject(&buffer, nbytes);
+      while (sc.isRecoverable()) {
+         // sleep
+         sc = m_inputStreamingTool->getObject(&buffer, nbytes);
+      }
+      if (!sc.isSuccess()) {
+         ATH_MSG_WARNING("Failed to get Address Token: " << addressToken.toString());
          return(StatusCode::FAILURE);
       }
+      auto token = std::make_unique<Token>();
+      token->fromString(static_cast<const char*>(buffer)); buffer = nullptr;
+      if (token->classID() == Guid::null()) {
+         token.reset();
+      }
+      m_inputStreamingTool->getObject(&buffer, nbytes).ignore();
+      if (token) {
+         refpAddress = new TokenAddress(POOL_StorageType, clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
+         return(StatusCode::SUCCESS);
+      }
+      else {
+         return(StatusCode::RECOVERABLE);
+      }
+   } else {
+      return AthenaPoolCnvSvc::createAddress(svcType, clid, par, ip, refpAddress);
    }
-   return AthenaPoolCnvSvc::createAddress(svcType, clid, par, ip, refpAddress);
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
@@ -612,8 +660,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::makeServer(int num) {
       m_streamServerActive = true;
       num = num % 1024;
       if (!m_outputStreamingTool.empty() && !m_outputStreamingTool->isServer()) {
-         ATH_MSG_DEBUG("makeServer: " << m_outputStreamingTool << " = " << num);
-         ATH_MSG_DEBUG("makeServer: Calling shared memory tool with port suffix " << m_streamPortString);
+         ATH_MSG_DEBUG(std::format("makeServer: {} = {}", m_outputStreamingTool.name(), num));
+         ATH_MSG_DEBUG(std::format("makeServer: Calling shared memory tool with port suffix {}", m_streamPortString.value()));
          const std::string streamPortSuffix = m_streamPortString.value();
          if (m_outputStreamingTool->makeServer(num, streamPortSuffix).isFailure()) {
             ATH_MSG_ERROR("makeServer: " << m_outputStreamingTool << " failed");

@@ -167,7 +167,7 @@ StatusCode FixHepMC::execute() {
       if (particle_to_fix)  semi_disconnected.push_back(ip);
       // Case 3: keep track of loop particles inside decay chains (seen in H7+EvtGen)
       if (abspid == 43 || abspid == 44 || abspid == 30353 || abspid == 30343) {
-        decay_loop_particles.push_back(ip);
+        decay_loop_particles.push_back(std::move(ip));
       }
     }
 
@@ -202,7 +202,7 @@ StatusCode FixHepMC::execute() {
           ATH_MSG_INFO("Try " << no_endv << "->" << no_prov << " splitting/merging.");
           auto v = HepMC::newGenVertexPtr();
           for (auto part : semi_disconnected) {
-            if (!part->production_vertex() || part->production_vertex()->id() == 0) v->add_particle_out(part);
+            if (!part->production_vertex() || part->production_vertex()->id() == 0) v->add_particle_out(std::move(part));
           }
           for (auto part : semi_disconnected) {
             if (!part->end_vertex()) v->add_particle_in(std::move(part));
@@ -232,7 +232,7 @@ StatusCode FixHepMC::execute() {
 
       /// remove loop
       auto daughters = vend->particles_out();
-      for (auto p : daughters) vprod->add_particle_out(p);
+      for (auto p : daughters) vprod->add_particle_out(std::move(p));
       for (auto sister : sisters) { 
         vprod->remove_particle_out(sister); 
         vend->remove_particle_in(sister); 

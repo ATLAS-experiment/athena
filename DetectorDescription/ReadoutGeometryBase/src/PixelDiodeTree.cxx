@@ -86,7 +86,8 @@ void PixelDiodeTree::computeMatrixCorner(const std::array<PixelDiodeTree::CellIn
 PixelDiodeTree::Vector2D PixelDiodeTree::computeTolerance(const std::array<PixelDiodeTree::CellIndexType,2> &matrix_dim) const {
    PixelDiodeTree::Vector2D tolerance;
    for (unsigned int axis_i=0; axis_i<2; ++axis_i) {
-      assert( matrix_dim[axis_i]>0 && std::abs(matrix_dim[axis_i]) < std::numeric_limits<unsigned int>::max());
+      assert( matrix_dim[axis_i]>0 &&
+              static_cast<unsigned int>(std::abs(matrix_dim[axis_i])) < std::numeric_limits<unsigned int>::max());
       unsigned int bits_i=0;
       for (; bits_i<16 && 1u<<bits_i < static_cast<unsigned int>(matrix_dim[axis_i])*3; ++bits_i);
       tolerance[axis_i]=(1u<<bits_i) * std::numeric_limits<PixelDiodeTree::FloatType>::epsilon();

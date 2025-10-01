@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkEventAthenaPool )
@@ -21,7 +21,7 @@ find_package( AthenaPoolUtilitiesTest )
 
 if( ATHENAPOOLUTILITIESTEST_FOUND )
   set( TRKEVENTATHENAPOOL_REFERENCE_TAG
-       TrkEventAthenaPoolReference-06-00-05 )
+       TrkEventAthenaPoolReference-06-00-06 )
   run_tpcnv_test( TrkEventTPCnv_14.5.0   AOD-14.5.0-full
                   REQUIRED_LIBRARIES TrackParticleAthenaPoolPoolCnv
                   REFERENCE_TAG ${TRKEVENTATHENAPOOL_REFERENCE_TAG} )

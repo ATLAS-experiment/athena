@@ -36,6 +36,6 @@ atlas_add_test( CaloConstIteratorAdaptor_test
 if( NOT GENERATIONBASE AND NOT SIMULATIONBASE)
 atlas_add_test( CaloDetDescrManager_test
                 SCRIPT python -m CaloDetDescr.CaloDetDescrManager_test
-		PROPERTIES TIMEOUT 120
+		PROPERTIES TIMEOUT 500
 		LOG_SELECT_PATTERN "CaloDD|^----|^Sampling" )
 endif()

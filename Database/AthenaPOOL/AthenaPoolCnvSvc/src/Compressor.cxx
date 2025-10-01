@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -16,24 +16,22 @@ using namespace std;
 
 // ---------- STANDARD
 void Compressor::reduceToUS(const std::vector<float> &vf, std::vector<unsigned short> &vc ){
-	std::vector<float>::const_iterator i=vf.begin();
-	unsigned int max_short_flt = 0x7f7f7fff;
+	constexpr unsigned int max_short_flt = 0x7f7f7fff;
 	union {unsigned int u;float f;} m;
 	vc.reserve(vf.size());
-	for (;i<vf.end();++i){
-		m.f=(*i);
+	for (const auto& value : vf){
+		m.f = value;
 		if ( (m.u & 0x7fffffff) > max_short_flt) vc.push_back (m.u>>16);
 		else vc.push_back((m.u+0x8000)>>16);
 	}
 }
 
 void Compressor::expandFromUStoFloat(const std::vector<unsigned short> &vc, std::vector<float> &vf){
-	std::vector<unsigned short>::const_iterator i=vc.begin();
 	union {unsigned int u;float f;} m;
 	vf.reserve(vc.size());
-	for (;i<vc.end();++i){
-		unsigned int ui((*i)<<16);
-		m.u=ui;
+	for (const auto& value : vc){
+		unsigned int ui(value << 16);
+		m.u = ui;
 		vf.push_back(m.f);
 	}
 }
@@ -41,7 +39,6 @@ void Compressor::expandFromUStoFloat(const std::vector<unsigned short> &vc, std:
 // ------------- WITH BITS AND SIGN
 void Compressor::reduce(const std::vector<float> &vf, std::vector<unsigned int> &vi){
 
-	std::vector<float>::const_iterator i=vf.begin();
 	vi.reserve(vf.size()*m_bits/16+17);//this is roughly. can be made precisse. depends on sign stripping too.
 	// composing format word
 	unsigned int format=0;
@@ -72,8 +69,8 @@ void Compressor::reduce(const std::vector<float> &vf, std::vector<unsigned int> 
 		int L;
 		if (m_sign) L=m_bits-1; else L=m_bits;
 		unsigned int CUR=0; int IN=0;
-		for (;i<vf.end();++i){ 
-			m.f=(*i);
+		for (const auto& value : vf){
+			m.f = value;
 			if ( (m.u & 0x7fffffff) > vmax) IN=m.u>>bshift;
 			else IN=(m.u+rounding)>>bshift;
 			
@@ -103,8 +100,8 @@ void Compressor::reduce(const std::vector<float> &vf, std::vector<unsigned int> 
 		
 	}
 	else
-		for (;i<vf.end();++i){
-			m.f=(*i);
+		for (const auto& value : vf){
+			m.f = value;
 			vi.push_back(m.u);
 			}
 	

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTagging/JetTagVertexDecoratorAlg.h"
@@ -53,7 +53,7 @@ namespace Analysis {
     ATH_CHECK( m_VertexCollectionName.initialize() );
     ATH_CHECK( m_jetSVLinkName.initialize() );
     ATH_CHECK( m_jetSVFlipLinkName.initialize(!m_jetSVFlipLinkName.empty()) );
-    ATH_CHECK( m_jetJFVtxLinkName.initialize() );
+    ATH_CHECK( m_jetJFVtxLinkName.initialize(!m_jetJFVtxLinkName.empty()) );
     ATH_CHECK( m_jetJFFlipVtxLinkName.initialize(!m_jetJFFlipVtxLinkName.empty()));
     ATH_CHECK( m_VxSecVertexInfoNames.initialize() );
       

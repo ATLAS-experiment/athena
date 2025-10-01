@@ -18,7 +18,7 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
                      AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
                      xAODTruth TruthUtils PATCoreLib PATInterfaces tauRecToolsLib 
-                     MCTruthClassifierLib AsgAnalysisInterfaces
+                     MCTruthClassifierLib TruthUtils AsgAnalysisInterfaces
                      xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib
       PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 else()
@@ -30,7 +30,7 @@ else()
                      AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
                      xAODTruth TruthUtils PATCoreLib PATInterfaces 
                      ElectronPhotonSelectorToolsLib tauRecToolsLib 
-                     MCTruthClassifierLib AsgAnalysisInterfaces GaudiKernel 
+                     MCTruthClassifierLib TruthUtils AsgAnalysisInterfaces GaudiKernel
                      xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib
       PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 endif()

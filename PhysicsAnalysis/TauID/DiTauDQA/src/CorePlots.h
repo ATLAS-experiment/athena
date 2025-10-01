@@ -29,10 +29,12 @@ class CorePlots: public PlotBase {
     TH1* lead_subjet_eta{};
     TH1* lead_subjet_phi{};
     TH1* lead_subjet_pt{};
+    TH1* lead_subjet_ntracks{};
 
     TH1* sublead_subjet_eta{};
     TH1* sublead_subjet_phi{};
     TH1* sublead_subjet_pt{};
+    TH1* sublead_subjet_ntracks{};
   
     TH1* omni_score{}; 
 

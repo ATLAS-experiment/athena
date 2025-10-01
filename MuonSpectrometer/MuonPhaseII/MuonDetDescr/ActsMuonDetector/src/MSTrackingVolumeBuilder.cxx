@@ -16,6 +16,7 @@
 #include "Acts/Geometry/TrackingVolume.hpp"
 #include "Acts/Material/HomogeneousVolumeMaterial.hpp"
 #include "Acts/Utilities/BinnedArrayXD.hpp"
+#include "Acts/Surfaces/SurfaceArray.hpp"
 
 #include <ranges>
 

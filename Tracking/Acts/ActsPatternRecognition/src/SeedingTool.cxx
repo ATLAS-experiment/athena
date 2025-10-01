@@ -305,7 +305,7 @@ ATH_FLATTEN
         
     state.spacePointMutableData.resize(std::distance(spBegin, spEnd));
 
-    for (const auto [bottom, middle, top] : spacePointsGrouping) {
+    for (const auto& [bottom, middle, top] : spacePointsGrouping) {
       m_finder.createSeedsForGroup(finderOpts, state, spacePointsGrouping.grid(), 
           seeds, bottom, middle, top, rMiddleSPRange);
     }
@@ -435,12 +435,12 @@ ATH_FLATTEN
     // manually convert the two types
     for (const auto& vec : m_rRangeMiddleSP) {
 	std::vector<float> convertedVec;
-	
+	convertedVec.reserve(vec.size());
 	for (const auto& val : vec) {
 	    convertedVec.push_back(static_cast<float>(val));
 	}
 	
-	m_finderCfg.rRangeMiddleSP.push_back(convertedVec);
+	m_finderCfg.rRangeMiddleSP.push_back(std::move(convertedVec));
     }
 
 

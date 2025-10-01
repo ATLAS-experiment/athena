@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -37,8 +37,9 @@ namespace{
 
 
 
-SCT_ID::SCT_ID(void)
+SCT_ID::SCT_ID()
   :
+  AtlasDetectorID("SCT_ID", "sct"),
   m_neighboursByEta{invalidHashFunc, invalidHashFunc, invalidHashFunc , invalidHashFunc, invalidHashFunc},
   m_dict(nullptr),
   m_wafer_hash_max(0),
@@ -252,7 +253,7 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   //
   int barrel_value;
   if (m_dict->get_label_value("barrel_endcap", "barrel", barrel_value)) {
-    const std::string errMsg = "Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary " + m_dict->m_name;
+    const std::string errMsg = "Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary " + m_dict->name();
     localMessage(errMsg, __func__, MSG::ERROR);
     return(1);
   }
@@ -272,7 +273,7 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
   int inDetField = -1;
   if (atlasDict->get_label_value("subdet", "InnerDetector", inDetField)) {
-    const std::string errMsg = "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " + atlasDict->m_name;
+    const std::string errMsg = "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " + atlasDict->name();
     localMessage(errMsg, __func__, MSG::ERROR);
     return(1);
   }
@@ -280,7 +281,7 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   // Find value for the field SCT
   int sctField = -1;
   if (m_dict->get_label_value("part", "SCT", sctField)) {
-    const std::string errMsg= "Could not get value for label 'SCT' of field 'part' in dictionary " + m_dict->m_name;
+    const std::string errMsg= "Could not get value for label 'SCT' of field 'part' in dictionary " + m_dict->name();
     localMessage(errMsg, __func__, MSG::ERROR);
     return(1);
   }
@@ -315,7 +316,7 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 }
 
 int
-SCT_ID::init_hashes(void) {
+SCT_ID::init_hashes() {
   //
   // create a vector(s) to retrieve the hashes for compact ids. For
   // the moment, we implement a hash for wafers but NOT for strips
@@ -463,7 +464,7 @@ SCT_ID::get_other_side(const IdentifierHash& hashId, IdentifierHash& other) cons
  }
 
 int
-SCT_ID::init_neighbors(void) {
+SCT_ID::init_neighbors() {
   //
   // create a vector(s) to retrieve the hashes for compact ids for
   // wafer neighbors.
@@ -589,7 +590,7 @@ SCT_ID::initLevelsFromDict() {
   auto findField = [this](const std::string &name, const size_t indx){
     IdDictField* pField = m_dict->find_field(name);
     if (pField) {
-      m_indices[indx] = pField->m_index;
+      m_indices[indx] = pField->index();
       return true;
     } 
     const auto lvl = (indx == ROW) ? MSG::DEBUG : MSG::ERROR;
@@ -610,19 +611,19 @@ SCT_ID::initLevelsFromDict() {
 
   // Set the field implementations: for bec, lay/disk, eta/phi mod
 
-  const IdDictRegion& region = *m_dict->m_regions[m_sct_region_index];
+  const IdDictRegion& region = m_dict->region(m_sct_region_index);
 
-  m_indet_impl = region.m_implementation[m_indices[INDET]];
-  m_sct_impl = region.m_implementation[m_indices[SCT]];
-  m_bec_impl = region.m_implementation[m_indices[BARREL_EC]];
-  m_lay_disk_impl = region.m_implementation[m_indices[LAYER_DISK]];
-  m_phi_mod_impl = region.m_implementation[m_indices[PHI]];
-  m_eta_mod_impl = region.m_implementation[m_indices[ETA]];
-  m_side_impl = region.m_implementation[m_indices[SIDE]];
+  m_indet_impl = region.implementation(m_indices[INDET]);
+  m_sct_impl = region.implementation(m_indices[SCT]);
+  m_bec_impl = region.implementation(m_indices[BARREL_EC]);
+  m_lay_disk_impl = region.implementation(m_indices[LAYER_DISK]);
+  m_phi_mod_impl = region.implementation(m_indices[PHI]);
+  m_eta_mod_impl = region.implementation(m_indices[ETA]);
+  m_side_impl = region.implementation(m_indices[SIDE]);
   if (m_hasRows) {
-    m_row_impl = region.m_implementation[m_indices[ROW]];
+    m_row_impl = region.implementation(m_indices[ROW]);
   }
-  m_strip_impl = region.m_implementation[m_indices[STRIP]];
+  m_strip_impl = region.implementation(m_indices[STRIP]);
   localMessage("decode index and bit fields for each level: ", __func__, MSG::DEBUG);
   localMessage("indet    " + m_indet_impl.show_to_string(), __func__, MSG::DEBUG);
   localMessage("sct      " + m_sct_impl.show_to_string(), __func__, MSG::DEBUG);
@@ -642,28 +643,28 @@ SCT_ID::initLevelsFromDict() {
 }
 
 SCT_ID::size_type
-SCT_ID::wafer_hash_max(void) const {
+SCT_ID::wafer_hash_max() const {
   return m_wafer_hash_max;
 }
 
 SCT_ID::size_type
-SCT_ID::strip_hash_max(void) const {
+SCT_ID::strip_hash_max() const {
   return m_strip_hash_max;
 }
 
-SCT_ID::const_id_iterator SCT_ID::wafer_begin(void) const {
+SCT_ID::const_id_iterator SCT_ID::wafer_begin() const {
   return(m_wafer_vec.begin());
 }
 
-SCT_ID::const_id_iterator SCT_ID::wafer_end(void) const {
+SCT_ID::const_id_iterator SCT_ID::wafer_end() const {
   return(m_wafer_vec.end());
 }
 
-SCT_ID::const_expanded_id_iterator SCT_ID::strip_begin(void) const {
+SCT_ID::const_expanded_id_iterator SCT_ID::strip_begin() const {
   return(m_full_strip_range.factory_begin());
 }
 
-SCT_ID::const_expanded_id_iterator SCT_ID::strip_end(void) const {
+SCT_ID::const_expanded_id_iterator SCT_ID::strip_end() const {
   return(m_full_strip_range.factory_end());
 }
 

@@ -135,7 +135,7 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon
 }
 
 
-StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const {
+StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster& prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const {
 
   double lorentzAngle {0.};
   if(m_applyMmBFieldCalib){
@@ -150,7 +150,7 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Acts
     double bfield = (magneticField.x()*std::sin(phi)-magneticField.y()*std::cos(phi))*1000.;
 
     /// swap sign depending on the readout side
-    int gasGap = m_idHelperSvc->mmIdHelper().gasGap(prepData->identify());
+    int gasGap = m_idHelperSvc->mmIdHelper().gasGap(prepData.identify());
     bool changeSign = ( globalPos.z() < 0. ? (gasGap==1 || gasGap==3) : (gasGap==2 || gasGap==4) );
     if (changeSign) bfield = -bfield;
 
@@ -159,12 +159,12 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Acts
   }
 
   /// loop over prepData strips
-  for (unsigned int i = 0; i < prepData->stripNumbers().size(); ++i){
-    Identifier id =  m_idHelperSvc->mmIdHelper().channelID(prepData->identify(), m_idHelperSvc->mmIdHelper().multilayer(prepData->identify()), m_idHelperSvc->mmIdHelper().gasGap(prepData->identify()),prepData->stripNumbers().at(i));
-    double time = prepData->stripTimes().at(i);
-    double charge = prepData->stripCharges().at(i);
+  for (unsigned int i = 0; i < prepData.stripNumbers().size(); ++i){
+    Identifier id =  m_idHelperSvc->mmIdHelper().channelID(prepData.identify(), m_idHelperSvc->mmIdHelper().multilayer(prepData.identify()), m_idHelperSvc->mmIdHelper().gasGap(prepData.identify()),prepData.stripNumbers().at(i));
+    double time = prepData.stripTimes().at(i);
+    double charge = prepData.stripCharges().at(i);
     //Retrieve pointing constraint
-    const Amg::Vector3D& globPos{prepData->readoutElement()->localToGlobalTrans(gctx, prepData->layerHash()) * (prepData->localPosition<1>()[0]*Amg::Vector3D::UnitX())};
+    const Amg::Vector3D& globPos{prepData.readoutElement()->localToGlobalTrans(gctx, prepData.layerHash()) * (prepData.localPosition<1>()[0]*Amg::Vector3D::UnitX())};
     NSWCalib::CalibratedStrip calibStrip;
     ATH_CHECK(calibrateStrip(ctx, id, time, charge, (globPos.theta() / toRad) , lorentzAngle, calibStrip));
 

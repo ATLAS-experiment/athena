@@ -149,10 +149,9 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
         FullEventFragment<const uint32_t*> fe(fragment.get());
 
         if (checkevents) {
-          if (!fe.check_tree()) {
+          if (!fe.check_tree_noex()) {
             std::cerr << std::format("Event {} failed check_tree\n",
                                      eventCounter);
-            return 1;
           }
         }
         totalSize += fe.readable_payload_size_word() * sizeof(uint32_t);

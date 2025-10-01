@@ -15,7 +15,7 @@ import argparse
 import csv
     
 parser = argparse.ArgumentParser()
-parser.add_argument('--year', type=str, help='15,16,17,18,22,23,24 or run3 for full Run-3')
+parser.add_argument('--year', type=str, help='15,16,17,18,22,23,24,25 or run3 or year1_year2_...')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--comp', action='store_true', help='Compare Zee and Zmumu?')
 parser.add_argument('--absolute', action='store_true', help='Compare absolute luminosity')
@@ -38,21 +38,32 @@ if args.absolute: ymin, ymax = 0.91, 1.09
 else: ymin, ymax = 0.93, 1.07
 
 if year == "run3": 
-    years = ["22", "23", "24"]
+    years = ["22", "23", "24", "25"]
     out_tag = "run3"
     time_format = "%m/%y"
     xtitle = 'Month / Year'
-    date_tag = "Run 3, #sqrt{s} = 13.6 TeV"
+    date_tag = "Run 3,#kern[-0.5]{ }#sqrt{s} = 13.6 TeV"
     labelsize = 44
     norm_type = "Run3"
+    multiyear = True
+elif len(year.split("_")) > 1: 
+    years = year.split("_")
+    out_tag = "data"+year
+    time_format = "%m/%y"
+    xtitle = 'Month / Year'
+    date_tag = "Run 3,#kern[-0.5]{ }#sqrt{s} = 13.6 TeV"
+    labelsize = 44
+    norm_type = "Run3"
+    multiyear = True
 else: 
     years = [year]
     out_tag = "data"+year
     time_format = "%d/%m"
     xtitle = 'Date in 20' + year
-    date_tag = "Data 20" + year  + ", #sqrt{s} = 13.6 TeV"
+    date_tag = "Data 20" + year  + ",#kern[-0.5]{ }#sqrt{s} = 13.6 TeV"
     norm_type = "year"
     labelsize = 22
+    multiyear = False
 
 def main():
     if args.comp: 
@@ -93,7 +104,7 @@ def channel_comparison(years):
             date  = dict_zlumi["Zee", key][2]
         
             if ratio < ymin or ratio > ymax:
-                print("WARNING: Run", key, "has Zee/Zmumu ratio", ratio, ", outside of y-axis range")
+                print("WARNING: Run", key, "has Zee/Zmumu ratio %.2f +- %.2f, outside of y-axis range" % (ratio, error))
             else:
                 vec_times.append(date)
                 vec_ratio.append(ratio)
@@ -106,13 +117,13 @@ def channel_comparison(years):
     leg.SetFillStyle(0)
 
     # Depending if we're plotting over whole Run-3, change canvas size
-    if out_tag == "run3":
+    if multiyear:
         c1 = R.TCanvas("c1", "c1", 2000, 1000)
     else:
         c1 = R.TCanvas()
 
     tg.Draw('ap')
-    tg.GetYaxis().SetTitle('L_{Z #rightarrow ee} / L_{Z #rightarrow #mu#mu}')
+    tg.GetYaxis().SetTitle(pt.Leemumuratiolabel)
     tg.Fit('pol0', '0q')
     tg.GetFunction('pol0').SetLineColor(R.kRed)
 
@@ -123,26 +134,20 @@ def channel_comparison(years):
     line1 = pt.make_bands(vec_times, stdev, mean)
     line1.Draw("same 3")
     tg.GetFunction('pol0').Draw("same l")
-    tg.Draw('same ep')
+    tg.Draw('same e0p')
 
     print("Pol0 fit mean +- 68% percentile = ", round(mean,3), " +- ", round(stdev, 3))
    
     leg.SetBorderSize(0)
     leg.SetTextSize(0.05)
-    leg.AddEntry(tg, "L_{Z #rightarrow ee}/L_{Z #rightarrow #mu#mu}", "ep")
-    leg.AddEntry(tg.GetFunction("pol0"), "Mean = " + str(round(mean, 3)), "l")
-    leg.AddEntry(line1, "68% band", "f")
+    leg.AddEntry(tg, pt.Leemumuratiolabel, "ep")
+    leg.AddEntry(tg.GetFunction("pol0"), "Mean = %.3f" % mean, "l")
+    leg.AddEntry(line1, "68%% band (#pm %.3f)" % stdev, "f")
     leg.Draw()
 
     pt.drawAtlasLabel(xval, 0.88, "Internal")
     pt.drawText(xval, 0.82, date_tag, size=labelsize)
 
-    new_trig_line = R.TLine(1683743066.0, 0.95, 1683743066.0, 1.05)
-        
-    new_trig_line.SetLineColor(R.kBlue)
-    new_trig_line.SetLineWidth(1)
-    new_trig_line.SetLineStyle(2)
-    new_trig_line.Draw("same")
     R.gPad.Update()
     
     tg.GetYaxis().SetRangeUser(ymin, ymax)
@@ -152,7 +157,7 @@ def channel_comparison(years):
     tg.GetXaxis().SetTimeFormat(time_format)
     tg.GetXaxis().SetTimeOffset(0,"gmt")
 
-    if years == ["22", "23", "24"]:
+    if years == ["22", "23", "24", "25"]:
         plot_title = "Ratio of Electron and Muon channel Z-counting Luminosities across Run 3"
     else:
         plot_title = "Ratio of Electron and Muon channel Z-counting Luminosities across 20" + years[0]
@@ -198,7 +203,7 @@ def zcounting_vs_atlas(channel, years):
 
             prelratio = zlumi/olumi
             if prelratio < ymin or prelratio > ymax:
-                print("WARNING: Run", run, "has", channel, "/ATLAS ratio", prelratio, ", outside of y-axis range")
+                print("WARNING: Run", run, "has", channel, "/ATLAS ratio %.2f +- %.2f, outside of y-axis range" % (prelratio, zerr/olumi) )
             
             # If plotting vs. date simply fill the arrays here
             arr_date.append(timestamp)
@@ -218,7 +223,7 @@ def zcounting_vs_atlas(channel, years):
     arr_zerr = np.array(arr_zerr)
     total_lumi = arr_olumi.sum()/1000000
     total_lumi_string = "Official DQ "
-    if year == "24": total_lumi_string = "Preliminary DQ "
+    if year == "25": total_lumi_string = "Preliminary DQ "
     total_lumi_string += str(round(total_lumi, 1)) + " fb^{-1}"
 
     #-----------Normalisation------------
@@ -242,12 +247,14 @@ def zcounting_vs_atlas(channel, years):
     tg = R.TGraphErrors(len(arr_date), arr_date, array('d',arr_zlumi_ratio), R.nullptr, array('d',arr_zerr_ratio))
 
     # Depending if we're plotting over whole Run-3, change canvas size
-    if out_tag == "run3":
+    if multiyear:
         c1 = R.TCanvas("c1", "c1", 2000, 1000)
+        leg = R.TLegend(0.5, 0.18, 0.65, 0.4)
     else:
         c1 = R.TCanvas()
+        leg = R.TLegend(0.6, 0.18, 0.75, 0.4)
 
-    tg.Draw('ap')
+    tg.Draw('ap e0')
     tg.GetYaxis().SetRangeUser(ymin, ymax)
     if args.absolute:
         plot_title = "Absolute L_{"+ zstring +"} to ATLAS across " + norm_type
@@ -267,18 +274,17 @@ def zcounting_vs_atlas(channel, years):
     line1.Draw("same 3")
     tg.Draw('same ep')
 
-    leg = R.TLegend(0.55, 0.20, 0.69, 0.45)
     leg.SetFillStyle(0)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.05)
     leg.AddEntry(tg, leg_entry, "ep")
-    leg.AddEntry(line1, "68% band", "f")
+    leg.AddEntry(line1, "68%% band (#pm %.3f)" % stdev, "f")
     leg.Draw()
 
     pt.drawAtlasLabel(xval, yval-0.47, "Internal")
     pt.drawText(xval, yval-0.53, date_tag, size=labelsize)
     pt.drawText(xval, yval-0.59, zstring, size=labelsize)
-    pt.drawText(xval, yval-0.65, "OflLumi-Run3-005", size=labelsize)
+    pt.drawText(xval, yval-0.65, "OflLumi-Run3-006", size=labelsize)
     pt.drawText(xval, yval-0.04, total_lumi_string, size=labelsize)
 
     pt.drawText(xval, 0.88, plot_title, size=labelsize)

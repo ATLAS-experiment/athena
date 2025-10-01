@@ -37,6 +37,7 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
         // Functions
 
         virtual StatusCode scoreEdges(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits, std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
+        int regionNum() const { return m_regionNum; }
 
     private:
 
@@ -44,6 +45,7 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
         // Handles
 
         ToolHandle<AthOnnx::IOnnxRuntimeInferenceTool> m_GNNInferenceTool {this, "GNNInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"};
+        Gaudi::Property<int> m_regionNum{this, "regionNum", -1, "Region number for this GNNEdgeClassifierTool"};
 
         ///////////////////////////////////////////////////////////////////////
         // Helpers
@@ -61,7 +63,6 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
             this, "GNNFeatureScales",
             {1000.0, 3.14159265359, 1000.0, 1.0, 1000.0, 3.14159265359, 1000.0, 1.0, 1000.0, 3.14159265359, 1000.0, 1.0},
             "Feature scales for the GNN model"};
-
 };      
 
 

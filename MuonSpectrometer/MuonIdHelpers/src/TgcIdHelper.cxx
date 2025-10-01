@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/TgcIdHelper.h"
 #include "Identifier/RangeIterator.h"
 
-TgcIdHelper::TgcIdHelper() : MuonIdHelper("TgcIdHelper") {
+TgcIdHelper::TgcIdHelper() : MuonIdHelper("TgcIdHelper", "tgc") {
     m_module_hashes.fill(-1);
 }
 
@@ -38,7 +38,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     IdDictField* field = m_dict->find_field("tgcGasGap");
     if (field) {
-        m_GASGAP_INDEX = field->m_index;
+        m_GASGAP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'tgcGasGap' field ");
         status = 1;
@@ -46,7 +46,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("isStrip");
     if (field) {
-        m_ISSTRIP_INDEX = field->m_index;
+        m_ISSTRIP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'isStrip' field ");
         status = 1;
@@ -54,7 +54,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("channel");
     if (field) {
-        m_CHANNEL_INDEX = field->m_index;
+        m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find channel' field ");
         status = 1;
@@ -68,16 +68,16 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     if (!tgcGroup) {
         ATH_MSG_ERROR("Cannot find tgc group");
     } else {
-        m_GROUP_INDEX = tgcGroup->regions()[0]->m_index;
+        m_GROUP_INDEX = tgcGroup->regions()[0]->index();
     }
 
-    const IdDictRegion& region = *m_dict->m_regions[m_GROUP_INDEX];
-    m_eta_impl = region.m_implementation[m_ETA_INDEX];
-    m_phi_impl = region.m_implementation[m_PHI_INDEX];
-    m_tec_impl = region.m_implementation[m_TECHNOLOGY_INDEX];
-    m_gap_impl = region.m_implementation[m_GASGAP_INDEX];
-    m_ist_impl = region.m_implementation[m_ISSTRIP_INDEX];
-    m_cha_impl = region.m_implementation[m_CHANNEL_INDEX];
+    const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
+    m_eta_impl = region.implementation(m_ETA_INDEX);
+    m_phi_impl = region.implementation(m_PHI_INDEX);
+    m_tec_impl = region.implementation(m_TECHNOLOGY_INDEX);
+    m_gap_impl = region.implementation(m_GASGAP_INDEX);
+    m_ist_impl = region.implementation(m_ISSTRIP_INDEX);
+    m_cha_impl = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG(" TGC decode index and bit fields for each level: " << std::endl
                                                                       << " muon        " << m_muon_impl.show_to_string() << std::endl
@@ -95,7 +95,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     int muonField = -1;
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
     if (atlasDict->get_label_value("subdet", "MuonSpectrometer", muonField)) {
-        ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->m_name);
+        ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->name());
         return (1);
     }
 

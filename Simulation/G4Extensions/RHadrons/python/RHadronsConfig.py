@@ -60,3 +60,13 @@ def RHadronsCfg(flags):
         physicsOptions = [ result.popToolsAndMerge(RHadronsPhysicsToolCfg(flags)) ]
         result.getService("PhysicsListSvc").PhysOption += physicsOptions
     return result
+
+def RHadrons_VerboseSelectorCfg(flags, name="G4UA::VerboseSelectorTool", **kwargs):
+    kwargs.setdefault('TargetEvent',1)
+    kwargs.setdefault('VerboseLevel',1)
+    kwargs.setdefault('TargetPdgIDs',
+                                    [
+                        1000612,1000622,1000632,1000642,1000652,1006113,1006211,1006213,1006223,1006311,1006313,1006321,1006323,1006333,-1000612,-1000622,-1000632,-1000642,-1000652,-1006113,-1006211,-1006213,-1006223,-1006311,-1006313,-1006321,-1006323,-1006333
+                                    ])
+    from G4DebuggingTools.G4DebuggingToolsConfig import VerboseSelectorToolCfg
+    return VerboseSelectorToolCfg(flags, name, **kwargs)

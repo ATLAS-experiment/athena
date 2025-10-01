@@ -75,6 +75,14 @@ namespace CP
     /// \brief whether to only run the global trigger matching, and not compute efficiency SFs
     Gaudi::Property<bool> m_doMatchingOnly {this, "doMatchingOnly", false, "whether to disable efficiency SFs and apply matching only"};
 
+    /// \brief store separate trigger matching flags for each trigger
+    Gaudi::Property<std::vector<std::string>> m_separateMatchingTriggers {this, "separateMatchingTriggers", {}, "triggers to store individual trigger matching flags for"};
+    std::unordered_map<std::string, SysWriteDecorHandle<bool>> m_separateMatchingDecorators;
+    std::unordered_map<std::string, bool> m_separateMatchingFlags;
+
+    /// \brief separate chain matching decorator suffix
+    Gaudi::Property<std::string> m_separateMatchingDecorSuffix {this, "separateMatchingDecorationSuffix", "", "suffix for the separate chain matching decorators"};
+
     /// \brief decoration of the global trigger SF
     SysWriteDecorHandle<float> m_scaleFactorDecoration {
       this, "scaleFactorDecoration", "", "the decoration for the global trigger efficiency scale factor"

@@ -40,7 +40,7 @@ storeClusters=False
 runF110=False
 threads=1
 nproc=0
-doCodeType="F100"
+doCodeType="F1X0"
 
 ## parsing flags
 while [ $# -ge 1 ];do

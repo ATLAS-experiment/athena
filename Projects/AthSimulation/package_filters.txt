@@ -70,7 +70,6 @@
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
 + Database/AthenaPOOL/AthenaPoolCnvSvc
-+ Database/AthenaPOOL/AthenaPoolServices
 + Database/AthenaPOOL/AthenaPoolUtilities
 + Database/AthenaPOOL/EventSelectorAthenaPool
 + Database/AthenaPOOL/OutputStreamAthenaPool
@@ -90,7 +89,6 @@
 + Database/IOVDbAthenaPool
 + Database/IOVDbDataModel
 + Database/IOVDbMetaDataTools
-+ Database/IOVDbPTCnv
 + Database/IOVDbSvc
 + Database/IOVDbTPCnv
 + Database/PersistentDataModel
@@ -134,7 +132,6 @@
 + Event/EventInfoMgt
 + Event/EventInfoUtils
 + Event/EventKernel
-+ Event/EventPTCnv
 + Event/EventPrimitives
 + Event/EventTPCnv
 + Event/PyDumper

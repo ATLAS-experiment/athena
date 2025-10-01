@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARFCAL_ID_H
@@ -62,8 +62,8 @@ public:
         
   typedef Identifier::size_type  size_type ;
 
-  LArFCAL_ID(void);        
-  ~LArFCAL_ID(void);
+  LArFCAL_ID();
+  ~LArFCAL_ID();
 
   /** initialization from the identifier dictionary*/
   virtual int  initialize_from_dictionary (const IdDictMgr& dict_mgr);

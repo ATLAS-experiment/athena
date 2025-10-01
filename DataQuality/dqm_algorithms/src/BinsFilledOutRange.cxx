@@ -115,7 +115,7 @@ dqm_algorithms::BinsFilledOutRange::execute(	const std::string & name,
   
   
   result->tags_["NBins"] = count;
-  result->object_ =  (boost::shared_ptr<TObject>)static_cast<TObject*>(resulthisto);
+  result->object_ =  boost::shared_ptr<TObject>(resulthisto);
   
   if (gthreshold > rthreshold) {
      if ( count >= gthreshold ) {

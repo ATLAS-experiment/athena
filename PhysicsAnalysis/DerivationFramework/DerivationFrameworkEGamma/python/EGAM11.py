@@ -251,7 +251,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     # Use modified OR that does not check overlaps with tauls
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
 
-    outputLabel = "DFCommonJets_passOR"
+    outputLabel = "DFCommonJets_passOR_HI"
     bJetLabel = ""  # default
     tauLabel = ""  # workaround for missing taus
     tauKey = ""  # workaround for missing taus

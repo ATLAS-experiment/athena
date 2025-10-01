@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-// Silicon trackers includes
 #include "PixelDefectsEmulatorCondAlg.h"
 
 #include "InDetIdentifier/PixelID.h"

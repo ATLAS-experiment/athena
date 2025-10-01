@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "src/TrigBtagEmulationChain.h"
@@ -16,7 +16,7 @@ namespace Trig {
 
 TrigBtagEmulationChain::TrigBtagEmulationChain(const std::string& name,
                                                const std::vector< std::string >& definition)
-  : AthMessaging("TrigBtagEmulationChain." + name),
+  : asg::AsgMessaging("TrigBtagEmulationChain." + name),
     m_name( name )
 {
   parseChainDefinition(definition);
@@ -91,7 +91,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     ATH_MSG_DEBUG( " -          eta range: [" << jet_eta_min << "," << jet_eta_max << "]");
     ATH_MSG_DEBUG( " -            JVT cut: " << jvt);
     ATH_MSG_DEBUG( " - BTagging algorithm: " << tagger);
-    ATH_MSG_DEBUG( " -   Jet preselection: " << m_jet_presel);
+    ATH_MSG_DEBUG( " -   Jet preselection: " << jetpresel);
     ATH_MSG_DEBUG( " -         Dijet Mass: " << dijetmass);
     ATH_MSG_DEBUG( " -           is PFlow: " << (is_PFlow ? "YES":"NO"));
     ATH_MSG_DEBUG( " -      GSC threshold: " << gsc_pt);

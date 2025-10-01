@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/ExtendedEventContext_test.cxx
@@ -49,11 +49,13 @@ void test1()
   Atlas::ExtendedEventContext ectx;
 
   assert (!Atlas::hasExtendedEventContext (ctx));
+  assert (Atlas::tryGetExtendedEventContext (ctx) == nullptr);
   ectx.setConditionsRun (42);
   ectx.setMemResource (&tmr);
   Atlas::setExtendedEventContext (ctx, std::move (ectx));
   assert (Atlas::hasExtendedEventContext (ctx));
   assert (Atlas::getExtendedEventContext (ctx).conditionsRun() == 42);
+  assert (Atlas::tryGetExtendedEventContext (ctx)->conditionsRun() == 42);
   assert (Atlas::getExtendedEventContext (ctx).memResource() == &tmr);
 }
 

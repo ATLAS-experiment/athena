@@ -12,10 +12,10 @@
 
 /// Framework include files
 #include "POOLCore/DbPrint.h"
-#include "StorageSvc/DbHeap.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbContainerImp.h"
+#include "StorageSvc/DbHeap.h"
 
 using namespace std;
 using namespace pool;

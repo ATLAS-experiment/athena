@@ -52,7 +52,7 @@ private:
 
   /// \brief the accessor for \ref m_priorityDecoration
 private:
-  std::unique_ptr<const SG::AuxElement::Decorator<char> > m_priorityDecorator {};
+  std::unique_ptr<const SG::Decorator<char> > m_priorityDecorator {};
 };
 
 } // namespace CP

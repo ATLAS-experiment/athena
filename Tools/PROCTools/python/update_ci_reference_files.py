@@ -88,7 +88,7 @@ def process_log_file(url, branch, test_name):
        print('WARNING: Did not find an AMI tag in the test "{}". Ignoring.'.format(test_name))
        return
 
-    mr_match = re.search(r'NICOS_TestLog_MR-(?P<mr_number>\d+)-(?P<date>\d{4}-\d{2}-\d{2}-\d{2}-\d{2})', url)
+    mr_match = re.search(r'ARDOC_TestLog_MR-(?P<mr_number>\d+)-(?P<date>\d{4}-\d{2}-\d{2}-\d{2}-\d{2})', url)
     if not mr_match:
         print('FATAL: Could not process the URL as expected. Aborting.')
         print(url)
@@ -117,7 +117,7 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
     if not copied_file_match:
         print("FATAL: Could not find matching copied file")
         sys.exit(1)
-    copied_file_path = copied_file_match.group().split('to')[1].strip().strip("'")+'/'
+    copied_file_path = copied_file_match.group().split('to')[1].strip().strip("'").strip("&#x27;")+'/'
 
     # Reference file paths
     ref_file_match = re.search(r'INFO     Reading the reference file from location.*', text)

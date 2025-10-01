@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // OutputConditionsAlg.cxx
@@ -104,7 +104,7 @@ StatusCode OutputConditionsAlg::finalize() {
       if (ihash2==std::string::npos) {
 	std::string key=m_objectList[iobj].substr(ihash+1,std::string::npos);
 	keys.push_back(key);
-	folders.push_back(key);
+	folders.push_back(std::move(key));
       } else {
 	keys.push_back(m_objectList[iobj].substr(ihash+1,ihash2-ihash-1));
 	folders.push_back(m_objectList[iobj].substr(ihash2+1,

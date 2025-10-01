@@ -11,10 +11,12 @@ def correction(mu, runmode, campaign, run=None):
             return 0.90238 - 8.75767e-05*mu - 5.79201e-06*mu*mu
         elif campaign == "mc21":
             return 0.889336 - 0.000191184*mu - 4.11419e-06*mu*mu 
-        elif campaign == "mc23a" and run < 451896:
-            return 0.8896 - 0.0000115*mu - 0.0000081*mu*mu
-        elif campaign == "mc23a" and run >= 451896:
-            return 0.8923 - 0.0001822*mu - 0.0000038*mu*mu
+        elif campaign == "mc23a":
+            return 0.888218 - 0.0000213381*mu - 0.00000507315*mu*mu
+        elif campaign == "mc23d":
+            return 1.04742 - 0.0102056*mu + 0.000197393*mu*mu - 0.00000132012*mu*mu*mu
+        elif campaign == "mc23e":
+            return 0.883555 + 0.00000150059*mu - 0.00000750447*mu*mu
     elif runmode == "Zmumu":
         if campaign == "mc16a":
             return 9.90074e-01 - 5.34716e-06*mu - 3.23366e-06*mu*mu
@@ -25,5 +27,9 @@ def correction(mu, runmode, campaign, run=None):
         elif campaign == "mc21":
             return 0.987 - 6.11277e-05*mu - 2.59671e-06*mu*mu 
         elif campaign == "mc23a":
-            return 0.9914 - 0.0001093*mu - 0.0000018*mu*mu
+            return 0.994803 - 0.000269879*mu + 0.000000169232*mu*mu
+        elif campaign == "mc23d":
+            return 0.976218 + 0.000148547*mu - 0.00000464437*mu*mu
+        elif campaign == "mc23e":
+            return 0.984034 - 0.000186118*mu - 0.000000939314*mu*mu
 

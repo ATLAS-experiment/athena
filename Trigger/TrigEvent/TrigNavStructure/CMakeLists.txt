@@ -1,10 +1,7 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigNavStructure )
-
-# External dependencies:
-find_package( Boost COMPONENTS regex )
 
 # Extra dependencies, based on the build environment:
 set( extra_libs )
@@ -16,8 +13,7 @@ endif()
 atlas_add_library( TrigNavStructure
    TrigNavStructure/*.h Root/*.cxx
    PUBLIC_HEADERS TrigNavStructure
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools AthContainers CxxUtils xAODCore ${extra_libs} )
+   LINK_LIBRARIES AsgTools AthContainers CxxUtils xAODCore ${extra_libs} )
 
 if( NOT XAOD_STANDALONE )
 	# Test(s) in the package:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollection.h"
@@ -33,7 +33,6 @@
 
 #include <exception>
 #include <map>
-#include <vector>
 #include <deque>
 #include <ctype.h>
 
@@ -422,7 +421,7 @@ namespace pool {
          AttributeListLayout* all = dynamic_cast<AttributeListLayout*>( m_tree->GetCurrentFile()->Get(RootCollection::c_attributeListLayoutName) );
          CollectionDescription desc( m_description.name(), m_description.type(), m_description.connection() );
          // clear the description
-         m_description = desc;
+         m_description = std::move(desc);
          if( all ) {
             // Copy the specification to collection description
             all->fillDescription( m_description );

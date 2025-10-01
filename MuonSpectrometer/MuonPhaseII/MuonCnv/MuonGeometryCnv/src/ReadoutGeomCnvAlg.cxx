@@ -1,6 +1,6 @@
 
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "ReadoutGeomCnvAlg.h"
 
@@ -42,6 +42,7 @@
 #include <GeoModelHelpers/TransformToStringConverter.h>
 #include <GeoModelHelpers/GeoShapeUtils.h>
 #include <map>
+#include <format>
 
 #include <GaudiKernel/SystemOfUnits.h>
 
@@ -149,7 +150,7 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     const int stPhi{m_idHelperSvc->stationPhi(stationId)};
     MuonGM::MuonStation* station = cacheObj.detMgr->getMuonStation(stName, stEta, stPhi);
     if (station) {
-        ATH_MSG_DEBUG("Station "<<stName<<" "<<stEta<<" "<<stPhi<<" already exists.");
+        ATH_MSG_DEBUG("Station "<<stName<<", stEta: "<<stEta<<", stPhi: "<<stPhi<<" already exists.");
         return StatusCode::SUCCESS;
     }
     /// Fetch the readout element to get its parent volume
@@ -210,8 +211,9 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     const Amg::Transform3D alignedTransform = copyMe->localToGlobalTrans(gctx) *
                                               (stationTransform * readOutVol->getX()).inverse();
 
-    ATH_MSG_VERBOSE("stName "<<stName<<","<<stEta<<","<<stPhi<<" -- shortS: "<<shortS<<", longS: "<<longS
-                <<", lengthR: "<<lengthR<<", lengthZ "<<lengthZ
+    ATH_MSG_VERBOSE("stName: "<<stName<<", stEta: "<<stEta<<", stPhi: "<<stPhi
+                <<" -- shortS: "<<shortS<<", longS: "<<longS
+                <<", lengthR: "<<lengthR<<", lengthZ: "<<lengthZ
                 <<std::endl<<"AlignableNode: "<<GeoTrf::toString(alignedTransform, true)
                 <<std::endl<<"Station transform: "<<GeoTrf::toString(stationTransform, true)
                 <<std::endl<<"Readout transform: "<<GeoTrf::toString(readOutVol->getX(), true));
@@ -368,10 +370,9 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, Construc
 StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
 
     std::vector<const MuonGMR4::TgcReadoutElement*> tgcReadouts{m_detMgr->getAllTgcReadoutElements()};
-    std::stable_sort(tgcReadouts.begin(), tgcReadouts.end(),
-                     [](const MuonGMR4::TgcReadoutElement* a, const MuonGMR4::TgcReadoutElement* b){
-                            return a->stationEta() > b->stationEta();
-                     });
+    std::ranges::stable_sort(tgcReadouts,[](const MuonGMR4::TgcReadoutElement* a, const MuonGMR4::TgcReadoutElement* b){
+                                return a->stationEta() > b->stationEta();
+                            });
     ATH_MSG_INFO("Copy "<<tgcReadouts.size()<<" Tgc readout elements to the legacy system");
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};    
     
@@ -388,8 +389,9 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
                                                                  cacheObj.detMgr.get());
         newRE->setIdentifier(reId);
         newRE->setParentMuonStation(station);
-        
-        std::shared_ptr<TgcReadoutParams>& readOutPars = readoutParMap[copyMe->chamberDesign()];
+        ATH_MSG_DEBUG("Readout element "<<m_idHelperSvc->toString(reId)<<", design: "<<copyMe->chamberDesign());
+        std::shared_ptr<TgcReadoutParams>& readOutPars = readoutParMap[std::format("{:}_{:}", copyMe->chamberDesign(), 
+                                                                                    copyMe->stationEta()> 0? 'A' : 'C')];
         if (!readOutPars) {
             using WiregangArray = TgcReadoutParams::WiregangArray;
             using StripArray = TgcReadoutParams::StripArray;
@@ -397,15 +399,18 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
 
             std::array<WiregangArray, 3> wires{};
             GasGapIntArray nWireGangs{}, nStrips{};
-            StripArray botMountings{}, topMountings{};
-            bool stripSet{false};
-            double wirePitch{0.};
+            std::vector<StripArray> botMountings(copyMe->nGasGaps()), 
+                                    topMountings(copyMe->nGasGaps());
 
+            double wirePitch{0.};
             for (unsigned int gasGap =1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
                 const IdentifierHash gangHash = copyMe->constructHash(0, gasGap, false);
                 const IdentifierHash stripHash = copyMe->constructHash(0, gasGap, true);
                 nWireGangs[gasGap -1] = copyMe->numWireGangs(gangHash);
                 nStrips[gasGap -1] = copyMe->numStrips(stripHash);
+                ATH_MSG_VERBOSE("Assigned wire gangs: "<<nWireGangs[gasGap-1]<<", strips: "<<nStrips[gasGap -1]
+                              <<" for gas gap "<<gasGap);
+
                 if (nWireGangs[gasGap -1]) {
                     const MuonGMR4::WireGroupDesign& design{copyMe->wireGangLayout(gangHash)};
                     wirePitch = design.stripPitch();
@@ -413,22 +418,22 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
                     for (int gang = 1; gang <= design.numStrips(); ++gang) {
                         fillMe[gang -1] = design.numWiresInGroup(gang);
                     }
+                    ATH_MSG_VERBOSE("Gang layout: "<<fillMe);
                 }
-                if (nStrips[gasGap -1] && !stripSet) {
+                if (nStrips[gasGap -1]) {
                     const MuonGMR4::RadialStripDesign& design{copyMe->stripLayout(stripHash)};
                     const int nCh = nStrips[gasGap -1];
                     for (int strip = 1; strip <= nCh; ++strip) {
-                        botMountings[strip-1] = - design.stripLeftBottom(strip).x();
-                        topMountings[strip-1] = - design.stripLeftTop(strip).x();
+                        botMountings[gasGap-1][strip-1] = - design.stripLeftBottom(strip).x();
+                        topMountings[gasGap-1][strip-1] = - design.stripLeftTop(strip).x();
                     }
-                    botMountings[nCh] = - design.stripRightBottom(nCh).x();
-                    topMountings[nCh] = - design.stripRightTop(nCh).x();
-
-                    stripSet = true;
+                    botMountings[gasGap-1][nCh] = - design.stripRightBottom(nCh).x();
+                    topMountings[gasGap-1][nCh] = - design.stripRightTop(nCh).x();
+                    ATH_MSG_VERBOSE("Strip layout\n bottom: "<<botMountings<<"\n top: "<<topMountings);
                 }
             }
             readOutPars = std::make_unique<TgcReadoutParams>(copyMe->chamberDesign(),
-                                                             0, 0, wirePitch,
+                                                             0, wirePitch,
                                                              idHelper.stationPhiMax(reId),
                                                              std::move(nWireGangs),
                                                              std::move(wires[0]), 
@@ -965,7 +970,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
             const IdentifierHash layHash = refEle.constructHash(0, gasGap, isStrip);
 
             const Identifier layId = idHelper.channelID(refEle.identify(), gasGap, isStrip, 1);
-            ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<" "<<refEle.numChannels(layHash)<<" "<<layHash);
+            ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<", nCh: "<<refEle.numChannels(layHash)<<", layHash: "<<layHash);
             if (!refEle.numChannels(layHash)) continue;
             const Amg::Transform3D& refLayerTrf = refEle.localToGlobalTrans(gctx, layHash);
             const Amg::Transform3D& testLayerTrf = testEle.transform(layId);
