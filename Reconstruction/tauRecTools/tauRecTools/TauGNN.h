@@ -69,7 +69,7 @@ public:
     }
 
     //Make the output config transparent to external tools
-    FlavorTagInference::SaltModel::OutputConfig gnn_output_config;
+    FlavorTagInference::OutputConfig gnn_output_config;
 
 private:
     using Inputs = FlavorTagInference::Inputs;

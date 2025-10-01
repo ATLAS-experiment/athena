@@ -22,7 +22,7 @@ TauGNN::TauGNN(const std::string &nnFile, const Config &config, bool useTRT):
     //==================================================//
 
     // get the configuration of the model outputs
-    FlavorTagInference::SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
+    FlavorTagInference::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
     
     //Let's see the output!
     for (const auto& out_node: gnn_output_config) {

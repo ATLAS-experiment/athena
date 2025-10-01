@@ -65,7 +65,7 @@ namespace InDetGNNHardScatterSelection {
     };
 
     /* create all decorators */
-    std::set<std::string> createDecorators(const FlavorTagInference::SaltModel::OutputConfig& outConfig);
+    std::set<std::string> createDecorators(const FlavorTagInference::OutputConfig& outConfig);
 
     std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel;
     std::string m_input_node_name;

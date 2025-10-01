@@ -4,7 +4,7 @@
 
 #include "FlavorTagInference/GNNDataLoader.h"
 
-FlavorTagInference::GNNDataLoader::GNNDataLoader(std::shared_ptr<const SaltModel> saltModel, const GNNOptions& gnn_options) : 
+FlavorTagInference::GNNDataLoader::GNNDataLoader(ISaltModelPtr saltModel, const GNNOptions& gnn_options):
   SaltModelEDMLoaderBase(saltModel),
   m_gnn_options(gnn_options)
   {
@@ -18,7 +18,7 @@ FlavorTagInference::GNNDataLoader::GNNDataLoader(std::shared_ptr<const SaltModel
             m_gnn_options.flip_config, 
             m_gnn_options.variable_remapping
         );
-    auto salt_model_version = salt_model->getSaltModelVersion();
+    auto salt_model_version = saltModel->getSaltModelVersion();
 
     for (auto config : constituents_configs){
       switch (config.type){
