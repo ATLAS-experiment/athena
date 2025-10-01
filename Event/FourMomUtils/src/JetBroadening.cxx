@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FourMomUtils/JetBroadening.h"
@@ -53,8 +53,8 @@ bool jetBroadening( const I4MomIter_t& iBeg, const I4MomIter_t& iEnd,
         }
     }
 
-  const double inv_Qu = 1. / Qu;
-  const double inv_Qd = 1. / Qd;
+  const double inv_Qu = Qu!=0 ? (1. / Qu) : 1;
+  const double inv_Qd = Qd!=0 ? (1. / Qd) : 1;
 
   etau *= inv_Qu;
   etad *= inv_Qd;
@@ -87,8 +87,10 @@ bool jetBroadening( const I4MomIter_t& iBeg, const I4MomIter_t& iEnd,
         }
     }
 
-  Bu /= 2*(Qu+Qd);
-  Bd /= 2*(Qu+Qd);
+  if (Qu+Qd != 0) {
+    Bu /= 2*(Qu+Qd);
+    Bd /= 2*(Qu+Qd);
+  }
 
   totalJetBroadening=Bu+Bd;
   wideJetBroadening=Bu;
