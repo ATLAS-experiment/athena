@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/GNN.h"
@@ -59,7 +59,7 @@ namespace InDetGNNHardScatterSelection {
     m_varsFromVertex = dataprep::createVertexVarGetters(inputs);
 
     // Retrieve the configuration for the model outputs.
-    FlavorTagInference::SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
+    FlavorTagInference::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
 
     for (const auto& outNode : gnn_output_config) {
       // the node's output name will be used to define the decoration name

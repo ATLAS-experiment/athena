@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/SaltModel.h"
@@ -126,7 +126,7 @@ namespace FlavorTagInference {
     return m_metadata;
   }
 
-  const SaltModel::OutputConfig& SaltModel::getOutputConfig() const {
+  const OutputConfig& SaltModel::getOutputConfig() const {
     return m_output_nodes;
   }
 
@@ -139,7 +139,7 @@ namespace FlavorTagInference {
   }
 
 
-  SaltModel::InferenceOutput SaltModel::runInference(
+  InferenceOutput SaltModel::runInference(
     std::map<std::string, Inputs>& gnn_inputs) const {
 
     std::vector<float> input_tensor_values;
