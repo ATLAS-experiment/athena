@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -115,7 +115,7 @@ inline void DrawTitleLatex(const char* chartitle,
 		left = left.substr(found);
 		found = left.find(" - ");
 		if(found == std::string::npos){
-			cuts.push_back(left);
+			cuts.push_back(std::move(left));
 			break;
 		}
 		cuts.push_back(left.substr(0,found));
