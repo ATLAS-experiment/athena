@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_EVENTSTREAMINFO_H
@@ -32,6 +32,13 @@ public:
   EventStreamInfo();
   /// Destructor
   virtual ~EventStreamInfo();
+
+  // Copy/move
+  EventStreamInfo(const EventStreamInfo&) = default;
+  EventStreamInfo(EventStreamInfo&&) = default;
+  EventStreamInfo& operator=(const EventStreamInfo&) = default;
+  EventStreamInfo& operator=(EventStreamInfo&&) = default;
+
 public:
   // Non-static members
   /// @return the Number of Events

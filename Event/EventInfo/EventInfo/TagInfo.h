@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_TAGINFO_H
@@ -50,6 +50,11 @@ public:
   //@{
   TagInfo();
   virtual ~TagInfo();
+
+  TagInfo(const TagInfo&) = default;
+  TagInfo(TagInfo&&) = default;
+  TagInfo& operator=(const TagInfo&) = default;
+  TagInfo& operator=(TagInfo&&) = default;
   //@}
 
   /// \name Tag information accessors

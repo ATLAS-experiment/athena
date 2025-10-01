@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -17,7 +17,9 @@ int main() {
   MergedEventInfo empty;
   assert( static_cast<EventID::number_type>(-1) == empty.event_ID()->run_number() || // Gaudi 27
           0 == empty.event_ID()->run_number()); // Gaudi 26
-  EventInfo anInfo(new EventID(1, 23), new EventType(), new TriggerInfo());
+  EventInfo anInfo(std::make_unique<EventID>(1, 23),
+                   std::make_unique<EventType>(),
+                   std::make_unique<TriggerInfo>());
 
   MergedEventInfo merged(anInfo, 3, 33);
   assert(3 == merged.event_ID()->run_number());

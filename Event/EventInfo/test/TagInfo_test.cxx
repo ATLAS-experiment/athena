@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_SUITE(TagInfoTest)
     TagInfo::NameTagPairVec insertionTagPairs{{"tag0","reference0"},{"tag1", "reference1"},{"ztag","zreference"},{"atag", "areference"}};
     std::for_each(insertionTagPairs.begin(), insertionTagPairs.end(),[&t](auto &x){t.addTag(x).ignore();});
     auto allInsertedTags=insertionTagPairs;
-    allInsertedTags.push_back(updatedNamePair); //allTags now contains all the tags we inserted (not in the same order, though)
+    allInsertedTags.push_back(std::move(updatedNamePair)); //allTags now contains all the tags we inserted (not in the same order, though)
     TagInfo::NameTagPairVec returnMultipleTagPairs;
     t.getTags(returnMultipleTagPairs);//these are sorted in the return vector
     BOOST_TEST(returnMultipleTagPairs.size() == allInsertedTags.size(),"Returned number of pairs matches the inserted number of pairs");
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_SUITE(TagInfoTest)
     TagInfo::NameTagPairVec insertionTagPairs{{"tag0","reference0"},{"tag1", "reference1"},{"ztag","zreference"},{"atag", "areference"}};
     std::for_each(insertionTagPairs.begin(), insertionTagPairs.end(),[&t](auto &x){t.addInputTag(x).ignore();});
     auto allInsertedTags=insertionTagPairs;
-    allInsertedTags.push_back(updatedNamePair); //allTags now contains all the tags we inserted (not in the same order, though)
+    allInsertedTags.push_back(std::move(updatedNamePair)); //allTags now contains all the tags we inserted (not in the same order, though)
     TagInfo::NameTagPairVec returnMultipleTagPairs;
     t.getInputTags(returnMultipleTagPairs);//these are sorted in the return vector
     BOOST_TEST(returnMultipleTagPairs.size() == allInsertedTags.size(),"Returned number of pairs matches the inserted number of pairs");
