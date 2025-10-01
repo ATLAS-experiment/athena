@@ -106,8 +106,7 @@ def UseCREST(flags):
     if environ.get('CREST_SERVER'):
         flags.IOVDb.CrestServer = environ.get('CREST_SERVER')
     else:
-        flags.IOVDb.CrestServer = 'https://crest.cern.ch'
-        msg.info('CREST_SERVER environment variable not defined using fall-back.')
+        msg.info('CREST_SERVER environment variable not defined - using fall-back.')
     msg.info(f'Using CrestServer: {flags.IOVDb.CrestServer}')
 
 
