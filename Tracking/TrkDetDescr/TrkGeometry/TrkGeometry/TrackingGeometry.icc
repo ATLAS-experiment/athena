@@ -67,16 +67,10 @@ TrackingGeometry::boundaryLayers()
   return m_boundaryLayers;
 }
 
-inline TrackingGeometry::constMapRange_t
-TrackingGeometry::boundaryLayers() const
-{
-  iterator_convert_const_t begin = boost::make_transform_iterator(
-    m_boundaryLayers.begin(), constTransformLayerMap());
-
-  iterator_convert_const_t end = boost::make_transform_iterator(
-    m_boundaryLayers.end(), constTransformLayerMap());
-
-  return TrackingGeometry::constMapRange_t(begin, end);
+inline auto TrackingGeometry::boundaryLayers() const {
+  return std::views::transform(m_boundaryLayers, [](const auto& in) {
+    return std::pair<const Layer*, int>{in.first, in.second};
+  });
 }
 
 inline size_t
