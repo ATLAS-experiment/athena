@@ -3,7 +3,6 @@
 */
 
 #include "tauRecTools/TauVertexedClusterDecorator.h"
-#include "tauRecTools/HelperFunctions.h"
 
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 
