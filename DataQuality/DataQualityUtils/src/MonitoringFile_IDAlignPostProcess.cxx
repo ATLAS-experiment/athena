@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -57,7 +57,7 @@ namespace dqutils {
       if (tdir_run != 0) {
         std::string tdir_run_name(tdir_run->GetName());
         if (tdir_run_name.find("run") != std::string::npos) {
-          run_dir = tdir_run_name;
+          run_dir = std::move(tdir_run_name);
           // std::cout<<"Run_directory: "<<run_dir<<std::endl;
           TIter next_perf(tdir_run->GetListOfKeys());
           TKey* key_perf(0);
