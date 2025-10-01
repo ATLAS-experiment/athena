@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -21,30 +21,13 @@
 // Public methods: 
 /////////////////////////////////////////////////////////////////// 
 
-// Constructors
+// Constructors/assignment
 ////////////////
-INav4MomAssocs::INav4MomAssocs() :
-  AssociationMap<INavigable4MomentumCollection, 
-                 INavigable4MomentumCollection>(),
-  m_assocStores()
-{}
-
-INav4MomAssocs::INav4MomAssocs( const INav4MomAssocs& rhs) :
-  AssociationMap<INavigable4MomentumCollection, 
-                 INavigable4MomentumCollection>(rhs),
-  m_assocStores( rhs.m_assocStores )
-{}
-
-// Assignment operator: 
-INav4MomAssocs& INav4MomAssocs::operator=(const INav4MomAssocs& rhs)
-{
-  if ( this != &rhs ) {
-    AssociationMap< INavigable4MomentumCollection,
-                    INavigable4MomentumCollection >::operator=(rhs);
-    m_assocStores = rhs.m_assocStores;
-  }
-  return *this;
-}
+INav4MomAssocs::INav4MomAssocs() = default;
+INav4MomAssocs::INav4MomAssocs( const INav4MomAssocs& rhs ) = default;
+INav4MomAssocs::INav4MomAssocs( INav4MomAssocs&& rhs ) = default;
+INav4MomAssocs& INav4MomAssocs::operator=( const INav4MomAssocs& rhs ) = default;
+INav4MomAssocs& INav4MomAssocs::operator=( INav4MomAssocs&& rhs ) = default;
 
 /////////////////////////////////////////////////////////////////// 
 // Const methods: 
